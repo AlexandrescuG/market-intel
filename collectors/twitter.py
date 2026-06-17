@@ -1,0 +1,272 @@
+"""Twitter/X-коллектор. Рефактор твоего monitor.py под единый конвейер.
+
+Сохранено: cloakbrowser-логин, парсинг статей, скриншот, алерт в Telegram.
+Изменено:
+  - пишет в core.db (единые сигналы), а не в свою таблицу
+  - узкие запросы из config.TWITTER_QUERIES вместо одного широкого OR
+  - фильтр по econ_relevance (мусор уровня «серьга подмигнула» не проходит)
+  - алерт по importance, а не по сырым лайкам
+  - лог не палит токен (см. core.logging_setup)
+"""
+from __future__ import annotations
+
+import asyncio
+import concurrent.futures
+import logging
+import re
+import time
+from datetime import datetime, timezone
+from urllib.parse import quote_plus
+
+import cloakbrowser
+
+from core import db, scoring
+from core.config import (ALERT_MIN_ENGAGEMENT, ALERT_MIN_GROWTH,
+                         ALERT_MIN_IMPORTANCE, STORE_MIN_ECON_RELEVANCE,
+                         TRANSLATE, TWITTER_PASSWORD, TWITTER_QUERIES,
+                         TWITTER_USERNAME)
+from core.telegram import send_photo, send_text
+
+log = logging.getLogger("twitter")
+_pool = concurrent.futures.ThreadPoolExecutor(max_workers=2)
+
+
+# ─── перевод (как у тебя) ───────────────────────────────────────────────────────
+def _is_russian(t: str) -> bool:
+    return sum(1 for c in t if "Ѐ" <= c <= "ӿ") / max(len(t), 1) > 0.25
+
+
+async def _translate(text: str) -> str | None:
+    if not TRANSLATE or not text or _is_russian(text):
+        return None
+    try:
+        from deep_translator import GoogleTranslator
+        loop = asyncio.get_event_loop()
+        tr = await loop.run_in_executor(
+            _pool, lambda: GoogleTranslator(source="auto", target="ru").translate(text[:1500]))
+        return tr if tr and tr.strip() != text.strip() else None
+    except Exception as e:
+        log.debug("translate failed: %s", e)
+        return None
+
+
+# ─── парсинг (перенесён из monitor.py, без изменений логики) ─────────────────────
+def _parse_count(raw: str) -> int:
+    s = raw.strip().replace(",", "").replace(" ", "").replace("\xa0", "")
+    m = re.match(r"^([\d.]+)([KkMmBb]?)$", s)
+    if not m:
+        return 0
+    val, suf = float(m.group(1)), m.group(2).upper()
+    return int(val * {"K": 1e3, "M": 1e6, "B": 1e9}.get(suf, 1))
+
+
+async def _btn_count(article, testid: str) -> int:
+    btn = await article.query_selector(f'button[data-testid="{testid}"]')
+    if not btn:
+        return 0
+    aria = await btn.get_attribute("aria-label") or ""
+    m = re.search(r"([\d,]+(?:\.\d+)?[KkMm]?)", aria)
+    if m:
+        return _parse_count(m.group(1).replace(",", ""))
+    span = await btn.query_selector('span[data-testid="app-text-transition-container"]')
+    if span:
+        return _parse_count((await span.inner_text()).strip())
+    return 0
+
+
+async def _extract(page) -> list[dict]:
+    out = []
+    for article in await page.query_selector_all('article[data-testid="tweet"]'):
+        try:
+            tid = turl = None
+            for link in await article.query_selector_all('a[href*="/status/"]'):
+                href = await link.get_attribute("href") or ""
+                m = re.search(r"/status/(\d+)", href)
+                if m:
+                    tid = m.group(1)
+                    turl = f"https://x.com{href}" if href.startswith("/") else href
+                    if await link.query_selector("time"):
+                        break
+            if not tid:
+                continue
+            author = ""
+            ub = await article.query_selector('[data-testid="User-Name"]')
+            if ub:
+                for a in await ub.query_selector_all("a"):
+                    h = (await a.get_attribute("href") or "").strip("/").split("/")[-1]
+                    if h and "/" not in h:
+                        author = h
+                        break
+            # время твита из <time datetime="2026-06-16T14:23:00.000Z">
+            tweet_ts = 0.0
+            time_el = await article.query_selector("time")
+            if time_el:
+                dt_str = await time_el.get_attribute("datetime") or ""
+                try:
+                    tweet_ts = datetime.fromisoformat(
+                        dt_str.replace("Z", "+00:00")).timestamp()
+                except Exception:
+                    pass
+
+            # пропускаем твиты старше 24 часов
+            if tweet_ts and tweet_ts < time.time() - 86400:
+                continue
+
+            text = ""
+            te = await article.query_selector('[data-testid="tweetText"]')
+            if te:
+                text = (await te.inner_text()).strip()
+            out.append({
+                "tweet_id": tid, "author": author, "text": text, "url": turl,
+                "likes": await _btn_count(article, "like"),
+                "retweets": await _btn_count(article, "retweet"),
+                "replies": await _btn_count(article, "reply"),
+                "tweet_ts": tweet_ts,
+            })
+        except Exception as e:
+            log.debug("skip article: %s", e)
+    return out
+
+
+# ─── логин (перенесён) ──────────────────────────────────────────────────────────
+async def _ensure_login(page) -> bool:
+    await page.goto("https://x.com/home", wait_until="domcontentloaded", timeout=40_000)
+    await asyncio.sleep(3)
+    if "login" not in page.url and "i/flow" not in page.url:
+        return True
+    if not TWITTER_USERNAME or not TWITTER_PASSWORD:
+        log.error("not logged in and no credentials")
+        return False
+    try:
+        await page.goto("https://x.com/i/flow/login", wait_until="domcontentloaded", timeout=40_000)
+        await asyncio.sleep(2)
+        inp = await page.wait_for_selector('input[autocomplete="username"]', timeout=12_000)
+        await inp.fill(TWITTER_USERNAME); await asyncio.sleep(0.5)
+        await page.keyboard.press("Enter"); await asyncio.sleep(2.5)
+        try:
+            await page.wait_for_selector('input[data-testid="ocfEnterTextTextInput"]', timeout=4_000)
+            log.warning("verification challenge — заполни вручную, жду 90с"); await asyncio.sleep(90)
+        except Exception:
+            pass
+        pwd = await page.wait_for_selector('input[type="password"]', timeout=12_000)
+        await pwd.fill(TWITTER_PASSWORD); await asyncio.sleep(0.5)
+        await page.keyboard.press("Enter"); await asyncio.sleep(6)
+        if "home" in page.url:
+            return True
+        log.info("жду 60с на ручной 2FA…"); await asyncio.sleep(60)
+        return "home" in page.url
+    except Exception as e:
+        log.error("login error: %s", e)
+        return False
+
+
+async def _screenshot(ctx, url: str) -> bytes | None:
+    page = await ctx.new_page()
+    try:
+        await page.goto(url, wait_until="domcontentloaded", timeout=35_000)
+        await asyncio.sleep(3)
+        art = await page.wait_for_selector('article[data-testid="tweet"]', timeout=15_000)
+        await art.scroll_into_view_if_needed(); await asyncio.sleep(1.5)
+        return await art.screenshot(type="png")
+    except Exception as e:
+        log.warning("screenshot %s: %s", url, e)
+        return None
+    finally:
+        await page.close()
+
+
+def _fmt(n: int) -> str:
+    return f"{n/1e6:.1f}M" if n >= 1e6 else f"{n/1e3:.1f}K" if n >= 1e3 else str(n)
+
+
+async def _caption(tw: dict, dim: str) -> str:
+    tr = await _translate(tw["text"][:200])
+    tline = f"\n\n🇷🇺 {tr.strip()}" if tr else ""
+    icon = {"economy": "💰", "geopolitics": "🌍", "crowd": "🔥"}.get(dim, "📊")
+    return (f"{icon} <b>@{tw['author']}</b>{tline}\n\n"
+            f"❤️ {_fmt(tw['likes'])}   🔁 {_fmt(tw['retweets'])}\n{tw['url']}")
+
+
+async def _scan_query(page, dimension: str, query: str) -> list[dict]:
+    url = f"https://x.com/search?q={quote_plus(query)}&src=typed_query&f=top"
+    try:
+        await page.goto(url, wait_until="domcontentloaded", timeout=40_000)
+    except Exception as e:
+        log.warning("nav timeout (non-fatal): %s", e)
+    await asyncio.sleep(4)
+    for _ in range(4):
+        await page.keyboard.press("End"); await asyncio.sleep(1.5)
+    tweets = await _extract(page)
+    for t in tweets:
+        t["dimension_hint"] = dimension
+        t["query"] = query
+    return tweets
+
+
+async def collect_with_context(ctx) -> int:
+    """Один прогон по всем запросам. Пишет сигналы, шлёт алерты. Возвращает #алертов."""
+    db.init_db()
+    page = await ctx.new_page()
+    alerts = 0
+    try:
+        if not await _ensure_login(page):
+            return 0
+        pending = []
+        for dimension, queries in TWITTER_QUERIES.items():
+            for q in queries:
+                tweets = await _scan_query(page, dimension, q)
+                log.info("twitter [%s] %d tweets", dimension, len(tweets))
+                for tw in tweets:
+                    eng = tw["likes"] + tw["retweets"]
+                    res = db.upsert(
+                        source="twitter", source_id=tw["tweet_id"],
+                        author=tw["author"], text=tw["text"], url=tw["url"],
+                        engagement=eng, replies=tw["replies"],
+                        topic_hint=tw["query"], lang="",
+                    )
+                    # отсев мусора по econ_relevance
+                    if res["econ_relevance"] < STORE_MIN_ECON_RELEVANCE:
+                        continue
+                    # алерт для контента: важно И (ново ИЛИ заметно подросло)
+                    if res["importance"] >= ALERT_MIN_IMPORTANCE and eng >= ALERT_MIN_ENGAGEMENT \
+                       and (res["is_new"] or res["growth"] >= ALERT_MIN_GROWTH):
+                        pending.append((tw, res))
+                        db.mark_alerted(res["uid"], eng)
+
+        # дедуп по tweet_id, топ по importance
+        seen = set(); uniq = []
+        for tw, res in sorted(pending, key=lambda x: x[1]["importance"], reverse=True):
+            if tw["tweet_id"] in seen:
+                continue
+            seen.add(tw["tweet_id"]); uniq.append((tw, res))
+
+        for tw, res in uniq[:12]:  # потолок, чтобы не залить ленту
+            log.info("ALERT @%s imp=%.2f eng=%d", tw["author"], res["importance"],
+                     tw["likes"] + tw["retweets"])
+            cap = await _caption(tw, res["dimension"])
+            photo = await _screenshot(ctx, tw["url"])
+            await (send_photo(photo, cap) if photo else send_text(cap))
+            await asyncio.sleep(1)
+            alerts += 1
+        if not uniq:
+            log.info("twitter: нет новых важных тредов")
+    finally:
+        await page.close()
+    return alerts
+
+
+if __name__ == "__main__":
+    from core.config import HEADLESS, PROFILE_DIR
+    from core.logging_setup import setup
+    setup("twitter")
+
+    async def _main():
+        ctx = await cloakbrowser.launch_persistent_context_async(
+            user_data_dir=str(PROFILE_DIR), headless=HEADLESS,
+            locale="en-US", timezone="Europe/Moscow",
+            viewport={"width": 1280, "height": 900})
+        try:
+            await collect_with_context(ctx)
+        finally:
+            await ctx.close()
+    asyncio.run(_main())
