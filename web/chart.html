@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SBF Chart</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/design.css">
+<script src="/assets/sbf-header.js?v=11" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
+<script src="/assets/grafik-engine.js"></script>
+<style>
+:root{
+  --cream:#FBF6EF; --paper:#FFFFFF; --line:#E7DFCF; --grid:#F0E9DA;
+  --ink:#2B2B33; --muted:#8A8275; --gold:#C9A227; --glow:#E6C257;
+  --up:#1e8e5a; --down:#c0392b;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--cream);color:var(--ink);font-family:Montserrat,sans-serif;padding:0}
+.chart-top{display:flex;align-items:center;gap:12px;padding:10px 18px;background:var(--paper);border-bottom:1px solid var(--line);font-family:'JetBrains Mono',monospace}
+.chart-top a{font-size:11px;color:var(--muted);text-decoration:none;letter-spacing:.3px}
+.chart-top a:hover{color:var(--gold)}
+.chart-body{padding:18px}
+.mono{font-family:'JetBrains Mono',monospace}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:14px;overflow:hidden;max-width:960px;margin:0 auto;
+  box-shadow:0 6px 24px rgba(43,43,51,.06)}
+.hd{display:flex;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.hd .sym{font-weight:700;font-size:18px}
+.hd .px{font-family:'JetBrains Mono';font-weight:600;font-size:19px;transition:color .25s}
+.hd .px.up{color:var(--up)} .hd .px.down{color:var(--down)}
+.live{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);font-family:'JetBrains Mono'}
+.live .dot{width:7px;height:7px;border-radius:50%;background:var(--up);box-shadow:0 0 7px var(--up);animation:pulse 1.6s infinite}
+@keyframes pulse{50%{opacity:.35}}
+.hd .stat{font-family:'JetBrains Mono';font-size:12px;color:var(--muted)}
+.hd .stat b{color:var(--ink);font-weight:600}
+.bias{font-size:11px;padding:3px 9px;border-radius:5px;font-family:'JetBrains Mono'}
+.bias.bear{color:var(--down);border:1px solid var(--down)}
+.bias.bull{color:var(--up);border:1px solid var(--up)}
+.bias.flat{color:var(--muted);border:1px solid var(--line)}
+/* Ряд контролов */
+.ctrl-row{display:flex;align-items:center;gap:8px;padding:9px 14px;border-bottom:1px solid var(--line);flex-wrap:wrap;background:var(--paper)}
+.tf-grp,.mode,.tog{display:flex;gap:3px}
+.mode{margin-left:auto}
+/* Разделитель в контролах */
+.ctrl-sep{width:1px;height:22px;background:var(--line);flex-shrink:0}
+#chart{height:440px}
+.card.sbf-fs{display:flex!important;flex-direction:column!important;overflow:hidden!important}
+.card.sbf-fs #chartContainer{flex:1;min-height:0;position:relative}
+.card.sbf-fs #chart{height:100%!important;width:100%!important}
+body.embed .chart-top,body.embed .beginner,body.embed .foot,body.embed .g-bottom-nav,body.embed .sbf-hd,body.embed #strip{display:none!important}
+@media(max-width:760px){.chart-top{display:none}}
+body.embed .ctrl-sep,body.embed .tog-label,body.embed #tog,body.embed .tog-hints{display:none!important}
+body.embed{overflow:hidden}
+body.embed .chart-body{padding:0}
+body.embed .card{border-radius:0;box-shadow:none;border:none;max-width:100%}
+.beginner{padding:12px 18px;border-top:1px solid var(--line);background:rgba(201,162,39,.06);font-size:13px;line-height:1.55;display:flex;gap:10px}
+.beginner .ic{color:var(--gold);font-weight:700} .beginner b{color:var(--gold)}
+.foot{padding:8px 18px;font-size:11px;color:var(--muted);border-top:1px solid var(--line)}
+.tog-label{font-size:10px;font-family:'JetBrains Mono';color:var(--muted);padding:0 4px;letter-spacing:.3px;text-transform:uppercase}
+.tog-hints{display:flex;flex-direction:column;gap:0;background:rgba(248,245,238,.7);border-bottom:1px solid var(--line)}
+.tog-hints:empty{display:none}
+.tog-hint-chip{font-family:'JetBrains Mono';font-size:11px;color:#444;padding:6px 14px;line-height:1.55;border-bottom:1px solid rgba(231,223,207,.6)}
+.tog-hint-chip:last-child{border-bottom:none}
+.tog-hint-chip b{color:#2B2B33;font-weight:600}
+</style>
+</head>
+<body>
+<div class="chart-top">
+  <a href="javascript:history.back()">← Назад</a>
+  <span style="color:var(--line)">|</span>
+  <a href="/" style="font-weight:700;color:var(--ink)">SBF</a>
+  <nav class="g-nav" style="margin-left:auto">
+    <a href="/" class="g-nav-item">Сегодня</a>
+    <a href="/edu/" class="g-nav-item">Обучение</a>
+    <a href="/calendar" class="g-nav-item">Календарь</a>
+  </nav>
+</div>
+<div class="chart-body">
+<div class="card">
+  <div class="hd">
+    <span class="sym" id="sym">—</span>
+    <span class="px mono" id="px">—</span>
+    <span class="live"><span class="dot"></span>live</span>
+    <span class="bias" id="bias">—</span>
+    <span class="stat">RSI <b id="rsi">—</b></span>
+    <span class="stat">ближайший: <b id="near">—</b></span>
+  </div>
+  <div class="ctrl-row">
+    <div class="tf-grp" id="tf">
+      <button class="tf" data-tf="M30">M30</button><button class="tf" data-tf="H1">H1</button>
+      <button class="tf" data-tf="H4">H4</button><button class="tf on" data-tf="D1">D1</button>
+      <button class="tf" data-tf="W1">W1</button>
+    </div>
+    <div class="ctrl-sep"></div>
+    <span class="tog-label">слои</span>
+    <div class="tog" id="tog">
+      <button class="chip on" data-t="piv">Пивоты</button>
+      <button class="chip" data-t="cndl">Паттерны</button>
+      <button class="chip" data-t="smc">SMC</button>
+    </div>
+  </div>
+  <div class="tog-hints" id="togHints"></div>
+  <div id="chartContainer" style="position:relative">
+    <div id="chart"></div>
+  </div>
+  <div class="beginner"><span class="ic">&#9432;</span><div id="explain">…</div></div>
+  <div class="foot">образовательная подсветка паттернов — контекст, не инвестиционная рекомендация</div>
+</div>
+
+<script>
+const _SP = new URLSearchParams(location.search);
+const PARAM = _SP.get('s') || 'GOLD';
+if (_SP.get('embed') === '1') document.body.classList.add('embed');
+const YF = {
+  GOLD:'GC=F', SILVER:'SI=F',
+  BTC:'BTC-USD', ETH:'ETH-USD', SOL:'SOL-USD',
+  SPX:'^GSPC', NASDAQ:'^IXIC', DJI:'^DJI', VIX:'^VIX',
+  WTI:'CL=F', NG:'NG=F',
+  EURUSD:'EURUSD=X', GBPUSD:'GBPUSD=X', USDJPY:'JPY=X', DXY:'DX-Y.NYB',
+};
+const BYBIT = {BTC:'BTCUSDT', ETH:'ETHUSDT', SOL:'SOLUSDT'};
+
+// ── Состояние ───────────────────────────────────────────────────────────────
+let chart = null, candleSeries = null, lastCandle = null, ws = null, curTF = 'D1';
+let _curData = null;           // результат SBFGrafik.loadBars
+let _curLines = [];            // priceLine refs (для удаления)
+let TOGGLES = {piv:true, cndl:false, smc:false};
+
+// ── Шапка ──────────────────────────────────────────────────────────────────
+function buildExplain(meta, near) {
+  if (!near) return '';
+  const side = near.name[0]==='S' ? 'поддержки' : near.name[0]==='R' ? 'сопротивления' : 'точки разворота';
+  const where = Math.abs(near.dist_pct) < 0.5
+    ? `вплотную к ${side}`
+    : `в ${Math.abs(near.dist_pct)}% от ${side}`;
+  const rsiV = meta.rsi;
+  const rsiTxt = rsiV < 30 ? 'ниже 30 — зона перепроданности (исторически возможен отскок)'
+    : rsiV > 70 ? 'выше 70 — зона перекупленности (исторически возможна коррекция)'
+    : `${rsiV} — нейтральная зона`;
+  const pats = (meta.patterns||[]).length ? ` Замечен паттерн: <b>${meta.patterns.join(', ')}</b>.` : '';
+  return `Цена <b>${where} ${near.name} ${(+near.price).toLocaleString('en')}</b> — уровень, у которого исторически разворачивалась цена.
+    Красные линии сверху — сопротивление, зелёные снизу — поддержка, золотая — точка разворота.
+    RSI <b>${rsiTxt}</b>.${pats}`;
+}
+
+function flash(el, up) {
+  el.classList.remove('up','down'); void el.offsetWidth;
+  el.classList.add(up ? 'up' : 'down');
+}
+
+// ── Тумблеры паттернов/SMC ─────────────────────────────────────────────────
+function getCandleMarkers() {
+  if (!_curData) return [];
+  const evts = SBFGrafik.detectCandles(_curData.bars);
+  const start = Math.max(0, _curData.bars.length - 40);
+  const lastSeen = {}; // label → last bar index shown (дедупликация)
+  return evts
+    .filter(e => {
+      if (e.i < start) return false;
+      if (lastSeen[e.label] !== undefined && e.i - lastSeen[e.label] < 6) return false;
+      lastSeen[e.label] = e.i;
+      return true;
+    })
+    .map(e => {
+      const lw = _curData.lw[e.i];
+      if (!lw) return null;
+      const col = e.dir==='bull' ? '#2E8B6F' : e.dir==='bear' ? '#C0504D' : '#C9A227';
+      return {
+        time: lw.time,
+        position: e.dir==='bull' ? 'belowBar' : 'aboveBar',
+        color: col,
+        shape: e.dir==='bull' ? 'arrowUp' : e.dir==='bear' ? 'arrowDown' : 'circle',
+        text: e.label
+      };
+    }).filter(Boolean);
+}
+
+function getSMCMarkers() {
+  if (!_curData) return [];
+  const evts = SBFGrafik.detectSMC(_curData.bars, 5);
+  const start = Math.max(0, _curData.bars.length - 60);
+  const swingTypes = ['hh','lh','hl','ll'];
+  return evts
+    .filter(e => swingTypes.includes(e.type) && e.i >= start)
+    .map(e => {
+      const lw = _curData.lw[e.i];
+      if (!lw) return null;
+      return {
+        time: lw.time,
+        position: e.dir==='bull' ? 'belowBar' : 'aboveBar',
+        color: e.dir==='bull' ? '#2E8B6F' : '#C0504D',
+        shape: 'circle',
+        text: e.label
+      };
+    }).filter(Boolean);
+}
+
+function applySMCLines(evts) {
+  const lines = [];
+  if (!candleSeries) return lines;
+  evts.forEach(ev => {
+    if (ev.type === 'bos') {
+      const col = ev.dir==='bear' ? '#c0392b' : '#1e8e5a';
+      lines.push(candleSeries.createPriceLine({
+        price: ev.y, color: col, lineWidth: 1, lineStyle: 2,
+        axisLabelVisible: true, title: ev.label
+      }));
+    }
+    if (ev.type === 'fvg') {
+      const col = ev.dir==='bull' ? '#1D9E75' : '#c0392b';
+      lines.push(candleSeries.createPriceLine({
+        price: ev.yTop, color: col, lineWidth: 1, lineStyle: 3,
+        axisLabelVisible: false, title: 'FVG'
+      }));
+      lines.push(candleSeries.createPriceLine({
+        price: ev.yBot, color: col, lineWidth: 1, lineStyle: 3,
+        axisLabelVisible: false, title: ''
+      }));
+    }
+    if (ev.type === 'ob') {
+      const col = ev.dir==='bull' ? '#C9A227' : '#B07CC6';
+      lines.push(candleSeries.createPriceLine({
+        price: ev.yTop, color: col, lineWidth: 1, lineStyle: 2,
+        axisLabelVisible: false, title: 'OB'
+      }));
+      lines.push(candleSeries.createPriceLine({
+        price: ev.yBot, color: col, lineWidth: 1, lineStyle: 2,
+        axisLabelVisible: false, title: ''
+      }));
+    }
+  });
+  return lines;
+}
+
+const TOG_HINTS = {
+  piv: '<b>Пивоты</b> — уровни поддержки/сопротивления, рассчитанные по хаям и лоям предыдущих периодов. <span style="color:#1e8e5a">Зелёные</span> — поддержка (S1, S2), <span style="color:#c0392b">красные</span> — сопротивление (R1, R2), <span style="color:#C9A227">золотая</span> — точка разворота PP.',
+  cndl: '<b>Паттерны</b> — значимые свечные формации на последних 40 барах. ↑ зелёная стрелка — бычий сигнал (молот, бычье поглощение и др.), ↓ красная — медвежий (харами, медвежье поглощение и др.), ● жёлтый — нейтральный (доджи). Не сигнал к сделке, контекст.',
+  smc: '<b>SMC — структура рынка:</b> <b>HH</b> (Higher High) — новый максимум выше предыдущего, тренд вверх; <b>HL</b> (Higher Low) — откат не пробивает предыдущий лой, тренд вверх; <b>LH</b> (Lower High) — максимум ниже предыдущего, слабость; <b>LL</b> (Lower Low) — новый минимум, тренд вниз. <b>BOS</b> — пробой структуры (подтверждение); <b>OB</b> — Order Block, зона крупных ордеров; <b>FVG</b> — разрыв ликвидности, цена часто его закрывает.',
+};
+
+function updateTogHints() {
+  const el = document.getElementById('togHints');
+  if (!el) return;
+  el.innerHTML = Object.entries(TOGGLES)
+    .filter(([,v]) => v)
+    .map(([k]) => TOG_HINTS[k] ? `<span class="tog-hint-chip">${TOG_HINTS[k]}</span>` : '')
+    .join('');
+}
+
+function applyToggles() {
+  if (!candleSeries) return;
+
+  // Снять старые priceLine
+  _curLines.forEach(l => { try { candleSeries.removePriceLine(l); } catch(e){} });
+  _curLines = [];
+
+  // Пивоты (из JSON levels)
+  if (TOGGLES.piv && _curData && _curData.levels.length) {
+    _curData.levels.forEach(L => {
+      _curLines.push(candleSeries.createPriceLine({
+        price: L.price, color: L.color, lineWidth: 1, lineStyle: 2,
+        axisLabelVisible: true, title: L.name
+      }));
+    });
+  }
+
+  // SMC priceLine (BOS, FVG, OB)
+  if (TOGGLES.smc && _curData) {
+    const smcEvts = SBFGrafik.detectSMC(_curData.bars, 5);
+    _curLines = _curLines.concat(applySMCLines(smcEvts));
+  }
+
+  // Маркеры (свечные паттерны + SMC свинги)
+  let markers = [];
+  if (TOGGLES.cndl) markers = markers.concat(getCandleMarkers());
+  if (TOGGLES.smc)  markers = markers.concat(getSMCMarkers());
+  markers.sort((a,b) => a.time > b.time ? 1 : a.time < b.time ? -1 : 0);
+  candleSeries.setMarkers(markers);
+  updateTogHints();
+}
+
+// ── Главный рендер «Наш» ───────────────────────────────────────────────────
+async function drawOurs(tf) {
+  curTF = tf;
+  _curData = await SBFGrafik.loadBars(PARAM, tf);
+  const m = _curData.meta;
+
+  // Шапка
+  document.getElementById('sym').textContent = m.label + ' · ' + m.interval;
+  const pxEl = document.getElementById('px');
+  pxEl.textContent = m.last != null ? m.last.toLocaleString('en') : '—';
+
+  const biasStr = m.bias || SBFGrafik.calcBias(_curData.bars);
+  const biasEl = document.getElementById('bias');
+  biasEl.textContent = biasStr.includes('быч') ? 'бычья' : biasStr.includes('медвеж') ? 'медвежья' : 'нейтр';
+  biasEl.className = 'bias ' + (biasStr.includes('быч') ? 'bull' : biasStr.includes('медвеж') ? 'bear' : 'flat');
+
+  const rsiVal = m.rsi != null ? m.rsi : SBFGrafik.calcRSI14(_curData.bars);
+  document.getElementById('rsi').textContent = rsiVal != null ? rsiVal : '—';
+
+  const near = m.nearest || SBFGrafik.nearestPivot(m.last, SBFGrafik.calcPivots(_curData.bars));
+  document.getElementById('near').textContent = near
+    ? `${near.name} ${(+near.price).toLocaleString('en')} (${near.dist_pct > 0 ? '+' : ''}${near.dist_pct}%)`
+    : '—';
+
+  document.getElementById('explain').innerHTML = buildExplain(
+    {...m, rsi: rsiVal}, near
+  );
+
+  // Инициализация LightweightCharts
+  document.getElementById('chart').innerHTML = '';
+  chart = LightweightCharts.createChart(document.getElementById('chart'), {
+    autoSize: true,
+    localization: {locale:'en'},
+    layout: {background:{type:'solid',color:'#FFFFFF'}, textColor:'#2B2B33', fontFamily:'JetBrains Mono'},
+    grid: {vertLines:{color:'#F0E9DA'}, horzLines:{color:'#F0E9DA'}},
+    rightPriceScale: {borderColor:'#E7DFCF'},
+    timeScale: {borderColor:'#E7DFCF', timeVisible: tf==='M30'||tf==='H1'||tf==='H4', rightOffset:6},
+    crosshair: {mode: LightweightCharts.CrosshairMode.Normal,
+      vertLine:{color:'#C9A227', labelBackgroundColor:'#C9A227'},
+      horzLine:{color:'#C9A227', labelBackgroundColor:'#C9A227'}},
+  });
+  candleSeries = chart.addCandlestickSeries({
+    upColor:'#1e8e5a', downColor:'#c0392b', borderVisible:false,
+    wickUpColor:'#1e8e5a', wickDownColor:'#c0392b'
+  });
+  candleSeries.setData(_curData.lw);
+  lastCandle = _curData.lw.length ? Object.assign({}, _curData.lw[_curData.lw.length-1]) : null;
+
+  // Объём
+  const vol = chart.addHistogramSeries({priceFormat:{type:'volume'}, priceScaleId:'vol'});
+  chart.priceScale('vol').applyOptions({scaleMargins:{top:0.86, bottom:0}});
+  vol.setData(_curData.volume);
+
+  // Последние ~120 баров, история доступна прокруткой
+  const n = _curData.lw.length;
+  chart.timeScale().setVisibleLogicalRange({from: Math.max(0, n-120), to: n+6});
+
+  // Слои (пивоты/паттерны/SMC)
+  applyToggles();
+}
+
+// ── Живая цена ─────────────────────────────────────────────────────────────
+function applyLive(price) {
+  if (price == null) return;
+  const pxEl = document.getElementById('px');
+  const prev = parseFloat(pxEl.textContent.replace(/,/g,''));
+  pxEl.textContent = price.toLocaleString('en');
+  if (!isNaN(prev) && price !== prev) flash(pxEl, price > prev);
+  if (lastCandle && candleSeries) {
+    lastCandle.close = price;
+    lastCandle.high  = Math.max(lastCandle.high, price);
+    lastCandle.low   = Math.min(lastCandle.low,  price);
+    candleSeries.update(lastCandle);
+  }
+}
+
+async function pollQuotes() {
+  try {
+    const q = await (await fetch('./data/quotes.json?t='+Date.now())).json();
+    const sym = YF[PARAM];
+    if (q.quotes && q.quotes[sym]) applyLive(q.quotes[sym].price);
+  } catch(e){}
+}
+
+function startCryptoWS() {
+  if (!BYBIT[PARAM]) return false;
+  try {
+    ws = new WebSocket('wss://stream.bybit.com/v5/public/spot');
+    ws.onopen = () => ws.send(JSON.stringify({op:'subscribe', args:['tickers.'+BYBIT[PARAM]]}));
+    ws.onmessage = ev => {
+      const m = JSON.parse(ev.data);
+      if (m.topic && m.data && m.data.lastPrice) applyLive(parseFloat(m.data.lastPrice));
+    };
+    return true;
+  } catch(e) { return false; }
+}
+function stopWS() { if (ws) { try { ws.close(); } catch(e){}; ws = null; } }
+
+// ── Переключение ────────────────────────────────────────────────────────────
+async function render(tf) {
+  await drawOurs(tf);
+}
+
+document.getElementById('tf').addEventListener('click', e => {
+  if (!e.target.dataset.tf) return;
+  document.querySelectorAll('#tf button').forEach(x => x.classList.remove('on'));
+  e.target.classList.add('on');
+  render(e.target.dataset.tf);
+});
+
+document.getElementById('tog').addEventListener('click', e => {
+  if (!e.target.dataset.t) return;
+  const t = e.target.dataset.t;
+  TOGGLES[t] = !TOGGLES[t];
+  e.target.classList.toggle('on', TOGGLES[t]);
+  applyToggles();
+});
+
+function _reportHeight() {
+  if (window.parent !== window)
+    window.parent.postMessage({type:'sbf-chart-height', h: document.body.scrollHeight}, '*');
+}
+
+// ── Старт ───────────────────────────────────────────────────────────────────
+render('D1').then(() => {
+  if (!startCryptoWS()) { pollQuotes(); setInterval(pollQuotes, 8000); }
+  SBFGrafik.chartFullscreenButton(document.querySelector('.card'));
+  _reportHeight();
+});
+</script>
+</div><!-- /.chart-body -->
+</body>
+</html>

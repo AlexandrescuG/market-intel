@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SBF · Экономический календарь</title>
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/design.css">
+<script src="/assets/sbf-header.js?v=11" defer></script>
+<script src="/edu/assets/grafik-engine.js"></script>
+<style>
+:root{--cream:#FBF6EF;--paper:#FFFFFF;--line:#E7DFCF;--ink:#2B2B33;--muted:#7C7563;
+  --faint:#C5BAA8;--gold:#C9A227;--glow:#E6C257;--up:#2E8B6F;--down:#C0504D;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--cream);color:var(--ink);font-family:Montserrat,sans-serif;
+  font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+
+/* ── Layout ───────────────────────────────────────────────────── */
+.cal-page{display:grid;grid-template-columns:220px 1fr;max-width:1200px;
+  margin:0 auto;padding:20px 16px 60px;gap:20px;min-height:60vh}
+
+/* ── Sidebar ──────────────────────────────────────────────────── */
+.cal-sidebar{align-self:start;position:sticky;top:140px}
+.fil-group{background:var(--paper);border:1px solid var(--line);border-radius:10px;
+  padding:14px 16px;margin-bottom:10px}
+.fil-title{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1.5px;
+  text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.fil-opt{display:flex;align-items:center;gap:7px;font-size:12.5px;cursor:pointer;
+  padding:3px 0;color:var(--ink)}
+.fil-opt input{accent-color:var(--gold);width:13px;height:13px;cursor:pointer}
+.fil-select{width:100%;font-family:'JetBrains Mono',monospace;font-size:12px;
+  padding:6px 8px;border:1px solid var(--line);border-radius:7px;
+  background:var(--cream);color:var(--ink);outline:none;cursor:pointer}
+.fil-select:focus{border-color:var(--gold)}
+
+/* ── Date range picker ────────────────────────────────────────── */
+.date-rng{display:flex;align-items:center;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.drng-presets{display:flex;gap:4px;flex-wrap:wrap}
+/* ── Calendar popup ───────────────────────────────────────────── */
+.drng-cal-wrap{position:relative;margin-left:auto}
+.drng-cal-toggle{font-family:'JetBrains Mono',monospace;font-size:12px;
+  padding:6px 12px;border:1px solid var(--line);border-radius:8px;
+  cursor:pointer;background:var(--paper);color:var(--ink);
+  white-space:nowrap;transition:.12s;display:flex;align-items:center;gap:5px}
+.drng-cal-toggle:hover,.drng-cal-toggle.open{border-color:var(--gold)}
+.drng-cal-panel{display:none;position:absolute;right:0;top:calc(100% + 6px);
+  background:var(--paper);border:1px solid var(--line);border-radius:10px;
+  padding:14px;z-index:500;box-shadow:0 4px 24px rgba(43,43,51,.14);min-width:242px}
+.drng-cal-panel.open{display:block}
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.cal-nav-btn{border:none;background:none;cursor:pointer;color:var(--muted);
+  font-size:17px;padding:2px 8px;border-radius:5px;line-height:1.3}
+.cal-nav-btn:hover{background:var(--cream);color:var(--ink)}
+.cal-nav-label{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--ink)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px}
+.cal-dh{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);
+  text-align:center;padding:4px 0;letter-spacing:.4px}
+.cal-d{font-family:'JetBrains Mono',monospace;font-size:12px;text-align:center;
+  padding:5px 2px;border-radius:4px;cursor:pointer;color:var(--ink);user-select:none;transition:.08s}
+.cal-d:hover:not(.cal-empty){background:rgba(201,162,39,.18)}
+.cal-empty{cursor:default;pointer-events:none}
+.cal-d.today{font-weight:700;color:var(--gold)}
+.cal-d.sel-start,.cal-d.sel-end{background:var(--ink)!important;color:#fff!important;font-weight:700}
+.cal-d.in-range{background:rgba(201,162,39,.2);border-radius:0}
+.cal-d.in-range.sel-start{border-radius:4px 0 0 4px}
+.cal-d.in-range.sel-end{border-radius:0 4px 4px 0}
+.cal-hint{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);
+  text-align:center;margin-top:8px;letter-spacing:.3px;min-height:14px}
+
+/* ── Event table ──────────────────────────────────────────────── */
+.ev-hdr{display:grid;grid-template-columns:60px 60px 1fr 80px 72px 72px 72px 24px;
+  gap:6px;padding:6px 14px;font-family:'JetBrains Mono',monospace;
+  font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);
+  border-bottom:1px solid var(--line);background:var(--cream);
+  border-radius:8px 8px 0 0;margin-bottom:0}
+
+.ev-list{border:1px solid var(--line);border-radius:8px;overflow:hidden}
+
+/* now line */
+.now-line{display:flex;align-items:center;gap:8px;padding:0 14px;
+  height:22px;background:rgba(201,162,39,.07)}
+.now-line span{font-family:'JetBrains Mono',monospace;font-size:11px;
+  letter-spacing:.8px;text-transform:uppercase;color:var(--gold);font-weight:700}
+.now-line::before,.now-line::after{content:'';flex:1;height:1px;background:var(--gold);opacity:.35}
+.now-line::before{flex:0 0 8px}
+
+/* event row */
+.ev-row{border-bottom:1px solid var(--line)}
+.ev-row:last-child{border-bottom:none}
+.ev-cells{display:grid;grid-template-columns:60px 60px 1fr 80px 72px 72px 72px 24px;
+  gap:6px;align-items:center;padding:9px 14px;cursor:pointer;
+  transition:background .1s;background:var(--paper)}
+.ev-cells:hover{background:rgba(201,162,39,.04)}
+.ev-row.past .ev-cells{opacity:.55}
+
+.ev-time{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted)}
+.ev-flag{font-size:12px;display:flex;align-items:center;gap:4px;
+  font-family:'JetBrains Mono',monospace;font-weight:700}
+.ev-name{font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ev-imp{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;
+  letter-spacing:.5px;padding:2px 7px;border-radius:5px;text-align:center}
+.ev-imp.h{background:var(--gold);color:#fff}
+.ev-imp.m{border:1px solid var(--muted);color:var(--muted)}
+.ev-imp.l{color:var(--faint);font-size:11px}
+.ev-num{font-family:'JetBrains Mono',monospace;font-size:12px;text-align:right}
+.ev-num.surp-up{color:var(--up);font-weight:700}
+.ev-num.surp-dn{color:var(--down);font-weight:700}
+.ev-chev{font-size:14px;color:var(--muted);transition:transform .2s;text-align:center;
+  justify-self:center}
+.ev-row.open .ev-chev{transform:rotate(180deg)}
+
+/* accordion detail */
+.ev-detail{display:none;background:var(--cream);border-top:1px solid var(--line)}
+.ev-row.open .ev-detail{display:block}
+.ev-detail-inner{padding:16px 18px}
+
+.ev-desc{font-size:13px;color:var(--ink);line-height:1.6;margin-bottom:14px}
+.ev-desc a{color:var(--gold);font-family:'JetBrains Mono',monospace;font-size:11px}
+.ev-gloss-short{margin-top:8px;padding:10px 14px;background:rgba(201,162,39,.06);
+  border-left:3px solid var(--gold);border-radius:0 6px 6px 0;
+  font-size:13px;line-height:1.6;color:var(--ink)}
+.ev-gloss-btn{margin-top:6px}
+
+/* segment control */
+.seg-ctrl{display:flex;gap:0;border:.5px solid var(--line);border-radius:var(--r-pill);
+  overflow:hidden;margin-bottom:14px;background:var(--paper)}
+.seg-ctrl .seg-btn{flex:1;border-radius:0;border:none;border-right:.5px solid var(--line)}
+.seg-ctrl .seg-btn:last-child{border-right:none}
+
+/* tab panes */
+.tab-pane{display:none}
+.tab-pane.on{display:block}
+.chart-wrap{border-radius:8px;overflow:hidden;background:var(--paper);
+  border:1px solid var(--line);padding:12px}
+.sym-sel{display:flex;gap:6px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+.sym-sel label{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);
+  letter-spacing:.5px;text-transform:uppercase}
+.sym-sel select{font-family:'JetBrains Mono',monospace;font-size:12px;
+  padding:4px 8px;border:1px solid var(--line);border-radius:6px;
+  background:var(--cream);color:var(--ink);outline:none;cursor:pointer}
+.sym-sel select:focus{border-color:var(--gold)}
+.hist-list{margin-top:10px;display:flex;flex-direction:column;gap:2px;max-height:120px;overflow-y:auto}
+.hist-row{display:flex;justify-content:space-between;align-items:center;
+  padding:3px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:11px}
+.hist-row:nth-child(odd){background:rgba(201,162,39,.04)}
+.hist-row .hd{color:var(--muted)}
+.hist-row .hv{font-weight:700}
+
+.soon-box{padding:30px 20px;text-align:center;border:1px dashed var(--line);
+  border-radius:8px;color:var(--muted)}
+.soon-box b{display:block;font-family:'JetBrains Mono',monospace;font-size:11px;
+  letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px}
+.soon-box p{font-size:12px;line-height:1.6}
+
+.chart-loading{padding:24px;text-align:center;color:var(--muted);
+  font-family:'JetBrains Mono',monospace;font-size:12px}
+
+/* ── Empty / states ───────────────────────────────────────────── */
+.empty-state{padding:60px 20px;text-align:center;color:var(--muted);
+  font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.8}
+
+/* ── Glossary modal ───────────────────────────────────────────── */
+.gloss-modal{display:none;position:fixed;inset:0;background:rgba(43,43,51,.5);
+  z-index:8000;align-items:center;justify-content:center;padding:20px}
+.gloss-modal.open{display:flex}
+.gloss-modal-box{background:var(--paper);border:1px solid var(--line);border-radius:14px;
+  max-width:520px;width:100%;padding:28px 28px 24px;position:relative;
+  box-shadow:0 8px 40px rgba(43,43,51,.18)}
+.gloss-modal-close{position:absolute;top:12px;right:14px;border:none;background:none;
+  font-size:20px;color:var(--muted);cursor:pointer;line-height:1;padding:4px}
+.gloss-modal-close:hover{color:var(--ink)}
+.gloss-modal-tag{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;
+  text-transform:uppercase;color:var(--gold);margin-bottom:6px}
+.gloss-modal-term{font-size:18px;font-weight:700;color:var(--ink);margin-bottom:10px;line-height:1.2}
+.gloss-modal-short{font-size:13.5px;color:var(--ink);line-height:1.65;margin-bottom:12px;
+  padding:10px 14px;background:rgba(201,162,39,.06);border-left:3px solid var(--gold);border-radius:0 6px 6px 0}
+.gloss-modal-full{font-size:13px;color:var(--muted);line-height:1.7}
+
+/* ── Mobile ───────────────────────────────────────────────────── */
+@media(max-width:800px){
+  .cal-page{grid-template-columns:1fr;padding:12px 8px 70px}
+  .cal-sidebar{display:none}
+  .ev-hdr{display:none}
+  .ev-cells{grid-template-columns:50px 44px 1fr 60px 60px 20px}
+  .ev-fore,.ev-prev{display:none}
+  .seg-btn{font-size:11px;padding:7px 2px}
+  .drng-cal-wrap{margin-left:0}
+  .drng-cal-panel{right:auto;left:0}
+  .date-rng{gap:8px}
+}
+</style>
+</head>
+<body>
+
+
+<div class="cal-page">
+  <!-- Sidebar / Filters -->
+  <aside class="cal-sidebar">
+    <div class="fil-group">
+      <div class="fil-title">Важность</div>
+      <label class="fil-opt"><input type="checkbox" id="f-high" checked onchange="applyFilters()"> Высокая</label>
+      <label class="fil-opt"><input type="checkbox" id="f-med" checked onchange="applyFilters()"> Средняя</label>
+      <label class="fil-opt"><input type="checkbox" id="f-low" onchange="applyFilters()"> Низкая</label>
+    </div>
+    <div class="fil-group">
+      <div class="fil-title">Страна</div>
+      <select class="fil-select" id="f-country" onchange="loadEvents()">
+        <option value="">Все страны</option>
+        <option value="US">🇺🇸 США</option>
+        <option value="EU">🇪🇺 Еврозона</option>
+        <option value="GB">🇬🇧 Великобритания</option>
+        <option value="JP">🇯🇵 Япония</option>
+        <option value="CN">🇨🇳 Китай</option>
+        <option value="DE">🇩🇪 Германия</option>
+        <option value="CA">🇨🇦 Канада</option>
+        <option value="AU">🇦🇺 Австралия</option>
+      </select>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="cal-main">
+    <!-- Date range picker -->
+    <div class="date-rng" id="date-rng">
+      <div class="drng-presets">
+        <button class="drng-btn on" id="preset-today"    onclick="setPreset('today',this)">Сегодня</button>
+        <button class="drng-btn"    id="preset-tomorrow" onclick="setPreset('tomorrow',this)">Завтра</button>
+        <button class="drng-btn"    id="preset-week"     onclick="setPreset('week',this)">Неделя</button>
+        <button class="drng-btn"    id="preset-month"    onclick="setPreset('month',this)">Месяц</button>
+      </div>
+      <div class="drng-cal-wrap" id="calWrap">
+        <button class="drng-cal-toggle" id="calToggle" onclick="toggleCalendar(event)">
+          <span id="calLabel">—</span><span style="font-size:10px;color:var(--muted)">▾</span>
+        </button>
+        <div class="drng-cal-panel" id="calPanel">
+          <div class="cal-nav">
+            <button class="cal-nav-btn" onclick="calPrevMonth()">‹</button>
+            <span class="cal-nav-label" id="calMonthLabel"></span>
+            <button class="cal-nav-btn" onclick="calNextMonth()">›</button>
+          </div>
+          <div class="cal-grid" id="calGrid"></div>
+          <div class="cal-hint" id="calHint">Выберите начало периода</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table header (desktop) -->
+    <div class="ev-hdr">
+      <span>Время</span><span>Страна</span><span>Событие</span>
+      <span>Важность</span><span>Факт</span><span>Прогноз</span><span>Предыдущ.</span><span></span>
+    </div>
+
+    <!-- Event list -->
+    <div class="ev-list" id="ev-list">
+      <div class="empty-state">Загрузка…</div>
+    </div>
+  </main>
+</div>
+
+<!-- Glossary modal (§3) -->
+<div id="gloss-modal" class="gloss-modal" onclick="closeGlossModal(event)">
+  <div class="gloss-modal-box">
+    <button class="gloss-modal-close" onclick="closeGlossModal()">×</button>
+    <div class="gloss-modal-tag">Экономические данные</div>
+    <div class="gloss-modal-term" id="gm-term"></div>
+    <div class="gloss-modal-short" id="gm-short"></div>
+    <div class="gloss-modal-full" id="gm-full"></div>
+  </div>
+</div>
+
+<script>
+// ── Константы ──────────────────────────────────────────────────────────────
+var FLAGS = {
+  'US':'🇺🇸','EU':'🇪🇺','EA':'🇪🇺','GB':'🇬🇧','JP':'🇯🇵',
+  'CN':'🇨🇳','DE':'🇩🇪','FR':'🇫🇷','IT':'🇮🇹','CA':'🇨🇦',
+  'AU':'🇦🇺','CH':'🇨🇭','NZ':'🇳🇿','RU':'🇷🇺','ZA':'🇿🇦',
+  'AE':'🇦🇪','KZ':'🇰🇿'
+};
+var COUNTRY_SYM = {
+  'US':'EURUSD','EU':'EURUSD','EA':'EURUSD','GB':'GBPUSD',
+  'JP':'USDJPY','CN':'USDCNY','RU':'USDRUB','ZA':'USDZAR','AE':'USDAED','KZ':'USDKZT'
+};
+var SYMBOLS = ['EURUSD','GBPUSD','USDJPY','XAUUSD','USDRUB','USDCNY','USDZAR','USDAED','USDKZT'];
+var MONTHS_RU = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
+
+var _lastEvents = [];
+var _openRowIdx = null;
+var _nowTs = Date.now() / 1000;
+
+// §2: автоматический часовой пояс из браузера (без селектора)
+var _TZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+// ── Range state ────────────────────────────────────────────────────────────
+var _rangeStart = null;
+var _rangeEnd   = null;
+var _pickStep   = 0; // 0 = ждём начала, 1 = ждём конца
+
+// ── Calendar state ─────────────────────────────────────────────────────────
+var _calYear  = 0;
+var _calMonth = 0;
+
+var _MONTHS_FULL  = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+var _MONTHS_SHORT = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
+var _DAYS_SHORT   = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+
+// ── Вспомогательные ────────────────────────────────────────────────────────
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function fmtTime(ts_utc){
+  if(!ts_utc) return '—';
+  var d = new Date(ts_utc);
+  try {
+    return d.toLocaleTimeString('ru', {hour:'2-digit',minute:'2-digit',timeZone:_TZ});
+  } catch(e) {
+    return d.toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit',timeZone:'UTC'});
+  }
+}
+
+function fmtDate(ts_utc){
+  if(!ts_utc) return '';
+  var d = new Date(ts_utc);
+  return d.toLocaleDateString('ru',{day:'numeric',month:'long',weekday:'short',timeZone:'UTC'});
+}
+
+function todayStr(){
+  return new Date().toISOString().slice(0,10);
+}
+function addDays(dateStr, n){
+  var d = new Date(dateStr + 'T12:00:00Z');
+  d.setUTCDate(d.getUTCDate() + n);
+  return d.toISOString().slice(0,10);
+}
+
+function eventKey(ev){
+  var t = (ev.country+'_'+ev.title).toLowerCase()
+    .replace(/\s*\(.*?\)/g,'')
+    .replace(/[^a-zа-яё0-9]+/g,'_')
+    .replace(/_{2,}/g,'_')
+    .replace(/^_|_$/g,'');
+  return t.slice(0,60);
+}
+
+function impCls(imp){
+  if(!imp) return 'l';
+  var i = imp.toLowerCase();
+  return i==='high'?'h':i==='medium'||i==='mid'?'m':'l';
+}
+function impLabel(imp){
+  var c = impCls(imp);
+  return c==='h'?'ВЫСОКИЙ':c==='m'?'СРЕДНИЙ':'низкий';
+}
+
+// ── §3 Глоссарий экономических данных ────────────────────────────────────
+var ECON_GLOSSARY = [
+  {
+    keys:['non-farm payroll','nfp','non farm'],
+    term:'NFP — Non-Farm Payrolls',
+    short:'Число новых рабочих мест в несельскохозяйственном секторе США. Выходит каждую первую пятницу месяца.',
+    full:'Один из ключевых индикаторов рынка труда. Превышение прогноза укрепляет доллар и усиливает ожидания подъёма ставки ФРС. Слабый NFP давит на USD и повышает вероятность смягчения ДКП.'
+  },
+  {
+    keys:['consumer price index','cpi'],
+    term:'CPI — Consumer Price Index',
+    short:'Индекс потребительских цен. Основной показатель инфляции США (рассчитывается BLS).',
+    full:'Измеряет изменение цен на потребительскую корзину. Core CPI исключает волатильные компоненты — еду и энергоносители. Выше прогноза → рост доллара. Ниже прогноза → слабый доллар, ожидания паузы ФРС.'
+  },
+  {
+    keys:['producer price index','ppi'],
+    term:'PPI — Producer Price Index',
+    short:'Индекс цен производителей. Опережающий сигнал инфляции на потребительском уровне.',
+    full:'Отражает изменение цен, которые производители получают за готовую продукцию. Часто рассматривается как ранний индикатор давления на CPI. Рост PPI при отставании CPI сигнализирует о будущей инфляции.'
+  },
+  {
+    keys:['personal consumption expenditures','pce'],
+    term:'PCE — Personal Consumption Expenditures',
+    short:'Предпочтительный инфляционный индикатор ФРС. Учитывает реальное поведение потребителей.',
+    full:'Core PCE (без еды и энергии) — ключевой таргет ФРС (цель 2%). В отличие от CPI гибко учитывает изменения в структуре потребления. Публикуется с отчётом по доходам/расходам населения (BEA).'
+  },
+  {
+    keys:['gross domestic product','gdp'],
+    term:'GDP — Gross Domestic Product',
+    short:'Валовой внутренний продукт — совокупная стоимость всех произведённых в стране товаров и услуг.',
+    full:'Выходит в трёх редакциях: предварительная → вторая → финальная. Сильный рост GDP подтверждает устойчивость экономики и поддерживает национальную валюту. Негативный квартальный GDP два квартала подряд — техническая рецессия.'
+  },
+  {
+    keys:['pmi manufacturing','manufacturing pmi','purchasing managers'],
+    term:'PMI Manufacturing — Индекс деловой активности (производство)',
+    short:'Показывает деловые настроения менеджеров по закупкам в промышленности. Порог: 50.',
+    full:'Значение выше 50 означает расширение производственного сектора, ниже 50 — сжатие. Финальный S&P/Markit PMI выходит в начале месяца, ISM Manufacturing — как правило, в первый рабочий день месяца.'
+  },
+  {
+    keys:['services pmi','service pmi','services business activity'],
+    term:'PMI Services — Индекс деловой активности (услуги)',
+    short:'Аналог PMI для сектора услуг. Порог: 50. Более значим для США (услуги ~70% ВВП).',
+    full:'Поскольку сектор услуг формирует большую часть ВВП развитых экономик, PMI Services нередко важнее PMI Manufacturing. Устойчивое значение выше 55 — сигнал перегрева экономики.'
+  },
+  {
+    keys:['ism manufacturing','ism services','ism non-manufacturing'],
+    term:'ISM — Institute for Supply Management',
+    short:'Американский аналог PMI от ISM. Порог: 50. Данные по manufacturing и services выходят ежемесячно.',
+    full:'ISM Manufacturing считается более предпочтительным, чем S&P PMI, для американского рынка. Компонента «новые заказы» особенно внимательно читается трейдерами как опережающий сигнал.'
+  },
+  {
+    keys:['unemployment rate','безработица'],
+    term:'Unemployment Rate — Уровень безработицы',
+    short:'Доля безработных от экономически активного населения. Выходит вместе с NFP.',
+    full:'Рост безработицы давит на доллар, снижение — поддерживает. ФРС таргетирует уровень около 4–4.5% (условный «полная занятость»). Высокая безработица делает вероятным снижение ставки.'
+  },
+  {
+    keys:['initial jobless claims','initial claims','jobless claims'],
+    term:'Initial Jobless Claims — Первичные заявки на пособие по безработице',
+    short:'Еженедельная статистика по числу впервые обратившихся за пособием. Выходит каждый четверг.',
+    full:'Опережающий показатель рынка труда. Рост заявок сигнализирует об ослаблении занятости. Чувствителен к праздникам и сезонным факторам. Уровни выше 300 тыс. воспринимаются рынком как тревожный сигнал.'
+  },
+  {
+    keys:['continuing claims'],
+    term:'Continuing Claims — Продолжающиеся заявки на пособие',
+    short:'Число людей, продолжающих получать пособие по безработице. Выходит еженедельно.',
+    full:'Выходит с задержкой на одну неделю относительно initial claims. Устойчивый рост указывает на то, что безработные дольше не могут найти работу — негативный сигнал для доллара.'
+  },
+  {
+    keys:['jolts','job openings'],
+    term:'JOLTS — Job Openings and Labor Turnover Survey',
+    short:'Число вакансий в экономике США. Важный показатель баланса спроса и предложения рабочей силы.',
+    full:'ФРС использует JOLTS для оценки перегрева рынка труда. Число вакансий, значительно превышающее число безработных, сигнализирует об инфляционном давлении со стороны зарплат.'
+  },
+  {
+    keys:['adp employment','adp non-farm','adp nonfarm'],
+    term:'ADP Employment Change',
+    short:'Оценка изменения занятости в частном секторе от агентства ADP. Выходит за 2 дня до NFP.',
+    full:'Часто рассматривается как предварительный индикатор официального NFP. Корреляция с официальным отчётом умеренная, поэтому рынок реагирует сдержаннее, чем на NFP.'
+  },
+  {
+    keys:['retail sales'],
+    term:'Retail Sales — Розничные продажи',
+    short:'Изменение объёма продаж в розничной торговле. Мера потребительской активности.',
+    full:'Потребление составляет ~70% ВВП США, поэтому розничные продажи — ключевой индикатор экономической активности. Рост выше прогноза → поддержка доллара. Core Retail Sales исключает авто как наиболее волатильный компонент.'
+  },
+  {
+    keys:['fomc','federal open market','interest rate decision','fed rate','rate statement','monetary policy statement'],
+    term:'FOMC — Решение по процентной ставке ФРС',
+    short:'Заседание Федерального комитета по открытым рынкам. Объявляют решение по ставке + публикуют заявление.',
+    full:'8 плановых заседаний в год. Помимо ставки важны: сопроводительное заявление, точечный график (dot plot) и пресс-конференция главы ФРС. Hawkish тон (намёк на повышение) укрепляет USD; dovish (смягчение) — ослабляет.'
+  },
+  {
+    keys:['eia crude','crude oil inventories','oil inventories','petroleum'],
+    term:'EIA Crude Oil Inventories',
+    short:'Еженедельное изменение запасов нефти в США (U.S. Energy Information Administration). По средам.',
+    full:'Рост запасов → переизбыток предложения → давление на нефть. Сокращение запасов → дефицит → рост нефти. API публикует данные во вторник вечером как предварительный ориентир.'
+  },
+  {
+    keys:['natural gas','eia natural gas','gas storage'],
+    term:'EIA Natural Gas Storage',
+    short:'Еженедельное изменение запасов природного газа в США. Публикуется по четвергам.',
+    full:'Важен для торговли природным газом (NG=F). Сезонность: зимой сокращение запасов — норма. Аномально большое сокращение в пик отопительного сезона → рост цен газа.'
+  },
+  {
+    keys:['durable goods'],
+    term:'Durable Goods Orders — Заказы на товары длительного пользования',
+    short:'Изменение новых заказов на производство товаров со сроком службы более 3 лет.',
+    full:'Опережающий индикатор производственной активности и корпоративных инвестиций. Core Durable Goods (без авиатехники и транспорта) более стабилен и лучше отражает базовые тенденции.'
+  },
+  {
+    keys:['trade balance','current account','торговый баланс'],
+    term:'Trade Balance / Current Account',
+    short:'Разница между экспортом и импортом товаров и услуг страны.',
+    full:'Дефицит торгового баланса (импорт > экспорт) создаёт спрос на иностранную валюту, оказывая давление на курс. Профицит — наоборот. Для USD особую значимость имеет сальдо с Китаем, Японией и ЕС.'
+  },
+  {
+    keys:['housing starts','building permits'],
+    term:'Housing Starts / Building Permits',
+    short:'Число начатых строительств (housing starts) и выданных разрешений на строительство.',
+    full:'Опережающий индикатор состояния рынка недвижимости. Building permits выходят одновременно и часто важнее, так как отражают будущую активность. Чувствительны к ипотечным ставкам.'
+  },
+  {
+    keys:['existing home sales','home sales','pending home'],
+    term:'Existing / Pending Home Sales',
+    short:'Число сделок купли-продажи на вторичном рынке жилья США.',
+    full:'Вторичный рынок жилья значительно больше первичного. Продажи чувствительны к ипотечным ставкам: рост ставки тормозит рынок. NAR публикует данные ежемесячно.'
+  },
+  {
+    keys:['consumer confidence','cb consumer confidence'],
+    term:'Consumer Confidence (Conference Board)',
+    short:'Индекс доверия потребителей от Conference Board. Отражает оценку населением текущей и будущей экономики.',
+    full:'Выходит в последний вторник месяца. Состоит из двух компонентов: текущая ситуация (Current Situation) и ожидания (Expectations). Используется как опережающий показатель потребительских расходов.'
+  },
+  {
+    keys:['michigan','umi consumer','university of michigan','consumer sentiment'],
+    term:'Michigan Consumer Sentiment / UoM',
+    short:'Индекс настроений потребителей Мичиганского университета. Два релиза в месяц: предварительный и финальный.',
+    full:'Предварительный (Preliminary) выходит в середине месяца, финальный — в конце. Компонента инфляционных ожиданий (5-year inflation expectations) особенно внимательно читается рынком и ФРС.'
+  },
+  {
+    keys:['factory orders','industrial production','capacity utilization'],
+    term:'Factory Orders / Industrial Production',
+    short:'Factory Orders: новые заказы на промышленные товары. Industrial Production: объём производства.',
+    full:'Industrial Production + Capacity Utilization выходят вместе от ФРС. Высокая загрузка мощностей (>80%) сигнализирует о возможном инфляционном давлении. Factory Orders — более широкий показатель, включает услуги.'
+  },
+  {
+    keys:['challenger job cuts','layoffs'],
+    term:'Challenger Job Cuts — Планируемые увольнения',
+    short:'Число объявленных сокращений персонала от компании Challenger, Gray & Christmas.',
+    full:'Выходит ежемесячно в первый четверг. Рост числа сокращений — ранний предупреждающий сигнал для рынка труда. Реакция рынка относительно слабая, но данные важны для контекста NFP.'
+  }
+];
+
+function getGlossEntry(title){
+  var t = (title||'').toLowerCase();
+  for(var i=0;i<ECON_GLOSSARY.length;i++){
+    var e = ECON_GLOSSARY[i];
+    for(var j=0;j<e.keys.length;j++){
+      if(t.includes(e.keys[j])) return e;
+    }
+  }
+  return null;
+}
+
+function showGlossModal(title){
+  var e = getGlossEntry(title);
+  if(!e) return;
+  document.getElementById('gm-term').textContent  = e.term;
+  document.getElementById('gm-short').textContent = e.short;
+  document.getElementById('gm-full').textContent  = e.full;
+  document.getElementById('gloss-modal').classList.add('open');
+}
+
+function openGlossForEvent(idx){
+  var ev = _lastEvents[idx];
+  if(ev) showGlossModal(ev.title);
+}
+
+function closeGlossModal(ev){
+  if(ev && ev.target !== document.getElementById('gloss-modal')) return;
+  document.getElementById('gloss-modal').classList.remove('open');
+}
+
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape') document.getElementById('gloss-modal').classList.remove('open');
+});
+
+// ── §4 Фильтрация (без прошедших — всегда показываем dimmed) ──────────────
+function applyFilters(){
+  var showH = document.getElementById('f-high').checked;
+  var showM = document.getElementById('f-med').checked;
+  var showL = document.getElementById('f-low').checked;
+  document.querySelectorAll('.ev-row[data-imp]').forEach(function(row){
+    var imp = row.dataset.imp;
+    var c = impCls(imp);
+    var visible = (c==='h'&&showH)||(c==='m'&&showM)||(c==='l'&&showL);
+    row.style.display = visible ? '' : 'none';
+  });
+}
+
+// ── §5 Диапазон дат ────────────────────────────────────────────────────────
+function setPreset(preset, btn){
+  var today = todayStr();
+  if(preset==='today'){
+    _rangeStart = today; _rangeEnd = today;
+  } else if(preset==='tomorrow'){
+    _rangeStart = addDays(today,1); _rangeEnd = addDays(today,1);
+  } else if(preset==='week'){
+    _rangeStart = today; _rangeEnd = addDays(today, 6);
+  } else if(preset==='month'){
+    _rangeStart = today; _rangeEnd = addDays(today, 29);
+  }
+  _pickStep = 0;
+  document.querySelectorAll('.drng-btn').forEach(function(b){b.classList.remove('on');});
+  if(btn) btn.classList.add('on');
+  updateCalLabel();
+  closeCalendar();
+  loadEvents();
+}
+
+// ── Calendar popup ─────────────────────────────────────────────────────────
+function toggleCalendar(e){
+  if(e) e.stopPropagation();
+  var panel = document.getElementById('calPanel');
+  var toggle = document.getElementById('calToggle');
+  var isOpen = panel.classList.contains('open');
+  if(isOpen){ closeCalendar(); return; }
+  var now = _rangeStart ? new Date(_rangeStart+'T12:00:00Z') : new Date();
+  _calYear  = now.getUTCFullYear();
+  _calMonth = now.getUTCMonth();
+  renderCalGrid();
+  panel.classList.add('open');
+  toggle.classList.add('open');
+}
+
+function closeCalendar(){
+  document.getElementById('calPanel').classList.remove('open');
+  document.getElementById('calToggle').classList.remove('open');
+}
+
+document.addEventListener('click', function(e){
+  var wrap = document.getElementById('calWrap');
+  if(wrap && !wrap.contains(e.target)) closeCalendar();
+});
+
+function calPrevMonth(){
+  _calMonth--;
+  if(_calMonth < 0){ _calMonth = 11; _calYear--; }
+  renderCalGrid();
+}
+function calNextMonth(){
+  _calMonth++;
+  if(_calMonth > 11){ _calMonth = 0; _calYear++; }
+  renderCalGrid();
+}
+
+function _isoDate(y, m, d){
+  return y+'-'+(m<9?'0':'')+(m+1)+'-'+(d<10?'0':'')+d;
+}
+
+function renderCalGrid(){
+  var ml = document.getElementById('calMonthLabel');
+  if(ml) ml.textContent = _MONTHS_FULL[_calMonth]+' '+_calYear;
+  var grid = document.getElementById('calGrid');
+  if(!grid) return;
+
+  var firstDow = new Date(_calYear, _calMonth, 1).getDay(); // 0=Sun
+  firstDow = (firstDow + 6) % 7; // Mon=0
+  var daysInMonth = new Date(_calYear, _calMonth+1, 0).getDate();
+  var today = todayStr();
+
+  var html = _DAYS_SHORT.map(function(d){ return '<div class="cal-dh">'+d+'</div>'; }).join('');
+
+  for(var i=0; i<firstDow; i++) html += '<div class="cal-d cal-empty"></div>';
+
+  for(var d=1; d<=daysInMonth; d++){
+    var ds = _isoDate(_calYear, _calMonth, d);
+    var cls = 'cal-d';
+    if(ds === today) cls += ' today';
+    var isStart = ds === _rangeStart;
+    var isEnd   = _rangeEnd && ds === _rangeEnd;
+    var inRange = _rangeStart && _rangeEnd && ds > _rangeStart && ds < _rangeEnd;
+    if(isStart) cls += ' sel-start';
+    if(isEnd)   cls += ' sel-end';
+    if(inRange) cls += ' in-range';
+    html += '<div class="'+cls+'" onclick="onCalDayClick(\''+ds+'\')">'+d+'</div>';
+  }
+  grid.innerHTML = html;
+
+  var hint = document.getElementById('calHint');
+  if(hint){
+    if(_pickStep===1 && _rangeStart){
+      hint.textContent = 'Выберите конечную дату';
+    } else {
+      hint.textContent = 'Выберите начало периода';
+    }
+  }
+}
+
+function onCalDayClick(ds){
+  if(_pickStep === 0 || (_rangeStart && _rangeEnd)){
+    _rangeStart = ds;
+    _rangeEnd   = null;
+    _pickStep   = 1;
+    document.querySelectorAll('.drng-btn').forEach(function(b){b.classList.remove('on');});
+    renderCalGrid();
+    updateCalLabel();
+  } else {
+    if(ds < _rangeStart){
+      _rangeEnd   = _rangeStart;
+      _rangeStart = ds;
+    } else {
+      _rangeEnd = ds;
+    }
+    _pickStep = 0;
+    document.querySelectorAll('.drng-btn').forEach(function(b){b.classList.remove('on');});
+    renderCalGrid();
+    updateCalLabel();
+    closeCalendar();
+    loadEvents();
+  }
+}
+
+function fmtShort(ds){
+  if(!ds) return '';
+  var d = new Date(ds+'T12:00:00Z');
+  return d.getUTCDate()+' '+_MONTHS_SHORT[d.getUTCMonth()];
+}
+
+function updateCalLabel(){
+  var lbl = document.getElementById('calLabel');
+  if(!lbl) return;
+  if(!_rangeStart){ lbl.textContent = 'Выбрать'; return; }
+  if(!_rangeEnd || _rangeStart === _rangeEnd){
+    lbl.textContent = fmtShort(_rangeStart);
+  } else {
+    lbl.textContent = fmtShort(_rangeStart)+' — '+fmtShort(_rangeEnd);
+  }
+}
+
+// ── Загрузка событий ───────────────────────────────────────────────────────
+async function loadEvents(){
+  var list = document.getElementById('ev-list');
+  list.innerHTML = '<div class="empty-state">Загрузка…</div>';
+  _openRowIdx = null;
+
+  var from    = _rangeStart || todayStr();
+  var to      = _rangeEnd   || from;
+  var country = document.getElementById('f-country').value;
+  var params  = '?from='+from+'&to='+to;
+  if(country) params += '&country='+country;
+
+  try {
+    var r = await fetch('/api/calendar/events'+params);
+    if(!r.ok) throw new Error(r.status);
+    var events = await r.json();
+    _lastEvents = events;
+    renderRows(events);
+  } catch(e) {
+    list.innerHTML = '<div class="empty-state">Ошибка загрузки: '+esc(String(e))+'</div>';
+  }
+}
+
+// ── Рендер строк ───────────────────────────────────────────────────────────
+function renderRows(events){
+  var list = document.getElementById('ev-list');
+  if(!events||!events.length){
+    list.innerHTML = '<div class="empty-state">Событий за выбранный период не найдено 🟢<br><small>Попробуйте другой диапазон или фильтр</small></div>';
+    return;
+  }
+
+  var nowTs = Date.now()/1000;
+  var nowInserted = false;
+  var html = '';
+
+  events.forEach(function(ev, idx){
+    var evTs = ev.ts_utc ? new Date(ev.ts_utc).getTime()/1000 : null;
+    var isPast = evTs != null && evTs < nowTs;
+    var hasFact = ev.actual != null && ev.actual !== '';
+
+    if(!nowInserted && evTs != null && evTs >= nowTs){
+      html += '<div class="now-line"><span>Сейчас</span></div>';
+      nowInserted = true;
+    }
+
+    var imp = impCls(ev.impact);
+    var flag = FLAGS[ev.country] || '🌐';
+    var time = fmtTime(ev.ts_utc);
+    var key = eventKey(ev);
+    var defSym = COUNTRY_SYM[ev.country] || 'EURUSD';
+
+    var surpriseCls = '';
+    if(hasFact && ev.forecast != null && ev.forecast !== ''){
+      var a = parseFloat(ev.actual), f = parseFloat(ev.forecast);
+      if(!isNaN(a)&&!isNaN(f)) surpriseCls = a>=f ? 'surp-up' : 'surp-dn';
+    }
+
+    html += '<div class="ev-row'+
+      (isPast?' past':'')+(imp!=='h'?' dim-imp':'')+'"'
+      +' data-imp="'+(ev.impact||'')+'"'
+      +' data-idx="'+idx+'"'
+      +' data-key="'+esc(key)+'"'
+      +' data-sym="'+defSym+'"'
+      +' data-yahoo="'+(ev.yahoo_url?esc(ev.yahoo_url):'')+'">'
+      +'<div class="ev-cells" onclick="toggleRow('+idx+')">'
+        +'<span class="ev-time">'+time+'</span>'
+        +'<span class="ev-flag">'+flag+' '+esc(ev.country||'')+'</span>'
+        +'<span class="ev-name" title="'+esc(ev.title)+'">'+esc(ev.title)+'</span>'
+        +'<span class="ev-imp '+imp+'">'+impLabel(ev.impact)+'</span>'
+        +'<span class="ev-num'+' '+(hasFact?surpriseCls:'')+'">'+(hasFact?esc(ev.actual):'—')+'</span>'
+        +'<span class="ev-num ev-fore">'+(ev.forecast!=null&&ev.forecast!==''?esc(ev.forecast):'—')+'</span>'
+        +'<span class="ev-num ev-prev">'+(ev.previous!=null&&ev.previous!==''?esc(ev.previous):'—')+'</span>'
+        +'<span class="ev-chev">▾</span>'
+      +'</div>'
+      +'<div class="ev-detail" id="detail-'+idx+'">'
+        +'<div class="ev-detail-inner">'
+          +'<div class="ev-desc" id="desc-'+idx+'"></div>'
+          +'<div class="seg-ctrl" id="seg-'+idx+'">'
+            +'<button class="seg-btn on" data-tab="price" onclick="switchTab('+idx+',this)">Ценовой график</button>'
+            +'<button class="seg-btn" data-tab="history" onclick="switchTab('+idx+',this)">График событий</button>'
+            +'<button class="seg-btn coming" title="Фаза 2">Волатильность</button>'
+            +'<button class="seg-btn coming" title="Фаза 2">Влияние</button>'
+          +'</div>'
+          +'<div id="tab-price-'+idx+'" class="tab-pane on">'
+            +'<div class="sym-sel">'
+              +'<label>Инструмент:</label>'
+              +'<select id="sym-sel-'+idx+'" onchange="loadPriceChart('+idx+')">'
+                +SYMBOLS.map(function(s){return '<option value="'+s+'"'+(s===defSym?' selected':'')+'>'+s+'</option>';}).join('')
+              +'</select>'
+            +'</div>'
+            +'<div id="price-chart-'+idx+'"><div class="chart-loading">Загрузка графика…</div></div>'
+          +'</div>'
+          +'<div id="tab-history-'+idx+'" class="tab-pane"><div class="chart-loading">Загрузка истории…</div></div>'
+          +'<div id="tab-vol-'+idx+'" class="tab-pane"><div class="soon-box"><b>Волатильность</b><p>Исторические данные о реакции цены на событие появятся позже (Фаза 2).</p></div></div>'
+          +'<div id="tab-impact-'+idx+'" class="tab-pane"><div class="soon-box"><b>Влияние</b><p>Статистика направления реакций за прошлые релизы появится позже (Фаза 2).</p></div></div>'
+        +'</div>'
+      +'</div>'
+      +'</div>';
+  });
+
+  if(!nowInserted) html += '<div class="now-line"><span>Сейчас</span></div>';
+
+  list.innerHTML = html;
+  applyFilters();
+}
+
+// ── Аккордеон ──────────────────────────────────────────────────────────────
+function toggleRow(idx){
+  var row = document.querySelector('.ev-row[data-idx="'+idx+'"]');
+  if(!row) return;
+
+  var wasOpen = row.classList.contains('open');
+  document.querySelectorAll('.ev-row.open').forEach(function(r){r.classList.remove('open');});
+
+  if(wasOpen) return;
+
+  row.classList.add('open');
+  _openRowIdx = idx;
+
+  var ev = _lastEvents[idx];
+  if(ev){
+    var descEl = document.getElementById('desc-'+idx);
+    if(descEl){
+      // §3 — короткое описание из глоссария
+      var gloss = getGlossEntry(ev.title);
+      var yahoo = ev.yahoo_url
+        ? ' <a href="'+esc(ev.yahoo_url)+'" target="_blank" rel="noopener">Источник →</a>' : '';
+      var glossHtml = gloss
+        ? '<div class="ev-gloss-short">'+esc(gloss.short)
+          +'</div><button class="ev-gloss-btn" onclick="openGlossForEvent('+idx+')">Подробнее →</button>'
+        : '';
+      descEl.innerHTML =
+        '<b style="font-size:14px">'+esc(ev.title)+'</b>'
+        +(ev.actual   ? '<br><span style="color:var(--up)">Факт: <b>'+esc(ev.actual)+'</b></span>' : '')
+        +(ev.forecast ? ' · Прогноз: '+esc(ev.forecast) : '')
+        +(ev.previous ? ' · Предыдущее: '+esc(ev.previous) : '')
+        +yahoo
+        +glossHtml;
+    }
+    loadPriceChart(idx);
+  }
+}
+
+// ── Переключение вкладок ───────────────────────────────────────────────────
+function switchTab(idx, btn){
+  if(btn.classList.contains('coming')) return;
+  var ctrl = document.getElementById('seg-'+idx);
+  ctrl.querySelectorAll('.seg-btn').forEach(function(b){b.classList.remove('on');});
+  btn.classList.add('on');
+  var tab = btn.dataset.tab;
+  ['history','price','vol','impact'].forEach(function(t){
+    var el = document.getElementById('tab-'+t+'-'+idx);
+    if(el) el.classList.toggle('on', t===tab);
+  });
+  if(tab==='history') loadEventHistory(idx);
+  if(tab==='price') loadPriceChart(idx);
+}
+
+// ── График событий (факт vs прогноз) ──────────────────────────────────────
+var _histCache = {};
+async function loadEventHistory(idx){
+  var pane = document.getElementById('tab-history-'+idx);
+  if(!pane) return;
+  var row  = document.querySelector('.ev-row[data-idx="'+idx+'"]');
+  if(!row) return;
+  var key = row.dataset.key;
+  if(!key) { pane.innerHTML = '<div class="chart-loading">Ключ события не определён</div>'; return; }
+
+  if(_histCache[key] !== undefined){
+    pane.innerHTML = _renderHistPane(key, _histCache[key], idx);
+    return;
+  }
+
+  pane.innerHTML = '<div class="chart-loading">Загрузка истории…</div>';
+  try {
+    var r = await fetch('/api/event/'+encodeURIComponent(key)+'/history');
+    var data = r.ok ? await r.json() : [];
+    _histCache[key] = Array.isArray(data) ? data : [];
+    pane.innerHTML = _renderHistPane(key, _histCache[key], idx);
+  } catch(e){
+    pane.innerHTML = '<div class="chart-loading">Ошибка: '+esc(String(e))+'</div>';
+  }
+}
+
+function _renderHistPane(key, data, idx){
+  var chart = window.SBFGrafik ? SBFGrafik.renderEventHistory(data) : '';
+  var listHtml = '';
+  if(data.length){
+    var sorted = data.slice().reverse().slice(0,8);
+    listHtml = '<div class="hist-list">'
+      + sorted.map(function(d){
+          var dt = new Date(d.ts*1000);
+          var ds = dt.toLocaleDateString('ru',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'});
+          var surpCls = d.actual!=null&&d.forecast!=null
+            ? (parseFloat(d.actual)>=parseFloat(d.forecast)?'surp-up':'surp-dn') : '';
+          return '<div class="hist-row"><span class="hd">'+ds+'</span>'
+            +'<span class="hv '+surpCls+'">'+(d.actual!=null?d.actual:'—')+'</span>'
+            +'<span class="hd">'+(d.forecast!=null?d.forecast:'—')+'</span>'
+            +'<span class="hd">'+(d.previous!=null?d.previous:'—')+'</span>'
+            +'</div>';
+        }).join('')
+      +'</div>';
+  }
+  return '<div class="chart-wrap">'+chart
+    +(data.length?'<div style="margin-top:8px;font-family:JetBrains Mono,monospace;font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:4px">Последние значения</div>'+listHtml:'')
+    +'</div>';
+}
+
+// ── Ценовой график (свечи + маркеры) ──────────────────────────────────────
+var _SYM_MAP = {XAUUSD:'GOLD', XAGUSD:'SILVER'};
+
+function loadPriceChart(idx){
+  var pane = document.getElementById('price-chart-'+idx);
+  if(!pane) return;
+  var sel = document.getElementById('sym-sel-'+idx);
+  var raw = sel ? sel.value : 'EURUSD';
+  var sym = _SYM_MAP[raw] || raw;
+  var fr = document.createElement('iframe');
+  fr.src = '/chart.html?s='+encodeURIComponent(sym)+'&embed=1';
+  fr.style.cssText = 'width:100%;border:none;display:block;height:520px';
+  fr.dataset.priceFrame = '1';
+  fr.allowFullscreen = true;
+  fr.setAttribute('allow', 'fullscreen');
+  fr.onload = function(){
+    try {
+      var h = fr.contentWindow.document.body.scrollHeight;
+      if (h > 0) fr.style.height = h + 'px';
+    } catch(e) {}
+  };
+  pane.innerHTML = '';
+  pane.appendChild(fr);
+}
+
+window.addEventListener('message', function(e){
+  if (!e.data || e.data.type !== 'sbf-chart-height') return;
+  document.querySelectorAll('iframe[data-price-frame]').forEach(function(fr){
+    try {
+      if (fr.contentWindow === e.source) fr.style.height = e.data.h + 'px';
+    } catch(ex) {}
+  });
+});
+
+// ── Init ───────────────────────────────────────────────────────────────────
+setPreset('today', document.getElementById('preset-today'));
+updateCalLabel();
+</script>
+
+</body>
+</html>

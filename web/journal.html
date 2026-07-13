@@ -1,0 +1,2522 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#FBF6EF">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Профиль — SBF</title>
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="apple-touch-icon" href="/assets/icons/icon-192.png">
+<link rel="manifest" href="/manifest.json">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/design.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="/assets/sbf-header.js?v=11" defer></script>
+
+<style>
+:root{--cream:#FBF6EF;--paper:#FFFFFF;--soft:#FCFAF5;--line:#E7DFCF;--ink:#2B2B33;
+  --muted:#8A8275;--gold:#C9A227;--up:#1e8e5a;--dn:#c0392b;--radius:12px}
+*{box-sizing:border-box}
+body{margin:0;background:var(--cream);color:var(--ink);font-family:Montserrat,sans-serif;
+  font-size:14px;padding-bottom:32px}
+a{color:var(--gold);text-decoration:none}
+
+/* ── Макет ── */
+.j-wrap{max-width:1100px;margin:0 auto;padding:24px 16px 48px}
+.j-title{font-size:22px;font-weight:700;margin:0 0 4px}
+.j-sub{font-size:13px;color:var(--muted);margin:0 0 22px}
+
+/* ── Статистика ── */
+.j-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+@media(max-width:600px){.j-stats{grid-template-columns:repeat(2,1fr)}}
+.j-stat{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px}
+.j-stat-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.j-stat-val{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700}
+
+/* ── Equity Curve ── */
+.j-curve{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:20px}
+.j-curve-title{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;font-weight:600}
+.j-curve canvas{display:block;width:100%!important;height:200px!important}
+
+/* ── Toolbar ── */
+.j-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.j-btn{background:var(--gold);color:#fff;border:none;border-radius:8px;padding:8px 16px;
+  font-family:Montserrat;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap}
+.j-btn:hover{opacity:.88}
+.j-btn.j-btn-sec{background:none;border:1px solid var(--line);color:var(--ink)}
+.j-btn.j-btn-sec:hover{border-color:var(--gold);color:var(--gold)}
+
+/* ── Таблица ── */
+.j-table-wrap{overflow-x:auto;background:var(--paper);border:1px solid var(--line);border-radius:var(--radius)}
+table{width:100%;border-collapse:collapse;min-width:680px}
+thead th{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;
+  padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+tbody tr{border-bottom:1px solid var(--line)}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:var(--soft)}
+tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
+.j-sym{font-weight:700;font-size:12px;background:rgba(201,162,39,.1);
+  color:var(--gold);padding:2px 7px;border-radius:4px}
+.j-mono{font-family:'JetBrains Mono',monospace}
+.j-muted{color:var(--muted)}
+.j-up{color:var(--up)}
+.j-dn{color:var(--dn)}
+.j-empty{color:var(--muted);text-align:center;padding:32px;font-size:13px}
+.j-del-btn{background:none;border:none;cursor:pointer;color:var(--muted);font-size:12px;
+  padding:3px 7px;border-radius:4px}
+.j-del-btn:hover{background:#fde8e8;color:var(--dn)}
+.j-journal-btn{background:none;border:none;cursor:pointer;font-size:14px;
+  padding:2px 5px;border-radius:4px;opacity:.5}
+.j-journal-btn:hover{opacity:1;background:rgba(201,162,39,.1)}
+.j-journal-btn.j-journaled{opacity:.9}
+
+/* ── Пагинация ── */
+.j-pager{display:flex;justify-content:center;align-items:center;gap:10px;margin-top:14px}
+.j-pg-btn{background:none;border:1px solid var(--line);border-radius:6px;
+  padding:5px 12px;cursor:pointer;font-family:Montserrat;font-size:14px}
+.j-pg-btn:hover{border-color:var(--gold)}
+.j-pg-info{font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+
+/* ── Модалки ── */
+.j-modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);
+  z-index:900;align-items:center;justify-content:center;padding:16px}
+.j-modal{background:var(--paper);border-radius:16px;padding:24px;width:100%;
+  max-width:480px;max-height:92vh;overflow-y:auto;position:relative}
+.j-modal-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.j-modal-hd h3{margin:0;font-size:17px}
+.j-close{background:none;border:none;font-size:18px;cursor:pointer;color:var(--muted);padding:4px 8px}
+.j-close:hover{color:var(--dn)}
+
+/* ── Форма ── */
+.j-field{margin-bottom:14px}
+.j-field label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;font-weight:600}
+.j-field input,.j-field select,.j-field textarea{width:100%;border:1px solid var(--line);
+  border-radius:8px;padding:9px 12px;font-family:Montserrat;font-size:13px;
+  background:var(--soft);color:var(--ink);outline:none}
+.j-field input:focus,.j-field select:focus,.j-field textarea:focus{border-color:var(--gold)}
+.j-field textarea{resize:vertical;min-height:60px}
+.j-row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.j-err{font-size:12px;color:var(--dn);margin-top:6px;min-height:16px}
+.j-submit{width:100%;margin-top:4px}
+
+/* ── Import tabs ── */
+.j-tabs{display:flex;gap:2px;margin-bottom:16px;border-bottom:1px solid var(--line)}
+.j-tab-btn{background:none;border:none;padding:8px 14px;cursor:pointer;
+  font-family:Montserrat;font-size:13px;font-weight:600;color:var(--muted);
+  border-bottom:2px solid transparent;margin-bottom:-1px}
+.j-tab-btn.on{color:var(--gold);border-bottom-color:var(--gold)}
+.j-import-result{font-size:12px;color:var(--muted);margin-top:10px;
+  font-family:'JetBrains Mono',monospace;min-height:16px}
+
+/* ── InvestorPassword Modal ── */
+.j-inv-hint{font-size:12px;color:var(--muted);line-height:1.6;margin:0 0 14px}
+.j-inv-steps{list-style:none;padding:0;margin:0}
+.j-inv-steps li{display:flex;gap:10px;align-items:flex-start;padding:9px 0;
+  border-bottom:1px solid var(--line);font-size:13px;line-height:1.5}
+.j-inv-steps li:last-child{border:none}
+.step-n{background:var(--gold);color:#fff;border-radius:50%;min-width:22px;height:22px;
+  display:flex;align-items:center;justify-content:center;font-size:11px;
+  font-weight:700;flex-shrink:0;margin-top:1px}
+.j-inv-warn{background:rgba(201,162,39,.07);border:1px solid rgba(201,162,39,.25);
+  border-radius:8px;padding:10px 14px;font-size:12px;color:var(--muted);margin-top:12px}
+
+/* ── MT5 аккаунты ── */
+.j-acc-row{display:flex;gap:10px;align-items:center;padding:8px 0;
+  border-bottom:1px solid var(--line);flex-wrap:wrap}
+.j-acc-row:last-child{border:none}
+.j-acc-broker{font-weight:700;font-size:13px}
+.j-acc-no{font-family:'JetBrains Mono',monospace;font-size:12px}
+
+/* ── ? кнопка ── */
+.j-inv-tip-btn{background:none;border:1.5px solid var(--gold);color:var(--gold);
+  border-radius:50%;width:20px;height:20px;font-size:11px;font-weight:700;
+  cursor:pointer;display:inline-flex;align-items:center;justify-content:center;
+  line-height:1;vertical-align:middle;margin-left:4px;padding:0}
+.j-inv-tip-btn:hover{background:var(--gold);color:#fff}
+
+/* ── Глобальная ошибка ── */
+#jGlobalErr{display:none;background:#fde8e8;border:1px solid #f5c6cb;
+  border-radius:8px;padding:10px 14px;font-size:12px;color:var(--dn);margin-bottom:14px}
+
+#jCsvText{font-family:'JetBrains Mono',monospace;font-size:11px;
+  min-height:120px;resize:vertical}
+
+/* ── Behavioral Mirror ── */
+.j-mirror{background:var(--paper);border:1px solid var(--line);
+  border-radius:var(--radius);padding:18px 18px 12px;margin-bottom:20px}
+.j-mirror-hd{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.j-mirror-title{font-size:13px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.5px;color:var(--muted)}
+
+/* Insights */
+.j-insight{display:flex;gap:10px;align-items:flex-start;padding:10px 14px;
+  border-radius:8px;margin-bottom:8px;font-size:13px;line-height:1.5}
+.j-insight.warn{background:rgba(192,57,43,.07);border:1px solid rgba(192,57,43,.2)}
+.j-insight.tip{background:rgba(30,142,90,.07);border:1px solid rgba(30,142,90,.2)}
+.j-insight.info{background:rgba(201,162,39,.07);border:1px solid rgba(201,162,39,.2)}
+.j-insight-ico{font-size:16px;flex-shrink:0;margin-top:1px}
+
+/* Queue banner */
+.j-queue-banner{display:flex;align-items:center;gap:12px;padding:12px 16px;
+  background:rgba(201,162,39,.08);border:1px solid rgba(201,162,39,.3);
+  border-radius:10px;margin-bottom:14px;cursor:pointer}
+.j-queue-banner:hover{background:rgba(201,162,39,.14)}
+.j-queue-count{background:var(--gold);color:#fff;border-radius:50%;
+  width:28px;height:28px;display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:13px;flex-shrink:0}
+.j-queue-text{font-size:13px;font-weight:600}
+.j-queue-sub{font-size:11px;color:var(--muted)}
+.j-queue-arr{margin-left:auto;color:var(--gold);font-size:18px}
+
+/* Revenge warning */
+.j-revenge-warn{display:flex;gap:10px;align-items:flex-start;padding:12px 16px;
+  background:rgba(192,57,43,.07);border:1px solid rgba(192,57,43,.25);
+  border-radius:10px;margin-bottom:14px;font-size:13px}
+
+/* Holding card */
+.j-holding{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.j-hold-card{background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:12px 14px;text-align:center}
+.j-hold-val{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;margin-bottom:2px}
+.j-hold-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+
+/* Analytics tables */
+.j-analytics-tabs{display:flex;gap:2px;margin-bottom:12px;border-bottom:1px solid var(--line)}
+.j-at-btn{background:none;border:none;padding:7px 12px;cursor:pointer;
+  font-family:Montserrat;font-size:12px;font-weight:600;color:var(--muted);
+  border-bottom:2px solid transparent;margin-bottom:-1px}
+.j-at-btn.on{color:var(--gold);border-bottom-color:var(--gold)}
+.j-at-table{overflow-x:auto}
+.j-at-table table{width:100%;border-collapse:collapse;font-size:12px}
+.j-at-table th{font-size:10px;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.4px;padding:6px 8px;border-bottom:1px solid var(--line);text-align:left}
+.j-at-table td{padding:7px 8px;border-bottom:1px solid var(--line)}
+.j-at-table tr:last-child td{border:none}
+.j-at-table tr:hover td{background:var(--soft)}
+
+/* ── Discipline Section ── */
+.j-disc{background:var(--paper);border:1px solid var(--line);
+  border-radius:var(--radius);padding:18px;margin-bottom:20px}
+.j-disc-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.j-disc-title{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
+
+/* Score gauge */
+.j-disc-body{display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap}
+.j-disc-gauge{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:90px}
+.j-disc-ring{width:80px;height:80px;border-radius:50%;display:flex;
+  align-items:center;justify-content:center;border:4px solid var(--line);
+  font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;
+  transition:border-color .3s,color .3s}
+.j-disc-ring.score-hi{border-color:var(--up);color:var(--up)}
+.j-disc-ring.score-md{border-color:#E8A800;color:#E8A800}
+.j-disc-ring.score-lo{border-color:var(--dn);color:var(--dn)}
+.j-disc-trend{font-size:13px;font-weight:700;font-family:'JetBrains Mono',monospace}
+.j-disc-trend.up{color:var(--up)}.j-disc-trend.dn{color:var(--dn)}.j-disc-trend.st{color:var(--muted)}
+
+/* Score details */
+.j-disc-details{flex:1;min-width:180px}
+.j-disc-worst{font-size:12px;color:var(--muted);margin-bottom:10px}
+.j-disc-worst strong{color:var(--dn)}
+
+/* Streaks */
+.j-streaks{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
+.j-streak-chip{display:flex;align-items:center;gap:5px;padding:5px 10px;
+  background:var(--soft);border:1px solid var(--line);border-radius:20px;font-size:12px}
+.j-streak-chip .s-n{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--gold)}
+.j-streak-chip.s-hot{border-color:rgba(30,142,90,.4);background:rgba(30,142,90,.06)}
+.j-streak-chip.s-hot .s-n{color:var(--up)}
+
+/* Breakout alert */
+.j-breakout-alert{display:flex;gap:10px;align-items:flex-start;padding:12px 16px;
+  background:rgba(192,57,43,.08);border:1px solid rgba(192,57,43,.35);
+  border-radius:10px;margin-top:14px;font-size:13px;line-height:1.5}
+
+/* ── Discipline Config Modal ── */
+.j-disc-presets{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.j-preset-btn{background:var(--soft);border:1.5px solid var(--line);border-radius:8px;
+  padding:7px 14px;cursor:pointer;font-family:Montserrat;font-size:12px;font-weight:600}
+.j-preset-btn:hover{border-color:var(--gold);color:var(--gold)}
+.j-preset-btn.on{border-color:var(--gold);background:rgba(201,162,39,.1);color:var(--gold)}
+.j-crit-table{width:100%;border-collapse:collapse;margin-bottom:14px}
+.j-crit-table th{font-size:10px;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.4px;padding:6px 8px;border-bottom:1px solid var(--line);text-align:left}
+.j-crit-table td{padding:8px;border-bottom:1px solid var(--line);font-size:13px;vertical-align:middle}
+.j-crit-table tr:last-child td{border:none}
+.j-crit-table input[type=checkbox]{width:16px;height:16px;cursor:pointer;accent-color:var(--gold)}
+.j-crit-table input[type=number]{width:60px;border:1px solid var(--line);border-radius:5px;
+  padding:4px 6px;font-family:'JetBrains Mono',monospace;font-size:12px;
+  background:var(--soft);text-align:center;color:var(--ink)}
+.j-wellbeing{background:rgba(201,162,39,.07);border:1px solid rgba(201,162,39,.25);
+  border-radius:8px;padding:10px 14px;font-size:12px;color:var(--muted);margin-bottom:14px}
+.j-adv-toggle{display:flex;align-items:center;gap:10px;font-size:13px;margin-bottom:14px}
+.j-adv-toggle input[type=checkbox]{width:16px;height:16px;accent-color:var(--dn)}
+
+/* ── Discipline in Meta Modal ── */
+.j-disc-criteria{border-top:1px solid var(--line);padding-top:14px;margin-top:2px}
+.j-disc-crit-row{display:flex;align-items:center;justify-content:space-between;
+  padding:7px 0;border-bottom:1px solid var(--line);font-size:13px}
+.j-disc-crit-row:last-child{border:none}
+.j-disc-crit-lbl{display:flex;align-items:center;gap:7px}
+.j-crit-pass-btns{display:flex;gap:5px}
+.j-crit-pb{background:none;border:1.5px solid var(--line);border-radius:6px;
+  padding:4px 10px;cursor:pointer;font-size:11px;font-weight:700;font-family:Montserrat}
+.j-crit-pb:hover{border-color:var(--gold)}
+.j-crit-pb.yes.on{border-color:var(--up);background:rgba(30,142,90,.1);color:var(--up)}
+.j-crit-pb.no.on{border-color:var(--dn);background:rgba(192,57,43,.07);color:var(--dn)}
+.j-crit-auto{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;
+  background:var(--soft);border-radius:4px;padding:2px 6px}
+
+/* ── Meta Modal ── */
+.j-meta-trade-hd{background:var(--soft);border:1px solid var(--line);
+  border-radius:8px;padding:10px 14px;margin-bottom:18px;font-size:13px}
+.j-meta-trade-row{display:flex;gap:16px;flex-wrap:wrap}
+.j-meta-kv{display:flex;flex-direction:column;gap:2px}
+.j-meta-kv-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+.j-meta-kv-val{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700}
+
+/* Emotion selector */
+.j-emo-label{font-size:12px;color:var(--muted);font-weight:600;margin-bottom:6px}
+.j-emo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px}
+@media(max-width:400px){.j-emo-grid{grid-template-columns:repeat(3,1fr)}}
+.j-emo-btn{background:var(--soft);border:1.5px solid var(--line);border-radius:8px;
+  padding:7px 4px;cursor:pointer;text-align:center;font-size:11px;
+  font-family:Montserrat;font-weight:600;color:var(--ink);line-height:1.3;
+  transition:border-color .15s,background .15s}
+.j-emo-btn .ico{display:block;font-size:18px;margin-bottom:2px}
+.j-emo-btn:hover{border-color:var(--gold);background:rgba(201,162,39,.07)}
+.j-emo-btn.on{border-color:var(--gold);background:rgba(201,162,39,.12);color:var(--gold)}
+
+/* Setup presets */
+.j-setup-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.j-setup-chip{background:var(--soft);border:1px solid var(--line);border-radius:6px;
+  padding:3px 10px;font-size:11px;cursor:pointer;font-family:'JetBrains Mono',monospace}
+.j-setup-chip:hover{border-color:var(--gold);color:var(--gold)}
+
+/* Followed plan toggle */
+.j-plan-toggle{display:flex;gap:8px;margin-bottom:14px}
+.j-plan-btn{flex:1;padding:9px;border:1.5px solid var(--line);border-radius:8px;
+  background:var(--soft);cursor:pointer;font-family:Montserrat;font-size:13px;
+  font-weight:600;text-align:center}
+.j-plan-btn:hover{border-color:var(--gold)}
+.j-plan-btn.on.yes{border-color:var(--up);background:rgba(30,142,90,.1);color:var(--up)}
+.j-plan-btn.on.no{border-color:var(--dn);background:rgba(192,57,43,.07);color:var(--dn)}
+
+/* Meta nav */
+.j-meta-nav{display:flex;gap:8px;margin-top:4px}
+.j-meta-nav .j-btn{flex:1}
+.j-meta-progress{font-size:11px;color:var(--muted);text-align:center;
+  margin-bottom:10px;font-family:'JetBrains Mono',monospace}
+
+/* ── Notification bell ── */
+.j-title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+  margin-bottom:4px}
+.j-notif-wrap{position:relative}
+.j-notif-bell{background:none;border:1.5px solid var(--line);border-radius:50%;
+  width:40px;height:40px;cursor:pointer;font-size:18px;display:flex;
+  align-items:center;justify-content:center;position:relative;flex-shrink:0}
+.j-notif-bell:hover{border-color:var(--gold);background:rgba(201,162,39,.07)}
+.j-notif-badge{position:absolute;top:-4px;right:-4px;background:var(--dn);color:#fff;
+  border-radius:50%;min-width:18px;height:18px;font-size:10px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;padding:0 4px;font-family:Montserrat}
+.j-notif-panel{display:none;position:absolute;top:48px;right:0;
+  width:340px;max-height:380px;overflow-y:auto;
+  background:var(--paper);border:1px solid var(--line);border-radius:12px;
+  box-shadow:0 8px 32px rgba(0,0,0,.12);z-index:800;padding:14px}
+.j-notif-panel.open{display:block}
+.j-notif-panel-hd{display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:10px;font-size:12px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.5px;color:var(--muted)}
+.j-notif-item{border-radius:8px;padding:10px 12px;margin-bottom:8px;
+  background:var(--soft);border:1px solid var(--line);font-size:13px}
+.j-notif-item.critical{background:rgba(192,57,43,.06);border-color:rgba(192,57,43,.25)}
+.j-notif-item-title{font-weight:700;margin-bottom:3px}
+.j-notif-item-body{font-size:12px;color:var(--muted);line-height:1.45}
+.j-notif-item-ts{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;
+  margin-top:4px}
+.j-notif-empty{font-size:13px;color:var(--muted);text-align:center;padding:20px 0}
+.j-notif-read-all{width:100%;margin-top:8px;background:none;border:1px solid var(--line);
+  border-radius:7px;padding:7px;cursor:pointer;font-family:Montserrat;font-size:12px;
+  font-weight:600;color:var(--muted)}
+.j-notif-read-all:hover{border-color:var(--gold);color:var(--gold)}
+
+/* ── Alerts Section ── */
+.j-alerts{background:var(--paper);border:1px solid var(--line);
+  border-radius:var(--radius);padding:18px;margin-bottom:20px}
+.j-alerts-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.j-alerts-title{font-size:13px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.5px;color:var(--muted);display:flex;align-items:center;gap:7px}
+.j-alert-rule{display:flex;align-items:center;gap:10px;padding:9px 0;
+  border-bottom:1px solid var(--line);font-size:13px}
+.j-alert-rule:last-child{border:none}
+.j-alert-rule-ico{font-size:16px;flex-shrink:0}
+.j-alert-rule-lbl{flex:1;min-width:0}
+.j-alert-rule-sym{font-weight:700;font-size:12px;background:rgba(201,162,39,.1);
+  color:var(--gold);padding:2px 7px;border-radius:4px;margin-right:6px}
+.j-alert-rule-kind{font-size:11px;color:var(--muted)}
+.j-alert-rule-actions{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.j-alert-toggle{background:none;border:1.5px solid var(--line);border-radius:14px;
+  width:36px;height:20px;cursor:pointer;position:relative;transition:background .2s,border-color .2s}
+.j-alert-toggle.on{background:var(--up);border-color:var(--up)}
+.j-alert-toggle::after{content:'';position:absolute;top:2px;left:2px;
+  width:14px;height:14px;background:#fff;border-radius:50%;transition:transform .2s}
+.j-alert-toggle.on::after{transform:translateX(16px)}
+.j-alert-del{background:none;border:none;cursor:pointer;color:var(--muted);
+  font-size:12px;padding:3px 7px;border-radius:4px}
+.j-alert-del:hover{background:#fde8e8;color:var(--dn)}
+.j-alerts-empty{font-size:13px;color:var(--muted);text-align:center;padding:16px 0}
+
+/* ── Alert rule kind params ── */
+#jAlertParamPriceCross,#jAlertParamRsi,#jAlertParamEcon,#jAlertParamWeekly{display:none}
+
+/* ── Setups / Playbook Section ── */
+.j-setups{background:var(--paper);border:1px solid var(--line);
+  border-radius:var(--radius);padding:18px;margin-bottom:20px}
+.j-setups-hd{display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.j-setups-title{font-size:13px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.5px;color:var(--muted);display:flex;align-items:center;gap:8px}
+.j-setup-filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.j-sf-btn{background:var(--soft);border:1.5px solid var(--line);border-radius:7px;
+  padding:5px 12px;cursor:pointer;font-family:Montserrat;font-size:11px;font-weight:600;
+  color:var(--muted)}
+.j-sf-btn:hover,.j-sf-btn.on{border-color:var(--gold);color:var(--gold);
+  background:rgba(201,162,39,.07)}
+.j-setup-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px}
+@media(max-width:500px){.j-setup-cards{grid-template-columns:1fr}}
+
+/* Setup card */
+.j-setup-card{background:var(--soft);border:1px solid var(--line);
+  border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.j-setup-card-hd{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.j-setup-card-sym{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.j-setup-sym-badge{font-weight:700;font-size:12px;background:rgba(201,162,39,.1);
+  color:var(--gold);padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace}
+.j-setup-tf{font-size:11px;color:var(--muted);background:var(--paper);
+  border:1px solid var(--line);border-radius:4px;padding:1px 6px;
+  font-family:'JetBrains Mono',monospace}
+.j-setup-status{font-size:10px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.3px;padding:3px 8px;border-radius:10px;white-space:nowrap}
+.j-setup-status.pending    {background:rgba(201,162,39,.12);color:#B8860B}
+.j-setup-status.executed   {background:rgba(30,142,90,.1);color:var(--up)}
+.j-setup-status.invalidated{background:rgba(192,57,43,.1);color:var(--dn)}
+.j-setup-status.expired    {background:var(--soft);border:1px solid var(--line);color:var(--muted)}
+.j-setup-pattern{font-size:12px;color:var(--muted)}
+.j-setup-levels{display:flex;flex-wrap:wrap;gap:5px}
+.j-setup-level{font-family:'JetBrains Mono',monospace;font-size:11px;
+  background:var(--paper);border:1px solid var(--line);border-radius:4px;padding:2px 7px}
+.j-setup-thesis{font-size:12px;color:var(--ink);line-height:1.5;
+  overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
+.j-setup-tags{display:flex;flex-wrap:wrap;gap:4px}
+.j-setup-tag{font-size:10px;background:rgba(201,162,39,.08);border:1px solid rgba(201,162,39,.25);
+  color:var(--gold);border-radius:10px;padding:2px 7px}
+.j-setup-footer{display:flex;align-items:center;justify-content:space-between;
+  margin-top:4px;flex-wrap:wrap;gap:6px}
+.j-setup-date{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.j-setup-actions{display:flex;gap:5px}
+.j-setup-action{background:none;border:1px solid var(--line);border-radius:6px;
+  padding:4px 8px;font-size:11px;cursor:pointer;font-family:Montserrat;font-weight:600;
+  color:var(--muted)}
+.j-setup-action:hover{border-color:var(--gold);color:var(--gold)}
+.j-setup-action.danger:hover{border-color:var(--dn);color:var(--dn)}
+.j-setups-empty{font-size:13px;color:var(--muted);text-align:center;padding:20px 0}
+
+/* Playbook stats */
+.j-playbook-stats{margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+.j-playbook-title{font-size:11px;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.5px;margin-bottom:10px;font-weight:600}
+.j-pb-table{width:100%;border-collapse:collapse;font-size:12px}
+.j-pb-table th{font-size:10px;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.3px;padding:6px 8px;border-bottom:1px solid var(--line);text-align:left}
+.j-pb-table td{padding:8px;border-bottom:1px solid var(--line)}
+.j-pb-table tr:last-child td{border:none}
+.j-pb-wr{font-family:'JetBrains Mono',monospace;font-weight:700}
+.j-pb-wr.hi{color:var(--up)}.j-pb-wr.lo{color:var(--dn)}.j-pb-wr.na{color:var(--muted)}
+
+/* ── Brief Section ── */
+.j-brief{background:var(--paper);border:1px solid var(--line);
+  border-radius:var(--radius);padding:18px;margin-bottom:20px}
+.j-brief-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.j-brief-title{font-size:13px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.5px;color:var(--muted);display:flex;align-items:center;gap:8px}
+.j-brief-date{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+
+/* Watchlist chips */
+.j-wl-wrap{margin-bottom:18px}
+.j-wl-label{font-size:11px;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.5px;margin-bottom:8px;font-weight:600}
+.j-wl-chips{display:flex;flex-wrap:wrap;gap:7px;align-items:center}
+.j-wl-chip{display:flex;align-items:center;gap:5px;background:rgba(201,162,39,.1);
+  border:1px solid rgba(201,162,39,.3);border-radius:14px;
+  padding:5px 10px;font-size:12px;font-weight:700;color:var(--gold);cursor:pointer}
+.j-wl-chip:hover{background:rgba(201,162,39,.18)}
+.j-wl-chip-sym{font-family:'JetBrains Mono',monospace}
+.j-wl-chip-del{font-size:10px;color:var(--muted);line-height:1;margin-left:2px;
+  background:none;border:none;cursor:pointer;padding:0;font-size:12px}
+.j-wl-chip-del:hover{color:var(--dn)}
+.j-wl-add{display:flex;gap:6px;align-items:center;margin-top:8px}
+.j-wl-add select{border:1px solid var(--line);border-radius:8px;
+  padding:6px 10px;font-family:Montserrat;font-size:12px;
+  background:var(--soft);color:var(--ink);outline:none;cursor:pointer}
+.j-wl-add select:focus{border-color:var(--gold)}
+
+/* Yesterday's retrospective */
+.j-retro{margin-bottom:18px}
+.j-retro-title{font-size:11px;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.5px;margin-bottom:8px;font-weight:600}
+.j-retro-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px}
+.j-retro-card{background:var(--soft);border:1px solid var(--line);
+  border-radius:8px;padding:10px 12px;cursor:pointer;text-decoration:none;
+  display:block;transition:border-color .15s}
+.j-retro-card:hover{border-color:var(--gold)}
+.j-retro-sym{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--ink)}
+.j-retro-chg{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;margin:4px 0 2px}
+.j-retro-vol{font-size:10px;text-transform:uppercase;letter-spacing:.4px;
+  padding:2px 7px;border-radius:10px;display:inline-block}
+.j-retro-vol.normal{background:rgba(30,142,90,.1);color:var(--up)}
+.j-retro-vol.high{background:rgba(201,162,39,.12);color:#C88000}
+.j-retro-vol.extreme{background:rgba(192,57,43,.1);color:var(--dn)}
+.j-retro-close{font-size:10px;color:var(--muted);margin-top:3px;
+  font-family:'JetBrains Mono',monospace}
+
+/* Today macro calendar */
+.j-macro-list{display:flex;flex-direction:column;gap:6px}
+.j-macro-event{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;
+  border-radius:8px;border:1px solid var(--line);background:var(--soft);
+  cursor:pointer;text-decoration:none;transition:border-color .15s}
+.j-macro-event:hover{border-color:var(--gold)}
+.j-macro-time{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);
+  white-space:nowrap;margin-top:1px;min-width:40px}
+.j-macro-body{flex:1;min-width:0}
+.j-macro-title{font-size:13px;font-weight:600;margin-bottom:2px}
+.j-macro-country{font-size:11px;color:var(--muted)}
+.j-macro-impact{flex-shrink:0;border-radius:4px;padding:2px 7px;
+  font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.3px}
+.j-macro-impact.high{background:rgba(192,57,43,.12);color:var(--dn)}
+.j-macro-impact.medium{background:rgba(201,162,39,.12);color:#C88000}
+.j-macro-impact.low{background:rgba(30,142,90,.1);color:var(--up)}
+.j-macro-figures{display:flex;gap:10px;margin-top:4px;font-size:11px;color:var(--muted);
+  font-family:'JetBrains Mono',monospace}
+.j-macro-figures span{display:flex;gap:3px}
+.j-macro-figures .lbl{color:var(--muted)}
+.j-macro-empty{font-size:13px;color:var(--muted);text-align:center;padding:12px 0}
+
+/* ── Part 7: Pre-trade Checklist ── */
+.j-checklist{background:var(--paper);border:1px solid var(--line);
+  border-radius:var(--radius);padding:18px;margin-bottom:20px}
+.j-checklist-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.j-checklist-title{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px}
+.j-checklist-items{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
+.j-cl-item{display:flex;align-items:center;gap:10px;padding:10px 12px;
+  border:1px solid var(--line);border-radius:8px;cursor:pointer;transition:background .1s}
+.j-cl-item:hover{background:var(--soft)}
+.j-cl-item.checked{background:rgba(46,139,106,.06);border-color:rgba(46,139,106,.3)}
+.j-cl-item input[type=checkbox]{width:17px;height:17px;accent-color:var(--up);cursor:pointer;flex-shrink:0}
+.j-cl-item-text{font-size:13px;flex:1}
+.j-cl-item.disabled .j-cl-item-text{color:var(--muted);text-decoration:line-through}
+.j-cl-item-del{background:none;border:none;color:var(--muted);cursor:pointer;
+  font-size:15px;padding:2px 5px;border-radius:4px;line-height:1}
+.j-cl-item-del:hover{color:var(--dn);background:rgba(192,57,43,.08)}
+.j-cl-add-row{display:flex;gap:8px;margin-top:4px}
+.j-cl-add-row input{flex:1;border:1px solid var(--line);border-radius:7px;
+  padding:8px 10px;font-family:inherit;font-size:13px;background:var(--cream)}
+.j-cl-status{font-size:12px;color:var(--muted);margin-top:10px;text-align:center}
+.j-cl-pass{color:var(--up);font-weight:600}
+
+/* ── Part 7: Tilt Banner ── */
+.j-tilt-banner{background:rgba(201,162,39,.08);border:1px solid rgba(201,162,39,.4);
+  border-radius:var(--radius);padding:16px 18px;margin-bottom:20px}
+.j-tilt-hd{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.j-tilt-ico{font-size:22px}
+.j-tilt-title{font-size:14px;font-weight:700}
+.j-tilt-reasons{display:flex;flex-direction:column;gap:6px}
+.j-tilt-reason{font-size:13px;color:var(--ink);padding:8px 12px;
+  background:rgba(201,162,39,.06);border-radius:7px;border-left:3px solid var(--gold)}
+
+/* ── Part 7: Cooldown Overlay ── */
+.j-cooldown{background:rgba(46,139,106,.07);border:1px solid rgba(46,139,106,.3);
+  border-radius:var(--radius);padding:18px;margin-bottom:20px;text-align:center}
+.j-cooldown-timer{font-family:'JetBrains Mono',monospace;font-size:32px;
+  font-weight:700;color:var(--up);margin:8px 0}
+.j-cooldown-msg{font-size:13px;color:var(--muted);max-width:420px;margin:0 auto}
+
+/* ── Part 7: Tilt Heatmap ── */
+.j-heatmap{margin-top:18px;overflow-x:auto}
+.j-heatmap-title{font-size:11px;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.5px;font-weight:600;margin-bottom:10px}
+.j-heatmap table{border-collapse:collapse;font-size:11px;min-width:340px}
+.j-heatmap th{padding:5px 8px;color:var(--muted);font-weight:600;font-size:10px;
+  text-transform:uppercase;letter-spacing:.3px;text-align:center}
+.j-heatmap td{padding:6px 8px;border:1px solid var(--line);text-align:center;
+  border-radius:3px;min-width:48px;font-family:'JetBrains Mono',monospace;font-weight:600}
+.j-hm-day{font-weight:700;text-align:left;padding-left:4px;color:var(--ink)}
+.j-hm-0{background:var(--paper);color:var(--faint)}
+.j-hm-1{background:rgba(201,162,39,.15);color:var(--ink)}
+.j-hm-2{background:rgba(201,162,39,.35);color:var(--ink)}
+.j-hm-3{background:rgba(201,162,39,.6);color:#fff}
+
+/* ── Part 8: Gamification Panel ── */
+.j-game{background:var(--paper);border:1px solid var(--line);
+  border-radius:var(--radius);padding:18px;margin-bottom:20px}
+.j-game-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.j-game-title{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px}
+
+/* XP Bar */
+.j-xp-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.j-xp-badge{background:var(--gold);color:#fff;font-family:'JetBrains Mono',monospace;
+  font-weight:700;font-size:11px;padding:3px 8px;border-radius:6px;white-space:nowrap}
+.j-xp-bar-wrap{flex:1;min-width:120px;height:8px;background:var(--line);border-radius:4px;overflow:hidden}
+.j-xp-bar-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--glow));
+  border-radius:4px;transition:width .4s ease}
+.j-xp-label{font-size:11px;color:var(--muted);white-space:nowrap}
+
+/* Streaks */
+.j-streaks-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.j-streak-chip{display:flex;align-items:center;gap:5px;padding:6px 10px;
+  border:1px solid var(--line);border-radius:20px;font-size:12px}
+.j-streak-chip.on{border-color:var(--gold);background:rgba(201,162,39,.08)}
+.j-streak-fire{font-size:16px}
+.j-streak-val{font-weight:700;font-family:'JetBrains Mono',monospace}
+.j-streak-lbl{color:var(--muted);font-size:11px}
+.j-streak-freeze{font-size:10px;color:var(--muted);cursor:pointer;padding:1px 5px;
+  border:1px solid var(--line);border-radius:4px;margin-left:4px}
+.j-streak-freeze:hover{background:rgba(46,139,106,.1);border-color:var(--up)}
+
+/* Daily Quests */
+.j-quests{margin-bottom:14px}
+.j-quests-title{font-size:11px;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.5px;font-weight:600;margin-bottom:8px}
+.j-quest-item{display:flex;align-items:center;gap:10px;padding:8px 10px;
+  border:1px solid var(--line);border-radius:8px;margin-bottom:6px;font-size:13px}
+.j-quest-item.done{opacity:.65;border-color:var(--up)}
+.j-quest-prog-wrap{flex:1;height:5px;background:var(--line);border-radius:3px;overflow:hidden;min-width:60px}
+.j-quest-prog{height:100%;background:var(--gold);border-radius:3px;transition:width .3s}
+.j-quest-item.done .j-quest-prog{background:var(--up)}
+.j-quest-xp{font-size:10px;color:var(--gold);font-weight:700;white-space:nowrap}
+.j-quest-done-ico{color:var(--up);font-size:15px}
+
+/* Achievements */
+.j-ach-grid{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.j-ach-badge{display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:8px 10px;border:1px solid var(--line);border-radius:9px;
+  min-width:72px;max-width:90px;text-align:center;transition:border-color .12s}
+.j-ach-badge.unlocked{border-color:var(--gold);background:rgba(201,162,39,.06)}
+.j-ach-badge.locked{opacity:.45;filter:grayscale(60%)}
+.j-ach-ico{font-size:22px;line-height:1}
+.j-ach-name{font-size:10px;font-weight:600;line-height:1.3}
+.j-ach-xp{font-size:9px;color:var(--gold);font-weight:700}
+
+/* Flashcard Modal */
+.j-fc-modal .j-modal{max-width:460px}
+.j-fc-card{background:var(--cream);border:1px solid var(--line);border-radius:12px;
+  padding:24px;min-height:120px;display:flex;align-items:center;justify-content:center;
+  text-align:center;font-size:18px;font-weight:700;cursor:pointer;margin-bottom:14px;
+  transition:background .15s;position:relative}
+.j-fc-card:hover{background:var(--soft)}
+.j-fc-card-hint{font-size:11px;color:var(--muted);position:absolute;bottom:8px;right:10px}
+.j-fc-answer{background:rgba(201,162,39,.07);border:1px solid rgba(201,162,39,.3);
+  border-radius:10px;padding:14px;font-size:14px;margin-bottom:14px;display:none;line-height:1.5}
+.j-fc-quality{margin-top:6px}
+.j-fc-quality-label{font-size:12px;color:var(--muted);text-align:center;margin-bottom:10px;
+  padding:7px 10px;background:var(--bg);border-radius:6px;line-height:1.4}
+.j-fc-quality-label em{font-style:italic;font-weight:600;color:var(--text)}
+.j-fc-quality-btns{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.j-fc-q-btn{flex:1;min-width:60px;max-width:80px;padding:8px 4px;border:1px solid var(--line);
+  border-radius:8px;cursor:pointer;font-size:11px;background:transparent;
+  color:var(--text);transition:border-color .15s,transform .1s;text-align:center;
+  display:flex;flex-direction:column;align-items:center;gap:2px}
+.j-fc-q-icon{font-size:14px;font-weight:700;line-height:1}
+.j-fc-q-lbl{font-size:9px;opacity:.8;white-space:nowrap}
+.j-fc-q-btn:hover{transform:translateY(-1px);border-color:var(--gold)}
+.j-fc-q-btn.q0{border-color:#dc2626;color:#dc2626}
+.j-fc-q-btn.q1{border-color:#ea580c;color:#ea580c}
+.j-fc-q-btn.q2{border-color:#ca8a04;color:#ca8a04}
+.j-fc-q-btn.q3{border-color:var(--gold);color:var(--gold)}
+.j-fc-q-btn.q4{border-color:#16a34a;color:#16a34a}
+.j-fc-q-btn.q5{border-color:#0ea5e9;color:#0ea5e9}
+.j-fc-progress{font-size:12px;color:var(--muted);text-align:center;margin-top:8px}
+.j-fc-done{text-align:center;padding:20px;color:var(--up);font-weight:700;font-size:15px}
+
+/* Course Progress */
+.j-course-title{font-size:11px;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.5px;font-weight:600;margin-bottom:8px}
+.j-course-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(32px,1fr));gap:5px;margin-bottom:14px}
+.j-ch-btn{aspect-ratio:1;border-radius:7px;border:1px solid var(--line);
+  font-size:11px;font-weight:700;cursor:pointer;background:var(--paper);
+  font-family:'JetBrains Mono',monospace;transition:all .12s;display:flex;
+  align-items:center;justify-content:center}
+.j-ch-btn.done{background:var(--up);border-color:var(--up);color:#fff}
+.j-ch-btn:hover:not(.done){background:rgba(201,162,39,.1);border-color:var(--gold)}
+
+/* Confetti */
+@keyframes confetti-fall {
+  0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+}
+.j-confetti-piece {
+  position: fixed;
+  top: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  animation: confetti-fall linear forwards;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ── Part 9: Goals & Seasons ── */
+.j-goals{background:var(--paper);border:1px solid var(--line);
+  border-radius:var(--radius);padding:18px;margin-bottom:20px}
+.j-goals-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px}
+.j-goals-title{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px}
+
+/* Season widget */
+.j-season-bar{display:flex;align-items:center;justify-content:space-between;
+  padding:10px 14px;background:var(--bg);border:1px solid var(--line);
+  border-radius:8px;margin-bottom:16px;flex-wrap:wrap;gap:8px}
+.j-season-name{font-size:12px;font-weight:700;color:var(--gold)}
+.j-season-meta{font-size:11px;color:var(--muted)}
+.j-season-xp{font-size:12px;font-family:'JetBrains Mono',monospace;font-weight:700}
+.j-season-close-btn{font-size:11px;padding:4px 10px;background:transparent;
+  border:1px solid var(--line);border-radius:6px;color:var(--muted);cursor:pointer}
+.j-season-close-btn:hover{border-color:var(--red);color:var(--red)}
+
+/* Goal presets */
+.j-presets{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;margin-bottom:16px}
+.j-preset-card{padding:12px;border:1px solid var(--line);border-radius:8px;cursor:pointer;
+  transition:border-color .15s,background .15s;text-align:left}
+.j-preset-card:hover{border-color:var(--gold);background:rgba(201,162,39,.05)}
+.j-preset-card-icon{font-size:22px;margin-bottom:6px}
+.j-preset-card-name{font-size:12px;font-weight:700;margin-bottom:3px}
+.j-preset-card-desc{font-size:11px;color:var(--muted);line-height:1.4}
+
+/* Active goals list */
+.j-goal-item{display:flex;align-items:flex-start;gap:10px;
+  padding:10px 0;border-bottom:1px solid var(--line)}
+.j-goal-item:last-child{border-bottom:none}
+.j-goal-left{flex:1;min-width:0}
+.j-goal-label{font-size:13px;font-weight:600;margin-bottom:4px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.j-goal-kind{font-size:10px;color:var(--muted);margin-bottom:6px}
+.j-goal-bar-wrap{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin-bottom:3px}
+.j-goal-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--gold));
+  border-radius:3px;transition:width .4s ease}
+.j-goal-bar-fill.done{background:var(--green)}
+.j-goal-progress-txt{font-size:10px;color:var(--muted)}
+.j-goal-delete{background:transparent;border:none;cursor:pointer;
+  color:var(--muted);padding:2px 6px;font-size:14px;flex-shrink:0}
+.j-goal-delete:hover{color:var(--red)}
+.j-goal-done-badge{font-size:10px;background:var(--green);color:#fff;
+  padding:2px 6px;border-radius:10px;flex-shrink:0;align-self:center}
+
+/* Custom goal form */
+.j-goal-form{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;
+  padding:12px;background:var(--bg);border-radius:8px}
+.j-goal-form select,.j-goal-form input{
+  flex:1;min-width:110px;padding:6px 8px;font-size:12px;
+  background:var(--paper);border:1px solid var(--line);
+  border-radius:6px;color:var(--text)}
+.j-goal-form input[type=number]{max-width:90px;flex:0 0 90px}
+.j-goal-add-btn{padding:7px 14px;font-size:12px}
+
+/* Level title badge */
+.j-level-title{font-size:11px;padding:2px 8px;border-radius:10px;
+  background:var(--line);color:var(--text);font-weight:600;white-space:nowrap}
+
+/* ── Part 10: Account Hub ── */
+.j-acct{background:var(--paper);border:1px solid var(--line);
+  border-radius:var(--radius);padding:18px;margin-bottom:20px}
+.j-acct-hd{display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:16px;flex-wrap:wrap;gap:8px}
+.j-acct-title{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px}
+
+/* Sub tier pill */
+.j-tier{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;
+  border-radius:20px;font-size:12px;font-weight:700}
+.j-tier.free{background:var(--line);color:var(--muted)}
+.j-tier.pro{background:linear-gradient(90deg,#7c3aed,#a855f7);color:#fff}
+.j-tier.mentor_mam{background:linear-gradient(90deg,var(--gold),#f59e0b);color:#fff}
+.j-sub-row{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.j-sub-renew{font-size:11px;color:var(--muted)}
+
+/* Referral card */
+.j-ref-card{background:var(--bg);border:1px solid var(--line);
+  border-radius:8px;padding:12px 14px;margin-bottom:16px}
+.j-ref-card-hd{font-size:11px;font-weight:700;text-transform:uppercase;
+  color:var(--muted);letter-spacing:.05em;margin-bottom:8px}
+.j-ref-code-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.j-ref-code{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;
+  letter-spacing:.1em;color:var(--gold)}
+.j-ref-copy{padding:5px 12px;font-size:11px}
+.j-ref-stats{font-size:11px;color:var(--muted);margin-top:6px}
+.j-ref-use-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.j-ref-use-row input{flex:1;min-width:130px;padding:6px 10px;font-size:12px;
+  background:var(--paper);border:1px solid var(--line);border-radius:6px;color:var(--text)}
+.j-ref-use-row button{font-size:12px;padding:6px 14px}
+
+/* Broker links */
+.j-broker-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+  gap:10px;margin-bottom:12px}
+.j-broker-card{padding:12px;border:1px solid var(--line);border-radius:8px}
+.j-broker-card-hd{display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:8px}
+.j-broker-name{font-size:13px;font-weight:700}
+.j-broker-ib-link{font-size:11px;color:var(--accent);text-decoration:none}
+.j-broker-ib-link:hover{text-decoration:underline}
+.j-broker-accounts{font-size:11px;color:var(--muted);margin-bottom:8px;min-height:16px}
+.j-broker-account-row{display:flex;align-items:center;justify-content:space-between;
+  padding:3px 0;border-bottom:1px dashed var(--line)}
+.j-broker-account-row:last-child{border-bottom:none}
+.j-broker-acct-num{font-family:'JetBrains Mono',monospace;font-size:11px}
+.j-broker-acct-status{font-size:10px;padding:1px 6px;border-radius:8px;
+  background:var(--line);color:var(--muted)}
+.j-broker-acct-status.verified{background:#dcfce7;color:#166534}
+.j-broker-acct-del{background:transparent;border:none;cursor:pointer;
+  color:var(--muted);padding:1px 5px;font-size:12px}
+.j-broker-acct-del:hover{color:var(--red)}
+.j-broker-add-form{display:flex;gap:6px;margin-top:6px}
+.j-broker-add-form input{flex:1;min-width:0;padding:5px 8px;font-size:11px;
+  background:var(--paper);border:1px solid var(--line);border-radius:5px;color:var(--text)}
+.j-broker-add-form button{font-size:11px;padding:5px 10px;white-space:nowrap}
+
+/* Compliance disclaimer (§10.5) */
+.j-disclaimer{font-size:11px;color:var(--muted);line-height:1.5;
+  padding:10px 12px;border-left:3px solid var(--line);margin-top:14px}
+
+/* GDPR block */
+.j-gdpr{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px;
+  padding-top:14px;border-top:1px solid var(--line)}
+.j-gdpr-btn{font-size:12px;padding:7px 14px}
+.j-gdpr-btn.danger{border-color:var(--red);color:var(--red)}
+.j-gdpr-btn.danger:hover{background:var(--red);color:#fff}
+.j-del-warn{font-size:11px;color:var(--red);margin-top:8px;display:none}
+
+/* ── MT4/MT5 Import modal ── */
+.j-mt-drop{border:2px dashed var(--line);border-radius:10px;padding:28px;text-align:center;
+  cursor:pointer;transition:border-color .15s;margin-bottom:14px}
+.j-mt-drop.dragover{border-color:var(--gold)}
+.j-mt-drop-ico{font-size:28px;margin-bottom:6px}
+.j-mt-drop p{font-size:13px;color:var(--muted);margin:0}
+.j-mt-drop span{color:var(--gold);font-weight:600}
+.j-mt-tz-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.j-mt-tz-row label{font-size:12px;font-weight:600}
+.j-mt-tz-row select{flex:1;min-width:140px;padding:7px 10px;font-size:12px;
+  background:var(--cream);border:1px solid var(--line);border-radius:6px;color:var(--text)}
+.j-mt-result{font-size:13px;line-height:1.6;padding:10px 12px;background:var(--cream);
+  border-radius:6px;border:1px solid var(--line);display:none;margin-top:10px}
+.j-mt-result.ok{border-color:#16a34a}
+.j-mt-result.err{border-color:var(--red)}
+
+/* ── Analytics section ── */
+.j-analytics{background:var(--paper);border:1px solid var(--line);border-radius:12px;
+  padding:16px 18px;margin-bottom:18px}
+.j-analytics-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.j-analytics-title{font-size:14px;font-weight:700}
+.j-period-tabs{display:flex;gap:4px}
+.j-period-tab{font-size:11px;padding:4px 10px;border-radius:6px;border:1px solid var(--line);
+  background:none;cursor:pointer;color:var(--muted);transition:all .12s}
+.j-period-tab.active{background:var(--gold);color:#fff;border-color:var(--gold)}
+.j-disc-cost-card{background:var(--cream);border-radius:8px;padding:14px 16px;margin-bottom:14px}
+.j-disc-cost-main{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+.j-disc-cost-r{font-size:28px;font-weight:700;font-family:'JetBrains Mono',monospace}
+.j-disc-cost-r.pos{color:var(--up)}
+.j-disc-cost-r.neg{color:var(--down)}
+.j-disc-cost-label{font-size:12px;color:var(--muted);line-height:1.4}
+.j-setups-table{width:100%;border-collapse:collapse;font-size:12px}
+.j-setups-table th{text-align:left;padding:6px 8px;color:var(--muted);font-weight:600;
+  border-bottom:1px solid var(--line);font-size:11px;text-transform:uppercase}
+.j-setups-table td{padding:7px 8px;border-bottom:1px solid var(--line)}
+.j-setups-table tr:last-child td{border-bottom:none}
+.j-setups-table td:nth-child(3),.j-setups-table td:nth-child(4){
+  font-family:'JetBrains Mono',monospace}
+.j-analytics-note{font-size:11px;color:var(--muted);margin-top:10px;font-style:italic}
+.j-analytics-placeholder{text-align:center;padding:20px;font-size:13px;color:var(--muted)}
+.j-setup-chart-wrap{margin-top:14px;display:none}
+
+/* ── Weekly Review card ── */
+.j-review-card{background:linear-gradient(135deg,rgba(201,162,39,.08),rgba(201,162,39,.03));
+  border:1px solid rgba(201,162,39,.3);border-radius:12px;padding:16px 18px;margin-bottom:18px}
+.j-review-card-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.j-review-card-title{font-size:14px;font-weight:700}
+.j-review-card-week{font-size:11px;color:var(--muted)}
+.j-review-stats{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px}
+.j-review-stat{display:flex;flex-direction:column;gap:2px}
+.j-review-stat-val{font-size:16px;font-weight:700;font-family:'JetBrains Mono',monospace}
+.j-review-stat-label{font-size:10px;color:var(--muted);text-transform:uppercase}
+.j-review-textarea{width:100%;min-height:80px;resize:vertical;font-size:13px;
+  padding:10px 12px;background:var(--cream);border:1px solid var(--line);border-radius:8px;
+  color:var(--text);outline:none;font-family:inherit;transition:border-color .15s;margin-bottom:8px}
+.j-review-textarea:focus{border-color:var(--gold)}
+.j-review-prev{font-size:12px;color:var(--muted);font-style:italic;margin-bottom:8px;
+  padding:8px 10px;background:var(--cream);border-radius:6px}
+
+/* ── Cooldown / Debrief ── */
+.j-cooldown-banner{background:rgba(46,139,111,.08);border:1px solid rgba(46,139,111,.3);
+  border-radius:12px;padding:16px 18px;margin-bottom:18px}
+.j-cooldown-hd{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.j-cooldown-hd-title{font-size:14px;font-weight:700;color:var(--up)}
+.j-cooldown-meta{font-size:12px;color:var(--muted)}
+.j-cooldown-override{font-size:12px;color:var(--muted);text-decoration:underline;
+  cursor:pointer;margin-top:6px;display:inline-block}
+.j-debrief-card{background:var(--cream);border:1px solid var(--line);border-radius:12px;
+  padding:16px 18px;margin-bottom:18px}
+.j-debrief-card-hd{font-size:14px;font-weight:700;margin-bottom:12px}
+.j-debrief-field{margin-bottom:10px}
+.j-debrief-field label{display:block;font-size:12px;font-weight:600;margin-bottom:4px;color:var(--muted)}
+.j-debrief-field textarea{width:100%;min-height:58px;resize:vertical;font-size:13px;
+  padding:8px 10px;background:var(--paper);border:1px solid var(--line);border-radius:6px;
+  color:var(--text);outline:none;font-family:inherit}
+.j-debrief-field textarea:focus{border-color:var(--gold)}
+</style>
+</head>
+<body>
+
+<div class="j-wrap">
+  <div class="j-title-row">
+    <div>
+      <h1 class="j-title">Дневник сделок</h1>
+      <p class="j-sub" style="margin:0">История, статистика и импорт сделок</p>
+    </div>
+    <div class="j-notif-wrap">
+      <button class="j-notif-bell" id="jNotifBell" title="Уведомления">
+        🔔
+        <span class="j-notif-badge" id="jNotifBadge" style="display:none">0</span>
+      </button>
+      <div class="j-notif-panel" id="jNotifPanel">
+        <div class="j-notif-panel-hd">
+          <span>Уведомления</span>
+          <span id="jNotifPanelCount" style="font-weight:400;color:var(--muted)"></span>
+        </div>
+        <div id="jNotifList"></div>
+        <button class="j-notif-read-all" id="jNotifReadAll">Отметить всё прочитанным</button>
+      </div>
+    </div>
+  </div>
+  <div style="margin-bottom:22px"></div>
+
+  <div id="jGlobalErr"></div>
+
+  <!-- Утренний бриф «Твой день» -->
+  <div class="j-brief" id="jBriefSection">
+    <div class="j-brief-hd">
+      <div class="j-brief-title">☀️ Твой день <span class="j-brief-date" id="jBriefDate"></span></div>
+      <button class="j-btn j-btn-sec" id="jBriefRefresh" style="padding:5px 11px;font-size:11px">↻ Обновить</button>
+    </div>
+
+    <!-- Watchlist -->
+    <div class="j-wl-wrap">
+      <div class="j-wl-label">Список наблюдения</div>
+      <div class="j-wl-chips" id="jWatchlistChips">
+        <span style="font-size:12px;color:var(--muted)">Загрузка…</span>
+      </div>
+      <div class="j-wl-add">
+        <select id="jWlAddSelect"><option value="">Добавить…</option></select>
+        <button class="j-btn j-btn-sec" id="jWlAddBtn" style="padding:5px 11px;font-size:12px">+</button>
+      </div>
+    </div>
+
+    <!-- Вчерашняя ретроспектива -->
+    <div class="j-retro" id="jRetroSection" style="display:none">
+      <div class="j-retro-title">📊 Что вчера двигало ваши инструменты</div>
+      <div class="j-retro-grid" id="jRetroGrid"></div>
+    </div>
+
+    <!-- Макрокалендарь сегодня -->
+    <div id="jMacroSection" style="display:none">
+      <div class="j-retro-title" style="margin-bottom:8px">📅 Экономический календарь на сегодня</div>
+      <div class="j-macro-list" id="jMacroList"></div>
+    </div>
+
+    <div id="jBriefEmpty" style="display:none;font-size:13px;color:var(--muted);
+      text-align:center;padding:16px 0">
+      Добавьте инструменты в список наблюдения, чтобы получить персональный бриф
+    </div>
+  </div>
+
+  <!-- ── Геймификация: XP, Квесты, Стрики, Достижения ── -->
+  <a id="gamification" style="display:block;visibility:hidden;height:0;margin:0"></a>
+  <div class="j-game" id="jGameSection">
+    <div class="j-game-hd">
+      <div class="j-game-title"><span>🎮</span> Прогресс и достижения</div>
+      <button class="j-btn j-btn-sec" id="jFlashcardsBtn" style="padding:6px 14px;font-size:12px">
+        🃏 Флешкарты <span id="jFcDueBadge" style="display:none;margin-left:4px;background:var(--gold);color:#fff;border-radius:10px;padding:1px 6px;font-size:10px"></span>
+      </button>
+    </div>
+
+    <!-- XP & Level -->
+    <div class="j-xp-row">
+      <div class="j-xp-badge" id="jXpLevelBadge">Ур. 1</div>
+      <div class="j-xp-bar-wrap">
+        <div class="j-xp-bar-fill" id="jXpBarFill" style="width:0%"></div>
+      </div>
+      <div class="j-xp-label" id="jXpLabel">0 / 500 XP</div>
+      <div class="j-level-title" id="jLevelTitle">Новичок</div>
+    </div>
+
+    <!-- Стрики -->
+    <div class="j-streaks-row" id="jGameStreaks"></div>
+
+    <!-- Ежедневные квесты -->
+    <div class="j-quests">
+      <div class="j-quests-title">📋 Квесты на сегодня</div>
+      <div id="jQuestsList"></div>
+    </div>
+
+    <!-- Достижения -->
+    <div>
+      <div class="j-quests-title" style="margin-bottom:8px">🏅 Достижения</div>
+      <div class="j-ach-grid" id="jAchGrid"></div>
+    </div>
+
+    <!-- Прогресс курса -->
+    <div id="jCourseBlock">
+      <div class="j-course-title">📚 Курс — прогресс по главам</div>
+      <div class="j-course-grid" id="jCourseGrid"></div>
+    </div>
+  </div>
+
+  <!-- Статистика -->
+  <div class="j-stats">
+    <div class="j-stat">
+      <div class="j-stat-lbl">Всего сделок</div>
+      <div class="j-stat-val" id="jStatTotal">—</div>
+    </div>
+    <div class="j-stat">
+      <div class="j-stat-lbl">Win Rate</div>
+      <div class="j-stat-val" id="jStatWinrate">—</div>
+    </div>
+    <div class="j-stat">
+      <div class="j-stat-lbl">Средний R</div>
+      <div class="j-stat-val" id="jStatAvgR">—</div>
+    </div>
+    <div class="j-stat">
+      <div class="j-stat-lbl">Итого PnL</div>
+      <div class="j-stat-val" id="jStatPnl">—</div>
+    </div>
+  </div>
+
+  <!-- Equity Curve -->
+  <div class="j-curve">
+    <div class="j-curve-title">Equity Curve (R-мультипликатор)</div>
+    <canvas id="jEqChart"></canvas>
+  </div>
+
+  <!-- ── Поведенческое зеркало ── -->
+  <div class="j-mirror" id="jBehavioralSection" style="display:none">
+    <div class="j-mirror-hd">
+      <span style="font-size:18px">🪞</span>
+      <span class="j-mirror-title">Поведенческое зеркало</span>
+    </div>
+
+    <!-- Queue banner -->
+    <div id="jQueueBanner" style="display:none" class="j-queue-banner" onclick="SBFJournal.openQueue()">
+      <div class="j-queue-count" id="jQueueCount">0</div>
+      <div>
+        <div class="j-queue-text">Сделок ждут заполнения дневника</div>
+        <div class="j-queue-sub">Нажмите, чтобы начать анализ</div>
+      </div>
+      <span class="j-queue-arr">→</span>
+    </div>
+
+    <!-- Revenge cluster warning -->
+    <div id="jRevengeWarn" class="j-revenge-warn" style="display:none">
+      <span style="font-size:18px">⚠️</span>
+      <span id="jRevengeWarnText"></span>
+    </div>
+
+    <!-- Insights -->
+    <div id="jInsightsList"></div>
+
+    <!-- Holding Duration -->
+    <div id="jHoldingWrap" style="display:none">
+      <div class="j-mirror-title" style="margin-bottom:10px">Время удержания позиций</div>
+      <div class="j-holding">
+        <div class="j-hold-card">
+          <div class="j-hold-val j-up" id="jHoldWin">—</div>
+          <div class="j-hold-lbl">Прибыльные (мин)</div>
+        </div>
+        <div class="j-hold-card">
+          <div class="j-hold-val j-dn" id="jHoldLoss">—</div>
+          <div class="j-hold-lbl">Убыточные (мин)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Analytics tables (setup / emotion) -->
+    <div id="jAnalyticsWrap" style="display:none">
+      <div class="j-analytics-tabs">
+        <button class="j-at-btn on" id="jAtBtnSetup" onclick="SBFJournal.switchAnalyticsTab('setup')">Сетапы</button>
+        <button class="j-at-btn" id="jAtBtnEmo" onclick="SBFJournal.switchAnalyticsTab('emo')">Эмоции</button>
+      </div>
+      <div class="j-at-table" id="jSetupTableWrap"></div>
+      <div class="j-at-table" id="jEmoTableWrap" style="display:none"></div>
+    </div>
+
+    <!-- Tilt Heatmap -->
+    <div class="j-heatmap" id="jTiltHeatmapWrap" style="display:none">
+      <div class="j-heatmap-title">🧠 Тильт по дням и сессиям</div>
+      <div id="jTiltHeatmapTable"></div>
+    </div>
+  </div>
+
+  <!-- ── Оценка дисциплины ── -->
+  <div class="j-disc" id="jDiscSection" style="display:none">
+    <a id="discipline" style="display:block;visibility:hidden;height:0;margin:0"></a>
+    <div class="j-disc-hd">
+      <div class="j-disc-title"><span>🎯</span> Оценка дисциплины</div>
+      <button class="j-btn j-btn-sec" style="padding:5px 12px;font-size:12px"
+              onclick="SBFJournal.openDiscConfig()">⚙ Настроить правила</button>
+    </div>
+
+    <!-- Пробой / тильт -->
+    <div id="jBreakoutAlert" class="j-breakout-alert" style="display:none;margin-bottom:14px">
+      <span style="font-size:20px">🚨</span>
+      <span id="jBreakoutText"></span>
+    </div>
+
+    <div class="j-disc-body">
+      <!-- Круговой индикатор -->
+      <div class="j-disc-gauge">
+        <div class="j-disc-ring" id="jDiscRing">—</div>
+        <div class="j-disc-trend" id="jDiscTrend"></div>
+        <div style="font-size:10px;color:var(--muted);margin-top:2px" id="jDiscEvalCount"></div>
+      </div>
+
+      <!-- Детали -->
+      <div class="j-disc-details">
+        <div class="j-disc-worst" id="jDiscWorst"></div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px">Стрики</div>
+        <div class="j-streaks" id="jDiscStreaks"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Тильт-детектор ── -->
+  <div class="j-tilt-banner" id="jTiltBanner" style="display:none">
+    <div class="j-tilt-hd">
+      <span class="j-tilt-ico">🧠</span>
+      <span class="j-tilt-title">Психологические индикаторы</span>
+    </div>
+    <div class="j-tilt-reasons" id="jTiltReasons"></div>
+    <!-- Voluntary cooldown offer -->
+    <div id="jCooldownOffer" style="display:none;margin-top:10px;padding:10px 12px;
+      background:rgba(46,139,111,.07);border-radius:8px;border:1px solid rgba(46,139,111,.2)">
+      <div style="font-size:12px;color:var(--fg);margin-bottom:8px" id="jCooldownOfferText"></div>
+      <div style="display:flex;gap:8px">
+        <button class="j-btn" style="font-size:12px;padding:6px 14px" id="jCooldownOfferYes">
+          Да, активировать стоп-день
+        </button>
+        <button class="j-btn j-btn-sec" style="font-size:12px;padding:6px 14px" id="jCooldownOfferNo">
+          Нет, продолжу торговлю
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Кулдаун-таймер ── -->
+  <div class="j-cooldown" id="jCooldownBlock" style="display:none">
+    <div style="font-size:14px;font-weight:700;color:var(--up);margin-bottom:4px">Режим паузы</div>
+    <div class="j-cooldown-timer" id="jCooldownTimer">60:00</div>
+    <div class="j-cooldown-msg">Данные анализа зафиксированы. Используйте это время для пересмотра торгового плана. Рынок будет доступен после паузы.</div>
+    <button class="j-btn j-btn-sec" style="margin-top:12px;padding:6px 18px;font-size:12px"
+            onclick="SBFJournal.dismissCooldown()">Продолжить торговлю</button>
+  </div>
+
+  <!-- Alerts Section -->
+  <a id="alerts" style="display:block;visibility:hidden;height:0;margin:0"></a>
+  <div class="j-alerts" id="jAlertsSection">
+    <div class="j-alerts-hd">
+      <div class="j-alerts-title">🔔 Алерты</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="j-btn j-btn-sec" id="jPushToggleBtn" style="padding:6px 12px;font-size:12px">🔕 Включить пуши</button>
+        <button class="j-btn j-btn-sec" id="jAddAlertBtn" style="padding:6px 12px;font-size:12px">+ Создать правило</button>
+      </div>
+    </div>
+    <div id="jPushStatusInfo" style="font-size:11px;color:var(--muted);margin-bottom:10px"></div>
+    <div id="jAlertRulesList">
+      <div class="j-alerts-empty">Загрузка…</div>
+    </div>
+  </div>
+
+  <!-- Мои разборы и сетапы (Part 6) -->
+  <a id="setups" style="display:block;visibility:hidden;height:0;margin:0"></a>
+  <div class="j-setups" id="jSetupsSection">
+    <div class="j-setups-hd">
+      <div class="j-setups-title">📐 Мои разборы</div>
+      <button class="j-btn" id="jAddSetupBtn" style="padding:6px 14px;font-size:12px">+ Новый сетап</button>
+    </div>
+    <div class="j-setup-filters" id="jSetupFilters">
+      <button class="j-sf-btn on" data-sf="all">Все</button>
+      <button class="j-sf-btn" data-sf="pending">Ожидает</button>
+      <button class="j-sf-btn" data-sf="executed">Исполнен</button>
+      <button class="j-sf-btn" data-sf="invalidated">Отменён</button>
+      <button class="j-sf-btn" data-sf="expired">Истёк</button>
+    </div>
+    <div class="j-setup-cards" id="jSetupCards">
+      <div class="j-setups-empty">Загрузка…</div>
+    </div>
+    <div class="j-playbook-stats" id="jPlaybookStats" style="display:none">
+      <div class="j-playbook-title">📊 Эффективность паттернов (плейбук)</div>
+      <div style="overflow-x:auto">
+        <table class="j-pb-table">
+          <thead><tr>
+            <th>Паттерн</th><th>Сохранено</th><th>Исполнено</th><th>Win Rate</th>
+          </tr></thead>
+          <tbody id="jPlaybookTbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Weekly Review card ── -->
+  <div id="jReviewCardWrap" style="display:none">
+    <div class="j-review-card">
+      <div class="j-review-card-hd">
+        <span class="j-review-card-title">📋 Ревью недели</span>
+        <span class="j-review-card-week" id="jReviewWeek"></span>
+      </div>
+      <div class="j-review-stats" id="jReviewStats"></div>
+      <div class="j-review-prev" id="jReviewPrev" style="display:none"></div>
+      <textarea class="j-review-textarea" id="jReviewText"
+        placeholder="Что изменю в следующей неделе? Мин. 20 символов…"></textarea>
+      <button class="j-btn" id="jReviewSubmitBtn" style="padding:10px 0;width:100%">
+        Завершить ревью (+75 XP)
+      </button>
+      <div id="jReviewErr" style="font-size:12px;color:var(--down);margin-top:6px;display:none"></div>
+    </div>
+  </div>
+
+  <!-- ── Cooldown banner ── -->
+  <div id="jCooldownBanner" style="display:none">
+    <div class="j-cooldown-banner">
+      <div class="j-cooldown-hd">
+        <span>⏸</span>
+        <span class="j-cooldown-hd-title">Стоп-день активен</span>
+      </div>
+      <div class="j-cooldown-meta" id="jCooldownMeta"></div>
+      <p style="font-size:13px;margin:8px 0 4px;line-height:1.5">
+        Стоп-день до <b id="jCooldownUntil"></b>. Ты сам его включил — уважай это решение.
+      </p>
+      <span class="j-cooldown-override" onclick="SBFJournal.overrideCooldown()">
+        Всё равно записать сделку
+      </span>
+    </div>
+  </div>
+
+  <!-- ── Tilt debrief card ── -->
+  <div id="jDebriefCardWrap" style="display:none">
+    <div class="j-debrief-card">
+      <div class="j-debrief-card-hd">🧠 Разбор эпизода (+30 XP)</div>
+      <div class="j-debrief-field">
+        <label>Что произошло?</label>
+        <textarea id="jDebQ1" rows="2" placeholder="Опиши ситуацию, мин. 10 символов…"></textarea>
+      </div>
+      <div class="j-debrief-field">
+        <label>Что стало триггером?</label>
+        <textarea id="jDebQ2" rows="2" placeholder="Что именно вызвало реакцию?"></textarea>
+      </div>
+      <div class="j-debrief-field">
+        <label>Что сделаю иначе?</label>
+        <textarea id="jDebQ3" rows="2" placeholder="Конкретный план на следующий раз…"></textarea>
+      </div>
+      <button class="j-btn" id="jDebSubmitBtn" style="padding:10px 0;width:100%">
+        Сохранить разбор (+30 XP)
+      </button>
+      <div id="jDebErr" style="font-size:12px;color:var(--down);margin-top:6px;display:none"></div>
+    </div>
+  </div>
+
+  <!-- ── Аналитика ── -->
+  <div class="j-analytics" id="jAnalyticsSection" style="display:none">
+    <div class="j-analytics-hd">
+      <span class="j-analytics-title">📊 Аналитика</span>
+      <div class="j-period-tabs">
+        <button class="j-period-tab active" data-period="30d">30д</button>
+        <button class="j-period-tab" data-period="90d">90д</button>
+        <button class="j-period-tab" data-period="all">Всё</button>
+      </div>
+    </div>
+
+    <!-- Цена недисциплины -->
+    <div class="j-disc-cost-card" id="jDiscCostCard">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;
+        color:var(--muted);letter-spacing:.05em;margin-bottom:8px">
+        Цена недисциплины
+        <span class="sbf-tip" data-tip="Сколько R ты потерял дополнительно по сделкам с нарушениями дисциплины, относительно среднего R чистых сделок">?</span>
+      </div>
+      <div class="j-disc-cost-main">
+        <div class="j-disc-cost-r" id="jDiscCostR">—</div>
+        <div class="j-disc-cost-label">R сверх нормы<br>потеряно из-за нарушений</div>
+      </div>
+      <div style="font-size:11px;color:var(--muted)" id="jDiscCostSub"></div>
+    </div>
+
+    <!-- Разбор по сетапам -->
+    <div style="overflow-x:auto">
+      <table class="j-setups-table" id="jSetupsAnalytics">
+        <thead><tr>
+          <th>Сетап</th><th>Сделок</th><th>Win %</th><th>avg R</th><th>Σ R</th>
+        </tr></thead>
+        <tbody id="jSetupsAnalyticsTbody"></tbody>
+      </table>
+    </div>
+    <div class="j-analytics-note">Статистика твоих сделок. Не прогноз, не рекомендация.</div>
+  </div>
+
+  <!-- ── Part 10: Аккаунт-Хаб ── -->
+  <a id="account" style="display:block;visibility:hidden;height:0;margin:0"></a>
+  <div class="j-acct" id="jAccountSection">
+    <div class="j-acct-hd">
+      <div class="j-acct-title"><span>🔑</span> Аккаунт и монетизация</div>
+    </div>
+
+    <!-- Подписка -->
+    <div class="j-sub-row">
+      <span class="j-tier free" id="jSubTierBadge">Free</span>
+      <span class="j-sub-renew" id="jSubRenewInfo"></span>
+    </div>
+
+    <!-- Реферальный код -->
+    <div class="j-ref-card">
+      <div class="j-ref-card-hd">Реферальная программа — Win-Win 7 дней PRO</div>
+      <div class="j-ref-code-row">
+        <span class="j-ref-code" id="jRefCode">—</span>
+        <button class="j-btn j-btn-sec j-ref-copy" id="jRefCopyBtn">Скопировать</button>
+      </div>
+      <div class="j-ref-stats" id="jRefStats">Приглашено: 0</div>
+      <div class="j-ref-use-row">
+        <input type="text" id="jRefCodeInput" placeholder="Введи чужой код…" maxlength="16">
+        <button class="j-btn" id="jRefUseBtn">Применить</button>
+      </div>
+    </div>
+
+    <!-- Брокеры-партнёры (IB-трекинг) -->
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;
+      color:var(--muted);letter-spacing:.05em;margin-bottom:10px">Брокеры-партнёры SBF Consult</div>
+    <div class="j-broker-grid" id="jBrokerGrid"></div>
+
+    <!-- Дисклеймер §10.5 -->
+    <div class="j-disclaimer">
+      SBF Consult получает партнёрское вознаграждение от брокеров-партнёров за привлечение
+      торгового объёма. Это не влияет на условия вашей торговли и не налагает дополнительных
+      комиссий. Все данные используются исключительно для вашей внутренней поведенческой
+      аналитики. Разделы сопровождения не содержат торговых рекомендаций или сигналов.
+    </div>
+
+    <!-- GDPR (§10.4) -->
+    <div class="j-gdpr">
+      <button class="j-btn j-btn-sec j-gdpr-btn" id="jExportBtn">⬇ Скачать мои данные (JSON)</button>
+      <button class="j-btn j-btn-sec j-gdpr-btn danger" id="jDeleteReqBtn">🗑 Удалить аккаунт</button>
+    </div>
+    <div class="j-del-warn" id="jDelWarn"></div>
+
+    <!-- Prestige (Phase 6.1) -->
+    <div class="j-prestige-row" id="jPrestigeRow" style="display:none">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;
+        color:var(--muted);letter-spacing:.05em;margin-bottom:8px">Престиж</div>
+      <div style="font-size:12px;color:var(--fg);margin-bottom:10px">
+        Доступно при уровне ≥ 8. Сбрасывает XP и уровень до 1, но сохраняет достижения и присваивает Prestige-метку.
+      </div>
+      <button class="j-btn j-btn-sec" id="jPrestigeBtn"
+        style="border-color:var(--accent);color:var(--accent)">
+        ⭐ Активировать престиж
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Part 9: Цели и сезоны ── -->
+  <a id="goals" style="display:block;visibility:hidden;height:0;margin:0"></a>
+  <div class="j-goals" id="jGoalsSection">
+    <div class="j-goals-hd">
+      <div class="j-goals-title"><span>🎯</span> Цели и сезоны</div>
+      <button class="j-btn j-btn-sec" id="jGoalFormToggle" style="padding:6px 14px;font-size:12px">+ Своя цель</button>
+    </div>
+
+    <!-- Season widget -->
+    <div id="jSeasonWidget"></div>
+
+    <!-- Preset cards -->
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--muted);letter-spacing:.05em;margin-bottom:8px">Быстрый старт</div>
+    <div class="j-presets">
+      <button class="j-preset-card" onclick="SBFJournal.applyPreset('iron_shield')">
+        <div class="j-preset-card-icon">🛡️</div>
+        <div class="j-preset-card-name">Железный щит</div>
+        <div class="j-preset-card-desc">Риск не более 1R на сделку, 30 торговых дней</div>
+      </button>
+      <button class="j-preset-card" onclick="SBFJournal.applyPreset('mindfulness_marathon')">
+        <div class="j-preset-card-icon">🧘</div>
+        <div class="j-preset-card-name">Осознанность</div>
+        <div class="j-preset-card-desc">Дисциплина &gt;80%, журнал 14 дней подряд</div>
+      </button>
+      <button class="j-preset-card" onclick="SBFJournal.applyPreset('academic_standard')">
+        <div class="j-preset-card-icon">📚</div>
+        <div class="j-preset-card-name">Академический</div>
+        <div class="j-preset-card-desc">Пройти 5 обучающих модулей за сезон</div>
+      </button>
+    </div>
+
+    <!-- Custom goal form (hidden by default) -->
+    <div class="j-goal-form" id="jGoalForm" style="display:none">
+      <select id="jGoalKind">
+        <option value="journal_streak_days">Серия дней в журнале</option>
+        <option value="max_risk_per_trade">Макс. риск на сделку (R)</option>
+        <option value="complete_learning_chapters">Пройти глав обучения</option>
+        <option value="maintain_discipline_score">Дисциплина (%)</option>
+      </select>
+      <input type="number" id="jGoalTarget" placeholder="Цель" min="0" step="0.1">
+      <input type="text" id="jGoalLabel" placeholder="Название (опц.)">
+      <button class="j-btn j-goal-add-btn" id="jGoalAddBtn">Добавить</button>
+    </div>
+
+    <!-- Active goals -->
+    <div id="jGoalsList" style="margin-top:4px"></div>
+  </div>
+
+  <!-- ── Пре-трейд чек-лист ── -->
+  <a id="checklist" style="display:block;visibility:hidden;height:0;margin:0"></a>
+  <div class="j-checklist" id="jChecklistSection">
+    <div class="j-checklist-hd">
+      <div class="j-checklist-title">
+        <span>✅</span> Пре-трейд ритуал
+        <span id="jClProgress" style="font-size:12px;font-weight:400;color:var(--muted)"></span>
+      </div>
+      <button class="j-btn" id="jRunChecklistBtn" style="padding:6px 16px;font-size:12px">Пройти чек-лист</button>
+    </div>
+    <div class="j-checklist-items" id="jChecklistItems">
+      <div style="font-size:13px;color:var(--muted)">Загрузка…</div>
+    </div>
+    <div class="j-cl-add-row">
+      <input type="text" id="jClNewText" placeholder="Добавить пункт…" maxlength="200">
+      <button class="j-btn j-btn-sec" id="jClAddBtn" style="padding:7px 14px;font-size:12px">+</button>
+    </div>
+    <div class="j-cl-status" id="jClStatus"></div>
+  </div>
+
+  <!-- Toolbar -->
+  <a id="trades" style="display:block;visibility:hidden;height:0;margin:0"></a>
+  <div class="j-toolbar">
+    <button class="j-btn" id="jAddBtn">+ Добавить сделку</button>
+    <button class="j-btn j-btn-sec" id="jImportBtn">↑ Импорт CSV / OCR</button>
+    <button class="j-btn j-btn-sec" id="jMtImportBtn">⬆ MT4/MT5</button>
+    <button class="j-btn j-btn-sec" id="jMt5Btn">
+      MT5 Инвест-пароль
+      <button class="j-inv-tip-btn" data-inv-tip="avatrade" title="Как найти инвест-пароль?">?</button>
+    </button>
+  </div>
+
+  <!-- Таблица -->
+  <div class="j-table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Инструмент</th><th>Тип</th><th>Лот</th>
+          <th>Вход</th><th>Выход</th>
+          <th>PnL</th><th>R</th><th>Закрыта</th><th></th><th></th>
+        </tr>
+      </thead>
+      <tbody id="jTradesTbody">
+        <tr><td colspan="9" class="j-empty">Загрузка…</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="j-pager" id="jPager"></div>
+</div>
+
+
+<!-- ══════════════════════════════════════ МОДАЛКИ ══════════════════════ -->
+
+<!-- Добавить сделку вручную -->
+<div class="j-modal-bg" id="jAddModal">
+  <div class="j-modal">
+    <div class="j-modal-hd">
+      <h3>Добавить сделку</h3>
+      <button class="j-close" id="jAddClose">✕</button>
+    </div>
+    <form id="jAddForm" autocomplete="off">
+      <div class="j-row2">
+        <div class="j-field">
+          <label>Инструмент *</label>
+          <input name="symbol" placeholder="EURUSD" required>
+        </div>
+        <div class="j-field">
+          <label>Направление *</label>
+          <select name="dir" id="jFldDir">
+            <option value="buy">Buy (Long)</option>
+            <option value="sell">Sell (Short)</option>
+          </select>
+        </div>
+      </div>
+      <div class="j-row2">
+        <div class="j-field">
+          <label>Лот *</label>
+          <input name="size" type="number" step="0.01" placeholder="0.10" id="jFldSize" required>
+        </div>
+        <div class="j-field">
+          <label>Stop Loss</label>
+          <input name="stop_loss" type="number" step="0.00001" placeholder="опционально">
+        </div>
+      </div>
+      <div class="j-row2">
+        <div class="j-field">
+          <label>Цена входа *</label>
+          <input name="entry_price" type="number" step="0.00001" id="jFldEntry" required>
+        </div>
+        <div class="j-field">
+          <label>Цена выхода *</label>
+          <input name="exit_price" type="number" step="0.00001" id="jFldExit" required>
+        </div>
+      </div>
+      <div class="j-row2">
+        <div class="j-field">
+          <label>Время открытия *</label>
+          <input name="open_ts" type="datetime-local" required>
+        </div>
+        <div class="j-field">
+          <label>Время закрытия *</label>
+          <input name="close_ts" type="datetime-local" required>
+        </div>
+      </div>
+      <div class="j-field">
+        <label>PnL (авто)</label>
+        <input name="pnl" type="number" step="0.01" id="jFldPnl" required>
+      </div>
+      <div class="j-field">
+        <label>Заметка</label>
+        <textarea name="note" placeholder="Сетап, эмоции, ошибки…"></textarea>
+      </div>
+      <div class="j-err" id="jAddError"></div>
+      <button type="submit" class="j-btn j-submit">Сохранить</button>
+    </form>
+  </div>
+</div>
+
+
+<!-- Импорт (CSV / OCR) -->
+<div class="j-modal-bg" id="jImportModal">
+  <div class="j-modal" style="max-width:540px">
+    <div class="j-modal-hd">
+      <h3>Импорт сделок</h3>
+      <button class="j-close" id="jImClose">✕</button>
+    </div>
+    <div class="j-tabs">
+      <button class="j-tab-btn on" id="jImTab_csv" data-im-tab="csv">CSV / HTML</button>
+      <button class="j-tab-btn" id="jImTab_ocr" data-im-tab="ocr">Скриншот OCR</button>
+    </div>
+
+    <div id="jImPanel_csv">
+      <p style="font-size:12px;color:var(--muted);margin:0 0 10px">
+        Вставьте CSV-экспорт MT4/MT5 или HTML-историю (любой разделитель).
+      </p>
+      <div class="j-field">
+        <textarea id="jCsvText" placeholder="Вставьте CSV или HTML сюда…"></textarea>
+      </div>
+      <button class="j-btn" id="jCsvSubmit">Импортировать</button>
+    </div>
+
+    <div id="jImPanel_ocr" style="display:none">
+      <p style="font-size:12px;color:var(--muted);margin:0 0 12px">
+        Загрузите скриншот вкладки «История» MT4/MT5.
+        Tesseract OCR распознает сделки автоматически.
+      </p>
+      <div class="j-field">
+        <label>Файл изображения (PNG / JPG)</label>
+        <input type="file" id="jOcrFile" accept="image/*">
+      </div>
+      <button class="j-btn" id="jOcrSubmit">Распознать и импортировать</button>
+    </div>
+
+    <div class="j-import-result" id="jImportResult"></div>
+  </div>
+</div>
+
+
+<!-- MT4/MT5 Импорт -->
+<div class="j-modal-bg" id="jMtImportModal">
+  <div class="j-modal" style="max-width:500px">
+    <div class="j-modal-hd">
+      <h3>Импорт из MT4 / MT5</h3>
+      <button class="j-close" id="jMtImClose">✕</button>
+    </div>
+    <p style="font-size:12px;color:var(--muted);margin:0 0 12px;line-height:1.5">
+      Загрузи HTML-отчёт из MT4/MT5 (ReportHistory-*.html или Statement.htm)
+      или CSV-экспорт истории. Сделки импортируются без дублей.
+    </p>
+    <div class="j-mt-tz-row">
+      <label>Время сервера брокера:</label>
+      <select id="jMtTzSelect">
+        <option value="-720">UTC−12</option>
+        <option value="-600">UTC−10</option>
+        <option value="-480">UTC−8</option>
+        <option value="-300">UTC−5</option>
+        <option value="-240">UTC−4</option>
+        <option value="0">UTC±0</option>
+        <option value="60">UTC+1</option>
+        <option value="120" selected>UTC+2 (AvaTrade/NAGA)</option>
+        <option value="180">UTC+3 (Летнее EET)</option>
+        <option value="240">UTC+4</option>
+        <option value="300">UTC+5</option>
+        <option value="360">UTC+6</option>
+        <option value="420">UTC+7</option>
+        <option value="480">UTC+8</option>
+        <option value="540">UTC+9 (Токио)</option>
+        <option value="600">UTC+10</option>
+        <option value="720">UTC+12</option>
+      </select>
+    </div>
+    <div class="j-mt-drop" id="jMtDrop">
+      <div class="j-mt-drop-ico">📂</div>
+      <p>Перетащи файл сюда или <span id="jMtBrowseLabel">нажми для выбора</span></p>
+      <input type="file" id="jMtFile" accept=".html,.htm,.csv,.txt" style="display:none">
+    </div>
+    <button class="j-btn" id="jMtSubmitBtn" disabled>⬆ Импортировать</button>
+    <div class="j-mt-result" id="jMtResult"></div>
+  </div>
+</div>
+
+<!-- MT5 Инвест-пароль -->
+<div class="j-modal-bg" id="jMt5Modal">
+  <div class="j-modal" style="max-width:500px">
+    <div class="j-modal-hd">
+      <h3>
+        MT5 Investor-пароль
+        <button class="j-inv-tip-btn" data-inv-tip="avatrade" style="margin-left:6px">?</button>
+      </h3>
+      <button class="j-close" id="jMt5Close">✕</button>
+    </div>
+    <p style="font-size:12px;color:var(--muted);margin:0 0 14px">
+      Инвестор-пароль — только чтение: мы скачиваем историю, не открываем позиции.
+      Шифруется AES-256-GCM локально.
+    </p>
+
+    <div id="jAccList" style="margin-bottom:16px"></div>
+
+    <form id="jMt5Form" autocomplete="off">
+      <div class="j-row2">
+        <div class="j-field">
+          <label>Брокер</label>
+          <input name="broker" placeholder="AvaTrade" required>
+        </div>
+        <div class="j-field">
+          <label>Номер счёта</label>
+          <input name="account_no" placeholder="123456" required>
+        </div>
+      </div>
+      <div class="j-field">
+        <label>Сервер MT5</label>
+        <input name="server" placeholder="AvaTrade-Live" required>
+      </div>
+      <div class="j-field">
+        <label>Инвестор-пароль</label>
+        <input name="password" type="password" required autocomplete="new-password">
+      </div>
+      <div class="j-err" id="jMt5Error"></div>
+      <button type="submit" class="j-btn j-submit">Сохранить аккаунт</button>
+    </form>
+  </div>
+</div>
+
+
+<!-- InvestorPasswordTooltip -->
+<div class="j-modal-bg" id="jInvTip">
+  <div class="j-modal" style="max-width:520px">
+    <div class="j-modal-hd">
+      <h3>Как найти Investor Password?</h3>
+      <button class="j-close" id="jInvClose">✕</button>
+    </div>
+    <div class="j-tabs">
+      <button class="j-tab-btn on" id="jInvTab_avatrade" data-inv-broker="avatrade">AvaTrade</button>
+      <button class="j-tab-btn" id="jInvTab_naga" data-inv-broker="naga">NAGA</button>
+    </div>
+
+    <div id="jInvPanel_avatrade">
+      <p class="j-inv-hint">
+        Investor Password (пароль для чтения) — отдельный пароль MT5-счёта.
+        Позволяет видеть историю, <strong>не</strong> открывать позиции.
+      </p>
+      <ul class="j-inv-steps">
+        <li><span class="step-n">1</span><span>Войдите в личный кабинет AvaTrade → <b>my.avatrade.com</b></span></li>
+        <li><span class="step-n">2</span><span>Перейдите в <b>«Мои счета»</b> → выберите нужный MT5-счёт</span></li>
+        <li><span class="step-n">3</span><span>Нажмите <b>«Изменить пароль»</b> → вкладка <b>«Инвестор»</b></span></li>
+        <li><span class="step-n">4</span><span>Установите или скопируйте пароль инвестора</span></li>
+        <li><span class="step-n">5</span><span>Сервер MT5 обычно: <b>AvaTrade-Live</b> или <b>AvaTrade-Live02</b></span></li>
+      </ul>
+      <div class="j-inv-warn">🔒 Пароль шифруется AES-256-GCM локально и нигде не логируется.</div>
+    </div>
+
+    <div id="jInvPanel_naga" style="display:none">
+      <p class="j-inv-hint">
+        В NAGA (MT5) Investor Password находится в настройках торгового счёта.
+      </p>
+      <ul class="j-inv-steps">
+        <li><span class="step-n">1</span><span>Войдите на <b>naga.com</b> → <b>«Торговые счета»</b></span></li>
+        <li><span class="step-n">2</span><span>Выберите MT5-счёт → <b>«Настройки счёта»</b></span></li>
+        <li><span class="step-n">3</span><span>Найдите <b>«Инвестор-пароль»</b> — можно сгенерировать новый</span></li>
+        <li><span class="step-n">4</span><span>Сервер: <b>NAGA-Server</b> (указан на той же странице)</span></li>
+        <li><span class="step-n">5</span><span>Скопируйте пароль и номер счёта, вставьте в форму</span></li>
+      </ul>
+      <div class="j-inv-warn">🔒 Пароль шифруется AES-256-GCM локально и нигде не логируется.</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ── Discipline Config Modal ── -->
+<div class="j-modal-bg" id="jDiscConfigModal">
+  <div class="j-modal" style="max-width:560px">
+    <div class="j-modal-hd">
+      <h3>🎯 Правила дисциплины</h3>
+      <button class="j-close" id="jDiscConfigClose">✕</button>
+    </div>
+
+    <!-- Пресеты -->
+    <div style="font-size:12px;color:var(--muted);margin-bottom:8px;font-weight:600">Пресет стиля торговли</div>
+    <div class="j-disc-presets">
+      <button class="j-preset-btn" data-preset="conservative">🛡️ Консервативный</button>
+      <button class="j-preset-btn" data-preset="scalper">⚡ Скальпер</button>
+      <button class="j-preset-btn" data-preset="investor">📈 Инвестор</button>
+    </div>
+
+    <!-- Wellbeing -->
+    <div class="j-wellbeing" id="jDiscWellbeing" style="display:none">
+      ⚠️ <span id="jDiscWellbeingText"></span>
+    </div>
+
+    <!-- Таблица критериев -->
+    <table class="j-crit-table" id="jCritTable">
+      <thead><tr><th>Критерий</th><th style="text-align:center">Вкл</th><th>Вес (0.1–3.0)</th></tr></thead>
+      <tbody id="jCritTableBody"></tbody>
+    </table>
+
+    <!-- Advanced mode toggle -->
+    <div class="j-adv-toggle">
+      <input type="checkbox" id="jAdvModeChk">
+      <label for="jAdvModeChk" style="font-size:12px;color:var(--muted)">
+        Продвинутый режим — снять ограничение Wellbeing
+      </label>
+    </div>
+
+    <div class="j-err" id="jDiscConfigErr"></div>
+    <button class="j-btn j-submit" id="jDiscConfigSave">Сохранить конфигурацию</button>
+  </div>
+</div>
+
+<!-- ── Meta Form Modal ── -->
+<div class="j-modal-bg" id="jMetaModal">
+  <div class="j-modal" style="max-width:500px">
+    <div class="j-modal-hd">
+      <h3>Анализ сделки</h3>
+      <button class="j-close" id="jMetaClose">✕</button>
+    </div>
+
+    <!-- Прогресс в очереди -->
+    <div class="j-meta-progress" id="jMetaProgress"></div>
+
+    <!-- Summary сделки -->
+    <div class="j-meta-trade-hd" id="jMetaTradeSummary"></div>
+
+    <form id="jMetaForm" autocomplete="off">
+      <!-- Эмоция на входе -->
+      <div class="j-emo-label">Эмоция при открытии</div>
+      <div class="j-emo-grid" id="jEmoOpenGrid"></div>
+
+      <!-- Эмоция на выходе -->
+      <div class="j-emo-label">Эмоция при закрытии</div>
+      <div class="j-emo-grid" id="jEmoCloseGrid"></div>
+
+      <!-- Сетап -->
+      <div class="j-field">
+        <label>Сетап / паттерн</label>
+        <input name="setup_tag" id="jMetaSetupInput" placeholder="Например: breakout, pullback…">
+        <div class="j-setup-chips" id="jSetupChips"></div>
+      </div>
+
+      <!-- Следовал ли плану -->
+      <div class="j-field">
+        <label>Следовал торговому плану?</label>
+        <div class="j-plan-toggle">
+          <button type="button" class="j-plan-btn yes" id="jPlanYes">✓ Да</button>
+          <button type="button" class="j-plan-btn no"  id="jPlanNo">✗ Нет</button>
+        </div>
+      </div>
+
+      <!-- Заметка -->
+      <div class="j-field">
+        <label>Заметка</label>
+        <textarea name="note" placeholder="Что пошло не так? Что сделал правильно?"></textarea>
+      </div>
+
+      <!-- Дисциплина (загружается динамически) -->
+      <div class="j-disc-criteria" id="jMetaDiscSection" style="display:none">
+        <div style="font-size:12px;color:var(--muted);font-weight:600;margin-bottom:10px">
+          🎯 Оценка дисциплины по этой сделке
+        </div>
+        <div id="jMetaDiscRows"></div>
+      </div>
+
+      <div class="j-err" id="jMetaError"></div>
+      <div class="j-meta-nav">
+        <button type="submit" class="j-btn" id="jMetaSaveNext">Сохранить и следующая →</button>
+        <button type="button" class="j-btn j-btn-sec" id="jMetaSaveDone">Готово</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ── Alert Rule Modal ── -->
+<div class="j-modal-bg" id="jAlertModal">
+  <div class="j-modal" style="max-width:440px">
+    <div class="j-modal-hd">
+      <h3>Новый алерт</h3>
+      <button class="j-close" id="jAlertClose">✕</button>
+    </div>
+    <div class="j-field">
+      <label>Тип алерта</label>
+      <select id="jAlertKind">
+        <optgroup label="Рыночные">
+          <option value="price_cross">Пересечение цены</option>
+          <option value="rsi_extreme">Экстремум RSI</option>
+          <option value="weekly_range">Недельный экстремум</option>
+          <option value="economic_event">Макрособытие</option>
+        </optgroup>
+        <optgroup label="Поведенческие (без параметров)">
+          <option value="behavioral_streak">Угроза стрику активности</option>
+          <option value="behavioral_journal">Аномальная сделка</option>
+          <option value="behavioral_tilt">Детектор тильта</option>
+          <option value="morning_brief">Утренний бриф</option>
+        </optgroup>
+      </select>
+    </div>
+    <div class="j-field" id="jAlertSymbolWrap">
+      <label>Инструмент (например, XAUUSD)</label>
+      <input type="text" id="jAlertSymbol" placeholder="XAUUSD" autocomplete="off">
+    </div>
+
+    <!-- price_cross params -->
+    <div id="jAlertParamPriceCross">
+      <div class="j-row2">
+        <div class="j-field">
+          <label>Целевая цена</label>
+          <input type="number" id="jAlertTarget" step="0.00001" placeholder="2350.00">
+        </div>
+        <div class="j-field">
+          <label>Направление</label>
+          <select id="jAlertDirection">
+            <option value="up">Вверх (≥)</option>
+            <option value="down">Вниз (≤)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- rsi_extreme params -->
+    <div id="jAlertParamRsi">
+      <div class="j-row2">
+        <div class="j-field">
+          <label>Таймфрейм</label>
+          <select id="jAlertTf">
+            <option value="M15">M15</option>
+            <option value="H1" selected>H1</option>
+            <option value="H4">H4</option>
+            <option value="D1">D1</option>
+          </select>
+        </div>
+        <div class="j-field">
+          <label>Зона</label>
+          <select id="jAlertCondition">
+            <option value="overbought">Перекупленность</option>
+            <option value="oversold">Перепроданность</option>
+          </select>
+        </div>
+      </div>
+      <div class="j-field">
+        <label>Уровень RSI</label>
+        <input type="number" id="jAlertRsiLevel" min="0" max="100" value="70">
+      </div>
+    </div>
+
+    <!-- economic_event params -->
+    <div id="jAlertParamEcon">
+      <div class="j-field">
+        <label>Название события</label>
+        <input type="text" id="jAlertEventName" placeholder="Core Retail Sales (USD)">
+      </div>
+      <div class="j-field">
+        <label>Уведомить за (минут)</label>
+        <input type="number" id="jAlertMinBefore" min="1" max="60" value="15">
+      </div>
+    </div>
+
+    <!-- weekly_range params -->
+    <div id="jAlertParamWeekly">
+      <div class="j-field">
+        <label>Экстремум</label>
+        <select id="jAlertExtreme">
+          <option value="high">Недельный максимум</option>
+          <option value="low">Недельный минимум</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="j-err" id="jAlertErr"></div>
+    <button class="j-btn j-submit" id="jAlertSubmit">Создать алерт</button>
+  </div>
+</div>
+
+<!-- ── Setup Create/Edit Modal ── -->
+<div class="j-modal-bg" id="jSetupModal">
+  <div class="j-modal" style="max-width:520px">
+    <div class="j-modal-hd">
+      <h3 id="jSetupModalTitle">Новый сетап</h3>
+      <button class="j-close" id="jSetupClose">✕</button>
+    </div>
+
+    <div class="j-row2">
+      <div class="j-field">
+        <label>Инструмент</label>
+        <input type="text" id="jSetupSymbol" placeholder="XAUUSD" autocomplete="off" style="text-transform:uppercase">
+      </div>
+      <div class="j-field">
+        <label>Таймфрейм</label>
+        <select id="jSetupTf">
+          <option>M5</option><option>M15</option><option>M30</option>
+          <option>H1</option><option selected>H4</option><option>D1</option>
+          <option>W1</option><option>MN</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="j-field">
+      <label>Паттерн</label>
+      <select id="jSetupPattern"></select>
+    </div>
+
+    <div class="j-field">
+      <label>Ключевые уровни (через запятую)</label>
+      <input type="text" id="jSetupLevels" placeholder="2340.5, 2365.0, 2390.0">
+    </div>
+
+    <div class="j-field">
+      <label>Тезис и логика входа</label>
+      <textarea id="jSetupThesis" style="min-height:90px"
+        placeholder="Опишите логику: что вы видите на графике, где вход, стоп, цель…"></textarea>
+    </div>
+
+    <div class="j-row2">
+      <div class="j-field">
+        <label>Напомнить через (недель)</label>
+        <input type="number" id="jSetupReviewWeeks" min="1" max="52" value="4">
+      </div>
+      <div class="j-field">
+        <label>Теги (через запятую)</label>
+        <input type="text" id="jSetupTags" placeholder="фибо, пробой, H4">
+      </div>
+    </div>
+
+    <div class="j-err" id="jSetupErr"></div>
+
+    <div id="jSetupLinkSection" style="display:none;margin-bottom:14px;
+      border-top:1px solid var(--line);padding-top:14px">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px;font-weight:600">
+        Привязать к сделке из дневника
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <select id="jSetupTradeSelect" style="flex:1;border:1px solid var(--line);
+          border-radius:8px;padding:7px 10px;font-family:Montserrat;font-size:12px;
+          background:var(--soft);color:var(--ink);outline:none">
+          <option value="">Выберите сделку…</option>
+        </select>
+        <button class="j-btn" id="jSetupLinkBtn" style="padding:7px 12px;font-size:12px">Привязать</button>
+      </div>
+    </div>
+
+    <button class="j-btn j-submit" id="jSetupSubmit">Сохранить</button>
+  </div>
+</div>
+
+<!-- ── Status Change Modal ── -->
+<div class="j-modal-bg" id="jSetupStatusModal">
+  <div class="j-modal" style="max-width:360px">
+    <div class="j-modal-hd">
+      <h3>Изменить статус</h3>
+      <button class="j-close" id="jSetupStatusClose">✕</button>
+    </div>
+    <p id="jSetupStatusDesc" style="font-size:13px;color:var(--muted);margin:0 0 16px"></p>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button class="j-btn j-btn-sec" data-new-status="executed"
+        style="text-align:left;justify-content:flex-start">
+        ✅ Исполнен — паттерн отработал, привязать к сделке
+      </button>
+      <button class="j-btn j-btn-sec" data-new-status="invalidated"
+        style="text-align:left;justify-content:flex-start">
+        ❌ Отменён — рынок пошёл против тезиса
+      </button>
+      <button class="j-btn j-btn-sec" data-new-status="expired"
+        style="text-align:left;justify-content:flex-start">
+        ⏰ Истёк — тезис потерял актуальность
+      </button>
+      <button class="j-btn j-btn-sec" data-new-status="pending"
+        style="text-align:left;justify-content:flex-start">
+        🔄 Вернуть в ожидание
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Flashcard Review Modal ── -->
+<div class="j-modal-bg j-fc-modal" id="jFcModal">
+  <div class="j-modal" style="max-width:460px">
+    <div class="j-modal-hd">
+      <h3 id="jFcModalTitle">Флешкарты</h3>
+      <button class="j-close" id="jFcClose">✕</button>
+    </div>
+    <div id="jFcDone" class="j-fc-done" style="display:none">
+      ✅ Все карточки пройдены! <br>
+      <span id="jFcSessionXp" style="font-size:13px;color:var(--gold);font-weight:600"></span>
+    </div>
+    <div id="jFcContent">
+      <!-- Шаг 1: вопрос — сначала вспомни сам, потом нажми -->
+      <div class="j-fc-card" id="jFcCard" onclick="SBFJournal.revealFcAnswer()">
+        <span id="jFcTerm">Загрузка…</span>
+        <span class="j-fc-card-hint">попробуй вспомнить, затем нажми</span>
+      </div>
+      <!-- Шаг 2: ответ показан -->
+      <div class="j-fc-answer" id="jFcAnswer"></div>
+      <!-- Шаг 2: оценка памяти — ПОСЛЕ просмотра ответа -->
+      <div class="j-fc-quality" id="jFcQuality" style="display:none">
+        <div class="j-fc-quality-label">Насколько хорошо ты помнил это <em>до</em> просмотра ответа?</div>
+        <div class="j-fc-quality-btns">
+          <button class="j-fc-q-btn q0" onclick="SBFJournal.rateFc(0)">
+            <span class="j-fc-q-icon">✗</span>
+            <span class="j-fc-q-lbl">Не помнил</span>
+          </button>
+          <button class="j-fc-q-btn q1" onclick="SBFJournal.rateFc(1)">
+            <span class="j-fc-q-icon">~</span>
+            <span class="j-fc-q-lbl">Смутно</span>
+          </button>
+          <button class="j-fc-q-btn q2" onclick="SBFJournal.rateFc(2)">
+            <span class="j-fc-q-icon">±</span>
+            <span class="j-fc-q-lbl">Ошибся</span>
+          </button>
+          <button class="j-fc-q-btn q3" onclick="SBFJournal.rateFc(3)">
+            <span class="j-fc-q-icon">✓</span>
+            <span class="j-fc-q-lbl">Вспомнил</span>
+          </button>
+          <button class="j-fc-q-btn q4" onclick="SBFJournal.rateFc(4)">
+            <span class="j-fc-q-icon">✓✓</span>
+            <span class="j-fc-q-lbl">Легко</span>
+          </button>
+          <button class="j-fc-q-btn q5" onclick="SBFJournal.rateFc(5)">
+            <span class="j-fc-q-icon">★</span>
+            <span class="j-fc-q-lbl">Мгновенно</span>
+          </button>
+        </div>
+      </div>
+      <div class="j-fc-progress" id="jFcProgressLbl"></div>
+    </div>
+  </div>
+</div>
+
+<script src="/assets/sbf-push.js?v=1"></script>
+<script src="/assets/sbf-journal.js?v=10"></script>
+<script>
+/* ── Journal Improvements: MT4/MT5 import, Analytics, Review, Cooldown, Debrief ── */
+(function () {
+  'use strict';
+
+  /* ─── Helpers ─── */
+  function _jwt() {
+    var k = ['sbf_jwt','sbf_token','token'];
+    for (var i = 0; i < k.length; i++) {
+      var v = localStorage.getItem(k[i]);
+      if (v) return v;
+    }
+    return '';
+  }
+  function _authHdr() { return { 'Authorization': 'Bearer ' + _jwt(), 'Content-Type': 'application/json' }; }
+  function _fmtDate(iso) {
+    if (!iso) return '—';
+    var d = new Date(iso);
+    return d.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+  }
+
+  /* ─── TZ auto-detect on login ─── */
+  function detectAndSendTZ() {
+    try {
+      var tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      if (!tz) return;
+      fetch('/api/auth/tz', {
+        method: 'POST',
+        headers: _authHdr(),
+        body: JSON.stringify({ tz: tz })
+      }).catch(function () {});
+    } catch (_) {}
+  }
+  /* Send TZ once per session after auth */
+  if (_jwt()) detectAndSendTZ();
+  document.addEventListener('sbf:auth:login', detectAndSendTZ);
+
+  /* ══════════════════════════════════════════════════════════
+     MT4/MT5 IMPORT MODAL
+  ══════════════════════════════════════════════════════════ */
+  var _mtModal  = document.getElementById('jMtImportModal');
+  var _mtBtn    = document.getElementById('jMtImportBtn');
+  var _mtDrop   = document.getElementById('jMtDrop');
+  var _mtFile   = document.getElementById('jMtFile');
+  var _mtTZ     = document.getElementById('jMtTzSelect');
+  var _mtSubmit = document.getElementById('jMtSubmitBtn');
+  var _mtResult = document.getElementById('jMtResult');
+  var _mtSelFile = null;
+
+  if (_mtBtn) {
+    _mtBtn.addEventListener('click', function () {
+      if (_mtModal) { _mtModal.style.display = 'flex'; }
+    });
+  }
+
+  function _mtClose() {
+    if (_mtModal) _mtModal.style.display = 'none';
+    _mtSelFile = null;
+    if (_mtResult) _mtResult.style.display = 'none';
+    if (_mtDrop) _mtDrop.classList.remove('dragover');
+  }
+
+  /* Close on backdrop click */
+  if (_mtModal) {
+    _mtModal.addEventListener('click', function (e) {
+      if (e.target === _mtModal) _mtClose();
+    });
+  }
+  var _mtCloseBtn = document.getElementById('jMtImClose');
+  if (_mtCloseBtn) _mtCloseBtn.addEventListener('click', _mtClose);
+
+  /* Drag-drop */
+  if (_mtDrop) {
+    _mtDrop.addEventListener('dragover', function (e) {
+      e.preventDefault();
+      _mtDrop.classList.add('dragover');
+    });
+    _mtDrop.addEventListener('dragleave', function () {
+      _mtDrop.classList.remove('dragover');
+    });
+    _mtDrop.addEventListener('drop', function (e) {
+      e.preventDefault();
+      _mtDrop.classList.remove('dragover');
+      var files = e.dataTransfer.files;
+      if (files && files[0]) _mtSetFile(files[0]);
+    });
+    _mtDrop.addEventListener('click', function () {
+      if (_mtFile) _mtFile.click();
+    });
+  }
+  if (_mtFile) {
+    _mtFile.addEventListener('change', function () {
+      if (_mtFile.files && _mtFile.files[0]) _mtSetFile(_mtFile.files[0]);
+    });
+  }
+
+  function _mtSetFile(f) {
+    _mtSelFile = f;
+    if (_mtDrop) {
+      var icon = _mtDrop.querySelector('.j-mt-drop-ico');
+      var hint = _mtDrop.querySelector('p');
+      if (icon) icon.textContent = '📄';
+      if (hint) hint.textContent = f.name;
+    }
+    if (_mtSubmit) _mtSubmit.disabled = false;
+  }
+
+  if (_mtSubmit) {
+    _mtSubmit.addEventListener('click', function () {
+      if (!_mtSelFile) {
+        if (_mtResult) { _mtResult.style.display = 'block'; _mtResult.textContent = 'Выбери файл'; }
+        return;
+      }
+      var tz = _mtTZ ? parseInt(_mtTZ.value, 10) : 0;
+      _mtSubmit.disabled = true;
+      _mtSubmit.textContent = 'Импортируем…';
+
+      var reader = new FileReader();
+      reader.onload = function (ev) {
+        var b64 = btoa(String.fromCharCode.apply(null, new Uint8Array(ev.target.result)));
+        fetch('/api/journal/import', {
+          method: 'POST',
+          headers: Object.assign({}, _authHdr(), { 'X-Filename': _mtSelFile.name }),
+          body: JSON.stringify({ data: b64, broker_tz_offset: tz })
+        })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          _mtSubmit.disabled = false;
+          _mtSubmit.textContent = 'Импортировать';
+          if (_mtResult) {
+            _mtResult.style.display = 'block';
+            if (d.error) {
+              _mtResult.className = 'j-mt-result err';
+              _mtResult.textContent = d.error;
+            } else {
+              _mtResult.className = 'j-mt-result ok';
+              _mtResult.innerHTML =
+                'Импортировано: <b>' + d.imported + '</b> сделок' +
+                (d.duplicates ? ' · дублей пропущено: ' + d.duplicates : '') +
+                (d.xp_awarded ? ' · +' + d.xp_awarded + ' XP' : '');
+              if (d.imported > 0 && typeof SBFJournal !== 'undefined' && SBFJournal.reload) {
+                setTimeout(function () { SBFJournal.reload(); }, 1200);
+              }
+            }
+          }
+        })
+        .catch(function (err) {
+          _mtSubmit.disabled = false;
+          _mtSubmit.textContent = 'Импортировать';
+          if (_mtResult) {
+            _mtResult.style.display = 'block';
+            _mtResult.className = 'j-mt-result err';
+            _mtResult.textContent = 'Ошибка сети: ' + err.message;
+          }
+        });
+      };
+      reader.readAsArrayBuffer(_mtSelFile);
+    });
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     COOLDOWN BANNER
+  ══════════════════════════════════════════════════════════ */
+  var _cdBanner = document.getElementById('jCooldownBanner');
+  var _cdMeta   = document.getElementById('jCooldownMeta');
+  var _cdUntil  = document.getElementById('jCooldownUntil');
+  var _activeCooldown = null;
+
+  function loadCooldown() {
+    if (!_jwt()) return;
+    fetch('/api/alerts/cooldown/active', { headers: _authHdr() })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        var cd = d && d.active;
+        if (cd && cd.status === 'active') {
+          _activeCooldown = cd;
+          if (_cdBanner) _cdBanner.style.display = 'block';
+          if (_cdUntil) _cdUntil.textContent = _fmtDate(cd.until_ts);
+          if (_cdMeta) _cdMeta.textContent = 'Активирован: ' + _fmtDate(cd.started_ts);
+        } else {
+          _activeCooldown = null;
+          if (_cdBanner) _cdBanner.style.display = 'none';
+        }
+      }).catch(function () {});
+  }
+
+  window.SBFJournal = window.SBFJournal || {};
+
+  window.SBFJournal.overrideCooldown = function () {
+    if (!_activeCooldown) return;
+    if (!confirm('Записать сделку и завершить стоп-день?')) return;
+    fetch('/api/alerts/cooldown/break', {
+      method: 'POST',
+      headers: _authHdr(),
+      body: JSON.stringify({})
+    }).then(function () {
+      _activeCooldown = null;
+      if (_cdBanner) _cdBanner.style.display = 'none';
+    }).catch(function () {});
+  };
+
+  window.SBFJournal.acceptCooldown = function (alertId, trigger) {
+    fetch('/api/alerts/cooldown', {
+      method: 'POST',
+      headers: _authHdr(),
+      body: JSON.stringify({ accept: true, trigger: trigger || 'loss_streak', alert_id: alertId })
+    }).then(function (r) { return r.json(); })
+    .then(function (d) {
+      if (d.ok) loadCooldown();
+    }).catch(function () {});
+  };
+
+  window.SBFJournal.rejectCooldown = function (alertId) {
+    fetch('/api/alerts/cooldown', {
+      method: 'POST',
+      headers: _authHdr(),
+      body: JSON.stringify({ accept: false, alert_id: alertId })
+    }).catch(function () {});
+  };
+
+  /* ══════════════════════════════════════════════════════════
+     DEBRIEF CARD
+  ══════════════════════════════════════════════════════════ */
+  var _debWrap   = document.getElementById('jDebriefCardWrap');
+  var _debQ1     = document.getElementById('jDebQ1');
+  var _debQ2     = document.getElementById('jDebQ2');
+  var _debQ3     = document.getElementById('jDebQ3');
+  var _debBtn    = document.getElementById('jDebSubmitBtn');
+  var _debErr    = document.getElementById('jDebErr');
+  var _pendingAlertId = null;
+
+  window.SBFJournal.showDebrief = function (alertId) {
+    _pendingAlertId = alertId || null;
+    if (_debWrap) _debWrap.style.display = 'block';
+    if (_debQ1) _debQ1.value = '';
+    if (_debQ2) _debQ2.value = '';
+    if (_debQ3) _debQ3.value = '';
+    if (_debErr) _debErr.style.display = 'none';
+    if (_debWrap) _debWrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+
+  if (_debBtn) {
+    _debBtn.addEventListener('click', function () {
+      var q1 = (_debQ1 && _debQ1.value) || '';
+      var q2 = (_debQ2 && _debQ2.value) || '';
+      var q3 = (_debQ3 && _debQ3.value) || '';
+      _debBtn.disabled = true;
+      fetch('/api/alerts/debrief', {
+        method: 'POST',
+        headers: _authHdr(),
+        body: JSON.stringify({ alert_id: _pendingAlertId, q1: q1, q2: q2, q3: q3 })
+      }).then(function (r) { return r.json(); })
+      .then(function (d) {
+        _debBtn.disabled = false;
+        if (d.error) {
+          if (_debErr) { _debErr.style.display = 'block'; _debErr.textContent = d.error; }
+        } else {
+          if (_debWrap) _debWrap.style.display = 'none';
+          if (typeof SBFJournal !== 'undefined' && SBFJournal.showXPToast) {
+            SBFJournal.showXPToast('+' + d.xp_awarded + ' XP за разбор');
+          }
+        }
+      }).catch(function (e) {
+        _debBtn.disabled = false;
+        if (_debErr) { _debErr.style.display = 'block'; _debErr.textContent = 'Ошибка: ' + e.message; }
+      });
+    });
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     WEEKLY REVIEW
+  ══════════════════════════════════════════════════════════ */
+  var _revWrap  = document.getElementById('jReviewCardWrap');
+  var _revWeek  = document.getElementById('jReviewWeek');
+  var _revStats = document.getElementById('jReviewStats');
+  var _revPrev  = document.getElementById('jReviewPrev');
+  var _revText  = document.getElementById('jReviewText');
+  var _revBtn   = document.getElementById('jReviewSubmitBtn');
+  var _revErr   = document.getElementById('jReviewErr');
+
+  function _isoWeek(date) {
+    var d = date ? new Date(date) : new Date();
+    var day = d.getDay() || 7;
+    d.setDate(d.getDate() + 4 - day);
+    var yearStart = new Date(d.getFullYear(), 0, 1);
+    var week = Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
+    return d.getFullYear() + '-W' + String(week).padStart(2, '0');
+  }
+
+  function loadWeeklyReview() {
+    if (!_jwt() || !_revWrap) return;
+    var week = _isoWeek();
+    fetch('/api/journal/review/current', { headers: _authHdr() })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        _revWrap.style.display = 'block';
+        if (_revWeek) _revWeek.textContent = week;
+        var stats = d.stats || {};
+        if (_revStats) {
+          _revStats.innerHTML =
+            '<span>Сделок: <b>' + (stats.trades_count || 0) + '</b></span>' +
+            '<span>Σ R: <b>' + ((stats.sum_r || 0) >= 0 ? '+' : '') + (+(stats.sum_r || 0)).toFixed(2) + '</b></span>' +
+            '<span>Дисциплина: <b>' + (stats.discipline_pct != null ? Math.round(stats.discipline_pct) + '%' : '—') + '</b></span>' +
+            '<span>Тильт-эп.: <b>' + (stats.tilt_episodes || 0) + '</b></span>';
+        }
+        var existing = d.existing_review;
+        if (existing) {
+          if (_revPrev) {
+            _revPrev.style.display = 'block';
+            _revPrev.textContent = 'Уже отправлено: ' + (existing.reflection || '').substring(0, 100);
+          }
+          if (_revBtn) {
+            _revBtn.disabled = true;
+            _revBtn.textContent = 'Ревью уже отправлено';
+          }
+        }
+        if (d.prev_reflection && _revText && !_revText.value) {
+          _revText.placeholder = 'Прошлая неделя: ' + d.prev_reflection.substring(0, 60) + '…';
+        }
+      }).catch(function () {});
+  }
+
+  if (_revBtn) {
+    _revBtn.addEventListener('click', function () {
+      var text = (_revText && _revText.value) || '';
+      var week = _isoWeek();
+      _revBtn.disabled = true;
+      fetch('/api/journal/review', {
+        method: 'POST',
+        headers: _authHdr(),
+        body: JSON.stringify({ week_iso: week, reflection: text })
+      }).then(function (r) { return r.json(); })
+      .then(function (d) {
+        _revBtn.disabled = false;
+        if (d.error) {
+          if (_revErr) { _revErr.style.display = 'block'; _revErr.textContent = d.error; }
+        } else {
+          _revBtn.textContent = 'Ревью отправлено ✓';
+          _revBtn.disabled = true;
+          if (_revErr) _revErr.style.display = 'none';
+          if (typeof SBFJournal !== 'undefined' && SBFJournal.showXPToast) {
+            SBFJournal.showXPToast('+75 XP за ревью');
+          }
+        }
+      }).catch(function (e) {
+        _revBtn.disabled = false;
+        if (_revErr) { _revErr.style.display = 'block'; _revErr.textContent = 'Ошибка: ' + e.message; }
+      });
+    });
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     ANALYTICS
+  ══════════════════════════════════════════════════════════ */
+  var _anSection  = document.getElementById('jAnalyticsSection');
+  var _anCostR    = document.getElementById('jDiscCostR');
+  var _anCostSub  = document.getElementById('jDiscCostSub');
+  var _anTbody    = document.getElementById('jSetupsAnalyticsTbody');
+  var _anPeriod   = '30d';
+
+  function loadAnalytics(period) {
+    _anPeriod = period || _anPeriod;
+    if (!_jwt() || !_anSection) return;
+    _anSection.style.display = 'block';
+
+    fetch('/api/journal/analytics/discipline-cost?period=' + _anPeriod, { headers: _authHdr() })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (d.insufficient_data) {
+          if (_anCostR) _anCostR.textContent = '—';
+          if (_anCostSub) _anCostSub.textContent = 'Недостаточно данных (нужно ≥10 чистых сделок)';
+        } else {
+          var cost = +(d.discipline_cost_r || 0);
+          if (_anCostR) {
+            _anCostR.textContent = (cost > 0 ? '−' : '') + Math.abs(cost).toFixed(2) + 'R';
+            _anCostR.style.color = cost > 0 ? 'var(--down)' : 'var(--up)';
+          }
+          if (_anCostSub) {
+            _anCostSub.textContent =
+              'Нарушений: ' + (d.violated_trades || 0) +
+              ' · Чистых: ' + (d.clean_trades || 0) +
+              ' · avg R чистых: ' + (+(d.avg_r_clean || 0)).toFixed(2);
+          }
+        }
+      }).catch(function () {});
+
+    fetch('/api/journal/analytics/setups?period=' + _anPeriod, { headers: _authHdr() })
+      .then(function (r) { return r.json(); })
+      .then(function (rows) {
+        if (!_anTbody) return;
+        if (!rows || !rows.length) {
+          _anTbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted)">Нет данных</td></tr>';
+          return;
+        }
+        _anTbody.innerHTML = rows.map(function (row) {
+          var winPct = row.win_pct != null ? Math.round(row.win_pct) + '%' : '—';
+          var avgR   = row.avg_r != null ? (+(row.avg_r)).toFixed(2) : '—';
+          var sumR   = row.sum_r != null ? (+(row.sum_r)).toFixed(1) : '—';
+          return '<tr>' +
+            '<td>' + (row.setup || '—') + '</td>' +
+            '<td>' + (row.count || 0) + '</td>' +
+            '<td>' + winPct + '</td>' +
+            '<td>' + avgR + '</td>' +
+            '<td style="color:' + ((+row.sum_r || 0) >= 0 ? 'var(--up)' : 'var(--down)') + '">' + sumR + '</td>' +
+            '</tr>';
+        }).join('');
+      }).catch(function () {});
+  }
+
+  /* Period tab clicks */
+  var _periodTabs = document.querySelectorAll('.j-period-tab');
+  _periodTabs.forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      _periodTabs.forEach(function (t) { t.classList.remove('active'); });
+      tab.classList.add('active');
+      loadAnalytics(tab.dataset.period);
+    });
+  });
+
+  /* ══════════════════════════════════════════════════════════
+     PRESTIGE BUTTON (Account section)
+  ══════════════════════════════════════════════════════════ */
+  var _prestigeBtn = document.getElementById('jPrestigeBtn');
+  if (_prestigeBtn) {
+    _prestigeBtn.addEventListener('click', function () {
+      if (!confirm('Сбросить XP и уровень до 1? Активируется только при уровне ≥ 8.')) return;
+      fetch('/api/auth/prestige', { method: 'POST', headers: _authHdr(), body: '{}' })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (d.error) {
+            alert(d.error);
+          } else {
+            alert('Престиж ' + d.prestige_count + ' активирован! Уровень сброшен.');
+            if (typeof SBFJournal !== 'undefined' && SBFJournal.reload) SBFJournal.reload();
+          }
+        }).catch(function () {});
+    });
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     TILT → COOLDOWN OFFER INTEGRATION
+  ══════════════════════════════════════════════════════════ */
+  var _cdOfferWrap = document.getElementById('jCooldownOffer');
+  var _cdOfferText = document.getElementById('jCooldownOfferText');
+  var _cdOfferYes  = document.getElementById('jCooldownOfferYes');
+  var _cdOfferNo   = document.getElementById('jCooldownOfferNo');
+  var _offerShown  = false;
+
+  /* Called by sbf-journal.js renderTiltBanner when tilt is detected */
+  window.SBFJournal.onTiltDetected = function (tiltData) {
+    if (!_cdOfferWrap || _offerShown || _activeCooldown) return;
+    var trigger = (tiltData && tiltData.trigger) || 'loss_streak';
+    var msgs = {
+      loss_streak: 'Статистически зафиксирована серия сделок с отрицательным R. Хочешь активировать добровольный стоп на сегодня?',
+      stop_revenge_reentry: 'Зафиксирован повторный вход в рынок после быстрого закрытия позиции. Хочешь активировать добровольный стоп на сегодня?'
+    };
+    if (_cdOfferText) _cdOfferText.textContent = msgs[trigger] || msgs.loss_streak;
+    _cdOfferWrap.style.display = 'block';
+    _offerShown = true;
+    if (_cdOfferYes) {
+      _cdOfferYes.onclick = function () {
+        _cdOfferWrap.style.display = 'none';
+        window.SBFJournal.acceptCooldown(null, trigger);
+      };
+    }
+    if (_cdOfferNo) {
+      _cdOfferNo.onclick = function () {
+        _cdOfferWrap.style.display = 'none';
+        window.SBFJournal.rejectCooldown(null);
+      };
+    }
+  };
+
+  /* ─── Init on page load ─── */
+  function _init() {
+    if (!_jwt()) return;
+    loadCooldown();
+    loadWeeklyReview();
+    loadAnalytics('30d');
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _init);
+  } else {
+    _init();
+  }
+
+  /* Re-init after login */
+  document.addEventListener('sbf:auth:login', function () {
+    detectAndSendTZ();
+    setTimeout(function () {
+      loadCooldown();
+      loadWeeklyReview();
+      loadAnalytics('30d');
+    }, 500);
+  });
+
+}());
+</script>
+</body>
+</html>

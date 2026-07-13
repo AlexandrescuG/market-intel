@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SBF · Глоссарий трейдера</title>
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/edu/edu.css">
+<script src="/assets/sbf-header.js?v=11" defer></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{padding-bottom:60px}
+.top{display:flex;align-items:center;gap:14px;padding:12px 24px;
+  background:var(--paper);border-bottom:1px solid var(--line);
+  position:sticky;top:0;z-index:30;box-shadow:0 2px 12px rgba(43,43,51,.05)}
+.top b{font-size:14px;font-weight:700;letter-spacing:.3px}
+.top .back{margin-left:auto;font-family:'JetBrains Mono';font-size:11px;
+  color:var(--muted);text-decoration:none;letter-spacing:.5px}
+.top .back:hover{color:var(--gold)}
+
+.hero{padding:36px 24px 28px;max-width:740px;margin:0 auto}
+.hero .tag{font-family:'JetBrains Mono';font-size:10px;letter-spacing:2px;
+  text-transform:uppercase;color:var(--gold);margin-bottom:10px}
+.hero h1{font-size:clamp(22px,4vw,32px);font-weight:700;color:var(--ink);line-height:1.2;margin-bottom:10px}
+.hero p{color:var(--muted);font-size:14px;line-height:1.7}
+
+.wrap{max-width:740px;margin:0 auto;padding:0 24px}
+
+.search-box{width:100%;padding:12px 16px;border:1px solid var(--line);border-radius:10px;
+  font-family:'JetBrains Mono';font-size:13px;background:var(--paper);color:var(--ink);
+  outline:none;margin-bottom:12px;transition:.15s}
+.search-box:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,162,39,.12)}
+
+/* Category filter tabs */
+.cat-tabs{display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap}
+.cat-tab{font-family:'JetBrains Mono';font-size:11px;font-weight:600;
+  padding:5px 14px;border:1px solid var(--line);border-radius:7px;
+  cursor:pointer;background:var(--paper);color:var(--muted);
+  transition:.12s;user-select:none}
+.cat-tab:hover{border-color:var(--gold);color:var(--ink)}
+.cat-tab.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+/* Category header */
+.gloss-cat-hdr{font-family:'JetBrains Mono';font-size:10px;letter-spacing:2px;
+  text-transform:uppercase;color:var(--gold);padding:18px 0 8px;
+  border-bottom:1px solid var(--line);margin-bottom:10px}
+
+.gloss-list{display:flex;flex-direction:column;gap:8px}
+.gloss-item{background:var(--paper);border:1px solid var(--line);border-radius:10px;
+  padding:16px 20px;transition:.15s}
+.gloss-item:hover{border-color:var(--gold);box-shadow:0 2px 10px rgba(201,162,39,.1)}
+.gloss-item.hidden{display:none}
+.gloss-term{font-family:'JetBrains Mono';font-size:13px;font-weight:700;color:var(--gold);
+  margin-bottom:6px;letter-spacing:.3px}
+.gloss-def{font-size:13.5px;line-height:1.6;color:var(--ink)}
+
+.empty{text-align:center;padding:40px 20px;color:var(--muted);
+  font-family:'JetBrains Mono';font-size:12px}
+@media(max-width:640px){
+  .hero{padding:24px 16px 18px}
+  .wrap{padding:0 12px}
+  .search-box{padding:10px 14px;font-size:12px;min-height:44px}
+  .gloss-item{padding:14px 16px}
+  .gloss-term{font-size:12px}
+  .gloss-def{font-size:13px}
+}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="tag">Словарь трейдера</div>
+  <h1>Глоссарий</h1>
+  <p>Ключевые термины биржевой торговли и макроэкономические индикаторы. Используйте поиск или фильтр по категории.</p>
+</div>
+
+<div class="wrap">
+  <input class="search-box" type="text" id="search" placeholder="Поиск термина…" oninput="filterGloss(this.value)">
+  <div class="cat-tabs">
+    <button class="cat-tab on" data-cat="all" onclick="setCategory('all',this)">Все</button>
+    <button class="cat-tab" data-cat="trading" onclick="setCategory('trading',this)">Трейдинг</button>
+    <button class="cat-tab" data-cat="econ" onclick="setCategory('econ',this)">Экономические данные</button>
+  </div>
+  <div class="gloss-list" id="gloss-list"></div>
+  <div class="empty hidden" id="empty">Ничего не найдено</div>
+</div>
+
+<script>
+var TERMS_TRADING = [
+  ["ATH", "All-Time High — исторический максимум цены актива."],
+  ["Bear Market", "Падение рынка на 20%+ от недавнего максимума."],
+  ["Bull Market", "Рост рынка на 20%+ от недавнего минимума."],
+  ["Volatility / VIX", "Мера неопределённости цены. VIX — «индекс страха» S&P 500."],
+  ["Long / Short", "Long — ставка на рост. Short — ставка на падение."],
+  ["Stop-Loss", "Ордер закрытия позиции при достижении убытка."],
+  ["Take-Profit", "Ордер фиксации прибыли при достижении цели."],
+  ["Leverage / Плечо", "Торговля заёмными средствами. Увеличивает и прибыль, и убыток."],
+  ["Liquidity", "Насколько легко купить/продать актив без сдвига цены."],
+  ["Hedge", "Позиция, страхующая против риска другой позиции."],
+  ["Spread", "Разница между ценой покупки (ask) и продажи (bid)."],
+  ["Flash Crash", "Резкое падение цены за короткое время, часто с последующим восстановлением."],
+  ["Break of Structure (BOS)", "Пробой структуры рынка — свидетельство смены тренда или продолжения движения."],
+  ["Order Block (OB)", "Институциональная зона интереса, откуда крупный игрок входил в позицию."],
+  ["Fair Value Gap (FVG)", "Неэффективность цены — разрыв между свечами, куда рынок часто возвращается."],
+  ["RSI", "Relative Strength Index — осциллятор 0–100. Зоны перекупленности (>70) и перепроданности (<30)."],
+  ["MACD", "Moving Average Convergence Divergence — разница двух EMA + сигнальная линия."],
+  ["ATR", "Average True Range — средний истинный диапазон. Мера волатильности."],
+  ["Fibonacci Levels", "Уровни коррекции 23.6%, 38.2%, 50%, 61.8% — зоны поддержки/сопротивления внутри тренда."],
+  ["Liquidity Sweep", "Выход цены за ключевой уровень для «снятия» стоп-ордеров перед разворотом."],
+];
+
+var TERMS_ECON = [
+  ["NFP — Non-Farm Payrolls",
+   "Число новых рабочих мест в несельскохозяйственном секторе США. Выходит каждую первую пятницу месяца. Превышение прогноза укрепляет USD и усиливает ожидания подъёма ставки ФРС."],
+  ["CPI — Consumer Price Index",
+   "Индекс потребительских цен. Основной показатель инфляции США (рассчитывается BLS). Core CPI исключает еду и энергоносители. Выше прогноза → укрепление доллара."],
+  ["PPI — Producer Price Index",
+   "Индекс цен производителей. Отражает изменение отпускных цен — опережающий сигнал давления на CPI. Рост PPI обычно предшествует росту потребительской инфляции."],
+  ["PCE — Personal Consumption Expenditures",
+   "Предпочтительный инфляционный индикатор ФРС. Core PCE (без еды и энергии) — ключевой таргет ФРС (цель 2%). Учитывает реальные изменения в структуре потребления."],
+  ["GDP — Gross Domestic Product",
+   "Валовой внутренний продукт. Выходит в трёх редакциях: предварительная → вторая → финальная. Два квартала отрицательного роста подряд — техническая рецессия."],
+  ["PMI Manufacturing — Индекс деловой активности (производство)",
+   "Показывает настроения менеджеров по закупкам в промышленности. Порог: 50. Выше — расширение, ниже — сжатие. ISM Manufacturing альтернативно выходит от американского ISM."],
+  ["PMI Services — Индекс деловой активности (услуги)",
+   "Аналог PMI для сектора услуг. Порог: 50. Более значим для США (услуги ~70% ВВП). Устойчивое значение выше 55 — сигнал перегрева экономики."],
+  ["ISM — Institute for Supply Management",
+   "Американские индексы делового климата от ISM для производства и услуг. Компонента «новые заказы» — опережающий сигнал. ISM Manufacturing выходит в первый рабочий день месяца."],
+  ["Unemployment Rate — Уровень безработицы",
+   "Доля безработных от экономически активного населения. Публикуется вместе с NFP. ФРС таргетирует уровень около 4–4.5% (условная «полная занятость»)."],
+  ["Initial Jobless Claims — Первичные заявки на пособие",
+   "Еженедельная статистика по числу впервые обратившихся за пособием по безработице (каждый четверг). Рост выше 300 тыс. — тревожный сигнал для рынка труда."],
+  ["Continuing Claims — Продолжающиеся заявки",
+   "Число людей, продолжающих получать пособие по безработице. Выходит еженедельно с задержкой. Устойчивый рост указывает, что безработным сложнее находить новую работу."],
+  ["JOLTS — Job Openings",
+   "Число открытых вакансий в экономике США (Job Openings and Labor Turnover Survey). ФРС использует для оценки перегрева рынка труда. Число вакансий >> безработных → инфляционное давление."],
+  ["ADP Employment Change",
+   "Оценка изменения занятости в частном секторе от агентства ADP. Публикуется за 2 дня до NFP как предварительный ориентир. Корреляция с NFP умеренная."],
+  ["Retail Sales — Розничные продажи",
+   "Изменение объёма продаж в розничной торговле. Мера потребительской активности (~70% ВВП США). Core Retail Sales исключает авто. Выше прогноза → поддержка доллара."],
+  ["FOMC — Решение по процентной ставке ФРС",
+   "Заседание Комитета по открытым рынкам. 8 плановых заседаний в год. Помимо ставки важны dot plot и пресс-конференция главы ФРС. Hawkish тон → укрепление USD."],
+  ["EIA Crude Oil Inventories",
+   "Еженедельное изменение запасов нефти в США (среды). Рост запасов → давление на нефть. Сокращение → рост цены. API публикует предварительные данные во вторник вечером."],
+  ["EIA Natural Gas Storage",
+   "Еженедельное изменение запасов природного газа в США (четверги). Аномальное снижение в отопительный сезон → рост цены газа."],
+  ["Durable Goods Orders — Заказы на товары длительного пользования",
+   "Изменение новых заказов на товары со сроком службы >3 лет. Core Durable Goods (без авиатехники) лучше отражает базовые тенденции корпоративных инвестиций."],
+  ["Trade Balance / Current Account",
+   "Разница между экспортом и импортом товаров и услуг. Устойчивый дефицит создаёт спрос на иностранную валюту и давит на курс. Для USD важно сальдо с Китаем, ЕС и Японией."],
+  ["Housing Starts / Building Permits",
+   "Housing Starts — число начатых строительств. Building Permits — выданные разрешения (опережающий показатель будущего строительства). Оба чувствительны к ипотечным ставкам."],
+  ["Existing / Pending Home Sales",
+   "Число сделок купли-продажи на вторичном рынке жилья. Вторичный рынок значительно больше первичного. Снижение при росте ставок ипотеки — стандартный сигнал."],
+  ["Consumer Confidence (Conference Board)",
+   "Индекс доверия потребителей от Conference Board. Выходит в последний вторник месяца. Состоит из оценки текущей ситуации и ожиданий — опережающий показатель расходов."],
+  ["Michigan Consumer Sentiment / UoM",
+   "Индекс настроений потребителей Мичиганского университета. Два релиза в месяц. Компонента 5-летних инфляционных ожиданий внимательно читается ФРС."],
+  ["Factory Orders / Industrial Production",
+   "Factory Orders: новые заказы на промышленные товары. Industrial Production + Capacity Utilization (от ФРС): объём и загрузка производственных мощностей. Загрузка >80% — инфляционный риск."],
+  ["Challenger Job Cuts",
+   "Число объявленных сокращений персонала (Challenger, Gray & Christmas). Выходит в первый четверг месяца. Ранний сигнал о возможном ухудшении рынка труда перед NFP."],
+];
+
+var _activeCat = 'all';
+var list = document.getElementById('gloss-list');
+var emptyEl = document.getElementById('empty');
+
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildList(){
+  list.innerHTML = '';
+
+  if(_activeCat === 'all' || _activeCat === 'trading'){
+    if(_activeCat === 'all'){
+      var hdr = document.createElement('div');
+      hdr.className = 'gloss-cat-hdr';
+      hdr.textContent = 'Термины трейдера';
+      list.appendChild(hdr);
+    }
+    TERMS_TRADING.forEach(function(t){
+      list.appendChild(makeItem(t[0], t[1], 'trading'));
+    });
+  }
+
+  if(_activeCat === 'all' || _activeCat === 'econ'){
+    if(_activeCat === 'all'){
+      var hdr2 = document.createElement('div');
+      hdr2.className = 'gloss-cat-hdr';
+      hdr2.textContent = 'Экономические данные';
+      list.appendChild(hdr2);
+    }
+    TERMS_ECON.forEach(function(t){
+      list.appendChild(makeItem(t[0], t[1], 'econ'));
+    });
+  }
+}
+
+function makeItem(term, def, cat){
+  var div = document.createElement('div');
+  div.className = 'gloss-item';
+  div.dataset.cat = cat;
+  div.dataset.q = term.toLowerCase() + ' ' + def.toLowerCase();
+  div.innerHTML = '<div class="gloss-term">' + esc(term) + '</div>'
+    + '<div class="gloss-def">' + esc(def) + '</div>';
+  return div;
+}
+
+function setCategory(cat, btn){
+  _activeCat = cat;
+  document.querySelectorAll('.cat-tab').forEach(function(b){b.classList.remove('on');});
+  if(btn) btn.classList.add('on');
+  buildList();
+  filterGloss(document.getElementById('search').value);
+}
+
+function filterGloss(q){
+  q = q.toLowerCase().trim();
+  var items = list.querySelectorAll('.gloss-item');
+  var found = 0;
+  items.forEach(function(el){
+    var match = !q || el.dataset.q.includes(q);
+    el.classList.toggle('hidden', !match);
+    if(match) found++;
+  });
+  // Category headers: hide if all items in section are hidden
+  list.querySelectorAll('.gloss-cat-hdr').forEach(function(hdr){
+    var next = hdr.nextElementSibling;
+    var anyVisible = false;
+    while(next && !next.classList.contains('gloss-cat-hdr')){
+      if(!next.classList.contains('hidden') && next.classList.contains('gloss-item'))
+        anyVisible = true;
+      next = next.nextElementSibling;
+    }
+    hdr.style.display = anyVisible ? '' : 'none';
+  });
+  emptyEl.classList.toggle('hidden', found > 0);
+}
+
+buildList();
+</script>
+</body>
+</html>

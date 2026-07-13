@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Глоссарий — SBF Intelligence</title>
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/design.css">
+<style>
+:root{--cream:#FBF6EF;--paper:#FFFFFF;--line:#E7DFCF;--ink:#2B2B33;--muted:#8A8275;--gold:#C9A227;--up:#1e8e5a;--down:#c0392b;--nav:62px}
+*{box-sizing:border-box}
+body{margin:0;background:var(--cream);color:var(--ink);font-family:Montserrat,sans-serif;font-size:14px;
+  padding-bottom:calc(var(--nav) + env(safe-area-inset-bottom))}
+.gl-page{max-width:640px;margin:0 auto;padding:16px 12px 24px}
+.gl-hero{padding:16px 0 8px}
+.gl-hero h1{font-size:20px;font-weight:700;margin:0 0 4px}
+.gl-hero p{font-size:13px;color:var(--muted);margin:0}
+</style>
+</head>
+<body>
+<script src="/assets/sbf-header.js?v=11" defer></script>
+<div class="gl-page">
+  <div class="gl-hero">
+    <h1>Глоссарий</h1>
+    <p>Термины трейдинга и финансовых рынков · <a href="/" style="color:var(--gold)">← На главную</a></p>
+  </div>
+  <div id="glContainer"></div>
+</div>
+<script src="/assets/sbf-glossary.js?v=2"></script>
+<script>
+(function () {
+  var slug = (location.hash || '').replace('#', '').replace('gl-', '');
+  var container = document.getElementById('glContainer');
+  if (container && window.SBFGlossary) {
+    SBFGlossary.renderPage(container, slug || null);
+  }
+  // Re-render on hash change
+  window.addEventListener('hashchange', function () {
+    var s = (location.hash || '').replace('#', '').replace('gl-', '');
+    SBFGlossary.renderPage(container, s || null);
+  });
+}());
+</script>
+</body>
+</html>

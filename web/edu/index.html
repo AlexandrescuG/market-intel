@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SBF — Биржевая торговля: руководство</title>
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/design.css">
+<link rel="stylesheet" href="/edu/edu.css">
+<script src="/assets/sbf-header.js?v=11" defer></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{min-height:100vh;padding-bottom:40px}
+
+.top{display:flex;align-items:center;gap:14px;padding:12px 24px;
+  background:var(--paper);border-bottom:1px solid var(--line);
+  position:sticky;top:0;z-index:30;box-shadow:0 2px 12px rgba(43,43,51,.05)}
+.top .logo{width:36px;height:36px;object-fit:contain}
+.top b{font-size:14px;font-weight:700;letter-spacing:.3px}
+.top .back{margin-left:auto;font-family:'JetBrains Mono';font-size:11px;
+  color:var(--muted);text-decoration:none;letter-spacing:.5px}
+.top .back:hover{color:var(--gold)}
+
+.hero{padding:48px 24px 36px;text-align:center;max-width:680px;margin:0 auto}
+.hero .tag{font-family:'JetBrains Mono';font-size:10px;letter-spacing:2px;
+  text-transform:uppercase;color:var(--gold);margin-bottom:12px}
+.hero h1{font-size:clamp(26px,5vw,38px);font-weight:700;color:var(--ink);
+  line-height:1.2;margin-bottom:14px}
+.hero p{color:var(--muted);font-size:14px;line-height:1.7}
+
+.wrap{max-width:800px;margin:0 auto;padding:0 24px}
+
+.progress-wrap{background:var(--paper);border:1px solid var(--line);
+  border-radius:12px;padding:18px 22px;margin-bottom:28px;display:flex;
+  align-items:center;gap:16px;flex-wrap:wrap}
+.progress-wrap .label{font-size:12px;color:var(--muted);font-family:'JetBrains Mono'}
+.progress-wrap .bar{flex:1;min-width:120px;height:6px;background:var(--line);
+  border-radius:3px;overflow:hidden}
+.progress-wrap .bar-fill{height:100%;background:var(--gold);border-radius:3px;
+  transition:width .4s}
+.progress-wrap .pct{font-family:'JetBrains Mono';font-weight:700;font-size:13px;
+  color:var(--gold)}
+.progress-wrap .reset{font-family:'JetBrains Mono';font-size:10px;color:var(--muted);
+  border:none;background:none;cursor:pointer;text-decoration:underline;
+  text-underline-offset:3px}
+.progress-wrap .reset:hover{color:var(--ink)}
+
+.chapters{display:flex;flex-direction:column;gap:8px;margin-bottom:40px}
+.ch{display:flex;align-items:center;gap:14px;padding:16px 18px;
+  background:var(--paper);border:1px solid var(--line);border-radius:10px;
+  text-decoration:none;color:var(--ink);transition:all .15s;position:relative}
+.ch:hover{border-color:var(--gold);box-shadow:0 2px 12px rgba(201,162,39,.12);
+  transform:translateX(3px)}
+.ch.done{border-color:rgba(30,142,90,.3)}
+.ch.done::after{content:'✓';position:absolute;right:16px;
+  color:var(--up);font-weight:700;font-size:14px}
+.ch .num{font-family:'JetBrains Mono';font-size:11px;color:var(--gold);
+  font-weight:700;min-width:28px;letter-spacing:.5px}
+.ch .title{font-weight:600;font-size:14px;line-height:1.3}
+.ch .sub{font-size:11px;color:var(--muted);margin-top:2px}
+.ch .ico{font-size:20px;flex-shrink:0}
+
+.section-label{font-family:'JetBrains Mono';font-size:11px;letter-spacing:2px;
+  text-transform:uppercase;color:var(--muted);margin:24px 0 10px 2px}
+
+.disclaimer{text-align:center;font-family:'JetBrains Mono';font-size:10px;
+  color:var(--muted);line-height:1.7;padding:0 24px 40px;max-width:640px;margin:0 auto}
+@media(max-width:640px){
+  .hero{padding:28px 16px 20px}
+  .wrap{padding:0 12px}
+  .section-label{font-size:11px}
+  .ch{padding:14px 14px;gap:10px;min-height:44px}
+  .ch .title{font-size:13px}
+  .ch .num{font-size:11px}
+  .progress-wrap{padding:14px 16px;gap:10px}
+  .disclaimer{font-size:11px;padding:0 16px 32px}
+}
+</style>
+</head>
+<body>
+
+
+<div class="hero">
+  <div class="tag">Образовательный курс</div>
+  <h1>Биржевая торговля<br>Полное руководство</h1>
+  <p>15 глав о профессиональном трейдинге. Теория с реальными данными, интерактивы и связь с живым рынком.</p>
+</div>
+
+<div class="wrap">
+  <div class="progress-wrap">
+    <span class="label">Прогресс:</span>
+    <div class="bar"><div class="bar-fill" id="pbar" style="width:0%"></div></div>
+    <span class="pct" id="ppct">0 из 15</span>
+    <button class="reset" onclick="resetProgress()">сбросить</button>
+  </div>
+
+  <div class="section-label">Основы</div>
+  <div class="chapters" id="toc"></div>
+</div>
+
+<div class="section-label" style="max-width:800px;margin:24px auto 10px;padding:0 24px">Инструменты трейдера</div>
+<div class="wrap" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:32px">
+  <a class="ch" href="/#tech" style="text-decoration:none">
+    <span class="ico">📈</span>
+    <div>
+      <div class="num">Технический</div>
+      <div class="title">График + библиотека</div>
+      <div class="sub">29 паттернов и индикаторов с анимацией</div>
+    </div>
+  </a>
+  <a class="ch" href="/calendar" style="text-decoration:none">
+    <span class="ico">📅</span>
+    <div>
+      <div class="num">Календарь</div>
+      <div class="title">Эконом-события</div>
+      <div class="sub">FOMC, CPI, NFP и другие ключевые публикации</div>
+    </div>
+  </a>
+  <a class="ch" href="/edu/glossary" style="text-decoration:none">
+    <span class="ico">📖</span>
+    <div>
+      <div class="num">Глоссарий</div>
+      <div class="title">Словарь трейдера</div>
+      <div class="sub">23 ключевых термина с поиском</div>
+    </div>
+  </a>
+</div>
+
+<div class="disclaimer">
+  Материалы предназначены исключительно для образовательных целей.<br>
+  Не являются инвестиционной рекомендацией. SBF Company SRL.
+</div>
+
+<script>
+// tier: "free"|"pro" — флаг для будущего гейтинга, сейчас всё открыто
+const CHAPTERS = [
+  {n:1,  tier:"free", ico:"📖", title:"Биржевая торговля",         sub:"Введение, ориентация, путь инвестора/трейдера"},
+  {n:2,  tier:"free", ico:"🌍", title:"Глобальные Кукловоды",       sub:"Биржи мира, капитализации, ключевые игроки"},
+  {n:3,  tier:"free", ico:"🛡️", title:"Арсенал и Защита",           sub:"Risk/Reward, Stop-Loss, расчёт позиции"},
+  {n:4,  tier:"free", ico:"⚙️", title:"Ликвидность и Ордера",       sub:"Стакан, маркет-мейкеры, типы ордеров, проскальзывание"},
+  {n:5,  tier:"free", ico:"🌐", title:"Глобальные Часы",             sub:"Торговые сессии, AMD-цикл, перекрытие Лондон+NY"},
+  {n:6,  tier:"pro",  ico:"📰", title:"Пульс Новостей",              sub:"NFP, CPI, ФРС. Как фундаментал создаёт тренды"},
+  {n:7,  tier:"pro",  ico:"🐳", title:"Институциональный след",      sub:"Smart Money, Liquidity Sweep, Fair Value Gap"},
+  {n:8,  tier:"pro",  ico:"🌊", title:"Тренд и Циклы",               sub:"Структура рынка, HH/HL, торговля с трендом"},
+  {n:9,  tier:"pro",  ico:"📊", title:"Отчётности и Осцилляторы",   sub:"RSI, MACD, дивергенция, поиск разворотов"},
+  {n:10, tier:"pro",  ico:"🧠", title:"Психология и Паттерны",       sub:"Флаг, клин, двойная вершина, поведение толпы"},
+  {n:11, tier:"pro",  ico:"🔬", title:"Тёмные пулы и HFT",           sub:"Скрытая ликвидность, алготрейдинг, VWAP"},
+  {n:12, tier:"pro",  ico:"☁️", title:"Японская философия",           sub:"Ишимоку: Облако, Tenkan, Kijun, Chikou"},
+  {n:13, tier:"pro",  ico:"🎯", title:"Анатомия Свинга",              sub:"Свинг-трейдинг: стратегии от входа до выхода"},
+  {n:14, tier:"pro",  ico:"⚡", title:"Анатомия Скальпинга",          sub:"Скальпинг: сессии, тайминг, управление рисками"},
+  {n:15, tier:"pro",  ico:"🏆", title:"Проп-Трейдинг и Финал",       sub:"Профессиональная торговля, финальный экзамен"},
+];
+
+const DONE_KEY = 'sbf_edu_done';
+
+function getDone() {
+  try { return JSON.parse(localStorage.getItem(DONE_KEY) || '[]'); } catch { return []; }
+}
+
+function resetProgress() {
+  if (!confirm('Сбросить прогресс?')) return;
+  localStorage.removeItem(DONE_KEY);
+  render();
+}
+
+function render() {
+  const done = getDone();
+  const pct = Math.round(done.length / 15 * 100);
+  document.getElementById('pbar').style.width = pct + '%';
+  document.getElementById('ppct').textContent = done.length + ' из 15';
+
+  const toc = document.getElementById('toc');
+  toc.innerHTML = CHAPTERS.map(c => {
+    const isDone = done.includes(c.n);
+    const tierBadge = c.tier === 'pro'
+      ? `<span style="font-family:'JetBrains Mono';font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--gold);border:1px solid var(--gold);padding:1px 6px;border-radius:4px;margin-left:8px;opacity:.7">PRO</span>`
+      : '';
+    return `<a class="ch${isDone ? ' done' : ''}" href="/edu/b/${c.n}">
+      <span class="ico">${c.ico}</span>
+      <div>
+        <div class="num">Глава ${c.n.toString().padStart(2,'0')}${tierBadge}</div>
+        <div class="title">${c.title}</div>
+        <div class="sub">${c.sub}</div>
+      </div>
+    </a>`;
+  }).join('');
+}
+
+render();
+</script>
+<nav class="g-bottom-nav">
+  <a href="/" class="g-bn-item"><span class="g-bn-ico">📊</span><span class="g-bn-lbl">Сегодня</span></a>
+  <a href="/edu/" class="g-bn-item active"><span class="g-bn-ico">📚</span><span class="g-bn-lbl">Обучение</span></a>
+  <a href="/calendar" class="g-bn-item"><span class="g-bn-ico">📅</span><span class="g-bn-lbl">Календарь</span></a>
+</nav>
+</body>
+</html>
