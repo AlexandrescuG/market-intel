@@ -25,6 +25,29 @@
     document.documentElement.classList.add('sbf-embed');
   }
 
+  // ?autoheight=1 — используется только вкладкой «Сегодня» SBFAcademy Mini App:
+  // без этого iframe там был фиксированной высоты и скроллился ВНУТРИ себя,
+  // из-за чего скролл всей страницы-хоста не двигался (и завязанная на него
+  // логика — прячущаяся при скролле цитата дня — никогда не срабатывала).
+  // Сообщаем родителю реальную высоту контента, чтобы он растянул iframe
+  // под неё и скролл стал общим. Не включаем это по умолчанию для всех
+  // embed-страниц (Обучение/График/Глоссарий), чтобы не менять их поведение.
+  if (_inIframe && new URLSearchParams(location.search).get('autoheight') === '1') {
+    var _reportHeight = function () {
+      try {
+        window.parent.postMessage(
+          { type: 'sbf-resize', height: document.documentElement.scrollHeight },
+          'https://web.sbfconsult.com'
+        );
+      } catch (e) { /* ignore */ }
+    };
+    if ('ResizeObserver' in window) {
+      new ResizeObserver(_reportHeight).observe(document.documentElement);
+    } else {
+      window.addEventListener('load', _reportHeight);
+    }
+  }
+
   var path = location.pathname;
   var isMain     = path === '/' || path === '/index.html';
   var isCalendar = path === '/calendar' || path.startsWith('/edu/calendar');
