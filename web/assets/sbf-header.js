@@ -93,16 +93,6 @@
     '.sbf-right{margin-left:auto;display:flex;align-items:center;gap:18px;',
     'font-size:12px;font-family:"JetBrains Mono",monospace;}',
 
-    // Вход в личный кабинет (SBFAcademy) — только для десктопа: на мобильных
-    // редиректим на web.sbfconsult.com целиком (см. верх файла), так что
-    // до этой кнопки там просто не доходит. Своя CSS, не design.css/edu.css,
-    // т.к. они подключены не на всех страницах, а сам хедер — везде.
-    '.sbf-login-btn{font-family:Montserrat,system-ui,sans-serif;font-size:13px;',
-    'font-weight:700;color:#fff!important;background:var(--gold,#C9A227);',
-    'padding:7px 16px;border-radius:7px;text-decoration:none!important;',
-    'white-space:nowrap;transition:background .12s;}',
-    '.sbf-login-btn:hover{background:var(--gold-hover,#B8931F);}',
-
     '.sbf-lang-sw{display:flex;gap:2px;align-items:center;margin-left:8px;}',
     '.sbf-lang-sw a{font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:700;',
     'letter-spacing:1.5px;text-decoration:none;color:var(--muted);padding:4px 7px;',
@@ -198,7 +188,6 @@
     '    <div class="sbf-win"><span class="dot" id="liveDot"></span><span id="liveTxt">Live</span></div>',
     '    <div class="sbf-win"><span class="dot" id="winDot"></span><span id="winTxt">—</span></div>',
     '    <div id="clock">—</div>',
-    '    <a href="https://web.sbfconsult.com/" class="sbf-login-btn">Войти</a>',
     bookNum
       ? '    <div class="sbf-lang-sw">' +
         '<a href="/edu/b/' + bookNum + '"' + (bookLang === 'ru' ? ' class="active"' : '') + '>RU</a>' +

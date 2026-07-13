@@ -2,17 +2,6 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<script>
-// Мобильные посетители получают то же приложение, что и в Telegram Mini App
-// (с входом в аккаунт), вместо публичной версии сайта. Синхронно и в самом
-// начале head — чтобы не было видно мигания старой страницы перед уходом.
-// window.self===window.top искл. случай, когда САМА эта страница встроена
-// в iframe (Telegram Mini App грузит её через ?embed=1) — иначе редирект
-// сработал бы и внутри iframe, ломая вкладки Сегодня/Обучение/График.
-if (window.self === window.top && /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)) {
-  location.replace("https://web.sbfconsult.com/" + location.search);
-}
-</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Глоссарий — SBF Intelligence</title>
 <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
@@ -30,7 +19,7 @@ body{margin:0;background:var(--cream);color:var(--ink);font-family:Montserrat,sa
 </style>
 </head>
 <body>
-<script src="/assets/sbf-header.js?v=14" defer></script>
+<script src="/assets/sbf-header.js?v=13" defer></script>
 <div class="gl-page">
   <div class="gl-hero">
     <h1>Глоссарий</h1>
