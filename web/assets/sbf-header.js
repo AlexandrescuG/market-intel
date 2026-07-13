@@ -16,6 +16,15 @@
   // обрывала выполнение ДО инъекции CSS и ломала именно такие страницы.
   var _inIframe = window.self !== window.top;
 
+  // ?embed=1 — SBFAcademy Mini App iframe'ит эту страницу внутрь своих
+  // собственных вкладок (у которых уже есть свой нижний нав) — .g-bottom-nav
+  // здесь был бы вторым, дублирующим нав-баром. Сама шапка/тикер на
+  // не-главных страницах и так не рисуются в iframe (см. return ниже);
+  // .g-bottom-nav — единственное, что рендерится независимо от _inIframe.
+  if (new URLSearchParams(location.search).get('embed') === '1') {
+    document.documentElement.classList.add('sbf-embed');
+  }
+
   var path = location.pathname;
   var isMain     = path === '/' || path === '/index.html';
   var isCalendar = path === '/calendar' || path.startsWith('/edu/calendar');
@@ -125,7 +134,8 @@
     '.g-bn-item:hover{color:var(--ink);text-decoration:none;}',
     '.g-bn-ico{font-size:20px;line-height:1;}',
     '.g-bn-lbl{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.4px;',
-    'font-weight:600;text-transform:uppercase;}'
+    'font-weight:600;text-transform:uppercase;}',
+    '.sbf-embed .g-bottom-nav, .sbf-embed .sbf-mob-bar, .sbf-embed .sbf-fw-btn, .sbf-embed .sbf-fw-bubble{display:none!important;}'
   ].join('');
 
   var st = document.createElement('style');
