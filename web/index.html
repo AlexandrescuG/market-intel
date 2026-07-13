@@ -3,6 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+// ?embed=1 — для встраивания в iframe (SBFAcademy Mini App, вкладка «График»):
+// прячет свою шапку/тикер/переключатель Фундаментальный-Технический, т.к. снаружи
+// уже есть хостовый хедер и отдельная вкладка «Сегодня» с тем же фундаменталом.
+// Синхронный inline-скрипт в <head> — чтобы класс встал до первой отрисовки, без мигания.
+if (new URLSearchParams(location.search).get("embed") === "1") {
+  document.documentElement.classList.add("sbf-embed");
+}
+</script>
 <title>SBF Consult — Intelligence Terminal | Анализ рынка и сопровождение счёта</title>
 <meta name="description" content="SBF Consult: аналитика финансовых рынков в реальном времени. Сопровождение счёта, анализ рынка и подбор брокера. Офисы: Молдова, Казахстан, ЮАР, ОАЭ, Швейцария, Португалия.">
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
@@ -261,6 +270,11 @@ a:hover{text-decoration:underline;color:var(--glow)}
 @keyframes flashDown{0%,30%{color:var(--down)}100%{color:var(--ink)}}
 .fl-up{animation:flashUp .9s ease-out forwards}
 .fl-dn{animation:flashDown .9s ease-out forwards}
+
+/* embed=1 — см. inline-скрипт в head */
+.sbf-embed .top, .sbf-embed .strip, .sbf-embed .seg-wrap,
+.sbf-embed .sbf-fw-btn, .sbf-embed .sbf-fw-bubble, .sbf-embed .g-bottom-nav { display: none !important; }
+.sbf-embed .wrap { padding-top: 0; }
 </style>
 </head>
 <body>
