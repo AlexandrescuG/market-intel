@@ -81,6 +81,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);
 
 <script src="https://telegram.org/js/telegram-widget.js?22" async></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="/assets/sbf-auth.js?v=1"></script>
 <script>
 'use strict';
 
@@ -101,8 +102,7 @@ function _next() {
 }
 
 function _onAuthSuccess(d) {
-  localStorage.setItem('sbf_token', d.access_token || d.token);
-  if (d.refresh_token) localStorage.setItem('sbf_refresh', d.refresh_token);
+  sbfAuth.setTokens(d.access_token || d.token, d.refresh_token);
   window.location.href = _next();
 }
 
@@ -200,9 +200,8 @@ _renderGoogleButton($('google-login-btn'), 'onGoogleCredential');
 
 // Уже авторизован — сразу дальше
 (function() {
-  var t = localStorage.getItem('sbf_token');
-  if (!t) return;
-  fetch('/api/auth/me', { headers: { 'X-Auth-Token': t } })
+  if (!sbfAuth.isLoggedIn()) return;
+  sbfAuth.fetch('/api/auth/me')
     .then(function(r) { return r.json(); })
     .then(function(d) { if (d && d.id) window.location.href = _next(); })
     .catch(function() {});

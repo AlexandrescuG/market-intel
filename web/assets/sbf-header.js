@@ -423,10 +423,22 @@
 
 })();
 
+// Автозагрузка общего auth-клиента (sbf-auth.js) — ДО профиля и фидбека,
+// оба используют window.sbfAuth. async=false на всех трёх сохраняет порядок
+// выполнения (иначе динамически вставленные <script> по умолчанию async
+// и могут выполниться в любом порядке).
+(function () {
+  var s = document.createElement('script');
+  s.src = '/assets/sbf-auth.js?v=1';
+  s.async = false;
+  document.head.appendChild(s);
+})();
+
 // Автозагрузка модуля профиля
 (function () {
   var s = document.createElement('script');
   s.src = '/assets/sbf-profile.js?v=2';
+  s.async = false;
   document.head.appendChild(s);
 })();
 
@@ -434,5 +446,6 @@
 (function () {
   var s = document.createElement('script');
   s.src = '/assets/sbf-feedback.js?v=1';
+  s.async = false;
   document.head.appendChild(s);
 })();

@@ -379,10 +379,10 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);
   </div>
 </div>
 
+<script src="/assets/sbf-auth.js?v=1"></script>
 <script>
 'use strict';
 
-var _token = localStorage.getItem('sbf_token') || '';
 var _answers = {};
 var DRAFT_KEY = 'sbfSurveyDraft';
 
@@ -467,11 +467,11 @@ document.addEventListener('click', function(e) {
 
 // ── Отправка ─────────────────────────────────────────────────────────────────
 function submitSurvey() {
-  if (!_token) { showErr('Необходимо войти в аккаунт'); return; }
+  if (!sbfAuth.isLoggedIn()) { showErr('Необходимо войти в аккаунт'); return; }
 
-  fetch('/api/auth/onboarding', {
+  sbfAuth.fetch('/api/auth/onboarding', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'X-Auth-Token': _token },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ answers: _answers }),
   })
   .then(function(r) { return r.json(); })
@@ -543,7 +543,7 @@ function _esc(s) {
 // ── afterBlockC — вызывается после Блока C ───────────────────────────────────
 function afterBlockC() {
   _doneBlocks.add('C');
-  if (!_token) {
+  if (!sbfAuth.isLoggedIn()) {
     // Анонимный пользователь — переходит к регистрации
     goStep('Reg');
   } else {
@@ -608,9 +608,8 @@ function submitViaRegister() {
         : d.error);
       return;
     }
-    _token = d.token || '';
-    if (_token) {
-      localStorage.setItem('sbf_token', _token);
+    if (d.token) {
+      sbfAuth.setTokens(d.token, d.refresh_token);
       // Save first name for profile avatar
       var firstName = name.split(' ')[0];
       var existingProfile = JSON.parse(localStorage.getItem('sbf_profile') || '{}');
@@ -635,17 +634,17 @@ function goLogin() {
 
 // ── Инициализация ─────────────────────────────────────────────────────────────
 (function init() {
-  if (!_token) {
+  if (!sbfAuth.isLoggedIn()) {
     // Опросник доступен только для авторизованных — перенаправляем на регистрацию
     window.location.href = '/register.html';
     return;
   }
   // Проверяем сессию и статус опросника
-  fetch('/api/auth/survey-status', { headers: { 'X-Auth-Token': _token } })
+  sbfAuth.fetch('/api/auth/survey-status')
     .then(function(r) { return r.json(); })
     .then(function(d) {
       if (d.done) {
-        fetch('/api/auth/my-path', { headers: { 'X-Auth-Token': _token } })
+        sbfAuth.fetch('/api/auth/my-path')
           .then(function(r) { return r.json(); })
           .then(function(path) {
             renderResult({ path: path, pro_granted: !!d.pro_until, pro_until: d.pro_until });

@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Админ-панель — SBF</title>
+<style>
+:root{
+  --bg:#0f0e0c;--paper:#1a1917;--text:#f0ede4;--muted:#9ca3af;
+  --line:#2c2a26;--accent:#c9a227;--gold:#c9a227;--up:#16a34a;
+  --dn:#dc2626;--cream:#1e1c18;--soft:#252320;--radius:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);
+  color:var(--text);min-height:100vh}
+a{color:var(--gold);text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* Layout */
+#app{display:grid;grid-template-columns:320px 1fr;min-height:100vh}
+#sidebar{background:var(--paper);border-right:1px solid var(--line);
+  display:flex;flex-direction:column;overflow:hidden}
+#main{display:flex;flex-direction:column;overflow:hidden}
+
+/* Header */
+.adm-header{padding:14px 18px;display:flex;align-items:center;
+  gap:10px;border-bottom:1px solid var(--line);background:var(--paper);
+  grid-column:1/-1;height:52px;flex-shrink:0}
+.adm-logo{font-size:16px;font-weight:800;color:var(--gold);margin-right:auto}
+.adm-user{font-size:12px;color:var(--muted)}
+.adm-logout{font-size:12px;color:var(--muted);cursor:pointer;
+  border:none;background:none;padding:4px 8px}
+.adm-logout:hover{color:var(--dn)}
+
+/* Login gate */
+#loginGate{display:flex;align-items:center;justify-content:center;
+  min-height:100vh;flex-direction:column;gap:16px;padding:24px}
+.adm-login-card{background:var(--paper);border:1px solid var(--line);
+  border-radius:var(--radius);padding:28px 28px 24px;width:100%;max-width:340px}
+.adm-login-card h2{font-size:18px;font-weight:700;margin-bottom:4px}
+.adm-login-card p{font-size:13px;color:var(--muted);margin-bottom:18px}
+.adm-field{margin-bottom:12px}
+.adm-field label{display:block;font-size:12px;font-weight:600;margin-bottom:4px}
+.adm-field input{width:100%;padding:10px 12px;font-size:14px;
+  background:var(--cream);border:1px solid var(--line);border-radius:8px;
+  color:var(--text);outline:none;transition:border-color .15s}
+.adm-field input:focus{border-color:var(--gold)}
+.btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;
+  cursor:pointer;border:none;transition:opacity .15s}
+.btn-gold{background:var(--gold);color:#fff}
+.btn-gold:hover{opacity:.88}
+.btn-gold:disabled{opacity:.45;cursor:not-allowed}
+.btn-outline{background:transparent;border:1.5px solid var(--line);color:var(--text)}
+.btn-outline:hover{border-color:var(--gold)}
+.adm-err{font-size:12px;color:var(--dn);margin-top:8px;display:none}
+
+/* Sidebar */
+.adm-sidebar-header{padding:14px 18px 10px;border-bottom:1px solid var(--line)}
+.adm-sidebar-header h3{font-size:13px;font-weight:700;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.adm-filters{display:flex;flex-wrap:wrap;gap:6px}
+.adm-filter-chip{font-size:11px;padding:4px 10px;border-radius:20px;
+  border:1px solid var(--line);cursor:pointer;background:none;color:var(--muted);
+  transition:all .12s}
+.adm-filter-chip.active{background:var(--gold);color:#fff;border-color:var(--gold)}
+.adm-cluster-list{flex:1;overflow-y:auto;padding:8px}
+.adm-cluster-item{padding:12px 14px;border-radius:8px;cursor:pointer;
+  border:1px solid transparent;margin-bottom:6px;transition:background .12s}
+.adm-cluster-item:hover{background:var(--soft)}
+.adm-cluster-item.selected{background:var(--soft);border-color:var(--gold)}
+.adm-cluster-title{font-size:13px;font-weight:600;margin-bottom:4px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.adm-cluster-meta{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted)}
+.adm-weight-badge{background:var(--gold);color:#fff;border-radius:10px;
+  padding:1px 7px;font-size:11px;font-weight:700}
+.adm-status-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.adm-status-dot.new{background:#6b7280}
+.adm-status-dot.planned{background:#3b82f6}
+.adm-status-dot.done{background:#16a34a}
+.adm-status-dot.rejected{background:#dc2626}
+.adm-status-dot.grouped{background:#c9a227}
+.adm-empty{padding:24px;text-align:center;font-size:13px;color:var(--muted)}
+
+/* Main area */
+.adm-main-header{padding:16px 20px;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:10px;flex-shrink:0}
+.adm-main-header h2{font-size:15px;font-weight:700;flex:1;min-width:0;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.adm-status-btns{display:flex;gap:6px;flex-wrap:wrap}
+.adm-status-btn{font-size:11px;padding:4px 10px;border-radius:6px;
+  border:1.5px solid var(--line);background:none;cursor:pointer;
+  color:var(--muted);transition:all .12s}
+.adm-status-btn:hover{border-color:var(--gold);color:var(--gold)}
+.adm-status-btn.active{background:var(--gold);color:#fff;border-color:var(--gold)}
+.adm-action-btns{display:flex;gap:6px}
+.adm-action-btn{font-size:11px;padding:4px 10px;border-radius:6px;
+  border:1.5px solid var(--line);background:none;cursor:pointer;color:var(--text)}
+.adm-action-btn:hover{border-color:var(--gold)}
+.adm-feedback-list{flex:1;overflow-y:auto;padding:12px 20px}
+.adm-fb-card{background:var(--cream);border:1px solid var(--line);
+  border-radius:8px;padding:14px 16px;margin-bottom:10px}
+.adm-fb-header{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.adm-fb-kind{font-size:11px;font-weight:700;padding:2px 8px;
+  border-radius:10px;border:1px solid var(--line);color:var(--muted)}
+.adm-fb-level{font-size:11px;color:var(--gold);font-weight:700}
+.adm-fb-ts{font-size:10px;color:var(--muted);margin-left:auto}
+.adm-fb-comment{font-size:13px;line-height:1.5;margin-bottom:8px}
+.adm-fb-url{font-size:11px;color:var(--muted)}
+.adm-fb-screenshot{width:100%;max-height:140px;object-fit:cover;
+  border-radius:6px;margin-top:8px;cursor:pointer;border:1px solid var(--line)}
+.adm-fb-actions{display:flex;gap:6px;margin-top:8px}
+.adm-fb-split-btn{font-size:11px;padding:3px 8px;border-radius:5px;
+  border:1px solid var(--line);background:none;cursor:pointer;color:var(--muted)}
+.adm-fb-split-btn:hover{border-color:var(--gold);color:var(--gold)}
+
+/* Merge modal */
+.adm-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);
+  z-index:9999;align-items:center;justify-content:center}
+.adm-overlay.open{display:flex}
+.adm-modal{background:var(--paper);border:1px solid var(--line);
+  border-radius:var(--radius);padding:24px;width:min(400px,90vw)}
+.adm-modal h3{font-size:15px;font-weight:700;margin-bottom:12px}
+.adm-modal p{font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.5}
+.adm-modal-actions{display:flex;gap:8px}
+.adm-title-edit{width:100%;padding:8px 10px;font-size:13px;
+  background:var(--cream);border:1px solid var(--line);border-radius:6px;
+  color:var(--text);outline:none;margin-bottom:10px}
+.adm-title-edit:focus{border-color:var(--gold)}
+
+/* Unassigned tab */
+.adm-tab-bar{display:flex;gap:0;border-bottom:1px solid var(--line)}
+.adm-tab{flex:1;padding:10px 0;font-size:12px;font-weight:600;
+  text-align:center;cursor:pointer;border:none;background:none;
+  color:var(--muted);border-bottom:2px solid transparent;transition:all .12s}
+.adm-tab.active{color:var(--text);border-bottom-color:var(--gold)}
+.adm-unassigned-wrap{flex:1;overflow-y:auto;padding:12px 20px}
+.adm-unassigned-row{padding:10px 12px;border-radius:6px;background:var(--cream);
+  border:1px solid var(--line);margin-bottom:6px;cursor:pointer;
+  display:flex;align-items:center;gap:8px}
+.adm-unassigned-row:hover{border-color:var(--gold)}
+.adm-unassigned-row input[type=checkbox]{accent-color:var(--gold);flex-shrink:0}
+.adm-unassigned-txt{flex:1;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.adm-unassigned-actions{padding:12px 20px;border-top:1px solid var(--line);
+  display:flex;gap:8px;flex-shrink:0}
+
+/* Placeholder */
+.adm-placeholder{display:flex;flex-direction:column;align-items:center;
+  justify-content:center;flex:1;gap:12px;color:var(--muted)}
+.adm-placeholder svg{width:48px;height:48px;opacity:.2}
+.adm-placeholder p{font-size:13px}
+
+/* Screenshot modal */
+.adm-img-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);
+  z-index:10000;align-items:center;justify-content:center;cursor:pointer}
+.adm-img-modal.open{display:flex}
+.adm-img-modal img{max-width:95vw;max-height:95vh;border-radius:8px}
+
+@media(max-width:700px){
+  #app{grid-template-columns:1fr}
+  #sidebar{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- Login gate -->
+<div id="loginGate">
+  <div class="adm-login-card">
+    <h2>Войти в админ-панель</h2>
+    <p>Доступ только для команды</p>
+    <div class="adm-field">
+      <label>Email</label>
+      <input type="email" id="loginEmail" autocomplete="email" placeholder="admin@sbf.ru">
+    </div>
+    <div class="adm-field">
+      <label>Пароль</label>
+      <input type="password" id="loginPwd" placeholder="••••••••">
+    </div>
+    <button class="btn btn-gold" style="width:100%" id="loginBtn" onclick="doLogin()">Войти</button>
+    <div class="adm-err" id="loginErr"></div>
+  </div>
+</div>
+
+<!-- Admin app -->
+<div id="app" style="display:none">
+  <!-- Sidebar -->
+  <div id="sidebar">
+    <div class="adm-sidebar-header">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <span style="font-size:16px;font-weight:800;color:var(--gold)">SBF Admin</span>
+        <span class="adm-user" id="sideUserName"></span>
+      </div>
+      <h3>Кластеры</h3>
+      <div class="adm-filters" id="filterBar">
+        <button class="adm-filter-chip active" data-status="">Все</button>
+        <button class="adm-filter-chip" data-status="new">Новые</button>
+        <button class="adm-filter-chip" data-status="planned">В плане</button>
+        <button class="adm-filter-chip" data-status="done">Готово</button>
+        <button class="adm-filter-chip" data-status="rejected">Отклонено</button>
+      </div>
+    </div>
+    <div class="adm-cluster-list" id="clusterList"></div>
+  </div>
+
+  <!-- Main -->
+  <div id="main">
+    <div class="adm-tab-bar">
+      <button class="adm-tab active" id="tabClusters" onclick="showTab('clusters')">Кластеры</button>
+      <button class="adm-tab" id="tabUnassigned" onclick="showTab('unassigned')">Без кластера <span id="unassignedCount"></span></button>
+      <button class="adm-tab" id="tabCopy" onclick="showTab('copy')">Тексты сайта</button>
+    </div>
+
+    <!-- Cluster detail -->
+    <div id="paneClusters" style="display:flex;flex-direction:column;flex:1;min-height:0">
+      <div id="clusterDetail" style="display:flex;flex-direction:column;flex:1;min-height:0">
+        <div class="adm-placeholder">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+            <rect x="3" y="14" width="7" height="7" rx="1"/><path d="M17.5 14v3m0 0v3m0-3h3m-3 0h-3"/>
+          </svg>
+          <p>Выберите кластер слева</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Unassigned -->
+    <div id="paneUnassigned" style="display:none;flex-direction:column;flex:1;min-height:0">
+      <div class="adm-unassigned-wrap" id="unassignedList"></div>
+      <div class="adm-unassigned-actions" id="unassignedActions" style="display:none">
+        <button class="btn btn-gold btn-sm" id="btnGroupSelected" onclick="groupSelected()">Сгруппировать выбранные</button>
+        <span style="font-size:12px;color:var(--muted);margin:auto 0" id="selCount"></span>
+      </div>
+    </div>
+
+    <!-- Copy texts -->
+    <div id="paneCopy" style="display:none;flex-direction:column;flex:1;min-height:0">
+      <div style="flex:1;overflow-y:auto;padding:16px 20px" id="copyList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Merge modal -->
+<div class="adm-overlay" id="mergeModal">
+  <div class="adm-modal">
+    <h3>Слить кластеры</h3>
+    <p>Выберите целевой кластер. Все заявки из текущего переедут туда.</p>
+    <select id="mergeTarget" style="width:100%;padding:8px;background:var(--cream);
+      border:1px solid var(--line);border-radius:6px;color:var(--text);
+      font-size:13px;margin-bottom:14px"></select>
+    <div class="adm-modal-actions">
+      <button class="btn btn-gold" onclick="confirmMerge()">Слить</button>
+      <button class="btn btn-outline" onclick="closeMerge()">Отмена</button>
+    </div>
+  </div>
+</div>
+
+<!-- Rename modal -->
+<div class="adm-overlay" id="renameModal">
+  <div class="adm-modal">
+    <h3>Переименовать кластер</h3>
+    <input type="text" class="adm-title-edit" id="renameTitleInput" placeholder="Заголовок…">
+    <div class="adm-modal-actions">
+      <button class="btn btn-gold" onclick="confirmRename()">Сохранить</button>
+      <button class="btn btn-outline" onclick="closeRename()">Отмена</button>
+    </div>
+  </div>
+</div>
+
+<!-- Group modal -->
+<div class="adm-overlay" id="groupModal">
+  <div class="adm-modal">
+    <h3>Создать кластер</h3>
+    <input type="text" class="adm-title-edit" id="groupTitleInput" placeholder="Заголовок кластера…">
+    <div class="adm-modal-actions">
+      <button class="btn btn-gold" onclick="confirmGroup()">Создать</button>
+      <button class="btn btn-outline" onclick="closeGroup()">Отмена</button>
+    </div>
+  </div>
+</div>
+
+<!-- Screenshot lightbox -->
+<div class="adm-img-modal" id="imgModal" onclick="document.getElementById('imgModal').classList.remove('open')">
+  <img id="imgModalSrc" src="" alt="">
+</div>
+
+<script src="/assets/sbf-auth.js?v=1"></script>
+<script src="/assets/sbf-admin.js"></script>
+</body>
+</html>

@@ -170,6 +170,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);
   </div>
 </div>
 
+<script src="/assets/sbf-auth.js?v=1"></script>
 <script>
 'use strict';
 
@@ -231,7 +232,7 @@ function doRegister() {
       btn.textContent = 'Зарегистрироваться';
       return showErr(d.error === 'age_gate' ? 'Функционал доступен с 18 лет' : d.error);
     }
-    localStorage.setItem('sbf_token', d.token);
+    sbfAuth.setTokens(d.token, d.refresh_token);
     localStorage.setItem('sbf_uid', d.user_id);
     window.location.href = '/journal.html';
   })
@@ -244,9 +245,8 @@ function doRegister() {
 
 // Если уже авторизован — сразу в журнал
 (function() {
-  var t = localStorage.getItem('sbf_token');
-  if (!t) return;
-  fetch('/api/auth/me', { headers: { 'X-Auth-Token': t } })
+  if (!sbfAuth.isLoggedIn()) return;
+  sbfAuth.fetch('/api/auth/me')
     .then(function(r) { return r.json(); })
     .then(function(d) { if (d && d.id) window.location.href = '/journal.html'; })
     .catch(function() {});

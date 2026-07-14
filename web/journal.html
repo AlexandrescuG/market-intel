@@ -13,7 +13,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/design.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script src="/assets/sbf-header.js?v=13" defer></script>
+<script src="/assets/sbf-header.js?v=14" defer></script>
 
 <style>
 :root{--cream:#FBF6EF;--paper:#FFFFFF;--soft:#FCFAF5;--line:#E7DFCF;--ink:#2B2B33;
@@ -2025,15 +2025,14 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
   'use strict';
 
   /* ─── Helpers ─── */
-  function _jwt() {
-    var k = ['sbf_jwt','sbf_token','token'];
-    for (var i = 0; i < k.length; i++) {
-      var v = localStorage.getItem(k[i]);
-      if (v) return v;
-    }
-    return '';
-  }
-  function _authHdr() { return { 'Authorization': 'Bearer ' + _jwt(), 'Content-Type': 'application/json' }; }
+  // Токен и заголовок теперь через sbfAuth (см. assets/sbf-auth.js) — раньше
+  // _authHdr() слал ТОЛЬКО Authorization: Bearer, а сервер читал ТОЛЬКО
+  // X-Auth-Token (см. serve.py:_auth_token) -- всё в этом IIFE (TZ-детект,
+  // MT4-импорт, cooldown, review, analytics x2, prestige) было из-за этого
+  // молча сломано. sbfAuth.fetch() ниже добавляет оба заголовка и сам
+  // обновляет токен на 401.
+  function _jwt() { return window.sbfAuth ? sbfAuth.token() : ''; }
+  function _authHdr() { return { 'Content-Type': 'application/json' }; }
   function _fmtDate(iso) {
     if (!iso) return '—';
     var d = new Date(iso);
@@ -2045,15 +2044,19 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
     try {
       var tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
       if (!tz) return;
-      fetch('/api/auth/tz', {
+      sbfAuth.fetch('/api/auth/tz', {
         method: 'POST',
         headers: _authHdr(),
         body: JSON.stringify({ tz: tz })
       }).catch(function () {});
     } catch (_) {}
   }
-  /* Send TZ once per session after auth */
-  if (_jwt()) detectAndSendTZ();
+  /* Send TZ once per session after auth. This inline script runs synchronously
+     during parsing -- BEFORE sbf-header.js (defer) has had a chance to inject
+     sbf-auth.js -- so window.sbfAuth may not exist yet here. Defer the initial
+     check to 'load' (fires after all defer scripts) rather than calling it
+     immediately; _jwt() itself still degrades safely (empty string) either way. */
+  window.addEventListener('load', function () { if (_jwt()) detectAndSendTZ(); });
   document.addEventListener('sbf:auth:login', detectAndSendTZ);
 
   /* ══════════════════════════════════════════════════════════
@@ -2139,7 +2142,7 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
       var reader = new FileReader();
       reader.onload = function (ev) {
         var b64 = btoa(String.fromCharCode.apply(null, new Uint8Array(ev.target.result)));
-        fetch('/api/journal/import', {
+        sbfAuth.fetch('/api/journal/import', {
           method: 'POST',
           headers: Object.assign({}, _authHdr(), { 'X-Filename': _mtSelFile.name }),
           body: JSON.stringify({ data: b64, broker_tz_offset: tz })
@@ -2189,7 +2192,7 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
 
   function loadCooldown() {
     if (!_jwt()) return;
-    fetch('/api/alerts/cooldown/active', { headers: _authHdr() })
+    sbfAuth.fetch('/api/alerts/cooldown/active', { headers: _authHdr() })
       .then(function (r) { return r.json(); })
       .then(function (d) {
         var cd = d && d.active;
@@ -2210,7 +2213,7 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
   window.SBFJournal.overrideCooldown = function () {
     if (!_activeCooldown) return;
     if (!confirm('Записать сделку и завершить стоп-день?')) return;
-    fetch('/api/alerts/cooldown/break', {
+    sbfAuth.fetch('/api/alerts/cooldown/break', {
       method: 'POST',
       headers: _authHdr(),
       body: JSON.stringify({})
@@ -2221,7 +2224,7 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
   };
 
   window.SBFJournal.acceptCooldown = function (alertId, trigger) {
-    fetch('/api/alerts/cooldown', {
+    sbfAuth.fetch('/api/alerts/cooldown', {
       method: 'POST',
       headers: _authHdr(),
       body: JSON.stringify({ accept: true, trigger: trigger || 'loss_streak', alert_id: alertId })
@@ -2232,7 +2235,7 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
   };
 
   window.SBFJournal.rejectCooldown = function (alertId) {
-    fetch('/api/alerts/cooldown', {
+    sbfAuth.fetch('/api/alerts/cooldown', {
       method: 'POST',
       headers: _authHdr(),
       body: JSON.stringify({ accept: false, alert_id: alertId })
@@ -2266,7 +2269,7 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
       var q2 = (_debQ2 && _debQ2.value) || '';
       var q3 = (_debQ3 && _debQ3.value) || '';
       _debBtn.disabled = true;
-      fetch('/api/alerts/debrief', {
+      sbfAuth.fetch('/api/alerts/debrief', {
         method: 'POST',
         headers: _authHdr(),
         body: JSON.stringify({ alert_id: _pendingAlertId, q1: q1, q2: q2, q3: q3 })
@@ -2311,7 +2314,7 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
   function loadWeeklyReview() {
     if (!_jwt() || !_revWrap) return;
     var week = _isoWeek();
-    fetch('/api/journal/review/current', { headers: _authHdr() })
+    sbfAuth.fetch('/api/journal/review/current', { headers: _authHdr() })
       .then(function (r) { return r.json(); })
       .then(function (d) {
         _revWrap.style.display = 'block';
@@ -2346,7 +2349,7 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
       var text = (_revText && _revText.value) || '';
       var week = _isoWeek();
       _revBtn.disabled = true;
-      fetch('/api/journal/review', {
+      sbfAuth.fetch('/api/journal/review', {
         method: 'POST',
         headers: _authHdr(),
         body: JSON.stringify({ week_iso: week, reflection: text })
@@ -2384,7 +2387,7 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
     if (!_jwt() || !_anSection) return;
     _anSection.style.display = 'block';
 
-    fetch('/api/journal/analytics/discipline-cost?period=' + _anPeriod, { headers: _authHdr() })
+    sbfAuth.fetch('/api/journal/analytics/discipline-cost?period=' + _anPeriod, { headers: _authHdr() })
       .then(function (r) { return r.json(); })
       .then(function (d) {
         if (d.insufficient_data) {
@@ -2405,7 +2408,7 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
         }
       }).catch(function () {});
 
-    fetch('/api/journal/analytics/setups?period=' + _anPeriod, { headers: _authHdr() })
+    sbfAuth.fetch('/api/journal/analytics/setups?period=' + _anPeriod, { headers: _authHdr() })
       .then(function (r) { return r.json(); })
       .then(function (rows) {
         if (!_anTbody) return;
@@ -2445,7 +2448,7 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
   if (_prestigeBtn) {
     _prestigeBtn.addEventListener('click', function () {
       if (!confirm('Сбросить XP и уровень до 1? Активируется только при уровне ≥ 8.')) return;
-      fetch('/api/auth/prestige', { method: 'POST', headers: _authHdr(), body: '{}' })
+      sbfAuth.fetch('/api/auth/prestige', { method: 'POST', headers: _authHdr(), body: '{}' })
         .then(function (r) { return r.json(); })
         .then(function (d) {
           if (d.error) {
