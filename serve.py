@@ -496,69 +496,79 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 
     def do_PUT(self):
         path_clean = self.path.split("?")[0]
+        user_id = self._current_user_id()
         if re.match(r"^/api/journal/setups/\d+$", path_clean):
             setup_id = int(path_clean.split("/")[-1])
-            self._handle_setups_update(setup_id)
+            self._handle_setups_update(setup_id, user_id)
         else:
             self._send_json({"error": "not found"}, 404)
 
     def do_DELETE(self):
         path_clean = self.path.split("?")[0]
+        # См. do_GET/do_POST -- та же правка: раньше ни одно из этих удалений
+        # не резолвило пользователя вообще, все они молча работали над общим
+        # "default" (см. delete_trade и т.п. -- все они уже принимали user_id
+        # и фильтровали DELETE ... WHERE id=? AND user_id=?, параметр просто
+        # никогда не передавался).
+        user_id = self._current_user_id()
         if re.match(r"^/api/journal/trades/\d+$", path_clean):
             trade_id = int(path_clean.split("/")[-1])
-            ok = journal_db.delete_trade(trade_id)
+            ok = journal_db.delete_trade(trade_id, user_id)
             self._send_json({"ok": ok})
         elif re.match(r"^/api/journal/alerts/rules/\d+$", path_clean):
             rule_id = int(path_clean.split("/")[-1])
-            self._send_json({"ok": journal_alerts.delete_rule(rule_id)})
+            self._send_json({"ok": journal_alerts.delete_rule(rule_id, user_id)})
         elif re.match(r"^/api/journal/alerts/subscriptions/\d+$", path_clean):
             sub_id = int(path_clean.split("/")[-1])
-            self._send_json({"ok": journal_alerts.delete_subscription(sub_id)})
+            self._send_json({"ok": journal_alerts.delete_subscription(sub_id, user_id)})
         elif re.match(r"^/api/journal/watchlist/[A-Z0-9]+$", path_clean):
             symbol = path_clean.split("/")[-1]
-            ok = journal_brief.remove_from_watchlist(symbol)
+            ok = journal_brief.remove_from_watchlist(symbol, user_id)
             if ok:
                 journal_brief.invalidate_cache()
             self._send_json({"ok": ok})
         elif re.match(r"^/api/journal/setups/\d+$", path_clean):
             setup_id = int(path_clean.split("/")[-1])
-            self._send_json({"ok": journal_setups.delete_setup(setup_id)})
+            self._send_json({"ok": journal_setups.delete_setup(setup_id, user_id)})
         elif re.match(r"^/api/journal/checklist/items/\d+$", path_clean):
             item_id = int(path_clean.split("/")[-1])
-            self._send_json({"ok": journal_tilt.delete_checklist_item(item_id)})
+            self._send_json({"ok": journal_tilt.delete_checklist_item(item_id, user_id)})
         elif re.match(r"^/api/journal/goals/\d+$", path_clean):
             goal_id = int(path_clean.split("/")[-1])
-            self._send_json({"ok": journal_goals.delete_goal(goal_id)})
+            self._send_json({"ok": journal_goals.delete_goal(goal_id, user_id)})
         elif re.match(r"^/api/account/broker-links/\d+$", path_clean):
             link_id = int(path_clean.split("/")[-1])
-            self._send_json({"ok": journal_account.delete_broker_link(link_id)})
+            self._send_json({"ok": journal_account.delete_broker_link(link_id, user_id)})
         else:
             self._send_json({"error": "not found"}, 404)
 
     def do_POST(self):
         path_clean = self.path.split("?")[0]
+        # См. do_GET -- тот же системный пробел (почти каждая journal_*-ветка
+        # ниже писала/читала под "default", а не под реально залогиненного).
+        user_id = self._current_user_id()
         if path_clean == "/api/ingest/bars":
             self._handle_ingest_bars()
         elif path_clean == "/api/journal/trades":
-            self._handle_journal_add_trade()
+            self._handle_journal_add_trade(user_id)
         elif path_clean == "/api/journal/import":
             self._handle_mt_import()
         elif path_clean == "/api/journal/import/csv":
-            self._handle_journal_import_csv()
+            self._handle_journal_import_csv(user_id)
         elif path_clean == "/api/journal/import/ocr":
-            self._handle_journal_import_ocr()
+            self._handle_journal_import_ocr(user_id)
         elif path_clean == "/api/journal/accounts":
-            self._handle_journal_save_account()
+            self._handle_journal_save_account(user_id)
         elif path_clean == "/api/journal/meta":
             self._handle_journal_save_meta()
         elif path_clean == "/api/journal/discipline/config":
-            self._handle_discipline_save_config()
+            self._handle_discipline_save_config(user_id)
         elif path_clean == "/api/journal/discipline/eval":
-            self._handle_discipline_save_eval()
+            self._handle_discipline_save_eval(user_id)
         elif path_clean == "/api/journal/discipline/preset":
-            self._handle_discipline_apply_preset()
+            self._handle_discipline_apply_preset(user_id)
         elif path_clean == "/api/journal/alerts/rules":
-            self._handle_alerts_add_rule()
+            self._handle_alerts_add_rule(user_id)
         elif path_clean == "/api/journal/alerts/subscriptions":
             self._handle_alerts_save_subscription()
         elif re.match(r"^/api/journal/alerts/rules/\d+/toggle$", path_clean):
@@ -569,9 +579,9 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         elif path_clean == "/api/journal/alerts/check":
             self._handle_alerts_behavioral_check()
         elif path_clean == "/api/journal/watchlist":
-            self._handle_brief_add_watchlist()
+            self._handle_brief_add_watchlist(user_id)
         elif path_clean == "/api/journal/setups":
-            self._handle_setups_create()
+            self._handle_setups_create(user_id)
         elif re.match(r"^/api/journal/setups/\d+/link-trade$", path_clean):
             setup_id = int(path_clean.split("/")[-2])
             self._handle_setups_link_trade(setup_id)
@@ -579,51 +589,51 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             setup_id = int(path_clean.split("/")[-2])
             self._handle_setups_update_status(setup_id)
         elif path_clean == "/api/journal/checklist/items":
-            self._handle_checklist_add_item()
+            self._handle_checklist_add_item(user_id)
         elif re.match(r"^/api/journal/checklist/items/\d+/toggle$", path_clean):
             item_id = int(path_clean.split("/")[-2])
-            self._send_json({"ok": journal_tilt.toggle_checklist_item(item_id)})
+            self._send_json({"ok": journal_tilt.toggle_checklist_item(item_id, user_id)})
         elif path_clean == "/api/journal/checklist/run":
-            self._handle_checklist_run()
+            self._handle_checklist_run(user_id)
         elif re.match(r"^/api/journal/checklist/runs/\d+/link-trade$", path_clean):
             run_id = int(path_clean.split("/")[-2])
             self._handle_checklist_link_trade(run_id)
         elif path_clean == "/api/journal/tilt/check":
-            self._send_json(journal_tilt.run_tilt_check())
+            self._send_json(journal_tilt.run_tilt_check(user_id))
         # ── Part 8: Gamification ──
         elif path_clean == "/api/journal/gamification/xp":
-            self._handle_gamification_award_xp()
+            self._handle_gamification_award_xp(user_id)
         elif path_clean == "/api/journal/flashcards/review":
-            self._handle_flashcard_review()
+            self._handle_flashcard_review(user_id)
         elif path_clean == "/api/journal/course/complete":
-            self._handle_course_complete()
+            self._handle_course_complete(user_id)
         elif path_clean.startswith("/api/journal/course/") and path_clean.endswith("/complete"):
             chapter_n = int(path_clean.split("/")[-2])
-            self._send_json(journal_gamification.complete_chapter(chapter_n))
+            self._send_json(journal_gamification.complete_chapter(chapter_n, user_id))
         elif path_clean == "/api/journal/streaks/freeze":
-            self._handle_streak_freeze()
+            self._handle_streak_freeze(user_id)
         elif path_clean == "/api/journal/quests/event":
-            self._handle_quest_event()
+            self._handle_quest_event(user_id)
         elif path_clean == "/api/journal/achievements/check":
-            newly = journal_gamification.check_achievements()
+            newly = journal_gamification.check_achievements(user_id)
             self._send_json({"newly_unlocked": newly})
         # ── Part 9: Goals & Seasons ──
         elif path_clean == "/api/journal/goals":
-            self._handle_goal_create()
+            self._handle_goal_create(user_id)
         elif re.match(r"^/api/journal/goals/preset/\w+$", path_clean):
             code = path_clean.split("/")[-1]
-            self._send_json(journal_goals.add_goal_from_preset(code))
+            self._send_json(journal_goals.add_goal_from_preset(code, user_id))
         elif path_clean == "/api/journal/seasons/close":
             self._handle_season_close()
         # ── Part 10: Account Hub ──
         elif path_clean == "/api/account/referral/use":
-            self._handle_referral_use()
+            self._handle_referral_use(user_id)
         elif path_clean == "/api/account/broker-links":
-            self._handle_broker_link_add()
+            self._handle_broker_link_add(user_id)
         elif path_clean == "/api/account/delete-request":
-            self._send_json(journal_account.request_account_deletion())
+            self._send_json(journal_account.request_account_deletion(user_id))
         elif path_clean == "/api/account/delete-cancel":
-            self._send_json({"ok": journal_account.cancel_deletion_request()})
+            self._send_json({"ok": journal_account.cancel_deletion_request(user_id)})
         # ── §0.3 Web Push ──
         elif path_clean == "/api/push/subscribe":
             self._handle_push_subscribe()
@@ -737,22 +747,29 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 
     def do_GET(self):
         path_clean = self.path.split("?")[0]
+        # Единая точка резолва пользователя для всего GET -- раньше почти каждая
+        # journal_*-ветка ниже вызывала функцию без user_id вообще, из-за чего
+        # ВСЕ данные (сделки/дисциплина/геймификация/цели/...) читались из общего
+        # "default", независимо от того, кто реально залогинен (см. коммит,
+        # добавляющий SBFAcademy-мост -- без этой правки мост не был бы виден
+        # нигде в самом журнале).
+        user_id = self._current_user_id()
         if self.path.startswith("/api/quotes"):
             self._handle_quotes()
         elif path_clean == "/api/journal/trades":
-            self._handle_journal_list_trades()
+            self._handle_journal_list_trades(user_id)
         elif path_clean == "/api/journal/equity-curve":
-            self._send_json(journal_db.equity_curve())
+            self._send_json(journal_db.equity_curve(user_id))
         elif path_clean == "/api/journal/stats":
-            self._send_json(journal_db.get_stats())
+            self._send_json(journal_db.get_stats(user_id))
         elif path_clean == "/api/journal/accounts":
-            self._send_json(journal_db.list_investor_accounts())
+            self._send_json(journal_db.list_investor_accounts(user_id))
         elif path_clean == "/api/journal/behavioral":
-            self._send_json(journal_meta.get_behavioral_data())
+            self._send_json(journal_meta.get_behavioral_data(user_id))
         elif path_clean == "/api/journal/discipline":
-            self._send_json(journal_discipline.get_discipline_data())
+            self._send_json(journal_discipline.get_discipline_data(user_id))
         elif path_clean == "/api/journal/discipline/config":
-            self._send_json(journal_discipline.get_config())
+            self._send_json(journal_discipline.get_config(user_id))
         elif path_clean.startswith("/api/journal/discipline/eval/"):
             trade_id = int(path_clean.split("/")[-1])
             self._send_json(journal_discipline.get_trade_eval(trade_id))
@@ -761,83 +778,84 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             m = journal_meta.get_meta(trade_id)
             self._send_json(m or {})
         elif path_clean == "/api/journal/alerts/rules":
-            self._send_json(journal_alerts.list_rules())
+            self._send_json(journal_alerts.list_rules(user_id))
         elif path_clean == "/api/journal/alerts/subscriptions":
-            self._send_json(journal_alerts.list_subscriptions())
+            self._send_json(journal_alerts.list_subscriptions(user_id))
         elif path_clean == "/api/journal/alerts/notifications":
-            self._send_json(journal_alerts.get_pending_notifications())
+            self._send_json(journal_alerts.get_pending_notifications(user_id))
         elif path_clean == "/api/journal/brief":
-            self._send_json(journal_brief.get_brief())
+            self._send_json(journal_brief.get_brief(user_id))
         elif path_clean == "/api/journal/watchlist":
             self._send_json({
-                "watchlist": journal_brief.get_watchlist(),
+                "watchlist": journal_brief.get_watchlist(user_id),
                 "available": journal_brief.get_available_symbols(),
             })
         elif path_clean == "/api/journal/setups":
             params = parse_qs(urlparse(self.path).query)
             self._send_json(journal_setups.list_setups(
+                user_id=user_id,
                 symbol=params.get("symbol", [None])[0],
                 status=params.get("status", [None])[0],
                 limit=min(int(params.get("limit", ["50"])[0]), 200),
                 offset=int(params.get("offset", ["0"])[0]),
             ))
         elif path_clean == "/api/journal/setups/playbook-stats":
-            self._send_json(journal_setups.get_playbook_stats())
+            self._send_json(journal_setups.get_playbook_stats(user_id))
         elif re.match(r"^/api/journal/setups/\d+$", path_clean):
             setup_id = int(path_clean.split("/")[-1])
-            setup = journal_setups.get_setup(setup_id)
+            setup = journal_setups.get_setup(setup_id, user_id)
             self._send_json(setup or {}, 200 if setup else 404)
         elif path_clean == "/api/journal/checklist":
-            recent = journal_tilt.get_recent_run()
+            recent = journal_tilt.get_recent_run(user_id)
             self._send_json({
-                "items": journal_tilt.get_checklist_items(),
+                "items": journal_tilt.get_checklist_items(user_id),
                 "recent_run": recent,
             })
         elif path_clean == "/api/journal/checklist/last-run":
-            self._send_json(journal_tilt.get_recent_run() or {})
+            self._send_json(journal_tilt.get_recent_run(user_id) or {})
         elif path_clean == "/api/journal/tilt":
-            self._send_json(journal_tilt.run_tilt_check())
+            self._send_json(journal_tilt.run_tilt_check(user_id))
         elif path_clean == "/api/journal/tilt/heatmap":
-            self._send_json(journal_tilt.get_tilt_heatmap())
+            self._send_json(journal_tilt.get_tilt_heatmap(user_id))
         elif path_clean == "/api/journal/tilt/recent":
-            self._send_json(journal_tilt.get_tilt_recent_events())
+            self._send_json(journal_tilt.get_tilt_recent_events(user_id))
         # ── Part 8: Gamification GET ──
         elif path_clean == "/api/journal/gamification":
-            self._send_json(journal_gamification.get_overview())
+            self._send_json(journal_gamification.get_overview(user_id))
         elif path_clean == "/api/journal/flashcards":
             params = parse_qs(urlparse(self.path).query)
             mode = params.get("mode", ["due"])[0]
             if mode == "all":
-                self._send_json(journal_gamification.get_all_flashcards())
+                self._send_json(journal_gamification.get_all_flashcards(user_id))
             elif mode == "quiz":
-                self._send_json(journal_gamification.get_quiz_cards())
+                self._send_json(journal_gamification.get_quiz_cards(user_id))
             else:
-                self._send_json(journal_gamification.get_due_flashcards())
+                self._send_json(journal_gamification.get_due_flashcards(user_id))
         elif path_clean == "/api/journal/quests":
-            self._send_json(journal_gamification.get_active_quests())
+            self._send_json(journal_gamification.get_active_quests(user_id))
         elif path_clean == "/api/journal/achievements":
-            self._send_json(journal_gamification.get_achievements())
+            self._send_json(journal_gamification.get_achievements(user_id))
         elif path_clean == "/api/journal/course":
-            self._send_json(journal_gamification.get_course_progress())
+            self._send_json(journal_gamification.get_course_progress(user_id))
         elif path_clean == "/api/journal/streaks":
-            self._send_json(journal_gamification.get_streaks())
+            self._send_json(journal_gamification.get_streaks(user_id))
         elif path_clean == "/api/journal/leaderboard":
-            self._send_json(journal_gamification.get_leaderboard())
+            self._send_json(journal_gamification.get_leaderboard(user_id))
         elif path_clean == "/api/journal/cosmetics":
-            self._send_json(journal_gamification.get_cosmetics())
+            self._send_json(journal_gamification.get_cosmetics(user_id))
         # ── Part 9: Goals & Seasons ──
         elif path_clean == "/api/journal/goals":
-            self._send_json(journal_goals.get_goals_overview())
+            self._send_json(journal_goals.get_goals_overview(user_id))
         elif path_clean == "/api/journal/seasons":
             self._send_json({
-                "active": journal_goals.get_active_season(),
-                "past": journal_goals.list_past_seasons()
+                "active": journal_goals.get_active_season(user_id),
+                "past": journal_goals.list_past_seasons(user_id)
             })
         # ── Part 10: Account Hub ──
         elif path_clean == "/api/account":
-            self._send_json(journal_account.get_account_overview())
+            self._send_json(journal_account.get_account_overview(user_id))
         elif path_clean == "/api/account/export":
-            self._handle_account_export()
+            self._handle_account_export(user_id)
         # ── §0.3 Web Push ──
         elif path_clean == "/api/push/vapid-key":
             self._send_json({"applicationServerKey": journal_alerts.get_vapid_public_key()})
@@ -1152,15 +1170,15 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self._send_json({"error": "invalid JSON"}, 400)
             return None
 
-    def _handle_journal_list_trades(self) -> None:
+    def _handle_journal_list_trades(self, user_id: str = "default") -> None:
         params = parse_qs(urlparse(self.path).query)
         limit  = min(int(params.get("limit",  ["100"])[0]), 500)
         offset = int(params.get("offset", ["0"])[0])
-        trades = journal_db.list_trades(limit=limit, offset=offset)
-        total  = journal_db.count_trades()
+        trades = journal_db.list_trades(user_id=user_id, limit=limit, offset=offset)
+        total  = journal_db.count_trades(user_id)
         self._send_json({"trades": trades, "total": total, "limit": limit, "offset": offset})
 
-    def _handle_journal_add_trade(self) -> None:
+    def _handle_journal_add_trade(self, user_id: str = "default") -> None:
         body = self._read_body_json()
         if body is None:
             return
@@ -1171,18 +1189,18 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self._send_json({"error": f"missing: {', '.join(missing)}"}, 400)
             return
         try:
-            result = journal_db.add_trade(body)
+            result = journal_db.add_trade(body, user_id)
             if not result.get("duplicate"):
                 try:
                     pnl_r = float(body.get("pnl_r") or body.get("pnl") or 0)
-                    journal_gamification.on_trade_added(result.get("id", 0), pnl_r)
+                    journal_gamification.on_trade_added(result.get("id", 0), pnl_r, user_id)
                 except Exception:
                     pass
             self._send_json(result, 201 if not result.get("duplicate") else 200)
         except Exception as e:
             self._send_json({"error": str(e)}, 500)
 
-    def _handle_journal_import_csv(self) -> None:
+    def _handle_journal_import_csv(self, user_id: str = "default") -> None:
         length = int(self.headers.get("Content-Length", 0))
         if length > 10_000_000:
             self._send_json({"error": "payload too large"}, 413)
@@ -1196,7 +1214,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         added, dupes, errors = 0, 0, 0
         for t in trades:
             try:
-                r = journal_db.add_trade(t)
+                r = journal_db.add_trade(t, user_id)
                 if r.get("duplicate"):
                     dupes += 1
                 else:
@@ -1206,7 +1224,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         self._send_json({"ok": True, "parsed": len(trades),
                          "added": added, "duplicates": dupes, "errors": errors})
 
-    def _handle_journal_import_ocr(self) -> None:
+    def _handle_journal_import_ocr(self, user_id: str = "default") -> None:
         import cgi
         ctype = self.headers.get("Content-Type", "")
         length = int(self.headers.get("Content-Length", 0))
@@ -1223,7 +1241,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         added, dupes = 0, 0
         for t in trades:
             try:
-                r = journal_db.add_trade(t)
+                r = journal_db.add_trade(t, user_id)
                 if r.get("duplicate"):
                     dupes += 1
                 else:
@@ -1233,7 +1251,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         self._send_json({"ok": True, "parsed": len(trades),
                          "added": added, "duplicates": dupes})
 
-    def _handle_discipline_save_config(self) -> None:
+    def _handle_discipline_save_config(self, user_id: str = "default") -> None:
         body = self._read_body_json()
         if body is None:
             return
@@ -1242,10 +1260,10 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         if not isinstance(config_list, list):
             self._send_json({"error": "config must be a list"}, 400)
             return
-        result = journal_discipline.save_config("default", config_list, advanced)
+        result = journal_discipline.save_config(user_id, config_list, advanced)
         self._send_json(result, 200 if result["ok"] else 400)
 
-    def _handle_discipline_save_eval(self) -> None:
+    def _handle_discipline_save_eval(self, user_id: str = "default") -> None:
         body = self._read_body_json()
         if body is None:
             return
@@ -1257,7 +1275,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         try:
             journal_discipline.save_eval(int(trade_id), evaluations)
             # Авто-обновляем journal_completed_24h если критерий включён
-            config = journal_discipline.get_config()
+            config = journal_discipline.get_config(user_id)
             j24 = next((c for c in config if c["criterion"] == "journal_completed_24h" and c["enabled"]), None)
             if j24:
                 passed_24h = journal_discipline.auto_eval_journal_24h(int(trade_id))
@@ -1266,7 +1284,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         except Exception as e:
             self._send_json({"error": str(e)}, 500)
 
-    def _handle_discipline_apply_preset(self) -> None:
+    def _handle_discipline_apply_preset(self, user_id: str = "default") -> None:
         body = self._read_body_json()
         if body is None:
             return
@@ -1274,12 +1292,12 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         if preset not in journal_discipline.PRESETS:
             self._send_json({"error": f"unknown preset: {preset}"}, 400)
             return
-        journal_discipline._apply_preset("default", preset)
-        self._send_json({"ok": True, "config": journal_discipline.get_config()})
+        journal_discipline._apply_preset(user_id, preset)
+        self._send_json({"ok": True, "config": journal_discipline.get_config(user_id)})
 
     # ── Alerts handlers (Part 4) ──────────────────────────────────────────────
 
-    def _handle_alerts_add_rule(self) -> None:
+    def _handle_alerts_add_rule(self, user_id: str = "default") -> None:
         body = self._read_body_json()
         if body is None:
             return
@@ -1296,6 +1314,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 symbol=str(body["symbol"]),
                 kind=body["kind"],
                 param=body["param"] if isinstance(body["param"], dict) else {},
+                user_id=user_id,
             )
             self._send_json(result, 201)
         except Exception as e:
@@ -1355,7 +1374,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         except Exception as e:
             self._send_json({"error": str(e)}, 500)
 
-    def _handle_brief_add_watchlist(self) -> None:
+    def _handle_brief_add_watchlist(self, user_id: str = "default") -> None:
         body = self._read_body_json()
         if body is None:
             return
@@ -1363,13 +1382,13 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         if not symbol:
             self._send_json({"error": "symbol required"}, 400)
             return
-        journal_brief.add_to_watchlist(symbol)
+        journal_brief.add_to_watchlist(symbol, user_id)
         journal_brief.invalidate_cache()
         self._send_json({"ok": True, "symbol": symbol})
 
     # ── Setups handlers (Part 6) ──────────────────────────────────────────────
 
-    def _handle_setups_create(self) -> None:
+    def _handle_setups_create(self, user_id: str = "default") -> None:
         body = self._read_body_json()
         if body is None:
             return
@@ -1379,16 +1398,16 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self._send_json({"error": f"missing: {', '.join(missing)}"}, 400)
             return
         try:
-            result = journal_setups.add_setup(body)
+            result = journal_setups.add_setup(body, user_id)
             self._send_json(result, 201)
         except Exception as e:
             self._send_json({"error": str(e)}, 500)
 
-    def _handle_setups_update(self, setup_id: int) -> None:
+    def _handle_setups_update(self, setup_id: int, user_id: str = "default") -> None:
         body = self._read_body_json()
         if body is None:
             return
-        ok = journal_setups.update_setup(setup_id, body)
+        ok = journal_setups.update_setup(setup_id, body, user_id)
         self._send_json({"ok": ok}, 200 if ok else 404)
 
     def _handle_setups_link_trade(self, setup_id: int) -> None:
@@ -1415,7 +1434,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 
     # ── Part 8: Gamification ─────────────────────────────────────────────────
 
-    def _handle_gamification_award_xp(self) -> None:
+    def _handle_gamification_award_xp(self, user_id: str = "default") -> None:
         body = self._read_body_json()
         if body is None:
             return
@@ -1424,10 +1443,10 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         if amount <= 0:
             self._send_json({"error": "amount must be > 0"}, 400)
             return
-        total = journal_gamification.award_xp(kind, amount)
+        total = journal_gamification.award_xp(kind, amount, user_id=user_id)
         self._send_json({"ok": True, "total_xp": total, "level": journal_gamification.calc_level(total)})
 
-    def _handle_flashcard_review(self) -> None:
+    def _handle_flashcard_review(self, user_id: str = "default") -> None:
         body = self._read_body_json()
         if body is None:
             return
@@ -1436,12 +1455,12 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         if card_id is None or quality is None:
             self._send_json({"error": "card_id and quality required"}, 400)
             return
-        result = journal_gamification.review_flashcard(int(card_id), int(quality))
+        result = journal_gamification.review_flashcard(int(card_id), int(quality), user_id)
         # Fire daily_login streak on any review
-        journal_gamification.update_streak("default", "daily_login")
+        journal_gamification.update_streak(user_id, "daily_login")
         self._send_json(result)
 
-    def _handle_course_complete(self) -> None:
+    def _handle_course_complete(self, user_id: str = "default") -> None:
         body = self._read_body_json()
         if body is None:
             return
@@ -1449,28 +1468,28 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         if not chapter_n:
             self._send_json({"error": "chapter_number required"}, 400)
             return
-        self._send_json(journal_gamification.complete_chapter(int(chapter_n)))
+        self._send_json(journal_gamification.complete_chapter(int(chapter_n), user_id))
 
-    def _handle_streak_freeze(self) -> None:
+    def _handle_streak_freeze(self, user_id: str = "default") -> None:
         body = self._read_body_json()
         if body is None:
             return
         kind = str(body.get("kind", "daily_login"))
-        self._send_json(journal_gamification.use_streak_freeze("default", kind))
+        self._send_json(journal_gamification.use_streak_freeze(user_id, kind))
 
-    def _handle_quest_event(self) -> None:
+    def _handle_quest_event(self, user_id: str = "default") -> None:
         body = self._read_body_json()
         if body is None:
             return
         event_type = str(body.get("type", ""))
         meta = body.get("meta") or {}
-        newly = journal_gamification.process_quest_event("default", event_type, meta)
-        journal_gamification.update_streak("default", "daily_login")
+        newly = journal_gamification.process_quest_event(user_id, event_type, meta)
+        journal_gamification.update_streak(user_id, "daily_login")
         self._send_json({"newly_completed": newly})
 
     # ── Part 7: Checklist & Tilt ──────────────────────────────────────────────
 
-    def _handle_checklist_add_item(self) -> None:
+    def _handle_checklist_add_item(self, user_id: str = "default") -> None:
         body = self._read_body_json()
         if body is None:
             return
@@ -1478,10 +1497,10 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         if not text:
             self._send_json({"error": "text required"}, 400)
             return
-        item = journal_tilt.add_checklist_item(text)
+        item = journal_tilt.add_checklist_item(text, user_id)
         self._send_json(item, 201)
 
-    def _handle_checklist_run(self) -> None:
+    def _handle_checklist_run(self, user_id: str = "default") -> None:
         body = self._read_body_json()
         if body is None:
             return
@@ -1489,20 +1508,20 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         if not isinstance(checked_ids, list):
             self._send_json({"error": "checked_ids must be a list"}, 400)
             return
-        result = journal_tilt.save_checklist_run([int(i) for i in checked_ids])
+        result = journal_tilt.save_checklist_run([int(i) for i in checked_ids], user_id)
         # Auto-trigger tilt check after run
-        tilt = journal_tilt.run_tilt_check()
+        tilt = journal_tilt.run_tilt_check(user_id)
         result["tilt"] = tilt
         # Award XP if checklist passed
         if result.get("passed"):
             try:
-                xp_result = journal_gamification.on_checklist_passed(result.get("id", 0))
+                xp_result = journal_gamification.on_checklist_passed(result.get("id", 0), user_id)
                 result["xp_awarded"] = xp_result.get("xp_awarded", 0)
             except Exception:
                 pass
         self._send_json(result, 201)
 
-    def _handle_goal_create(self) -> None:
+    def _handle_goal_create(self, user_id: str = "default") -> None:
         body = self._read_body_json()
         if body is None:
             return
@@ -1517,6 +1536,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 target_value=float(target),
                 label=body.get("label") or "",
                 deadline_days=int(body.get("deadline_days", 30)),
+                user_id=user_id,
             )
             self._send_json(result, 201)
         except (ValueError, TypeError) as e:
@@ -1537,6 +1557,14 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         if auth.startswith("Bearer "):
             return auth[7:]
         return ""
+
+    def _current_user_id(self) -> str:
+        """Резолвит user_id из токена запроса, или 'default' для анонимных
+        визитёров (сохраняет прежнее поведение для гостей). Раньше почти
+        каждый POST-обработчик ниже либо вообще не резолвил токен, либо
+        передавал буквально строку "default" — из-за этого залогиненный
+        пользователь читал/писал в общий анонимный набор данных, а не в свой."""
+        return journal_auth.validate_session(self._auth_token()) or "default"
 
     def _handle_auth_register(self) -> None:
         body = self._read_body_json()
@@ -2162,7 +2190,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 
     # ── Part 10: Account Hub handlers ────────────────────────────────────────
 
-    def _handle_referral_use(self) -> None:
+    def _handle_referral_use(self, user_id: str = "default") -> None:
         body = self._read_body_json()
         if body is None:
             return
@@ -2170,9 +2198,9 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         if not code:
             self._send_json({"error": "code required"}, 400)
             return
-        self._send_json(journal_account.use_referral_code(code))
+        self._send_json(journal_account.use_referral_code(code, user_id))
 
-    def _handle_broker_link_add(self) -> None:
+    def _handle_broker_link_add(self, user_id: str = "default") -> None:
         body = self._read_body_json()
         if body is None:
             return
@@ -2182,13 +2210,13 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self._send_json({"error": "broker and account_number required"}, 400)
             return
         result = journal_account.add_broker_link(
-            broker=broker, account_number=account_number
+            user_id=user_id, broker=broker, account_number=account_number
         )
         status = 400 if "error" in result else 201
         self._send_json(result, status)
 
-    def _handle_account_export(self) -> None:
-        data = journal_account.export_user_data()
+    def _handle_account_export(self, user_id: str = "default") -> None:
+        data = journal_account.export_user_data(user_id)
         body = json.dumps(data, ensure_ascii=False, indent=2).encode("utf-8")
         ts = datetime.now().strftime("%Y%m%d_%H%M%S")
         self.send_response(200)
@@ -2248,7 +2276,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         except Exception as e:
             self._send_json({"error": str(e)}, 500)
 
-    def _handle_journal_save_account(self) -> None:
+    def _handle_journal_save_account(self, user_id: str = "default") -> None:
         body = self._read_body_json()
         if body is None:
             return
@@ -2261,7 +2289,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             enc, iv = journal_crypto.encrypt_password(body["password"])
             acc_id = journal_db.save_investor_account(
                 body["broker"], body["account_no"],
-                body["server"], enc, iv,
+                body["server"], enc, iv, user_id,
             )
             self._send_json({"ok": True, "id": acc_id})
         except Exception as e:
