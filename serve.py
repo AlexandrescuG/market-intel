@@ -14,7 +14,7 @@ from urllib.parse import urlparse, parse_qs
 
 # Journal modules (добавляем core/ в path)
 sys.path.insert(0, str(Path(__file__).parent))
-from core import journal_db, journal_crypto, journal_ocr, journal_csv, journal_meta, journal_discipline, journal_alerts, journal_brief, journal_setups, journal_tilt, journal_gamification, journal_goals, journal_account, journal_auth, journal_feedback, journal_import, journal_analytics, journal_review, journal_cooldown
+from core import journal_db, journal_crypto, journal_ocr, journal_csv, journal_meta, journal_discipline, journal_alerts, journal_brief, journal_setups, journal_tilt, journal_gamification, journal_goals, journal_account, journal_auth, journal_feedback, journal_import, journal_analytics, journal_review, journal_cooldown, i18n
 
 from jinja2 import Environment, FileSystemLoader
 
@@ -80,6 +80,16 @@ def _url_for(endpoint, **values):
 
 _jinja = Environment(loader=FileSystemLoader(str(BOOK_DIR)), autoescape=False)
 _jinja.globals["url_for"] = _url_for
+
+# Отдельное окружение для обычных страниц сайта (не глав курса) -- шаблоны
+# лежат прямо в web/ (это те же .html, что раньше отдавались как статика;
+# конвертация в Jinja добавляет только {{ t(...) }} и {% ... %}, разметка
+# не переезжает в отдельную templates/ директорию). autoescape=True здесь
+# (в отличие от _jinja выше) -- это обычный HTML с пользовательским вводом
+# в некоторых местах (email в формах и т.п.), книжный движок исторически
+# жил без экранирования, но новый код это ни от чего не освобождает.
+_site_jinja = Environment(loader=FileSystemLoader(str(WEB_DIR)), autoescape=True)
+_site_jinja.globals["t"] = i18n.t
 
 _EDU_RE     = re.compile(r'^/edu(?:/(?P<lang>ro|en))?/b(?:/(?P<ch>\d+))?(?:\?.*)?$')
 _EDU_TOC_RE = re.compile(r'^/edu/?(?:\?.*)?$')
@@ -747,6 +757,14 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 
     def do_GET(self):
         path_clean = self.path.split("?")[0]
+        # /ro/... -> lang='ro', путь без префикса -- единая точка для ВСЕХ
+        # страниц кроме /edu/*, у которого уже свой собственный, более старый
+        # формат (/edu/ro/b/N, сегмент языка ПОСЛЕ /edu, не перед ним) — не
+        # трогаем его парсинг, иначе /ro/edu/b/1 и /edu/ro/b/1 разошлись бы
+        # в две разные, путающие друг друга схемы.
+        req_lang = i18n.DEFAULT_LANG
+        if not path_clean.startswith("/edu"):
+            req_lang, path_clean = i18n.lang_from_path(path_clean)
         # Единая точка резолва пользователя для всего GET -- раньше почти каждая
         # journal_*-ветка ниже вызывала функцию без user_id вообще, из-за чего
         # ВСЕ данные (сделки/дисциплина/геймификация/цели/...) читались из общего
@@ -856,6 +874,11 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self._send_json(journal_account.get_account_overview(user_id))
         elif path_clean == "/api/account/export":
             self._handle_account_export(user_id)
+        # ── i18n ──
+        elif path_clean == "/api/i18n":
+            params = parse_qs(urlparse(self.path).query)
+            lang = params.get("lang", [i18n.DEFAULT_LANG])[0]
+            self._send_json(i18n.all_dict(lang))
         # ── §0.3 Web Push ──
         elif path_clean == "/api/push/vapid-key":
             self._send_json({"applicationServerKey": journal_alerts.get_vapid_public_key()})
@@ -893,10 +916,14 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self._handle_cooldown_stats()
         elif path_clean == "/api/alerts/debriefs":
             self._handle_debriefs_list()
-        elif path_clean == "/register":
-            self._serve_static(WEB_DIR / "register.html")
-        elif path_clean == "/survey":
-            self._serve_static(WEB_DIR / "survey.html")
+        elif path_clean == "/":
+            self._render_site_page("index.html", req_lang)
+        elif path_clean in ("/register", "/register.html"):
+            self._render_site_page("register.html", req_lang)
+        elif path_clean in ("/login", "/login.html"):
+            self._render_site_page("login.html", req_lang)
+        elif path_clean in ("/survey", "/survey.html"):
+            self._render_site_page("survey.html", req_lang)
         elif path_clean == "/journal":
             self._serve_static(WEB_DIR / "journal.html")
         # ── Legacy /m/* routes → redirect to unified index ──
@@ -904,8 +931,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.send_response(301)
             self.send_header("Location", "/")
             self.end_headers()
-        elif path_clean in ("/glossary", "/m/glossary"):
-            self._serve_static(WEB_DIR / "glossary.html")
+        elif path_clean in ("/glossary", "/glossary.html", "/m/glossary"):
+            self._render_site_page("glossary.html", req_lang)
         # ── Gated LP API endpoints ──
         elif path_clean == "/api/lp/signals":
             self._handle_lp_signals()
@@ -969,6 +996,12 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 content_type="image/jpeg",
             )
         else:
+            if req_lang != i18n.DEFAULT_LANG:
+                # Страница ещё не переведена (нет явного Jinja-маршрута выше) --
+                # не 404им на /ro/<file>, тихо отдаём русскую версию по
+                # каноническому (без префикса) пути.
+                query = self.path.split("?", 1)
+                self.path = path_clean + ("?" + query[1] if len(query) > 1 else "")
             super().do_GET()
 
     def _handle_edu_toc(self):
@@ -1020,6 +1053,27 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.send_header("Content-Type", "text/plain")
             self.end_headers()
             self.wfile.write(b"Not found")
+
+    def _render_site_page(self, template_name: str, lang: str = i18n.DEFAULT_LANG) -> None:
+        """Рендерит web/<template_name> через _site_jinja с {{ t(key) }}
+        доступным внутри. lang прокидывается в шаблон явно (а не только
+        через глобальный t, у которого свой параметр по умолчанию) -- сами
+        шаблоны используют `{{ t('key', lang) }}`."""
+        try:
+            tpl = _site_jinja.get_template(template_name)
+            html = tpl.render(lang=lang)
+        except Exception as e:
+            self.send_response(500)
+            self.send_header("Content-Type", "text/plain; charset=utf-8")
+            self.end_headers()
+            self.wfile.write(f"Template error: {e}".encode("utf-8"))
+            return
+        body = html.encode("utf-8")
+        self.send_response(200)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Cache-Control", "no-cache")
+        self.end_headers()
+        self.wfile.write(body)
 
     def _handle_calendar_api(self):
         from datetime import datetime as _dt, timezone as _tz
