@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Регистрация — SBF Journal</title>
+<style>
+:root{
+  --bg:#f5f4f0;--paper:#fff;--text:#1a1a1a;--muted:#6b7280;
+  --line:#e5e2db;--accent:#2563eb;--gold:#c9a227;--up:#16a34a;
+  --dn:#dc2626;--radius:12px;--cream:#faf9f5;--soft:#f0ede4;
+}
+@media(prefers-color-scheme:dark){
+  :root{--bg:#0f0e0c;--paper:#1a1917;--text:#f0ede4;--muted:#9ca3af;
+    --line:#2c2a26;--cream:#1e1c18;--soft:#252320}
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);
+  color:var(--text);min-height:100vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:flex-start;padding:24px 16px 60px}
+.logo{font-size:20px;font-weight:800;letter-spacing:-.5px;margin-bottom:32px;
+  color:var(--gold);text-decoration:none}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);
+  padding:28px 28px 24px;width:100%;max-width:420px}
+
+/* Progress */
+.prog-wrap{margin-bottom:24px}
+.prog-label{display:flex;justify-content:space-between;font-size:11px;
+  color:var(--muted);margin-bottom:6px}
+.prog-bar{height:4px;background:var(--line);border-radius:2px;overflow:hidden}
+.prog-fill{height:100%;background:var(--gold);border-radius:2px;transition:width .4s}
+
+/* Steps */
+.step{display:none}
+.step.active{display:block}
+.step-title{font-size:18px;font-weight:700;margin-bottom:4px}
+.step-sub{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.5}
+
+/* Fields */
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12px;font-weight:600;margin-bottom:5px;
+  color:var(--text);letter-spacing:.02em}
+.field input{width:100%;padding:10px 12px;font-size:14px;
+  background:var(--cream);border:1px solid var(--line);border-radius:8px;
+  color:var(--text);outline:none;transition:border-color .15s}
+.field input:focus{border-color:var(--gold)}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field-opt label::after{content:" (необязательно)";font-weight:400;color:var(--muted);font-size:10px}
+
+/* Checkboxes */
+.check-item{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;
+  padding:12px;background:var(--cream);border:1px solid var(--line);border-radius:8px;
+  cursor:pointer}
+.check-item.required{border-left:3px solid var(--gold)}
+.check-item input[type=checkbox]{width:18px;height:18px;flex-shrink:0;
+  accent-color:var(--gold);margin-top:1px;cursor:pointer}
+.check-item label{font-size:13px;line-height:1.45;cursor:pointer;color:var(--text)}
+.check-item label a{color:var(--accent)}
+
+/* PRO badge */
+.pro-teaser{display:flex;align-items:center;gap:10px;padding:12px 14px;
+  background:rgba(201,162,39,.07);border:1px solid rgba(201,162,39,.3);
+  border-radius:8px;margin-bottom:18px}
+.pro-teaser-ico{font-size:22px;flex-shrink:0}
+.pro-teaser-text{font-size:12px;color:var(--text);line-height:1.45}
+.pro-teaser-text b{color:var(--gold)}
+
+/* Buttons */
+.nav-row{display:flex;gap:10px;margin-top:20px}
+.btn{flex:1;padding:12px 20px;border-radius:8px;font-size:14px;font-weight:600;
+  cursor:pointer;transition:all .15s;border:none}
+.btn-primary{background:var(--gold);color:#fff}
+.btn-primary:hover{opacity:.9}
+.btn-primary:disabled{opacity:.45;cursor:not-allowed}
+.btn-secondary{background:transparent;border:1.5px solid var(--line);color:var(--text)}
+.btn-secondary:hover{border-color:var(--gold)}
+
+/* Error */
+.err{background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;
+  padding:10px 12px;font-size:13px;color:var(--dn);margin-bottom:14px;display:none}
+
+/* Login link */
+.login-note{text-align:center;font-size:12px;color:var(--muted);margin-top:16px}
+.login-note a{color:var(--gold)}
+</style>
+</head>
+<body>
+
+<a class="logo" href="/">SBF Journal</a>
+
+<div class="card">
+  <div class="prog-wrap">
+    <div class="prog-label">
+      <span id="progText">Создай аккаунт</span>
+      <span id="progNum">1 / 2</span>
+    </div>
+    <div class="prog-bar"><div class="prog-fill" id="progFill" style="width:50%"></div></div>
+  </div>
+
+  <div class="err" id="errBox"></div>
+
+  <!-- ── Шаг 1: Данные ── -->
+  <div class="step active" id="step1">
+    <div class="step-title">Создай аккаунт</div>
+    <div class="step-sub">Только необходимое. Без лишних вопросов.</div>
+
+    <div class="field-row">
+      <div class="field">
+        <label>Имя</label>
+        <input type="text" id="firstName" placeholder="Иван" autocomplete="given-name">
+      </div>
+      <div class="field">
+        <label>Фамилия</label>
+        <input type="text" id="lastName" placeholder="Петров" autocomplete="family-name">
+      </div>
+    </div>
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="email" placeholder="you@example.com" autocomplete="email">
+    </div>
+    <div class="field">
+      <label>Пароль (от 8 символов)</label>
+      <input type="password" id="password" placeholder="••••••••" autocomplete="new-password">
+    </div>
+    <div class="field field-opt">
+      <label>Телефон</label>
+      <input type="tel" id="phone" placeholder="+7 900 000-00-00" autocomplete="tel">
+    </div>
+
+    <div class="nav-row">
+      <button class="btn btn-primary" onclick="goStep2()">Далее →</button>
+    </div>
+    <p class="login-note">Уже есть аккаунт? <a href="/journal.html">Войти</a></p>
+  </div>
+
+  <!-- ── Шаг 2: Согласия ── -->
+  <div class="step" id="step2">
+    <div class="step-title">Подтверждения</div>
+    <div class="step-sub">Последний шаг — и ты внутри.</div>
+
+    <div class="pro-teaser">
+      <span class="pro-teaser-ico">🎁</span>
+      <div class="pro-teaser-text">
+        Пройди опросник в Профиле и получи <b>30 дней PRO бесплатно</b>.<br>
+        Без автосписания. Добровольно, в любое время.
+      </div>
+    </div>
+
+    <label class="check-item required">
+      <input type="checkbox" id="consentAge">
+      <label for="consentAge">Мне есть <strong>18 лет</strong>. Я понимаю, что торговый функционал доступен только совершеннолетним.</label>
+    </label>
+    <label class="check-item required">
+      <input type="checkbox" id="consentData">
+      <label for="consentData">Согласен(на) на <a href="#" target="_blank">обработку персональных данных</a>.</label>
+    </label>
+    <label class="check-item required">
+      <input type="checkbox" id="consentDisclaimer">
+      <label for="consentDisclaimer">SBF Journal — образовательная платформа, <strong>не инвестиционный совет</strong>. Торговля сопряжена с риском потери средств.</label>
+    </label>
+    <label class="check-item">
+      <input type="checkbox" id="consentMarketing">
+      <label for="consentMarketing">Согласен(на) получать маркетинговые материалы (необязательно).</label>
+    </label>
+
+    <div class="nav-row">
+      <button class="btn btn-secondary" onclick="setStep(1)">← Назад</button>
+      <button class="btn btn-primary" id="regBtn" onclick="doRegister()">Зарегистрироваться</button>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+function $(id) { return document.getElementById(id); }
+function showErr(msg) {
+  var b = $('errBox'); b.textContent = msg; b.style.display = msg ? 'block' : 'none';
+}
+
+function setStep(n) {
+  document.querySelectorAll('.step').forEach(function(s) { s.classList.remove('active'); });
+  $('step' + n).classList.add('active');
+  showErr('');
+  $('progText').textContent = n === 1 ? 'Создай аккаунт' : 'Подтверждения';
+  $('progNum').textContent  = n + ' / 2';
+  $('progFill').style.width = n === 1 ? '50%' : '100%';
+  window.scrollTo(0, 0);
+}
+
+function goStep2() {
+  var fn = $('firstName').value.trim();
+  var em = $('email').value.trim();
+  var pw = $('password').value;
+  if (!fn) return showErr('Введи имя');
+  if (!em || !em.includes('@')) return showErr('Введи корректный email');
+  if (pw.length < 8) return showErr('Пароль: минимум 8 символов');
+  showErr('');
+  setStep(2);
+}
+
+function doRegister() {
+  if (!$('consentAge').checked)        return showErr('Подтверди, что тебе есть 18 лет');
+  if (!$('consentData').checked)       return showErr('Необходимо согласие на обработку данных');
+  if (!$('consentDisclaimer').checked) return showErr('Прочитай и подтверди дисклеймер');
+
+  var btn = $('regBtn');
+  btn.disabled = true;
+  btn.textContent = 'Создаём аккаунт…';
+
+  fetch('/api/auth/register', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      email:              $('email').value.trim().toLowerCase(),
+      password:           $('password').value,
+      first_name:         $('firstName').value.trim(),
+      last_name:          $('lastName').value.trim(),
+      phone:              $('phone').value.trim(),
+      lang:               'ru',
+      age_18_confirmed:   $('consentAge').checked,
+      consent_data:       $('consentData').checked,
+      consent_disclaimer: $('consentDisclaimer').checked,
+      consent_marketing:  $('consentMarketing').checked,
+    }),
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (d.error) {
+      btn.disabled = false;
+      btn.textContent = 'Зарегистрироваться';
+      return showErr(d.error === 'age_gate' ? 'Функционал доступен с 18 лет' : d.error);
+    }
+    localStorage.setItem('sbf_token', d.token);
+    localStorage.setItem('sbf_uid', d.user_id);
+    window.location.href = '/journal.html';
+  })
+  .catch(function(e) {
+    btn.disabled = false;
+    btn.textContent = 'Зарегистрироваться';
+    showErr('Ошибка сети: ' + e.message);
+  });
+}
+
+// Если уже авторизован — сразу в журнал
+(function() {
+  var t = localStorage.getItem('sbf_token');
+  if (!t) return;
+  fetch('/api/auth/me', { headers: { 'X-Auth-Token': t } })
+    .then(function(r) { return r.json(); })
+    .then(function(d) { if (d && d.id) window.location.href = '/journal.html'; })
+    .catch(function() {});
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Опрос трейдера — SBF Journal</title>
+<style>
+:root{
+  --bg:#f5f4f0;--paper:#fff;--text:#1a1a1a;--muted:#6b7280;
+  --line:#e5e2db;--gold:#c9a227;--up:#16a34a;--dn:#dc2626;
+  --radius:12px;--cream:#faf9f5;--soft:#f0ede4;
+}
+@media(prefers-color-scheme:dark){
+  :root{--bg:#0f0e0c;--paper:#1a1917;--text:#f0ede4;--muted:#9ca3af;
+    --line:#2c2a26;--cream:#1e1c18;--soft:#252320}
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);
+  color:var(--text);min-height:100vh;display:flex;flex-direction:column;
+  align-items:center;padding:24px 16px 60px}
+.logo{font-size:20px;font-weight:800;letter-spacing:-.5px;margin-bottom:8px;
+  color:var(--gold);text-decoration:none}
+.hero-badge{font-size:12px;color:var(--muted);margin-bottom:24px;text-align:center}
+.hero-badge b{color:var(--gold)}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);
+  padding:26px 26px 22px;width:100%;max-width:480px}
+
+/* Progress */
+.prog-wrap{margin-bottom:22px}
+.prog-label{display:flex;justify-content:space-between;font-size:11px;
+  color:var(--muted);margin-bottom:6px}
+.prog-bar{height:4px;background:var(--line);border-radius:2px;overflow:hidden}
+.prog-fill{height:100%;background:var(--gold);border-radius:2px;transition:width .4s}
+.prog-blocks{display:flex;gap:4px;margin-top:6px}
+.prog-block{flex:1;height:3px;border-radius:2px;background:var(--line);transition:background .3s}
+.prog-block.done{background:var(--gold)}
+
+/* Steps */
+.step{display:none}
+.step.active{display:block}
+.step-title{font-size:17px;font-weight:700;margin-bottom:3px}
+.step-sub{font-size:12px;color:var(--muted);margin-bottom:18px;line-height:1.5}
+
+/* Chips */
+.q-block{margin-bottom:18px}
+.q-label{font-size:13px;font-weight:600;margin-bottom:8px;line-height:1.4}
+.q-hint{font-size:11px;color:var(--muted);font-weight:400}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{padding:8px 14px;border:1.5px solid var(--line);border-radius:20px;
+  font-size:13px;cursor:pointer;background:var(--paper);color:var(--text);
+  transition:all .15s;min-height:40px;display:flex;align-items:center;
+  user-select:none}
+.chip:hover{border-color:var(--gold)}
+.chip.selected{background:var(--gold);border-color:var(--gold);color:#fff;font-weight:600}
+
+/* Nav */
+.nav-row{display:flex;gap:10px;margin-top:20px}
+.btn{flex:1;padding:11px 18px;border-radius:8px;font-size:14px;font-weight:600;
+  cursor:pointer;transition:all .15s;border:none}
+.btn-primary{background:var(--gold);color:#fff}
+.btn-primary:hover{opacity:.9}
+.btn-secondary{background:transparent;border:1.5px solid var(--line);color:var(--text)}
+.btn-secondary:hover{border-color:var(--gold)}
+.btn-skip{background:transparent;border:none;color:var(--muted);font-size:12px;
+  text-decoration:underline;cursor:pointer;display:block;text-align:center;margin-top:10px}
+
+/* «Твой путь» */
+.path-hero{text-align:center;padding:8px 0 16px}
+.path-hello{font-size:21px;font-weight:800;margin-bottom:3px}
+.path-tagline{font-size:13px;color:var(--muted);margin-bottom:16px}
+.pro-award{display:flex;align-items:center;gap:12px;
+  background:linear-gradient(135deg,rgba(201,162,39,.12),rgba(230,194,87,.06));
+  border:1.5px solid rgba(201,162,39,.4);border-radius:10px;
+  padding:14px 16px;margin-bottom:16px}
+.pro-award-ico{font-size:28px;flex-shrink:0}
+.pro-award-title{font-size:15px;font-weight:700;color:var(--gold)}
+.pro-award-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.path-goal{background:linear-gradient(135deg,var(--gold),#f59e0b);
+  border-radius:10px;padding:14px;margin-bottom:14px;text-align:center}
+.path-goal-title{font-size:16px;font-weight:700;color:#fff}
+.path-goal-sub{font-size:12px;color:rgba(255,255,255,.85);margin-top:3px}
+.path-cards{display:grid;gap:9px;margin-bottom:16px}
+.path-card{padding:11px 13px;border:1px solid var(--line);border-radius:8px;
+  font-size:13px;line-height:1.45;display:flex;align-items:flex-start;gap:9px}
+.path-card-ico{font-size:18px;flex-shrink:0}
+.path-steps{background:var(--cream);border-radius:8px;padding:12px 13px 8px}
+.path-steps-title{font-size:10px;font-weight:700;text-transform:uppercase;
+  color:var(--muted);letter-spacing:.05em;margin-bottom:9px}
+.path-step{display:flex;gap:9px;margin-bottom:7px;font-size:12px;align-items:flex-start}
+.path-step-n{width:18px;height:18px;border-radius:50%;background:var(--gold);
+  color:#fff;font-size:9px;font-weight:700;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center}
+.market-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.market-tag{padding:3px 9px;background:var(--soft);border-radius:11px;font-size:11px;font-weight:600}
+
+/* Auth gate */
+.auth-gate{text-align:center;padding:16px 0}
+.auth-gate-ico{font-size:40px;margin-bottom:12px}
+.auth-gate-title{font-size:16px;font-weight:700;margin-bottom:8px}
+.auth-gate-text{font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:16px}
+.auth-gate-btns{display:flex;gap:10px;justify-content:center}
+.auth-gate-btn{padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;
+  text-decoration:none;cursor:pointer}
+.auth-gate-btn.primary{background:var(--gold);color:#fff}
+.auth-gate-btn.secondary{border:1.5px solid var(--line);color:var(--text)}
+
+/* Error */
+.err{background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;
+  padding:9px 12px;font-size:12px;color:var(--dn);margin-bottom:12px;display:none}
+</style>
+</head>
+<body>
+
+<a class="logo" href="/">SBF Journal</a>
+<div class="hero-badge">Заполни — получи <b>30 дней PRO бесплатно</b> · без автосписания</div>
+
+<div class="card">
+  <div class="prog-wrap">
+    <div class="prog-label">
+      <span id="progText">Блок A — Опыт</span>
+      <span id="progNum">1 / 4</span>
+    </div>
+    <div class="prog-bar"><div class="prog-fill" id="progFill" style="width:25%"></div></div>
+    <div class="prog-blocks">
+      <div class="prog-block" id="pb0"></div>
+      <div class="prog-block" id="pb1"></div>
+      <div class="prog-block" id="pb2"></div>
+      <div class="prog-block" id="pb3"></div>
+    </div>
+  </div>
+
+  <div class="err" id="errBox"></div>
+
+  <!-- ── Auth gate hidden — anon starts survey directly ── -->
+  <div class="step" id="stepAuth" style="display:none!important"></div>
+
+  <!-- ── Fast-track registration (shown after Block C for anonymous) ── -->
+  <div class="step" id="stepReg">
+    <div class="step-title">Сохрани свой путь</div>
+    <div class="step-sub">Регистрация — 30 секунд. Без карты и автосписаний. 30 дней PRO сразу.</div>
+    <div class="q-block">
+      <div class="q-label">Имя</div>
+      <input type="text" id="regName" placeholder="Как тебя зовут?" autocomplete="given-name"
+        style="width:100%;padding:11px 13px;border:1.5px solid var(--line);border-radius:10px;
+        font-size:14px;font-family:inherit;background:var(--paper);color:var(--text);margin-top:2px;box-sizing:border-box">
+    </div>
+    <div class="q-block">
+      <div class="q-label">Email</div>
+      <input type="email" id="regEmail" placeholder="email@example.com" autocomplete="email"
+        style="width:100%;padding:11px 13px;border:1.5px solid var(--line);border-radius:10px;
+        font-size:14px;font-family:inherit;background:var(--paper);color:var(--text);margin-top:2px;box-sizing:border-box">
+    </div>
+    <div class="q-block">
+      <div class="q-label">Пароль (мин. 8 символов)</div>
+      <input type="password" id="regPwd" placeholder="Пароль" autocomplete="new-password"
+        style="width:100%;padding:11px 13px;border:1.5px solid var(--line);border-radius:10px;
+        font-size:14px;font-family:inherit;background:var(--paper);color:var(--text);margin-top:2px;box-sizing:border-box">
+    </div>
+    <div class="q-block" style="display:flex;flex-direction:column;gap:10px">
+      <label style="display:flex;gap:10px;align-items:flex-start;font-size:13px;cursor:pointer">
+        <input type="checkbox" id="regAge" style="margin-top:2px;accent-color:var(--gold);flex-shrink:0">
+        <span>Мне исполнилось 18 лет</span>
+      </label>
+      <label style="display:flex;gap:10px;align-items:flex-start;font-size:13px;cursor:pointer">
+        <input type="checkbox" id="regData" style="margin-top:2px;accent-color:var(--gold);flex-shrink:0">
+        <span>Согласен на обработку данных в соответствии с <a href="/privacy" style="color:var(--gold)">политикой конфиденциальности</a></span>
+      </label>
+      <label style="display:flex;gap:10px;align-items:flex-start;font-size:13px;cursor:pointer">
+        <input type="checkbox" id="regDisc" style="margin-top:2px;accent-color:var(--gold);flex-shrink:0">
+        <span>Понимаю, что аналитика SBF — не торговые рекомендации</span>
+      </label>
+      <label style="display:flex;gap:10px;align-items:flex-start;font-size:13px;cursor:pointer">
+        <input type="checkbox" id="regMkt" style="margin-top:2px;accent-color:var(--gold);flex-shrink:0">
+        <span>Получать полезные материалы на email (необязательно)</span>
+      </label>
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:14px;line-height:1.5">
+      30 дней PRO, без карты и автосписаний. Отменить можно в любой момент.
+    </div>
+    <div class="nav-row">
+      <button class="btn btn-secondary" onclick="goBlock('C')">← Назад</button>
+      <button class="btn btn-primary" id="regSubmitBtn" onclick="submitViaRegister()">Создать аккаунт и получить PRO →</button>
+    </div>
+    <div style="text-align:center;margin-top:12px;font-size:12px;color:var(--muted)">
+      Уже есть аккаунт? <a href="#" id="regLoginLink" style="color:var(--gold)">Войти</a>
+    </div>
+  </div>
+
+  <!-- ── Блок A: Опыт и знания ── -->
+  <div class="step" id="stepA">
+    <div class="step-title">Блок A — Опыт и знания</div>
+    <div class="step-sub">Core · нужен для PRO</div>
+
+    <div class="q-block">
+      <div class="q-label">1. Твой уровень?</div>
+      <div class="chips" data-q="level" data-multi="0">
+        <div class="chip" data-v="beginner">Новичок</div>
+        <div class="chip" data-v="intermediate">Средний</div>
+        <div class="chip" data-v="advanced">Опытный</div>
+      </div>
+    </div>
+    <div class="q-block">
+      <div class="q-label">2. Сколько лет торгуешь?</div>
+      <div class="chips" data-q="years" data-multi="0">
+        <div class="chip" data-v="none">Нет опыта</div>
+        <div class="chip" data-v="lt1">Менее 1</div>
+        <div class="chip" data-v="1to3">1–3 года</div>
+        <div class="chip" data-v="gt3">Более 3</div>
+      </div>
+    </div>
+    <div class="q-block">
+      <div class="q-label">3. Чем торговал(а)? <span class="q-hint">(несколько)</span></div>
+      <div class="chips" data-q="instruments" data-multi="1">
+        <div class="chip" data-v="forex">Форекс</div>
+        <div class="chip" data-v="cfd">CFD</div>
+        <div class="chip" data-v="stocks">Акции</div>
+        <div class="chip" data-v="crypto">Крипто</div>
+        <div class="chip" data-v="futures">Фьючерсы</div>
+        <div class="chip" data-v="nothing">Ничего</div>
+      </div>
+    </div>
+    <div class="q-block">
+      <div class="q-label">4. Знаешь, что такое кредитное плечо?</div>
+      <div class="chips" data-q="knows_leverage" data-multi="0">
+        <div class="chip" data-v="use">Да, использую</div>
+        <div class="chip" data-v="heard">Слышал(а)</div>
+        <div class="chip" data-v="no">Нет</div>
+      </div>
+    </div>
+    <div class="q-block">
+      <div class="q-label">5. Используешь стоп-лосс?</div>
+      <div class="chips" data-q="uses_sl" data-multi="0">
+        <div class="chip" data-v="always">Всегда</div>
+        <div class="chip" data-v="sometimes">Иногда</div>
+        <div class="chip" data-v="never">Нет</div>
+        <div class="chip" data-v="no_idea">Не знаю, что это</div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn btn-primary" onclick="goBlock('B')">Далее →</button>
+    </div>
+  </div>
+
+  <!-- ── Блок B: Цели и стиль ── -->
+  <div class="step" id="stepB">
+    <div class="step-title">Блок B — Цели и стиль</div>
+    <div class="step-sub">Core · нужен для PRO</div>
+
+    <div class="q-block">
+      <div class="q-label">6. Чего хочешь от платформы?</div>
+      <div class="chips" data-q="goal" data-multi="0">
+        <div class="chip" data-v="learn">Научиться с нуля</div>
+        <div class="chip" data-v="improve">Улучшить результаты</div>
+        <div class="chip" data-v="passive">Пассивный доход</div>
+        <div class="chip" data-v="coaching">Сопровождение счёта</div>
+      </div>
+    </div>
+    <div class="q-block">
+      <div class="q-label">7. Стиль / горизонт?</div>
+      <div class="chips" data-q="style" data-multi="0">
+        <div class="chip" data-v="scalping">Скальпинг</div>
+        <div class="chip" data-v="intraday">Интрадей</div>
+        <div class="chip" data-v="swing">Свинг</div>
+        <div class="chip" data-v="longterm">Долгосрок</div>
+        <div class="chip" data-v="unknown">Пока не знаю</div>
+      </div>
+    </div>
+    <div class="q-block">
+      <div class="q-label">8. Сколько времени готов(а) уделять?</div>
+      <div class="chips" data-q="time" data-multi="0">
+        <div class="chip" data-v="lt1h">&lt;1 ч/нед</div>
+        <div class="chip" data-v="several">Несколько ч/нед</div>
+        <div class="chip" data-v="daily">Ежедневно</div>
+        <div class="chip" data-v="fulltime">Это работа</div>
+      </div>
+    </div>
+    <div class="q-block">
+      <div class="q-label">9. Какие рынки интересны? <span class="q-hint">(несколько)</span></div>
+      <div class="chips" data-q="markets" data-multi="1">
+        <div class="chip" data-v="forex">Форекс</div>
+        <div class="chip" data-v="crypto">Крипто</div>
+        <div class="chip" data-v="commodities">Золото/товары</div>
+        <div class="chip" data-v="indices">Индексы</div>
+        <div class="chip" data-v="stocks">Акции</div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn btn-secondary" onclick="goBlock('A')">← Назад</button>
+      <button class="btn btn-primary" onclick="goBlock('C')">Далее →</button>
+    </div>
+  </div>
+
+  <!-- ── Блок C: Риск ── -->
+  <div class="step" id="stepC">
+    <div class="step-title">Блок C — Отношение к риску</div>
+    <div class="step-sub">Core · нужен для PRO · это не оценка платёжеспособности</div>
+
+    <div class="q-block">
+      <div class="q-label">10. Счёт просел на 20%. Твои действия?</div>
+      <div class="chips" data-q="drawdown_reaction" data-multi="0">
+        <div class="chip" data-v="close_all">Закрою всё</div>
+        <div class="chip" data-v="average_in">Докуплю</div>
+        <div class="chip" data-v="wait_plan">Буду ждать по плану</div>
+        <div class="chip" data-v="dont_know">Не знаю</div>
+      </div>
+    </div>
+    <div class="q-block">
+      <div class="q-label">11. Комфортный риск на сделку?</div>
+      <div class="chips" data-q="risk_per_trade" data-multi="0">
+        <div class="chip" data-v="lt1pct">До 1%</div>
+        <div class="chip" data-v="1to2pct">1–2%</div>
+        <div class="chip" data-v="gt2pct">Более 2%</div>
+        <div class="chip" data-v="no_idea">Не знаю</div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn btn-secondary" onclick="goBlock('B')">← Назад</button>
+      <button class="btn btn-primary" onclick="afterBlockC()">Далее →</button>
+    </div>
+  </div>
+
+  <!-- ── Блок D: Опционально ── -->
+  <div class="step" id="stepD">
+    <div class="step-title">Блок D — Финальные вопросы</div>
+    <div class="step-sub">Необязательно — можно пропустить и получить PRO уже сейчас.</div>
+
+    <div class="q-block">
+      <div class="q-label">12. Откуда узнал(а) о нас?</div>
+      <div class="chips" data-q="source" data-multi="0">
+        <div class="chip" data-v="social">Соцсети</div>
+        <div class="chip" data-v="friend">Друг</div>
+        <div class="chip" data-v="ads">Реклама</div>
+        <div class="chip" data-v="search">Поиск</div>
+        <div class="chip" data-v="other">Другое</div>
+      </div>
+    </div>
+    <div class="q-block">
+      <div class="q-label">13. Язык интерфейса</div>
+      <div class="chips" data-q="lang" data-multi="0">
+        <div class="chip selected" data-v="ru">🇷🇺 Русский</div>
+        <div class="chip" data-v="en">🇬🇧 English</div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn btn-secondary" onclick="goBlock('C')">← Назад</button>
+      <button class="btn btn-primary" onclick="submitSurvey()">Завершить и получить PRO →</button>
+    </div>
+    <button class="btn-skip" onclick="submitSurvey()">Пропустить и получить PRO сейчас</button>
+  </div>
+
+  <!-- ── «Твой путь» + PRO ── -->
+  <div class="step" id="stepResult">
+    <div class="path-hero">
+      <div class="path-hello" id="pathHello">Отлично!</div>
+      <div class="path-tagline">Твой персональный путь готов</div>
+    </div>
+    <div class="pro-award" id="proAward">
+      <div class="pro-award-ico">🎁</div>
+      <div>
+        <div class="pro-award-title">30 дней PRO активированы!</div>
+        <div class="pro-award-sub" id="proUntilText">Действует без автосписания.</div>
+      </div>
+    </div>
+    <div class="path-goal" id="pathGoal">
+      <div class="path-goal-title" id="pathGoalTitle">📚 Обучение</div>
+      <div class="path-goal-sub" id="pathGoalSub"></div>
+    </div>
+    <div class="path-cards" id="pathCards"></div>
+    <div class="path-steps" id="pathSteps"></div>
+    <div class="nav-row" style="margin-top:18px">
+      <a class="btn btn-primary" href="/" style="text-align:center;text-decoration:none">
+        Начать работу →
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+var _token = localStorage.getItem('sbf_token') || '';
+var _answers = {};
+var DRAFT_KEY = 'sbfSurveyDraft';
+
+// Restore draft from localStorage
+(function() {
+  try {
+    var draft = JSON.parse(localStorage.getItem(DRAFT_KEY) || '{}');
+    if (draft && typeof draft === 'object') {
+      Object.assign(_answers, draft);
+      // Re-apply chip selections
+      Object.keys(draft).forEach(function(q) {
+        var val = draft[q];
+        var wrap = document.querySelector('.chips[data-q="' + q + '"]');
+        if (!wrap) return;
+        var vals = Array.isArray(val) ? val : [val];
+        wrap.querySelectorAll('.chip').forEach(function(c) {
+          if (vals.indexOf(c.dataset.v) !== -1) c.classList.add('selected');
+        });
+      });
+    }
+  } catch(e) {}
+}());
+
+// lang дефолт
+if (!_answers['lang']) _answers['lang'] = 'ru';
+
+function $(id) { return document.getElementById(id); }
+function showErr(msg) {
+  var b = $('errBox'); b.textContent = msg; b.style.display = msg ? 'block' : 'none';
+}
+
+// ── Блоки и прогресс ────────────────────────────────────────────────────────
+var BLOCKS = ['A', 'B', 'C', 'D'];
+var BLOCK_INFO = {
+  A: { label: 'Блок A — Опыт',     pct: 25, num: '1 / 4' },
+  B: { label: 'Блок B — Цели',     pct: 50, num: '2 / 4' },
+  C: { label: 'Блок C — Риск',     pct: 75, num: '3 / 4' },
+  D: { label: 'Блок D — Прочее',   pct: 95, num: '4 / 4' },
+};
+var _doneBlocks = new Set();
+
+function goBlock(b) {
+  document.querySelectorAll('.step').forEach(function(s) { s.classList.remove('active'); });
+  $('step' + b).classList.add('active');
+  showErr('');
+  var info = BLOCK_INFO[b];
+  $('progText').textContent = info.label;
+  $('progNum').textContent  = info.num;
+  $('progFill').style.width = info.pct + '%';
+  BLOCKS.forEach(function(bb, i) {
+    $('pb' + i).classList.toggle('done', _doneBlocks.has(bb));
+  });
+  window.scrollTo(0, 0);
+}
+
+// ── Chip selection ───────────────────────────────────────────────────────────
+document.addEventListener('click', function(e) {
+  var chip = e.target.closest('.chip');
+  if (!chip) return;
+  var wrap = chip.closest('.chips');
+  if (!wrap) return;
+  var multi = wrap.dataset.multi === '1';
+  if (!multi) {
+    wrap.querySelectorAll('.chip').forEach(function(c) { c.classList.remove('selected'); });
+  }
+  chip.classList.toggle('selected');
+  var q = wrap.dataset.q;
+  if (multi) {
+    _answers[q] = Array.from(wrap.querySelectorAll('.chip.selected')).map(function(c) { return c.dataset.v; });
+  } else {
+    _answers[q] = chip.classList.contains('selected') ? chip.dataset.v : null;
+  }
+  // Помечаем блок как затронутый
+  var step = wrap.closest('.step');
+  if (step) {
+    var id = step.id.replace('step', '');
+    if (['A','B','C','D'].includes(id)) _doneBlocks.add(id);
+  }
+  // Save draft to localStorage
+  try { localStorage.setItem(DRAFT_KEY, JSON.stringify(_answers)); } catch(e) {}
+});
+
+// ── Отправка ─────────────────────────────────────────────────────────────────
+function submitSurvey() {
+  if (!_token) { showErr('Необходимо войти в аккаунт'); return; }
+
+  fetch('/api/auth/onboarding', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Auth-Token': _token },
+    body: JSON.stringify({ answers: _answers }),
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (d.error) { showErr(d.error); return; }
+    // Сбросить промо-счётчики
+    localStorage.removeItem('sbfSurveyDeclines');
+    localStorage.setItem('sbfSurveyDone', '1');
+    renderResult(d);
+  })
+  .catch(function(e) { showErr('Ошибка сети: ' + e.message); });
+}
+
+// ── «Твой путь» ─────────────────────────────────────────────────────────────
+function renderResult(d) {
+  var path = d.path || {};
+  var proGranted = d.pro_granted;
+  var proUntil  = d.pro_until;
+
+  $('pathHello').textContent = 'Отлично, ' + (path.first_name || '') + '!';
+  $('pathGoalTitle').textContent = path.goal_title || '📚 Обучение';
+  $('pathGoalSub').textContent   = path.goal_subtitle || '';
+
+  // PRO badge
+  if (proGranted && proUntil) {
+    var d30 = new Date(proUntil);
+    $('proUntilText').textContent = 'Действует до ' + d30.toLocaleDateString('ru-RU') + ' · без автосписания.';
+    $('proAward').style.display = '';
+  } else {
+    $('proAward').style.display = 'none';
+  }
+
+  var cards = '';
+  if (path.level_advice)  cards += _card('🎯', path.level_advice);
+  if (path.preset_advice) cards += _card('🛡', path.preset_advice);
+  if (path.markets && path.markets.length) {
+    var tags = path.markets.map(function(m) {
+      return '<span class="market-tag">' + _esc(m) + '</span>';
+    }).join('');
+    cards += _card('📊', 'Ватчлист настроен:<div class="market-tags">' + tags + '</div>');
+  }
+  $('pathCards').innerHTML = cards;
+
+  var steps = '';
+  (path.steps || []).forEach(function(s, i) {
+    steps += '<div class="path-step"><span class="path-step-n">' + (i+1) + '</span>' +
+      '<span>' + _esc(s) + '</span></div>';
+  });
+  $('pathSteps').innerHTML = '<div class="path-steps-title">С чего начать</div>' + steps;
+
+  // Переход на экран результата
+  document.querySelectorAll('.step').forEach(function(s) { s.classList.remove('active'); });
+  $('stepResult').classList.add('active');
+  $('progText').textContent = 'Готово!';
+  $('progNum').textContent  = '✓';
+  $('progFill').style.width = '100%';
+  ['pb0','pb1','pb2','pb3'].forEach(function(id) { $(id).classList.add('done'); });
+  window.scrollTo(0, 0);
+}
+
+function _card(ico, text) {
+  return '<div class="path-card"><span class="path-card-ico">' + ico + '</span>' +
+    '<span>' + text + '</span></div>';
+}
+function _esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── afterBlockC — вызывается после Блока C ───────────────────────────────────
+function afterBlockC() {
+  _doneBlocks.add('C');
+  if (!_token) {
+    // Анонимный пользователь — переходит к регистрации
+    goStep('Reg');
+  } else {
+    goBlock('D');
+  }
+}
+
+function goStep(id) {
+  document.querySelectorAll('.step').forEach(function(s) { s.classList.remove('active'); });
+  $('step' + id).classList.add('active');
+  showErr('');
+  window.scrollTo(0, 0);
+  // Прогресс
+  if (id === 'Reg') {
+    $('progText').textContent = 'Регистрация';
+    $('progNum').textContent = '— / 4';
+    $('progFill').style.width = '80%';
+  }
+}
+
+// ── Регистрация через опросник ────────────────────────────────────────────────
+function submitViaRegister() {
+  showErr('');
+  var name    = ($('regName').value || '').trim();
+  var email   = ($('regEmail').value || '').trim();
+  var pwd     = ($('regPwd').value || '').trim();
+  var ageOk   = $('regAge').checked;
+  var dataOk  = $('regData').checked;
+  var discOk  = $('regDisc').checked;
+  var mktOk   = $('regMkt').checked;
+
+  if (!name)   { showErr('Введи своё имя'); return; }
+  if (!email || !email.includes('@')) { showErr('Введи корректный email'); return; }
+  if (pwd.length < 8) { showErr('Пароль — минимум 8 символов'); return; }
+  if (!ageOk)  { showErr('Подтверди, что тебе 18+'); return; }
+  if (!dataOk) { showErr('Необходимо согласие на обработку данных'); return; }
+  if (!discOk) { showErr('Необходимо согласие с условиями'); return; }
+
+  var btn = $('regSubmitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Создаём аккаунт…';
+
+  fetch('/api/auth/register-via-survey', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name: name, email: email, password: pwd,
+      age_18_confirmed: true,
+      consent_data: true,
+      consent_disclaimer: discOk,
+      consent_marketing: mktOk,
+      answers: _answers,
+    }),
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    btn.disabled = false;
+    btn.textContent = 'Создать аккаунт и получить PRO →';
+    if (d.error) {
+      showErr(d.email_exists
+        ? d.error + ' Используй кнопку «Войти» ниже.'
+        : d.error);
+      return;
+    }
+    _token = d.token || '';
+    if (_token) {
+      localStorage.setItem('sbf_token', _token);
+      // Save first name for profile avatar
+      var firstName = name.split(' ')[0];
+      var existingProfile = JSON.parse(localStorage.getItem('sbf_profile') || '{}');
+      existingProfile.firstName = firstName;
+      localStorage.setItem('sbf_profile', JSON.stringify(existingProfile));
+      localStorage.setItem('sbfSurveyDone', '1');
+    }
+    localStorage.removeItem(DRAFT_KEY);
+    // Переходим к блоку D (финальные вопросы / можно пропустить)
+    goBlock('D');
+  })
+  .catch(function(e) {
+    btn.disabled = false;
+    btn.textContent = 'Создать аккаунт и получить PRO →';
+    showErr('Ошибка сети: ' + e.message);
+  });
+}
+
+function goLogin() {
+  window.location.href = '/login.html?next=' + encodeURIComponent(window.location.pathname);
+}
+
+// ── Инициализация ─────────────────────────────────────────────────────────────
+(function init() {
+  if (!_token) {
+    // Опросник доступен только для авторизованных — перенаправляем на регистрацию
+    window.location.href = '/register.html';
+    return;
+  }
+  // Проверяем сессию и статус опросника
+  fetch('/api/auth/survey-status', { headers: { 'X-Auth-Token': _token } })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d.done) {
+        fetch('/api/auth/my-path', { headers: { 'X-Auth-Token': _token } })
+          .then(function(r) { return r.json(); })
+          .then(function(path) {
+            renderResult({ path: path, pro_granted: !!d.pro_until, pro_until: d.pro_until });
+          })
+          .catch(function() { goBlock('A'); });
+      } else {
+        goBlock('A');
+      }
+    })
+    .catch(function() { goBlock('A'); });
+
+  var regLink = $('regLoginLink');
+  if (regLink) regLink.addEventListener('click', function(e) { e.preventDefault(); goLogin(); });
+})();
+</script>
+</body>
+</html>
