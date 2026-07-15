@@ -5,16 +5,36 @@
 (function () {
   'use strict';
 
+  // ── i18n (см. assets/i18n.js, паттерн — sbf-header.js) ───────────────────
+  var _i18n = window.sbfI18n || { lang: 'ru', t: function (k, fb) { return fb || k; }, ready: Promise.resolve() };
+  function t(key, fallback) { return _i18n.t(key, fallback); }
+
+  // Патч-пасс для узлов, отрисованных ДО того как словарь догрузился:
+  // data-i18n → textContent, data-i18n-aria → aria-label, data-i18n-ph → placeholder.
+  function _patchI18n(root) {
+    if (_i18n.lang === 'ru') return;
+    var sel = '[data-i18n],[data-i18n-aria],[data-i18n-ph]';
+    var found = Array.prototype.slice.call(root.querySelectorAll(sel));
+    if (root.matches && root.matches(sel)) found.unshift(root);
+    found.forEach(function (el) {
+      if (el.hasAttribute('data-i18n')) el.textContent = t(el.getAttribute('data-i18n'), el.textContent);
+      if (el.hasAttribute('data-i18n-aria')) el.setAttribute('aria-label', t(el.getAttribute('data-i18n-aria'), el.getAttribute('aria-label')));
+      if (el.hasAttribute('data-i18n-ph')) el.setAttribute('placeholder', t(el.getAttribute('data-i18n-ph'), el.getAttribute('placeholder')));
+    });
+  }
+
   var _STATE = 0;
   var _utt   = null;
   var _twTimer = null;
   var _screenshotDataUrl = null;
   var _adminMode = false;
 
-  var BUBBLE_TEXT =
-    'Если вы нашли баг или хотели бы что-то добавить — ' +
-    'нажмите на меня ещё раз, сделайте скриншот и допишите комментарий. ' +
-    'Информация уйдёт в техподдержку, мы её рассмотрим.';
+  function bubbleText() {
+    return t('feedback.bubble_text',
+      'Если вы нашли баг или хотели бы что-то добавить — ' +
+      'нажмите на меня ещё раз, сделайте скриншот и допишите комментарий. ' +
+      'Информация уйдёт в техподдержку, мы её рассмотрим.');
+  }
 
   // ── CSS ────────────────────────────────────────────────────────────────────
   var css = `
@@ -254,12 +274,14 @@
     _bubble.className = 'sbf-fw-bubble';
     _bubble.innerHTML =
       '<div class="sbf-fw-bubble-text" id="sbf-fw-btext"></div>' +
-      '<button class="sbf-fw-bubble-skip" id="sbf-fw-skip">Пропустить → форма</button>';
+      '<button class="sbf-fw-bubble-skip" id="sbf-fw-skip" data-i18n="feedback.bubble_skip">' +
+        t('feedback.bubble_skip', 'Пропустить → форма') + '</button>';
 
     // Кнопка-кружок
     _btn = document.createElement('button');
     _btn.className = 'sbf-fw-btn';
-    _btn.setAttribute('aria-label', 'Обратная связь');
+    _btn.setAttribute('data-i18n-aria', 'feedback.aria_feedback');
+    _btn.setAttribute('aria-label', t('feedback.aria_feedback', 'Обратная связь'));
     _btn.innerHTML = ICON_SVG;
 
     // Форма
@@ -268,26 +290,26 @@
     _form.innerHTML =
       '<div class="sbf-fw-form">' +
         '<div class="sbf-fw-form-header">' +
-          '<span class="sbf-fw-form-title">Оставить отзыв</span>' +
-          '<button class="sbf-fw-close-btn" id="sbf-fw-close" aria-label="Закрыть">×</button>' +
+          '<span class="sbf-fw-form-title" data-i18n="feedback.form_title">' + t('feedback.form_title', 'Оставить отзыв') + '</span>' +
+          '<button class="sbf-fw-close-btn" id="sbf-fw-close" data-i18n-aria="feedback.aria_close" aria-label="' + t('feedback.aria_close', 'Закрыть') + '">×</button>' +
         '</div>' +
         '<div class="sbf-fw-screenshot-wrap">' +
-          '<div class="sbf-fw-screenshot-progress" id="sbf-fw-scprog">Захватываем скриншот…</div>' +
+          '<div class="sbf-fw-screenshot-progress" id="sbf-fw-scprog" data-i18n="feedback.screenshot_capturing">' + t('feedback.screenshot_capturing', 'Захватываем скриншот…') + '</div>' +
           '<img class="sbf-fw-screenshot-preview" id="sbf-fw-preview" alt="">' +
           '<label class="sbf-fw-file-label">' +
             '<input type="file" accept="image/*" class="sbf-fw-file-input" id="sbf-fw-file">' +
-            '📎 Прикрепить свой скриншот' +
+            '<span data-i18n="feedback.attach_screenshot">' + t('feedback.attach_screenshot', '📎 Прикрепить свой скриншот') + '</span>' +
           '</label>' +
         '</div>' +
         '<div class="sbf-fw-kind-row" id="sbf-fw-kinds">' +
-          '<button class="sbf-fw-kind-btn" data-kind="bug">🐛 Баг</button>' +
-          '<button class="sbf-fw-kind-btn active" data-kind="other">💬 Другое</button>' +
-          '<button class="sbf-fw-kind-btn" data-kind="idea">💡 Идея</button>' +
+          '<button class="sbf-fw-kind-btn" data-kind="bug" data-i18n="feedback.kind_bug">' + t('feedback.kind_bug', '🐛 Баг') + '</button>' +
+          '<button class="sbf-fw-kind-btn active" data-kind="other" data-i18n="feedback.kind_other">' + t('feedback.kind_other', '💬 Другое') + '</button>' +
+          '<button class="sbf-fw-kind-btn" data-kind="idea" data-i18n="feedback.kind_idea">' + t('feedback.kind_idea', '💡 Идея') + '</button>' +
         '</div>' +
-        '<textarea class="sbf-fw-textarea" id="sbf-fw-comment" ' +
-          'placeholder="Опишите проблему или предложение…" rows="3"></textarea>' +
+        '<textarea class="sbf-fw-textarea" id="sbf-fw-comment" data-i18n-ph="feedback.comment_placeholder" ' +
+          'placeholder="' + t('feedback.comment_placeholder', 'Опишите проблему или предложение…') + '" rows="3"></textarea>' +
         '<div class="sbf-fw-anon-note" id="sbf-fw-anon"></div>' +
-        '<button class="sbf-fw-submit-btn" id="sbf-fw-send">Отправить</button>' +
+        '<button class="sbf-fw-submit-btn" id="sbf-fw-send" data-i18n="feedback.submit_button">' + t('feedback.submit_button', 'Отправить') + '</button>' +
       '</div>';
 
     // Admin bar
@@ -295,16 +317,21 @@
     _adminBar.className = 'sbf-fw-admin-bar';
     _adminBar.id = 'sbf-fw-admin-bar';
     _adminBar.innerHTML =
-      '<span>⚙ Админ-режим</span>' +
-      '<a href="/admin.html">Панель</a>' +
+      '<span data-i18n="feedback.admin_mode_label">' + t('feedback.admin_mode_label', '⚙ Админ-режим') + '</span>' +
+      '<a href="/admin.html" data-i18n="feedback.admin_panel_link">' + t('feedback.admin_panel_link', 'Панель') + '</a>' +
       '<label class="sbf-fw-admin-toggle">' +
-        '<input type="checkbox" id="sbf-fw-copy-toggle"> Правка текстов' +
+        '<input type="checkbox" id="sbf-fw-copy-toggle"><span data-i18n="feedback.admin_copy_edit_label">' + t('feedback.admin_copy_edit_label', ' Правка текстов') + '</span>' +
       '</label>';
 
     document.body.appendChild(_adminBar);
     document.body.appendChild(_bubble);
     document.body.appendChild(_btn);
     document.body.appendChild(_form);
+
+    _patchI18n(_adminBar);
+    _patchI18n(_bubble);
+    _patchI18n(_btn);
+    _patchI18n(_form);
 
     _bubbleText = document.getElementById('sbf-fw-btext');
     _preview    = document.getElementById('sbf-fw-preview');
@@ -348,7 +375,7 @@
   function showBubble() {
     _bubble.style.display = 'block';
     _bubbleText.textContent = '';
-    speakAndType(BUBBLE_TEXT, _bubbleText, function () {});
+    speakAndType(bubbleText(), _bubbleText, function () {});
   }
 
   function openForm() {
@@ -358,7 +385,7 @@
     // Анонимность
     if (!window.sbfAuth || !sbfAuth.isLoggedIn()) {
       document.getElementById('sbf-fw-anon').innerHTML =
-        'Вы анонимны (вес 1). <a href="/journal.html">Войдите</a> — голос весит больше.';
+        t('feedback.anon_note', 'Вы анонимны (вес 1). <a href="/journal.html">Войдите</a> — голос весит больше.');
     } else {
       document.getElementById('sbf-fw-anon').textContent = '';
     }
@@ -376,7 +403,7 @@
     _preview.src = '';
     _textarea.value = '';
     document.getElementById('sbf-fw-scprog').textContent = '';
-    document.getElementById('sbf-fw-send').innerHTML = 'Отправить';
+    document.getElementById('sbf-fw-send').innerHTML = t('feedback.submit_button', 'Отправить');
     _submitBtn.disabled = false;
   }
 
@@ -441,7 +468,7 @@
     if (_twTimer) { clearInterval(_twTimer); _twTimer = null; }
     if (window.speechSynthesis) { try { window.speechSynthesis.cancel(); } catch (e) {} }
     _utt = null;
-    if (_bubbleText) _bubbleText.textContent = BUBBLE_TEXT;
+    if (_bubbleText) _bubbleText.textContent = bubbleText();
   }
 
   // ── Screenshot ─────────────────────────────────────────────────────────────
@@ -452,14 +479,14 @@
     s.onload = cb;
     s.onerror = function () {
       document.getElementById('sbf-fw-scprog').textContent =
-        'Скриншот недоступен — прикрепите свой.';
+        t('feedback.screenshot_unavailable', 'Скриншот недоступен — прикрепите свой.');
     };
     document.head.appendChild(s);
   }
 
   function doScreenshot() {
     var prog = document.getElementById('sbf-fw-scprog');
-    prog.textContent = 'Захватываем скриншот…';
+    prog.textContent = t('feedback.screenshot_capturing', 'Захватываем скриншот…');
     loadHtml2Canvas(function () {
       window.html2canvas(document.body, {
         scale: 0.6,
@@ -475,18 +502,18 @@
         },
       }).then(function (canvas) {
         canvas.toBlob(function (blob) {
-          if (!blob) { prog.textContent = 'Не удалось — прикрепите свой.'; return; }
+          if (!blob) { prog.textContent = t('feedback.screenshot_failed', 'Не удалось — прикрепите свой.'); return; }
           var reader = new FileReader();
           reader.onload = function (ev) {
             _screenshotDataUrl = ev.target.result;
             _preview.src = _screenshotDataUrl;
             _preview.style.display = 'block';
-            prog.textContent = 'Скриншот готов';
+            prog.textContent = t('feedback.screenshot_ready', 'Скриншот готов');
           };
           reader.readAsDataURL(blob);
         }, 'image/jpeg', 0.65);
       }).catch(function () {
-        prog.textContent = 'Не удалось — прикрепите свой.';
+        prog.textContent = t('feedback.screenshot_failed', 'Не удалось — прикрепите свой.');
       });
     });
   }
@@ -499,7 +526,7 @@
       _screenshotDataUrl = ev.target.result;
       _preview.src = _screenshotDataUrl;
       _preview.style.display = 'block';
-      document.getElementById('sbf-fw-scprog').textContent = 'Файл прикреплён';
+      document.getElementById('sbf-fw-scprog').textContent = t('feedback.file_attached', 'Файл прикреплён');
     };
     reader.readAsDataURL(file);
   }
@@ -515,7 +542,7 @@
     }
 
     _submitBtn.disabled = true;
-    _submitBtn.textContent = 'Отправляем…';
+    _submitBtn.textContent = t('feedback.submitting', 'Отправляем…');
 
     var payload = {
       kind: _selectedKind,
@@ -539,20 +566,20 @@
         inner.innerHTML =
           '<div class="sbf-fw-done-msg">' +
           '<div style="font-size:32px;margin-bottom:8px">✅</div>' +
-          '<div style="font-weight:700;margin-bottom:6px">Отзыв отправлен!</div>' +
-          '<div style="font-size:12px;color:var(--muted,#6b7280)">Мы рассмотрим его в ближайшее время. Спасибо!</div>' +
+          '<div style="font-weight:700;margin-bottom:6px">' + t('feedback.submitted_title', 'Отзыв отправлен!') + '</div>' +
+          '<div style="font-size:12px;color:var(--muted,#6b7280)">' + t('feedback.submitted_note', 'Мы рассмотрим его в ближайшее время. Спасибо!') + '</div>' +
           '</div>';
         setTimeout(function () { closeAll(); _STATE = 0; }, 2800);
       } else {
         _submitBtn.disabled = false;
-        _submitBtn.textContent = 'Отправить';
-        alert(d.error || 'Ошибка отправки');
+        _submitBtn.textContent = t('feedback.submit_button', 'Отправить');
+        alert(d.error || t('feedback.err_generic', 'Ошибка отправки'));
       }
     })
     .catch(function (e) {
       _submitBtn.disabled = false;
-      _submitBtn.textContent = 'Отправить';
-      alert('Ошибка: ' + e.message);
+      _submitBtn.textContent = t('feedback.submit_button', 'Отправить');
+      alert(t('feedback.err_prefix', 'Ошибка: ') + e.message);
     });
   }
 

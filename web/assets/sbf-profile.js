@@ -6,6 +6,24 @@
 (function () {
   'use strict';
 
+  // ── i18n (см. assets/i18n.js, паттерн — sbf-header.js) ───────────────────
+  var _i18n = window.sbfI18n || { lang: 'ru', t: function (k, fb) { return fb || k; }, ready: Promise.resolve() };
+  function t(key, fallback) { return _i18n.t(key, fallback); }
+
+  // Патч-пасс для узлов, отрисованных ДО того как словарь догрузился:
+  // data-i18n → textContent, data-i18n-aria → aria-label, data-i18n-ph → placeholder.
+  function _patchI18n(root) {
+    if (_i18n.lang === 'ru') return;
+    var sel = '[data-i18n],[data-i18n-aria],[data-i18n-ph]';
+    var found = Array.prototype.slice.call(root.querySelectorAll(sel));
+    if (root.matches && root.matches(sel)) found.unshift(root);
+    found.forEach(function (el) {
+      if (el.hasAttribute('data-i18n')) el.textContent = t(el.getAttribute('data-i18n'), el.textContent);
+      if (el.hasAttribute('data-i18n-aria')) el.setAttribute('aria-label', t(el.getAttribute('data-i18n-aria'), el.getAttribute('aria-label')));
+      if (el.hasAttribute('data-i18n-ph')) el.setAttribute('placeholder', t(el.getAttribute('data-i18n-ph'), el.getAttribute('placeholder')));
+    });
+  }
+
   var KEY = 'sbf_profile';
 
   // ── Хранилище ────────────────────────────────────────────────────────────────
@@ -45,7 +63,14 @@
   }
 
   var TITLES = ['Новичок','Наблюдатель','Аналитик','Тактик','Стратег','Мастер','Эксперт','Профессионал'];
-  function lvlTitle(n) { return TITLES[Math.min(n - 1, TITLES.length - 1)]; }
+  var TITLE_KEYS = [
+    'profile.level_title_1', 'profile.level_title_2', 'profile.level_title_3', 'profile.level_title_4',
+    'profile.level_title_5', 'profile.level_title_6', 'profile.level_title_7', 'profile.level_title_8'
+  ];
+  function lvlTitle(n) {
+    var idx = Math.min(n - 1, TITLES.length - 1);
+    return t(TITLE_KEYS[idx], TITLES[idx]);
+  }
 
   function esc(s) {
     return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -345,20 +370,20 @@
     panel.className = 'sbf-pp';
     panel.setAttribute('role', 'dialog');
     panel.setAttribute('aria-modal', 'true');
-    panel.setAttribute('aria-label', 'Мой профиль');
+    panel.setAttribute('aria-label', t('profile.aria_my_profile', 'Мой профиль'));
     panel.addEventListener('click', function (e) { e.stopPropagation(); });
 
     panel.innerHTML = [
       // Drag handle + header
       '<div class="sbf-pp-drag"></div>',
       '<div class="sbf-pp-hd">',
-      '  <h3>Профиль</h3>',
-      '  <button class="sbf-pp-x" id="sbfPpX" aria-label="Закрыть">✕</button>',
+      '  <h3 data-i18n="profile.panel_title">' + t('profile.panel_title', 'Профиль') + '</h3>',
+      '  <button class="sbf-pp-x" id="sbfPpX" data-i18n-aria="profile.aria_close" aria-label="' + t('profile.aria_close', 'Закрыть') + '">✕</button>',
       '</div>',
 
       // Avatar strip (compact, outside scroll)
       '<div class="sbf-pp-av-strip">',
-      '  <button class="sbf-pp-av-btn" id="sbfPpAvBtn" aria-label="Изменить фото">',
+      '  <button class="sbf-pp-av-btn" id="sbfPpAvBtn" data-i18n-aria="profile.aria_change_photo" aria-label="' + t('profile.aria_change_photo', 'Изменить фото') + '">',
       '    <div class="sbf-pp-av-lg" id="sbfPpAvLg"></div>',
       '    <div class="sbf-pp-av-ed">✎</div>',
       '  </button>',
@@ -371,10 +396,10 @@
 
       // Tab bar
       '<div class="sbf-pp-tabs">',
-      '  <button class="sbf-pp-tab active" data-tab="Overview">Обзор</button>',
-      '  <button class="sbf-pp-tab" data-tab="Diary">Дневник</button>',
-      '  <button class="sbf-pp-tab" data-tab="Progress">Прогресс</button>',
-      '  <button class="sbf-pp-tab" data-tab="Account">Аккаунт</button>',
+      '  <button class="sbf-pp-tab active" data-tab="Overview" data-i18n="profile.tab_overview">' + t('profile.tab_overview', 'Обзор') + '</button>',
+      '  <button class="sbf-pp-tab" data-tab="Diary" data-i18n="profile.tab_diary">' + t('profile.tab_diary', 'Дневник') + '</button>',
+      '  <button class="sbf-pp-tab" data-tab="Progress" data-i18n="profile.tab_progress">' + t('profile.tab_progress', 'Прогресс') + '</button>',
+      '  <button class="sbf-pp-tab" data-tab="Account" data-i18n="profile.tab_account">' + t('profile.tab_account', 'Аккаунт') + '</button>',
       '</div>',
 
       // Scrollable body
@@ -386,38 +411,38 @@
       // Survey promo (hidden after completion or too many dismissals)
       '  <div class="sbf-pp-survey-promo" id="sbfSurveyPromo" style="display:none">',
       '    <div class="sbf-pp-sp-header">',
-      '      <span class="sbf-pp-sp-badge">🎁 PRO · 30 дней</span>',
-      '      <button class="sbf-pp-sp-x" id="sbfSurveyDismiss" aria-label="Закрыть">✕</button>',
+      '      <span class="sbf-pp-sp-badge" data-i18n="profile.survey_badge">' + t('profile.survey_badge', '🎁 PRO · 30 дней') + '</span>',
+      '      <button class="sbf-pp-sp-x" id="sbfSurveyDismiss" data-i18n-aria="profile.aria_close" aria-label="' + t('profile.aria_close', 'Закрыть') + '">✕</button>',
       '    </div>',
-      '    <div class="sbf-pp-sp-text">',
-      '      Пройди опрос трейдера — получи <b>30 дней PRO бесплатно</b>.',
-      '      <div class="sbf-pp-sp-fine">Только за полное прохождение. Без автосписания.</div>',
+      '    <div class="sbf-pp-sp-text" data-i18n="profile.survey_promo_text">',
+      '      ' + t('profile.survey_promo_text', 'Пройди опрос трейдера — получи <b>30 дней PRO бесплатно</b>.'),
+      '      <div class="sbf-pp-sp-fine" data-i18n="profile.survey_promo_fine">' + t('profile.survey_promo_fine', 'Только за полное прохождение. Без автосписания.') + '</div>',
       '    </div>',
-      '    <a href="/survey.html" class="sbf-pp-sp-btn">Пройти опросник →</a>',
+      '    <a href="/survey.html" class="sbf-pp-sp-btn" data-i18n="profile.survey_promo_button">' + t('profile.survey_promo_button', 'Пройти опросник →') + '</a>',
       '  </div>',
 
       // First-run hero (hidden when trades exist)
       '  <div class="sbf-pp-hero" id="sbfHero">',
       '    <span class="sbf-pp-hero-ico">📓</span>',
-      '    <div class="sbf-pp-hero-t">Начни вести журнал</div>',
-      '    <div class="sbf-pp-hero-s">Внеси первую сделку — и сразу увидишь',
-      '      <span class="sbf-tip" data-tip="Во сколько прибыль больше риска. +2R = заработал вдвое больше, чем рисковал">R-кратное<span class="sbf-tip-ico">?</span></span>,',
-      '      <span class="sbf-tip" data-tip="% соблюдения ВАШИХ правил — стоп, риск, план. Это не прибыль.">дисциплину<span class="sbf-tip-ico">?</span></span>',
-      '      и аналитику на реальных данных.',
+      '    <div class="sbf-pp-hero-t" data-i18n="profile.hero_title">' + t('profile.hero_title', 'Начни вести журнал') + '</div>',
+      '    <div class="sbf-pp-hero-s"><span data-i18n="profile.hero_text_p1">' + t('profile.hero_text_p1', 'Внеси первую сделку — и сразу увидишь') + '</span>',
+      '      <span class="sbf-tip" data-tip="' + t('profile.tip_r_multiple', 'Во сколько прибыль больше риска. +2R = заработал вдвое больше, чем рисковал') + '"><span data-i18n="profile.tip_r_multiple_label">' + t('profile.tip_r_multiple_label', 'R-кратное') + '</span><span class="sbf-tip-ico">?</span></span>,',
+      '      <span class="sbf-tip" data-tip="' + t('profile.tip_discipline_full', '% соблюдения ВАШИХ правил — стоп, риск, план. Это не прибыль.') + '"><span data-i18n="profile.hero_discipline_label">' + t('profile.hero_discipline_label', 'дисциплину') + '</span><span class="sbf-tip-ico">?</span></span>',
+      '      <span data-i18n="profile.hero_text_p2">' + t('profile.hero_text_p2', 'и аналитику на реальных данных.') + '</span>',
       '    </div>',
-      '    <a href="/journal.html#trades" class="sbf-pp-hero-btn">Добавить сделку →</a>',
+      '    <a href="/journal.html#trades" class="sbf-pp-hero-btn" data-i18n="profile.hero_button">' + t('profile.hero_button', 'Добавить сделку →') + '</a>',
       '  </div>',
 
       // Mini stats (shown after first trade)
       '  <div id="sbfPpStatsCard" style="display:none" class="sbf-pp-stats-row">',
       '    <div class="sbf-pp-mini-stat">',
       '      <div class="sbf-pp-mini-stat-val" id="sbfPpTradeVal">0</div>',
-      '      <div class="sbf-pp-mini-stat-lbl">сделок</div>',
+      '      <div class="sbf-pp-mini-stat-lbl" data-i18n="profile.stat_trades_label">' + t('profile.stat_trades_label', 'сделок') + '</div>',
       '    </div>',
       '    <div class="sbf-pp-mini-stat">',
       '      <div class="sbf-pp-mini-stat-val" id="sbfPpDiscVal">—</div>',
       '      <div class="sbf-pp-mini-stat-lbl">',
-      '        <span class="sbf-tip" data-tip="% соблюдения ВАШИХ правил — стоп, риск, план">дисциплина<span class="sbf-tip-ico">?</span></span>',
+      '        <span class="sbf-tip" data-tip="' + t('profile.tip_discipline_short', '% соблюдения ВАШИХ правил — стоп, риск, план') + '"><span data-i18n="profile.stat_discipline_label">' + t('profile.stat_discipline_label', 'дисциплина') + '</span><span class="sbf-tip-ico">?</span></span>',
       '      </div>',
       '    </div>',
       '  </div>',
@@ -429,7 +454,7 @@
       '      <div class="sbf-pp-lvl-t" id="sbfPpLt">Новичок</div>',
       '      <div class="sbf-pp-xp-row">',
       '        <span class="sbf-pp-xp-lbl">',
-      '          <span class="sbf-tip" data-tip="Опыт за полезные действия: уроки, дневник, дисциплина, серии">',
+      '          <span class="sbf-tip" data-tip="' + t('profile.tip_xp', 'Опыт за полезные действия: уроки, дневник, дисциплина, серии') + '">',
       '            XP<span class="sbf-tip-ico">?</span>',
       '          </span>',
       '        </span>',
@@ -443,106 +468,106 @@
       '  </div>',
 
       // Name edit
-      '  <div class="sbf-pp-f"><label for="sbfPpFn">Имя</label>',
-      '    <input type="text" id="sbfPpFn" placeholder="Введите имя" autocomplete="given-name"></div>',
-      '  <div class="sbf-pp-f"><label for="sbfPpLa">Фамилия</label>',
-      '    <input type="text" id="sbfPpLa" placeholder="Введите фамилию" autocomplete="family-name"></div>',
-      '  <button class="sbf-pp-save" id="sbfPpSv">Сохранить</button>',
+      '  <div class="sbf-pp-f"><label for="sbfPpFn" data-i18n="profile.field_first_name">' + t('profile.field_first_name', 'Имя') + '</label>',
+      '    <input type="text" id="sbfPpFn" data-i18n-ph="profile.placeholder_first_name" placeholder="' + t('profile.placeholder_first_name', 'Введите имя') + '" autocomplete="given-name"></div>',
+      '  <div class="sbf-pp-f"><label for="sbfPpLa" data-i18n="profile.field_last_name">' + t('profile.field_last_name', 'Фамилия') + '</label>',
+      '    <input type="text" id="sbfPpLa" data-i18n-ph="profile.placeholder_last_name" placeholder="' + t('profile.placeholder_last_name', 'Введите фамилию') + '" autocomplete="family-name"></div>',
+      '  <button class="sbf-pp-save" id="sbfPpSv" data-i18n="profile.save_button">' + t('profile.save_button', 'Сохранить') + '</button>',
       '</div>',
 
       // ── Tab: Дневник ────────────────────────────────────────────────────────
       '<div class="sbf-pp-pane" id="sbfTabDiary">',
-      '  <div class="sbf-pp-sec-hd">Дневник</div>',
+      '  <div class="sbf-pp-sec-hd" data-i18n="profile.diary_section">' + t('profile.diary_section', 'Дневник') + '</div>',
       '  <div class="sbf-pp-links">',
       '    <a href="/journal.html#trades" class="sbf-pp-jlink">',
       '      <span class="sbf-pp-jlink-ico">📋</span>',
-      '      <span class="sbf-pp-jlink-lbl">Сделки</span></a>',
+      '      <span class="sbf-pp-jlink-lbl" data-i18n="profile.link_trades">' + t('profile.link_trades', 'Сделки') + '</span></a>',
       '    <a href="/journal.html#brief" class="sbf-pp-jlink">',
       '      <span class="sbf-pp-jlink-ico">☀️</span>',
-      '      <span class="sbf-pp-jlink-lbl">Твой день</span></a>',
+      '      <span class="sbf-pp-jlink-lbl" data-i18n="profile.link_your_day">' + t('profile.link_your_day', 'Твой день') + '</span></a>',
       '    <a href="/journal.html#checklist" class="sbf-pp-jlink">',
       '      <span class="sbf-pp-jlink-ico">✅</span>',
       '      <span class="sbf-pp-jlink-lbl">',
-      '        <span class="sbf-tip" data-tip="Чек-лист перед входом в сделку — ваши правила в одном месте">',
-      '          Ритуал<span class="sbf-tip-ico">?</span></span></span></a>',
+      '        <span class="sbf-tip" data-tip="' + t('profile.tip_ritual', 'Чек-лист перед входом в сделку — ваши правила в одном месте') + '">',
+      '          <span data-i18n="profile.link_ritual">' + t('profile.link_ritual', 'Ритуал') + '</span><span class="sbf-tip-ico">?</span></span></span></a>',
       '    <a href="/journal.html#discipline" class="sbf-pp-jlink">',
       '      <span class="sbf-pp-jlink-ico">🎯</span>',
       '      <span class="sbf-pp-jlink-lbl">',
-      '        <span class="sbf-tip" data-tip="% соблюдения ВАШИХ правил — стоп, риск, план. Это не прибыль.">',
-      '          Дисциплина<span class="sbf-tip-ico">?</span></span></span></a>',
+      '        <span class="sbf-tip" data-tip="' + t('profile.tip_discipline_full', '% соблюдения ВАШИХ правил — стоп, риск, план. Это не прибыль.') + '">',
+      '          <span data-i18n="profile.link_discipline">' + t('profile.link_discipline', 'Дисциплина') + '</span><span class="sbf-tip-ico">?</span></span></span></a>',
       '  </div>',
-      '  <div class="sbf-pp-sec-hd">Аналитика</div>',
+      '  <div class="sbf-pp-sec-hd" data-i18n="profile.analytics_section">' + t('profile.analytics_section', 'Аналитика') + '</div>',
       '  <div class="sbf-pp-links">',
       '    <a href="/journal.html#setups" class="sbf-pp-jlink">',
       '      <span class="sbf-pp-jlink-ico">📐</span>',
       '      <span class="sbf-pp-jlink-lbl">',
-      '        <span class="sbf-tip" data-tip="Ваша коллекция сетапов и как они отработали — ваш личный плейбук">',
-      '          Плейбук<span class="sbf-tip-ico">?</span></span></span></a>',
+      '        <span class="sbf-tip" data-tip="' + t('profile.tip_playbook', 'Ваша коллекция сетапов и как они отработали — ваш личный плейбук') + '">',
+      '          <span data-i18n="profile.link_playbook">' + t('profile.link_playbook', 'Плейбук') + '</span><span class="sbf-tip-ico">?</span></span></span></a>',
       '    <a href="/journal.html#alerts" class="sbf-pp-jlink">',
       '      <span class="sbf-pp-jlink-ico">🔔</span>',
-      '      <span class="sbf-pp-jlink-lbl">Алерты</span></a>',
+      '      <span class="sbf-pp-jlink-lbl" data-i18n="profile.link_alerts">' + t('profile.link_alerts', 'Алерты') + '</span></a>',
       '  </div>',
       '</div>',
 
       // ── Tab: Прогресс ───────────────────────────────────────────────────────
       '<div class="sbf-pp-pane" id="sbfTabProgress">',
-      '  <div class="sbf-pp-sec-hd">Развитие</div>',
+      '  <div class="sbf-pp-sec-hd" data-i18n="profile.development_section">' + t('profile.development_section', 'Развитие') + '</div>',
       '  <div class="sbf-pp-links">',
       '    <a href="/journal.html#gamification" class="sbf-pp-jlink">',
       '      <span class="sbf-pp-jlink-ico">🎮</span>',
       '      <span class="sbf-pp-jlink-lbl">',
-      '        <span class="sbf-tip" data-tip="Опыт за полезные действия: уроки, дневник, дисциплина">',
-      '          XP и уровень<span class="sbf-tip-ico">?</span></span></span></a>',
+      '        <span class="sbf-tip" data-tip="' + t('profile.tip_xp_level', 'Опыт за полезные действия: уроки, дневник, дисциплина') + '">',
+      '          <span data-i18n="profile.link_xp_level">' + t('profile.link_xp_level', 'XP и уровень') + '</span><span class="sbf-tip-ico">?</span></span></span></a>',
       '    <a href="/edu/" class="sbf-pp-jlink">',
       '      <span class="sbf-pp-jlink-ico">📚</span>',
-      '      <span class="sbf-pp-jlink-lbl">Обучение</span></a>',
+      '      <span class="sbf-pp-jlink-lbl" data-i18n="profile.link_education">' + t('profile.link_education', 'Обучение') + '</span></a>',
       '    <a href="/journal.html#goals" class="sbf-pp-jlink">',
       '      <span class="sbf-pp-jlink-ico">🏆</span>',
-      '      <span class="sbf-pp-jlink-lbl">Цели</span></a>',
+      '      <span class="sbf-pp-jlink-lbl" data-i18n="profile.link_goals">' + t('profile.link_goals', 'Цели') + '</span></a>',
       '    <a href="/journal.html#gamification" class="sbf-pp-jlink">',
       '      <span class="sbf-pp-jlink-ico">🃏</span>',
       '      <span class="sbf-pp-jlink-lbl">',
-      '        <span class="sbf-tip" data-tip="Карточки для повторения терминов — алгоритм SM-2 подбирает интервалы">',
-      '          Флешкарты<span class="sbf-tip-ico">?</span></span></span></a>',
+      '        <span class="sbf-tip" data-tip="' + t('profile.tip_flashcards', 'Карточки для повторения терминов — алгоритм SM-2 подбирает интервалы') + '">',
+      '          <span data-i18n="profile.link_flashcards">' + t('profile.link_flashcards', 'Флешкарты') + '</span><span class="sbf-tip-ico">?</span></span></span></a>',
       '  </div>',
-      '  <div class="sbf-pp-sec-hd">Серии и значки</div>',
+      '  <div class="sbf-pp-sec-hd" data-i18n="profile.streaks_badges_section">' + t('profile.streaks_badges_section', 'Серии и значки') + '</div>',
       '  <div class="sbf-pp-links">',
       '    <a href="/journal.html#gamification" class="sbf-pp-jlink">',
       '      <span class="sbf-pp-jlink-ico">🔥</span>',
       '      <span class="sbf-pp-jlink-lbl">',
-      '        <span class="sbf-tip" data-tip="Сколько дней подряд вы держите привычку вести дневник">',
-      '          Стрик<span class="sbf-tip-ico">?</span></span></span></a>',
+      '        <span class="sbf-tip" data-tip="' + t('profile.tip_streak', 'Сколько дней подряд вы держите привычку вести дневник') + '">',
+      '          <span data-i18n="profile.link_streak">' + t('profile.link_streak', 'Стрик') + '</span><span class="sbf-tip-ico">?</span></span></span></a>',
       '    <a href="/journal.html#gamification" class="sbf-pp-jlink">',
       '      <span class="sbf-pp-jlink-ico">🏅</span>',
-      '      <span class="sbf-pp-jlink-lbl">Значки</span></a>',
+      '      <span class="sbf-pp-jlink-lbl" data-i18n="profile.link_badges">' + t('profile.link_badges', 'Значки') + '</span></a>',
       '  </div>',
       '</div>',
 
       // ── Tab: Аккаунт ────────────────────────────────────────────────────────
       '<div class="sbf-pp-pane" id="sbfTabAccount">',
-      '  <div class="sbf-pp-sec-hd">Подписка и услуги</div>',
+      '  <div class="sbf-pp-sec-hd" data-i18n="profile.subscription_section">' + t('profile.subscription_section', 'Подписка и услуги') + '</div>',
       '  <div class="sbf-pp-links">',
       '    <a href="/journal.html#account" class="sbf-pp-jlink">',
       '      <span class="sbf-pp-jlink-ico">⭐</span>',
-      '      <span class="sbf-pp-jlink-lbl">Подписка</span></a>',
+      '      <span class="sbf-pp-jlink-lbl" data-i18n="profile.link_subscription">' + t('profile.link_subscription', 'Подписка') + '</span></a>',
       '    <a href="/journal.html#account" class="sbf-pp-jlink">',
       '      <span class="sbf-pp-jlink-ico">🤝</span>',
-      '      <span class="sbf-pp-jlink-lbl">Реферал</span></a>',
+      '      <span class="sbf-pp-jlink-lbl" data-i18n="profile.link_referral">' + t('profile.link_referral', 'Реферал') + '</span></a>',
       '    <a href="/journal.html#account" class="sbf-pp-jlink">',
       '      <span class="sbf-pp-jlink-ico">🏦</span>',
-      '      <span class="sbf-pp-jlink-lbl">Брокеры</span></a>',
+      '      <span class="sbf-pp-jlink-lbl" data-i18n="profile.link_brokers">' + t('profile.link_brokers', 'Брокеры') + '</span></a>',
       '    <a href="/register.html?retake=1" class="sbf-pp-jlink">',
       '      <span class="sbf-pp-jlink-ico">📋</span>',
-      '      <span class="sbf-pp-jlink-lbl">Опросник</span></a>',
+      '      <span class="sbf-pp-jlink-lbl" data-i18n="profile.link_survey">' + t('profile.link_survey', 'Опросник') + '</span></a>',
       '  </div>',
-      '  <div class="sbf-pp-sec-hd">Данные и приватность</div>',
+      '  <div class="sbf-pp-sec-hd" data-i18n="profile.data_privacy_section">' + t('profile.data_privacy_section', 'Данные и приватность') + '</div>',
       '  <div class="sbf-pp-links">',
       '    <a href="/journal.html#account" class="sbf-pp-jlink">',
       '      <span class="sbf-pp-jlink-ico">📤</span>',
-      '      <span class="sbf-pp-jlink-lbl">Экспорт</span></a>',
+      '      <span class="sbf-pp-jlink-lbl" data-i18n="profile.link_export">' + t('profile.link_export', 'Экспорт') + '</span></a>',
       '    <a href="/journal.html#account" class="sbf-pp-jlink">',
       '      <span class="sbf-pp-jlink-ico">🗑</span>',
-      '      <span class="sbf-pp-jlink-lbl">Удаление</span></a>',
+      '      <span class="sbf-pp-jlink-lbl" data-i18n="profile.link_delete">' + t('profile.link_delete', 'Удаление') + '</span></a>',
       '  </div>',
       '</div>',
 
@@ -598,6 +623,11 @@
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && panel.classList.contains('open')) closePanel();
     });
+
+    // Панель могла быть построена ДО того как словарь догрузился (гонка,
+    // маловероятна т.к. buildPanel вызывается только по клику пользователя) —
+    // подстраховываемся так же, как sbf-header.js делает для шапки.
+    _i18n.ready.then(function () { _patchI18n(panel); });
   }
 
   function _checkSurveyPromo() {
@@ -652,13 +682,13 @@
     if (la) la.value = p.lastName  || '';
 
     var n = document.getElementById('sbfPpLn');
-    var t = document.getElementById('sbfPpLt');
+    var ltEl = document.getElementById('sbfPpLt');
     var xl = document.getElementById('sbfPpXl');
     var xp = document.getElementById('sbfPpXp');
     var xf = document.getElementById('sbfPpXf');
-    if (n)  n.textContent  = lvl.level;
-    if (t)  t.textContent  = title;
-    if (xl) xl.textContent = (p.xp || 0) + ' XP · до ур. ' + (lvl.level + 1) + ': ' + left + ' XP';
+    if (n)    n.textContent  = lvl.level;
+    if (ltEl) ltEl.textContent = title;
+    if (xl) xl.textContent = (p.xp || 0) + ' XP · ' + t('profile.xp_to_level_label', 'до ур.') + ' ' + (lvl.level + 1) + ': ' + left + ' XP';
     if (xp) xp.textContent = pct + '%';
     if (xf) xf.style.width = pct + '%';
 
@@ -668,7 +698,7 @@
     var xmf = document.getElementById('sbfPpXMini');
     var fullName = ((p.firstName || '') + ' ' + (p.lastName || '')).trim();
     if (nm)  nm.textContent  = fullName || '—';
-    if (sub) sub.textContent = 'Уровень ' + lvl.level + ' · ' + title + ' · ' + (p.xp || 0) + ' XP';
+    if (sub) sub.textContent = t('profile.level_label', 'Уровень') + ' ' + lvl.level + ' · ' + title + ' · ' + (p.xp || 0) + ' XP';
     if (xmf) xmf.style.width = pct + '%';
 
     refreshLargeAvatar(p);
@@ -731,9 +761,9 @@
     refreshAllAvatars(p);
     var btn = document.getElementById('sbfPpSv');
     if (btn) {
-      btn.textContent = '✓ Сохранено';
+      btn.textContent = t('profile.saved_label', '✓ Сохранено');
       btn.classList.add('saved');
-      setTimeout(function () { btn.textContent = 'Сохранить'; btn.classList.remove('saved'); }, 1600);
+      setTimeout(function () { btn.textContent = t('profile.save_button', 'Сохранить'); btn.classList.remove('saved'); }, 1600);
     }
   }
 
@@ -774,7 +804,8 @@
   function makeHeaderAvatar() {
     var btn = document.createElement('button');
     btn.className = 'sbf-av';
-    btn.setAttribute('aria-label', 'Профиль');
+    btn.setAttribute('data-i18n-aria', 'profile.profile_label');
+    btn.setAttribute('aria-label', t('profile.profile_label', 'Профиль'));
     btn.style.cssText = 'width:34px;height:34px;margin-left:10px;';
     applyAvatar(btn, load(), 34);
     btn.addEventListener('click', openPanel);
@@ -810,23 +841,27 @@
         item = document.createElement('a');
         item.href = '/survey';
         item.className = 'sbf-bn-prof g-bn-item';
-        item.setAttribute('aria-label', 'Войти');
+        item.setAttribute('data-i18n-aria', 'profile.login_label');
+        item.setAttribute('aria-label', t('profile.login_label', 'Войти'));
         var ico = document.createElement('span');
         ico.className = 'g-bn-ico';
         ico.textContent = '👤';
         var lbl = document.createElement('span');
         lbl.className = 'g-bn-lbl';
-        lbl.textContent = 'Войти';
+        lbl.setAttribute('data-i18n', 'profile.login_label');
+        lbl.textContent = t('profile.login_label', 'Войти');
         item.appendChild(ico);
         item.appendChild(lbl);
       } else {
         item = document.createElement('button');
         item.className = 'sbf-bn-prof';
-        item.setAttribute('aria-label', 'Профиль');
+        item.setAttribute('data-i18n-aria', 'profile.profile_label');
+        item.setAttribute('aria-label', t('profile.profile_label', 'Профиль'));
         item.appendChild(makeNavAvatar(26));
         var lbl2 = document.createElement('span');
         lbl2.className = 'g-bn-lbl';
-        lbl2.textContent = 'Профиль';
+        lbl2.setAttribute('data-i18n', 'profile.profile_label');
+        lbl2.textContent = t('profile.profile_label', 'Профиль');
         item.appendChild(lbl2);
         item.addEventListener('click', function (e) {
           e.stopPropagation();
@@ -846,7 +881,8 @@
     if (!appBar || appBar.querySelector('.sbf-av')) return;
     var btn = document.createElement('button');
     btn.className = 'sbf-av';
-    btn.setAttribute('aria-label', 'Профиль');
+    btn.setAttribute('data-i18n-aria', 'profile.profile_label');
+    btn.setAttribute('aria-label', t('profile.profile_label', 'Профиль'));
     btn.style.cssText = 'width:32px;height:32px;margin-left:8px;flex-shrink:0;';
     applyAvatar(btn, load(), 32);
     btn.addEventListener('click', openPanel);
@@ -859,7 +895,8 @@
     if (!nav || nav.querySelector('.sbf-bn-prof')) return;
     var item = document.createElement('button');
     item.className = 'sbf-bn-prof';
-    item.setAttribute('aria-label', 'Профиль');
+    item.setAttribute('data-i18n-aria', 'profile.profile_label');
+    item.setAttribute('aria-label', t('profile.profile_label', 'Профиль'));
     // стили m.html nav-кнопок
     item.style.cssText = 'flex:1;border:none;background:none;padding:10px 0 9px;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--muted);font-family:Montserrat;font-size:10px;font-weight:600;cursor:pointer;';
     item.innerHTML = '';
@@ -868,7 +905,8 @@
     ic.appendChild(makeNavAvatar(22));
     item.appendChild(ic);
     var lbl = document.createElement('span');
-    lbl.textContent = 'Профиль';
+    lbl.setAttribute('data-i18n', 'profile.profile_label');
+    lbl.textContent = t('profile.profile_label', 'Профиль');
     item.appendChild(lbl);
     item.addEventListener('click', function (e) {
       e.stopPropagation(); // не передаём в m.js nav-обработчик
@@ -894,6 +932,14 @@
     st.textContent = CSS;
     document.head.appendChild(st);
 
+    // Догоняющий патч переводов для узлов, вставленных здесь ДО того как
+    // словарь (sbfI18n.ready) успел догрузиться — тот же приём, что и в
+    // sbf-header.js. Вызываем ПОСЛЕ фактической инъекции (в т.ч. после
+    // возможного poll), чтобы не промахнуться мимо ещё не созданных узлов.
+    function afterInject() {
+      _i18n.ready.then(function () { _patchI18n(document); });
+    }
+
     // .sbf-right может ещё не существовать если sbf-header.js чуть задержался
     if (!injectIntoStandardHeader()) {
       var tries = 0;
@@ -901,10 +947,12 @@
         if (injectIntoStandardHeader() || ++tries > 40) {
           clearInterval(poll);
           injectIntoStandardBottomNav();
+          afterInject();
         }
       }, 50);
     } else {
       injectIntoStandardBottomNav();
+      afterInject();
     }
 
     injectIntoMobileApp();
