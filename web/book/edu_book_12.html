@@ -71,28 +71,28 @@ const TR = {
     scalesTitle:"Интерактивные весы: накидывай факторы на чаши",
     scalesSub:"Выбирай макроэкономические факторы и наблюдай, как смещается фундаментальный баланс",
     bullFactors:[
-      {id:"rate_cut",label:"ФРС снижает ставку",weight:3,emoji:"📉"},
-      {id:"gdp_up",label:"ВВП растёт",weight:2,emoji:"📈"},
+      {id:"rate_cut",label:"ФРС снижает ставку",weight:3,emoji:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-down.png' alt='' width='20' height='20' />"},
+      {id:"gdp_up",label:"ВВП растёт",weight:2,emoji:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-up.png' alt='' width='20' height='20' />"},
       {id:"jobs_up",label:"Рынок труда силён",weight:2,emoji:"💪"},
-      {id:"earnings",label:"Прибыли бьют прогнозы",weight:3,emoji:"💰"},
+      {id:"earnings",label:"Прибыли бьют прогнозы",weight:3,emoji:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-money.png' alt='' width='20' height='20' />"},
       {id:"qe",label:"Количественное смягчение",weight:4,emoji:"🖨️"},
       {id:"china_open",label:"Китай открывает экономику",weight:2,emoji:"🇨🇳"},
     ],
     bearFactors:[
-      {id:"rate_hike",label:"ФРС повышает ставку",weight:3,emoji:"📊"},
-      {id:"inflation",label:"Инфляция растёт",weight:3,emoji:"🔥"},
-      {id:"recession",label:"Риск рецессии",weight:4,emoji:"⚠️"},
+      {id:"rate_hike",label:"ФРС повышает ставку",weight:3,emoji:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-bar-chart.png' alt='' width='20' height='20' />"},
+      {id:"inflation",label:"Инфляция растёт",weight:3,emoji:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-flame.png' alt='' width='20' height='20' />"},
+      {id:"recession",label:"Риск рецессии",weight:4,emoji:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-warning.png' alt='' width='20' height='20' />"},
       {id:"credit",label:"Кредитный кризис",weight:4,emoji:"💳"},
       {id:"war",label:"Геополитический риск",weight:3,emoji:"⚔️"},
-      {id:"miss",label:"Прибыли разочаровывают",weight:2,emoji:"📉"},
+      {id:"miss",label:"Прибыли разочаровывают",weight:2,emoji:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-down.png' alt='' width='20' height='20' />"},
     ],
     scalesBullLabel:"🐂 БЫКИ",
     scalesBearLabel:"🐻 МЕДВЕДИ",
     scalesResult:{
-      strong_bull:"🚀 Сильный бычий рынок. Покупки оправданы.",
-      mild_bull:"📈 Умеренный бычий перевес. Рынок склонен к росту.",
+      strong_bull:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-rocket.png' alt='' width='20' height='20' /> Сильный бычий рынок. Покупки оправданы.",
+      mild_bull:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-up.png' alt='' width='20' height='20' /> Умеренный бычий перевес. Рынок склонен к росту.",
       neutral:"⚖️ Равновесие. Флэт или неопределённость.",
-      mild_bear:"📉 Умеренный медвежий перевес. Осторожность.",
+      mild_bear:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-down.png' alt='' width='20' height='20' /> Умеренный медвежий перевес. Осторожность.",
       strong_bear:"🐻 Сильный медвежий рынок. Риски доминируют.",
     },
     scalesReset:"Очистить весы",
@@ -275,7 +275,7 @@ const TR = {
 
     online:"онлайн",
     tgMsg:"Привет 👋 Чем можем помочь? Оставьте заявку.",
-    waMsg:"Добрый день! Напишите что вас интересует 📊",
+    waMsg:"Добрый день! Напишите что вас интересует <img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-bar-chart.png' alt='' width='20' height='20' />",
     apTitle:"Предпочитаете мессенджер?",
     apSub:"Напишите в Telegram или WhatsApp — сообщение уже готово.",
     tgBtn:"ОТКРЫТЬ TELEGRAM",waBtn:"ОТКРЫТЬ WHATSAPP",
@@ -297,27 +297,27 @@ const TR = {
     scalesTag:"BALANCE SCALES",scalesTitle:"Interactive scales: add factors to each side",
     scalesSub:"Choose macroeconomic factors and watch the fundamental balance shift",
     bullFactors:[
-      {id:"rate_cut",label:"Fed cuts rates",weight:3,emoji:"📉"},
-      {id:"gdp_up",label:"GDP is growing",weight:2,emoji:"📈"},
+      {id:"rate_cut",label:"Fed cuts rates",weight:3,emoji:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-down.png' alt='' width='20' height='20' />"},
+      {id:"gdp_up",label:"GDP is growing",weight:2,emoji:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-up.png' alt='' width='20' height='20' />"},
       {id:"jobs_up",label:"Labor market is strong",weight:2,emoji:"💪"},
-      {id:"earnings",label:"Earnings beat estimates",weight:3,emoji:"💰"},
+      {id:"earnings",label:"Earnings beat estimates",weight:3,emoji:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-money.png' alt='' width='20' height='20' />"},
       {id:"qe",label:"Quantitative easing",weight:4,emoji:"🖨️"},
       {id:"china_open",label:"China reopens economy",weight:2,emoji:"🇨🇳"},
     ],
     bearFactors:[
-      {id:"rate_hike",label:"Fed hikes rates",weight:3,emoji:"📊"},
-      {id:"inflation",label:"Inflation rising",weight:3,emoji:"🔥"},
-      {id:"recession",label:"Recession risk",weight:4,emoji:"⚠️"},
+      {id:"rate_hike",label:"Fed hikes rates",weight:3,emoji:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-bar-chart.png' alt='' width='20' height='20' />"},
+      {id:"inflation",label:"Inflation rising",weight:3,emoji:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-flame.png' alt='' width='20' height='20' />"},
+      {id:"recession",label:"Recession risk",weight:4,emoji:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-warning.png' alt='' width='20' height='20' />"},
       {id:"credit",label:"Credit crisis",weight:4,emoji:"💳"},
       {id:"war",label:"Geopolitical risk",weight:3,emoji:"⚔️"},
-      {id:"miss",label:"Earnings disappoint",weight:2,emoji:"📉"},
+      {id:"miss",label:"Earnings disappoint",weight:2,emoji:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-down.png' alt='' width='20' height='20' />"},
     ],
     scalesBullLabel:"🐂 BULLS",scalesBearLabel:"🐻 BEARS",
     scalesResult:{
-      strong_bull:"🚀 Strong bull market. Buying is justified.",
-      mild_bull:"📈 Mild bullish bias. Market inclined to grow.",
+      strong_bull:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-rocket.png' alt='' width='20' height='20' /> Strong bull market. Buying is justified.",
+      mild_bull:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-up.png' alt='' width='20' height='20' /> Mild bullish bias. Market inclined to grow.",
       neutral:"⚖️ Equilibrium. Sideways or uncertainty.",
-      mild_bear:"📉 Mild bearish bias. Caution warranted.",
+      mild_bear:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-down.png' alt='' width='20' height='20' /> Mild bearish bias. Caution warranted.",
       strong_bear:"🐻 Strong bear market. Risks dominate.",
     },
     scalesReset:"Clear scales",addBull:"→ Bull side",addBear:"→ Bear side",
@@ -396,7 +396,7 @@ const TR = {
       {q:"Which signal is considered strongest in Ichimoku?",o:["TK Cross below the Cloud","All 5 components confirm direction (Perfect Storm)","Price crossing Tenkan","Kijun pointing horizontal"],c:1},
       {q:"Why does Hosoda use (MAX + MIN) / 2 instead of average closes?",o:["Easier to calculate by hand","Mid-price reflects the true price balance of the period","Japanese accounting standard","Close prices are less reliable"],c:1},
     ],
-    online:"online",tgMsg:"Hi 👋 How can we help?",waMsg:"Hello! Tell us what interests you 📊",
+    online:"online",tgMsg:"Hi 👋 How can we help?",waMsg:"Hello! Tell us what interests you <img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-bar-chart.png' alt='' width='20' height='20' />",
     apTitle:"Prefer a messenger?",apSub:"Write on Telegram or WhatsApp — message ready.",
     tgBtn:"OPEN TELEGRAM",waBtn:"OPEN WHATSAPP",chMsg:(n)=>`Hello, question on chapter ${n}`,
   },
@@ -416,27 +416,27 @@ const TR = {
     scalesTag:"BALANȚA ECHILIBRULUI",scalesTitle:"Balanță interactivă: adaugă factori pe fiecare tavă",
     scalesSub:"Alegeți factori macroeconomici și urmăriți cum se schimbă echilibrul fundamental",
     bullFactors:[
-      {id:"rate_cut",label:"Fed scade ratele",weight:3,emoji:"📉"},
-      {id:"gdp_up",label:"PIB-ul crește",weight:2,emoji:"📈"},
+      {id:"rate_cut",label:"Fed scade ratele",weight:3,emoji:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-down.png' alt='' width='20' height='20' />"},
+      {id:"gdp_up",label:"PIB-ul crește",weight:2,emoji:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-up.png' alt='' width='20' height='20' />"},
       {id:"jobs_up",label:"Piața muncii e puternică",weight:2,emoji:"💪"},
-      {id:"earnings",label:"Profiturile depășesc estimările",weight:3,emoji:"💰"},
+      {id:"earnings",label:"Profiturile depășesc estimările",weight:3,emoji:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-money.png' alt='' width='20' height='20' />"},
       {id:"qe",label:"Relaxare cantitativă",weight:4,emoji:"🖨️"},
       {id:"china_open",label:"China redeschide economia",weight:2,emoji:"🇨🇳"},
     ],
     bearFactors:[
-      {id:"rate_hike",label:"Fed majorează ratele",weight:3,emoji:"📊"},
-      {id:"inflation",label:"Inflația crește",weight:3,emoji:"🔥"},
-      {id:"recession",label:"Risc de recesiune",weight:4,emoji:"⚠️"},
+      {id:"rate_hike",label:"Fed majorează ratele",weight:3,emoji:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-bar-chart.png' alt='' width='20' height='20' />"},
+      {id:"inflation",label:"Inflația crește",weight:3,emoji:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-flame.png' alt='' width='20' height='20' />"},
+      {id:"recession",label:"Risc de recesiune",weight:4,emoji:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-warning.png' alt='' width='20' height='20' />"},
       {id:"credit",label:"Criză de credit",weight:4,emoji:"💳"},
       {id:"war",label:"Risc geopolitic",weight:3,emoji:"⚔️"},
-      {id:"miss",label:"Profituri dezamăgitoare",weight:2,emoji:"📉"},
+      {id:"miss",label:"Profituri dezamăgitoare",weight:2,emoji:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-down.png' alt='' width='20' height='20' />"},
     ],
     scalesBullLabel:"🐂 TAURI",scalesBearLabel:"🐻 URȘI",
     scalesResult:{
-      strong_bull:"🚀 Piață bull puternică. Cumpărările sunt justificate.",
-      mild_bull:"📈 Bias bull moderat. Piața înclinată spre creștere.",
+      strong_bull:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-rocket.png' alt='' width='20' height='20' /> Piață bull puternică. Cumpărările sunt justificate.",
+      mild_bull:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-up.png' alt='' width='20' height='20' /> Bias bull moderat. Piața înclinată spre creștere.",
       neutral:"⚖️ Echilibru. Lateral sau incertitudine.",
-      mild_bear:"📉 Bias bear moderat. Prudență justificată.",
+      mild_bear:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-down.png' alt='' width='20' height='20' /> Bias bear moderat. Prudență justificată.",
       strong_bear:"🐻 Piață bear puternică. Riscurile domină.",
     },
     scalesReset:"Golește balanța",addBull:"→ Pe tava taurilor",addBear:"→ Pe tava urșilor",
@@ -515,7 +515,7 @@ const TR = {
       {q:"Care semnal este cel mai puternic în Ichimoku?",o:["TK Cross sub Nor","Toate 5 componente confirmă direcția (Perfect Storm)","Prețul traversează Tenkan","Kijun indică orizontal"],c:1},
       {q:"De ce Hosoda folosește (MAX + MIN) / 2 și nu media închiderilor?",o:["Mai ușor de calculat manual","Mid-price reflectă echilibrul real al prețului perioadei","Standard contabil japonez","Prețurile de închidere sunt mai puțin fiabile"],c:1},
     ],
-    online:"online",tgMsg:"Salut 👋 Cu ce vă putem ajuta?",waMsg:"Bună ziua! Spuneți ce vă interesează 📊",
+    online:"online",tgMsg:"Salut 👋 Cu ce vă putem ajuta?",waMsg:"Bună ziua! Spuneți ce vă interesează <img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-bar-chart.png' alt='' width='20' height='20' />",
     apTitle:"Preferați un messenger?",apSub:"Scrieți pe Telegram sau WhatsApp — mesajul este gata.",
     tgBtn:"DESCHIDE TELEGRAM",waBtn:"DESCHIDE WHATSAPP",chMsg:(n)=>`Bună ziua, întrebare capitol ${n}`,
   },
@@ -598,8 +598,8 @@ function AskAnalystPopup({chapterNum,lang,onClose}) {
           <p style={{fontSize:18,color:C.inkMid}}>{t.apSub}</p>
         </div>
         <div className="messenger-grid">
-          {[{name:"SBF Support",plat:"Telegram",bg:"#0088cc",icon:"🚀",link:tgLink,btn:t.tgBtn,msgBg:"#e1f3fb"},
-            {name:"SBF Company",plat:"WhatsApp",bg:"#25d366",icon:"💬",link:waLink,btn:t.waBtn,msgBg:"#e8f5ed"}
+          {[{name:"SBF Support",plat:"Telegram",bg:"#0088cc",icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-rocket.png' alt='' width='20' height='20' />",link:tgLink,btn:t.tgBtn,msgBg:"#e1f3fb"},
+            {name:"SBF Company",plat:"WhatsApp",bg:"#25d366",icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-quote.png' alt='' width='20' height='20' />",link:waLink,btn:t.waBtn,msgBg:"#e8f5ed"}
           ].map((m,i)=>
             <div key={i} style={{background:"#fff",border:"1px solid #e0e0e0",borderRadius:12,padding:"30px 25px",display:"flex",flexDirection:"column"}}>
               <div style={{display:"flex",alignItems:"center",gap:15,marginBottom:30}}>
@@ -970,7 +970,7 @@ function SignalGame({t}) {
 
   if(done) return (
     <div style={{background:C.surface,border:`1px solid ${C.border}`,padding:"36px 28px",textAlign:"center"}}>
-      <div style={{fontSize:48,marginBottom:12}}>🎯</div>
+      <div style={{fontSize:48,marginBottom:12}}><img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-target.png' alt='' width='20' height='20' /></div>
       <div style={{fontFamily:"monospace",fontSize:28,color:C.gold,fontWeight:700,marginBottom:8}}>{score} / {sc.length}</div>
       <div style={{fontSize:14,color:C.inkSoft,marginBottom:20}}>{t.signalFinish}</div>
       {score>=2 && (

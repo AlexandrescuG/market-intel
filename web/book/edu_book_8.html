@@ -418,8 +418,8 @@ function AskAnalystPopup({onClose}) {
           <p style={{fontSize:18,color:C.inkMid}}>{tr.sub}</p>
         </div>
         <div className="messenger-grid">
-          {[{href:tgLink,bg:"#0088cc",icon:"🚀",name:"SBF Support",sub:`Telegram · ${tr.online}`,btn:tr.btnTg},
-            {href:waLink,bg:"#25d366",icon:"💬",name:"SBF Company",sub:`WhatsApp · ${tr.online}`,btn:tr.btnWa}
+          {[{href:tgLink,bg:"#0088cc",icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-rocket.png' alt='' width='20' height='20' />",name:"SBF Support",sub:`Telegram · ${tr.online}`,btn:tr.btnTg},
+            {href:waLink,bg:"#25d366",icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-quote.png' alt='' width='20' height='20' />",name:"SBF Company",sub:`WhatsApp · ${tr.online}`,btn:tr.btnWa}
           ].map((m,i)=>(
             <div key={i} style={{background:"#fff",border:"1px solid #e0e0e0",borderRadius:12,padding:"30px 25px",display:"flex",flexDirection:"column"}}>
               <div style={{display:"flex",alignItems:"center",gap:15,marginBottom:30}}>
@@ -446,7 +446,7 @@ function AssetRotation() {
   const phases = [
     { id:"recovery", label:S.rotPhRecoveryLabel, sub:S.rotPhRecoverySub, color:"#2563eb", bg:"rgba(37,99,235,0.08)", icon:"🌱",
       correct:["tech","crypto","smallcap"], hint:S.rotPhRecoveryHint },
-    { id:"expansion", label:S.rotPhExpansionLabel, sub:S.rotPhExpansionSub, color:"#d97706", bg:"rgba(217,119,6,0.08)", icon:"🔥",
+    { id:"expansion", label:S.rotPhExpansionLabel, sub:S.rotPhExpansionSub, color:"#d97706", bg:"rgba(217,119,6,0.08)", icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-flame.png' alt='' width='20' height='20' />",
       correct:["oil","commodities","realestate"], hint:S.rotPhExpansionHint },
     { id:"slowdown", label:S.rotPhSlowdownLabel, sub:S.rotPhSlowdownSub, color:"#7c3aed", bg:"rgba(124,58,237,0.08)", icon:"🍂",
       correct:["bonds","utilities","healthcare"], hint:S.rotPhSlowdownHint },
@@ -457,12 +457,12 @@ function AssetRotation() {
   const allAssets = [
     { id:"tech",       label:S.rotAssetTech,        emoji:"💻", phase:"recovery"  },
     { id:"crypto",     label:S.rotAssetCrypto,      emoji:"₿",  phase:"recovery"  },
-    { id:"smallcap",   label:S.rotAssetSmallcap,    emoji:"🚀", phase:"recovery"  },
+    { id:"smallcap",   label:S.rotAssetSmallcap,    emoji:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-rocket.png' alt='' width='20' height='20' />", phase:"recovery"  },
     { id:"oil",        label:S.rotAssetOil,         emoji:"🛢️", phase:"expansion" },
     { id:"commodities",label:S.rotAssetCommodities, emoji:"⚙️", phase:"expansion" },
-    { id:"realestate", label:S.rotAssetRealestate,  emoji:"🏠", phase:"expansion" },
+    { id:"realestate", label:S.rotAssetRealestate,  emoji:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-house.png' alt='' width='20' height='20' />", phase:"expansion" },
     { id:"bonds",      label:S.rotAssetBonds,       emoji:"🏛️", phase:"slowdown"  },
-    { id:"utilities",  label:S.rotAssetUtilities,   emoji:"💡", phase:"slowdown"  },
+    { id:"utilities",  label:S.rotAssetUtilities,   emoji:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-idea.png' alt='' width='20' height='20' />", phase:"slowdown"  },
     { id:"healthcare", label:S.rotAssetHealthcare,  emoji:"🏥", phase:"slowdown"  },
     { id:"gold",       label:S.rotAssetGold,        emoji:"🥇", phase:"recession" },
     { id:"cash",       label:S.rotAssetCash,        emoji:"💵", phase:"recession" },
@@ -529,7 +529,7 @@ function AssetRotation() {
       {/* Score */}
       {checked && (
         <div style={{background:pct>=70?"rgba(45,122,79,0.2)":pct>=40?"rgba(201,151,58,0.2)":"rgba(192,57,43,0.2)",border:`1px solid ${pct>=70?C.greenD:pct>=40?C.gold:C.redD}`,borderRadius:4,padding:"14px 20px",marginBottom:24,display:"flex",gap:14,alignItems:"center"}}>
-          <span style={{fontSize:28}}>{pct>=70?"🏆":pct>=40?"📚":"🎯"}</span>
+          <span style={{fontSize:28}}>{pct>=70?"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trophy.png' alt='' width='20' height='20' />":pct>=40?"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-books.png' alt='' width='20' height='20' />":"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-target.png' alt='' width='20' height='20' />"}</span>
           <div>
             <div style={{fontWeight:700,fontSize:16,color:pct>=70?"#2ecc71":pct>=40?C.gold:"#e74c3c"}}>{pct}% — {S.rotScoreLine.replace("{s}",score).replace("{t}",allAssets.length)}</div>
             <div style={{fontSize:12,color:"rgba(255,255,255,0.5)",marginTop:3}}>{S.rotScoreNote}</div>
@@ -595,7 +595,7 @@ function AssetRotation() {
               </div>
               {checked && (
                 <div style={{marginTop:8,fontSize:11,color:"rgba(255,255,255,0.4)",lineHeight:1.5,borderTop:"1px solid rgba(255,255,255,0.06)",paddingTop:8}}>
-                  💡 {ph.hint}
+                  <img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-idea.png' alt='' width='20' height='20' /> {ph.hint}
                 </div>
               )}
             </div>
@@ -761,7 +761,7 @@ function EMAConfigurator() {
         </label>
         {crosses.map((c,i) => (
           <span key={i} style={{fontSize:12,padding:"3px 10px",background:c.type==='golden'?'rgba(45,122,79,0.1)':'rgba(192,57,43,0.1)',border:`1px solid ${c.type==='golden'?C.greenD:C.redD}`,borderRadius:3,color:c.type==='golden'?C.greenD:C.redD,fontFamily:"monospace"}}>
-            {c.type==='golden'?'⭐ Golden Cross':'💀 Death Cross'} @ bar {c.i}
+            {c.type==='golden'?"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-star.png' alt='' width='20' height='20' /> Golden Cross":'💀 Death Cross'} @ bar {c.i}
           </span>
         ))}
       </div>
@@ -802,7 +802,7 @@ function EMAConfigurator() {
                 stroke={c.type==='golden'?"#2ecc71":"#e74c3c"} strokeWidth="1" strokeDasharray="4 3" opacity="0.6"/>
               <rect x={toX(c.i)-18} y={PAD.t+2} width={36} height={14} fill={c.type==='golden'?"#2d7a4f":"#c0392b"} rx="2" opacity="0.85"/>
               <text x={toX(c.i)} y={PAD.t+12} fontSize="8" fill="#fff" textAnchor="middle" fontFamily="monospace">
-                {c.type==='golden'?"⭐ GC":"💀 DC"}
+                {c.type==='golden'?"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-star.png' alt='' width='20' height='20' /> GC":"💀 DC"}
               </text>
             </g>
           ))}
@@ -861,7 +861,7 @@ function Chapter8() {
       gdp:S.cycP1Gdp, inflation:S.cycP1Inflation, rates:S.cycP1Rates,
       best:S.cycP1Best, worst:S.cycP1Worst,
       why:S.cycP1Why },
-    { phase:S.cycP2Phase, icon:"🔥", color:"#d97706",
+    { phase:S.cycP2Phase, icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-flame.png' alt='' width='20' height='20' />", color:"#d97706",
       gdp:S.cycP2Gdp, inflation:S.cycP2Inflation, rates:S.cycP2Rates,
       best:S.cycP2Best, worst:S.cycP2Worst,
       why:S.cycP2Why },
@@ -945,7 +945,7 @@ function Chapter8() {
               {/* Phase arcs */}
               {[
                 {startAngle:-90, endAngle:0,   color:"#2563eb", label:S.cycArcRecovery, icon:"🌱", cx:330, cy:80},
-                {startAngle:0,   endAngle:90,  color:"#d97706", label:S.cycArcExpansion,     icon:"🔥", cx:330, cy:220},
+                {startAngle:0,   endAngle:90,  color:"#d97706", label:S.cycArcExpansion,     icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-flame.png' alt='' width='20' height='20' />", cx:330, cy:220},
                 {startAngle:90,  endAngle:180, color:"#7c3aed", label:S.cycArcSlowdown,     icon:"🍂", cx:190, cy:220},
                 {startAngle:180, endAngle:270, color:"#c0392b", label:S.cycArcRecession,       icon:"❄️", cx:190, cy:80},
               ].map((s,i) => {
@@ -1003,7 +1003,7 @@ function Chapter8() {
                 </div>
               ))}
               <div style={{marginTop:12,fontSize:12,color:C.inkSoft,lineHeight:1.65,padding:"10px 12px",background:C.surfaceMid,borderRadius:3}}>
-                💡 {ph.why}
+                <img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-idea.png' alt='' width='20' height='20' /> {ph.why}
               </div>
             </div>
           ))}
@@ -1061,7 +1061,7 @@ function Chapter8() {
               <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:16}}>{S.gcSectionLabel}</Mono>
               <div style={{marginBottom:20}}>
                 <div style={{display:"flex",gap:12,alignItems:"flex-start",marginBottom:16,padding:"14px",background:"rgba(45,122,79,0.12)",borderRadius:4,border:"1px solid rgba(45,122,79,0.3)"}}>
-                  <span style={{fontSize:22}}>⭐</span>
+                  <span style={{fontSize:22}}><img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-star.png' alt='' width='20' height='20' /></span>
                   <div>
                     <div style={{fontWeight:700,fontSize:14,color:"#2ecc71",marginBottom:5}}>{S.gcGoldenTitle}</div>
                     <div style={{fontSize:13,color:"rgba(255,255,255,0.6)",lineHeight:1.6}}>

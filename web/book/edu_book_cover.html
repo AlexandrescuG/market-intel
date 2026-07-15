@@ -323,7 +323,7 @@ const CANDLES = [
 ];
 // Конвертация цены в пиксели Y (диапазон цен: 5080 - 5250)
 const getCY = (price) => 260 - ((price - 5080) / 170) * 230;
-const TM_EMOJIS = {"S&P 500":"📈","Apple":"🍎","Gold":"🥇","Bitcoin":"₿","NVIDIA":"🎮","Amazon":"📦","Microsoft":"💻","Tesla":"⚡","Ethereum":"🔷","Oil (WTI)":"🛢️"};
+const TM_EMOJIS = {"S&P 500":"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-up.png' alt='' width='20' height='20' />","Apple":"🍎","Gold":"🥇","Bitcoin":"₿","NVIDIA":"🎮","Amazon":"📦","Microsoft":"💻","Tesla":"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-lightning.png' alt='' width='20' height='20' />","Ethereum":"🔷","Oil (WTI)":"🛢️"};
 
 const GLOSSARY={
   ru:{
@@ -622,7 +622,7 @@ function Level1({onBack, onNext, path}) {
 
       // ANTI-MYTH — тёмный блок
       React.createElement('div',{style:{background:C.dark,color:C.white,padding:"36px 40px",marginBottom:48,position:"relative",overflow:"hidden"}},
-        React.createElement('div',{style:{position:"absolute",top:-10,right:24,fontSize:100,opacity:0.05,fontFamily:"monospace"}},"⚡"),
+        React.createElement('div',{style:{position:"absolute",top:-10,right:24,fontSize:100,opacity:0.05,fontFamily:"monospace"}},"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-lightning.png' alt='' width='20' height='20' />"),
         React.createElement(Chip,{color:C.gold},tr.antiMythTag),
         React.createElement('h2',{style:{fontSize:"clamp(20px,2.8vw,30px)",fontWeight:700,margin:"14px 0 10px",color:C.white,lineHeight:1.25,fontFamily:"'DM Serif Display',serif"}},tr.antiMythTitle),
         React.createElement('p',{style:{fontSize:15,color:"#cccccc",lineHeight:1.8,margin:0}},tr.antiMythBody)
@@ -832,7 +832,7 @@ function Level1({onBack, onNext, path}) {
               React.createElement('span',{style:{fontSize:12,fontFamily:"monospace",fontWeight:700,color:C.inkMid,minWidth:76,textAlign:"right"}},"$"+tmRes.depFin.toLocaleString())
             ),
             React.createElement('div',{style:{display:"flex",alignItems:"center",gap:10}},
-              React.createElement('span',{style:{fontSize:11,fontFamily:"monospace",color:C.inkSoft,width:110,flexShrink:0}},(TM_EMOJIS[tmAsset]||"📈")+" "+tmAsset.substring(0,10)),
+              React.createElement('span',{style:{fontSize:11,fontFamily:"monospace",color:C.inkSoft,width:110,flexShrink:0}},(TM_EMOJIS[tmAsset]||"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-up.png' alt='' width='20' height='20' />")+" "+tmAsset.substring(0,10)),
               React.createElement('div',{style:{flex:1,height:7,background:"#e8e4dc",borderRadius:3,overflow:"hidden"}},
                 React.createElement('div',{style:{width:"100%",height:"100%",background:C.gold,borderRadius:3}})
               ),
@@ -1070,7 +1070,7 @@ function SkillTree({ path, onBack }) {
             </svg>
 
             <div style={{ width: 100, background: path==="trader"?C.goldPale:"#222", color: path==="trader"?C.black:"#888", padding: "12px", borderRadius: "8px", border: `1px solid ${path==="trader"?C.gold:"#444"}`, zIndex: 1 }}>
-              <div style={{ fontSize: 18, marginBottom: 4 }}>📈</div>
+              <div style={{ fontSize: 18, marginBottom: 4 }}><img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-up.png' alt='' width='20' height='20' /></div>
               <div style={{ fontSize: 10, fontFamily: "monospace", fontWeight: 700 }}>{S.treeNodeTA}</div>
               <div style={{ fontSize: 9, marginTop: 4 }}>{S.treeUnlocked}</div>
             </div>
@@ -1082,7 +1082,7 @@ function SkillTree({ path, onBack }) {
             </div>
 
             <div style={{ width: 100, background: "#222", color: "#888", padding: "12px", borderRadius: "8px", border: "1px solid #444", zIndex: 1 }}>
-              <div style={{ fontSize: 18, marginBottom: 4 }}>🧠</div>
+              <div style={{ fontSize: 18, marginBottom: 4 }}><img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-mindset.png' alt='' width='20' height='20' /></div>
               <div style={{ fontSize: 10, fontFamily: "monospace", fontWeight: 700 }}>{S.treeNodePsych}</div>
               <div style={{ fontSize: 9, marginTop: 4 }}>{S.treeLocked}</div>
             </div>

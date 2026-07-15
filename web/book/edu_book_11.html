@@ -64,14 +64,14 @@ const STRINGS = {
     hftTitle: "Симулятор HFT Фронт-Раннинга",
     hftTag: "ИНТЕРАКТИВ — ФУНДАМЕНТАЛ",
     logSend: (qty, price) => `📤 Отправка заявки: BUY ${qty} AAPL @ $${price.toFixed(2)}`,
-    logDetect: "⚡ HFT-алгоритм обнаружил заявку за 0.000043 сек!",
+    logDetect: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-lightning.png' alt='' width='20' height='20' /> HFT-алгоритм обнаружил заявку за 0.000043 сек!",
     logBuyUp: (qty, price) => `🤖 Робот скупает ${qty} акций по $${price.toFixed(2)}…`,
     logSellBack: (hftSell, profit) => `💸 Робот продал вам по $${hftSell.toFixed(2)} (+$${profit} прибыль роботу)`,
-    logFilled: (fillPrice) => `✅ Ваша заявка исполнена по $${fillPrice.toFixed(2)} (хуже на $50)`,
-    logExplainer: "📊 Это называется фронт-раннинг. Повторяется миллиарды раз в день.",
+    logFilled: (fillPrice) => `<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-check.png' alt='' width='20' height='20' /> Ваша заявка исполнена по $${fillPrice.toFixed(2)} (хуже на $50)`,
+    logExplainer: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-bar-chart.png' alt='' width='20' height='20' /> Это называется фронт-раннинг. Повторяется миллиарды раз в день.",
     stateIdle: "Готов к отправке",
     stateSending: "Пакет летит к NASDAQ…",
-    stateIntercept: "⚠️ HFT перехватывает!",
+    stateIntercept: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-warning.png' alt='' width='20' height='20' /> HFT перехватывает!",
     stateExecute: "Робот извлекает прибыль…",
     stateDone: "Заявка исполнена",
     nodeYou: "Вы", nodeYouSub: "Брокер",
@@ -95,7 +95,7 @@ const STRINGS = {
     // VolumeProfileBuilder
     vpTitle: "Профиль Объёма (Volume Profile)",
     vpTag: "ИНТЕРАКТИВ — ТЕХНИКА",
-    vpTaskLabel: "📌 Задание:",
+    vpTaskLabel: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-pin.png' alt='' width='20' height='20' /> Задание:",
     vpTaskBody: " Выдели мышью зону накопления на графике (боковик в начале) — потяни рамку по свечам. Профиль объёма и POC отрисуются автоматически.",
     vpResultStrong: (poc) => `POC найден на уровне ~${poc}`,
     vpResultRest: " — это зона максимального объёма, где крупные игроки накапливали позицию. После выхода из боковика цена часто возвращается к POC как к поддержке.",
@@ -211,14 +211,14 @@ const STRINGS = {
     hftTitle: "Simulator HFT Front-Running",
     hftTag: "INTERACTIV — FUNDAMENTAL",
     logSend: (qty, price) => `📤 Trimitere ordin: BUY ${qty} AAPL @ $${price.toFixed(2)}`,
-    logDetect: "⚡ Algoritmul HFT a detectat ordinul în 0.000043 sec!",
+    logDetect: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-lightning.png' alt='' width='20' height='20' /> Algoritmul HFT a detectat ordinul în 0.000043 sec!",
     logBuyUp: (qty, price) => `🤖 Robotul cumpără ${qty} acțiuni la $${price.toFixed(2)}…`,
     logSellBack: (hftSell, profit) => `💸 Robotul ți-a vândut la $${hftSell.toFixed(2)} (+$${profit} profit pentru robot)`,
-    logFilled: (fillPrice) => `✅ Ordinul tău a fost executat la $${fillPrice.toFixed(2)} (mai rău cu $50)`,
-    logExplainer: "📊 Aceasta se numește front-running. Se repetă de miliarde de ori pe zi.",
+    logFilled: (fillPrice) => `<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-check.png' alt='' width='20' height='20' /> Ordinul tău a fost executat la $${fillPrice.toFixed(2)} (mai rău cu $50)`,
+    logExplainer: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-bar-chart.png' alt='' width='20' height='20' /> Aceasta se numește front-running. Se repetă de miliarde de ori pe zi.",
     stateIdle: "Gata de trimitere",
     stateSending: "Pachetul zboară spre NASDAQ…",
-    stateIntercept: "⚠️ HFT intercepteaza!",
+    stateIntercept: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-warning.png' alt='' width='20' height='20' /> HFT intercepteaza!",
     stateExecute: "Robotul extrage profit…",
     stateDone: "Ordin executat",
     nodeYou: "Tu", nodeYouSub: "Broker",
@@ -242,7 +242,7 @@ const STRINGS = {
     // VolumeProfileBuilder
     vpTitle: "Profil de Volum (Volume Profile)",
     vpTag: "INTERACTIV — TEHNICĂ",
-    vpTaskLabel: "📌 Sarcină:",
+    vpTaskLabel: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-pin.png' alt='' width='20' height='20' /> Sarcină:",
     vpTaskBody: " Selectează cu mouse-ul zona de acumulare de pe grafic (mișcarea laterală de la început) — trage rama peste lumânări. Profilul de volum și POC se vor desena automat.",
     vpResultStrong: (poc) => `POC găsit la nivelul ~${poc}`,
     vpResultRest: " — aceasta este zona de volum maxim, unde jucătorii mari au acumulat poziția. După ieșirea din mișcarea laterală, prețul revine adesea la POC ca suport.",
@@ -414,8 +414,8 @@ function AskAnalystPopup({onClose}) {
           <p style={{fontSize:18,color:C.inkMid}}>{tr.sub}</p>
         </div>
         <div className="messenger-grid">
-          {[{href:tgLink,bg:"#0088cc",icon:"🚀",name:"SBF Support",sub:`Telegram · ${tr.online}`,btn:tr.btnTg},
-            {href:waLink,bg:"#25d366",icon:"💬",name:"SBF Company",sub:`WhatsApp · ${tr.online}`,btn:tr.btnWa}
+          {[{href:tgLink,bg:"#0088cc",icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-rocket.png' alt='' width='20' height='20' />",name:"SBF Support",sub:`Telegram · ${tr.online}`,btn:tr.btnTg},
+            {href:waLink,bg:"#25d366",icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-quote.png' alt='' width='20' height='20' />",name:"SBF Company",sub:`WhatsApp · ${tr.online}`,btn:tr.btnWa}
           ].map((m,i)=>(
             <div key={i} style={{background:"#fff",border:"1px solid #e0e0e0",borderRadius:12,padding:"30px 25px",display:"flex",flexDirection:"column"}}>
               <div style={{display:"flex",alignItems:"center",gap:15,marginBottom:30}}>
@@ -533,7 +533,7 @@ function HFTSimulator() {
           {label:S.nodeNet,sub:S.nodeNetSub,     x:"28%", icon:"🌐", color:"rgba(255,255,255,0.3)"},
           {label:S.nodeHft,     sub:S.nodeHftSub,  x:"52%", icon:"🤖", color:phase==="intercept"||phase==="execute"?C.red:"rgba(255,255,255,0.4)", pulse:phase==="intercept"||phase==="execute"},
           {label:S.nodeExch,  sub:S.nodeExchSub,    x:"75%", icon:"🏛️", color:"rgba(255,255,255,0.4)"},
-          {label:S.nodeFill,sub:S.nodeFillSub,   x:"93%", icon:"✅", color:phase==="done"?C.gold:"rgba(255,255,255,0.3)"},
+          {label:S.nodeFill,sub:S.nodeFillSub,   x:"93%", icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-check.png' alt='' width='20' height='20' />", color:phase==="done"?C.gold:"rgba(255,255,255,0.3)"},
         ].map((n,i) => (
           <div key={i} style={{position:"absolute",left:n.x,top:"50%",transform:"translate(-50%,-50%)",textAlign:"center",zIndex:3}}>
             <div style={{
@@ -722,7 +722,7 @@ function VolumeProfileBuilder() {
   return (
     <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"36px 40px"}}>
       <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:20}}>
-        <span style={{fontSize:28}}>📊</span>
+        <span style={{fontSize:28}}><img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-bar-chart.png' alt='' width='20' height='20' /></span>
         <div>
           <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.black}}>{S.vpTitle}</div>
           <Mono size={11} color={C.inkSoft} spacing={2}>{S.vpTag}</Mono>
@@ -734,7 +734,7 @@ function VolumeProfileBuilder() {
             <strong>{S.vpTaskLabel}</strong>{S.vpTaskBody}
           </div>
         : <div style={{background:C.greenPale,border:`1px solid ${C.greenD}`,borderRadius:4,padding:"12px 16px",marginBottom:14,display:"flex",gap:10,alignItems:"center"}}>
-            <span style={{fontSize:20}}>🎯</span>
+            <span style={{fontSize:20}}><img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-target.png' alt='' width='20' height='20' /></span>
             <div style={{fontSize:13,color:C.greenD}}>
               <strong>{S.vpResultStrong(pocPrice ? Math.round(pocPrice) : "—")}</strong>{S.vpResultRest}
             </div>
@@ -865,16 +865,16 @@ function Chapter11() {
       text:S.dpf1Text },
     { icon:"🏦", title:S.dpf2Title, accent:C.blue,
       text:S.dpf2Text },
-    { icon:"⚡", title:S.dpf3Title, accent:C.red,
+    { icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-lightning.png' alt='' width='20' height='20' />", title:S.dpf3Title, accent:C.red,
       text:S.dpf3Text },
-    { icon:"🎯", title:S.dpf4Title, accent:C.gold,
+    { icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-target.png' alt='' width='20' height='20' />", title:S.dpf4Title, accent:C.gold,
       text:S.dpf4Text },
   ];
 
   const vpConcepts = [
-    { icon:"📊", title:S.vpc1Title, accent:C.cyan,
+    { icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-bar-chart.png' alt='' width='20' height='20' />", title:S.vpc1Title, accent:C.cyan,
       text:S.vpc1Text },
-    { icon:"🎯", title:S.vpc2Title, accent:C.red,
+    { icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-target.png' alt='' width='20' height='20' />", title:S.vpc2Title, accent:C.red,
       text:S.vpc2Text },
     { icon:"📐", title:S.vpc3Title, accent:C.gold,
       text:S.vpc3Text },
@@ -994,7 +994,7 @@ function Chapter11() {
         {/* Defence tips */}
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:16,marginBottom:56}} className="g3">
           {[
-            {icon:"🛡️",title:S.def1Title,accent:C.greenD,text:S.def1Text},
+            {icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-shield.png' alt='' width='20' height='20' />",title:S.def1Title,accent:C.greenD,text:S.def1Text},
             {icon:"⏰",title:S.def2Title,accent:C.gold,text:S.def2Text},
             {icon:"👣",title:S.def3Title,accent:C.purple,text:S.def3Text},
           ].map((t,i)=><InfoCard key={i} {...t}/>)}

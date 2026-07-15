@@ -68,7 +68,7 @@ const STRINGS = {
     matrixLabel:"МАТРИЦА ВЛИЯНИЯ НОВОСТЕЙ (ПРИ ЗНАЧЕНИЯХ ВЫШЕ ПРОГНОЗА)",
     matrixColEvent:"Событие", matrixColDollar:"Доллар (DXY)", matrixColGold:"Золото (XAU)", matrixColSP:"S&P 500", matrixColCrypto:"Крипта (BTC)",
     matrixRowNFP:"NFP (Рабочие места) ↑", matrixRowCPI:"CPI (Инфляция) ↑", matrixRowFOMC:"FOMC (Ставка ФРС) ↑",
-    matrixStrongUp:"🟢 Сильный рост", matrixUp:"🟢 Рост", matrixDown:"🔴 Падение", matrixMixed:"🟡 Смешанно", matrixStrongDown:"🔴 Сильное падение",
+    matrixStrongUp:"🟢 Сильный рост", matrixUp:"🟢 Рост", matrixDown:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-alert-dot.png' alt='' width='20' height='20' /> Падение", matrixMixed:"🟡 Смешанно", matrixStrongDown:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-alert-dot.png' alt='' width='20' height='20' /> Сильное падение",
 
     cycleLabel:"ЖИЗНЕННЫЙ ЦИКЛ НОВОСТИ",
     phase1Label:"ФАЗА 1: ОЖИДАНИЕ", phase1Sub:"«Слухи»",
@@ -83,22 +83,22 @@ const STRINGS = {
     nfpForecastLabel:"Прогноз аналитиकों:",
     nfpSimulateBtn:"СИМУЛИРОВАТЬ РЕЛИЗ", nfpLocalTimeFallback:"15:30 МСК",
     nfpFactLabel:"ФАКТ (Actual):",
-    nfpShockPart1:"🔥 ШОКОВЫЕ ДАННЫЕ!", nfpShockPart2:"Значение колоссально превышает прогноз.",
+    nfpShockPart1:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-flame.png' alt='' width='20' height='20' /> ШОКОВЫЕ ДАННЫЕ!", nfpShockPart2:"Значение колоссально превышает прогноз.",
     nfpInstrumentTitle:"Инструмент: XAU/USD (Золото)",
     nfpStage0Text:"Изучите макро-ожидания слева. Как только выйдут данные, у вас будут доли секунды, чтобы принять верное решение. Приготовьтесь.",
     nfpStage1Text:"🚨 ДАННЫЕ ВЫШЛИ! Рабочих мест создано в 2 раза больше прогноза. Экономика перегрета. Что делаем с золотом?",
     nfpStage2Text:"Сделка зафиксирована.",
     nfpBuyBtn:"BUY (Купить)", nfpSellBtn:"SELL (Продать)",
-    nfpCorrectTitle:"✅ Блестяще! Вы забрали профит.", nfpWrongTitle:"❌ Ошибка. Вас выбило по стопу.",
+    nfpCorrectTitle:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-check.png' alt='' width='20' height='20' /> Блестяще! Вы забрали профит.", nfpWrongTitle:"❌ Ошибка. Вас выбило по стопу.",
     nfpCorrectExplain:"Логика: NFP вышел лучше прогноза (285K > 150K). Экономика США сильна. Инвесторы начинают верить, что ФРС повысит ставки. Капитал перетекает в Доллар (USD). Так как золото котируется в долларах (XAU/USD), сильный доллар мгновенно обрушает цену золота.",
     nfpWrongExplain:"Логика: Вы купили золото, но NFP вышел феноменально сильным (285K > 150K). Это позитив для экономики США и Доллара. Инвесторы скупают доллар, что математически давит пару XAU/USD вниз. Покупка золота при сильном долларе — это игра против локомотива.",
     nfpResetBtn:"↺ ПОВТОРИТЬ СИМУЛЯЦИЮ",
 
     sqzHeader:"Охота на Squeeze (Сжатие)", sqzBadge:"ИНТЕРАКТИВ — ТЕХНИКА (BOLLINGER BANDS)",
     sqzInitialMsg:"Найдите на графике зону 'Squeeze' (максимального сужения линий) и кликните в этот блок.",
-    sqzCorrectMsg:"🎯 Идеально! Вы нашли Squeeze. Волатильность упала до нуля, пружина сжалась. Именно здесь крупные игроки накопили позицию перед мощным прострелом вверх.",
+    sqzCorrectMsg:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-target.png' alt='' width='20' height='20' /> Идеально! Вы нашли Squeeze. Волатильность упала до нуля, пружина сжалась. Именно здесь крупные игроки накопили позицию перед мощным прострелом вверх.",
     sqzWrongMsg:"❌ Нет, здесь полосы всё ещё широкие. Ищите 'узкое горлышко', где цена зажата в тиски.",
-    sqzBreakoutLabel:"ВЗРЫВ (BREAKOUT) 🚀", sqzFutureHidden:"БУДУЩЕЕ СКРЫТО", sqzHideBtn:"↻ СКРЫТЬ ГРАФИК",
+    sqzBreakoutLabel:"ВЗРЫВ (BREAKOUT) <img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-rocket.png' alt='' width='20' height='20' />", sqzFutureHidden:"БУДУЩЕЕ СКРЫТО", sqzHideBtn:"↻ СКРЫТЬ ГРАФИК",
 
     bbSmaTitle:"Справедливая цена (SMA)",
     bbSmaText:"Средняя линия индикатора — это 20-периодная скользящая средняя. Она показывает, где находится баланс сил между покупателями и продавцами прямо сейчас.",
@@ -140,7 +140,7 @@ const STRINGS = {
     matrixLabel:"MATRICEA IMPACTULUI ȘTIRILOR (LA VALORI PESTE PROGNOZĂ)",
     matrixColEvent:"Eveniment", matrixColDollar:"Dolar (DXY)", matrixColGold:"Aur (XAU)", matrixColSP:"S&P 500", matrixColCrypto:"Cripto (BTC)",
     matrixRowNFP:"NFP (Locuri de muncă) ↑", matrixRowCPI:"CPI (Inflație) ↑", matrixRowFOMC:"FOMC (Rata Fed) ↑",
-    matrixStrongUp:"🟢 Creștere puternică", matrixUp:"🟢 Creștere", matrixDown:"🔴 Scădere", matrixMixed:"🟡 Mixt", matrixStrongDown:"🔴 Scădere puternică",
+    matrixStrongUp:"🟢 Creștere puternică", matrixUp:"🟢 Creștere", matrixDown:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-alert-dot.png' alt='' width='20' height='20' /> Scădere", matrixMixed:"🟡 Mixt", matrixStrongDown:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-alert-dot.png' alt='' width='20' height='20' /> Scădere puternică",
 
     cycleLabel:"CICLUL DE VIAȚĂ AL ȘTIRII",
     phase1Label:"FAZA 1: AȘTEPTARE", phase1Sub:"«Zvonuri»",
@@ -155,22 +155,22 @@ const STRINGS = {
     nfpForecastLabel:"Prognoza analiștilor:",
     nfpSimulateBtn:"SIMULEAZĂ PUBLICAREA", nfpLocalTimeFallback:"15:30 MSK",
     nfpFactLabel:"FAPT (Actual):",
-    nfpShockPart1:"🔥 DATE ȘOCANTE!", nfpShockPart2:"Valoarea depășește colosal prognoza.",
+    nfpShockPart1:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-flame.png' alt='' width='20' height='20' /> DATE ȘOCANTE!", nfpShockPart2:"Valoarea depășește colosal prognoza.",
     nfpInstrumentTitle:"Instrument: XAU/USD (Aur)",
     nfpStage0Text:"Studiază așteptările macro din stânga. De îndată ce apar datele, vei avea o fracțiune de secundă pentru a lua decizia corectă. Pregătește-te.",
     nfpStage1Text:"🚨 DATELE AU APĂRUT! S-au creat de 2 ori mai multe locuri de muncă decât prognoza. Economia este supraîncălzită. Ce facem cu aurul?",
     nfpStage2Text:"Tranzacția este finalizată.",
     nfpBuyBtn:"BUY (Cumpără)", nfpSellBtn:"SELL (Vinde)",
-    nfpCorrectTitle:"✅ Excelent! Ai luat profitul.", nfpWrongTitle:"❌ Greșeală. Ai fost scos pe stop.",
+    nfpCorrectTitle:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-check.png' alt='' width='20' height='20' /> Excelent! Ai luat profitul.", nfpWrongTitle:"❌ Greșeală. Ai fost scos pe stop.",
     nfpCorrectExplain:"Logica: NFP a ieșit mai bun decât prognoza (285K > 150K). Economia SUA este puternică. Investitorii încep să creadă că Fed va majora rata dobânzii. Capitalul se mută spre Dolar (USD). Deoarece aurul este cotat în dolari (XAU/USD), un dolar puternic prăbușește instantaneu prețul aurului.",
     nfpWrongExplain:"Logica: Ai cumpărat aur, dar NFP a ieșit fenomenal de puternic (285K > 150K). Acesta este un semnal pozitiv pentru economia SUA și pentru dolar. Investitorii cumpără masiv dolari, ceea ce împinge matematic perechea XAU/USD în jos. Cumpărarea aurului atunci când dolarul este puternic înseamnă să joci împotriva locomotivei.",
     nfpResetBtn:"↺ REPETĂ SIMULAREA",
 
     sqzHeader:"Vânătoare de Squeeze (Comprimare)", sqzBadge:"INTERACTIV — TEHNICĂ (BOLLINGER BANDS)",
     sqzInitialMsg:"Găsește pe grafic zona de 'Squeeze' (comprimarea maximă a liniilor) și dă clic în acest bloc.",
-    sqzCorrectMsg:"🎯 Perfect! Ai găsit Squeeze-ul. Volatilitatea a scăzut la zero, arcul s-a comprimat. Exact aici jucătorii mari și-au acumulat poziția înainte de o mișcare puternică în sus.",
+    sqzCorrectMsg:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-target.png' alt='' width='20' height='20' /> Perfect! Ai găsit Squeeze-ul. Volatilitatea a scăzut la zero, arcul s-a comprimat. Exact aici jucătorii mari și-au acumulat poziția înainte de o mișcare puternică în sus.",
     sqzWrongMsg:"❌ Nu, aici benzile sunt încă largi. Caută 'gâtul de sticlă' unde prețul este strâns ca într-o menghină.",
-    sqzBreakoutLabel:"EXPLOZIE (BREAKOUT) 🚀", sqzFutureHidden:"VIITORUL ESTE ASCUNS", sqzHideBtn:"↻ ASCUNDE GRAFICUL",
+    sqzBreakoutLabel:"EXPLOZIE (BREAKOUT) <img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-rocket.png' alt='' width='20' height='20' />", sqzFutureHidden:"VIITORUL ESTE ASCUNS", sqzHideBtn:"↻ ASCUNDE GRAFICUL",
 
     bbSmaTitle:"Prețul corect (SMA)",
     bbSmaText:"Linia mediană a indicatorului este o medie mobilă pe 20 de perioade. Ea arată unde se află echilibrul de forțe dintre cumpărători și vânzători chiar acum.",
@@ -255,8 +255,8 @@ function AskAnalystPopup({chapterNum, lang, onClose}) {
           <p style={{fontSize:18,color:C.inkMid}}>{tr.sub}</p>
         </div>
         <div className="messenger-grid">
-          {[{href:tgLink,bg:"#0088cc",icon:"🚀",name:"SBF Support",sub:`Telegram · ${tr.online}`,btn:tr.btnTg},
-            {href:waLink,bg:"#25d366",icon:"💬",name:"SBF Company",sub:`WhatsApp · ${tr.online}`,btn:tr.btnWa}
+          {[{href:tgLink,bg:"#0088cc",icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-rocket.png' alt='' width='20' height='20' />",name:"SBF Support",sub:`Telegram · ${tr.online}`,btn:tr.btnTg},
+            {href:waLink,bg:"#25d366",icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-quote.png' alt='' width='20' height='20' />",name:"SBF Company",sub:`WhatsApp · ${tr.online}`,btn:tr.btnWa}
           ].map((m,i) => (
             <div key={i} style={{background:"#fff",border:"1px solid #e0e0e0",borderRadius:12,padding:"30px 25px",display:"flex",flexDirection:"column"}}>
               <div style={{display:"flex",alignItems:"center",gap:15,marginBottom:30}}>
@@ -353,11 +353,11 @@ function NFPNewsSimulator() {
           {stage <= 1 ? (
             <div style={{display:"grid", gridTemplateColumns:"1fr 1fr", gap:15}}>
               <button onClick={() => handleChoice('buy')} disabled={stage===0} style={{padding:"20px", background:stage===0?"#1a1a1a":"rgba(8,153,129,0.1)", border:stage===0?"1px solid #333":`1px solid ${C.greenB}`, color:stage===0?"#444":C.greenB, borderRadius:6, cursor:stage===0?"not-allowed":"pointer", fontWeight:700, fontSize:16, transition:"all .2s"}}>
-                <span style={{fontSize:24, display:"block", marginBottom:8}}>📈</span>
+                <span style={{fontSize:24, display:"block", marginBottom:8}}><img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-up.png' alt='' width='20' height='20' /></span>
                 {S.nfpBuyBtn}
               </button>
               <button onClick={() => handleChoice('sell')} disabled={stage===0} style={{padding:"20px", background:stage===0?"#1a1a1a":"rgba(242,54,69,0.1)", border:stage===0?"1px solid #333":`1px solid ${C.redB}`, color:stage===0?"#444":C.redB, borderRadius:6, cursor:stage===0?"not-allowed":"pointer", fontWeight:700, fontSize:16, transition:"all .2s"}}>
-                <span style={{fontSize:24, display:"block", marginBottom:8}}>📉</span>
+                <span style={{fontSize:24, display:"block", marginBottom:8}}><img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-down.png' alt='' width='20' height='20' /></span>
                 {S.nfpSellBtn}
               </button>
             </div>
@@ -530,7 +530,7 @@ function Chapter6() {
   const [askOpen, setAskOpen] = useState(false);
 
   const fundamentals = [
-    {icon:"💼", title:"NFP (Non-Farm Payrolls)", accent:C.blue, text:S.fundNfpText},
+    {icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-briefcase.png' alt='' width='20' height='20' />", title:"NFP (Non-Farm Payrolls)", accent:C.blue, text:S.fundNfpText},
     {icon:"🛒", title:"CPI (Consumer Price Index)", accent:C.red, text:S.fundCpiText},
     {icon:"🏦", title:S.fundFomcTitle, accent:C.gold, text:S.fundFomcText},
     {icon:"🗣️", title:S.fundGdpTitle, accent:C.green, text:S.fundGdpText},

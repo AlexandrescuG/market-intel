@@ -45,7 +45,7 @@ const STRINGS = {
     // LiquidityGlobe
     glTitle: "Глобус Ликвидности",
     glSubtitle: "ИНТЕРАКТИВ — ФУНДАМЕНТАЛ · ДВИГАЙТЕ ПОЛЗУНОК",
-    glOverlapBanner: "⚡ ПЕРЕКРЫТИЕ ЛОНДОН + НЬЮ-ЙОРК — ПИКОВАЯ ЛИКВИДНОСТЬ",
+    glOverlapBanner: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-lightning.png' alt='' width='20' height='20' /> ПЕРЕКРЫТИЕ ЛОНДОН + НЬЮ-ЙОРК — ПИКОВАЯ ЛИКВИДНОСТЬ",
     glSessionTokyoName: "Токио / Азия",
     glSessionTokyoDesc: "Накопление. Институты готовят позиции. Диапазон узкий, движения медленные.",
     glSessionLondonName: "Лондон / Европа",
@@ -65,7 +65,7 @@ const STRINGS = {
     abStep2: "ШАГ 2: В какую сторону был ИСТИННЫЙ пробой? (не ловушка)",
     abUpBtn: "↑ ВВЕРХ",
     abDownBtn: "↓ ВНИЗ",
-    abResultPerfectTitle: "✅ Отлично! Идеально распознали Коробку Азии и истинный пробой!",
+    abResultPerfectTitle: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-check.png' alt='' width='20' height='20' /> Отлично! Идеально распознали Коробку Азии и истинный пробой!",
     abResultDirOkTitle: "👍 Направление правильное! Но точнее выделяйте диапазон Азии.",
     abResultWrongTitle: "❌ Направление неверно. Это был ложный пробой вниз (Stop Hunt) — ловушка институтов.",
     abResultPerfectBody: "Лондон сделал ложное движение вниз — выбил стопы тех, кто поставил под диапазон Азии. Затем истинный пробой — вверх.",
@@ -154,7 +154,7 @@ const STRINGS = {
     checklistItem5: "Перекрытие Лондон + Нью-Йорк (16:00–<span class='local-time' data-utc='2026-03-09T16:00:00Z'>19:00 МСК</span>) — пик объёмов",
     checklistItem6: "AMD: Накопление → Манипуляция → Дистрибуция — цикл в каждом дне",
     checklistItem7: "Золото взрывается в 15:30–<span class='local-time' data-utc='2026-03-09T13:00:00Z'>16:00 МСК</span>: открытие Нью-Йорка + COMEX",
-    checklistDoneTitle: "✅ Глава 5 освоена!",
+    checklistDoneTitle: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-check.png' alt='' width='20' height='20' /> Глава 5 освоена!",
     checklistDoneBody: "Вы готовы читать рынок как расписание, а не как хаос.",
     // Conclusions
     conclusionsLabel: "ИТОГИ ГЛАВЫ 5",
@@ -182,7 +182,7 @@ const STRINGS = {
     // LiquidityGlobe
     glTitle: "Globul Lichidității",
     glSubtitle: "INTERACTIV — FUNDAMENTAL · MIȘCĂ CURSORUL",
-    glOverlapBanner: "⚡ SUPRAPUNERE LONDRA + NEW YORK — LICHIDITATE MAXIMĂ",
+    glOverlapBanner: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-lightning.png' alt='' width='20' height='20' /> SUPRAPUNERE LONDRA + NEW YORK — LICHIDITATE MAXIMĂ",
     glSessionTokyoName: "Tokyo / Asia",
     glSessionTokyoDesc: "Acumulare. Instituțiile își pregătesc pozițiile. Interval îngust, mișcări lente.",
     glSessionLondonName: "Londra / Europa",
@@ -202,7 +202,7 @@ const STRINGS = {
     abStep2: "PASUL 2: În ce direcție a fost spargerea REALĂ? (nu capcana)",
     abUpBtn: "↑ SUS",
     abDownBtn: "↓ JOS",
-    abResultPerfectTitle: "✅ Excelent! Ați recunoscut perfect Caseta Asiei și spargerea reală!",
+    abResultPerfectTitle: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-check.png' alt='' width='20' height='20' /> Excelent! Ați recunoscut perfect Caseta Asiei și spargerea reală!",
     abResultDirOkTitle: "👍 Direcția este corectă! Dar selectați mai precis intervalul Asiei.",
     abResultWrongTitle: "❌ Direcție greșită. A fost o spargere falsă în jos (Stop Hunt) — capcana instituțiilor.",
     abResultPerfectBody: "Londra a făcut o mișcare falsă în jos — a declanșat stop-loss-urile celor care le-au plasat sub intervalul Asiei. Apoi a urmat spargerea reală — în sus.",
@@ -291,7 +291,7 @@ const STRINGS = {
     checklistItem5: "Suprapunerea Londra + New York (16:00–<span class='local-time' data-utc='2026-03-09T16:00:00Z'>19:00 MSK</span>) — vârful volumelor",
     checklistItem6: "AMD: Acumulare → Manipulare → Distribuție — un ciclu în fiecare zi",
     checklistItem7: "Aurul explodează la 15:30–<span class='local-time' data-utc='2026-03-09T13:00:00Z'>16:00 MSK</span>: deschiderea New York-ului + COMEX",
-    checklistDoneTitle: "✅ Capitolul 5 asimilat!",
+    checklistDoneTitle: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-check.png' alt='' width='20' height='20' /> Capitolul 5 asimilat!",
     checklistDoneBody: "Sunteți gata să citiți piața ca pe un program, nu ca pe un haos.",
     // Conclusions
     conclusionsLabel: "CONCLUZIILE CAPITOLULUI 5",
@@ -362,8 +362,8 @@ function AskAnalystPopup({onClose}) {
           <p style={{fontSize:18,color:C.inkMid}}>{S.askBody}</p>
         </div>
         <div className="messenger-grid">
-          {[{href:tgLink,bg:"#0088cc",icon:"🚀",name:"SBF Support",sub:S.askTelegramSub,btn:S.askTelegramBtn},
-            {href:waLink,bg:"#25d366",icon:"💬",name:"SBF Company",sub:S.askWhatsappSub,btn:S.askWhatsappBtn}
+          {[{href:tgLink,bg:"#0088cc",icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-rocket.png' alt='' width='20' height='20' />",name:"SBF Support",sub:S.askTelegramSub,btn:S.askTelegramBtn},
+            {href:waLink,bg:"#25d366",icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-quote.png' alt='' width='20' height='20' />",name:"SBF Company",sub:S.askWhatsappSub,btn:S.askWhatsappBtn}
           ].map((m,i) => (
             <div key={i} style={{background:"#fff",border:"1px solid #e0e0e0",borderRadius:12,padding:"30px 25px",display:"flex",flexDirection:"column"}}>
               <div style={{display:"flex",alignItems:"center",gap:15,marginBottom:30}}>
@@ -454,7 +454,7 @@ function LiquidityGlobe() {
   return (
     <div style={{background:C.black,borderRadius:8,padding:"36px 40px",color:C.white}}>
       <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:28}}>
-        <span style={{fontSize:28}}>🌍</span>
+        <span style={{fontSize:28}}><img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-globe.png' alt='' width='20' height='20' /></span>
         <div>
           <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.gold}}>{S.glTitle}</div>
           <Mono size={11} color="rgba(255,255,255,0.4)" spacing={2}>{S.glSubtitle}</Mono>
@@ -675,7 +675,7 @@ function AsiaBoxTrainer() {
     <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"36px 40px"}}>
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:20,flexWrap:"wrap",gap:12}}>
         <div style={{display:"flex",alignItems:"center",gap:12}}>
-          <span style={{fontSize:28}}>🎯</span>
+          <span style={{fontSize:28}}><img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-target.png' alt='' width='20' height='20' /></span>
           <div>
             <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.black}}>{S.abTitle}</div>
             <Mono size={11} color={C.inkSoft} spacing={2}>{S.abSubtitle}</Mono>
@@ -839,7 +839,7 @@ function Chapter5() {
     {letter:"M",word:S.amdManipWord,eng:"Manipulation",icon:"🎭",
      color:C.red,colorL:C.redPale,
      desc:S.amdManipDesc},
-    {letter:"D",word:S.amdDistWord,eng:"Distribution",icon:"📈",
+    {letter:"D",word:S.amdDistWord,eng:"Distribution",icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-up.png' alt='' width='20' height='20' />",
      color:C.green,colorL:C.greenPale,
      desc:S.amdDistDesc},
   ];
@@ -979,7 +979,7 @@ function Chapter5() {
           <InfoCard icon="🌙" title={S.infoCard1Title}
             text={S.infoCard1Body}
             accent="#8b5cf6"/>
-          <InfoCard icon="⚡" title={S.infoCard2Title}
+          <InfoCard icon="<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-lightning.png' alt='' width='20' height='20' />" title={S.infoCard2Title}
             text={S.infoCard2Body}
             accent={C.gold}/>
           <InfoCard icon="🏦" title={S.infoCard3Title}
@@ -1053,7 +1053,7 @@ function Chapter5() {
         {/* Session overlap detail */}
         <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:6,padding:"28px 36px",marginBottom:56}}>
           <div style={{display:"flex",gap:16,alignItems:"flex-start"}}>
-            <div style={{width:52,height:52,borderRadius:4,background:`rgba(201,151,58,0.12)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:26,flexShrink:0}}>⚡</div>
+            <div style={{width:52,height:52,borderRadius:4,background:`rgba(201,151,58,0.12)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:26,flexShrink:0}}><img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-lightning.png' alt='' width='20' height='20' /></div>
             <div>
               <div style={{fontWeight:700,fontSize:15,color:C.black,marginBottom:8}}>{S.overlapDetailPrefix}<span class='local-time' data-utc='2026-03-09T16:00:00Z'>{S.overlapDetailMskLabel}</span>{S.overlapDetailSuffix}</div>
               <p style={{fontSize:14,color:C.inkMid,lineHeight:1.75}}>

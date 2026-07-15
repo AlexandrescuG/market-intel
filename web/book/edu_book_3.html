@@ -82,7 +82,7 @@ const STRINGS = {
     corrHeaders:["Событие","S&P 500","Золото","Облигации","Нефть","DXY"],
     corrRow1Label:"🏦 Кризис 2008",
     corrRow2Label:"🦠 COVID 2020",
-    corrRow3Label:"📈 Бычий рынок",
+    corrRow3Label:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-up.png' alt='' width='20' height='20' /> Бычий рынок",
     corrRow4Label:"💸 Инфляция ↑",
     corrFootnote:"* Приблизительные значения на основе исторических данных",
 
@@ -113,7 +113,7 @@ const STRINGS = {
     crashRecoverySuffix:(months)=>`~${months} мес.`,
     ratingProtected:"🟢 Защищённый",
     ratingModerate:"🟡 Умеренный риск",
-    ratingHigh:"🔴 Высокий риск",
+    ratingHigh:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-alert-dot.png' alt='' width='20' height='20' /> Высокий риск",
     crashChartTag:"ДИНАМИКА ПОРТФЕЛЯ В КРИЗИС",
     crashChartBottomLabel:"дно",
 
@@ -223,7 +223,7 @@ const STRINGS = {
     corrHeaders:["Eveniment","S&P 500","Aur","Obligațiuni","Petrol","DXY"],
     corrRow1Label:"🏦 Criza 2008",
     corrRow2Label:"🦠 COVID 2020",
-    corrRow3Label:"📈 Piață bull",
+    corrRow3Label:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-up.png' alt='' width='20' height='20' /> Piață bull",
     corrRow4Label:"💸 Inflație ↑",
     corrFootnote:"* Valori aproximative bazate pe date istorice",
 
@@ -254,7 +254,7 @@ const STRINGS = {
     crashRecoverySuffix:(months)=>`~${months} luni`,
     ratingProtected:"🟢 Protejat",
     ratingModerate:"🟡 Risc moderat",
-    ratingHigh:"🔴 Risc ridicat",
+    ratingHigh:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-alert-dot.png' alt='' width='20' height='20' /> Risc ridicat",
     crashChartTag:"DINAMICA PORTOFOLIULUI ÎN CRIZĂ",
     crashChartBottomLabel:"minim",
 
@@ -382,7 +382,7 @@ function AskAnalystPopup({chapterNum, lang, onClose}) {
         <div className="messenger-grid">
           <div style={{background:"#fff",border:"1px solid #e0e0e0",borderRadius:12,padding:"30px 25px",display:"flex",flexDirection:"column"}}>
             <div style={{display:"flex",alignItems:"center",gap:15,marginBottom:30}}>
-              <div style={{width:50,height:50,borderRadius:"50%",background:"#e1f3fb",display:"flex",alignItems:"center",justifyContent:"center"}}>🚀</div>
+              <div style={{width:50,height:50,borderRadius:"50%",background:"#e1f3fb",display:"flex",alignItems:"center",justifyContent:"center"}}><img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-rocket.png' alt='' width='20' height='20' /></div>
               <div><div style={{fontSize:18,fontWeight:700}}>SBF Support</div><div style={{fontSize:14,color:C.inkFaint}}>Telegram · {tr.online}</div></div>
             </div>
             <div style={{background:"#0088cc",padding:"15px 20px",borderRadius:"12px 12px 0 12px",marginBottom:30,alignSelf:"flex-end",maxWidth:"90%"}}>
@@ -392,7 +392,7 @@ function AskAnalystPopup({chapterNum, lang, onClose}) {
           </div>
           <div style={{background:"#fff",border:"1px solid #e0e0e0",borderRadius:12,padding:"30px 25px",display:"flex",flexDirection:"column"}}>
             <div style={{display:"flex",alignItems:"center",gap:15,marginBottom:30}}>
-              <div style={{width:50,height:50,borderRadius:"50%",background:"#e8f5ed",display:"flex",alignItems:"center",justifyContent:"center"}}>💬</div>
+              <div style={{width:50,height:50,borderRadius:"50%",background:"#e8f5ed",display:"flex",alignItems:"center",justifyContent:"center"}}><img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-quote.png' alt='' width='20' height='20' /></div>
               <div><div style={{fontSize:18,fontWeight:700}}>SBF Company</div><div style={{fontSize:14,color:C.inkFaint}}>WhatsApp · {tr.online}</div></div>
             </div>
             <div style={{background:"#25d366",padding:"15px 20px",borderRadius:"12px 12px 0 12px",marginBottom:30,alignSelf:"flex-end",maxWidth:"90%"}}>
@@ -440,7 +440,7 @@ function CrashTest() {
   };
 
   const assetLabels = {
-    sp500:  { label:S.assetSp500Label, color:"#2563eb",  emoji:"📈" },
+    sp500:  { label:S.assetSp500Label, color:"#2563eb",  emoji:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-up.png' alt='' width='20' height='20' />" },
     bonds:  { label:S.assetBondsLabel, color:"#7c3aed", emoji:"🏛️" },
     gold:   { label:S.assetGoldLabel,         color:"#c9973a", emoji:"🥇" },
     oil:    { label:S.assetOilLabel,            color:"#92400e", emoji:"🛢️" },
@@ -795,7 +795,7 @@ function Chapter3() {
   const [askOpen, setAskOpen] = useState(false);
 
   const assetClasses = [
-    {icon:"📈", title:S.ac1Title, accent:C.blue,
+    {icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-up.png' alt='' width='20' height='20' />", title:S.ac1Title, accent:C.blue,
      items:[
        {k:S.ac1K1, v:S.ac1V1},
        {k:S.ac1K2, v:S.ac1V2},
@@ -914,9 +914,9 @@ function Chapter3() {
               </thead>
               <tbody>
                 {[
-                  [S.corrRow1Label,    "-56%","🟢 +25%","🟢 +8%", "🔴 -77%","🟢 +22%"],
-                  [S.corrRow2Label,     "-34%","🟢 +6%", "🟢 +8%", "🔴 -65%","🟢 +8%" ],
-                  [S.corrRow3Label,   "🟢 +28%","-2%",    "-4%",   "🟢 +15%","🔴 -5%" ],
+                  [S.corrRow1Label,    "-56%","🟢 +25%","🟢 +8%", "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-alert-dot.png' alt='' width='20' height='20' /> -77%","🟢 +22%"],
+                  [S.corrRow2Label,     "-34%","🟢 +6%", "🟢 +8%", "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-alert-dot.png' alt='' width='20' height='20' /> -65%","🟢 +8%" ],
+                  [S.corrRow3Label,   "🟢 +28%","-2%",    "-4%",   "🟢 +15%","<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-alert-dot.png' alt='' width='20' height='20' /> -5%" ],
                   [S.corrRow4Label,    "-18%","🟢 +12%", "-12%",  "🟢 +30%","🟢 +8%" ],
                 ].map((row,i) => (
                   <tr key={i} style={{borderBottom:"1px solid rgba(255,255,255,0.05)"}}>
@@ -996,9 +996,9 @@ function Chapter3() {
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,marginBottom:56}} className="grid-2">
           <InfoCard icon="🛑" title="Stop-Loss (SL)" accent={C.red}
             text={S.infoSLText}/>
-          <InfoCard icon="🎯" title="Take-Profit (TP)" accent={C.green}
+          <InfoCard icon="<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-target.png' alt='' width='20' height='20' />" title="Take-Profit (TP)" accent={C.green}
             text={S.infoTPText}/>
-          <InfoCard icon="📊" title="Trailing Stop" accent={C.blue}
+          <InfoCard icon="<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-bar-chart.png' alt='' width='20' height='20' />" title="Trailing Stop" accent={C.blue}
             text={S.infoTrailingText}/>
           <InfoCard icon="⚖️" title={S.infoRRTitle} accent={C.gold}
             text={S.infoRRText}/>

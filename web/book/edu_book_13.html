@@ -76,11 +76,11 @@ const STRINGS = {
     calEv7Name: "Индекс потребдоверия Мичиган",
     calEv7Hint: "Небольшое улучшение. Нейтрально для золота.",
     calImpCritical: "КРИТИЧНО", calImpHigh: "ВАЖНО", calImpMedium: "СРЕДНЕ", calImpLow: "НИЗКОЕ",
-    calImpactBullish: "📈 Бычий для золота", calImpactBearish: "📉 Медвежий", calImpactNeutral: "➡️ Нейтральный",
+    calImpactBullish: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-up.png' alt='' width='20' height='20' /> Бычий для золота", calImpactBearish: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-down.png' alt='' width='20' height='20' /> Медвежий", calImpactNeutral: "➡️ Нейтральный",
     calForecastLabel: "Прогноз:", calPrevLabel: "Пред.:",
     calStudiedLabel: "Изучено", calEventsWord: "событий",
-    calHoldBtn: "📈 ДЕРЖАТЬ ПОЗИЦИЮ", calCloseBtn: "🔒 ЗАКРЫТЬ СЕЙЧАС",
-    calResultCorrect: "✅ Правильно! Держать позицию — верное решение.",
+    calHoldBtn: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-up.png' alt='' width='20' height='20' /> ДЕРЖАТЬ ПОЗИЦИЮ", calCloseBtn: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-lock.png' alt='' width='20' height='20' /> ЗАКРЫТЬ СЕЙЧАС",
+    calResultCorrect: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-check.png' alt='' width='20' height='20' /> Правильно! Держать позицию — верное решение.",
     calResultWrong: "❌ Поторопились. Фундаментал указывал на удержание.",
     calResultParaA: "На этой неделе ожидаются ",
     calResultParaBold: "бычьих события",
@@ -89,7 +89,7 @@ const STRINGS = {
     calScenarioPowell: "После Пауэлла",
     calScenarioPowellPrefix: "Ещё",
     calScenarioWeek: "Итог недели",
-    calPrinciple: "💡 Принцип Daoti: «Не закрывай прибыльную позицию перед бычьим фундаменталом. Дай ей дышать.»",
+    calPrinciple: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-idea.png' alt='' width='20' height='20' /> Принцип Daoti: «Не закрывай прибыльную позицию перед бычьим фундаменталом. Дай ей дышать.»",
 
     // Interactive 2: Pyramiding Simulator
     simTitle: "Симулятор Пирамидинга",
@@ -104,17 +104,17 @@ const STRINGS = {
     simStatFloatPnl: "Float PnL",
     simStatStopLoss: "Стоп-лосс",
     simDefaultMsg: "Нажми СТАРТ, затем добавляй лоты при откатах к EMA 20.",
-    simWarnFar: "⚠️ Цена далеко от EMA 20. Ждите отката для добавления лота.",
+    simWarnFar: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-warning.png' alt='' width='20' height='20' /> Цена далеко от EMA 20. Ждите отката для добавления лота.",
     simLotAt: "лот по",
     simTotalPositionsLabel: "Всего позиций",
     simSlUpdated: "SL обновлён.",
-    simBreakeven: "🔒 Стоп переведён в безубыток! Позиция защищена.",
+    simBreakeven: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-lock.png' alt='' width='20' height='20' /> Стоп переведён в безубыток! Позиция защищена.",
     simSlTriggered: "сработал.",
     simResultLabel: "Итог",
     simPointsOnWord: "пунктов на",
     simLotsWord: "лот(а)",
     simComplete: "🏁 Симуляция завершена! Итоговый PnL показан ниже.",
-    simAddBtnActive: "🎯 ДОБАВИТЬ ЛОТ — ЦЕНА У EMA 20!",
+    simAddBtnActive: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-target.png' alt='' width='20' height='20' /> ДОБАВИТЬ ЛОТ — ЦЕНА У EMA 20!",
     simAddBtnWaitPrefix: "+ ДОБАВИТЬ ЛОТ (ждите отката к EMA 20 · сейчас:",
     simAddBtnWaitMid: ", EMA20:",
     simLegendEma20: "EMA 20 (быстрая)",
@@ -122,8 +122,8 @@ const STRINGS = {
     simLegendEntries: "Уровни входа",
     simLegendTp: "Take Profit +150пт",
     simLegendSl: "Stop Loss (тяни мышью)",
-    simDoneGood: "✅ Отличный пирамидинг!",
-    simDoneNeutral: "📊 Итог симуляции",
+    simDoneGood: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-check.png' alt='' width='20' height='20' /> Отличный пирамидинг!",
+    simDoneNeutral: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-bar-chart.png' alt='' width='20' height='20' /> Итог симуляции",
     simDoneAdded: "Добавлено позиций",
     simDoneFinalPnl: "Итоговый PnL",
     simDoneExplain: "Пирамидинг усиливает прибыль при тренде, но требует дисциплины: добавлять только у EMA 20, каждый раз поднимать SL, никогда не добавлять в убыточную позицию.",
@@ -161,7 +161,7 @@ const STRINGS = {
     checklist6: "После каждой доливки — поднимать стоп-лосс",
     checklist7: "При +15 пунктов от входа — перевести стоп в безубыток",
     checklist8: "TP фиксированный: +150 пт. SL: -80 пт. RR = 1:1.875",
-    checklistDoneTitle: "✅ Глава 13 освоена!",
+    checklistDoneTitle: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-check.png' alt='' width='20' height='20' /> Глава 13 освоена!",
     checklistDoneBody: "Вы понимаете механику профессионального свинга. Терпение — это ваша позиция.",
 
     // Conclusions
@@ -284,11 +284,11 @@ const STRINGS = {
     calEv7Name: "Indicele încrederii consumatorilor Michigan",
     calEv7Hint: "Ușoară îmbunătățire. Neutru pentru aur.",
     calImpCritical: "CRITIC", calImpHigh: "IMPORTANT", calImpMedium: "MEDIU", calImpLow: "SCĂZUT",
-    calImpactBullish: "📈 Bullish pentru aur", calImpactBearish: "📉 Bearish", calImpactNeutral: "➡️ Neutru",
+    calImpactBullish: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-up.png' alt='' width='20' height='20' /> Bullish pentru aur", calImpactBearish: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-down.png' alt='' width='20' height='20' /> Bearish", calImpactNeutral: "➡️ Neutru",
     calForecastLabel: "Prognoză:", calPrevLabel: "Anterior:",
     calStudiedLabel: "Studiat", calEventsWord: "evenimente",
-    calHoldBtn: "📈 MENȚINE POZIȚIA", calCloseBtn: "🔒 ÎNCHIDE ACUM",
-    calResultCorrect: "✅ Corect! Menținerea poziției este decizia corectă.",
+    calHoldBtn: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-up.png' alt='' width='20' height='20' /> MENȚINE POZIȚIA", calCloseBtn: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-lock.png' alt='' width='20' height='20' /> ÎNCHIDE ACUM",
+    calResultCorrect: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-check.png' alt='' width='20' height='20' /> Corect! Menținerea poziției este decizia corectă.",
     calResultWrong: "❌ V-ați grăbit. Fundamentalul indica menținerea poziției.",
     calResultParaA: "În această săptămână sunt așteptate ",
     calResultParaBold: "evenimente bullish",
@@ -297,7 +297,7 @@ const STRINGS = {
     calScenarioPowell: "După Powell",
     calScenarioPowellPrefix: "Încă",
     calScenarioWeek: "Rezultatul săptămânii",
-    calPrinciple: "💡 Principiul Daoti: «Nu închide o poziție profitabilă înainte de un fundamental bullish. Las-o să respire.»",
+    calPrinciple: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-idea.png' alt='' width='20' height='20' /> Principiul Daoti: «Nu închide o poziție profitabilă înainte de un fundamental bullish. Las-o să respire.»",
 
     // Interactive 2: Pyramiding Simulator
     simTitle: "Simulator de Piramidare",
@@ -312,17 +312,17 @@ const STRINGS = {
     simStatFloatPnl: "Float PnL",
     simStatStopLoss: "Stop-loss",
     simDefaultMsg: "Apasă START, apoi adaugă loturi la retragerile către EMA 20.",
-    simWarnFar: "⚠️ Prețul este departe de EMA 20. Așteaptă o retragere pentru a adăuga un lot.",
+    simWarnFar: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-warning.png' alt='' width='20' height='20' /> Prețul este departe de EMA 20. Așteaptă o retragere pentru a adăuga un lot.",
     simLotAt: "lot la",
     simTotalPositionsLabel: "Total poziții",
     simSlUpdated: "SL actualizat.",
-    simBreakeven: "🔒 Stopul a fost mutat pe breakeven! Poziția este protejată.",
+    simBreakeven: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-lock.png' alt='' width='20' height='20' /> Stopul a fost mutat pe breakeven! Poziția este protejată.",
     simSlTriggered: "declanșat.",
     simResultLabel: "Rezultat",
     simPointsOnWord: "puncte pe",
     simLotsWord: "lot(uri)",
     simComplete: "🏁 Simularea s-a încheiat! PnL-ul final este afișat mai jos.",
-    simAddBtnActive: "🎯 ADAUGĂ LOT — PREȚUL E LA EMA 20!",
+    simAddBtnActive: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-target.png' alt='' width='20' height='20' /> ADAUGĂ LOT — PREȚUL E LA EMA 20!",
     simAddBtnWaitPrefix: "+ ADAUGĂ LOT (așteaptă retragerea la EMA 20 · acum:",
     simAddBtnWaitMid: ", EMA20:",
     simLegendEma20: "EMA 20 (rapidă)",
@@ -330,8 +330,8 @@ const STRINGS = {
     simLegendEntries: "Niveluri de intrare",
     simLegendTp: "Take Profit +150 pct",
     simLegendSl: "Stop Loss (trage cu mouse-ul)",
-    simDoneGood: "✅ Piramidare excelentă!",
-    simDoneNeutral: "📊 Rezultatul simulării",
+    simDoneGood: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-check.png' alt='' width='20' height='20' /> Piramidare excelentă!",
+    simDoneNeutral: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-bar-chart.png' alt='' width='20' height='20' /> Rezultatul simulării",
     simDoneAdded: "Poziții adăugate",
     simDoneFinalPnl: "PnL final",
     simDoneExplain: "Piramidarea amplifică profitul într-un trend, dar cere disciplină: adaugă loturi doar la EMA 20, ridică SL după fiecare adăugare, nu adăuga niciodată la o poziție pe pierdere.",
@@ -369,7 +369,7 @@ const STRINGS = {
     checklist6: "După fiecare adăugare — ridică stop-loss-ul",
     checklist7: "La +15 puncte de la intrare — mută stopul pe breakeven",
     checklist8: "TP fix: +150 pct. SL: -80 pct. RR = 1:1.875",
-    checklistDoneTitle: "✅ Capitolul 13 asimilat!",
+    checklistDoneTitle: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-check.png' alt='' width='20' height='20' /> Capitolul 13 asimilat!",
     checklistDoneBody: "Înțelegi mecanica swing-ului profesionist. Răbdarea este poziția ta.",
 
     // Conclusions
@@ -508,8 +508,8 @@ function AskAnalystPopup({onClose}) {
           <p style={{fontSize:18,color:C.inkMid}}>{S.askBody}</p>
         </div>
         <div className="messenger-grid">
-          {[{href:tgLink,bg:"#0088cc",icon:"🚀",name:"SBF Support",sub:S.askTgSub,btn:S.askTgBtn},
-            {href:waLink,bg:"#25d366",icon:"💬",name:"SBF Company",sub:S.askWaSub,btn:S.askWaBtn}
+          {[{href:tgLink,bg:"#0088cc",icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-rocket.png' alt='' width='20' height='20' />",name:"SBF Support",sub:S.askTgSub,btn:S.askTgBtn},
+            {href:waLink,bg:"#25d366",icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-quote.png' alt='' width='20' height='20' />",name:"SBF Company",sub:S.askWaSub,btn:S.askWaBtn}
           ].map((m,i) => (
             <div key={i} style={{background:"#fff",border:"1px solid #e0e0e0",borderRadius:12,padding:"30px 25px",display:"flex",flexDirection:"column"}}>
               <div style={{display:"flex",alignItems:"center",gap:15,marginBottom:30}}>
@@ -605,7 +605,7 @@ function NewsCalendar() {
   return (
     <div style={{background:C.black,borderRadius:8,padding:"36px 40px",color:C.white}}>
       <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:28}}>
-        <span style={{fontSize:28}}>📅</span>
+        <span style={{fontSize:28}}><img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-calendar.png' alt='' width='20' height='20' /></span>
         <div>
           <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.gold}}>{S.calTitle}</div>
           <Mono size={11} color="rgba(255,255,255,0.4)" spacing={2}>{S.calSubtitle}</Mono>
@@ -639,7 +639,7 @@ function NewsCalendar() {
       {/* Instruction */}
       {phase === "analyze" && (
         <div style={{background:"rgba(201,151,58,0.08)",border:"1px solid rgba(201,151,58,0.25)",borderRadius:4,padding:"12px 18px",marginBottom:20,display:"flex",gap:10,alignItems:"center"}}>
-          <span style={{fontSize:16}}>💡</span>
+          <span style={{fontSize:16}}><img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-idea.png' alt='' width='20' height='20' /></span>
           <Mono size={12} color={C.gold} spacing={1}>
             {S.calInstruction}
           </Mono>
@@ -838,7 +838,7 @@ function PyramidingSim() {
     setPositions(p => [...p, { entry: currentPrice, lots, idx: visibleCount }]);
     if (sl === null) setSl(+(currentPrice - 25).toFixed(2));
     else setSl(s => +(Math.max(s, currentPrice - 25)).toFixed(2)); // trail SL up
-    setMessage(`✅ +${lots} ${S.simLotAt} ${currentPrice.toFixed(2)}. ${S.simTotalPositionsLabel}: ${positions.length+1}. ${S.simSlUpdated}`);
+    setMessage(`<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-check.png' alt='' width='20' height='20' /> +${lots} ${S.simLotAt} ${currentPrice.toFixed(2)}. ${S.simTotalPositionsLabel}: ${positions.length+1}. ${S.simSlUpdated}`);
     setMsgType("good");
   }, [canAdd, currentPrice, visibleCount, sl, nearEma20, running, positions.length]);
 
@@ -861,7 +861,7 @@ function PyramidingSim() {
       setDone(true);
       const pnl = ((sl - avgEntry) * totalLots * 100).toFixed(0);
       const sign = Number(pnl) >= 0 ? "+" : "";
-      setMessage(`📊 ${S.simStatStopLoss} ${sl} ${S.simSlTriggered} ${S.simResultLabel}: ${sign}${pnl} ${S.simPointsOnWord} ${totalLots} ${S.simLotsWord}.`);
+      setMessage(`<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-bar-chart.png' alt='' width='20' height='20' /> ${S.simStatStopLoss} ${sl} ${S.simSlTriggered} ${S.simResultLabel}: ${sign}${pnl} ${S.simPointsOnWord} ${totalLots} ${S.simLotsWord}.`);
       setMsgType(Number(pnl) >= 0 ? "good" : "bad");
     }
   }, [currentPrice, sl, positions, running]);

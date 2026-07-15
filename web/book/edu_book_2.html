@@ -77,7 +77,7 @@ const STRINGS = {
     fedRangeNeutral: "5% — Нейтральная",
     fedRangeTight: "10% — Жёсткая",
     fedModeRiskOn: "🟢 РИСК-ОН",
-    fedModeRiskOff: "🔴 РИСК-ОФФ",
+    fedModeRiskOff: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-alert-dot.png' alt='' width='20' height='20' /> РИСК-ОФФ",
     fedModeNeutral: "🟡 НЕЙТРАЛЬНЫЙ",
     fedDescRiskOn: "Дешёвые деньги текут в рисковые активы — акции, крипто, развивающиеся рынки. Печатный станок работает.",
     fedDescRiskOff: "Деньги дорогие. Инвесторы уходят в «тихую гавань»: доллар, US Treasuries. Акции и крипто под давлением.",
@@ -105,7 +105,7 @@ const STRINGS = {
     macro6Text: "Когда 2-летние US Treasuries доходнее 10-летних — исторически предшествует рецессии. Сработало 7 из 8 раз с 1970 года.",
     calNoteTitle: "Экономический календарь — ваш обязательный инструмент",
     calNoteBefore: "Перед каждой сессией проверяйте события с рейтингом ",
-    calNoteImportant: "🔴 Высокая важность",
+    calNoteImportant: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-alert-dot.png' alt='' width='20' height='20' /> Высокая важность",
     calNoteMiddle: ". За 15–30 минут до релиза крупные игроки закрывают позиции — рынок «замирает». После выхода данных — резкое движение. ",
     calNoteWarning: "Торговать в момент публикации без опыта крайне опасно.",
     // ── Block 3: Support & Resistance ──
@@ -199,7 +199,7 @@ const STRINGS = {
     fedRangeNeutral: "5% — Neutră",
     fedRangeTight: "10% — Restrictivă",
     fedModeRiskOn: "🟢 RISK-ON",
-    fedModeRiskOff: "🔴 RISK-OFF",
+    fedModeRiskOff: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-alert-dot.png' alt='' width='20' height='20' /> RISK-OFF",
     fedModeNeutral: "🟡 NEUTRU",
     fedDescRiskOn: "Banii ieftini curg spre activele riscante — acțiuni, cripto, piețe emergente. Tiparnița funcționează.",
     fedDescRiskOff: "Banii sunt scumpi. Investitorii se refugiază în «refugii sigure»: dolar, US Treasuries. Acțiunile și cripto sunt sub presiune.",
@@ -227,7 +227,7 @@ const STRINGS = {
     macro6Text: "Când randamentul US Treasuries pe 2 ani depășește randamentul celor pe 10 ani, istoric acest lucru precede o recesiune. S-a confirmat de 7 ori din 8 începând din 1970.",
     calNoteTitle: "Calendarul economic — instrumentul tău obligatoriu",
     calNoteBefore: "Înainte de fiecare sesiune, verifică evenimentele cu rating ",
-    calNoteImportant: "🔴 Importanță ridicată",
+    calNoteImportant: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-alert-dot.png' alt='' width='20' height='20' /> Importanță ridicată",
     calNoteMiddle: ". Cu 15–30 de minute înainte de publicare, jucătorii mari își închid pozițiile — piața «îngheață». După publicarea datelor urmează o mișcare bruscă. ",
     calNoteWarning: "Tranzacționarea chiar în momentul publicării, fără experiență, este extrem de periculoasă.",
     // ── Block 3: Support & Resistance ──
@@ -393,7 +393,7 @@ function FedSimulator() {
 
       {/* Mode badge */}
       <div style={{background:"rgba(255,255,255,0.06)",border:`1px solid rgba(255,255,255,0.1)`,borderRadius:6,padding:"16px 20px",marginBottom:24,display:"flex",gap:12,alignItems:"flex-start"}}>
-        <span style={{fontSize:22}}>{riskMode?"🟢":tightMode?"🔴":"🟡"}</span>
+        <span style={{fontSize:22}}>{riskMode?"🟢":tightMode?"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-alert-dot.png' alt='' width='20' height='20' />":"🟡"}</span>
         <div>
           <div style={{fontWeight:700,fontSize:15,marginBottom:4}}>{modeLabel}</div>
           <div style={{fontSize:13,color:"rgba(255,255,255,0.55)",lineHeight:1.6}}>{modeDesc}</div>
@@ -507,7 +507,7 @@ function SRTrainer() {
     <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"36px 40px"}}>
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:20,flexWrap:"wrap",gap:12}}>
         <div style={{display:"flex",alignItems:"center",gap:12}}>
-          <span style={{fontSize:28}}>📈</span>
+          <span style={{fontSize:28}}><img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-up.png' alt='' width='20' height='20' /></span>
           <div>
             <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.black}}>{S.srTitle}</div>
             <Mono size={11} color={C.inkSoft} spacing={2}>{S.srKicker}</Mono>
@@ -527,14 +527,14 @@ function SRTrainer() {
       {/* Instructions */}
       {!checked && (
         <div style={{background:"rgba(201,151,58,0.08)",border:`1px solid ${C.borderGold}`,borderRadius:4,padding:"12px 16px",marginBottom:16,fontSize:13,color:C.inkMid}}>
-          📌 <strong>{S.srInstrTask}</strong> {S.srInstrBody1}{correctZones.length}{S.srInstrBody2}{lines.length}/3
+          <img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-pin.png' alt='' width='20' height='20' /> <strong>{S.srInstrTask}</strong> {S.srInstrBody1}{correctZones.length}{S.srInstrBody2}{lines.length}/3
         </div>
       )}
 
       {/* Score */}
       {checked && score !== null && (
         <div style={{background: score>=67?C.greenPale:score>=33?"#fff8e1":C.redPale, border:`1px solid ${score>=67?"#2d7a4f":score>=33?C.gold:C.red}`, borderRadius:4,padding:"14px 20px",marginBottom:16,display:"flex",gap:12,alignItems:"center"}}>
-          <span style={{fontSize:32}}>{score>=67?"🏆":score>=33?"🎯":"📚"}</span>
+          <span style={{fontSize:32}}>{score>=67?"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trophy.png' alt='' width='20' height='20' />":score>=33?"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-target.png' alt='' width='20' height='20' />":"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-books.png' alt='' width='20' height='20' />"}</span>
           <div>
             <div style={{fontWeight:700,fontSize:16,color:score>=67?C.green:score>=33?C.gold:C.red}}>
               {score}% {S.srAccuracyLabel} {score>=67?S.srScoreGreat:score>=33?S.srScoreOk:S.srScoreLow}
@@ -631,17 +631,17 @@ function Chapter2() {
   ];
 
   const macroIndicators = [
-    {icon:"📊", title:S.macro1Title, text:S.macro1Text},
-    {icon:"💼", title:S.macro2Title, text:S.macro2Text},
+    {icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-bar-chart.png' alt='' width='20' height='20' />", title:S.macro1Title, text:S.macro1Text},
+    {icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-briefcase.png' alt='' width='20' height='20' />", title:S.macro2Title, text:S.macro2Text},
     {icon:"🏭", title:S.macro3Title, text:S.macro3Text},
-    {icon:"🛍️", title:S.macro4Title, text:S.macro4Text},
-    {icon:"🏠", title:S.macro5Title, text:S.macro5Text},
-    {icon:"📉", title:S.macro6Title, text:S.macro6Text},
+    {icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-shopping.png' alt='' width='20' height='20' />", title:S.macro4Title, text:S.macro4Text},
+    {icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-house.png' alt='' width='20' height='20' />", title:S.macro5Title, text:S.macro5Text},
+    {icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-down.png' alt='' width='20' height='20' />", title:S.macro6Title, text:S.macro6Text},
   ];
 
   const srPrinciples = [
     {icon:"🏔️", title:S.srp1Title, text:S.srp1Text},
-    {icon:"🛡️", title:S.srp2Title, text:S.srp2Text},
+    {icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-shield.png' alt='' width='20' height='20' />", title:S.srp2Title, text:S.srp2Text},
     {icon:"🔄", title:S.srp3Title, text:S.srp3Text},
     {icon:"📐", title:S.srp4Title, text:S.srp4Text},
   ];
@@ -714,9 +714,9 @@ function Chapter2() {
           <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:20}}>{S.rateMechKicker}</Mono>
           <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:0}} className="grid-3">
             {[
-              {step:"01", title:S.rateStep1Title, text:S.rateStep1Text, icon:"📈"},
+              {step:"01", title:S.rateStep1Title, text:S.rateStep1Text, icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-up.png' alt='' width='20' height='20' />"},
               {step:"02", title:S.rateStep2Title, text:S.rateStep2Text, icon:"💸"},
-              {step:"03", title:S.rateStep3Title, text:S.rateStep3Text, icon:"🌍"},
+              {step:"03", title:S.rateStep3Title, text:S.rateStep3Text, icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-globe.png' alt='' width='20' height='20' />"},
             ].map((s,i) => (
               <div key={i} style={{padding:"20px 24px",borderLeft:i>0?"1px solid rgba(255,255,255,0.08)":"none"}}>
                 <div style={{display:"flex",gap:10,alignItems:"center",marginBottom:12}}>
@@ -748,7 +748,7 @@ function Chapter2() {
 
         {/* Economic calendar note */}
         <div style={{background:"rgba(201,151,58,0.06)",border:`1px solid ${C.borderGold}`,borderRadius:6,padding:"24px 28px",marginBottom:56,display:"flex",gap:16,alignItems:"flex-start"}}>
-          <span style={{fontSize:28,flexShrink:0}}>📅</span>
+          <span style={{fontSize:28,flexShrink:0}}><img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-calendar.png' alt='' width='20' height='20' /></span>
           <div>
             <div style={{fontWeight:600,fontSize:14,color:C.black,marginBottom:8}}>{S.calNoteTitle}</div>
             <div style={{fontSize:13,color:C.inkMid,lineHeight:1.7}}>

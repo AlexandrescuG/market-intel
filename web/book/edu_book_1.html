@@ -87,7 +87,7 @@ const MSG_TR = {
     title: "Предпочитаете мессенджер?",
     sub: "Напишите в Telegram или WhatsApp — сообщение уже готово, просто нажмите Отправить.",
     tgInc: "Привет 👋 Чем можем помочь? Оставьте заявку и мы пришлём материалы.",
-    waInc: "Добрый день! Напишите что вас интересует 📊",
+    waInc: "Добрый день! Напишите что вас интересует <img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-bar-chart.png' alt='' width='20' height='20' />",
     btnTg: "ОТКРЫТЬ TELEGRAM",
     btnWa: "ОТКРЫТЬ WHATSAPP",
     you: "Вы",
@@ -99,7 +99,7 @@ const MSG_TR = {
     title: "Prefer a messenger?",
     sub: "Write us on Telegram or WhatsApp — the message is pre-filled, just click Send.",
     tgInc: "Hi 👋 How can we help? Leave a request and we'll send the materials.",
-    waInc: "Good day! Tell us what you're interested in 📊",
+    waInc: "Good day! Tell us what you're interested in <img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-bar-chart.png' alt='' width='20' height='20' />",
     btnTg: "OPEN TELEGRAM",
     btnWa: "OPEN WHATSAPP",
     you: "You",
@@ -111,7 +111,7 @@ const MSG_TR = {
     title: "Preferați un messenger?",
     sub: "Scrieți pe Telegram sau WhatsApp — mesajul este pregătit, doar apăsați Trimite.",
     tgInc: "Bună 👋 Cu ce vă putem ajuta? Lăsați o cerere și vă trimitem materialele.",
-    waInc: "Bună ziua! Spuneți ce vă interesează 📊",
+    waInc: "Bună ziua! Spuneți ce vă interesează <img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-bar-chart.png' alt='' width='20' height='20' />",
     btnTg: "DESCHIDE TELEGRAM",
     btnWa: "DESCHIDE WHATSAPP",
     you: "Tu",
@@ -345,7 +345,7 @@ const CANDLES = [
   {o:5165, h:5180, l:5160, c:5175}, {o:5175, h:5185, l:5165, c:5170}, {o:5170, h:5180, l:5155, c:5178}
 ];
 const getCY = (price) => 260 - ((price - 5080) / 170) * 230;
-const TM_EMOJIS = {"S&P 500":"📈","Apple":"🍎","Gold":"🥇","Bitcoin":"₿","NVIDIA":"🎮","Amazon":"📦","Microsoft":"💻","Tesla":"⚡","Ethereum":"🔷","Oil (WTI)":"🛢️"};
+const TM_EMOJIS = {"S&P 500":"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-up.png' alt='' width='20' height='20' />","Apple":"🍎","Gold":"🥇","Bitcoin":"₿","NVIDIA":"🎮","Amazon":"📦","Microsoft":"💻","Tesla":"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-lightning.png' alt='' width='20' height='20' />","Ethereum":"🔷","Oil (WTI)":"🛢️"};
 
 const GLOSSARY={
   ru:{
@@ -508,7 +508,7 @@ function AskAnalystPopup({chapterNum, lang, onClose}) {
             </div>
 
             <a href={waLink} target="_blank" rel="noreferrer" style={{marginTop: "auto", display: "block", background: "#25d366", color: "#fff", textAlign: "center", padding: "18px 20px", borderRadius: 8, fontSize: 15, letterSpacing: 1.5, fontFamily: "monospace", fontWeight: 700, textDecoration: "none", transition: "opacity 0.2s"}} onMouseEnter={e=>e.currentTarget.style.opacity=0.85} onMouseLeave={e=>e.currentTarget.style.opacity=1}>
-              <span style={{display: "inline-block", marginRight: 10, verticalAlign: "middle"}}>💬</span>
+              <span style={{display: "inline-block", marginRight: 10, verticalAlign: "middle"}}><img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-quote.png' alt='' width='20' height='20' /></span>
               {tr.btnWa}
             </a>
           </div>
@@ -644,7 +644,7 @@ function Level1({onBack, onNext, path}) {
 
     React.createElement('div',{style:{maxWidth:1060,margin:"0 auto",padding:"60px 5vw 120px"}},
       React.createElement('div',{style:{background:C.dark,color:C.white,padding:"45px 5vw",marginBottom:60,position:"relative",overflow:"hidden"}},
-        React.createElement('div',{style:{position:"absolute",top:-12,right:30,fontSize:127,opacity:0.05,fontFamily:"monospace"}},"⚡"),
+        React.createElement('div',{style:{position:"absolute",top:-12,right:30,fontSize:127,opacity:0.05,fontFamily:"monospace"}},"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-lightning.png' alt='' width='20' height='20' />"),
         React.createElement(Chip,{color:C.gold},tr.antiMythTag),
         React.createElement('h2',{style:{fontSize:"clamp(25px,3.5vw,38px)",fontWeight:700,margin:"18px 0 12px",color:C.white,lineHeight:1.25,fontFamily:"'DM Serif Display',serif"}},tr.antiMythTitle),
         React.createElement('p',{style:{fontSize:19,color:"#cccccc",lineHeight:1.8,margin:0}},tr.antiMythBody)
@@ -843,7 +843,7 @@ function Level1({onBack, onNext, path}) {
               React.createElement('span',{style:{fontSize:15,fontFamily:"monospace",fontWeight:700,color:C.inkMid,minWidth:96,textAlign:"right"}},"$"+tmRes.depFin.toLocaleString())
             ),
             React.createElement('div',{style:{display:"flex",alignItems:"center",gap:12, flexWrap:"wrap"}},
-              React.createElement('span',{style:{fontSize:14,fontFamily:"monospace",color:C.inkSoft,width:140,flexShrink:0}},(TM_EMOJIS[tmAsset]||"📈")+" "+tmAsset.substring(0,10)),
+              React.createElement('span',{style:{fontSize:14,fontFamily:"monospace",color:C.inkSoft,width:140,flexShrink:0}},(TM_EMOJIS[tmAsset]||"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-up.png' alt='' width='20' height='20' />")+" "+tmAsset.substring(0,10)),
               React.createElement('div',{style:{flex:1,height:9,background:"#e8e4dc",borderRadius:4,overflow:"hidden", minWidth: 100}},
                 React.createElement('div',{style:{width:"100%",height:"100%",background:C.gold,borderRadius:4}})
               ),
@@ -1026,7 +1026,7 @@ function SkillTree({ path, onBack }) {
           <div style={{ display: "flex", justifyContent: "center", gap: "clamp(20px, 5vw, 76px)", marginTop: 50, position: "relative", flexWrap: "wrap" }}>
 
             <div style={{ width: 127, background: path==="trader"?C.goldPale:"#222", color: path==="trader"?C.black:"#888", padding: "15px", borderRadius: "10px", border: `1px solid ${path==="trader"?C.gold:"#444"}`, zIndex: 1 }}>
-              <div style={{ fontSize: 23, marginBottom: 5 }}>📈</div>
+              <div style={{ fontSize: 23, marginBottom: 5 }}><img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-up.png' alt='' width='20' height='20' /></div>
               <div style={{ fontSize: 13, fontFamily: "monospace", fontWeight: 700 }}>{S.treeTechAnalysis}</div>
               <div style={{ fontSize: 11, marginTop: 5 }}>{S.treeUnlocked}</div>
             </div>
@@ -1038,7 +1038,7 @@ function SkillTree({ path, onBack }) {
             </div>
 
             <div style={{ width: 127, background: "#222", color: "#888", padding: "15px", borderRadius: "10px", border: "1px solid #444", zIndex: 1 }}>
-              <div style={{ fontSize: 23, marginBottom: 5 }}>🧠</div>
+              <div style={{ fontSize: 23, marginBottom: 5 }}><img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-mindset.png' alt='' width='20' height='20' /></div>
               <div style={{ fontSize: 13, fontFamily: "monospace", fontWeight: 700 }}>{S.treePsychology}</div>
               <div style={{ fontSize: 11, marginTop: 5 }}>{S.treeLocked}</div>
             </div>
