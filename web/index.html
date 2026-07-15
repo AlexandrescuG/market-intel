@@ -67,9 +67,10 @@ if (new URLSearchParams(location.search).get("embed") === "1") {
   --signal:#b07d18;
 }
 *{box-sizing:border-box}
+html{overflow-x:hidden}
 body{margin:0;background:var(--cream);color:var(--ink);
   font-family:Montserrat,sans-serif;font-size:14px;line-height:1.6;
-  -webkit-font-smoothing:antialiased;overflow-x:hidden}
+  -webkit-font-smoothing:antialiased}
 .mono{font-family:'JetBrains Mono',monospace}
 h1,h2,h3{font-family:Montserrat,sans-serif;font-weight:700;margin:0}
 a{color:var(--gold);text-decoration:none}
@@ -305,6 +306,12 @@ a:hover{text-decoration:underline;color:var(--glow)}
     </div>
   </div>
 </header>
+
+<div class="sbf-mob-bar" id="sbfMobBar">
+  <img src="./assets/logo.png" alt="SBF">
+  <span class="mob-brand">SBF INTELLIGENCE</span>
+  <div class="mob-time"><span class="mob-dot" id="mobLiveDot"></span><span id="mobClock">—</span></div>
+</div>
 
 <div class="strip" id="strip"><div class="strip-inner" id="stripInner"></div></div>
 
