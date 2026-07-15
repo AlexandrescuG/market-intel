@@ -58,10 +58,10 @@
 
   function authHeaders(extra) {
     var h = Object.assign({}, extra || {});
-    var t = token();
-    if (t) {
-      h['X-Auth-Token'] = t;
-      h['Authorization'] = 'Bearer ' + t;
+    var tok = token();
+    if (tok) {
+      h['X-Auth-Token'] = tok;
+      h['Authorization'] = 'Bearer ' + tok;
     }
     return h;
   }
