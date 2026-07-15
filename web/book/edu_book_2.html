@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>SBF | {% if lang == 'ro' %}Capitolul 2. Păpușarii Globali{% else %}Глава 2. Глобальные Кукловоды{% endif %}</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html,body{max-width:100vw;overflow-x:hidden;scroll-behavior:smooth}
+    body{background:#ffffff;font-family:'DM Sans',system-ui,sans-serif;color:#18181a}
+    #sbf-book-root{min-height:100vh}
+    .back-to-edu{
+      position:fixed;bottom:20px;right:20px;z-index:500;
+      background:#18181a;color:rgba(255,255,255,0.6);
+      font-family:'DM Sans',sans-serif;font-size:.75rem;letter-spacing:1.5px;text-transform:uppercase;
+      padding:7px 13px;text-decoration:none;transition:all .2s;
+      border:1px solid rgba(255,255,255,0.08);
+    }
+    .back-to-edu:hover{background:#c9973a;color:#fff}
+    @media(max-width:768px){.hide-mobile{display:none!important}.grid-2{grid-template-columns:1fr!important}.grid-3{grid-template-columns:1fr!important}}
+  </style>
+</head>
+<body>
+
+
+<div id="sbf-book-root"></div>
+<a href="/edu" class="back-to-edu">← Edu</a>
+
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<script type="text/babel" data-presets="react">
+const INITIAL_LANG = "{{ lang }}";
+
+{% raw %}
+const STRINGS = {
+  ru: {
+    // ── Sticky header ──
+    stickyLevel: "УРОВЕНЬ 2",
+    stickyTitle: "Глобальные Кукловоды",
+    stickyFA: "ФА 60%",
+    stickyTA: "ТА 40%",
+    // ── Hero ──
+    heroKicker: "SBF COMPANY — ГЛАВА 2",
+    heroTitleLine1: "Глобальные",
+    heroTitleLine2: "Кукловоды",
+    heroBody: "Почему графики вообще двигаются? Потому что центральные банки меняют стоимость денег — и вся финансовая система реагирует цепной реакцией.",
+    heroChipFA: "Фундаментал 60%",
+    heroChipTA: "Техника 40%",
+    heroChipInteractive: "2 Интерактива",
+    // ── Block 1: Central banks ──
+    sec1Title: "Центральные банки: кто управляет деньгами мира",
+    sec1Sub: "Центральные банки не торгуют на бирже — они устанавливают правила игры. Стоимость денег, доступность кредита, уровень инфляции — всё это в их руках.",
+    cb1Abbr: "ФРС", cb1Full: "Федеральная Резервная Система", cb1Country: "США 🇺🇸",
+    cb1Desc: "Управляет долларом — мировой резервной валютой. Решения Комитета FOMC двигают все рынки планеты одновременно.",
+    cb2Abbr: "ЕЦБ", cb2Full: "Европейский Центральный Банк", cb2Country: "ЕС 🇪🇺",
+    cb2Desc: "Контролирует евро для 20 стран еврозоны. Политика ЕЦБ задаёт тон для EUR/USD — самой торгуемой валютной пары.",
+    cb3Abbr: "Банк Японии", cb3Full: "Bank of Japan (BOJ)", cb3Country: "Япония 🇯🇵",
+    cb3Desc: "Создатель политики отрицательных ставок. Иена (JPY) — валюта-убежище и главная «финансирующая» валюта для кэрри-трейда.",
+    cb4Abbr: "Банк Англии", cb4Full: "Bank of England (BOE)", cb4Country: "Великобритания 🇬🇧",
+    cb4Desc: "Один из старейших ЦБ мира (1694). Управляет фунтом стерлингов — третьей по значимости резервной валютой.",
+    rateMechKicker: "КАК РАБОТАЕТ ПРОЦЕНТНАЯ СТАВКА",
+    rateStep1Title: "ФРС поднимает ставку",
+    rateStep1Text: "Стоимость кредита растёт. Бизнесу дороже брать займы, потребители меньше тратят. Инфляция замедляется.",
+    rateStep2Title: "Инвесторы перекладываются",
+    rateStep2Text: "Безрисковая доходность US Treasuries растёт. Зачем рисковать в акциях, если государство платит 5%+?",
+    rateStep3Title: "Рынки реагируют",
+    rateStep3Text: "DXY растёт — деньги текут в доллар. Акции, золото, крипто под давлением. Облигации дорожают.",
+    // ── FED Simulator (interactive 1) ──
+    fedTitle: "Симулятор ФРС",
+    fedKicker: "ИНТЕРАКТИВ — ФУНДАМЕНТАЛ",
+    fedRateLabel: "Ключевая ставка ФРС",
+    fedRangeSoft: "0% — QE (Мягкая)",
+    fedRangeNeutral: "5% — Нейтральная",
+    fedRangeTight: "10% — Жёсткая",
+    fedModeRiskOn: "🟢 РИСК-ОН",
+    fedModeRiskOff: "🔴 РИСК-ОФФ",
+    fedModeNeutral: "🟡 НЕЙТРАЛЬНЫЙ",
+    fedDescRiskOn: "Дешёвые деньги текут в рисковые активы — акции, крипто, развивающиеся рынки. Печатный станок работает.",
+    fedDescRiskOff: "Деньги дорогие. Инвесторы уходят в «тихую гавань»: доллар, US Treasuries. Акции и крипто под давлением.",
+    fedDescNeutral: "Умеренная политика. Рынки ищут направление, волатильность повышена.",
+    fedAssetDXYLabel: "DXY (Индекс $)", fedAssetDXYDesc: "Сила доллара vs 6 валют",
+    fedAssetSPXLabel: "S&P 500", fedAssetSPXDesc: "Индекс 500 акций США",
+    fedAssetGoldLabel: "Gold (XAU/USD)", fedAssetGoldDesc: "Тройская унция",
+    fedAssetBTCLabel: "Bitcoin", fedAssetBTCDesc: "Крипто = риск-актив",
+    fedAssetBondLabel: "US 10Y Bond", fedAssetBondDesc: "Доходность гособлигаций",
+    fedFootnote: "* Упрощённая модель корреляций на основе исторических данных 1990–2024",
+    // ── Block 2: Macro indicators ──
+    sec2Title: "Ключевые макроэкономические индикаторы",
+    sec2Sub: "Прежде чем открыть сделку, опытный трейдер проверяет экономический календарь. Релизы макроданных — это «взрывы» волатильности.",
+    macro1Title: "Инфляция (CPI)",
+    macro1Text: "Consumer Price Index. ФРС таргетирует 2%. При CPI выше цели — ставки растут. Выходит ежемесячно — один из самых «взрывных» релизов для рынков.",
+    macro2Title: "Рынок труда (NFP)",
+    macro2Text: "Non-Farm Payrolls. Число рабочих мест в США за месяц. Выходит каждую первую пятницу. Сильный NFP = ставки выше = доллар крепче.",
+    macro3Title: "ВВП (GDP)",
+    macro3Text: "Валовой внутренний продукт. Мерило экономического роста. Два квартала роста = бум. Два квартала снижения = рецессия.",
+    macro4Title: "Розничные продажи",
+    macro4Text: "Потребительские расходы = 70% ВВП США. Сильный показатель поддерживает рост, слабый — сигнал замедления.",
+    macro5Title: "Рынок недвижимости",
+    macro5Text: "Продажи домов, ипотечные ставки — «термометр» экономики. При росте ставок ФРС ипотека дорожает, рынок жилья остывает.",
+    macro6Title: "Инверсия кривой доходности",
+    macro6Text: "Когда 2-летние US Treasuries доходнее 10-летних — исторически предшествует рецессии. Сработало 7 из 8 раз с 1970 года.",
+    calNoteTitle: "Экономический календарь — ваш обязательный инструмент",
+    calNoteBefore: "Перед каждой сессией проверяйте события с рейтингом ",
+    calNoteImportant: "🔴 Высокая важность",
+    calNoteMiddle: ". За 15–30 минут до релиза крупные игроки закрывают позиции — рынок «замирает». После выхода данных — резкое движение. ",
+    calNoteWarning: "Торговать в момент публикации без опыта крайне опасно.",
+    // ── Block 3: Support & Resistance ──
+    sec3Title: "Поддержка и Сопротивление: память рынка",
+    sec3Sub: "Макроэкономика создаёт импульсы — но цена не движется в пустоте. Она взаимодействует с уровнями, которые рынок «помнит» месяцами и годами.",
+    srIntroText: "Когда цена достигает определённого уровня и разворачивается — она оставляет «след» в памяти участников рынка. Крупные игроки помнят, где они покупали и продавали. При повторном приходе цены на этот уровень они снова выставляют ордера — создавая зону с повышенной активностью. Это и есть уровни поддержки и сопротивления.",
+    srp1Title: "Уровень сопротивления",
+    srp1Text: "Ценовая зона, где продавцы исторически превышали покупателей. Цена «отбивается» сверху вниз. При пробое — сопротивление становится поддержкой.",
+    srp2Title: "Уровень поддержки",
+    srp2Text: "Ценовая зона, где покупатели исторически превышали продавцов. Цена «отбивается» снизу вверх. При пробое — поддержка становится сопротивлением.",
+    srp3Title: "Смена ролей",
+    srp3Text: "Пробитое сопротивление становится поддержкой, и наоборот. Это одно из важнейших правил технического анализа — основа многих торговых стратегий.",
+    srp4Title: "Психологические уровни",
+    srp4Text: "Круглые числа (2000, 2500, 50000) — мощные уровни. Крупные игроки ставят ордера на круглых отметках, что делает их самоисполняющимися зонами.",
+    // Static SR diagram (SVG)
+    diagKicker: "ПРИНЦИП СМЕНЫ РОЛЕЙ",
+    diagResistanceLabel: "СОПРОТИВЛЕНИЕ 2,540",
+    diagSupportLabel: "ПОДДЕРЖКА 2,450",
+    diagBounceUp: "↑ отбой",
+    diagBounceDown: "↓ отбой",
+    diagBreakout: "↑ пробой",
+    diagNowSupport: "→ теперь поддержка",
+    // ── SR Trainer (interactive 2) ──
+    srTitle: "Тренажёр Уровней",
+    srKicker: "ИНТЕРАКТИВ — ТЕХНИКА",
+    srZoneSupport: "Поддержка",
+    srZoneResistance: "Сопротивление",
+    srReset: "Сбросить",
+    srCheck: "Проверить →",
+    srRetry: "Попробовать снова",
+    srInstrTask: "Задание:",
+    srInstrBody1: "Кликните на график, чтобы провести горизонтальную линию на уровне поддержки или сопротивления. Найдите все ",
+    srInstrBody2: " уровня. Нарисовано: ",
+    srScoreGreat: "Отлично!",
+    srScoreOk: "Неплохо, но есть куда расти",
+    srScoreLow: "Продолжай изучать",
+    srAccuracyLabel: "точность —",
+    srCorrectLevelsPrefix: "Верных уровней: ",
+    srCorrectLevelsMid: " из ",
+    srCorrectLevelsSuffix: ". Зелёные линии — попадание, красные — промах.",
+    srFooter: "Инструмент: XAU/USD (Золото) · Таймфрейм: 4H · Условные данные для обучения",
+    // ── Conclusions ──
+    concKicker: "ИТОГИ ГЛАВЫ 2",
+    concTitle: "Что вы теперь знаете",
+    conc1: "ФРС — главный «кукловод»: одно решение по ставке двигает доллар, акции, облигации, золото и крипту одновременно",
+    conc2: "Ставка вверх → DXY вверх, рисковые активы вниз. Ставка вниз → деньги дешевеют, рисковые активы растут",
+    conc3: "Макроэкономика (CPI, NFP, GDP) задаёт контекст, в котором работает технический анализ",
+    conc4: "Уровни поддержки и сопротивления — это «память рынка»: ценовые зоны, где крупные игроки совершали крупные сделки",
+    conc5: "Пробитое сопротивление становится поддержкой — принцип смены ролей работает на всех таймфреймах",
+    // ── Footer nav ──
+    navPrev: "← Глава 1: Инфраструктура",
+    navNext: "Уровень 3: Арсенал и Защита →",
+  },
+  ro: {
+    // ── Sticky header ──
+    stickyLevel: "NIVEL 2",
+    stickyTitle: "Păpușarii Globali",
+    stickyFA: "AF 60%",
+    stickyTA: "AT 40%",
+    // ── Hero ──
+    heroKicker: "SBF COMPANY — CAPITOLUL 2",
+    heroTitleLine1: "Păpușarii",
+    heroTitleLine2: "Globali",
+    heroBody: "De ce se mișcă graficele, de fapt? Pentru că băncile centrale schimbă costul banilor — iar întregul sistem financiar reacționează printr-o reacție în lanț.",
+    heroChipFA: "Fundamental 60%",
+    heroChipTA: "Tehnică 40%",
+    heroChipInteractive: "2 Exerciții Interactive",
+    // ── Block 1: Central banks ──
+    sec1Title: "Băncile centrale: cine conduce banii lumii",
+    sec1Sub: "Băncile centrale nu tranzacționează la bursă — ele stabilesc regulile jocului. Costul banilor, accesul la credit, nivelul inflației — toate acestea sunt în mâinile lor.",
+    cb1Abbr: "Fed", cb1Full: "Rezerva Federală a SUA", cb1Country: "SUA 🇺🇸",
+    cb1Desc: "Administrează dolarul — moneda de rezervă a lumii. Deciziile Comitetului FOMC mișcă simultan toate piețele planetei.",
+    cb2Abbr: "BCE", cb2Full: "Banca Centrală Europeană", cb2Country: "UE 🇪🇺",
+    cb2Desc: "Controlează euro pentru cele 20 de țări din zona euro. Politica BCE dă tonul pentru EUR/USD — cea mai tranzacționată pereche valutară.",
+    cb3Abbr: "Banca Japoniei", cb3Full: "Bank of Japan (BOJ)", cb3Country: "Japonia 🇯🇵",
+    cb3Desc: "Creatorul politicii ratelor negative. Yenul (JPY) este o monedă-refugiu și principala monedă de finanțare pentru carry trade.",
+    cb4Abbr: "Banca Angliei", cb4Full: "Bank of England (BOE)", cb4Country: "Marea Britanie 🇬🇧",
+    cb4Desc: "Una dintre cele mai vechi bănci centrale din lume (1694). Administrează lira sterlină — a treia monedă de rezervă ca importanță.",
+    rateMechKicker: "CUM FUNCȚIONEAZĂ RATA DOBÂNZII",
+    rateStep1Title: "Fed majorează rata",
+    rateStep1Text: "Costul creditului crește. Este mai scump pentru companii să ia împrumuturi, iar consumatorii cheltuiesc mai puțin. Inflația încetinește.",
+    rateStep2Title: "Investitorii își redirecționează capitalul",
+    rateStep2Text: "Randamentul fără risc al US Treasuries crește. De ce să-ți asumi riscul acțiunilor, dacă statul plătește 5%+?",
+    rateStep3Title: "Piețele reacționează",
+    rateStep3Text: "DXY crește — banii curg spre dolar. Acțiunile, aurul și cripto sunt sub presiune. Obligațiunile se scumpesc.",
+    // ── FED Simulator (interactive 1) ──
+    fedTitle: "Simulatorul Fed",
+    fedKicker: "INTERACTIV — FUNDAMENTAL",
+    fedRateLabel: "Rata dobânzii de referință Fed",
+    fedRangeSoft: "0% — QE (Relaxare)",
+    fedRangeNeutral: "5% — Neutră",
+    fedRangeTight: "10% — Restrictivă",
+    fedModeRiskOn: "🟢 RISK-ON",
+    fedModeRiskOff: "🔴 RISK-OFF",
+    fedModeNeutral: "🟡 NEUTRU",
+    fedDescRiskOn: "Banii ieftini curg spre activele riscante — acțiuni, cripto, piețe emergente. Tiparnița funcționează.",
+    fedDescRiskOff: "Banii sunt scumpi. Investitorii se refugiază în «refugii sigure»: dolar, US Treasuries. Acțiunile și cripto sunt sub presiune.",
+    fedDescNeutral: "Politică moderată. Piețele caută o direcție, volatilitatea este ridicată.",
+    fedAssetDXYLabel: "DXY (Indicele $)", fedAssetDXYDesc: "Puterea dolarului vs. 6 valute",
+    fedAssetSPXLabel: "S&P 500", fedAssetSPXDesc: "Indicele celor 500 de acțiuni din SUA",
+    fedAssetGoldLabel: "Gold (XAU/USD)", fedAssetGoldDesc: "Uncie troy",
+    fedAssetBTCLabel: "Bitcoin", fedAssetBTCDesc: "Cripto = activ de risc",
+    fedAssetBondLabel: "US 10Y Bond", fedAssetBondDesc: "Randamentul obligațiunilor de stat",
+    fedFootnote: "* Model simplificat de corelații bazat pe date istorice 1990–2024",
+    // ── Block 2: Macro indicators ──
+    sec2Title: "Indicatori macroeconomici cheie",
+    sec2Sub: "Înainte de a deschide o poziție, un trader experimentat verifică calendarul economic. Publicările de date macro sunt adevărate «explozii» de volatilitate.",
+    macro1Title: "Inflația (CPI)",
+    macro1Text: "Consumer Price Index. Fed țintește 2%. Când CPI depășește ținta, ratele cresc. Se publică lunar — una dintre cele mai «explozive» publicări pentru piețe.",
+    macro2Title: "Piața muncii (NFP)",
+    macro2Text: "Non-Farm Payrolls. Numărul de locuri de muncă create în SUA într-o lună. Se publică în prima vineri a lunii. Un NFP puternic = rate mai mari = dolar mai puternic.",
+    macro3Title: "PIB (GDP)",
+    macro3Text: "Produsul Intern Brut. Măsura creșterii economice. Două trimestre de creștere = boom economic. Două trimestre de scădere = recesiune.",
+    macro4Title: "Vânzările cu amănuntul",
+    macro4Text: "Cheltuielile consumatorilor reprezintă 70% din PIB-ul SUA. Un indicator puternic susține creșterea, unul slab semnalează o încetinire.",
+    macro5Title: "Piața imobiliară",
+    macro5Text: "Vânzările de locuințe, ratele ipotecare — «termometrul» economiei. Când Fed majorează ratele, creditele ipotecare se scumpesc, iar piața locuințelor se răcește.",
+    macro6Title: "Inversarea curbei randamentelor",
+    macro6Text: "Când randamentul US Treasuries pe 2 ani depășește randamentul celor pe 10 ani, istoric acest lucru precede o recesiune. S-a confirmat de 7 ori din 8 începând din 1970.",
+    calNoteTitle: "Calendarul economic — instrumentul tău obligatoriu",
+    calNoteBefore: "Înainte de fiecare sesiune, verifică evenimentele cu rating ",
+    calNoteImportant: "🔴 Importanță ridicată",
+    calNoteMiddle: ". Cu 15–30 de minute înainte de publicare, jucătorii mari își închid pozițiile — piața «îngheață». După publicarea datelor urmează o mișcare bruscă. ",
+    calNoteWarning: "Tranzacționarea chiar în momentul publicării, fără experiență, este extrem de periculoasă.",
+    // ── Block 3: Support & Resistance ──
+    sec3Title: "Suport și Rezistență: memoria pieței",
+    sec3Sub: "Macroeconomia creează impulsuri — dar prețul nu se mișcă în vid. El interacționează cu niveluri pe care piața le «ține minte» luni și ani întregi.",
+    srIntroText: "Când prețul atinge un anumit nivel și se întoarce, el lasă o «urmă» în memoria participanților pieței. Jucătorii mari țin minte unde au cumpărat și unde au vândut. Când prețul revine la acel nivel, ei plasează din nou ordine — creând o zonă cu activitate crescută. Acestea sunt, de fapt, nivelurile de suport și rezistență.",
+    srp1Title: "Nivelul de rezistență",
+    srp1Text: "O zonă de preț în care, istoric, vânzătorii au depășit numeric cumpărătorii. Prețul «se respinge» de sus în jos. La spargere, rezistența devine suport.",
+    srp2Title: "Nivelul de suport",
+    srp2Text: "O zonă de preț în care, istoric, cumpărătorii au depășit numeric vânzătorii. Prețul «se respinge» de jos în sus. La spargere, suportul devine rezistență.",
+    srp3Title: "Schimbarea rolurilor",
+    srp3Text: "Rezistența spartă devine suport, și invers. Aceasta este una dintre cele mai importante reguli ale analizei tehnice — fundamentul multor strategii de tranzacționare.",
+    srp4Title: "Niveluri psihologice",
+    srp4Text: "Numerele rotunde (2000, 2500, 50000) sunt niveluri puternice. Jucătorii mari plasează ordine la aceste cote rotunde, ceea ce le transformă în zone autoîmplinite.",
+    // Static SR diagram (SVG)
+    diagKicker: "PRINCIPIUL SCHIMBĂRII ROLURILOR",
+    diagResistanceLabel: "REZISTENȚĂ 2,540",
+    diagSupportLabel: "SUPORT 2,450",
+    diagBounceUp: "↑ recul",
+    diagBounceDown: "↓ recul",
+    diagBreakout: "↑ străpungere",
+    diagNowSupport: "→ acum suport",
+    // ── SR Trainer (interactive 2) ──
+    srTitle: "Trainer de Niveluri",
+    srKicker: "INTERACTIV — TEHNICĂ",
+    srZoneSupport: "Suport",
+    srZoneResistance: "Rezistență",
+    srReset: "Resetează",
+    srCheck: "Verifică →",
+    srRetry: "Încearcă din nou",
+    srInstrTask: "Sarcină:",
+    srInstrBody1: "Dă clic pe grafic pentru a trasa o linie orizontală la nivelul de suport sau rezistență. Găsește toate cele ",
+    srInstrBody2: " niveluri. Desenate: ",
+    srScoreGreat: "Excelent!",
+    srScoreOk: "Deloc rău, dar mai ai loc de creștere",
+    srScoreLow: "Continuă să înveți",
+    srAccuracyLabel: "precizie —",
+    srCorrectLevelsPrefix: "Niveluri corecte: ",
+    srCorrectLevelsMid: " din ",
+    srCorrectLevelsSuffix: ". Liniile verzi — nimerite, cele roșii — greșite.",
+    srFooter: "Instrument: XAU/USD (Aur) · Timeframe: 4H · Date convenționale, exclusiv în scop didactic",
+    // ── Conclusions ──
+    concKicker: "CONCLUZIILE CAPITOLULUI 2",
+    concTitle: "Ce știi acum",
+    conc1: "Fed este principalul «păpușar»: o singură decizie privind rata dobânzii mișcă simultan dolarul, acțiunile, obligațiunile, aurul și cripto",
+    conc2: "Rata în sus → DXY în sus, activele de risc în jos. Rata în jos → banii se ieftinesc, activele de risc cresc",
+    conc3: "Macroeconomia (CPI, NFP, GDP) stabilește contextul în care funcționează analiza tehnică",
+    conc4: "Nivelurile de suport și rezistență reprezintă «memoria pieței»: zone de preț unde jucătorii mari au făcut tranzacții mari",
+    conc5: "Rezistența spartă devine suport — principiul schimbării rolurilor funcționează pe toate timeframe-urile",
+    // ── Footer nav ──
+    navPrev: "← Capitolul 1: Infrastructura",
+    navNext: "Nivelul 3: Arsenal și Apărare →",
+  },
+};
+const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
+
+const C = {
+  gold:"#c9973a", goldLight:"#f4d49f", goldPale:"#f7f0e3",
+  black:"#18181a", ink:"#18181a", inkMid:"#555555",
+  inkSoft:"rgba(24,24,26,0.58)", inkFaint:"rgba(24,24,26,0.28)",
+  white:"#ffffff", surface:"#faf8f5", surfaceMid:"#f0ebe0",
+  border:"rgba(24,24,26,0.1)", borderGold:"rgba(201,151,58,0.25)",
+  green:"#2d7a4f", greenPale:"#eaf5ee", red:"#c0392b", redPale:"#fdecea",
+  blue:"#2563eb", bluePale:"#eff6ff"
+};
+
+const Mono = ({children,size=13,color=C.inkSoft,spacing=3,style={},className=""}) =>
+  <span className={className} style={{fontFamily:"'Courier New',monospace",fontSize:size,letterSpacing:spacing,color,...style}}>{children}</span>;
+
+const Chip = ({children,color=C.gold}) =>
+  <span style={{fontFamily:"'Courier New',monospace",fontSize:11,letterSpacing:3,color,border:`1px solid ${color}`,padding:"4px 11px",display:"inline-block",textTransform:"uppercase"}}>{children}</span>;
+
+const Rule = ({w="50%",my=32}) =>
+  <div style={{height:1,background:`linear-gradient(90deg,transparent,${C.gold},transparent)`,width:w,margin:`${my}px auto`,opacity:0.4}}></div>;
+
+const SectionTitle = ({children,sub,align="left"}) => (
+  <div style={{textAlign:align,marginBottom:36}}>
+    <h2 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(24px,3.2vw,36px)",fontWeight:400,color:C.black,lineHeight:1.15,marginBottom:sub?10:0}}>{children}</h2>
+    {sub && <p style={{fontSize:15,color:C.inkSoft,lineHeight:1.65,maxWidth:680,margin:align==="center"?"0 auto":0}}>{sub}</p>}
+  </div>
+);
+
+const InfoCard = ({icon,title,text,accent=C.gold}) => (
+  <div style={{background:C.surface,border:`1px solid ${C.border}`,padding:"22px 26px",borderRadius:4,borderLeft:`3px solid ${accent}`}}>
+    <div style={{fontSize:20,marginBottom:8}}>{icon}</div>
+    <div style={{fontWeight:600,fontSize:13,color:C.black,letterSpacing:0.5,marginBottom:7,textTransform:"uppercase"}}>{title}</div>
+    <div style={{fontSize:13,color:C.inkMid,lineHeight:1.65}}>{text}</div>
+  </div>
+);
+
+const getChUrl = (ch) => {
+  const p = new URLSearchParams(window.location.search).get('path') || 'explorer';
+  let base = INITIAL_LANG === 'ru' ? '/edu/b' : `/edu/${INITIAL_LANG}/b`;
+  return ch === 'start' ? `${base}?path=${p}` : `${base}/${ch}?path=${p}`;
+};
+
+// ─── Interactive 1: FED Simulator ─────────────────────────────────────────────
+function FedSimulator() {
+  const { useState, useMemo } = React;
+  const [rate, setRate] = useState(5.5);
+
+  // Correlations (simplified model)
+  // Rate ↑ → DXY ↑, S&P ↓, Gold ↓, BTC ↓, Bonds ↑
+  const dxy   = useMemo(() => +(96 + rate * 1.55).toFixed(1), [rate]);
+  const sp500 = useMemo(() => Math.round(5800 - rate * 160), [rate]);
+  const gold  = useMemo(() => Math.round(2450 - rate * 28), [rate]);
+  const btc   = useMemo(() => Math.round(68000 - rate * 4200), [rate]);
+  const bonds = useMemo(() => +(3.5 + rate * 0.45).toFixed(2), [rate]);
+
+  const riskMode = rate < 3.5;
+  const neutral  = rate >= 3.5 && rate <= 5.5;
+  const tightMode = rate > 5.5;
+
+  const modeLabel = riskMode ? S.fedModeRiskOn : tightMode ? S.fedModeRiskOff : S.fedModeNeutral;
+  const modeDesc  = riskMode
+    ? S.fedDescRiskOn
+    : tightMode
+    ? S.fedDescRiskOff
+    : S.fedDescNeutral;
+
+  const assets = [
+    { label:S.fedAssetDXYLabel,  val:`${dxy}`, dir: rate>5.5 ? "↑" : rate<3.5 ? "↓" : "→", color: rate>5.5 ? C.green : rate<3.5 ? C.red : C.inkMid, desc:S.fedAssetDXYDesc },
+    { label:S.fedAssetSPXLabel,  val:`${sp500.toLocaleString()}`, dir: rate>5.5 ? "↓" : rate<3.5 ? "↑" : "→", color: rate>5.5 ? C.red : rate<3.5 ? C.green : C.inkMid, desc:S.fedAssetSPXDesc },
+    { label:S.fedAssetGoldLabel, val:`$${gold.toLocaleString()}`, dir: rate>5.5 ? "↓" : rate<3.5 ? "↑" : "→", color: rate>5.5 ? C.red : rate<3.5 ? C.green : C.inkMid, desc:S.fedAssetGoldDesc },
+    { label:S.fedAssetBTCLabel,  val:`$${btc.toLocaleString()}`, dir: rate>5.5 ? "↓" : rate<3.5 ? "↑" : "→", color: rate>5.5 ? C.red : rate<3.5 ? C.green : C.inkMid, desc:S.fedAssetBTCDesc },
+    { label:S.fedAssetBondLabel, val:`${bonds}%`, dir: rate>5.5 ? "↑" : "↓", color: rate>5.5 ? C.green : C.red, desc:S.fedAssetBondDesc },
+  ];
+
+  // Visual scale: rate 0..10 maps to position
+  const pct = rate / 10 * 100;
+
+  return (
+    <div style={{background:C.black,borderRadius:8,padding:"36px 40px",color:C.white}}>
+      <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:28}}>
+        <span style={{fontSize:28}}>🎛️</span>
+        <div>
+          <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.gold}}>{S.fedTitle}</div>
+          <Mono size={11} color="rgba(255,255,255,0.4)" spacing={2}>{S.fedKicker}</Mono>
+        </div>
+      </div>
+
+      {/* Rate slider */}
+      <div style={{marginBottom:32}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:10}}>
+          <span style={{fontSize:14,color:"rgba(255,255,255,0.6)"}}>{S.fedRateLabel}</span>
+          <span style={{fontFamily:"'DM Serif Display',serif",fontSize:40,color:C.gold,lineHeight:1}}>{rate.toFixed(1)}<span style={{fontSize:22}}>%</span></span>
+        </div>
+        <div style={{position:"relative",marginBottom:8}}>
+          {/* Colored track */}
+          <div style={{height:8,borderRadius:4,background:`linear-gradient(90deg, #2d7a4f 0%, #c9973a 40%, #c0392b 100%)`,position:"relative",overflow:"visible"}}>
+            <div style={{position:"absolute",top:"50%",left:`${pct}%`,transform:"translate(-50%,-50%)",width:20,height:20,borderRadius:"50%",background:"#fff",boxShadow:"0 2px 8px rgba(0,0,0,0.5)",pointerEvents:"none"}}/>
+          </div>
+          <input type="range" min="0" max="10" step="0.25" value={rate}
+            onChange={e => setRate(+e.target.value)}
+            style={{position:"absolute",top:0,left:0,width:"100%",height:"100%",opacity:0,cursor:"pointer",margin:0}}/>
+        </div>
+        <div style={{display:"flex",justifyContent:"space-between",fontSize:11,color:"rgba(255,255,255,0.3)"}}>
+          <span>{S.fedRangeSoft}</span>
+          <span>{S.fedRangeNeutral}</span>
+          <span>{S.fedRangeTight}</span>
+        </div>
+      </div>
+
+      {/* Mode badge */}
+      <div style={{background:"rgba(255,255,255,0.06)",border:`1px solid rgba(255,255,255,0.1)`,borderRadius:6,padding:"16px 20px",marginBottom:24,display:"flex",gap:12,alignItems:"flex-start"}}>
+        <span style={{fontSize:22}}>{riskMode?"🟢":tightMode?"🔴":"🟡"}</span>
+        <div>
+          <div style={{fontWeight:700,fontSize:15,marginBottom:4}}>{modeLabel}</div>
+          <div style={{fontSize:13,color:"rgba(255,255,255,0.55)",lineHeight:1.6}}>{modeDesc}</div>
+        </div>
+      </div>
+
+      {/* Assets grid */}
+      <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:10}}>
+        {assets.map((a,i) => (
+          <div key={i} style={{background:"rgba(255,255,255,0.05)",borderRadius:4,padding:"14px 12px",textAlign:"center",border:`1px solid rgba(255,255,255,0.07)`}}>
+            <div style={{fontSize:10,color:"rgba(255,255,255,0.3)",marginBottom:6,letterSpacing:0.5}}>{a.label}</div>
+            <div style={{fontSize:16,fontWeight:700,color:a.color,fontFamily:"monospace"}}>{a.dir} {a.val}</div>
+            <div style={{fontSize:10,color:"rgba(255,255,255,0.2)",marginTop:4}}>{a.desc}</div>
+          </div>
+        ))}
+      </div>
+
+      <p style={{fontSize:11,color:"rgba(255,255,255,0.18)",marginTop:16,textAlign:"center"}}>
+        {S.fedFootnote}
+      </p>
+    </div>
+  );
+}
+
+// ─── Interactive 2: Support & Resistance Trainer ──────────────────────────────
+function SRTrainer() {
+  const { useState, useRef, useCallback } = React;
+
+  const W = 700, H = 320;
+  const PAD = { l:40, r:20, t:20, b:30 };
+
+  // Pre-generated candle data (20 candles, price range 2400-2650)
+  const candles = [
+    {o:2480,h:2510,l:2460,c:2505},{o:2505,h:2530,l:2490,c:2515},
+    {o:2515,h:2540,l:2500,c:2498},{o:2498,h:2510,l:2470,c:2475},
+    {o:2475,h:2485,l:2440,c:2445},{o:2445,h:2460,l:2430,c:2458},
+    {o:2458,h:2490,l:2450,c:2488},{o:2488,h:2520,l:2480,c:2515},
+    {o:2515,h:2545,l:2510,c:2540},{o:2540,h:2560,l:2525,c:2530},
+    {o:2530,h:2540,l:2505,c:2508},{o:2508,h:2520,l:2488,c:2492},
+    {o:2492,h:2500,l:2460,c:2465},{o:2465,h:2480,l:2450,c:2478},
+    {o:2478,h:2510,l:2470,c:2505},{o:2505,h:2535,l:2498,c:2530},
+    {o:2530,h:2555,l:2520,c:2548},{o:2548,h:2570,l:2540,c:2558},
+    {o:2558,h:2575,l:2545,c:2550},{o:2550,h:2565,l:2535,c:2542},
+  ];
+
+  // Correct zones (price levels)
+  const correctZones = [
+    {price:2450, label:S.srZoneSupport,   type:"support",    tolerance:18},
+    {price:2508, label:S.srZoneResistance,type:"resistance", tolerance:15},
+    {price:2540, label:S.srZoneResistance,type:"resistance", tolerance:16},
+  ];
+
+  const priceMin = 2410, priceMax = 2600;
+  const priceRange = priceMax - priceMin;
+  const chartW = W - PAD.l - PAD.r;
+  const chartH = H - PAD.t - PAD.b;
+  const candleW = Math.floor(chartW / candles.length) - 3;
+
+  const toX = (i) => PAD.l + i * (chartW / candles.length) + candleW / 2;
+  const toY = (p) => PAD.t + chartH - ((p - priceMin) / priceRange) * chartH;
+
+  const [lines, setLines] = useState([]);
+  const [dragging, setDragging] = useState(false);
+  const [dragY, setDragY] = useState(null);
+  const [checked, setChecked] = useState(false);
+  const [score, setScore] = useState(null);
+  const svgRef = useRef(null);
+
+  const getSVGY = useCallback((e) => {
+    const rect = svgRef.current.getBoundingClientRect();
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return (clientY - rect.top) * (H / rect.height);
+  }, []);
+
+  const yToPrice = (y) => priceMin + ((chartH - (y - PAD.t)) / chartH) * priceRange;
+
+  const onMouseDown = (e) => {
+    if (checked) return;
+    setDragging(true);
+    setDragY(getSVGY(e));
+  };
+  const onMouseMove = (e) => {
+    if (!dragging) return;
+    setDragY(getSVGY(e));
+  };
+  const onMouseUp = (e) => {
+    if (!dragging) return;
+    setDragging(false);
+    const y = getSVGY(e);
+    if (y > PAD.t && y < H - PAD.b && lines.length < 3) {
+      setLines(prev => [...prev, { y, price: Math.round(yToPrice(y)), id: Date.now() }]);
+    }
+    setDragY(null);
+  };
+
+  const checkAnswers = () => {
+    let hits = 0;
+    const results = lines.map(line => {
+      const match = correctZones.find(z => Math.abs(z.price - line.price) <= z.tolerance);
+      if (match) hits++;
+      return { ...line, correct: !!match, matchLabel: match?.label };
+    });
+    setLines(results);
+    setScore(Math.round((hits / correctZones.length) * 100));
+    setChecked(true);
+  };
+
+  const reset = () => { setLines([]); setChecked(false); setScore(null); };
+
+  return (
+    <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"36px 40px"}}>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:20,flexWrap:"wrap",gap:12}}>
+        <div style={{display:"flex",alignItems:"center",gap:12}}>
+          <span style={{fontSize:28}}>📈</span>
+          <div>
+            <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.black}}>{S.srTitle}</div>
+            <Mono size={11} color={C.inkSoft} spacing={2}>{S.srKicker}</Mono>
+          </div>
+        </div>
+        <div style={{display:"flex",gap:10,alignItems:"center"}}>
+          {!checked && lines.length > 0 &&
+            <button onClick={reset} style={{background:"transparent",border:`1px solid ${C.border}`,padding:"8px 16px",cursor:"pointer",fontSize:12,fontFamily:"monospace",color:C.inkMid,borderRadius:3}}>{S.srReset}</button>
+          }
+          {!checked
+            ? <button onClick={checkAnswers} disabled={lines.length===0} style={{background:lines.length===0?C.surfaceMid:C.black,color:C.white,border:"none",padding:"10px 20px",cursor:lines.length===0?"not-allowed":"pointer",fontFamily:"monospace",fontSize:12,letterSpacing:1,borderRadius:3}}>{S.srCheck}</button>
+            : <button onClick={reset} style={{background:C.gold,color:C.black,border:"none",padding:"10px 20px",cursor:"pointer",fontFamily:"monospace",fontSize:12,letterSpacing:1,fontWeight:700,borderRadius:3}}>{S.srRetry}</button>
+          }
+        </div>
+      </div>
+
+      {/* Instructions */}
+      {!checked && (
+        <div style={{background:"rgba(201,151,58,0.08)",border:`1px solid ${C.borderGold}`,borderRadius:4,padding:"12px 16px",marginBottom:16,fontSize:13,color:C.inkMid}}>
+          📌 <strong>{S.srInstrTask}</strong> {S.srInstrBody1}{correctZones.length}{S.srInstrBody2}{lines.length}/3
+        </div>
+      )}
+
+      {/* Score */}
+      {checked && score !== null && (
+        <div style={{background: score>=67?C.greenPale:score>=33?"#fff8e1":C.redPale, border:`1px solid ${score>=67?"#2d7a4f":score>=33?C.gold:C.red}`, borderRadius:4,padding:"14px 20px",marginBottom:16,display:"flex",gap:12,alignItems:"center"}}>
+          <span style={{fontSize:32}}>{score>=67?"🏆":score>=33?"🎯":"📚"}</span>
+          <div>
+            <div style={{fontWeight:700,fontSize:16,color:score>=67?C.green:score>=33?C.gold:C.red}}>
+              {score}% {S.srAccuracyLabel} {score>=67?S.srScoreGreat:score>=33?S.srScoreOk:S.srScoreLow}
+            </div>
+            <div style={{fontSize:13,color:C.inkMid,marginTop:3}}>
+              {checked && `${S.srCorrectLevelsPrefix}${lines.filter(l=>l.correct).length}${S.srCorrectLevelsMid}${correctZones.length}${S.srCorrectLevelsSuffix}`}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* SVG Chart */}
+      <div style={{borderRadius:4,overflow:"hidden",border:`1px solid ${C.border}`,cursor: checked?"default":"crosshair"}}>
+        <svg
+          ref={svgRef}
+          viewBox={`0 0 ${W} ${H}`}
+          style={{width:"100%",display:"block",background:C.black,userSelect:"none",touchAction:"none"}}
+          onMouseDown={onMouseDown}
+          onMouseMove={onMouseMove}
+          onMouseUp={onMouseUp}
+          onMouseLeave={() => { if(dragging){setDragging(false);setDragY(null);} }}>
+
+          {/* Grid lines */}
+          {[2450,2500,2550,2600].map(p => (
+            <g key={p}>
+              <line x1={PAD.l} y1={toY(p)} x2={W-PAD.r} y2={toY(p)} stroke="rgba(255,255,255,0.05)" strokeWidth="1"/>
+              <text x={PAD.l-4} y={toY(p)+4} fontSize="9" fill="rgba(255,255,255,0.25)" textAnchor="end">{p}</text>
+            </g>
+          ))}
+
+          {/* Candles */}
+          {candles.map((c,i) => {
+            const x = toX(i);
+            const bull = c.c >= c.o;
+            const col = bull ? "#2d7a4f" : "#c0392b";
+            const bodyT = toY(Math.max(c.o,c.c));
+            const bodyB = toY(Math.min(c.o,c.c));
+            return (
+              <g key={i}>
+                <line x1={x} y1={toY(c.h)} x2={x} y2={toY(c.l)} stroke={col} strokeWidth="1.5"/>
+                <rect x={x-candleW/2} y={bodyT} width={candleW} height={Math.max(bodyB-bodyT,1)} fill={col} rx="1"/>
+              </g>
+            );
+          })}
+
+          {/* User lines */}
+          {lines.map(line => {
+            const col = checked ? (line.correct ? "#2d7a4f" : "#c0392b") : C.gold;
+            return (
+              <g key={line.id}>
+                <line x1={PAD.l} y1={line.y} x2={W-PAD.r} y2={line.y}
+                  stroke={col} strokeWidth="1.5" strokeDasharray="6 3"/>
+                <rect x={W-PAD.r-52} y={line.y-10} width={52} height={18} fill={col} opacity="0.9" rx="2"/>
+                <text x={W-PAD.r-26} y={line.y+4} fontSize="9" fill="#fff" textAnchor="middle" fontFamily="monospace">
+                  {line.price} {checked && line.correct && "✓"}
+                </text>
+              </g>
+            );
+          })}
+
+          {/* Drag preview */}
+          {dragging && dragY && (
+            <line x1={PAD.l} y1={dragY} x2={W-PAD.r} y2={dragY}
+              stroke={C.gold} strokeWidth="1" strokeDasharray="4 4" opacity="0.5"/>
+          )}
+
+          {/* Show correct zones after check */}
+          {checked && correctZones.map((z,i) => (
+            <g key={i}>
+              <rect x={PAD.l} y={toY(z.price)-12} width={chartW} height={24}
+                fill={z.type==="support"?"rgba(45,122,79,0.12)":"rgba(192,57,43,0.12)"}/>
+              <text x={PAD.l+6} y={toY(z.price)+4} fontSize="10" fill={z.type==="support"?"#2d7a4f":"#c0392b"} fontFamily="monospace">
+                {z.label} {z.price}
+              </text>
+            </g>
+          ))}
+        </svg>
+      </div>
+
+      <p style={{fontSize:11,color:C.inkFaint,marginTop:10,textAlign:"center"}}>
+        {S.srFooter}
+      </p>
+    </div>
+  );
+}
+
+// ─── Main Chapter 2 ────────────────────────────────────────────────────────────
+function Chapter2() {
+  const centralBanks = [
+    {abbr:S.cb1Abbr, full:S.cb1Full, country:S.cb1Country, desc:S.cb1Desc, color:C.blue},
+    {abbr:S.cb2Abbr, full:S.cb2Full, country:S.cb2Country, desc:S.cb2Desc, color:"#003399"},
+    {abbr:S.cb3Abbr, full:S.cb3Full, country:S.cb3Country, desc:S.cb3Desc, color:"#bc002d"},
+    {abbr:S.cb4Abbr, full:S.cb4Full, country:S.cb4Country, desc:S.cb4Desc, color:"#00247d"},
+  ];
+
+  const macroIndicators = [
+    {icon:"📊", title:S.macro1Title, text:S.macro1Text},
+    {icon:"💼", title:S.macro2Title, text:S.macro2Text},
+    {icon:"🏭", title:S.macro3Title, text:S.macro3Text},
+    {icon:"🛍️", title:S.macro4Title, text:S.macro4Text},
+    {icon:"🏠", title:S.macro5Title, text:S.macro5Text},
+    {icon:"📉", title:S.macro6Title, text:S.macro6Text},
+  ];
+
+  const srPrinciples = [
+    {icon:"🏔️", title:S.srp1Title, text:S.srp1Text},
+    {icon:"🛡️", title:S.srp2Title, text:S.srp2Text},
+    {icon:"🔄", title:S.srp3Title, text:S.srp3Text},
+    {icon:"📐", title:S.srp4Title, text:S.srp4Text},
+  ];
+
+  const conclusions = [
+    S.conc1,
+    S.conc2,
+    S.conc3,
+    S.conc4,
+    S.conc5,
+  ];
+
+  return (
+    <div style={{minHeight:"100vh",background:C.white,color:C.ink,fontFamily:"'DM Sans',sans-serif"}}>
+
+      {/* Sticky header */}
+      <div style={{position:"sticky",top:106,background:"rgba(255,255,255,0.96)",backdropFilter:"blur(10px)",borderBottom:`1px solid ${C.border}`,padding:"15px 5vw",display:"flex",alignItems:"center",justifyContent:"space-between",zIndex:50}}>
+        <div style={{display:"flex",alignItems:"center",gap:20}}>
+          <span onClick={() => window.location.href = getChUrl(1)} style={{color:C.gold,cursor:"pointer",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</span>
+          <Chip>{S.stickyLevel}</Chip>
+          <Mono size={14} color={C.inkSoft} spacing={0} className="hide-mobile">{S.stickyTitle}</Mono>
+        </div>
+        <div style={{display:"flex",gap:8}}>
+          <Chip color={C.inkFaint}>{S.stickyFA}</Chip>
+          <Chip color={C.inkFaint}>{S.stickyTA}</Chip>
+        </div>
+      </div>
+
+      {/* HERO */}
+      <div style={{background:C.black,padding:"80px 5vw 70px",textAlign:"center",position:"relative",overflow:"hidden"}}>
+        <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 20% 50%, rgba(37,99,235,0.08) 0%, transparent 50%), radial-gradient(ellipse at 80% 50%, rgba(201,151,58,0.1) 0%, transparent 50%)"}}/>
+        <div style={{position:"relative"}}>
+          <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:20}}>{S.heroKicker}</Mono>
+          <h1 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(36px,6vw,66px)",fontWeight:400,color:C.white,lineHeight:1.05,marginBottom:20}}>
+            {S.heroTitleLine1}<br/><span style={{color:C.gold}}>{S.heroTitleLine2}</span>
+          </h1>
+          <p style={{fontSize:"clamp(16px,2vw,20px)",color:"rgba(255,255,255,0.55)",maxWidth:620,margin:"0 auto 32px",lineHeight:1.65}}>
+            {S.heroBody}
+          </p>
+          <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
+            <Chip color={C.gold}>{S.heroChipFA}</Chip>
+            <Chip color="rgba(255,255,255,0.3)">{S.heroChipTA}</Chip>
+            <Chip color="rgba(255,255,255,0.3)">{S.heroChipInteractive}</Chip>
+          </div>
+        </div>
+      </div>
+
+      <div style={{maxWidth:1060,margin:"0 auto",padding:"72px 5vw 120px"}}>
+
+        {/* ── BLOCK 1: Central Banks ── */}
+        <SectionTitle sub={S.sec1Sub}>
+          {S.sec1Title}
+        </SectionTitle>
+
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(240px,1fr))",gap:16,marginBottom:48}} className="grid-2">
+          {centralBanks.map((cb,i) => (
+            <div key={i} style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:4,padding:"26px",borderTop:`3px solid ${cb.color}`}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10}}>
+                <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.black}}>{cb.abbr}</div>
+                <Mono size={10} color={C.inkFaint} spacing={1}>{cb.country}</Mono>
+              </div>
+              <div style={{fontSize:11,color:C.inkSoft,marginBottom:10,letterSpacing:0.5}}>{cb.full}</div>
+              <div style={{fontSize:13,color:C.inkMid,lineHeight:1.65}}>{cb.desc}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Rate mechanism explainer */}
+        <div style={{background:C.black,borderRadius:6,padding:"32px 36px",marginBottom:48}}>
+          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:20}}>{S.rateMechKicker}</Mono>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:0}} className="grid-3">
+            {[
+              {step:"01", title:S.rateStep1Title, text:S.rateStep1Text, icon:"📈"},
+              {step:"02", title:S.rateStep2Title, text:S.rateStep2Text, icon:"💸"},
+              {step:"03", title:S.rateStep3Title, text:S.rateStep3Text, icon:"🌍"},
+            ].map((s,i) => (
+              <div key={i} style={{padding:"20px 24px",borderLeft:i>0?"1px solid rgba(255,255,255,0.08)":"none"}}>
+                <div style={{display:"flex",gap:10,alignItems:"center",marginBottom:12}}>
+                  <Mono size={11} color={C.gold} spacing={1}>{s.step}</Mono>
+                  <span style={{fontSize:20}}>{s.icon}</span>
+                </div>
+                <div style={{fontWeight:600,fontSize:13,color:C.white,marginBottom:8}}>{s.title}</div>
+                <div style={{fontSize:12,color:"rgba(255,255,255,0.5)",lineHeight:1.65}}>{s.text}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ── INTERACTIVE 1: FED Simulator ── */}
+        <div style={{marginBottom:64}}>
+          <FedSimulator/>
+        </div>
+
+        <Rule/>
+
+        {/* ── BLOCK 2: Macro indicators ── */}
+        <SectionTitle sub={S.sec2Sub}>
+          {S.sec2Title}
+        </SectionTitle>
+
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",gap:16,marginBottom:56}} className="grid-2">
+          {macroIndicators.map((m,i) => <InfoCard key={i} {...m}/>)}
+        </div>
+
+        {/* Economic calendar note */}
+        <div style={{background:"rgba(201,151,58,0.06)",border:`1px solid ${C.borderGold}`,borderRadius:6,padding:"24px 28px",marginBottom:56,display:"flex",gap:16,alignItems:"flex-start"}}>
+          <span style={{fontSize:28,flexShrink:0}}>📅</span>
+          <div>
+            <div style={{fontWeight:600,fontSize:14,color:C.black,marginBottom:8}}>{S.calNoteTitle}</div>
+            <div style={{fontSize:13,color:C.inkMid,lineHeight:1.7}}>
+              {S.calNoteBefore}<strong style={{color:C.red}}>{S.calNoteImportant}</strong>{S.calNoteMiddle}<strong>{S.calNoteWarning}</strong>
+            </div>
+          </div>
+        </div>
+
+        <Rule/>
+
+        {/* ── BLOCK 3: Support & Resistance theory ── */}
+        <SectionTitle sub={S.sec3Sub}>
+          {S.sec3Title}
+        </SectionTitle>
+
+        <p style={{fontSize:15,color:C.inkMid,lineHeight:1.75,marginBottom:32,maxWidth:780}}>
+          {S.srIntroText}
+        </p>
+
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,marginBottom:48}} className="grid-2">
+          {srPrinciples.map((p,i) => (
+            <InfoCard key={i} {...p} accent={i===0||i===2?C.red:i===1?C.green:C.gold}/>
+          ))}
+        </div>
+
+        {/* Visual SR diagram */}
+        <div style={{background:C.black,borderRadius:6,padding:"28px 24px",marginBottom:56,overflow:"hidden"}}>
+          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:16,textAlign:"center"}}>{S.diagKicker}</Mono>
+          <svg viewBox="0 0 660 180" style={{width:"100%",display:"block"}}>
+            {/* Background */}
+            <rect width="660" height="180" fill="#18181a"/>
+
+            {/* Resistance zone (top) */}
+            <rect x="0" y="30" width="660" height="20" fill="rgba(192,57,43,0.15)"/>
+            <line x1="0" y1="40" x2="660" y2="40" stroke="#c0392b" strokeWidth="1.5" strokeDasharray="8 4"/>
+            <text x="10" y="35" fontSize="10" fill="#c0392b" fontFamily="monospace">{S.diagResistanceLabel}</text>
+
+            {/* Support zone (bottom) */}
+            <rect x="0" y="130" width="660" height="20" fill="rgba(45,122,79,0.15)"/>
+            <line x1="0" y1="140" x2="660" y2="140" stroke="#2d7a4f" strokeWidth="1.5" strokeDasharray="8 4"/>
+            <text x="10" y="135" fontSize="10" fill="#2d7a4f" fontFamily="monospace">{S.diagSupportLabel}</text>
+
+            {/* Price path */}
+            <polyline points="20,140 80,140 100,80 140,80 160,140 200,140 230,90 270,40 310,40 340,40 370,80 400,80 430,40 470,40 490,80 530,140 560,140 600,80 640,80"
+              fill="none" stroke="#c9973a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+
+            {/* Bounce arrows */}
+            <text x="85" y="75" fontSize="11" fill="#2d7a4f">{S.diagBounceUp}</text>
+            <text x="195" y="155" fontSize="11" fill="#2d7a4f">{S.diagBounceUp}</text>
+            <text x="270" y="35" fontSize="11" fill="#c0392b">{S.diagBounceDown}</text>
+            <text x="430" y="35" fontSize="11" fill="#c0392b">{S.diagBounceDown}</text>
+            <text x="520" y="155" fontSize="11" fill="#c9973a">{S.diagBreakout}</text>
+
+            {/* Breakout annotation */}
+            <line x1="550" y1="100" x2="550" y2="140" stroke="#c9973a" strokeWidth="1" strokeDasharray="3 3"/>
+            <text x="555" y="125" fontSize="9" fill="#c9973a" fontFamily="monospace">{S.diagNowSupport}</text>
+          </svg>
+        </div>
+
+        {/* ── INTERACTIVE 2: SR Trainer ── */}
+        <div style={{marginBottom:64}}>
+          <SRTrainer/>
+        </div>
+
+        <Rule/>
+
+        {/* ── CONCLUSIONS ── */}
+        <div style={{background:C.black,borderRadius:8,padding:"44px 48px"}}>
+          <div style={{textAlign:"center",marginBottom:32}}>
+            <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:12}}>{S.concKicker}</Mono>
+            <h3 style={{fontFamily:"'DM Serif Display',serif",fontSize:28,color:C.white,fontWeight:400}}>{S.concTitle}</h3>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+            {conclusions.map((c,i) => (
+              <div key={i} style={{display:"flex",gap:14,alignItems:"flex-start",padding:"14px 16px",background:"rgba(255,255,255,0.04)",borderRadius:4,border:"1px solid rgba(255,255,255,0.06)"}}>
+                <span style={{color:C.gold,fontFamily:"monospace",fontSize:11,marginTop:2,flexShrink:0}}>0{i+1}</span>
+                <span style={{fontSize:13,color:"rgba(255,255,255,0.7)",lineHeight:1.65}}>{c}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Footer navigation */}
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",paddingTop:48,marginTop:48,borderTop:`1px solid ${C.border}`}}>
+          <span
+            onClick={() => window.location.href = getChUrl(1)}
+            style={{fontSize:14,color:C.inkSoft,fontFamily:"monospace",borderBottom:`1px solid ${C.border}`,cursor:"pointer"}}>
+            {S.navPrev}
+          </span>
+          <button
+            onClick={() => window.location.href = getChUrl(3)}
+            style={{background:C.black,color:C.white,border:"none",padding:"18px 35px",cursor:"pointer",fontFamily:"monospace",fontSize:14,letterSpacing:2,fontWeight:700,transition:"background .2s"}}
+            onMouseEnter={e=>e.target.style.background=C.gold}
+            onMouseLeave={e=>e.target.style.background=C.black}>
+            {S.navNext}
+          </button>
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('sbf-book-root')).render(<Chapter2 />);
+{% endraw %}
+</script>
+</body>
+</html>
