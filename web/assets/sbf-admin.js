@@ -11,6 +11,23 @@ var _currentTab = 'clusters';
 var _unassigned = [];
 var _selectedUnassigned = new Set();
 
+// ── i18n (см. assets/i18n.js, паттерн — sbf-profile.js) ─────────────────────
+
+function t(key, fallback) {
+  return (window.sbfI18n && window.sbfI18n.t) ? window.sbfI18n.t(key, fallback) : (fallback || key);
+}
+
+function _patchI18n(root) {
+  if ((window.sbfI18n && window.sbfI18n.lang) === 'ru') return;
+  var tt = window.sbfI18n ? window.sbfI18n.t : function (k, fb) { return fb || k; };
+  (root || document).querySelectorAll('[data-i18n]').forEach(function (el) {
+    el.textContent = tt(el.getAttribute('data-i18n'), el.textContent);
+  });
+  (root || document).querySelectorAll('[data-i18n-placeholder]').forEach(function (el) {
+    el.setAttribute('placeholder', tt(el.getAttribute('data-i18n-placeholder'), el.getAttribute('placeholder') || ''));
+  });
+}
+
 // ── Auth ───────────────────────────────────────────────────────────────────
 
 function doLogin() {
@@ -18,9 +35,9 @@ function doLogin() {
   var pwd   = document.getElementById('loginPwd').value;
   var btn   = document.getElementById('loginBtn');
   var err   = document.getElementById('loginErr');
-  if (!email || !pwd) { showErr(err, 'Заполни все поля'); return; }
+  if (!email || !pwd) { showErr(err, t('admin.fill_all_fields', 'Заполни все поля')); return; }
   btn.disabled = true;
-  btn.textContent = 'Входим…';
+  btn.textContent = t('admin.logging_in', 'Входим…');
 
   fetch('/api/auth/login', {
     method: 'POST',
@@ -29,7 +46,7 @@ function doLogin() {
   })
   .then(function (r) { return r.json(); })
   .then(function (d) {
-    if (d.error) { btn.disabled = false; btn.textContent = 'Войти'; showErr(err, d.error); return; }
+    if (d.error) { btn.disabled = false; btn.textContent = t('admin.login_button', 'Войти'); showErr(err, d.error); return; }
     sbfAuth.setTokens(d.token, d.refresh_token);
     localStorage.setItem('sbf_uid', d.user_id);
     _userId = d.user_id;
@@ -37,8 +54,8 @@ function doLogin() {
   })
   .catch(function (e) {
     btn.disabled = false;
-    btn.textContent = 'Войти';
-    showErr(err, 'Ошибка: ' + e.message);
+    btn.textContent = t('admin.login_button', 'Войти');
+    showErr(err, t('admin.error_prefix', 'Ошибка: ') + e.message);
   });
 }
 
@@ -47,7 +64,7 @@ function checkAdmin() {
   sbfAuth.fetch('/api/admin/me')
     .then(function (r) { return r.json(); })
     .then(function (d) {
-      if (!d.is_admin) { showLogin('Нет доступа — не в admin_users'); return; }
+      if (!d.is_admin) { showLogin(t('admin.no_access', 'Нет доступа — не в admin_users')); return; }
       document.getElementById('loginGate').style.display = 'none';
       document.getElementById('app').style.display = 'grid';
       document.getElementById('sideUserName').textContent = d.email || _userId;
@@ -80,10 +97,10 @@ function ah(obj) {
 
 function showTab(tab) {
   _currentTab = tab;
-  ['clusters', 'unassigned', 'copy'].forEach(function (t) {
-    document.getElementById('pane' + capitalize(t)).style.display = t === tab ? 'flex' : 'none';
-    var tabEl = document.getElementById('tab' + capitalize(t));
-    if (tabEl) tabEl.classList.toggle('active', t === tab);
+  ['clusters', 'unassigned', 'copy'].forEach(function (name) {
+    document.getElementById('pane' + capitalize(name)).style.display = name === tab ? 'flex' : 'none';
+    var tabEl = document.getElementById('tab' + capitalize(name));
+    if (tabEl) tabEl.classList.toggle('active', name === tab);
   });
   if (tab === 'unassigned') loadUnassigned();
   if (tab === 'copy')       loadCopyList();
@@ -109,15 +126,15 @@ function loadClusters() {
 function renderClusterList() {
   var el = document.getElementById('clusterList');
   if (!_clusters.length) {
-    el.innerHTML = '<div class="adm-empty">Нет кластеров</div>';
+    el.innerHTML = '<div class="adm-empty">' + t('admin.no_clusters', 'Нет кластеров') + '</div>';
     return;
   }
   el.innerHTML = _clusters.map(function (cl) {
     return '<div class="adm-cluster-item' + (cl.id === _selectedClusterId ? ' selected' : '') + '" onclick="selectCluster(\'' + cl.id + '\')">' +
-      '<div class="adm-cluster-title">' + esc(cl.title || '(без названия)') + '</div>' +
+      '<div class="adm-cluster-title">' + esc(cl.title || t('admin.untitled', '(без названия)')) + '</div>' +
       '<div class="adm-cluster-meta">' +
         '<span class="adm-status-dot ' + (cl.status || 'new') + '"></span>' +
-        '<span>' + (cl.item_count || 0) + ' заявок</span>' +
+        '<span>' + (cl.item_count || 0) + ' ' + t('admin.requests_suffix', 'заявок') + '</span>' +
         '<span class="adm-weight-badge">⚡ ' + (cl.total_weight || 0) + '</span>' +
         '<span style="margin-left:auto;font-size:10px">' + fmtDate(cl.updated_ts) + '</span>' +
       '</div>' +
@@ -137,22 +154,22 @@ function loadClusterDetail(id) {
   var detail = document.getElementById('clusterDetail');
   detail.innerHTML = '<div style="padding:16px 20px;border-bottom:1px solid var(--line);">' +
     '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">' +
-      '<h2 style="font-size:15px;font-weight:700;flex:1">' + esc(cl.title || '(без названия)') + '</h2>' +
-      '<button class="adm-action-btn" onclick="openRename(\'' + id + '\',\'' + escQ(cl.title) + '\')">✏ Переименовать</button>' +
-      '<button class="adm-action-btn" onclick="openMerge(\'' + id + '\')">⊕ Слить</button>' +
+      '<h2 style="font-size:15px;font-weight:700;flex:1">' + esc(cl.title || t('admin.untitled', '(без названия)')) + '</h2>' +
+      '<button class="adm-action-btn" onclick="openRename(\'' + id + '\',\'' + escQ(cl.title) + '\')">' + t('admin.rename_action', '✏ Переименовать') + '</button>' +
+      '<button class="adm-action-btn" onclick="openMerge(\'' + id + '\')">' + t('admin.merge_action', '⊕ Слить') + '</button>' +
     '</div>' +
     '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">' +
-      '<span style="font-size:12px;color:var(--muted)">Статус:</span>' +
+      '<span style="font-size:12px;color:var(--muted)">' + t('admin.status_label', 'Статус:') + '</span>' +
       '<div class="adm-status-btns">' +
-        statusBtn(id, 'new',      cl.status, '⬜ Новое') +
-        statusBtn(id, 'planned',  cl.status, '📋 В плане') +
-        statusBtn(id, 'done',     cl.status, '✅ Готово') +
-        statusBtn(id, 'rejected', cl.status, '❌ Отклонить') +
+        statusBtn(id, 'new',      cl.status, t('admin.status_new', '⬜ Новое')) +
+        statusBtn(id, 'planned',  cl.status, t('admin.status_planned', '📋 В плане')) +
+        statusBtn(id, 'done',     cl.status, t('admin.status_done', '✅ Готово')) +
+        statusBtn(id, 'rejected', cl.status, t('admin.status_rejected', '❌ Отклонить')) +
       '</div>' +
-      '<span style="font-size:12px;color:var(--muted);margin-left:auto">Вес: <b>' + cl.total_weight + '</b> | Голосов: <b>' + cl.voters + '</b></span>' +
+      '<span style="font-size:12px;color:var(--muted);margin-left:auto">' + t('admin.weight_label', 'Вес:') + ' <b>' + cl.total_weight + '</b> | ' + t('admin.voters_label', 'Голосов:') + ' <b>' + cl.voters + '</b></span>' +
     '</div>' +
   '</div>' +
-  '<div style="flex:1;overflow-y:auto;padding:12px 20px" id="fbList"><div style="text-align:center;color:var(--muted);padding:20px;font-size:13px">Загружаем…</div></div>';
+  '<div style="flex:1;overflow-y:auto;padding:12px 20px" id="fbList"><div style="text-align:center;color:var(--muted);padding:20px;font-size:13px">' + t('admin.loading_data', 'Загружаем…') + '</div></div>';
 
   detail.style.display = 'flex';
   detail.style.flexDirection = 'column';
@@ -162,21 +179,21 @@ function loadClusterDetail(id) {
     .then(function (d) {
       var fbList = document.getElementById('fbList');
       if (!d.feedbacks || !d.feedbacks.length) {
-        fbList.innerHTML = '<div class="adm-empty">Нет заявок</div>';
+        fbList.innerHTML = '<div class="adm-empty">' + t('admin.no_requests', 'Нет заявок') + '</div>';
         return;
       }
       fbList.innerHTML = d.feedbacks.map(function (fb) {
         return '<div class="adm-fb-card">' +
           '<div class="adm-fb-header">' +
             '<span class="adm-fb-kind">' + kindEmoji(fb.kind) + ' ' + (fb.kind || '') + '</span>' +
-            '<span class="adm-fb-level">Ур. ' + (fb.level_at_submit || 1) + '</span>' +
+            '<span class="adm-fb-level">' + t('admin.level_short', 'Ур.') + ' ' + (fb.level_at_submit || 1) + '</span>' +
             '<span class="adm-fb-ts">' + fmtDate(fb.created_ts) + '</span>' +
           '</div>' +
           '<div class="adm-fb-comment">' + esc(fb.comment) + '</div>' +
           '<div class="adm-fb-url">📄 ' + esc(fb.page_url || '') + '</div>' +
           (fb.screenshot_path ? '<img class="adm-fb-screenshot" src="/' + esc(fb.screenshot_path) + '" onclick="openImg(this.src)" loading="lazy">' : '') +
           '<div class="adm-fb-actions">' +
-            '<button class="adm-fb-split-btn" onclick="splitFeedback(\'' + fb.id + '\')">↗ Выделить в отдельный кластер</button>' +
+            '<button class="adm-fb-split-btn" onclick="splitFeedback(\'' + fb.id + '\')">' + t('admin.split_action', '↗ Выделить в отдельный кластер') + '</button>' +
           '</div>' +
         '</div>';
       }).join('');
@@ -207,7 +224,7 @@ function setStatus(clusterId, status) {
 }
 
 function splitFeedback(feedbackId) {
-  if (!confirm('Выделить эту заявку в отдельный кластер?')) return;
+  if (!confirm(t('admin.split_confirm', 'Выделить эту заявку в отдельный кластер?'))) return;
   sbfAuth.fetch('/api/admin/feedback/' + encodeURIComponent(feedbackId) + '/split', {
     method: 'POST',
     headers: ah({ 'Content-Type': 'application/json' }),
@@ -229,7 +246,7 @@ function openMerge(sourceId) {
   sel.innerHTML = _clusters
     .filter(function (c) { return c.id !== sourceId; })
     .map(function (c) {
-      return '<option value="' + c.id + '">' + esc(c.title || '(без названия)') + ' (⚡' + c.total_weight + ')</option>';
+      return '<option value="' + c.id + '">' + esc(c.title || t('admin.untitled', '(без названия)')) + ' (⚡' + c.total_weight + ')</option>';
     }).join('');
   document.getElementById('mergeModal').classList.add('open');
 }
@@ -308,7 +325,7 @@ function renderUnassigned() {
   _selectedUnassigned.clear();
   updateSelCount();
   if (!_unassigned.length) {
-    el.innerHTML = '<div class="adm-empty">Нет незакреплённых заявок</div>';
+    el.innerHTML = '<div class="adm-empty">' + t('admin.no_unassigned', 'Нет незакреплённых заявок') + '</div>';
     document.getElementById('unassignedActions').style.display = 'none';
     return;
   }
@@ -330,7 +347,7 @@ function toggleUnassigned(cb) {
 
 function updateSelCount() {
   var el = document.getElementById('selCount');
-  el.textContent = _selectedUnassigned.size ? 'Выбрано: ' + _selectedUnassigned.size : '';
+  el.textContent = _selectedUnassigned.size ? t('admin.selected_prefix', 'Выбрано: ') + _selectedUnassigned.size : '';
 }
 
 function groupSelected() {
@@ -379,7 +396,7 @@ function loadCopyList() {
       var el = document.getElementById('copyList');
       var items = d.items || [];
       if (!items.length) {
-        el.innerHTML = '<div class="adm-empty">Нет текстов с data-copy-id</div>';
+        el.innerHTML = '<div class="adm-empty">' + t('admin.no_copy_texts', 'Нет текстов с data-copy-id') + '</div>';
         return;
       }
       el.innerHTML = items.map(function (item) {
@@ -387,7 +404,7 @@ function loadCopyList() {
           '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">' +
             '<code style="font-size:11px;color:var(--gold)">' + esc(item.copy_id) + '</code>' +
             '<span style="font-size:11px;color:var(--muted)">' + esc(item.page || '') + '</span>' +
-            '<button class="adm-fb-split-btn" style="margin-left:auto" onclick="resetCopy(\'' + escQ(item.copy_id) + '\')">↩ По умолчанию</button>' +
+            '<button class="adm-fb-split-btn" style="margin-left:auto" onclick="resetCopy(\'' + escQ(item.copy_id) + '\')">' + t('admin.reset_default', '↩ По умолчанию') + '</button>' +
           '</div>' +
           '<div contenteditable="true" data-copy-id-adm="' + escQ(item.copy_id) + '" ' +
             'style="font-size:13px;padding:8px;border:1px solid var(--line);border-radius:6px;outline:none;min-height:2em" ' +
@@ -442,7 +459,8 @@ function escQ(s) {
 
 function fmtDate(ts) {
   if (!ts) return '';
-  try { return new Date(ts.replace(' ', 'T') + 'Z').toLocaleDateString('ru-RU'); } catch (e) { return ts; }
+  var locale = (window.sbfI18n && window.sbfI18n.lang === 'ro') ? 'ro-RO' : 'ru-RU';
+  try { return new Date(ts.replace(' ', 'T') + 'Z').toLocaleDateString(locale); } catch (e) { return ts; }
 }
 
 function kindEmoji(kind) {
@@ -457,10 +475,16 @@ document.getElementById('loginPwd').addEventListener('keydown', function (e) {
 });
 
 // Logout
+// NB: this file is a plain (non-defer) <script> at the bottom of <body>, so it
+// runs BEFORE the deferred /assets/i18n.js in <head> has executed — t() below
+// will resolve to the Russian fallback regardless of language. data-i18n is
+// set too so the later _patchI18n(document) pass (once the dict is ready)
+// fixes it for ro.
 (function () {
   var logoutBtn = document.createElement('button');
   logoutBtn.className = 'adm-logout';
-  logoutBtn.textContent = 'Выйти';
+  logoutBtn.setAttribute('data-i18n', 'admin.logout_button');
+  logoutBtn.textContent = t('admin.logout_button', 'Выйти');
   logoutBtn.onclick = function () {
     sbfAuth.clear();
     localStorage.removeItem('sbf_uid');
@@ -468,6 +492,14 @@ document.getElementById('loginPwd').addEventListener('keydown', function (e) {
   };
   document.getElementById('sideUserName').after(logoutBtn);
 })();
+
+// Patch statically-rendered [data-i18n] nodes once the dictionary is loaded
+// (login gate markup exists before login, so this can run right away).
+window.sbfI18n
+  ? window.sbfI18n.ready.then(function () { _patchI18n(document); })
+  : document.addEventListener('DOMContentLoaded', function () {
+      if (window.sbfI18n) window.sbfI18n.ready.then(function () { _patchI18n(document); });
+    });
 
 // Auto-check on load
 checkAdmin();

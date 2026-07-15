@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Админ-панель — SBF</title>
+<title data-i18n="admin.page_title">Админ-панель — SBF</title>
+<script src="/assets/i18n.js?v=1" defer></script>
 <style>
 :root{
   --bg:#0f0e0c;--paper:#1a1917;--text:#f0ede4;--muted:#9ca3af;
@@ -166,17 +167,17 @@ a:hover{text-decoration:underline}
 <!-- Login gate -->
 <div id="loginGate">
   <div class="adm-login-card">
-    <h2>Войти в админ-панель</h2>
-    <p>Доступ только для команды</p>
+    <h2 data-i18n="admin.login_title">Войти в админ-панель</h2>
+    <p data-i18n="admin.login_subtitle">Доступ только для команды</p>
     <div class="adm-field">
-      <label>Email</label>
+      <label data-i18n="admin.email_label">Email</label>
       <input type="email" id="loginEmail" autocomplete="email" placeholder="admin@sbf.ru">
     </div>
     <div class="adm-field">
-      <label>Пароль</label>
+      <label data-i18n="admin.password_label">Пароль</label>
       <input type="password" id="loginPwd" placeholder="••••••••">
     </div>
-    <button class="btn btn-gold" style="width:100%" id="loginBtn" onclick="doLogin()">Войти</button>
+    <button class="btn btn-gold" style="width:100%" id="loginBtn" onclick="doLogin()" data-i18n="admin.login_button">Войти</button>
     <div class="adm-err" id="loginErr"></div>
   </div>
 </div>
@@ -190,13 +191,13 @@ a:hover{text-decoration:underline}
         <span style="font-size:16px;font-weight:800;color:var(--gold)">SBF Admin</span>
         <span class="adm-user" id="sideUserName"></span>
       </div>
-      <h3>Кластеры</h3>
+      <h3 data-i18n="admin.clusters_title">Кластеры</h3>
       <div class="adm-filters" id="filterBar">
-        <button class="adm-filter-chip active" data-status="">Все</button>
-        <button class="adm-filter-chip" data-status="new">Новые</button>
-        <button class="adm-filter-chip" data-status="planned">В плане</button>
-        <button class="adm-filter-chip" data-status="done">Готово</button>
-        <button class="adm-filter-chip" data-status="rejected">Отклонено</button>
+        <button class="adm-filter-chip active" data-status="" data-i18n="admin.filter_all">Все</button>
+        <button class="adm-filter-chip" data-status="new" data-i18n="admin.filter_new">Новые</button>
+        <button class="adm-filter-chip" data-status="planned" data-i18n="admin.filter_planned">В плане</button>
+        <button class="adm-filter-chip" data-status="done" data-i18n="admin.filter_done">Готово</button>
+        <button class="adm-filter-chip" data-status="rejected" data-i18n="admin.filter_rejected">Отклонено</button>
       </div>
     </div>
     <div class="adm-cluster-list" id="clusterList"></div>
@@ -205,9 +206,9 @@ a:hover{text-decoration:underline}
   <!-- Main -->
   <div id="main">
     <div class="adm-tab-bar">
-      <button class="adm-tab active" id="tabClusters" onclick="showTab('clusters')">Кластеры</button>
-      <button class="adm-tab" id="tabUnassigned" onclick="showTab('unassigned')">Без кластера <span id="unassignedCount"></span></button>
-      <button class="adm-tab" id="tabCopy" onclick="showTab('copy')">Тексты сайта</button>
+      <button class="adm-tab active" id="tabClusters" onclick="showTab('clusters')" data-i18n="admin.clusters_title">Кластеры</button>
+      <button class="adm-tab" id="tabUnassigned" onclick="showTab('unassigned')"><span data-i18n="admin.tab_unassigned">Без кластера</span> <span id="unassignedCount"></span></button>
+      <button class="adm-tab" id="tabCopy" onclick="showTab('copy')" data-i18n="admin.tab_copy">Тексты сайта</button>
     </div>
 
     <!-- Cluster detail -->
@@ -218,7 +219,7 @@ a:hover{text-decoration:underline}
             <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
             <rect x="3" y="14" width="7" height="7" rx="1"/><path d="M17.5 14v3m0 0v3m0-3h3m-3 0h-3"/>
           </svg>
-          <p>Выберите кластер слева</p>
+          <p data-i18n="admin.select_cluster_placeholder">Выберите кластер слева</p>
         </div>
       </div>
     </div>
@@ -227,7 +228,7 @@ a:hover{text-decoration:underline}
     <div id="paneUnassigned" style="display:none;flex-direction:column;flex:1;min-height:0">
       <div class="adm-unassigned-wrap" id="unassignedList"></div>
       <div class="adm-unassigned-actions" id="unassignedActions" style="display:none">
-        <button class="btn btn-gold btn-sm" id="btnGroupSelected" onclick="groupSelected()">Сгруппировать выбранные</button>
+        <button class="btn btn-gold btn-sm" id="btnGroupSelected" onclick="groupSelected()" data-i18n="admin.group_selected_button">Сгруппировать выбранные</button>
         <span style="font-size:12px;color:var(--muted);margin:auto 0" id="selCount"></span>
       </div>
     </div>
@@ -242,14 +243,14 @@ a:hover{text-decoration:underline}
 <!-- Merge modal -->
 <div class="adm-overlay" id="mergeModal">
   <div class="adm-modal">
-    <h3>Слить кластеры</h3>
-    <p>Выберите целевой кластер. Все заявки из текущего переедут туда.</p>
+    <h3 data-i18n="admin.merge_modal_title">Слить кластеры</h3>
+    <p data-i18n="admin.merge_modal_desc">Выберите целевой кластер. Все заявки из текущего переедут туда.</p>
     <select id="mergeTarget" style="width:100%;padding:8px;background:var(--cream);
       border:1px solid var(--line);border-radius:6px;color:var(--text);
       font-size:13px;margin-bottom:14px"></select>
     <div class="adm-modal-actions">
-      <button class="btn btn-gold" onclick="confirmMerge()">Слить</button>
-      <button class="btn btn-outline" onclick="closeMerge()">Отмена</button>
+      <button class="btn btn-gold" onclick="confirmMerge()" data-i18n="admin.merge_button">Слить</button>
+      <button class="btn btn-outline" onclick="closeMerge()" data-i18n="admin.cancel_button">Отмена</button>
     </div>
   </div>
 </div>
@@ -257,11 +258,11 @@ a:hover{text-decoration:underline}
 <!-- Rename modal -->
 <div class="adm-overlay" id="renameModal">
   <div class="adm-modal">
-    <h3>Переименовать кластер</h3>
-    <input type="text" class="adm-title-edit" id="renameTitleInput" placeholder="Заголовок…">
+    <h3 data-i18n="admin.rename_modal_title">Переименовать кластер</h3>
+    <input type="text" class="adm-title-edit" id="renameTitleInput" placeholder="Заголовок…" data-i18n-placeholder="admin.title_placeholder">
     <div class="adm-modal-actions">
-      <button class="btn btn-gold" onclick="confirmRename()">Сохранить</button>
-      <button class="btn btn-outline" onclick="closeRename()">Отмена</button>
+      <button class="btn btn-gold" onclick="confirmRename()" data-i18n="admin.save_button">Сохранить</button>
+      <button class="btn btn-outline" onclick="closeRename()" data-i18n="admin.cancel_button">Отмена</button>
     </div>
   </div>
 </div>
@@ -269,11 +270,11 @@ a:hover{text-decoration:underline}
 <!-- Group modal -->
 <div class="adm-overlay" id="groupModal">
   <div class="adm-modal">
-    <h3>Создать кластер</h3>
-    <input type="text" class="adm-title-edit" id="groupTitleInput" placeholder="Заголовок кластера…">
+    <h3 data-i18n="admin.create_cluster_modal_title">Создать кластер</h3>
+    <input type="text" class="adm-title-edit" id="groupTitleInput" placeholder="Заголовок кластера…" data-i18n-placeholder="admin.cluster_title_placeholder">
     <div class="adm-modal-actions">
-      <button class="btn btn-gold" onclick="confirmGroup()">Создать</button>
-      <button class="btn btn-outline" onclick="closeGroup()">Отмена</button>
+      <button class="btn btn-gold" onclick="confirmGroup()" data-i18n="admin.create_button">Создать</button>
+      <button class="btn btn-outline" onclick="closeGroup()" data-i18n="admin.cancel_button">Отмена</button>
     </div>
   </div>
 </div>
