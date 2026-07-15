@@ -1,0 +1,2038 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>SBF | {% if lang == 'ro' %}Capitolul 15. Prop Trading și Final{% else %}Глава 15. Проп-Трейдинг и Финал{% endif %}</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html,body{max-width:100vw;overflow-x:hidden;scroll-behavior:smooth}
+    body{background:#ffffff;font-family:'DM Sans',system-ui,sans-serif;color:#18181a}
+    #sbf-book-root{min-height:100vh}
+    .back-to-edu{
+      position:fixed;bottom:20px;right:20px;z-index:500;
+      background:#18181a;color:rgba(255,255,255,0.6);
+      font-family:'DM Sans',sans-serif;font-size:.75rem;letter-spacing:1.5px;text-transform:uppercase;
+      padding:7px 13px;text-decoration:none;transition:all .2s;
+      border:1px solid rgba(255,255,255,0.08);
+    }
+    .back-to-edu:hover{background:#c9973a;color:#fff}
+    .messenger-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:30px}
+    @keyframes glowPulse{0%,100%{box-shadow:0 0 15px rgba(201,151,58,0.25)}50%{box-shadow:0 0 35px rgba(201,151,58,0.65)}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes shimmer{0%{background-position:-400px 0}100%{background-position:400px 0}}
+    @keyframes starPop{0%{transform:scale(0) rotate(-20deg);opacity:0}70%{transform:scale(1.2) rotate(5deg);opacity:1}100%{transform:scale(1) rotate(0deg);opacity:1}}
+    .cta-pulse{animation:glowPulse 2.2s infinite}
+    .cta-pulse:hover{transform:translateY(-3px);animation:none;box-shadow:0 0 50px rgba(201,151,58,0.85)!important}
+    .broker-card{transition:all .3s cubic-bezier(.4,0,.2,1);border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);border-radius:12px}
+    .broker-card:hover{transform:translateY(-5px);background:rgba(255,255,255,0.06);border-color:rgba(201,151,58,0.45)}
+    .fade-up{animation:fadeUp .5s ease both}
+    .gold-line{height:1px;background:linear-gradient(90deg,transparent,#c9973a,transparent);opacity:.35}
+    @media(max-width:900px){.g3{grid-template-columns:1fr 1fr!important}}
+    @media(max-width:768px){.messenger-grid{grid-template-columns:1fr}.hide-mobile{display:none!important}.g2,.g3{grid-template-columns:1fr!important}}
+  </style>
+</head>
+<body>
+
+
+<div id="sbf-book-root"></div>
+<a href="/edu" class="back-to-edu">← Edu</a>
+
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<script type="text/babel" data-presets="react">
+const INITIAL_LANG = "{{ lang }}";
+{% raw %}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// STRINGS (i18n) — ru / ro
+// ═══════════════════════════════════════════════════════════════════════════════
+const STRINGS = {
+  ru: {
+    // BOOK_CHAPTERS recap (KnowledgeMap)
+    bc1Title:"Введение в трейдинг", bc1Desc:"Что такое финансовые рынки, участники, инструменты. Почему 90% теряют деньги — и как попасть в 10%.",
+    bc2Title:"Чтение графиков", bc2Desc:"Японские свечи, таймфреймы, базовые паттерны. Язык, которым говорит рынок — научились читать.",
+    bc3Title:"Защита Капитала", bc3Desc:"Risk/Reward, Stop-Loss, расчёт позиции. Выживание важнее прибыли — правило №1 профессионала.",
+    bc4Title:"Ликвидность и Ордера", bc4Desc:"Стакан, маркет-мейкеры, типы ордеров, проскальзывание. Механика исполнения каждой сделки.",
+    bc5Title:"Глобальные Часы", bc5Desc:"Торговые сессии, AMD-цикл, перекрытие Лондон+NY. Почему золото взрывается в <span class='local-time' data-utc='2026-03-09T12:00:00Z'>15:30 МСК</span>.",
+    bc6Title:"Пульс Новостей", bc6Desc:"NFP, CPI, ФРС, Пауэлл. Как фундаментал создаёт «топливо» для трендов на неделю вперёд.",
+    bc7Title:"Институциональный след", bc7Desc:"Smart Money, Liquidity Sweep, Fair Value Gap. Как читать след крупного капитала на графике.",
+    bc8Title:"Тренд и Циклы", bc8Desc:"Структура рынка, HH/HL vs LH/LL. Торговать с трендом, а не против него — золотое правило.",
+    bc9Title:"Уровни и Зоны", bc9Desc:"Горизонтальные уровни, зоны спроса/предложения. Где цена разворачивается — снова и снова.",
+    bc10Title:"Психология Толпы", bc10Desc:"Fear & Greed, VIX, паттерны. Геометрия страха и жадности — почему они повторяются всегда.",
+    bc11Title:"Индикаторы и сигналы", bc11Desc:"RSI, MACD, Bollinger Bands. Инструменты подтверждения — не для входа, а для фильтрации шума.",
+    bc12Title:"Ишимоку и Облако", bc12Desc:"Пять линий, Облако Куумо, сигналы Тенкан/Киджун. Японская философия баланса рынка.",
+    bc13Title:"Анатомия Свинга (Daoti)", bc13Desc:"EMA 20/50, пирамидинг, анализ фундаментала на неделю. Стратегия удержания от 1 до 7 дней.",
+    bc14Title:"Анатомия Скальпинга", bc14Desc:"EMA 9/21 + RSI 35/65 на M5. Стратегия Олега: ювелирные входы внутри дня, жёсткий SL 30пт.",
+    bc15Title:"Проп-Трейдинг и Практика", bc15Desc:"Проп-фирмы, challenge и ваш первый funded старт. Дорожная карта на первые 90 дней.",
+
+    // KEY_LESSONS (9 rules)
+    kl1:"Никогда не рискуй более 2% депозита",
+    kl2:"Ставь Stop-Loss до входа, не после",
+    kl3:"Торгуй в своё окно — Лондон+NY overlap",
+    kl4:"Проверяй календарь перед каждой сделкой",
+    kl5:"Sweep перед ростом — это не ошибка, план",
+    kl6:"При 2+ убытках подряд — закрой терминал",
+    kl7:"Торгуй только в сторону Облака Ишимоку",
+    kl8:"Пирамидинг: добавляй лоты ТОЛЬКО у EMA 20",
+    kl9:"RSI 35/65 на M5 — точка входа, не сигнал",
+
+    // Chapter ref chip titles (used in BrokerSection headers)
+    chRefTitle14:"Глава 14: Анатомия Скальпинга", chRefTitle3:"Глава 3: Защита Капитала",
+    chRefTitle13:"Глава 13: Анатомия Свинга", chRefTitle7:"Глава 7: Ликвидность/SM",
+    chRefTitle8:"Глава 8: Тренд и Циклы", chRefTitle10:"Глава 10: Психология",
+
+    // PROP_DATA — scalp
+    propScalpCategory:"ПРОП-ТРЕЙДИНГ · СКАЛПИНГ",
+    propScalpHeadline:"Speed + строгие правила: для скальпинга важны drawdown-лимиты и дисциплина",
+    propScalpTheoryTitle:"Почему скальперу подходит проп-challenge",
+    propScalpPt1Title:"Исполнение и контроль проскальзывания", propScalpPt1Text:"В проп-челленджах важны не “удача”, а соблюдение правил: быстрый вход/выход и управление риском по плану.",
+    propScalpPt2Title:"Дневные/общие лимиты по просадке", propScalpPt2Text:"Главное отличие проп: лимиты фиксируют дисциплину и защищают от “догона” после ошибки.",
+    propScalpPt3Title:"Психология: 1–2 ошибки = завершение", propScalpPt3Text:"Скальпинг не про “попробую ещё раз”. Проп-трейдинг заставляет торговать по заранее выбранным условиям.",
+    propScalpPt4Title:"Стратегия из Главы 14", propScalpPt4Text:"Ровно тот стек: фильтр тренда + RSI 35/65 + вход по ликвидности. Точка входа важнее сигнала.",
+    ftmoTag:"Популярный challenge",
+    ftmoWhy:"Прозрачные правила, понятные метрики (profit target / max drawdown), подходит под дневные сценарии и строгую дисциплину.",
+    ftmoBestFor1:"Skalping / Day trading", ftmoBestFor2:"XAUUSD и FX", ftmoBestFor3:"Чёткие лимиты",
+    ftmoDesc:"Проп-challenge с фокусом на соблюдение правил и управлении риском. Для скальперского подхода — один из самых удобных стартов.",
+    the5ersTag:"Гибкие этапы",
+    the5ersWhy:"Подходит под системный трейдинг: выстраивание процесса, дневные лимиты и повторяемость выполнения стратегии.",
+    the5ersBestFor1:"Правила vs эмоции", the5ersBestFor2:"Дисциплина", the5ersBestFor3:"Скальпинг-выдержка",
+    the5ersDesc:"Challenge-формат с акцентом на стабильность. Хорошо ложится на стратегию с чёткой точкой входа и строгим риск-менеджментом.",
+
+    // PROP_DATA — swing
+    propSwingCategory:"ПРОП-ТРЕЙДИНГ · СВИНГ",
+    propSwingHeadline:"Свинговый challenge: важны структура, ожидание, и контроль просадок",
+    propSwingTheoryTitle:"Как устроен свинг в проп-challenge",
+    propSwingPt1Title:"План вместо шума", propSwingPt1Text:"Свингу нужна выборка: выждать структуру, а не “гоняться” за каждой свечой.",
+    propSwingPt2Title:"Стоп и лимиты фиксируют процесс", propSwingPt2Text:"Соблюдение max drawdown/weekly rules делает результат повторяемым.",
+    propSwingPt3Title:"Фильтры по Главам 13–12", propSwingPt3Text:"Тренд/уровни/Ишимоку помогают выбирать моменты, когда вероятность выше.",
+    propSwingPt4Title:"Управление риском важнее “идеального входа”", propSwingPt4Text:"Сильный вход без дисциплины = сломанный challenge. Сила — в процессе.",
+    earn2tradeTag:"Swing-ready",
+    earn2tradeWhy:"Подходит для среднесрочных сценариев: когда вы держите позицию и управляете риском по плану.",
+    earn2tradeBestFor1:"Swing", earn2tradeBestFor2:"Ишимоку/H1–H4", earn2tradeBestFor3:"Уровни и зоны",
+    earn2tradeDesc:"Challenge-формат для трейдеров, которые строят сделку на структуре и контролируют риск в процессе.",
+    myforexfundsTag:"Стабильность",
+    myforexfundsWhy:"Результат достигается повторением процесса: правила просадки + дисциплина = шанс пройти этапы.",
+    myforexfundsBestFor1:"Trend-following", myforexfundsBestFor2:"Среднесрочный риск", myforexfundsBestFor3:"Процесс > эмоции",
+    myforexfundsDesc:"Хорошо ложится на стратегию свинга: ждём структуру, вход по правилам, контроль лимитов на всём горизонте.",
+
+    // PROP_DATA — long-term (pamm slot)
+    propLongCategory:"ПРОП-ТРЕЙДИНГ · LONG-TERM",
+    propLongHeadline:"Long-term challenge: дисциплина, планы масштабирования и контроль риска",
+    propLongTheoryTitle:"Почему long-term проп-challenge подходит большинству",
+    propLongPt1Title:"Challenge-этапы вместо “угадайки”", propLongPt1Text:"Вы доказываете, что умеете соблюдать правила: drawdown, profit target, процесс.",
+    propLongPt2Title:"Масштабирование только по факту", propLongPt2Text:"Пирамидинг/добавление — только если вы стабильно держите качество сделок.",
+    propLongPt3Title:"Дисциплина = главный актив", propLongPt3Text:"Серия ошибок ломает этапы. Поэтому проп тренирует контроль эмоций и риск-менеджмент.",
+    propLongPt4Title:"Психология из Главы 10", propLongPt4Text:"Если после 2+ убыточных сделок эмоции растут — challenge заканчивается. План должен быть.",
+    traders4tradersTag:"Long / multi-asset",
+    traders4tradersWhy:"Формат подходит тем, кто умеет ждать и растить позицию через правила, а не через эмоции.",
+    traders4tradersBestFor1:"Long-term", traders4tradersBestFor2:"Стратегии на циклах", traders4tradersBestFor3:"Управление просадками",
+    traders4tradersDesc:"Долгосрочные цели проще удерживать в challenge-рамках: вы масштабируете подход только после подтверждения качества.",
+    surgetraderTag:"Адаптация под стиль",
+    surgetraderWhy:"Хороший вариант для трейдеров, которые готовы к процессу и контролю лимитов на протяжении этапов.",
+    surgetraderBestFor1:"Long-term", surgetraderBestFor2:"Ждать структуру", surgetraderBestFor3:"Планирование",
+    surgetraderDesc:"Сфокусирован на обучении дисциплине: выполнить правила — значит получить funded-статус.",
+
+    // Shared broker stat values
+    fundedTo100k:"Funded до $100k", fundedTo200k:"Funded до $200k", fundedTo150k:"Funded до $150k", fundedTo50k:"Funded до $50k",
+    condConditional:"Комиссии/спред по условию",
+    depositFee:"Взнос за оценку",
+
+    // BrokerSection UI
+    chapterRefLabel:"ПОВТОРИТЬ",
+    statFund:"Фонд", statPlatform:"Платформа", statConditions:"Комиссии/условия", statBonus:"Profit split", statDeposit:"Взнос",
+    whyChooseLabel:"ПОЧЕМУ ВЫБИРАЮТ",
+    moreAboutBtn:"ПОДРОБНЕЕ О",
+
+    // MATCH_QUESTIONS
+    mq1Q:"Сколько времени вы готовы уделять торговле?",
+    mq1Opt1:"Весь день у экрана — ловлю каждое движение",
+    mq1Opt2:"1–2 часа анализа в день, сделки удерживаю днями",
+    mq1Opt3:"Нет времени — хочу funded challenge без ежедневной рутины",
+    mq2Q:"Какой риск-профиль вам ближе?",
+    mq2Opt1:"Высокий риск, быстрый разгон, много сделок",
+    mq2Opt2:"Умеренный риск, позиции на 3–7 дней",
+    mq2Opt3:"Консервативно: drawdown-лимиты + стабильный рост",
+    mq3Q:"С каким инструментом хотите работать?",
+    mq3Opt1:"Форекс, золото (XAU), быстро внутри дня",
+    mq3Opt2:"Акции, ETF, индексы, среднесрочный тренд",
+    mq3Opt3:"Длинные цели и гибкий портфель (long-term challenge)",
+    mq4Q:"Каков ваш стартовый капитал?",
+    mq4Opt1:"До $500 — начинаю с малого",
+    mq4Opt2:"$500–$5 000 — готов к серьёзной работе",
+    mq4Opt3:"$1 000+ — хочу стартовать с funded условиями",
+
+    // ROADMAP
+    rm1Period:"Дни 1–14", rm1Title:"Фундамент",
+    rm1Step1:"Пройти trial (демо) у выбранной prop-фирмы",
+    rm1Step2:"Повторить главы 3, 4, 5 (риск, ордера, сессии)",
+    rm1Step3:"Отработать 50 сделок на демо по своей стратегии",
+    rm1Step4:"Вести торговый журнал с каждой сделкой",
+    rm2Period:"Дни 15–30", rm2Title:"Первые реальные сделки",
+    rm2Step1:"Стартовать на live phase (challenge / funded)",
+    rm2Step2:"Торговать минимальным объёмом в рамках правил первые 2 недели",
+    rm2Step3:"Не более 3 сделок в день, жёсткий дневной стоп -5%",
+    rm2Step4:"Связаться с менеджером SBF для сопровождения",
+    rm3Period:"Дни 31–60", rm3Title:"Калибровка стратегии",
+    rm3Step1:"Проанализировать первые 50 реальных сделок",
+    rm3Step2:"Выявить 2–3 повторяющиеся ошибки, устранить",
+    rm3Step3:"Увеличить лот только при 60%+ прибыльных сделок",
+    rm3Step4:"Добавить второй инструмент (если скальпинг — добавить EURUSD)",
+    rm4Period:"Дни 61–90", rm4Title:"Масштабирование",
+    rm4Step1:"Первый пирамидинг: +1 лот при прибыли +15 пт",
+    rm4Step2:"Провести личный разбор сделок с аналитиком SBF",
+    rm4Step3:"Целевой RR портфеля: не менее 1:1.5 за период",
+    rm4Step4:"Вывести первую прибыль и зафиксировать результат",
+
+    // KnowledgeMap
+    kmLabel:"АРСЕНАЛ ТРЕЙДЕРА СОБРАН",
+    kmTitle:"Все 15 глав — одним взглядом",
+    kmChPrefix:"ГЛ.",
+    kmChapterChip:"Глава",
+    kmRepeatLink:"↩ ПОВТОРИТЬ ГЛАВУ",
+
+    // KeyLessons
+    klLabel:"9 ПРАВИЛ ВЫЖИВШЕГО",
+    klTitle:"Законы, нарушение которых стоит денег",
+    klMasteredChip:"усвоено",
+    klChPrefix:"ГЛ.",
+    klAllDone:"🏆 Все правила усвоены!",
+    klAllDoneSub:"Вы готовы к реальной торговле с дисциплиной профессионала.",
+
+    // BrokerMatchmaker
+    bmTitle:"Подбор торговых условий",
+    bmSubtitle:"ИНТЕРАКТИВ — 4 ВОПРОСА",
+    bmQuestionOf:"Вопрос",
+    bmOf:"из",
+    bmReadyPct:"готово",
+    bmResultLabel:"ВАШ СТИЛЬ ТОРГОВЛИ",
+    bmRepeat:"Повторить:",
+    bmApplyBtn:"ПОДАТЬ НА CHALLENGE С МЕНЕДЖЕРОМ →",
+    bmRetryBtn:"↺ ПРОЙТИ СНОВА",
+
+    // TradingQuiz
+    tqTitle:"Финальный тест",
+    tqSubtitle:"5 СИТУАЦИЙ — ПРОВЕРЬ СЕБЯ",
+    tqQ1:"Вы открыли BUY XAUUSD. Через 20 минут цена упала на 15 пунктов. Ваши действия?",
+    tqQ1Opt1Text:"Закрываю позицию — не хочу больше терять", tqQ1Opt1Hint:"Продажа в убыток без достижения стопа — эмоциональное решение. Стоп должен был быть выставлен ещё при входе.",
+    tqQ1Opt2Text:"Жду — стоп ещё не достигнут, план в силе", tqQ1Opt2Hint:"✅ Правильно. Пока стоп-лосс не сработал — позиция управляется по плану. Глава 3: доверяй своему стопу.",
+    tqQ1Opt3Text:"Добавляю ещё лот — усредняюсь", tqQ1Opt3Hint:"Усреднение в убыточную позицию — одна из главных ошибок. Это увеличивает риск, нарушая правило 2%.",
+    tqQ2:"Сегодня выходит NFP в <span class='local-time' data-utc='2026-03-09T12:00:00Z'>15:30 МСК</span>. Когда лучше всего войти в сделку?",
+    tqQ2Opt1Text:"Прямо перед выходом данных — захвачу движение", tqQ2Opt1Hint:"За 2–3 минуты до NFP спред расширяется в 10–30 раз. Вы оплатите весь спред и получите проскальзывание. Глава 4 + 6.",
+    tqQ2Opt2Text:"Сразу после выхода — когда направление понятно", tqQ2Opt2Hint:"✅ Верно. Дождаться первоначального движения, дать рынку «переварить» данные (5–10 мин), затем войти с подтверждением.",
+    tqQ2Opt3Text:"Не торгую в день NFP вообще", tqQ2Opt3Hint:"Это консервативно, но упускает лучшие движения месяца. Опытный трейдер использует NFP как возможность при правильном подходе.",
+    tqQ3:"График XAUUSD на H1. EMA 20 ниже EMA 50. Цена коснулась EMA 20. Что делаем?",
+    tqQ3Opt1Text:"BUY — классический сигнал возврата к EMA", tqQ3Opt1Hint:"EMA 20 < EMA 50 означает нисходящий тренд. Касание EMA 20 снизу — сигнал для SHORT по стратегии Daoti, а не для BUY. Глава 13.",
+    tqQ3Opt2Text:"SELL — тренд нисходящий, торгую с трендом", tqQ3Opt2Hint:"✅ Правильно. EMA 20 < EMA 50 = медвежий тренд. Откат к EMA 20 — точка для добавления SHORT по стратегии Daoti.",
+    tqQ3Opt3Text:"Жду пересечения EMA перед входом", tqQ3Opt3Hint:"Ожидание пересечения = опоздание. К моменту пересечения большая часть движения уже пройдена. Работаем с касанием у EMA 20.",
+    tqQ4:"Ваш Liquidity Sweep: цена пробила поддержку вниз, активировала ваш стоп, затем мгновенно развернулась вверх. Что произошло?",
+    tqQ4Opt1Text:"Случайная волатильность — просто не повезло", tqQ4Opt1Hint:"Это не случайность — это классический Sweep из Главы 7. Институты использовали ваш стоп как ликвидность.",
+    tqQ4Opt2Text:"Smart Money собрал стопы лонгистов, теперь рост", tqQ4Opt2Hint:"✅ Именно так. Liquidity Sweep (Гл.7): пробой уровня, сбор стопов, разворот. Правильный вход — ПОСЛЕ Sweep, не до.",
+    tqQ4Opt3Text:"Пора сменить стратегию — эта не работает", tqQ4Opt3Hint:"Не стратегия сломана — сломано понимание. Изучите Главу 7 и начните ставить стоп после зоны стопов, а не внутри неё.",
+    tqQ5:"Конец дня: 3 убыточные сделки подряд. Итог: -4.5% депозита. Что делаете?",
+    tqQ5Opt1Text:"Открываю 4-ю сделку — отыграюсь", tqQ5Opt1Hint:"3 убытка подряд = рынок не даёт сигналов или вы не в зоне. «Отыгрыш» — ловушка психологии. Глава 10: при 2+ убытках — закрой терминал.",
+    tqQ5Opt2Text:"Закрываю терминал на сегодня. Завтра новый день", tqQ5Opt2Hint:"✅ Правило дневного стопа. -5% в день = стоп-сессия. Сохраните 95.5% депозита — завтра работаете с позиции силы. Глава 3.",
+    tqQ5Opt3Text:"Меняю инструмент — может с EUR повезёт", tqQ5Opt3Hint:"Смена инструмента не решает проблему. Если алгоритм торговли не работает сегодня — он не заработает на другой паре.",
+    tqCorrectSuffix:"правильных",
+    tqResultGreat:"Отличный результат! Вы готовы к реальной торговле.",
+    tqResultGood:"Хорошая база. Повторите главы по ошибочным ответам.",
+    tqResultWeak:"Рекомендуем пройти повторение перед реальным счётом.",
+    tqReviewLabel:"ПОВТОРИТЕ ЭТИ ГЛАВЫ:",
+    tqChapterLink:"Глава",
+    tqStartTradingBtn:"НАЧАТЬ ТОРГОВАТЬ С SBF →",
+    tqRetryBtn:"↺ ПРОЙТИ СНОВА",
+
+    // RoadmapBlock
+    rmLabel:"ДОРОЖНАЯ КАРТА",
+    rmTitle:"Ваши первые 90 дней в трейдинге",
+    rmTip:"💡 Рекомендация: свяжитесь с менеджером SBF на этапе первых реальных сделок — наставник убережёт от 90% стандартных ошибок новичков.",
+    rmReviewBtn:"ЗАПИСАТЬСЯ НА РАЗБОР СДЕЛОК →",
+
+    // AskAnalystPopup
+    apPrefill:"Здравствуйте! Я закончил обучение SBF. Хочу выбрать prop-фирму и пройти challenge.",
+    apLabel:"ПЕРЕХОД К ПРАКТИКЕ",
+    apTitle:"Хватит читать. Пора торговать.",
+    apBodyIntro:"У вас есть знания 15 глав. Теперь нужна правильная prop-фирма, подходящий тип challenge и наставник на старте.",
+    apBodyBold:"Менеджер SBF поможет с каждым из этих шагов — бесплатно.",
+    apFeat1:"Подбор prop-фирмы под ваш стиль торговли",
+    apFeat2:"VIP условия и эксклюзивные бонусы",
+    apFeat3:"Разбор первых 10 сделок с аналитиком",
+    apTgSub:"Telegram · Эксперты онлайн", apTgBtn:"НАПИСАТЬ В TELEGRAM",
+    apWaSub:"WhatsApp · Ответим за 2 минуты", apWaBtn:"НАПИСАТЬ В WHATSAPP",
+    apDisclaimer:"Консультация и подбор challenge — бесплатно. Без обязательств.",
+
+    // MidPageCTA
+    midCtaBtn:"СВЯЗАТЬСЯ С МЕНЕДЖЕРОМ →",
+    midCtaSub:"Telegram + WhatsApp · Ответ в течение 2 минут",
+    midCta1Text:"Знаете правила — теперь нужно их применять на реальном рынке.",
+    midCta1Sub:"Менеджер SBF поможет выбрать prop-challenge и сопроводит первые сделки.",
+    midCta2Text:"Скальпинг требует дисциплины и правильной prop-фирмы.",
+    midCta2Sub:"Получите личные рекомендации по настройке процесса challenge от аналитика SBF.",
+
+    // Chapter15 main
+    stickyChip:"ФИНАЛ · ГЛАВА 15",
+    stickySub:"От Теории к Практике",
+    stickyBtn:"НАЧАТЬ ТОРГОВАТЬ →",
+    heroLabel:"SBF COMPANY — ФИНАЛЬНЫЙ УРОВЕНЬ",
+    heroChip1:"15 Глав", heroChip2:"Всё пройдено", heroChip3:"Готов к практике",
+    heroTitleLine1:"От Теории", heroTitleLine2:"К Практике",
+    heroBody:"Вы изучили психологию толпы, механику ликвидности, Smart Money, торговые сессии, паттерны, две живые стратегии. Теперь — правильная площадка и первый реальный шаг.",
+    heroBtn:"ПРОЙТИ CHALLENGE И НАЧАТЬ →",
+    heroFootnote:"Бесплатная консультация · VIP условия · Личный аналитик",
+
+    findStyleLabel:"НАЙДИ СВОЙ СТИЛЬ",
+    findStyleTitle:"Какой трейдер вы?",
+    findStyleSub:"Ответьте на 4 вопроса — получите персональную рекомендацию по prop-challenge и стратегии.",
+
+    propFirmsLabel:"ПРОП-ФИРМЫ SBF COMPANY",
+    propFirmsTitle:"Инструментарий под ваш стиль",
+    propFirmsSub:"Только проверенные prop-фирмы. Разные правила — для разных задач. Нельзя скальпировать там, где условия не подходят под скорость и дисциплину.",
+
+    compareLabel:"БЫСТРОЕ СРАВНЕНИЕ",
+    compareTitle:"Все prop-фирмы рядом",
+    thPropFirm:"Prop-фирма", thStyle:"Стиль", thFund:"Фонд", thConditions:"Комиссии/условия", thPlatform:"Платформа", thBonus:"Profit split", thBestFor:"Лучше для",
+    styleScalp:"Скальп", styleSwing:"Свинг", styleLong:"Лонг",
+    tableCondLimits:"условия/лимиты",
+    bestXauDiscipline:"XAU/дисциплина", bestProcessVsEmotion:"процесс > эмоции", bestSwingStructure:"структура свинга",
+    bestTrendFollowing:"trend-following", bestLongTermRules:"long-term правила", bestStageDiscipline:"дисциплина этапов",
+
+    examLabel:"ФИНАЛЬНЫЙ ЭКЗАМЕН",
+    examTitle:"Готов ли ты к рынку?",
+    examSub:"5 реальных ситуаций из торговли. Проверьте, насколько глубоко усвоены знания 15 глав.",
+
+    finalAttentionBadge:"ВНИМАНИЕ",
+    finalTitleLine1:"Рынок не прощает", finalTitleLine2:"одиночек",
+    finalBodyIntro:"Самостоятельный старт — это статистически первые три слитых депозита. Это не страшилка — это данные. Через SBF Company вы получаете",
+    finalBodyBold:"личного аналитика, VIP-условия у prop-фирм и закрытые сигналы",
+    finalBodyOutro:"— абсолютно бесплатно.",
+    finalReason1Title:"Личный аналитик", finalReason1Text:"Разбор каждой сделки, коррекция стратегии",
+    finalReason2Title:"VIP условия", finalReason2Text:"Эксклюзивные бонусы от партнёров",
+    finalReason3Title:"Закрытые сигналы", finalReason3Text:"Готовые сетапы с уровнями входа",
+    finalCtaBtn:"СВЯЗАТЬСЯ С МЕНЕДЖЕРОМ →",
+    finalCtaFootnote:"Ответим в Telegram и WhatsApp в течение 2 минут",
+
+    partnersLabel:"ПАРТНЁРЫ",
+
+    achLabel:"ДОСТИЖЕНИЕ РАЗБЛОКИРОВАНО",
+    achTitle:"Полный курс пройден",
+    achBody:"Вы прошли 15 глав: от азов психологии рынка до живых торговых стратегий. Теперь вы понимаете язык, которым говорит рынок.",
+    achBadge1:"15 глав", achBadge2:"9 правил", achBadge3:"2 стратегии", achBadge4:"6 prop-фирм", achBadge5:"Финальный тест",
+    achBtn:"СДЕЛАТЬ ПЕРВЫЙ ШАГ →",
+
+    bottomNavAsk:"Остался вопрос? Напиши аналитику",
+    bottomNavDone:"Книга завершена",
+
+    footerCopyright:"© 2026 SBF Company · Обучение завершено",
+    footerToc:"← Оглавление",
+  },
+  ro: {
+    // BOOK_CHAPTERS recap (KnowledgeMap)
+    bc1Title:"Introducere în trading", bc1Desc:"Ce sunt piețele financiare, participanții, instrumentele. De ce 90% pierd bani — și cum să ajungi în cei 10%.",
+    bc2Title:"Citirea graficelor", bc2Desc:"Lumânări japoneze, timeframe-uri, modele de bază. Limbajul în care vorbește piața — am învățat să-l citim.",
+    bc3Title:"Protecția Capitalului", bc3Desc:"Risk/Reward, Stop-Loss, calculul poziției. Supraviețuirea contează mai mult decât profitul — regula nr. 1 a profesionistului.",
+    bc4Title:"Lichiditate și Ordine", bc4Desc:"Order book, market maker-ii, tipurile de ordine, slippage. Mecanica execuției fiecărei tranzacții.",
+    bc5Title:"Ceasul Global", bc5Desc:"Sesiunile de tranzacționare, ciclul AMD, suprapunerea Londra+NY. De ce explodează aurul la <span class='local-time' data-utc='2026-03-09T12:00:00Z'>15:30 MSK</span>.",
+    bc6Title:"Pulsul Știrilor", bc6Desc:"NFP, CPI, Fed, Powell. Cum creează fundamentalul „combustibilul” pentru trenduri cu o săptămână înainte.",
+    bc7Title:"Urma Instituțională", bc7Desc:"Smart Money, Liquidity Sweep, Fair Value Gap. Cum să citești urma capitalului mare pe grafic.",
+    bc8Title:"Trend și Cicluri", bc8Desc:"Structura pieței, HH/HL vs LH/LL. Să tranzacționezi în direcția trendului, nu împotriva lui — regula de aur.",
+    bc9Title:"Niveluri și Zone", bc9Desc:"Niveluri orizontale, zone de cerere/ofertă. Unde întoarce prețul — iar și iar.",
+    bc10Title:"Psihologia Mulțimii", bc10Desc:"Fear & Greed, VIX, tipare comportamentale. Geometria fricii și lăcomiei — de ce se repetă mereu.",
+    bc11Title:"Indicatori și Semnale", bc11Desc:"RSI, MACD, Bollinger Bands. Instrumente de confirmare — nu pentru intrare, ci pentru filtrarea zgomotului.",
+    bc12Title:"Ichimoku și Norul", bc12Desc:"Cinci linii, Norul Kumo, semnalele Tenkan/Kijun. Filosofia japoneză a echilibrului pieței.",
+    bc13Title:"Anatomia Swing-ului (Daoti)", bc13Desc:"EMA 20/50, piramidare, analiza fundamentală săptămânală. Strategie de deținere de la 1 la 7 zile.",
+    bc14Title:"Anatomia Scalping-ului", bc14Desc:"EMA 9/21 + RSI 35/65 pe M5. Strategia lui Oleg: intrări de bijutier intraday, SL strict de 30 pt.",
+    bc15Title:"Prop Trading și Practică", bc15Desc:"Firme prop, challenge și primul tău start funded. Foaia de parcurs pentru primele 90 de zile.",
+
+    // KEY_LESSONS (9 rules)
+    kl1:"Nu risca niciodată mai mult de 2% din depozit",
+    kl2:"Plasează Stop-Loss înainte de intrare, nu după",
+    kl3:"Tranzacționează în fereastra ta — suprapunerea Londra+NY",
+    kl4:"Verifică calendarul înainte de fiecare tranzacție",
+    kl5:"Sweep înainte de creștere — nu e o greșeală, e un plan",
+    kl6:"La 2+ pierderi consecutive — închide terminalul",
+    kl7:"Tranzacționează doar în direcția Norului Ichimoku",
+    kl8:"Piramidare: adaugă loturi DOAR la EMA 20",
+    kl9:"RSI 35/65 pe M5 — punct de intrare, nu semnal",
+
+    // Chapter ref chip titles (used in BrokerSection headers)
+    chRefTitle14:"Capitolul 14: Anatomia Scalping-ului", chRefTitle3:"Capitolul 3: Protecția Capitalului",
+    chRefTitle13:"Capitolul 13: Anatomia Swing-ului", chRefTitle7:"Capitolul 7: Lichiditate/SM",
+    chRefTitle8:"Capitolul 8: Trend și Cicluri", chRefTitle10:"Capitolul 10: Psihologie",
+
+    // PROP_DATA — scalp
+    propScalpCategory:"PROP TRADING · SCALPING",
+    propScalpHeadline:"Speed + reguli stricte: pentru scalping contează limitele de drawdown și disciplina",
+    propScalpTheoryTitle:"De ce i se potrivește scalperului un prop-challenge",
+    propScalpPt1Title:"Execuție și control al slippage-ului", propScalpPt1Text:"În prop-challenge-uri nu contează „norocul”, ci respectarea regulilor: intrare/ieșire rapidă și management al riscului conform planului.",
+    propScalpPt2Title:"Limite zilnice/totale de drawdown", propScalpPt2Text:"Principala diferență a prop-ului: limitele impun disciplină și protejează de „recuperarea în forță” după o greșeală.",
+    propScalpPt3Title:"Psihologie: 1–2 greșeli = final", propScalpPt3Text:"Scalping-ul nu înseamnă „mai încerc o dată”. Prop trading-ul te obligă să tranzacționezi după condiții stabilite dinainte.",
+    propScalpPt4Title:"Strategia din Capitolul 14", propScalpPt4Text:"Exact același stack: filtru de trend + RSI 35/65 + intrare pe lichiditate. Punctul de intrare contează mai mult decât semnalul.",
+    ftmoTag:"Challenge popular",
+    ftmoWhy:"Reguli transparente, metrici clare (profit target / max drawdown), potrivit pentru scenarii intraday și disciplină strictă.",
+    ftmoBestFor1:"Scalping / Day trading", ftmoBestFor2:"XAUUSD și FX", ftmoBestFor3:"Limite clare",
+    ftmoDesc:"Prop-challenge axat pe respectarea regulilor și managementul riscului. Pentru abordarea de scalping — unul dintre cele mai comode start-uri.",
+    the5ersTag:"Etape flexibile",
+    the5ersWhy:"Se potrivește tradingului sistematic: construirea unui proces, limite zilnice și repetabilitatea execuției strategiei.",
+    the5ersBestFor1:"Reguli vs emoții", the5ersBestFor2:"Disciplină", the5ersBestFor3:"Rezistență în scalping",
+    the5ersDesc:"Format challenge cu accent pe stabilitate. Se potrivește bine unei strategii cu punct de intrare clar și risc-management strict.",
+
+    // PROP_DATA — swing
+    propSwingCategory:"PROP TRADING · SWING",
+    propSwingHeadline:"Challenge de swing: contează structura, așteptarea și controlul drawdown-urilor",
+    propSwingTheoryTitle:"Cum funcționează swingul într-un prop-challenge",
+    propSwingPt1Title:"Plan în loc de zgomot", propSwingPt1Text:"Swingul are nevoie de selectivitate: să aștepți structura, nu să „alergi” după fiecare lumânare.",
+    propSwingPt2Title:"Stopul și limitele fixează procesul", propSwingPt2Text:"Respectarea regulilor de max drawdown/weekly face rezultatul repetabil.",
+    propSwingPt3Title:"Filtre din Capitolele 13–12", propSwingPt3Text:"Trend/niveluri/Ichimoku ajută să alegi momentele cu probabilitate mai mare.",
+    propSwingPt4Title:"Managementul riscului contează mai mult decât „intrarea perfectă”", propSwingPt4Text:"O intrare puternică fără disciplină = challenge ratat. Forța stă în proces.",
+    earn2tradeTag:"Swing-ready",
+    earn2tradeWhy:"Potrivit pentru scenarii pe termen mediu: când deții poziția și gestionezi riscul conform planului.",
+    earn2tradeBestFor1:"Swing", earn2tradeBestFor2:"Ichimoku/H1–H4", earn2tradeBestFor3:"Niveluri și zone",
+    earn2tradeDesc:"Format challenge pentru traderii care construiesc tranzacția pe structură și controlează riscul pe parcurs.",
+    myforexfundsTag:"Stabilitate",
+    myforexfundsWhy:"Rezultatul se obține prin repetarea procesului: reguli de drawdown + disciplină = șansă de a trece etapele.",
+    myforexfundsBestFor1:"Trend-following", myforexfundsBestFor2:"Risc pe termen mediu", myforexfundsBestFor3:"Proces > emoții",
+    myforexfundsDesc:"Se potrivește bine strategiei de swing: așteptăm structura, intrare după reguli, control al limitelor pe tot parcursul.",
+
+    // PROP_DATA — long-term (pamm slot)
+    propLongCategory:"PROP TRADING · LONG-TERM",
+    propLongHeadline:"Challenge long-term: disciplină, planuri de scalare și control al riscului",
+    propLongTheoryTitle:"De ce i se potrivește majorității un prop-challenge long-term",
+    propLongPt1Title:"Etape de challenge în loc de „ghicit”", propLongPt1Text:"Demonstrezi că știi să respecți regulile: drawdown, profit target, proces.",
+    propLongPt2Title:"Scalare doar pe bază de rezultate", propLongPt2Text:"Piramidarea/adăugarea — doar dacă menții constant calitatea tranzacțiilor.",
+    propLongPt3Title:"Disciplina = principalul activ", propLongPt3Text:"O serie de greșeli distruge etapele. De aceea prop-ul antrenează controlul emoțiilor și risc-managementul.",
+    propLongPt4Title:"Psihologia din Capitolul 10", propLongPt4Text:"Dacă după 2+ tranzacții pierzătoare emoțiile cresc — challenge-ul se termină. Trebuie să existe un plan.",
+    traders4tradersTag:"Long / multi-asset",
+    traders4tradersWhy:"Formatul se potrivește celor care știu să aștepte și să crească poziția prin reguli, nu prin emoții.",
+    traders4tradersBestFor1:"Long-term", traders4tradersBestFor2:"Strategii pe cicluri", traders4tradersBestFor3:"Managementul drawdown-urilor",
+    traders4tradersDesc:"Obiectivele pe termen lung sunt mai ușor de menținut în cadrul unui challenge: scalezi abordarea doar după confirmarea calității.",
+    surgetraderTag:"Adaptare la stil",
+    surgetraderWhy:"O opțiune bună pentru traderii pregătiți pentru proces și control al limitelor pe parcursul etapelor.",
+    surgetraderBestFor1:"Long-term", surgetraderBestFor2:"Așteptarea structurii", surgetraderBestFor3:"Planificare",
+    surgetraderDesc:"Axat pe formarea disciplinei: respectarea regulilor înseamnă obținerea statutului funded.",
+
+    // Shared broker stat values
+    fundedTo100k:"Funded până la $100k", fundedTo200k:"Funded până la $200k", fundedTo150k:"Funded până la $150k", fundedTo50k:"Funded până la $50k",
+    condConditional:"Comisioane/spread conform condițiilor",
+    depositFee:"Taxă pentru evaluare",
+
+    // BrokerSection UI
+    chapterRefLabel:"RECAPITULEAZĂ",
+    statFund:"Fond", statPlatform:"Platformă", statConditions:"Comisioane/condiții", statBonus:"Profit split", statDeposit:"Taxă",
+    whyChooseLabel:"DE CE ALEG",
+    moreAboutBtn:"AFLĂ MAI MULTE DESPRE",
+
+    // MATCH_QUESTIONS
+    mq1Q:"Cât timp ești dispus să dedici tradingului?",
+    mq1Opt1:"Toată ziua la ecran — prind fiecare mișcare",
+    mq1Opt2:"1–2 ore de analiză pe zi, dețin tranzacțiile zile întregi",
+    mq1Opt3:"Nu am timp — vreau un challenge funded fără rutină zilnică",
+    mq2Q:"Ce profil de risc ți se potrivește?",
+    mq2Opt1:"Risc ridicat, avânt rapid, multe tranzacții",
+    mq2Opt2:"Risc moderat, poziții de 3–7 zile",
+    mq2Opt3:"Conservator: limite de drawdown + creștere stabilă",
+    mq3Q:"Cu ce instrument vrei să lucrezi?",
+    mq3Opt1:"Forex, aur (XAU), rapid intraday",
+    mq3Opt2:"Acțiuni, ETF, indici, trend pe termen mediu",
+    mq3Opt3:"Obiective pe termen lung și portofoliu flexibil (challenge long-term)",
+    mq4Q:"Care este capitalul tău de start?",
+    mq4Opt1:"Până la $500 — încep de la puțin",
+    mq4Opt2:"$500–$5.000 — sunt pregătit pentru muncă serioasă",
+    mq4Opt3:"$1.000+ — vreau să pornesc cu condiții funded",
+
+    // ROADMAP
+    rm1Period:"Zilele 1–14", rm1Title:"Fundamentul",
+    rm1Step1:"Parcurge trial-ul (demo) la firma prop aleasă",
+    rm1Step2:"Recapitulează capitolele 3, 4, 5 (risc, ordine, sesiuni)",
+    rm1Step3:"Execută 50 de tranzacții demo conform strategiei tale",
+    rm1Step4:"Ține un jurnal de trading pentru fiecare tranzacție",
+    rm2Period:"Zilele 15–30", rm2Title:"Primele tranzacții reale",
+    rm2Step1:"Pornește faza live (challenge / funded)",
+    rm2Step2:"Tranzacționează cu volum minim, în cadrul regulilor, primele 2 săptămâni",
+    rm2Step3:"Maximum 3 tranzacții pe zi, stop zilnic strict de -5%",
+    rm2Step4:"Contactează managerul SBF pentru îndrumare",
+    rm3Period:"Zilele 31–60", rm3Title:"Calibrarea strategiei",
+    rm3Step1:"Analizează primele 50 de tranzacții reale",
+    rm3Step2:"Identifică 2–3 greșeli repetitive și elimină-le",
+    rm3Step3:"Mărește lotul doar la 60%+ tranzacții profitabile",
+    rm3Step4:"Adaugă un al doilea instrument (dacă faci scalping — adaugă EURUSD)",
+    rm4Period:"Zilele 61–90", rm4Title:"Scalare",
+    rm4Step1:"Prima piramidare: +1 lot la profit de +15 pt",
+    rm4Step2:"Fă o analiză personală a tranzacțiilor cu analistul SBF",
+    rm4Step3:"RR țintă al portofoliului: minimum 1:1,5 pe perioadă",
+    rm4Step4:"Retrage primul profit și consemnează rezultatul",
+
+    // KnowledgeMap
+    kmLabel:"ARSENALUL TRADERULUI ESTE COMPLET",
+    kmTitle:"Toate cele 15 capitole — dintr-o privire",
+    kmChPrefix:"CAP.",
+    kmChapterChip:"Capitolul",
+    kmRepeatLink:"↩ RECAPITULEAZĂ CAPITOLUL",
+
+    // KeyLessons
+    klLabel:"9 REGULI ALE SUPRAVIEȚUITORULUI",
+    klTitle:"Legile a căror încălcare costă bani",
+    klMasteredChip:"însușite",
+    klChPrefix:"CAP.",
+    klAllDone:"🏆 Toate regulile însușite!",
+    klAllDoneSub:"Ești pregătit pentru trading real cu disciplina unui profesionist.",
+
+    // BrokerMatchmaker
+    bmTitle:"Selectarea condițiilor de tranzacționare",
+    bmSubtitle:"INTERACTIV — 4 ÎNTREBĂRI",
+    bmQuestionOf:"Întrebarea",
+    bmOf:"din",
+    bmReadyPct:"finalizat",
+    bmResultLabel:"STILUL TĂU DE TRADING",
+    bmRepeat:"Recapitulează:",
+    bmApplyBtn:"APLICĂ LA CHALLENGE CU UN MANAGER →",
+    bmRetryBtn:"↺ REFĂ TESTUL",
+
+    // TradingQuiz
+    tqTitle:"Testul final",
+    tqSubtitle:"5 SITUAȚII — TESTEAZĂ-TE",
+    tqQ1:"Ai deschis BUY XAUUSD. După 20 de minute prețul a scăzut cu 15 puncte. Ce faci?",
+    tqQ1Opt1Text:"Închid poziția — nu vreau să mai pierd", tqQ1Opt1Hint:"Vânzarea în pierdere fără atingerea stopului este o decizie emoțională. Stopul trebuia plasat încă de la intrare.",
+    tqQ1Opt2Text:"Aștept — stopul nu a fost încă atins, planul rămâne valabil", tqQ1Opt2Hint:"✅ Corect. Cât timp stop-loss-ul nu s-a declanșat — poziția este gestionată conform planului. Capitolul 3: ai încredere în stopul tău.",
+    tqQ1Opt3Text:"Mai adaug un lot — fac mediere", tqQ1Opt3Hint:"Medierea unei poziții în pierdere este una dintre cele mai grave greșeli. Crește riscul, încălcând regula de 2%.",
+    tqQ2:"Astăzi apare NFP la <span class='local-time' data-utc='2026-03-09T12:00:00Z'>15:30 MSK</span>. Când e cel mai bine să intri în tranzacție?",
+    tqQ2Opt1Text:"Chiar înainte de publicarea datelor — prind mișcarea", tqQ2Opt1Hint:"Cu 2–3 minute înainte de NFP spread-ul se lărgește de 10–30 de ori. Vei plăti tot spread-ul și vei primi slippage. Capitolele 4 + 6.",
+    tqQ2Opt2Text:"Imediat după publicare — când direcția e clară", tqQ2Opt2Hint:"✅ Corect. Așteaptă mișcarea inițială, lasă piața să „digere” datele (5–10 min), apoi intră cu confirmare.",
+    tqQ2Opt3Text:"Nu tranzacționez deloc în ziua NFP", tqQ2Opt3Hint:"E o abordare conservatoare, dar ratează cele mai bune mișcări ale lunii. Un trader experimentat folosește NFP ca oportunitate, cu abordarea corectă.",
+    tqQ3:"Grafic XAUUSD pe H1. EMA 20 este sub EMA 50. Prețul a atins EMA 20. Ce facem?",
+    tqQ3Opt1Text:"BUY — semnalul clasic de revenire la EMA", tqQ3Opt1Hint:"EMA 20 < EMA 50 înseamnă trend descendent. Atingerea EMA 20 de jos este semnal pentru SHORT conform strategiei Daoti, nu pentru BUY. Capitolul 13.",
+    tqQ3Opt2Text:"SELL — trendul e descendent, tranzacționez în direcția lui", tqQ3Opt2Hint:"✅ Corect. EMA 20 < EMA 50 = trend bearish. Retragerea la EMA 20 este punctul pentru adăugarea de SHORT conform strategiei Daoti.",
+    tqQ3Opt3Text:"Aștept intersecția EMA-urilor înainte de a intra", tqQ3Opt3Hint:"Așteptarea intersecției înseamnă întârziere. Până la intersecție, cea mai mare parte a mișcării s-a consumat deja. Lucrăm cu atingerea EMA 20.",
+    tqQ4:"Liquidity Sweep-ul tău: prețul a spart suportul în jos, ți-a activat stopul, apoi s-a întors instant în sus. Ce s-a întâmplat?",
+    tqQ4Opt1Text:"Volatilitate întâmplătoare — pur și simplu ghinion", tqQ4Opt1Hint:"Nu e întâmplare — e un Sweep clasic din Capitolul 7. Instituțiile ți-au folosit stopul drept lichiditate.",
+    tqQ4Opt2Text:"Smart Money a colectat stopurile long-iștilor, acum urmează creșterea", tqQ4Opt2Hint:"✅ Exact așa. Liquidity Sweep (Cap.7): spargerea nivelului, colectarea stopurilor, întoarcerea. Intrarea corectă este DUPĂ Sweep, nu înainte.",
+    tqQ4Opt3Text:"E timpul să schimb strategia — asta nu funcționează", tqQ4Opt3Hint:"Nu strategia e defectă — înțelegerea e defectă. Recapitulează Capitolul 7 și începe să plasezi stopul dincolo de zona de stopuri, nu în interiorul ei.",
+    tqQ5:"Sfârșitul zilei: 3 tranzacții pierzătoare consecutive. Rezultat: -4,5% din depozit. Ce faci?",
+    tqQ5Opt1Text:"Deschid a 4-a tranzacție — îmi recuperez pierderea", tqQ5Opt1Hint:"3 pierderi consecutive = piața nu dă semnale sau nu ești în formă. „Recuperarea” este o capcană psihologică. Capitolul 10: la 2+ pierderi — închide terminalul.",
+    tqQ5Opt2Text:"Închid terminalul pentru azi. Mâine e o zi nouă", tqQ5Opt2Hint:"✅ Regula stopului zilnic. -5% pe zi = stop-sesiune. Păstrezi 95,5% din depozit — mâine lucrezi dintr-o poziție de forță. Capitolul 3.",
+    tqQ5Opt3Text:"Schimb instrumentul — poate am noroc cu EUR", tqQ5Opt3Hint:"Schimbarea instrumentului nu rezolvă problema. Dacă algoritmul de trading nu funcționează azi, nu va funcționa nici pe altă pereche.",
+    tqCorrectSuffix:"corecte",
+    tqResultGreat:"Rezultat excelent! Ești pregătit pentru trading real.",
+    tqResultGood:"Bază bună. Recapitulează capitolele la care ai greșit.",
+    tqResultWeak:"Recomandăm o recapitulare înainte de un cont real.",
+    tqReviewLabel:"RECAPITULEAZĂ ACESTE CAPITOLE:",
+    tqChapterLink:"Capitolul",
+    tqStartTradingBtn:"ÎNCEPE SĂ TRANZACȚIONEZI CU SBF →",
+    tqRetryBtn:"↺ REFĂ TESTUL",
+
+    // RoadmapBlock
+    rmLabel:"FOAIA DE PARCURS",
+    rmTitle:"Primele tale 90 de zile în trading",
+    rmTip:"💡 Recomandare: contactează managerul SBF în etapa primelor tranzacții reale — un mentor te va feri de 90% din greșelile standard ale începătorilor.",
+    rmReviewBtn:"PROGRAMEAZĂ-TE PENTRU ANALIZA TRANZACȚIILOR →",
+
+    // AskAnalystPopup
+    apPrefill:"Bună ziua! Am terminat cursul SBF. Vreau să aleg o firmă prop și să trec un challenge.",
+    apLabel:"TRECEREA LA PRACTICĂ",
+    apTitle:"Ajunge cu cititul. E timpul să tranzacționezi.",
+    apBodyIntro:"Ai cunoștințele din 15 capitole. Acum ai nevoie de firma prop potrivită, tipul corect de challenge și un mentor la start.",
+    apBodyBold:"Managerul SBF te va ajuta cu fiecare dintre acești pași — gratuit.",
+    apFeat1:"Selectarea unei firme prop potrivite stilului tău de trading",
+    apFeat2:"Condiții VIP și bonusuri exclusive",
+    apFeat3:"Analiza primelor 10 tranzacții cu un analist",
+    apTgSub:"Telegram · Experți online", apTgBtn:"SCRIE PE TELEGRAM",
+    apWaSub:"WhatsApp · Răspundem în 2 minute", apWaBtn:"SCRIE PE WHATSAPP",
+    apDisclaimer:"Consultația și selectarea challenge-ului — gratuit. Fără obligații.",
+
+    // MidPageCTA
+    midCtaBtn:"CONTACTEAZĂ UN MANAGER →",
+    midCtaSub:"Telegram + WhatsApp · Răspuns în 2 minute",
+    midCta1Text:"Cunoști regulile — acum trebuie să le aplici pe piața reală.",
+    midCta1Sub:"Managerul SBF te va ajuta să alegi un prop-challenge și te va însoți în primele tranzacții.",
+    midCta2Text:"Scalping-ul cere disciplină și firma prop potrivită.",
+    midCta2Sub:"Primește recomandări personale pentru configurarea procesului de challenge de la analistul SBF.",
+
+    // Chapter15 main
+    stickyChip:"FINAL · CAPITOLUL 15",
+    stickySub:"De la Teorie la Practică",
+    stickyBtn:"ÎNCEPE SĂ TRANZACȚIONEZI →",
+    heroLabel:"SBF COMPANY — NIVELUL FINAL",
+    heroChip1:"15 Capitole", heroChip2:"Totul parcurs", heroChip3:"Pregătit pentru practică",
+    heroTitleLine1:"De la Teorie", heroTitleLine2:"La Practică",
+    heroBody:"Ai studiat psihologia mulțimii, mecanica lichidității, Smart Money, sesiunile de tranzacționare, tiparele, două strategii vii. Acum — platforma potrivită și primul pas real.",
+    heroBtn:"TRECI CHALLENGE-UL ȘI ÎNCEPI →",
+    heroFootnote:"Consultație gratuită · Condiții VIP · Analist personal",
+
+    findStyleLabel:"GĂSEȘTE-ȚI STILUL",
+    findStyleTitle:"Ce fel de trader ești?",
+    findStyleSub:"Răspunde la 4 întrebări — primești o recomandare personalizată pentru prop-challenge și strategie.",
+
+    propFirmsLabel:"FIRME PROP SBF COMPANY",
+    propFirmsTitle:"Instrumentar pentru stilul tău",
+    propFirmsSub:"Doar firme prop verificate. Reguli diferite — pentru sarcini diferite. Nu poți face scalping acolo unde condițiile nu se potrivesc vitezei și disciplinei.",
+
+    compareLabel:"COMPARAȚIE RAPIDĂ",
+    compareTitle:"Toate firmele prop, alături",
+    thPropFirm:"Firmă prop", thStyle:"Stil", thFund:"Fond", thConditions:"Comisioane/condiții", thPlatform:"Platformă", thBonus:"Profit split", thBestFor:"Cel mai bun pentru",
+    styleScalp:"Scalping", styleSwing:"Swing", styleLong:"Long",
+    tableCondLimits:"condiții/limite",
+    bestXauDiscipline:"XAU/disciplină", bestProcessVsEmotion:"proces > emoții", bestSwingStructure:"structură de swing",
+    bestTrendFollowing:"trend-following", bestLongTermRules:"reguli long-term", bestStageDiscipline:"disciplina etapelor",
+
+    examLabel:"EXAMENUL FINAL",
+    examTitle:"Ești pregătit pentru piață?",
+    examSub:"5 situații reale din trading. Verifică cât de bine ai însușit cunoștințele din 15 capitole.",
+
+    finalAttentionBadge:"ATENȚIE",
+    finalTitleLine1:"Piața nu iartă", finalTitleLine2:"singuraticii",
+    finalBodyIntro:"Un start pe cont propriu înseamnă, statistic, primele trei depozite pierdute. Nu e o poveste de spaimă — sunt date. Prin SBF Company primești",
+    finalBodyBold:"un analist personal, condiții VIP la firmele prop și semnale exclusive",
+    finalBodyOutro:"— complet gratuit.",
+    finalReason1Title:"Analist personal", finalReason1Text:"Analiza fiecărei tranzacții, corectarea strategiei",
+    finalReason2Title:"Condiții VIP", finalReason2Text:"Bonusuri exclusive de la parteneri",
+    finalReason3Title:"Semnale exclusive", finalReason3Text:"Setup-uri gata făcute cu niveluri de intrare",
+    finalCtaBtn:"CONTACTEAZĂ UN MANAGER →",
+    finalCtaFootnote:"Răspundem pe Telegram și WhatsApp în 2 minute",
+
+    partnersLabel:"PARTENERI",
+
+    achLabel:"REALIZARE DEBLOCATĂ",
+    achTitle:"Curs complet finalizat",
+    achBody:"Ai parcurs 15 capitole: de la bazele psihologiei pieței până la strategii de tranzacționare reale. Acum înțelegi limbajul în care vorbește piața.",
+    achBadge1:"15 capitole", achBadge2:"9 reguli", achBadge3:"2 strategii", achBadge4:"6 firme prop", achBadge5:"Test final",
+    achBtn:"FĂ PRIMUL PAS →",
+
+    bottomNavAsk:"Mai ai o întrebare? Scrie-i analistului",
+    bottomNavDone:"Cartea s-a încheiat",
+
+    footerCopyright:"© 2026 SBF Company · Instruire finalizată",
+    footerToc:"← Cuprins",
+  },
+};
+const S0 = STRINGS[INITIAL_LANG] || STRINGS.ru;
+
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// DESIGN TOKENS
+// ═══════════════════════════════════════════════════════════════════════════════
+const C = {
+  gold:"#c9973a", goldLight:"#f4d49f", goldPale:"rgba(201,151,58,0.12)",
+  black:"#18181a", bg:"#0d0d0f", bg2:"#131315", bg3:"#1a1a1d",
+  surface:"#1f1f22", surface2:"#27272a",
+  inkSoft:"rgba(255,255,255,0.62)", inkFaint:"rgba(255,255,255,0.3)",
+  white:"#ffffff",
+  border:"rgba(255,255,255,0.09)", borderGold:"rgba(201,151,58,0.3)",
+  green:"#089981", greenD:"#2d7a4f", greenPale:"rgba(8,153,129,0.12)",
+  red:"#f23645", redD:"#c0392b", redPale:"rgba(242,54,69,0.1)",
+  blue:"#3b82f6", bluePale:"rgba(59,130,246,0.12)",
+  purple:"#8b5cf6", purplePale:"rgba(139,92,246,0.12)",
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// PRIMITIVES
+// ═══════════════════════════════════════════════════════════════════════════════
+const Mono = ({children,size=13,color=C.inkSoft,spacing=3,style={},className=""}) =>
+  <span className={className} style={{fontFamily:"'Courier New',monospace",fontSize:size,letterSpacing:spacing,color,...style}}>{children}</span>;
+
+const Chip = ({children,color=C.gold,bg="transparent",size=11}) =>
+  <span style={{fontFamily:"'Courier New',monospace",fontSize:size,letterSpacing:2,color,border:`1px solid ${color}`,background:bg,padding:"4px 12px",display:"inline-block",textTransform:"uppercase",borderRadius:3}}>{children}</span>;
+
+const GoldRule = ({my=48}) =>
+  <div className="gold-line" style={{margin:`${my}px 0`}}/>;
+
+const SectionLabel = ({children,color=C.gold}) =>
+  <Mono size={11} color={color} spacing={4} style={{display:"block",marginBottom:14,fontWeight:700,textTransform:"uppercase"}}>{children}</Mono>;
+
+const SectionTitle = ({children,sub,align="left",light=false}) => (
+  <div style={{textAlign:align,marginBottom:36}}>
+    <h2 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(26px,3.8vw,44px)",fontWeight:400,color:C.white,lineHeight:1.1,marginBottom:sub?14:0}}>{children}</h2>
+    {sub && <p style={{fontSize:16,color:C.inkSoft,lineHeight:1.75,maxWidth:760,margin:align==="center"?"0 auto":0}}>{sub}</p>}
+  </div>
+);
+
+const getChUrl = ch => {
+  const p = new URLSearchParams(window.location.search).get('path')||'explorer';
+  const base = INITIAL_LANG==='ru'?'/edu/b':`/edu/${INITIAL_LANG}/b`;
+  return `${base}/${ch}?path=${p}`;
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// ALL DATA
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// Book recap — all 15 chapters
+const BOOK_CHAPTERS = [
+  {ch:1,  icon:"🌍", title:S0.bc1Title,  color:C.gold,   desc:S0.bc1Desc},
+  {ch:2,  icon:"📊", title:S0.bc2Title,  color:C.gold,   desc:S0.bc2Desc},
+  {ch:3,  icon:"🛡️", title:S0.bc3Title,  color:C.red,    desc:S0.bc3Desc},
+  {ch:4,  icon:"⚙️", title:S0.bc4Title,  color:C.blue,   desc:S0.bc4Desc},
+  {ch:5,  icon:"🌐", title:S0.bc5Title,  color:C.purple, desc:S0.bc5Desc},
+  {ch:6,  icon:"📰", title:S0.bc6Title,  color:C.gold,   desc:S0.bc6Desc},
+  {ch:7,  icon:"🐳", title:S0.bc7Title,  color:C.red,    desc:S0.bc7Desc},
+  {ch:8,  icon:"🌊", title:S0.bc8Title,  color:C.green,  desc:S0.bc8Desc},
+  {ch:9,  icon:"📐", title:S0.bc9Title,  color:C.blue,   desc:S0.bc9Desc},
+  {ch:10, icon:"🧠", title:S0.bc10Title, color:C.purple, desc:S0.bc10Desc},
+  {ch:11, icon:"📈", title:S0.bc11Title, color:C.gold,   desc:S0.bc11Desc},
+  {ch:12, icon:"🇯🇵", title:S0.bc12Title, color:C.gold,   desc:S0.bc12Desc},
+  {ch:13, icon:"🌊", title:S0.bc13Title, color:C.green,  desc:S0.bc13Desc},
+  {ch:14, icon:"⚡", title:S0.bc14Title, color:C.red,    desc:S0.bc14Desc},
+  {ch:15, icon:"🏁", title:S0.bc15Title, color:C.gold,   desc:S0.bc15Desc},
+];
+
+// Key lessons for recap
+const KEY_LESSONS = [
+  {icon:"🛡️", ch:3,  title:S0.kl1, color:C.red,    short:"Правило 2%"},
+  {icon:"⚙️", ch:4,  title:S0.kl2, color:C.blue,   short:"Сначала стоп"},
+  {icon:"🌐", ch:5,  title:S0.kl3, color:C.purple, short:"Окно ликвидности"},
+  {icon:"📰", ch:6,  title:S0.kl4, color:C.gold,   short:"Новости = контекст"},
+  {icon:"🐳", ch:7,  title:S0.kl5, color:C.red,    short:"Sweep = вход"},
+  {icon:"🧠", ch:10, title:S0.kl6, color:C.purple, short:"Дисциплина"},
+  {icon:"🇯🇵", ch:12, title:S0.kl7, color:C.gold,   short:"Облако = тренд"},
+  {icon:"🌊", ch:13, title:S0.kl8, color:C.green,  short:"Пирамидинг"},
+  {icon:"⚡", ch:14, title:S0.kl9, color:C.red,    short:"Скальп RSI"},
+];
+
+// Brokers full data
+const BROKERS_DATA = {
+  scalp: {
+    id:"scalp",
+    category:"СКАЛЬПИНГ И ДЭЙ-ТРЕЙДИНГ",
+    categoryShort:"Скальпинг",
+    icon:"⚡",
+    color:C.red,
+    colorPale:C.redPale,
+    chapterRefs:[{ch:14,title:"Глава 14: Анатомия Скальпинга"},{ch:5,title:"Глава 5: Глобальные Часы"}],
+    headline:"Скорость исполнения и минимальные издержки — главный критерий",
+    theoryBlock:{
+      title:"Почему скальперу нужен особый брокер",
+      points:[
+        {icon:"⚡",title:"Исполнение < 50мс",text:"Скальпер берёт 20–50 пунктов за сделку. При задержке исполнения в 200мс цена может пройти эти 50 пунктов без вас. Нужен ECN/STP брокер с прямым доступом к рынку."},
+        {icon:"💰",title:"Спред — главный враг",text:"При скальпинге вы входите и выходите 10–20 раз в день. Разница в 0.5 пункта спреда × 20 сделок = 10 пунктов в день «в никуда». Выбирайте спред < 1.0."},
+        {icon:"📊",title:"Центовые счета для старта",text:"Центовый счёт позволяет торговать от $10 с лотами 0.001. Идеально для отработки стратегии EMA 9/21 + RSI без риска для основного депозита."},
+        {icon:"🔄",title:"Swap-free (без свопа)",text:"Скальпер иногда держит позицию через ночь. Счёт без свопа (Islamic account) освобождает от ежедневной комиссии за перенос — особенно важно для XAUUSD."},
+      ]
+    },
+    brokers:[
+      {
+        name:"DAOTI", logo:"🟣", tag:"Топ выбор",tagColor:C.green,
+        url:"https://daoti.io/",
+        logoUrl:"https://static.wixstatic.com/media/689211_510a33bc03964426a9e3ef7230c6b7f3~mv2.png",
+        leverage:"1:100", platform:"MT5", spread:"0.7", bonus:"до 15% на баланс",
+        deposit:"Карта, крипто-переводы",
+        why:"Самый низкий спред среди партнёров (0.7). MT5 с современным интерфейсом. Быстрые пополнения через крипту.",
+        bestFor:["XAUUSD скальп","FX пары","Крипто CFD"],
+        desc:"Современный сервис с низкими спредами и молниеносным исполнением. Оптимален для скальпинга по металлам и валютам. Поддерживает стратегию EMA 9/21 + RSI 35/65."
+      },
+      {
+        name:"INSTAFOREX", logo:"🔴", tag:"Центовые счета",tagColor:C.blue,
+        url:"https://www.instaforex.com/en/fast_open_live_account?x=TTVDG",
+        logoUrl:"https://static.wixstatic.com/media/689211_07a301c98ab3431bb2f282a125009cd5~mv2.png",
+        leverage:"1:1000", platform:"MT4, MT5, Tick", spread:"0.0–3.0", bonus:"100%, 55%, 30%",
+        deposit:"Карты, Skrill, Neteller, PM, Крипто",
+        why:"Центовые счета от $1. Рекордное кредитное плечо 1:1000. Крупнейшая бонусная программа на рынке.",
+        bestFor:["Центовый счёт","Forex пары","Бонус-старт"],
+        desc:"Лидер по объёму бонусных программ и гибкости счетов. Тысячи инструментов, уникальная Tick-платформа. Идеален для начинающих скальперов с малым депозитом."
+      },
+      {
+        name:"ALPARI", logo:"🏔️", tag:"Плечо 1:3000",tagColor:C.gold,
+        url:"https://alpari.com/en/",
+        logoUrl:"https://static.wixstatic.com/media/689211_8360b9cd2dac4275a5890298b131033c~mv2.png",
+        leverage:"1:3000", platform:"MT4, MT5", spread:"1.0", bonus:"—",
+        deposit:"Карта, банковский перевод",
+        why:"Рекордное плечо 1:3000 — максимальная гибкость для управления позицией. Проверенный брокер с 20-летней историей.",
+        bestFor:["Высокое плечо","MT4 ветераны","FX классика"],
+        desc:"Брокер с колоссальным опытом и самым высоким плечом на рынке. Подойдёт опытным трейдерам, умеющим грамотно управлять риском при высоком плече."
+      },
+    ]
+  },
+  swing: {
+    id:"swing",
+    category:"СВИНГ-ТРЕЙДИНГ И ИНВЕСТИЦИИ",
+    categoryShort:"Свинг/Инвест",
+    icon:"🌊",
+    color:C.blue,
+    colorPale:C.bluePale,
+    chapterRefs:[{ch:13,title:"Глава 13: Анатомия Свинга"},{ch:12,title:"Глава 12: Ишимоку"},{ch:3,title:"Глава 3: Защита Капитала"}],
+    headline:"Надёжность, аналитика и широкий выбор активов — на первом месте",
+    theoryBlock:{
+      title:"Почему свинг-трейдеру нужен другой брокер",
+      points:[
+        {icon:"📅",title:"Свопы имеют значение",text:"При удержании позиции 3–7 дней ежедневные свопы накапливаются. Выбирайте брокера с минимальными или положительными свопами по вашим инструментам."},
+        {icon:"📊",title:"Широкий выбор акций и ETF",text:"Свинг по глобальным акциям (S&P500, NASDAQ) требует доступа к CFD на акции и индексы. Не каждый FX-брокер это даёт."},
+        {icon:"🔍",title:"Аналитика и инструменты",text:"Свинг-трейдер тратит время на анализ, а не на торговлю. Нужны встроенная аналитика, экономический календарь и расширенные индикаторы прямо в платформе."},
+        {icon:"🛡️",title:"Надёжность регуляции",text:"При удержании позиций на $10 000+ несколько дней критически важно, чтобы брокер был регулирован в нескольких юрисдикциях (ASIC, CySEC, FSCA)."},
+      ]
+    },
+    brokers:[
+      {
+        name:"AVATRADE", logo:"🛡️", tag:"Инновации",tagColor:C.blue,
+        url:"https://avatrade.com/?tag=184200",
+        logoUrl:"https://static.wixstatic.com/media/689211_8225039e696a485280b166329472a6d2~mv2.png",
+        leverage:"1:400", platform:"MT4, MT5, AvaOptions", spread:"0.9", bonus:"10%–20%",
+        deposit:"Банк. карты, Skrill, Neteller, PerfectMoney",
+        why:"Инновационная AvaOptions платформа для опционных стратегий. 6 регуляторов. Более 1250 инструментов.",
+        bestFor:["Свинг по акциям","Ишимоку H4","Опционные стратегии"],
+        desc:"Надёжный международный брокер с мощной платформой и широким инструментарием. Отличный выбор для среднесрочной торговли по Ишимоку и портфельных инвестиций в индексы."
+      },
+      {
+        name:"CAPEX", logo:"📊", tag:"Лицензия",tagColor:C.green,
+        url:"https://account.capex.com/en/register?sidc=88EA29D5-46D9-472E-AEB2-C6E5C30E822A",
+        logoUrl:"https://static.wixstatic.com/media/689211_95085bd10f7d4fd7b7a54e09479658d5~mv2.png",
+        leverage:"1:400", platform:"WebTrader, MT5", spread:"от 1.2", bonus:"Индивидуально",
+        deposit:"Карта, Skrill, Neteller, Перевод",
+        why:"Уникальный WebTrader с встроенной аналитикой. Акции, ETF, индексы, форекс. Прозрачные условия и качественная поддержка.",
+        bestFor:["Инвест-портфель","Акции CFD","Начинающие инвесторы"],
+        desc:"Лицензированный посредник с уникальным веб-терминалом и подробной аналитикой. Идеален для формирования инвестиционного портфеля и среднесрочной торговли без установки MT4."
+      },
+    ]
+  },
+  pamm: {
+    id:"pamm",
+    category:"ДОВЕРИТЕЛЬНОЕ УПРАВЛЕНИЕ (PAMM/MAM)",
+    categoryShort:"ДУ / Пассивно",
+    icon:"💼",
+    color:C.gold,
+    colorPale:C.goldPale,
+    chapterRefs:[{ch:10,title:"Глава 10: Психология — контроль эмоций"},{ch:3,title:"Глава 3: Защита Капитала"}],
+    headline:"Профессиональное управление капиталом без личного участия в сделках",
+    theoryBlock:{
+      title:"Когда доверительное управление — правильный выбор",
+      points:[
+        {icon:"💼",title:"PAMM-счета: как это работает",text:"Управляющий трейдер торгует своим и вашим капиталом одновременно. Его прибыль = ваша прибыль (пропорционально). Убыток — тоже общий. Управляющий рискует своими деньгами."},
+        {icon:"⏱️",title:"Для кого подходит",text:"У вас есть $500–$50 000, нет времени торговать самостоятельно или вы пока недостаточно уверены в стратегии. Хотите пассивный доход с ежемесячными выплатами."},
+        {icon:"📊",title:"Как выбирать управляющего",text:"Смотрите на: срок работы (>6 мес), просадку (< 20%), коэффициент Шарпа (> 1.5), стейтмент (верифицированный, не скриншот). Диверсифицируйте между 3–5 управляющими."},
+        {icon:"🔒",title:"Безопасность средств",text:"Ваши деньги всегда на вашем счёте. Управляющий имеет права только на открытие/закрытие сделок — он не может вывести ваши средства. Это стандарт технологии PAMM."},
+      ]
+    },
+    brokers:[
+      {
+        name:"FXPRO", logo:"🟥", tag:"ДУ + cTrader",tagColor:C.gold,
+        url:"https://direct-fxpro.com/en/partner/32TQQFd7H",
+        logoUrl:"https://static.wixstatic.com/media/689211_67212ee97bf24ea8b81885b16e5a3e1a~mv2.png",
+        leverage:"1:500", platform:"MT4, MT5, cTrader, FxPro Edge", spread:"от 1.2", bonus:"VIP условия",
+        deposit:"Карты, Skrill, Neteller, PayPal, Крипто",
+        why:"Единственный в партнёрской сети брокер с cTrader — платформой №1 для профессионального ДУ. Высокая ликвидность. Регулятор FCA (Великобритания).",
+        bestFor:["PAMM счета","Инвест-портфели","cTrader алго"],
+        desc:"Профессиональная экосистема: MT4/MT5/cTrader плюс собственная платформа FxPro Edge. Лучший выбор для передачи капитала в управление — прозрачная отчётность, FCA регуляция и лучшая ликвидность."
+      },
+    ]
+  }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PROP FIRMS DATA (replaces broker selection on the last chapter)
+// ─────────────────────────────────────────────────────────────────────────────
+const PROP_DATA = {
+  scalp: {
+    id: "prop_scalp",
+    category: S0.propScalpCategory,
+    categoryShort: "Prop · Scalping",
+    icon: "⚡",
+    color: C.red,
+    colorPale: C.redPale,
+    chapterRefs: [{ ch: 14, title: S0.chRefTitle14 }, { ch: 3, title: S0.chRefTitle3 }],
+    headline: S0.propScalpHeadline,
+    theoryBlock: {
+      title: S0.propScalpTheoryTitle,
+      points: [
+        { icon: "⚡", title: S0.propScalpPt1Title, text: S0.propScalpPt1Text },
+        { icon: "🛡️", title: S0.propScalpPt2Title, text: S0.propScalpPt2Text },
+        { icon: "📉", title: S0.propScalpPt3Title, text: S0.propScalpPt3Text },
+        { icon: "🧠", title: S0.propScalpPt4Title, text: S0.propScalpPt4Text },
+      ],
+    },
+    brokers: [
+      {
+        name: "FTMO",
+        logo: "🛡️",
+        tag: S0.ftmoTag,
+        tagColor: C.red,
+        url: "https://ftmo.com/",
+        logoUrl: "",
+        leverage: S0.fundedTo100k,
+        platform: "MT4/MT5",
+        spread: S0.condConditional,
+        bonus: "Profit split",
+        deposit: S0.depositFee,
+        why: S0.ftmoWhy,
+        bestFor: [S0.ftmoBestFor1, S0.ftmoBestFor2, S0.ftmoBestFor3],
+        desc: S0.ftmoDesc,
+      },
+      {
+        name: "The5ers",
+        logo: "🏁",
+        tag: S0.the5ersTag,
+        tagColor: C.gold,
+        url: "https://the5ers.com/",
+        logoUrl: "",
+        leverage: S0.fundedTo200k,
+        platform: "MT4/MT5",
+        spread: S0.condConditional,
+        bonus: "Profit split",
+        deposit: S0.depositFee,
+        why: S0.the5ersWhy,
+        bestFor: [S0.the5ersBestFor1, S0.the5ersBestFor2, S0.the5ersBestFor3],
+        desc: S0.the5ersDesc,
+      },
+    ],
+  },
+
+  swing: {
+    id: "prop_swing",
+    category: S0.propSwingCategory,
+    categoryShort: "Prop · Swing",
+    icon: "🌊",
+    color: C.blue,
+    colorPale: C.bluePale,
+    chapterRefs: [{ ch: 13, title: S0.chRefTitle13 }, { ch: 7, title: S0.chRefTitle7 }],
+    headline: S0.propSwingHeadline,
+    theoryBlock: {
+      title: S0.propSwingTheoryTitle,
+      points: [
+        { icon: "📅", title: S0.propSwingPt1Title, text: S0.propSwingPt1Text },
+        { icon: "🧱", title: S0.propSwingPt2Title, text: S0.propSwingPt2Text },
+        { icon: "📊", title: S0.propSwingPt3Title, text: S0.propSwingPt3Text },
+        { icon: "🛡️", title: S0.propSwingPt4Title, text: S0.propSwingPt4Text },
+      ],
+    },
+    brokers: [
+      {
+        name: "Earn2Trade",
+        logo: "💎",
+        tag: S0.earn2tradeTag,
+        tagColor: C.blue,
+        url: "https://earn2trade.com/",
+        logoUrl: "",
+        leverage: S0.fundedTo200k,
+        platform: "MT4/MT5",
+        spread: S0.condConditional,
+        bonus: "Profit split",
+        deposit: S0.depositFee,
+        why: S0.earn2tradeWhy,
+        bestFor: [S0.earn2tradeBestFor1, S0.earn2tradeBestFor2, S0.earn2tradeBestFor3],
+        desc: S0.earn2tradeDesc,
+      },
+      {
+        name: "MyForexFunds",
+        logo: "🧠",
+        tag: S0.myforexfundsTag,
+        tagColor: C.gold,
+        url: "https://myforexfunds.com/",
+        logoUrl: "",
+        leverage: S0.fundedTo100k,
+        platform: "MT4/MT5",
+        spread: S0.condConditional,
+        bonus: "Profit split",
+        deposit: S0.depositFee,
+        why: S0.myforexfundsWhy,
+        bestFor: [S0.myforexfundsBestFor1, S0.myforexfundsBestFor2, S0.myforexfundsBestFor3],
+        desc: S0.myforexfundsDesc,
+      },
+    ],
+  },
+
+  pamm: {
+    id: "prop_long",
+    category: S0.propLongCategory,
+    categoryShort: "Prop · Long",
+    icon: "🎯",
+    color: C.gold,
+    colorPale: C.goldPale,
+    chapterRefs: [{ ch: 8, title: S0.chRefTitle8 }, { ch: 10, title: S0.chRefTitle10 }],
+    headline: S0.propLongHeadline,
+    theoryBlock: {
+      title: S0.propLongTheoryTitle,
+      points: [
+        { icon: "🧩", title: S0.propLongPt1Title, text: S0.propLongPt1Text },
+        { icon: "📈", title: S0.propLongPt2Title, text: S0.propLongPt2Text },
+        { icon: "🛡️", title: S0.propLongPt3Title, text: S0.propLongPt3Text },
+        { icon: "🧠", title: S0.propLongPt4Title, text: S0.propLongPt4Text },
+      ],
+    },
+    brokers: [
+      {
+        name: "Traders4Traders",
+        logo: "🏆",
+        tag: S0.traders4tradersTag,
+        tagColor: C.green,
+        url: "https://traders4traders.com/",
+        logoUrl: "",
+        leverage: S0.fundedTo150k,
+        platform: "MT4/MT5",
+        spread: S0.condConditional,
+        bonus: "Profit split",
+        deposit: S0.depositFee,
+        why: S0.traders4tradersWhy,
+        bestFor: [S0.traders4tradersBestFor1, S0.traders4tradersBestFor2, S0.traders4tradersBestFor3],
+        desc: S0.traders4tradersDesc,
+      },
+      {
+        name: "SurgeTrader",
+        logo: "🚀",
+        tag: S0.surgetraderTag,
+        tagColor: C.red,
+        url: "https://surgetrader.com/",
+        logoUrl: "",
+        leverage: S0.fundedTo50k,
+        platform: "MT4/MT5",
+        spread: S0.condConditional,
+        bonus: "Profit split",
+        deposit: S0.depositFee,
+        why: S0.surgetraderWhy,
+        bestFor: [S0.surgetraderBestFor1, S0.surgetraderBestFor2, S0.surgetraderBestFor3],
+        desc: S0.surgetraderDesc,
+      },
+    ],
+  },
+};
+
+// Broker matchmaker questions
+const MATCH_QUESTIONS = [
+  {
+    q:S0.mq1Q,
+    icon:"⏱️",
+    opts:[
+      {label:S0.mq1Opt1,val:"scalp",emoji:"⚡"},
+      {label:S0.mq1Opt2,val:"swing",emoji:"🌊"},
+      {label:S0.mq1Opt3,val:"pamm",emoji:"🛡️"},
+    ]
+  },
+  {
+    q:S0.mq2Q,
+    icon:"⚖️",
+    opts:[
+      {label:S0.mq2Opt1,val:"scalp",emoji:"🔥"},
+      {label:S0.mq2Opt2,val:"swing",emoji:"📈"},
+      {label:S0.mq2Opt3,val:"pamm",emoji:"🛡️"},
+    ]
+  },
+  {
+    q:S0.mq3Q,
+    icon:"📊",
+    opts:[
+      {label:S0.mq3Opt1,val:"scalp",emoji:"💱"},
+      {label:S0.mq3Opt2,val:"swing",emoji:"📊"},
+      {label:S0.mq3Opt3,val:"pamm",emoji:"🎯"},
+    ]
+  },
+  {
+    q:S0.mq4Q,
+    icon:"💰",
+    opts:[
+      {label:S0.mq4Opt1,val:"scalp",emoji:"🪙"},
+      {label:S0.mq4Opt2,val:"swing",emoji:"💵"},
+      {label:S0.mq4Opt3,val:"pamm",emoji:"💎"},
+    ]
+  },
+];
+
+// 90-day roadmap
+const ROADMAP = [
+  {
+    period:S0.rm1Period,title:S0.rm1Title,color:C.blue,
+    steps:[S0.rm1Step1, S0.rm1Step2, S0.rm1Step3, S0.rm1Step4]
+  },
+  {
+    period:S0.rm2Period,title:S0.rm2Title,color:C.gold,
+    steps:[S0.rm2Step1, S0.rm2Step2, S0.rm2Step3, S0.rm2Step4]
+  },
+  {
+    period:S0.rm3Period,title:S0.rm3Title,color:C.green,
+    steps:[S0.rm3Step1, S0.rm3Step2, S0.rm3Step3, S0.rm3Step4]
+  },
+  {
+    period:S0.rm4Period,title:S0.rm4Title,color:C.purple,
+    steps:[S0.rm4Step1, S0.rm4Step2, S0.rm4Step3, S0.rm4Step4]
+  },
+];
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// COMPONENT: KNOWLEDGE MAP
+// ═══════════════════════════════════════════════════════════════════════════════
+function KnowledgeMap({onOpenContact}) {
+  const { useState, useEffect } = React;
+  const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
+  const [active, setActive] = useState(0);
+  const [expanded, setExpanded] = useState(false);
+
+  useEffect(() => {
+    if (expanded) return;
+    const t = setInterval(() => setActive(p => (p+1) % BOOK_CHAPTERS.length), 2800);
+    return () => clearInterval(t);
+  }, [expanded]);
+
+  const ch = BOOK_CHAPTERS[active];
+
+  return (
+    <div style={{background:"#0a0a0c",border:`1px solid ${C.border}`,borderRadius:16,padding:"44px 40px",marginBottom:60,position:"relative",overflow:"hidden"}}>
+      <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 100%, rgba(201,151,58,0.08) 0%, transparent 65%)",pointerEvents:"none"}}/>
+      <div style={{position:"relative"}}>
+        <div style={{textAlign:"center",marginBottom:36}}>
+          <SectionLabel>{S.kmLabel}</SectionLabel>
+          <h3 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(26px,3.5vw,36px)",color:C.white,fontWeight:400}}>{S.kmTitle}</h3>
+        </div>
+
+        {/* Chapter grid */}
+        <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:10,marginBottom:32}} className="g3">
+          {BOOK_CHAPTERS.map((c,i) => (
+            <div
+              key={i}
+              onClick={() => { setActive(i); setExpanded(true); }}
+              style={{
+                padding:"14px 10px",borderRadius:8,textAlign:"center",cursor:"pointer",
+                background: i===active ? `${c.color}18` : "rgba(255,255,255,0.03)",
+                border: `1px solid ${i===active ? c.color+"66" : "rgba(255,255,255,0.06)"}`,
+                transition:"all .25s",
+              }}>
+              <div style={{fontSize:20,marginBottom:6}}>{c.icon}</div>
+              <div style={{fontSize:9,fontFamily:"monospace",color:i===active?c.color:C.inkFaint,letterSpacing:1,marginBottom:3}}>{S.kmChPrefix}{c.ch}</div>
+              <div style={{fontSize:11,fontWeight:600,color:i===active?C.white:C.inkSoft,lineHeight:1.3}}>{c.title}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Active chapter detail */}
+        <div style={{background:"rgba(255,255,255,0.03)",borderRadius:8,padding:"24px 28px",border:`1px solid ${ch.color}33`,display:"flex",gap:20,alignItems:"flex-start",flexWrap:"wrap"}}>
+          <div style={{width:52,height:52,borderRadius:10,background:`${ch.color}18`,border:`1px solid ${ch.color}44`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:26,flexShrink:0}}>{ch.icon}</div>
+          <div style={{flex:1,minWidth:200}}>
+            <div style={{display:"flex",gap:12,alignItems:"center",marginBottom:8,flexWrap:"wrap"}}>
+              <span style={{fontFamily:"'DM Serif Display',serif",fontSize:20,color:C.white}}>{ch.title}</span>
+              <Chip color={ch.color} size={9}>{S.kmChapterChip} {ch.ch}</Chip>
+            </div>
+            <p style={{fontSize:14,color:C.inkSoft,lineHeight:1.65,marginBottom:12}}>{ch.desc}</p>
+            <a href={getChUrl(ch.ch)} style={{fontSize:12,fontFamily:"monospace",color:ch.color,textDecoration:"none",letterSpacing:1}}>
+              {S.kmRepeatLink} {ch.ch} →
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// COMPONENT: KEY LESSONS CAROUSEL
+// ═══════════════════════════════════════════════════════════════════════════════
+function KeyLessons() {
+  const { useState } = React;
+  const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
+  const [checkedMap, setCheckedMap] = useState({});
+  const toggle = i => setCheckedMap(p => ({...p,[i]:!p[i]}));
+  const count = Object.values(checkedMap).filter(Boolean).length;
+
+  return (
+    <div style={{marginBottom:60}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end",marginBottom:28,flexWrap:"wrap",gap:12}}>
+        <div>
+          <SectionLabel>{S.klLabel}</SectionLabel>
+          <h3 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(24px,3vw,32px)",color:C.white,fontWeight:400}}>{S.klTitle}</h3>
+        </div>
+        {count > 0 && <Chip color={C.green} bg={C.greenPale}>{count}/9 {S.klMasteredChip}</Chip>}
+      </div>
+      <div style={{display:"grid",gap:10}}>
+        {KEY_LESSONS.map((l,i) => {
+          const done = checkedMap[i];
+          return (
+            <div
+              key={i}
+              onClick={() => toggle(i)}
+              style={{
+                display:"flex",gap:16,alignItems:"center",padding:"16px 20px",borderRadius:8,cursor:"pointer",
+                background: done ? `${l.color}10` : "rgba(255,255,255,0.03)",
+                border:`1px solid ${done ? l.color+"44" : "rgba(255,255,255,0.07)"}`,
+                transition:"all .2s"
+              }}>
+              <div style={{width:36,height:36,borderRadius:6,background:done?`${l.color}20`:"rgba(255,255,255,0.05)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>
+                {done ? "✓" : l.icon}
+              </div>
+              <div style={{flex:1}}>
+                <span style={{fontSize:14,color:done?C.white:C.inkSoft,fontWeight:done?600:400,lineHeight:1.4}}>{l.title}</span>
+              </div>
+              <a href={getChUrl(l.ch)} onClick={e=>e.stopPropagation()} style={{fontSize:10,fontFamily:"monospace",color:l.color,textDecoration:"none",letterSpacing:1,flexShrink:0}}>{S.klChPrefix}{l.ch} →</a>
+            </div>
+          );
+        })}
+      </div>
+      {count === 9 && (
+        <div style={{marginTop:20,background:"rgba(8,153,129,0.1)",border:`1px solid ${C.green}44`,borderRadius:8,padding:"18px 24px",textAlign:"center"}}>
+          <div style={{fontWeight:700,color:C.green,fontSize:15,marginBottom:4}}>{S.klAllDone}</div>
+          <div style={{fontSize:13,color:C.inkSoft}}>{S.klAllDoneSub}</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// COMPONENT: BROKER MATCHMAKER
+// ═══════════════════════════════════════════════════════════════════════════════
+function BrokerMatchmaker({onOpenContact}) {
+  const { useState } = React;
+  const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
+  const [step, setStep] = useState(0);
+  const [scores, setScores] = useState({scalp:0,swing:0,pamm:0});
+  const [result, setResult] = useState(null);
+  const [chosen, setChosen] = useState(null);
+
+  const handleAnswer = (val) => {
+    const ns = {...scores,[val]:scores[val]+1};
+    setScores(ns);
+    if (step < MATCH_QUESTIONS.length - 1) {
+      setChosen(null);
+      setStep(s => s+1);
+    } else {
+      let winner = Object.entries(ns).sort((a,b)=>b[1]-a[1])[0][0];
+      setResult(PROP_DATA[winner]);
+    }
+    setChosen(val);
+  };
+
+  const reset = () => { setStep(0); setScores({scalp:0,swing:0,pamm:0}); setResult(null); setChosen(null); };
+
+  const q = MATCH_QUESTIONS[step];
+  const progress = ((step) / MATCH_QUESTIONS.length) * 100;
+
+  return (
+    <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:16,padding:"40px",marginBottom:60}}>
+      <div style={{display:"flex",alignItems:"center",gap:16,marginBottom:32}}>
+        <div style={{fontSize:32}}>🎯</div>
+        <div>
+          <div style={{fontFamily:"'DM Serif Display',serif",fontSize:24,color:C.white}}>{S.bmTitle}</div>
+          <Mono size={11} color={C.inkSoft}>{S.bmSubtitle}</Mono>
+        </div>
+      </div>
+
+      {!result ? (
+        <div>
+          {/* Progress */}
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
+            <Mono size={11} color={C.gold} spacing={1}>{S.bmQuestionOf} {step+1} {S.bmOf} {MATCH_QUESTIONS.length}</Mono>
+            <Mono size={11} color={C.inkFaint} spacing={1}>{Math.round(progress)}% {S.bmReadyPct}</Mono>
+          </div>
+          <div style={{height:4,background:"rgba(255,255,255,0.07)",borderRadius:3,marginBottom:28,overflow:"hidden"}}>
+            <div style={{height:"100%",background:C.gold,width:`${progress}%`,transition:"width .4s",borderRadius:3}}/>
+          </div>
+
+          <div style={{display:"flex",gap:12,alignItems:"center",marginBottom:24}}>
+            <span style={{fontSize:24}}>{q.icon}</span>
+            <h4 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(18px,2.5vw,24px)",color:C.white,fontWeight:400}}>{q.q}</h4>
+          </div>
+
+          <div style={{display:"grid",gap:12}}>
+            {q.opts.map((opt,i) => (
+              <button
+                key={i}
+                onClick={() => handleAnswer(opt.val)}
+                style={{
+                  display:"flex",gap:16,alignItems:"center",padding:"18px 20px",
+                  background: chosen===opt.val ? `rgba(201,151,58,0.1)` : "rgba(255,255,255,0.03)",
+                  border:`1px solid ${chosen===opt.val ? C.gold : "rgba(255,255,255,0.08)"}`,
+                  borderRadius:8,cursor:"pointer",textAlign:"left",
+                  color:C.white,fontFamily:"'DM Sans',sans-serif",fontSize:14,
+                  transition:"all .2s"
+                }}>
+                <span style={{fontSize:22,flexShrink:0}}>{opt.emoji}</span>
+                <span style={{lineHeight:1.5}}>{opt.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="fade-up">
+          <div style={{textAlign:"center",marginBottom:28}}>
+            <div style={{fontSize:48,marginBottom:12}}>{result.icon}</div>
+            <SectionLabel color={result.color}>{S.bmResultLabel}</SectionLabel>
+            <h3 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(24px,3.5vw,36px)",color:C.white,marginBottom:12}}>{result.category}</h3>
+            <p style={{fontSize:15,color:C.inkSoft,maxWidth:600,margin:"0 auto",lineHeight:1.65}}>{result.headline}</p>
+          </div>
+
+          {/* Recommended brokers */}
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(240px,1fr))",gap:16,marginBottom:24}}>
+            {result.brokers.slice(0,2).map((b,i) => (
+              <div key={i} style={{background:"rgba(255,255,255,0.04)",border:`1px solid ${result.color}44`,borderRadius:8,padding:"20px"}}>
+                <div style={{fontSize:24,marginBottom:10}}>{b.logo}</div>
+                <div style={{fontFamily:"'DM Serif Display',serif",fontSize:18,color:C.gold,marginBottom:6}}>{b.name}</div>
+                <div style={{fontSize:12,color:C.inkSoft,lineHeight:1.55,marginBottom:12}}>{b.desc}</div>
+                <div style={{fontSize:11,fontFamily:"monospace",color:result.color}}>{b.why}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Chapter refs */}
+          <div style={{display:"flex",gap:10,flexWrap:"wrap",marginBottom:24}}>
+            <span style={{fontSize:12,color:C.inkFaint,fontFamily:"monospace",alignSelf:"center"}}>{S.bmRepeat}</span>
+            {result.chapterRefs.map((r,i) => (
+              <a key={i} href={getChUrl(r.ch)} style={{fontSize:11,fontFamily:"monospace",color:result.color,background:`${result.color}12`,padding:"4px 12px",borderRadius:3,textDecoration:"none",border:`1px solid ${result.color}44`}}>
+                {r.title} →
+              </a>
+            ))}
+          </div>
+
+          <div style={{display:"flex",gap:12,flexWrap:"wrap"}}>
+            <button onClick={onOpenContact} className="cta-pulse" style={{flex:1,padding:"16px",background:result.color,color:result.color===C.gold?C.black:C.white,border:"none",borderRadius:8,cursor:"pointer",fontFamily:"monospace",fontSize:13,fontWeight:700,letterSpacing:1}}>
+              {S.bmApplyBtn}
+            </button>
+            <button onClick={reset} style={{padding:"16px 20px",background:"transparent",border:`1px solid ${C.border}`,color:C.inkSoft,borderRadius:8,cursor:"pointer",fontFamily:"monospace",fontSize:12}}>
+              {S.bmRetryBtn}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// COMPONENT: TRADING STYLE QUIZ (final test)
+// ═══════════════════════════════════════════════════════════════════════════════
+function TradingQuiz({onOpenContact}) {
+  const { useState } = React;
+  const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
+
+  const questions = [
+    {
+      q:S.tqQ1,
+      opts:[
+        {text:S.tqQ1Opt1Text,correct:false,hint:S.tqQ1Opt1Hint},
+        {text:S.tqQ1Opt2Text,correct:true,hint:S.tqQ1Opt2Hint},
+        {text:S.tqQ1Opt3Text,correct:false,hint:S.tqQ1Opt3Hint},
+      ]
+    },
+    {
+      q:S.tqQ2,
+      opts:[
+        {text:S.tqQ2Opt1Text,correct:false,hint:S.tqQ2Opt1Hint},
+        {text:S.tqQ2Opt2Text,correct:true,hint:S.tqQ2Opt2Hint},
+        {text:S.tqQ2Opt3Text,correct:false,hint:S.tqQ2Opt3Hint},
+      ]
+    },
+    {
+      q:S.tqQ3,
+      opts:[
+        {text:S.tqQ3Opt1Text,correct:false,hint:S.tqQ3Opt1Hint},
+        {text:S.tqQ3Opt2Text,correct:true,hint:S.tqQ3Opt2Hint},
+        {text:S.tqQ3Opt3Text,correct:false,hint:S.tqQ3Opt3Hint},
+      ]
+    },
+    {
+      q:S.tqQ4,
+      opts:[
+        {text:S.tqQ4Opt1Text,correct:false,hint:S.tqQ4Opt1Hint},
+        {text:S.tqQ4Opt2Text,correct:true,hint:S.tqQ4Opt2Hint},
+        {text:S.tqQ4Opt3Text,correct:false,hint:S.tqQ4Opt3Hint},
+      ]
+    },
+    {
+      q:S.tqQ5,
+      opts:[
+        {text:S.tqQ5Opt1Text,correct:false,hint:S.tqQ5Opt1Hint},
+        {text:S.tqQ5Opt2Text,correct:true,hint:S.tqQ5Opt2Hint},
+        {text:S.tqQ5Opt3Text,correct:false,hint:S.tqQ5Opt3Hint},
+      ]
+    },
+  ];
+
+  const [qIdx, setQIdx] = useState(0);
+  const [answers, setAnswers] = useState([]);
+  const [selected, setSelected] = useState(null);
+  const [done, setDone] = useState(false);
+
+  const handleSelect = (i) => {
+    if (selected !== null) return;
+    setSelected(i);
+    setTimeout(() => {
+      const newAnswers = [...answers, {q:qIdx, a:i, correct:questions[qIdx].opts[i].correct}];
+      setAnswers(newAnswers);
+      if (qIdx + 1 >= questions.length) {
+        setDone(true);
+      } else {
+        setQIdx(qi => qi+1);
+        setSelected(null);
+      }
+    }, 1400);
+  };
+
+  const reset = () => { setQIdx(0); setAnswers([]); setSelected(null); setDone(false); };
+  const score = answers.filter(a=>a.correct).length;
+  const pct = done ? Math.round((score/questions.length)*100) : 0;
+
+  const q = questions[qIdx];
+
+  return (
+    <div style={{background:"#0a0a0c",border:`1px solid ${C.border}`,borderRadius:16,padding:"40px",marginBottom:60}}>
+      <div style={{display:"flex",alignItems:"center",gap:16,marginBottom:32}}>
+        <span style={{fontSize:32}}>🧩</span>
+        <div>
+          <div style={{fontFamily:"'DM Serif Display',serif",fontSize:24,color:C.white}}>{S.tqTitle}</div>
+          <Mono size={11} color={C.inkSoft}>{S.tqSubtitle}</Mono>
+        </div>
+        {!done && <Chip color={C.gold} size={10} style={{marginLeft:"auto"}}>{qIdx+1} / {questions.length}</Chip>}
+      </div>
+
+      {!done ? (
+        <div>
+          {/* Progress */}
+          <div style={{height:3,background:"rgba(255,255,255,0.06)",borderRadius:3,marginBottom:28,overflow:"hidden"}}>
+            <div style={{height:"100%",background:C.gold,width:`${(qIdx/questions.length)*100}%`,transition:"width .4s",borderRadius:3}}/>
+          </div>
+
+          <h4 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(17px,2.3vw,22px)",color:C.white,fontWeight:400,marginBottom:24,lineHeight:1.4}}>{q.q}</h4>
+
+          <div style={{display:"grid",gap:10}}>
+            {q.opts.map((opt,i) => {
+              const isSelected = selected === i;
+              const showResult = selected !== null;
+              const bg = !showResult ? "rgba(255,255,255,0.03)" : isSelected ? (opt.correct ? "rgba(8,153,129,0.15)" : "rgba(242,54,69,0.12)") : opt.correct ? "rgba(8,153,129,0.08)" : "rgba(255,255,255,0.02)";
+              const border = !showResult ? "rgba(255,255,255,0.08)" : isSelected ? (opt.correct ? C.green : C.red) : opt.correct ? C.green+"55" : "rgba(255,255,255,0.05)";
+              return (
+                <div key={i}>
+                  <button
+                    onClick={() => handleSelect(i)}
+                    disabled={selected !== null}
+                    style={{width:"100%",display:"flex",gap:14,alignItems:"center",padding:"16px 18px",background:bg,border:`1px solid ${border}`,borderRadius:8,cursor:selected!==null?"default":"pointer",textAlign:"left",color:C.white,fontFamily:"'DM Sans',sans-serif",fontSize:14,transition:"all .25s"}}>
+                    <div style={{width:24,height:24,borderRadius:"50%",background:!showResult?"rgba(255,255,255,0.08)":isSelected?(opt.correct?C.green:C.red):opt.correct?C.green+"66":"rgba(255,255,255,0.05)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,flexShrink:0,color:C.white,fontWeight:700}}>
+                      {!showResult ? String.fromCharCode(65+i) : isSelected ? (opt.correct?"✓":"✗") : opt.correct ? "✓" : String.fromCharCode(65+i)}
+                    </div>
+                    <span style={{lineHeight:1.5}}>{opt.text}</span>
+                  </button>
+                  {showResult && isSelected && (
+                    <div style={{padding:"10px 16px",background:opt.correct?"rgba(8,153,129,0.08)":"rgba(242,54,69,0.07)",borderRadius:"0 0 6px 6px",marginTop:-1,border:`1px solid ${opt.correct?C.green+"33":C.red+"33"}`,borderTop:"none"}}>
+                      <p style={{fontSize:12,color:opt.correct?C.green:C.red,lineHeight:1.55,fontFamily:"monospace"}}>{opt.hint}</p>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ) : (
+        <div className="fade-up">
+          <div style={{textAlign:"center",marginBottom:32}}>
+            <div style={{fontSize:56,marginBottom:16}}>
+              {pct>=80?"🏆":pct>=60?"🥈":"📚"}
+            </div>
+            <div style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(28px,4vw,42px)",color:pct>=80?C.gold:pct>=60?C.inkSoft:C.inkFaint,marginBottom:12}}>
+              {score} / {questions.length} {S.tqCorrectSuffix}
+            </div>
+            <div style={{fontSize:15,color:C.inkSoft,marginBottom:24}}>
+              {pct>=80?S.tqResultGreat:pct>=60?S.tqResultGood:S.tqResultWeak}
+            </div>
+            {/* Wrong answers review */}
+            {answers.filter(a=>!a.correct).length > 0 && (
+              <div style={{background:"rgba(255,255,255,0.03)",borderRadius:8,padding:"16px 20px",marginBottom:20,textAlign:"left"}}>
+                <Mono size={10} color={C.inkFaint} spacing={1} style={{display:"block",marginBottom:10}}>{S.tqReviewLabel}</Mono>
+                <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+                  {[...new Set(answers.filter(a=>!a.correct).map(a=>{
+                    const refs = {0:3,1:6,2:13,3:7,4:10};
+                    return refs[a.q]||3;
+                  }))].map(ch => (
+                    <a key={ch} href={getChUrl(ch)} style={{fontSize:11,fontFamily:"monospace",color:C.red,background:"rgba(242,54,69,0.1)",padding:"4px 12px",borderRadius:3,textDecoration:"none",border:`1px solid rgba(242,54,69,0.2)`}}>
+                      {S.tqChapterLink} {ch} →
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+          <div style={{display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap"}}>
+            <button onClick={onOpenContact} className="cta-pulse" style={{padding:"16px 32px",background:C.gold,color:C.black,border:"none",borderRadius:8,cursor:"pointer",fontFamily:"monospace",fontSize:14,fontWeight:700,letterSpacing:1}}>
+              {S.tqStartTradingBtn}
+            </button>
+            <button onClick={reset} style={{padding:"16px 20px",background:"transparent",border:`1px solid ${C.border}`,color:C.inkSoft,borderRadius:8,cursor:"pointer",fontFamily:"monospace",fontSize:12}}>
+              {S.tqRetryBtn}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// COMPONENT: BROKER SECTION (one trading style)
+// ═══════════════════════════════════════════════════════════════════════════════
+function BrokerSection({data, onOpenContact}) {
+  const { useState } = React;
+  const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
+  const [openBroker, setOpenBroker] = useState(null);
+
+  return (
+    <div style={{marginBottom:80}}>
+      {/* Category header */}
+      <div style={{borderBottom:`2px solid ${data.color}44`,paddingBottom:24,marginBottom:36}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",flexWrap:"wrap",gap:16}}>
+          <div>
+            <div style={{display:"flex",gap:12,alignItems:"center",marginBottom:10}}>
+              <span style={{fontSize:28}}>{data.icon}</span>
+              <SectionLabel color={data.color}>{data.category}</SectionLabel>
+            </div>
+            <h3 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(22px,3vw,30px)",color:C.white,fontWeight:400,marginBottom:10}}>{data.headline}</h3>
+          </div>
+          {/* Chapter refs */}
+          <div style={{display:"flex",gap:8,flexWrap:"wrap",alignItems:"flex-start"}}>
+            {data.chapterRefs.map((r,i) => (
+              <a key={i} href={getChUrl(r.ch)} style={{display:"flex",gap:8,alignItems:"center",background:"rgba(255,255,255,0.04)",border:`1px solid ${data.color}33`,padding:"8px 14px",borderRadius:6,textDecoration:"none",transition:"all .2s"}}>
+                <span style={{fontSize:14}}>📖</span>
+                <div>
+                  <div style={{fontSize:9,fontFamily:"monospace",color:data.color,letterSpacing:1}}>{S.chapterRefLabel}</div>
+                  <div style={{fontSize:12,color:C.white,fontWeight:600}}>{r.title}</div>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Theory block */}
+      <div style={{background:"rgba(255,255,255,0.02)",border:`1px solid rgba(255,255,255,0.06)`,borderRadius:12,padding:"28px 32px",marginBottom:32}}>
+        <div style={{fontWeight:600,fontSize:15,color:C.white,marginBottom:20}}>{data.theoryBlock.title}</div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}} className="g2">
+          {data.theoryBlock.points.map((pt,i) => (
+            <div key={i} style={{display:"flex",gap:12,alignItems:"flex-start"}}>
+              <div style={{width:36,height:36,background:`${data.color}18`,borderRadius:6,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>{pt.icon}</div>
+              <div>
+                <div style={{fontWeight:600,fontSize:13,color:C.white,marginBottom:4}}>{pt.title}</div>
+                <p style={{fontSize:12,color:C.inkSoft,lineHeight:1.65}}>{pt.text}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Broker cards */}
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(300px,1fr))",gap:24}}>
+        {data.brokers.map((broker,i) => (
+          <div key={i} className="broker-card" style={{padding:"32px",display:"flex",flexDirection:"column"}}>
+            {/* Header */}
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:20}}>
+              <div style={{display:"flex",alignItems:"center",gap:14}}>
+                <div style={{width:52,height:52,background:"rgba(255,255,255,0.05)",borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",fontSize:26,border:`1px solid rgba(255,255,255,0.1)`,overflow:"hidden"}}>
+                  {broker.logoUrl ? (
+                    <img src={broker.logoUrl} alt={broker.name} style={{width:"100%",height:"100%",objectFit:"contain"}} onError={e=>{e.target.style.display="none";e.target.parentNode.innerHTML=broker.logo;}}/>
+                  ) : (
+                    <span style={{fontSize:22,lineHeight:1}}>{broker.logo}</span>
+                  )}
+                </div>
+                <div>
+                  <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.gold,letterSpacing:0.5}}>{broker.name}</div>
+                  <Chip color={broker.tagColor} bg={`${broker.tagColor}15`} size={9}>{broker.tag}</Chip>
+                </div>
+              </div>
+            </div>
+
+            {/* Description */}
+            <p style={{fontSize:13,color:C.inkSoft,lineHeight:1.65,marginBottom:20,flex:1}}>{broker.desc}</p>
+
+            {/* Why this broker */}
+            <div style={{background:`${data.color}10`,border:`1px solid ${data.color}33`,borderRadius:6,padding:"10px 14px",marginBottom:20}}>
+              <div style={{fontSize:9,fontFamily:"monospace",color:data.color,letterSpacing:1,marginBottom:4}}>{S.whyChooseLabel}</div>
+              <p style={{fontSize:12,color:C.white,lineHeight:1.55}}>{broker.why}</p>
+            </div>
+
+            {/* Best for tags */}
+            <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:20}}>
+              {broker.bestFor.map((tag,j) => (
+                <span key={j} style={{fontSize:10,fontFamily:"monospace",color:data.color,background:`${data.color}12`,padding:"3px 9px",borderRadius:3,border:`1px solid ${data.color}33`}}>{tag}</span>
+              ))}
+            </div>
+
+            {/* Stats */}
+            <div style={{display:"grid",gap:8,marginBottom:24}}>
+              {[
+                {l:S.statFund,v:broker.leverage},
+                {l:S.statPlatform,v:broker.platform},
+                {l:S.statConditions,v:broker.spread},
+                {l:S.statBonus,v:broker.bonus},
+                {l:S.statDeposit,v:broker.deposit},
+              ].map((s,k) => (
+                <div key={k} style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",paddingBottom:6,borderBottom:"1px dotted rgba(255,255,255,0.07)"}}>
+                  <span style={{fontSize:12,color:C.inkSoft}}>{s.l}</span>
+                  <span style={{fontSize:12,color:C.white,fontWeight:600,fontFamily:"monospace",textAlign:"right",maxWidth:"58%"}}>{s.v}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* CTA */}
+            <button
+              onClick={onOpenContact}
+              style={{width:"100%",background:C.white,color:C.black,border:"none",padding:"14px",borderRadius:6,fontFamily:"monospace",fontSize:13,fontWeight:700,cursor:"pointer",transition:"all .2s",letterSpacing:1}}
+              onMouseEnter={e=>{e.target.style.background=data.color;e.target.style.color=data.color===C.gold?C.black:C.white;}}
+              onMouseLeave={e=>{e.target.style.background=C.white;e.target.style.color=C.black;}}>
+              {S.moreAboutBtn} {broker.name} →
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// COMPONENT: 90-DAY ROADMAP
+// ═══════════════════════════════════════════════════════════════════════════════
+function RoadmapBlock({onOpenContact}) {
+  const { useState } = React;
+  const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
+  const [activePhase, setActivePhase] = useState(0);
+  const phase = ROADMAP[activePhase];
+
+  return (
+    <div style={{marginBottom:80}}>
+      <div style={{textAlign:"center",marginBottom:40}}>
+        <SectionLabel>{S.rmLabel}</SectionLabel>
+        <SectionTitle align="center">
+          {S.rmTitle}
+        </SectionTitle>
+      </div>
+
+      {/* Phase tabs */}
+      <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginBottom:32}} className="g2">
+        {ROADMAP.map((p,i) => (
+          <button
+            key={i}
+            onClick={() => setActivePhase(i)}
+            style={{
+              padding:"16px 12px",borderRadius:8,cursor:"pointer",textAlign:"center",
+              background: i===activePhase ? `${p.color}18` : "rgba(255,255,255,0.03)",
+              border:`1px solid ${i===activePhase ? p.color : "rgba(255,255,255,0.07)"}`,
+              color:C.white,fontFamily:"'DM Sans',sans-serif",transition:"all .2s"
+            }}>
+            <div style={{fontSize:10,fontFamily:"monospace",color:i===activePhase?p.color:C.inkFaint,letterSpacing:1,marginBottom:6}}>{p.period}</div>
+            <div style={{fontWeight:600,fontSize:13,color:i===activePhase?C.white:C.inkSoft}}>{p.title}</div>
+          </button>
+        ))}
+      </div>
+
+      {/* Active phase detail */}
+      <div style={{background:`${phase.color}0d`,border:`1px solid ${phase.color}44`,borderRadius:12,padding:"32px 36px"}}>
+        <div style={{display:"flex",gap:16,alignItems:"center",marginBottom:24}}>
+          <div style={{width:8,height:40,background:phase.color,borderRadius:4,flexShrink:0}}/>
+          <div>
+            <div style={{fontFamily:"monospace",fontSize:11,color:phase.color,letterSpacing:2,marginBottom:4}}>{phase.period}</div>
+            <div style={{fontFamily:"'DM Serif Display',serif",fontSize:24,color:C.white}}>{phase.title}</div>
+          </div>
+        </div>
+        <div style={{display:"grid",gap:12}}>
+          {phase.steps.map((step,i) => (
+            <div key={i} style={{display:"flex",gap:14,alignItems:"flex-start"}}>
+              <div style={{width:26,height:26,borderRadius:"50%",background:`${phase.color}20`,border:`1px solid ${phase.color}55`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontFamily:"monospace",fontSize:11,color:phase.color,fontWeight:700}}>
+                {i+1}
+              </div>
+              <span style={{fontSize:14,color:C.inkSoft,lineHeight:1.6,paddingTop:4}}>{step}</span>
+            </div>
+          ))}
+        </div>
+        {activePhase === 1 && (
+          <div style={{marginTop:20,padding:"14px 18px",background:"rgba(201,151,58,0.08)",border:`1px solid ${C.gold}44`,borderRadius:6}}>
+            <Mono size={12} color={C.gold} spacing={1}>{S.rmTip}</Mono>
+          </div>
+        )}
+        {activePhase === 3 && (
+          <button onClick={onOpenContact} className="cta-pulse" style={{marginTop:24,padding:"14px 32px",background:C.gold,color:C.black,border:"none",borderRadius:8,cursor:"pointer",fontFamily:"monospace",fontSize:13,fontWeight:700,letterSpacing:1}}>
+            {S.rmReviewBtn}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// COMPONENT: ASK ANALYST POPUP (aggressive final version)
+// ═══════════════════════════════════════════════════════════════════════════════
+function AskAnalystPopup({onClose}) {
+  const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
+  const prefill = S.apPrefill;
+  const tgLink = `https://t.me/SBF_Support?text=${encodeURIComponent(prefill)}`;
+  const waLink = `https://api.whatsapp.com/send/?phone=37369005200&text=${encodeURIComponent(prefill)}&type=phone_number&app_absent=0`;
+
+  return (
+    <div style={{position:"fixed",inset:0,zIndex:1000,display:"flex",alignItems:"center",justifyContent:"center",padding:20,background:"rgba(0,0,0,0.88)",backdropFilter:"blur(6px)"}} onClick={onClose}>
+      <div onClick={e=>e.stopPropagation()} style={{position:"relative",width:"100%",maxWidth:820,background:"#131315",border:`1px solid ${C.gold}`,borderRadius:16,padding:"48px 40px",boxShadow:"0 0 60px rgba(201,151,58,0.2)"}}>
+        <button onClick={onClose} style={{position:"absolute",top:16,right:20,background:"none",border:"none",fontSize:32,cursor:"pointer",color:C.inkFaint,lineHeight:1}}>×</button>
+
+        {/* Top accent line */}
+        <div style={{position:"absolute",top:0,left:0,right:0,height:3,background:`linear-gradient(90deg,transparent,${C.gold},transparent)`,borderRadius:"16px 16px 0 0"}}/>
+
+        <div style={{textAlign:"center",marginBottom:36}}>
+          <div style={{fontSize:48,marginBottom:12}}>🚀</div>
+          <Mono size={12} color={C.gold} spacing={3} style={{display:"block",marginBottom:14}}>{S.apLabel}</Mono>
+          <h2 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(26px,4vw,36px)",fontWeight:400,color:C.white,marginBottom:16}}>{S.apTitle}</h2>
+          <p style={{fontSize:15,color:C.inkSoft,maxWidth:560,margin:"0 auto",lineHeight:1.7}}>
+            {S.apBodyIntro}
+            <strong style={{color:C.white}}> {S.apBodyBold}</strong>
+          </p>
+        </div>
+
+        {/* Features */}
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:12,marginBottom:32}} className="g3">
+          {[
+              {icon:"🎯",text:S.apFeat1},
+            {icon:"💰",text:S.apFeat2},
+            {icon:"📊",text:S.apFeat3},
+          ].map((f,i) => (
+            <div key={i} style={{textAlign:"center",padding:"16px 12px",background:"rgba(255,255,255,0.04)",borderRadius:8,border:`1px solid ${C.border}`}}>
+              <div style={{fontSize:24,marginBottom:8}}>{f.icon}</div>
+              <div style={{fontSize:12,color:C.inkSoft,lineHeight:1.5}}>{f.text}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Messenger buttons */}
+        <div className="messenger-grid" style={{marginTop:0}}>
+          {[
+            {href:tgLink,bg:"#0088cc",icon:"🚀",name:"SBF Support",sub:S.apTgSub,btn:S.apTgBtn},
+            {href:waLink,bg:"#25d366",icon:"💬",name:"SBF Company",sub:S.apWaSub,btn:S.apWaBtn},
+          ].map((m,i) => (
+            <div key={i} style={{background:"#1f1f22",border:"1px solid rgba(255,255,255,0.1)",borderRadius:12,padding:"28px 24px",display:"flex",flexDirection:"column"}}>
+              <div style={{display:"flex",alignItems:"center",gap:14,marginBottom:16}}>
+                <div style={{width:48,height:48,borderRadius:"50%",background:`${m.bg}22`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20}}>{m.icon}</div>
+                <div>
+                  <div style={{fontSize:17,fontWeight:700,color:C.white}}>{m.name}</div>
+                  <div style={{fontSize:12,color:C.green}}>{m.sub}</div>
+                </div>
+              </div>
+              <div style={{background:m.bg,padding:"12px 16px",borderRadius:"10px 10px 0 10px",marginBottom:20,alignSelf:"flex-end",maxWidth:"90%"}}>
+                <div style={{fontSize:13,color:"#fff",lineHeight:1.4}}>{prefill}</div>
+              </div>
+              <a href={m.href} target="_blank" style={{display:"block",background:m.bg,color:"#fff",textAlign:"center",padding:"15px",borderRadius:8,textDecoration:"none",fontWeight:700,fontSize:14,letterSpacing:1}}>{m.btn}</a>
+            </div>
+          ))}
+        </div>
+
+        <div style={{textAlign:"center",marginTop:16,fontSize:11,fontFamily:"monospace",color:C.inkFaint}}>
+          {S.apDisclaimer}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// COMPONENT: INLINE CTA BANNER (mid-page aggressive)
+// ═══════════════════════════════════════════════════════════════════════════════
+function MidPageCTA({onOpenContact, text, sub}) {
+  const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
+  return (
+    <div style={{background:`linear-gradient(135deg, #1a130a 0%, #0d0d0f 50%, #0a1a0a 100%)`,border:`1px solid ${C.borderGold}`,borderRadius:12,padding:"36px 40px",textAlign:"center",margin:"0 0 60px",position:"relative",overflow:"hidden"}}>
+      <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 100%, rgba(201,151,58,0.07) 0%, transparent 70%)",pointerEvents:"none"}}/>
+      <div style={{position:"relative"}}>
+        <p style={{fontSize:"clamp(16px,2.2vw,20px)",color:C.white,lineHeight:1.6,marginBottom:20}}>{text}<strong style={{color:C.gold}}> {sub}</strong></p>
+        <button onClick={onOpenContact} className="cta-pulse" style={{background:C.gold,color:C.black,border:"none",padding:"16px 40px",borderRadius:8,cursor:"pointer",fontFamily:"monospace",fontSize:14,fontWeight:700,letterSpacing:2}}>
+          {S.midCtaBtn}
+        </button>
+        <div style={{marginTop:12,fontSize:11,fontFamily:"monospace",color:C.inkFaint}}>
+          {S.midCtaSub}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// MAIN CHAPTER 15 COMPONENT
+// ═══════════════════════════════════════════════════════════════════════════════
+function Chapter15() {
+  const { useState } = React;
+  const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
+  const [askOpen, setAskOpen] = useState(false);
+  const openContact = () => setAskOpen(true);
+
+  return (
+    <div style={{minHeight:"100vh",background:C.bg,color:C.white,fontFamily:"'DM Sans',sans-serif"}}>
+
+      {/* ── STICKY HEADER ── */}
+      <div style={{position:"sticky",top:106,background:"rgba(13,13,15,0.97)",backdropFilter:"blur(12px)",borderBottom:`1px solid rgba(255,255,255,0.06)`,padding:"14px 5vw",display:"flex",alignItems:"center",justifyContent:"space-between",zIndex:50}}>
+        <div style={{display:"flex",alignItems:"center",gap:20}}>
+          <span onClick={()=>window.location.href=getChUrl(14)} style={{color:C.gold,cursor:"pointer",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</span>
+          <Chip>{S.stickyChip}</Chip>
+          <Mono size={13} color={C.inkSoft} spacing={0} className="hide-mobile">{S.stickySub}</Mono>
+        </div>
+        <button onClick={openContact} className="cta-pulse" style={{background:C.gold,color:C.black,border:"none",padding:"9px 20px",borderRadius:4,cursor:"pointer",fontFamily:"monospace",fontSize:11,fontWeight:700,letterSpacing:2}}>
+          {S.stickyBtn}
+        </button>
+      </div>
+
+      {/* ── EPIC HERO ── */}
+      <div style={{background:"#070709",padding:"110px 5vw 90px",textAlign:"center",position:"relative",overflow:"hidden",borderBottom:`1px solid rgba(255,255,255,0.04)`}}>
+        {/* Background glow */}
+        <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 110%, rgba(201,151,58,0.18) 0%, transparent 60%)",pointerEvents:"none"}}/>
+        {/* Top gold line */}
+        <div style={{position:"absolute",top:0,left:0,right:0,height:2,background:`linear-gradient(90deg,transparent,${C.gold},transparent)`,opacity:.6}}/>
+        <div style={{position:"relative",zIndex:2}}>
+          <Mono size={12} color={C.gold} spacing={5} style={{display:"block",marginBottom:20,fontWeight:700}}>{S.heroLabel}</Mono>
+          <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap",marginBottom:28}}>
+            <Chip color={C.gold}>{S.heroChip1}</Chip>
+            <Chip color={C.inkSoft}>{S.heroChip2}</Chip>
+            <Chip color={C.green}>{S.heroChip3}</Chip>
+          </div>
+          <h1 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(44px,7.5vw,88px)",fontWeight:400,color:C.white,lineHeight:1.0,marginBottom:28}}>
+            {S.heroTitleLine1}<br/><span style={{color:C.gold}}>{S.heroTitleLine2}</span>
+          </h1>
+          <p style={{fontSize:"clamp(16px,2vw,20px)",color:"rgba(255,255,255,0.55)",maxWidth:700,margin:"0 auto 36px",lineHeight:1.75}}>
+            {S.heroBody}
+          </p>
+          <button onClick={openContact} className="cta-pulse" style={{background:C.gold,color:C.black,border:"none",padding:"20px 52px",cursor:"pointer",fontFamily:"monospace",fontSize:16,letterSpacing:2,fontWeight:800,borderRadius:8}}>
+            {S.heroBtn}
+          </button>
+          <div style={{marginTop:14,fontSize:12,fontFamily:"monospace",color:C.inkFaint}}>
+            {S.heroFootnote}
+          </div>
+        </div>
+      </div>
+
+      {/* ── MAIN CONTENT ── */}
+      <div style={{maxWidth:1100,margin:"0 auto",padding:"80px 5vw 120px"}}>
+
+        {/* ── SECTION 1: KNOWLEDGE MAP ── */}
+        <KnowledgeMap onOpenContact={openContact}/>
+
+        {/* ── SECTION 2: KEY LESSONS ── */}
+        <KeyLessons/>
+
+        {/* ── MID CTA 1 ── */}
+        <MidPageCTA
+          onOpenContact={openContact}
+          text={S.midCta1Text}
+          sub={S.midCta1Sub}/>
+
+        {/* ── SECTION 3: BROKER MATCHMAKER ── */}
+        <div style={{textAlign:"center",marginBottom:40}}>
+          <SectionLabel>{S.findStyleLabel}</SectionLabel>
+          <SectionTitle align="center"
+            sub={S.findStyleSub}>
+            {S.findStyleTitle}
+          </SectionTitle>
+        </div>
+        <BrokerMatchmaker onOpenContact={openContact}/>
+
+        {/* ── SECTION 4: BROKER SHOWCASE ── */}
+        <div style={{marginBottom:20}}>
+          <div style={{textAlign:"center",marginBottom:48}}>
+            <SectionLabel>{S.propFirmsLabel}</SectionLabel>
+            <SectionTitle align="center"
+            sub={S.propFirmsSub}>
+              {S.propFirmsTitle}
+            </SectionTitle>
+          </div>
+
+          {/* Scalping section */}
+          <BrokerSection data={PROP_DATA.scalp} onOpenContact={openContact}/>
+
+          {/* Mid CTA */}
+          <MidPageCTA
+            onOpenContact={openContact}
+            text={S.midCta2Text}
+            sub={S.midCta2Sub}/>
+
+          {/* Swing section */}
+          <BrokerSection data={PROP_DATA.swing} onOpenContact={openContact}/>
+
+          {/* PAMM section */}
+          <BrokerSection data={PROP_DATA.pamm} onOpenContact={openContact}/>
+        </div>
+
+        {/* ── SECTION 5: COMPARISON TABLE ── */}
+        <div style={{marginBottom:80}}>
+          <div style={{textAlign:"center",marginBottom:36}}>
+            <SectionLabel>{S.compareLabel}</SectionLabel>
+            <SectionTitle align="center">{S.compareTitle}</SectionTitle>
+          </div>
+          <div style={{overflowX:"auto"}}>
+            <table style={{width:"100%",borderCollapse:"collapse",fontSize:12}}>
+              <thead>
+                <tr>
+                  {[S.thPropFirm,S.thStyle,S.thFund,S.thConditions,S.thPlatform,S.thBonus,S.thBestFor].map(h => (
+                    <th key={h} style={{textAlign:"left",padding:"10px 14px",fontSize:10,color:C.inkFaint,letterSpacing:1,borderBottom:`2px solid ${C.border}`,textTransform:"uppercase",whiteSpace:"nowrap"}}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  {name:"FTMO",            style:S.styleScalp, leverage:S.fundedTo100k,  spread:S.tableCondLimits, platform:"MT4/MT5", bonus:"Profit split", best:S.bestXauDiscipline, color:C.red},
+                  {name:"The5ers",        style:S.styleScalp, leverage:S.fundedTo200k,  spread:S.tableCondLimits, platform:"MT4/MT5", bonus:"Profit split", best:S.bestProcessVsEmotion, color:C.gold},
+                  {name:"Earn2Trade",    style:S.styleSwing,  leverage:S.fundedTo200k,  spread:S.tableCondLimits, platform:"MT4/MT5", bonus:"Profit split", best:S.bestSwingStructure, color:C.blue},
+                  {name:"MyForexFunds",  style:S.styleSwing,  leverage:S.fundedTo100k,  spread:S.tableCondLimits, platform:"MT4/MT5", bonus:"Profit split", best:S.bestTrendFollowing, color:C.gold},
+                  {name:"Traders4Traders",style:S.styleLong,  leverage:S.fundedTo150k, spread:S.tableCondLimits, platform:"MT4/MT5", bonus:"Profit split", best:S.bestLongTermRules, color:C.green},
+                  {name:"SurgeTrader",    style:S.styleLong,  leverage:S.fundedTo50k,   spread:S.tableCondLimits, platform:"MT4/MT5", bonus:"Profit split", best:S.bestStageDiscipline, color:C.red},
+                ].map((row,i) => (
+                  <tr key={i} style={{borderBottom:`1px solid rgba(255,255,255,0.05)`}}>
+                    <td style={{padding:"12px 14px"}}>
+                      <span style={{fontFamily:"'DM Serif Display',serif",fontSize:14,color:C.gold}}>{row.name}</span>
+                    </td>
+                    <td style={{padding:"12px 14px"}}>
+                      <span style={{fontSize:10,fontFamily:"monospace",color:row.color,background:`${row.color}12`,padding:"2px 8px",borderRadius:2}}>{row.style}</span>
+                    </td>
+                    <td style={{padding:"12px 14px",fontFamily:"monospace",fontSize:12,color:C.white}}>{row.leverage}</td>
+                    <td style={{padding:"12px 14px",fontFamily:"monospace",fontSize:12,color:C.white}}>{row.spread}</td>
+                    <td style={{padding:"12px 14px",fontSize:12,color:C.inkSoft}}>{row.platform}</td>
+                    <td style={{padding:"12px 14px",fontFamily:"monospace",fontSize:12,color:row.bonus==="—"?C.inkFaint:C.green}}>{row.bonus}</td>
+                    <td style={{padding:"12px 14px",fontSize:12,color:C.inkSoft}}>{row.best}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* ── SECTION 6: FINAL QUIZ ── */}
+        <div style={{marginBottom:20}}>
+          <div style={{textAlign:"center",marginBottom:36}}>
+            <SectionLabel>{S.examLabel}</SectionLabel>
+            <SectionTitle align="center"
+              sub={S.examSub}>
+              {S.examTitle}
+            </SectionTitle>
+          </div>
+          <TradingQuiz onOpenContact={openContact}/>
+        </div>
+
+        {/* ── SECTION 7: ROADMAP ── */}
+        <RoadmapBlock onOpenContact={openContact}/>
+
+        {/* ── SECTION 8: AGGRESSIVE FINAL CTA ── */}
+        <div style={{background:"radial-gradient(ellipse at 50% 80%, #1a150a 0%, #0a0a0c 100%)",border:`1px solid ${C.gold}`,borderRadius:20,padding:"70px 48px",textAlign:"center",position:"relative",overflow:"hidden",marginBottom:60}}>
+          {/* Decorative */}
+          <div style={{position:"absolute",top:0,left:0,right:0,height:3,background:`linear-gradient(90deg,transparent,${C.gold},transparent)`}}/>
+          <div style={{position:"absolute",bottom:0,left:0,right:0,height:2,background:`linear-gradient(90deg,transparent,${C.borderGold},transparent)`}}/>
+          <div style={{position:"absolute",top:-50,left:"50%",transform:"translateX(-50%)",width:300,height:200,background:"radial-gradient(circle,rgba(201,151,58,0.12),transparent)",pointerEvents:"none"}}/>
+
+          <div style={{position:"relative"}}>
+            <div style={{display:"inline-block",background:C.gold,color:C.black,padding:"7px 22px",borderRadius:20,fontFamily:"monospace",fontSize:13,fontWeight:800,letterSpacing:2,marginBottom:28}}>
+              {S.finalAttentionBadge}
+            </div>
+            <h2 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(32px,5vw,52px)",color:C.white,marginBottom:24,fontWeight:400,lineHeight:1.1}}>
+              {S.finalTitleLine1}<br/><span style={{color:C.gold}}>{S.finalTitleLine2}</span>
+            </h2>
+            <p style={{fontSize:"clamp(15px,2vw,19px)",color:C.inkSoft,lineHeight:1.75,maxWidth:700,margin:"0 auto 32px"}}>
+              {S.finalBodyIntro}{" "}
+              <strong style={{color:C.white}}>{S.finalBodyBold}</strong>{" "}{S.finalBodyOutro}
+            </p>
+
+            {/* 3 reasons */}
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:16,marginBottom:40,maxWidth:700,margin:"0 auto 40px"}} className="g3">
+              {[
+                {icon:"🎯",title:S.finalReason1Title,text:S.finalReason1Text},
+                {icon:"💰",title:S.finalReason2Title,text:S.finalReason2Text},
+                {icon:"📊",title:S.finalReason3Title,text:S.finalReason3Text},
+              ].map((r,i) => (
+                <div key={i} style={{padding:"18px 14px",background:"rgba(255,255,255,0.04)",borderRadius:8,border:`1px solid rgba(255,255,255,0.08)`}}>
+                  <div style={{fontSize:28,marginBottom:10}}>{r.icon}</div>
+                  <div style={{fontWeight:600,fontSize:13,color:C.white,marginBottom:6}}>{r.title}</div>
+                  <div style={{fontSize:12,color:C.inkSoft,lineHeight:1.5}}>{r.text}</div>
+                </div>
+              ))}
+            </div>
+
+            <button onClick={openContact} className="cta-pulse" style={{background:C.gold,color:C.black,border:"none",padding:"22px 64px",cursor:"pointer",fontFamily:"monospace",fontSize:18,letterSpacing:2,fontWeight:800,borderRadius:10,textTransform:"uppercase",display:"block",margin:"0 auto 16px"}}>
+              {S.finalCtaBtn}
+            </button>
+            <div style={{fontSize:12,fontFamily:"monospace",color:C.inkFaint}}>
+              {S.finalCtaFootnote}
+            </div>
+          </div>
+        </div>
+
+        {/* ── SECTION 9: PARTNER LOGO ROW ── */}
+        <div style={{textAlign:"center",marginBottom:60}}>
+          <SectionLabel color={C.inkFaint}>{S.partnersLabel}</SectionLabel>
+          <div style={{display:"flex",gap:20,justifyContent:"center",flexWrap:"wrap",alignItems:"center"}}>
+            {[
+              {name:"AvaTrade",  url:"https://avatrade.com/?tag=184200",             img:"https://static.wixstatic.com/media/689211_8225039e696a485280b166329472a6d2~mv2.png"},
+              {name:"Daoti",    url:"https://daoti.io/",                              img:"https://static.wixstatic.com/media/689211_510a33bc03964426a9e3ef7230c6b7f3~mv2.png"},
+              {name:"Capex",    url:"https://account.capex.com/en/register?sidc=88EA29D5-46D9-472E-AEB2-C6E5C30E822A", img:"https://static.wixstatic.com/media/689211_95085bd10f7d4fd7b7a54e09479658d5~mv2.png"},
+              {name:"InstaForex",url:"https://www.instaforex.com/en/fast_open_live_account?x=TTVDG",img:"https://static.wixstatic.com/media/689211_07a301c98ab3431bb2f282a125009cd5~mv2.png"},
+              {name:"Alpari",   url:"https://alpari.com/en/",                         img:"https://static.wixstatic.com/media/689211_8360b9cd2dac4275a5890298b131033c~mv2.png"},
+              {name:"FxPro",    url:"https://direct-fxpro.com/en/partner/32TQQFd7H",  img:"https://static.wixstatic.com/media/689211_67212ee97bf24ea8b81885b16e5a3e1a~mv2.png"},
+            ].map((b,i) => (
+              <a key={i} href={b.url} target="_blank" style={{display:"flex",alignItems:"center",justifyContent:"center",width:80,height:40,background:"rgba(255,255,255,0.04)",borderRadius:8,border:`1px solid ${C.border}`,padding:"8px",textDecoration:"none",transition:"all .2s",opacity:.65}}
+                onMouseEnter={e=>{e.currentTarget.style.opacity="1";e.currentTarget.style.borderColor=C.gold+"66";}}
+                onMouseLeave={e=>{e.currentTarget.style.opacity=".65";e.currentTarget.style.borderColor=C.border;}}>
+                <img src={b.img} alt={b.name} style={{maxWidth:"100%",maxHeight:"100%",objectFit:"contain",filter:"brightness(0) invert(1)"}}/>
+              </a>
+            ))}
+          </div>
+        </div>
+
+        {/* ── SECTION 10: ACHIEVEMENT — BOOK COMPLETE ── */}
+        <div style={{background:"linear-gradient(135deg,#0d1a0d,#0d0d0f)",border:`2px solid ${C.green}`,borderRadius:16,padding:"48px 40px",textAlign:"center",marginBottom:60}}>
+          <div style={{fontSize:64,marginBottom:16,animation:"starPop .5s ease both"}}>🏆</div>
+          <SectionLabel color={C.green}>{S.achLabel}</SectionLabel>
+          <h2 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(28px,4vw,42px)",color:C.white,fontWeight:400,marginBottom:16}}>{S.achTitle}</h2>
+          <p style={{fontSize:16,color:C.inkSoft,maxWidth:600,margin:"0 auto 24px",lineHeight:1.7}}>
+            {S.achBody}
+          </p>
+          <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap",marginBottom:28}}>
+            {[S.achBadge1,S.achBadge2,S.achBadge3,S.achBadge4,S.achBadge5].map((b,i) => (
+              <Chip key={i} color={C.green} bg={C.greenPale} size={10}>{b}</Chip>
+            ))}
+          </div>
+          <button onClick={openContact} style={{background:C.green,color:C.white,border:"none",padding:"16px 40px",borderRadius:8,cursor:"pointer",fontFamily:"monospace",fontSize:14,fontWeight:700,letterSpacing:1}}>
+            {S.achBtn}
+          </button>
+        </div>
+
+        {/* ── BOTTOM NAV ── */}
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",paddingTop:32,borderTop:`1px solid rgba(255,255,255,0.07)`}}>
+          <span onClick={openContact} style={{fontSize:13,color:C.inkFaint,fontFamily:"monospace",borderBottom:`1px solid rgba(255,255,255,0.12)`,cursor:"pointer",paddingBottom:2}}>
+            {S.bottomNavAsk}
+          </span>
+          <div style={{display:"flex",gap:8,alignItems:"center"}}>
+            <span style={{fontSize:12,fontFamily:"monospace",color:C.inkFaint}}>{S.bottomNavDone}</span>
+            <span style={{fontSize:20}}>🏁</span>
+          </div>
+        </div>
+
+      </div>
+
+      {/* ── FOOTER ── */}
+      <div style={{textAlign:"center",padding:"28px 5vw",borderTop:`1px solid rgba(255,255,255,0.04)`,display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:12}}>
+        <div style={{fontSize:11,fontFamily:"monospace",color:C.inkFaint}}>{S.footerCopyright}</div>
+        <div style={{display:"flex",gap:16}}>
+          <a href={`https://t.me/SBF_Support`} target="_blank" style={{fontSize:11,fontFamily:"monospace",color:C.inkFaint,textDecoration:"none"}}>Telegram</a>
+          <a href={`https://api.whatsapp.com/send/?phone=37369005200`} target="_blank" style={{fontSize:11,fontFamily:"monospace",color:C.inkFaint,textDecoration:"none"}}>WhatsApp</a>
+          <a href="/edu/b" style={{fontSize:11,fontFamily:"monospace",color:C.inkFaint,textDecoration:"none"}}>{S.footerToc}</a>
+        </div>
+      </div>
+
+      {askOpen && <AskAnalystPopup onClose={() => setAskOpen(false)}/>}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('sbf-book-root')).render(<Chapter15/>);
+{% endraw %}
+</script>
+</body>
+</html>
+<script>
+// Скрипт для конвертации UTC времени в локальное время пользователя
+document.addEventListener('DOMContentLoaded', function() {
+    var _pageLang = "{{ lang }}";
+    var _intlLocale = _pageLang === 'ro' ? 'ro-RO' : 'ru-RU';
+    const utcTimes = document.querySelectorAll('.local-time[data-utc]');
+
+    utcTimes.forEach(function(element) {
+        // Получаем UTC время из data-utc атрибута
+        var utcString = element.getAttribute('data-utc');
+
+        try {
+            // Парсим UTC дату и время
+            var utcDate = new Date(utcString);
+
+            // Конвертируем в локальное время пользователя
+            var localDate = new Date(utcDate.getTime() + utcDate.getTimezoneOffset() * 60000);
+
+            // Форматируем для отображения (например, "19:00 МСК")
+            var hours = String(localDate.getHours()).padStart(2, '0');
+            var minutes = String(localDate.getMinutes()).padStart(2, '0');
+            var timeZoneName = Intl.DateTimeFormat(_intlLocale, { timeZoneName: 'long' }).format(localDate);
+            
+            // Обновляем текст элемента с локальным временем
+            element.innerHTML = '<span class="local-time-display">' + hours + ':' + minutes + ' ' + timeZoneName.replace(/\s/g, '') + '</span>';
+        } catch (e) {
+            console.error('Ошибка конвертации времени:', e);
+        }
+    });
+});
+</script>
