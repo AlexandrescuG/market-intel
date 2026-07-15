@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SBF · Глоссарий трейдера</title>
+<title data-i18n="eduglossary.page_title">SBF · Глоссарий трейдера</title>
 <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/edu/edu.css">
@@ -71,97 +71,118 @@ body{padding-bottom:60px}
 <body>
 
 <div class="hero">
-  <div class="tag">Словарь трейдера</div>
-  <h1>Глоссарий</h1>
-  <p>Ключевые термины биржевой торговли и макроэкономические индикаторы. Используйте поиск или фильтр по категории.</p>
+  <div class="tag" data-i18n="eduglossary.tag">Словарь трейдера</div>
+  <h1 data-i18n="eduglossary.h1">Глоссарий</h1>
+  <p data-i18n="eduglossary.subtitle">Ключевые термины биржевой торговли и макроэкономические индикаторы. Используйте поиск или фильтр по категории.</p>
 </div>
 
 <div class="wrap">
-  <input class="search-box" type="text" id="search" placeholder="Поиск термина…" oninput="filterGloss(this.value)">
+  <input class="search-box" type="text" id="search" placeholder="Поиск термина…" data-i18n-placeholder="eduglossary.search_placeholder" oninput="filterGloss(this.value)">
   <div class="cat-tabs">
-    <button class="cat-tab on" data-cat="all" onclick="setCategory('all',this)">Все</button>
-    <button class="cat-tab" data-cat="trading" onclick="setCategory('trading',this)">Трейдинг</button>
-    <button class="cat-tab" data-cat="econ" onclick="setCategory('econ',this)">Экономические данные</button>
+    <button class="cat-tab on" data-cat="all" data-i18n="eduglossary.cat_all" onclick="setCategory('all',this)">Все</button>
+    <button class="cat-tab" data-cat="trading" data-i18n="eduglossary.cat_trading" onclick="setCategory('trading',this)">Трейдинг</button>
+    <button class="cat-tab" data-cat="econ" data-i18n="eduglossary.cat_econ" onclick="setCategory('econ',this)">Экономические данные</button>
   </div>
   <div class="gloss-list" id="gloss-list"></div>
-  <div class="empty hidden" id="empty">Ничего не найдено</div>
+  <div class="empty hidden" id="empty" data-i18n="eduglossary.empty">Ничего не найдено</div>
 </div>
 
 <script>
+function t(key, fallback) {
+  return (window.sbfI18n && window.sbfI18n.t) ? window.sbfI18n.t(key, fallback) : (fallback || key);
+}
+
+function _patchI18n(root) {
+  if ((window.sbfI18n && window.sbfI18n.lang) === 'ru') return;
+  var tt = window.sbfI18n ? window.sbfI18n.t : function (k, fb) { return fb || k; };
+  (root || document).querySelectorAll('[data-i18n]').forEach(function (el) {
+    el.textContent = tt(el.getAttribute('data-i18n'), el.textContent);
+  });
+  (root || document).querySelectorAll('[data-i18n-html]').forEach(function (el) {
+    el.innerHTML = tt(el.getAttribute('data-i18n-html'), el.innerHTML);
+  });
+  (root || document).querySelectorAll('[data-i18n-placeholder]').forEach(function (el) {
+    el.setAttribute('placeholder', tt(el.getAttribute('data-i18n-placeholder'), el.getAttribute('placeholder') || ''));
+  });
+  (root || document).querySelectorAll('[data-i18n-title]').forEach(function (el) {
+    el.setAttribute('title', tt(el.getAttribute('data-i18n-title'), el.getAttribute('title') || ''));
+  });
+}
+
 var TERMS_TRADING = [
-  ["ATH", "All-Time High — исторический максимум цены актива."],
-  ["Bear Market", "Падение рынка на 20%+ от недавнего максимума."],
-  ["Bull Market", "Рост рынка на 20%+ от недавнего минимума."],
-  ["Volatility / VIX", "Мера неопределённости цены. VIX — «индекс страха» S&P 500."],
-  ["Long / Short", "Long — ставка на рост. Short — ставка на падение."],
-  ["Stop-Loss", "Ордер закрытия позиции при достижении убытка."],
-  ["Take-Profit", "Ордер фиксации прибыли при достижении цели."],
-  ["Leverage / Плечо", "Торговля заёмными средствами. Увеличивает и прибыль, и убыток."],
-  ["Liquidity", "Насколько легко купить/продать актив без сдвига цены."],
-  ["Hedge", "Позиция, страхующая против риска другой позиции."],
-  ["Spread", "Разница между ценой покупки (ask) и продажи (bid)."],
-  ["Flash Crash", "Резкое падение цены за короткое время, часто с последующим восстановлением."],
-  ["Break of Structure (BOS)", "Пробой структуры рынка — свидетельство смены тренда или продолжения движения."],
-  ["Order Block (OB)", "Институциональная зона интереса, откуда крупный игрок входил в позицию."],
-  ["Fair Value Gap (FVG)", "Неэффективность цены — разрыв между свечами, куда рынок часто возвращается."],
-  ["RSI", "Relative Strength Index — осциллятор 0–100. Зоны перекупленности (>70) и перепроданности (<30)."],
-  ["MACD", "Moving Average Convergence Divergence — разница двух EMA + сигнальная линия."],
-  ["ATR", "Average True Range — средний истинный диапазон. Мера волатильности."],
-  ["Fibonacci Levels", "Уровни коррекции 23.6%, 38.2%, 50%, 61.8% — зоны поддержки/сопротивления внутри тренда."],
-  ["Liquidity Sweep", "Выход цены за ключевой уровень для «снятия» стоп-ордеров перед разворотом."],
+  ["ATH", "All-Time High — исторический максимум цены актива.", "ath"],
+  ["Bear Market", "Падение рынка на 20%+ от недавнего максимума.", "bear-market"],
+  ["Bull Market", "Рост рынка на 20%+ от недавнего минимума.", "bull-market"],
+  ["Volatility / VIX", "Мера неопределённости цены. VIX — «индекс страха» S&P 500.", "volatility-vix"],
+  ["Long / Short", "Long — ставка на рост. Short — ставка на падение.", "long-short"],
+  ["Stop-Loss", "Ордер закрытия позиции при достижении убытка.", "stoploss"],
+  ["Take-Profit", "Ордер фиксации прибыли при достижении цели.", "takeprofit"],
+  ["Leverage / Плечо", "Торговля заёмными средствами. Увеличивает и прибыль, и убыток.", "leverage"],
+  ["Liquidity", "Насколько легко купить/продать актив без сдвига цены.", "liquidity"],
+  ["Hedge", "Позиция, страхующая против риска другой позиции.", "hedge"],
+  ["Spread", "Разница между ценой покупки (ask) и продажи (bid).", "spread"],
+  ["Flash Crash", "Резкое падение цены за короткое время, часто с последующим восстановлением.", "flashcrash"],
+  ["Break of Structure (BOS)", "Пробой структуры рынка — свидетельство смены тренда или продолжения движения.", "bos"],
+  ["Order Block (OB)", "Институциональная зона интереса, откуда крупный игрок входил в позицию.", "orderblock"],
+  ["Fair Value Gap (FVG)", "Неэффективность цены — разрыв между свечами, куда рынок часто возвращается.", "fvg"],
+  ["RSI", "Relative Strength Index — осциллятор 0–100. Зоны перекупленности (>70) и перепроданности (<30).", "rsi"],
+  ["MACD", "Moving Average Convergence Divergence — разница двух EMA + сигнальная линия.", "macd"],
+  ["ATR", "Average True Range — средний истинный диапазон. Мера волатильности.", "atr"],
+  ["Fibonacci Levels", "Уровни коррекции 23.6%, 38.2%, 50%, 61.8% — зоны поддержки/сопротивления внутри тренда.", "fib-levels"],
+  ["Liquidity Sweep", "Выход цены за ключевой уровень для «снятия» стоп-ордеров перед разворотом.", "liquidity-sweep"],
 ];
 
 var TERMS_ECON = [
   ["NFP — Non-Farm Payrolls",
-   "Число новых рабочих мест в несельскохозяйственном секторе США. Выходит каждую первую пятницу месяца. Превышение прогноза укрепляет USD и усиливает ожидания подъёма ставки ФРС."],
+   "Число новых рабочих мест в несельскохозяйственном секторе США. Выходит каждую первую пятницу месяца. Превышение прогноза укрепляет USD и усиливает ожидания подъёма ставки ФРС.", "nfp"],
   ["CPI — Consumer Price Index",
-   "Индекс потребительских цен. Основной показатель инфляции США (рассчитывается BLS). Core CPI исключает еду и энергоносители. Выше прогноза → укрепление доллара."],
+   "Индекс потребительских цен. Основной показатель инфляции США (рассчитывается BLS). Core CPI исключает еду и энергоносители. Выше прогноза → укрепление доллара.", "cpi"],
   ["PPI — Producer Price Index",
-   "Индекс цен производителей. Отражает изменение отпускных цен — опережающий сигнал давления на CPI. Рост PPI обычно предшествует росту потребительской инфляции."],
+   "Индекс цен производителей. Отражает изменение отпускных цен — опережающий сигнал давления на CPI. Рост PPI обычно предшествует росту потребительской инфляции.", "ppi"],
   ["PCE — Personal Consumption Expenditures",
-   "Предпочтительный инфляционный индикатор ФРС. Core PCE (без еды и энергии) — ключевой таргет ФРС (цель 2%). Учитывает реальные изменения в структуре потребления."],
+   "Предпочтительный инфляционный индикатор ФРС. Core PCE (без еды и энергии) — ключевой таргет ФРС (цель 2%). Учитывает реальные изменения в структуре потребления.", "pce"],
   ["GDP — Gross Domestic Product",
-   "Валовой внутренний продукт. Выходит в трёх редакциях: предварительная → вторая → финальная. Два квартала отрицательного роста подряд — техническая рецессия."],
+   "Валовой внутренний продукт. Выходит в трёх редакциях: предварительная → вторая → финальная. Два квартала отрицательного роста подряд — техническая рецессия.", "gdp"],
   ["PMI Manufacturing — Индекс деловой активности (производство)",
-   "Показывает настроения менеджеров по закупкам в промышленности. Порог: 50. Выше — расширение, ниже — сжатие. ISM Manufacturing альтернативно выходит от американского ISM."],
+   "Показывает настроения менеджеров по закупкам в промышленности. Порог: 50. Выше — расширение, ниже — сжатие. ISM Manufacturing альтернативно выходит от американского ISM.", "pmi-manufacturing"],
   ["PMI Services — Индекс деловой активности (услуги)",
-   "Аналог PMI для сектора услуг. Порог: 50. Более значим для США (услуги ~70% ВВП). Устойчивое значение выше 55 — сигнал перегрева экономики."],
+   "Аналог PMI для сектора услуг. Порог: 50. Более значим для США (услуги ~70% ВВП). Устойчивое значение выше 55 — сигнал перегрева экономики.", "pmi-services"],
   ["ISM — Institute for Supply Management",
-   "Американские индексы делового климата от ISM для производства и услуг. Компонента «новые заказы» — опережающий сигнал. ISM Manufacturing выходит в первый рабочий день месяца."],
+   "Американские индексы делового климата от ISM для производства и услуг. Компонента «новые заказы» — опережающий сигнал. ISM Manufacturing выходит в первый рабочий день месяца.", "ism"],
   ["Unemployment Rate — Уровень безработицы",
-   "Доля безработных от экономически активного населения. Публикуется вместе с NFP. ФРС таргетирует уровень около 4–4.5% (условная «полная занятость»)."],
+   "Доля безработных от экономически активного населения. Публикуется вместе с NFP. ФРС таргетирует уровень около 4–4.5% (условная «полная занятость»).", "unemployment-rate"],
   ["Initial Jobless Claims — Первичные заявки на пособие",
-   "Еженедельная статистика по числу впервые обратившихся за пособием по безработице (каждый четверг). Рост выше 300 тыс. — тревожный сигнал для рынка труда."],
+   "Еженедельная статистика по числу впервые обратившихся за пособием по безработице (каждый четверг). Рост выше 300 тыс. — тревожный сигнал для рынка труда.", "initial-jobless-claims"],
   ["Continuing Claims — Продолжающиеся заявки",
-   "Число людей, продолжающих получать пособие по безработице. Выходит еженедельно с задержкой. Устойчивый рост указывает, что безработным сложнее находить новую работу."],
+   "Число людей, продолжающих получать пособие по безработице. Выходит еженедельно с задержкой. Устойчивый рост указывает, что безработным сложнее находить новую работу.", "continuing-claims"],
   ["JOLTS — Job Openings",
-   "Число открытых вакансий в экономике США (Job Openings and Labor Turnover Survey). ФРС использует для оценки перегрева рынка труда. Число вакансий >> безработных → инфляционное давление."],
+   "Число открытых вакансий в экономике США (Job Openings and Labor Turnover Survey). ФРС использует для оценки перегрева рынка труда. Число вакансий >> безработных → инфляционное давление.", "jolts"],
   ["ADP Employment Change",
-   "Оценка изменения занятости в частном секторе от агентства ADP. Публикуется за 2 дня до NFP как предварительный ориентир. Корреляция с NFP умеренная."],
+   "Оценка изменения занятости в частном секторе от агентства ADP. Публикуется за 2 дня до NFP как предварительный ориентир. Корреляция с NFP умеренная.", "adp"],
   ["Retail Sales — Розничные продажи",
-   "Изменение объёма продаж в розничной торговле. Мера потребительской активности (~70% ВВП США). Core Retail Sales исключает авто. Выше прогноза → поддержка доллара."],
+   "Изменение объёма продаж в розничной торговле. Мера потребительской активности (~70% ВВП США). Core Retail Sales исключает авто. Выше прогноза → поддержка доллара.", "retail-sales"],
   ["FOMC — Решение по процентной ставке ФРС",
-   "Заседание Комитета по открытым рынкам. 8 плановых заседаний в год. Помимо ставки важны dot plot и пресс-конференция главы ФРС. Hawkish тон → укрепление USD."],
+   "Заседание Комитета по открытым рынкам. 8 плановых заседаний в год. Помимо ставки важны dot plot и пресс-конференция главы ФРС. Hawkish тон → укрепление USD.", "fomc"],
   ["EIA Crude Oil Inventories",
-   "Еженедельное изменение запасов нефти в США (среды). Рост запасов → давление на нефть. Сокращение → рост цены. API публикует предварительные данные во вторник вечером."],
+   "Еженедельное изменение запасов нефти в США (среды). Рост запасов → давление на нефть. Сокращение → рост цены. API публикует предварительные данные во вторник вечером.", "eia-crude"],
   ["EIA Natural Gas Storage",
-   "Еженедельное изменение запасов природного газа в США (четверги). Аномальное снижение в отопительный сезон → рост цены газа."],
+   "Еженедельное изменение запасов природного газа в США (четверги). Аномальное снижение в отопительный сезон → рост цены газа.", "eia-natgas"],
   ["Durable Goods Orders — Заказы на товары длительного пользования",
-   "Изменение новых заказов на товары со сроком службы >3 лет. Core Durable Goods (без авиатехники) лучше отражает базовые тенденции корпоративных инвестиций."],
+   "Изменение новых заказов на товары со сроком службы >3 лет. Core Durable Goods (без авиатехники) лучше отражает базовые тенденции корпоративных инвестиций.", "durable-goods"],
   ["Trade Balance / Current Account",
-   "Разница между экспортом и импортом товаров и услуг. Устойчивый дефицит создаёт спрос на иностранную валюту и давит на курс. Для USD важно сальдо с Китаем, ЕС и Японией."],
+   "Разница между экспортом и импортом товаров и услуг. Устойчивый дефицит создаёт спрос на иностранную валюту и давит на курс. Для USD важно сальдо с Китаем, ЕС и Японией.", "trade-balance"],
   ["Housing Starts / Building Permits",
-   "Housing Starts — число начатых строительств. Building Permits — выданные разрешения (опережающий показатель будущего строительства). Оба чувствительны к ипотечным ставкам."],
+   "Housing Starts — число начатых строительств. Building Permits — выданные разрешения (опережающий показатель будущего строительства). Оба чувствительны к ипотечным ставкам.", "housing-starts"],
   ["Existing / Pending Home Sales",
-   "Число сделок купли-продажи на вторичном рынке жилья. Вторичный рынок значительно больше первичного. Снижение при росте ставок ипотеки — стандартный сигнал."],
+   "Число сделок купли-продажи на вторичном рынке жилья. Вторичный рынок значительно больше первичного. Снижение при росте ставок ипотеки — стандартный сигнал.", "home-sales"],
   ["Consumer Confidence (Conference Board)",
-   "Индекс доверия потребителей от Conference Board. Выходит в последний вторник месяца. Состоит из оценки текущей ситуации и ожиданий — опережающий показатель расходов."],
+   "Индекс доверия потребителей от Conference Board. Выходит в последний вторник месяца. Состоит из оценки текущей ситуации и ожиданий — опережающий показатель расходов.", "consumer-confidence"],
   ["Michigan Consumer Sentiment / UoM",
-   "Индекс настроений потребителей Мичиганского университета. Два релиза в месяц. Компонента 5-летних инфляционных ожиданий внимательно читается ФРС."],
+   "Индекс настроений потребителей Мичиганского университета. Два релиза в месяц. Компонента 5-летних инфляционных ожиданий внимательно читается ФРС.", "michigan-sentiment"],
   ["Factory Orders / Industrial Production",
-   "Factory Orders: новые заказы на промышленные товары. Industrial Production + Capacity Utilization (от ФРС): объём и загрузка производственных мощностей. Загрузка >80% — инфляционный риск."],
+   "Factory Orders: новые заказы на промышленные товары. Industrial Production + Capacity Utilization (от ФРС): объём и загрузка производственных мощностей. Загрузка >80% — инфляционный риск.", "factory-orders"],
   ["Challenger Job Cuts",
-   "Число объявленных сокращений персонала (Challenger, Gray & Christmas). Выходит в первый четверг месяца. Ранний сигнал о возможном ухудшении рынка труда перед NFP."],
+   "Число объявленных сокращений персонала (Challenger, Gray & Christmas). Выходит в первый четверг месяца. Ранний сигнал о возможном ухудшении рынка труда перед NFP.", "challenger-cuts"],
 ];
 
 var _activeCat = 'all';
@@ -177,11 +198,11 @@ function buildList(){
     if(_activeCat === 'all'){
       var hdr = document.createElement('div');
       hdr.className = 'gloss-cat-hdr';
-      hdr.textContent = 'Термины трейдера';
+      hdr.textContent = t('eduglossary.hdr_trading', 'Термины трейдера');
       list.appendChild(hdr);
     }
-    TERMS_TRADING.forEach(function(t){
-      list.appendChild(makeItem(t[0], t[1], 'trading'));
+    TERMS_TRADING.forEach(function(row){
+      list.appendChild(makeItem(row[0], row[1], 'trading', row[2]));
     });
   }
 
@@ -189,22 +210,24 @@ function buildList(){
     if(_activeCat === 'all'){
       var hdr2 = document.createElement('div');
       hdr2.className = 'gloss-cat-hdr';
-      hdr2.textContent = 'Экономические данные';
+      hdr2.textContent = t('eduglossary.cat_econ', 'Экономические данные');
       list.appendChild(hdr2);
     }
-    TERMS_ECON.forEach(function(t){
-      list.appendChild(makeItem(t[0], t[1], 'econ'));
+    TERMS_ECON.forEach(function(row){
+      list.appendChild(makeItem(row[0], row[1], 'econ', row[2]));
     });
   }
 }
 
-function makeItem(term, def, cat){
+function makeItem(term, def, cat, slug){
+  var trTerm = slug ? t('eduglossary.term.' + slug + '.name', term) : term;
+  var trDef = slug ? t('eduglossary.term.' + slug + '.def', def) : def;
   var div = document.createElement('div');
   div.className = 'gloss-item';
   div.dataset.cat = cat;
-  div.dataset.q = term.toLowerCase() + ' ' + def.toLowerCase();
-  div.innerHTML = '<div class="gloss-term">' + esc(term) + '</div>'
-    + '<div class="gloss-def">' + esc(def) + '</div>';
+  div.dataset.q = trTerm.toLowerCase() + ' ' + trDef.toLowerCase();
+  div.innerHTML = '<div class="gloss-term">' + esc(trTerm) + '</div>'
+    + '<div class="gloss-def">' + esc(trDef) + '</div>';
   return div;
 }
 
@@ -240,6 +263,22 @@ function filterGloss(q){
 }
 
 buildList();
+_patchI18n(document);
+if (window.sbfI18n) {
+  window.sbfI18n.ready.then(function () {
+    _patchI18n(document);
+    buildList();
+    filterGloss(document.getElementById('search').value);
+  });
+} else {
+  document.addEventListener('DOMContentLoaded', function () {
+    if (window.sbfI18n) window.sbfI18n.ready.then(function () {
+      _patchI18n(document);
+      buildList();
+      filterGloss(document.getElementById('search').value);
+    });
+  });
+}
 </script>
 </body>
 </html>
