@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SBF · Экономический календарь</title>
+<title data-i18n="calendar.page_title">SBF · Экономический календарь</title>
 <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/design.css">
@@ -200,23 +200,23 @@ body{background:var(--cream);color:var(--ink);font-family:Montserrat,sans-serif;
   <!-- Sidebar / Filters -->
   <aside class="cal-sidebar">
     <div class="fil-group">
-      <div class="fil-title">Важность</div>
-      <label class="fil-opt"><input type="checkbox" id="f-high" checked onchange="applyFilters()"> Высокая</label>
-      <label class="fil-opt"><input type="checkbox" id="f-med" checked onchange="applyFilters()"> Средняя</label>
-      <label class="fil-opt"><input type="checkbox" id="f-low" onchange="applyFilters()"> Низкая</label>
+      <div class="fil-title" data-i18n="calendar.filter_importance">Важность</div>
+      <label class="fil-opt"><input type="checkbox" id="f-high" checked onchange="applyFilters()"> <span data-i18n="calendar.imp_high">Высокая</span></label>
+      <label class="fil-opt"><input type="checkbox" id="f-med" checked onchange="applyFilters()"> <span data-i18n="calendar.imp_med">Средняя</span></label>
+      <label class="fil-opt"><input type="checkbox" id="f-low" onchange="applyFilters()"> <span data-i18n="calendar.imp_low">Низкая</span></label>
     </div>
     <div class="fil-group">
-      <div class="fil-title">Страна</div>
+      <div class="fil-title" data-i18n="calendar.filter_country">Страна</div>
       <select class="fil-select" id="f-country" onchange="loadEvents()">
-        <option value="">Все страны</option>
-        <option value="US">🇺🇸 США</option>
-        <option value="EU">🇪🇺 Еврозона</option>
-        <option value="GB">🇬🇧 Великобритания</option>
-        <option value="JP">🇯🇵 Япония</option>
-        <option value="CN">🇨🇳 Китай</option>
-        <option value="DE">🇩🇪 Германия</option>
-        <option value="CA">🇨🇦 Канада</option>
-        <option value="AU">🇦🇺 Австралия</option>
+        <option value="" data-i18n="calendar.country_all">Все страны</option>
+        <option value="US" data-i18n="calendar.country_us">🇺🇸 США</option>
+        <option value="EU" data-i18n="calendar.country_eu">🇪🇺 Еврозона</option>
+        <option value="GB" data-i18n="calendar.country_gb">🇬🇧 Великобритания</option>
+        <option value="JP" data-i18n="calendar.country_jp">🇯🇵 Япония</option>
+        <option value="CN" data-i18n="calendar.country_cn">🇨🇳 Китай</option>
+        <option value="DE" data-i18n="calendar.country_de">🇩🇪 Германия</option>
+        <option value="CA" data-i18n="calendar.country_ca">🇨🇦 Канада</option>
+        <option value="AU" data-i18n="calendar.country_au">🇦🇺 Австралия</option>
       </select>
     </div>
   </aside>
@@ -226,10 +226,10 @@ body{background:var(--cream);color:var(--ink);font-family:Montserrat,sans-serif;
     <!-- Date range picker -->
     <div class="date-rng" id="date-rng">
       <div class="drng-presets">
-        <button class="drng-btn on" id="preset-today"    onclick="setPreset('today',this)">Сегодня</button>
-        <button class="drng-btn"    id="preset-tomorrow" onclick="setPreset('tomorrow',this)">Завтра</button>
-        <button class="drng-btn"    id="preset-week"     onclick="setPreset('week',this)">Неделя</button>
-        <button class="drng-btn"    id="preset-month"    onclick="setPreset('month',this)">Месяц</button>
+        <button class="drng-btn on" id="preset-today"    onclick="setPreset('today',this)" data-i18n="calendar.preset_today">Сегодня</button>
+        <button class="drng-btn"    id="preset-tomorrow" onclick="setPreset('tomorrow',this)" data-i18n="calendar.preset_tomorrow">Завтра</button>
+        <button class="drng-btn"    id="preset-week"     onclick="setPreset('week',this)" data-i18n="calendar.preset_week">Неделя</button>
+        <button class="drng-btn"    id="preset-month"    onclick="setPreset('month',this)" data-i18n="calendar.preset_month">Месяц</button>
       </div>
       <div class="drng-cal-wrap" id="calWrap">
         <button class="drng-cal-toggle" id="calToggle" onclick="toggleCalendar(event)">
@@ -242,20 +242,20 @@ body{background:var(--cream);color:var(--ink);font-family:Montserrat,sans-serif;
             <button class="cal-nav-btn" onclick="calNextMonth()">›</button>
           </div>
           <div class="cal-grid" id="calGrid"></div>
-          <div class="cal-hint" id="calHint">Выберите начало периода</div>
+          <div class="cal-hint" id="calHint" data-i18n="calendar.hint_pick_start">Выберите начало периода</div>
         </div>
       </div>
     </div>
 
     <!-- Table header (desktop) -->
     <div class="ev-hdr">
-      <span>Время</span><span>Страна</span><span>Событие</span>
-      <span>Важность</span><span>Факт</span><span>Прогноз</span><span>Предыдущ.</span><span></span>
+      <span data-i18n="calendar.th_time">Время</span><span data-i18n="calendar.filter_country">Страна</span><span data-i18n="calendar.th_event">Событие</span>
+      <span data-i18n="calendar.filter_importance">Важность</span><span data-i18n="calendar.th_actual">Факт</span><span data-i18n="calendar.th_forecast">Прогноз</span><span data-i18n="calendar.th_previous">Предыдущ.</span><span></span>
     </div>
 
     <!-- Event list -->
     <div class="ev-list" id="ev-list">
-      <div class="empty-state">Загрузка…</div>
+      <div class="empty-state" data-i18n="calendar.loading">Загрузка…</div>
     </div>
   </main>
 </div>
@@ -264,7 +264,7 @@ body{background:var(--cream);color:var(--ink);font-family:Montserrat,sans-serif;
 <div id="gloss-modal" class="gloss-modal" onclick="closeGlossModal(event)">
   <div class="gloss-modal-box">
     <button class="gloss-modal-close" onclick="closeGlossModal()">×</button>
-    <div class="gloss-modal-tag">Экономические данные</div>
+    <div class="gloss-modal-tag" data-i18n="calendar.gloss_tag">Экономические данные</div>
     <div class="gloss-modal-term" id="gm-term"></div>
     <div class="gloss-modal-short" id="gm-short"></div>
     <div class="gloss-modal-full" id="gm-full"></div>
@@ -272,6 +272,40 @@ body{background:var(--cream);color:var(--ink);font-family:Montserrat,sans-serif;
 </div>
 
 <script>
+/* ── i18n ───
+   ВАЖНО: этот <script> исполняется синхронно во время парсинга HTML, т.е.
+   ДО i18n.js/sbf-header.js (оба defer в <head>). Поэтому t() НЕ кэширует
+   window.sbfI18n в замыкании — он смотрит на window.sbfI18n каждый раз при
+   вызове. Реальные вызовы происходят только внутри рендер-функций и
+   колбэков (клики, fetch), которые выполняются позже — к этому времени
+   defer-скрипты уже отработали и window.sbfI18n существует.
+   См. web/journal.html для идентичного паттерна на этой же кодовой базе. */
+function t(key, fallback) {
+  return (window.sbfI18n && window.sbfI18n.t) ? window.sbfI18n.t(key, fallback) : (fallback || key);
+}
+
+function _patchI18n(root) {
+  if ((window.sbfI18n && window.sbfI18n.lang) === 'ru') return;
+  var tt = window.sbfI18n ? window.sbfI18n.t : function (k, fb) { return fb || k; };
+  (root || document).querySelectorAll('[data-i18n]').forEach(function (el) {
+    el.textContent = tt(el.getAttribute('data-i18n'), el.textContent);
+  });
+  (root || document).querySelectorAll('[data-i18n-html]').forEach(function (el) {
+    el.innerHTML = tt(el.getAttribute('data-i18n-html'), el.innerHTML);
+  });
+  (root || document).querySelectorAll('[data-i18n-placeholder]').forEach(function (el) {
+    el.setAttribute('placeholder', tt(el.getAttribute('data-i18n-placeholder'), el.getAttribute('placeholder') || ''));
+  });
+  (root || document).querySelectorAll('[data-i18n-title]').forEach(function (el) {
+    el.setAttribute('title', tt(el.getAttribute('data-i18n-title'), el.getAttribute('title') || ''));
+  });
+}
+window.sbfI18n
+  ? window.sbfI18n.ready.then(function () { _patchI18n(document); })
+  : document.addEventListener('DOMContentLoaded', function () {
+      if (window.sbfI18n) window.sbfI18n.ready.then(function () { _patchI18n(document); });
+    });
+
 // ── Константы ──────────────────────────────────────────────────────────────
 var FLAGS = {
   'US':'🇺🇸','EU':'🇪🇺','EA':'🇪🇺','GB':'🇬🇧','JP':'🇯🇵',
@@ -306,6 +340,18 @@ var _MONTHS_FULL  = ['Январь','Февраль','Март','Апрель','
 var _MONTHS_SHORT = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
 var _DAYS_SHORT   = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 
+// RO-варианты для собственной сетки календаря (не Intl — обычные строковые
+// массивы, поэтому переключаются вручную по window.sbfI18n.lang).
+var _MONTHS_FULL_RO  = ['Ianuarie','Februarie','Martie','Aprilie','Mai','Iunie','Iulie','August','Septembrie','Octombrie','Noiembrie','Decembrie'];
+var _MONTHS_SHORT_RO = ['ian','feb','mar','apr','mai','iun','iul','aug','sep','oct','noi','dec'];
+var _DAYS_SHORT_RO   = ['Lu','Ma','Mi','Jo','Vi','Sâ','Du'];
+
+function _isRo(){ return !!(window.sbfI18n && window.sbfI18n.lang === 'ro'); }
+function _monthsFull(){ return _isRo() ? _MONTHS_FULL_RO : _MONTHS_FULL; }
+function _monthsShort(){ return _isRo() ? _MONTHS_SHORT_RO : _MONTHS_SHORT; }
+function _daysShort(){ return _isRo() ? _DAYS_SHORT_RO : _DAYS_SHORT; }
+function _dtLocale(){ return _isRo() ? 'ro-RO' : 'ru'; }
+
 // ── Вспомогательные ────────────────────────────────────────────────────────
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
@@ -313,16 +359,16 @@ function fmtTime(ts_utc){
   if(!ts_utc) return '—';
   var d = new Date(ts_utc);
   try {
-    return d.toLocaleTimeString('ru', {hour:'2-digit',minute:'2-digit',timeZone:_TZ});
+    return d.toLocaleTimeString(_dtLocale(), {hour:'2-digit',minute:'2-digit',timeZone:_TZ});
   } catch(e) {
-    return d.toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit',timeZone:'UTC'});
+    return d.toLocaleTimeString(_dtLocale(),{hour:'2-digit',minute:'2-digit',timeZone:'UTC'});
   }
 }
 
 function fmtDate(ts_utc){
   if(!ts_utc) return '';
   var d = new Date(ts_utc);
-  return d.toLocaleDateString('ru',{day:'numeric',month:'long',weekday:'short',timeZone:'UTC'});
+  return d.toLocaleDateString(_dtLocale(),{day:'numeric',month:'long',weekday:'short',timeZone:'UTC'});
 }
 
 function todayStr(){
@@ -350,160 +396,168 @@ function impCls(imp){
 }
 function impLabel(imp){
   var c = impCls(imp);
-  return c==='h'?'ВЫСОКИЙ':c==='m'?'СРЕДНИЙ':'низкий';
+  return c==='h' ? t('calendar.imp_high_badge','ВЫСОКИЙ')
+       : c==='m' ? t('calendar.imp_med_badge','СРЕДНИЙ')
+       : t('calendar.imp_low_badge','низкий');
 }
 
 // ── §3 Глоссарий экономических данных ────────────────────────────────────
+// Примечание: term/short/full ниже остаются на русском как fallback-текст
+// (используются напрямую при отсутствии window.sbfI18n). Для перевода их
+// оборачивают в t(entry.XKey, entry.X) в момент рендера (showGlossModal,
+// toggleRow) — НЕ здесь, при инициализации массива (см. комментарий про
+// i18n в начале файла: на момент eval этого литерала window.sbfI18n ещё
+// не готов).
 var ECON_GLOSSARY = [
   {
     keys:['non-farm payroll','nfp','non farm'],
-    term:'NFP — Non-Farm Payrolls',
-    short:'Число новых рабочих мест в несельскохозяйственном секторе США. Выходит каждую первую пятницу месяца.',
-    full:'Один из ключевых индикаторов рынка труда. Превышение прогноза укрепляет доллар и усиливает ожидания подъёма ставки ФРС. Слабый NFP давит на USD и повышает вероятность смягчения ДКП.'
+    termKey:'calendar.gloss_nfp_term',   term:'NFP — Non-Farm Payrolls',
+    shortKey:'calendar.gloss_nfp_short', short:'Число новых рабочих мест в несельскохозяйственном секторе США. Выходит каждую первую пятницу месяца.',
+    fullKey:'calendar.gloss_nfp_full',   full:'Один из ключевых индикаторов рынка труда. Превышение прогноза укрепляет доллар и усиливает ожидания подъёма ставки ФРС. Слабый NFP давит на USD и повышает вероятность смягчения ДКП.'
   },
   {
     keys:['consumer price index','cpi'],
-    term:'CPI — Consumer Price Index',
-    short:'Индекс потребительских цен. Основной показатель инфляции США (рассчитывается BLS).',
-    full:'Измеряет изменение цен на потребительскую корзину. Core CPI исключает волатильные компоненты — еду и энергоносители. Выше прогноза → рост доллара. Ниже прогноза → слабый доллар, ожидания паузы ФРС.'
+    termKey:'calendar.gloss_cpi_term',   term:'CPI — Consumer Price Index',
+    shortKey:'calendar.gloss_cpi_short', short:'Индекс потребительских цен. Основной показатель инфляции США (рассчитывается BLS).',
+    fullKey:'calendar.gloss_cpi_full',   full:'Измеряет изменение цен на потребительскую корзину. Core CPI исключает волатильные компоненты — еду и энергоносители. Выше прогноза → рост доллара. Ниже прогноза → слабый доллар, ожидания паузы ФРС.'
   },
   {
     keys:['producer price index','ppi'],
-    term:'PPI — Producer Price Index',
-    short:'Индекс цен производителей. Опережающий сигнал инфляции на потребительском уровне.',
-    full:'Отражает изменение цен, которые производители получают за готовую продукцию. Часто рассматривается как ранний индикатор давления на CPI. Рост PPI при отставании CPI сигнализирует о будущей инфляции.'
+    termKey:'calendar.gloss_ppi_term',   term:'PPI — Producer Price Index',
+    shortKey:'calendar.gloss_ppi_short', short:'Индекс цен производителей. Опережающий сигнал инфляции на потребительском уровне.',
+    fullKey:'calendar.gloss_ppi_full',   full:'Отражает изменение цен, которые производители получают за готовую продукцию. Часто рассматривается как ранний индикатор давления на CPI. Рост PPI при отставании CPI сигнализирует о будущей инфляции.'
   },
   {
     keys:['personal consumption expenditures','pce'],
-    term:'PCE — Personal Consumption Expenditures',
-    short:'Предпочтительный инфляционный индикатор ФРС. Учитывает реальное поведение потребителей.',
-    full:'Core PCE (без еды и энергии) — ключевой таргет ФРС (цель 2%). В отличие от CPI гибко учитывает изменения в структуре потребления. Публикуется с отчётом по доходам/расходам населения (BEA).'
+    termKey:'calendar.gloss_pce_term',   term:'PCE — Personal Consumption Expenditures',
+    shortKey:'calendar.gloss_pce_short', short:'Предпочтительный инфляционный индикатор ФРС. Учитывает реальное поведение потребителей.',
+    fullKey:'calendar.gloss_pce_full',   full:'Core PCE (без еды и энергии) — ключевой таргет ФРС (цель 2%). В отличие от CPI гибко учитывает изменения в структуре потребления. Публикуется с отчётом по доходам/расходам населения (BEA).'
   },
   {
     keys:['gross domestic product','gdp'],
-    term:'GDP — Gross Domestic Product',
-    short:'Валовой внутренний продукт — совокупная стоимость всех произведённых в стране товаров и услуг.',
-    full:'Выходит в трёх редакциях: предварительная → вторая → финальная. Сильный рост GDP подтверждает устойчивость экономики и поддерживает национальную валюту. Негативный квартальный GDP два квартала подряд — техническая рецессия.'
+    termKey:'calendar.gloss_gdp_term',   term:'GDP — Gross Domestic Product',
+    shortKey:'calendar.gloss_gdp_short', short:'Валовой внутренний продукт — совокупная стоимость всех произведённых в стране товаров и услуг.',
+    fullKey:'calendar.gloss_gdp_full',   full:'Выходит в трёх редакциях: предварительная → вторая → финальная. Сильный рост GDP подтверждает устойчивость экономики и поддерживает национальную валюту. Негативный квартальный GDP два квартала подряд — техническая рецессия.'
   },
   {
     keys:['pmi manufacturing','manufacturing pmi','purchasing managers'],
-    term:'PMI Manufacturing — Индекс деловой активности (производство)',
-    short:'Показывает деловые настроения менеджеров по закупкам в промышленности. Порог: 50.',
-    full:'Значение выше 50 означает расширение производственного сектора, ниже 50 — сжатие. Финальный S&P/Markit PMI выходит в начале месяца, ISM Manufacturing — как правило, в первый рабочий день месяца.'
+    termKey:'calendar.gloss_pmi_mfg_term',   term:'PMI Manufacturing — Индекс деловой активности (производство)',
+    shortKey:'calendar.gloss_pmi_mfg_short', short:'Показывает деловые настроения менеджеров по закупкам в промышленности. Порог: 50.',
+    fullKey:'calendar.gloss_pmi_mfg_full',   full:'Значение выше 50 означает расширение производственного сектора, ниже 50 — сжатие. Финальный S&P/Markit PMI выходит в начале месяца, ISM Manufacturing — как правило, в первый рабочий день месяца.'
   },
   {
     keys:['services pmi','service pmi','services business activity'],
-    term:'PMI Services — Индекс деловой активности (услуги)',
-    short:'Аналог PMI для сектора услуг. Порог: 50. Более значим для США (услуги ~70% ВВП).',
-    full:'Поскольку сектор услуг формирует большую часть ВВП развитых экономик, PMI Services нередко важнее PMI Manufacturing. Устойчивое значение выше 55 — сигнал перегрева экономики.'
+    termKey:'calendar.gloss_pmi_svc_term',   term:'PMI Services — Индекс деловой активности (услуги)',
+    shortKey:'calendar.gloss_pmi_svc_short', short:'Аналог PMI для сектора услуг. Порог: 50. Более значим для США (услуги ~70% ВВП).',
+    fullKey:'calendar.gloss_pmi_svc_full',   full:'Поскольку сектор услуг формирует большую часть ВВП развитых экономик, PMI Services нередко важнее PMI Manufacturing. Устойчивое значение выше 55 — сигнал перегрева экономики.'
   },
   {
     keys:['ism manufacturing','ism services','ism non-manufacturing'],
-    term:'ISM — Institute for Supply Management',
-    short:'Американский аналог PMI от ISM. Порог: 50. Данные по manufacturing и services выходят ежемесячно.',
-    full:'ISM Manufacturing считается более предпочтительным, чем S&P PMI, для американского рынка. Компонента «новые заказы» особенно внимательно читается трейдерами как опережающий сигнал.'
+    termKey:'calendar.gloss_ism_term',   term:'ISM — Institute for Supply Management',
+    shortKey:'calendar.gloss_ism_short', short:'Американский аналог PMI от ISM. Порог: 50. Данные по manufacturing и services выходят ежемесячно.',
+    fullKey:'calendar.gloss_ism_full',   full:'ISM Manufacturing считается более предпочтительным, чем S&P PMI, для американского рынка. Компонента «новые заказы» особенно внимательно читается трейдерами как опережающий сигнал.'
   },
   {
     keys:['unemployment rate','безработица'],
-    term:'Unemployment Rate — Уровень безработицы',
-    short:'Доля безработных от экономически активного населения. Выходит вместе с NFP.',
-    full:'Рост безработицы давит на доллар, снижение — поддерживает. ФРС таргетирует уровень около 4–4.5% (условный «полная занятость»). Высокая безработица делает вероятным снижение ставки.'
+    termKey:'calendar.gloss_unemployment_term',   term:'Unemployment Rate — Уровень безработицы',
+    shortKey:'calendar.gloss_unemployment_short', short:'Доля безработных от экономически активного населения. Выходит вместе с NFP.',
+    fullKey:'calendar.gloss_unemployment_full',   full:'Рост безработицы давит на доллар, снижение — поддерживает. ФРС таргетирует уровень около 4–4.5% (условный «полная занятость»). Высокая безработица делает вероятным снижение ставки.'
   },
   {
     keys:['initial jobless claims','initial claims','jobless claims'],
-    term:'Initial Jobless Claims — Первичные заявки на пособие по безработице',
-    short:'Еженедельная статистика по числу впервые обратившихся за пособием. Выходит каждый четверг.',
-    full:'Опережающий показатель рынка труда. Рост заявок сигнализирует об ослаблении занятости. Чувствителен к праздникам и сезонным факторам. Уровни выше 300 тыс. воспринимаются рынком как тревожный сигнал.'
+    termKey:'calendar.gloss_jobless_claims_term',   term:'Initial Jobless Claims — Первичные заявки на пособие по безработице',
+    shortKey:'calendar.gloss_jobless_claims_short', short:'Еженедельная статистика по числу впервые обратившихся за пособием. Выходит каждый четверг.',
+    fullKey:'calendar.gloss_jobless_claims_full',   full:'Опережающий показатель рынка труда. Рост заявок сигнализирует об ослаблении занятости. Чувствителен к праздникам и сезонным факторам. Уровни выше 300 тыс. воспринимаются рынком как тревожный сигнал.'
   },
   {
     keys:['continuing claims'],
-    term:'Continuing Claims — Продолжающиеся заявки на пособие',
-    short:'Число людей, продолжающих получать пособие по безработице. Выходит еженедельно.',
-    full:'Выходит с задержкой на одну неделю относительно initial claims. Устойчивый рост указывает на то, что безработные дольше не могут найти работу — негативный сигнал для доллара.'
+    termKey:'calendar.gloss_continuing_claims_term',   term:'Continuing Claims — Продолжающиеся заявки на пособие',
+    shortKey:'calendar.gloss_continuing_claims_short', short:'Число людей, продолжающих получать пособие по безработице. Выходит еженедельно.',
+    fullKey:'calendar.gloss_continuing_claims_full',   full:'Выходит с задержкой на одну неделю относительно initial claims. Устойчивый рост указывает на то, что безработные дольше не могут найти работу — негативный сигнал для доллара.'
   },
   {
     keys:['jolts','job openings'],
-    term:'JOLTS — Job Openings and Labor Turnover Survey',
-    short:'Число вакансий в экономике США. Важный показатель баланса спроса и предложения рабочей силы.',
-    full:'ФРС использует JOLTS для оценки перегрева рынка труда. Число вакансий, значительно превышающее число безработных, сигнализирует об инфляционном давлении со стороны зарплат.'
+    termKey:'calendar.gloss_jolts_term',   term:'JOLTS — Job Openings and Labor Turnover Survey',
+    shortKey:'calendar.gloss_jolts_short', short:'Число вакансий в экономике США. Важный показатель баланса спроса и предложения рабочей силы.',
+    fullKey:'calendar.gloss_jolts_full',   full:'ФРС использует JOLTS для оценки перегрева рынка труда. Число вакансий, значительно превышающее число безработных, сигнализирует об инфляционном давлении со стороны зарплат.'
   },
   {
     keys:['adp employment','adp non-farm','adp nonfarm'],
-    term:'ADP Employment Change',
-    short:'Оценка изменения занятости в частном секторе от агентства ADP. Выходит за 2 дня до NFP.',
-    full:'Часто рассматривается как предварительный индикатор официального NFP. Корреляция с официальным отчётом умеренная, поэтому рынок реагирует сдержаннее, чем на NFP.'
+    termKey:'calendar.gloss_adp_term',   term:'ADP Employment Change',
+    shortKey:'calendar.gloss_adp_short', short:'Оценка изменения занятости в частном секторе от агентства ADP. Выходит за 2 дня до NFP.',
+    fullKey:'calendar.gloss_adp_full',   full:'Часто рассматривается как предварительный индикатор официального NFP. Корреляция с официальным отчётом умеренная, поэтому рынок реагирует сдержаннее, чем на NFP.'
   },
   {
     keys:['retail sales'],
-    term:'Retail Sales — Розничные продажи',
-    short:'Изменение объёма продаж в розничной торговле. Мера потребительской активности.',
-    full:'Потребление составляет ~70% ВВП США, поэтому розничные продажи — ключевой индикатор экономической активности. Рост выше прогноза → поддержка доллара. Core Retail Sales исключает авто как наиболее волатильный компонент.'
+    termKey:'calendar.gloss_retail_sales_term',   term:'Retail Sales — Розничные продажи',
+    shortKey:'calendar.gloss_retail_sales_short', short:'Изменение объёма продаж в розничной торговле. Мера потребительской активности.',
+    fullKey:'calendar.gloss_retail_sales_full',   full:'Потребление составляет ~70% ВВП США, поэтому розничные продажи — ключевой индикатор экономической активности. Рост выше прогноза → поддержка доллара. Core Retail Sales исключает авто как наиболее волатильный компонент.'
   },
   {
     keys:['fomc','federal open market','interest rate decision','fed rate','rate statement','monetary policy statement'],
-    term:'FOMC — Решение по процентной ставке ФРС',
-    short:'Заседание Федерального комитета по открытым рынкам. Объявляют решение по ставке + публикуют заявление.',
-    full:'8 плановых заседаний в год. Помимо ставки важны: сопроводительное заявление, точечный график (dot plot) и пресс-конференция главы ФРС. Hawkish тон (намёк на повышение) укрепляет USD; dovish (смягчение) — ослабляет.'
+    termKey:'calendar.gloss_fomc_term',   term:'FOMC — Решение по процентной ставке ФРС',
+    shortKey:'calendar.gloss_fomc_short', short:'Заседание Федерального комитета по открытым рынкам. Объявляют решение по ставке + публикуют заявление.',
+    fullKey:'calendar.gloss_fomc_full',   full:'8 плановых заседаний в год. Помимо ставки важны: сопроводительное заявление, точечный график (dot plot) и пресс-конференция главы ФРС. Hawkish тон (намёк на повышение) укрепляет USD; dovish (смягчение) — ослабляет.'
   },
   {
     keys:['eia crude','crude oil inventories','oil inventories','petroleum'],
-    term:'EIA Crude Oil Inventories',
-    short:'Еженедельное изменение запасов нефти в США (U.S. Energy Information Administration). По средам.',
-    full:'Рост запасов → переизбыток предложения → давление на нефть. Сокращение запасов → дефицит → рост нефти. API публикует данные во вторник вечером как предварительный ориентир.'
+    termKey:'calendar.gloss_eia_crude_term',   term:'EIA Crude Oil Inventories',
+    shortKey:'calendar.gloss_eia_crude_short', short:'Еженедельное изменение запасов нефти в США (U.S. Energy Information Administration). По средам.',
+    fullKey:'calendar.gloss_eia_crude_full',   full:'Рост запасов → переизбыток предложения → давление на нефть. Сокращение запасов → дефицит → рост нефти. API публикует данные во вторник вечером как предварительный ориентир.'
   },
   {
     keys:['natural gas','eia natural gas','gas storage'],
-    term:'EIA Natural Gas Storage',
-    short:'Еженедельное изменение запасов природного газа в США. Публикуется по четвергам.',
-    full:'Важен для торговли природным газом (NG=F). Сезонность: зимой сокращение запасов — норма. Аномально большое сокращение в пик отопительного сезона → рост цен газа.'
+    termKey:'calendar.gloss_eia_gas_term',   term:'EIA Natural Gas Storage',
+    shortKey:'calendar.gloss_eia_gas_short', short:'Еженедельное изменение запасов природного газа в США. Публикуется по четвергам.',
+    fullKey:'calendar.gloss_eia_gas_full',   full:'Важен для торговли природным газом (NG=F). Сезонность: зимой сокращение запасов — норма. Аномально большое сокращение в пик отопительного сезона → рост цен газа.'
   },
   {
     keys:['durable goods'],
-    term:'Durable Goods Orders — Заказы на товары длительного пользования',
-    short:'Изменение новых заказов на производство товаров со сроком службы более 3 лет.',
-    full:'Опережающий индикатор производственной активности и корпоративных инвестиций. Core Durable Goods (без авиатехники и транспорта) более стабилен и лучше отражает базовые тенденции.'
+    termKey:'calendar.gloss_durable_goods_term',   term:'Durable Goods Orders — Заказы на товары длительного пользования',
+    shortKey:'calendar.gloss_durable_goods_short', short:'Изменение новых заказов на производство товаров со сроком службы более 3 лет.',
+    fullKey:'calendar.gloss_durable_goods_full',   full:'Опережающий индикатор производственной активности и корпоративных инвестиций. Core Durable Goods (без авиатехники и транспорта) более стабилен и лучше отражает базовые тенденции.'
   },
   {
     keys:['trade balance','current account','торговый баланс'],
-    term:'Trade Balance / Current Account',
-    short:'Разница между экспортом и импортом товаров и услуг страны.',
-    full:'Дефицит торгового баланса (импорт > экспорт) создаёт спрос на иностранную валюту, оказывая давление на курс. Профицит — наоборот. Для USD особую значимость имеет сальдо с Китаем, Японией и ЕС.'
+    termKey:'calendar.gloss_trade_balance_term',   term:'Trade Balance / Current Account',
+    shortKey:'calendar.gloss_trade_balance_short', short:'Разница между экспортом и импортом товаров и услуг страны.',
+    fullKey:'calendar.gloss_trade_balance_full',   full:'Дефицит торгового баланса (импорт > экспорт) создаёт спрос на иностранную валюту, оказывая давление на курс. Профицит — наоборот. Для USD особую значимость имеет сальдо с Китаем, Японией и ЕС.'
   },
   {
     keys:['housing starts','building permits'],
-    term:'Housing Starts / Building Permits',
-    short:'Число начатых строительств (housing starts) и выданных разрешений на строительство.',
-    full:'Опережающий индикатор состояния рынка недвижимости. Building permits выходят одновременно и часто важнее, так как отражают будущую активность. Чувствительны к ипотечным ставкам.'
+    termKey:'calendar.gloss_housing_starts_term',   term:'Housing Starts / Building Permits',
+    shortKey:'calendar.gloss_housing_starts_short', short:'Число начатых строительств (housing starts) и выданных разрешений на строительство.',
+    fullKey:'calendar.gloss_housing_starts_full',   full:'Опережающий индикатор состояния рынка недвижимости. Building permits выходят одновременно и часто важнее, так как отражают будущую активность. Чувствительны к ипотечным ставкам.'
   },
   {
     keys:['existing home sales','home sales','pending home'],
-    term:'Existing / Pending Home Sales',
-    short:'Число сделок купли-продажи на вторичном рынке жилья США.',
-    full:'Вторичный рынок жилья значительно больше первичного. Продажи чувствительны к ипотечным ставкам: рост ставки тормозит рынок. NAR публикует данные ежемесячно.'
+    termKey:'calendar.gloss_home_sales_term',   term:'Existing / Pending Home Sales',
+    shortKey:'calendar.gloss_home_sales_short', short:'Число сделок купли-продажи на вторичном рынке жилья США.',
+    fullKey:'calendar.gloss_home_sales_full',   full:'Вторичный рынок жилья значительно больше первичного. Продажи чувствительны к ипотечным ставкам: рост ставки тормозит рынок. NAR публикует данные ежемесячно.'
   },
   {
     keys:['consumer confidence','cb consumer confidence'],
-    term:'Consumer Confidence (Conference Board)',
-    short:'Индекс доверия потребителей от Conference Board. Отражает оценку населением текущей и будущей экономики.',
-    full:'Выходит в последний вторник месяца. Состоит из двух компонентов: текущая ситуация (Current Situation) и ожидания (Expectations). Используется как опережающий показатель потребительских расходов.'
+    termKey:'calendar.gloss_consumer_confidence_term',   term:'Consumer Confidence (Conference Board)',
+    shortKey:'calendar.gloss_consumer_confidence_short', short:'Индекс доверия потребителей от Conference Board. Отражает оценку населением текущей и будущей экономики.',
+    fullKey:'calendar.gloss_consumer_confidence_full',   full:'Выходит в последний вторник месяца. Состоит из двух компонентов: текущая ситуация (Current Situation) и ожидания (Expectations). Используется как опережающий показатель потребительских расходов.'
   },
   {
     keys:['michigan','umi consumer','university of michigan','consumer sentiment'],
-    term:'Michigan Consumer Sentiment / UoM',
-    short:'Индекс настроений потребителей Мичиганского университета. Два релиза в месяц: предварительный и финальный.',
-    full:'Предварительный (Preliminary) выходит в середине месяца, финальный — в конце. Компонента инфляционных ожиданий (5-year inflation expectations) особенно внимательно читается рынком и ФРС.'
+    termKey:'calendar.gloss_michigan_term',   term:'Michigan Consumer Sentiment / UoM',
+    shortKey:'calendar.gloss_michigan_short', short:'Индекс настроений потребителей Мичиганского университета. Два релиза в месяц: предварительный и финальный.',
+    fullKey:'calendar.gloss_michigan_full',   full:'Предварительный (Preliminary) выходит в середине месяца, финальный — в конце. Компонента инфляционных ожиданий (5-year inflation expectations) особенно внимательно читается рынком и ФРС.'
   },
   {
     keys:['factory orders','industrial production','capacity utilization'],
-    term:'Factory Orders / Industrial Production',
-    short:'Factory Orders: новые заказы на промышленные товары. Industrial Production: объём производства.',
-    full:'Industrial Production + Capacity Utilization выходят вместе от ФРС. Высокая загрузка мощностей (>80%) сигнализирует о возможном инфляционном давлении. Factory Orders — более широкий показатель, включает услуги.'
+    termKey:'calendar.gloss_factory_orders_term',   term:'Factory Orders / Industrial Production',
+    shortKey:'calendar.gloss_factory_orders_short', short:'Factory Orders: новые заказы на промышленные товары. Industrial Production: объём производства.',
+    fullKey:'calendar.gloss_factory_orders_full',   full:'Industrial Production + Capacity Utilization выходят вместе от ФРС. Высокая загрузка мощностей (>80%) сигнализирует о возможном инфляционном давлении. Factory Orders — более широкий показатель, включает услуги.'
   },
   {
     keys:['challenger job cuts','layoffs'],
-    term:'Challenger Job Cuts — Планируемые увольнения',
-    short:'Число объявленных сокращений персонала от компании Challenger, Gray & Christmas.',
-    full:'Выходит ежемесячно в первый четверг. Рост числа сокращений — ранний предупреждающий сигнал для рынка труда. Реакция рынка относительно слабая, но данные важны для контекста NFP.'
+    termKey:'calendar.gloss_challenger_term',   term:'Challenger Job Cuts — Планируемые увольнения',
+    shortKey:'calendar.gloss_challenger_short', short:'Число объявленных сокращений персонала от компании Challenger, Gray & Christmas.',
+    fullKey:'calendar.gloss_challenger_full',   full:'Выходит ежемесячно в первый четверг. Рост числа сокращений — ранний предупреждающий сигнал для рынка труда. Реакция рынка относительно слабая, но данные важны для контекста NFP.'
   }
 ];
 
@@ -521,9 +575,9 @@ function getGlossEntry(title){
 function showGlossModal(title){
   var e = getGlossEntry(title);
   if(!e) return;
-  document.getElementById('gm-term').textContent  = e.term;
-  document.getElementById('gm-short').textContent = e.short;
-  document.getElementById('gm-full').textContent  = e.full;
+  document.getElementById('gm-term').textContent  = t(e.termKey, e.term);
+  document.getElementById('gm-short').textContent = t(e.shortKey, e.short);
+  document.getElementById('gm-full').textContent  = t(e.fullKey, e.full);
   document.getElementById('gloss-modal').classList.add('open');
 }
 
@@ -616,7 +670,7 @@ function _isoDate(y, m, d){
 
 function renderCalGrid(){
   var ml = document.getElementById('calMonthLabel');
-  if(ml) ml.textContent = _MONTHS_FULL[_calMonth]+' '+_calYear;
+  if(ml) ml.textContent = _monthsFull()[_calMonth]+' '+_calYear;
   var grid = document.getElementById('calGrid');
   if(!grid) return;
 
@@ -625,7 +679,7 @@ function renderCalGrid(){
   var daysInMonth = new Date(_calYear, _calMonth+1, 0).getDate();
   var today = todayStr();
 
-  var html = _DAYS_SHORT.map(function(d){ return '<div class="cal-dh">'+d+'</div>'; }).join('');
+  var html = _daysShort().map(function(d){ return '<div class="cal-dh">'+d+'</div>'; }).join('');
 
   for(var i=0; i<firstDow; i++) html += '<div class="cal-d cal-empty"></div>';
 
@@ -646,9 +700,9 @@ function renderCalGrid(){
   var hint = document.getElementById('calHint');
   if(hint){
     if(_pickStep===1 && _rangeStart){
-      hint.textContent = 'Выберите конечную дату';
+      hint.textContent = t('calendar.hint_pick_end','Выберите конечную дату');
     } else {
-      hint.textContent = 'Выберите начало периода';
+      hint.textContent = t('calendar.hint_pick_start','Выберите начало периода');
     }
   }
 }
@@ -680,13 +734,13 @@ function onCalDayClick(ds){
 function fmtShort(ds){
   if(!ds) return '';
   var d = new Date(ds+'T12:00:00Z');
-  return d.getUTCDate()+' '+_MONTHS_SHORT[d.getUTCMonth()];
+  return d.getUTCDate()+' '+_monthsShort()[d.getUTCMonth()];
 }
 
 function updateCalLabel(){
   var lbl = document.getElementById('calLabel');
   if(!lbl) return;
-  if(!_rangeStart){ lbl.textContent = 'Выбрать'; return; }
+  if(!_rangeStart){ lbl.textContent = t('calendar.label_select','Выбрать'); return; }
   if(!_rangeEnd || _rangeStart === _rangeEnd){
     lbl.textContent = fmtShort(_rangeStart);
   } else {
@@ -697,7 +751,7 @@ function updateCalLabel(){
 // ── Загрузка событий ───────────────────────────────────────────────────────
 async function loadEvents(){
   var list = document.getElementById('ev-list');
-  list.innerHTML = '<div class="empty-state">Загрузка…</div>';
+  list.innerHTML = '<div class="empty-state">'+t('calendar.loading','Загрузка…')+'</div>';
   _openRowIdx = null;
 
   var from    = _rangeStart || todayStr();
@@ -713,7 +767,7 @@ async function loadEvents(){
     _lastEvents = events;
     renderRows(events);
   } catch(e) {
-    list.innerHTML = '<div class="empty-state">Ошибка загрузки: '+esc(String(e))+'</div>';
+    list.innerHTML = '<div class="empty-state">'+t('calendar.load_error','Ошибка загрузки:')+' '+esc(String(e))+'</div>';
   }
 }
 
@@ -721,7 +775,7 @@ async function loadEvents(){
 function renderRows(events){
   var list = document.getElementById('ev-list');
   if(!events||!events.length){
-    list.innerHTML = '<div class="empty-state">Событий за выбранный период не найдено 🟢<br><small>Попробуйте другой диапазон или фильтр</small></div>';
+    list.innerHTML = '<div class="empty-state">'+t('calendar.no_events_found','Событий за выбранный период не найдено 🟢')+'<br><small>'+t('calendar.no_events_hint','Попробуйте другой диапазон или фильтр')+'</small></div>';
     return;
   }
 
@@ -735,7 +789,7 @@ function renderRows(events){
     var hasFact = ev.actual != null && ev.actual !== '';
 
     if(!nowInserted && evTs != null && evTs >= nowTs){
-      html += '<div class="now-line"><span>Сейчас</span></div>';
+      html += '<div class="now-line"><span>'+t('calendar.now_label','Сейчас')+'</span></div>';
       nowInserted = true;
     }
 
@@ -772,29 +826,29 @@ function renderRows(events){
         +'<div class="ev-detail-inner">'
           +'<div class="ev-desc" id="desc-'+idx+'"></div>'
           +'<div class="seg-ctrl" id="seg-'+idx+'">'
-            +'<button class="seg-btn on" data-tab="price" onclick="switchTab('+idx+',this)">Ценовой график</button>'
-            +'<button class="seg-btn" data-tab="history" onclick="switchTab('+idx+',this)">График событий</button>'
-            +'<button class="seg-btn coming" title="Фаза 2">Волатильность</button>'
-            +'<button class="seg-btn coming" title="Фаза 2">Влияние</button>'
+            +'<button class="seg-btn on" data-tab="price" onclick="switchTab('+idx+',this)">'+t('calendar.tab_price','Ценовой график')+'</button>'
+            +'<button class="seg-btn" data-tab="history" onclick="switchTab('+idx+',this)">'+t('calendar.tab_history','График событий')+'</button>'
+            +'<button class="seg-btn coming" title="'+t('calendar.phase2_tooltip','Фаза 2')+'">'+t('calendar.tab_volatility','Волатильность')+'</button>'
+            +'<button class="seg-btn coming" title="'+t('calendar.phase2_tooltip','Фаза 2')+'">'+t('calendar.tab_impact','Влияние')+'</button>'
           +'</div>'
           +'<div id="tab-price-'+idx+'" class="tab-pane on">'
             +'<div class="sym-sel">'
-              +'<label>Инструмент:</label>'
+              +'<label>'+t('calendar.instrument_label','Инструмент:')+'</label>'
               +'<select id="sym-sel-'+idx+'" onchange="loadPriceChart('+idx+')">'
                 +SYMBOLS.map(function(s){return '<option value="'+s+'"'+(s===defSym?' selected':'')+'>'+s+'</option>';}).join('')
               +'</select>'
             +'</div>'
-            +'<div id="price-chart-'+idx+'"><div class="chart-loading">Загрузка графика…</div></div>'
+            +'<div id="price-chart-'+idx+'"><div class="chart-loading">'+t('calendar.loading_chart','Загрузка графика…')+'</div></div>'
           +'</div>'
-          +'<div id="tab-history-'+idx+'" class="tab-pane"><div class="chart-loading">Загрузка истории…</div></div>'
-          +'<div id="tab-vol-'+idx+'" class="tab-pane"><div class="soon-box"><b>Волатильность</b><p>Исторические данные о реакции цены на событие появятся позже (Фаза 2).</p></div></div>'
-          +'<div id="tab-impact-'+idx+'" class="tab-pane"><div class="soon-box"><b>Влияние</b><p>Статистика направления реакций за прошлые релизы появится позже (Фаза 2).</p></div></div>'
+          +'<div id="tab-history-'+idx+'" class="tab-pane"><div class="chart-loading">'+t('calendar.loading_history','Загрузка истории…')+'</div></div>'
+          +'<div id="tab-vol-'+idx+'" class="tab-pane"><div class="soon-box"><b>'+t('calendar.tab_volatility','Волатильность')+'</b><p>'+t('calendar.vol_soon_desc','Исторические данные о реакции цены на событие появятся позже (Фаза 2).')+'</p></div></div>'
+          +'<div id="tab-impact-'+idx+'" class="tab-pane"><div class="soon-box"><b>'+t('calendar.tab_impact','Влияние')+'</b><p>'+t('calendar.impact_soon_desc','Статистика направления реакций за прошлые релизы появится позже (Фаза 2).')+'</p></div></div>'
         +'</div>'
       +'</div>'
       +'</div>';
   });
 
-  if(!nowInserted) html += '<div class="now-line"><span>Сейчас</span></div>';
+  if(!nowInserted) html += '<div class="now-line"><span>'+t('calendar.now_label','Сейчас')+'</span></div>';
 
   list.innerHTML = html;
   applyFilters();
@@ -820,16 +874,16 @@ function toggleRow(idx){
       // §3 — короткое описание из глоссария
       var gloss = getGlossEntry(ev.title);
       var yahoo = ev.yahoo_url
-        ? ' <a href="'+esc(ev.yahoo_url)+'" target="_blank" rel="noopener">Источник →</a>' : '';
+        ? ' <a href="'+esc(ev.yahoo_url)+'" target="_blank" rel="noopener">'+t('calendar.source_link','Источник →')+'</a>' : '';
       var glossHtml = gloss
-        ? '<div class="ev-gloss-short">'+esc(gloss.short)
-          +'</div><button class="ev-gloss-btn" onclick="openGlossForEvent('+idx+')">Подробнее →</button>'
+        ? '<div class="ev-gloss-short">'+esc(t(gloss.shortKey, gloss.short))
+          +'</div><button class="ev-gloss-btn" onclick="openGlossForEvent('+idx+')">'+t('calendar.gloss_more_link','Подробнее →')+'</button>'
         : '';
       descEl.innerHTML =
         '<b style="font-size:14px">'+esc(ev.title)+'</b>'
-        +(ev.actual   ? '<br><span style="color:var(--up)">Факт: <b>'+esc(ev.actual)+'</b></span>' : '')
-        +(ev.forecast ? ' · Прогноз: '+esc(ev.forecast) : '')
-        +(ev.previous ? ' · Предыдущее: '+esc(ev.previous) : '')
+        +(ev.actual   ? '<br><span style="color:var(--up)">'+t('calendar.detail_actual_label','Факт:')+' <b>'+esc(ev.actual)+'</b></span>' : '')
+        +(ev.forecast ? ' · '+t('calendar.detail_forecast_label','Прогноз:')+' '+esc(ev.forecast) : '')
+        +(ev.previous ? ' · '+t('calendar.detail_previous_label','Предыдущее:')+' '+esc(ev.previous) : '')
         +yahoo
         +glossHtml;
     }
@@ -860,21 +914,21 @@ async function loadEventHistory(idx){
   var row  = document.querySelector('.ev-row[data-idx="'+idx+'"]');
   if(!row) return;
   var key = row.dataset.key;
-  if(!key) { pane.innerHTML = '<div class="chart-loading">Ключ события не определён</div>'; return; }
+  if(!key) { pane.innerHTML = '<div class="chart-loading">'+t('calendar.event_key_undefined','Ключ события не определён')+'</div>'; return; }
 
   if(_histCache[key] !== undefined){
     pane.innerHTML = _renderHistPane(key, _histCache[key], idx);
     return;
   }
 
-  pane.innerHTML = '<div class="chart-loading">Загрузка истории…</div>';
+  pane.innerHTML = '<div class="chart-loading">'+t('calendar.loading_history','Загрузка истории…')+'</div>';
   try {
     var r = await fetch('/api/event/'+encodeURIComponent(key)+'/history');
     var data = r.ok ? await r.json() : [];
     _histCache[key] = Array.isArray(data) ? data : [];
     pane.innerHTML = _renderHistPane(key, _histCache[key], idx);
   } catch(e){
-    pane.innerHTML = '<div class="chart-loading">Ошибка: '+esc(String(e))+'</div>';
+    pane.innerHTML = '<div class="chart-loading">'+t('calendar.generic_error','Ошибка:')+' '+esc(String(e))+'</div>';
   }
 }
 
@@ -886,7 +940,7 @@ function _renderHistPane(key, data, idx){
     listHtml = '<div class="hist-list">'
       + sorted.map(function(d){
           var dt = new Date(d.ts*1000);
-          var ds = dt.toLocaleDateString('ru',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'});
+          var ds = dt.toLocaleDateString(_dtLocale(),{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'});
           var surpCls = d.actual!=null&&d.forecast!=null
             ? (parseFloat(d.actual)>=parseFloat(d.forecast)?'surp-up':'surp-dn') : '';
           return '<div class="hist-row"><span class="hd">'+ds+'</span>'
@@ -898,7 +952,7 @@ function _renderHistPane(key, data, idx){
       +'</div>';
   }
   return '<div class="chart-wrap">'+chart
-    +(data.length?'<div style="margin-top:8px;font-family:JetBrains Mono,monospace;font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:4px">Последние значения</div>'+listHtml:'')
+    +(data.length?'<div style="margin-top:8px;font-family:JetBrains Mono,monospace;font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:4px">'+t('calendar.recent_values_label','Последние значения')+'</div>'+listHtml:'')
     +'</div>';
 }
 
