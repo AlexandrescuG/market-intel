@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SBF — Биржевая торговля: руководство</title>
+<title data-i18n="eduindex.page_title">SBF — Биржевая торговля: руководство</title>
 <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/design.css">
@@ -84,74 +84,102 @@ body{min-height:100vh;padding-bottom:40px}
 
 
 <div class="hero">
-  <div class="tag">Образовательный курс</div>
-  <h1>Биржевая торговля<br>Полное руководство</h1>
-  <p>15 глав о профессиональном трейдинге. Теория с реальными данными, интерактивы и связь с живым рынком.</p>
+  <div class="tag" data-i18n="eduindex.hero.tag">Образовательный курс</div>
+  <h1 data-i18n-html="eduindex.hero.title">Биржевая торговля<br>Полное руководство</h1>
+  <p data-i18n="eduindex.hero.desc">15 глав о профессиональном трейдинге. Теория с реальными данными, интерактивы и связь с живым рынком.</p>
 </div>
 
 <div class="wrap">
   <div class="progress-wrap">
-    <span class="label">Прогресс:</span>
+    <span class="label" data-i18n="eduindex.progress.label">Прогресс:</span>
     <div class="bar"><div class="bar-fill" id="pbar" style="width:0%"></div></div>
     <span class="pct" id="ppct">0 из 15</span>
-    <button class="reset" onclick="resetProgress()">сбросить</button>
+    <button class="reset" onclick="resetProgress()" data-i18n="eduindex.progress.reset">сбросить</button>
   </div>
 
-  <div class="section-label">Основы</div>
+  <div class="section-label" data-i18n="eduindex.section.basics">Основы</div>
   <div class="chapters" id="toc"></div>
 </div>
 
-<div class="section-label" style="max-width:800px;margin:24px auto 10px;padding:0 24px">Инструменты трейдера</div>
+<div class="section-label" style="max-width:800px;margin:24px auto 10px;padding:0 24px" data-i18n="eduindex.section.tools">Инструменты трейдера</div>
 <div class="wrap" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:32px">
   <a class="ch" href="/#tech" style="text-decoration:none">
-    <span class="ico">📈</span>
+    <span class="ico"><img class="mi-icon" src="/assets/icons/icon-trend-up.png" alt="" width="20" height="20"></span>
     <div>
-      <div class="num">Технический</div>
-      <div class="title">График + библиотека</div>
-      <div class="sub">29 паттернов и индикаторов с анимацией</div>
+      <div class="num" data-i18n="eduindex.tool.tech.num">Технический</div>
+      <div class="title" data-i18n="eduindex.tool.tech.title">График + библиотека</div>
+      <div class="sub" data-i18n="eduindex.tool.tech.sub">29 паттернов и индикаторов с анимацией</div>
     </div>
   </a>
   <a class="ch" href="/calendar" style="text-decoration:none">
-    <span class="ico">📅</span>
+    <span class="ico"><img class="mi-icon" src="/assets/icons/icon-calendar.png" alt="" width="20" height="20"></span>
     <div>
-      <div class="num">Календарь</div>
-      <div class="title">Эконом-события</div>
-      <div class="sub">FOMC, CPI, NFP и другие ключевые публикации</div>
+      <div class="num" data-i18n="eduindex.tool.calendar.num">Календарь</div>
+      <div class="title" data-i18n="eduindex.tool.calendar.title">Эконом-события</div>
+      <div class="sub" data-i18n="eduindex.tool.calendar.sub">FOMC, CPI, NFP и другие ключевые публикации</div>
     </div>
   </a>
   <a class="ch" href="/edu/glossary" style="text-decoration:none">
-    <span class="ico">📖</span>
+    <span class="ico"><img class="mi-icon" src="/assets/icons/icon-books.png" alt="" width="20" height="20"></span>
     <div>
-      <div class="num">Глоссарий</div>
-      <div class="title">Словарь трейдера</div>
-      <div class="sub">23 ключевых термина с поиском</div>
+      <div class="num" data-i18n="eduindex.tool.glossary.num">Глоссарий</div>
+      <div class="title" data-i18n="eduindex.tool.glossary.title">Словарь трейдера</div>
+      <div class="sub" data-i18n="eduindex.tool.glossary.sub">23 ключевых термина с поиском</div>
     </div>
   </a>
 </div>
 
-<div class="disclaimer">
+<div class="disclaimer" data-i18n-html="eduindex.disclaimer">
   Материалы предназначены исключительно для образовательных целей.<br>
   Не являются инвестиционной рекомендацией. SBF Company SRL.
 </div>
 
 <script>
+/* ── i18n ───
+   Этот <script> обычный (не defer) и стоит в <body>, поэтому исполняется
+   синхронно во время парсинга HTML — ДО i18n.js/sbf-header.js (оба defer
+   в <head>, выполняются только после парсинга всего документа). Значит на
+   момент первого render() window.sbfI18n гарантированно ещё не существует;
+   t() смотрит на него заново при каждом вызове, а не кэширует. */
+function t(key, fallback) {
+  var i = window.sbfI18n;
+  return i ? i.t(key, fallback) : (fallback || key);
+}
+
+function _patchI18n(root) {
+  if ((window.sbfI18n && window.sbfI18n.lang) === 'ru') return;
+  var tt = window.sbfI18n ? window.sbfI18n.t : function (k, fb) { return fb || k; };
+  (root || document).querySelectorAll('[data-i18n]').forEach(function (el) {
+    el.textContent = tt(el.getAttribute('data-i18n'), el.textContent);
+  });
+  (root || document).querySelectorAll('[data-i18n-html]').forEach(function (el) {
+    el.innerHTML = tt(el.getAttribute('data-i18n-html'), el.innerHTML);
+  });
+  (root || document).querySelectorAll('[data-i18n-placeholder]').forEach(function (el) {
+    el.setAttribute('placeholder', tt(el.getAttribute('data-i18n-placeholder'), el.getAttribute('placeholder') || ''));
+  });
+  (root || document).querySelectorAll('[data-i18n-title]').forEach(function (el) {
+    el.setAttribute('title', tt(el.getAttribute('data-i18n-title'), el.getAttribute('title') || ''));
+  });
+}
+
 // tier: "free"|"pro" — флаг для будущего гейтинга, сейчас всё открыто
 const CHAPTERS = [
-  {n:1,  tier:"free", ico:"📖", title:"Биржевая торговля",         sub:"Введение, ориентация, путь инвестора/трейдера"},
-  {n:2,  tier:"free", ico:"🌍", title:"Глобальные Кукловоды",       sub:"Биржи мира, капитализации, ключевые игроки"},
-  {n:3,  tier:"free", ico:"🛡️", title:"Арсенал и Защита",           sub:"Risk/Reward, Stop-Loss, расчёт позиции"},
-  {n:4,  tier:"free", ico:"⚙️", title:"Ликвидность и Ордера",       sub:"Стакан, маркет-мейкеры, типы ордеров, проскальзывание"},
-  {n:5,  tier:"free", ico:"🌐", title:"Глобальные Часы",             sub:"Торговые сессии, AMD-цикл, перекрытие Лондон+NY"},
-  {n:6,  tier:"pro",  ico:"📰", title:"Пульс Новостей",              sub:"NFP, CPI, ФРС. Как фундаментал создаёт тренды"},
-  {n:7,  tier:"pro",  ico:"🐳", title:"Институциональный след",      sub:"Smart Money, Liquidity Sweep, Fair Value Gap"},
-  {n:8,  tier:"pro",  ico:"🌊", title:"Тренд и Циклы",               sub:"Структура рынка, HH/HL, торговля с трендом"},
-  {n:9,  tier:"pro",  ico:"📊", title:"Отчётности и Осцилляторы",   sub:"RSI, MACD, дивергенция, поиск разворотов"},
-  {n:10, tier:"pro",  ico:"🧠", title:"Психология и Паттерны",       sub:"Флаг, клин, двойная вершина, поведение толпы"},
-  {n:11, tier:"pro",  ico:"🔬", title:"Тёмные пулы и HFT",           sub:"Скрытая ликвидность, алготрейдинг, VWAP"},
-  {n:12, tier:"pro",  ico:"☁️", title:"Японская философия",           sub:"Ишимоку: Облако, Tenkan, Kijun, Chikou"},
-  {n:13, tier:"pro",  ico:"🎯", title:"Анатомия Свинга",              sub:"Свинг-трейдинг: стратегии от входа до выхода"},
-  {n:14, tier:"pro",  ico:"⚡", title:"Анатомия Скальпинга",          sub:"Скальпинг: сессии, тайминг, управление рисками"},
-  {n:15, tier:"pro",  ico:"🏆", title:"Проп-Трейдинг и Финал",       sub:"Профессиональная торговля, финальный экзамен"},
+  {n:1,  tier:"free", ico:'<img class="mi-icon" src="/assets/icons/icon-books.png" alt="" width="20" height="20">', title:"Биржевая торговля",         sub:"Введение, ориентация, путь инвестора/трейдера"},
+  {n:2,  tier:"free", ico:'<img class="mi-icon" src="/assets/icons/icon-globe.svg" alt="" width="20" height="20">', title:"Глобальные Кукловоды",       sub:"Биржи мира, капитализации, ключевые игроки"},
+  {n:3,  tier:"free", ico:'<img class="mi-icon" src="/assets/icons/icon-shield.png" alt="" width="20" height="20">', title:"Арсенал и Защита",           sub:"Risk/Reward, Stop-Loss, расчёт позиции"},
+  {n:4,  tier:"free", ico:'<img class="mi-icon" src="/assets/icons/icon-settings.svg" alt="" width="20" height="20">', title:"Ликвидность и Ордера",       sub:"Стакан, маркет-мейкеры, типы ордеров, проскальзывание"},
+  {n:5,  tier:"free", ico:'<img class="mi-icon" src="/assets/icons/icon-globe.svg" alt="" width="20" height="20">', title:"Глобальные Часы",             sub:"Торговые сессии, AMD-цикл, перекрытие Лондон+NY"},
+  {n:6,  tier:"pro",  ico:'<img class="mi-icon" src="/assets/icons/icon-newspaper.svg" alt="" width="20" height="20">', title:"Пульс Новостей",              sub:"NFP, CPI, ФРС. Как фундаментал создаёт тренды"},
+  {n:7,  tier:"pro",  ico:'<img class="mi-icon" src="/assets/icons/icon-footprints.svg" alt="" width="20" height="20">', title:"Институциональный след",      sub:"Smart Money, Liquidity Sweep, Fair Value Gap"},
+  {n:8,  tier:"pro",  ico:'<img class="mi-icon" src="/assets/icons/icon-waves.svg" alt="" width="20" height="20">', title:"Тренд и Циклы",               sub:"Структура рынка, HH/HL, торговля с трендом"},
+  {n:9,  tier:"pro",  ico:'<img class="mi-icon" src="/assets/icons/icon-bar-chart.png" alt="" width="20" height="20">', title:"Отчётности и Осцилляторы",   sub:"RSI, MACD, дивергенция, поиск разворотов"},
+  {n:10, tier:"pro",  ico:'<img class="mi-icon" src="/assets/icons/icon-mindset.png" alt="" width="20" height="20">', title:"Психология и Паттерны",       sub:"Флаг, клин, двойная вершина, поведение толпы"},
+  {n:11, tier:"pro",  ico:'<img class="mi-icon" src="/assets/icons/icon-microscope.svg" alt="" width="20" height="20">', title:"Тёмные пулы и HFT",           sub:"Скрытая ликвидность, алготрейдинг, VWAP"},
+  {n:12, tier:"pro",  ico:'<img class="mi-icon" src="/assets/icons/icon-cloud.svg" alt="" width="20" height="20">', title:"Японская философия",           sub:"Ишимоку: Облако, Tenkan, Kijun, Chikou"},
+  {n:13, tier:"pro",  ico:'<img class="mi-icon" src="/assets/icons/icon-target.png" alt="" width="20" height="20">', title:"Анатомия Свинга",              sub:"Свинг-трейдинг: стратегии от входа до выхода"},
+  {n:14, tier:"pro",  ico:'<img class="mi-icon" src="/assets/icons/icon-lightning.png" alt="" width="20" height="20">', title:"Анатомия Скальпинга",          sub:"Скальпинг: сессии, тайминг, управление рисками"},
+  {n:15, tier:"pro",  ico:'<img class="mi-icon" src="/assets/icons/icon-trophy.png" alt="" width="20" height="20">', title:"Проп-Трейдинг и Финал",       sub:"Профессиональная торговля, финальный экзамен"},
 ];
 
 const DONE_KEY = 'sbf_edu_done';
@@ -161,7 +189,7 @@ function getDone() {
 }
 
 function resetProgress() {
-  if (!confirm('Сбросить прогресс?')) return;
+  if (!confirm(t('eduindex.confirm_reset', 'Сбросить прогресс?'))) return;
   localStorage.removeItem(DONE_KEY);
   render();
 }
@@ -170,7 +198,7 @@ function render() {
   const done = getDone();
   const pct = Math.round(done.length / 15 * 100);
   document.getElementById('pbar').style.width = pct + '%';
-  document.getElementById('ppct').textContent = done.length + ' из 15';
+  document.getElementById('ppct').textContent = done.length + ' ' + t('eduindex.of', 'из') + ' 15';
 
   const toc = document.getElementById('toc');
   toc.innerHTML = CHAPTERS.map(c => {
@@ -178,23 +206,33 @@ function render() {
     const tierBadge = c.tier === 'pro'
       ? `<span style="font-family:'JetBrains Mono';font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--gold);border:1px solid var(--gold);padding:1px 6px;border-radius:4px;margin-left:8px;opacity:.7">PRO</span>`
       : '';
+    const chapterTitle = t('eduindex.chapters.' + c.n + '.title', c.title);
+    const chapterSub = t('eduindex.chapters.' + c.n + '.sub', c.sub);
     return `<a class="ch${isDone ? ' done' : ''}" href="/edu/b/${c.n}">
       <span class="ico">${c.ico}</span>
       <div>
-        <div class="num">Глава ${c.n.toString().padStart(2,'0')}${tierBadge}</div>
-        <div class="title">${c.title}</div>
-        <div class="sub">${c.sub}</div>
+        <div class="num">${t('eduindex.chapter_label', 'Глава')} ${c.n.toString().padStart(2,'0')}${tierBadge}</div>
+        <div class="title">${chapterTitle}</div>
+        <div class="sub">${chapterSub}</div>
       </div>
     </a>`;
   }).join('');
 }
 
 render();
+_patchI18n(document);
+if (window.sbfI18n) {
+  window.sbfI18n.ready.then(function () { _patchI18n(document); render(); });
+} else {
+  document.addEventListener('DOMContentLoaded', function () {
+    if (window.sbfI18n) window.sbfI18n.ready.then(function () { _patchI18n(document); render(); });
+  });
+}
 </script>
 <nav class="g-bottom-nav">
-  <a href="/" class="g-bn-item"><span class="g-bn-ico">📊</span><span class="g-bn-lbl">Сегодня</span></a>
-  <a href="/edu/" class="g-bn-item active"><span class="g-bn-ico">📚</span><span class="g-bn-lbl">Обучение</span></a>
-  <a href="/calendar" class="g-bn-item"><span class="g-bn-ico">📅</span><span class="g-bn-lbl">Календарь</span></a>
+  <a href="/" class="g-bn-item"><span class="g-bn-ico"><img class="mi-icon" src="/assets/icons/icon-sun.svg" alt="" width="20" height="20"></span><span class="g-bn-lbl" data-i18n="nav.today">Сегодня</span></a>
+  <a href="/edu/" class="g-bn-item active"><span class="g-bn-ico"><img class="mi-icon" src="/assets/icons/icon-books.png" alt="" width="20" height="20"></span><span class="g-bn-lbl" data-i18n="nav.edu">Обучение</span></a>
+  <a href="/calendar" class="g-bn-item"><span class="g-bn-ico"><img class="mi-icon" src="/assets/icons/icon-calendar.png" alt="" width="20" height="20"></span><span class="g-bn-lbl" data-i18n="nav.calendar">Календарь</span></a>
 </nav>
 </body>
 </html>
