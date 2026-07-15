@@ -1,0 +1,35 @@
+/* ============================================================================
+   SBF I18N — клиентский доступ к тому же словарю, что и сервер (core/i18n.py,
+   /api/i18n?lang=). Нужен для sbf-header.js/sbf-profile.js/sbf-feedback.js —
+   они не рендерятся через Jinja (строятся строкой в браузере), а серверные
+   страницы (index.html/register.html/...) используют {{ t('key', lang) }}
+   напрямую и в этом файле не нуждаются.
+
+   Синхронно не выйдет (словарь качается по сети) — window.sbfI18n.ready
+   резолвится, когда словарь загружен; для не критичных ко времени вызовов
+   (панели, поздние перерисовки) можно просто звать t() сразу — до загрузки
+   вернёт ключ как есть, страница не сломается, просто на долю секунды
+   пропустит перевод (некритично для навигации/лейблов).
+   ========================================================================= */
+(function () {
+  'use strict';
+
+  function detectLang() {
+    var m = location.pathname.match(/^\/(ro)(\/|$)/);
+    return m ? m[1] : 'ru';
+  }
+
+  var LANG = detectLang();
+  var DICT = {};
+
+  var ready = fetch('/api/i18n?lang=' + LANG)
+    .then(function (r) { return r.ok ? r.json() : {}; })
+    .then(function (d) { DICT = d || {}; })
+    .catch(function () { /* остаёмся на ключах-заглушках, не критично */ });
+
+  function t(key, fallback) {
+    return DICT[key] || fallback || key;
+  }
+
+  window.sbfI18n = { lang: LANG, t: t, ready: ready };
+})();

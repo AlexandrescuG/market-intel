@@ -17,6 +17,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from core import journal_db, journal_crypto, journal_ocr, journal_csv, journal_meta, journal_discipline, journal_alerts, journal_brief, journal_setups, journal_tilt, journal_gamification, journal_goals, journal_account, journal_auth, journal_feedback, journal_import, journal_analytics, journal_review, journal_cooldown, i18n
 
 from jinja2 import Environment, FileSystemLoader
+from markupsafe import Markup
 
 PORT = 8085
 DIRECTORY = os.path.join(os.path.dirname(os.path.abspath(__file__)), "web")
@@ -90,6 +91,24 @@ _jinja.globals["url_for"] = _url_for
 # жил без экранирования, но новый код это ни от чего не освобождает.
 _site_jinja = Environment(loader=FileSystemLoader(str(WEB_DIR)), autoescape=True)
 _site_jinja.globals["t"] = i18n.t
+
+
+def _tojson_filter(value) -> Markup:
+    """Обычная jinja2.Environment (в отличие от Flask) не регистрирует tojson
+    сама -- нужен для безопасной подстановки переведённых строк внутрь <script>
+    как JS-литералов (напр. {{ t('key', lang) | tojson }}). json.dumps() как
+    filter НЕЛЬЗЯ регистрировать напрямую: при autoescape=True Jinja экранирует
+    его результат как обычный текст (" -> &#34;), а HTML-entities внутри
+    <script> браузер не декодирует -- получился бы синтаксически битый JS.
+    Оборачиваем в Markup (уже безопасно для вставки как есть) и вдобавок
+    экранируем </script>-подобные последовательности и &, чтобы переведённая
+    строка не могла преждевременно закрыть тег или пробить HTML."""
+    raw = json.dumps(value, ensure_ascii=False)
+    raw = raw.replace("&", "\\u0026").replace("<", "\\u003c").replace(">", "\\u003e")
+    return Markup(raw)
+
+
+_site_jinja.filters["tojson"] = _tojson_filter
 
 _EDU_RE     = re.compile(r'^/edu(?:/(?P<lang>ro|en))?/b(?:/(?P<ch>\d+))?(?:\?.*)?$')
 _EDU_TOC_RE = re.compile(r'^/edu/?(?:\?.*)?$')

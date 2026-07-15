@@ -49,9 +49,16 @@
   }
 
   var path = location.pathname;
-  var isMain     = path === '/' || path === '/index.html';
-  var isCalendar = path === '/calendar' || path.startsWith('/edu/calendar');
-  var isJournal  = path === '/journal.html' || path === '/journal';
+  // /ro/<...> — те же маршруты, что и без префикса (см. i18n.lang_from_path на
+  // сервере); без этой нормализации isMain/isCalendar/isJournal ломаются на
+  // /ro/-страницах (пример реальной поломки: на /ro/ isMain оказывался false,
+  // и поверх собственного инлайн-скрипта index.html поверх тех же #clock/
+  // #liveDot/#winTxt начинал параллельно писать ещё и clockTick()/setLive()
+  // из этого файла — гонка за одни и те же элементы).
+  var _bare = path.replace(/^\/ro(?=\/|$)/, '') || '/';
+  var isMain     = _bare === '/' || _bare === '/index.html';
+  var isCalendar = _bare === '/calendar' || _bare.startsWith('/edu/calendar');
+  var isJournal  = _bare === '/journal.html' || _bare === '/journal';
   var isEdu      = !isMain && !isCalendar && !isJournal;
 
   // Detect edu book pages for RU/RO/EN switcher: /edu/b/n, /edu/ro/b/n, /edu/en/b/n
@@ -170,6 +177,22 @@
   // не нужно (снаружи уже есть свой хост-хром) и просто расходует ресурсы.
   if (_inIframe) return;
 
+  // ── i18n (см. assets/i18n.js) ───────────────────────────────────────────
+  // Шапка вставляется СИНХРОННО (как и раньше) — sbf-profile.js/sbf-feedback.js
+  // ожидают .g-bottom-nav в DOM сразу после выполнения этого скрипта. Поэтому
+  // текст статичных лейблов (nav/tagline) не ждёт словарь: t(key, fallback)
+  // либо сразу отдаёт готовый перевод (если словарь уже успел загрузиться),
+  // либо русский fallback — и через data-i18n правится один раз ниже, когда
+  // sbfI18n.ready резолвится.
+  var _i18n = window.sbfI18n || { lang: 'ru', t: function (k, fb) { return fb || k; }, ready: Promise.resolve() };
+  function t(key, fallback) { return _i18n.t(key, fallback); }
+
+  function otherLangHref(lang) {
+    var isRo = /^\/ro(\/|$)/.test(path);
+    if (lang === 'ro') return isRo ? path : ('/ro' + (path === '/' ? '' : path));
+    return isRo ? (path.replace(/^\/ro/, '') || '/') : path;
+  }
+
   // ── HTML ─────────────────────────────────────────────────────────────────
   var isCharts = path === '/chart.html' || path.includes('/chart');
 
@@ -177,12 +200,12 @@
     '<header class="sbf-hd">',
     '  <a href="/" class="sbf-brand">',
     '    <div class="logo-wrap"><img src="/assets/logo.png" alt="SBF"></div>',
-    '    <div class="sbf-brand-text"><b>SBF INTELLIGENCE</b><span>рыночная разведка · sbfconsult.com</span></div>',
+    '    <div class="sbf-brand-text"><b>SBF INTELLIGENCE</b><span data-i18n="brand.tagline">' + t('brand.tagline', 'рыночная разведка · sbfconsult.com') + '</span></div>',
     '  </a>',
     '  <nav class="g-nav">',
-    '    <a href="/"           class="g-nav-item ' + navCls('today')    + '">Сегодня</a>',
-    '    <a href="/edu/"       class="g-nav-item ' + navCls('edu')       + '">Обучение</a>',
-    '    <a href="/calendar"   class="g-nav-item ' + navCls('calendar')  + '">Календарь</a>',
+    '    <a href="/"           class="g-nav-item ' + navCls('today')    + '" data-i18n="nav.today">' + t('nav.today', 'Сегодня') + '</a>',
+    '    <a href="/edu/"       class="g-nav-item ' + navCls('edu')       + '" data-i18n="nav.edu">' + t('nav.edu', 'Обучение') + '</a>',
+    '    <a href="/calendar"   class="g-nav-item ' + navCls('calendar')  + '" data-i18n="nav.calendar">' + t('nav.calendar', 'Календарь') + '</a>',
     '  </nav>',
     '  <div class="sbf-right">',
     '    <div class="sbf-win"><span class="dot" id="liveDot"></span><span id="liveTxt">Live</span></div>',
@@ -194,7 +217,10 @@
         '<a href="/edu/ro/b/' + bookNum + '"' + (bookLang === 'ro' ? ' class="active"' : '') + '>RO</a>' +
         '<a href="/edu/en/b/' + bookNum + '"' + (bookLang === 'en' ? ' class="active"' : '') + '>EN</a>' +
         '</div>'
-      : '',
+      : '    <div class="sbf-lang-sw">' +
+        '<a href="' + otherLangHref('ru') + '"' + (_i18n.lang === 'ru' ? ' class="active"' : '') + '>RU</a>' +
+        '<a href="' + otherLangHref('ro') + '"' + (_i18n.lang === 'ro' ? ' class="active"' : '') + '>RO</a>' +
+        '</div>',
     '  </div>',
     '</header>',
     '<div class="sbf-mob-bar" id="sbfMobBar">',
@@ -207,10 +233,10 @@
 
   // Bottom nav built separately so position:fixed is never trapped inside a stacking parent
   var _navHtml = [
-    '<a href="/"           class="g-bn-item ' + navCls('today')    + '"><span class="g-bn-ico">☀️</span><span class="g-bn-lbl">Сегодня</span></a>',
+    '<a href="/"           class="g-bn-item ' + navCls('today')    + '"><span class="g-bn-ico">☀️</span><span class="g-bn-lbl" data-i18n="nav.today">' + t('nav.today', 'Сегодня') + '</span></a>',
     // Profile injected here as 2nd by sbf-profile.js
-    '<a href="/edu/"     class="g-bn-item ' + navCls('edu')       + '"><span class="g-bn-ico">📚</span><span class="g-bn-lbl">Обучение</span></a>',
-    '<a href="/calendar" class="g-bn-item ' + navCls('calendar')  + '"><span class="g-bn-ico">📅</span><span class="g-bn-lbl">Календарь</span></a>'
+    '<a href="/edu/"     class="g-bn-item ' + navCls('edu')       + '"><span class="g-bn-ico">📚</span><span class="g-bn-lbl" data-i18n="nav.edu">' + t('nav.edu', 'Обучение') + '</span></a>',
+    '<a href="/calendar" class="g-bn-item ' + navCls('calendar')  + '"><span class="g-bn-ico">📅</span><span class="g-bn-lbl" data-i18n="nav.calendar">' + t('nav.calendar', 'Календарь') + '</span></a>'
   ].join('\n');
 
   function inject() {
@@ -231,6 +257,18 @@
   if (document.body) { inject(); }
   else { document.addEventListener('DOMContentLoaded', inject); }
 
+  // Статичные лейблы (nav/tagline) вставлены синхронно с русским fallback —
+  // как только словарь догрузится (обычно за десятки мс), одноразово
+  // подставляем реальный перевод по data-i18n. Общий механизм на будущее:
+  // любой новый статичный текст в шапке достаточно пометить data-i18n="key".
+  _i18n.ready.then(function () {
+    if (_i18n.lang === 'ru') return;
+    var nodes = document.querySelectorAll('[data-i18n]');
+    for (var i = 0; i < nodes.length; i++) {
+      nodes[i].textContent = t(nodes[i].getAttribute('data-i18n'), nodes[i].textContent);
+    }
+  });
+
   // На главной странице index.html сам управляет данными через те же DOM-ID.
   if (isMain) return;
 
@@ -241,11 +279,16 @@
     return Math.abs(n) >= 1000 ? n.toLocaleString('en-US', { maximumFractionDigits: 2 }) : String(n);
   };
   var NAMES = {
-    'GC=F':'GOLD','SI=F':'SILVER','CL=F':'Нефть WTI','NG=F':'Природный газ',
+    'GC=F':'GOLD','SI=F':'SILVER',
     'BTC-USD':'BTCUSD','ETH-USD':'ETHUSD','SOL-USD':'SOLUSD',
     'EURUSD=X':'EURUSD','GBPUSD=X':'GBPUSD',
     '^GSPC':'S&P 500','^IXIC':'Nasdaq','^DJI':'Dow Jones','^VIX':'VIX','DX-Y.NYB':'DXY'
   };
+  function tickerName(ticker) {
+    if (ticker === 'CL=F') return t('ticker.wti', 'Нефть WTI');
+    if (ticker === 'NG=F') return t('ticker.gas', 'Природный газ');
+    return NAMES[ticker];
+  }
   var BYBIT_MAP = { 'BTCUSDT':'BTC-USD','ETHUSDT':'ETH-USD','SOLUSDT':'SOL-USD' };
   var _fng = null;
   var _live = {};
@@ -260,7 +303,7 @@
       var chg = i.change_pct;
       var cls = chg > 0 ? 'up' : chg < 0 ? 'down' : '';
       var sign = chg > 0 ? '+' : '';
-      var name = NAMES[i.ticker] || i.name || i.ticker;
+      var name = tickerName(i.ticker) || i.name || i.ticker;
       _live[i.ticker] = i.price;
       return '<div class="tick"><div class="k">' + name + '</div>' +
         '<div class="v" id="sp_' + safeId(i.ticker) + '">' + fmt(i.price) + '</div>' +
@@ -325,16 +368,17 @@
     var winDot = document.getElementById('winDot');
     var winTxt = document.getElementById('winTxt');
     if (winDot) winDot.className = 'dot' + (inWin ? ' on' : '');
-    if (winTxt) winTxt.textContent = inWin ? 'Утренний синтез' : 'Скрипты 24/7';
+    if (winTxt) winTxt.textContent = inWin ? t('clock.morning_window', 'Утренний синтез') : t('clock.always_on', 'Скрипты 24/7');
   }
   clockTick();
   setInterval(clockTick, 60000);
+  _i18n.ready.then(clockTick); // подставить перевод сразу, не ждать минуту до первого interval
 
   function setLive(ok) {
     var liveDot = document.getElementById('liveDot');
     var liveTxt = document.getElementById('liveTxt');
     if (liveDot) liveDot.className = 'dot' + (ok ? ' on' : '');
-    if (liveTxt) liveTxt.textContent = ok ? 'Live' : 'retry…';
+    if (liveTxt) liveTxt.textContent = ok ? t('live.on', 'Live') : t('live.retry', 'retry…');
     var mobLiveDot = document.getElementById('mobLiveDot');
     if (mobLiveDot) mobLiveDot.className = 'mob-dot' + (ok ? '' : ' off');
   }
@@ -423,10 +467,14 @@
 
 })();
 
+// i18n.js НЕ автозагружаем отсюда — sbf-header.js сам строит переведённую
+// шапку (нужен словарь ДО того, как этот файл дойдёт до низа и что-то
+// заинжектил бы), поэтому i18n.js подключён отдельным <script> пораньше в
+// <head> каждой страницы (до sbf-header.js). См. ниже — построение шапки
+// дожидается sbfI18n.ready.
+
 // Автозагрузка общего auth-клиента (sbf-auth.js) — ДО профиля и фидбека,
-// оба используют window.sbfAuth. async=false на всех трёх сохраняет порядок
-// выполнения (иначе динамически вставленные <script> по умолчанию async
-// и могут выполниться в любом порядке).
+// оба используют window.sbfAuth.
 (function () {
   var s = document.createElement('script');
   s.src = '/assets/sbf-auth.js?v=1';
