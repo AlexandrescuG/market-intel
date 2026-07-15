@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>SBF | {% if lang == 'ro' %}Capitolul 6. Pulsul Știrilor{% else %}Глава 6. Пульс Новостей{% endif %}</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html,body{max-width:100vw;overflow-x:hidden;scroll-behavior:smooth}
+    body{background:#ffffff;font-family:'DM Sans',system-ui,sans-serif;color:#18181a}
+    #sbf-book-root{min-height:100vh}
+    .back-to-edu{
+      position:fixed;bottom:20px;right:20px;z-index:500;
+      background:#18181a;color:rgba(255,255,255,0.6);
+      font-family:'DM Sans',sans-serif;font-size:.75rem;letter-spacing:1.5px;text-transform:uppercase;
+      padding:7px 13px;text-decoration:none;transition:all .2s;
+      border:1px solid rgba(255,255,255,0.08);
+    }
+    .back-to-edu:hover{background:#c9973a;color:#fff}
+    .messenger-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:30px}
+    @media(max-width:768px){
+      .messenger-grid{grid-template-columns:1fr}
+      .hide-mobile{display:none!important}
+      .g2{grid-template-columns:1fr!important}
+      .g3{grid-template-columns:1fr!important}
+      .g4{grid-template-columns:1fr 1fr!important}
+    }
+    @keyframes pulseFlash {
+      0% { background-color: rgba(242,54,69,0.1); }
+      50% { background-color: rgba(242,54,69,0.4); }
+      100% { background-color: rgba(242,54,69,0.1); }
+    }
+    .flash-news { animation: pulseFlash 1.5s infinite; }
+  </style>
+</head>
+<body>
+
+
+<div id="sbf-book-root"></div>
+<a href="/edu" class="back-to-edu">← Edu</a>
+
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<script type="text/babel" data-presets="react">
+const INITIAL_LANG = "{{ lang }}";
+
+{% raw %}
+const STRINGS = {
+  ru: {
+    stickyLevel:"УРОВЕНЬ 6", stickyTitle:"Пульс Новостей", stickyFA:"ФА 50%", stickyTA:"ТА 50%",
+    heroLabel:"SBF COMPANY — ГЛАВА 6", heroTitleA:"Пульс", heroTitleB:"Новостей",
+    heroSub:"Как фундаментальный анализ предсказывает экономический взрыв, а технический индикатор визуализирует сжатие пружины перед пробоем.",
+    heroChip1:"Макроэкономика", heroChip3:"2 Тренажера",
+
+    sec1Title:"Макроэкономика: Три кита волатильности",
+    sec1Sub:"Рынок движут не линии на графике, а капитал. Капитал перетекает из актива в актив только под давлением глобальных экономических данных. Новость — это триггер ликвидности.",
+
+    fundFomcTitle:"FOMC (Ставка ФРС)", fundGdpTitle:"GDP (ВВП США)",
+    fundNfpText:"Количество новых рабочих мест в США. Выходит в первую пятницу месяца. Один из самых волатильных дней в трейдинге. Если мест больше прогноза — экономика сильна, доллар растёт.",
+    fundCpiText:"Индекс потребительских цен (Инфляция). Главный страх рынков. Если инфляция выше ожиданий, инвесторы паникуют, акции падают, а ФРС готовится ужесточать политику.",
+    fundFomcText:"Решение Центрального Банка США по процентной ставке. Деньги дорожают = акции и крипта дешевеют. И наоборот. Это 'рубильник' мировой ликвидности.",
+    fundGdpText:"Базовый индикатор здоровья экономики. Отклонения от прогноза вызывают переоценку всех активов институциональными инвесторами.",
+
+    matrixLabel:"МАТРИЦА ВЛИЯНИЯ НОВОСТЕЙ (ПРИ ЗНАЧЕНИЯХ ВЫШЕ ПРОГНОЗА)",
+    matrixColEvent:"Событие", matrixColDollar:"Доллар (DXY)", matrixColGold:"Золото (XAU)", matrixColSP:"S&P 500", matrixColCrypto:"Крипта (BTC)",
+    matrixRowNFP:"NFP (Рабочие места) ↑", matrixRowCPI:"CPI (Инфляция) ↑", matrixRowFOMC:"FOMC (Ставка ФРС) ↑",
+    matrixStrongUp:"🟢 Сильный рост", matrixUp:"🟢 Рост", matrixDown:"🔴 Падение", matrixMixed:"🟡 Смешанно", matrixStrongDown:"🔴 Сильное падение",
+
+    cycleLabel:"ЖИЗНЕННЫЙ ЦИКЛ НОВОСТИ",
+    phase1Label:"ФАЗА 1: ОЖИДАНИЕ", phase1Sub:"«Слухи»",
+    phase1Text:"Аналитики прогнозируют хорошие данные. Толпа начинает заранее скупать актив. Цена стабильно растет без видимых причин.",
+    phase2Label:"ФАЗА 2: РЕЛИЗ", phase2Sub:"«Факт»",
+    phase2Text:"Выходит позитивная новость. В рынок залетают опоздавшие (FOMO). Происходит резкий всплеск волатильности и ликвидности.",
+    phase3Label:"ФАЗА 3: ФИКСАЦИЯ", phase3Sub:"«Обвал»",
+    phase3Text:"Крупные игроки (Умные деньги), купившие на 'Фазе 1', продают свои огромные объемы об радостную толпу. Цена стремительно падает.",
+
+    nfpHeader:"Bloomberg Терминал: Релиз NFP", nfpBadge:"ИНТЕРАКТИВ — ФУНДАМЕНТАЛ",
+    nfpEventLabel:"Событие", nfpEventDesc:"Изменение числа занятых в несельскохозяйственном секторе",
+    nfpForecastLabel:"Прогноз аналитиकों:",
+    nfpSimulateBtn:"СИМУЛИРОВАТЬ РЕЛИЗ", nfpLocalTimeFallback:"15:30 МСК",
+    nfpFactLabel:"ФАКТ (Actual):",
+    nfpShockPart1:"🔥 ШОКОВЫЕ ДАННЫЕ!", nfpShockPart2:"Значение колоссально превышает прогноз.",
+    nfpInstrumentTitle:"Инструмент: XAU/USD (Золото)",
+    nfpStage0Text:"Изучите макро-ожидания слева. Как только выйдут данные, у вас будут доли секунды, чтобы принять верное решение. Приготовьтесь.",
+    nfpStage1Text:"🚨 ДАННЫЕ ВЫШЛИ! Рабочих мест создано в 2 раза больше прогноза. Экономика перегрета. Что делаем с золотом?",
+    nfpStage2Text:"Сделка зафиксирована.",
+    nfpBuyBtn:"BUY (Купить)", nfpSellBtn:"SELL (Продать)",
+    nfpCorrectTitle:"✅ Блестяще! Вы забрали профит.", nfpWrongTitle:"❌ Ошибка. Вас выбило по стопу.",
+    nfpCorrectExplain:"Логика: NFP вышел лучше прогноза (285K > 150K). Экономика США сильна. Инвесторы начинают верить, что ФРС повысит ставки. Капитал перетекает в Доллар (USD). Так как золото котируется в долларах (XAU/USD), сильный доллар мгновенно обрушает цену золота.",
+    nfpWrongExplain:"Логика: Вы купили золото, но NFP вышел феноменально сильным (285K > 150K). Это позитив для экономики США и Доллара. Инвесторы скупают доллар, что математически давит пару XAU/USD вниз. Покупка золота при сильном долларе — это игра против локомотива.",
+    nfpResetBtn:"↺ ПОВТОРИТЬ СИМУЛЯЦИЮ",
+
+    sqzHeader:"Охота на Squeeze (Сжатие)", sqzBadge:"ИНТЕРАКТИВ — ТЕХНИКА (BOLLINGER BANDS)",
+    sqzInitialMsg:"Найдите на графике зону 'Squeeze' (максимального сужения линий) и кликните в этот блок.",
+    sqzCorrectMsg:"🎯 Идеально! Вы нашли Squeeze. Волатильность упала до нуля, пружина сжалась. Именно здесь крупные игроки накопили позицию перед мощным прострелом вверх.",
+    sqzWrongMsg:"❌ Нет, здесь полосы всё ещё широкие. Ищите 'узкое горлышко', где цена зажата в тиски.",
+    sqzBreakoutLabel:"ВЗРЫВ (BREAKOUT) 🚀", sqzFutureHidden:"БУДУЩЕЕ СКРЫТО", sqzHideBtn:"↻ СКРЫТЬ ГРАФИК",
+
+    bbSmaTitle:"Справедливая цена (SMA)",
+    bbSmaText:"Средняя линия индикатора — это 20-периодная скользящая средняя. Она показывает, где находится баланс сил между покупателями и продавцами прямо сейчас.",
+    bbExtremeTitle:"Зоны экстремума (±2 SD)",
+    bbExtremeText:"Верхняя и нижняя границы построены на отклонениях математической дисперсии. 95% времени цена находится внутри этого тоннеля. Выход за границы — это аномалия.",
+    bbExpansionTitle:"Пузырь (Expansion)",
+    bbExpansionText:"Когда на рынке мощный тренд или паника, полосы резко расходятся в стороны. Запрыгивать в сделку в этот момент — самая частая ошибка новичков.",
+    bbSqueezeTitle:"Сжатие (Squeeze)",
+    bbSqueezeText:"Полосы сужаются в узкий коридор. Волатильность падает. Рынок замер и копит энергию. Именно в этой зоне профессионалы расставляют ловушки на пробой.",
+
+    sec2Title:"Bollinger Bands: Индикатор дыхания рынка",
+    sec2Sub:"Новость — это спичка. Но чтобы произошел мощный взрыв, нужен плотно спрессованный порох. Индикатор Bollinger Bands визуально показывает периоды, когда рынок зажат в тиски и копит энергию.",
+
+    concl1:"Фундаментал (Макро-новости) создает причину для движения капитала. Техника (Индикаторы) визуализирует это на графике.",
+    concl2:"Правило №1 при NFP: Сильная экономика = Сильный доллар (DXY) = Золото и Евро падают.",
+    concl3:"Рынок живет ожиданиями. Принцип 'Покупай на слухах, продавай на фактах' объясняет, почему актив может рухнуть даже при хороших новостях.",
+    concl4:"Индикатор Bollinger Bands — это детектор волатильности. Он не предсказывает направление, он предсказывает силу будущего движения.",
+    concl5:"Не торгуйте внутри 'Сжатия' (Squeeze). Дождитесь пробоя границы и подтверждения объемами.",
+
+    conclLabel:"ИТОГИ ГЛАВЫ 6", conclTitle:"Чек-лист: Пульс Новостей",
+
+    footerAsk:"Остался вопрос? Напиши аналитику", footerNextBtn:"Уровень 7: Следы Институционалов →",
+  },
+  ro: {
+    stickyLevel:"NIVELUL 6", stickyTitle:"Pulsul Știrilor", stickyFA:"AF 50%", stickyTA:"AT 50%",
+    heroLabel:"SBF COMPANY — CAPITOLUL 6", heroTitleA:"Pulsul", heroTitleB:"Știrilor",
+    heroSub:"Cum analiza fundamentală anticipează o explozie economică, iar un indicator tehnic vizualizează comprimarea arcului înainte de spargere (breakout).",
+    heroChip1:"Macroeconomie", heroChip3:"2 Simulatoare",
+
+    sec1Title:"Macroeconomie: Cei trei piloni ai volatilității",
+    sec1Sub:"Piața nu este mișcată de liniile de pe grafic, ci de capital. Capitalul se deplasează dintr-un activ în altul doar sub presiunea datelor economice globale. Știrea este declanșatorul lichidității.",
+
+    fundFomcTitle:"FOMC (Rata Fed)", fundGdpTitle:"GDP (PIB-ul SUA)",
+    fundNfpText:"Numărul de locuri de muncă noi create în SUA. Se publică în prima vineri a lunii. Una dintre cele mai volatile zile din trading. Dacă numărul de locuri de muncă depășește prognoza — economia este puternică, dolarul crește.",
+    fundCpiText:"Indicele prețurilor de consum (Inflația). Principala teamă a piețelor. Dacă inflația depășește așteptările, investitorii intră în panică, acțiunile scad, iar Fed se pregătește să înăsprească politica monetară.",
+    fundFomcText:"Decizia Băncii Centrale a SUA privind rata dobânzii. Banii devin mai scumpi = acțiunile și cripto se ieftinesc. Și invers. Acesta este „întrerupătorul” lichidității mondiale.",
+    fundGdpText:"Indicatorul de bază al sănătății economiei. Abaterile de la prognoză determină reevaluarea tuturor activelor de către investitorii instituționali.",
+
+    matrixLabel:"MATRICEA IMPACTULUI ȘTIRILOR (LA VALORI PESTE PROGNOZĂ)",
+    matrixColEvent:"Eveniment", matrixColDollar:"Dolar (DXY)", matrixColGold:"Aur (XAU)", matrixColSP:"S&P 500", matrixColCrypto:"Cripto (BTC)",
+    matrixRowNFP:"NFP (Locuri de muncă) ↑", matrixRowCPI:"CPI (Inflație) ↑", matrixRowFOMC:"FOMC (Rata Fed) ↑",
+    matrixStrongUp:"🟢 Creștere puternică", matrixUp:"🟢 Creștere", matrixDown:"🔴 Scădere", matrixMixed:"🟡 Mixt", matrixStrongDown:"🔴 Scădere puternică",
+
+    cycleLabel:"CICLUL DE VIAȚĂ AL ȘTIRII",
+    phase1Label:"FAZA 1: AȘTEPTARE", phase1Sub:"«Zvonuri»",
+    phase1Text:"Analiștii prognozează date bune. Mulțimea începe să cumpere activul din timp. Prețul crește constant fără motive vizibile.",
+    phase2Label:"FAZA 2: PUBLICARE", phase2Sub:"«Fapt»",
+    phase2Text:"Apare o știre pozitivă. Pe piață intră întârziații (FOMO). Are loc un salt brusc al volatilității și lichidității.",
+    phase3Label:"FAZA 3: ÎNCASAREA PROFITULUI", phase3Sub:"«Prăbușire»",
+    phase3Text:"Marii jucători (Smart Money), care au cumpărat în 'Faza 1', își vând acum volumele uriașe către mulțimea euforică. Prețul se prăbușește rapid.",
+
+    nfpHeader:"Terminal Bloomberg: Publicarea NFP", nfpBadge:"INTERACTIV — FUNDAMENTAL",
+    nfpEventLabel:"Eveniment", nfpEventDesc:"Variația numărului de angajați în sectorul non-agricol",
+    nfpForecastLabel:"Prognoza analiștilor:",
+    nfpSimulateBtn:"SIMULEAZĂ PUBLICAREA", nfpLocalTimeFallback:"15:30 MSK",
+    nfpFactLabel:"FAPT (Actual):",
+    nfpShockPart1:"🔥 DATE ȘOCANTE!", nfpShockPart2:"Valoarea depășește colosal prognoza.",
+    nfpInstrumentTitle:"Instrument: XAU/USD (Aur)",
+    nfpStage0Text:"Studiază așteptările macro din stânga. De îndată ce apar datele, vei avea o fracțiune de secundă pentru a lua decizia corectă. Pregătește-te.",
+    nfpStage1Text:"🚨 DATELE AU APĂRUT! S-au creat de 2 ori mai multe locuri de muncă decât prognoza. Economia este supraîncălzită. Ce facem cu aurul?",
+    nfpStage2Text:"Tranzacția este finalizată.",
+    nfpBuyBtn:"BUY (Cumpără)", nfpSellBtn:"SELL (Vinde)",
+    nfpCorrectTitle:"✅ Excelent! Ai luat profitul.", nfpWrongTitle:"❌ Greșeală. Ai fost scos pe stop.",
+    nfpCorrectExplain:"Logica: NFP a ieșit mai bun decât prognoza (285K > 150K). Economia SUA este puternică. Investitorii încep să creadă că Fed va majora rata dobânzii. Capitalul se mută spre Dolar (USD). Deoarece aurul este cotat în dolari (XAU/USD), un dolar puternic prăbușește instantaneu prețul aurului.",
+    nfpWrongExplain:"Logica: Ai cumpărat aur, dar NFP a ieșit fenomenal de puternic (285K > 150K). Acesta este un semnal pozitiv pentru economia SUA și pentru dolar. Investitorii cumpără masiv dolari, ceea ce împinge matematic perechea XAU/USD în jos. Cumpărarea aurului atunci când dolarul este puternic înseamnă să joci împotriva locomotivei.",
+    nfpResetBtn:"↺ REPETĂ SIMULAREA",
+
+    sqzHeader:"Vânătoare de Squeeze (Comprimare)", sqzBadge:"INTERACTIV — TEHNICĂ (BOLLINGER BANDS)",
+    sqzInitialMsg:"Găsește pe grafic zona de 'Squeeze' (comprimarea maximă a liniilor) și dă clic în acest bloc.",
+    sqzCorrectMsg:"🎯 Perfect! Ai găsit Squeeze-ul. Volatilitatea a scăzut la zero, arcul s-a comprimat. Exact aici jucătorii mari și-au acumulat poziția înainte de o mișcare puternică în sus.",
+    sqzWrongMsg:"❌ Nu, aici benzile sunt încă largi. Caută 'gâtul de sticlă' unde prețul este strâns ca într-o menghină.",
+    sqzBreakoutLabel:"EXPLOZIE (BREAKOUT) 🚀", sqzFutureHidden:"VIITORUL ESTE ASCUNS", sqzHideBtn:"↻ ASCUNDE GRAFICUL",
+
+    bbSmaTitle:"Prețul corect (SMA)",
+    bbSmaText:"Linia mediană a indicatorului este o medie mobilă pe 20 de perioade. Ea arată unde se află echilibrul de forțe dintre cumpărători și vânzători chiar acum.",
+    bbExtremeTitle:"Zonele extreme (±2 SD)",
+    bbExtremeText:"Marginile superioară și inferioară sunt construite pe baza abaterilor dispersiei matematice. 95% din timp, prețul se află în interiorul acestui tunel. Ieșirea în afara marginilor este o anomalie.",
+    bbExpansionTitle:"Balonul (Expansion)",
+    bbExpansionText:"Când pe piață este un trend puternic sau panică, benzile se depărtează brusc una de alta. Să sari într-o tranzacție chiar în acest moment este cea mai frecventă greșeală a începătorilor.",
+    bbSqueezeTitle:"Comprimare (Squeeze)",
+    bbSqueezeText:"Benzile se îngustează într-un coridor strâmt. Volatilitatea scade. Piața a înghețat și acumulează energie. Exact în această zonă profesioniștii pregătesc capcane pentru breakout.",
+
+    sec2Title:"Bollinger Bands: Indicatorul respirației pieței",
+    sec2Sub:"Știrea este un chibrit. Dar pentru o explozie puternică e nevoie de praf de pușcă bine comprimat. Indicatorul Bollinger Bands arată vizual perioadele în care piața este strânsă ca într-o menghină și acumulează energie.",
+
+    concl1:"Fundamentalul (știrile macro) creează motivul mișcării capitalului. Tehnica (indicatorii) vizualizează acest lucru pe grafic.",
+    concl2:"Regula nr. 1 la NFP: Economie puternică = Dolar puternic (DXY) = Aurul și Euro scad.",
+    concl3:"Piața trăiește din așteptări. Principiul 'Cumpără pe zvonuri, vinde pe fapte' explică de ce un activ poate să se prăbușească chiar și la vești bune.",
+    concl4:"Indicatorul Bollinger Bands este un detector de volatilitate. El nu prezice direcția, ci prezice forța mișcării viitoare.",
+    concl5:"Nu tranzacționa în interiorul 'Comprimării' (Squeeze). Așteaptă spargerea marginii și confirmarea prin volum.",
+
+    conclLabel:"CONCLUZIILE CAPITOLULUI 6", conclTitle:"Checklist: Pulsul Știrilor",
+
+    footerAsk:"Mai ai o întrebare? Scrie analistului", footerNextBtn:"Nivelul 7: Urmele Instituționalilor →",
+  }
+};
+
+const C = {
+  gold:"#c9973a", goldLight:"#f4d49f", goldPale:"#f7f0e3",
+  black:"#18181a", ink:"#18181a", inkMid:"#555555",
+  inkSoft:"rgba(24,24,26,0.58)", inkFaint:"rgba(24,24,26,0.28)",
+  white:"#ffffff", surface:"#faf8f5", surfaceMid:"#f0ebe0",
+  border:"rgba(24,24,26,0.1)", borderGold:"rgba(201,151,58,0.25)",
+  green:"#089981", greenD:"#2d7a4f", greenPale:"#eaf5ee",
+  red:"#f23645", redD:"#c0392b", redPale:"#fdecea",
+  blue:"#2563eb", chart:"#131722", bluePale:"#eff6ff"
+};
+
+const MSG_TR = {
+  ru:{ tag:"НАПИСАТЬ НАМ", title:"Предпочитаете мессенджер?", sub:"Напишите в Telegram или WhatsApp — сообщение уже готово.", btnTg:"ОТКРЫТЬ TELEGRAM", btnWa:"ОТКРЫТЬ WHATSAPP", online:"онлайн" },
+  en:{ tag:"CONTACT US", title:"Prefer a messenger?", sub:"Write us on Telegram or WhatsApp.", btnTg:"OPEN TELEGRAM", btnWa:"OPEN WHATSAPP", online:"online" },
+  ro:{ tag:"CONTACTAȚI-NE", title:"Preferați un messenger?", sub:"Scrieți pe Telegram sau WhatsApp.", btnTg:"DESCHIDE TELEGRAM", btnWa:"DESCHIDE WHATSAPP", online:"online" }
+};
+
+const Mono = ({children,size=13,color=C.inkSoft,spacing=3,style={},className=""}) =>
+  <span className={className} style={{fontFamily:"'Courier New',monospace",fontSize:size,letterSpacing:spacing,color,...style}}>{children}</span>;
+const Chip = ({children,color=C.gold,bg="transparent"}) =>
+  <span style={{fontFamily:"'Courier New',monospace",fontSize:11,letterSpacing:3,color,border:`1px solid ${color}`,background:bg,padding:"4px 11px",display:"inline-block",textTransform:"uppercase"}}>{children}</span>;
+const Rule = ({w="50%",my=32}) =>
+  <div style={{height:1,background:`linear-gradient(90deg,transparent,${C.gold},transparent)`,width:w,margin:`${my}px auto`,opacity:0.4}}/>;
+const SectionTitle = ({children,sub,align="left"}) => (
+  <div style={{textAlign:align,marginBottom:40}}>
+    <h2 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(24px,3.2vw,36px)",fontWeight:400,color:C.black,lineHeight:1.15,marginBottom:sub?12:0}}>{children}</h2>
+    {sub && <p style={{fontSize:15,color:C.inkSoft,lineHeight:1.65,maxWidth:720,margin:align==="center"?"0 auto":0}}>{sub}</p>}
+  </div>
+);
+const InfoCard = ({icon,title,text,accent=C.gold}) => (
+  <div style={{background:C.surface,border:`1px solid ${C.border}`,padding:"24px 28px",borderRadius:6,borderLeft:`3px solid ${accent}`}}>
+    <div style={{fontSize:24,marginBottom:12}}>{icon}</div>
+    <div style={{fontWeight:700,fontSize:14,color:C.black,letterSpacing:0.5,marginBottom:8,textTransform:"uppercase"}}>{title}</div>
+    <div style={{fontSize:14,color:C.inkMid,lineHeight:1.65}}>{text}</div>
+  </div>
+);
+
+const getChUrl = (ch) => {
+  let base = INITIAL_LANG==='ru'?'/edu/b':`/edu/${INITIAL_LANG}/b`;
+  return `${base}/${ch}`;
+};
+
+// ─── AskAnalystPopup ──────────────────────────────────────────────────────────
+function AskAnalystPopup({chapterNum, lang, onClose}) {
+  const tr = MSG_TR[lang]||MSG_TR.ru;
+  const prefill = lang==='ru'?`Здравствуйте, есть вопрос по главе ${chapterNum}`:(lang==='en'?`Hello, question on ch ${chapterNum}`:`Bună ziua, întrebare cap ${chapterNum}`);
+  const tgLink = `https://t.me/SBF_Support?text=${encodeURIComponent(prefill)}`;
+  const waLink = `https://api.whatsapp.com/send/?phone=37369005200&text=${encodeURIComponent(prefill)}&type=phone_number&app_absent=0`;
+  return (
+    <div style={{position:"fixed",inset:0,zIndex:1000,display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={onClose}>
+      <div style={{position:"fixed",inset:0,background:"rgba(250,248,245,0.98)"}}/>
+      <div onClick={e=>e.stopPropagation()} style={{position:"relative",width:"100%",maxWidth:900,zIndex:1,margin:"auto",padding:"40px 0"}}>
+        <button onClick={onClose} style={{position:"absolute",top:0,right:10,background:"none",border:"none",fontSize:35,cursor:"pointer",color:C.inkFaint,lineHeight:1}}>×</button>
+        <div style={{marginBottom:40}}>
+          <Mono size={13} color={C.gold} spacing={3} style={{display:"block",marginBottom:15}}>— {tr.tag}</Mono>
+          <h2 style={{fontSize:"clamp(30px,5vw,42px)",fontWeight:700,color:C.black,marginBottom:15,fontFamily:"'DM Serif Display',serif"}}>{tr.title}</h2>
+          <p style={{fontSize:18,color:C.inkMid}}>{tr.sub}</p>
+        </div>
+        <div className="messenger-grid">
+          {[{href:tgLink,bg:"#0088cc",icon:"🚀",name:"SBF Support",sub:`Telegram · ${tr.online}`,btn:tr.btnTg},
+            {href:waLink,bg:"#25d366",icon:"💬",name:"SBF Company",sub:`WhatsApp · ${tr.online}`,btn:tr.btnWa}
+          ].map((m,i) => (
+            <div key={i} style={{background:"#fff",border:"1px solid #e0e0e0",borderRadius:12,padding:"30px 25px",display:"flex",flexDirection:"column"}}>
+              <div style={{display:"flex",alignItems:"center",gap:15,marginBottom:30}}>
+                <div style={{width:50,height:50,borderRadius:"50%",background:i===0?"#e1f3fb":"#e8f5ed",display:"flex",alignItems:"center",justifyContent:"center"}}>{m.icon}</div>
+                <div><div style={{fontSize:18,fontWeight:700}}>{m.name}</div><div style={{fontSize:14,color:C.inkFaint}}>{m.sub}</div></div>
+              </div>
+              <div style={{background:m.bg,padding:"15px 20px",borderRadius:"12px 12px 0 12px",marginBottom:30,alignSelf:"flex-end",maxWidth:"90%"}}>
+                <div style={{fontSize:14,color:"#fff"}}>{prefill}</div>
+              </div>
+              <a href={m.href} target="_blank" style={{marginTop:"auto",display:"block",background:m.bg,color:"#fff",textAlign:"center",padding:"18px",borderRadius:8,textDecoration:"none",fontWeight:700}}>{m.btn}</a>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Interactive 1: NFP Terminal Simulator ───────────────────────────────────
+function NFPNewsSimulator() {
+  const { useState } = React;
+  const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
+  const [stage, setStage] = useState(0);
+  const [choice, setChoice] = useState(null);
+
+  const handleRelease = () => setStage(1);
+  const handleChoice = (c) => { if (stage === 1) { setChoice(c); setStage(2); } };
+  const reset = () => { setStage(0); setChoice(null); };
+
+  const isCorrect = choice === 'sell';
+
+  return (
+    <div style={{background:C.black, borderRadius:8, padding:"40px 48px", color:C.white, position:"relative", overflow:"hidden"}}>
+      <div style={{position:"absolute", top:0, right:0, width:300, height:300, background:"radial-gradient(circle at top right, rgba(201,151,58,0.1), transparent)", pointerEvents:"none"}}/>
+      
+      <div style={{display:"flex",alignItems:"center",gap:14,marginBottom:32, position:"relative"}}>
+        <span style={{fontSize:32}}>📺</span>
+        <div>
+          <div style={{fontFamily:"'DM Serif Display',serif",fontSize:24,color:C.gold}}>{S.nfpHeader}</div>
+          <Mono size={11} color="rgba(255,255,255,0.4)" spacing={2}>{S.nfpBadge}</Mono>
+        </div>
+      </div>
+
+      <div style={{display:"grid", gridTemplateColumns:"1fr 1.2fr", gap:40, alignItems:"stretch"}} className="g2">
+        {/* Terminal Screen */}
+        <div style={{background:"#0a0a0c", border:`1px solid #333`, borderRadius:6, padding:24, display:"flex", flexDirection:"column", justifyContent:"space-between"}}>
+          <div>
+            <Mono size={11} color={C.gold} spacing={2} style={{display:"block", marginBottom:20}}>ECONOMIC CALENDAR (USA)</Mono>
+            
+            <div style={{borderBottom:"1px dashed #333", paddingBottom:15, marginBottom:20}}>
+              <div style={{color:"#888", fontSize:12, marginBottom:6, textTransform:"uppercase"}}>{S.nfpEventLabel}</div>
+              <div style={{fontSize:16, fontWeight:600, color:"#eee"}}>🇺🇸 Non-Farm Payrolls (NFP)</div>
+              <div style={{fontSize:12, color:"#666", marginTop:4}}>{S.nfpEventDesc}</div>
+            </div>
+
+            <div style={{display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:20, padding:"12px 16px", background:"rgba(255,255,255,0.03)", borderRadius:4}}>
+              <span style={{fontSize:14, color:"#aaa"}}>{S.nfpForecastLabel}</span>
+              <span style={{fontFamily:"monospace", fontSize:18, fontWeight:700, color:"#ccc"}}>150,000</span>
+            </div>
+          </div>
+
+          <div style={{minHeight: 100, display:"flex", flexDirection:"column", justifyContent:"center"}}>
+            {stage === 0 && (
+              <button onClick={handleRelease} style={{background:C.gold, color:C.black, border:"none", padding:"16px", fontWeight:700, fontFamily:"monospace", cursor:"pointer", borderRadius:4, letterSpacing:1, width:"100%", transition:"transform 0.1s"}} onMouseDown={e=>e.target.style.transform="scale(0.98)"} onMouseUp={e=>e.target.style.transform="scale(1)"}>
+                {S.nfpSimulateBtn} <span class='local-time' data-utc='2026-03-09T12:00:00Z'>{S.nfpLocalTimeFallback}</span>
+              </button>
+            )}
+
+            {stage >= 1 && (
+              <div className={stage === 1 ? "flash-news" : ""} style={{padding: "20px", borderRadius:4, background: stage === 1 ? "rgba(242,54,69,0.15)" : "rgba(255,255,255,0.05)", border: stage === 1 ? `1px solid ${C.redB}` : `1px solid #333`, transition:"background 0.3s"}}>
+                <div style={{display:"flex", justifyContent:"space-between", alignItems:"center"}}>
+                  <span style={{fontSize:14, fontWeight:700, color:stage===1?C.white:"#888"}}>{S.nfpFactLabel}</span>
+                  <span style={{fontFamily:"monospace", fontSize:28, fontWeight:700, color:C.greenB}}>285,000</span>
+                </div>
+                <div style={{fontSize:12, color:C.greenB, marginTop:10, opacity:0.9, lineHeight:1.4}}>
+                  {S.nfpShockPart1}<br/>{S.nfpShockPart2}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Action Screen */}
+        <div style={{display:"flex", flexDirection:"column", justifyContent:"center"}}>
+          <div style={{marginBottom:24}}>
+            <h3 style={{fontSize:20, fontWeight:600, marginBottom:12, color:C.white}}>{S.nfpInstrumentTitle}</h3>
+            <div style={{fontSize:15, color:"#aaa", lineHeight:1.7, background:"rgba(255,255,255,0.03)", padding:"16px", borderRadius:4, borderLeft:`3px solid ${C.gold}`}}>
+              {stage === 0 ? S.nfpStage0Text
+               : stage === 1 ? S.nfpStage1Text
+               : S.nfpStage2Text}
+            </div>
+          </div>
+
+          {stage <= 1 ? (
+            <div style={{display:"grid", gridTemplateColumns:"1fr 1fr", gap:15}}>
+              <button onClick={() => handleChoice('buy')} disabled={stage===0} style={{padding:"20px", background:stage===0?"#1a1a1a":"rgba(8,153,129,0.1)", border:stage===0?"1px solid #333":`1px solid ${C.greenB}`, color:stage===0?"#444":C.greenB, borderRadius:6, cursor:stage===0?"not-allowed":"pointer", fontWeight:700, fontSize:16, transition:"all .2s"}}>
+                <span style={{fontSize:24, display:"block", marginBottom:8}}>📈</span>
+                {S.nfpBuyBtn}
+              </button>
+              <button onClick={() => handleChoice('sell')} disabled={stage===0} style={{padding:"20px", background:stage===0?"#1a1a1a":"rgba(242,54,69,0.1)", border:stage===0?"1px solid #333":`1px solid ${C.redB}`, color:stage===0?"#444":C.redB, borderRadius:6, cursor:stage===0?"not-allowed":"pointer", fontWeight:700, fontSize:16, transition:"all .2s"}}>
+                <span style={{fontSize:24, display:"block", marginBottom:8}}>📉</span>
+                {S.nfpSellBtn}
+              </button>
+            </div>
+          ) : (
+            <div style={{padding:"24px", borderRadius:6, background: isCorrect ? "rgba(8,153,129,0.1)" : "rgba(242,54,69,0.1)", border: isCorrect ? `1px solid rgba(8,153,129,0.3)` : `1px solid rgba(242,54,69,0.3)`}}>
+              <h4 style={{fontSize:20, color: isCorrect ? C.greenB : C.redB, marginBottom:12, fontFamily:"'DM Serif Display',serif"}}>
+                {isCorrect ? S.nfpCorrectTitle : S.nfpWrongTitle}
+              </h4>
+              <p style={{fontSize:14, color:"#ccc", lineHeight:1.7, marginBottom:20}}>
+                {isCorrect
+                  ? S.nfpCorrectExplain
+                  : S.nfpWrongExplain}
+              </p>
+              <button onClick={reset} style={{background:"transparent", border:`1px solid ${C.gold}`, color:C.gold, padding:"10px 20px", borderRadius:4, cursor:"pointer", fontSize:13, fontWeight:700, fontFamily:"monospace"}}>{S.nfpResetBtn}</button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Interactive 2: Bollinger Squeeze Hunter ─────────────────────────────────
+function BollingerSqueeze() {
+  const { useState, useRef } = React;
+  const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
+
+  const W = 700, H = 280;
+  const dataLen = 70;
+  const points = [];
+  let currentPrice = 120;
+
+  for (let i = 0; i <= dataLen; i++) {
+    let vol = 0;
+    if (i < 25) vol = 8; // Expansion
+    else if (i >= 25 && i <= 45) vol = 1.5; // THE SQUEEZE
+    else if (i > 45) vol = 12; // Breakout
+    
+    let trend = 0;
+    if (i > 45) trend = (i - 45) * 3; // Pump
+    else trend = Math.sin(i / 4) * 3; // Walk
+
+    currentPrice = 120 + trend;
+    let upBand = currentPrice + (vol * 2.5);
+    let lowBand = currentPrice - (vol * 2.5);
+    
+    points.push({ x: i * (W / dataLen), c: currentPrice, u: upBand, l: lowBand });
+  }
+
+  const minP = Math.min(...points.map(p => p.l)) - 10;
+  const maxP = Math.max(...points.map(p => p.u)) + 10;
+  const toY = p => H - ((p - minP) / (maxP - minP)) * H;
+
+  const pLine = points.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x},${toY(p.c)}`).join(' ');
+  const uLine = points.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x},${toY(p.u)}`).join(' ');
+  const lLine = points.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x},${toY(p.l)}`).join(' ');
+  const areaPath = uLine + ' ' + points.slice().reverse().map(p => `L${p.x},${toY(p.l)}`).join(' ') + ' Z';
+
+  const [revealed, setRevealed] = useState(false);
+  const [msg, setMsg] = useState(S.sqzInitialMsg);
+  const [errFlash, setErrFlash] = useState(false);
+  const svgRef = useRef(null);
+
+  const handleClick = (e) => {
+    if (revealed) return;
+    const rect = svgRef.current.getBoundingClientRect();
+    const xClick = e.clientX - rect.left;
+    const clickIndex = Math.round(xClick / (W / dataLen));
+
+    if (clickIndex >= 25 && clickIndex <= 45) {
+      setRevealed(true);
+      setMsg(S.sqzCorrectMsg);
+    } else {
+      setMsg(S.sqzWrongMsg);
+      setErrFlash(true);
+      setTimeout(() => setErrFlash(false), 500);
+    }
+  };
+
+  const reset = () => {
+    setRevealed(false);
+    setMsg(S.sqzInitialMsg);
+  };
+
+  const visibleWidth = revealed ? W : (45 * (W / dataLen));
+
+  return (
+    <div style={{background:C.surface, border:`1px solid ${errFlash ? C.redB : C.border}`, borderRadius:8, padding:"40px", transition: "border 0.3s"}}>
+      <div style={{display:"flex",alignItems:"center",gap:14,marginBottom:32}}>
+        <span style={{fontSize:32}}>🗜️</span>
+        <div>
+          <div style={{fontFamily:"'DM Serif Display',serif",fontSize:24,color:C.black}}>{S.sqzHeader}</div>
+          <Mono size={11} color={C.inkSoft} spacing={2}>{S.sqzBadge}</Mono>
+        </div>
+      </div>
+
+      <div style={{marginBottom: 24, padding: "16px 20px", background: revealed ? "rgba(8,153,129,0.08)" : C.surfaceMid, borderRadius: 6, color: revealed ? C.greenD : C.inkMid, fontWeight: revealed ? 600 : 400, fontSize: 15, borderLeft: revealed ? `4px solid ${C.greenB}` : `4px solid transparent`, transition:"all .3s"}}>
+        {msg}
+      </div>
+
+      <div style={{position:"relative", background:C.chart, borderRadius:6, overflow:"hidden", cursor: revealed ? "default" : "crosshair", boxShadow:"inset 0 0 20px rgba(0,0,0,0.5)"}} onClick={handleClick} ref={svgRef}>
+        <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%", display:"block"}}>
+          
+          <clipPath id="chartMask">
+            <rect x="0" y="0" width={visibleWidth} height={H} style={{transition: "width 1.5s cubic-bezier(0.4, 0, 0.2, 1)"}} />
+          </clipPath>
+
+          <g clipPath="url(#chartMask)">
+            {[0.2, 0.4, 0.6, 0.8].map(v => (
+              <line key={v} x1="0" y1={H*v} x2={W} y2={H*v} stroke="rgba(255,255,255,0.05)" strokeWidth="1" strokeDasharray="4 4" />
+            ))}
+
+            {/* Area */}
+            <path d={areaPath} fill="rgba(37,99,235,0.08)" />
+            
+            {/* Bands */}
+            <path d={uLine} fill="none" stroke={C.blue} strokeWidth="1.5" opacity="0.6" />
+            <path d={lLine} fill="none" stroke={C.blue} strokeWidth="1.5" opacity="0.6" />
+            
+            {/* SMA */}
+            <path d={points.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x},${toY((p.u+p.l)/2)}`).join(' ')} fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1" strokeDasharray="5 5" />
+
+            {/* Price */}
+            <path d={pLine} fill="none" stroke={C.gold} strokeWidth="2.5" />
+          </g>
+
+          {/* Highlights */}
+          {revealed && (
+            <g style={{animation: "fadeIn 1s forwards"}}>
+              <rect x={25 * (W/dataLen)} y="0" width={20 * (W/dataLen)} height={H} fill="rgba(201,151,58,0.15)" />
+              <line x1={25 * (W/dataLen)} y1="0" x2={25 * (W/dataLen)} y2={H} stroke={C.gold} strokeWidth="1" strokeDasharray="4 4" opacity="0.5"/>
+              <line x1={45 * (W/dataLen)} y1="0" x2={45 * (W/dataLen)} y2={H} stroke={C.gold} strokeWidth="1" strokeDasharray="4 4" opacity="0.5"/>
+              
+              <rect x={29 * (W/dataLen)} y="15" width={80} height={24} fill={C.gold} rx="4" />
+              <text x={34 * (W/dataLen)} y="31" fill={C.black} fontSize="11" fontFamily="monospace" fontWeight="bold" textAnchor="middle">SQUEEZE</text>
+              
+              <text x={58 * (W/dataLen)} y="50" fill={C.greenB} fontSize="16" fontWeight="bold" textAnchor="middle">{S.sqzBreakoutLabel}</text>
+            </g>
+          )}
+
+          {/* Fog line */}
+          {!revealed && (
+             <line x1={visibleWidth} y1="0" x2={visibleWidth} y2={H} stroke="rgba(255,255,255,0.5)" strokeWidth="2" strokeDasharray="4 4" />
+          )}
+        </svg>
+
+        {/* Fog overlay */}
+        {!revealed && (
+          <div style={{position:"absolute", top:0, right:0, bottom:0, left: `${(45/dataLen)*100}%`, background:"rgba(19,23,34,0.92)", display:"flex", alignItems:"center", justifyContent:"center", backdropFilter:"blur(2px)"}}>
+            <span style={{color:"rgba(255,255,255,0.4)", fontSize:13, fontFamily:"monospace", letterSpacing:2}}>{S.sqzFutureHidden}</span>
+          </div>
+        )}
+      </div>
+
+      {revealed && (
+        <div style={{marginTop: 24, textAlign:"center"}}>
+           <button onClick={reset} style={{background:"transparent", border:`1px solid ${C.inkMid}`, color:C.inkMid, padding:"10px 20px", borderRadius:4, cursor:"pointer", fontSize:12, fontFamily:"monospace", fontWeight:700, letterSpacing:1}}>
+             {S.sqzHideBtn}
+           </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Main Chapter 6 ────────────────────────────────────────────────────────────
+function Chapter6() {
+  const { useState } = React;
+  const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
+  const [askOpen, setAskOpen] = useState(false);
+
+  const fundamentals = [
+    {icon:"💼", title:"NFP (Non-Farm Payrolls)", accent:C.blue, text:S.fundNfpText},
+    {icon:"🛒", title:"CPI (Consumer Price Index)", accent:C.red, text:S.fundCpiText},
+    {icon:"🏦", title:S.fundFomcTitle, accent:C.gold, text:S.fundFomcText},
+    {icon:"🗣️", title:S.fundGdpTitle, accent:C.green, text:S.fundGdpText},
+  ];
+
+  const bollingerCards = [
+    {icon:"📏", title:S.bbSmaTitle, text:S.bbSmaText},
+    {icon:"🌋", title:S.bbExtremeTitle, text:S.bbExtremeText},
+    {icon:"🎈", title:S.bbExpansionTitle, text:S.bbExpansionText},
+    {icon:"🗜️", title:S.bbSqueezeTitle, text:S.bbSqueezeText},
+  ];
+
+  const conclusions = [S.concl1, S.concl2, S.concl3, S.concl4, S.concl5];
+
+  return (
+    <div style={{minHeight:"100vh",background:C.white,color:C.ink,fontFamily:"'DM Sans',sans-serif"}}>
+
+      {/* Sticky header */}
+      <div style={{position:"sticky",top:106,background:"rgba(255,255,255,0.96)",backdropFilter:"blur(10px)",borderBottom:`1px solid ${C.border}`,padding:"15px 5vw",display:"flex",alignItems:"center",justifyContent:"space-between",zIndex:50}}>
+        <div style={{display:"flex",alignItems:"center",gap:20}}>
+          <span onClick={() => window.location.href = getChUrl(5)} style={{color:C.gold,cursor:"pointer",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</span>
+          <Chip>{S.stickyLevel}</Chip>
+          <Mono size={14} color={C.inkSoft} spacing={0} className="hide-mobile">{S.stickyTitle}</Mono>
+        </div>
+        <div style={{display:"flex",gap:8}}>
+          <Chip color={C.inkFaint}>{S.stickyFA}</Chip>
+          <Chip color={C.inkFaint}>{S.stickyTA}</Chip>
+        </div>
+      </div>
+
+      {/* HERO */}
+      <div style={{background:C.black,padding:"90px 5vw 80px",textAlign:"center",position:"relative",overflow:"hidden"}}>
+        <div style={{position:"absolute",inset:0,background:"radial-gradient(circle at 50% 120%, rgba(201,151,58,0.15) 0%, transparent 60%)"}}/>
+        <div style={{position:"relative"}}>
+          <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:24}}>{S.heroLabel}</Mono>
+          <h1 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(40px,7vw,72px)",fontWeight:400,color:C.white,lineHeight:1.05,marginBottom:24}}>
+            {S.heroTitleA} <span style={{color:C.gold}}>{S.heroTitleB}</span>
+          </h1>
+          <p style={{fontSize:"clamp(16px,2vw,20px)",color:"rgba(255,255,255,0.6)",maxWidth:680,margin:"0 auto 36px",lineHeight:1.6}}>
+            {S.heroSub}
+          </p>
+          <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
+            <Chip color={C.gold}>{S.heroChip1}</Chip>
+            <Chip color="rgba(255,255,255,0.3)">Bollinger Bands</Chip>
+            <Chip color="rgba(255,255,255,0.3)">{S.heroChip3}</Chip>
+          </div>
+        </div>
+      </div>
+
+      <div style={{maxWidth:1060,margin:"0 auto",padding:"72px 5vw 120px"}}>
+
+        {/* ── BLOCK 1: Fundamental News ── */}
+        <SectionTitle sub={S.sec1Sub}>
+          {S.sec1Title}
+        </SectionTitle>
+
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:20,marginBottom:48}} className="g2">
+          {fundamentals.map((f,i) => <InfoCard key={i} {...f} />)}
+        </div>
+
+        {/* Volatility Matrix */}
+        <div style={{background:C.surfaceMid, borderRadius:8, padding:"32px 40px", marginBottom:56, border:`1px solid ${C.border}`}}>
+          <Mono size={11} color={C.black} spacing={2} style={{display:"block",marginBottom:20, fontWeight:700}}>{S.matrixLabel}</Mono>
+          <div style={{overflowX:"auto"}}>
+            <table style={{width:"100%",borderCollapse:"collapse",fontSize:14, fontFamily:"'DM Sans', sans-serif"}}>
+              <thead>
+                <tr>
+                  {[S.matrixColEvent, S.matrixColDollar, S.matrixColGold, S.matrixColSP, S.matrixColCrypto].map(h => (
+                    <th key={h} style={{textAlign:"left",padding:"12px 16px",color:C.inkMid,borderBottom:`2px solid ${C.border}`,fontWeight:600}}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  [S.matrixRowNFP, S.matrixStrongUp, S.matrixDown, S.matrixMixed, S.matrixDown],
+                  [S.matrixRowCPI, S.matrixUp, S.matrixDown, S.matrixStrongDown, S.matrixStrongDown],
+                  [S.matrixRowFOMC, S.matrixStrongUp, S.matrixStrongDown, S.matrixStrongDown, S.matrixStrongDown],
+                ].map((row,i) => (
+                  <tr key={i} style={{borderBottom:`1px solid ${C.border}`}}>
+                    {row.map((cell,j) => (
+                      <td key={j} style={{padding:"14px 16px", color:j===0?C.black:C.inkMid, fontWeight:j===0?600:400}}>
+                        {cell}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* "Buy the rumor" Diagram */}
+        <div style={{background:C.black, borderRadius:8, padding:"40px", color:C.white, marginBottom:64}}>
+          <Mono size={11} color={C.gold} spacing={2} style={{display:"block",marginBottom:24}}>{S.cycleLabel}</Mono>
+          <h3 style={{fontFamily:"'DM Serif Display',serif",fontSize:26,marginBottom:32}}>Buy the Rumor, Sell the News</h3>
+
+          <div style={{display:"grid", gridTemplateColumns:"repeat(3, 1fr)", gap:20}} className="g3">
+            <div style={{background:"rgba(255,255,255,0.05)", padding:"24px", borderRadius:6, borderTop:`3px solid ${C.blue}`}}>
+              <div style={{fontSize:12, color:"#888", marginBottom:8, fontFamily:"monospace"}}>{S.phase1Label}</div>
+              <div style={{fontSize:18, fontWeight:700, marginBottom:12}}>{S.phase1Sub}</div>
+              <p style={{fontSize:13, color:"#bbb", lineHeight:1.6}}>{S.phase1Text}</p>
+            </div>
+
+            <div style={{background:"rgba(255,255,255,0.05)", padding:"24px", borderRadius:6, borderTop:`3px solid ${C.gold}`}}>
+              <div style={{fontSize:12, color:"#888", marginBottom:8, fontFamily:"monospace"}}>{S.phase2Label}</div>
+              <div style={{fontSize:18, fontWeight:700, marginBottom:12}}>{S.phase2Sub}</div>
+              <p style={{fontSize:13, color:"#bbb", lineHeight:1.6}}>{S.phase2Text}</p>
+            </div>
+
+            <div style={{background:"rgba(255,255,255,0.05)", padding:"24px", borderRadius:6, borderTop:`3px solid ${C.redB}`}}>
+              <div style={{fontSize:12, color:"#888", marginBottom:8, fontFamily:"monospace"}}>{S.phase3Label}</div>
+              <div style={{fontSize:18, fontWeight:700, marginBottom:12}}>{S.phase3Sub}</div>
+              <p style={{fontSize:13, color:"#bbb", lineHeight:1.6}}>{S.phase3Text}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* ── INTERACTIVE 1: NFP Quiz ── */}
+        <div style={{marginBottom:72}}>
+          <NFPNewsSimulator/>
+        </div>
+
+        <Rule/>
+
+        {/* ── BLOCK 2: Technical Analysis (Bollinger) ── */}
+        <SectionTitle sub={S.sec2Sub}>
+          {S.sec2Title}
+        </SectionTitle>
+
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:20,marginBottom:56}} className="g2">
+          {bollingerCards.map((f,i) => <InfoCard key={i} {...f} accent={i===3 ? C.gold : C.inkMid} />)}
+        </div>
+
+        {/* ── INTERACTIVE 2: Squeeze Hunter ── */}
+        <div style={{marginBottom:64}}>
+          <BollingerSqueeze/>
+        </div>
+
+        <Rule/>
+
+        {/* ── CONCLUSIONS ── */}
+        <div style={{background:C.black,borderRadius:8,padding:"48px 56px"}}>
+          <div style={{textAlign:"center",marginBottom:36}}>
+            <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:12}}>{S.conclLabel}</Mono>
+            <h3 style={{fontFamily:"'DM Serif Display',serif",fontSize:32,color:C.white,fontWeight:400}}>{S.conclTitle}</h3>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}} className="g2">
+            {conclusions.map((c,i) => (
+              <div key={i} style={{display:"flex",gap:16,alignItems:"flex-start",padding:"16px 20px",background:"rgba(255,255,255,0.04)",borderRadius:6,border:"1px solid rgba(255,255,255,0.06)"}}>
+                <span style={{color:C.gold,fontFamily:"monospace",fontSize:12,marginTop:2,flexShrink:0}}>0{i+1}</span>
+                <span style={{fontSize:14,color:"rgba(255,255,255,0.75)",lineHeight:1.6}}>{c}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Footer navigation */}
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",paddingTop:48,marginTop:48,borderTop:`1px solid ${C.border}`}}>
+          <span onClick={() => setAskOpen(true)} style={{fontSize:14,color:C.inkSoft,fontFamily:"monospace",borderBottom:`1px solid ${C.border}`,cursor:"pointer"}}>
+            {S.footerAsk}
+          </span>
+          <button
+            onClick={() => window.location.href = getChUrl(7)}
+            style={{background:C.black,color:C.white,border:"none",padding:"18px 35px",cursor:"pointer",fontFamily:"monospace",fontSize:14,letterSpacing:2,fontWeight:700,transition:"background .2s"}}
+            onMouseEnter={e=>e.target.style.background=C.gold}
+            onMouseLeave={e=>e.target.style.background=C.black}>
+            {S.footerNextBtn}
+          </button>
+        </div>
+
+      </div>
+
+      {askOpen && <AskAnalystPopup chapterNum={6} lang={INITIAL_LANG} onClose={() => setAskOpen(false)}/>}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('sbf-book-root')).render(<Chapter6 />);
+{% endraw %}
+</script>
+</body>
+</html>
+<script>
+// Скрипт для конвертации UTC времени в локальное время пользователя
+document.addEventListener('DOMContentLoaded', function() {
+    var _pageLang = "{{ lang }}";
+    var _intlLocale = _pageLang === 'ro' ? 'ro-RO' : 'ru-RU';
+    const utcTimes = document.querySelectorAll('.local-time[data-utc]');
+
+    utcTimes.forEach(function(element) {
+        // Получаем UTC время из data-utc атрибута
+        var utcString = element.getAttribute('data-utc');
+
+        try {
+            // Парсим UTC дату и время
+            var utcDate = new Date(utcString);
+
+            // Конвертируем в локальное время пользователя
+            var localDate = new Date(utcDate.getTime() + utcDate.getTimezoneOffset() * 60000);
+
+            // Форматируем для отображения (например, "19:00 МСК")
+            var hours = String(localDate.getHours()).padStart(2, '0');
+            var minutes = String(localDate.getMinutes()).padStart(2, '0');
+            var timeZoneName = Intl.DateTimeFormat(_intlLocale, { timeZoneName: 'long' }).format(localDate);
+            
+            // Обновляем текст элемента с локальным временем
+            element.innerHTML = '<span class="local-time-display">' + hours + ':' + minutes + ' ' + timeZoneName.replace(/\s/g, '') + '</span>';
+        } catch (e) {
+            console.error('Ошибка конвертации времени:', e);
+        }
+    });
+});
+</script>
