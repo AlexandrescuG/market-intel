@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="{{ lang }}">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Регистрация — SBF Journal</title>
+<title>{{ t('register.title', lang) }}</title>
 <style>
 :root{
   --bg:#f5f4f0;--paper:#fff;--text:#1a1a1a;--muted:#6b7280;
@@ -45,7 +45,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);
   color:var(--text);outline:none;transition:border-color .15s}
 .field input:focus{border-color:var(--gold)}
 .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.field-opt label::after{content:" (необязательно)";font-weight:400;color:var(--muted);font-size:10px}
+.field-opt label::after{content:{{ t('register.optional_suffix', lang) | tojson }};font-weight:400;color:var(--muted);font-size:10px}
 
 /* Checkboxes */
 .check-item{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;
@@ -91,7 +91,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);
 <div class="card">
   <div class="prog-wrap">
     <div class="prog-label">
-      <span id="progText">Создай аккаунт</span>
+      <span id="progText">{{ t('register.step1_title', lang) }}</span>
       <span id="progNum">1 / 2</span>
     </div>
     <div class="prog-bar"><div class="prog-fill" id="progFill" style="width:50%"></div></div>
@@ -101,71 +101,71 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);
 
   <!-- ── Шаг 1: Данные ── -->
   <div class="step active" id="step1">
-    <div class="step-title">Создай аккаунт</div>
-    <div class="step-sub">Только необходимое. Без лишних вопросов.</div>
+    <div class="step-title">{{ t('register.step1_title', lang) }}</div>
+    <div class="step-sub">{{ t('register.step1_subtitle', lang) }}</div>
 
     <div class="field-row">
       <div class="field">
-        <label>Имя</label>
-        <input type="text" id="firstName" placeholder="Иван" autocomplete="given-name">
+        <label>{{ t('register.first_name_label', lang) }}</label>
+        <input type="text" id="firstName" placeholder="{{ t('register.first_name_placeholder', lang) }}" autocomplete="given-name">
       </div>
       <div class="field">
-        <label>Фамилия</label>
-        <input type="text" id="lastName" placeholder="Петров" autocomplete="family-name">
+        <label>{{ t('register.last_name_label', lang) }}</label>
+        <input type="text" id="lastName" placeholder="{{ t('register.last_name_placeholder', lang) }}" autocomplete="family-name">
       </div>
     </div>
     <div class="field">
-      <label>Email</label>
-      <input type="email" id="email" placeholder="you@example.com" autocomplete="email">
+      <label>{{ t('register.email_label', lang) }}</label>
+      <input type="email" id="email" placeholder="{{ t('register.email_placeholder', lang) }}" autocomplete="email">
     </div>
     <div class="field">
-      <label>Пароль (от 8 символов)</label>
+      <label>{{ t('register.password_label', lang) }}</label>
       <input type="password" id="password" placeholder="••••••••" autocomplete="new-password">
     </div>
     <div class="field field-opt">
-      <label>Телефон</label>
+      <label>{{ t('register.phone_label', lang) }}</label>
       <input type="tel" id="phone" placeholder="+7 900 000-00-00" autocomplete="tel">
     </div>
 
     <div class="nav-row">
-      <button class="btn btn-primary" onclick="goStep2()">Далее →</button>
+      <button class="btn btn-primary" onclick="goStep2()">{{ t('register.next_button', lang) }}</button>
     </div>
-    <p class="login-note">Уже есть аккаунт? <a href="/journal.html">Войти</a></p>
+    <p class="login-note">{{ t('register.have_account', lang) }} <a href="/journal.html">{{ t('login.submit_button', lang) }}</a></p>
   </div>
 
   <!-- ── Шаг 2: Согласия ── -->
   <div class="step" id="step2">
-    <div class="step-title">Подтверждения</div>
-    <div class="step-sub">Последний шаг — и ты внутри.</div>
+    <div class="step-title">{{ t('register.step2_title', lang) }}</div>
+    <div class="step-sub">{{ t('register.step2_subtitle', lang) }}</div>
 
     <div class="pro-teaser">
       <span class="pro-teaser-ico">🎁</span>
       <div class="pro-teaser-text">
-        Пройди опросник в Профиле и получи <b>30 дней PRO бесплатно</b>.<br>
-        Без автосписания. Добровольно, в любое время.
+        {{ t('register.pro_teaser_intro', lang) }} <b>{{ t('register.pro_teaser_bonus', lang) }}</b>.<br>
+        {{ t('register.pro_teaser_note', lang) }}
       </div>
     </div>
 
     <label class="check-item required">
       <input type="checkbox" id="consentAge">
-      <label for="consentAge">Мне есть <strong>18 лет</strong>. Я понимаю, что торговый функционал доступен только совершеннолетним.</label>
+      <label for="consentAge">{{ t('register.consent_age_pre', lang) }} <strong>{{ t('register.consent_age_years', lang) }}</strong>{{ t('register.consent_age_post', lang) }}</label>
     </label>
     <label class="check-item required">
       <input type="checkbox" id="consentData">
-      <label for="consentData">Согласен(на) на <a href="#" target="_blank">обработку персональных данных</a>.</label>
+      <label for="consentData">{{ t('register.consent_data_pre', lang) }} <a href="#" target="_blank">{{ t('register.consent_data_link', lang) }}</a>.</label>
     </label>
     <label class="check-item required">
       <input type="checkbox" id="consentDisclaimer">
-      <label for="consentDisclaimer">SBF Journal — образовательная платформа, <strong>не инвестиционный совет</strong>. Торговля сопряжена с риском потери средств.</label>
+      <label for="consentDisclaimer">{{ t('register.consent_disclaimer_pre', lang) }} <strong>{{ t('register.consent_disclaimer_bold', lang) }}</strong>{{ t('register.consent_disclaimer_post', lang) }}</label>
     </label>
     <label class="check-item">
       <input type="checkbox" id="consentMarketing">
-      <label for="consentMarketing">Согласен(на) получать маркетинговые материалы (необязательно).</label>
+      <label for="consentMarketing">{{ t('register.consent_marketing', lang) }}</label>
     </label>
 
     <div class="nav-row">
-      <button class="btn btn-secondary" onclick="setStep(1)">← Назад</button>
-      <button class="btn btn-primary" id="regBtn" onclick="doRegister()">Зарегистрироваться</button>
+      <button class="btn btn-secondary" onclick="setStep(1)">{{ t('register.back_button', lang) }}</button>
+      <button class="btn btn-primary" id="regBtn" onclick="doRegister()">{{ t('register.register_button', lang) }}</button>
     </div>
   </div>
 </div>
@@ -183,7 +183,7 @@ function setStep(n) {
   document.querySelectorAll('.step').forEach(function(s) { s.classList.remove('active'); });
   $('step' + n).classList.add('active');
   showErr('');
-  $('progText').textContent = n === 1 ? 'Создай аккаунт' : 'Подтверждения';
+  $('progText').textContent = n === 1 ? {{ t('register.step1_title', lang) | tojson }} : {{ t('register.step2_title', lang) | tojson }};
   $('progNum').textContent  = n + ' / 2';
   $('progFill').style.width = n === 1 ? '50%' : '100%';
   window.scrollTo(0, 0);
@@ -193,21 +193,21 @@ function goStep2() {
   var fn = $('firstName').value.trim();
   var em = $('email').value.trim();
   var pw = $('password').value;
-  if (!fn) return showErr('Введи имя');
-  if (!em || !em.includes('@')) return showErr('Введи корректный email');
-  if (pw.length < 8) return showErr('Пароль: минимум 8 символов');
+  if (!fn) return showErr({{ t('register.err_name_required', lang) | tojson }});
+  if (!em || !em.includes('@')) return showErr({{ t('register.err_email_invalid', lang) | tojson }});
+  if (pw.length < 8) return showErr({{ t('register.err_password_short', lang) | tojson }});
   showErr('');
   setStep(2);
 }
 
 function doRegister() {
-  if (!$('consentAge').checked)        return showErr('Подтверди, что тебе есть 18 лет');
-  if (!$('consentData').checked)       return showErr('Необходимо согласие на обработку данных');
-  if (!$('consentDisclaimer').checked) return showErr('Прочитай и подтверди дисклеймер');
+  if (!$('consentAge').checked)        return showErr({{ t('register.err_consent_age', lang) | tojson }});
+  if (!$('consentData').checked)       return showErr({{ t('register.err_consent_data', lang) | tojson }});
+  if (!$('consentDisclaimer').checked) return showErr({{ t('register.err_consent_disclaimer', lang) | tojson }});
 
   var btn = $('regBtn');
   btn.disabled = true;
-  btn.textContent = 'Создаём аккаунт…';
+  btn.textContent = {{ t('register.creating_account', lang) | tojson }};
 
   fetch('/api/auth/register', {
     method: 'POST',
@@ -218,7 +218,7 @@ function doRegister() {
       first_name:         $('firstName').value.trim(),
       last_name:          $('lastName').value.trim(),
       phone:              $('phone').value.trim(),
-      lang:               'ru',
+      lang:               {{ lang | tojson }},
       age_18_confirmed:   $('consentAge').checked,
       consent_data:       $('consentData').checked,
       consent_disclaimer: $('consentDisclaimer').checked,
@@ -229,8 +229,8 @@ function doRegister() {
   .then(function(d) {
     if (d.error) {
       btn.disabled = false;
-      btn.textContent = 'Зарегистрироваться';
-      return showErr(d.error === 'age_gate' ? 'Функционал доступен с 18 лет' : d.error);
+      btn.textContent = {{ t('register.register_button', lang) | tojson }};
+      return showErr(d.error === 'age_gate' ? {{ t('register.err_age_gate', lang) | tojson }} : d.error);
     }
     sbfAuth.setTokens(d.token, d.refresh_token);
     localStorage.setItem('sbf_uid', d.user_id);
@@ -238,8 +238,8 @@ function doRegister() {
   })
   .catch(function(e) {
     btn.disabled = false;
-    btn.textContent = 'Зарегистрироваться';
-    showErr('Ошибка сети: ' + e.message);
+    btn.textContent = {{ t('register.register_button', lang) | tojson }};
+    showErr({{ t('register.err_network_prefix', lang) | tojson }} + e.message);
   });
 }
 

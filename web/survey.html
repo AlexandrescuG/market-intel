@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="{{ lang }}">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Опрос трейдера — SBF Journal</title>
+<title>{{ t('survey.title', lang) }}</title>
 <style>
 :root{
   --bg:#f5f4f0;--paper:#fff;--text:#1a1a1a;--muted:#6b7280;
@@ -112,12 +112,12 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);
 <body>
 
 <a class="logo" href="/">SBF Journal</a>
-<div class="hero-badge">Заполни — получи <b>30 дней PRO бесплатно</b> · без автосписания</div>
+<div class="hero-badge">{{ t('survey.hero_intro', lang) }} <b>{{ t('register.pro_teaser_bonus', lang) }}</b> {{ t('survey.hero_note', lang) }}</div>
 
 <div class="card">
   <div class="prog-wrap">
     <div class="prog-label">
-      <span id="progText">Блок A — Опыт</span>
+      <span id="progText">{{ t('survey.block_a_short', lang) }}</span>
       <span id="progNum">1 / 4</span>
     </div>
     <div class="prog-bar"><div class="prog-fill" id="progFill" style="width:25%"></div></div>
@@ -136,244 +136,244 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);
 
   <!-- ── Fast-track registration (shown after Block C for anonymous) ── -->
   <div class="step" id="stepReg">
-    <div class="step-title">Сохрани свой путь</div>
-    <div class="step-sub">Регистрация — 30 секунд. Без карты и автосписаний. 30 дней PRO сразу.</div>
+    <div class="step-title">{{ t('survey.reg_title', lang) }}</div>
+    <div class="step-sub">{{ t('survey.reg_subtitle', lang) }}</div>
     <div class="q-block">
-      <div class="q-label">Имя</div>
-      <input type="text" id="regName" placeholder="Как тебя зовут?" autocomplete="given-name"
+      <div class="q-label">{{ t('register.first_name_label', lang) }}</div>
+      <input type="text" id="regName" placeholder="{{ t('survey.reg_name_placeholder', lang) }}" autocomplete="given-name"
         style="width:100%;padding:11px 13px;border:1.5px solid var(--line);border-radius:10px;
         font-size:14px;font-family:inherit;background:var(--paper);color:var(--text);margin-top:2px;box-sizing:border-box">
     </div>
     <div class="q-block">
-      <div class="q-label">Email</div>
-      <input type="email" id="regEmail" placeholder="email@example.com" autocomplete="email"
+      <div class="q-label">{{ t('register.email_label', lang) }}</div>
+      <input type="email" id="regEmail" placeholder="{{ t('survey.reg_email_placeholder', lang) }}" autocomplete="email"
         style="width:100%;padding:11px 13px;border:1.5px solid var(--line);border-radius:10px;
         font-size:14px;font-family:inherit;background:var(--paper);color:var(--text);margin-top:2px;box-sizing:border-box">
     </div>
     <div class="q-block">
-      <div class="q-label">Пароль (мин. 8 символов)</div>
-      <input type="password" id="regPwd" placeholder="Пароль" autocomplete="new-password"
+      <div class="q-label">{{ t('survey.reg_password_label', lang) }}</div>
+      <input type="password" id="regPwd" placeholder="{{ t('survey.reg_password_placeholder', lang) }}" autocomplete="new-password"
         style="width:100%;padding:11px 13px;border:1.5px solid var(--line);border-radius:10px;
         font-size:14px;font-family:inherit;background:var(--paper);color:var(--text);margin-top:2px;box-sizing:border-box">
     </div>
     <div class="q-block" style="display:flex;flex-direction:column;gap:10px">
       <label style="display:flex;gap:10px;align-items:flex-start;font-size:13px;cursor:pointer">
         <input type="checkbox" id="regAge" style="margin-top:2px;accent-color:var(--gold);flex-shrink:0">
-        <span>Мне исполнилось 18 лет</span>
+        <span>{{ t('survey.consent_age_short', lang) }}</span>
       </label>
       <label style="display:flex;gap:10px;align-items:flex-start;font-size:13px;cursor:pointer">
         <input type="checkbox" id="regData" style="margin-top:2px;accent-color:var(--gold);flex-shrink:0">
-        <span>Согласен на обработку данных в соответствии с <a href="/privacy" style="color:var(--gold)">политикой конфиденциальности</a></span>
+        <span>{{ t('survey.consent_data_pre', lang) }} <a href="/privacy" style="color:var(--gold)">{{ t('survey.consent_data_link', lang) }}</a></span>
       </label>
       <label style="display:flex;gap:10px;align-items:flex-start;font-size:13px;cursor:pointer">
         <input type="checkbox" id="regDisc" style="margin-top:2px;accent-color:var(--gold);flex-shrink:0">
-        <span>Понимаю, что аналитика SBF — не торговые рекомендации</span>
+        <span>{{ t('survey.consent_disclaimer_short', lang) }}</span>
       </label>
       <label style="display:flex;gap:10px;align-items:flex-start;font-size:13px;cursor:pointer">
         <input type="checkbox" id="regMkt" style="margin-top:2px;accent-color:var(--gold);flex-shrink:0">
-        <span>Получать полезные материалы на email (необязательно)</span>
+        <span>{{ t('survey.consent_marketing', lang) }}</span>
       </label>
     </div>
     <div style="font-size:11px;color:var(--muted);margin-bottom:14px;line-height:1.5">
-      30 дней PRO, без карты и автосписаний. Отменить можно в любой момент.
+      {{ t('survey.reg_pro_note', lang) }}
     </div>
     <div class="nav-row">
-      <button class="btn btn-secondary" onclick="goBlock('C')">← Назад</button>
-      <button class="btn btn-primary" id="regSubmitBtn" onclick="submitViaRegister()">Создать аккаунт и получить PRO →</button>
+      <button class="btn btn-secondary" onclick="goBlock('C')">{{ t('register.back_button', lang) }}</button>
+      <button class="btn btn-primary" id="regSubmitBtn" onclick="submitViaRegister()">{{ t('survey.create_account_button', lang) }}</button>
     </div>
     <div style="text-align:center;margin-top:12px;font-size:12px;color:var(--muted)">
-      Уже есть аккаунт? <a href="#" id="regLoginLink" style="color:var(--gold)">Войти</a>
+      {{ t('register.have_account', lang) }} <a href="#" id="regLoginLink" style="color:var(--gold)">{{ t('login.submit_button', lang) }}</a>
     </div>
   </div>
 
   <!-- ── Блок A: Опыт и знания ── -->
   <div class="step" id="stepA">
-    <div class="step-title">Блок A — Опыт и знания</div>
-    <div class="step-sub">Core · нужен для PRO</div>
+    <div class="step-title">{{ t('survey.block_a_title', lang) }}</div>
+    <div class="step-sub">{{ t('survey.badge_core', lang) }}</div>
 
     <div class="q-block">
-      <div class="q-label">1. Твой уровень?</div>
+      <div class="q-label">{{ t('survey.q1_label', lang) }}</div>
       <div class="chips" data-q="level" data-multi="0">
-        <div class="chip" data-v="beginner">Новичок</div>
-        <div class="chip" data-v="intermediate">Средний</div>
-        <div class="chip" data-v="advanced">Опытный</div>
+        <div class="chip" data-v="beginner">{{ t('survey.level_beginner', lang) }}</div>
+        <div class="chip" data-v="intermediate">{{ t('survey.level_intermediate', lang) }}</div>
+        <div class="chip" data-v="advanced">{{ t('survey.level_advanced', lang) }}</div>
       </div>
     </div>
     <div class="q-block">
-      <div class="q-label">2. Сколько лет торгуешь?</div>
+      <div class="q-label">{{ t('survey.q2_label', lang) }}</div>
       <div class="chips" data-q="years" data-multi="0">
-        <div class="chip" data-v="none">Нет опыта</div>
-        <div class="chip" data-v="lt1">Менее 1</div>
-        <div class="chip" data-v="1to3">1–3 года</div>
-        <div class="chip" data-v="gt3">Более 3</div>
+        <div class="chip" data-v="none">{{ t('survey.years_none', lang) }}</div>
+        <div class="chip" data-v="lt1">{{ t('survey.years_lt1', lang) }}</div>
+        <div class="chip" data-v="1to3">{{ t('survey.years_1to3', lang) }}</div>
+        <div class="chip" data-v="gt3">{{ t('survey.years_gt3', lang) }}</div>
       </div>
     </div>
     <div class="q-block">
-      <div class="q-label">3. Чем торговал(а)? <span class="q-hint">(несколько)</span></div>
+      <div class="q-label">{{ t('survey.q3_label', lang) }} <span class="q-hint">{{ t('survey.hint_multiple', lang) }}</span></div>
       <div class="chips" data-q="instruments" data-multi="1">
-        <div class="chip" data-v="forex">Форекс</div>
+        <div class="chip" data-v="forex">{{ t('survey.instr_forex', lang) }}</div>
         <div class="chip" data-v="cfd">CFD</div>
-        <div class="chip" data-v="stocks">Акции</div>
-        <div class="chip" data-v="crypto">Крипто</div>
-        <div class="chip" data-v="futures">Фьючерсы</div>
-        <div class="chip" data-v="nothing">Ничего</div>
+        <div class="chip" data-v="stocks">{{ t('survey.instr_stocks', lang) }}</div>
+        <div class="chip" data-v="crypto">{{ t('survey.instr_crypto', lang) }}</div>
+        <div class="chip" data-v="futures">{{ t('survey.instr_futures', lang) }}</div>
+        <div class="chip" data-v="nothing">{{ t('survey.instr_nothing', lang) }}</div>
       </div>
     </div>
     <div class="q-block">
-      <div class="q-label">4. Знаешь, что такое кредитное плечо?</div>
+      <div class="q-label">{{ t('survey.q4_label', lang) }}</div>
       <div class="chips" data-q="knows_leverage" data-multi="0">
-        <div class="chip" data-v="use">Да, использую</div>
-        <div class="chip" data-v="heard">Слышал(а)</div>
-        <div class="chip" data-v="no">Нет</div>
+        <div class="chip" data-v="use">{{ t('survey.leverage_yes', lang) }}</div>
+        <div class="chip" data-v="heard">{{ t('survey.leverage_heard', lang) }}</div>
+        <div class="chip" data-v="no">{{ t('survey.answer_no', lang) }}</div>
       </div>
     </div>
     <div class="q-block">
-      <div class="q-label">5. Используешь стоп-лосс?</div>
+      <div class="q-label">{{ t('survey.q5_label', lang) }}</div>
       <div class="chips" data-q="uses_sl" data-multi="0">
-        <div class="chip" data-v="always">Всегда</div>
-        <div class="chip" data-v="sometimes">Иногда</div>
-        <div class="chip" data-v="never">Нет</div>
-        <div class="chip" data-v="no_idea">Не знаю, что это</div>
+        <div class="chip" data-v="always">{{ t('survey.freq_always', lang) }}</div>
+        <div class="chip" data-v="sometimes">{{ t('survey.freq_sometimes', lang) }}</div>
+        <div class="chip" data-v="never">{{ t('survey.answer_no', lang) }}</div>
+        <div class="chip" data-v="no_idea">{{ t('survey.no_idea_what_is', lang) }}</div>
       </div>
     </div>
 
     <div class="nav-row">
-      <button class="btn btn-primary" onclick="goBlock('B')">Далее →</button>
+      <button class="btn btn-primary" onclick="goBlock('B')">{{ t('register.next_button', lang) }}</button>
     </div>
   </div>
 
   <!-- ── Блок B: Цели и стиль ── -->
   <div class="step" id="stepB">
-    <div class="step-title">Блок B — Цели и стиль</div>
-    <div class="step-sub">Core · нужен для PRO</div>
+    <div class="step-title">{{ t('survey.block_b_title', lang) }}</div>
+    <div class="step-sub">{{ t('survey.badge_core', lang) }}</div>
 
     <div class="q-block">
-      <div class="q-label">6. Чего хочешь от платформы?</div>
+      <div class="q-label">{{ t('survey.q6_label', lang) }}</div>
       <div class="chips" data-q="goal" data-multi="0">
-        <div class="chip" data-v="learn">Научиться с нуля</div>
-        <div class="chip" data-v="improve">Улучшить результаты</div>
-        <div class="chip" data-v="passive">Пассивный доход</div>
-        <div class="chip" data-v="coaching">Сопровождение счёта</div>
+        <div class="chip" data-v="learn">{{ t('survey.goal_learn', lang) }}</div>
+        <div class="chip" data-v="improve">{{ t('survey.goal_improve', lang) }}</div>
+        <div class="chip" data-v="passive">{{ t('survey.goal_passive', lang) }}</div>
+        <div class="chip" data-v="coaching">{{ t('survey.goal_coaching', lang) }}</div>
       </div>
     </div>
     <div class="q-block">
-      <div class="q-label">7. Стиль / горизонт?</div>
+      <div class="q-label">{{ t('survey.q7_label', lang) }}</div>
       <div class="chips" data-q="style" data-multi="0">
-        <div class="chip" data-v="scalping">Скальпинг</div>
-        <div class="chip" data-v="intraday">Интрадей</div>
-        <div class="chip" data-v="swing">Свинг</div>
-        <div class="chip" data-v="longterm">Долгосрок</div>
-        <div class="chip" data-v="unknown">Пока не знаю</div>
+        <div class="chip" data-v="scalping">{{ t('survey.style_scalping', lang) }}</div>
+        <div class="chip" data-v="intraday">{{ t('survey.style_intraday', lang) }}</div>
+        <div class="chip" data-v="swing">{{ t('survey.style_swing', lang) }}</div>
+        <div class="chip" data-v="longterm">{{ t('survey.style_longterm', lang) }}</div>
+        <div class="chip" data-v="unknown">{{ t('survey.style_unknown', lang) }}</div>
       </div>
     </div>
     <div class="q-block">
-      <div class="q-label">8. Сколько времени готов(а) уделять?</div>
+      <div class="q-label">{{ t('survey.q8_label', lang) }}</div>
       <div class="chips" data-q="time" data-multi="0">
-        <div class="chip" data-v="lt1h">&lt;1 ч/нед</div>
-        <div class="chip" data-v="several">Несколько ч/нед</div>
-        <div class="chip" data-v="daily">Ежедневно</div>
-        <div class="chip" data-v="fulltime">Это работа</div>
+        <div class="chip" data-v="lt1h">{{ t('survey.time_lt1h', lang) }}</div>
+        <div class="chip" data-v="several">{{ t('survey.time_several', lang) }}</div>
+        <div class="chip" data-v="daily">{{ t('survey.time_daily', lang) }}</div>
+        <div class="chip" data-v="fulltime">{{ t('survey.time_fulltime', lang) }}</div>
       </div>
     </div>
     <div class="q-block">
-      <div class="q-label">9. Какие рынки интересны? <span class="q-hint">(несколько)</span></div>
+      <div class="q-label">{{ t('survey.q9_label', lang) }} <span class="q-hint">{{ t('survey.hint_multiple', lang) }}</span></div>
       <div class="chips" data-q="markets" data-multi="1">
-        <div class="chip" data-v="forex">Форекс</div>
-        <div class="chip" data-v="crypto">Крипто</div>
-        <div class="chip" data-v="commodities">Золото/товары</div>
-        <div class="chip" data-v="indices">Индексы</div>
-        <div class="chip" data-v="stocks">Акции</div>
+        <div class="chip" data-v="forex">{{ t('survey.instr_forex', lang) }}</div>
+        <div class="chip" data-v="crypto">{{ t('survey.instr_crypto', lang) }}</div>
+        <div class="chip" data-v="commodities">{{ t('survey.market_commodities', lang) }}</div>
+        <div class="chip" data-v="indices">{{ t('survey.market_indices', lang) }}</div>
+        <div class="chip" data-v="stocks">{{ t('survey.instr_stocks', lang) }}</div>
       </div>
     </div>
 
     <div class="nav-row">
-      <button class="btn btn-secondary" onclick="goBlock('A')">← Назад</button>
-      <button class="btn btn-primary" onclick="goBlock('C')">Далее →</button>
+      <button class="btn btn-secondary" onclick="goBlock('A')">{{ t('register.back_button', lang) }}</button>
+      <button class="btn btn-primary" onclick="goBlock('C')">{{ t('register.next_button', lang) }}</button>
     </div>
   </div>
 
   <!-- ── Блок C: Риск ── -->
   <div class="step" id="stepC">
-    <div class="step-title">Блок C — Отношение к риску</div>
-    <div class="step-sub">Core · нужен для PRO · это не оценка платёжеспособности</div>
+    <div class="step-title">{{ t('survey.block_c_title', lang) }}</div>
+    <div class="step-sub">{{ t('survey.step_c_subtitle', lang) }}</div>
 
     <div class="q-block">
-      <div class="q-label">10. Счёт просел на 20%. Твои действия?</div>
+      <div class="q-label">{{ t('survey.q10_label', lang) }}</div>
       <div class="chips" data-q="drawdown_reaction" data-multi="0">
-        <div class="chip" data-v="close_all">Закрою всё</div>
-        <div class="chip" data-v="average_in">Докуплю</div>
-        <div class="chip" data-v="wait_plan">Буду ждать по плану</div>
-        <div class="chip" data-v="dont_know">Не знаю</div>
+        <div class="chip" data-v="close_all">{{ t('survey.dd_close_all', lang) }}</div>
+        <div class="chip" data-v="average_in">{{ t('survey.dd_average_in', lang) }}</div>
+        <div class="chip" data-v="wait_plan">{{ t('survey.dd_wait_plan', lang) }}</div>
+        <div class="chip" data-v="dont_know">{{ t('survey.dont_know', lang) }}</div>
       </div>
     </div>
     <div class="q-block">
-      <div class="q-label">11. Комфортный риск на сделку?</div>
+      <div class="q-label">{{ t('survey.q11_label', lang) }}</div>
       <div class="chips" data-q="risk_per_trade" data-multi="0">
-        <div class="chip" data-v="lt1pct">До 1%</div>
-        <div class="chip" data-v="1to2pct">1–2%</div>
-        <div class="chip" data-v="gt2pct">Более 2%</div>
-        <div class="chip" data-v="no_idea">Не знаю</div>
+        <div class="chip" data-v="lt1pct">{{ t('survey.risk_lt1pct', lang) }}</div>
+        <div class="chip" data-v="1to2pct">{{ t('survey.risk_1to2pct', lang) }}</div>
+        <div class="chip" data-v="gt2pct">{{ t('survey.risk_gt2pct', lang) }}</div>
+        <div class="chip" data-v="no_idea">{{ t('survey.dont_know', lang) }}</div>
       </div>
     </div>
 
     <div class="nav-row">
-      <button class="btn btn-secondary" onclick="goBlock('B')">← Назад</button>
-      <button class="btn btn-primary" onclick="afterBlockC()">Далее →</button>
+      <button class="btn btn-secondary" onclick="goBlock('B')">{{ t('register.back_button', lang) }}</button>
+      <button class="btn btn-primary" onclick="afterBlockC()">{{ t('register.next_button', lang) }}</button>
     </div>
   </div>
 
   <!-- ── Блок D: Опционально ── -->
   <div class="step" id="stepD">
-    <div class="step-title">Блок D — Финальные вопросы</div>
-    <div class="step-sub">Необязательно — можно пропустить и получить PRO уже сейчас.</div>
+    <div class="step-title">{{ t('survey.block_d_title', lang) }}</div>
+    <div class="step-sub">{{ t('survey.block_d_subtitle', lang) }}</div>
 
     <div class="q-block">
-      <div class="q-label">12. Откуда узнал(а) о нас?</div>
+      <div class="q-label">{{ t('survey.q12_label', lang) }}</div>
       <div class="chips" data-q="source" data-multi="0">
-        <div class="chip" data-v="social">Соцсети</div>
-        <div class="chip" data-v="friend">Друг</div>
-        <div class="chip" data-v="ads">Реклама</div>
-        <div class="chip" data-v="search">Поиск</div>
-        <div class="chip" data-v="other">Другое</div>
+        <div class="chip" data-v="social">{{ t('survey.source_social', lang) }}</div>
+        <div class="chip" data-v="friend">{{ t('survey.source_friend', lang) }}</div>
+        <div class="chip" data-v="ads">{{ t('survey.source_ads', lang) }}</div>
+        <div class="chip" data-v="search">{{ t('survey.source_search', lang) }}</div>
+        <div class="chip" data-v="other">{{ t('survey.source_other', lang) }}</div>
       </div>
     </div>
     <div class="q-block">
-      <div class="q-label">13. Язык интерфейса</div>
+      <div class="q-label">{{ t('survey.q13_label', lang) }}</div>
       <div class="chips" data-q="lang" data-multi="0">
-        <div class="chip selected" data-v="ru">🇷🇺 Русский</div>
-        <div class="chip" data-v="en">🇬🇧 English</div>
+        <div class="chip selected" data-v="ru">{{ t('survey.lang_option_ru', lang) }}</div>
+        <div class="chip" data-v="en">{{ t('survey.lang_option_en', lang) }}</div>
       </div>
     </div>
 
     <div class="nav-row">
-      <button class="btn btn-secondary" onclick="goBlock('C')">← Назад</button>
-      <button class="btn btn-primary" onclick="submitSurvey()">Завершить и получить PRO →</button>
+      <button class="btn btn-secondary" onclick="goBlock('C')">{{ t('register.back_button', lang) }}</button>
+      <button class="btn btn-primary" onclick="submitSurvey()">{{ t('survey.finish_button', lang) }}</button>
     </div>
-    <button class="btn-skip" onclick="submitSurvey()">Пропустить и получить PRO сейчас</button>
+    <button class="btn-skip" onclick="submitSurvey()">{{ t('survey.skip_button', lang) }}</button>
   </div>
 
   <!-- ── «Твой путь» + PRO ── -->
   <div class="step" id="stepResult">
     <div class="path-hero">
-      <div class="path-hello" id="pathHello">Отлично!</div>
-      <div class="path-tagline">Твой персональный путь готов</div>
+      <div class="path-hello" id="pathHello">{{ t('survey.default_hello', lang) }}</div>
+      <div class="path-tagline">{{ t('survey.path_tagline', lang) }}</div>
     </div>
     <div class="pro-award" id="proAward">
       <div class="pro-award-ico">🎁</div>
       <div>
-        <div class="pro-award-title">30 дней PRO активированы!</div>
-        <div class="pro-award-sub" id="proUntilText">Действует без автосписания.</div>
+        <div class="pro-award-title">{{ t('survey.pro_activated', lang) }}</div>
+        <div class="pro-award-sub" id="proUntilText">{{ t('survey.pro_active_no_autobill', lang) }}</div>
       </div>
     </div>
     <div class="path-goal" id="pathGoal">
-      <div class="path-goal-title" id="pathGoalTitle">📚 Обучение</div>
+      <div class="path-goal-title" id="pathGoalTitle">{{ t('survey.default_goal_title', lang) }}</div>
       <div class="path-goal-sub" id="pathGoalSub"></div>
     </div>
     <div class="path-cards" id="pathCards"></div>
     <div class="path-steps" id="pathSteps"></div>
     <div class="nav-row" style="margin-top:18px">
       <a class="btn btn-primary" href="/" style="text-align:center;text-decoration:none">
-        Начать работу →
+        {{ t('survey.start_button', lang) }}
       </a>
     </div>
   </div>
@@ -417,10 +417,10 @@ function showErr(msg) {
 // ── Блоки и прогресс ────────────────────────────────────────────────────────
 var BLOCKS = ['A', 'B', 'C', 'D'];
 var BLOCK_INFO = {
-  A: { label: 'Блок A — Опыт',     pct: 25, num: '1 / 4' },
-  B: { label: 'Блок B — Цели',     pct: 50, num: '2 / 4' },
-  C: { label: 'Блок C — Риск',     pct: 75, num: '3 / 4' },
-  D: { label: 'Блок D — Прочее',   pct: 95, num: '4 / 4' },
+  A: { label: {{ t('survey.block_a_short', lang) | tojson }}, pct: 25, num: '1 / 4' },
+  B: { label: {{ t('survey.block_b_short', lang) | tojson }}, pct: 50, num: '2 / 4' },
+  C: { label: {{ t('survey.block_c_short', lang) | tojson }}, pct: 75, num: '3 / 4' },
+  D: { label: {{ t('survey.block_d_short', lang) | tojson }}, pct: 95, num: '4 / 4' },
 };
 var _doneBlocks = new Set();
 
@@ -467,7 +467,7 @@ document.addEventListener('click', function(e) {
 
 // ── Отправка ─────────────────────────────────────────────────────────────────
 function submitSurvey() {
-  if (!sbfAuth.isLoggedIn()) { showErr('Необходимо войти в аккаунт'); return; }
+  if (!sbfAuth.isLoggedIn()) { showErr({{ t('survey.err_must_login', lang) | tojson }}); return; }
 
   sbfAuth.fetch('/api/auth/onboarding', {
     method: 'POST',
@@ -482,7 +482,7 @@ function submitSurvey() {
     localStorage.setItem('sbfSurveyDone', '1');
     renderResult(d);
   })
-  .catch(function(e) { showErr('Ошибка сети: ' + e.message); });
+  .catch(function(e) { showErr({{ t('register.err_network_prefix', lang) | tojson }} + e.message); });
 }
 
 // ── «Твой путь» ─────────────────────────────────────────────────────────────
@@ -491,14 +491,14 @@ function renderResult(d) {
   var proGranted = d.pro_granted;
   var proUntil  = d.pro_until;
 
-  $('pathHello').textContent = 'Отлично, ' + (path.first_name || '') + '!';
-  $('pathGoalTitle').textContent = path.goal_title || '📚 Обучение';
+  $('pathHello').textContent = {{ t('survey.hello_prefix', lang) | tojson }} + ' ' + (path.first_name || '') + {{ t('survey.hello_suffix', lang) | tojson }};
+  $('pathGoalTitle').textContent = path.goal_title || {{ t('survey.default_goal_title', lang) | tojson }};
   $('pathGoalSub').textContent   = path.goal_subtitle || '';
 
   // PRO badge
   if (proGranted && proUntil) {
     var d30 = new Date(proUntil);
-    $('proUntilText').textContent = 'Действует до ' + d30.toLocaleDateString('ru-RU') + ' · без автосписания.';
+    $('proUntilText').textContent = {{ t('survey.pro_active_until_prefix', lang) | tojson }} + ' ' + d30.toLocaleDateString('ru-RU') + ' ' + {{ t('survey.pro_active_until_suffix', lang) | tojson }};
     $('proAward').style.display = '';
   } else {
     $('proAward').style.display = 'none';
@@ -511,7 +511,7 @@ function renderResult(d) {
     var tags = path.markets.map(function(m) {
       return '<span class="market-tag">' + _esc(m) + '</span>';
     }).join('');
-    cards += _card('📊', 'Ватчлист настроен:<div class="market-tags">' + tags + '</div>');
+    cards += _card('📊', {{ t('survey.watchlist_configured', lang) | tojson }} + '<div class="market-tags">' + tags + '</div>');
   }
   $('pathCards').innerHTML = cards;
 
@@ -520,12 +520,12 @@ function renderResult(d) {
     steps += '<div class="path-step"><span class="path-step-n">' + (i+1) + '</span>' +
       '<span>' + _esc(s) + '</span></div>';
   });
-  $('pathSteps').innerHTML = '<div class="path-steps-title">С чего начать</div>' + steps;
+  $('pathSteps').innerHTML = '<div class="path-steps-title">' + {{ t('survey.where_to_start', lang) | tojson }} + '</div>' + steps;
 
   // Переход на экран результата
   document.querySelectorAll('.step').forEach(function(s) { s.classList.remove('active'); });
   $('stepResult').classList.add('active');
-  $('progText').textContent = 'Готово!';
+  $('progText').textContent = {{ t('survey.done_label', lang) | tojson }};
   $('progNum').textContent  = '✓';
   $('progFill').style.width = '100%';
   ['pb0','pb1','pb2','pb3'].forEach(function(id) { $(id).classList.add('done'); });
@@ -558,7 +558,7 @@ function goStep(id) {
   window.scrollTo(0, 0);
   // Прогресс
   if (id === 'Reg') {
-    $('progText').textContent = 'Регистрация';
+    $('progText').textContent = {{ t('survey.registration_label', lang) | tojson }};
     $('progNum').textContent = '— / 4';
     $('progFill').style.width = '80%';
   }
@@ -575,16 +575,16 @@ function submitViaRegister() {
   var discOk  = $('regDisc').checked;
   var mktOk   = $('regMkt').checked;
 
-  if (!name)   { showErr('Введи своё имя'); return; }
-  if (!email || !email.includes('@')) { showErr('Введи корректный email'); return; }
-  if (pwd.length < 8) { showErr('Пароль — минимум 8 символов'); return; }
-  if (!ageOk)  { showErr('Подтверди, что тебе 18+'); return; }
-  if (!dataOk) { showErr('Необходимо согласие на обработку данных'); return; }
-  if (!discOk) { showErr('Необходимо согласие с условиями'); return; }
+  if (!name)   { showErr({{ t('survey.err_name_required', lang) | tojson }}); return; }
+  if (!email || !email.includes('@')) { showErr({{ t('register.err_email_invalid', lang) | tojson }}); return; }
+  if (pwd.length < 8) { showErr({{ t('survey.err_password_short', lang) | tojson }}); return; }
+  if (!ageOk)  { showErr({{ t('survey.err_age_confirm', lang) | tojson }}); return; }
+  if (!dataOk) { showErr({{ t('register.err_consent_data', lang) | tojson }}); return; }
+  if (!discOk) { showErr({{ t('survey.err_consent_disclaimer', lang) | tojson }}); return; }
 
   var btn = $('regSubmitBtn');
   btn.disabled = true;
-  btn.textContent = 'Создаём аккаунт…';
+  btn.textContent = {{ t('register.creating_account', lang) | tojson }};
 
   fetch('/api/auth/register-via-survey', {
     method: 'POST',
@@ -601,10 +601,10 @@ function submitViaRegister() {
   .then(function(r) { return r.json(); })
   .then(function(d) {
     btn.disabled = false;
-    btn.textContent = 'Создать аккаунт и получить PRO →';
+    btn.textContent = {{ t('survey.create_account_button', lang) | tojson }};
     if (d.error) {
       showErr(d.email_exists
-        ? d.error + ' Используй кнопку «Войти» ниже.'
+        ? d.error + {{ t('survey.use_login_button_hint', lang) | tojson }}
         : d.error);
       return;
     }
@@ -623,8 +623,8 @@ function submitViaRegister() {
   })
   .catch(function(e) {
     btn.disabled = false;
-    btn.textContent = 'Создать аккаунт и получить PRO →';
-    showErr('Ошибка сети: ' + e.message);
+    btn.textContent = {{ t('survey.create_account_button', lang) | tojson }};
+    showErr({{ t('register.err_network_prefix', lang) | tojson }} + e.message);
   });
 }
 

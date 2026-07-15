@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="{{ lang }}">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Вход — SBF Journal</title>
+<title>{{ t('login.title', lang) }}</title>
 <style>
 :root{
   --bg:#f5f4f0;--paper:#fff;--text:#1a1a1a;--muted:#6b7280;
@@ -51,32 +51,32 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);
 <a class="logo" href="/">SBF Journal</a>
 
 <div class="card">
-  <div class="step-title">Вход</div>
-  <div class="step-sub">Один аккаунт для сайта и приложения в Telegram.</div>
+  <div class="step-title">{{ t('login.page_title', lang) }}</div>
+  <div class="step-sub">{{ t('login.subtitle', lang) }}</div>
 
   <div class="err" id="errBox"></div>
 
   <form onsubmit="return doLogin(event)">
     <div class="field">
-      <label>Email</label>
-      <input type="email" id="email" placeholder="you@example.com" autocomplete="email" required>
+      <label>{{ t('register.email_label', lang) }}</label>
+      <input type="email" id="email" placeholder="{{ t('register.email_placeholder', lang) }}" autocomplete="email" required>
     </div>
     <div class="field">
-      <label>Пароль</label>
+      <label>{{ t('login.password_label', lang) }}</label>
       <input type="password" id="password" placeholder="••••••••" autocomplete="current-password" required>
     </div>
     <div class="nav-row">
-      <button type="submit" class="btn btn-primary" id="loginBtn">Войти</button>
+      <button type="submit" class="btn btn-primary" id="loginBtn">{{ t('login.submit_button', lang) }}</button>
     </div>
   </form>
 
-  <div class="divider">или</div>
+  <div class="divider">{{ t('login.divider_or', lang) }}</div>
   <div class="providers">
     <div id="tg-login-btn"></div>
     <div id="google-login-btn"></div>
   </div>
 
-  <p class="login-note">Нет аккаунта? <a href="/register.html">Зарегистрироваться</a></p>
+  <p class="login-note">{{ t('login.no_account', lang) }} <a href="/register.html">{{ t('register.register_button', lang) }}</a></p>
 </div>
 
 <script src="https://telegram.org/js/telegram-widget.js?22" async></script>
@@ -111,7 +111,7 @@ function doLogin(e) {
   var email = $('email').value.trim().toLowerCase();
   var password = $('password').value;
   var btn = $('loginBtn');
-  btn.disabled = true; btn.textContent = 'Входим…';
+  btn.disabled = true; btn.textContent = {{ t('login.logging_in', lang) | tojson }};
   showErr('');
   fetch('/api/auth/login', {
     method: 'POST',
@@ -120,13 +120,13 @@ function doLogin(e) {
   })
   .then(function(r) { return r.json(); })
   .then(function(d) {
-    btn.disabled = false; btn.textContent = 'Войти';
-    if (d.error) { showErr(d.error === 'rate_limit' ? 'Слишком много попыток, подождите' : d.error); return; }
+    btn.disabled = false; btn.textContent = {{ t('login.submit_button', lang) | tojson }};
+    if (d.error) { showErr(d.error === 'rate_limit' ? {{ t('login.err_rate_limit', lang) | tojson }} : d.error); return; }
     _onAuthSuccess(d);
   })
   .catch(function(err) {
-    btn.disabled = false; btn.textContent = 'Войти';
-    showErr('Ошибка сети: ' + err.message);
+    btn.disabled = false; btn.textContent = {{ t('login.submit_button', lang) | tojson }};
+    showErr({{ t('register.err_network_prefix', lang) | tojson }} + err.message);
   });
   return false;
 }
@@ -172,10 +172,10 @@ function onTelegramAuth(user) {
   })
   .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, d: d }; }); })
   .then(function(res) {
-    if (!res.ok) { showErr(res.d.detail || 'Не удалось войти через Telegram'); return; }
+    if (!res.ok) { showErr(res.d.detail || {{ t('login.err_telegram_failed', lang) | tojson }}); return; }
     _onAuthSuccess(res.d);
   })
-  .catch(function(e) { showErr('Ошибка сети: ' + e.message); });
+  .catch(function(e) { showErr({{ t('register.err_network_prefix', lang) | tojson }} + e.message); });
 }
 window.onTelegramAuth = onTelegramAuth;
 
@@ -188,10 +188,10 @@ function onGoogleCredential(response) {
   })
   .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, d: d }; }); })
   .then(function(res) {
-    if (!res.ok) { showErr(res.d.detail || 'Не удалось войти через Google'); return; }
+    if (!res.ok) { showErr(res.d.detail || {{ t('login.err_google_failed', lang) | tojson }}); return; }
     _onAuthSuccess(res.d);
   })
-  .catch(function(e) { showErr('Ошибка сети: ' + e.message); });
+  .catch(function(e) { showErr({{ t('register.err_network_prefix', lang) | tojson }} + e.message); });
 }
 window.onGoogleCredential = onGoogleCredential;
 
