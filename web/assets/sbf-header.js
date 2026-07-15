@@ -359,11 +359,18 @@
   // ── Часы и окно ──────────────────────────────────────────────────────────
   function clockTick() {
     var d = new Date(), h = d.getHours();
-    var t = d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+    // NB: назвать эту переменную "t" нельзя -- затенила бы функцию-переводчик
+    // t(key, fallback), объявленную выше в этом же файле (var внутри функции
+    // хостится на весь scope), из-за чего t('clock...') ниже упал бы с
+    // "TypeError: t is not a function" на каждой НЕ главной странице (там,
+    // где isMain=false и этот код реально выполняется) -- именно так и было,
+    // пока не нашли: исключение рвало остаток скрипта и обрывало автозагрузку
+    // sbf-auth.js/sbf-profile.js/sbf-feedback.js в хвосте этого же файла.
+    var timeStr = d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
     var clockEl = document.getElementById('clock');
-    if (clockEl) clockEl.textContent = t;
+    if (clockEl) clockEl.textContent = timeStr;
     var mobClockEl = document.getElementById('mobClock');
-    if (mobClockEl) mobClockEl.textContent = t;
+    if (mobClockEl) mobClockEl.textContent = timeStr;
     var inWin = h >= 6 && h < 10;
     var winDot = document.getElementById('winDot');
     var winTxt = document.getElementById('winTxt');
