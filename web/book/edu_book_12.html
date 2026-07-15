@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>SBF | {% if lang == 'ru' %}Глава 12. Японская философия (Ишимоку){% elif lang == 'ro' %}Capitolul 12. Filosofia Japoneză (Ichimoku){% else %}Chapter 12. Japanese Philosophy (Ichimoku){% endif %}</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html,body{max-width:100vw;overflow-x:hidden;scroll-behavior:smooth}
+    body{background:#fff;font-family:'DM Sans',system-ui,sans-serif;color:#18181a}
+    #sbf-book-root{min-height:100vh}
+    .back-to-edu{
+      position:fixed;bottom:20px;right:20px;z-index:500;
+      background:#18181a;color:rgba(255,255,255,0.6);
+      font-family:'DM Sans',sans-serif;font-size:.75rem;letter-spacing:1.5px;text-transform:uppercase;
+      padding:7px 13px;text-decoration:none;transition:all .2s;
+      border:1px solid rgba(255,255,255,0.08);
+    }
+    .back-to-edu:hover{background:#c9973a;color:#fff}
+    .messenger-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:30px}
+    @media(max-width:768px){.messenger-grid{grid-template-columns:1fr}.hide-mobile{display:none!important}}
+  </style>
+</head>
+<body>
+<div id="sbf-book-root"></div>
+<a href="/edu" class="back-to-edu">← Edu</a>
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
+<script src="/edu/edu-chart.js"></script>
+<script type="text/babel" data-presets="react">
+const INITIAL_LANG = "{{ lang }}";
+{% raw %}
+const C = {
+  gold:"#c9973a",goldLight:"#f4d49f",goldPale:"#f7f0e3",black:"#18181a",
+  ink:"#18181a",inkMid:"#555555",inkSoft:"rgba(24,24,26,0.58)",inkFaint:"rgba(24,24,26,0.28)",
+  white:"#ffffff",surface:"#faf8f5",surfaceMid:"#f0ebe0",border:"rgba(24,24,26,0.1)",
+  borderGold:"rgba(201,151,58,0.25)",dark:"#18181a",
+  bull:"#22c55e",bear:"#ef4444",blue:"#3b82f6",purple:"#8b5cf6",
+  tenkan:"#e53e3e",kijun:"#3182ce",chiku:"#805ad5",
+  spanA:"#38a169",spanB:"#c53030",
+};
+
+// ─────────────────────────────────────────────
+// TRANSLATIONS
+// ─────────────────────────────────────────────
+const TR = {
+  ru:{
+    chNum:"УРОВЕНЬ 12", chName:"Японская философия",
+    chTitle:"Ichimoku Kinko Hyo: пять линий, которые видят всё",
+    prevCh:"← Уровень 11", nextCh:"Уровень 13 →",
+    askLink:"Остался вопрос? Напиши аналитику",
+
+    // INTRO DARK BLOCK
+    mythTag:"ФИЛОСОФИЯ ИШИМОКУ",
+    mythTitle:"«Одним взглядом на баланс горы»",
+    mythBody:"Именно так переводится «Ichimoku Kinko Hyo» с японского. Гоичи Хосода разработал эту систему в 1930-х годах, публично представив её только в 1969-м — после 30 лет тестирования. Это не просто индикатор. Это самостоятельная торговая философия: рынок всегда стремится к балансу, а цена — это всего лишь временное отклонение от него. Система одновременно показывает тренд, импульс, поддержку, сопротивление и будущее — без дополнительных инструментов.",
+
+    // SECTION FA
+    faTag:"12.1 — РАВНОВЕСИЕ РЫНКА",
+    faTitle:"Почему цена всегда возвращается к балансу",
+    faSub:"Японская философия торговли строится на одном принципе: рынок — это не хаос, а постоянное движение к равновесию спроса и предложения.",
+    faBegText:"Представьте рынок как весы. Когда новости хорошие — быки перевешивают, цена растёт. Когда плохие — медведи давят, цена падает. Но всегда есть точка баланса — среднее значение между максимумом и минимумом за период. Именно к ней цена постоянно притягивается, как маятник. Все линии Ишимоку — это и есть такие точки баланса на разных временных горизонтах.",
+    faProText:"Концепция Ichimoku основана на mid-price (средней цене): (High + Low) / 2, а не на close price, как большинство западных индикаторов. Это принципиально: mid-price отражает реальный ценовой баланс периода, а не случайную точку закрытия. Хосода считал, что японские рынки имеют специфику weekly/monthly циклов, поэтому периоды 9, 26, 52 — не случайны: это торговые недели (9 = 2 недели, 26 = 1 мес., 52 = 2 мес. при 6-дневной неделе 1930-х). Современная адаптация: для 24/7 крипторынков используют 10, 30, 60.",
+
+    // BALANCE SCALES
+    scalesTag:"ВЕСЫ РАВНОВЕСИЯ",
+    scalesTitle:"Интерактивные весы: накидывай факторы на чаши",
+    scalesSub:"Выбирай макроэкономические факторы и наблюдай, как смещается фундаментальный баланс",
+    bullFactors:[
+      {id:"rate_cut",label:"ФРС снижает ставку",weight:3,emoji:"📉"},
+      {id:"gdp_up",label:"ВВП растёт",weight:2,emoji:"📈"},
+      {id:"jobs_up",label:"Рынок труда силён",weight:2,emoji:"💪"},
+      {id:"earnings",label:"Прибыли бьют прогнозы",weight:3,emoji:"💰"},
+      {id:"qe",label:"Количественное смягчение",weight:4,emoji:"🖨️"},
+      {id:"china_open",label:"Китай открывает экономику",weight:2,emoji:"🇨🇳"},
+    ],
+    bearFactors:[
+      {id:"rate_hike",label:"ФРС повышает ставку",weight:3,emoji:"📊"},
+      {id:"inflation",label:"Инфляция растёт",weight:3,emoji:"🔥"},
+      {id:"recession",label:"Риск рецессии",weight:4,emoji:"⚠️"},
+      {id:"credit",label:"Кредитный кризис",weight:4,emoji:"💳"},
+      {id:"war",label:"Геополитический риск",weight:3,emoji:"⚔️"},
+      {id:"miss",label:"Прибыли разочаровывают",weight:2,emoji:"📉"},
+    ],
+    scalesBullLabel:"🐂 БЫКИ",
+    scalesBearLabel:"🐻 МЕДВЕДИ",
+    scalesResult:{
+      strong_bull:"🚀 Сильный бычий рынок. Покупки оправданы.",
+      mild_bull:"📈 Умеренный бычий перевес. Рынок склонен к росту.",
+      neutral:"⚖️ Равновесие. Флэт или неопределённость.",
+      mild_bear:"📉 Умеренный медвежий перевес. Осторожность.",
+      strong_bear:"🐻 Сильный медвежий рынок. Риски доминируют.",
+    },
+    scalesReset:"Очистить весы",
+    addBull:"→ На бычью чашу",
+    addBear:"→ На медвежью чашу",
+
+    // SECTION TA
+    taTag:"12.2 — ICHIMOKU KINKO HYO",
+    taTitle:"Пять линий, которые заменяют все остальные индикаторы",
+    taSub:"Ichimoku — единственный индикатор, который показывает прошлое, настоящее и будущее одновременно. Разберём каждый элемент.",
+
+    lines:[
+      {
+        key:"tenkan", name:"Тенкан-Сен", nameEn:"Tenkan-Sen", nameRo:"Tenkan-Sen",
+        color:"#e53e3e", period:"9",
+        formula:"(MAX(9) + MIN(9)) / 2",
+        badge:"БЫСТРЫЙ ТРЕНД",
+        beg:"Аналог быстрой скользящей средней, но считается иначе: не среднее цен закрытия, а средняя точка между максимумом и минимумом за 9 периодов. Показывает краткосрочный тренд. Когда цена выше Тенкан — краткосрочный импульс бычий.",
+        pro:"Тенкан-Сен — индикатор краткосрочного моментума. Плоская Тенкан = боковое движение. Крутая Тенкан = сильный тренд. Угол наклона важнее самого значения. Пересечение цены с Тенкан = слабый сигнал первого порядка (TK Cross). Сигнал тем сильнее, чем дальше от Облака происходит пересечение.",
+      },
+      {
+        key:"kijun", name:"Киджун-Сен", nameEn:"Kijun-Sen", nameRo:"Kijun-Sen",
+        color:"#3182ce", period:"26",
+        formula:"(MAX(26) + MIN(26)) / 2",
+        badge:"ЛИНИЯ БАЛАНСА",
+        beg:"Главная «линия баланса» системы. Если цена выше Киджун — рынок бычий, ниже — медвежий. Киджун также служит динамическим уровнем поддержки/сопротивления: цена часто возвращается к ней после импульсных движений.",
+        pro:"Киджун — базовая линия (стандарт). Угол Киджун определяет качество тренда. Плоская Киджун в зоне Облака = сильный уровень. Стратегия Kijun Bounce: вход при откате цены к Киджун в направлении основного тренда — один из наиболее надёжных сигналов системы.",
+      },
+      {
+        key:"chiku", name:"Чикоу-Спан", nameEn:"Chikou Span", nameRo:"Chikou Span",
+        color:"#805ad5", period:"26",
+        formula:"Close, сдвинутый на 26 периодов назад",
+        badge:"ПОДТВЕРЖДЕНИЕ",
+        beg:"Самый необычный элемент: это текущая цена закрытия, нанесённая на 26 периодов назад. Если Чикоу выше цены 26 периодов назад — сигнал подтверждён. Это «взгляд назад» — подтверждение того, что текущий тренд сильнее прошлого.",
+        pro:"Чикоу — фильтр ложных сигналов. Правило: сигнал (покупка/продажа) действителен только если Чикоу не «блокируется» исторической ценой. Если линия проходит сквозь зону исторических цен — сигнал слабее. Профессионалы используют Чикоу как финальный фильтр перед входом.",
+      },
+      {
+        key:"spanA", name:"Сенко-Спан А", nameEn:"Senkou Span A", nameRo:"Senkou Span A",
+        color:"#38a169", period:"26",
+        formula:"(Тенкан + Киджун) / 2, сдвинуто +26",
+        badge:"ГРАНИЦА ОБЛАКА",
+        beg:"Быстрая граница Облака Кумо. Это среднее между Тенкан и Киджун, сдвинутое на 26 периодов вперёд в будущее. То, что вы видите правее текущей цены — это прогноз зоны поддержки/сопротивления. Уникальность Ишимоку: он единственный показывает будущее на графике.",
+        pro:"Сенко А формирует динамическую зону поддержки при бычьем рынке. В бычьем тренде цена обычно находится выше Облака, откаты останавливаются у Сенко А. Если Облако «тонкое» (A ≈ B) — слабый тренд, возможен пробой. «Толстое» Облако = сильная поддержка/сопротивление.",
+      },
+      {
+        key:"spanB", name:"Сенко-Спан Б", nameEn:"Senkou Span B", nameRo:"Senkou Span B",
+        color:"#c53030", period:"52",
+        formula:"(MAX(52) + MIN(52)) / 2, сдвинуто +26",
+        badge:"ДОЛГОСРОЧНЫЙ БАЛАНС",
+        beg:"Медленная граница Облака. Считается за 52 периода — это долгосрочный баланс рынка. Вместе с Сенко А образует Облако Кумо. Зелёное Облако (A выше B) = бычий тренд. Красное (B выше A) = медвежий. Когда цена пересекает Облако — это смена тренда.",
+        pro:"Сенко Б — долгосрочный якорь системы. Плоский Сенко Б = сильный уровень (много сделок прошло по близкой цене). Пробой Облака: цена пересекает Облако сверху вниз с закрытием ниже Сенко Б = сильный медвежий сигнал. Kumo Twist (перекрест A и B в будущем) — визуальный прогноз разворота тренда.",
+      },
+    ],
+
+    // ICHIMOKU BUILDER
+    builderTag:"СБОРКА ИШИМОКУ",
+    builderTitle:"Включай линии послойно и наблюдай систему в сборе",
+    builderSub:"Начни с пустого графика. Включай элементы один за одним, чтобы понять роль каждого.",
+    layerLabels:["Тенкан-Сен","Киджун-Сен","Чикоу-Спан","Облако Кумо"],
+    layerHints:[
+      "Быстрый тренд активирован. Наблюдайте: когда Тенкан направлена вверх — импульс бычий.",
+      "Линия баланса добавлена. TK-пересечение (Тенкан × Киджун) — сигнал смены тренда.",
+      "Подтверждение добавлено. Чикоу выше прошлых цен = сигнал подтверждён.",
+      "Облако Кумо активировано. Зелёное = бычий тренд. Цена выше Облака = покупки.",
+    ],
+    signalLabel:"АКТИВНЫХ СИГНАЛОВ",
+    signalItems:[
+      "TK Cross бычий: Тенкан пересекает Киджун снизу вверх",
+      "Цена выше Облака: бычий тренд подтверждён",
+      "Чикоу выше цены 26 периодов назад: сигнал валиден",
+      "Облако зелёное: Сенко А > Сенко Б",
+    ],
+
+    // KUMO TRADING RULES
+    kumoTag:"ПРАВИЛА ТОРГОВЛИ",
+    kumoTitle:"Как торговать с Ишимоку: три уровня сигналов",
+    kumoRules:[
+      {
+        level:"УРОВЕНЬ 1 — СЛАБЫЙ",
+        color:"#f59e0b",
+        signals:[
+          "TK Cross: Тенкан пересекает Киджун",
+          "Kijun Cross: цена пересекает Киджун",
+        ],
+        note:"Работает только в направлении основного тренда. Игнорировать против тренда.",
+      },
+      {
+        level:"УРОВЕНЬ 2 — СРЕДНИЙ",
+        color:"#3b82f6",
+        signals:[
+          "Сигнал уровня 1 + цена выше/ниже Облака",
+          "Chikou подтверждает направление",
+        ],
+        note:"Требует 2 подтверждения. Хороший сигнал для входа с управлением риском.",
+      },
+      {
+        level:"УРОВЕНЬ 3 — СИЛЬНЫЙ",
+        color:"#22c55e",
+        signals:[
+          "Все 5 компонентов подтверждают направление",
+          "Цена, Тенкан, Киджун и Чикоу — все выше Облака",
+          "Облако впереди зелёное (будущее бычье)",
+        ],
+        note:"Редкий, но высоконадёжный сигнал. Perfect Storm — все индикаторы согласованы.",
+      },
+    ],
+
+    // SIGNAL GAME
+    gameTag:"ТЕСТ СИГНАЛОВ",
+    gameTitle:"Определи силу сигнала Ишимоку",
+    gameSub:"На каждом графике — сценарий. Определи: это слабый, средний или сильный сигнал?",
+    scenarios:[
+      {
+        id:1,
+        desc:"Тенкан пересекает Киджун снизу вверх. Цена НИЖЕ Облака. Чикоу ниже прошлых цен.",
+        correct:"weak",
+        explanation:"Несмотря на TK Cross — цена ниже Облака и Чикоу не подтверждает. Это слабый сигнал ПРОТИВ тренда. Профессионалы его игнорируют.",
+      },
+      {
+        id:2,
+        desc:"Цена пробивает Облако снизу вверх и закрывается выше Сенко Б. Тенкан направлена вверх. Чикоу выше исторической цены.",
+        correct:"strong",
+        explanation:"Пробой Облака с подтверждением Чикоу и бычьим Тенкан — это сигнал уровня 3. Kumo breakout — один из сильнейших сигналов системы.",
+      },
+      {
+        id:3,
+        desc:"Цена выше Облака, Тенкан > Киджун, но Чикоу проходит сквозь зону исторических свечей.",
+        correct:"medium",
+        explanation:"Два из трёх условий выполнены, но Чикоу «заблокирован» — это снижает надёжность до уровня 2. Входить можно, но с осторожностью.",
+      },
+    ],
+    signalWeak:"СЛАБЫЙ",
+    signalMedium:"СРЕДНИЙ",
+    signalStrong:"СИЛЬНЫЙ",
+    signalCorrect:"✓ Верно!",
+    signalWrong:"✗ Неверно",
+    signalExplain:"Объяснение:",
+    signalNext:"Следующий →",
+    signalFinish:"Все сценарии разобраны",
+    signalScore:"Счёт",
+    signalOf:"из",
+
+    // NON-OBVIOUS FACT
+    factTag:"НЕОЧЕВИДНЫЙ ФАКТ",
+    factTitle:"Хосода тестировал систему 30 лет, нанимая студентов для ручных расчётов",
+    factBody:"В 1930-е не было компьютеров. Гоичи Хосода нанимал команды студентов, которые вручную рассчитывали тысячи сценариев для акций японского рынка. Только убедившись в надёжности на 30-летней истории, он опубликовал систему в 1969 году — под псевдонимом «Ichimoku Sanjin» (Человек, видящий горизонт). Он намеренно скрывал авторство, считая, что инструмент должен говорить сам за себя.",
+
+    // CHECKLIST
+    checkTag:"ПРОГРЕСС УРОВНЯ", checkTitle:"Проверь себя",
+    checks:[
+      "Я понимаю концепцию равновесия рынка в японской философии",
+      "Я знаю, что считает Тенкан-Сен и что означает её наклон",
+      "Я понимаю роль Киджун-Сен как линии баланса",
+      "Я знаю, что такое Чикоу-Спан и как он подтверждает сигналы",
+      "Я понимаю, как читать Облако Кумо (цвет, толщина, положение цены)",
+      "Я умею определять силу сигнала Ишимоку (1, 2, 3 уровень)",
+    ],
+
+    // QUIZ
+    quizTag:"ТЕСТ УРОВНЯ", quizStartBtn:"Пройти тест →",
+    qof:(i,n)=>`ВОПРОС ${i} из ${n}`,qcor:(n)=>`Правильных: ${n}`,
+    passmsg:"Превосходно! Уровень 12 пройден.",failmsg:"Сложный материал — перечитай и попробуй снова.",
+    medalTitle:"🏅 СТРАТЕГ ДЗЕН",medalDesc:"Уровень 12 пройден · +280 XP",
+    quiz:[
+      {q:"Что означает «Ichimoku Kinko Hyo» в переводе с японского?",
+       o:["Японский индикатор технического анализа","Одним взглядом на баланс горы","Система пяти скользящих средних","Метод предсказания будущего"],c:1},
+      {q:"Как рассчитывается Тенкан-Сен?",
+       o:["Среднее цен закрытия за 9 периодов","(MAX(9) + MIN(9)) / 2","EMA(9) от цены закрытия","Сумма 9 свечей / 9"],c:1},
+      {q:"Что уникально в Облаке Кумо по сравнению с другими индикаторами?",
+       o:["Оно считает объём торгов","Оно показывает будущие зоны поддержки (сдвинуто +26)","Оно использует логарифмическую шкалу","Оно работает только на дневном таймфрейме"],c:1},
+      {q:"Чикоу-Спан расположен ниже цен 26 периодов назад. Это означает:",
+       o:["Сигнал подтверждён","Сигнал не подтверждён, надёжность снижается","Сильный бычий сигнал","Нужно добавить объём"],c:1},
+      {q:"Зелёное Облако Кумо означает:",
+       o:["Цена выше Облака","Сенко Спан А выше Сенко Спан Б (бычий тренд)","Тенкан выше Киджун","Чикоу подтверждает тренд"],c:1},
+      {q:"Какой сигнал считается самым сильным в Ишимоку?",
+       o:["TK Cross ниже Облака","Все 5 компонентов подтверждают направление (Perfect Storm)","Пересечение цены с Тенкан","Киджун направлена горизонтально"],c:1},
+      {q:"Почему Хосода использует (MAX + MIN) / 2, а не среднее закрытий?",
+       o:["Так проще считать вручную","Mid-price отражает реальный ценовой баланс периода","Это стандарт японского учёта","Цены закрытия менее надёжны"],c:1},
+    ],
+
+    online:"онлайн",
+    tgMsg:"Привет 👋 Чем можем помочь? Оставьте заявку.",
+    waMsg:"Добрый день! Напишите что вас интересует 📊",
+    apTitle:"Предпочитаете мессенджер?",
+    apSub:"Напишите в Telegram или WhatsApp — сообщение уже готово.",
+    tgBtn:"ОТКРЫТЬ TELEGRAM",waBtn:"ОТКРЫТЬ WHATSAPP",
+    chMsg:(n)=>`Здравствуйте, есть вопрос по главе ${n}`,
+  },
+
+  en:{
+    chNum:"LEVEL 12",chName:"Japanese Philosophy",
+    chTitle:"Ichimoku Kinko Hyo: five lines that see everything",
+    prevCh:"← Level 11",nextCh:"Level 13 →",
+    askLink:"Have a question? Write to an analyst",
+    mythTag:"ICHIMOKU PHILOSOPHY",
+    mythTitle:"'At a glance, the balance of the mountain'",
+    mythBody:"That's the literal translation of 'Ichimoku Kinko Hyo'. Goichi Hosoda developed this system in the 1930s, publicly releasing it only in 1969 — after 30 years of testing. This isn't just an indicator. It's a complete trading philosophy: markets always seek equilibrium, and price is merely a temporary deviation from it. The system simultaneously shows trend, momentum, support, resistance, and the future — without any additional tools.",
+    faTag:"12.1 — MARKET EQUILIBRIUM",faTitle:"Why price always returns to balance",
+    faSub:"Japanese trading philosophy is built on one principle: markets are not chaos — they are constant movement toward the equilibrium of supply and demand.",
+    faBegText:"Think of the market as a scale. When news is good — bulls outweigh, price rises. When bad — bears push down. But there's always a balance point — the midpoint between high and low for a period. Price is constantly drawn to it, like a pendulum. All Ichimoku lines are exactly these balance points at different time horizons.",
+    faProText:"Ichimoku is based on mid-price: (High + Low) / 2, not close price like most Western indicators. This is fundamental: mid-price reflects the true price balance of the period, not a random closing tick. Hosoda believed Japanese markets had specific weekly/monthly cycles, so periods 9, 26, 52 are not arbitrary: these are trading weeks (9 = 2 weeks, 26 = 1 month, 52 = 2 months with the 6-day week of 1930s Japan). Modern adaptation: for 24/7 crypto markets, traders use 10, 30, 60.",
+    scalesTag:"BALANCE SCALES",scalesTitle:"Interactive scales: add factors to each side",
+    scalesSub:"Choose macroeconomic factors and watch the fundamental balance shift",
+    bullFactors:[
+      {id:"rate_cut",label:"Fed cuts rates",weight:3,emoji:"📉"},
+      {id:"gdp_up",label:"GDP is growing",weight:2,emoji:"📈"},
+      {id:"jobs_up",label:"Labor market is strong",weight:2,emoji:"💪"},
+      {id:"earnings",label:"Earnings beat estimates",weight:3,emoji:"💰"},
+      {id:"qe",label:"Quantitative easing",weight:4,emoji:"🖨️"},
+      {id:"china_open",label:"China reopens economy",weight:2,emoji:"🇨🇳"},
+    ],
+    bearFactors:[
+      {id:"rate_hike",label:"Fed hikes rates",weight:3,emoji:"📊"},
+      {id:"inflation",label:"Inflation rising",weight:3,emoji:"🔥"},
+      {id:"recession",label:"Recession risk",weight:4,emoji:"⚠️"},
+      {id:"credit",label:"Credit crisis",weight:4,emoji:"💳"},
+      {id:"war",label:"Geopolitical risk",weight:3,emoji:"⚔️"},
+      {id:"miss",label:"Earnings disappoint",weight:2,emoji:"📉"},
+    ],
+    scalesBullLabel:"🐂 BULLS",scalesBearLabel:"🐻 BEARS",
+    scalesResult:{
+      strong_bull:"🚀 Strong bull market. Buying is justified.",
+      mild_bull:"📈 Mild bullish bias. Market inclined to grow.",
+      neutral:"⚖️ Equilibrium. Sideways or uncertainty.",
+      mild_bear:"📉 Mild bearish bias. Caution warranted.",
+      strong_bear:"🐻 Strong bear market. Risks dominate.",
+    },
+    scalesReset:"Clear scales",addBull:"→ Bull side",addBear:"→ Bear side",
+    taTag:"12.2 — ICHIMOKU KINKO HYO",taTitle:"Five lines that replace every other indicator",
+    taSub:"Ichimoku is the only indicator that simultaneously shows past, present, and future. Let's break down each element.",
+    lines:[
+      {key:"tenkan",name:"Tenkan-Sen",nameEn:"Tenkan-Sen",nameRo:"Tenkan-Sen",color:"#e53e3e",period:"9",formula:"(MAX(9) + MIN(9)) / 2",badge:"FAST TREND",
+       beg:"Analogous to a fast moving average, but calculated differently: not the average of closing prices, but the midpoint between high and low over 9 periods. Shows short-term trend. When price is above Tenkan — short-term momentum is bullish.",
+       pro:"Tenkan-Sen is a short-term momentum indicator. Flat Tenkan = sideways movement. Steep Tenkan = strong trend. Angle matters more than the value itself. Price crossing Tenkan = weak first-order signal (TK Cross). Signal is stronger the further from the Cloud the crossover occurs."},
+      {key:"kijun",name:"Kijun-Sen",nameEn:"Kijun-Sen",nameRo:"Kijun-Sen",color:"#3182ce",period:"26",formula:"(MAX(26) + MIN(26)) / 2",badge:"BASELINE",
+       beg:"The main 'balance line' of the system. If price is above Kijun — market is bullish, below — bearish. Kijun also acts as a dynamic support/resistance: price often returns to it after impulsive moves.",
+       pro:"Kijun is the base line (standard). Kijun angle determines trend quality. Flat Kijun within the Cloud = strong level. Kijun Bounce strategy: enter on price pullback to Kijun in the direction of the main trend — one of the most reliable signals."},
+      {key:"chiku",name:"Chikou Span",nameEn:"Chikou Span",nameRo:"Chikou Span",color:"#805ad5",period:"26",formula:"Close shifted 26 periods back",badge:"CONFIRMATION",
+       beg:"The most unusual element: the current closing price plotted 26 periods in the past. If Chikou is above price 26 periods ago — signal confirmed. It's a 'look back' — confirmation that the current trend is stronger than the past.",
+       pro:"Chikou is a false signal filter. Rule: a signal (buy/sell) is valid only if Chikou is not 'blocked' by historical price. If the line passes through historical candles — signal is weaker. Professionals use Chikou as the final filter before entry."},
+      {key:"spanA",name:"Senkou Span A",nameEn:"Senkou Span A",nameRo:"Senkou Span A",color:"#38a169",period:"26",formula:"(Tenkan + Kijun) / 2, shifted +26",badge:"CLOUD EDGE",
+       beg:"The fast edge of the Kumo Cloud. This is the average of Tenkan and Kijun, shifted 26 periods forward into the future. What you see to the right of current price is a forecast of future support/resistance zones. Ichimoku's uniqueness: it's the only indicator that projects the future on the chart.",
+       pro:"Senkou A forms dynamic support in a bull market. In a bullish trend price usually stays above the Cloud, with pullbacks stopping at Senkou A. If the Cloud is 'thin' (A ≈ B) — weak trend, breakout possible. 'Thick' Cloud = strong support/resistance."},
+      {key:"spanB",name:"Senkou Span B",nameEn:"Senkou Span B",nameRo:"Senkou Span B",color:"#c53030",period:"52",formula:"(MAX(52) + MIN(52)) / 2, shifted +26",badge:"LONG-TERM BALANCE",
+       beg:"The slow Cloud boundary. Calculated over 52 periods — this is the long-term market balance. Together with Senkou A forms the Kumo Cloud. Green Cloud (A above B) = bull trend. Red (B above A) = bear. When price crosses the Cloud — trend change.",
+       pro:"Senkou B is the long-term anchor of the system. Flat Senkou B = strong level (many trades at near prices). Cloud breakout: price crosses Cloud top-to-bottom closing below Senkou B = strong bearish signal. Kumo Twist (A and B crossover in the future) = visual trend reversal forecast."},
+    ],
+    builderTag:"ICHIMOKU BUILDER",builderTitle:"Enable lines layer by layer and see the full system",
+    builderSub:"Start with a bare chart. Enable elements one by one to understand each line's role.",
+    layerLabels:["Tenkan-Sen","Kijun-Sen","Chikou Span","Kumo Cloud"],
+    layerHints:[
+      "Fast trend activated. Watch: when Tenkan points up — momentum is bullish.",
+      "Baseline added. TK Cross (Tenkan × Kijun) — trend change signal.",
+      "Confirmation added. Chikou above past prices = signal confirmed.",
+      "Kumo Cloud activated. Green = bull trend. Price above Cloud = buy bias.",
+    ],
+    signalLabel:"ACTIVE SIGNALS",
+    signalItems:[
+      "TK Cross bullish: Tenkan crosses Kijun from below",
+      "Price above Cloud: bull trend confirmed",
+      "Chikou above price 26 periods ago: signal valid",
+      "Cloud is green: Senkou A > Senkou B",
+    ],
+    kumoTag:"TRADING RULES",kumoTitle:"How to trade with Ichimoku: three signal levels",
+    kumoRules:[
+      {level:"LEVEL 1 — WEAK",color:"#f59e0b",
+       signals:["TK Cross: Tenkan crosses Kijun","Kijun Cross: price crosses Kijun"],
+       note:"Works only in the direction of the main trend. Ignore against the trend."},
+      {level:"LEVEL 2 — MEDIUM",color:"#3b82f6",
+       signals:["Level 1 signal + price above/below Cloud","Chikou confirms direction"],
+       note:"Requires 2 confirmations. Good entry signal with risk management."},
+      {level:"LEVEL 3 — STRONG",color:"#22c55e",
+       signals:["All 5 components confirm direction","Price, Tenkan, Kijun and Chikou all above Cloud","Future Cloud is green (bullish ahead)"],
+       note:"Rare but highly reliable signal. Perfect Storm — all indicators aligned."},
+    ],
+    gameTag:"SIGNAL TEST",gameTitle:"Identify the Ichimoku signal strength",
+    gameSub:"Each chart shows a scenario. Determine: is this a weak, medium, or strong signal?",
+    scenarios:[
+      {id:1,desc:"Tenkan crosses Kijun from below. Price is BELOW the Cloud. Chikou is below past prices.",correct:"weak",explanation:"Despite the TK Cross — price is below the Cloud and Chikou doesn't confirm. This is a weak signal AGAINST the trend. Professionals ignore it."},
+      {id:2,desc:"Price breaks above the Cloud and closes above Senkou B. Tenkan is pointing up. Chikou is above historical price.",correct:"strong",explanation:"Cloud breakout with Chikou confirmation and bullish Tenkan — this is a Level 3 signal. Kumo breakout is one of the strongest signals in the system."},
+      {id:3,desc:"Price is above the Cloud, Tenkan > Kijun, but Chikou passes through a zone of historical candles.",correct:"medium",explanation:"Two of three conditions met, but Chikou is 'blocked' — this reduces reliability to Level 2. Can enter, but with caution."},
+    ],
+    signalWeak:"WEAK",signalMedium:"MEDIUM",signalStrong:"STRONG",
+    signalCorrect:"✓ Correct!",signalWrong:"✗ Wrong",signalExplain:"Explanation:",
+    signalNext:"Next →",signalFinish:"All scenarios reviewed",signalScore:"Score",signalOf:"of",
+    factTag:"NON-OBVIOUS FACT",
+    factTitle:"Hosoda tested the system for 30 years using teams of students for manual calculations",
+    factBody:"In the 1930s there were no computers. Goichi Hosoda hired teams of students who manually calculated thousands of scenarios for Japanese market stocks. Only after confirming reliability on 30 years of history did he publish the system in 1969 — under the pseudonym 'Ichimoku Sanjin' (The Man Who Sees the Horizon). He deliberately concealed his authorship, believing the tool should speak for itself.",
+    checkTag:"LEVEL PROGRESS",checkTitle:"Check Yourself",
+    checks:["I understand the equilibrium concept in Japanese market philosophy","I know what Tenkan-Sen calculates and what its angle means","I understand Kijun-Sen's role as the balance line","I know what Chikou Span is and how it confirms signals","I can read the Kumo Cloud (color, thickness, price position)","I can identify Ichimoku signal strength (levels 1, 2, 3)"],
+    quizTag:"LEVEL TEST",quizStartBtn:"Take the test →",
+    qof:(i,n)=>`QUESTION ${i} of ${n}`,qcor:(n)=>`Correct: ${n}`,
+    passmsg:"Outstanding! Level 12 complete.",failmsg:"Complex material — re-read and try again.",
+    medalTitle:"🏅 ZEN STRATEGIST",medalDesc:"Level 12 Complete · +280 XP",
+    quiz:[
+      {q:"What does 'Ichimoku Kinko Hyo' mean in Japanese?",o:["A Japanese technical indicator","At a glance, the balance of the mountain","System of five moving averages","Method of predicting the future"],c:1},
+      {q:"How is Tenkan-Sen calculated?",o:["Average of closing prices over 9 periods","(MAX(9) + MIN(9)) / 2","EMA(9) of closing price","Sum of 9 candles / 9"],c:1},
+      {q:"What is unique about the Kumo Cloud vs other indicators?",o:["It measures trading volume","It shows future support zones (shifted +26)","It uses a logarithmic scale","It only works on daily timeframe"],c:1},
+      {q:"Chikou Span is below price from 26 periods ago. This means:",o:["Signal is confirmed","Signal not confirmed, reliability reduced","Strong bullish signal","Add volume indicator"],c:1},
+      {q:"A green Kumo Cloud means:",o:["Price is above the Cloud","Senkou Span A is above Senkou Span B (bull trend)","Tenkan is above Kijun","Chikou confirms the trend"],c:1},
+      {q:"Which signal is considered strongest in Ichimoku?",o:["TK Cross below the Cloud","All 5 components confirm direction (Perfect Storm)","Price crossing Tenkan","Kijun pointing horizontal"],c:1},
+      {q:"Why does Hosoda use (MAX + MIN) / 2 instead of average closes?",o:["Easier to calculate by hand","Mid-price reflects the true price balance of the period","Japanese accounting standard","Close prices are less reliable"],c:1},
+    ],
+    online:"online",tgMsg:"Hi 👋 How can we help?",waMsg:"Hello! Tell us what interests you 📊",
+    apTitle:"Prefer a messenger?",apSub:"Write on Telegram or WhatsApp — message ready.",
+    tgBtn:"OPEN TELEGRAM",waBtn:"OPEN WHATSAPP",chMsg:(n)=>`Hello, question on chapter ${n}`,
+  },
+
+  ro:{
+    chNum:"NIVEL 12",chName:"Filosofia Japoneză",
+    chTitle:"Ichimoku Kinko Hyo: cinci linii care văd totul",
+    prevCh:"← Nivel 11",nextCh:"Nivel 13 →",
+    askLink:"Aveți o întrebare? Scrieți unui analist",
+    mythTag:"FILOSOFIA ICHIMOKU",
+    mythTitle:"„La o privire, echilibrul muntelui”",
+    mythBody:"Acesta este sensul literal al «Ichimoku Kinko Hyo». Goichi Hosoda a dezvoltat acest sistem în anii 1930, publicându-l abia în 1969 — după 30 de ani de testare. Nu este doar un indicator. Este o filosofie de tranzacționare completă: piețele caută întotdeauna echilibrul, iar prețul este doar o abatere temporară de la acesta.",
+    faTag:"12.1 — ECHILIBRUL PIEȚEI",faTitle:"De ce prețul revine întotdeauna la echilibru",
+    faSub:"Filosofia japoneză de tranzacționare este construită pe un principiu: piețele nu sunt haos — sunt mișcare constantă spre echilibrul cererii și ofertei.",
+    faBegText:"Imaginați-vă piața ca o balanță. Când știrile sunt bune — taurii depășesc, prețul crește. Când sunt proaste — urșii apasă. Dar există întotdeauna un punct de echilibru — punctul mediu între maxim și minim pentru o perioadă. Prețul este atras constant spre el, ca un pendul. Toate liniile Ichimoku sunt exact aceste puncte de echilibru pe diferite orizonturi de timp.",
+    faProText:"Ichimoku se bazează pe mid-price: (High + Low) / 2, nu pe prețul de închidere ca majoritatea indicatorilor occidentali. Aceasta este fundamental: mid-price reflectă echilibrul real al prețului perioadei. Hosoda credea că piețele japoneze au cicluri săptămânale/lunare specifice, deci perioadele 9, 26, 52 nu sunt arbitrare: acestea sunt săptămâni de tranzacționare (9 = 2 săptămâni, 26 = 1 lună, 52 = 2 luni cu săptămâna de 6 zile din anii 1930).",
+    scalesTag:"BALANȚA ECHILIBRULUI",scalesTitle:"Balanță interactivă: adaugă factori pe fiecare tavă",
+    scalesSub:"Alegeți factori macroeconomici și urmăriți cum se schimbă echilibrul fundamental",
+    bullFactors:[
+      {id:"rate_cut",label:"Fed scade ratele",weight:3,emoji:"📉"},
+      {id:"gdp_up",label:"PIB-ul crește",weight:2,emoji:"📈"},
+      {id:"jobs_up",label:"Piața muncii e puternică",weight:2,emoji:"💪"},
+      {id:"earnings",label:"Profiturile depășesc estimările",weight:3,emoji:"💰"},
+      {id:"qe",label:"Relaxare cantitativă",weight:4,emoji:"🖨️"},
+      {id:"china_open",label:"China redeschide economia",weight:2,emoji:"🇨🇳"},
+    ],
+    bearFactors:[
+      {id:"rate_hike",label:"Fed majorează ratele",weight:3,emoji:"📊"},
+      {id:"inflation",label:"Inflația crește",weight:3,emoji:"🔥"},
+      {id:"recession",label:"Risc de recesiune",weight:4,emoji:"⚠️"},
+      {id:"credit",label:"Criză de credit",weight:4,emoji:"💳"},
+      {id:"war",label:"Risc geopolitic",weight:3,emoji:"⚔️"},
+      {id:"miss",label:"Profituri dezamăgitoare",weight:2,emoji:"📉"},
+    ],
+    scalesBullLabel:"🐂 TAURI",scalesBearLabel:"🐻 URȘI",
+    scalesResult:{
+      strong_bull:"🚀 Piață bull puternică. Cumpărările sunt justificate.",
+      mild_bull:"📈 Bias bull moderat. Piața înclinată spre creștere.",
+      neutral:"⚖️ Echilibru. Lateral sau incertitudine.",
+      mild_bear:"📉 Bias bear moderat. Prudență justificată.",
+      strong_bear:"🐻 Piață bear puternică. Riscurile domină.",
+    },
+    scalesReset:"Golește balanța",addBull:"→ Pe tava taurilor",addBear:"→ Pe tava urșilor",
+    taTag:"12.2 — ICHIMOKU KINKO HYO",taTitle:"Cinci linii care înlocuiesc toți ceilalți indicatori",
+    taSub:"Ichimoku este singurul indicator care arată simultan trecutul, prezentul și viitorul. Să analizăm fiecare element.",
+    lines:[
+      {key:"tenkan",name:"Tenkan-Sen",nameEn:"Tenkan-Sen",nameRo:"Tenkan-Sen",color:"#e53e3e",period:"9",formula:"(MAX(9) + MIN(9)) / 2",badge:"TREND RAPID",
+       beg:"Analog cu o medie mobilă rapidă, dar calculat diferit: nu media prețurilor de închidere, ci punctul mediu între maxim și minim pentru 9 perioade. Arată trendul pe termen scurt. Când prețul este deasupra Tenkan — impulsul pe termen scurt este bullish.",
+       pro:"Tenkan-Sen este un indicator de momentum pe termen scurt. Tenkan plat = mișcare laterală. Tenkan abruptă = trend puternic. Unghiul contează mai mult decât valoarea. Traversarea prețului cu Tenkan = semnal slab de ordinul 1 (TK Cross)."},
+      {key:"kijun",name:"Kijun-Sen",nameEn:"Kijun-Sen",nameRo:"Kijun-Sen",color:"#3182ce",period:"26",formula:"(MAX(26) + MIN(26)) / 2",badge:"LINIA DE BAZĂ",
+       beg:"Principala 'linie de echilibru' a sistemului. Dacă prețul este deasupra Kijun — piața este bullish, dedesubt — bearish. Kijun acționează și ca suport/rezistență dinamică: prețul revine adesea la ea după mișcări impulsive.",
+       pro:"Kijun este linia de bază (standard). Unghiul Kijun determină calitatea trendului. Kijun plat în zona Norul = nivel puternic. Strategia Kijun Bounce: intrare la retragerea prețului la Kijun în direcția trendului principal."},
+      {key:"chiku",name:"Chikou Span",nameEn:"Chikou Span",nameRo:"Chikou Span",color:"#805ad5",period:"26",formula:"Close deplasat cu 26 perioade înapoi",badge:"CONFIRMARE",
+       beg:"Cel mai neobișnuit element: prețul curent de închidere reprezentat cu 26 perioade în trecut. Dacă Chikou este deasupra prețului din acum 26 perioade — semnalul este confirmat. Este o 'privire înapoi' — confirmare că trendul curent este mai puternic decât trecutul.",
+       pro:"Chikou este un filtru pentru semnale false. Regulă: un semnal este valid numai dacă Chikou nu este 'blocat' de prețul istoric. Dacă linia trece prin zona lumânărilor istorice — semnalul este mai slab. Profesioniștii folosesc Chikou ca filtru final înainte de intrare."},
+      {key:"spanA",name:"Senkou Span A",nameEn:"Senkou Span A",nameRo:"Senkou Span A",color:"#38a169",period:"26",formula:"(Tenkan + Kijun) / 2, deplasat +26",badge:"MARGINEA NORULUI",
+       beg:"Marginea rapidă a Norului Kumo. Aceasta este media dintre Tenkan și Kijun, deplasată cu 26 perioade în viitor. Ceea ce vedeți la dreapta prețului curent este o prognoză a viitoarelor zone de suport/rezistență. Unicitatea Ichimoku: este singurul indicator care proiectează viitorul pe grafic.",
+       pro:"Senkou A formează suport dinamic pe piața bull. În trend bullish prețul stă de obicei deasupra Norului, cu retrageri oprite la Senkou A. Dacă Norul este 'subțire' (A ≈ B) — trend slab, posibil breakout. Norul 'gros' = suport/rezistență puternică."},
+      {key:"spanB",name:"Senkou Span B",nameEn:"Senkou Span B",nameRo:"Senkou Span B",color:"#c53030",period:"52",formula:"(MAX(52) + MIN(52)) / 2, deplasat +26",badge:"ECHILIBRU TERMEN LUNG",
+       beg:"Marginea lentă a Norului. Calculată pe 52 perioade — aceasta este echilibrul pe termen lung al pieței. Împreună cu Senkou A formează Norul Kumo. Nor verde (A deasupra B) = trend bull. Roșu (B deasupra A) = bear. Când prețul traversează Norul — schimbare de trend.",
+       pro:"Senkou B este ancora pe termen lung a sistemului. Senkou B plat = nivel puternic (multe tranzacții la prețuri apropiate). Breakout din Nor: prețul traversează Norul de sus în jos cu închidere sub Senkou B = semnal bearish puternic. Kumo Twist = prognoză vizuală de reversare a trendului."},
+    ],
+    builderTag:"CONSTRUCTOR ICHIMOKU",builderTitle:"Activează liniile strat cu strat și observă sistemul complet",
+    builderSub:"Începe cu un grafic gol. Activează elementele unul câte unul pentru a înțelege rolul fiecărei linii.",
+    layerLabels:["Tenkan-Sen","Kijun-Sen","Chikou Span","Norul Kumo"],
+    layerHints:[
+      "Trend rapid activat. Urmăriți: când Tenkan indică în sus — impulsul este bullish.",
+      "Linia de bază adăugată. TK Cross (Tenkan × Kijun) — semnal de schimbare a trendului.",
+      "Confirmare adăugată. Chikou deasupra prețurilor trecute = semnal confirmat.",
+      "Norul Kumo activat. Verde = trend bull. Preț deasupra Norului = bias de cumpărare.",
+    ],
+    signalLabel:"SEMNALE ACTIVE",
+    signalItems:[
+      "TK Cross bullish: Tenkan traversează Kijun de jos în sus",
+      "Preț deasupra Norului: trend bull confirmat",
+      "Chikou deasupra prețului din 26 perioade: semnal valid",
+      "Norul este verde: Senkou A > Senkou B",
+    ],
+    kumoTag:"REGULI DE TRANZACȚIONARE",kumoTitle:"Cum să tranzacționezi cu Ichimoku: trei niveluri de semnale",
+    kumoRules:[
+      {level:"NIVELUL 1 — SLAB",color:"#f59e0b",
+       signals:["TK Cross: Tenkan traversează Kijun","Kijun Cross: prețul traversează Kijun"],
+       note:"Funcționează numai în direcția trendului principal. Ignorați împotriva trendului."},
+      {level:"NIVELUL 2 — MEDIU",color:"#3b82f6",
+       signals:["Semnal nivel 1 + preț deasupra/sub Nor","Chikou confirmă direcția"],
+       note:"Necesită 2 confirmări. Semnal bun de intrare cu gestionarea riscului."},
+      {level:"NIVELUL 3 — PUTERNIC",color:"#22c55e",
+       signals:["Toate 5 componente confirmă direcția","Prețul, Tenkan, Kijun și Chikou — toate deasupra Norului","Norul viitor este verde (bullish înainte)"],
+       note:"Rar, dar înalt fiabil. Perfect Storm — toți indicatorii aliniați."},
+    ],
+    gameTag:"TEST SEMNALE",gameTitle:"Identifică puterea semnalului Ichimoku",
+    gameSub:"Fiecare grafic arată un scenariu. Determinați: este un semnal slab, mediu sau puternic?",
+    scenarios:[
+      {id:1,desc:"Tenkan traversează Kijun de jos în sus. Prețul este SUB Nor. Chikou este sub prețurile trecute.",correct:"weak",explanation:"În ciuda TK Cross — prețul este sub Nor și Chikou nu confirmă. Acesta este un semnal slab ÎMPOTRIVA trendului. Profesioniștii îl ignoră."},
+      {id:2,desc:"Prețul sparge Norul de jos în sus și se închide deasupra Senkou B. Tenkan indică în sus. Chikou este deasupra prețului istoric.",correct:"strong",explanation:"Breakout din Nor cu confirmarea Chikou și Tenkan bullish — acesta este un semnal de nivel 3. Kumo breakout este unul dintre cele mai puternice semnale ale sistemului."},
+      {id:3,desc:"Prețul este deasupra Norului, Tenkan > Kijun, dar Chikou trece printr-o zonă de lumânări istorice.",correct:"medium",explanation:"Două din trei condiții îndeplinite, dar Chikou este 'blocat' — aceasta reduce fiabilitatea la nivelul 2. Se poate intra, dar cu prudență."},
+    ],
+    signalWeak:"SLAB",signalMedium:"MEDIU",signalStrong:"PUTERNIC",
+    signalCorrect:"✓ Corect!",signalWrong:"✗ Greșit",signalExplain:"Explicație:",
+    signalNext:"Următor →",signalFinish:"Toate scenariile analizate",signalScore:"Scor",signalOf:"din",
+    factTag:"FAPT NEAȘTEPTAT",
+    factTitle:"Hosoda a testat sistemul 30 de ani angajând studenți pentru calcule manuale",
+    factBody:"În anii 1930 nu existau calculatoare. Goichi Hosoda a angajat echipe de studenți care calculau manual mii de scenarii pentru acțiunile pieței japoneze. Abia după confirmarea fiabilității pe 30 de ani de istorie a publicat sistemul în 1969 — sub pseudonimul 'Ichimoku Sanjin' (Omul care vede orizontul).",
+    checkTag:"PROGRES NIVEL",checkTitle:"Verificați-vă",
+    checks:["Înțeleg conceptul de echilibru al pieței în filosofia japoneză","Știu ce calculează Tenkan-Sen și ce înseamnă unghiul său","Înțeleg rolul Kijun-Sen ca linie de echilibru","Știu ce este Chikou Span și cum confirmă semnalele","Pot citi Norul Kumo (culoare, grosime, poziția prețului)","Pot identifica puterea semnalului Ichimoku (nivelurile 1, 2, 3)"],
+    quizTag:"TEST NIVEL",quizStartBtn:"Susține testul →",
+    qof:(i,n)=>`ÎNTREBARE ${i} din ${n}`,qcor:(n)=>`Corecte: ${n}`,
+    passmsg:"Excelent! Nivelul 12 finalizat.",failmsg:"Material complex — recitește și încearcă din nou.",
+    medalTitle:"🏅 STRATEG ZEN",medalDesc:"Nivelul 12 Finalizat · +280 XP",
+    quiz:[
+      {q:"Ce înseamnă 'Ichimoku Kinko Hyo' în japoneză?",o:["Un indicator tehnic japonez","La o privire, echilibrul muntelui","Sistem de cinci medii mobile","Metodă de prezicere a viitorului"],c:1},
+      {q:"Cum se calculează Tenkan-Sen?",o:["Media prețurilor de închidere pe 9 perioade","(MAX(9) + MIN(9)) / 2","EMA(9) din prețul de închidere","Suma a 9 lumânări / 9"],c:1},
+      {q:"Ce este unic la Norul Kumo față de alți indicatori?",o:["Măsoară volumul de tranzacționare","Arată viitoarele zone de suport (deplasat +26)","Folosește scală logaritmică","Funcționează doar pe TF zilnic"],c:1},
+      {q:"Chikou Span este sub prețul din 26 perioade. Aceasta înseamnă:",o:["Semnalul este confirmat","Semnal neconfirmat, fiabilitate redusă","Semnal bullish puternic","Adaugă indicator de volum"],c:1},
+      {q:"Un Nor Kumo verde înseamnă:",o:["Prețul este deasupra Norului","Senkou Span A este deasupra Senkou Span B (trend bull)","Tenkan este deasupra Kijun","Chikou confirmă trendul"],c:1},
+      {q:"Care semnal este cel mai puternic în Ichimoku?",o:["TK Cross sub Nor","Toate 5 componente confirmă direcția (Perfect Storm)","Prețul traversează Tenkan","Kijun indică orizontal"],c:1},
+      {q:"De ce Hosoda folosește (MAX + MIN) / 2 și nu media închiderilor?",o:["Mai ușor de calculat manual","Mid-price reflectă echilibrul real al prețului perioadei","Standard contabil japonez","Prețurile de închidere sunt mai puțin fiabile"],c:1},
+    ],
+    online:"online",tgMsg:"Salut 👋 Cu ce vă putem ajuta?",waMsg:"Bună ziua! Spuneți ce vă interesează 📊",
+    apTitle:"Preferați un messenger?",apSub:"Scrieți pe Telegram sau WhatsApp — mesajul este gata.",
+    tgBtn:"DESCHIDE TELEGRAM",waBtn:"DESCHIDE WHATSAPP",chMsg:(n)=>`Bună ziua, întrebare capitol ${n}`,
+  },
+};
+
+// ─────────────────────────────────────────────
+// STRINGS — hardcoded strings not covered by TR
+// ─────────────────────────────────────────────
+const STRINGS = {
+  ru:{
+    scalesBullShort:"БЫКИ / BULLS",
+    scalesBearShort:"МЕДВЕДИ / BEARS",
+    chartLabel:"EUR/USD · ИШИМОКУ КИНКО ХЁ · 2023",
+    realDataBadge:"РЕАЛЬНЫЕ ДАННЫЕ",
+    cloudBullLegend:"Облако бычье",
+    cloudBearLegend:"Облако медвежье",
+    bullCandleLegend:"Бычья свеча / Bull candle",
+    bearCandleLegend:"Медвежья / Bear",
+    tenkanLegend:"Тенкан (T)",
+    kijunLegend:"Киджун (K)",
+    chikouLegend:"Чикоу (チ)",
+    senkouALegend:"Сенко А",
+    senkouBLegend:"Сенко Б",
+    scenarioLabel:(i)=>`СЦЕНАРИЙ / SCENARIO ${i}`,
+    modeMetaphors:"метафоры",
+    modeProNuance:"профессиональные нюансы",
+  },
+  ro:{
+    scalesBullShort:"TAURI / BULLS",
+    scalesBearShort:"URȘI / BEARS",
+    chartLabel:"EUR/USD · ICHIMOKU KINKO HYO · 2023",
+    realDataBadge:"DATE REALE",
+    cloudBullLegend:"Nor bull",
+    cloudBearLegend:"Nor bear",
+    bullCandleLegend:"Lumânare bull / Bull candle",
+    bearCandleLegend:"Lumânare bear / Bear candle",
+    tenkanLegend:"Tenkan (T)",
+    kijunLegend:"Kijun (K)",
+    chikouLegend:"Chikou (チ)",
+    senkouALegend:"Senkou A",
+    senkouBLegend:"Senkou B",
+    scenarioLabel:(i)=>`SCENARIU / SCENARIO ${i}`,
+    modeMetaphors:"metafore",
+    modeProNuance:"nuanțe profesionale",
+  },
+};
+
+// ─────────────────────────────────────────────
+// MICRO COMPONENTS
+// ─────────────────────────────────────────────
+const {useState, useEffect, useRef, useCallback} = React;
+const Mono = ({children,size=13,color=C.inkSoft,spacing=3,style={}}) =>
+  <span style={{fontFamily:"'Courier New',monospace",fontSize:size,letterSpacing:spacing,color,...style}}>{children}</span>;
+const Chip = ({children,color=C.gold}) =>
+  <span style={{fontFamily:"'Courier New',monospace",fontSize:11,letterSpacing:3,color,border:`1px solid ${color}`,padding:"4px 11px",display:"inline-block",textTransform:"uppercase"}}>{children}</span>;
+const Rule = ({w="50%",my=32}) =>
+  <div style={{height:1,background:`linear-gradient(90deg,transparent,${C.gold},transparent)`,width:w,margin:`${my}px auto`,opacity:0.4}}></div>;
+const getChUrl = (ch) => {
+  const p = new URLSearchParams(window.location.search).get('path')||'explorer';
+  let base = INITIAL_LANG==='ru'?'/edu/b':`/edu/${INITIAL_LANG}/b`;
+  return ch==='start'?`${base}?path=${p}`:`${base}/${ch}?path=${p}`;
+};
+
+// ─────────────────────────────────────────────
+// ANALYST POPUP
+// ─────────────────────────────────────────────
+function AskAnalystPopup({chapterNum,lang,onClose}) {
+  const t = TR[lang]||TR.ru;
+  const prefill = t.chMsg(chapterNum);
+  const tgLink = `https://t.me/SBF_Support?text=${encodeURIComponent(prefill)}`;
+  const waLink = `https://api.whatsapp.com/send/?phone=37369005200&text=${encodeURIComponent(prefill)}&type=phone_number&app_absent=0`;
+  return (
+    <div style={{position:"fixed",inset:0,zIndex:500,display:"flex",alignItems:"center",justifyContent:"center",padding:20,overflowY:"auto"}} onClick={onClose}>
+      <div style={{position:"fixed",inset:0,background:"rgba(250,248,245,0.98)"}}></div>
+      <div onClick={e=>e.stopPropagation()} style={{position:"relative",width:"100%",maxWidth:900,zIndex:1,margin:"auto",padding:"40px 0"}}>
+        <button onClick={onClose} style={{position:"absolute",top:0,right:10,background:"none",border:"none",fontSize:35,cursor:"pointer",color:C.inkFaint,lineHeight:1}}>×</button>
+        <div style={{marginBottom:40,padding:"0 10px"}}>
+          <Mono size={13} color={C.gold} spacing={3} style={{display:"block",marginBottom:15}}>— {t.chNum}</Mono>
+          <h2 style={{fontSize:"clamp(30px,5vw,42px)",fontWeight:700,color:C.black,marginBottom:15,fontFamily:"'DM Serif Display',serif"}}>{t.apTitle}</h2>
+          <p style={{fontSize:18,color:C.inkMid}}>{t.apSub}</p>
+        </div>
+        <div className="messenger-grid">
+          {[{name:"SBF Support",plat:"Telegram",bg:"#0088cc",icon:"🚀",link:tgLink,btn:t.tgBtn,msgBg:"#e1f3fb"},
+            {name:"SBF Company",plat:"WhatsApp",bg:"#25d366",icon:"💬",link:waLink,btn:t.waBtn,msgBg:"#e8f5ed"}
+          ].map((m,i)=>
+            <div key={i} style={{background:"#fff",border:"1px solid #e0e0e0",borderRadius:12,padding:"30px 25px",display:"flex",flexDirection:"column"}}>
+              <div style={{display:"flex",alignItems:"center",gap:15,marginBottom:30}}>
+                <div style={{width:50,height:50,borderRadius:"50%",background:m.msgBg,display:"flex",alignItems:"center",justifyContent:"center"}}>{m.icon}</div>
+                <div><div style={{fontSize:18,fontWeight:700}}>{m.name}</div><div style={{fontSize:14,color:C.inkFaint}}>{m.plat} · {t.online}</div></div>
+              </div>
+              <div style={{background:m.bg,padding:"15px 20px",borderRadius:"12px 12px 0 12px",marginBottom:30,alignSelf:"flex-end",maxWidth:"90%"}}>
+                <div style={{fontSize:16,color:"#fff"}}>{prefill}</div>
+              </div>
+              <a href={m.link} target="_blank" style={{marginTop:"auto",display:"block",background:m.bg,color:"#fff",textAlign:"center",padding:"18px",borderRadius:8,textDecoration:"none",fontWeight:700}}>{m.btn}</a>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
+// BALANCE SCALES
+// ─────────────────────────────────────────────
+function BalanceScales({t}) {
+  const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
+  const [bullActive, setBullActive] = useState([]);
+  const [bearActive, setBearActive] = useState([]);
+
+  const bullWeight = bullActive.reduce((s,id)=>{
+    const f = t.bullFactors.find(x=>x.id===id);
+    return s+(f?f.weight:0);
+  },0);
+  const bearWeight = bearActive.reduce((s,id)=>{
+    const f = t.bearFactors.find(x=>x.id===id);
+    return s+(f?f.weight:0);
+  },0);
+
+  const diff = bullWeight - bearWeight;
+  const maxW = 16;
+  // Tilt: positive = bull wins (left goes down in visual = left plate lower)
+  const tilt = Math.max(-35, Math.min(35, diff * 4));
+  const result = diff >= 6 ? "strong_bull" : diff >= 2 ? "mild_bull" : diff <= -6 ? "strong_bear" : diff <= -2 ? "mild_bear" : "neutral";
+  const resultColor = result.includes("bull") ? C.bull : result === "neutral" ? C.gold : C.bear;
+
+  const toggle = (side, id) => {
+    if(side==="bull") setBullActive(a=>a.includes(id)?a.filter(x=>x!==id):[...a,id]);
+    else setBearActive(a=>a.includes(id)?a.filter(x=>x!==id):[...a,id]);
+  };
+
+  const reset = () => { setBullActive([]); setBearActive([]); };
+
+  // Beam tilt: negative tilt = bear heavier (right goes down)
+  const beamAngle = -tilt; // positive = left (bull) plate goes down
+
+  return (
+    <div style={{background:C.surface,border:`1px solid ${C.border}`,padding:"28px 24px",marginBottom:52}}>
+      <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:6}}>
+        <Chip>{t.scalesTag}</Chip>
+      </div>
+      <div style={{fontFamily:"'DM Serif Display',serif",fontSize:20,fontWeight:700,color:C.black,marginBottom:4}}>{t.scalesTitle}</div>
+      <div style={{fontSize:13,color:C.inkSoft,marginBottom:24}}>{t.scalesSub}</div>
+
+      {/* Visual scales SVG */}
+      <div style={{textAlign:"center",marginBottom:24,userSelect:"none"}}>
+        <svg viewBox="0 0 400 180" style={{width:"100%",maxWidth:460,overflow:"visible"}} xmlns="http://www.w3.org/2000/svg">
+          {/* Stand */}
+          <line x1="200" y1="40" x2="200" y2="160" stroke={C.inkSoft} strokeWidth="3"/>
+          <ellipse cx="200" cy="162" rx="30" ry="6" fill={C.surfaceMid}/>
+          {/* Pivot */}
+          <circle cx="200" cy="42" r="6" fill={C.gold}/>
+          {/* Beam — rotates around pivot */}
+          <g transform={`rotate(${beamAngle}, 200, 42)`}>
+            <line x1="60" y1="42" x2="340" y2="42" stroke={C.black} strokeWidth="2.5"/>
+            {/* Left string (bull) */}
+            <line x1="80" y1="42" x2="80" y2="88" stroke={C.inkSoft} strokeWidth="1.5"/>
+            {/* Right string (bear) */}
+            <line x1="320" y1="42" x2="320" y2="88" stroke={C.inkSoft} strokeWidth="1.5"/>
+            {/* Left plate (bull) */}
+            <ellipse cx="80" cy="92" rx="44" ry="10" fill="rgba(34,197,94,.15)" stroke={C.bull} strokeWidth="1.5"/>
+            <text x="80" y="96" textAnchor="middle" fontSize="10" fontFamily="monospace" fill={C.bull} fontWeight="700">
+              {t.scalesBullLabel}
+            </text>
+            {/* Bull weight indicators */}
+            {bullWeight > 0 && (
+              <text x="80" y="80" textAnchor="middle" fontSize="11" fontFamily="monospace" fill={C.bull} fontWeight="900">
+                +{bullWeight}
+              </text>
+            )}
+            {/* Right plate (bear) */}
+            <ellipse cx="320" cy="92" rx="44" ry="10" fill="rgba(239,68,68,.15)" stroke={C.bear} strokeWidth="1.5"/>
+            <text x="320" y="96" textAnchor="middle" fontSize="10" fontFamily="monospace" fill={C.bear} fontWeight="700">
+              {t.scalesBearLabel}
+            </text>
+            {bearWeight > 0 && (
+              <text x="320" y="80" textAnchor="middle" fontSize="11" fontFamily="monospace" fill={C.bear} fontWeight="900">
+                +{bearWeight}
+              </text>
+            )}
+          </g>
+        </svg>
+      </div>
+
+      {/* Result bar */}
+      <div style={{background:"rgba(0,0,0,.04)",border:`1px solid ${C.border}`,padding:"12px 16px",marginBottom:24,textAlign:"center"}}>
+        <div style={{fontFamily:"monospace",fontSize:14,fontWeight:700,color:resultColor}}>{t.scalesResult[result]}</div>
+        {(bullWeight>0||bearWeight>0) && (
+          <div style={{display:"flex",gap:16,justifyContent:"center",marginTop:6,flexWrap:"wrap"}}>
+            <Mono size={11} color={C.bull} spacing={1}>{S.scalesBullShort}: +{bullWeight}</Mono>
+            <Mono size={11} color={C.bear} spacing={1}>{S.scalesBearShort}: +{bearWeight}</Mono>
+          </div>
+        )}
+      </div>
+
+      {/* Factor grids */}
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:20}}>
+        {/* Bull factors */}
+        <div>
+          <div style={{fontFamily:"monospace",fontSize:10,letterSpacing:2,color:C.bull,marginBottom:10,fontWeight:700}}>🐂 {t.scalesBullLabel}</div>
+          {t.bullFactors.map(f=>(
+            <div key={f.id} onClick={()=>toggle("bull",f.id)}
+              style={{display:"flex",alignItems:"center",gap:10,padding:"9px 12px",marginBottom:6,cursor:"pointer",
+                border:`1px solid ${bullActive.includes(f.id)?C.bull:C.border}`,
+                background:bullActive.includes(f.id)?"rgba(34,197,94,.08)":"#fff",transition:"all .2s"}}>
+              <span style={{fontSize:16}}>{f.emoji}</span>
+              <span style={{flex:1,fontSize:12,color:C.inkMid,lineHeight:1.4}}>{f.label}</span>
+              <span style={{fontFamily:"monospace",fontSize:10,color:bullActive.includes(f.id)?C.bull:C.inkFaint,fontWeight:700}}>+{f.weight}</span>
+              <div style={{width:16,height:16,border:`1px solid ${bullActive.includes(f.id)?C.bull:C.border}`,
+                background:bullActive.includes(f.id)?C.bull:"transparent",display:"flex",alignItems:"center",justifyContent:"center",transition:"all .2s"}}>
+                {bullActive.includes(f.id)&&<span style={{color:"#fff",fontSize:10}}>✓</span>}
+              </div>
+            </div>
+          ))}
+        </div>
+        {/* Bear factors */}
+        <div>
+          <div style={{fontFamily:"monospace",fontSize:10,letterSpacing:2,color:C.bear,marginBottom:10,fontWeight:700}}>🐻 {t.scalesBearLabel}</div>
+          {t.bearFactors.map(f=>(
+            <div key={f.id} onClick={()=>toggle("bear",f.id)}
+              style={{display:"flex",alignItems:"center",gap:10,padding:"9px 12px",marginBottom:6,cursor:"pointer",
+                border:`1px solid ${bearActive.includes(f.id)?C.bear:C.border}`,
+                background:bearActive.includes(f.id)?"rgba(239,68,68,.08)":"#fff",transition:"all .2s"}}>
+              <span style={{fontSize:16}}>{f.emoji}</span>
+              <span style={{flex:1,fontSize:12,color:C.inkMid,lineHeight:1.4}}>{f.label}</span>
+              <span style={{fontFamily:"monospace",fontSize:10,color:bearActive.includes(f.id)?C.bear:C.inkFaint,fontWeight:700}}>+{f.weight}</span>
+              <div style={{width:16,height:16,border:`1px solid ${bearActive.includes(f.id)?C.bear:C.border}`,
+                background:bearActive.includes(f.id)?C.bear:"transparent",display:"flex",alignItems:"center",justifyContent:"center",transition:"all .2s"}}>
+                {bearActive.includes(f.id)&&<span style={{color:"#fff",fontSize:10}}>✓</span>}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+      <button onClick={reset} style={{marginTop:16,background:"transparent",border:`1px solid ${C.border}`,color:C.inkSoft,padding:"8px 18px",cursor:"pointer",fontFamily:"monospace",fontSize:10,letterSpacing:2}}>{t.scalesReset}</button>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
+// ICHIMOKU CHART — реальные данные через EduChart + Lightweight Charts
+// ─────────────────────────────────────────────
+function IchimokuChart({layers}) {
+  const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
+  const chartRef = useRef(null);
+  useEffect(()=>{
+    const el = chartRef.current;
+    if(!el || typeof EduChart === 'undefined') return;
+    el.innerHTML = '';
+    EduChart.create(el, {
+      fixture: 'ichimoku_trend',
+      panes: ['price'],
+      overlays: ['ichimoku'],
+      height: 300,
+      interactive: true,
+    });
+  },[]);
+  return (
+    <div>
+      <div style={{marginBottom:6,display:'flex',gap:10,alignItems:'center',flexWrap:'wrap'}}>
+        <Mono size={10} color={C.inkFaint} spacing={1}>{S.chartLabel}</Mono>
+        <span style={{fontFamily:'JetBrains Mono, monospace',fontSize:9,color:'#1e8e5a',background:'rgba(30,142,90,.08)',padding:'2px 7px',borderRadius:3}}>{S.realDataBadge}</span>
+      </div>
+      <div ref={chartRef} style={{background:'#fff',border:'1px solid #E7DFCF',minHeight:340}}/>
+      <div style={{marginTop:8,display:'flex',gap:14,flexWrap:'wrap',fontSize:10,color:'#8A8275',fontFamily:'JetBrains Mono,monospace'}}>
+        {[{c:'#e67e22',l:'Tenkan-sen (9)'},{c:'#3b82f6',l:'Kijun-sen (26)'},{c:'rgba(30,142,90,.5)',l:S.cloudBullLegend},{c:'rgba(192,57,43,.5)',l:S.cloudBearLegend}].map((x,i)=>(
+          <div key={i} style={{display:'flex',alignItems:'center',gap:5}}>
+            <span style={{display:'inline-block',width:14,height:3,background:x.c,borderRadius:2}}></span>{x.l}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
+// ICHIMOKU BUILDER
+// ─────────────────────────────────────────────
+function IchimokuBuilder({t}) {
+  const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
+  const [layers, setLayers] = useState({tenkan:false,kijun:false,chikou:false,kumo:false});
+  const layerKeys = ["tenkan","kijun","chikou","kumo"];
+  const layerColors = [C.tenkan, C.kijun, C.chiku, C.gold];
+
+  const activeCount = Object.values(layers).filter(Boolean).length;
+  const lastHint = layerKeys.reduce((acc,k,i)=>layers[k]?t.layerHints[i]:acc, null);
+  const activeSignals = t.signalItems.filter((_,i)=>{
+    if(i===0) return layers.tenkan && layers.kijun;
+    if(i===1) return layers.kumo;
+    if(i===2) return layers.chikou;
+    if(i===3) return layers.kumo;
+    return false;
+  });
+
+  return (
+    <div style={{background:C.surface,border:`1px solid ${C.border}`,padding:"24px 24px 20px",marginBottom:48}}>
+      <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:6}}>
+        <Chip>{t.builderTag}</Chip>
+      </div>
+      <div style={{fontFamily:"'DM Serif Display',serif",fontSize:20,fontWeight:700,color:C.black,marginBottom:4}}>{t.builderTitle}</div>
+      <div style={{fontSize:13,color:C.inkSoft,marginBottom:20}}>{t.builderSub}</div>
+
+      {/* Toggle buttons */}
+      <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:16}}>
+        {layerKeys.map((k,i)=>(
+          <button key={k} onClick={()=>setLayers(l=>({...l,[k]:!l[k]}))}
+            style={{display:"flex",alignItems:"center",gap:8,padding:"8px 14px",cursor:"pointer",border:`1.5px solid ${layers[k]?layerColors[i]:C.border}`,
+              background:layers[k]?`${layerColors[i]}18`:"#fff",fontFamily:"monospace",fontSize:10,letterSpacing:2,color:layers[k]?layerColors[i]:C.inkSoft,
+              fontWeight:700,transition:"all .2s"}}>
+            <div style={{width:12,height:3,background:layers[k]?layerColors[i]:C.border,borderRadius:2}}/>
+            {t.layerLabels[i]}
+            {layers[k]&&<span style={{color:layerColors[i]}}>✓</span>}
+          </button>
+        ))}
+      </div>
+
+      {/* Chart */}
+      <IchimokuChart layers={layers}/>
+
+      {/* Legend */}
+      <div style={{display:"flex",gap:14,flexWrap:"wrap",marginTop:10,marginBottom:16}}>
+        {[
+          {c:C.bull,l:S.bullCandleLegend},{c:C.bear,l:S.bearCandleLegend},
+          ...(layers.tenkan?[{c:C.tenkan,l:S.tenkanLegend}]:[]),
+          ...(layers.kijun?[{c:C.kijun,l:S.kijunLegend}]:[]),
+          ...(layers.chikou?[{c:C.chiku,l:S.chikouLegend,dash:true}]:[]),
+          ...(layers.kumo?[{c:C.spanA,l:S.senkouALegend,dash:true},{c:C.spanB,l:S.senkouBLegend}]:[]),
+        ].map((x,i)=>(
+          <div key={i} style={{display:"flex",alignItems:"center",gap:5}}>
+            <div style={{width:14,height:3,background:x.c,borderRadius:2}}/>
+            <Mono size={10} color={C.inkFaint} spacing={0}>{x.l}</Mono>
+          </div>
+        ))}
+      </div>
+
+      {/* Active hint */}
+      {lastHint && (
+        <div style={{background:"rgba(201,151,58,.07)",border:`1px solid ${C.borderGold}`,padding:"10px 14px",marginBottom:14,fontSize:13,color:C.inkMid,lineHeight:1.6}}>
+          <strong style={{color:C.gold}}>→ </strong>{lastHint}
+        </div>
+      )}
+
+      {/* Active signals counter */}
+      {activeSignals.length > 0 && (
+        <div style={{background:C.dark,padding:"14px 18px"}}>
+          <Mono size={10} color={C.gold} spacing={2} style={{display:"block",marginBottom:10}}>
+            ✓ {activeSignals.length} {t.signalLabel}
+          </Mono>
+          {activeSignals.map((s,i)=>(
+            <div key={i} style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
+              <div style={{width:6,height:6,background:C.bull,borderRadius:"50%",flexShrink:0}}/>
+              <span style={{fontSize:12,color:"rgba(255,255,255,.75)"}}>{s}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
+// LINE ACCORDION
+// ─────────────────────────────────────────────
+function LinesAccordion({t,mode}) {
+  const [open,setOpen] = useState(null);
+  return (
+    <div style={{marginBottom:48}}>
+      {t.lines.map((line,i)=>(
+        <div key={line.key} onClick={()=>setOpen(open===i?null:i)}
+          style={{border:`1px solid ${open===i?line.color:C.border}`,marginBottom:-1,cursor:"pointer",background:open===i?`${line.color}08`:"#fff",transition:"all .2s"}}>
+          <div style={{display:"flex",alignItems:"center",gap:14,padding:"14px 18px"}}>
+            {/* Color bar */}
+            <div style={{width:4,height:36,background:line.color,borderRadius:2,flexShrink:0}}/>
+            <div style={{flex:1,minWidth:0}}>
+              <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap",marginBottom:3}}>
+                <span style={{fontFamily:"'DM Serif Display',serif",fontSize:16,fontWeight:700,color:C.black}}>{line.name}</span>
+                <span style={{fontFamily:"monospace",fontSize:9,letterSpacing:2,color:line.color,border:`1px solid ${line.color}`,padding:"2px 7px"}}>{line.badge}</span>
+              </div>
+              <span style={{fontFamily:"monospace",fontSize:10,color:C.inkFaint,letterSpacing:1}}>{line.formula} · Period: {line.period}</span>
+            </div>
+            <div style={{fontSize:14,color:C.inkFaint,transition:"transform .25s",transform:open===i?"rotate(90deg)":"none",flexShrink:0}}>›</div>
+          </div>
+          {open===i && (
+            <div style={{padding:"0 18px 18px 36px",borderTop:`1px solid ${line.color}20`}}>
+              <p style={{fontSize:14,color:C.inkMid,lineHeight:1.8,marginTop:14}}>
+                {mode==="pro" ? line.pro : line.beg}
+              </p>
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
+// KUMO RULES
+// ─────────────────────────────────────────────
+function KumoRules({t}) {
+  return (
+    <div style={{marginBottom:48}}>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(250px,1fr))",gap:16}}>
+        {t.kumoRules.map((r,i)=>(
+          <div key={i} style={{border:`1px solid ${r.color}40`,background:`${r.color}06`,padding:"20px 20px 18px"}}>
+            <div style={{fontFamily:"monospace",fontSize:10,letterSpacing:2,color:r.color,fontWeight:700,marginBottom:12}}>{r.level}</div>
+            <div style={{marginBottom:12}}>
+              {r.signals.map((s,j)=>(
+                <div key={j} style={{display:"flex",alignItems:"flex-start",gap:8,marginBottom:6}}>
+                  <div style={{width:6,height:6,background:r.color,borderRadius:"50%",flexShrink:0,marginTop:5}}/>
+                  <span style={{fontSize:13,color:C.inkMid,lineHeight:1.5}}>{s}</span>
+                </div>
+              ))}
+            </div>
+            <div style={{borderTop:`1px solid ${r.color}30`,paddingTop:10,fontSize:12,color:C.inkSoft,lineHeight:1.6,fontStyle:"italic"}}>
+              {r.note}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
+// SIGNAL STRENGTH GAME
+// ─────────────────────────────────────────────
+function SignalGame({t}) {
+  const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
+  const [idx,setIdx] = useState(0);
+  const [chosen,setChosen] = useState(null);
+  const [score,setScore] = useState(0);
+  const [done,setDone] = useState(false);
+
+  const sc = t.scenarios;
+  const cur = sc[idx];
+  const levels = ["weak","medium","strong"];
+  const labelMap = {weak:t.signalWeak, medium:t.signalMedium, strong:t.signalStrong};
+  const colorMap = {weak:"#f59e0b", medium:"#3b82f6", strong:"#22c55e"};
+
+  const choose = (lv) => {
+    if(chosen) return;
+    const ok = lv === cur.correct;
+    if(ok) setScore(s=>s+1);
+    setChosen(lv);
+  };
+
+  const next = () => {
+    if(idx+1>=sc.length){setDone(true);return;}
+    setIdx(i=>i+1);
+    setChosen(null);
+  };
+
+  if(done) return (
+    <div style={{background:C.surface,border:`1px solid ${C.border}`,padding:"36px 28px",textAlign:"center"}}>
+      <div style={{fontSize:48,marginBottom:12}}>🎯</div>
+      <div style={{fontFamily:"monospace",fontSize:28,color:C.gold,fontWeight:700,marginBottom:8}}>{score} / {sc.length}</div>
+      <div style={{fontSize:14,color:C.inkSoft,marginBottom:20}}>{t.signalFinish}</div>
+      {score>=2 && (
+        <div style={{background:"#fff",border:`1px solid ${C.borderGold}`,display:"inline-block",padding:"14px 28px"}}>
+          <span style={{fontFamily:"monospace",fontSize:11,letterSpacing:3,color:C.gold,display:"block",marginBottom:4}}>🔮 ICHIMOKU READER</span>
+          <span style={{fontFamily:"monospace",fontSize:12,color:C.inkSoft}}>+{score===3?"80":"50"} BONUS XP</span>
+        </div>
+      )}
+    </div>
+  );
+
+  const ok = chosen === cur.correct;
+
+  return (
+    <div style={{background:C.surface,border:`1px solid ${C.border}`,padding:"26px 26px 22px"}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:18,flexWrap:"wrap",gap:8}}>
+        <div style={{display:"flex",alignItems:"center",gap:10}}>
+          <Chip>{t.gameTag}</Chip>
+          <Mono size={11} color={C.inkFaint} spacing={0}>{idx+1} {t.signalOf} {sc.length}</Mono>
+        </div>
+        <Mono size={12} color={C.inkSoft} spacing={1}>{t.signalScore}: {score}</Mono>
+      </div>
+
+      {/* Scenario */}
+      <div style={{background:"#fff",border:`1px solid ${C.border}`,padding:"18px 20px",marginBottom:20}}>
+        <Mono size={10} color={C.gold} spacing={2} style={{display:"block",marginBottom:8}}>{S.scenarioLabel(cur.id)}</Mono>
+        <p style={{fontSize:15,color:C.black,lineHeight:1.7,fontWeight:500}}>{cur.desc}</p>
+      </div>
+
+      {/* Choices */}
+      {!chosen && (
+        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10}}>
+          {levels.map(lv=>(
+            <button key={lv} onClick={()=>choose(lv)}
+              style={{padding:"14px 8px",cursor:"pointer",border:`2px solid ${colorMap[lv]}`,
+                background:`${colorMap[lv]}10`,fontFamily:"monospace",fontSize:11,letterSpacing:2,
+                color:colorMap[lv],fontWeight:700,transition:"all .2s"}}
+              onMouseEnter={e=>{e.currentTarget.style.background=`${colorMap[lv]}25`;}}
+              onMouseLeave={e=>{e.currentTarget.style.background=`${colorMap[lv]}10`;}}
+            >{labelMap[lv]}</button>
+          ))}
+        </div>
+      )}
+
+      {/* Result */}
+      {chosen && (
+        <div>
+          <div style={{padding:"16px 20px",background:ok?"rgba(34,197,94,.08)":"rgba(239,68,68,.08)",border:`1px solid ${ok?C.bull:C.bear}`,marginBottom:14}}>
+            <div style={{fontSize:16,fontWeight:700,color:ok?C.bull:C.bear,marginBottom:4}}>
+              {ok?t.signalCorrect:t.signalWrong}
+              <span style={{fontFamily:"monospace",fontSize:12,marginLeft:10,color:colorMap[cur.correct]}}> → {labelMap[cur.correct]}</span>
+            </div>
+            <div style={{fontSize:13,color:C.inkMid,lineHeight:1.7}}>
+              <strong style={{color:C.black}}>{t.signalExplain}</strong> {cur.explanation}
+            </div>
+          </div>
+          <button onClick={next}
+            style={{background:C.black,color:C.white,border:"none",padding:"11px 24px",cursor:"pointer",fontFamily:"monospace",fontSize:11,letterSpacing:2,fontWeight:700,float:"right",transition:"background .2s"}}
+            onMouseEnter={e=>e.currentTarget.style.background=C.gold}
+            onMouseLeave={e=>e.currentTarget.style.background=C.black}
+          >{idx+1<sc.length?t.signalNext:t.signalFinish}</button>
+          <div style={{clear:"both"}}/>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
+// MODE TOGGLE
+// ─────────────────────────────────────────────
+function ModeToggle({mode,setMode,t}) {
+  return (
+    <div style={{display:"inline-flex",border:`1px solid ${C.border}`}}>
+      {["beg","pro"].map(m=>(
+        <button key={m} onClick={()=>setMode(m)}
+          style={{background:m===mode?C.black:"transparent",color:m===mode?"#fff":C.inkSoft,
+            border:"none",padding:"6px 18px",cursor:"pointer",fontFamily:"monospace",
+            fontSize:9,letterSpacing:3,fontWeight:700,transition:"all .2s"}}>
+          {m==="beg"?(INITIAL_LANG==="ru"?"НОВИЧОК":INITIAL_LANG==="ro"?"ÎNCEPĂTOR":"BEGINNER"):"PRO"}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
+// CHECKLIST
+// ─────────────────────────────────────────────
+function Checklist({t}) {
+  const [checks,setChecks] = useState(new Array(t.checks.length).fill(false));
+  const pct = Math.round(checks.filter(Boolean).length/checks.length*100);
+  return (
+    <div>
+      <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16}}>
+        <div style={{flex:1,height:3,background:C.surfaceMid,borderRadius:2,overflow:"hidden"}}>
+          <div style={{width:pct+"%",height:"100%",background:C.gold,transition:"width .4s"}}/>
+        </div>
+        <Mono size={11} color={C.inkFaint} spacing={1}>{pct}%</Mono>
+      </div>
+      {t.checks.map((text,i)=>(
+        <div key={i} onClick={()=>setChecks(c=>{const n=[...c];n[i]=!n[i];return n;})}
+          style={{display:"flex",alignItems:"center",gap:14,padding:"13px 18px",marginBottom:8,cursor:"pointer",
+            border:`1px solid ${checks[i]?C.gold:C.border}`,background:checks[i]?"rgba(201,151,58,.06)":"#fff",transition:"all .25s"}}>
+          <div style={{width:18,height:18,border:`1px solid ${checks[i]?C.gold:C.inkFaint}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,background:checks[i]?C.gold:"transparent",transition:"all .25s"}}>
+            {checks[i]&&<span style={{color:"#fff",fontSize:11}}>✓</span>}
+          </div>
+          <span style={{fontSize:14,color:checks[i]?C.black:C.inkMid}}>{text}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
+// QUIZ
+// ─────────────────────────────────────────────
+function Quiz({t}) {
+  const [started,setStarted] = useState(false);
+  const [qidx,setQidx] = useState(0);
+  const [score,setScore] = useState(0);
+  const [sel,setSel] = useState(null);
+  const [done,setDone] = useState(false);
+  const qq = t.quiz;
+
+  const choose = (i) => {
+    if(sel!==null) return;
+    setSel(i);
+    if(i===qq[qidx].c) setScore(s=>s+1);
+    setTimeout(()=>{setSel(null);if(qidx+1>=qq.length)setDone(true);else setQidx(x=>x+1);},950);
+  };
+
+  if(!started) return (
+    <div style={{textAlign:"center"}}>
+      <button onClick={()=>setStarted(true)}
+        style={{background:"transparent",border:`1px solid ${C.black}`,color:C.black,padding:"13px 36px",cursor:"pointer",fontFamily:"monospace",fontSize:11,letterSpacing:3,transition:"all .2s"}}
+        onMouseEnter={e=>{e.currentTarget.style.background=C.black;e.currentTarget.style.color="#fff";}}
+        onMouseLeave={e=>{e.currentTarget.style.background="transparent";e.currentTarget.style.color=C.black;}}
+      >{t.quizStartBtn}</button>
+    </div>
+  );
+
+  if(done) return (
+    <div style={{background:C.surface,border:`1px solid ${C.border}`,padding:"36px 28px",textAlign:"center"}}>
+      <div style={{fontSize:48,marginBottom:14}}>🏅</div>
+      <div style={{fontFamily:"monospace",fontSize:28,color:C.gold,fontWeight:700,marginBottom:8}}>{score} / {qq.length}</div>
+      <p style={{fontSize:14,color:C.inkSoft,marginBottom:24}}>{score>=5?t.passmsg:t.failmsg}</p>
+      {score>=5&&<div style={{background:"#fff",border:`1px solid ${C.borderGold}`,display:"inline-block",padding:"14px 28px"}}>
+        <span style={{fontFamily:"monospace",fontSize:11,letterSpacing:3,color:C.gold,display:"block",marginBottom:4}}>{t.medalTitle}</span>
+        <span style={{fontFamily:"monospace",fontSize:12,color:C.inkSoft}}>{t.medalDesc}</span>
+      </div>}
+    </div>
+  );
+
+  const q = qq[qidx];
+  return (
+    <div style={{background:C.surface,border:`1px solid ${C.border}`,padding:"26px 28px"}}>
+      <div style={{display:"flex",justifyContent:"space-between",marginBottom:18,alignItems:"center"}}>
+        <Chip>{t.qof(qidx+1,qq.length)}</Chip>
+        <Mono size={12} color={C.inkSoft} spacing={1}>{t.qcor(score)}</Mono>
+      </div>
+      <p style={{fontSize:16,color:C.black,marginBottom:18,lineHeight:1.55,fontWeight:500}}>{q.q}</p>
+      <div style={{display:"grid",gap:10}}>
+        {q.o.map((opt,i)=>{
+          let bg="#fff",bc=C.border;
+          if(sel!==null){if(i===q.c){bg="rgba(34,197,94,.08)";bc="#86efac";}else if(i===sel){bg="rgba(239,68,68,.08)";bc="#fca5a5";}}
+          return <button key={i} onClick={()=>choose(i)}
+            style={{background:bg,border:`1px solid ${bc}`,color:C.ink,padding:"11px 15px",cursor:"pointer",textAlign:"left",fontFamily:"'DM Sans',sans-serif",fontSize:14,transition:"all .2s"}}>{opt}</button>;
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
+// MAIN CHAPTER 12
+// ─────────────────────────────────────────────
+function Chapter12() {
+  const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
+  const [askOpen,setAskOpen] = useState(false);
+  const [mode,setMode] = useState("beg");
+  const t = TR[INITIAL_LANG]||TR.ru;
+
+  return (
+    <div style={{minHeight:"100vh",background:C.white,color:C.ink,fontFamily:"'DM Sans',sans-serif"}}>
+
+      {/* STICKY NAV */}
+      <div style={{position:"sticky",top:106,background:"rgba(255,255,255,0.96)",backdropFilter:"blur(10px)",borderBottom:`1px solid ${C.border}`,padding:"12px 5vw",display:"flex",alignItems:"center",justifyContent:"space-between",zIndex:50,flexWrap:"wrap",gap:10}}>
+        <div style={{display:"flex",alignItems:"center",gap:16}}>
+          <span onClick={()=>window.location.href=getChUrl(11)} style={{color:C.gold,cursor:"pointer",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</span>
+          <Chip>{t.chNum}</Chip>
+          <Mono size={14} color={C.inkSoft} spacing={0} className="hide-mobile">{t.chName}</Mono>
+        </div>
+        <ModeToggle mode={mode} setMode={setMode} t={t}/>
+      </div>
+
+      <div style={{maxWidth:920,margin:"0 auto",padding:"52px 5vw 120px"}}>
+
+        {/* TITLE */}
+        <div style={{textAlign:"center",marginBottom:60}}>
+          <Mono size={12} color={C.gold} spacing={4} style={{display:"block",marginBottom:14}}>SBF COMPANY · {t.chNum}</Mono>
+          <h1 style={{fontSize:"clamp(32px,5vw,52px)",fontWeight:700,color:C.black,fontFamily:"'DM Serif Display',serif",marginBottom:16,lineHeight:1.1}}>
+            {t.chName}
+          </h1>
+          <p style={{fontSize:18,color:C.inkMid,maxWidth:640,margin:"0 auto",lineHeight:1.6}}>{t.chTitle}</p>
+        </div>
+
+        {/* INTRO DARK */}
+        <div style={{background:C.dark,color:"#fff",padding:"32px 36px",marginBottom:56,position:"relative",overflow:"hidden"}}>
+          <div style={{position:"absolute",top:-15,right:20,fontSize:100,opacity:.04,fontFamily:"serif",pointerEvents:"none"}}>☁</div>
+          <Chip color={C.gold}>{t.mythTag}</Chip>
+          <h2 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(18px,2.5vw,26px)",fontWeight:700,margin:"14px 0 12px",color:"#fff",lineHeight:1.25}}>{t.mythTitle}</h2>
+          <p style={{fontSize:15,color:"#ccc",lineHeight:1.85}}>{t.mythBody}</p>
+        </div>
+
+        {/* ═══ 12.1 EQUILIBRIUM ═══ */}
+        <div style={{marginBottom:28}}>
+          <div style={{fontFamily:"monospace",fontSize:11,letterSpacing:3,color:C.gold,border:`1px solid ${C.gold}`,padding:"3px 9px",display:"inline-block",marginBottom:10}}>{t.faTag}</div>
+          <div style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(22px,3vw,32px)",fontWeight:700,color:C.black,letterSpacing:-.5,marginBottom:6,lineHeight:1.2}}>{t.faTitle}</div>
+          <div style={{fontSize:13,color:C.inkSoft,marginBottom:20}}>{t.faSub}</div>
+        </div>
+
+        <div style={{marginBottom:16,display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
+          <ModeToggle mode={mode} setMode={setMode} t={t}/>
+        </div>
+
+        <div style={{background:C.surface,border:`1px solid ${C.border}`,padding:"22px 24px",marginBottom:48}}>
+          <p style={{fontSize:15,color:C.inkMid,lineHeight:1.85}}>{mode==="beg"?t.faBegText:t.faProText}</p>
+        </div>
+
+        {/* BALANCE SCALES */}
+        <BalanceScales t={t}/>
+
+        <Rule/>
+
+        {/* ═══ 12.2 ICHIMOKU ═══ */}
+        <div style={{marginBottom:28}}>
+          <div style={{fontFamily:"monospace",fontSize:11,letterSpacing:3,color:C.gold,border:`1px solid ${C.gold}`,padding:"3px 9px",display:"inline-block",marginBottom:10}}>{t.taTag}</div>
+          <div style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(22px,3vw,32px)",fontWeight:700,color:C.black,letterSpacing:-.5,marginBottom:6,lineHeight:1.2}}>{t.taTitle}</div>
+          <div style={{fontSize:13,color:C.inkSoft,marginBottom:20}}>{t.taSub}</div>
+        </div>
+
+        <div style={{marginBottom:16,display:"flex",alignItems:"center",gap:10}}>
+          <ModeToggle mode={mode} setMode={setMode} t={t}/>
+          <Mono size={11} color={C.inkFaint} spacing={1}>{mode==="beg"?S.modeMetaphors:S.modeProNuance}</Mono>
+        </div>
+
+        {/* Lines accordion */}
+        <LinesAccordion t={t} mode={mode}/>
+
+        {/* Kumo trading rules */}
+        <div style={{marginBottom:16}}>
+          <div style={{fontFamily:"monospace",fontSize:11,letterSpacing:3,color:C.gold,border:`1px solid ${C.gold}`,padding:"3px 9px",display:"inline-block",marginBottom:10}}>{t.kumoTag}</div>
+          <div style={{fontFamily:"'DM Serif Display',serif",fontSize:20,fontWeight:700,color:C.black,marginBottom:6}}>{t.kumoTitle}</div>
+        </div>
+        <KumoRules t={t}/>
+
+        {/* ICHIMOKU BUILDER */}
+        <IchimokuBuilder t={t}/>
+
+        {/* SIGNAL GAME */}
+        <div style={{marginBottom:16}}>
+          <div style={{fontFamily:"'DM Serif Display',serif",fontSize:20,fontWeight:700,color:C.black,marginBottom:6}}>{t.gameTitle}</div>
+          <div style={{fontSize:13,color:C.inkSoft,marginBottom:16}}>{t.gameSub}</div>
+        </div>
+        <SignalGame t={t}/>
+
+        <Rule/>
+
+        {/* NON-OBVIOUS FACT */}
+        <div style={{border:`1px solid ${C.border}`,padding:"26px 30px",marginBottom:52,background:C.surface,position:"relative"}}>
+          <div style={{position:"absolute",top:16,right:18}}>
+            <Chip>{t.factTag}</Chip>
+          </div>
+          <p style={{fontFamily:"'DM Serif Display',serif",fontSize:16,fontWeight:700,margin:"0 0 10px",color:C.black,paddingRight:160,lineHeight:1.4}}>{t.factTitle}</p>
+          <p style={{fontSize:14,color:C.inkMid,lineHeight:1.85}}>{t.factBody}</p>
+        </div>
+
+        {/* CHECKLIST */}
+        <div style={{marginBottom:12}}>
+          <div style={{fontFamily:"monospace",fontSize:11,letterSpacing:3,color:C.gold,border:`1px solid ${C.gold}`,padding:"3px 9px",display:"inline-block",marginBottom:10}}>{t.checkTag}</div>
+          <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,fontWeight:700,color:C.black,marginBottom:16}}>{t.checkTitle}</div>
+        </div>
+        <Checklist t={t}/>
+
+        <div style={{marginBottom:40}}/>
+
+        {/* QUIZ */}
+        <div style={{marginBottom:12}}><Chip>{t.quizTag}</Chip><div style={{height:16}}/></div>
+        <Quiz t={t}/>
+
+        <div style={{height:40}}/>
+
+        {/* FOOTER */}
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",paddingTop:32,borderTop:`1px solid ${C.border}`,flexWrap:"wrap",gap:12}}>
+          <button onClick={()=>window.location.href=getChUrl(11)}
+            style={{background:"transparent",border:`1px solid ${C.border}`,color:C.inkSoft,padding:"11px 20px",cursor:"pointer",fontFamily:"monospace",fontSize:11,letterSpacing:2,transition:"all .2s"}}
+            onMouseEnter={e=>{e.currentTarget.style.borderColor=C.gold;e.currentTarget.style.color=C.gold;}}
+            onMouseLeave={e=>{e.currentTarget.style.borderColor=C.border;e.currentTarget.style.color=C.inkSoft;}}
+          >{t.prevCh}</button>
+          <span onClick={()=>setAskOpen(true)} style={{fontSize:14,color:C.inkSoft,fontFamily:"monospace",borderBottom:`1px solid ${C.border}`,cursor:"pointer",letterSpacing:1}}>{t.askLink}</span>
+          <button onClick={()=>window.location.href=getChUrl(13)}
+            style={{background:C.black,color:C.white,border:"none",padding:"16px 28px",cursor:"pointer",fontFamily:"monospace",fontSize:13,letterSpacing:2,fontWeight:700,transition:"background .2s"}}
+            onMouseEnter={e=>e.currentTarget.style.background=C.gold}
+            onMouseLeave={e=>e.currentTarget.style.background=C.black}
+          >{t.nextCh}</button>
+        </div>
+
+      </div>
+
+      {askOpen&&<AskAnalystPopup chapterNum={12} lang={INITIAL_LANG} onClose={()=>setAskOpen(false)}/>}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('sbf-book-root')).render(<Chapter12/>);
+{% endraw %}
+</script>
+</body>
+</html>
