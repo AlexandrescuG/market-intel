@@ -1,0 +1,1317 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>SBF | {% if lang == 'ru' %}Глава 10. Психология и Паттерны{% elif lang == 'ro' %}Capitolul 10. Psihologie și Modele{% else %}Chapter 10. Psychology and Patterns{% endif %}</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html,body{max-width:100vw;overflow-x:hidden;scroll-behavior:smooth}
+    body{background:#ffffff;font-family:'DM Sans',system-ui,sans-serif;color:#18181a}
+    #sbf-book-root{min-height:100vh}
+    .back-to-edu{position:fixed;bottom:20px;right:20px;z-index:500;background:#18181a;color:rgba(255,255,255,0.6);font-family:'DM Sans',sans-serif;font-size:.75rem;letter-spacing:1.5px;text-transform:uppercase;padding:7px 13px;text-decoration:none;transition:all .2s;border:1px solid rgba(255,255,255,0.08)}
+    .back-to-edu:hover{background:#c9973a;color:#fff}
+    .messenger-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:30px}
+    @media(max-width:768px){.messenger-grid{grid-template-columns:1fr}.hide-mobile{display:none!important}.g2{grid-template-columns:1fr!important}.g3{grid-template-columns:1fr!important}}
+  </style>
+</head>
+<body>
+
+
+<div id="sbf-book-root"></div>
+{% if lang == 'ro' %}
+<a href="/edu/ro/b" class="back-to-edu">← Înapoi la cuprins</a>
+{% else %}
+<a href="/edu/b" class="back-to-edu">← К оглавлению</a>
+{% endif %}
+
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<script type="text/babel" data-presets="react">
+const INITIAL_LANG = "{{ lang }}";
+
+{% raw %}
+const STRINGS = {
+  ru: {
+    // Ask Analyst popup
+    askTag: "— НАПИСАТЬ НАМ",
+    askTitle: "Предпочитаете мессенджер?",
+    askSub: "Напишите в Telegram или WhatsApp — сообщение уже готово.",
+    tgSub: "Telegram · онлайн",
+    waSub: "WhatsApp · онлайн",
+    tgBtn: "ОТКРЫТЬ TELEGRAM",
+    waBtn: "ОТКРЫТЬ WHATSAPP",
+
+    // Sentiment Swipe interactive
+    hl1: "Биткоин мёртв. Эксперты советуют срочно продавать.",
+    hl2: "Золото бьёт рекорды — аналитики прогнозируют ещё +40% до конца года!",
+    hl3: "Рынки рухнули: это худший кризис за 20 лет",
+    hl4: "Каждый студент покупает акции. Ваш сосед уже заработал 300%",
+    hl5: "Криптовалюта — главная инвестиция десятилетия!",
+    hl6: "Паника на Уолл-Стрит: инвесторы бегут из акций в кэш",
+    hl7: "«Больше никогда не куплю акции» — говорят тысячи инвесторов",
+    hl8: "Дефицит жилья: цены на недвижимость только растут!",
+    hl9: "ИИ изменит всё — акции Nvidia взлетят в 10 раз",
+    hl10: "Рецессия неизбежна: Goldman предупреждает о крахе",
+    sentTitle: "Шкала Сантимента",
+    sentTag: "ИНТЕРАКТИВ — ФУНДАМЕНТАЛ · СВАЙП КАРТОЧЕК",
+    sentReset: "↺ СБРОС",
+    sentHeadlinesLabel: "ЗАГОЛОВКОВ",
+    sentFearArrow: "← СТРАХ",
+    sentGreedArrow: "ЖАДНОСТЬ →",
+    sentFearHint: "СТРАХ 😱",
+    sentGreedHint: "ЖАДНОСТЬ 🤑",
+    sentFearBtn: "← СТРАХ 😱",
+    sentGreedBtn: "ЖАДНОСТЬ 🤑 →",
+    sentDragHint: "Тяните карточку или нажмите кнопку",
+    sentResultsTitle: "Результаты анализа",
+    sentSignalFear: "СТРАХ",
+    sentSignalGreed: "ЖАДНОСТЬ",
+    sentSignalFearLower: "страх",
+    sentSignalGreedLower: "жадность",
+    sentCorrectSuffix: "— верно",
+    sentIncorrectSuffix: "— неверно (это",
+    sentGaugeLabel: "ИНДЕКС САНТИМЕНТА",
+    zoneExtremeFear: "Экстремальный страх",
+    zoneFear: "Страх",
+    zoneNeutral: "Нейтрально",
+    zoneGreed: "Жадность",
+    zoneExtremeGreed: "Экстремальная жадность",
+    sentLabelExtremeGreed: "Экстремальная жадность 🔥 ПРОДАВАЙ",
+    sentLabelGreed: "Жадность — рынок перегрет",
+    sentLabelNeutral: "Нейтрально",
+    sentLabelFear: "Страх — возможность покупки",
+    sentLabelExtremeFear: "Экстремальный страх 💎 ПОКУПАЙ",
+    sentConclusionEuphoria: "Рынок в эйфории — исторически лучшее время для осторожности.",
+    sentConclusionPanic: "Рынок в панике — исторически лучшее время для покупки.",
+    sentConclusionNeutral: "Рынок нейтрален — следите за трендом.",
+    sentConclusionLabel: "💡 Вывод:",
+    sentQuote: "«Будь жадным, когда другие боятся, и бойся, когда другие жадны» — Уоррен Баффетт. Индекс страха и жадности — не сигнал для немедленной сделки, но мощный фильтр рыночного контекста.",
+
+    // Bear Flag Trainer interactive
+    bfTitle: "Тренажёр «Медвежий Флаг»",
+    bfTag: "ИНТЕРАКТИВ — ТЕХНИКА · ИЗМЕРЕНИЕ ЦЕЛИ",
+    bfResetBtn: "↺ СНАЧАЛА",
+    bfStep1a: "ШАГ 1: Кликните на ВЕРХ древка флагштока (начало падения)",
+    bfStep1b: "ШАГ 1: Теперь кликните на НИЗ древка (конец импульса)",
+    bfStep2: "ШАГ 2: Тяните золотую линию цели вниз от точки пробоя на длину древка. Затем нажмите «Проверить».",
+    bfCheckBtn: "Проверить →",
+    bfResultGood: "✅ Отлично! Цель {t} — верно. Погрешность: {e} пунктов.",
+    bfResultClose: "👍 Близко! Ваша цель: {t}. Правильно: ~{c}. Погрешность: {e} пт.",
+    bfResultMiss: "❌ Промах. Ваша цель: {t}. Правильно: ~{c} (погрешность: {e} пт).",
+    bfRuleText: "Правило «флага»: цель = точка пробоя флага МИНУС высота древка. Высота древка ≈ {h} пунктов. Пробой ≈ {b}, цель ≈ {t}.",
+    bfPoleLabel: "Древко:",
+    bfTargetLabel: "Ваша цель:",
+    bfBreakoutLabel: "Пробой:",
+    bfPtUnit: "пт",
+    bfFlagSvg: "ФЛАГ",
+    bfPoleSvg: "ДРЕВКО ↓",
+    bfBreakoutSvg: "пробой →",
+    bfTargetSvg: "ЦЕЛЬ:",
+    bfTargetApproxSvg: "ЦЕЛЬ ≈",
+    bfYoursSvg: "ВАШ:",
+    bfLegendPole: "Древко (импульс)",
+    bfLegendFlag: "Флаг (консолидация)",
+    bfLegendTarget: "Цель Take-Profit",
+    bfLegendUser: "Ваше измерение",
+
+    // Chapter 10 main
+    headerLevel: "УРОВЕНЬ 10",
+    headerTitle: "Психология и Паттерны",
+    headerFa: "ФА 40%",
+    headerTa: "ТА 60%",
+    heroTag: "SBF COMPANY — ГЛАВА 10",
+    heroTitle1: "Психология толпы",
+    heroAnd: "и",
+    heroTitle2: "Паттерны",
+    heroSub: "Паттерны — не магия. Это геометрия человеческого страха и жадности, повторяющаяся снова и снова.",
+    heroChip1: "Фундаментал 40%",
+    heroChip2: "Техника 60%",
+    heroChip3: "2 Интерактива",
+    mythTag: "РАСПРОСТРАНЁННОЕ ЗАБЛУЖДЕНИЕ",
+    mythTitle: "«Технический анализ — это рисование фигурок. Паттерны — самосбывающееся пророчество без реальной основы.»",
+    mythBody: "Паттерны работают не потому, что их видят все. Они работают, потому что отражают реальное поведение участников рынка: где стоят их стоп-лоссы, где они зафиксировались в убытке, где накопилась ликвидность. «Голова и плечи» — это не магия, это тысячи заперших позиций, готовых к распродаже.",
+    voiceTag: "— АНАЛИТИК SBF · ОЛЕГ",
+    voiceQuote: "«Когда я вижу панические заголовки о крахе — я открываю вотчлист. Когда новости пишут о \"новой эре\" и \"небесах без потолка\" — я начинаю искать выход. Сантимент — это опережающий индикатор.»",
+    voiceBody: "Страх и жадность толпы измеримы. И они дают сигналы раньше, чем любой технический индикатор.",
+    ignoranceLabel: "Цена незнания",
+    ignoranceBody: "Трейдер видит «флаг» — консолидацию после падения. Он думает: «Отскок! Покупаю». Он не знает, что это медвежий флаг — пауза перед продолжением падения. Результат: убыток в направлении тренда, который он видел сам.",
+    ignoranceStrong: "Незнание типа паттерна превращает правильное наблюдение в неправильную сделку.",
+
+    sec1Title: "Психология рыночного цикла",
+    sec1Sub: "Рынок движется циклами. В каждом цикле толпа проходит одни и те же психологические стадии — и каждый раз теряет одинаково.",
+    cycleTag: "ЦИКЛ РЫНОЧНЫХ ЭМОЦИЙ",
+    cycleDenial: "Отрицание", cycleDenialDesc: "«Это временно, скоро отскочит»",
+    cycleFear: "Страх", cycleFearDesc: "«Может упасть ещё»",
+    cyclePanic: "Паника", cyclePanicDesc: "«Продаю всё!»",
+    cycleCapitulation: "Капитуляция", cycleCapitulationDesc: "← ТОЧКА ПОКУПКИ",
+    cycleDespondency: "Уныние", cycleDespondencyDesc: "«Рынок сломан»",
+    cycleHope: "Надежда", cycleHopeDesc: "«Кажется, дно»",
+    cycleConfidence: "Уверенность", cycleConfidenceDesc: "«Покупаю»",
+    cycleEuphoria: "Эйфория", cycleEuphoriaDesc: "← ТОЧКА ПРОДАЖИ",
+    cycleGreed: "Жадность", cycleGreedDesc: "«Буду богатым»",
+
+    pc1Title: "VIX — индекс страха",
+    pc1Text: "VIX измеряет ожидаемую волатильность S&P 500 на 30 дней вперёд. VIX > 30 — рынок в панике, исторически зона покупки. VIX < 15 — самодовольство, рынок может резко упасть.",
+    pc2Title: "Fear & Greed Index",
+    pc2Text: "Агрегирует 7 факторов: волатильность, импульс рынка, спрос на защитные активы, позиции по опционам. 0 = экстремальный страх (возможность), 100 = экстремальная жадность (риск).",
+    pc3Title: "«Покупай, когда льётся кровь»",
+    pc3Text: "Максимальный пессимизм = минимальные цены + минимальное количество покупателей. Именно здесь Smart Money набирает позиции. Эту фразу приписывают Ротшильду и Баффетту.",
+    pc4Title: "Психологический цикл повторяется",
+    pc4Text: "Отрицание → Страх → Паника → Капитуляция → Уныние → Надежда → Уверенность → Эйфория → Жадность → Отрицание. Каждый бычий и медвежий цикл проходит эти стадии.",
+
+    sec2Title: "Паттерны через призму ликвидности",
+    sec2Sub: "Каждый классический паттерн имеет ликвидностную логику. Понимание этой логики делает вас на шаг впереди толпы.",
+
+    pat1Name: "Флаг / Вымпел", pat1Type: "Продолжение тренда", pat1Reliability: "Высокая", pat1Timeframe: "1ч–1д",
+    pat1Desc: "После резкого импульса (древко) цена консолидируется под небольшим углом против тренда (флаг). Это не разворот — это пауза перед продолжением. Участники набирают позиции тихо.",
+    pat1Stops: "Стопы ловцов дна стоят над флагом — их выбивает перед пробоем",
+
+    pat2Name: "Голова и Плечи", pat2Type: "Разворот тренда", pat2Reliability: "Средняя", pat2Timeframe: "4ч–1нед",
+    pat2Desc: "«Голова» — хай тренда. «Правое плечо» — неудачная попытка обновить хай. Покупатели правого плеча заперты в убытках и продают при пробое «шеи», ускоряя падение.",
+    pat2Stops: "Огромный пул стопов под уровнем «шеи» — главное топливо паттерна",
+
+    pat3Name: "Двойная вершина / дно", pat3Type: "Разворот", pat3Reliability: "Средняя", pat3Timeframe: "1ч–1нед",
+    pat3Desc: "Цена дважды не может пробить уровень. При двойной вершине: покупатели второго пика заперты. Пробой поддержки между пиками = каскад стопов. Цель = высота паттерна.",
+    pat3Stops: "Стопы покупателей обеих вершин — под зоной поддержки между пиками",
+
+    liquidityLabel: "Ликвидность:",
+    hnsCaption: "Голова и плечи — где стоят стопы · нажми, чтобы проиграть заново",
+    hnsLink: "📈 Разобрать в полном Графике",
+
+    checklistSecTitle: "Чек-лист главы 10",
+    checklistSecSub: "Отметьте пункты, которые поняли и готовы применять.",
+    check1: "Fear & Greed Index: 0–25 — страх (возможность), 75–100 — жадность (риск)",
+    check2: "VIX > 30 — рынок в панике, исторически зона покупки",
+    check3: "Психологический цикл: капитуляция = дно, эйфория = вершина",
+    check4: "Медвежий флаг: консолидация после импульса = продолжение, не разворот",
+    check5: "Голова и Плечи: стопы покупателей правого плеча — топливо падения",
+    check6: "Цель паттерна = высота древка/паттерна, перенесённая от точки пробоя",
+    check7: "Паттерны — это геометрия страха и жадности, а не магия",
+    checklistDoneTitle: "✅ Глава 10 освоена!",
+    checklistDoneSub: "Вы читаете паттерны как психолог, а не как чертёжник.",
+
+    concTag: "ИТОГИ ГЛАВЫ 10",
+    concTitle: "Что вы теперь знаете",
+    conc1: "Максимальный страх толпы = лучшее время для покупки Smart Money",
+    conc2: "Флаг после падения — это пауза, а не разворот. Тренд продолжится",
+    conc3: "Голова и Плечи работает за счёт запертых покупателей правого плеча",
+    conc4: "VIX и F&G Index — макро-фильтры: контекст, не сигналы",
+    conc5: "Цель по паттерну = высота структуры, перенесённая от пробоя",
+    conc6: "Паттерны повторяются, потому что психология людей не меняется",
+
+    askAnalyst: "Остался вопрос? Напиши аналитику",
+    nextLevel: "Уровень 11 →",
+  },
+  ro: {
+    // Ask Analyst popup
+    askTag: "— SCRIE-NE",
+    askTitle: "Preferați un messenger?",
+    askSub: "Scrie-ne pe Telegram sau WhatsApp — mesajul e deja pregătit.",
+    tgSub: "Telegram · online",
+    waSub: "WhatsApp · online",
+    tgBtn: "DESCHIDE TELEGRAM",
+    waBtn: "DESCHIDE WHATSAPP",
+
+    // Sentiment Swipe interactive
+    hl1: "Bitcoin e mort. Experții recomandă vânzarea urgentă.",
+    hl2: "Aurul bate recorduri — analiștii prognozează încă +40% până la finalul anului!",
+    hl3: "Piețele s-au prăbușit: cea mai gravă criză din ultimii 20 de ani",
+    hl4: "Fiecare student cumpără acțiuni. Vecinul tău a câștigat deja 300%",
+    hl5: "Criptomoneda — cea mai bună investiție a deceniului!",
+    hl6: "Panică pe Wall Street: investitorii fug din acțiuni spre cash",
+    hl7: "„Nu mai cumpăr niciodată acțiuni” — spun mii de investitori",
+    hl8: "Deficit de locuințe: prețurile imobiliarelor doar cresc!",
+    hl9: "AI va schimba totul — acțiunile Nvidia vor exploda de 10 ori",
+    hl10: "Recesiunea este inevitabilă: Goldman avertizează despre un colaps",
+    sentTitle: "Scala Sentimentului",
+    sentTag: "INTERACTIV — FUNDAMENTAL · SWIPE CARDURI",
+    sentReset: "↺ RESETEAZĂ",
+    sentHeadlinesLabel: "TITLURI",
+    sentFearArrow: "← FRICĂ",
+    sentGreedArrow: "LĂCOMIE →",
+    sentFearHint: "FRICĂ 😱",
+    sentGreedHint: "LĂCOMIE 🤑",
+    sentFearBtn: "← FRICĂ 😱",
+    sentGreedBtn: "LĂCOMIE 🤑 →",
+    sentDragHint: "Trageți cardul sau apăsați butonul",
+    sentResultsTitle: "Rezultatele analizei",
+    sentSignalFear: "FRICĂ",
+    sentSignalGreed: "LĂCOMIE",
+    sentSignalFearLower: "frică",
+    sentSignalGreedLower: "lăcomie",
+    sentCorrectSuffix: "— corect",
+    sentIncorrectSuffix: "— greșit (este de fapt",
+    sentGaugeLabel: "INDICELE SENTIMENTULUI",
+    zoneExtremeFear: "Frică extremă",
+    zoneFear: "Frică",
+    zoneNeutral: "Neutru",
+    zoneGreed: "Lăcomie",
+    zoneExtremeGreed: "Lăcomie extremă",
+    sentLabelExtremeGreed: "Lăcomie extremă 🔥 VINDE",
+    sentLabelGreed: "Lăcomie — piața e supraîncălzită",
+    sentLabelNeutral: "Neutru",
+    sentLabelFear: "Frică — oportunitate de cumpărare",
+    sentLabelExtremeFear: "Frică extremă 💎 CUMPĂRĂ",
+    sentConclusionEuphoria: "Piața e în euforie — istoric, cel mai bun moment pentru prudență.",
+    sentConclusionPanic: "Piața e în panică — istoric, cel mai bun moment pentru cumpărare.",
+    sentConclusionNeutral: "Piața e neutră — urmăriți tendința.",
+    sentConclusionLabel: "💡 Concluzie:",
+    sentQuote: "«Fii lacom când alții se tem și teamă-te când alții sunt lacomi» — Warren Buffett. Indicele Fear & Greed nu este un semnal pentru o tranzacție imediată, ci un filtru puternic al contextului de piață.",
+
+    // Bear Flag Trainer interactive
+    bfTitle: "Simulator „Steag Descendent” (Bear Flag)",
+    bfTag: "INTERACTIV — TEHNIC · MĂSURAREA ȚINTEI",
+    bfResetBtn: "↺ DE LA ÎNCEPUT",
+    bfStep1a: "PASUL 1: Faceți clic pe VÂRFUL catargului steagului (începutul căderii)",
+    bfStep1b: "PASUL 1: Acum faceți clic pe BAZA catargului (finalul impulsului)",
+    bfStep2: "PASUL 2: Trageți linia aurie a țintei în jos, de la punctul de breakout, pe lungimea catargului. Apoi apăsați „Verifică”.",
+    bfCheckBtn: "Verifică →",
+    bfResultGood: "✅ Excelent! Ținta {t} — corect. Eroare: {e} puncte.",
+    bfResultClose: "👍 Aproape! Ținta ta: {t}. Corect: ~{c}. Eroare: {e} pct.",
+    bfResultMiss: "❌ Ratat. Ținta ta: {t}. Corect: ~{c} (eroare: {e} pct).",
+    bfRuleText: "Regula „steagului”: ținta = punctul de breakout al steagului MINUS înălțimea catargului. Înălțimea catargului ≈ {h} puncte. Breakout ≈ {b}, țintă ≈ {t}.",
+    bfPoleLabel: "Catarg:",
+    bfTargetLabel: "Ținta ta:",
+    bfBreakoutLabel: "Breakout:",
+    bfPtUnit: "pct",
+    bfFlagSvg: "STEAG",
+    bfPoleSvg: "CATARG ↓",
+    bfBreakoutSvg: "breakout →",
+    bfTargetSvg: "ȚINTĂ:",
+    bfTargetApproxSvg: "ȚINTĂ ≈",
+    bfYoursSvg: "AL TĂU:",
+    bfLegendPole: "Catarg (impuls)",
+    bfLegendFlag: "Steag (consolidare)",
+    bfLegendTarget: "Țintă Take-Profit",
+    bfLegendUser: "Măsurarea ta",
+
+    // Chapter 10 main
+    headerLevel: "NIVEL 10",
+    headerTitle: "Psihologie și Modele",
+    headerFa: "FA 40%",
+    headerTa: "TA 60%",
+    heroTag: "SBF COMPANY — CAPITOLUL 10",
+    heroTitle1: "Psihologia mulțimii",
+    heroAnd: "și",
+    heroTitle2: "Modele",
+    heroSub: "Modelele nu sunt magie. Sunt geometria fricii și lăcomiei umane, care se repetă la nesfârșit.",
+    heroChip1: "Fundamental 40%",
+    heroChip2: "Tehnic 60%",
+    heroChip3: "2 Interactive",
+    mythTag: "CONCEPȚIE GREȘITĂ RĂSPÂNDITĂ",
+    mythTitle: "„Analiza tehnică înseamnă desenat figurine. Modelele sunt o profeție autoîmplinită, fără nicio bază reală.”",
+    mythBody: "Modelele funcționează nu pentru că le văd toți. Ele funcționează pentru că reflectă comportamentul real al participanților la piață: unde le stau stop-loss-urile, unde s-au blocat în pierdere, unde s-a acumulat lichiditatea. „Cap și umeri” nu e magie — sunt mii de poziții blocate, gata de lichidare.",
+    voiceTag: "— ANALIST SBF · OLEG",
+    voiceQuote: "„Când văd titluri panicate despre prăbușire — deschid watchlist-ul. Când presa scrie despre «o eră nouă» și «cer fără plafon» — încep să caut ieșirea. Sentimentul este un indicator anticipativ.”",
+    voiceBody: "Frica și lăcomia mulțimii sunt măsurabile. Și oferă semnale mai devreme decât orice indicator tehnic.",
+    ignoranceLabel: "Prețul ignoranței",
+    ignoranceBody: "Un trader vede un „steag” — o consolidare după o cădere. El crede: „Rebound! Cumpăr”. Nu știe că este un bear flag — o pauză înainte de continuarea căderii. Rezultat: pierdere în direcția tendinței pe care el însuși a văzut-o.",
+    ignoranceStrong: "Necunoașterea tipului de model transformă o observație corectă într-o tranzacție greșită.",
+
+    sec1Title: "Psihologia ciclului de piață",
+    sec1Sub: "Piața se mișcă în cicluri. În fiecare ciclu, mulțimea trece prin aceleași stadii psihologice — și pierde de fiecare dată în același fel.",
+    cycleTag: "CICLUL EMOȚIILOR DE PIAȚĂ",
+    cycleDenial: "Negare", cycleDenialDesc: "„E temporar, revine curând”",
+    cycleFear: "Frică", cycleFearDesc: "„Poate mai scade”",
+    cyclePanic: "Panică", cyclePanicDesc: "„Vând tot!”",
+    cycleCapitulation: "Capitulare", cycleCapitulationDesc: "← PUNCT DE CUMPĂRARE",
+    cycleDespondency: "Deznădejde", cycleDespondencyDesc: "„Piața e stricată”",
+    cycleHope: "Speranță", cycleHopeDesc: "„Cred că e fundul”",
+    cycleConfidence: "Încredere", cycleConfidenceDesc: "„Cumpăr”",
+    cycleEuphoria: "Euforie", cycleEuphoriaDesc: "← PUNCT DE VÂNZARE",
+    cycleGreed: "Lăcomie", cycleGreedDesc: "„O să fiu bogat”",
+
+    pc1Title: "VIX — indicele fricii",
+    pc1Text: "VIX măsoară volatilitatea așteptată a S&P 500 pentru următoarele 30 de zile. VIX > 30 — piața e în panică, istoric zonă de cumpărare. VIX < 15 — complezență, piața poate scădea brusc.",
+    pc2Title: "Fear & Greed Index",
+    pc2Text: "Agregă 7 factori: volatilitate, impuls de piață, cerere pentru active de refugiu, poziții pe opțiuni. 0 = frică extremă (oportunitate), 100 = lăcomie extremă (risc).",
+    pc3Title: "„Cumpără când curge sânge”",
+    pc3Text: "Pesimism maxim = prețuri minime + cel mai mic număr de cumpărători. Exact aici Smart Money acumulează poziții. Fraza este atribuită lui Rothschild și lui Buffett.",
+    pc4Title: "Ciclul psihologic se repetă",
+    pc4Text: "Negare → Frică → Panică → Capitulare → Deznădejde → Speranță → Încredere → Euforie → Lăcomie → Negare. Fiecare ciclu bullish și bearish parcurge aceste stadii.",
+
+    sec2Title: "Modelele prin prisma lichidității",
+    sec2Sub: "Fiecare model clasic are o logică de lichiditate. Înțelegerea acestei logici vă pune cu un pas înaintea mulțimii.",
+
+    pat1Name: "Steag / Fanion (Flag/Pennant)", pat1Type: "Continuarea tendinței", pat1Reliability: "Ridicată", pat1Timeframe: "1h–1z",
+    pat1Desc: "După un impuls brusc (catargul), prețul se consolidează într-un unghi mic împotriva tendinței (steagul). Nu este o inversare — este o pauză înainte de continuare. Participanții acumulează poziții discret.",
+    pat1Stops: "Stop-loss-urile vânătorilor de minime stau deasupra steagului — sunt eliminate înainte de breakout",
+
+    pat2Name: "Cap și Umeri", pat2Type: "Inversarea tendinței", pat2Reliability: "Medie", pat2Timeframe: "4h–1săpt",
+    pat2Desc: "„Capul” este maximul tendinței. „Umărul drept” este o încercare eșuată de a depăși maximul. Cumpărătorii umărului drept rămân blocați în pierdere și vând la spargerea „gâtului” (neckline), accelerând căderea.",
+    pat2Stops: "Un bazin uriaș de stop-loss-uri sub nivelul „gâtului” — principalul combustibil al modelului",
+
+    pat3Name: "Vârf dublu / Fund dublu", pat3Type: "Inversare", pat3Reliability: "Medie", pat3Timeframe: "1h–1săpt",
+    pat3Desc: "Prețul nu reușește de două ori să spargă un nivel. La vârful dublu: cumpărătorii celui de-al doilea vârf rămân blocați. Spargerea suportului dintre vârfuri = cascadă de stop-loss-uri. Ținta = înălțimea modelului.",
+    pat3Stops: "Stop-loss-urile cumpărătorilor ambelor vârfuri — sub zona de suport dintre vârfuri",
+
+    liquidityLabel: "Lichiditate:",
+    hnsCaption: "Cap și umeri — unde stau stop-loss-urile · apasă pentru a reda din nou",
+    hnsLink: "📈 Analizează în Graficul complet",
+
+    checklistSecTitle: "Checklist capitolul 10",
+    checklistSecSub: "Bifați punctele pe care le-ați înțeles și sunteți gata să le aplicați.",
+    check1: "Fear & Greed Index: 0–25 — frică (oportunitate), 75–100 — lăcomie (risc)",
+    check2: "VIX > 30 — piața e în panică, istoric zonă de cumpărare",
+    check3: "Ciclul psihologic: capitularea = fund, euforia = vârf",
+    check4: "Bear flag: consolidarea după impuls = continuare, nu inversare",
+    check5: "Cap și Umeri: stop-loss-urile cumpărătorilor umărului drept — combustibilul căderii",
+    check6: "Ținta modelului = înălțimea catargului/modelului, transferată de la punctul de breakout",
+    check7: "Modelele sunt geometria fricii și lăcomiei, nu magie",
+    checklistDoneTitle: "✅ Capitolul 10 asimilat!",
+    checklistDoneSub: "Citiți modelele ca un psiholog, nu ca un desenator.",
+
+    concTag: "CONCLUZIILE CAPITOLULUI 10",
+    concTitle: "Ce știți acum",
+    conc1: "Frica maximă a mulțimii = cel mai bun moment pentru cumpărarea Smart Money",
+    conc2: "Steagul după o cădere este o pauză, nu o inversare. Tendința va continua",
+    conc3: "Cap și Umeri funcționează datorită cumpărătorilor blocați ai umărului drept",
+    conc4: "VIX și F&G Index — filtre macro: context, nu semnale",
+    conc5: "Ținta modelului = înălțimea structurii, transferată de la breakout",
+    conc6: "Modelele se repetă pentru că psihologia oamenilor nu se schimbă",
+
+    askAnalyst: "Mai aveți o întrebare? Scrieți analistului",
+    nextLevel: "Nivelul 11 →",
+  },
+};
+
+const C = {
+  gold:"#c9973a", goldLight:"#f4d49f", goldPale:"#f7f0e3",
+  black:"#18181a", ink:"#18181a", inkMid:"#555555",
+  inkSoft:"rgba(24,24,26,0.58)", inkFaint:"rgba(24,24,26,0.28)",
+  white:"#ffffff", surface:"#faf8f5", surfaceMid:"#f0ebe0",
+  border:"rgba(24,24,26,0.1)", borderGold:"rgba(201,151,58,0.25)",
+  green:"#089981", greenD:"#2d7a4f", greenPale:"#eaf5ee",
+  red:"#f23645", redD:"#c0392b", redPale:"#fdecea",
+  blue:"#2563eb", chart:"#131722"
+};
+
+const Mono = ({children,size=13,color=C.inkSoft,spacing=3,style={},className=""}) =>
+  <span className={className} style={{fontFamily:"'Courier New',monospace",fontSize:size,letterSpacing:spacing,color,...style}}>{children}</span>;
+const Chip = ({children,color=C.gold}) =>
+  <span style={{fontFamily:"'Courier New',monospace",fontSize:11,letterSpacing:3,color,border:`1px solid ${color}`,padding:"4px 11px",display:"inline-block",textTransform:"uppercase"}}>{children}</span>;
+const Rule = ({w="50%",my=32}) =>
+  <div style={{height:1,background:`linear-gradient(90deg,transparent,${C.gold},transparent)`,width:w,margin:`${my}px auto`,opacity:0.4}}/>;
+const SectionTitle = ({children,sub,align="left"}) => (
+  <div style={{textAlign:align,marginBottom:36}}>
+    <h2 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(24px,3.2vw,36px)",fontWeight:400,color:C.black,lineHeight:1.15,marginBottom:sub?10:0}}>{children}</h2>
+    {sub && <p style={{fontSize:15,color:C.inkSoft,lineHeight:1.65,maxWidth:680,margin:align==="center"?"0 auto":0}}>{sub}</p>}
+  </div>
+);
+const InfoCard = ({icon,title,text,accent=C.gold}) => (
+  <div style={{background:C.surface,border:`1px solid ${C.border}`,padding:"22px 26px",borderRadius:4,borderLeft:`3px solid ${accent}`}}>
+    <div style={{fontSize:20,marginBottom:8}}>{icon}</div>
+    <div style={{fontWeight:600,fontSize:13,color:C.black,letterSpacing:0.5,marginBottom:7,textTransform:"uppercase"}}>{title}</div>
+    <div style={{fontSize:13,color:C.inkMid,lineHeight:1.65}}>{text}</div>
+  </div>
+);
+const getChUrl = (ch) => {
+  const p = new URLSearchParams(window.location.search).get('path')||'explorer';
+  let base = INITIAL_LANG==='ru'?'/edu/b':`/edu/${INITIAL_LANG}/b`;
+  return `${base}/${ch}?path=${p}`;
+};
+
+// ─── AskAnalystPopup ──────────────────────────────────────────────────────────
+function AskAnalystPopup({onClose}) {
+  const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
+  const prefill = INITIAL_LANG==='ru' ? "Здравствуйте, есть вопрос по главе 10"
+    : INITIAL_LANG==='en' ? "Hello, question on chapter 10" : "Bună ziua, întrebare cap 10";
+  const tgLink = `https://t.me/SBF_Support?text=${encodeURIComponent(prefill)}`;
+  const waLink = `https://api.whatsapp.com/send/?phone=37369005200&text=${encodeURIComponent(prefill)}&type=phone_number&app_absent=0`;
+  return (
+    <div style={{position:"fixed",inset:0,zIndex:1000,display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={onClose}>
+      <div style={{position:"fixed",inset:0,background:"rgba(250,248,245,0.98)"}}/>
+      <div onClick={e=>e.stopPropagation()} style={{position:"relative",width:"100%",maxWidth:900,zIndex:1,margin:"auto",padding:"40px 0"}}>
+        <button onClick={onClose} style={{position:"absolute",top:0,right:10,background:"none",border:"none",fontSize:35,cursor:"pointer",color:C.inkFaint,lineHeight:1}}>×</button>
+        <div style={{marginBottom:40}}>
+          <Mono size={13} color={C.gold} spacing={3} style={{display:"block",marginBottom:15}}>{S.askTag}</Mono>
+          <h2 style={{fontSize:"clamp(30px,5vw,42px)",fontWeight:700,color:C.black,marginBottom:15,fontFamily:"'DM Serif Display',serif"}}>{S.askTitle}</h2>
+          <p style={{fontSize:18,color:C.inkMid}}>{S.askSub}</p>
+        </div>
+        <div className="messenger-grid">
+          {[{href:tgLink,bg:"#0088cc",icon:"🚀",name:"SBF Support",sub:S.tgSub,btn:S.tgBtn},
+            {href:waLink,bg:"#25d366",icon:"💬",name:"SBF Company",sub:S.waSub,btn:S.waBtn}
+          ].map((m,i) => (
+            <div key={i} style={{background:"#fff",border:"1px solid #e0e0e0",borderRadius:12,padding:"30px 25px",display:"flex",flexDirection:"column"}}>
+              <div style={{display:"flex",alignItems:"center",gap:15,marginBottom:30}}>
+                <div style={{width:50,height:50,borderRadius:"50%",background:i===0?"#e1f3fb":"#e8f5ed",display:"flex",alignItems:"center",justifyContent:"center"}}>{m.icon}</div>
+                <div><div style={{fontSize:18,fontWeight:700}}>{m.name}</div><div style={{fontSize:14,color:C.inkFaint}}>{m.sub}</div></div>
+              </div>
+              <div style={{background:m.bg,padding:"15px 20px",borderRadius:"12px 12px 0 12px",marginBottom:30,alignSelf:"flex-end",maxWidth:"90%"}}>
+                <div style={{fontSize:14,color:"#fff"}}>{prefill}</div>
+              </div>
+              <a href={m.href} target="_blank" style={{marginTop:"auto",display:"block",background:m.bg,color:"#fff",textAlign:"center",padding:"18px",borderRadius:8,textDecoration:"none",fontWeight:700}}>{m.btn}</a>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Interactive 1: Sentiment Swipe Cards + Speedometer ──────────────────────
+function SentimentSwipe() {
+  const { useState, useRef } = React;
+  const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
+
+  const headlines = [
+    {text:S.hl1, signal:"fear", emoji:"😱", source:"FinMedia · 2022"},
+    {text:S.hl2, signal:"greed", emoji:"🤑", source:"GoldNews · 2024"},
+    {text:S.hl3, signal:"fear", emoji:"💀", source:"Bloomberg · 2020"},
+    {text:S.hl4, signal:"greed", emoji:"🚀", source:"Reddit · 2021"},
+    {text:S.hl5, signal:"greed", emoji:"💎", source:"CryptoPump · 2021"},
+    {text:S.hl6, signal:"fear", emoji:"🏃", source:"Reuters · 2022"},
+    {text:S.hl7, signal:"fear", emoji:"😤", source:"Twitter · 2022"},
+    {text:S.hl8, signal:"greed", emoji:"🏠", source:"Forbes · 2023"},
+    {text:S.hl9, signal:"greed", emoji:"🤖", source:"Tech Digest · 2024"},
+    {text:S.hl10, signal:"fear", emoji:"⚠️", source:"CNBC · 2023"},
+  ];
+
+  const [idx, setIdx] = useState(0);
+  const [score, setScore] = useState({fear:0, greed:0});
+  const [history, setHistory] = useState([]);
+  const [done, setDone] = useState(false);
+  const [swipeAnim, setSwipeAnim] = useState(null); // 'left'|'right'
+  const [dragging, setDragging] = useState(false);
+  const [dragX, setDragX] = useState(0);
+  const startXRef = useRef(null);
+
+  const swipe = (dir) => {
+    if (done || swipeAnim) return;
+    const card = headlines[idx];
+    const correct = (dir === "left" && card.signal === "fear") || (dir === "right" && card.signal === "greed");
+    setSwipeAnim(dir);
+    setTimeout(() => {
+      setSwipeAnim(null);
+      setDragX(0);
+      setHistory(h => [...h, {...card, userChoice: dir, correct}]);
+      setScore(s => ({...s, [card.signal]: s[card.signal]+1}));
+      if (idx + 1 >= headlines.length) setDone(true);
+      else setIdx(i => i+1);
+    }, 320);
+  };
+
+  const reset = () => { setIdx(0); setScore({fear:0,greed:0}); setHistory([]); setDone(false); setSwipeAnim(null); setDragX(0); };
+
+  // Drag handlers
+  const onMouseDown = (e) => { startXRef.current = e.clientX; setDragging(true); };
+  const onMouseMove = (e) => { if (!dragging || startXRef.current === null) return; setDragX(e.clientX - startXRef.current); };
+  const onMouseUp = () => {
+    if (Math.abs(dragX) > 80) swipe(dragX > 0 ? "right" : "left");
+    else setDragX(0);
+    setDragging(false); startXRef.current = null;
+  };
+  const onTouchStart = (e) => { startXRef.current = e.touches[0].clientX; };
+  const onTouchMove = (e) => { if (startXRef.current === null) return; setDragX(e.touches[0].clientX - startXRef.current); };
+  const onTouchEnd = () => {
+    if (Math.abs(dragX) > 60) swipe(dragX > 0 ? "right" : "left");
+    else setDragX(0);
+    startXRef.current = null;
+  };
+
+  // Sentiment score: 0=extreme fear, 100=extreme greed
+  const totalSeen = history.length;
+  const greedPct = totalSeen > 0 ? Math.round((score.greed / totalSeen) * 100) : 50;
+
+  // Speedometer needle angle: -120deg (fear) to +120deg (greed)
+  const needleAngle = -120 + (greedPct / 100) * 240;
+  const cx = 120, cy = 110, r = 90;
+  const toRad = deg => (deg * Math.PI) / 180;
+  const nx = cx + (r - 10) * Math.cos(toRad(needleAngle - 90));
+  const ny = cy + (r - 10) * Math.sin(toRad(needleAngle - 90));
+
+  // Zones on speedometer
+  const zones = [
+    {from:-120, to:-60, color:"#1a3a4a", label:S.zoneExtremeFear},
+    {from:-60,  to:-20, color:"#c0392b",  label:S.zoneFear},
+    {from:-20,  to:20,  color:"#f59e0b",  label:S.zoneNeutral},
+    {from:20,   to:60,  color:"#27ae60",  label:S.zoneGreed},
+    {from:60,   to:120, color:"#e67e22",  label:S.zoneExtremeGreed},
+  ];
+
+  const arcPath = (from, to, innerR, outerR) => {
+    const a1 = toRad(from - 90), a2 = toRad(to - 90);
+    const x1o = cx + outerR * Math.cos(a1), y1o = cy + outerR * Math.sin(a1);
+    const x2o = cx + outerR * Math.cos(a2), y2o = cy + outerR * Math.sin(a2);
+    const x1i = cx + innerR * Math.cos(a1), y1i = cy + innerR * Math.sin(a1);
+    const x2i = cx + innerR * Math.cos(a2), y2i = cy + innerR * Math.sin(a2);
+    const large = (to - from) > 180 ? 1 : 0;
+    return `M${x1o},${y1o} A${outerR},${outerR} 0 ${large},1 ${x2o},${y2o} L${x2i},${y2i} A${innerR},${innerR} 0 ${large},0 ${x1i},${y1i} Z`;
+  };
+
+  const sentimentLabel = greedPct >= 75 ? S.sentLabelExtremeGreed
+    : greedPct >= 55 ? S.sentLabelGreed
+    : greedPct >= 45 ? S.sentLabelNeutral
+    : greedPct >= 25 ? S.sentLabelFear
+    : S.sentLabelExtremeFear;
+  const sentimentColor = greedPct >= 75 ? C.red : greedPct >= 55 ? "#e67e22" : greedPct >= 45 ? C.gold : greedPct >= 25 ? C.green : "#0ea5e9";
+
+  const card = !done ? headlines[idx] : null;
+  const cardTilt = dragX * 0.08;
+  const showFear = dragX < -40;
+  const showGreed = dragX > 40;
+
+  return (
+    <div style={{background:C.black,borderRadius:8,padding:"36px 40px",color:C.white}}>
+      <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:28}}>
+        <span style={{fontSize:28}}>🧠</span>
+        <div>
+          <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.gold}}>{S.sentTitle}</div>
+          <Mono size={11} color="rgba(255,255,255,0.4)" spacing={2}>{S.sentTag}</Mono>
+        </div>
+        {(done || totalSeen > 0) && (
+          <button onClick={reset} style={{marginLeft:"auto",padding:"7px 14px",background:"rgba(255,255,255,0.07)",color:"rgba(255,255,255,0.5)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:3,cursor:"pointer",fontFamily:"monospace",fontSize:11}}>{S.sentReset}</button>
+        )}
+      </div>
+
+      <div style={{display:"grid",gridTemplateColumns:"1fr 240px",gap:32,alignItems:"start"}} className="g2">
+
+        {/* Card area */}
+        <div>
+          {!done ? (
+            <>
+              <div style={{marginBottom:14,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                <Mono size={11} color="rgba(255,255,255,0.35)" spacing={1}>{idx+1} / {headlines.length} {S.sentHeadlinesLabel}</Mono>
+                <div style={{display:"flex",gap:12}}>
+                  <Mono size={11} color={C.red} spacing={1}>{S.sentFearArrow}</Mono>
+                  <Mono size={11} color={C.green} spacing={1}>{S.sentGreedArrow}</Mono>
+                </div>
+              </div>
+
+              {/* Card */}
+              <div style={{position:"relative",height:200,marginBottom:20}}>
+                {/* Next card shadow */}
+                {idx+1 < headlines.length && (
+                  <div style={{position:"absolute",inset:0,background:"rgba(255,255,255,0.04)",borderRadius:12,border:"1px solid rgba(255,255,255,0.08)",transform:"scale(0.96) translateY(8px)"}}/>
+                )}
+                {/* Main card */}
+                <div
+                  onMouseDown={onMouseDown} onMouseMove={onMouseMove} onMouseUp={onMouseUp} onMouseLeave={onMouseUp}
+                  onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}
+                  style={{
+                    position:"absolute",inset:0,
+                    background: showFear ? "rgba(242,54,69,0.15)" : showGreed ? "rgba(8,153,129,0.15)" : "rgba(255,255,255,0.07)",
+                    borderRadius:12,
+                    border:`1px solid ${showFear ? C.red : showGreed ? C.green : "rgba(255,255,255,0.12)"}`,
+                    padding:"32px 28px",cursor:"grab",
+                    transform:`translateX(${swipeAnim==="left" ? -400 : swipeAnim==="right" ? 400 : dragX}px) rotate(${swipeAnim==="left" ? -15 : swipeAnim==="right" ? 15 : cardTilt}deg)`,
+                    transition: swipeAnim ? "transform .3s ease" : dragging ? "none" : "transform .15s ease",
+                    userSelect:"none",display:"flex",flexDirection:"column",justifyContent:"space-between"
+                  }}>
+                  {/* Swipe hint overlays */}
+                  {showFear && <div style={{position:"absolute",top:16,left:16,background:C.red,color:"#fff",padding:"4px 12px",borderRadius:4,fontFamily:"monospace",fontSize:12,fontWeight:700,transform:"rotate(-8deg)"}}>{S.sentFearHint}</div>}
+                  {showGreed && <div style={{position:"absolute",top:16,right:16,background:C.green,color:"#fff",padding:"4px 12px",borderRadius:4,fontFamily:"monospace",fontSize:12,fontWeight:700,transform:"rotate(8deg)"}}>{S.sentGreedHint}</div>}
+                  <div>
+                    <div style={{fontSize:36,marginBottom:16}}>{card.emoji}</div>
+                    <p style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(16px,2.2vw,20px)",color:C.white,lineHeight:1.45,marginBottom:12}}>{card.text}</p>
+                  </div>
+                  <Mono size={10} color="rgba(255,255,255,0.3)" spacing={1}>{card.source}</Mono>
+                </div>
+              </div>
+
+              {/* Buttons */}
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+                <button onClick={() => swipe("left")} style={{padding:"14px",background:"rgba(242,54,69,0.12)",border:`1px solid ${C.red}`,color:C.red,borderRadius:8,cursor:"pointer",fontFamily:"monospace",fontSize:13,fontWeight:700,letterSpacing:1}}>
+                  {S.sentFearBtn}
+                </button>
+                <button onClick={() => swipe("right")} style={{padding:"14px",background:"rgba(8,153,129,0.12)",border:`1px solid ${C.green}`,color:C.green,borderRadius:8,cursor:"pointer",fontFamily:"monospace",fontSize:13,fontWeight:700,letterSpacing:1}}>
+                  {S.sentGreedBtn}
+                </button>
+              </div>
+              <p style={{fontSize:11,color:"rgba(255,255,255,0.25)",textAlign:"center",marginTop:10,fontFamily:"monospace"}}>{S.sentDragHint}</p>
+            </>
+          ) : (
+            <div style={{background:"rgba(255,255,255,0.05)",borderRadius:8,padding:"28px",marginBottom:16}}>
+              <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.gold,marginBottom:16}}>{S.sentResultsTitle}</div>
+              <div style={{display:"grid",gap:8,maxHeight:280,overflowY:"auto"}}>
+                {history.map((h,i) => (
+                  <div key={i} style={{display:"flex",gap:10,alignItems:"flex-start",padding:"8px 10px",background:"rgba(255,255,255,0.03)",borderRadius:4,border:`1px solid ${h.correct ? "rgba(8,153,129,0.2)" : "rgba(242,54,69,0.15)"}`}}>
+                    <span style={{fontSize:14,flexShrink:0}}>{h.correct ? "✅" : "❌"}</span>
+                    <div style={{flex:1,minWidth:0}}>
+                      <div style={{fontSize:12,color:"rgba(255,255,255,0.6)",lineHeight:1.4,marginBottom:4}}>{h.text}</div>
+                      <div style={{fontSize:10,fontFamily:"monospace",color: h.signal==="fear" ? C.red : C.green}}>
+                        {h.signal==="fear" ? S.sentSignalFear : S.sentSignalGreed} {h.correct ? S.sentCorrectSuffix : `${S.sentIncorrectSuffix} ${h.signal==="fear"?S.sentSignalFearLower:S.sentSignalGreedLower})`}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Speedometer */}
+        <div style={{textAlign:"center"}}>
+          <Mono size={9} color="rgba(255,255,255,0.3)" spacing={1} style={{display:"block",marginBottom:12}}>{S.sentGaugeLabel}</Mono>
+          <svg viewBox="0 0 240 150" style={{width:"100%",display:"block"}}>
+            {/* Background arc zones */}
+            {zones.map((z,i) => <path key={i} d={arcPath(z.from, z.to, 65, 90)} fill={z.color} opacity="0.85"/>)}
+            {/* Tick marks */}
+            {[-120,-90,-60,-30,0,30,60,90,120].map(a => {
+              const r1 = 91, r2 = 98;
+              const x1 = cx + r1*Math.cos(toRad(a-90)), y1 = cy + r1*Math.sin(toRad(a-90));
+              const x2 = cx + r2*Math.cos(toRad(a-90)), y2 = cy + r2*Math.sin(toRad(a-90));
+              return <line key={a} x1={x1} y1={y1} x2={x2} y2={y2} stroke="rgba(255,255,255,0.3)" strokeWidth="1.5"/>;
+            })}
+            {/* Center cap */}
+            <circle cx={cx} cy={cy} r={62} fill="#18181a"/>
+            {/* Needle */}
+            <line
+              x1={cx} y1={cy}
+              x2={nx} y2={ny}
+              stroke={C.gold} strokeWidth="2.5" strokeLinecap="round"
+              style={{transition:"x2 .5s ease, y2 .5s ease"}}
+            />
+            <circle cx={cx} cy={cy} r={6} fill={C.gold}/>
+            {/* Value */}
+            <text x={cx} y={cy-20} fontSize="22" fontWeight="700" fill={sentimentColor} textAnchor="middle" fontFamily="monospace" style={{transition:"fill .5s"}}>
+              {greedPct}
+            </text>
+            <text x={cx} y={cy-6} fontSize="8" fill="rgba(255,255,255,0.4)" textAnchor="middle" fontFamily="monospace">/ 100</text>
+            {/* Labels */}
+            <text x={cx-88} y={cy+16} fontSize="7" fill="rgba(255,255,255,0.4)" textAnchor="middle" fontFamily="monospace">{S.sentSignalFear}</text>
+            <text x={cx+88} y={cy+16} fontSize="7" fill="rgba(255,255,255,0.4)" textAnchor="middle" fontFamily="monospace">{S.sentSignalGreed}</text>
+          </svg>
+          <div style={{fontSize:11,fontWeight:700,color:sentimentColor,fontFamily:"monospace",marginTop:4,lineHeight:1.4,transition:"color .5s"}}>
+            {sentimentLabel}
+          </div>
+          <div style={{marginTop:16,display:"grid",gap:6}}>
+            {zones.slice().reverse().map((z,i) => (
+              <div key={i} style={{display:"flex",alignItems:"center",gap:7}}>
+                <div style={{width:10,height:10,borderRadius:2,background:z.color,flexShrink:0}}/>
+                <span style={{fontSize:10,fontFamily:"monospace",color:"rgba(255,255,255,0.4)"}}>{z.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {done && (
+        <div style={{marginTop:20,background:"rgba(201,151,58,0.08)",border:`1px solid ${C.gold}44`,borderRadius:4,padding:"16px 20px"}}>
+          <div style={{fontWeight:700,color:C.gold,fontSize:14,marginBottom:8}}>
+            {S.sentConclusionLabel} {greedPct >= 70 ? S.sentConclusionEuphoria : greedPct <= 30 ? S.sentConclusionPanic : S.sentConclusionNeutral}
+          </div>
+          <p style={{fontSize:13,color:"rgba(255,255,255,0.6)",lineHeight:1.65}}>
+            {S.sentQuote}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Interactive 2: Bear Flag Trainer ────────────────────────────────────────
+function BearFlagTrainer() {
+  const { useState, useRef } = React;
+  const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
+
+  const W = 680, H = 320;
+  const PRICE_MIN = 2470, PRICE_MAX = 2530;
+  const toY = p => H - ((p - PRICE_MIN) / (PRICE_MAX - PRICE_MIN)) * H;
+  const toP = y => PRICE_MIN + ((H - y) / H) * (PRICE_MAX - PRICE_MIN);
+
+  // Pre-built scenario: flagpole (impulse down) + flag (consolidation up) + breakdown expected
+  const candles = [
+    // initial trend (context)
+    {o:2525,c:2522,h:2527,l:2520,x:24},
+    {o:2522,c:2519,h:2523,l:2517,x:50},
+    // FLAGPOLE: sharp impulse DOWN
+    {o:2519,c:2510,h:2521,l:2508,x:76},
+    {o:2510,c:2501,h:2512,l:2499,x:102},
+    {o:2501,c:2494,h:2503,l:2492,x:128},
+    // FLAG: consolidation upward (smaller candles, slant up)
+    {o:2494,c:2497,h:2499,l:2492,x:154},
+    {o:2497,c:2500,h:2502,l:2495,x:180},
+    {o:2500,c:2498,h:2503,l:2496,x:206},
+    {o:2498,c:2502,h:2504,l:2496,x:232},
+    {o:2502,c:2499,h:2505,l:2497,x:258},
+    {o:2499,c:2503,h:2506,l:2497,x:284},
+    {o:2503,c:2500,h:2506,l:2498,x:310},
+    // Current: breakdown candle starting
+    {o:2500,c:2500,h:2501,l:2500,x:336}, // placeholder
+  ];
+
+  // True values for the flag
+  const flagpoleTop = 2519;
+  const flagpoleBottom = 2492;
+  const flagPoleHeight = flagpoleTop - flagpoleBottom; // ~27
+  const flagTop = 2506;
+  const flagBottom = 2492;
+  const breakdownX = 336;
+  const targetPrice = flagpoleBottom - flagPoleHeight; // ~2465
+
+  const [phase, setPhase] = useState("measure"); // measure | place_target | result
+  // User's flagpole measurement: two y-values clicked on chart
+  const [measStart, setMeasStart] = useState(null);
+  const [measEnd, setMeasEnd] = useState(null);
+  const [targetY, setTargetY] = useState(null);
+  const [draggingTarget, setDraggingTarget] = useState(false);
+  const [result, setResult] = useState(null);
+  const svgRef = useRef(null);
+
+  const getSVGY = (e) => {
+    const rect = svgRef.current.getBoundingClientRect();
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return Math.max(0, Math.min(H, (clientY - rect.top) * (H / rect.height)));
+  };
+  const getSVGX = (e) => {
+    const rect = svgRef.current.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    return Math.max(0, Math.min(W, (clientX - rect.left) * (W / rect.width)));
+  };
+
+  const handleClick = (e) => {
+    const y = getSVGY(e);
+    const p = toP(y);
+    if (phase === "measure") {
+      if (!measStart) { setMeasStart(y); }
+      else if (!measEnd) {
+        setMeasEnd(y);
+        setPhase("place_target");
+      }
+    }
+  };
+
+  const handleMove = (e) => {
+    if (draggingTarget && phase === "place_target") {
+      setTargetY(getSVGY(e));
+    }
+  };
+  const handleUp = () => setDraggingTarget(false);
+
+  const checkResult = () => {
+    if (targetY === null) return;
+    const userTarget = toP(targetY);
+    const err = Math.abs(userTarget - targetPrice);
+    const good = err <= 5;
+    const close = err <= 12;
+    setResult({good, close, userTarget: Math.round(userTarget), correctTarget: Math.round(targetPrice), err: Math.round(err)});
+    setPhase("result");
+  };
+
+  const reset = () => {
+    setPhase("measure"); setMeasStart(null); setMeasEnd(null); setTargetY(null);
+    setDraggingTarget(false); setResult(null);
+  };
+
+  // Measured pole height in price units
+  const userPoleHeight = measStart !== null && measEnd !== null
+    ? Math.abs(toP(measStart) - toP(measEnd)) : null;
+
+  // Breakdown level (flag bottom)
+  const breakdownY = toY(flagBottom);
+  // Projected target based on user measurement
+  const projTargetY = (measStart !== null && measEnd !== null && targetY !== null) ? targetY : null;
+
+  const candleW = 16;
+
+  return (
+    <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"36px 40px"}}>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:20,flexWrap:"wrap",gap:12}}>
+        <div style={{display:"flex",alignItems:"center",gap:12}}>
+          <span style={{fontSize:28}}>📐</span>
+          <div>
+            <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.black}}>{S.bfTitle}</div>
+            <Mono size={11} color={C.inkSoft} spacing={2}>{S.bfTag}</Mono>
+          </div>
+        </div>
+        {phase !== "measure" && (
+          <button onClick={reset} style={{padding:"9px 18px",background:C.black,color:"#fff",border:"none",borderRadius:4,cursor:"pointer",fontFamily:"monospace",fontSize:11,letterSpacing:1}}>
+            {S.bfResetBtn}
+          </button>
+        )}
+      </div>
+
+      {/* Step instructions */}
+      <div style={{marginBottom:16}}>
+        {phase === "measure" && (
+          <div style={{background:"rgba(201,151,58,0.08)",border:"1px solid rgba(201,151,58,0.25)",borderRadius:4,padding:"12px 18px",display:"flex",gap:10,alignItems:"center"}}>
+            <span style={{fontSize:18}}>📏</span>
+            <Mono size={12} color={C.gold} spacing={1}>
+              {!measStart ? S.bfStep1a : S.bfStep1b}
+            </Mono>
+          </div>
+        )}
+        {phase === "place_target" && (
+          <div style={{background:C.greenPale,border:`1px solid ${C.green}`,borderRadius:4,padding:"12px 18px",display:"flex",gap:12,alignItems:"center",flexWrap:"wrap"}}>
+            <Mono size={12} color={C.greenD} spacing={1} style={{flex:1}}>
+              {S.bfStep2}
+            </Mono>
+            <button onClick={checkResult} style={{padding:"9px 18px",background:C.greenD,color:"#fff",border:"none",borderRadius:4,cursor:"pointer",fontFamily:"monospace",fontSize:12,fontWeight:700}}>
+              {S.bfCheckBtn}
+            </button>
+          </div>
+        )}
+        {phase === "result" && result && (
+          <div style={{background: result.good ? C.greenPale : result.close ? "rgba(201,151,58,0.08)" : C.redPale,
+            border:`1px solid ${result.good ? C.green : result.close ? C.gold : C.red}`,
+            borderRadius:4,padding:"14px 20px"}}>
+            <div style={{fontWeight:700,fontSize:14,color: result.good ? C.greenD : result.close ? C.gold : C.redD,marginBottom:6}}>
+              {result.good ? S.bfResultGood.replace("{t}", result.userTarget).replace("{e}", result.err)
+                : result.close ? S.bfResultClose.replace("{t}", result.userTarget).replace("{c}", result.correctTarget).replace("{e}", result.err)
+                : S.bfResultMiss.replace("{t}", result.userTarget).replace("{c}", result.correctTarget).replace("{e}", result.err)}
+            </div>
+            <p style={{fontSize:13,color:C.inkMid,lineHeight:1.65}}>
+              {S.bfRuleText.replace("{h}", Math.round(flagPoleHeight)).replace("{b}", Math.round(flagBottom)).replace("{t}", Math.round(targetPrice))}
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Measurements display */}
+      {userPoleHeight && (
+        <div style={{display:"flex",gap:16,marginBottom:12,flexWrap:"wrap"}}>
+          <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:3,padding:"6px 14px"}}>
+            <Mono size={11} color={C.inkSoft} spacing={1}>{S.bfPoleLabel} </Mono>
+            <Mono size={12} color={C.black} spacing={0}>{Math.round(userPoleHeight)} {S.bfPtUnit}</Mono>
+          </div>
+          {targetY !== null && (
+            <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:3,padding:"6px 14px"}}>
+              <Mono size={11} color={C.inkSoft} spacing={1}>{S.bfTargetLabel} </Mono>
+              <Mono size={12} color={C.gold} spacing={0}>{Math.round(toP(targetY))}</Mono>
+            </div>
+          )}
+          <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:3,padding:"6px 14px"}}>
+            <Mono size={11} color={C.inkSoft} spacing={1}>{S.bfBreakoutLabel} </Mono>
+            <Mono size={12} color={C.red} spacing={0}>{Math.round(flagBottom)}</Mono>
+          </div>
+        </div>
+      )}
+
+      {/* Chart */}
+      <div style={{borderRadius:4,overflow:"hidden",border:`1px solid ${C.border}`,userSelect:"none"}}>
+        <svg
+          ref={svgRef}
+          viewBox={`0 0 ${W} ${H}`}
+          style={{width:"100%",display:"block",background:C.chart,
+            cursor: phase==="measure" ? "crosshair" : phase==="place_target" ? "ns-resize" : "default",
+            touchAction:"none"}}
+          onClick={handleClick}
+          onMouseMove={handleMove}
+          onMouseUp={handleUp}
+          onMouseLeave={handleUp}
+        >
+          {/* Grid */}
+          {[2475,2480,2485,2490,2495,2500,2505,2510,2515,2520,2525].map(p => (
+            <g key={p}>
+              <line x1="0" y1={toY(p)} x2={W} y2={toY(p)} stroke="rgba(255,255,255,0.04)" strokeWidth="1"/>
+              <text x="4" y={toY(p)-3} fontSize="9" fill="rgba(255,255,255,0.18)" fontFamily="monospace">{p}</text>
+            </g>
+          ))}
+
+          {/* Flag channel lines (shown always for context) */}
+          <line x1="128" y1={toY(flagTop)} x2={breakdownX} y2={toY(flagTop)} stroke="rgba(201,151,58,0.3)" strokeWidth="1" strokeDasharray="5 3"/>
+          <line x1="128" y1={toY(flagBottom)} x2={breakdownX} y2={toY(flagBottom)} stroke="rgba(201,151,58,0.3)" strokeWidth="1" strokeDasharray="5 3"/>
+          <rect x="128" y={toY(flagTop)} width={breakdownX-128} height={toY(flagBottom)-toY(flagTop)}
+            fill="rgba(201,151,58,0.05)" stroke="none"/>
+          <text x={(128+breakdownX)/2} y={toY((flagTop+flagBottom)/2)+4} fontSize="9" fill="rgba(201,151,58,0.5)" textAnchor="middle" fontFamily="monospace">{S.bfFlagSvg}</text>
+
+          {/* Candles */}
+          {candles.slice(0,-1).map((c,i) => {
+            const bull = c.c >= c.o;
+            // Color: flagpole red, flag gold-ish, rest neutral
+            const col = i >= 2 && i <= 4 ? C.red : i >= 5 && i <= 11 ? "#f59e0b" : (bull ? C.green : C.red);
+            const bodyT = toY(Math.max(c.o,c.c));
+            const bodyB = toY(Math.min(c.o,c.c));
+            return (
+              <g key={i}>
+                <line x1={c.x} y1={toY(c.h)} x2={c.x} y2={toY(c.l)} stroke={col} strokeWidth="1.5"/>
+                <rect x={c.x-candleW/2} y={bodyT} width={candleW} height={Math.max(bodyB-bodyT,1.5)} fill={col} rx="1"/>
+              </g>
+            );
+          })}
+
+          {/* Annotations */}
+          <text x="76" y={toY(flagpoleTop)-6} fontSize="9" fill={C.red} fontFamily="monospace" textAnchor="middle">{S.bfPoleSvg}</text>
+
+          {/* Breakdown vertical line */}
+          <line x1={breakdownX} y1="0" x2={breakdownX} y2={H} stroke="rgba(255,255,255,0.1)" strokeWidth="1" strokeDasharray="4 3"/>
+          <text x={breakdownX+4} y={12} fontSize="9" fill="rgba(255,255,255,0.3)" fontFamily="monospace">{S.bfBreakoutSvg}</text>
+
+          {/* User measurement: start point */}
+          {measStart !== null && (
+            <g>
+              <circle cx={76} cy={measStart} r={5} fill={C.gold} opacity="0.9"/>
+              <line x1="0" y1={measStart} x2={breakdownX} y2={measStart} stroke={C.gold} strokeWidth="1" strokeDasharray="4 3" opacity="0.5"/>
+              <text x={breakdownX+4} y={measStart+4} fontSize="9" fill={C.gold} fontFamily="monospace">T: {Math.round(toP(measStart))}</text>
+            </g>
+          )}
+          {measEnd !== null && (
+            <g>
+              <circle cx={76} cy={measEnd} r={5} fill={C.gold} opacity="0.9"/>
+              <line x1="0" y1={measEnd} x2={breakdownX} y2={measEnd} stroke={C.gold} strokeWidth="1" strokeDasharray="4 3" opacity="0.5"/>
+              <text x={breakdownX+4} y={measEnd+4} fontSize="9" fill={C.gold} fontFamily="monospace">B: {Math.round(toP(measEnd))}</text>
+            </g>
+          )}
+          {/* Measured distance arrow */}
+          {measStart !== null && measEnd !== null && (
+            <g>
+              <line x1="60" y1={measStart} x2="60" y2={measEnd} stroke={C.gold} strokeWidth="2"/>
+              <line x1="52" y1={measStart} x2="68" y2={measStart} stroke={C.gold} strokeWidth="1.5"/>
+              <line x1="52" y1={measEnd}   x2="68" y2={measEnd}   stroke={C.gold} strokeWidth="1.5"/>
+            </g>
+          )}
+
+          {/* Target line — draggable */}
+          {phase === "place_target" && (
+            <g>
+              <line x1={breakdownX} y1={targetY ?? toY(flagBottom - (userPoleHeight||0))}
+                    x2={W} y2={targetY ?? toY(flagBottom - (userPoleHeight||0))}
+                    stroke={C.green} strokeWidth="2" strokeDasharray="6 3"/>
+              <rect
+                x={breakdownX} y={(targetY ?? toY(flagBottom-(userPoleHeight||0)))-12}
+                width={W-breakdownX} height={24}
+                fill="transparent" cursor="ns-resize"
+                onMouseDown={() => setDraggingTarget(true)}
+                onTouchStart={() => setDraggingTarget(true)}
+              />
+              <rect x={breakdownX+4} y={(targetY ?? toY(flagBottom-(userPoleHeight||0)))-10} width={100} height={18} fill="rgba(8,153,129,0.2)" rx="2"/>
+              <text x={breakdownX+10} y={(targetY ?? toY(flagBottom-(userPoleHeight||0)))+3} fontSize="9" fill={C.green} fontFamily="monospace">{S.bfTargetSvg} {Math.round(toP(targetY ?? toY(flagBottom-(userPoleHeight||0))))}</text>
+            </g>
+          )}
+
+          {/* Result — show true target */}
+          {phase === "result" && (
+            <g>
+              <line x1={breakdownX} y1={toY(targetPrice)} x2={W} y2={toY(targetPrice)} stroke={C.green} strokeWidth="1.5" strokeDasharray="6 3"/>
+              <rect x={breakdownX+4} y={toY(targetPrice)-10} width={110} height={18} fill="rgba(8,153,129,0.2)" rx="2"/>
+              <text x={breakdownX+10} y={toY(targetPrice)+3} fontSize="9" fill={C.green} fontFamily="monospace">{S.bfTargetApproxSvg} {Math.round(targetPrice)}</text>
+              {/* User's target */}
+              {targetY && (
+                <>
+                  <line x1={breakdownX} y1={targetY} x2={W} y2={targetY} stroke={C.gold} strokeWidth="1.5" strokeDasharray="4 3" opacity="0.7"/>
+                  <text x={breakdownX+10} y={targetY+12} fontSize="9" fill={C.gold} fontFamily="monospace">{S.bfYoursSvg} {Math.round(toP(targetY))}</text>
+                </>
+              )}
+            </g>
+          )}
+        </svg>
+      </div>
+
+      <div style={{marginTop:12,display:"flex",gap:20,flexWrap:"wrap"}}>
+        {[{color:C.red,label:S.bfLegendPole},
+          {color:"#f59e0b",label:S.bfLegendFlag},
+          {color:C.green,label:S.bfLegendTarget},
+          {color:C.gold,label:S.bfLegendUser}
+        ].map((l,i) => (
+          <div key={i} style={{display:"flex",alignItems:"center",gap:6}}>
+            <div style={{width:12,height:3,background:l.color,borderRadius:2}}/>
+            <span style={{fontSize:11,fontFamily:"monospace",color:C.inkMid}}>{l.label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── Main Chapter 10 ──────────────────────────────────────────────────────────
+function Chapter10() {
+  const { useState } = React;
+  const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
+  const [askOpen, setAskOpen] = useState(false);
+  const [checked, setChecked] = useState({});
+
+  const toggleCheck = (i) => setChecked(p => ({...p,[i]:!p[i]}));
+  const checkedCount = Object.values(checked).filter(Boolean).length;
+
+  // Market Psychology Cycle stages
+  const cycleStages = [
+    {emoji:"😐", label:S.cycleDenial,      price:"↗", color:"rgba(255,255,255,0.3)", desc:S.cycleDenialDesc},
+    {emoji:"😰", label:S.cycleFear,        price:"↘", color:C.red,   desc:S.cycleFearDesc},
+    {emoji:"😱", label:S.cyclePanic,       price:"↓↓",color:C.redD,  desc:S.cyclePanicDesc},
+    {emoji:"💎", label:S.cycleCapitulation,price:"⬛", color:"#0ea5e9", desc:S.cycleCapitulationDesc},
+    {emoji:"😒", label:S.cycleDespondency, price:"→", color:"#8b5cf6", desc:S.cycleDespondencyDesc},
+    {emoji:"🤔", label:S.cycleHope,        price:"↗", color:C.gold,  desc:S.cycleHopeDesc},
+    {emoji:"😊", label:S.cycleConfidence,  price:"↑", color:C.green, desc:S.cycleConfidenceDesc},
+    {emoji:"🤑", label:S.cycleEuphoria,    price:"↑↑",color:"#f59e0b", desc:S.cycleEuphoriaDesc},
+    {emoji:"😤", label:S.cycleGreed,       price:"↗↗",color:C.red,  desc:S.cycleGreedDesc},
+  ];
+
+  const psychCards = [
+    {icon:"😨", title:S.pc1Title,
+     text:S.pc1Text,
+     accent:"#8b5cf6"},
+    {icon:"😱", title:S.pc2Title,
+     text:S.pc2Text,
+     accent:C.red},
+    {icon:"🩸", title:S.pc3Title,
+     text:S.pc3Text,
+     accent:C.gold},
+    {icon:"🔁", title:S.pc4Title,
+     text:S.pc4Text,
+     accent:C.green},
+  ];
+
+  const patterns = [
+    {
+      name:S.pat1Name, type:S.pat1Type, reliability:S.pat1Reliability, timeframe:S.pat1Timeframe,
+      color:C.red,
+      desc:S.pat1Desc,
+      stops:S.pat1Stops,
+    },
+    {
+      name:S.pat2Name, type:S.pat2Type, reliability:S.pat2Reliability, timeframe:S.pat2Timeframe,
+      color:"#8b5cf6",
+      desc:S.pat2Desc,
+      stops:S.pat2Stops,
+    },
+    {
+      name:S.pat3Name, type:S.pat3Type, reliability:S.pat3Reliability, timeframe:S.pat3Timeframe,
+      color:C.gold,
+      desc:S.pat3Desc,
+      stops:S.pat3Stops,
+    },
+  ];
+
+  const checklistItems = [
+    S.check1,
+    S.check2,
+    S.check3,
+    S.check4,
+    S.check5,
+    S.check6,
+    S.check7,
+  ];
+
+  const conclusions = [
+    S.conc1,
+    S.conc2,
+    S.conc3,
+    S.conc4,
+    S.conc5,
+    S.conc6,
+  ];
+
+  return (
+    <div style={{minHeight:"100vh",background:C.white,color:C.ink,fontFamily:"'DM Sans',sans-serif"}}>
+
+      {/* Sticky header */}
+      <div style={{position:"sticky",top:106,background:"rgba(255,255,255,0.96)",backdropFilter:"blur(10px)",borderBottom:`1px solid ${C.border}`,padding:"15px 5vw",display:"flex",alignItems:"center",justifyContent:"space-between",zIndex:50}}>
+        <div style={{display:"flex",alignItems:"center",gap:20}}>
+          <span onClick={() => window.location.href = getChUrl(9)} style={{color:C.gold,cursor:"pointer",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</span>
+          <Chip>{S.headerLevel}</Chip>
+          <Mono size={14} color={C.inkSoft} spacing={0} className="hide-mobile">{S.headerTitle}</Mono>
+        </div>
+        <div style={{display:"flex",gap:8,alignItems:"center"}}>
+          {checkedCount > 0 && <Chip color={C.green}>{checkedCount}/{checklistItems.length} ✓</Chip>}
+          <Chip color={C.inkFaint}>{S.headerFa}</Chip>
+          <Chip color={C.inkFaint}>{S.headerTa}</Chip>
+        </div>
+      </div>
+
+      {/* HERO */}
+      <div style={{background:C.black,padding:"80px 5vw 70px",textAlign:"center",position:"relative",overflow:"hidden"}}>
+        <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 100%, rgba(139,92,246,0.08) 0%, transparent 60%)"}}/>
+        <div style={{position:"relative"}}>
+          <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:20}}>{S.heroTag}</Mono>
+          <h1 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(36px,6vw,66px)",fontWeight:400,color:C.white,lineHeight:1.05,marginBottom:20}}>
+            {S.heroTitle1}<br/>{S.heroAnd} <span style={{color:C.gold}}>{S.heroTitle2}</span>
+          </h1>
+          <p style={{fontSize:"clamp(16px,2vw,20px)",color:"rgba(255,255,255,0.55)",maxWidth:620,margin:"0 auto 32px",lineHeight:1.65}}>
+            {S.heroSub}
+          </p>
+          <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
+            <Chip color={C.gold}>{S.heroChip1}</Chip>
+            <Chip color="rgba(255,255,255,0.3)">{S.heroChip2}</Chip>
+            <Chip color="rgba(255,255,255,0.3)">{S.heroChip3}</Chip>
+          </div>
+        </div>
+      </div>
+
+      <div style={{maxWidth:1060,margin:"0 auto",padding:"72px 5vw 120px"}}>
+
+        {/* ── ANTI-MYTH ── */}
+        <div style={{background:C.black,borderRadius:6,padding:"36px 40px",marginBottom:56,position:"relative",overflow:"hidden"}}>
+          <div style={{position:"absolute",top:0,left:0,bottom:0,width:4,background:"#8b5cf6"}}/>
+          <Mono size={11} color="#8b5cf6" spacing={3} style={{display:"block",marginBottom:16,color:"#8b5cf6"}}>{S.mythTag}</Mono>
+          <h3 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(20px,3vw,28px)",color:C.white,fontWeight:400,marginBottom:16,lineHeight:1.3}}>
+            {S.mythTitle}
+          </h3>
+          <p style={{fontSize:14,color:"rgba(255,255,255,0.55)",lineHeight:1.75,maxWidth:700}}>
+            {S.mythBody}
+          </p>
+        </div>
+
+        {/* ── SBF VOICE ── */}
+        <div style={{background:C.goldPale,border:`1px solid ${C.borderGold}`,borderRadius:6,padding:"32px 40px",marginBottom:56}}>
+          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:14}}>{S.voiceTag}</Mono>
+          <blockquote style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(18px,2.5vw,24px)",color:C.black,fontWeight:400,lineHeight:1.5,marginBottom:16,fontStyle:"italic"}}>
+            {S.voiceQuote}
+          </blockquote>
+          <p style={{fontSize:13,color:C.inkMid,lineHeight:1.65}}>
+            {S.voiceBody}
+          </p>
+        </div>
+
+        {/* ── PRICE OF IGNORANCE ── */}
+        <div style={{background:C.redPale,border:`1px solid rgba(242,54,69,0.25)`,borderRadius:6,padding:"28px 36px",marginBottom:64,display:"flex",gap:24,alignItems:"flex-start",flexWrap:"wrap"}}>
+          <div style={{fontSize:40,flexShrink:0}}>💸</div>
+          <div>
+            <div style={{fontWeight:700,fontSize:14,color:C.redD,letterSpacing:0.5,textTransform:"uppercase",marginBottom:10}}>{S.ignoranceLabel}</div>
+            <p style={{fontSize:14,color:C.redD,lineHeight:1.75}}>
+              {S.ignoranceBody} <strong>{S.ignoranceStrong}</strong>
+            </p>
+          </div>
+        </div>
+
+        {/* ── THEORY 1: FA — Psychology ── */}
+        <SectionTitle sub={S.sec1Sub}>
+          {S.sec1Title}
+        </SectionTitle>
+
+        {/* Cycle diagram */}
+        <div style={{background:C.black,borderRadius:6,padding:"28px 32px",marginBottom:40,overflowX:"auto"}}>
+          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:20}}>{S.cycleTag}</Mono>
+          <div style={{display:"flex",gap:0,alignItems:"flex-end",minWidth:560}}>
+            {cycleStages.map((s,i) => {
+              // Heights: simulate curve — low at panic, high at euphoria
+              const heights = [55, 40, 25, 20, 22, 38, 58, 80, 88];
+              const h = heights[i];
+              return (
+                <div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:6}}>
+                  <div style={{fontSize:11,fontFamily:"monospace",color:s.color,letterSpacing:0,textAlign:"center",lineHeight:1.3,marginBottom:4}}>{s.price}</div>
+                  <div style={{width:"100%",background:s.color,borderRadius:"3px 3px 0 0",height:h,opacity:0.7,transition:"height .3s"}}/>
+                  <div style={{fontSize:16}}>{s.emoji}</div>
+                  <div style={{fontSize:9,fontWeight:600,color:s.color,textAlign:"center",letterSpacing:0,lineHeight:1.3}}>{s.label}</div>
+                  <div style={{fontSize:8,color:"rgba(255,255,255,0.25)",textAlign:"center",lineHeight:1.3,fontFamily:"monospace"}}>{s.desc}</div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,marginBottom:56}} className="g2">
+          {psychCards.map((c,i) => <InfoCard key={i} {...c}/>)}
+        </div>
+
+        {/* ── INTERACTIVE 1 ── */}
+        <div style={{marginBottom:64}}>
+          <SentimentSwipe/>
+        </div>
+
+        <Rule/>
+
+        {/* ── THEORY 2: TA — Patterns ── */}
+        <SectionTitle sub={S.sec2Sub}>
+          {S.sec2Title}
+        </SectionTitle>
+
+        {/* Pattern cards */}
+        <div style={{display:"grid",gap:24,marginBottom:56}}>
+          {patterns.map((pat,i) => (
+            <div key={i} style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:6,padding:"28px 32px",borderTop:`3px solid ${pat.color}`}}>
+              <div style={{display:"flex",gap:16,alignItems:"flex-start",flexWrap:"wrap"}}>
+                <div style={{flex:1,minWidth:220}}>
+                  <div style={{display:"flex",gap:12,alignItems:"center",marginBottom:12}}>
+                    <div style={{fontFamily:"'DM Serif Display',serif",fontSize:20,color:C.black}}>{pat.name}</div>
+                    <span style={{fontSize:10,fontFamily:"monospace",color:pat.color,background:`${pat.color}18`,padding:"2px 8px",borderRadius:2,letterSpacing:0.5}}>{pat.type}</span>
+                    <span style={{fontSize:10,fontFamily:"monospace",color:C.inkFaint,background:C.surface,padding:"2px 8px",borderRadius:2,border:`1px solid ${C.border}`}}>{pat.timeframe}</span>
+                  </div>
+                  <p style={{fontSize:13,color:C.inkMid,lineHeight:1.7,marginBottom:10}}>{pat.desc}</p>
+                  <div style={{fontSize:12,color:C.redD,background:C.redPale,padding:"8px 12px",borderRadius:3,border:`1px solid rgba(242,54,69,0.2)`}}>
+                    🎯 <strong>{S.liquidityLabel}</strong> {pat.stops}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Head & Shoulders — движок SBFGrafik (заменяет инлайн SVG) */}
+        <div className="sbf-fig" data-cat="chart" data-key="hns"
+          data-caption={S.hnsCaption} />
+        <span className="sbf-figlink" onClick={() => window.sbfOpenGrafik && window.sbfOpenGrafik('chart','hns')}>
+          {S.hnsLink}
+        </span>
+        <div style={{marginBottom:40}} />
+
+        {/* ── INTERACTIVE 2 ── */}
+        <div style={{marginBottom:64}}>
+          <BearFlagTrainer/>
+        </div>
+
+        <Rule/>
+
+        {/* ── CHECKLIST ── */}
+        <div style={{marginBottom:64}}>
+          <SectionTitle sub={S.checklistSecSub} align="center">
+            {S.checklistSecTitle}
+          </SectionTitle>
+          <div style={{display:"grid",gap:10}}>
+            {checklistItems.map((item,i) => (
+              <div
+                key={i}
+                onClick={() => toggleCheck(i)}
+                style={{
+                  display:"flex",gap:14,alignItems:"center",
+                  padding:"16px 20px",borderRadius:4,cursor:"pointer",
+                  border:`1px solid ${checked[i] ? C.green : C.border}`,
+                  background: checked[i] ? C.greenPale : C.surface,
+                  transition:"all .2s"
+                }}>
+                <div style={{
+                  width:22,height:22,borderRadius:3,flexShrink:0,
+                  border:`2px solid ${checked[i] ? C.green : C.border}`,
+                  background: checked[i] ? C.green : "transparent",
+                  display:"flex",alignItems:"center",justifyContent:"center",
+                  color:"#fff",fontSize:13,transition:"all .2s"
+                }}>{checked[i] ? "✓" : ""}</div>
+                <span style={{fontSize:14,color:checked[i] ? C.greenD : C.inkMid,lineHeight:1.5}}>{item}</span>
+              </div>
+            ))}
+          </div>
+          {checkedCount === checklistItems.length && (
+            <div style={{marginTop:20,background:C.greenPale,border:`1px solid ${C.green}`,borderRadius:4,padding:"18px 24px",textAlign:"center"}}>
+              <div style={{fontWeight:700,color:C.greenD,fontSize:15,marginBottom:4}}>{S.checklistDoneTitle}</div>
+              <div style={{fontSize:13,color:C.greenD}}>{S.checklistDoneSub}</div>
+            </div>
+          )}
+        </div>
+
+        {/* ── CONCLUSIONS ── */}
+        <div style={{background:C.black,borderRadius:8,padding:"44px 48px"}}>
+          <div style={{textAlign:"center",marginBottom:32}}>
+            <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:12}}>{S.concTag}</Mono>
+            <h3 style={{fontFamily:"'DM Serif Display',serif",fontSize:28,color:C.white,fontWeight:400}}>{S.concTitle}</h3>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+            {conclusions.map((c,i) => (
+              <div key={i} style={{display:"flex",gap:14,alignItems:"flex-start",padding:"14px 16px",background:"rgba(255,255,255,0.04)",borderRadius:4,border:"1px solid rgba(255,255,255,0.06)"}}>
+                <span style={{color:C.gold,fontFamily:"monospace",fontSize:11,marginTop:2,flexShrink:0}}>{String(i+1).padStart(2,"0")}</span>
+                <span style={{fontSize:13,color:"rgba(255,255,255,0.7)",lineHeight:1.65}}>{c}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Footer navigation */}
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",paddingTop:48,marginTop:48,borderTop:`1px solid ${C.border}`}}>
+          <span onClick={() => setAskOpen(true)} style={{fontSize:14,color:C.inkSoft,fontFamily:"monospace",borderBottom:`1px solid ${C.border}`,cursor:"pointer"}}>
+            {S.askAnalyst}
+          </span>
+          <button
+            onClick={() => window.location.href = getChUrl(11)}
+            style={{background:C.black,color:C.white,border:"none",padding:"18px 35px",cursor:"pointer",fontFamily:"monospace",fontSize:14,letterSpacing:2,fontWeight:700,transition:"background .2s"}}
+            onMouseEnter={e=>e.target.style.background=C.gold}
+            onMouseLeave={e=>e.target.style.background=C.black}>
+            {S.nextLevel}
+          </button>
+        </div>
+
+      </div>
+
+      {askOpen && <AskAnalystPopup onClose={() => setAskOpen(false)}/>}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('sbf-book-root')).render(<Chapter10 />);
+{% endraw %}
+</script>
+</body>
+</html>
