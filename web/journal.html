@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#FBF6EF">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<title>Профиль — SBF</title>
+<title data-i18n="journal.page_title">Профиль — SBF</title>
 <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
 <link rel="apple-touch-icon" href="/assets/icons/icon-192.png">
 <link rel="manifest" href="/manifest.json">
@@ -876,21 +876,21 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
 <div class="j-wrap">
   <div class="j-title-row">
     <div>
-      <h1 class="j-title">Дневник сделок</h1>
-      <p class="j-sub" style="margin:0">История, статистика и импорт сделок</p>
+      <h1 class="j-title" data-i18n="journal.title">Дневник сделок</h1>
+      <p class="j-sub" style="margin:0" data-i18n="journal.subtitle">История, статистика и импорт сделок</p>
     </div>
     <div class="j-notif-wrap">
-      <button class="j-notif-bell" id="jNotifBell" title="Уведомления">
+      <button class="j-notif-bell" id="jNotifBell" data-i18n-title="journal.notifications" title="Уведомления">
         🔔
         <span class="j-notif-badge" id="jNotifBadge" style="display:none">0</span>
       </button>
       <div class="j-notif-panel" id="jNotifPanel">
         <div class="j-notif-panel-hd">
-          <span>Уведомления</span>
+          <span data-i18n="journal.notifications">Уведомления</span>
           <span id="jNotifPanelCount" style="font-weight:400;color:var(--muted)"></span>
         </div>
         <div id="jNotifList"></div>
-        <button class="j-notif-read-all" id="jNotifReadAll">Отметить всё прочитанным</button>
+        <button class="j-notif-read-all" id="jNotifReadAll" data-i18n="journal.mark_all_read">Отметить всё прочитанным</button>
       </div>
     </div>
   </div>
@@ -901,36 +901,36 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
   <!-- Утренний бриф «Твой день» -->
   <div class="j-brief" id="jBriefSection">
     <div class="j-brief-hd">
-      <div class="j-brief-title">☀️ Твой день <span class="j-brief-date" id="jBriefDate"></span></div>
-      <button class="j-btn j-btn-sec" id="jBriefRefresh" style="padding:5px 11px;font-size:11px">↻ Обновить</button>
+      <div class="j-brief-title"><span data-i18n="journal.brief_title">☀️ Твой день</span> <span class="j-brief-date" id="jBriefDate"></span></div>
+      <button class="j-btn j-btn-sec" id="jBriefRefresh" style="padding:5px 11px;font-size:11px" data-i18n="journal.refresh">↻ Обновить</button>
     </div>
 
     <!-- Watchlist -->
     <div class="j-wl-wrap">
-      <div class="j-wl-label">Список наблюдения</div>
+      <div class="j-wl-label" data-i18n="journal.watchlist_label">Список наблюдения</div>
       <div class="j-wl-chips" id="jWatchlistChips">
-        <span style="font-size:12px;color:var(--muted)">Загрузка…</span>
+        <span style="font-size:12px;color:var(--muted)" data-i18n="journal.loading">Загрузка…</span>
       </div>
       <div class="j-wl-add">
-        <select id="jWlAddSelect"><option value="">Добавить…</option></select>
+        <select id="jWlAddSelect"><option value="" data-i18n="journal.add_ellipsis">Добавить…</option></select>
         <button class="j-btn j-btn-sec" id="jWlAddBtn" style="padding:5px 11px;font-size:12px">+</button>
       </div>
     </div>
 
     <!-- Вчерашняя ретроспектива -->
     <div class="j-retro" id="jRetroSection" style="display:none">
-      <div class="j-retro-title">📊 Что вчера двигало ваши инструменты</div>
+      <div class="j-retro-title" data-i18n="journal.retro_title">📊 Что вчера двигало ваши инструменты</div>
       <div class="j-retro-grid" id="jRetroGrid"></div>
     </div>
 
     <!-- Макрокалендарь сегодня -->
     <div id="jMacroSection" style="display:none">
-      <div class="j-retro-title" style="margin-bottom:8px">📅 Экономический календарь на сегодня</div>
+      <div class="j-retro-title" style="margin-bottom:8px" data-i18n="journal.macro_title">📅 Экономический календарь на сегодня</div>
       <div class="j-macro-list" id="jMacroList"></div>
     </div>
 
     <div id="jBriefEmpty" style="display:none;font-size:13px;color:var(--muted);
-      text-align:center;padding:16px 0">
+      text-align:center;padding:16px 0" data-i18n="journal.brief_empty">
       Добавьте инструменты в список наблюдения, чтобы получить персональный бриф
     </div>
   </div>
@@ -939,20 +939,20 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
   <a id="gamification" style="display:block;visibility:hidden;height:0;margin:0"></a>
   <div class="j-game" id="jGameSection">
     <div class="j-game-hd">
-      <div class="j-game-title"><span>🎮</span> Прогресс и достижения</div>
+      <div class="j-game-title"><span>🎮</span> <span data-i18n="journal.progress_achievements">Прогресс и достижения</span></div>
       <button class="j-btn j-btn-sec" id="jFlashcardsBtn" style="padding:6px 14px;font-size:12px">
-        🃏 Флешкарты <span id="jFcDueBadge" style="display:none;margin-left:4px;background:var(--gold);color:#fff;border-radius:10px;padding:1px 6px;font-size:10px"></span>
+        🃏 <span data-i18n="journal.flashcards">Флешкарты</span> <span id="jFcDueBadge" style="display:none;margin-left:4px;background:var(--gold);color:#fff;border-radius:10px;padding:1px 6px;font-size:10px"></span>
       </button>
     </div>
 
     <!-- XP & Level -->
     <div class="j-xp-row">
-      <div class="j-xp-badge" id="jXpLevelBadge">Ур. 1</div>
+      <div class="j-xp-badge" id="jXpLevelBadge" data-i18n="journal.level_short_1">Ур. 1</div>
       <div class="j-xp-bar-wrap">
         <div class="j-xp-bar-fill" id="jXpBarFill" style="width:0%"></div>
       </div>
       <div class="j-xp-label" id="jXpLabel">0 / 500 XP</div>
-      <div class="j-level-title" id="jLevelTitle">Новичок</div>
+      <div class="j-level-title" id="jLevelTitle" data-i18n="journal.level_title_novice">Новичок</div>
     </div>
 
     <!-- Стрики -->
@@ -960,19 +960,19 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
 
     <!-- Ежедневные квесты -->
     <div class="j-quests">
-      <div class="j-quests-title">📋 Квесты на сегодня</div>
+      <div class="j-quests-title" data-i18n="journal.quests_today">📋 Квесты на сегодня</div>
       <div id="jQuestsList"></div>
     </div>
 
     <!-- Достижения -->
     <div>
-      <div class="j-quests-title" style="margin-bottom:8px">🏅 Достижения</div>
+      <div class="j-quests-title" style="margin-bottom:8px" data-i18n="journal.achievements">🏅 Достижения</div>
       <div class="j-ach-grid" id="jAchGrid"></div>
     </div>
 
     <!-- Прогресс курса -->
     <div id="jCourseBlock">
-      <div class="j-course-title">📚 Курс — прогресс по главам</div>
+      <div class="j-course-title" data-i18n="journal.course_progress">📚 Курс — прогресс по главам</div>
       <div class="j-course-grid" id="jCourseGrid"></div>
     </div>
   </div>
@@ -980,7 +980,7 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
   <!-- Статистика -->
   <div class="j-stats">
     <div class="j-stat">
-      <div class="j-stat-lbl">Всего сделок</div>
+      <div class="j-stat-lbl" data-i18n="journal.stat_total_trades">Всего сделок</div>
       <div class="j-stat-val" id="jStatTotal">—</div>
     </div>
     <div class="j-stat">
@@ -988,18 +988,18 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
       <div class="j-stat-val" id="jStatWinrate">—</div>
     </div>
     <div class="j-stat">
-      <div class="j-stat-lbl">Средний R</div>
+      <div class="j-stat-lbl" data-i18n="journal.stat_avg_r">Средний R</div>
       <div class="j-stat-val" id="jStatAvgR">—</div>
     </div>
     <div class="j-stat">
-      <div class="j-stat-lbl">Итого PnL</div>
+      <div class="j-stat-lbl" data-i18n="journal.stat_total_pnl">Итого PnL</div>
       <div class="j-stat-val" id="jStatPnl">—</div>
     </div>
   </div>
 
   <!-- Equity Curve -->
   <div class="j-curve">
-    <div class="j-curve-title">Equity Curve (R-мультипликатор)</div>
+    <div class="j-curve-title" data-i18n="journal.equity_curve_title">Equity Curve (R-мультипликатор)</div>
     <canvas id="jEqChart"></canvas>
   </div>
 
@@ -1007,15 +1007,15 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
   <div class="j-mirror" id="jBehavioralSection" style="display:none">
     <div class="j-mirror-hd">
       <span style="font-size:18px">🪞</span>
-      <span class="j-mirror-title">Поведенческое зеркало</span>
+      <span class="j-mirror-title" data-i18n="journal.behavioral_mirror">Поведенческое зеркало</span>
     </div>
 
     <!-- Queue banner -->
     <div id="jQueueBanner" style="display:none" class="j-queue-banner" onclick="SBFJournal.openQueue()">
       <div class="j-queue-count" id="jQueueCount">0</div>
       <div>
-        <div class="j-queue-text">Сделок ждут заполнения дневника</div>
-        <div class="j-queue-sub">Нажмите, чтобы начать анализ</div>
+        <div class="j-queue-text" data-i18n="journal.queue_waiting">Сделок ждут заполнения дневника</div>
+        <div class="j-queue-sub" data-i18n="journal.queue_click_start">Нажмите, чтобы начать анализ</div>
       </div>
       <span class="j-queue-arr">→</span>
     </div>
@@ -1031,15 +1031,15 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
 
     <!-- Holding Duration -->
     <div id="jHoldingWrap" style="display:none">
-      <div class="j-mirror-title" style="margin-bottom:10px">Время удержания позиций</div>
+      <div class="j-mirror-title" style="margin-bottom:10px" data-i18n="journal.holding_duration">Время удержания позиций</div>
       <div class="j-holding">
         <div class="j-hold-card">
           <div class="j-hold-val j-up" id="jHoldWin">—</div>
-          <div class="j-hold-lbl">Прибыльные (мин)</div>
+          <div class="j-hold-lbl" data-i18n="journal.holding_profitable_min">Прибыльные (мин)</div>
         </div>
         <div class="j-hold-card">
           <div class="j-hold-val j-dn" id="jHoldLoss">—</div>
-          <div class="j-hold-lbl">Убыточные (мин)</div>
+          <div class="j-hold-lbl" data-i18n="journal.holding_losing_min">Убыточные (мин)</div>
         </div>
       </div>
     </div>
@@ -1047,8 +1047,8 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
     <!-- Analytics tables (setup / emotion) -->
     <div id="jAnalyticsWrap" style="display:none">
       <div class="j-analytics-tabs">
-        <button class="j-at-btn on" id="jAtBtnSetup" onclick="SBFJournal.switchAnalyticsTab('setup')">Сетапы</button>
-        <button class="j-at-btn" id="jAtBtnEmo" onclick="SBFJournal.switchAnalyticsTab('emo')">Эмоции</button>
+        <button class="j-at-btn on" id="jAtBtnSetup" onclick="SBFJournal.switchAnalyticsTab('setup')" data-i18n="journal.tab_setups">Сетапы</button>
+        <button class="j-at-btn" id="jAtBtnEmo" onclick="SBFJournal.switchAnalyticsTab('emo')" data-i18n="journal.tab_emotions">Эмоции</button>
       </div>
       <div class="j-at-table" id="jSetupTableWrap"></div>
       <div class="j-at-table" id="jEmoTableWrap" style="display:none"></div>
@@ -1056,7 +1056,7 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
 
     <!-- Tilt Heatmap -->
     <div class="j-heatmap" id="jTiltHeatmapWrap" style="display:none">
-      <div class="j-heatmap-title">🧠 Тильт по дням и сессиям</div>
+      <div class="j-heatmap-title" data-i18n="journal.tilt_heatmap_title">🧠 Тильт по дням и сессиям</div>
       <div id="jTiltHeatmapTable"></div>
     </div>
   </div>
@@ -1065,9 +1065,9 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
   <div class="j-disc" id="jDiscSection" style="display:none">
     <a id="discipline" style="display:block;visibility:hidden;height:0;margin:0"></a>
     <div class="j-disc-hd">
-      <div class="j-disc-title"><span>🎯</span> Оценка дисциплины</div>
+      <div class="j-disc-title"><span>🎯</span> <span data-i18n="journal.discipline_score">Оценка дисциплины</span></div>
       <button class="j-btn j-btn-sec" style="padding:5px 12px;font-size:12px"
-              onclick="SBFJournal.openDiscConfig()">⚙ Настроить правила</button>
+              onclick="SBFJournal.openDiscConfig()" data-i18n="journal.configure_rules">⚙ Настроить правила</button>
     </div>
 
     <!-- Пробой / тильт -->
@@ -1087,7 +1087,7 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
       <!-- Детали -->
       <div class="j-disc-details">
         <div class="j-disc-worst" id="jDiscWorst"></div>
-        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px">Стрики</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px" data-i18n="journal.streaks">Стрики</div>
         <div class="j-streaks" id="jDiscStreaks"></div>
       </div>
     </div>
@@ -1097,7 +1097,7 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
   <div class="j-tilt-banner" id="jTiltBanner" style="display:none">
     <div class="j-tilt-hd">
       <span class="j-tilt-ico">🧠</span>
-      <span class="j-tilt-title">Психологические индикаторы</span>
+      <span class="j-tilt-title" data-i18n="journal.psych_indicators">Психологические индикаторы</span>
     </div>
     <div class="j-tilt-reasons" id="jTiltReasons"></div>
     <!-- Voluntary cooldown offer -->
@@ -1105,10 +1105,10 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
       background:rgba(46,139,111,.07);border-radius:8px;border:1px solid rgba(46,139,111,.2)">
       <div style="font-size:12px;color:var(--fg);margin-bottom:8px" id="jCooldownOfferText"></div>
       <div style="display:flex;gap:8px">
-        <button class="j-btn" style="font-size:12px;padding:6px 14px" id="jCooldownOfferYes">
+        <button class="j-btn" style="font-size:12px;padding:6px 14px" id="jCooldownOfferYes" data-i18n="journal.cooldown_offer_yes">
           Да, активировать стоп-день
         </button>
-        <button class="j-btn j-btn-sec" style="font-size:12px;padding:6px 14px" id="jCooldownOfferNo">
+        <button class="j-btn j-btn-sec" style="font-size:12px;padding:6px 14px" id="jCooldownOfferNo" data-i18n="journal.cooldown_offer_no">
           Нет, продолжу торговлю
         </button>
       </div>
@@ -1117,26 +1117,26 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
 
   <!-- ── Кулдаун-таймер ── -->
   <div class="j-cooldown" id="jCooldownBlock" style="display:none">
-    <div style="font-size:14px;font-weight:700;color:var(--up);margin-bottom:4px">Режим паузы</div>
+    <div style="font-size:14px;font-weight:700;color:var(--up);margin-bottom:4px" data-i18n="journal.pause_mode">Режим паузы</div>
     <div class="j-cooldown-timer" id="jCooldownTimer">60:00</div>
-    <div class="j-cooldown-msg">Данные анализа зафиксированы. Используйте это время для пересмотра торгового плана. Рынок будет доступен после паузы.</div>
+    <div class="j-cooldown-msg" data-i18n="journal.cooldown_msg">Данные анализа зафиксированы. Используйте это время для пересмотра торгового плана. Рынок будет доступен после паузы.</div>
     <button class="j-btn j-btn-sec" style="margin-top:12px;padding:6px 18px;font-size:12px"
-            onclick="SBFJournal.dismissCooldown()">Продолжить торговлю</button>
+            onclick="SBFJournal.dismissCooldown()" data-i18n="journal.continue_trading">Продолжить торговлю</button>
   </div>
 
   <!-- Alerts Section -->
   <a id="alerts" style="display:block;visibility:hidden;height:0;margin:0"></a>
   <div class="j-alerts" id="jAlertsSection">
     <div class="j-alerts-hd">
-      <div class="j-alerts-title">🔔 Алерты</div>
+      <div class="j-alerts-title" data-i18n="journal.alerts_title">🔔 Алерты</div>
       <div style="display:flex;gap:8px;align-items:center">
-        <button class="j-btn j-btn-sec" id="jPushToggleBtn" style="padding:6px 12px;font-size:12px">🔕 Включить пуши</button>
-        <button class="j-btn j-btn-sec" id="jAddAlertBtn" style="padding:6px 12px;font-size:12px">+ Создать правило</button>
+        <button class="j-btn j-btn-sec" id="jPushToggleBtn" style="padding:6px 12px;font-size:12px" data-i18n="journal.enable_push">🔕 Включить пуши</button>
+        <button class="j-btn j-btn-sec" id="jAddAlertBtn" style="padding:6px 12px;font-size:12px" data-i18n="journal.create_rule">+ Создать правило</button>
       </div>
     </div>
     <div id="jPushStatusInfo" style="font-size:11px;color:var(--muted);margin-bottom:10px"></div>
     <div id="jAlertRulesList">
-      <div class="j-alerts-empty">Загрузка…</div>
+      <div class="j-alerts-empty" data-i18n="journal.loading">Загрузка…</div>
     </div>
   </div>
 
@@ -1144,25 +1144,25 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
   <a id="setups" style="display:block;visibility:hidden;height:0;margin:0"></a>
   <div class="j-setups" id="jSetupsSection">
     <div class="j-setups-hd">
-      <div class="j-setups-title">📐 Мои разборы</div>
-      <button class="j-btn" id="jAddSetupBtn" style="padding:6px 14px;font-size:12px">+ Новый сетап</button>
+      <div class="j-setups-title" data-i18n="journal.my_setups">📐 Мои разборы</div>
+      <button class="j-btn" id="jAddSetupBtn" style="padding:6px 14px;font-size:12px" data-i18n="journal.new_setup">+ Новый сетап</button>
     </div>
     <div class="j-setup-filters" id="jSetupFilters">
-      <button class="j-sf-btn on" data-sf="all">Все</button>
-      <button class="j-sf-btn" data-sf="pending">Ожидает</button>
-      <button class="j-sf-btn" data-sf="executed">Исполнен</button>
-      <button class="j-sf-btn" data-sf="invalidated">Отменён</button>
-      <button class="j-sf-btn" data-sf="expired">Истёк</button>
+      <button class="j-sf-btn on" data-sf="all" data-i18n="journal.filter_all">Все</button>
+      <button class="j-sf-btn" data-sf="pending" data-i18n="journal.filter_pending">Ожидает</button>
+      <button class="j-sf-btn" data-sf="executed" data-i18n="journal.filter_executed">Исполнен</button>
+      <button class="j-sf-btn" data-sf="invalidated" data-i18n="journal.filter_invalidated">Отменён</button>
+      <button class="j-sf-btn" data-sf="expired" data-i18n="journal.filter_expired">Истёк</button>
     </div>
     <div class="j-setup-cards" id="jSetupCards">
-      <div class="j-setups-empty">Загрузка…</div>
+      <div class="j-setups-empty" data-i18n="journal.loading">Загрузка…</div>
     </div>
     <div class="j-playbook-stats" id="jPlaybookStats" style="display:none">
-      <div class="j-playbook-title">📊 Эффективность паттернов (плейбук)</div>
+      <div class="j-playbook-title" data-i18n="journal.playbook_effectiveness">📊 Эффективность паттернов (плейбук)</div>
       <div style="overflow-x:auto">
         <table class="j-pb-table">
           <thead><tr>
-            <th>Паттерн</th><th>Сохранено</th><th>Исполнено</th><th>Win Rate</th>
+            <th data-i18n="journal.th_pattern">Паттерн</th><th data-i18n="journal.th_saved">Сохранено</th><th data-i18n="journal.th_executed">Исполнено</th><th>Win Rate</th>
           </tr></thead>
           <tbody id="jPlaybookTbody"></tbody>
         </table>
@@ -1174,14 +1174,14 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
   <div id="jReviewCardWrap" style="display:none">
     <div class="j-review-card">
       <div class="j-review-card-hd">
-        <span class="j-review-card-title">📋 Ревью недели</span>
+        <span class="j-review-card-title" data-i18n="journal.weekly_review_title">📋 Ревью недели</span>
         <span class="j-review-card-week" id="jReviewWeek"></span>
       </div>
       <div class="j-review-stats" id="jReviewStats"></div>
       <div class="j-review-prev" id="jReviewPrev" style="display:none"></div>
       <textarea class="j-review-textarea" id="jReviewText"
-        placeholder="Что изменю в следующей неделе? Мин. 20 символов…"></textarea>
-      <button class="j-btn" id="jReviewSubmitBtn" style="padding:10px 0;width:100%">
+        data-i18n-placeholder="journal.review_placeholder" placeholder="Что изменю в следующей неделе? Мин. 20 символов…"></textarea>
+      <button class="j-btn" id="jReviewSubmitBtn" style="padding:10px 0;width:100%" data-i18n="journal.finish_review">
         Завершить ревью (+75 XP)
       </button>
       <div id="jReviewErr" style="font-size:12px;color:var(--down);margin-top:6px;display:none"></div>
@@ -1193,13 +1193,13 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
     <div class="j-cooldown-banner">
       <div class="j-cooldown-hd">
         <span>⏸</span>
-        <span class="j-cooldown-hd-title">Стоп-день активен</span>
+        <span class="j-cooldown-hd-title" data-i18n="journal.stopday_active">Стоп-день активен</span>
       </div>
       <div class="j-cooldown-meta" id="jCooldownMeta"></div>
       <p style="font-size:13px;margin:8px 0 4px;line-height:1.5">
-        Стоп-день до <b id="jCooldownUntil"></b>. Ты сам его включил — уважай это решение.
+        <span data-i18n="journal.stopday_until">Стоп-день до</span> <b id="jCooldownUntil"></b>. <span data-i18n="journal.stopday_respect">Ты сам его включил — уважай это решение.</span>
       </p>
-      <span class="j-cooldown-override" onclick="SBFJournal.overrideCooldown()">
+      <span class="j-cooldown-override" onclick="SBFJournal.overrideCooldown()" data-i18n="journal.record_anyway">
         Всё равно записать сделку
       </span>
     </div>
@@ -1208,20 +1208,20 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
   <!-- ── Tilt debrief card ── -->
   <div id="jDebriefCardWrap" style="display:none">
     <div class="j-debrief-card">
-      <div class="j-debrief-card-hd">🧠 Разбор эпизода (+30 XP)</div>
+      <div class="j-debrief-card-hd" data-i18n="journal.debrief_title">🧠 Разбор эпизода (+30 XP)</div>
       <div class="j-debrief-field">
-        <label>Что произошло?</label>
-        <textarea id="jDebQ1" rows="2" placeholder="Опиши ситуацию, мин. 10 символов…"></textarea>
+        <label data-i18n="journal.deb_q1">Что произошло?</label>
+        <textarea id="jDebQ1" rows="2" data-i18n-placeholder="journal.deb_q1_ph" placeholder="Опиши ситуацию, мин. 10 символов…"></textarea>
       </div>
       <div class="j-debrief-field">
-        <label>Что стало триггером?</label>
-        <textarea id="jDebQ2" rows="2" placeholder="Что именно вызвало реакцию?"></textarea>
+        <label data-i18n="journal.deb_q2">Что стало триггером?</label>
+        <textarea id="jDebQ2" rows="2" data-i18n-placeholder="journal.deb_q2_ph" placeholder="Что именно вызвало реакцию?"></textarea>
       </div>
       <div class="j-debrief-field">
-        <label>Что сделаю иначе?</label>
-        <textarea id="jDebQ3" rows="2" placeholder="Конкретный план на следующий раз…"></textarea>
+        <label data-i18n="journal.deb_q3">Что сделаю иначе?</label>
+        <textarea id="jDebQ3" rows="2" data-i18n-placeholder="journal.deb_q3_ph" placeholder="Конкретный план на следующий раз…"></textarea>
       </div>
-      <button class="j-btn" id="jDebSubmitBtn" style="padding:10px 0;width:100%">
+      <button class="j-btn" id="jDebSubmitBtn" style="padding:10px 0;width:100%" data-i18n="journal.save_debrief">
         Сохранить разбор (+30 XP)
       </button>
       <div id="jDebErr" style="font-size:12px;color:var(--down);margin-top:6px;display:none"></div>
@@ -1231,11 +1231,11 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
   <!-- ── Аналитика ── -->
   <div class="j-analytics" id="jAnalyticsSection" style="display:none">
     <div class="j-analytics-hd">
-      <span class="j-analytics-title">📊 Аналитика</span>
+      <span class="j-analytics-title" data-i18n="journal.analytics_title">📊 Аналитика</span>
       <div class="j-period-tabs">
-        <button class="j-period-tab active" data-period="30d">30д</button>
-        <button class="j-period-tab" data-period="90d">90д</button>
-        <button class="j-period-tab" data-period="all">Всё</button>
+        <button class="j-period-tab active" data-period="30d" data-i18n="journal.period_30d">30д</button>
+        <button class="j-period-tab" data-period="90d" data-i18n="journal.period_90d">90д</button>
+        <button class="j-period-tab" data-period="all" data-i18n="journal.period_all">Всё</button>
       </div>
     </div>
 
@@ -1243,12 +1243,12 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
     <div class="j-disc-cost-card" id="jDiscCostCard">
       <div style="font-size:11px;font-weight:700;text-transform:uppercase;
         color:var(--muted);letter-spacing:.05em;margin-bottom:8px">
-        Цена недисциплины
-        <span class="sbf-tip" data-tip="Сколько R ты потерял дополнительно по сделкам с нарушениями дисциплины, относительно среднего R чистых сделок">?</span>
+        <span data-i18n="journal.discipline_cost">Цена недисциплины</span>
+        <span class="sbf-tip" data-i18n-tip="journal.discipline_cost_tip" data-tip="Сколько R ты потерял дополнительно по сделкам с нарушениями дисциплины, относительно среднего R чистых сделок">?</span>
       </div>
       <div class="j-disc-cost-main">
         <div class="j-disc-cost-r" id="jDiscCostR">—</div>
-        <div class="j-disc-cost-label">R сверх нормы<br>потеряно из-за нарушений</div>
+        <div class="j-disc-cost-label"><span data-i18n="journal.discipline_cost_label_l1">R сверх нормы</span><br><span data-i18n="journal.discipline_cost_label_l2">потеряно из-за нарушений</span></div>
       </div>
       <div style="font-size:11px;color:var(--muted)" id="jDiscCostSub"></div>
     </div>
@@ -1257,19 +1257,19 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
     <div style="overflow-x:auto">
       <table class="j-setups-table" id="jSetupsAnalytics">
         <thead><tr>
-          <th>Сетап</th><th>Сделок</th><th>Win %</th><th>avg R</th><th>Σ R</th>
+          <th data-i18n="journal.th_setup">Сетап</th><th data-i18n="journal.th_trades">Сделок</th><th>Win %</th><th>avg R</th><th>Σ R</th>
         </tr></thead>
         <tbody id="jSetupsAnalyticsTbody"></tbody>
       </table>
     </div>
-    <div class="j-analytics-note">Статистика твоих сделок. Не прогноз, не рекомендация.</div>
+    <div class="j-analytics-note" data-i18n="journal.analytics_disclaimer">Статистика твоих сделок. Не прогноз, не рекомендация.</div>
   </div>
 
   <!-- ── Part 10: Аккаунт-Хаб ── -->
   <a id="account" style="display:block;visibility:hidden;height:0;margin:0"></a>
   <div class="j-acct" id="jAccountSection">
     <div class="j-acct-hd">
-      <div class="j-acct-title"><span>🔑</span> Аккаунт и монетизация</div>
+      <div class="j-acct-title"><span>🔑</span> <span data-i18n="journal.account_monetization">Аккаунт и монетизация</span></div>
     </div>
 
     <!-- Подписка -->
@@ -1280,25 +1280,25 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
 
     <!-- Реферальный код -->
     <div class="j-ref-card">
-      <div class="j-ref-card-hd">Реферальная программа — Win-Win 7 дней PRO</div>
+      <div class="j-ref-card-hd" data-i18n="journal.referral_program">Реферальная программа — Win-Win 7 дней PRO</div>
       <div class="j-ref-code-row">
         <span class="j-ref-code" id="jRefCode">—</span>
-        <button class="j-btn j-btn-sec j-ref-copy" id="jRefCopyBtn">Скопировать</button>
+        <button class="j-btn j-btn-sec j-ref-copy" id="jRefCopyBtn" data-i18n="journal.copy">Скопировать</button>
       </div>
-      <div class="j-ref-stats" id="jRefStats">Приглашено: 0</div>
+      <div class="j-ref-stats" id="jRefStats" data-i18n="journal.referred_count_zero">Приглашено: 0</div>
       <div class="j-ref-use-row">
-        <input type="text" id="jRefCodeInput" placeholder="Введи чужой код…" maxlength="16">
-        <button class="j-btn" id="jRefUseBtn">Применить</button>
+        <input type="text" id="jRefCodeInput" data-i18n-placeholder="journal.enter_others_code" placeholder="Введи чужой код…" maxlength="16">
+        <button class="j-btn" id="jRefUseBtn" data-i18n="journal.apply">Применить</button>
       </div>
     </div>
 
     <!-- Брокеры-партнёры (IB-трекинг) -->
     <div style="font-size:11px;font-weight:700;text-transform:uppercase;
-      color:var(--muted);letter-spacing:.05em;margin-bottom:10px">Брокеры-партнёры SBF Consult</div>
+      color:var(--muted);letter-spacing:.05em;margin-bottom:10px" data-i18n="journal.broker_partners">Брокеры-партнёры SBF Consult</div>
     <div class="j-broker-grid" id="jBrokerGrid"></div>
 
     <!-- Дисклеймер §10.5 -->
-    <div class="j-disclaimer">
+    <div class="j-disclaimer" data-i18n="journal.broker_disclaimer">
       SBF Consult получает партнёрское вознаграждение от брокеров-партнёров за привлечение
       торгового объёма. Это не влияет на условия вашей торговли и не налагает дополнительных
       комиссий. Все данные используются исключительно для вашей внутренней поведенческой
@@ -1307,20 +1307,20 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
 
     <!-- GDPR (§10.4) -->
     <div class="j-gdpr">
-      <button class="j-btn j-btn-sec j-gdpr-btn" id="jExportBtn">⬇ Скачать мои данные (JSON)</button>
-      <button class="j-btn j-btn-sec j-gdpr-btn danger" id="jDeleteReqBtn">🗑 Удалить аккаунт</button>
+      <button class="j-btn j-btn-sec j-gdpr-btn" id="jExportBtn" data-i18n="journal.download_my_data">⬇ Скачать мои данные (JSON)</button>
+      <button class="j-btn j-btn-sec j-gdpr-btn danger" id="jDeleteReqBtn" data-i18n="journal.delete_account">🗑 Удалить аккаунт</button>
     </div>
     <div class="j-del-warn" id="jDelWarn"></div>
 
     <!-- Prestige (Phase 6.1) -->
     <div class="j-prestige-row" id="jPrestigeRow" style="display:none">
       <div style="font-size:11px;font-weight:700;text-transform:uppercase;
-        color:var(--muted);letter-spacing:.05em;margin-bottom:8px">Престиж</div>
-      <div style="font-size:12px;color:var(--fg);margin-bottom:10px">
+        color:var(--muted);letter-spacing:.05em;margin-bottom:8px" data-i18n="journal.prestige">Престиж</div>
+      <div style="font-size:12px;color:var(--fg);margin-bottom:10px" data-i18n="journal.prestige_desc">
         Доступно при уровне ≥ 8. Сбрасывает XP и уровень до 1, но сохраняет достижения и присваивает Prestige-метку.
       </div>
       <button class="j-btn j-btn-sec" id="jPrestigeBtn"
-        style="border-color:var(--accent);color:var(--accent)">
+        style="border-color:var(--accent);color:var(--accent)" data-i18n="journal.activate_prestige">
         ⭐ Активировать престиж
       </button>
     </div>
@@ -1330,44 +1330,44 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
   <a id="goals" style="display:block;visibility:hidden;height:0;margin:0"></a>
   <div class="j-goals" id="jGoalsSection">
     <div class="j-goals-hd">
-      <div class="j-goals-title"><span>🎯</span> Цели и сезоны</div>
-      <button class="j-btn j-btn-sec" id="jGoalFormToggle" style="padding:6px 14px;font-size:12px">+ Своя цель</button>
+      <div class="j-goals-title"><span>🎯</span> <span data-i18n="journal.goals_seasons">Цели и сезоны</span></div>
+      <button class="j-btn j-btn-sec" id="jGoalFormToggle" style="padding:6px 14px;font-size:12px" data-i18n="journal.own_goal">+ Своя цель</button>
     </div>
 
     <!-- Season widget -->
     <div id="jSeasonWidget"></div>
 
     <!-- Preset cards -->
-    <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--muted);letter-spacing:.05em;margin-bottom:8px">Быстрый старт</div>
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--muted);letter-spacing:.05em;margin-bottom:8px" data-i18n="journal.quick_start">Быстрый старт</div>
     <div class="j-presets">
       <button class="j-preset-card" onclick="SBFJournal.applyPreset('iron_shield')">
         <div class="j-preset-card-icon">🛡️</div>
-        <div class="j-preset-card-name">Железный щит</div>
-        <div class="j-preset-card-desc">Риск не более 1R на сделку, 30 торговых дней</div>
+        <div class="j-preset-card-name" data-i18n="journal.preset_iron_shield">Железный щит</div>
+        <div class="j-preset-card-desc" data-i18n="journal.preset_iron_shield_desc">Риск не более 1R на сделку, 30 торговых дней</div>
       </button>
       <button class="j-preset-card" onclick="SBFJournal.applyPreset('mindfulness_marathon')">
         <div class="j-preset-card-icon">🧘</div>
-        <div class="j-preset-card-name">Осознанность</div>
-        <div class="j-preset-card-desc">Дисциплина &gt;80%, журнал 14 дней подряд</div>
+        <div class="j-preset-card-name" data-i18n="journal.preset_mindfulness">Осознанность</div>
+        <div class="j-preset-card-desc" data-i18n="journal.preset_mindfulness_desc">Дисциплина &gt;80%, журнал 14 дней подряд</div>
       </button>
       <button class="j-preset-card" onclick="SBFJournal.applyPreset('academic_standard')">
         <div class="j-preset-card-icon">📚</div>
-        <div class="j-preset-card-name">Академический</div>
-        <div class="j-preset-card-desc">Пройти 5 обучающих модулей за сезон</div>
+        <div class="j-preset-card-name" data-i18n="journal.preset_academic">Академический</div>
+        <div class="j-preset-card-desc" data-i18n="journal.preset_academic_desc">Пройти 5 обучающих модулей за сезон</div>
       </button>
     </div>
 
     <!-- Custom goal form (hidden by default) -->
     <div class="j-goal-form" id="jGoalForm" style="display:none">
       <select id="jGoalKind">
-        <option value="journal_streak_days">Серия дней в журнале</option>
-        <option value="max_risk_per_trade">Макс. риск на сделку (R)</option>
-        <option value="complete_learning_chapters">Пройти глав обучения</option>
-        <option value="maintain_discipline_score">Дисциплина (%)</option>
+        <option value="journal_streak_days" data-i18n="journal.goal_streak_days">Серия дней в журнале</option>
+        <option value="max_risk_per_trade" data-i18n="journal.goal_max_risk">Макс. риск на сделку (R)</option>
+        <option value="complete_learning_chapters" data-i18n="journal.goal_complete_chapters">Пройти глав обучения</option>
+        <option value="maintain_discipline_score" data-i18n="journal.goal_maintain_discipline">Дисциплина (%)</option>
       </select>
-      <input type="number" id="jGoalTarget" placeholder="Цель" min="0" step="0.1">
-      <input type="text" id="jGoalLabel" placeholder="Название (опц.)">
-      <button class="j-btn j-goal-add-btn" id="jGoalAddBtn">Добавить</button>
+      <input type="number" id="jGoalTarget" data-i18n-placeholder="journal.goal_target_ph" placeholder="Цель" min="0" step="0.1">
+      <input type="text" id="jGoalLabel" data-i18n-placeholder="journal.goal_label_ph" placeholder="Название (опц.)">
+      <button class="j-btn j-goal-add-btn" id="jGoalAddBtn" data-i18n="journal.add">Добавить</button>
     </div>
 
     <!-- Active goals -->
@@ -1379,16 +1379,16 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
   <div class="j-checklist" id="jChecklistSection">
     <div class="j-checklist-hd">
       <div class="j-checklist-title">
-        <span>✅</span> Пре-трейд ритуал
+        <span>✅</span> <span data-i18n="journal.pretrade_ritual">Пре-трейд ритуал</span>
         <span id="jClProgress" style="font-size:12px;font-weight:400;color:var(--muted)"></span>
       </div>
-      <button class="j-btn" id="jRunChecklistBtn" style="padding:6px 16px;font-size:12px">Пройти чек-лист</button>
+      <button class="j-btn" id="jRunChecklistBtn" style="padding:6px 16px;font-size:12px" data-i18n="journal.run_checklist">Пройти чек-лист</button>
     </div>
     <div class="j-checklist-items" id="jChecklistItems">
-      <div style="font-size:13px;color:var(--muted)">Загрузка…</div>
+      <div style="font-size:13px;color:var(--muted)" data-i18n="journal.loading">Загрузка…</div>
     </div>
     <div class="j-cl-add-row">
-      <input type="text" id="jClNewText" placeholder="Добавить пункт…" maxlength="200">
+      <input type="text" id="jClNewText" data-i18n-placeholder="journal.add_item_ph" placeholder="Добавить пункт…" maxlength="200">
       <button class="j-btn j-btn-sec" id="jClAddBtn" style="padding:7px 14px;font-size:12px">+</button>
     </div>
     <div class="j-cl-status" id="jClStatus"></div>
@@ -1397,12 +1397,12 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
   <!-- Toolbar -->
   <a id="trades" style="display:block;visibility:hidden;height:0;margin:0"></a>
   <div class="j-toolbar">
-    <button class="j-btn" id="jAddBtn">+ Добавить сделку</button>
-    <button class="j-btn j-btn-sec" id="jImportBtn">↑ Импорт CSV / OCR</button>
+    <button class="j-btn" id="jAddBtn" data-i18n="journal.add_trade">+ Добавить сделку</button>
+    <button class="j-btn j-btn-sec" id="jImportBtn" data-i18n="journal.import_csv_ocr">↑ Импорт CSV / OCR</button>
     <button class="j-btn j-btn-sec" id="jMtImportBtn">⬆ MT4/MT5</button>
     <button class="j-btn j-btn-sec" id="jMt5Btn">
-      MT5 Инвест-пароль
-      <button class="j-inv-tip-btn" data-inv-tip="avatrade" title="Как найти инвест-пароль?">?</button>
+      <span data-i18n="journal.mt5_investor_password">MT5 Инвест-пароль</span>
+      <button class="j-inv-tip-btn" data-inv-tip="avatrade" data-i18n-title="journal.how_find_investor_password" title="Как найти инвест-пароль?">?</button>
     </button>
   </div>
 
@@ -1411,13 +1411,13 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
     <table>
       <thead>
         <tr>
-          <th>Инструмент</th><th>Тип</th><th>Лот</th>
-          <th>Вход</th><th>Выход</th>
-          <th>PnL</th><th>R</th><th>Закрыта</th><th></th><th></th>
+          <th data-i18n="journal.th_instrument">Инструмент</th><th data-i18n="journal.th_type">Тип</th><th data-i18n="journal.th_lot">Лот</th>
+          <th data-i18n="journal.th_entry">Вход</th><th data-i18n="journal.th_exit">Выход</th>
+          <th>PnL</th><th>R</th><th data-i18n="journal.th_closed">Закрыта</th><th></th><th></th>
         </tr>
       </thead>
       <tbody id="jTradesTbody">
-        <tr><td colspan="9" class="j-empty">Загрузка…</td></tr>
+        <tr><td colspan="9" class="j-empty" data-i18n="journal.loading">Загрузка…</td></tr>
       </tbody>
     </table>
   </div>
@@ -1431,17 +1431,17 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
 <div class="j-modal-bg" id="jAddModal">
   <div class="j-modal">
     <div class="j-modal-hd">
-      <h3>Добавить сделку</h3>
+      <h3 data-i18n="journal.add_trade_title">Добавить сделку</h3>
       <button class="j-close" id="jAddClose">✕</button>
     </div>
     <form id="jAddForm" autocomplete="off">
       <div class="j-row2">
         <div class="j-field">
-          <label>Инструмент *</label>
+          <label data-i18n="journal.field_instrument">Инструмент *</label>
           <input name="symbol" placeholder="EURUSD" required>
         </div>
         <div class="j-field">
-          <label>Направление *</label>
+          <label data-i18n="journal.field_direction">Направление *</label>
           <select name="dir" id="jFldDir">
             <option value="buy">Buy (Long)</option>
             <option value="sell">Sell (Short)</option>
@@ -1450,44 +1450,44 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
       </div>
       <div class="j-row2">
         <div class="j-field">
-          <label>Лот *</label>
+          <label data-i18n="journal.field_lot">Лот *</label>
           <input name="size" type="number" step="0.01" placeholder="0.10" id="jFldSize" required>
         </div>
         <div class="j-field">
           <label>Stop Loss</label>
-          <input name="stop_loss" type="number" step="0.00001" placeholder="опционально">
+          <input name="stop_loss" type="number" step="0.00001" data-i18n-placeholder="journal.optional_ph" placeholder="опционально">
         </div>
       </div>
       <div class="j-row2">
         <div class="j-field">
-          <label>Цена входа *</label>
+          <label data-i18n="journal.field_entry_price">Цена входа *</label>
           <input name="entry_price" type="number" step="0.00001" id="jFldEntry" required>
         </div>
         <div class="j-field">
-          <label>Цена выхода *</label>
+          <label data-i18n="journal.field_exit_price">Цена выхода *</label>
           <input name="exit_price" type="number" step="0.00001" id="jFldExit" required>
         </div>
       </div>
       <div class="j-row2">
         <div class="j-field">
-          <label>Время открытия *</label>
+          <label data-i18n="journal.field_open_time">Время открытия *</label>
           <input name="open_ts" type="datetime-local" required>
         </div>
         <div class="j-field">
-          <label>Время закрытия *</label>
+          <label data-i18n="journal.field_close_time">Время закрытия *</label>
           <input name="close_ts" type="datetime-local" required>
         </div>
       </div>
       <div class="j-field">
-        <label>PnL (авто)</label>
+        <label data-i18n="journal.field_pnl_auto">PnL (авто)</label>
         <input name="pnl" type="number" step="0.01" id="jFldPnl" required>
       </div>
       <div class="j-field">
-        <label>Заметка</label>
-        <textarea name="note" placeholder="Сетап, эмоции, ошибки…"></textarea>
+        <label data-i18n="journal.field_note">Заметка</label>
+        <textarea name="note" data-i18n-placeholder="journal.note_ph_setup" placeholder="Сетап, эмоции, ошибки…"></textarea>
       </div>
       <div class="j-err" id="jAddError"></div>
-      <button type="submit" class="j-btn j-submit">Сохранить</button>
+      <button type="submit" class="j-btn j-submit" data-i18n="journal.save">Сохранить</button>
     </form>
   </div>
 </div>
@@ -1497,34 +1497,34 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
 <div class="j-modal-bg" id="jImportModal">
   <div class="j-modal" style="max-width:540px">
     <div class="j-modal-hd">
-      <h3>Импорт сделок</h3>
+      <h3 data-i18n="journal.import_trades_title">Импорт сделок</h3>
       <button class="j-close" id="jImClose">✕</button>
     </div>
     <div class="j-tabs">
       <button class="j-tab-btn on" id="jImTab_csv" data-im-tab="csv">CSV / HTML</button>
-      <button class="j-tab-btn" id="jImTab_ocr" data-im-tab="ocr">Скриншот OCR</button>
+      <button class="j-tab-btn" id="jImTab_ocr" data-im-tab="ocr" data-i18n="journal.screenshot_ocr">Скриншот OCR</button>
     </div>
 
     <div id="jImPanel_csv">
-      <p style="font-size:12px;color:var(--muted);margin:0 0 10px">
+      <p style="font-size:12px;color:var(--muted);margin:0 0 10px" data-i18n="journal.csv_import_hint">
         Вставьте CSV-экспорт MT4/MT5 или HTML-историю (любой разделитель).
       </p>
       <div class="j-field">
-        <textarea id="jCsvText" placeholder="Вставьте CSV или HTML сюда…"></textarea>
+        <textarea id="jCsvText" data-i18n-placeholder="journal.csv_paste_ph" placeholder="Вставьте CSV или HTML сюда…"></textarea>
       </div>
-      <button class="j-btn" id="jCsvSubmit">Импортировать</button>
+      <button class="j-btn" id="jCsvSubmit" data-i18n="journal.import_button">Импортировать</button>
     </div>
 
     <div id="jImPanel_ocr" style="display:none">
       <p style="font-size:12px;color:var(--muted);margin:0 0 12px">
-        Загрузите скриншот вкладки «История» MT4/MT5.
-        Tesseract OCR распознает сделки автоматически.
+        <span data-i18n="journal.ocr_hint_l1">Загрузите скриншот вкладки «История» MT4/MT5.</span>
+        <span data-i18n="journal.ocr_hint_l2">Tesseract OCR распознает сделки автоматически.</span>
       </p>
       <div class="j-field">
-        <label>Файл изображения (PNG / JPG)</label>
+        <label data-i18n="journal.image_file_label">Файл изображения (PNG / JPG)</label>
         <input type="file" id="jOcrFile" accept="image/*">
       </div>
-      <button class="j-btn" id="jOcrSubmit">Распознать и импортировать</button>
+      <button class="j-btn" id="jOcrSubmit" data-i18n="journal.recognize_and_import">Распознать и импортировать</button>
     </div>
 
     <div class="j-import-result" id="jImportResult"></div>
@@ -1536,15 +1536,15 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
 <div class="j-modal-bg" id="jMtImportModal">
   <div class="j-modal" style="max-width:500px">
     <div class="j-modal-hd">
-      <h3>Импорт из MT4 / MT5</h3>
+      <h3 data-i18n="journal.import_mt45_title">Импорт из MT4 / MT5</h3>
       <button class="j-close" id="jMtImClose">✕</button>
     </div>
-    <p style="font-size:12px;color:var(--muted);margin:0 0 12px;line-height:1.5">
+    <p style="font-size:12px;color:var(--muted);margin:0 0 12px;line-height:1.5" data-i18n="journal.mt_import_hint">
       Загрузи HTML-отчёт из MT4/MT5 (ReportHistory-*.html или Statement.htm)
       или CSV-экспорт истории. Сделки импортируются без дублей.
     </p>
     <div class="j-mt-tz-row">
-      <label>Время сервера брокера:</label>
+      <label data-i18n="journal.broker_server_time">Время сервера брокера:</label>
       <select id="jMtTzSelect">
         <option value="-720">UTC−12</option>
         <option value="-600">UTC−10</option>
@@ -1554,23 +1554,23 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
         <option value="0">UTC±0</option>
         <option value="60">UTC+1</option>
         <option value="120" selected>UTC+2 (AvaTrade/NAGA)</option>
-        <option value="180">UTC+3 (Летнее EET)</option>
+        <option value="180" data-i18n="journal.tz_eet_summer">UTC+3 (Летнее EET)</option>
         <option value="240">UTC+4</option>
         <option value="300">UTC+5</option>
         <option value="360">UTC+6</option>
         <option value="420">UTC+7</option>
         <option value="480">UTC+8</option>
-        <option value="540">UTC+9 (Токио)</option>
+        <option value="540" data-i18n="journal.tz_tokyo">UTC+9 (Токио)</option>
         <option value="600">UTC+10</option>
         <option value="720">UTC+12</option>
       </select>
     </div>
     <div class="j-mt-drop" id="jMtDrop">
       <div class="j-mt-drop-ico">📂</div>
-      <p>Перетащи файл сюда или <span id="jMtBrowseLabel">нажми для выбора</span></p>
+      <p><span data-i18n="journal.drop_file_here">Перетащи файл сюда или</span> <span id="jMtBrowseLabel" data-i18n="journal.click_to_select">нажми для выбора</span></p>
       <input type="file" id="jMtFile" accept=".html,.htm,.csv,.txt" style="display:none">
     </div>
-    <button class="j-btn" id="jMtSubmitBtn" disabled>⬆ Импортировать</button>
+    <button class="j-btn" id="jMtSubmitBtn" disabled data-i18n="journal.import_button_arrow">⬆ Импортировать</button>
     <div class="j-mt-result" id="jMtResult"></div>
   </div>
 </div>
@@ -1580,12 +1580,12 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
   <div class="j-modal" style="max-width:500px">
     <div class="j-modal-hd">
       <h3>
-        MT5 Investor-пароль
+        <span data-i18n="journal.mt5_investor_password_full">MT5 Investor-пароль</span>
         <button class="j-inv-tip-btn" data-inv-tip="avatrade" style="margin-left:6px">?</button>
       </h3>
       <button class="j-close" id="jMt5Close">✕</button>
     </div>
-    <p style="font-size:12px;color:var(--muted);margin:0 0 14px">
+    <p style="font-size:12px;color:var(--muted);margin:0 0 14px" data-i18n="journal.investor_password_readonly">
       Инвестор-пароль — только чтение: мы скачиваем историю, не открываем позиции.
       Шифруется AES-256-GCM локально.
     </p>
@@ -1595,24 +1595,24 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
     <form id="jMt5Form" autocomplete="off">
       <div class="j-row2">
         <div class="j-field">
-          <label>Брокер</label>
+          <label data-i18n="journal.field_broker">Брокер</label>
           <input name="broker" placeholder="AvaTrade" required>
         </div>
         <div class="j-field">
-          <label>Номер счёта</label>
+          <label data-i18n="journal.field_account_no">Номер счёта</label>
           <input name="account_no" placeholder="123456" required>
         </div>
       </div>
       <div class="j-field">
-        <label>Сервер MT5</label>
+        <label data-i18n="journal.field_mt5_server">Сервер MT5</label>
         <input name="server" placeholder="AvaTrade-Live" required>
       </div>
       <div class="j-field">
-        <label>Инвестор-пароль</label>
+        <label data-i18n="journal.field_investor_password">Инвестор-пароль</label>
         <input name="password" type="password" required autocomplete="new-password">
       </div>
       <div class="j-err" id="jMt5Error"></div>
-      <button type="submit" class="j-btn j-submit">Сохранить аккаунт</button>
+      <button type="submit" class="j-btn j-submit" data-i18n="journal.save_account">Сохранить аккаунт</button>
     </form>
   </div>
 </div>
@@ -1622,7 +1622,7 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
 <div class="j-modal-bg" id="jInvTip">
   <div class="j-modal" style="max-width:520px">
     <div class="j-modal-hd">
-      <h3>Как найти Investor Password?</h3>
+      <h3 data-i18n="journal.how_find_investor_password_title">Как найти Investor Password?</h3>
       <button class="j-close" id="jInvClose">✕</button>
     </div>
     <div class="j-tabs">
@@ -1631,32 +1631,32 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
     </div>
 
     <div id="jInvPanel_avatrade">
-      <p class="j-inv-hint">
+      <p class="j-inv-hint" data-i18n-html="journal.inv_avatrade_intro">
         Investor Password (пароль для чтения) — отдельный пароль MT5-счёта.
         Позволяет видеть историю, <strong>не</strong> открывать позиции.
       </p>
       <ul class="j-inv-steps">
-        <li><span class="step-n">1</span><span>Войдите в личный кабинет AvaTrade → <b>my.avatrade.com</b></span></li>
-        <li><span class="step-n">2</span><span>Перейдите в <b>«Мои счета»</b> → выберите нужный MT5-счёт</span></li>
-        <li><span class="step-n">3</span><span>Нажмите <b>«Изменить пароль»</b> → вкладка <b>«Инвестор»</b></span></li>
-        <li><span class="step-n">4</span><span>Установите или скопируйте пароль инвестора</span></li>
-        <li><span class="step-n">5</span><span>Сервер MT5 обычно: <b>AvaTrade-Live</b> или <b>AvaTrade-Live02</b></span></li>
+        <li><span class="step-n">1</span><span data-i18n-html="journal.inv_avatrade_step1">Войдите в личный кабинет AvaTrade → <b>my.avatrade.com</b></span></li>
+        <li><span class="step-n">2</span><span data-i18n-html="journal.inv_avatrade_step2">Перейдите в <b>«Мои счета»</b> → выберите нужный MT5-счёт</span></li>
+        <li><span class="step-n">3</span><span data-i18n-html="journal.inv_avatrade_step3">Нажмите <b>«Изменить пароль»</b> → вкладка <b>«Инвестор»</b></span></li>
+        <li><span class="step-n">4</span><span data-i18n="journal.inv_avatrade_step4">Установите или скопируйте пароль инвестора</span></li>
+        <li><span class="step-n">5</span><span data-i18n-html="journal.inv_avatrade_step5">Сервер MT5 обычно: <b>AvaTrade-Live</b> или <b>AvaTrade-Live02</b></span></li>
       </ul>
-      <div class="j-inv-warn">🔒 Пароль шифруется AES-256-GCM локально и нигде не логируется.</div>
+      <div class="j-inv-warn" data-i18n="journal.inv_encryption_note">🔒 Пароль шифруется AES-256-GCM локально и нигде не логируется.</div>
     </div>
 
     <div id="jInvPanel_naga" style="display:none">
-      <p class="j-inv-hint">
+      <p class="j-inv-hint" data-i18n="journal.inv_naga_intro">
         В NAGA (MT5) Investor Password находится в настройках торгового счёта.
       </p>
       <ul class="j-inv-steps">
-        <li><span class="step-n">1</span><span>Войдите на <b>naga.com</b> → <b>«Торговые счета»</b></span></li>
-        <li><span class="step-n">2</span><span>Выберите MT5-счёт → <b>«Настройки счёта»</b></span></li>
-        <li><span class="step-n">3</span><span>Найдите <b>«Инвестор-пароль»</b> — можно сгенерировать новый</span></li>
-        <li><span class="step-n">4</span><span>Сервер: <b>NAGA-Server</b> (указан на той же странице)</span></li>
-        <li><span class="step-n">5</span><span>Скопируйте пароль и номер счёта, вставьте в форму</span></li>
+        <li><span class="step-n">1</span><span data-i18n-html="journal.inv_naga_step1">Войдите на <b>naga.com</b> → <b>«Торговые счета»</b></span></li>
+        <li><span class="step-n">2</span><span data-i18n-html="journal.inv_naga_step2">Выберите MT5-счёт → <b>«Настройки счёта»</b></span></li>
+        <li><span class="step-n">3</span><span data-i18n-html="journal.inv_naga_step3">Найдите <b>«Инвестор-пароль»</b> — можно сгенерировать новый</span></li>
+        <li><span class="step-n">4</span><span data-i18n-html="journal.inv_naga_step4">Сервер: <b>NAGA-Server</b> (указан на той же странице)</span></li>
+        <li><span class="step-n">5</span><span data-i18n="journal.inv_naga_step5">Скопируйте пароль и номер счёта, вставьте в форму</span></li>
       </ul>
-      <div class="j-inv-warn">🔒 Пароль шифруется AES-256-GCM локально и нигде не логируется.</div>
+      <div class="j-inv-warn" data-i18n="journal.inv_encryption_note">🔒 Пароль шифруется AES-256-GCM локально и нигде не логируется.</div>
     </div>
   </div>
 </div>
@@ -1666,16 +1666,16 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
 <div class="j-modal-bg" id="jDiscConfigModal">
   <div class="j-modal" style="max-width:560px">
     <div class="j-modal-hd">
-      <h3>🎯 Правила дисциплины</h3>
+      <h3 data-i18n="journal.discipline_rules_title">🎯 Правила дисциплины</h3>
       <button class="j-close" id="jDiscConfigClose">✕</button>
     </div>
 
     <!-- Пресеты -->
-    <div style="font-size:12px;color:var(--muted);margin-bottom:8px;font-weight:600">Пресет стиля торговли</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:8px;font-weight:600" data-i18n="journal.trading_style_preset">Пресет стиля торговли</div>
     <div class="j-disc-presets">
-      <button class="j-preset-btn" data-preset="conservative">🛡️ Консервативный</button>
-      <button class="j-preset-btn" data-preset="scalper">⚡ Скальпер</button>
-      <button class="j-preset-btn" data-preset="investor">📈 Инвестор</button>
+      <button class="j-preset-btn" data-preset="conservative" data-i18n="journal.preset_conservative">🛡️ Консервативный</button>
+      <button class="j-preset-btn" data-preset="scalper" data-i18n="journal.preset_scalper">⚡ Скальпер</button>
+      <button class="j-preset-btn" data-preset="investor" data-i18n="journal.preset_investor">📈 Инвестор</button>
     </div>
 
     <!-- Wellbeing -->
@@ -1685,20 +1685,20 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
 
     <!-- Таблица критериев -->
     <table class="j-crit-table" id="jCritTable">
-      <thead><tr><th>Критерий</th><th style="text-align:center">Вкл</th><th>Вес (0.1–3.0)</th></tr></thead>
+      <thead><tr><th data-i18n="journal.th_criterion">Критерий</th><th style="text-align:center" data-i18n="journal.th_enabled">Вкл</th><th data-i18n="journal.th_weight">Вес (0.1–3.0)</th></tr></thead>
       <tbody id="jCritTableBody"></tbody>
     </table>
 
     <!-- Advanced mode toggle -->
     <div class="j-adv-toggle">
       <input type="checkbox" id="jAdvModeChk">
-      <label for="jAdvModeChk" style="font-size:12px;color:var(--muted)">
+      <label for="jAdvModeChk" style="font-size:12px;color:var(--muted)" data-i18n="journal.advanced_mode_desc">
         Продвинутый режим — снять ограничение Wellbeing
       </label>
     </div>
 
     <div class="j-err" id="jDiscConfigErr"></div>
-    <button class="j-btn j-submit" id="jDiscConfigSave">Сохранить конфигурацию</button>
+    <button class="j-btn j-submit" id="jDiscConfigSave" data-i18n="journal.save_configuration">Сохранить конфигурацию</button>
   </div>
 </div>
 
@@ -1706,7 +1706,7 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
 <div class="j-modal-bg" id="jMetaModal">
   <div class="j-modal" style="max-width:500px">
     <div class="j-modal-hd">
-      <h3>Анализ сделки</h3>
+      <h3 data-i18n="journal.trade_analysis">Анализ сделки</h3>
       <button class="j-close" id="jMetaClose">✕</button>
     </div>
 
@@ -1718,38 +1718,38 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
 
     <form id="jMetaForm" autocomplete="off">
       <!-- Эмоция на входе -->
-      <div class="j-emo-label">Эмоция при открытии</div>
+      <div class="j-emo-label" data-i18n="journal.emotion_on_open">Эмоция при открытии</div>
       <div class="j-emo-grid" id="jEmoOpenGrid"></div>
 
       <!-- Эмоция на выходе -->
-      <div class="j-emo-label">Эмоция при закрытии</div>
+      <div class="j-emo-label" data-i18n="journal.emotion_on_close">Эмоция при закрытии</div>
       <div class="j-emo-grid" id="jEmoCloseGrid"></div>
 
       <!-- Сетап -->
       <div class="j-field">
-        <label>Сетап / паттерн</label>
-        <input name="setup_tag" id="jMetaSetupInput" placeholder="Например: breakout, pullback…">
+        <label data-i18n="journal.setup_pattern_label">Сетап / паттерн</label>
+        <input name="setup_tag" id="jMetaSetupInput" data-i18n-placeholder="journal.setup_pattern_ph" placeholder="Например: breakout, pullback…">
         <div class="j-setup-chips" id="jSetupChips"></div>
       </div>
 
       <!-- Следовал ли плану -->
       <div class="j-field">
-        <label>Следовал торговому плану?</label>
+        <label data-i18n="journal.followed_plan_label">Следовал торговому плану?</label>
         <div class="j-plan-toggle">
-          <button type="button" class="j-plan-btn yes" id="jPlanYes">✓ Да</button>
-          <button type="button" class="j-plan-btn no"  id="jPlanNo">✗ Нет</button>
+          <button type="button" class="j-plan-btn yes" id="jPlanYes" data-i18n="journal.yes">✓ Да</button>
+          <button type="button" class="j-plan-btn no"  id="jPlanNo" data-i18n="journal.no">✗ Нет</button>
         </div>
       </div>
 
       <!-- Заметка -->
       <div class="j-field">
-        <label>Заметка</label>
-        <textarea name="note" placeholder="Что пошло не так? Что сделал правильно?"></textarea>
+        <label data-i18n="journal.field_note">Заметка</label>
+        <textarea name="note" data-i18n-placeholder="journal.note_ph_meta" placeholder="Что пошло не так? Что сделал правильно?"></textarea>
       </div>
 
       <!-- Дисциплина (загружается динамически) -->
       <div class="j-disc-criteria" id="jMetaDiscSection" style="display:none">
-        <div style="font-size:12px;color:var(--muted);font-weight:600;margin-bottom:10px">
+        <div style="font-size:12px;color:var(--muted);font-weight:600;margin-bottom:10px" data-i18n="journal.discipline_score_for_trade">
           🎯 Оценка дисциплины по этой сделке
         </div>
         <div id="jMetaDiscRows"></div>
@@ -1757,8 +1757,8 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
 
       <div class="j-err" id="jMetaError"></div>
       <div class="j-meta-nav">
-        <button type="submit" class="j-btn" id="jMetaSaveNext">Сохранить и следующая →</button>
-        <button type="button" class="j-btn j-btn-sec" id="jMetaSaveDone">Готово</button>
+        <button type="submit" class="j-btn" id="jMetaSaveNext" data-i18n="journal.save_and_next">Сохранить и следующая →</button>
+        <button type="button" class="j-btn j-btn-sec" id="jMetaSaveDone" data-i18n="journal.done">Готово</button>
       </div>
     </form>
   </div>
@@ -1768,28 +1768,28 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
 <div class="j-modal-bg" id="jAlertModal">
   <div class="j-modal" style="max-width:440px">
     <div class="j-modal-hd">
-      <h3>Новый алерт</h3>
+      <h3 data-i18n="journal.new_alert">Новый алерт</h3>
       <button class="j-close" id="jAlertClose">✕</button>
     </div>
     <div class="j-field">
-      <label>Тип алерта</label>
+      <label data-i18n="journal.alert_type">Тип алерта</label>
       <select id="jAlertKind">
-        <optgroup label="Рыночные">
-          <option value="price_cross">Пересечение цены</option>
-          <option value="rsi_extreme">Экстремум RSI</option>
-          <option value="weekly_range">Недельный экстремум</option>
-          <option value="economic_event">Макрособытие</option>
+        <optgroup label="Рыночные" data-i18n-label="journal.alert_group_market">
+          <option value="price_cross" data-i18n="journal.alert_price_cross">Пересечение цены</option>
+          <option value="rsi_extreme" data-i18n="journal.alert_rsi_extreme">Экстремум RSI</option>
+          <option value="weekly_range" data-i18n="journal.alert_weekly_extreme">Недельный экстремум</option>
+          <option value="economic_event" data-i18n="journal.alert_macro_event">Макрособытие</option>
         </optgroup>
-        <optgroup label="Поведенческие (без параметров)">
-          <option value="behavioral_streak">Угроза стрику активности</option>
-          <option value="behavioral_journal">Аномальная сделка</option>
-          <option value="behavioral_tilt">Детектор тильта</option>
-          <option value="morning_brief">Утренний бриф</option>
+        <optgroup label="Поведенческие (без параметров)" data-i18n-label="journal.alert_group_behavioral">
+          <option value="behavioral_streak" data-i18n="journal.alert_streak_threat">Угроза стрику активности</option>
+          <option value="behavioral_journal" data-i18n="journal.alert_anomalous_trade">Аномальная сделка</option>
+          <option value="behavioral_tilt" data-i18n="journal.alert_tilt_detector">Детектор тильта</option>
+          <option value="morning_brief" data-i18n="journal.alert_morning_brief">Утренний бриф</option>
         </optgroup>
       </select>
     </div>
     <div class="j-field" id="jAlertSymbolWrap">
-      <label>Инструмент (например, XAUUSD)</label>
+      <label data-i18n="journal.instrument_example">Инструмент (например, XAUUSD)</label>
       <input type="text" id="jAlertSymbol" placeholder="XAUUSD" autocomplete="off">
     </div>
 
@@ -1797,14 +1797,14 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
     <div id="jAlertParamPriceCross">
       <div class="j-row2">
         <div class="j-field">
-          <label>Целевая цена</label>
+          <label data-i18n="journal.target_price">Целевая цена</label>
           <input type="number" id="jAlertTarget" step="0.00001" placeholder="2350.00">
         </div>
         <div class="j-field">
-          <label>Направление</label>
+          <label data-i18n="journal.direction">Направление</label>
           <select id="jAlertDirection">
-            <option value="up">Вверх (≥)</option>
-            <option value="down">Вниз (≤)</option>
+            <option value="up" data-i18n="journal.direction_up">Вверх (≥)</option>
+            <option value="down" data-i18n="journal.direction_down">Вниз (≤)</option>
           </select>
         </div>
       </div>
@@ -1814,7 +1814,7 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
     <div id="jAlertParamRsi">
       <div class="j-row2">
         <div class="j-field">
-          <label>Таймфрейм</label>
+          <label data-i18n="journal.timeframe">Таймфрейм</label>
           <select id="jAlertTf">
             <option value="M15">M15</option>
             <option value="H1" selected>H1</option>
@@ -1823,15 +1823,15 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
           </select>
         </div>
         <div class="j-field">
-          <label>Зона</label>
+          <label data-i18n="journal.zone">Зона</label>
           <select id="jAlertCondition">
-            <option value="overbought">Перекупленность</option>
-            <option value="oversold">Перепроданность</option>
+            <option value="overbought" data-i18n="journal.overbought">Перекупленность</option>
+            <option value="oversold" data-i18n="journal.oversold">Перепроданность</option>
           </select>
         </div>
       </div>
       <div class="j-field">
-        <label>Уровень RSI</label>
+        <label data-i18n="journal.rsi_level">Уровень RSI</label>
         <input type="number" id="jAlertRsiLevel" min="0" max="100" value="70">
       </div>
     </div>
@@ -1839,11 +1839,11 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
     <!-- economic_event params -->
     <div id="jAlertParamEcon">
       <div class="j-field">
-        <label>Название события</label>
+        <label data-i18n="journal.event_name">Название события</label>
         <input type="text" id="jAlertEventName" placeholder="Core Retail Sales (USD)">
       </div>
       <div class="j-field">
-        <label>Уведомить за (минут)</label>
+        <label data-i18n="journal.notify_before_minutes">Уведомить за (минут)</label>
         <input type="number" id="jAlertMinBefore" min="1" max="60" value="15">
       </div>
     </div>
@@ -1851,16 +1851,16 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
     <!-- weekly_range params -->
     <div id="jAlertParamWeekly">
       <div class="j-field">
-        <label>Экстремум</label>
+        <label data-i18n="journal.extreme">Экстремум</label>
         <select id="jAlertExtreme">
-          <option value="high">Недельный максимум</option>
-          <option value="low">Недельный минимум</option>
+          <option value="high" data-i18n="journal.weekly_high">Недельный максимум</option>
+          <option value="low" data-i18n="journal.weekly_low">Недельный минимум</option>
         </select>
       </div>
     </div>
 
     <div class="j-err" id="jAlertErr"></div>
-    <button class="j-btn j-submit" id="jAlertSubmit">Создать алерт</button>
+    <button class="j-btn j-submit" id="jAlertSubmit" data-i18n="journal.create_alert">Создать алерт</button>
   </div>
 </div>
 
@@ -1868,17 +1868,17 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
 <div class="j-modal-bg" id="jSetupModal">
   <div class="j-modal" style="max-width:520px">
     <div class="j-modal-hd">
-      <h3 id="jSetupModalTitle">Новый сетап</h3>
+      <h3 id="jSetupModalTitle" data-i18n="journal.new_setup_title">Новый сетап</h3>
       <button class="j-close" id="jSetupClose">✕</button>
     </div>
 
     <div class="j-row2">
       <div class="j-field">
-        <label>Инструмент</label>
+        <label data-i18n="journal.field_instrument_short">Инструмент</label>
         <input type="text" id="jSetupSymbol" placeholder="XAUUSD" autocomplete="off" style="text-transform:uppercase">
       </div>
       <div class="j-field">
-        <label>Таймфрейм</label>
+        <label data-i18n="journal.timeframe">Таймфрейм</label>
         <select id="jSetupTf">
           <option>M5</option><option>M15</option><option>M30</option>
           <option>H1</option><option selected>H4</option><option>D1</option>
@@ -1888,29 +1888,29 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
     </div>
 
     <div class="j-field">
-      <label>Паттерн</label>
+      <label data-i18n="journal.pattern_label">Паттерн</label>
       <select id="jSetupPattern"></select>
     </div>
 
     <div class="j-field">
-      <label>Ключевые уровни (через запятую)</label>
+      <label data-i18n="journal.key_levels_csv">Ключевые уровни (через запятую)</label>
       <input type="text" id="jSetupLevels" placeholder="2340.5, 2365.0, 2390.0">
     </div>
 
     <div class="j-field">
-      <label>Тезис и логика входа</label>
+      <label data-i18n="journal.thesis_entry_logic">Тезис и логика входа</label>
       <textarea id="jSetupThesis" style="min-height:90px"
-        placeholder="Опишите логику: что вы видите на графике, где вход, стоп, цель…"></textarea>
+        data-i18n-placeholder="journal.thesis_ph" placeholder="Опишите логику: что вы видите на графике, где вход, стоп, цель…"></textarea>
     </div>
 
     <div class="j-row2">
       <div class="j-field">
-        <label>Напомнить через (недель)</label>
+        <label data-i18n="journal.remind_in_weeks">Напомнить через (недель)</label>
         <input type="number" id="jSetupReviewWeeks" min="1" max="52" value="4">
       </div>
       <div class="j-field">
-        <label>Теги (через запятую)</label>
-        <input type="text" id="jSetupTags" placeholder="фибо, пробой, H4">
+        <label data-i18n="journal.tags_csv">Теги (через запятую)</label>
+        <input type="text" id="jSetupTags" data-i18n-placeholder="journal.tags_ph" placeholder="фибо, пробой, H4">
       </div>
     </div>
 
@@ -1918,20 +1918,20 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
 
     <div id="jSetupLinkSection" style="display:none;margin-bottom:14px;
       border-top:1px solid var(--line);padding-top:14px">
-      <div style="font-size:12px;color:var(--muted);margin-bottom:8px;font-weight:600">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px;font-weight:600" data-i18n="journal.link_to_trade">
         Привязать к сделке из дневника
       </div>
       <div style="display:flex;gap:8px;align-items:center">
         <select id="jSetupTradeSelect" style="flex:1;border:1px solid var(--line);
           border-radius:8px;padding:7px 10px;font-family:Montserrat;font-size:12px;
           background:var(--soft);color:var(--ink);outline:none">
-          <option value="">Выберите сделку…</option>
+          <option value="" data-i18n="journal.choose_trade">Выберите сделку…</option>
         </select>
-        <button class="j-btn" id="jSetupLinkBtn" style="padding:7px 12px;font-size:12px">Привязать</button>
+        <button class="j-btn" id="jSetupLinkBtn" style="padding:7px 12px;font-size:12px" data-i18n="journal.link_btn">Привязать</button>
       </div>
     </div>
 
-    <button class="j-btn j-submit" id="jSetupSubmit">Сохранить</button>
+    <button class="j-btn j-submit" id="jSetupSubmit" data-i18n="journal.save">Сохранить</button>
   </div>
 </div>
 
@@ -1939,25 +1939,25 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
 <div class="j-modal-bg" id="jSetupStatusModal">
   <div class="j-modal" style="max-width:360px">
     <div class="j-modal-hd">
-      <h3>Изменить статус</h3>
+      <h3 data-i18n="journal.change_status">Изменить статус</h3>
       <button class="j-close" id="jSetupStatusClose">✕</button>
     </div>
     <p id="jSetupStatusDesc" style="font-size:13px;color:var(--muted);margin:0 0 16px"></p>
     <div style="display:flex;flex-direction:column;gap:8px">
       <button class="j-btn j-btn-sec" data-new-status="executed"
-        style="text-align:left;justify-content:flex-start">
+        style="text-align:left;justify-content:flex-start" data-i18n="journal.status_executed_desc">
         ✅ Исполнен — паттерн отработал, привязать к сделке
       </button>
       <button class="j-btn j-btn-sec" data-new-status="invalidated"
-        style="text-align:left;justify-content:flex-start">
+        style="text-align:left;justify-content:flex-start" data-i18n="journal.status_invalidated_desc">
         ❌ Отменён — рынок пошёл против тезиса
       </button>
       <button class="j-btn j-btn-sec" data-new-status="expired"
-        style="text-align:left;justify-content:flex-start">
+        style="text-align:left;justify-content:flex-start" data-i18n="journal.status_expired_desc">
         ⏰ Истёк — тезис потерял актуальность
       </button>
       <button class="j-btn j-btn-sec" data-new-status="pending"
-        style="text-align:left;justify-content:flex-start">
+        style="text-align:left;justify-content:flex-start" data-i18n="journal.status_pending_desc">
         🔄 Вернуть в ожидание
       </button>
     </div>
@@ -1968,48 +1968,48 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
 <div class="j-modal-bg j-fc-modal" id="jFcModal">
   <div class="j-modal" style="max-width:460px">
     <div class="j-modal-hd">
-      <h3 id="jFcModalTitle">Флешкарты</h3>
+      <h3 id="jFcModalTitle" data-i18n="journal.flashcards">Флешкарты</h3>
       <button class="j-close" id="jFcClose">✕</button>
     </div>
     <div id="jFcDone" class="j-fc-done" style="display:none">
-      ✅ Все карточки пройдены! <br>
+      <span data-i18n="journal.all_cards_done">✅ Все карточки пройдены!</span> <br>
       <span id="jFcSessionXp" style="font-size:13px;color:var(--gold);font-weight:600"></span>
     </div>
     <div id="jFcContent">
       <!-- Шаг 1: вопрос — сначала вспомни сам, потом нажми -->
       <div class="j-fc-card" id="jFcCard" onclick="SBFJournal.revealFcAnswer()">
-        <span id="jFcTerm">Загрузка…</span>
-        <span class="j-fc-card-hint">попробуй вспомнить, затем нажми</span>
+        <span id="jFcTerm" data-i18n="journal.loading">Загрузка…</span>
+        <span class="j-fc-card-hint" data-i18n="journal.try_to_remember">попробуй вспомнить, затем нажми</span>
       </div>
       <!-- Шаг 2: ответ показан -->
       <div class="j-fc-answer" id="jFcAnswer"></div>
       <!-- Шаг 2: оценка памяти — ПОСЛЕ просмотра ответа -->
       <div class="j-fc-quality" id="jFcQuality" style="display:none">
-        <div class="j-fc-quality-label">Насколько хорошо ты помнил это <em>до</em> просмотра ответа?</div>
+        <div class="j-fc-quality-label"><span data-i18n="journal.fc_quality_q1">Насколько хорошо ты помнил это</span> <em data-i18n="journal.fc_quality_before">до</em> <span data-i18n="journal.fc_quality_q2">просмотра ответа?</span></div>
         <div class="j-fc-quality-btns">
           <button class="j-fc-q-btn q0" onclick="SBFJournal.rateFc(0)">
             <span class="j-fc-q-icon">✗</span>
-            <span class="j-fc-q-lbl">Не помнил</span>
+            <span class="j-fc-q-lbl" data-i18n="journal.fc_q0">Не помнил</span>
           </button>
           <button class="j-fc-q-btn q1" onclick="SBFJournal.rateFc(1)">
             <span class="j-fc-q-icon">~</span>
-            <span class="j-fc-q-lbl">Смутно</span>
+            <span class="j-fc-q-lbl" data-i18n="journal.fc_q1">Смутно</span>
           </button>
           <button class="j-fc-q-btn q2" onclick="SBFJournal.rateFc(2)">
             <span class="j-fc-q-icon">±</span>
-            <span class="j-fc-q-lbl">Ошибся</span>
+            <span class="j-fc-q-lbl" data-i18n="journal.fc_q2">Ошибся</span>
           </button>
           <button class="j-fc-q-btn q3" onclick="SBFJournal.rateFc(3)">
             <span class="j-fc-q-icon">✓</span>
-            <span class="j-fc-q-lbl">Вспомнил</span>
+            <span class="j-fc-q-lbl" data-i18n="journal.fc_q3">Вспомнил</span>
           </button>
           <button class="j-fc-q-btn q4" onclick="SBFJournal.rateFc(4)">
             <span class="j-fc-q-icon">✓✓</span>
-            <span class="j-fc-q-lbl">Легко</span>
+            <span class="j-fc-q-lbl" data-i18n="journal.fc_q4">Легко</span>
           </button>
           <button class="j-fc-q-btn q5" onclick="SBFJournal.rateFc(5)">
             <span class="j-fc-q-icon">★</span>
-            <span class="j-fc-q-lbl">Мгновенно</span>
+            <span class="j-fc-q-lbl" data-i18n="journal.fc_q5">Мгновенно</span>
           </button>
         </div>
       </div>
@@ -2025,6 +2025,47 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
 (function () {
   'use strict';
 
+  /* ─── i18n ───
+     ВАЖНО: этот <script> — обычный (не defer), исполняется синхронно во
+     время парсинга HTML, т.е. ДО i18n.js/sbf-header.js (оба defer в <head>).
+     Поэтому t() НЕ кэширует window.sbfI18n в замыкании при загрузке файла —
+     он смотрит на window.sbfI18n каждый раз при вызове. Реальные вызовы
+     происходят только внутри колбэков (клики, fetch-обработчики, DOMContentLoaded),
+     которые всегда выполняются позже — к этому времени defer-скрипты уже
+     отработали и window.sbfI18n существует. См. паттерн detectAndSendTZ() ниже. */
+  function t(key, fallback) {
+    var i = window.sbfI18n;
+    return i ? i.t(key, fallback) : (fallback || key);
+  }
+
+  function _patchI18n(root) {
+    if ((window.sbfI18n && window.sbfI18n.lang) === 'ru') return;
+    var tt = window.sbfI18n ? window.sbfI18n.t : function (k, fb) { return fb || k; };
+    (root || document).querySelectorAll('[data-i18n]').forEach(function (el) {
+      el.textContent = tt(el.getAttribute('data-i18n'), el.textContent);
+    });
+    (root || document).querySelectorAll('[data-i18n-html]').forEach(function (el) {
+      el.innerHTML = tt(el.getAttribute('data-i18n-html'), el.innerHTML);
+    });
+    (root || document).querySelectorAll('[data-i18n-placeholder]').forEach(function (el) {
+      el.setAttribute('placeholder', tt(el.getAttribute('data-i18n-placeholder'), el.getAttribute('placeholder') || ''));
+    });
+    (root || document).querySelectorAll('[data-i18n-title]').forEach(function (el) {
+      el.setAttribute('title', tt(el.getAttribute('data-i18n-title'), el.getAttribute('title') || ''));
+    });
+    (root || document).querySelectorAll('[data-i18n-tip]').forEach(function (el) {
+      el.setAttribute('data-tip', tt(el.getAttribute('data-i18n-tip'), el.getAttribute('data-tip') || ''));
+    });
+    (root || document).querySelectorAll('[data-i18n-label]').forEach(function (el) {
+      el.setAttribute('label', tt(el.getAttribute('data-i18n-label'), el.getAttribute('label') || ''));
+    });
+  }
+  window.sbfI18n
+    ? window.sbfI18n.ready.then(function () { _patchI18n(document); })
+    : document.addEventListener('DOMContentLoaded', function () {
+        if (window.sbfI18n) window.sbfI18n.ready.then(function () { _patchI18n(document); });
+      });
+
   /* ─── Helpers ─── */
   // Токен и заголовок теперь через sbfAuth (см. assets/sbf-auth.js) — раньше
   // _authHdr() слал ТОЛЬКО Authorization: Bearer, а сервер читал ТОЛЬКО
@@ -2037,7 +2078,8 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
   function _fmtDate(iso) {
     if (!iso) return '—';
     var d = new Date(iso);
-    return d.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+    var locale = (window.sbfI18n && window.sbfI18n.lang === 'ro') ? 'ro-RO' : 'ru-RU';
+    return d.toLocaleDateString(locale, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
   }
 
   /* ─── TZ auto-detect on login ─── */
@@ -2133,12 +2175,12 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
   if (_mtSubmit) {
     _mtSubmit.addEventListener('click', function () {
       if (!_mtSelFile) {
-        if (_mtResult) { _mtResult.style.display = 'block'; _mtResult.textContent = 'Выбери файл'; }
+        if (_mtResult) { _mtResult.style.display = 'block'; _mtResult.textContent = t('journal.choose_file', 'Выбери файл'); }
         return;
       }
       var tz = _mtTZ ? parseInt(_mtTZ.value, 10) : 0;
       _mtSubmit.disabled = true;
-      _mtSubmit.textContent = 'Импортируем…';
+      _mtSubmit.textContent = t('journal.importing', 'Импортируем…');
 
       var reader = new FileReader();
       reader.onload = function (ev) {
@@ -2151,7 +2193,7 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
         .then(function (r) { return r.json(); })
         .then(function (d) {
           _mtSubmit.disabled = false;
-          _mtSubmit.textContent = 'Импортировать';
+          _mtSubmit.textContent = t('journal.import_button', 'Импортировать');
           if (_mtResult) {
             _mtResult.style.display = 'block';
             if (d.error) {
@@ -2160,8 +2202,8 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
             } else {
               _mtResult.className = 'j-mt-result ok';
               _mtResult.innerHTML =
-                'Импортировано: <b>' + d.imported + '</b> сделок' +
-                (d.duplicates ? ' · дублей пропущено: ' + d.duplicates : '') +
+                t('journal.imported_prefix', 'Импортировано:') + ' <b>' + d.imported + '</b> ' + t('journal.trades_word', 'сделок') +
+                (d.duplicates ? ' · ' + t('journal.duplicates_skipped', 'дублей пропущено:') + ' ' + d.duplicates : '') +
                 (d.xp_awarded ? ' · +' + d.xp_awarded + ' XP' : '');
               if (d.imported > 0 && typeof SBFJournal !== 'undefined' && SBFJournal.reload) {
                 setTimeout(function () { SBFJournal.reload(); }, 1200);
@@ -2171,11 +2213,11 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
         })
         .catch(function (err) {
           _mtSubmit.disabled = false;
-          _mtSubmit.textContent = 'Импортировать';
+          _mtSubmit.textContent = t('journal.import_button', 'Импортировать');
           if (_mtResult) {
             _mtResult.style.display = 'block';
             _mtResult.className = 'j-mt-result err';
-            _mtResult.textContent = 'Ошибка сети: ' + err.message;
+            _mtResult.textContent = t('journal.network_error_prefix', 'Ошибка сети: ') + err.message;
           }
         });
       };
@@ -2201,7 +2243,7 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
           _activeCooldown = cd;
           if (_cdBanner) _cdBanner.style.display = 'block';
           if (_cdUntil) _cdUntil.textContent = _fmtDate(cd.until_ts);
-          if (_cdMeta) _cdMeta.textContent = 'Активирован: ' + _fmtDate(cd.started_ts);
+          if (_cdMeta) _cdMeta.textContent = t('journal.activated_prefix', 'Активирован:') + ' ' + _fmtDate(cd.started_ts);
         } else {
           _activeCooldown = null;
           if (_cdBanner) _cdBanner.style.display = 'none';
@@ -2213,7 +2255,7 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
 
   window.SBFJournal.overrideCooldown = function () {
     if (!_activeCooldown) return;
-    if (!confirm('Записать сделку и завершить стоп-день?')) return;
+    if (!confirm(t('journal.confirm_record_and_end_stopday', 'Записать сделку и завершить стоп-день?'))) return;
     sbfAuth.fetch('/api/alerts/cooldown/break', {
       method: 'POST',
       headers: _authHdr(),
@@ -2282,12 +2324,12 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
         } else {
           if (_debWrap) _debWrap.style.display = 'none';
           if (typeof SBFJournal !== 'undefined' && SBFJournal.showXPToast) {
-            SBFJournal.showXPToast('+' + d.xp_awarded + ' XP за разбор');
+            SBFJournal.showXPToast('+' + d.xp_awarded + ' ' + t('journal.xp_for_debrief', 'XP за разбор'));
           }
         }
       }).catch(function (e) {
         _debBtn.disabled = false;
-        if (_debErr) { _debErr.style.display = 'block'; _debErr.textContent = 'Ошибка: ' + e.message; }
+        if (_debErr) { _debErr.style.display = 'block'; _debErr.textContent = t('journal.error_prefix', 'Ошибка: ') + e.message; }
       });
     });
   }
@@ -2323,24 +2365,24 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
         var stats = d.stats || {};
         if (_revStats) {
           _revStats.innerHTML =
-            '<span>Сделок: <b>' + (stats.trades_count || 0) + '</b></span>' +
+            '<span>' + t('journal.trades_colon', 'Сделок:') + ' <b>' + (stats.trades_count || 0) + '</b></span>' +
             '<span>Σ R: <b>' + ((stats.sum_r || 0) >= 0 ? '+' : '') + (+(stats.sum_r || 0)).toFixed(2) + '</b></span>' +
-            '<span>Дисциплина: <b>' + (stats.discipline_pct != null ? Math.round(stats.discipline_pct) + '%' : '—') + '</b></span>' +
-            '<span>Тильт-эп.: <b>' + (stats.tilt_episodes || 0) + '</b></span>';
+            '<span>' + t('journal.discipline_colon', 'Дисциплина:') + ' <b>' + (stats.discipline_pct != null ? Math.round(stats.discipline_pct) + '%' : '—') + '</b></span>' +
+            '<span>' + t('journal.tilt_episodes_colon', 'Тильт-эп.:') + ' <b>' + (stats.tilt_episodes || 0) + '</b></span>';
         }
         var existing = d.existing_review;
         if (existing) {
           if (_revPrev) {
             _revPrev.style.display = 'block';
-            _revPrev.textContent = 'Уже отправлено: ' + (existing.reflection || '').substring(0, 100);
+            _revPrev.textContent = t('journal.already_submitted_prefix', 'Уже отправлено: ') + (existing.reflection || '').substring(0, 100);
           }
           if (_revBtn) {
             _revBtn.disabled = true;
-            _revBtn.textContent = 'Ревью уже отправлено';
+            _revBtn.textContent = t('journal.review_already_submitted', 'Ревью уже отправлено');
           }
         }
         if (d.prev_reflection && _revText && !_revText.value) {
-          _revText.placeholder = 'Прошлая неделя: ' + d.prev_reflection.substring(0, 60) + '…';
+          _revText.placeholder = t('journal.last_week_prefix', 'Прошлая неделя: ') + d.prev_reflection.substring(0, 60) + '…';
         }
       }).catch(function () {});
   }
@@ -2360,16 +2402,16 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
         if (d.error) {
           if (_revErr) { _revErr.style.display = 'block'; _revErr.textContent = d.error; }
         } else {
-          _revBtn.textContent = 'Ревью отправлено ✓';
+          _revBtn.textContent = t('journal.review_submitted', 'Ревью отправлено ✓');
           _revBtn.disabled = true;
           if (_revErr) _revErr.style.display = 'none';
           if (typeof SBFJournal !== 'undefined' && SBFJournal.showXPToast) {
-            SBFJournal.showXPToast('+75 XP за ревью');
+            SBFJournal.showXPToast('+75 ' + t('journal.xp_for_review', 'XP за ревью'));
           }
         }
       }).catch(function (e) {
         _revBtn.disabled = false;
-        if (_revErr) { _revErr.style.display = 'block'; _revErr.textContent = 'Ошибка: ' + e.message; }
+        if (_revErr) { _revErr.style.display = 'block'; _revErr.textContent = t('journal.error_prefix', 'Ошибка: ') + e.message; }
       });
     });
   }
@@ -2393,7 +2435,7 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
       .then(function (d) {
         if (d.insufficient_data) {
           if (_anCostR) _anCostR.textContent = '—';
-          if (_anCostSub) _anCostSub.textContent = 'Недостаточно данных (нужно ≥10 чистых сделок)';
+          if (_anCostSub) _anCostSub.textContent = t('journal.insufficient_data', 'Недостаточно данных (нужно ≥10 чистых сделок)');
         } else {
           var cost = +(d.discipline_cost_r || 0);
           if (_anCostR) {
@@ -2402,9 +2444,9 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
           }
           if (_anCostSub) {
             _anCostSub.textContent =
-              'Нарушений: ' + (d.violated_trades || 0) +
-              ' · Чистых: ' + (d.clean_trades || 0) +
-              ' · avg R чистых: ' + (+(d.avg_r_clean || 0)).toFixed(2);
+              t('journal.violations_colon', 'Нарушений:') + ' ' + (d.violated_trades || 0) +
+              ' · ' + t('journal.clean_colon', 'Чистых:') + ' ' + (d.clean_trades || 0) +
+              ' · ' + t('journal.avg_r_clean_colon', 'avg R чистых:') + ' ' + (+(d.avg_r_clean || 0)).toFixed(2);
           }
         }
       }).catch(function () {});
@@ -2414,7 +2456,7 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
       .then(function (rows) {
         if (!_anTbody) return;
         if (!rows || !rows.length) {
-          _anTbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted)">Нет данных</td></tr>';
+          _anTbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted)">' + t('journal.no_data', 'Нет данных') + '</td></tr>';
           return;
         }
         _anTbody.innerHTML = rows.map(function (row) {
@@ -2448,14 +2490,14 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
   var _prestigeBtn = document.getElementById('jPrestigeBtn');
   if (_prestigeBtn) {
     _prestigeBtn.addEventListener('click', function () {
-      if (!confirm('Сбросить XP и уровень до 1? Активируется только при уровне ≥ 8.')) return;
+      if (!confirm(t('journal.confirm_prestige_reset', 'Сбросить XP и уровень до 1? Активируется только при уровне ≥ 8.'))) return;
       sbfAuth.fetch('/api/auth/prestige', { method: 'POST', headers: _authHdr(), body: '{}' })
         .then(function (r) { return r.json(); })
         .then(function (d) {
           if (d.error) {
             alert(d.error);
           } else {
-            alert('Престиж ' + d.prestige_count + ' активирован! Уровень сброшен.');
+            alert(t('journal.prestige_prefix', 'Престиж') + ' ' + d.prestige_count + ' ' + t('journal.prestige_activated_suffix', 'активирован! Уровень сброшен.'));
             if (typeof SBFJournal !== 'undefined' && SBFJournal.reload) SBFJournal.reload();
           }
         }).catch(function () {});
@@ -2476,8 +2518,8 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
     if (!_cdOfferWrap || _offerShown || _activeCooldown) return;
     var trigger = (tiltData && tiltData.trigger) || 'loss_streak';
     var msgs = {
-      loss_streak: 'Статистически зафиксирована серия сделок с отрицательным R. Хочешь активировать добровольный стоп на сегодня?',
-      stop_revenge_reentry: 'Зафиксирован повторный вход в рынок после быстрого закрытия позиции. Хочешь активировать добровольный стоп на сегодня?'
+      loss_streak: t('journal.tilt_msg_loss_streak', 'Статистически зафиксирована серия сделок с отрицательным R. Хочешь активировать добровольный стоп на сегодня?'),
+      stop_revenge_reentry: t('journal.tilt_msg_revenge_reentry', 'Зафиксирован повторный вход в рынок после быстрого закрытия позиции. Хочешь активировать добровольный стоп на сегодня?')
     };
     if (_cdOfferText) _cdOfferText.textContent = msgs[trigger] || msgs.loss_streak;
     _cdOfferWrap.style.display = 'block';
