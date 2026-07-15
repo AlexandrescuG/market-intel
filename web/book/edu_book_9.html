@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>SBF | {% if lang == 'ro' %}Capitolul 9. Rapoarte și Oscilatori{% else %}Глава 9. Отчётности и Осцилляторы{% endif %}</title>
+  <title>SBF | {% if lang == 'ru' %}Глава 9. Отчётности и Осцилляторы{% elif lang == 'ro' %}Capitolul 9. Rapoarte și Oscilatori{% else %}Chapter 9. Earnings and Oscillators{% endif %}</title>
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
@@ -137,8 +137,8 @@ const TR = {
         explanationRo:"iPhone este produsul cheie. Ratarea segmentului iPhone ($51B vs $54B așteptat) a eclipsat totul.",
       },
     ],
-    simChoiceUp:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-up.png' alt='' width='20' height='20' /> Акция вырастет",
-    simChoiceDown:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-down.png' alt='' width='20' height='20' /> Акция упадёт",
+    simChoiceUp:"📈 Акция вырастет",
+    simChoiceDown:"📉 Акция упадёт",
     simCorrect:"✓ Верно!",
     simWrong:"✗ Неверно",
     simNext:"Следующий кейс →",
@@ -182,7 +182,7 @@ const TR = {
     huntStep2:"Шаг 2: Нажмите на второй пик цены (правее, выше)",
     huntStep3:"Шаг 3: Нажмите на первый пик RSI",
     huntStep4:"Шаг 4: Нажмите на второй пик RSI (должен быть ниже)",
-    huntCorrect:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-target.png' alt='' width='20' height='20' /> Дивергенция найдена! Цена шла вверх, RSI — вниз. Топливо кончилось. Через 3 свечи акция упала на 12%.",
+    huntCorrect:"🎯 Дивергенция найдена! Цена шла вверх, RSI — вниз. Топливо кончилось. Через 3 свечи акция упала на 12%.",
     huntWrong:"Не совсем. Попробуй выбрать оба ценовых пика (оба выше), и оба пика RSI (второй должен быть ниже первого).",
     huntReset:"Начать заново",
     huntReveal:"Показать решение",
@@ -294,7 +294,7 @@ const TR = {
        explanationEn:"iPhone miss ($51B vs $54B) overshadowed everything despite EPS beat.",
        explanationRo:"Ratarea iPhone ($51B vs $54B) a eclipsat totul, în ciuda EPS beat."},
     ],
-    simChoiceUp:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-up.png' alt='' width='20' height='20' /> Stock will rise", simChoiceDown:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-down.png' alt='' width='20' height='20' /> Stock will fall",
+    simChoiceUp:"📈 Stock will rise", simChoiceDown:"📉 Stock will fall",
     simCorrect:"✓ Correct!", simWrong:"✗ Wrong",
     simNext:"Next case →", simFinish:"All cases reviewed", simScore:"Score", simExplain:"Explanation:", simOf:"of",
     taTag:"9.2 — TECHNICAL ANALYSIS", taTitle:"Oscillators: RSI and MACD",
@@ -317,7 +317,7 @@ const TR = {
     huntStep2:"Step 2: Click the second price peak (right, higher)",
     huntStep3:"Step 3: Click the first RSI peak",
     huntStep4:"Step 4: Click the second RSI peak (should be lower)",
-    huntCorrect:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-target.png' alt='' width='20' height='20' /> Divergence found! Price went up, RSI went down. Fuel ran out. 3 candles later the stock fell 12%.",
+    huntCorrect:"🎯 Divergence found! Price went up, RSI went down. Fuel ran out. 3 candles later the stock fell 12%.",
     huntWrong:"Not quite. Try selecting both price peaks (both higher), and both RSI peaks (second lower than first).",
     huntReset:"Reset",huntReveal:"Show solution",
     comboTag:"COMBO SIGNAL", comboTitle:"RSI + MACD together: when they agree — signal strengthens",
@@ -392,7 +392,7 @@ const TR = {
        explanationEn:"iPhone miss overshadowed everything.",
        explanationRo:"Ratarea iPhone ($51 vs $54 mld) a eclipsat totul."},
     ],
-    simChoiceUp:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-up.png' alt='' width='20' height='20' /> Acțiunea va crește",simChoiceDown:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-down.png' alt='' width='20' height='20' /> Acțiunea va scădea",
+    simChoiceUp:"📈 Acțiunea va crește",simChoiceDown:"📉 Acțiunea va scădea",
     simCorrect:"✓ Corect!",simWrong:"✗ Greșit",
     simNext:"Următorul caz →",simFinish:"Toate cazurile analizate",simScore:"Scor",simExplain:"Explicație:",simOf:"din",
     taTag:"9.2 — ANALIZĂ TEHNICĂ",taTitle:"Oscilatori: RSI și MACD",
@@ -415,7 +415,7 @@ const TR = {
     huntStep2:"Pasul 2: Faceți clic pe al doilea vârf de preț (dreapta, mai sus)",
     huntStep3:"Pasul 3: Faceți clic pe primul vârf RSI",
     huntStep4:"Pasul 4: Faceți clic pe al doilea vârf RSI (trebuie să fie mai jos)",
-    huntCorrect:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-target.png' alt='' width='20' height='20' /> Divergență găsită! Prețul a urcat, RSI a coborât. Combustibil epuizat. Peste 3 lumânări, acțiunea a scăzut 12%.",
+    huntCorrect:"🎯 Divergență găsită! Prețul a urcat, RSI a coborât. Combustibil epuizat. Peste 3 lumânări, acțiunea a scăzut 12%.",
     huntWrong:"Nu chiar. Încercați să selectați ambele vârfuri de preț (ambele mai sus) și ambele vârfuri RSI (al doilea mai jos decât primul).",
     huntReset:"Resetare",huntReveal:"Arată soluția",
     comboTag:"SEMNAL COMBINAT",comboTitle:"RSI + MACD împreună: când coincid — semnalul se amplifică",
@@ -451,21 +451,33 @@ const STRINGS = {
   ru: {
     metricsHeaders:["МЕТРИКА","ФАКТ","ОЖИДАЛОСЬ",""],
     rsiFigCaption:"RSI(14) · как считается и зоны 30/70",
-    rsiFigLink:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-up.png' alt='' width='20' height='20' /> Открыть RSI в полном Графике",
+    rsiFigLink:"📈 Открыть RSI в полном Графике",
     macdFigCaption:"MACD(12,26,9) · линия, сигнал, гистограмма",
-    macdFigLink:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-up.png' alt='' width='20' height='20' /> Открыть MACD в полном Графике",
+    macdFigLink:"📈 Открыть MACD в полном Графике",
     rsiChartLabel:"GOLD · МЕДВЕЖЬЯ ДИВЕРГЕНЦИЯ RSI · Авг–Ноя 2024",
     macdChartLabel:"S&P 500 · MACD(12,26,9) · Янв–Авг 2024",
     realData:"РЕАЛЬНЫЕ ДАННЫЕ",
     modeBeg:"метафоры и примеры",
     modePro:"профессиональная глубина",
   },
+  en: {
+    metricsHeaders:["METRIC","ACTUAL","EXPECTED",""],
+    rsiFigCaption:"RSI(14) · how it's calculated and the 30/70 zones",
+    rsiFigLink:"📈 Open RSI in the Full Chart",
+    macdFigCaption:"MACD(12,26,9) · line, signal, histogram",
+    macdFigLink:"📈 Open MACD in the Full Chart",
+    rsiChartLabel:"GOLD · BEARISH RSI DIVERGENCE · Aug–Nov 2024",
+    macdChartLabel:"S&P 500 · MACD(12,26,9) · Jan–Aug 2024",
+    realData:"REAL DATA",
+    modeBeg:"metaphors and examples",
+    modePro:"professional depth",
+  },
   ro: {
     metricsHeaders:["METRICĂ","REAL","AȘTEPTAT",""],
     rsiFigCaption:"RSI(14) · cum se calculează și zonele 30/70",
-    rsiFigLink:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-up.png' alt='' width='20' height='20' /> Deschide RSI în Graficul complet",
+    rsiFigLink:"📈 Deschide RSI în Graficul complet",
     macdFigCaption:"MACD(12,26,9) · linie, semnal, histogramă",
-    macdFigLink:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-up.png' alt='' width='20' height='20' /> Deschide MACD în Graficul complet",
+    macdFigLink:"📈 Deschide MACD în Graficul complet",
     rsiChartLabel:"GOLD · DIVERGENȚĂ BEARISH RSI · Aug–Noi 2024",
     macdChartLabel:"S&P 500 · MACD(12,26,9) · Ian–Aug 2024",
     realData:"DATE REALE",
@@ -510,8 +522,8 @@ function AskAnalystPopup({chapterNum, lang, onClose}) {
           <p style={{fontSize:18,color:C.inkMid}}>{t.apSub}</p>
         </div>
         <div className="messenger-grid">
-          {[{name:"SBF Support",plat:"Telegram",bg:"#0088cc",icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-rocket.png' alt='' width='20' height='20' />",link:tgLink,btn:t.tgBtn,msgBg:"#e1f3fb"},
-            {name:"SBF Company",plat:"WhatsApp",bg:"#25d366",icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-quote.png' alt='' width='20' height='20' />",link:waLink,btn:t.waBtn,msgBg:"#e8f5ed"}].map((m,i)=>
+          {[{name:"SBF Support",plat:"Telegram",bg:"#0088cc",icon:"🚀",link:tgLink,btn:t.tgBtn,msgBg:"#e1f3fb"},
+            {name:"SBF Company",plat:"WhatsApp",bg:"#25d366",icon:"💬",link:waLink,btn:t.waBtn,msgBg:"#e8f5ed"}].map((m,i)=>
             <div key={i} style={{background:"#fff",border:"1px solid #e0e0e0",borderRadius:12,padding:"30px 25px",display:"flex",flexDirection:"column"}}>
               <div style={{display:"flex",alignItems:"center",gap:15,marginBottom:30}}>
                 <div style={{width:50,height:50,borderRadius:"50%",background:m.msgBg,display:"flex",alignItems:"center",justifyContent:"center"}}>{m.icon}</div>
@@ -646,7 +658,7 @@ function EarningsSimulator({t}) {
               {correct ? t.simCorrect : t.simWrong}
               {" "}
               <span style={{fontFamily:"monospace",fontSize:13,fontWeight:700,color:correct?C.bull:C.bear}}>
-                {c.verdict==="up"?"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-up.png' alt='' width='20' height='20' />":"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-down.png' alt='' width='20' height='20' />"} {c.verdictPct}
+                {c.verdict==="up"?"📈":"📉"} {c.verdictPct}
               </span>
             </div>
             <div style={{fontSize:13,color:C.inkMid,lineHeight:1.7}}>

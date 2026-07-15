@@ -55,7 +55,7 @@
   // и поверх собственного инлайн-скрипта index.html поверх тех же #clock/
   // #liveDot/#winTxt начинал параллельно писать ещё и clockTick()/setLive()
   // из этого файла — гонка за одни и те же элементы).
-  var _bare = path.replace(/^\/ro(?=\/|$)/, '') || '/';
+  var _bare = path.replace(/^\/(ro|en)(?=\/|$)/, '') || '/';
   var isMain     = _bare === '/' || _bare === '/index.html';
   var isCalendar = _bare === '/calendar' || _bare.startsWith('/edu/calendar');
   var isJournal  = _bare === '/journal.html' || _bare === '/journal';
@@ -188,22 +188,24 @@
   function t(key, fallback) { return _i18n.t(key, fallback); }
 
   function otherLangHref(lang) {
-    var isRo = /^\/ro(\/|$)/.test(path);
-    if (lang === 'ro') return isRo ? path : ('/ro' + (path === '/' ? '' : path));
-    return isRo ? (path.replace(/^\/ro/, '') || '/') : path;
+    var m = path.match(/^\/(ro|en)(\/|$)/);
+    var curPrefix = m ? m[1] : null;
+    var rest = curPrefix ? (path.replace(/^\/(ro|en)/, '') || '/') : path;
+    if (lang === curPrefix) return path;
+    if (lang === 'ru') return rest;
+    return '/' + lang + (rest === '/' ? '' : rest);
   }
 
   // Ссылки в шапке/нижнем баре (Сегодня/Обучение/Календарь) раньше были
-  // жёстко "/", "/edu/", "/calendar" — переход с любой /ro/-страницы (или
-  // с книжной главы /edu/ro/b/N) сбрасывал язык на русский, т.к. href не
-  // сохранял текущий язык. На книжных страницах язык — bookLang (у них своя
-  // схема /edu/ro/b/N, отдельная от общего префикса /ro/); на остальных —
-  // смотрим, был ли у пути префикс /ro/. Для EN общего сайтового аналога нет
-  // (EN не поддерживается вне 2 глав), поэтому падает на RU — лучшего адреса
-  // всё равно нет.
-  var _navLang = bookLang || (path !== _bare ? 'ro' : 'ru');
+  // жёстко "/", "/edu/", "/calendar" — переход с любой /ro/- или /en/-страницы
+  // (или с книжной главы /edu/ro/b/N, /edu/en/b/N) сбрасывал язык на русский,
+  // т.к. href не сохранял текущий язык. На книжных страницах язык — bookLang
+  // (у них своя схема /edu/{lang}/b/N, отдельная от общего префикса /{lang}/);
+  // на остальных — смотрим, какой префикс (ro|en) стоит у текущего пути.
+  var _siteLangM = path.match(/^\/(ro|en)(\/|$)/);
+  var _navLang = bookLang || (_siteLangM ? _siteLangM[1] : 'ru');
   function navHref(targetPath) {
-    return _navLang === 'ro' ? ('/ro' + (targetPath === '/' ? '' : targetPath)) : targetPath;
+    return _navLang !== 'ru' ? ('/' + _navLang + (targetPath === '/' ? '' : targetPath)) : targetPath;
   }
 
   // ── HTML ─────────────────────────────────────────────────────────────────
@@ -233,6 +235,7 @@
       : '    <div class="sbf-lang-sw">' +
         '<a href="' + otherLangHref('ru') + '"' + (_i18n.lang === 'ru' ? ' class="active"' : '') + '>RU</a>' +
         '<a href="' + otherLangHref('ro') + '"' + (_i18n.lang === 'ro' ? ' class="active"' : '') + '>RO</a>' +
+        '<a href="' + otherLangHref('en') + '"' + (_i18n.lang === 'en' ? ' class="active"' : '') + '>EN</a>' +
         '</div>',
     '  </div>',
     '</header>',

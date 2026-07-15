@@ -459,7 +459,8 @@ function escQ(s) {
 
 function fmtDate(ts) {
   if (!ts) return '';
-  var locale = (window.sbfI18n && window.sbfI18n.lang === 'ro') ? 'ro-RO' : 'ru-RU';
+  var _lg = window.sbfI18n && window.sbfI18n.lang;
+  var locale = _lg === 'ro' ? 'ro-RO' : _lg === 'en' ? 'en-US' : 'ru-RU';
   try { return new Date(ts.replace(' ', 'T') + 'Z').toLocaleDateString(locale); } catch (e) { return ts; }
 }
 

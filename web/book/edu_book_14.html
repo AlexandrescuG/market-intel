@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>SBF | {% if lang == 'ro' %}Capitolul 14. Anatomia Scalpingului{% else %}Глава 14. Анатомия Скальпинга{% endif %}</title>
+  <title>SBF | {% if lang == 'ru' %}Глава 14. Анатомия Скальпинга{% elif lang == 'ro' %}Capitolul 14. Anatomia Scalpingului{% else %}Chapter 14. Anatomy of Scalping{% endif %}</title>
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
   <style>
@@ -43,8 +43,8 @@ const STRINGS = {
     clockCityTokyo:"Токио", clockCityLondon:"Лондон", clockCityNy:"Нью-Йорк",
     clockMskTokyo:"03–12 МСК", clockMskLondon:"11–20 МСК", clockMskNy:"16–01 МСК",
     mskAbbrev:"МСК",
-    qualPeak:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-flame.png' alt='' width='20' height='20' /> ПИКОВАЯ", qualGood:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-check.png' alt='' width='20' height='20' /> Хорошая", qualModerate:"🟡 Умеренная", qualWeak:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-alert-dot.png' alt='' width='20' height='20' /> Слабая", qualNone:"⛔ Нет ликвидности",
-    clockFbSuccessLead:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-check.png' alt='' width='20' height='20' /> Отличный выбор!",
+    qualPeak:"🔥 ПИКОВАЯ", qualGood:"✅ Хорошая", qualModerate:"🟡 Умеренная", qualWeak:"🔴 Слабая", qualNone:"⛔ Нет ликвидности",
+    clockFbSuccessLead:"✅ Отличный выбор!",
     clockFbSuccessLondonNy:" + Нью-Йорк",
     clockFbSuccessTail:"дают максимальные объёмы. Спред на XAU/USD минимален.",
     clockFbWarnLead:"🟡 Сойдёт, но не идеально.",
@@ -59,14 +59,14 @@ const STRINGS = {
     legendPeak:"Пик", legendGood:"Хорошо", legendModerate:"Умерен.", legendWeak:"Слабо",
     clockSessionsLabel:"ТОРГОВЫЕ СЕССИИ",
     chipPeak:"ПИКОВАЯ", chipLow:"НИЗКАЯ",
-    clockOverlapTitle:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-star.png' alt='' width='20' height='20' /> Перекрытие Лондон–NY",
+    clockOverlapTitle:"⭐ Перекрытие Лондон–NY",
     clockOverlapRange:"13–17 UTC / 16–20 МСК",
     clockOverlapDesc:"Максимальный объём, минимальный спред XAU/USD (0.8–1.2 pt). Идеально для скальпинга.",
     clockVolatilityLabel:"ВОЛАТИЛЬНОСТЬ XAU/USD ПО ЧАСАМ (UTC)",
     clockHint:"← Кликни на сегмент часового циферблата",
     // ScalpingSimulator
     simSlMsg:"⛔ Стоп-лосс! -15 пунктов. Рынок пошёл против вас.",
-    simTpMsg:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-check.png' alt='' width='20' height='20' /> Тейк-профит! +5 пунктов. Отличный скальп!",
+    simTpMsg:"✅ Тейк-профит! +5 пунктов. Отличный скальп!",
     simOpenPrefix:"📥 Позиция открыта по",
     simClosedProfit:"📤 Закрыто в плюс", simClosedLoss:"📤 Закрыто в минус",
     unitPct:"пт",
@@ -74,8 +74,8 @@ const STRINGS = {
     simTag:"ИНТЕРАКТИВ — ТЕХНИКА · EMA 9/21 · RSI 14",
     simResetBtn:"↺ Сброс",
     simPauseBtn:"⏸ ПАУЗА", simStartBtn:"▶ СТАРТ",
-    simSignalAlert:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-lightning.png' alt='' width='20' height='20' /> СИГНАЛ: EMA 9 × EMA 21 + RSI из 35 — момент для входа!",
-    simPositionPrefix:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-bar-chart.png' alt='' width='20' height='20' /> В ПОЗИЦИИ @", simPositionMid:"| P&L:",
+    simSignalAlert:"⚡ СИГНАЛ: EMA 9 × EMA 21 + RSI из 35 — момент для входа!",
+    simPositionPrefix:"📊 В ПОЗИЦИИ @", simPositionMid:"| P&L:",
     simCloseBtn:"ЗАКРЫТЬ",
     simLegendPrice:"Цена XAU/USD",
     simInstructionsTitle:"Правила входа (стратегия Олега):",
@@ -86,7 +86,7 @@ const STRINGS = {
     simWinRateNote:"WinRate стратегии: 92–95%",
     simTradeLogLabel:"ЖУРНАЛ СДЕЛОК",
     simNoTrades:"Сделок пока нет",
-    simTypeTp:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-check.png' alt='' width='20' height='20' /> TP", simTypeSl:"⛔ SL", simTypeManual:"📤 Ручной",
+    simTypeTp:"✅ TP", simTypeSl:"⛔ SL", simTypeManual:"📤 Ручной",
     // Chapter14 main
     stickyLevel:"УРОВЕНЬ 14",
     stickyChapterLabel:"Анатомия Скальпинга (AvaTrade)",
@@ -149,13 +149,124 @@ const STRINGS = {
     askModalTitle:"Есть вопрос по главе 14?",
     askPrefill:"Здравствуйте, вопрос по главе 14",
   },
+  en: {
+    // SessionClock
+    clockCityTokyo:"Tokyo", clockCityLondon:"London", clockCityNy:"New York",
+    clockMskTokyo:"03–12 MSK", clockMskLondon:"11–20 MSK", clockMskNy:"16–01 MSK",
+    mskAbbrev:"MSK",
+    qualPeak:"🔥 PEAK", qualGood:"✅ Good", qualModerate:"🟡 Moderate", qualWeak:"🔴 Weak", qualNone:"⛔ No liquidity",
+    clockFbSuccessLead:"✅ Excellent choice!",
+    clockFbSuccessLondonNy:" + New York",
+    clockFbSuccessTail:"give the maximum volume. The XAU/USD spread is minimal.",
+    clockFbWarnLead:"🟡 It'll do, but not ideal.",
+    clockFbWarnMid:"— moderate liquidity. Better to wait for",
+    clockFbWarnTail:"UTC for peak volume.",
+    clockFbErrorLead:"⛔ Poor choice.",
+    clockFbErrorTail:"Asian night: the XAU/USD spread widens to 3–8 points, the scalp's profit (3–6 pt) is completely eaten up. Wait for London.",
+    clockTitle:"Scalper's Time Management",
+    clockTag:"INTERACTIVE — FUNDAMENTAL",
+    clockPickHour:"PICK AN HOUR FOR SCALPING (UTC)",
+    clockCenterLabel:"SCALPING",
+    legendPeak:"Peak", legendGood:"Good", legendModerate:"Moderate", legendWeak:"Weak",
+    clockSessionsLabel:"TRADING SESSIONS",
+    chipPeak:"PEAK", chipLow:"LOW",
+    clockOverlapTitle:"⭐ London–NY Overlap",
+    clockOverlapRange:"13–17 UTC / 16–20 MSK",
+    clockOverlapDesc:"Maximum volume, minimal XAU/USD spread (0.8–1.2 pt). Ideal for scalping.",
+    clockVolatilityLabel:"XAU/USD VOLATILITY BY HOUR (UTC)",
+    clockHint:"← Click a segment of the hour dial",
+    // ScalpingSimulator
+    simSlMsg:"⛔ Stop-loss! -15 points. The market moved against you.",
+    simTpMsg:"✅ Take-profit! +5 points. Excellent scalp!",
+    simOpenPrefix:"📥 Position opened at",
+    simClosedProfit:"📤 Closed in profit", simClosedLoss:"📤 Closed in loss",
+    unitPct:"pt",
+    simTitle:"Hardcore Scalping — M5",
+    simTag:"INTERACTIVE — TECHNIQUE · EMA 9/21 · RSI 14",
+    simResetBtn:"↺ Reset",
+    simPauseBtn:"⏸ PAUSE", simStartBtn:"▶ START",
+    simSignalAlert:"⚡ SIGNAL: EMA 9 × EMA 21 + RSI from 35 — time to enter!",
+    simPositionPrefix:"📊 IN POSITION @", simPositionMid:"| P&L:",
+    simCloseBtn:"CLOSE",
+    simLegendPrice:"XAU/USD Price",
+    simInstructionsTitle:"Entry rules (Oleg's strategy):",
+    simRule1:"1. EMA 9 crosses EMA 21 from below",
+    simRule2:"2. RSI exits the zone below 35",
+    simRule3Prefix:"3. On signal", simRule3Suffix:"— press BUY",
+    simRule4:"4. TP: +5 points | SL: -15 points",
+    simWinRateNote:"Strategy WinRate: 92–95%",
+    simTradeLogLabel:"TRADE LOG",
+    simNoTrades:"No trades yet",
+    simTypeTp:"✅ TP", simTypeSl:"⛔ SL", simTypeManual:"📤 Manual",
+    // Chapter14 main
+    stickyLevel:"LEVEL 14",
+    stickyChapterLabel:"Anatomy of Scalping (AvaTrade)",
+    chipFA:"FA 30%", chipTA:"TA 70%",
+    heroKicker:"SBF COMPANY — CHAPTER 14",
+    heroTitleLine1:"Anatomy", heroTitleLine2:"of Scalping",
+    heroSub:"Surgical precision within the day. Oleg's strategy on AvaTrade: EMA 9/21, RSI 35/65, WinRate 92–95%.",
+    heroChipFundamental:"Fundamental 30%", heroChipTechnical:"Technical 70%", heroChipInteractive:"2 Interactives",
+    sec1Title:"Scalping vs Swing: Two Different Worlds",
+    sec1Sub:"Scalping isn't just “fast trades.” It's a separate trading philosophy with completely different rules, tools, and psychology.",
+    tableLabel:"COMPARISON OF APPROACHES",
+    tableHeadParam:"Parameter", tableHeadScalp:"Scalping <img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-lightning.png' alt='' width='20' height='20' />", tableHeadSwing:"Swing 🌊",
+    rowTimeframe:"Timeframe", rowTradesPerDay:"Trades per Day", rowTarget:"Target (TP)", rowStop:"Stop (SL)",
+    rowTimeInTrade:"Time in Trade", rowWinRate:"WinRate", rowRequirements:"Requirements", rowRiskPerTrade:"Risk per Trade",
+    targetScalp:"3–8 points", targetSwing:"50–200 points",
+    stopScalp:"10–20 points", stopSwing:"30–100 points",
+    timeScalp:"30 sec – 5 min", timeSwing:"2–48 hours",
+    reqScalp:"Speed, discipline", reqSwing:"Patience, analysis",
+    info1Title:"Why scalping works",
+    info1Text:"Short-term moves are more predictable than long-term ones — at the micro scale, the market follows simple patterns. High trade frequency with the right WR creates stable income.",
+    info2Title:"The scalper's main enemy",
+    info2Text:"Emotion and hesitation. You have 3–5 seconds to decide. No signal — no entry. Signal appears — you enter without a second thought. Any hesitation = a missed entry point.",
+    info3Title:"The AvaTrade Platform",
+    info3Text:"Fixed spread on XAU/USD = 0.29 points. Execution: 50–100 ms. Leverage up to 1:400. Minimum lot 0.01. Ideal conditions for scalping.",
+    sec2Title:"Oleg's Strategy: 6 Rules of Scalping",
+    sec2Sub:"A combination of three tools: trend filter (EMA 200) + momentum (EMA 9/21) + oversold confirmation (RSI 35/65). Every component is mandatory.",
+    rule1Title:"Trend Filter (EMA 200)",
+    rule1Text:"On M15, price must be above the EMA 200. We trade only in the direction of the global trend. Against the trend — we skip any signals.",
+    rule2Title:"Momentum (EMA 9 × EMA 21)",
+    rule2Text:"EMA 9 crosses EMA 21 from below = bullish momentum. This is the base entry condition. In strong trends, EMA 9 stays above EMA 21 the whole time.",
+    rule3Title:"RSI Oscillator (35/65)",
+    rule3Text:"RSI exits oversold territory (below 35) and crosses the 35 level upward. The 30/70 zones are too rare for scalping. 35/65 gives more signals at the same quality.",
+    rule4Title:"Enter Only During Liquidity",
+    rule4TextA:"We trade only during session overlap hours: 08:00–",
+    rule4TextB:" (London) and 13:00–",
+    rule4TextC:" (London + NY). We skip the Asian session.",
+    rule5Title:"A Surgical Take-Profit (+5 pt)",
+    rule5Text:"The target is just 5 points. Don't get greedy. 10 trades at +5 = +50 pt >> 1 trade targeting +50 pt at 50% WR.",
+    rule6Title:"A Hard Stop (–15 pt)",
+    rule6Text:"R/R = 1:3 in favor of the stop, but WR compensates: at a 90% success rate, the math works. Never move the stop further away!",
+    mathLabel:"STRATEGY MATH",
+    scenario1:"WinRate 90%, RR 1:3 (inverse)",
+    math1:"100 trades × $10 risk:\n90 × +$3.33 = +$300\n10 × –$10 = –$100\n<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-up.png' alt='' width='20' height='20' /> Result: +$200",
+    scenario2:"WinRate 92%, 20 trades/day",
+    math2:"18.4 winners × +5 pt = +92 pt\n1.6 losers × –15 pt = –24 pt\n<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-up.png' alt='' width='20' height='20' /> Result: +68 pt/day",
+    scenario3:"WinRate 70% (without discipline)",
+    math3:"100 trades × $10 risk:\n70 × +$3.33 = +$233\n30 × –$10 = –$300\n<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-down.png' alt='' width='20' height='20' /> Result: –$67",
+    mathConclusionLabel:"Conclusion:",
+    mathConclusionText:"At RR 1:3 (in favor of the stop), the strategy is profitable only at WR ≥ 75%. Oleg's strategy with WR 92%+ delivers a stable result even under conservative settings.",
+    concludeLabel:"CHAPTER 14 TAKEAWAYS",
+    concludeTitle:"What You Know Now",
+    concl1:"Scalping requires liquidity — trade only during the London–NY overlap hours (13–17 UTC)",
+    concl2:"EMA 9/21 on M5 = short-term momentum indicator. A cross from below is a buy signal",
+    concl3:"RSI with 35/65 zones (not 30/70) gives more signals at a high WinRate on M5",
+    concl4:"TP = 3–6 points, SL = 15 points. A small target at a high WR = stable income",
+    concl5:"Scalping psychology: no room for hesitation — either there's a signal and you enter, or there isn't — and you skip it",
+    askQuestionLink:"Still have a question? Ask our analyst",
+    nextChapterBtn:"Level 15: Prop Trading →",
+    askTag:"— CONTACT US",
+    askModalTitle:"Have a question about chapter 14?",
+    askPrefill:"Hello, question about chapter 14",
+  },
   ro: {
     // SessionClock
     clockCityTokyo:"Tokyo", clockCityLondon:"Londra", clockCityNy:"New York",
     clockMskTokyo:"03–12 MSK", clockMskLondon:"11–20 MSK", clockMskNy:"16–01 MSK",
     mskAbbrev:"MSK",
-    qualPeak:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-flame.png' alt='' width='20' height='20' /> VÂRF", qualGood:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-check.png' alt='' width='20' height='20' /> Bună", qualModerate:"🟡 Moderată", qualWeak:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-alert-dot.png' alt='' width='20' height='20' /> Slabă", qualNone:"⛔ Fără lichiditate",
-    clockFbSuccessLead:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-check.png' alt='' width='20' height='20' /> Alegere excelentă!",
+    qualPeak:"🔥 VÂRF", qualGood:"✅ Bună", qualModerate:"🟡 Moderată", qualWeak:"🔴 Slabă", qualNone:"⛔ Fără lichiditate",
+    clockFbSuccessLead:"✅ Alegere excelentă!",
     clockFbSuccessLondonNy:" + New York",
     clockFbSuccessTail:"oferă volumele maxime. Spread-ul la XAU/USD este minim.",
     clockFbWarnLead:"🟡 Acceptabil, dar nu ideal.",
@@ -170,14 +281,14 @@ const STRINGS = {
     legendPeak:"Vârf", legendGood:"Bine", legendModerate:"Moderat.", legendWeak:"Slab",
     clockSessionsLabel:"SESIUNI DE TRANZACȚIONARE",
     chipPeak:"VÂRF", chipLow:"SCĂZUT",
-    clockOverlapTitle:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-star.png' alt='' width='20' height='20' /> Suprapunere Londra–NY",
+    clockOverlapTitle:"⭐ Suprapunere Londra–NY",
     clockOverlapRange:"13–17 UTC / 16–20 MSK",
     clockOverlapDesc:"Volum maxim, spread minim XAU/USD (0.8–1.2 pct). Ideal pentru scalping.",
     clockVolatilityLabel:"VOLATILITATEA XAU/USD PE ORE (UTC)",
     clockHint:"← Apasă pe un segment al cadranului orar",
     // ScalpingSimulator
     simSlMsg:"⛔ Stop-loss! -15 puncte. Piața a mers împotriva ta.",
-    simTpMsg:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-check.png' alt='' width='20' height='20' /> Take-profit! +5 puncte. Scalp excelent!",
+    simTpMsg:"✅ Take-profit! +5 puncte. Scalp excelent!",
     simOpenPrefix:"📥 Poziție deschisă la",
     simClosedProfit:"📤 Închis pe plus", simClosedLoss:"📤 Închis pe minus",
     unitPct:"pct",
@@ -185,8 +296,8 @@ const STRINGS = {
     simTag:"INTERACTIV — TEHNICĂ · EMA 9/21 · RSI 14",
     simResetBtn:"↺ Resetare",
     simPauseBtn:"⏸ PAUZĂ", simStartBtn:"▶ START",
-    simSignalAlert:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-lightning.png' alt='' width='20' height='20' /> SEMNAL: EMA 9 × EMA 21 + RSI din 35 — moment de intrare!",
-    simPositionPrefix:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-bar-chart.png' alt='' width='20' height='20' /> ÎN POZIȚIE @", simPositionMid:"| P&L:",
+    simSignalAlert:"⚡ SEMNAL: EMA 9 × EMA 21 + RSI din 35 — moment de intrare!",
+    simPositionPrefix:"📊 ÎN POZIȚIE @", simPositionMid:"| P&L:",
     simCloseBtn:"ÎNCHIDE",
     simLegendPrice:"Preț XAU/USD",
     simInstructionsTitle:"Reguli de intrare (strategia lui Oleg):",
@@ -197,7 +308,7 @@ const STRINGS = {
     simWinRateNote:"WinRate strategie: 92–95%",
     simTradeLogLabel:"JURNAL DE TRANZACȚII",
     simNoTrades:"Încă nu sunt tranzacții",
-    simTypeTp:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-check.png' alt='' width='20' height='20' /> TP", simTypeSl:"⛔ SL", simTypeManual:"📤 Manual",
+    simTypeTp:"✅ TP", simTypeSl:"⛔ SL", simTypeManual:"📤 Manual",
     // Chapter14 main
     stickyLevel:"NIVELUL 14",
     stickyChapterLabel:"Anatomia Scalpingului (AvaTrade)",
@@ -941,9 +1052,9 @@ function Chapter14() {
             </table>
           </div>
           <div style={{display:"flex",flexDirection:"column",gap:14}}>
-            <InfoCard icon="<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-lightning.png' alt='' width='20' height='20' />" title={S.info1Title} accent={C.gold}
+            <InfoCard icon="⚡" title={S.info1Title} accent={C.gold}
               text={S.info1Text}/>
-            <InfoCard icon="<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-mindset.png' alt='' width='20' height='20' />" title={S.info2Title} accent={C.redD}
+            <InfoCard icon="🧠" title={S.info2Title} accent={C.redD}
               text={S.info2Text}/>
             <InfoCard icon="💻" title={S.info3Title} accent={C.blue}
               text={S.info3Text}/>
@@ -1070,7 +1181,7 @@ ReactDOM.createRoot(document.getElementById('sbf-book-root')).render(<Chapter14/
 // Скрипт для конвертации UTC времени в локальное время пользователя
 document.addEventListener('DOMContentLoaded', function() {
     var _pageLang = "{{ lang }}";
-    var _intlLocale = _pageLang === 'ro' ? 'ro-RO' : 'ru-RU';
+    var _intlLocale = _pageLang === 'ro' ? 'ro-RO' : _pageLang === 'en' ? 'en-US' : 'ru-RU';
     const utcTimes = document.querySelectorAll('.local-time[data-utc]');
 
     utcTimes.forEach(function(element) {

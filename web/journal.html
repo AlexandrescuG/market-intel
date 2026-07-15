@@ -2078,7 +2078,8 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
   function _fmtDate(iso) {
     if (!iso) return '—';
     var d = new Date(iso);
-    var locale = (window.sbfI18n && window.sbfI18n.lang === 'ro') ? 'ro-RO' : 'ru-RU';
+    var _lg = window.sbfI18n && window.sbfI18n.lang;
+    var locale = _lg === 'ro' ? 'ro-RO' : _lg === 'en' ? 'en-US' : 'ru-RU';
     return d.toLocaleDateString(locale, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
   }
 

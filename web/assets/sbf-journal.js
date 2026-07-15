@@ -1080,7 +1080,8 @@
   function _fmtEventTime(scheduledTs, tsUtc) {
     if (scheduledTs) {
       var d = new Date(scheduledTs * 1000);
-      var locale = (window.sbfI18n && window.sbfI18n.lang === 'ro') ? 'ro-RO' : 'ru';
+      var _lg = window.sbfI18n && window.sbfI18n.lang;
+      var locale = _lg === 'ro' ? 'ro-RO' : _lg === 'en' ? 'en-GB' : 'ru';
       return d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' });
     }
     if (tsUtc) {

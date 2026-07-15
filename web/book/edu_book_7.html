@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>SBF | Глава 7. Институциональный след</title>
+  <title>SBF | {% if lang == 'ru' %}Глава 7. Институциональный след{% elif lang == 'ro' %}Capitolul 7. Amprenta Instituțională{% else %}Chapter 7. Institutional Footprint{% endif %}</title>
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
   <style>
@@ -49,11 +49,11 @@ const STRINGS = {
     // Interactive 1: Hedge Fund Position Builder
     hedgeMsgInitial: `Фонду нужно купить 100 000 лотов. В рынке только 20 500 — этого мало.`,
     hedgeMsgTryBuy: `Пробуем купить по рынку... Доступно только 20 500 лотов. Цена уже сдвигается вверх!`,
-    hedgeMsgInsufficient: `<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-warning.png' alt='' width='20' height='20' /> Мы купили 20 500 лотов, но цена выросла на 0.75 — ещё 79 500 лотов стали дороже. Нужно другое решение.`,
+    hedgeMsgInsufficient: `⚠️ Мы купили 20 500 лотов, но цена выросла на 0.75 — ещё 79 500 лотов стали дороже. Нужно другое решение.`,
     hedgeMsgSweepStart: `🎭 Инициируем ложное падение... Продаём крупный блок чтобы испугать толпу...`,
     hedgeMsgPanic: `😱 Цена падает... Ритейл-трейдеры в панике! Их стоп-лоссы активируются как рыночные ордера на ПРОДАЖУ!`,
-    hedgeMsgStopsHit: `<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-money.png' alt='' width='20' height='20' /> Стопы сработали! 72 000 рыночных ордеров на продажу хлынули в рынок. Скупаем их всех по своим лимиткам!`,
-    hedgeMsgDone: `<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-check.png' alt='' width='20' height='20' /> Позиция собрана! 100 000 лотов куплено по средней цене 2504–2506. Теперь фонд разворачивает рынок вверх.`,
+    hedgeMsgStopsHit: `💰 Стопы сработали! 72 000 рыночных ордеров на продажу хлынули в рынок. Скупаем их всех по своим лимиткам!`,
+    hedgeMsgDone: `✅ Позиция собрана! 100 000 лотов куплено по средней цене 2504–2506. Теперь фонд разворачивает рынок вверх.`,
     hedgeTitle: `Сбор Позиции Хедж-Фонда`,
     hedgeSubtitle: `ИНТЕРАКТИВ — ФУНДАМЕНТАЛ · СИМУЛЯТОР`,
     hedgeReset: `↺ СБРОС`,
@@ -75,7 +75,7 @@ const STRINGS = {
     hedgeBtn1: `1. Купить по рынку`,
     hedgeBtn2: `2. Инициировать Sweep ↓`,
     hedgeBtnRepeat: `↺ Повторить симуляцию`,
-    hedgeResultTitle: `<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-idea.png' alt='' width='20' height='20' /> Именно так работает Liquidity Sweep`,
+    hedgeResultTitle: `💡 Именно так работает Liquidity Sweep`,
     hedgeResultBody: `Фонд использовал стоп-лоссы розничных трейдеров как источник ликвидности. Падение было инструментом, а не случайностью. После сбора позиции цена разворачивается — теперь в интересах фонда.`,
 
     // Interactive 2: X-Ray Chart Trainer
@@ -91,7 +91,7 @@ const STRINGS = {
     xrayBtnUp: `↑ ВВЕРХ`,
     xrayBtnDown: `↓ ВНИЗ`,
     xrayBtnSideways: `→ БОКОМ`,
-    xrayResultCorrect: `<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-check.png' alt='' width='20' height='20' /> Верно! Цена пойдёт вверх — к Fair Value Gap.`,
+    xrayResultCorrect: `✅ Верно! Цена пойдёт вверх — к Fair Value Gap.`,
     xrayResultWrong: `❌ Не совсем. Правильный ответ — вверх.`,
     xrayResultBody: `Sweep сработал: длинная тень пробила зону стоп-лоссов лонгистов (2503–2509), забрала ликвидность. После Sweep маркет-мейкер закрыл шорт и развернулся вверх. FVG на 2522–2530 — незакрытый дисбаланс, притягивает цену как магнит.`,
     xrayModeActive: `X-RAY РЕЖИМ АКТИВЕН`,
@@ -190,7 +190,7 @@ const STRINGS = {
     checklist4: `После Sweep цена разворачивается в истинном направлении`,
     checklist5: `Fair Value Gap — импульсный разрыв, к которому цена всегда возвращается`,
     checklist6: `Smart Money не угадывает рынок — они его создают`,
-    checklistDoneTitle: `<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-check.png' alt='' width='20' height='20' /> Глава 7 освоена!`,
+    checklistDoneTitle: `✅ Глава 7 освоена!`,
     checklistDoneBody: `Вы видите рынок глазами Smart Money. Sweep и FVG — ваши новые инструменты.`,
 
     // Conclusions
@@ -207,6 +207,177 @@ const STRINGS = {
     askQuestionFooter: `Остался вопрос? Напиши аналитику`,
     nextChapterBtn: `Уровень 8: Тренд и Циклы →`,
   },
+  en: {
+    // Ask-analyst contact popup
+    askTag: `— CONTACT US`,
+    askTitle: `Prefer a messenger?`,
+    askBody: `Write to us on Telegram or WhatsApp — the message is already prepared.`,
+    askTgSub: `Telegram · online`,
+    askTgBtn: `OPEN TELEGRAM`,
+    askWaSub: `WhatsApp · online`,
+    askWaBtn: `OPEN WHATSAPP`,
+
+    // Interactive 1: Hedge Fund Position Builder
+    hedgeMsgInitial: `The fund needs to buy 100,000 lots. Only 20,500 are available in the market — not enough.`,
+    hedgeMsgTryBuy: `Trying to buy at market... Only 20,500 lots available. The price is already moving up!`,
+    hedgeMsgInsufficient: `⚠️ We bought 20,500 lots, but the price rose by 0.75 — another 79,500 lots just got more expensive. We need a different approach.`,
+    hedgeMsgSweepStart: `🎭 Initiating a false drop... Selling a large block to scare the crowd...`,
+    hedgeMsgPanic: `😱 The price is falling... Retail traders are panicking! Their stop-losses are triggering as market SELL orders!`,
+    hedgeMsgStopsHit: `💰 The stops got hit! 72,000 market sell orders flooded into the market. We're buying them all up with our limit orders!`,
+    hedgeMsgDone: `✅ Position built! 100,000 lots bought at an average price of 2504–2506. Now the fund turns the market upward.`,
+    hedgeTitle: `Building a Hedge Fund Position`,
+    hedgeSubtitle: `INTERACTIVE — FUNDAMENTALS · SIMULATOR`,
+    hedgeReset: `↺ RESET`,
+    hedgeTaskLabel: `FUND'S TASK`,
+    hedgeTaskValue: `BUY 100,000 LOTS XAU/USD`,
+    hedgeFilledLabel: `FILLED`,
+    hedgeChartLabel: `XAU/USD PRICE`,
+    hedgeStopsActiveLabel: `STOPS ACTIVATED ✓`,
+    hedgeBookLabel: `ORDER BOOK (ASK)`,
+    hedgeColPrice: `Price`,
+    hedgeColVolume: `Volume`,
+    hedgeTotalPrefix: `Total:`,
+    hedgeTotalSuffix: `lots`,
+    hedgeStopsBelowLabel: `STOP-LOSSES (below market)`,
+    hedgeStopsBelowValue: `≈2503.50 · 72,000 lots`,
+    hedgeStopsBelowNote: `hidden liquidity of the crowd`,
+    hedgeBoughtSuffix: `bought`,
+    hedgeBoughtNote: `from the crowd's stops`,
+    hedgeBtn1: `1. Buy at market`,
+    hedgeBtn2: `2. Initiate Sweep ↓`,
+    hedgeBtnRepeat: `↺ Repeat simulation`,
+    hedgeResultTitle: `💡 This is exactly how a Liquidity Sweep works`,
+    hedgeResultBody: `The fund used retail traders' stop-losses as a source of liquidity. The drop was a tool, not a coincidence. Once the position is built, the price reverses — now in the fund's favor.`,
+
+    // Interactive 2: X-Ray Chart Trainer
+    xraySupport1: `Support`,
+    xraySupport2: `Support 2`,
+    xrayStopLong: `Long traders' stop-losses`,
+    xrayStopShort: `Short traders' stop-losses`,
+    xrayTitle: `Chart X-Ray`,
+    xraySubtitle: `INTERACTIVE — TECHNICALS · X-RAY MODE`,
+    xrayReset: `↺ START OVER`,
+    xrayInstructExplore: `Hold the "X-RAY" button to see the hidden liquidity. Then predict the next price move.`,
+    xrayInstructGuess: `Which way will the price go on the next candle?`,
+    xrayBtnUp: `↑ UP`,
+    xrayBtnDown: `↓ DOWN`,
+    xrayBtnSideways: `→ SIDEWAYS`,
+    xrayResultCorrect: `✅ Correct! The price will go up — toward the Fair Value Gap.`,
+    xrayResultWrong: `❌ Not quite. The correct answer is — up.`,
+    xrayResultBody: `The Sweep triggered: a long wick pierced the long traders' stop-loss zone (2503–2509) and took the liquidity. After the Sweep, the market maker closed the short and reversed upward. The FVG at 2522–2530 is an unclosed imbalance, pulling the price like a magnet.`,
+    xrayModeActive: `X-RAY MODE ACTIVE`,
+    xrayLegendStops: `Stop-losses (hidden liquidity)`,
+    xrayBtnHold: `🩻 HOLD: X-RAY`,
+    xrayBtnActive: `🩻 X-RAY ACTIVE`,
+    xrayHintExplore: `← Hold and release to move to the question`,
+    xrayHintGuess: `← Choose a direction above`,
+    xrayHintResult: `← Correct: the price is heading to fill the FVG ↑`,
+
+    // Chapter 7 — sticky header
+    chipLevel: `LEVEL 7`,
+    headerChapterName: `Institutional Footprint`,
+    chipFA: `FA 40%`,
+    chipTA: `TA 60%`,
+
+    // HERO
+    heroTag: `SBF COMPANY — CHAPTER 7`,
+    heroTitle1: `Institutional`,
+    heroTitle2: `footprint —`,
+    heroSub: `Why does the market always break your stop right before rallying? Who moves the price? How do you read the footprint of institutional capital?`,
+    chipFundamental: `Fundamentals 40%`,
+    chipTechnical: `Technicals 60%`,
+    chipInteractive: `2 Interactives`,
+
+    // ANTI-MYTH
+    mythTag: `COMMON MISCONCEPTION`,
+    mythTitle: `"The market hit my stop by accident — it just wasn't my trade."`,
+    mythBody: `This is not an accident. Your stop sits exactly where institutions planned to take liquidity. Obvious support levels are not protection. They're a target. Understanding the mechanics of "stop hunting" changes the way you see every price move.`,
+
+    // SBF VOICE
+    voiceTag: `— SBF ANALYST · OLEG`,
+    voiceQuote: `"When your stop gets taken right before the reversal, you didn't lose because of a bad entry. You became part of the mechanism. Someone very large needed your stop-loss."`,
+    voiceBody: `After this chapter, you'll stop placing stops in "obvious" spots. You'll start looking for entries after the Sweep — where the crowd has already been shaken out.`,
+
+    // PRICE OF IGNORANCE
+    ignoranceTag: `The cost of not knowing`,
+    ignoranceBodyA: `A trader sees a clear support level, buys right at it, places a stop below. The price breaks the level, hits the stop — and immediately reverses upward. This isn't bad luck. This is `,
+    ignoranceBodyB: `. He could have entered after the reversal with a small stop and profit. Instead — a loss and frustration.`,
+
+    // THEORY 1 (FA)
+    fa1Sub: `Big capital operates differently than a retail trader. Understanding its logic is the key to reading the market.`,
+    fa1Title: `How institutional capital thinks`,
+    smc1Title: `The liquidity problem of whales`,
+    smc1Text: `A hedge fund with $10 billion can't just click "Buy" like a retail trader. Its order for 100,000 lots would instantly move the market against it. It needs a seller with enormous volume — and the crowd is turned into that seller.`,
+    smc2Title: `Stop-losses as bait`,
+    smc2Text: `Retail traders place stops in obvious spots: below support levels, beyond local lows. That's exactly where liquidity accumulates. Institutions know these levels — they push the price to reach them, trigger the stops, and take the volume.`,
+    smc3Title: `Liquidity Sweep — Taking the liquidity`,
+    smc3Text: `The price "pierces" a support or resistance level, triggers stop-losses (turning them into market orders), and immediately reverses. On the chart, this looks like a long candle wick beyond the level.`,
+    smc4Title: `Fair Value Gap (FVG)`,
+    smc4Text: `A sharp impulsive move creates a "gap" — three candles where the middle candle's body isn't overlapped by the two outer candles. The market maker always returns to the FVG to close the imbalance. It's a magnet for price.`,
+
+    // Liquidity diagram
+    diagTitle: `DIAGRAM: HOW AN INSTITUTION BUILDS A POSITION`,
+    diagAccumTitle: `ACCUMULATION`,
+    diagAccumSub1: `Range-bound`,
+    diagAccumSub2: `Fund accumulates`,
+    diagSweepTitle: `SWEEP (HUNT)`,
+    diagSweepSub1: `Level break`,
+    diagSweepSub2: `Stops trigger`,
+    diagSweepNote: `← Your SL here`,
+    diagReversalTitle: `REVERSAL`,
+    diagReversalSub1: `Fund buys up the stops`,
+    diagReversalSub2: `Position built`,
+    diagTrendTitle: `TREND ↑`,
+    diagTrendSub1: `Price rises`,
+    diagTrendSub2: `Fund is in profit`,
+    diagPlanNote: `Institutional plan`,
+
+    // THEORY 2 (TA)
+    ta2Sub: `Two key Smart Money patterns on the chart: Liquidity Sweep and Fair Value Gap.`,
+    ta2Title: `How to read the Smart Money footprint on the chart`,
+
+    // Sweep anatomy
+    sweepAnatomyTitle: `ANATOMY OF A LIQUIDITY SWEEP`,
+    sweepSupportLabel: `SUPPORT (visible to everyone)`,
+    sweepZoneLabel: `STOP-LOSS ZONE (hidden from retail)`,
+    sweepActivatedLabel: `Stops activated`,
+    sweepWickNote: `Long wick = hunt`,
+    sweepTrueMoveLabel: `↑ TRUE MOVE`,
+    sweepEntryLabel: `SMART MONEY ENTRY`,
+
+    // FVG anatomy
+    fvgAnatomyTitle: `ANATOMY OF A FAIR VALUE GAP (FVG)`,
+    fvgReturnLabel1: `Price returns`,
+    fvgReturnLabel2: `to close the FVG`,
+    fvgUsageStrong: `How to use the FVG:`,
+    fvgUsageBody: `after an impulsive move, the price often returns to the gap zone (FVG) to "rebalance." This is a zone of potential entry in the direction of the impulse — with a tight stop beyond the lower boundary of the FVG.`,
+
+    // Checklist
+    checklistSub: `Check off each point you understood.`,
+    checklistTitle: `Chapter 7 checklist`,
+    checklist1: `Big capital can't buy without liquidity — it needs sellers`,
+    checklist2: `Retail traders' stop-losses = liquidity for institutions`,
+    checklist3: `Liquidity Sweep: a false level break with a long wick = a stop hunt`,
+    checklist4: `After the Sweep, the price reverses in the true direction`,
+    checklist5: `Fair Value Gap — an impulsive gap the price always returns to`,
+    checklist6: `Smart Money doesn't guess the market — they create it`,
+    checklistDoneTitle: `✅ Chapter 7 mastered!`,
+    checklistDoneBody: `You now see the market through Smart Money's eyes. Sweep and FVG are your new tools.`,
+
+    // Conclusions
+    conclusionsTitle: `CHAPTER 7 SUMMARY`,
+    conclusionsSub: `What you now know`,
+    conclusion1: `The market moves to where the stops are — that's where the liquidity is`,
+    conclusion2: `A long candle wick below support is a sign of a Sweep, not a breakdown`,
+    conclusion3: `FVG after an impulse = a price-attraction zone on the pullback`,
+    conclusion4: `Institutions use the crowd's fear as fuel for the rally`,
+    conclusion5: `Buying after Sweep + FVG — that's where Smart Money enters`,
+    conclusion6: `"Obvious" support is a trap. The real entry is after the Sweep`,
+
+    // Footer
+    askQuestionFooter: `Have a question? Write to an analyst`,
+    nextChapterBtn: `Level 8: Trend and Cycles →`,
+  },
   ro: {
     // Ask-analyst contact popup
     askTag: `— CONTACTAȚI-NE`,
@@ -220,11 +391,11 @@ const STRINGS = {
     // Interactive 1: Hedge Fund Position Builder
     hedgeMsgInitial: `Fondul trebuie să cumpere 100.000 de loturi. Pe piață sunt disponibile doar 20.500 — insuficient.`,
     hedgeMsgTryBuy: `Încercăm să cumpărăm la piață... Sunt disponibile doar 20.500 de loturi. Prețul deja se mișcă în sus!`,
-    hedgeMsgInsufficient: `<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-warning.png' alt='' width='20' height='20' /> Am cumpărat 20.500 de loturi, dar prețul a crescut cu 0,75 — încă 79.500 de loturi au devenit mai scumpe. Este nevoie de altă soluție.`,
+    hedgeMsgInsufficient: `⚠️ Am cumpărat 20.500 de loturi, dar prețul a crescut cu 0,75 — încă 79.500 de loturi au devenit mai scumpe. Este nevoie de altă soluție.`,
     hedgeMsgSweepStart: `🎭 Inițiem o cădere falsă... Vindem un bloc masiv ca să speriem mulțimea...`,
     hedgeMsgPanic: `😱 Prețul scade... Traderii de retail intră în panică! Stop-loss-urile lor se activează ca ordine de piață de VÂNZARE!`,
-    hedgeMsgStopsHit: `<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-money.png' alt='' width='20' height='20' /> Stopurile au fost declanșate! 72.000 de ordine de piață de vânzare au inundat piața. Le cumpărăm pe toate cu ordinele noastre limită!`,
-    hedgeMsgDone: `<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-check.png' alt='' width='20' height='20' /> Poziția a fost construită! 100.000 de loturi cumpărate la prețul mediu 2504–2506. Acum fondul întoarce piața în sus.`,
+    hedgeMsgStopsHit: `💰 Stopurile au fost declanșate! 72.000 de ordine de piață de vânzare au inundat piața. Le cumpărăm pe toate cu ordinele noastre limită!`,
+    hedgeMsgDone: `✅ Poziția a fost construită! 100.000 de loturi cumpărate la prețul mediu 2504–2506. Acum fondul întoarce piața în sus.`,
     hedgeTitle: `Construirea Poziției unui Hedge Fund`,
     hedgeSubtitle: `INTERACTIV — FUNDAMENTAL · SIMULATOR`,
     hedgeReset: `↺ RESETARE`,
@@ -246,7 +417,7 @@ const STRINGS = {
     hedgeBtn1: `1. Cumpără la piață`,
     hedgeBtn2: `2. Inițiază Sweep ↓`,
     hedgeBtnRepeat: `↺ Repetă simularea`,
-    hedgeResultTitle: `<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-idea.png' alt='' width='20' height='20' /> Exact așa funcționează un Liquidity Sweep`,
+    hedgeResultTitle: `💡 Exact așa funcționează un Liquidity Sweep`,
     hedgeResultBody: `Fondul a folosit stop-loss-urile traderilor de retail ca sursă de lichiditate. Căderea a fost un instrument, nu o coincidență. După ce poziția este construită, prețul se întoarce — acum în interesul fondului.`,
 
     // Interactive 2: X-Ray Chart Trainer
@@ -262,7 +433,7 @@ const STRINGS = {
     xrayBtnUp: `↑ SUS`,
     xrayBtnDown: `↓ JOS`,
     xrayBtnSideways: `→ LATERAL`,
-    xrayResultCorrect: `<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-check.png' alt='' width='20' height='20' /> Corect! Prețul va urca — spre Fair Value Gap.`,
+    xrayResultCorrect: `✅ Corect! Prețul va urca — spre Fair Value Gap.`,
     xrayResultWrong: `❌ Nu chiar. Răspunsul corect este — în sus.`,
     xrayResultBody: `Sweep-ul s-a declanșat: fitilul lung a străpuns zona stop-loss-urilor pozițiilor long (2503–2509) și a preluat lichiditatea. După Sweep, market maker-ul și-a închis poziția short și a întors prețul în sus. FVG-ul de la 2522–2530 este un dezechilibru neînchis, care atrage prețul ca un magnet.`,
     xrayModeActive: `MOD X-RAY ACTIV`,
@@ -361,7 +532,7 @@ const STRINGS = {
     checklist4: `După Sweep, prețul se întoarce în direcția reală`,
     checklist5: `Fair Value Gap — decalajul impulsiv la care prețul revine mereu`,
     checklist6: `Smart Money nu ghicește piața — o creează`,
-    checklistDoneTitle: `<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-check.png' alt='' width='20' height='20' /> Capitolul 7 asimilat!`,
+    checklistDoneTitle: `✅ Capitolul 7 asimilat!`,
     checklistDoneBody: `Vezi piața cu ochii Smart Money. Sweep și FVG sunt acum instrumentele tale noi.`,
 
     // Conclusions
@@ -434,8 +605,8 @@ function AskAnalystPopup({onClose}) {
           <p style={{fontSize:18,color:C.inkMid}}>{S.askBody}</p>
         </div>
         <div className="messenger-grid">
-          {[{href:tgLink,bg:"#0088cc",icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-rocket.png' alt='' width='20' height='20' />",name:"SBF Support",sub:S.askTgSub,btn:S.askTgBtn},
-            {href:waLink,bg:"#25d366",icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-quote.png' alt='' width='20' height='20' />",name:"SBF Company",sub:S.askWaSub,btn:S.askWaBtn}
+          {[{href:tgLink,bg:"#0088cc",icon:"🚀",name:"SBF Support",sub:S.askTgSub,btn:S.askTgBtn},
+            {href:waLink,bg:"#25d366",icon:"💬",name:"SBF Company",sub:S.askWaSub,btn:S.askWaBtn}
           ].map((m,i) => (
             <div key={i} style={{background:"#fff",border:"1px solid #e0e0e0",borderRadius:12,padding:"30px 25px",display:"flex",flexDirection:"column"}}>
               <div style={{display:"flex",alignItems:"center",gap:15,marginBottom:30}}>
@@ -980,7 +1151,7 @@ function Chapter7() {
     {icon:"🎣", title:S.smc2Title,
      text:S.smc2Text,
      accent:C.red},
-    {icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-bar-chart.png' alt='' width='20' height='20' />", title:S.smc3Title,
+    {icon:"📊", title:S.smc3Title,
      text:S.smc3Text,
      accent:C.blue},
     {icon:"⚖️", title:S.smc4Title,

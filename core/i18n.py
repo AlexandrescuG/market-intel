@@ -20,7 +20,7 @@ from pathlib import Path
 log = logging.getLogger("i18n")
 
 DEFAULT_LANG = "ru"
-SUPPORTED_LANGS = ("ru", "ro")
+SUPPORTED_LANGS = ("ru", "ro", "en")
 
 _I18N_DIR = Path(__file__).parent.parent / "i18n" / "site"
 _cache: dict[str, dict[str, str]] = {}

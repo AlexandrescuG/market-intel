@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>SBF | {% if lang == 'ro' %}Capitolul 8. Trend și Cicluri{% else %}Глава 8. Тренд и Циклы{% endif %}</title>
+  <title>SBF | {% if lang == 'ru' %}Глава 8. Тренд и Циклы{% elif lang == 'ro' %}Capitolul 8. Trend și Cicluri{% else %}Chapter 8. Trend and Cycles{% endif %}</title>
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
   <style>
@@ -196,6 +196,165 @@ const STRINGS = {
     // Footer nav
     footerAsk: "Остался вопрос? Напиши аналитику",
     footerNext: "Уровень 9: Отчётности и Осцилляторы →",
+  },
+  en: {
+    // Header / sticky nav
+    lvlChip: "LEVEL 8",
+    lvlChapterName: "Trend and Cycles (EMA)",
+    lvlFaChip: "FA 40%",
+    lvlTaChip: "TA 60%",
+
+    // Hero
+    heroTag: "SBF COMPANY — CHAPTER 8",
+    heroTitle1: "Trend",
+    heroAnd: "and",
+    heroTitle2: "Cycles",
+    heroSub: "The global economic cycle gives birth to the trend on the chart. EMA is the tool that turns this cycle into trading signals.",
+    heroChip1: "Fundamentals 40%",
+    heroChip2: "Technicals 60%",
+    heroChip3: "2 Interactives",
+
+    // Block 1: Economic cycle
+    cycSectionTitle: "The Economic Cycle: Four Phases of Capital",
+    cycSectionSub: "The economy never stands still — it moves through a predictable 4-phase cycle lasting 7–11 years. Understanding the current phase is the key to correct portfolio rotation.",
+    cycClockLabel: "ECONOMIC CYCLE CLOCK",
+    cycClockCenterSub: "years/cycle",
+    cycArcRecovery: "RECOVERY",
+    cycArcExpansion: "EXPANSION",
+    cycArcSlowdown: "SLOWDOWN",
+    cycArcRecession: "RECESSION",
+
+    cycRowGdp: "GDP",
+    cycRowInflation: "Inflation",
+    cycRowRates: "Rates",
+    cycRowBest: "Best Assets",
+    cycRowWorst: "Under Pressure",
+
+    cycP1Phase: "Recovery", cycP1Gdp: "Rising ↑", cycP1Inflation: "Low", cycP1Rates: "Falling",
+    cycP1Best: "IT, crypto, small-cap", cycP1Worst: "Cash, bonds",
+    cycP1Why: "Fed cuts rates → cheap money → risk assets take off first",
+
+    cycP2Phase: "Expansion / Peak", cycP2Gdp: "Maximum", cycP2Inflation: "Rising", cycP2Rates: "Rising",
+    cycP2Best: "Oil, commodities, REITs", cycP2Worst: "Bonds (credit gets more expensive)",
+    cycP2Why: "Economy overheats → demand for real assets → inflation protection",
+
+    cycP3Phase: "Slowdown", cycP3Gdp: "Slowing", cycP3Inflation: "High", cycP3Rates: "Peak",
+    cycP3Best: "Bonds, utilities, healthcare", cycP3Worst: "IT, crypto",
+    cycP3Why: "Rates at their peak → flight to defensive assets with guaranteed income",
+
+    cycP4Phase: "Recession", cycP4Gdp: "Falling", cycP4Inflation: "Falling", cycP4Rates: "Starting to fall",
+    cycP4Best: "Gold, USD, short-term bonds", cycP4Worst: "Stocks, oil",
+    cycP4Why: "Fear and uncertainty → gold as a 'safe haven', Fed eases again",
+
+    // Interactive 1: Asset Rotation
+    rotTitle: "Asset Rotation",
+    rotBadge: "INTERACTIVE — FUNDAMENTALS",
+    rotReset: "Reset",
+    rotRetry: "Try Again",
+    rotCheck: "Check →",
+    rotScoreLine: "correct {s} of {t}",
+    rotScoreNote: "Incorrect placements are highlighted in red. Correct ones — in green.",
+    rotPoolLabel: "ASSETS — DRAG TO THE RIGHT PHASE:",
+    rotAllPlaced: "All assets placed",
+    rotDropHint: "Drop here…",
+    rotFooterHint: "Click a card in a zone to move it back",
+
+    rotPhRecoveryLabel: "Recovery", rotPhRecoverySub: "GDP rising, inflation low",
+    rotPhRecoveryHint: "Cheap money, dovish Fed → risk assets rise first",
+    rotPhExpansionLabel: "Expansion / Peak", rotPhExpansionSub: "Overheating, inflation ↑",
+    rotPhExpansionHint: "Commodities and real assets — the best inflation hedge",
+    rotPhSlowdownLabel: "Slowdown", rotPhSlowdownSub: "Growth falling, rates high",
+    rotPhSlowdownHint: "Investors move into defensive assets and bonds",
+    rotPhRecessionLabel: "Recession", rotPhRecessionSub: "GDP decline, unemployment ↑",
+    rotPhRecessionHint: "Gold and cash — a 'safe haven' amid market panic",
+
+    rotAssetTech: "IT Stocks / NASDAQ",
+    rotAssetCrypto: "Cryptocurrencies",
+    rotAssetSmallcap: "Small-cap Stocks",
+    rotAssetOil: "Oil",
+    rotAssetCommodities: "Commodities / Metals",
+    rotAssetRealestate: "Real Estate (REIT)",
+    rotAssetBonds: "US Treasuries",
+    rotAssetUtilities: "Utilities Sector",
+    rotAssetHealthcare: "Healthcare",
+    rotAssetGold: "Gold",
+    rotAssetCash: "Cash / USD",
+
+    // Interactive 2: EMA Configurator
+    emaTitle: "EMA Configurator",
+    emaBadge: "INTERACTIVE — TECHNICALS",
+    emaSliderFastNote: "5 (fast)",
+    emaSliderSlowNote: "100 (slow)",
+    emaSlider2LongNote: "200 (long-term)",
+    emaShowCrossLabel: "Show Golden/Death Cross",
+    emaLegendPrice: "Price",
+    emaMetricFast: "Fast EMA",
+    emaMetricSlow: "Slow EMA",
+    emaMetricOff: "Off",
+    emaMetricLag: "Lag",
+    emaMetricCrosses: "Price Crossovers",
+    emaTimesSuffix: "times",
+    emaNoiseSlow: "Too Slow",
+    emaNoiseOptimal: "Optimal",
+    emaNoiseNoisy: "Too Noisy",
+    emaHintLabel: "Hint:",
+    emaHintNoisy: "EMA {p} is too fast — it crosses the price {n} times, many false signals. Increase the period.",
+    emaHintSlow: "EMA {p} is too slow — it lags far behind the price. Decrease the period or use it as a long-term filter.",
+    emaHintBalanced: "EMA {p} balances noise and lag well. On crossover with EMA {p2} — a Golden/Death Cross signal.",
+
+    // Block 2: EMA theory
+    emaSectionTitle: "Moving Averages (EMA): The Language of Trend",
+    emaSectionSub: "A moving average smooths out price noise and shows the trend direction. EMA (exponential) reacts faster — it gives more weight to recent bars.",
+    emaTheoryPara: "EMA is calculated with a weighting coefficient: each next bar matters more than the previous one. This makes EMA more sensitive to recent price movements, unlike a simple SMA.",
+    emaFormulaLabel: "EMA FORMULA",
+    emaFormulaPeriod: "Period",
+    emaFormulaPrice: "Price",
+    emaFormulaPrev: "EMA_prev",
+    emaFormulaNote: "At period 20: k = 2÷21 ≈ 0.095 — each new candle weighs ~9.5%",
+    emaInfoCardTitle: "EMA as Dynamic Support",
+    emaInfoCardText: "Large funds use EMA 20/50/200 as levels for buying dips. When price touches the EMA from below going up — it's a signal to enter in the direction of the trend.",
+    emaPeriodsHeading: "Popular EMA Periods",
+    emaRowNoiseLabel: "Noise",
+    emaRowLagLabel: "Lag",
+
+    emaT1Speed: "Very Fast", emaT1Use: "Scalping, day trading", emaT1Noise: "High", emaT1Lag: "Minimal",
+    emaT2Speed: "Fast", emaT2Use: "Swing trading, 4H–1D", emaT2Noise: "Moderate", emaT2Lag: "Small",
+    emaT3Speed: "Medium", emaT3Use: "Medium-term trends", emaT3Noise: "Low", emaT3Lag: "Medium",
+    emaT4Speed: "Slow", emaT4Use: "Long-term trend filter", emaT4Noise: "Very low", emaT4Lag: "Significant",
+    emaT5Speed: "Very Slow", emaT5Use: "Master trend. Above it all = bull market", emaT5Noise: "Minimal", emaT5Lag: "Large",
+
+    // Golden Cross / Death Cross
+    gcSectionLabel: "GOLDEN CROSS AND DEATH CROSS",
+    gcGoldenTitle: "Golden Cross",
+    gcGoldenPre: "EMA 50 crosses EMA 200",
+    gcGoldenBold: "from below going up",
+    gcGoldenPost: "One of the most reliable bullish signals — confirms a shift from a bear market to a bull market.",
+    gcGoldenExample: "Example: S&P 500 Golden Cross in April 2020 → +100% growth in 2 years",
+    gcDeathTitle: "Death Cross",
+    gcDeathPre: "EMA 50 crosses EMA 200",
+    gcDeathBold: "from above going down",
+    gcDeathPost: "A bearish signal — confirms the start of a long-term downtrend.",
+    gcDeathExample: "Example: Bitcoin Death Cross in January 2022 → -75% drop",
+
+    gcRulesLabel: "EMA TRADING RULES",
+    gcRule1: "Price above EMA 200 = global uptrend. Trade longs only.",
+    gcRule2: "Price below EMA 200 = bear market. Longs are risky — wait or short.",
+    gcRule3: "Long entry: price pulled back to EMA 20/50 and reversed upward.",
+    gcRule4: "Golden Cross on the weekly timeframe — the strategic signal of the year.",
+    gcRule5: "EMA doesn't predict a reversal — it confirms a trend that has already started.",
+
+    // Conclusions
+    concLabel: "CHAPTER 8 TAKEAWAYS",
+    concHeading: "What You Now Know",
+    conc1: "The economy moves through 4 cycle phases: Recovery → Expansion → Slowdown → Recession — and around again",
+    conc2: "Sector rotation: IT and crypto rise in the recovery phase, gold and USD — in a recession",
+    conc3: "EMA (exponential moving average) gives more weight to recent data — reacts faster than SMA",
+    conc4: "Golden Cross (EMA 50 crosses EMA 200 from below going up) — one of the strongest bullish signals",
+    conc5: "EMA 200 = the boundary between a bull and bear market: price above EMA 200 → global uptrend",
+
+    // Footer nav
+    footerAsk: "Have a question? Write to an analyst",
+    footerNext: "Level 9: Reports and Oscillators →",
   },
   ro: {
     // Header / sticky nav
@@ -418,8 +577,8 @@ function AskAnalystPopup({onClose}) {
           <p style={{fontSize:18,color:C.inkMid}}>{tr.sub}</p>
         </div>
         <div className="messenger-grid">
-          {[{href:tgLink,bg:"#0088cc",icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-rocket.png' alt='' width='20' height='20' />",name:"SBF Support",sub:`Telegram · ${tr.online}`,btn:tr.btnTg},
-            {href:waLink,bg:"#25d366",icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-quote.png' alt='' width='20' height='20' />",name:"SBF Company",sub:`WhatsApp · ${tr.online}`,btn:tr.btnWa}
+          {[{href:tgLink,bg:"#0088cc",icon:"🚀",name:"SBF Support",sub:`Telegram · ${tr.online}`,btn:tr.btnTg},
+            {href:waLink,bg:"#25d366",icon:"💬",name:"SBF Company",sub:`WhatsApp · ${tr.online}`,btn:tr.btnWa}
           ].map((m,i)=>(
             <div key={i} style={{background:"#fff",border:"1px solid #e0e0e0",borderRadius:12,padding:"30px 25px",display:"flex",flexDirection:"column"}}>
               <div style={{display:"flex",alignItems:"center",gap:15,marginBottom:30}}>
@@ -446,7 +605,7 @@ function AssetRotation() {
   const phases = [
     { id:"recovery", label:S.rotPhRecoveryLabel, sub:S.rotPhRecoverySub, color:"#2563eb", bg:"rgba(37,99,235,0.08)", icon:"🌱",
       correct:["tech","crypto","smallcap"], hint:S.rotPhRecoveryHint },
-    { id:"expansion", label:S.rotPhExpansionLabel, sub:S.rotPhExpansionSub, color:"#d97706", bg:"rgba(217,119,6,0.08)", icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-flame.png' alt='' width='20' height='20' />",
+    { id:"expansion", label:S.rotPhExpansionLabel, sub:S.rotPhExpansionSub, color:"#d97706", bg:"rgba(217,119,6,0.08)", icon:"🔥",
       correct:["oil","commodities","realestate"], hint:S.rotPhExpansionHint },
     { id:"slowdown", label:S.rotPhSlowdownLabel, sub:S.rotPhSlowdownSub, color:"#7c3aed", bg:"rgba(124,58,237,0.08)", icon:"🍂",
       correct:["bonds","utilities","healthcare"], hint:S.rotPhSlowdownHint },
@@ -457,12 +616,12 @@ function AssetRotation() {
   const allAssets = [
     { id:"tech",       label:S.rotAssetTech,        emoji:"💻", phase:"recovery"  },
     { id:"crypto",     label:S.rotAssetCrypto,      emoji:"₿",  phase:"recovery"  },
-    { id:"smallcap",   label:S.rotAssetSmallcap,    emoji:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-rocket.png' alt='' width='20' height='20' />", phase:"recovery"  },
+    { id:"smallcap",   label:S.rotAssetSmallcap,    emoji:"🚀", phase:"recovery"  },
     { id:"oil",        label:S.rotAssetOil,         emoji:"🛢️", phase:"expansion" },
     { id:"commodities",label:S.rotAssetCommodities, emoji:"⚙️", phase:"expansion" },
-    { id:"realestate", label:S.rotAssetRealestate,  emoji:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-house.png' alt='' width='20' height='20' />", phase:"expansion" },
+    { id:"realestate", label:S.rotAssetRealestate,  emoji:"🏠", phase:"expansion" },
     { id:"bonds",      label:S.rotAssetBonds,       emoji:"🏛️", phase:"slowdown"  },
-    { id:"utilities",  label:S.rotAssetUtilities,   emoji:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-idea.png' alt='' width='20' height='20' />", phase:"slowdown"  },
+    { id:"utilities",  label:S.rotAssetUtilities,   emoji:"💡", phase:"slowdown"  },
     { id:"healthcare", label:S.rotAssetHealthcare,  emoji:"🏥", phase:"slowdown"  },
     { id:"gold",       label:S.rotAssetGold,        emoji:"🥇", phase:"recession" },
     { id:"cash",       label:S.rotAssetCash,        emoji:"💵", phase:"recession" },
@@ -529,7 +688,7 @@ function AssetRotation() {
       {/* Score */}
       {checked && (
         <div style={{background:pct>=70?"rgba(45,122,79,0.2)":pct>=40?"rgba(201,151,58,0.2)":"rgba(192,57,43,0.2)",border:`1px solid ${pct>=70?C.greenD:pct>=40?C.gold:C.redD}`,borderRadius:4,padding:"14px 20px",marginBottom:24,display:"flex",gap:14,alignItems:"center"}}>
-          <span style={{fontSize:28}}>{pct>=70?"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trophy.png' alt='' width='20' height='20' />":pct>=40?"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-books.png' alt='' width='20' height='20' />":"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-target.png' alt='' width='20' height='20' />"}</span>
+          <span style={{fontSize:28}}>{pct>=70?"🏆":pct>=40?"📚":"🎯"}</span>
           <div>
             <div style={{fontWeight:700,fontSize:16,color:pct>=70?"#2ecc71":pct>=40?C.gold:"#e74c3c"}}>{pct}% — {S.rotScoreLine.replace("{s}",score).replace("{t}",allAssets.length)}</div>
             <div style={{fontSize:12,color:"rgba(255,255,255,0.5)",marginTop:3}}>{S.rotScoreNote}</div>
@@ -761,7 +920,7 @@ function EMAConfigurator() {
         </label>
         {crosses.map((c,i) => (
           <span key={i} style={{fontSize:12,padding:"3px 10px",background:c.type==='golden'?'rgba(45,122,79,0.1)':'rgba(192,57,43,0.1)',border:`1px solid ${c.type==='golden'?C.greenD:C.redD}`,borderRadius:3,color:c.type==='golden'?C.greenD:C.redD,fontFamily:"monospace"}}>
-            {c.type==='golden'?"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-star.png' alt='' width='20' height='20' /> Golden Cross":'💀 Death Cross'} @ bar {c.i}
+            {c.type==='golden'?"⭐ Golden Cross":'💀 Death Cross'} @ bar {c.i}
           </span>
         ))}
       </div>
@@ -802,7 +961,7 @@ function EMAConfigurator() {
                 stroke={c.type==='golden'?"#2ecc71":"#e74c3c"} strokeWidth="1" strokeDasharray="4 3" opacity="0.6"/>
               <rect x={toX(c.i)-18} y={PAD.t+2} width={36} height={14} fill={c.type==='golden'?"#2d7a4f":"#c0392b"} rx="2" opacity="0.85"/>
               <text x={toX(c.i)} y={PAD.t+12} fontSize="8" fill="#fff" textAnchor="middle" fontFamily="monospace">
-                {c.type==='golden'?"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-star.png' alt='' width='20' height='20' /> GC":"💀 DC"}
+                {c.type==='golden'?"⭐ GC":"💀 DC"}
               </text>
             </g>
           ))}
@@ -861,7 +1020,7 @@ function Chapter8() {
       gdp:S.cycP1Gdp, inflation:S.cycP1Inflation, rates:S.cycP1Rates,
       best:S.cycP1Best, worst:S.cycP1Worst,
       why:S.cycP1Why },
-    { phase:S.cycP2Phase, icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-flame.png' alt='' width='20' height='20' />", color:"#d97706",
+    { phase:S.cycP2Phase, icon:"🔥", color:"#d97706",
       gdp:S.cycP2Gdp, inflation:S.cycP2Inflation, rates:S.cycP2Rates,
       best:S.cycP2Best, worst:S.cycP2Worst,
       why:S.cycP2Why },
@@ -945,7 +1104,7 @@ function Chapter8() {
               {/* Phase arcs */}
               {[
                 {startAngle:-90, endAngle:0,   color:"#2563eb", label:S.cycArcRecovery, icon:"🌱", cx:330, cy:80},
-                {startAngle:0,   endAngle:90,  color:"#d97706", label:S.cycArcExpansion,     icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-flame.png' alt='' width='20' height='20' />", cx:330, cy:220},
+                {startAngle:0,   endAngle:90,  color:"#d97706", label:S.cycArcExpansion,     icon:"🔥", cx:330, cy:220},
                 {startAngle:90,  endAngle:180, color:"#7c3aed", label:S.cycArcSlowdown,     icon:"🍂", cx:190, cy:220},
                 {startAngle:180, endAngle:270, color:"#c0392b", label:S.cycArcRecession,       icon:"❄️", cx:190, cy:80},
               ].map((s,i) => {

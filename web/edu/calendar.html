@@ -340,17 +340,21 @@ var _MONTHS_FULL  = ['Январь','Февраль','Март','Апрель','
 var _MONTHS_SHORT = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
 var _DAYS_SHORT   = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 
-// RO-варианты для собственной сетки календаря (не Intl — обычные строковые
+// RO/EN-варианты для собственной сетки календаря (не Intl — обычные строковые
 // массивы, поэтому переключаются вручную по window.sbfI18n.lang).
 var _MONTHS_FULL_RO  = ['Ianuarie','Februarie','Martie','Aprilie','Mai','Iunie','Iulie','August','Septembrie','Octombrie','Noiembrie','Decembrie'];
 var _MONTHS_SHORT_RO = ['ian','feb','mar','apr','mai','iun','iul','aug','sep','oct','noi','dec'];
 var _DAYS_SHORT_RO   = ['Lu','Ma','Mi','Jo','Vi','Sâ','Du'];
 
-function _isRo(){ return !!(window.sbfI18n && window.sbfI18n.lang === 'ro'); }
-function _monthsFull(){ return _isRo() ? _MONTHS_FULL_RO : _MONTHS_FULL; }
-function _monthsShort(){ return _isRo() ? _MONTHS_SHORT_RO : _MONTHS_SHORT; }
-function _daysShort(){ return _isRo() ? _DAYS_SHORT_RO : _DAYS_SHORT; }
-function _dtLocale(){ return _isRo() ? 'ro-RO' : 'ru'; }
+var _MONTHS_FULL_EN  = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+var _MONTHS_SHORT_EN = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+var _DAYS_SHORT_EN   = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+
+function _curLang(){ return (window.sbfI18n && window.sbfI18n.lang) || 'ru'; }
+function _monthsFull(){ var l=_curLang(); return l==='ro'?_MONTHS_FULL_RO:l==='en'?_MONTHS_FULL_EN:_MONTHS_FULL; }
+function _monthsShort(){ var l=_curLang(); return l==='ro'?_MONTHS_SHORT_RO:l==='en'?_MONTHS_SHORT_EN:_MONTHS_SHORT; }
+function _daysShort(){ var l=_curLang(); return l==='ro'?_DAYS_SHORT_RO:l==='en'?_DAYS_SHORT_EN:_DAYS_SHORT; }
+function _dtLocale(){ var l=_curLang(); return l==='ro'?'ro-RO':l==='en'?'en-US':'ru'; }
 
 // ── Вспомогательные ────────────────────────────────────────────────────────
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }

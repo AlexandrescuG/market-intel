@@ -76,11 +76,11 @@ const STRINGS = {
     calEv7Name: "Индекс потребдоверия Мичиган",
     calEv7Hint: "Небольшое улучшение. Нейтрально для золота.",
     calImpCritical: "КРИТИЧНО", calImpHigh: "ВАЖНО", calImpMedium: "СРЕДНЕ", calImpLow: "НИЗКОЕ",
-    calImpactBullish: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-up.png' alt='' width='20' height='20' /> Бычий для золота", calImpactBearish: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-down.png' alt='' width='20' height='20' /> Медвежий", calImpactNeutral: "➡️ Нейтральный",
+    calImpactBullish: "📈 Бычий для золота", calImpactBearish: "📉 Медвежий", calImpactNeutral: "➡️ Нейтральный",
     calForecastLabel: "Прогноз:", calPrevLabel: "Пред.:",
     calStudiedLabel: "Изучено", calEventsWord: "событий",
-    calHoldBtn: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-up.png' alt='' width='20' height='20' /> ДЕРЖАТЬ ПОЗИЦИЮ", calCloseBtn: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-lock.png' alt='' width='20' height='20' /> ЗАКРЫТЬ СЕЙЧАС",
-    calResultCorrect: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-check.png' alt='' width='20' height='20' /> Правильно! Держать позицию — верное решение.",
+    calHoldBtn: "📈 ДЕРЖАТЬ ПОЗИЦИЮ", calCloseBtn: "🔒 ЗАКРЫТЬ СЕЙЧАС",
+    calResultCorrect: "✅ Правильно! Держать позицию — верное решение.",
     calResultWrong: "❌ Поторопились. Фундаментал указывал на удержание.",
     calResultParaA: "На этой неделе ожидаются ",
     calResultParaBold: "бычьих события",
@@ -89,7 +89,7 @@ const STRINGS = {
     calScenarioPowell: "После Пауэлла",
     calScenarioPowellPrefix: "Ещё",
     calScenarioWeek: "Итог недели",
-    calPrinciple: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-idea.png' alt='' width='20' height='20' /> Принцип Daoti: «Не закрывай прибыльную позицию перед бычьим фундаменталом. Дай ей дышать.»",
+    calPrinciple: "💡 Принцип Daoti: «Не закрывай прибыльную позицию перед бычьим фундаменталом. Дай ей дышать.»",
 
     // Interactive 2: Pyramiding Simulator
     simTitle: "Симулятор Пирамидинга",
@@ -104,17 +104,17 @@ const STRINGS = {
     simStatFloatPnl: "Float PnL",
     simStatStopLoss: "Стоп-лосс",
     simDefaultMsg: "Нажми СТАРТ, затем добавляй лоты при откатах к EMA 20.",
-    simWarnFar: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-warning.png' alt='' width='20' height='20' /> Цена далеко от EMA 20. Ждите отката для добавления лота.",
+    simWarnFar: "⚠️ Цена далеко от EMA 20. Ждите отката для добавления лота.",
     simLotAt: "лот по",
     simTotalPositionsLabel: "Всего позиций",
     simSlUpdated: "SL обновлён.",
-    simBreakeven: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-lock.png' alt='' width='20' height='20' /> Стоп переведён в безубыток! Позиция защищена.",
+    simBreakeven: "🔒 Стоп переведён в безубыток! Позиция защищена.",
     simSlTriggered: "сработал.",
     simResultLabel: "Итог",
     simPointsOnWord: "пунктов на",
     simLotsWord: "лот(а)",
     simComplete: "🏁 Симуляция завершена! Итоговый PnL показан ниже.",
-    simAddBtnActive: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-target.png' alt='' width='20' height='20' /> ДОБАВИТЬ ЛОТ — ЦЕНА У EMA 20!",
+    simAddBtnActive: "🎯 ДОБАВИТЬ ЛОТ — ЦЕНА У EMA 20!",
     simAddBtnWaitPrefix: "+ ДОБАВИТЬ ЛОТ (ждите отката к EMA 20 · сейчас:",
     simAddBtnWaitMid: ", EMA20:",
     simLegendEma20: "EMA 20 (быстрая)",
@@ -122,8 +122,8 @@ const STRINGS = {
     simLegendEntries: "Уровни входа",
     simLegendTp: "Take Profit +150пт",
     simLegendSl: "Stop Loss (тяни мышью)",
-    simDoneGood: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-check.png' alt='' width='20' height='20' /> Отличный пирамидинг!",
-    simDoneNeutral: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-bar-chart.png' alt='' width='20' height='20' /> Итог симуляции",
+    simDoneGood: "✅ Отличный пирамидинг!",
+    simDoneNeutral: "📊 Итог симуляции",
     simDoneAdded: "Добавлено позиций",
     simDoneFinalPnl: "Итоговый PnL",
     simDoneExplain: "Пирамидинг усиливает прибыль при тренде, но требует дисциплины: добавлять только у EMA 20, каждый раз поднимать SL, никогда не добавлять в убыточную позицию.",
@@ -161,7 +161,7 @@ const STRINGS = {
     checklist6: "После каждой доливки — поднимать стоп-лосс",
     checklist7: "При +15 пунктов от входа — перевести стоп в безубыток",
     checklist8: "TP фиксированный: +150 пт. SL: -80 пт. RR = 1:1.875",
-    checklistDoneTitle: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-check.png' alt='' width='20' height='20' /> Глава 13 освоена!",
+    checklistDoneTitle: "✅ Глава 13 освоена!",
     checklistDoneBody: "Вы понимаете механику профессионального свинга. Терпение — это ваша позиция.",
 
     // Conclusions
@@ -244,6 +244,214 @@ const STRINGS = {
     footerAsk: "Остался вопрос? Напиши аналитику",
     footerNext: "Уровень 14: Анатомия Скальпинга →",
   },
+  en: {
+    // Ask-analyst contact popup
+    askTag: "— CONTACT US",
+    askTitle: "Prefer a messenger?",
+    askBody: "Message us on Telegram or WhatsApp — the message is already prepared.",
+    askTgSub: "Telegram · online",
+    askTgBtn: "OPEN TELEGRAM",
+    askWaSub: "WhatsApp · online",
+    askWaBtn: "OPEN WHATSAPP",
+
+    // Interactive 1: News Calendar
+    calTitle: "Assessing the News Backdrop",
+    calSubtitle: "INTERACTIVE — FUNDAMENTALS · WEEKLY ANALYSIS",
+    calOpenPosLabel: "OPEN POSITION",
+    calEntry: "Entry",
+    calCurrent: "Current",
+    calFloatPnl: "Floating PnL",
+    calTakeProfit: "Take Profit",
+    calStopLoss: "Stop Loss",
+    calToTarget: "TO TARGET",
+    calPt: "pts",
+    calInstruction: "Study the economic calendar for the week ahead. Click each event to see the consensus forecast and its impact on gold. Then make your decision.",
+    calDayMon: "Mon", calDayTue: "Tue", calDayWed: "Wed", calDayThu: "Thu", calDayFri: "Fri",
+    calDateMon: "16 June", calDateTue: "17 June", calDateWed: "18 June", calDateThu: "19 June", calDateFri: "20 June",
+    calEv1Name: "US Retail Sales",
+    calEv1Hint: "Moderate data. No sharp reaction expected in gold.",
+    calEv2Name: "Producer Price Index (PPI)",
+    calEv2Hint: "PPI below expectations → disinflationary pressure → Fed turns more dovish → gold rises.",
+    calEv3Name: "Fed Governor Bowman speech",
+    calEv3Hint: "Cautious rhetoric. Unlikely to move the market.",
+    calEv4Name: "CPI (US Inflation)",
+    calEv4Hint: "CPI below forecast → inflation is cooling → Fed moves closer to cutting rates → XAUUSD +$15–30.",
+    calEv5Name: "Powell Press Conference (Fed)",
+    calEv5Consensus: "No change",
+    calEv5Hint: "Powell hints at a September rate cut. Dovish rhetoric = strong momentum for gold.",
+    calEv6Name: "Unemployment Claims",
+    calEv6Hint: "Labor market is stable. No impact on the gold position.",
+    calEv7Name: "Michigan Consumer Sentiment Index",
+    calEv7Hint: "Slight improvement. Neutral for gold.",
+    calImpCritical: "CRITICAL", calImpHigh: "HIGH", calImpMedium: "MEDIUM", calImpLow: "LOW",
+    calImpactBullish: "📈 Bullish for gold", calImpactBearish: "📉 Bearish", calImpactNeutral: "➡️ Neutral",
+    calForecastLabel: "Forecast:", calPrevLabel: "Prev.:",
+    calStudiedLabel: "Studied", calEventsWord: "events",
+    calHoldBtn: "📈 HOLD POSITION", calCloseBtn: "🔒 CLOSE NOW",
+    calResultCorrect: "✅ Correct! Holding the position is the right call.",
+    calResultWrong: "❌ Too hasty. The fundamentals pointed to holding.",
+    calResultParaA: "This week, ",
+    calResultParaBold: "bullish events",
+    calResultParaB: " are expected for gold: PPI below expectations (Tue), CPI below forecast (Wed) and Powell's dovish rhetoric (Thu). All three catalysts are pushing XAUUSD higher — toward Take Profit $",
+    calScenarioCpi: "Scenario after CPI",
+    calScenarioPowell: "After Powell",
+    calScenarioPowellPrefix: "Further",
+    calScenarioWeek: "Week total",
+    calPrinciple: "💡 Daoti principle: 'Don't close a profitable position ahead of a bullish fundamental. Let it breathe.'",
+
+    // Interactive 2: Pyramiding Simulator
+    simTitle: "Pyramiding Simulator",
+    simSubtitle: "INTERACTIVE — TECHNIQUE · EMA 20/50 + PYRAMIDING",
+    simResetBtn: "↺ RESET",
+    simPauseBtn: "⏸ PAUSE",
+    simContinueBtn: "▶ CONTINUE",
+    simStartBtn: "▶ START",
+    simStatPositions: "Positions",
+    simStatTotalLots: "Total lots",
+    simStatAvgEntry: "Average entry",
+    simStatFloatPnl: "Float PnL",
+    simStatStopLoss: "Stop-loss",
+    simDefaultMsg: "Press START, then add lots on pullbacks to EMA 20.",
+    simWarnFar: "⚠️ Price is far from EMA 20. Wait for a pullback before adding a lot.",
+    simLotAt: "lot at",
+    simTotalPositionsLabel: "Total positions",
+    simSlUpdated: "SL updated.",
+    simBreakeven: "🔒 Stop moved to breakeven! Position is protected.",
+    simSlTriggered: "triggered.",
+    simResultLabel: "Result",
+    simPointsOnWord: "points on",
+    simLotsWord: "lot(s)",
+    simComplete: "🏁 Simulation complete! Final PnL is shown below.",
+    simAddBtnActive: "🎯 ADD LOT — PRICE AT EMA 20!",
+    simAddBtnWaitPrefix: "+ ADD LOT (wait for a pullback to EMA 20 · now:",
+    simAddBtnWaitMid: ", EMA20:",
+    simLegendEma20: "EMA 20 (fast)",
+    simLegendEma50: "EMA 50 (slow)",
+    simLegendEntries: "Entry levels",
+    simLegendTp: "Take Profit +150pts",
+    simLegendSl: "Stop Loss (drag with mouse)",
+    simDoneGood: "✅ Excellent pyramiding!",
+    simDoneNeutral: "📊 Simulation Result",
+    simDoneAdded: "Positions added",
+    simDoneFinalPnl: "Final PnL",
+    simDoneExplain: "Pyramiding amplifies profit in a trend, but requires discipline: add only at EMA 20, raise the SL after every add-on, never add to a losing position.",
+
+    // Swing facts (info cards)
+    fact1Title: "Swing vs. Scalping",
+    fact1Text: "A swing trader holds a position for 1–7 days, capturing moves of 80–300+ points. No need to sit in front of the screen all day. Intraday noise is psychologically easier to endure.",
+    fact2Title: "Metals — the instrument of choice",
+    fact2Text: "XAUUSD and XAGUSD react to macro trends (inflation, Fed rates, geopolitics) predictably and with large amplitude. The Daoti strategy specializes specifically in gold.",
+    fact3Title: "Ignore intraday noise",
+    fact3Text: "On H1, news comes out every hour that briefly moves the price. A swing trader looks at H4 and Daily — where the real structure is visible. Small moves don't change the overall picture.",
+    fact4Title: "Daoti's real track record",
+    fact4Text: "The strategy shows stable profit through holding: most profitable trades closed not on the first day, but on the 3rd–5th, once the news backdrop had fully played out.",
+
+    // Pyramid rules
+    rule1Title: "First lot — on the EMA signal",
+    rule1Text: "We open the base position on the EMA 20 / EMA 50 crossover or when price touches EMA 20 within a trend. Volume — 1 lot.",
+    rule2Title: "Adding — only on a pullback to EMA 20",
+    rule2Text: "Each subsequent lot is added strictly when price touches EMA 20 (not 'approximately' — a confirmed touch at candle close).",
+    rule3Title: "SL moves after every add-on",
+    rule3Text: "After adding a lot, the stop is moved above the previous low. The goal is to keep the loss from growing as the position gets bigger.",
+    rule4Title: "Breakeven at +15 points",
+    rule4Text: "As soon as price has moved +15 points from the first entry, the stop on the first lot is moved to the entry point. Risk = 0.",
+    rule5Title: "Take Profit — 150 points from the first entry",
+    rule5Text: "Fixed TP at Entry + 150. Risk/reward: SL 80 pts / TP 150 pts = 1:1.875. With pyramiding, the final RR grows.",
+
+    // Checklist
+    checklistSub: "Check off each point you understand and are ready to apply.",
+    checklistTitle: "Chapter 13 Checklist",
+    checklist1: "Swing: 1–7 day hold, target 80–300+ points on XAUUSD",
+    checklist2: "Before holding — analyze the economic calendar for the week ahead",
+    checklist3: "EMA 20 — dynamic support line for adding to the position",
+    checklist4: "EMA 50 — trend direction: above = bullish, below = bearish",
+    checklist5: "Pyramiding: add lots only on pullbacks to EMA 20",
+    checklist6: "After every add-on — raise the stop-loss",
+    checklist7: "At +15 points from entry — move the stop to breakeven",
+    checklist8: "TP fixed: +150 pts. SL: -80 pts. RR = 1:1.875",
+    checklistDoneTitle: "✅ Chapter 13 mastered!",
+    checklistDoneBody: "You understand the mechanics of professional swing trading. Patience is your position.",
+
+    // Conclusions
+    conclusionsTitle: "CHAPTER 13 CONCLUSIONS",
+    conclusionsSub: "What you now know",
+    conclusion1: "Swing trading is patience: don't close profit ahead of time",
+    conclusion2: "The economic calendar is a mandatory tool before holding a position",
+    conclusion3: "EMA 20 is an anchor for pyramiding, not for guessing entries",
+    conclusion4: "Every add-on must be followed by raising the stop",
+    conclusion5: "Pyramiding without stop control is a recipe for disaster",
+    conclusion6: "Daoti strategy: trade quality matters more than trade count",
+
+    // Sticky header
+    headerLevelChip: "LEVEL 13",
+    headerSubtitle: "Swing Anatomy · Daoti",
+    headerFaChip: "FA 35%",
+    headerTaChip: "TA 65%",
+
+    // Hero
+    heroEyebrow: "SBF COMPANY — CHAPTER 13",
+    heroBadge: "SBF ANALYST STRATEGY — DAOTI",
+    heroTitleLine1: "Swing Anatomy",
+    heroTitleAnd: "and",
+    heroTitleLine2: "Pyramiding",
+    heroSub: "How a professional analyst builds a gold position over several days. Real mechanics. Live numbers.",
+    heroChip1: "Fundamentals 35%",
+    heroChip2: "Technicals 65%",
+    heroChip3: "2 Interactives",
+
+    // Anti-myth
+    mythTag: "COMMON MISCONCEPTION",
+    mythQuote: "'The more you trade, the more you earn. You need to catch every move.'",
+    mythBody: "Most traders overtrade. Every extra trade means commission, stress, and a decision made outside the strategy. A professional swing trader makes 2–5 trades a week. But each one follows the plan, with full fundamental analysis and clear levels.",
+
+    // SBF voice
+    voiceTag: "— SBF ANALYST · DAOTI",
+    voiceQuote: "'My best trade of the month is often the one I almost closed on day two. The market needs time to do what it has to do. Patience is a position.'",
+    voiceBody: "Daoti is a real SBF Company track record. The strategy is built on the macro trend in metals, EMA dynamics, and strict position control through pyramiding.",
+
+    // Price of ignorance
+    ignoranceTag: "The price of ignorance",
+    ignoranceBody: "A trader opens a gold position. 12 hours later it's at +45 points. He locks in the profit — 'before it gets taken away.' The next day CPI came in below forecast, and Powell hinted at easing: XAUUSD +180 points. He looked at the closed trade. ",
+    ignoranceBold: "Not knowing the fundamental context cost him 135 points of profit.",
+
+    // Theory 1
+    theory1Sub: "Swing trading is a trading style in which a position is held for several days to capture a medium-term move.",
+    theory1Title: "What swing trading on metals is",
+
+    // Trades table
+    tradesHeader: "TRADE EXAMPLES — DAOTI STRATEGY (XAUUSD)",
+    thDate: "Date", thInstrument: "Instrument", thDirection: "Direction",
+    thEntry: "Entry", thExit: "Exit", thHold: "Hold", thPnl: "PnL (pts)", thCatalyst: "Catalyst",
+    trade1Date: "12 Mar", trade1Hold: "4 days", trade1Cat: "CPI -0.2% + Powell",
+    trade2Date: "28 Mar", trade2Hold: "5 days", trade2Cat: "Weak NFP",
+    trade3Date: "9 Apr", trade3Hold: "3 days", trade3Cat: "Geopolitics + inflation",
+    trade4Date: "22 Apr", trade4Hold: "2 days", trade4Cat: "Correction after ATH",
+    trade5Date: "5 May", trade5Hold: "1 day", trade5Cat: "SL triggered (NFP above forecast)",
+
+    // Theory 2
+    theory2Sub: "EMA 20 and EMA 50 on H1 are dynamic support levels for building a position through pyramiding.",
+    theory2Title: "EMA strategy and the mechanics of pyramiding",
+
+    // EMA diagram
+    emaDiagramHeader: "HOW EMA 20 / EMA 50 WORK IN A SWING",
+    emaDiagramTp: "TP +150pts",
+
+    // Risk math example
+    riskMathHeader: "PYRAMIDING MATH — EXAMPLE",
+    riskStep1: "Entry #1", riskStep2: "Add-on #2", riskStep3: "Add-on #3",
+    riskNote1: "Risk: 80pts × 1L = 80pts",
+    riskNote2: "Stop #1 → breakeven",
+    riskNote3: "Average entry ~2499",
+    riskPriceLabel: "Price:", riskLotsLabel: "Lots:",
+    riskSummaryLabel: "Result at TP (+150pts from #1): ",
+    riskSummaryFormula: "(150pts×1L) + (135pts×1L) + (123pts×1L) = ",
+    riskSummaryBold: "408 points",
+    riskSummaryTail: " against risk of ~80pts",
+
+    // Footer
+    footerAsk: "Still have a question? Message an analyst",
+    footerNext: "Level 14: Scalping Anatomy →",
+  },
   ro: {
     // Ask-analyst contact popup
     askTag: "— CONTACTAȚI-NE",
@@ -284,11 +492,11 @@ const STRINGS = {
     calEv7Name: "Indicele încrederii consumatorilor Michigan",
     calEv7Hint: "Ușoară îmbunătățire. Neutru pentru aur.",
     calImpCritical: "CRITIC", calImpHigh: "IMPORTANT", calImpMedium: "MEDIU", calImpLow: "SCĂZUT",
-    calImpactBullish: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-up.png' alt='' width='20' height='20' /> Bullish pentru aur", calImpactBearish: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-down.png' alt='' width='20' height='20' /> Bearish", calImpactNeutral: "➡️ Neutru",
+    calImpactBullish: "📈 Bullish pentru aur", calImpactBearish: "📉 Bearish", calImpactNeutral: "➡️ Neutru",
     calForecastLabel: "Prognoză:", calPrevLabel: "Anterior:",
     calStudiedLabel: "Studiat", calEventsWord: "evenimente",
-    calHoldBtn: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-up.png' alt='' width='20' height='20' /> MENȚINE POZIȚIA", calCloseBtn: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-lock.png' alt='' width='20' height='20' /> ÎNCHIDE ACUM",
-    calResultCorrect: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-check.png' alt='' width='20' height='20' /> Corect! Menținerea poziției este decizia corectă.",
+    calHoldBtn: "📈 MENȚINE POZIȚIA", calCloseBtn: "🔒 ÎNCHIDE ACUM",
+    calResultCorrect: "✅ Corect! Menținerea poziției este decizia corectă.",
     calResultWrong: "❌ V-ați grăbit. Fundamentalul indica menținerea poziției.",
     calResultParaA: "În această săptămână sunt așteptate ",
     calResultParaBold: "evenimente bullish",
@@ -297,7 +505,7 @@ const STRINGS = {
     calScenarioPowell: "După Powell",
     calScenarioPowellPrefix: "Încă",
     calScenarioWeek: "Rezultatul săptămânii",
-    calPrinciple: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-idea.png' alt='' width='20' height='20' /> Principiul Daoti: «Nu închide o poziție profitabilă înainte de un fundamental bullish. Las-o să respire.»",
+    calPrinciple: "💡 Principiul Daoti: «Nu închide o poziție profitabilă înainte de un fundamental bullish. Las-o să respire.»",
 
     // Interactive 2: Pyramiding Simulator
     simTitle: "Simulator de Piramidare",
@@ -312,17 +520,17 @@ const STRINGS = {
     simStatFloatPnl: "Float PnL",
     simStatStopLoss: "Stop-loss",
     simDefaultMsg: "Apasă START, apoi adaugă loturi la retragerile către EMA 20.",
-    simWarnFar: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-warning.png' alt='' width='20' height='20' /> Prețul este departe de EMA 20. Așteaptă o retragere pentru a adăuga un lot.",
+    simWarnFar: "⚠️ Prețul este departe de EMA 20. Așteaptă o retragere pentru a adăuga un lot.",
     simLotAt: "lot la",
     simTotalPositionsLabel: "Total poziții",
     simSlUpdated: "SL actualizat.",
-    simBreakeven: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-lock.png' alt='' width='20' height='20' /> Stopul a fost mutat pe breakeven! Poziția este protejată.",
+    simBreakeven: "🔒 Stopul a fost mutat pe breakeven! Poziția este protejată.",
     simSlTriggered: "declanșat.",
     simResultLabel: "Rezultat",
     simPointsOnWord: "puncte pe",
     simLotsWord: "lot(uri)",
     simComplete: "🏁 Simularea s-a încheiat! PnL-ul final este afișat mai jos.",
-    simAddBtnActive: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-target.png' alt='' width='20' height='20' /> ADAUGĂ LOT — PREȚUL E LA EMA 20!",
+    simAddBtnActive: "🎯 ADAUGĂ LOT — PREȚUL E LA EMA 20!",
     simAddBtnWaitPrefix: "+ ADAUGĂ LOT (așteaptă retragerea la EMA 20 · acum:",
     simAddBtnWaitMid: ", EMA20:",
     simLegendEma20: "EMA 20 (rapidă)",
@@ -330,8 +538,8 @@ const STRINGS = {
     simLegendEntries: "Niveluri de intrare",
     simLegendTp: "Take Profit +150 pct",
     simLegendSl: "Stop Loss (trage cu mouse-ul)",
-    simDoneGood: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-check.png' alt='' width='20' height='20' /> Piramidare excelentă!",
-    simDoneNeutral: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-bar-chart.png' alt='' width='20' height='20' /> Rezultatul simulării",
+    simDoneGood: "✅ Piramidare excelentă!",
+    simDoneNeutral: "📊 Rezultatul simulării",
     simDoneAdded: "Poziții adăugate",
     simDoneFinalPnl: "PnL final",
     simDoneExplain: "Piramidarea amplifică profitul într-un trend, dar cere disciplină: adaugă loturi doar la EMA 20, ridică SL după fiecare adăugare, nu adăuga niciodată la o poziție pe pierdere.",
@@ -369,7 +577,7 @@ const STRINGS = {
     checklist6: "După fiecare adăugare — ridică stop-loss-ul",
     checklist7: "La +15 puncte de la intrare — mută stopul pe breakeven",
     checklist8: "TP fix: +150 pct. SL: -80 pct. RR = 1:1.875",
-    checklistDoneTitle: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-check.png' alt='' width='20' height='20' /> Capitolul 13 asimilat!",
+    checklistDoneTitle: "✅ Capitolul 13 asimilat!",
     checklistDoneBody: "Înțelegi mecanica swing-ului profesionist. Răbdarea este poziția ta.",
 
     // Conclusions
@@ -508,8 +716,8 @@ function AskAnalystPopup({onClose}) {
           <p style={{fontSize:18,color:C.inkMid}}>{S.askBody}</p>
         </div>
         <div className="messenger-grid">
-          {[{href:tgLink,bg:"#0088cc",icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-rocket.png' alt='' width='20' height='20' />",name:"SBF Support",sub:S.askTgSub,btn:S.askTgBtn},
-            {href:waLink,bg:"#25d366",icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-quote.png' alt='' width='20' height='20' />",name:"SBF Company",sub:S.askWaSub,btn:S.askWaBtn}
+          {[{href:tgLink,bg:"#0088cc",icon:"🚀",name:"SBF Support",sub:S.askTgSub,btn:S.askTgBtn},
+            {href:waLink,bg:"#25d366",icon:"💬",name:"SBF Company",sub:S.askWaSub,btn:S.askWaBtn}
           ].map((m,i) => (
             <div key={i} style={{background:"#fff",border:"1px solid #e0e0e0",borderRadius:12,padding:"30px 25px",display:"flex",flexDirection:"column"}}>
               <div style={{display:"flex",alignItems:"center",gap:15,marginBottom:30}}>
@@ -838,7 +1046,7 @@ function PyramidingSim() {
     setPositions(p => [...p, { entry: currentPrice, lots, idx: visibleCount }]);
     if (sl === null) setSl(+(currentPrice - 25).toFixed(2));
     else setSl(s => +(Math.max(s, currentPrice - 25)).toFixed(2)); // trail SL up
-    setMessage(`<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-check.png' alt='' width='20' height='20' /> +${lots} ${S.simLotAt} ${currentPrice.toFixed(2)}. ${S.simTotalPositionsLabel}: ${positions.length+1}. ${S.simSlUpdated}`);
+    setMessage(`✅ +${lots} ${S.simLotAt} ${currentPrice.toFixed(2)}. ${S.simTotalPositionsLabel}: ${positions.length+1}. ${S.simSlUpdated}`);
     setMsgType("good");
   }, [canAdd, currentPrice, visibleCount, sl, nearEma20, running, positions.length]);
 
@@ -861,7 +1069,7 @@ function PyramidingSim() {
       setDone(true);
       const pnl = ((sl - avgEntry) * totalLots * 100).toFixed(0);
       const sign = Number(pnl) >= 0 ? "+" : "";
-      setMessage(`<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-bar-chart.png' alt='' width='20' height='20' /> ${S.simStatStopLoss} ${sl} ${S.simSlTriggered} ${S.simResultLabel}: ${sign}${pnl} ${S.simPointsOnWord} ${totalLots} ${S.simLotsWord}.`);
+      setMessage(`📊 ${S.simStatStopLoss} ${sl} ${S.simSlTriggered} ${S.simResultLabel}: ${sign}${pnl} ${S.simPointsOnWord} ${totalLots} ${S.simLotsWord}.`);
       setMsgType(Number(pnl) >= 0 ? "good" : "bad");
     }
   }, [currentPrice, sl, positions, running]);

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>SBF | {% if lang == 'ro' %}Capitolul 3. Arsenal și Apărare{% else %}Глава 3. Арсенал и Защита{% endif %}</title>
+  <title>SBF | {% if lang == 'ru' %}Глава 3. Арсенал и Защита{% elif lang == 'ro' %}Capitolul 3. Arsenal și Apărare{% else %}Chapter 3. Arsenal and Defense{% endif %}</title>
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
   <style>
@@ -82,7 +82,7 @@ const STRINGS = {
     corrHeaders:["Событие","S&P 500","Золото","Облигации","Нефть","DXY"],
     corrRow1Label:"🏦 Кризис 2008",
     corrRow2Label:"🦠 COVID 2020",
-    corrRow3Label:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-up.png' alt='' width='20' height='20' /> Бычий рынок",
+    corrRow3Label:"📈 Бычий рынок",
     corrRow4Label:"💸 Инфляция ↑",
     corrFootnote:"* Приблизительные значения на основе исторических данных",
 
@@ -113,7 +113,7 @@ const STRINGS = {
     crashRecoverySuffix:(months)=>`~${months} мес.`,
     ratingProtected:"🟢 Защищённый",
     ratingModerate:"🟡 Умеренный риск",
-    ratingHigh:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-alert-dot.png' alt='' width='20' height='20' /> Высокий риск",
+    ratingHigh:"🔴 Высокий риск",
     crashChartTag:"ДИНАМИКА ПОРТФЕЛЯ В КРИЗИС",
     crashChartBottomLabel:"дно",
 
@@ -179,6 +179,147 @@ const STRINGS = {
     footerAskLink:"Остался вопрос? Напиши аналитику",
     footerNextBtn:"Уровень 4: Механика ордеров →",
   },
+  en:{
+    // Sticky header / hero
+    chapterTitleShort:"Arsenal and Defense",
+    stickyLevel:"LEVEL 3",
+    chipFA:"FA 50%",
+    chipTA:"TA 50%",
+    heroEyebrow:"SBF COMPANY — CHAPTER 3",
+    heroLine1:"Arsenal",
+    heroAnd:"and",
+    heroLine2Gold:"Defense",
+    heroSubtitle:"How to protect your capital before you start earning. Asset classes, diversification, risk math — the foundation of any trading system.",
+    fundamentalChip:"Fundamentals 50%",
+    technicalChip:"Technical 50%",
+    interactiveChip:"2 Interactive Tools",
+
+    // Block 1 — Asset classes
+    block1Title:"Asset Classes: A Trader's Arsenal",
+    block1Sub:"Before you trade, you need to understand the instruments. Each asset class behaves differently across different phases of the economic cycle.",
+    ac1Title:"Stocks (Equities)",
+    ac1K1:"Return", ac1V1:"High (+7–15%/year long-term)",
+    ac1K2:"Risk", ac1V2:"High. Can drop -50% during a crisis",
+    ac1K3:"Liquidity", ac1V3:"Very high (NYSE, NASDAQ)",
+    ac1K4:"Correlation with GDP", ac1V4:"Direct — economy grows = stocks grow",
+    ac2Title:"Bonds",
+    ac2K1:"Return", ac2V1:"Moderate (3–6%/year)",
+    ac2K2:"Risk", ac2V2:"Low. US Treasuries = a “risk-free” asset",
+    ac2K3:"Liquidity", ac2V3:"High",
+    ac2K4:"Correlation with stocks", ac2V4:"Inverse — crisis = bonds rise",
+    ac3Title:"Gold",
+    ac3K1:"Return", ac3V1:"Moderate (+6–8%/year historically)",
+    ac3K2:"Risk", ac3V2:"Medium. Inflation hedge",
+    ac3K3:"Liquidity", ac3V3:"High (COMEX, ETF GLD)",
+    ac3K4:"Correlation", ac3V4:"Inverse to the USD (DXY)",
+    ac4Title:"Oil (Commodities)",
+    ac4K1:"Return", ac4V1:"High volatility (from -70% to +200%)",
+    ac4K2:"Risk", ac4V2:"Very high. Geopolitics, OPEC",
+    ac4K3:"Liquidity", ac4V3:"Very high (NYMEX, ICE)",
+    ac4K4:"Correlation", ac4V4:"With global demand and USD",
+
+    // Correlation matrix
+    corrMatrixTag:"ASSET CORRELATIONS IN A CRISIS",
+    corrHeaders:["Event","S&P 500","Gold","Bonds","Oil","DXY"],
+    corrRow1Label:"🏦 2008 Crisis",
+    corrRow2Label:"🦠 COVID 2020",
+    corrRow3Label:"📈 Bull Market",
+    corrRow4Label:"💸 Inflation ↑",
+    corrFootnote:"* Approximate values based on historical data",
+
+    // Crash test interactive
+    crashTag:"INTERACTIVE — FUNDAMENTALS",
+    crashTitle:"Portfolio Crash Test",
+    crashCompLabel:"Portfolio Composition",
+    assetSp500Label:"S&P 500 (US stocks)",
+    assetBondsLabel:"US Bonds",
+    assetGoldLabel:"Gold",
+    assetOilLabel:"Oil",
+    assetBtcLabel:"Bitcoin (crypto)",
+    assetCashLabel:"Cash",
+    crashDepositLabel:"Portfolio Size ($)",
+    crashChooseCrisis:"Choose a crisis:",
+    crisis2008Label:"2008 Financial Crisis",
+    crisis2008Desc:"The Lehman Brothers collapse, the mortgage market crash. The worst crisis since the Great Depression.",
+    crisisCovidLabel:"COVID-19 Crash 2020",
+    crisisCovidDesc:"The fastest bear market in history — -34% in 33 days. Recovery in 5 months.",
+    crisisDotLabel:"Dot-com Bubble 2000–2002",
+    crisisDotDesc:"The tech stock crash. NASDAQ lost 78%. Recovery took 15 years.",
+    crashTestBtn:"TEST WITH CRISIS →",
+    crashAllocateBtn:(total)=>`Allocate 100% (currently ${total}%)`,
+    crashMetricDrawdown:"Portfolio Drawdown",
+    crashMetricLoss:"Loss ($)",
+    crashMetricRemaining:"Remaining",
+    crashMetricRecovery:"Recovery",
+    crashRecoverySuffix:(months)=>`~${months} mo.`,
+    ratingProtected:"🟢 Protected",
+    ratingModerate:"🟡 Moderate risk",
+    ratingHigh:"🔴 High risk",
+    crashChartTag:"PORTFOLIO DYNAMICS DURING CRISIS",
+    crashChartBottomLabel:"bottom",
+
+    // Position calculator
+    calcTag:"INTERACTIVE — TECHNICAL",
+    calcTitle:"Position Size Calculator",
+    calcInstrumentLabel:"Instrument",
+    instGoldUnit:"oz",
+    instEurUsdUnit:"lot",
+    instSp500Unit:"ctr",
+    calcDepositLabel:"Deposit",
+    calcRiskLabel:"Risk per Trade",
+    calcEntryLabel:"Entry Price",
+    calcStopLabel:"Stop-Loss (distance)",
+    calcStopPointsSuffix:"points",
+    calcRRLabel:"Risk/Reward Ratio",
+    calcResultTag:"CALCULATION RESULT",
+    calcMetricMaxVolume:"Max. Position Size",
+    calcMetricPosValue:"Position Value",
+    calcMetricSLPrice:"Stop-Loss Price",
+    calcMetricTPPrice:"Take-Profit Price",
+    calcMetricMaxLoss:"Max. Loss",
+    calcMetricPotentialProfit:"Potential Profit",
+    calcExplainerLead:"At an RR of",
+    calcExplainerAfterRatio:"you only need to win",
+    calcExplainerAfterPct:"of trades to break even.",
+    calcExplainerEvenAt:"Even with",
+    calcExplainerLossSuffix:"losing trades — you don't lose money.",
+    calcChartTag:"TRADE VISUALIZATION",
+    calcFormulaTitle:"Position Size Formula:",
+    calcFormulaLine1:"Size = (Deposit × Risk%) ÷ Distance to SL",
+
+    // Block 2 — Risk math
+    block2Title:"Risk Math: Why 1% Saves Your Deposit",
+    block2Sub:"“Rule #1: never lose money. Rule #2: don't forget rule #1.” — Warren Buffett. Risk math isn't a restriction — it's a survival system.",
+    riskSeriesTitle:"🧮 The Effect of a Losing Streak",
+    riskSeriesIntro:"Why a 10% risk per trade is catastrophic — even with just 5 losses in a row:",
+    riskLabel:"Risk",
+    riskLossesArrow:"5 losses →",
+    riskSeriesFootnote:"Starting deposit: $10,000",
+    rrTableTitle:"📐 Risk/Reward Table",
+    rrTableIntro:"The minimum win rate to stay profitable over 100 trades with a $10,000 deposit and 1% risk:",
+    rrNeededWR:"need WR ≥",
+    rrTableFootnote:"* Profit over 100 trades, Win Rate = minimum threshold",
+
+    // InfoCards
+    infoRRTitle:"R/R Ratio",
+    infoSLText:"An order that automatically closes a losing trade once the price reaches a set level. SL isn't “fear of losing” — it's the pre-planned cost of the information that you were wrong in your analysis.",
+    infoTPText:"An order that automatically closes a profitable trade. Locks in the result before the market reverses. TP = the point where your analysis says “target reached.”",
+    infoTrailingText:"A dynamic Stop-Loss that follows the price at a set distance. Lets you “ride” the trend, automatically locking in profit if it reverses.",
+    infoRRText:"Risk/Reward = distance to TP ÷ distance to SL. Professionals only trade at R/R ≥ 1:2. This improves the math of the system — a strategy can be profitable even with less than 50% correct entries.",
+
+    // Conclusions
+    conclTag:"CHAPTER 3 TAKEAWAYS",
+    conclTitle:"What You Now Know",
+    concl1:"Diversification is the only “free lunch” in investing: it reduces risk without sacrificing returns",
+    concl2:"Gold and bonds rise in a crisis when stocks fall — this is the basis of a protected portfolio",
+    concl3:"The 1–2% risk-per-trade rule: it's not a limit on profit, it's protection for your deposit against catastrophic losses",
+    concl4:"At an RR of 1:3, you only need to win 26% of trades to stay profitable",
+    concl5:"Position size = (Deposit × Risk%) ÷ Distance to Stop-Loss. Always calculate this BEFORE entering a trade",
+
+    // Footer
+    footerAskLink:"Have a question? Write to an analyst",
+    footerNextBtn:"Level 4: Order Mechanics →",
+  },
   ro:{
     // Sticky header / hero
     chapterTitleShort:"Arsenal și Apărare",
@@ -223,7 +364,7 @@ const STRINGS = {
     corrHeaders:["Eveniment","S&P 500","Aur","Obligațiuni","Petrol","DXY"],
     corrRow1Label:"🏦 Criza 2008",
     corrRow2Label:"🦠 COVID 2020",
-    corrRow3Label:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-up.png' alt='' width='20' height='20' /> Piață bull",
+    corrRow3Label:"📈 Piață bull",
     corrRow4Label:"💸 Inflație ↑",
     corrFootnote:"* Valori aproximative bazate pe date istorice",
 
@@ -254,7 +395,7 @@ const STRINGS = {
     crashRecoverySuffix:(months)=>`~${months} luni`,
     ratingProtected:"🟢 Protejat",
     ratingModerate:"🟡 Risc moderat",
-    ratingHigh:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-alert-dot.png' alt='' width='20' height='20' /> Risc ridicat",
+    ratingHigh:"🔴 Risc ridicat",
     crashChartTag:"DINAMICA PORTOFOLIULUI ÎN CRIZĂ",
     crashChartBottomLabel:"minim",
 
@@ -440,7 +581,7 @@ function CrashTest() {
   };
 
   const assetLabels = {
-    sp500:  { label:S.assetSp500Label, color:"#2563eb",  emoji:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-up.png' alt='' width='20' height='20' />" },
+    sp500:  { label:S.assetSp500Label, color:"#2563eb",  emoji:"📈" },
     bonds:  { label:S.assetBondsLabel, color:"#7c3aed", emoji:"🏛️" },
     gold:   { label:S.assetGoldLabel,         color:"#c9973a", emoji:"🥇" },
     oil:    { label:S.assetOilLabel,            color:"#92400e", emoji:"🛢️" },
@@ -795,7 +936,7 @@ function Chapter3() {
   const [askOpen, setAskOpen] = useState(false);
 
   const assetClasses = [
-    {icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-up.png' alt='' width='20' height='20' />", title:S.ac1Title, accent:C.blue,
+    {icon:"📈", title:S.ac1Title, accent:C.blue,
      items:[
        {k:S.ac1K1, v:S.ac1V1},
        {k:S.ac1K2, v:S.ac1V2},
@@ -914,9 +1055,9 @@ function Chapter3() {
               </thead>
               <tbody>
                 {[
-                  [S.corrRow1Label,    "-56%","🟢 +25%","🟢 +8%", "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-alert-dot.png' alt='' width='20' height='20' /> -77%","🟢 +22%"],
-                  [S.corrRow2Label,     "-34%","🟢 +6%", "🟢 +8%", "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-alert-dot.png' alt='' width='20' height='20' /> -65%","🟢 +8%" ],
-                  [S.corrRow3Label,   "🟢 +28%","-2%",    "-4%",   "🟢 +15%","<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-alert-dot.png' alt='' width='20' height='20' /> -5%" ],
+                  [S.corrRow1Label,    "-56%","🟢 +25%","🟢 +8%", "🔴 -77%","🟢 +22%"],
+                  [S.corrRow2Label,     "-34%","🟢 +6%", "🟢 +8%", "🔴 -65%","🟢 +8%" ],
+                  [S.corrRow3Label,   "🟢 +28%","-2%",    "-4%",   "🟢 +15%","🔴 -5%" ],
                   [S.corrRow4Label,    "-18%","🟢 +12%", "-12%",  "🟢 +30%","🟢 +8%" ],
                 ].map((row,i) => (
                   <tr key={i} style={{borderBottom:"1px solid rgba(255,255,255,0.05)"}}>
@@ -996,9 +1137,9 @@ function Chapter3() {
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,marginBottom:56}} className="grid-2">
           <InfoCard icon="🛑" title="Stop-Loss (SL)" accent={C.red}
             text={S.infoSLText}/>
-          <InfoCard icon="<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-target.png' alt='' width='20' height='20' />" title="Take-Profit (TP)" accent={C.green}
+          <InfoCard icon="🎯" title="Take-Profit (TP)" accent={C.green}
             text={S.infoTPText}/>
-          <InfoCard icon="<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-bar-chart.png' alt='' width='20' height='20' />" title="Trailing Stop" accent={C.blue}
+          <InfoCard icon="📊" title="Trailing Stop" accent={C.blue}
             text={S.infoTrailingText}/>
           <InfoCard icon="⚖️" title={S.infoRRTitle} accent={C.gold}
             text={S.infoRRText}/>

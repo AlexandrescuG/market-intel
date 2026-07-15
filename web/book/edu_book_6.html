@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>SBF | {% if lang == 'ro' %}Capitolul 6. Pulsul Știrilor{% else %}Глава 6. Пульс Новостей{% endif %}</title>
+  <title>SBF | {% if lang == 'ru' %}Глава 6. Пульс Новостей{% elif lang == 'ro' %}Capitolul 6. Pulsul Știrilor{% else %}Chapter 6. News Pulse{% endif %}</title>
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
   <style>
@@ -68,7 +68,7 @@ const STRINGS = {
     matrixLabel:"МАТРИЦА ВЛИЯНИЯ НОВОСТЕЙ (ПРИ ЗНАЧЕНИЯХ ВЫШЕ ПРОГНОЗА)",
     matrixColEvent:"Событие", matrixColDollar:"Доллар (DXY)", matrixColGold:"Золото (XAU)", matrixColSP:"S&P 500", matrixColCrypto:"Крипта (BTC)",
     matrixRowNFP:"NFP (Рабочие места) ↑", matrixRowCPI:"CPI (Инфляция) ↑", matrixRowFOMC:"FOMC (Ставка ФРС) ↑",
-    matrixStrongUp:"🟢 Сильный рост", matrixUp:"🟢 Рост", matrixDown:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-alert-dot.png' alt='' width='20' height='20' /> Падение", matrixMixed:"🟡 Смешанно", matrixStrongDown:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-alert-dot.png' alt='' width='20' height='20' /> Сильное падение",
+    matrixStrongUp:"🟢 Сильный рост", matrixUp:"🟢 Рост", matrixDown:"🔴 Падение", matrixMixed:"🟡 Смешанно", matrixStrongDown:"🔴 Сильное падение",
 
     cycleLabel:"ЖИЗНЕННЫЙ ЦИКЛ НОВОСТИ",
     phase1Label:"ФАЗА 1: ОЖИДАНИЕ", phase1Sub:"«Слухи»",
@@ -83,20 +83,20 @@ const STRINGS = {
     nfpForecastLabel:"Прогноз аналитиकों:",
     nfpSimulateBtn:"СИМУЛИРОВАТЬ РЕЛИЗ", nfpLocalTimeFallback:"15:30 МСК",
     nfpFactLabel:"ФАКТ (Actual):",
-    nfpShockPart1:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-flame.png' alt='' width='20' height='20' /> ШОКОВЫЕ ДАННЫЕ!", nfpShockPart2:"Значение колоссально превышает прогноз.",
+    nfpShockPart1:"🔥 ШОКОВЫЕ ДАННЫЕ!", nfpShockPart2:"Значение колоссально превышает прогноз.",
     nfpInstrumentTitle:"Инструмент: XAU/USD (Золото)",
     nfpStage0Text:"Изучите макро-ожидания слева. Как только выйдут данные, у вас будут доли секунды, чтобы принять верное решение. Приготовьтесь.",
     nfpStage1Text:"🚨 ДАННЫЕ ВЫШЛИ! Рабочих мест создано в 2 раза больше прогноза. Экономика перегрета. Что делаем с золотом?",
     nfpStage2Text:"Сделка зафиксирована.",
     nfpBuyBtn:"BUY (Купить)", nfpSellBtn:"SELL (Продать)",
-    nfpCorrectTitle:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-check.png' alt='' width='20' height='20' /> Блестяще! Вы забрали профит.", nfpWrongTitle:"❌ Ошибка. Вас выбило по стопу.",
+    nfpCorrectTitle:"✅ Блестяще! Вы забрали профит.", nfpWrongTitle:"❌ Ошибка. Вас выбило по стопу.",
     nfpCorrectExplain:"Логика: NFP вышел лучше прогноза (285K > 150K). Экономика США сильна. Инвесторы начинают верить, что ФРС повысит ставки. Капитал перетекает в Доллар (USD). Так как золото котируется в долларах (XAU/USD), сильный доллар мгновенно обрушает цену золота.",
     nfpWrongExplain:"Логика: Вы купили золото, но NFP вышел феноменально сильным (285K > 150K). Это позитив для экономики США и Доллара. Инвесторы скупают доллар, что математически давит пару XAU/USD вниз. Покупка золота при сильном долларе — это игра против локомотива.",
     nfpResetBtn:"↺ ПОВТОРИТЬ СИМУЛЯЦИЮ",
 
     sqzHeader:"Охота на Squeeze (Сжатие)", sqzBadge:"ИНТЕРАКТИВ — ТЕХНИКА (BOLLINGER BANDS)",
     sqzInitialMsg:"Найдите на графике зону 'Squeeze' (максимального сужения линий) и кликните в этот блок.",
-    sqzCorrectMsg:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-target.png' alt='' width='20' height='20' /> Идеально! Вы нашли Squeeze. Волатильность упала до нуля, пружина сжалась. Именно здесь крупные игроки накопили позицию перед мощным прострелом вверх.",
+    sqzCorrectMsg:"🎯 Идеально! Вы нашли Squeeze. Волатильность упала до нуля, пружина сжалась. Именно здесь крупные игроки накопили позицию перед мощным прострелом вверх.",
     sqzWrongMsg:"❌ Нет, здесь полосы всё ещё широкие. Ищите 'узкое горлышко', где цена зажата в тиски.",
     sqzBreakoutLabel:"ВЗРЫВ (BREAKOUT) <img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-rocket.png' alt='' width='20' height='20' />", sqzFutureHidden:"БУДУЩЕЕ СКРЫТО", sqzHideBtn:"↻ СКРЫТЬ ГРАФИК",
 
@@ -122,6 +122,78 @@ const STRINGS = {
 
     footerAsk:"Остался вопрос? Напиши аналитику", footerNextBtn:"Уровень 7: Следы Институционалов →",
   },
+  en: {
+    stickyLevel:"LEVEL 6", stickyTitle:"News Pulse", stickyFA:"FA 50%", stickyTA:"TA 50%",
+    heroLabel:"SBF COMPANY — CHAPTER 6", heroTitleA:"News", heroTitleB:"Pulse",
+    heroSub:"How fundamental analysis predicts an economic explosion, while a technical indicator visualizes a spring compressing before it breaks out.",
+    heroChip1:"Macroeconomics", heroChip3:"2 Simulators",
+
+    sec1Title:"Macroeconomics: The Three Whales of Volatility",
+    sec1Sub:"The market isn't driven by lines on a chart, but by capital. Capital flows from one asset to another only under the pressure of global economic data. News is a liquidity trigger.",
+
+    fundFomcTitle:"FOMC (Fed Rate)", fundGdpTitle:"GDP (US GDP)",
+    fundNfpText:"The number of new jobs created in the US. Released on the first Friday of the month. One of the most volatile days in trading. If jobs beat the forecast — the economy is strong, the dollar rises.",
+    fundCpiText:"Consumer Price Index (Inflation). The markets' main fear. If inflation comes in above expectations, investors panic, stocks fall, and the Fed prepares to tighten policy.",
+    fundFomcText:"The US central bank's decision on the interest rate. Money gets more expensive = stocks and crypto get cheaper. And vice versa. This is the «switch» for the world's liquidity.",
+    fundGdpText:"The core indicator of economic health. Deviations from forecast trigger a repricing of all assets by institutional investors.",
+
+    matrixLabel:"NEWS IMPACT MATRIX (WHEN VALUES BEAT FORECAST)",
+    matrixColEvent:"Event", matrixColDollar:"Dollar (DXY)", matrixColGold:"Gold (XAU)", matrixColSP:"S&P 500", matrixColCrypto:"Crypto (BTC)",
+    matrixRowNFP:"NFP (Jobs) ↑", matrixRowCPI:"CPI (Inflation) ↑", matrixRowFOMC:"FOMC (Fed Rate) ↑",
+    matrixStrongUp:"🟢 Strong rise", matrixUp:"🟢 Rise", matrixDown:"🔴 Fall", matrixMixed:"🟡 Mixed", matrixStrongDown:"🔴 Strong fall",
+
+    cycleLabel:"THE LIFE CYCLE OF A NEWS EVENT",
+    phase1Label:"PHASE 1: ANTICIPATION", phase1Sub:"«Rumors»",
+    phase1Text:"Analysts forecast good data. The crowd starts buying the asset ahead of time. The price rises steadily for no visible reason.",
+    phase2Label:"PHASE 2: RELEASE", phase2Sub:"«Fact»",
+    phase2Text:"Positive news comes out. Latecomers pile into the market (FOMO). Volatility and liquidity spike sharply.",
+    phase3Label:"PHASE 3: PROFIT-TAKING", phase3Sub:"«Collapse»",
+    phase3Text:"Big players (Smart Money), who bought during 'Phase 1', sell their huge volumes into the euphoric crowd. The price plunges rapidly.",
+
+    nfpHeader:"Bloomberg Terminal: NFP Release", nfpBadge:"INTERACTIVE — FUNDAMENTAL",
+    nfpEventLabel:"Event", nfpEventDesc:"Change in the number of people employed in the non-farm sector",
+    nfpForecastLabel:"Analysts' forecast:",
+    nfpSimulateBtn:"SIMULATE RELEASE", nfpLocalTimeFallback:"15:30 MSK",
+    nfpFactLabel:"ACTUAL:",
+    nfpShockPart1:"🔥 SHOCK DATA!", nfpShockPart2:"The value colossally exceeds the forecast.",
+    nfpInstrumentTitle:"Instrument: XAU/USD (Gold)",
+    nfpStage0Text:"Study the macro expectations on the left. As soon as the data comes out, you'll have a split second to make the right call. Get ready.",
+    nfpStage1Text:"🚨 THE DATA IS OUT! Twice as many jobs were created as forecast. The economy is overheating. What do we do with gold?",
+    nfpStage2Text:"Trade closed.",
+    nfpBuyBtn:"BUY", nfpSellBtn:"SELL",
+    nfpCorrectTitle:"✅ Brilliant! You locked in the profit.", nfpWrongTitle:"❌ Mistake. You got stopped out.",
+    nfpCorrectExplain:"Logic: NFP came in better than forecast (285K > 150K). The US economy is strong. Investors start to believe the Fed will raise rates. Capital flows into the Dollar (USD). Since gold is quoted in dollars (XAU/USD), a strong dollar instantly crushes the price of gold.",
+    nfpWrongExplain:"Logic: You bought gold, but NFP came in phenomenally strong (285K > 150K). That's bullish for the US economy and the Dollar. Investors buy up dollars, which mathematically pushes the XAU/USD pair down. Buying gold while the dollar is strong means playing against the locomotive.",
+    nfpResetBtn:"↺ REPEAT SIMULATION",
+
+    sqzHeader:"Hunting for the Squeeze", sqzBadge:"INTERACTIVE — TECHNICAL (BOLLINGER BANDS)",
+    sqzInitialMsg:"Find the 'Squeeze' zone on the chart (where the lines narrow the most) and click on that block.",
+    sqzCorrectMsg:"🎯 Perfect! You found the Squeeze. Volatility dropped to zero, the spring compressed. This is exactly where big players accumulated their position before a powerful move up.",
+    sqzWrongMsg:"❌ No, the bands are still wide here. Look for the 'narrow neck' where price is squeezed in a vice.",
+    sqzBreakoutLabel:"BREAKOUT <img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-rocket.png' alt='' width='20' height='20' />", sqzFutureHidden:"THE FUTURE IS HIDDEN", sqzHideBtn:"↻ HIDE CHART",
+
+    bbSmaTitle:"Fair Price (SMA)",
+    bbSmaText:"The indicator's middle line is a 20-period moving average. It shows where the balance of power between buyers and sellers stands right now.",
+    bbExtremeTitle:"Extreme Zones (±2 SD)",
+    bbExtremeText:"The upper and lower bands are built on deviations of mathematical variance. 95% of the time, price stays inside this tunnel. Breaking outside the bands is an anomaly.",
+    bbExpansionTitle:"Expansion",
+    bbExpansionText:"When the market has a powerful trend or panic, the bands spread sharply apart. Jumping into a trade at that exact moment is the most common beginner mistake.",
+    bbSqueezeTitle:"Squeeze",
+    bbSqueezeText:"The bands narrow into a tight corridor. Volatility drops. The market has frozen and is storing up energy. This is exactly the zone where professionals set traps for the breakout.",
+
+    sec2Title:"Bollinger Bands: The Market's Breathing Indicator",
+    sec2Sub:"News is the match. But for a powerful explosion, you need tightly packed gunpowder. The Bollinger Bands indicator visually shows the periods when the market is squeezed in a vice and storing up energy.",
+
+    concl1:"Fundamentals (macro news) create the reason for capital to move. Technicals (indicators) visualize this on the chart.",
+    concl2:"Rule #1 for NFP: Strong economy = Strong dollar (DXY) = Gold and the Euro fall.",
+    concl3:"The market lives on expectations. The 'buy the rumor, sell the fact' principle explains why an asset can crash even on good news.",
+    concl4:"The Bollinger Bands indicator is a volatility detector. It doesn't predict direction, it predicts the strength of the coming move.",
+    concl5:"Don't trade inside a 'Squeeze'. Wait for the band breakout and volume confirmation.",
+
+    conclLabel:"CHAPTER 6 TAKEAWAYS", conclTitle:"Checklist: News Pulse",
+
+    footerAsk:"Have a question? Write to an analyst", footerNextBtn:"Level 7: Institutional Footprint →",
+  },
   ro: {
     stickyLevel:"NIVELUL 6", stickyTitle:"Pulsul Știrilor", stickyFA:"AF 50%", stickyTA:"AT 50%",
     heroLabel:"SBF COMPANY — CAPITOLUL 6", heroTitleA:"Pulsul", heroTitleB:"Știrilor",
@@ -140,7 +212,7 @@ const STRINGS = {
     matrixLabel:"MATRICEA IMPACTULUI ȘTIRILOR (LA VALORI PESTE PROGNOZĂ)",
     matrixColEvent:"Eveniment", matrixColDollar:"Dolar (DXY)", matrixColGold:"Aur (XAU)", matrixColSP:"S&P 500", matrixColCrypto:"Cripto (BTC)",
     matrixRowNFP:"NFP (Locuri de muncă) ↑", matrixRowCPI:"CPI (Inflație) ↑", matrixRowFOMC:"FOMC (Rata Fed) ↑",
-    matrixStrongUp:"🟢 Creștere puternică", matrixUp:"🟢 Creștere", matrixDown:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-alert-dot.png' alt='' width='20' height='20' /> Scădere", matrixMixed:"🟡 Mixt", matrixStrongDown:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-alert-dot.png' alt='' width='20' height='20' /> Scădere puternică",
+    matrixStrongUp:"🟢 Creștere puternică", matrixUp:"🟢 Creștere", matrixDown:"🔴 Scădere", matrixMixed:"🟡 Mixt", matrixStrongDown:"🔴 Scădere puternică",
 
     cycleLabel:"CICLUL DE VIAȚĂ AL ȘTIRII",
     phase1Label:"FAZA 1: AȘTEPTARE", phase1Sub:"«Zvonuri»",
@@ -155,20 +227,20 @@ const STRINGS = {
     nfpForecastLabel:"Prognoza analiștilor:",
     nfpSimulateBtn:"SIMULEAZĂ PUBLICAREA", nfpLocalTimeFallback:"15:30 MSK",
     nfpFactLabel:"FAPT (Actual):",
-    nfpShockPart1:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-flame.png' alt='' width='20' height='20' /> DATE ȘOCANTE!", nfpShockPart2:"Valoarea depășește colosal prognoza.",
+    nfpShockPart1:"🔥 DATE ȘOCANTE!", nfpShockPart2:"Valoarea depășește colosal prognoza.",
     nfpInstrumentTitle:"Instrument: XAU/USD (Aur)",
     nfpStage0Text:"Studiază așteptările macro din stânga. De îndată ce apar datele, vei avea o fracțiune de secundă pentru a lua decizia corectă. Pregătește-te.",
     nfpStage1Text:"🚨 DATELE AU APĂRUT! S-au creat de 2 ori mai multe locuri de muncă decât prognoza. Economia este supraîncălzită. Ce facem cu aurul?",
     nfpStage2Text:"Tranzacția este finalizată.",
     nfpBuyBtn:"BUY (Cumpără)", nfpSellBtn:"SELL (Vinde)",
-    nfpCorrectTitle:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-check.png' alt='' width='20' height='20' /> Excelent! Ai luat profitul.", nfpWrongTitle:"❌ Greșeală. Ai fost scos pe stop.",
+    nfpCorrectTitle:"✅ Excelent! Ai luat profitul.", nfpWrongTitle:"❌ Greșeală. Ai fost scos pe stop.",
     nfpCorrectExplain:"Logica: NFP a ieșit mai bun decât prognoza (285K > 150K). Economia SUA este puternică. Investitorii încep să creadă că Fed va majora rata dobânzii. Capitalul se mută spre Dolar (USD). Deoarece aurul este cotat în dolari (XAU/USD), un dolar puternic prăbușește instantaneu prețul aurului.",
     nfpWrongExplain:"Logica: Ai cumpărat aur, dar NFP a ieșit fenomenal de puternic (285K > 150K). Acesta este un semnal pozitiv pentru economia SUA și pentru dolar. Investitorii cumpără masiv dolari, ceea ce împinge matematic perechea XAU/USD în jos. Cumpărarea aurului atunci când dolarul este puternic înseamnă să joci împotriva locomotivei.",
     nfpResetBtn:"↺ REPETĂ SIMULAREA",
 
     sqzHeader:"Vânătoare de Squeeze (Comprimare)", sqzBadge:"INTERACTIV — TEHNICĂ (BOLLINGER BANDS)",
     sqzInitialMsg:"Găsește pe grafic zona de 'Squeeze' (comprimarea maximă a liniilor) și dă clic în acest bloc.",
-    sqzCorrectMsg:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-target.png' alt='' width='20' height='20' /> Perfect! Ai găsit Squeeze-ul. Volatilitatea a scăzut la zero, arcul s-a comprimat. Exact aici jucătorii mari și-au acumulat poziția înainte de o mișcare puternică în sus.",
+    sqzCorrectMsg:"🎯 Perfect! Ai găsit Squeeze-ul. Volatilitatea a scăzut la zero, arcul s-a comprimat. Exact aici jucătorii mari și-au acumulat poziția înainte de o mișcare puternică în sus.",
     sqzWrongMsg:"❌ Nu, aici benzile sunt încă largi. Caută 'gâtul de sticlă' unde prețul este strâns ca într-o menghină.",
     sqzBreakoutLabel:"EXPLOZIE (BREAKOUT) <img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-rocket.png' alt='' width='20' height='20' />", sqzFutureHidden:"VIITORUL ESTE ASCUNS", sqzHideBtn:"↻ ASCUNDE GRAFICUL",
 
@@ -255,8 +327,8 @@ function AskAnalystPopup({chapterNum, lang, onClose}) {
           <p style={{fontSize:18,color:C.inkMid}}>{tr.sub}</p>
         </div>
         <div className="messenger-grid">
-          {[{href:tgLink,bg:"#0088cc",icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-rocket.png' alt='' width='20' height='20' />",name:"SBF Support",sub:`Telegram · ${tr.online}`,btn:tr.btnTg},
-            {href:waLink,bg:"#25d366",icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-quote.png' alt='' width='20' height='20' />",name:"SBF Company",sub:`WhatsApp · ${tr.online}`,btn:tr.btnWa}
+          {[{href:tgLink,bg:"#0088cc",icon:"🚀",name:"SBF Support",sub:`Telegram · ${tr.online}`,btn:tr.btnTg},
+            {href:waLink,bg:"#25d366",icon:"💬",name:"SBF Company",sub:`WhatsApp · ${tr.online}`,btn:tr.btnWa}
           ].map((m,i) => (
             <div key={i} style={{background:"#fff",border:"1px solid #e0e0e0",borderRadius:12,padding:"30px 25px",display:"flex",flexDirection:"column"}}>
               <div style={{display:"flex",alignItems:"center",gap:15,marginBottom:30}}>
@@ -530,7 +602,7 @@ function Chapter6() {
   const [askOpen, setAskOpen] = useState(false);
 
   const fundamentals = [
-    {icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-briefcase.png' alt='' width='20' height='20' />", title:"NFP (Non-Farm Payrolls)", accent:C.blue, text:S.fundNfpText},
+    {icon:"💼", title:"NFP (Non-Farm Payrolls)", accent:C.blue, text:S.fundNfpText},
     {icon:"🛒", title:"CPI (Consumer Price Index)", accent:C.red, text:S.fundCpiText},
     {icon:"🏦", title:S.fundFomcTitle, accent:C.gold, text:S.fundFomcText},
     {icon:"🗣️", title:S.fundGdpTitle, accent:C.green, text:S.fundGdpText},
@@ -717,7 +789,7 @@ ReactDOM.createRoot(document.getElementById('sbf-book-root')).render(<Chapter6 /
 // Скрипт для конвертации UTC времени в локальное время пользователя
 document.addEventListener('DOMContentLoaded', function() {
     var _pageLang = "{{ lang }}";
-    var _intlLocale = _pageLang === 'ro' ? 'ro-RO' : 'ru-RU';
+    var _intlLocale = _pageLang === 'ro' ? 'ro-RO' : _pageLang === 'en' ? 'en-US' : 'ru-RU';
     const utcTimes = document.querySelectorAll('.local-time[data-utc]');
 
     utcTimes.forEach(function(element) {

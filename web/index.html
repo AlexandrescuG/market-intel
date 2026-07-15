@@ -292,9 +292,9 @@ a:hover{text-decoration:underline;color:var(--glow)}
     </div>
   </div>
   <nav class="g-nav">
-    <a href="{{ '/ro' if lang == 'ro' else '' }}/" class="g-nav-item active">{{ t('nav.today', lang) }}</a>
-    <a href="{{ '/ro' if lang == 'ro' else '' }}/edu/" class="g-nav-item">{{ t('nav.edu', lang) }}</a>
-    <a href="{{ '/ro' if lang == 'ro' else '' }}/calendar" class="g-nav-item">{{ t('nav.calendar', lang) }}</a>
+    <a href="{{ ('/' + lang) if lang != 'ru' else '' }}/" class="g-nav-item active">{{ t('nav.today', lang) }}</a>
+    <a href="{{ ('/' + lang) if lang != 'ru' else '' }}/edu/" class="g-nav-item">{{ t('nav.edu', lang) }}</a>
+    <a href="{{ ('/' + lang) if lang != 'ru' else '' }}/calendar" class="g-nav-item">{{ t('nav.calendar', lang) }}</a>
   </nav>
   <div class="right sbf-right">
     <div class="win"><span class="dot" id="liveDot"></span><span id="liveTxt">—</span></div>
@@ -303,6 +303,7 @@ a:hover{text-decoration:underline;color:var(--glow)}
     <div class="sbf-lang-sw">
       <a href="/"{{ (' class="active"'|safe) if lang == 'ru' else '' }}>RU</a>
       <a href="/ro/"{{ (' class="active"'|safe) if lang == 'ro' else '' }}>RO</a>
+      <a href="/en/"{{ (' class="active"'|safe) if lang == 'en' else '' }}>EN</a>
     </div>
   </div>
 </header>
@@ -444,6 +445,8 @@ a:hover{text-decoration:underline;color:var(--glow)}
 
 <script>
 const DATA = './data/';
+const _PAGE_LANG = {{ lang | tojson }};
+const _CLOCK_LOCALE = _PAGE_LANG === 'ro' ? 'ro-RO' : _PAGE_LANG === 'en' ? 'en-GB' : 'ru-RU';
 const fmt = n => n==null?'—':(Math.abs(n)>=1000?n.toLocaleString('en-US',{maximumFractionDigits:2}):n);
 function fmt_(tpl, vars) { return tpl.replace(/\{(\w+)\}/g, (_, k) => (vars[k] != null ? vars[k] : '')); }
 const I18N_TIME = {
@@ -459,7 +462,7 @@ async function get(f){ try{ const r=await fetch(DATA+f+'.json?t='+Date.now()); r
 
 function clockWindow(){
   const d=new Date(), h=d.getHours();
-  document.getElementById('clock').textContent=d.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+  document.getElementById('clock').textContent=d.toLocaleTimeString(_CLOCK_LOCALE,{hour:'2-digit',minute:'2-digit'});
   const inWin = h>=6 && h<10;
   document.getElementById('winDot').className='dot'+(inWin?' on':'');
   document.getElementById('winTxt').textContent=inWin?{{ t('clock.morning_window', lang) | tojson }}:{{ t('clock.always_on', lang) | tojson }};

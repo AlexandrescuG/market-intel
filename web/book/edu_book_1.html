@@ -264,6 +264,25 @@ const STRINGS = {
     treePsychology: "ПСИХОЛОГИЯ",
     treeLocked: "Закрыто (Ур. 2)",
   },
+  en: {
+    chartResistancePivot: "Resistance | Pivot Point",
+    chartLastSignal: "Last Signal",
+    chartSupport: "Support",
+    pivotBase: "1. Base Point (P) =",
+    pivotResistance: "2. Resistance (R1) =",
+    pivotSupport: "3. Support (S1) =",
+    pivotNote: "* Where High, Low, Close are the previous day's high, low, and closing price.",
+    comingSoonBack: "← Back to Chapter 1",
+    treeBack: "← BACK",
+    treeLevelDone: "LEVEL 1 COMPLETE",
+    treeMarketBase: "MARKET BASICS",
+    treeTechAnalysis: "TECHNICAL ANALYSIS",
+    treeUnlocked: "Unlocked",
+    treeFundamentals: "FUNDAMENTALS",
+    treeInProgress: "In progress...",
+    treePsychology: "PSYCHOLOGY",
+    treeLocked: "Locked (Lvl. 2)",
+  },
   ro: {
     chartResistancePivot: "Rezistență | Punct de pivot",
     chartLastSignal: "Ultimul semnal",
@@ -323,16 +342,16 @@ const EXCHANGES=[
   {name:"LSE",flag:"🇬🇧",cap:"$5.9T",cos:"1,025",yr:1801,bar:18,top5:["AstraZeneca (AZN) — $0.28T","Shell (SHEL) — $0.22T","HSBC (HSBA) — $0.18T","Unilever (ULVR) — $0.12T","GSK (GSK) — $0.08T"]},
 ];
 const TM={
-  "S&P 500":   {2005:1249,2010:1136,2012:1426,2015:2043,2018:2746,2020:3756,2022:4770,now:5842,note:{ru:"+408% за 15 лет",ro:"+408% în 15 ani"}},
-  "Apple":     {2005:6,  2010:29,  2012:76,  2015:108, 2018:157, 2020:131, 2022:150, now:227,  note:{ru:"+3,683% с 2005",ro:"+3.683% din 2005"}},
-  "Gold":      {2005:513,2010:1115,2012:1675,2015:1062,2018:1282,2020:1900,2022:1826,now:3124, note:{ru:"+313% за 15 лет (реал.)",ro:"+313% în 15 ani (real)"}},
-  "Bitcoin":   {                  2015:320, 2018:13800,2020:29000,2022:47000,          now:83421,note:{ru:"+26,069% за 10 лет",ro:"+26.069% în 10 ani"}},
-  "NVIDIA":    {        2010:4,  2012:13,  2015:23,  2018:33,  2020:131, 2022:140,    now:875,  note:{ru:"+21,775% за 15 лет",ro:"+21.775% în 15 ani"}},
-  "Amazon":    {2005:47, 2010:185,2012:227,2015:694,2018:1501,2020:3256,2022:94,      now:226,  note:{ru:"+381% за 10 лет",ro:"+381% în 10 ani"}},
-  "Microsoft": {2005:26, 2010:31, 2012:28, 2015:55, 2018:102, 2020:214, 2022:290,    now:420,  note:{ru:"+1,515% за 20 лет",ro:"+1.515% în 20 ani"}},
-  "Tesla":     {                 2015:50, 2018:65,  2020:705, 2022:123,               now:338,  note:{ru:"+576% за 10 лет",ro:"+576% în 10 ani"}},
-  "Ethereum":  {                          2018:350, 2020:730, 2022:3740,              now:2100, note:{ru:"+500% за 7 лет",ro:"+500% în 7 ani"}},
-  "Oil (WTI)": {2005:60, 2010:79, 2012:91, 2015:50, 2018:61,  2020:47,  2022:78,    now:68,   note:{ru:"+13% за 20 лет",ro:"+13% în 20 ani"}},
+  "S&P 500":   {2005:1249,2010:1136,2012:1426,2015:2043,2018:2746,2020:3756,2022:4770,now:5842,note:{ru:"+408% за 15 лет",en:"+408% in 15 years",ro:"+408% în 15 ani"}},
+  "Apple":     {2005:6,  2010:29,  2012:76,  2015:108, 2018:157, 2020:131, 2022:150, now:227,  note:{ru:"+3,683% с 2005",en:"+3,683% since 2005",ro:"+3.683% din 2005"}},
+  "Gold":      {2005:513,2010:1115,2012:1675,2015:1062,2018:1282,2020:1900,2022:1826,now:3124, note:{ru:"+313% за 15 лет (реал.)",en:"+313% in 15 years (real)",ro:"+313% în 15 ani (real)"}},
+  "Bitcoin":   {                  2015:320, 2018:13800,2020:29000,2022:47000,          now:83421,note:{ru:"+26,069% за 10 лет",en:"+26,069% in 10 years",ro:"+26.069% în 10 ani"}},
+  "NVIDIA":    {        2010:4,  2012:13,  2015:23,  2018:33,  2020:131, 2022:140,    now:875,  note:{ru:"+21,775% за 15 лет",en:"+21,775% in 15 years",ro:"+21.775% în 15 ani"}},
+  "Amazon":    {2005:47, 2010:185,2012:227,2015:694,2018:1501,2020:3256,2022:94,      now:226,  note:{ru:"+381% за 10 лет",en:"+381% in 10 years",ro:"+381% în 10 ani"}},
+  "Microsoft": {2005:26, 2010:31, 2012:28, 2015:55, 2018:102, 2020:214, 2022:290,    now:420,  note:{ru:"+1,515% за 20 лет",en:"+1,515% in 20 years",ro:"+1.515% în 20 ani"}},
+  "Tesla":     {                 2015:50, 2018:65,  2020:705, 2022:123,               now:338,  note:{ru:"+576% за 10 лет",en:"+576% in 10 years",ro:"+576% în 10 ani"}},
+  "Ethereum":  {                          2018:350, 2020:730, 2022:3740,              now:2100, note:{ru:"+500% за 7 лет",en:"+500% in 7 years",ro:"+500% în 7 ani"}},
+  "Oil (WTI)": {2005:60, 2010:79, 2012:91, 2015:50, 2018:61,  2020:47,  2022:78,    now:68,   note:{ru:"+13% за 20 лет",en:"+13% in 20 years",ro:"+13% în 20 ani"}},
 };
 const CANDLES = [
   {o:5180, h:5195, l:5175, c:5190}, {o:5190, h:5195, l:5170, c:5175}, {o:5175, h:5185, l:5165, c:5180},
@@ -345,7 +364,7 @@ const CANDLES = [
   {o:5165, h:5180, l:5160, c:5175}, {o:5175, h:5185, l:5165, c:5170}, {o:5170, h:5180, l:5155, c:5178}
 ];
 const getCY = (price) => 260 - ((price - 5080) / 170) * 230;
-const TM_EMOJIS = {"S&P 500":"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-up.png' alt='' width='20' height='20' />","Apple":"🍎","Gold":"🥇","Bitcoin":"₿","NVIDIA":"🎮","Amazon":"📦","Microsoft":"💻","Tesla":"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-lightning.png' alt='' width='20' height='20' />","Ethereum":"🔷","Oil (WTI)":"🛢️"};
+const TM_EMOJIS = {"S&P 500":"📈","Apple":"🍎","Gold":"🥇","Bitcoin":"₿","NVIDIA":"🎮","Amazon":"📦","Microsoft":"💻","Tesla":"⚡","Ethereum":"🔷","Oil (WTI)":"🛢️"};
 
 const GLOSSARY={
   ru:{
@@ -362,6 +381,7 @@ const GLOSSARY={
     "exchange":{s:"A marketplace where buyers and sellers trade securities",a:"Organized market for standardized financial instruments",e:"NYSE — $31.7T market cap"},
     "liquidity":{s:"How quickly you can sell an asset without price loss",a:"Ability to convert an asset to cash at market price",e:"Apple shares — sold in seconds"},
     "volatility":{s:"How wildly an asset's price swings",a:"Standard deviation of returns. Higher = more unpredictable movement. VIX measures S&P500 volatility",e:"BTC is ~10x more volatile than gold. VIX >30 = panic, <15 = calm"},
+    "broker":{s:"An intermediary who executes trades on an exchange",a:"An agent who carries out orders on behalf of clients on the exchange",e:"24 brokers founded the NYSE in 1792 under a buttonwood tree"},
     "market maker":{s:"A participant always ready to buy and sell an asset",a:"Professional participant providing liquidity via continuous two-sided quotes",e:"Citadel Securities, Virtu Financial — largest market makers"},
     "IPO":{s:"Initial Public Offering — company first sells shares on exchange",a:"Process by which a private company becomes publicly traded",e:"Apple IPO 1980: $22/share. Now $227"},
     "index":{s:"A basket of stocks showing market performance",a:"Weighted measure of a group of securities. Benchmark for fund managers",e:"S&P 500 = 500 largest US companies"},
@@ -644,7 +664,7 @@ function Level1({onBack, onNext, path}) {
 
     React.createElement('div',{style:{maxWidth:1060,margin:"0 auto",padding:"60px 5vw 120px"}},
       React.createElement('div',{style:{background:C.dark,color:C.white,padding:"45px 5vw",marginBottom:60,position:"relative",overflow:"hidden"}},
-        React.createElement('div',{style:{position:"absolute",top:-12,right:30,fontSize:127,opacity:0.05,fontFamily:"monospace"}},"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-lightning.png' alt='' width='20' height='20' />"),
+        React.createElement('div',{style:{position:"absolute",top:-12,right:30,fontSize:127,opacity:0.05,fontFamily:"monospace"}},"⚡"),
         React.createElement(Chip,{color:C.gold},tr.antiMythTag),
         React.createElement('h2',{style:{fontSize:"clamp(25px,3.5vw,38px)",fontWeight:700,margin:"18px 0 12px",color:C.white,lineHeight:1.25,fontFamily:"'DM Serif Display',serif"}},tr.antiMythTitle),
         React.createElement('p',{style:{fontSize:19,color:"#cccccc",lineHeight:1.8,margin:0}},tr.antiMythBody)
@@ -843,7 +863,7 @@ function Level1({onBack, onNext, path}) {
               React.createElement('span',{style:{fontSize:15,fontFamily:"monospace",fontWeight:700,color:C.inkMid,minWidth:96,textAlign:"right"}},"$"+tmRes.depFin.toLocaleString())
             ),
             React.createElement('div',{style:{display:"flex",alignItems:"center",gap:12, flexWrap:"wrap"}},
-              React.createElement('span',{style:{fontSize:14,fontFamily:"monospace",color:C.inkSoft,width:140,flexShrink:0}},(TM_EMOJIS[tmAsset]||"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-up.png' alt='' width='20' height='20' />")+" "+tmAsset.substring(0,10)),
+              React.createElement('span',{style:{fontSize:14,fontFamily:"monospace",color:C.inkSoft,width:140,flexShrink:0}},(TM_EMOJIS[tmAsset]||"📈")+" "+tmAsset.substring(0,10)),
               React.createElement('div',{style:{flex:1,height:9,background:"#e8e4dc",borderRadius:4,overflow:"hidden", minWidth: 100}},
                 React.createElement('div',{style:{width:"100%",height:"100%",background:C.gold,borderRadius:4}})
               ),

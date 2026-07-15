@@ -89,7 +89,7 @@ const STRINGS = {
     sentConclusionEuphoria: "Рынок в эйфории — исторически лучшее время для осторожности.",
     sentConclusionPanic: "Рынок в панике — исторически лучшее время для покупки.",
     sentConclusionNeutral: "Рынок нейтрален — следите за трендом.",
-    sentConclusionLabel: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-idea.png' alt='' width='20' height='20' /> Вывод:",
+    sentConclusionLabel: "💡 Вывод:",
     sentQuote: "«Будь жадным, когда другие боятся, и бойся, когда другие жадны» — Уоррен Баффетт. Индекс страха и жадности — не сигнал для немедленной сделки, но мощный фильтр рыночного контекста.",
 
     // Bear Flag Trainer interactive
@@ -100,7 +100,7 @@ const STRINGS = {
     bfStep1b: "ШАГ 1: Теперь кликните на НИЗ древка (конец импульса)",
     bfStep2: "ШАГ 2: Тяните золотую линию цели вниз от точки пробоя на длину древка. Затем нажмите «Проверить».",
     bfCheckBtn: "Проверить →",
-    bfResultGood: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-check.png' alt='' width='20' height='20' /> Отлично! Цель {t} — верно. Погрешность: {e} пунктов.",
+    bfResultGood: "✅ Отлично! Цель {t} — верно. Погрешность: {e} пунктов.",
     bfResultClose: "👍 Близко! Ваша цель: {t}. Правильно: ~{c}. Погрешность: {e} пт.",
     bfResultMiss: "❌ Промах. Ваша цель: {t}. Правильно: ~{c} (погрешность: {e} пт).",
     bfRuleText: "Правило «флага»: цель = точка пробоя флага МИНУС высота древка. Высота древка ≈ {h} пунктов. Пробой ≈ {b}, цель ≈ {t}.",
@@ -181,7 +181,7 @@ const STRINGS = {
 
     liquidityLabel: "Ликвидность:",
     hnsCaption: "Голова и плечи — где стоят стопы · нажми, чтобы проиграть заново",
-    hnsLink: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-up.png' alt='' width='20' height='20' /> Разобрать в полном Графике",
+    hnsLink: "📈 Разобрать в полном Графике",
 
     checklistSecTitle: "Чек-лист главы 10",
     checklistSecSub: "Отметьте пункты, которые поняли и готовы применять.",
@@ -192,7 +192,7 @@ const STRINGS = {
     check5: "Голова и Плечи: стопы покупателей правого плеча — топливо падения",
     check6: "Цель паттерна = высота древка/паттерна, перенесённая от точки пробоя",
     check7: "Паттерны — это геометрия страха и жадности, а не магия",
-    checklistDoneTitle: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-check.png' alt='' width='20' height='20' /> Глава 10 освоена!",
+    checklistDoneTitle: "✅ Глава 10 освоена!",
     checklistDoneSub: "Вы читаете паттерны как психолог, а не как чертёжник.",
 
     concTag: "ИТОГИ ГЛАВЫ 10",
@@ -206,6 +206,177 @@ const STRINGS = {
 
     askAnalyst: "Остался вопрос? Напиши аналитику",
     nextLevel: "Уровень 11 →",
+  },
+  en: {
+    // Ask Analyst popup
+    askTag: "— MESSAGE US",
+    askTitle: "Prefer messenger?",
+    askSub: "Message us on Telegram or WhatsApp — the message is already written.",
+    tgSub: "Telegram · online",
+    waSub: "WhatsApp · online",
+    tgBtn: "OPEN TELEGRAM",
+    waBtn: "OPEN WHATSAPP",
+
+    // Sentiment Swipe interactive
+    hl1: "Bitcoin is dead. Experts urge investors to sell immediately.",
+    hl2: "Gold shatters records — analysts forecast another +40% by year-end!",
+    hl3: "Markets collapse: the worst crisis in 20 years",
+    hl4: "Every student is buying stocks. Your neighbor has already made 300%",
+    hl5: "Crypto is the investment of the decade!",
+    hl6: "Panic on Wall Street: investors flee stocks for cash",
+    hl7: "“I'll never buy stocks again” — say thousands of investors",
+    hl8: "Housing shortage: real estate prices only go up!",
+    hl9: "AI will change everything — Nvidia stock set to 10x",
+    hl10: "Recession is inevitable: Goldman warns of a crash",
+    sentTitle: "Sentiment Scale",
+    sentTag: "INTERACTIVE — FUNDAMENTALS · SWIPE CARDS",
+    sentReset: "↺ RESET",
+    sentHeadlinesLabel: "HEADLINES",
+    sentFearArrow: "← FEAR",
+    sentGreedArrow: "GREED →",
+    sentFearHint: "FEAR 😱",
+    sentGreedHint: "GREED 🤑",
+    sentFearBtn: "← FEAR 😱",
+    sentGreedBtn: "GREED 🤑 →",
+    sentDragHint: "Drag the card or press a button",
+    sentResultsTitle: "Analysis Results",
+    sentSignalFear: "FEAR",
+    sentSignalGreed: "GREED",
+    sentSignalFearLower: "fear",
+    sentSignalGreedLower: "greed",
+    sentCorrectSuffix: "— correct",
+    sentIncorrectSuffix: "— incorrect (actually",
+    sentGaugeLabel: "SENTIMENT INDEX",
+    zoneExtremeFear: "Extreme Fear",
+    zoneFear: "Fear",
+    zoneNeutral: "Neutral",
+    zoneGreed: "Greed",
+    zoneExtremeGreed: "Extreme Greed",
+    sentLabelExtremeGreed: "Extreme Greed <img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-flame.png' alt='' width='20' height='20' /> SELL",
+    sentLabelGreed: "Greed — the market is overheated",
+    sentLabelNeutral: "Neutral",
+    sentLabelFear: "Fear — a buying opportunity",
+    sentLabelExtremeFear: "Extreme Fear 💎 BUY",
+    sentConclusionEuphoria: "The market is euphoric — historically the best time for caution.",
+    sentConclusionPanic: "The market is in panic — historically the best time to buy.",
+    sentConclusionNeutral: "The market is neutral — watch the trend.",
+    sentConclusionLabel: "💡 Takeaway:",
+    sentQuote: "“Be greedy when others are fearful, and fearful when others are greedy” — Warren Buffett. The Fear & Greed Index is not a signal for an immediate trade, but a powerful filter for market context.",
+
+    // Bear Flag Trainer interactive
+    bfTitle: "Bear Flag Trainer",
+    bfTag: "INTERACTIVE — TECHNICAL · TARGET MEASUREMENT",
+    bfResetBtn: "↺ START OVER",
+    bfStep1a: "STEP 1: Click the TOP of the flagpole (start of the drop)",
+    bfStep1b: "STEP 1: Now click the BOTTOM of the pole (end of the impulse)",
+    bfStep2: "STEP 2: Drag the gold target line down from the breakout point, by the length of the pole. Then press “Check”.",
+    bfCheckBtn: "Check →",
+    bfResultGood: "✅ Excellent! Target {t} — correct. Error: {e} points.",
+    bfResultClose: "👍 Close! Your target: {t}. Correct: ~{c}. Error: {e} pts.",
+    bfResultMiss: "❌ Miss. Your target: {t}. Correct: ~{c} (error: {e} pts).",
+    bfRuleText: "The “flag” rule: target = flag breakout point MINUS pole height. Pole height ≈ {h} points. Breakout ≈ {b}, target ≈ {t}.",
+    bfPoleLabel: "Pole:",
+    bfTargetLabel: "Your target:",
+    bfBreakoutLabel: "Breakout:",
+    bfPtUnit: "pts",
+    bfFlagSvg: "FLAG",
+    bfPoleSvg: "POLE ↓",
+    bfBreakoutSvg: "breakout →",
+    bfTargetSvg: "TARGET:",
+    bfTargetApproxSvg: "TARGET ≈",
+    bfYoursSvg: "YOURS:",
+    bfLegendPole: "Pole (impulse)",
+    bfLegendFlag: "Flag (consolidation)",
+    bfLegendTarget: "Take-Profit Target",
+    bfLegendUser: "Your measurement",
+
+    // Chapter 10 main
+    headerLevel: "LEVEL 10",
+    headerTitle: "Psychology and Patterns",
+    headerFa: "FA 40%",
+    headerTa: "TA 60%",
+    heroTag: "SBF COMPANY — CHAPTER 10",
+    heroTitle1: "Crowd Psychology",
+    heroAnd: "and",
+    heroTitle2: "Patterns",
+    heroSub: "Patterns aren't magic. They're the geometry of human fear and greed, repeating again and again.",
+    heroChip1: "Fundamentals 40%",
+    heroChip2: "Technicals 60%",
+    heroChip3: "2 Interactive Tools",
+    mythTag: "COMMON MISCONCEPTION",
+    mythTitle: "“Technical analysis is just drawing shapes. Patterns are a self-fulfilling prophecy with no real basis.”",
+    mythBody: "Patterns don't work because everyone sees them. They work because they reflect the real behavior of market participants: where their stop-losses sit, where they got locked into a loss, where liquidity has pooled. “Head and Shoulders” isn't magic — it's thousands of trapped positions ready to be sold off.",
+    voiceTag: "— SBF ANALYST · OLEG",
+    voiceQuote: "“When I see panic headlines about a crash, I open my watchlist. When the news talks about a ‘new era’ and ‘no ceiling in the sky,’ I start looking for the exit. Sentiment is a leading indicator.”",
+    voiceBody: "The crowd's fear and greed are measurable. And they give signals earlier than any technical indicator.",
+    ignoranceLabel: "The Price of Ignorance",
+    ignoranceBody: "A trader sees a “flag” — consolidation after a drop. He thinks: “A bounce! I'm buying.” He doesn't know it's a bear flag — a pause before the fall continues. Result: a loss in the direction of the trend he saw with his own eyes.",
+    ignoranceStrong: "Not knowing the pattern type turns a correct observation into a wrong trade.",
+
+    sec1Title: "The Psychology of the Market Cycle",
+    sec1Sub: "The market moves in cycles. In every cycle the crowd goes through the same psychological stages — and loses the same way every time.",
+    cycleTag: "THE CYCLE OF MARKET EMOTIONS",
+    cycleDenial: "Denial", cycleDenialDesc: "“It's temporary, it'll bounce back soon”",
+    cycleFear: "Fear", cycleFearDesc: "“It might fall further”",
+    cyclePanic: "Panic", cyclePanicDesc: "“I'm selling everything!”",
+    cycleCapitulation: "Capitulation", cycleCapitulationDesc: "← BUY POINT",
+    cycleDespondency: "Despondency", cycleDespondencyDesc: "“The market is broken”",
+    cycleHope: "Hope", cycleHopeDesc: "“Looks like the bottom”",
+    cycleConfidence: "Confidence", cycleConfidenceDesc: "“I'm buying”",
+    cycleEuphoria: "Euphoria", cycleEuphoriaDesc: "← SELL POINT",
+    cycleGreed: "Greed", cycleGreedDesc: "“I'm going to be rich”",
+
+    pc1Title: "VIX — the Fear Index",
+    pc1Text: "VIX measures the expected volatility of the S&P 500 over the next 30 days. VIX > 30 — the market is in panic, historically a buy zone. VIX < 15 — complacency, the market can drop sharply.",
+    pc2Title: "Fear & Greed Index",
+    pc2Text: "It aggregates 7 factors: volatility, market momentum, demand for safe-haven assets, and options positioning. 0 = extreme fear (opportunity), 100 = extreme greed (risk).",
+    pc3Title: "“Buy When There's Blood in the Streets”",
+    pc3Text: "Maximum pessimism = minimum prices + the fewest buyers. This is exactly where Smart Money builds positions. The phrase is attributed to Rothschild and Buffett.",
+    pc4Title: "The Psychological Cycle Repeats",
+    pc4Text: "Denial → Fear → Panic → Capitulation → Despondency → Hope → Confidence → Euphoria → Greed → Denial. Every bull and bear cycle passes through these stages.",
+
+    sec2Title: "Patterns Through the Lens of Liquidity",
+    sec2Sub: "Every classic pattern has a liquidity logic behind it. Understanding that logic puts you one step ahead of the crowd.",
+
+    pat1Name: "Flag / Pennant", pat1Type: "Trend Continuation", pat1Reliability: "High", pat1Timeframe: "1h–1d",
+    pat1Desc: "After a sharp impulse move (the pole), price consolidates at a slight angle against the trend (the flag). This isn't a reversal — it's a pause before continuation. Participants quietly build positions.",
+    pat1Stops: "Bottom-fishers' stop-losses sit above the flag — they get triggered before the breakout",
+
+    pat2Name: "Head and Shoulders", pat2Type: "Trend Reversal", pat2Reliability: "Medium", pat2Timeframe: "4h–1wk",
+    pat2Desc: "The “head” is the trend's high. The “right shoulder” is a failed attempt to make a new high. Buyers of the right shoulder get trapped in losses and sell when the “neckline” breaks, accelerating the drop.",
+    pat2Stops: "A huge pool of stop-losses sits below the “neckline” — the main fuel for the pattern",
+
+    pat3Name: "Double Top / Bottom", pat3Type: "Reversal", pat3Reliability: "Medium", pat3Timeframe: "1h–1wk",
+    pat3Desc: "Price fails twice to break a level. On a double top: buyers of the second peak get trapped. A break of the support between the peaks triggers a cascade of stop-losses. Target = the height of the pattern.",
+    pat3Stops: "Stop-losses of buyers from both peaks sit below the support zone between the peaks",
+
+    liquidityLabel: "Liquidity:",
+    hnsCaption: "Head and Shoulders — where the stops sit · click to replay",
+    hnsLink: "📈 Explore in the Full Chart",
+
+    checklistSecTitle: "Chapter 10 Checklist",
+    checklistSecSub: "Check off the points you understand and are ready to apply.",
+    check1: "Fear & Greed Index: 0–25 — fear (opportunity), 75–100 — greed (risk)",
+    check2: "VIX > 30 — the market is in panic, historically a buy zone",
+    check3: "The psychological cycle: capitulation = the bottom, euphoria = the top",
+    check4: "Bear flag: consolidation after an impulse = continuation, not reversal",
+    check5: "Head and Shoulders: right-shoulder buyers' stop-losses are the fuel for the drop",
+    check6: "Pattern target = the pole/pattern height, projected from the breakout point",
+    check7: "Patterns are the geometry of fear and greed, not magic",
+    checklistDoneTitle: "✅ Chapter 10 mastered!",
+    checklistDoneSub: "You read patterns like a psychologist, not a draftsman.",
+
+    concTag: "CHAPTER 10 TAKEAWAYS",
+    concTitle: "What You Now Know",
+    conc1: "Maximum crowd fear = the best time for Smart Money to buy",
+    conc2: "A flag after a drop is a pause, not a reversal. The trend will continue",
+    conc3: "Head and Shoulders works because of trapped right-shoulder buyers",
+    conc4: "VIX and the F&G Index are macro filters: context, not signals",
+    conc5: "The pattern target = the structure's height, projected from the breakout",
+    conc6: "Patterns repeat because human psychology never changes",
+
+    askAnalyst: "Still have a question? Message an analyst",
+    nextLevel: "Level 11 →",
   },
   ro: {
     // Ask Analyst popup
@@ -260,7 +431,7 @@ const STRINGS = {
     sentConclusionEuphoria: "Piața e în euforie — istoric, cel mai bun moment pentru prudență.",
     sentConclusionPanic: "Piața e în panică — istoric, cel mai bun moment pentru cumpărare.",
     sentConclusionNeutral: "Piața e neutră — urmăriți tendința.",
-    sentConclusionLabel: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-idea.png' alt='' width='20' height='20' /> Concluzie:",
+    sentConclusionLabel: "💡 Concluzie:",
     sentQuote: "«Fii lacom când alții se tem și teamă-te când alții sunt lacomi» — Warren Buffett. Indicele Fear & Greed nu este un semnal pentru o tranzacție imediată, ci un filtru puternic al contextului de piață.",
 
     // Bear Flag Trainer interactive
@@ -271,7 +442,7 @@ const STRINGS = {
     bfStep1b: "PASUL 1: Acum faceți clic pe BAZA catargului (finalul impulsului)",
     bfStep2: "PASUL 2: Trageți linia aurie a țintei în jos, de la punctul de breakout, pe lungimea catargului. Apoi apăsați „Verifică”.",
     bfCheckBtn: "Verifică →",
-    bfResultGood: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-check.png' alt='' width='20' height='20' /> Excelent! Ținta {t} — corect. Eroare: {e} puncte.",
+    bfResultGood: "✅ Excelent! Ținta {t} — corect. Eroare: {e} puncte.",
     bfResultClose: "👍 Aproape! Ținta ta: {t}. Corect: ~{c}. Eroare: {e} pct.",
     bfResultMiss: "❌ Ratat. Ținta ta: {t}. Corect: ~{c} (eroare: {e} pct).",
     bfRuleText: "Regula „steagului”: ținta = punctul de breakout al steagului MINUS înălțimea catargului. Înălțimea catargului ≈ {h} puncte. Breakout ≈ {b}, țintă ≈ {t}.",
@@ -352,7 +523,7 @@ const STRINGS = {
 
     liquidityLabel: "Lichiditate:",
     hnsCaption: "Cap și umeri — unde stau stop-loss-urile · apasă pentru a reda din nou",
-    hnsLink: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-up.png' alt='' width='20' height='20' /> Analizează în Graficul complet",
+    hnsLink: "📈 Analizează în Graficul complet",
 
     checklistSecTitle: "Checklist capitolul 10",
     checklistSecSub: "Bifați punctele pe care le-ați înțeles și sunteți gata să le aplicați.",
@@ -363,7 +534,7 @@ const STRINGS = {
     check5: "Cap și Umeri: stop-loss-urile cumpărătorilor umărului drept — combustibilul căderii",
     check6: "Ținta modelului = înălțimea catargului/modelului, transferată de la punctul de breakout",
     check7: "Modelele sunt geometria fricii și lăcomiei, nu magie",
-    checklistDoneTitle: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-check.png' alt='' width='20' height='20' /> Capitolul 10 asimilat!",
+    checklistDoneTitle: "✅ Capitolul 10 asimilat!",
     checklistDoneSub: "Citiți modelele ca un psiholog, nu ca un desenator.",
 
     concTag: "CONCLUZIILE CAPITOLULUI 10",
@@ -434,8 +605,8 @@ function AskAnalystPopup({onClose}) {
           <p style={{fontSize:18,color:C.inkMid}}>{S.askSub}</p>
         </div>
         <div className="messenger-grid">
-          {[{href:tgLink,bg:"#0088cc",icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-rocket.png' alt='' width='20' height='20' />",name:"SBF Support",sub:S.tgSub,btn:S.tgBtn},
-            {href:waLink,bg:"#25d366",icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-quote.png' alt='' width='20' height='20' />",name:"SBF Company",sub:S.waSub,btn:S.waBtn}
+          {[{href:tgLink,bg:"#0088cc",icon:"🚀",name:"SBF Support",sub:S.tgSub,btn:S.tgBtn},
+            {href:waLink,bg:"#25d366",icon:"💬",name:"SBF Company",sub:S.waSub,btn:S.waBtn}
           ].map((m,i) => (
             <div key={i} style={{background:"#fff",border:"1px solid #e0e0e0",borderRadius:12,padding:"30px 25px",display:"flex",flexDirection:"column"}}>
               <div style={{display:"flex",alignItems:"center",gap:15,marginBottom:30}}>
@@ -463,13 +634,13 @@ function SentimentSwipe() {
     {text:S.hl1, signal:"fear", emoji:"😱", source:"FinMedia · 2022"},
     {text:S.hl2, signal:"greed", emoji:"🤑", source:"GoldNews · 2024"},
     {text:S.hl3, signal:"fear", emoji:"💀", source:"Bloomberg · 2020"},
-    {text:S.hl4, signal:"greed", emoji:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-rocket.png' alt='' width='20' height='20' />", source:"Reddit · 2021"},
+    {text:S.hl4, signal:"greed", emoji:"🚀", source:"Reddit · 2021"},
     {text:S.hl5, signal:"greed", emoji:"💎", source:"CryptoPump · 2021"},
     {text:S.hl6, signal:"fear", emoji:"🏃", source:"Reuters · 2022"},
     {text:S.hl7, signal:"fear", emoji:"😤", source:"Twitter · 2022"},
-    {text:S.hl8, signal:"greed", emoji:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-house.png' alt='' width='20' height='20' />", source:"Forbes · 2023"},
+    {text:S.hl8, signal:"greed", emoji:"🏠", source:"Forbes · 2023"},
     {text:S.hl9, signal:"greed", emoji:"🤖", source:"Tech Digest · 2024"},
-    {text:S.hl10, signal:"fear", emoji:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-warning.png' alt='' width='20' height='20' />", source:"CNBC · 2023"},
+    {text:S.hl10, signal:"fear", emoji:"⚠️", source:"CNBC · 2023"},
   ];
 
   const [idx, setIdx] = useState(0);
@@ -631,7 +802,7 @@ function SentimentSwipe() {
               <div style={{display:"grid",gap:8,maxHeight:280,overflowY:"auto"}}>
                 {history.map((h,i) => (
                   <div key={i} style={{display:"flex",gap:10,alignItems:"flex-start",padding:"8px 10px",background:"rgba(255,255,255,0.03)",borderRadius:4,border:`1px solid ${h.correct ? "rgba(8,153,129,0.2)" : "rgba(242,54,69,0.15)"}`}}>
-                    <span style={{fontSize:14,flexShrink:0}}>{h.correct ? "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-check.png' alt='' width='20' height='20' />" : "❌"}</span>
+                    <span style={{fontSize:14,flexShrink:0}}>{h.correct ? "✅" : "❌"}</span>
                     <div style={{flex:1,minWidth:0}}>
                       <div style={{fontSize:12,color:"rgba(255,255,255,0.6)",lineHeight:1.4,marginBottom:4}}>{h.text}</div>
                       <div style={{fontSize:10,fontFamily:"monospace",color: h.signal==="fear" ? C.red : C.green}}>

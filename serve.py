@@ -211,11 +211,11 @@ def _edu_inject(ch: int, lang: str = i18n.DEFAULT_LANG) -> str:
     # "Назад"/"Содержание" всегда уводят на русскую версию -- баг, из-за
     # которого переход на новую страницу в ro/en "сбрасывал" в ru. Главы
     # используют свою схему /edu/{lang}/b/N (см. _EDU_RE), а TOC-страница --
-    # общий префикс /ro/edu/ (см. i18n.lang_from_path в serve.py; /edu/*
+    # общий префикс /{lang}/edu/ (см. i18n.lang_from_path в serve.py; /edu/*
     # исключён из общего механизма, у книги своя схема, но сама TOC-страница
-    # index.html не является главой и живёт по общей /ro/-схеме).
+    # index.html не является главой и живёт по общей /{lang}/-схеме).
     _book_lang_seg = f"{lang}/" if lang in ("ro", "en") else ""
-    _toc_href = "/ro/edu/" if lang == "ro" else "/edu/"
+    _toc_href = f"/{lang}/edu/" if lang != i18n.DEFAULT_LANG else "/edu/"
     prev_href  = f"/edu/{_book_lang_seg}b/{ch - 1}" if ch > 1  else _toc_href
     next_href  = f"/edu/{_book_lang_seg}b/{ch + 1}" if ch < 15 else _toc_href
     prev_label = i18n.t("edu.chapter_n", lang, n=ch - 1) if ch > 1  else i18n.t("edu.toc", lang)
@@ -467,11 +467,17 @@ def _build_edu_page(ch: int, lang: str) -> bytes:
             '/book/vendor/babel.min.js'
         )
 
-    # Инжектируем edu.css + sbf-header.js + движок Графика перед </head>
+    # Инжектируем edu.css + i18n.js + sbf-header.js + движок Графика перед </head>
+    # i18n.js должен идти ДО sbf-header.js: без него window.sbfI18n не определён,
+    # и sbf-header.js падает на свой fallback-объект {lang:'ru', t:(k,fb)=>fb||k}
+    # -- верхний нав (Сегодня/Обучение/Календарь) оставался русским на ЛЮБОЙ
+    # главе независимо от lang (баг, существовавший и до английской версии --
+    # главы никогда не грузили /assets/i18n.js, только сам sbf-header.js).
     css_tags = (
         '<link rel="stylesheet" href="/assets/design.css">\n'
         '<link rel="stylesheet" href="/edu/edu.css">\n'
         '<link rel="stylesheet" href="/assets/sbf-nav.css">\n'
+        '<script src="/assets/i18n.js?v=1" defer></script>\n'
         '<script src="/assets/sbf-header.js?v=15" defer></script>'
     )
     if '/edu/edu.css' not in html:
@@ -479,6 +485,7 @@ def _build_edu_page(ch: int, lang: str) -> bytes:
     elif '/assets/sbf-header.js?v=15' not in html:
         html = html.replace("</head>",
             '<link rel="stylesheet" href="/assets/sbf-nav.css">\n'
+            '<script src="/assets/i18n.js?v=1" defer></script>\n'
             '<script src="/assets/sbf-header.js?v=15" defer></script>\n</head>', 1)
 
     grafik_tags = (

@@ -47,7 +47,7 @@ const STRINGS = {
     mdTag:"ИНТЕРАКТИВ — ФУНДАМЕНТАЛ",
     colPrice:"Цена", colVolume:"Объём", colCount:"Кол",
     spreadLabel:"СПРЕД: ",
-    newsAlertTitle:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-warning.png' alt='' width='20' height='20' /> ВЫХОД CPI — ликвидность исчезла!",
+    newsAlertTitle:"⚠️ ВЫХОД CPI — ликвидность исчезла!",
     normalTitle:"📖 Нормальное состояние рынка",
     newsAlertBody:"Маркет-мейкеры убрали свои ордера из центра стакана. Спред вырос с 0.20 до 8.00+. Любой рыночный ордер будет исполнен по ужасной цене — это называется проскальзывание (Slippage).",
     normalBody:"Маркет-мейкеры плотно держат стакан. Спред минимальный, ликвидности много. Ваш рыночный ордер исполнится по цене, близкой к текущей.",
@@ -68,7 +68,7 @@ const STRINGS = {
     descSellLimit:"Продать по цене выше текущей",
     descBuyStop:"Купить по цене выше текущей",
     descSellStop:"Продать по цене ниже текущей",
-    runningHint:(label)=>`<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-target.png' alt='' width='20' height='20' /> Тяни линию ${label} на нужный уровень. Цена будет двигаться автоматически.`,
+    runningHint:(label)=>`🎯 Тяни линию ${label} на нужный уровень. Цена будет двигаться автоматически.`,
     idleHint:"Нажми СТАРТ, выбери тип ордера и установи линию на нужную цену.",
 
     // Chapter4 — sticky header / hero
@@ -92,7 +92,7 @@ const STRINGS = {
        text:"Крупные финансовые институты (банки, HFT-фирмы), обязанные постоянно выставлять двусторонние котировки. Они зарабатывают на спреде — разнице между ценой покупки и продажи."},
       {icon:"💧", title:"Почему ликвидность важна?",
        text:"Ликвидность = способность быстро купить или продать актив без значительного изменения цены. Высокая ликвидность → узкий спред → низкие издержки. Низкая ликвидность → широкий спред → дорогой вход."},
-      {icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-warning.png' alt='' width='20' height='20' />", title:"Проскальзывание (Slippage)",
+      {icon:"⚠️", title:"Проскальзывание (Slippage)",
        text:"Разница между ожидаемой и реальной ценой исполнения. Возникает при рыночных ордерах в период низкой ликвидности. При выходе NFP или CPI спред может вырасти в 10–50 раз!"},
       {icon:"🕐", title:"Когда ликвидность максимальна?",
        text:"Пересечение Лондонской и Нью-Йоркской сессий (16:00–<span class='local-time' data-utc='2026-03-09T17:00:00Z'>20:00 МСК</span>) — пик объёмов. Азиатская сессия — минимальная ликвидность, широкий спред. Пятница после 20:00 — рынок «пустеет»."},
@@ -101,9 +101,9 @@ const STRINGS = {
     flowItems:[
       {icon:"👤",label:"Трейдер",sub:"Нажимает BUY"},
       {icon:"🏢",label:"Брокер / ECN",sub:"Маршрутизация"},
-      {icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-bar-chart.png' alt='' width='20' height='20' />",label:"Стакан (DOM)",sub:"Лучшая цена"},
+      {icon:"📊",label:"Стакан (DOM)",sub:"Лучшая цена"},
       {icon:"🏦",label:"Маркет-мейкер",sub:"Продаёт лот"},
-      {icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-check.png' alt='' width='20' height='20' />",label:"Исполнение",sub:"Ордер заполнен"},
+      {icon:"✅",label:"Исполнение",sub:"Ордер заполнен"},
     ],
 
     // Slippage table
@@ -121,7 +121,7 @@ const STRINGS = {
     block2Sub:"Ордер — это инструкция брокеру. Выбор типа ордера определяет, по какой цене и при каких условиях откроется ваша позиция.",
     block2Title:"Типы ордеров: арсенал трейдера",
     orderTypes:[
-      {icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-lightning.png' alt='' width='20' height='20' />", title:"Market Order (Рыночный)",
+      {icon:"⚡", title:"Market Order (Рыночный)",
        text:"Исполняется мгновенно по лучшей доступной цене. Гарантия исполнения, но не гарантия цены. При низкой ликвидности — сильное проскальзывание.",
        use:"Когда нужно войти немедленно, ликвидность высокая"},
       {icon:"📍", title:"Limit Order (Лимитный)",
@@ -130,7 +130,7 @@ const STRINGS = {
       {icon:"🚦", title:"Stop Order (Стоп)",
        text:"Превращается в рыночный ордер при достижении стоп-цены. BUY STOP — выше рынка (на пробой). SELL STOP — ниже рынка (на пробой вниз).",
        use:"Для входа на пробое уровня или постановки Stop-Loss"},
-      {icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-target.png' alt='' width='20' height='20' />", title:"Stop-Limit (Стоп-Лимит)",
+      {icon:"🎯", title:"Stop-Limit (Стоп-Лимит)",
        text:"Гибрид: при достижении стоп-цены выставляется лимитный ордер по указанной цене. Контроль цены исполнения, но риск не исполниться при сильном движении.",
        use:"Для точного входа на пробое с контролем цены"},
     ],
@@ -154,6 +154,128 @@ const STRINGS = {
     askQuestionLabel:"Остался вопрос? Напиши аналитику",
     nextChapterBtn:"Уровень 5: Глобальные Часы →",
   },
+  en: {
+    // Contact popup (AskAnalystPopup)
+    apTag:"— CONTACT US",
+    apTitle:"Prefer a messenger?",
+    apSub:"Write us on Telegram or WhatsApp — the message is already prepared.",
+    tgOnlineLabel:"Telegram · online",
+    waOnlineLabel:"WhatsApp · online",
+    tgBtn:"OPEN TELEGRAM",
+    waBtn:"OPEN WHATSAPP",
+
+    // MarketDepthSimulator
+    mdTitle:"Market Depth Simulator",
+    mdTag:"INTERACTIVE — FUNDAMENTAL",
+    colPrice:"Price", colVolume:"Volume", colCount:"Cnt",
+    spreadLabel:"SPREAD: ",
+    newsAlertTitle:"⚠️ CPI RELEASE — liquidity has vanished!",
+    normalTitle:"📖 Normal market state",
+    newsAlertBody:"Market makers pulled their orders out of the center of the book. The spread widened from 0.20 to 8.00+. Any market order will fill at a terrible price — this is called slippage.",
+    normalBody:"Market makers keep the book tightly packed. The spread is minimal, liquidity is plentiful. Your market order will fill close to the current price.",
+    resetBtn:"↺ Restore liquidity",
+    triggerBtn:"💣 Release CPI (news)",
+    spreadVizLabel:"SPREAD VISUALIZATION",
+    spreadWordLower:"spread",
+    tapeLabel:"TIME & SALES",
+
+    // LimitCatcher
+    gameTitle:"Order Execution Trainer",
+    gameTag:"INTERACTIVE — TECHNICAL",
+    executedLabel:"EXECUTED",
+    executedInlineLabel:"Executed",
+    startBtn:"▶ START",
+    stopBtn:"⏹ STOP",
+    descBuyLimit:"Buy below the current price",
+    descSellLimit:"Sell above the current price",
+    descBuyStop:"Buy above the current price",
+    descSellStop:"Sell below the current price",
+    runningHint:(label)=>`🎯 Drag the ${label} line to the level you want. The price will move automatically.`,
+    idleHint:"Press START, choose an order type, and set the line at the price you want.",
+
+    // Chapter4 — sticky header / hero
+    levelChip:"LEVEL 4",
+    faTag:"FA 50%", taTag:"TA 50%",
+    chapterNameShort:"Liquidity and Order Mechanics",
+    heroEyebrow:"SBF COMPANY — CHAPTER 4",
+    heroTitleLine1:"Liquidity",
+    heroAnd:"and",
+    heroTitleLine2:"Order Mechanics",
+    heroSubtitle:"Who's standing on the other side of your trade? How is the order book structured? Why does your order fill at a different price?",
+    fundamentalChip:"Fundamental 50%",
+    technicalChip:"Technical 50%",
+    interactiveChip:"2 Interactives",
+
+    // Block 1
+    block1Sub:"An exchange isn't an abstract screen full of numbers. It's a queue of real participants. For you to buy 1 lot of gold right now, someone has to sell it to you.",
+    block1Title:"Market makers: who provides liquidity",
+    mmFacts:[
+      {icon:"🏦", title:"Who are market makers?",
+       text:"Large financial institutions (banks, HFT firms) obligated to continuously quote two-sided prices. They earn on the spread — the difference between the buy and sell price."},
+      {icon:"💧", title:"Why does liquidity matter?",
+       text:"Liquidity = the ability to quickly buy or sell an asset without a significant change in price. High liquidity → tight spread → low costs. Low liquidity → wide spread → expensive entry."},
+      {icon:"⚠️", title:"Slippage",
+       text:"The difference between the expected and actual execution price. It occurs on market orders during periods of low liquidity. On an NFP or CPI release, the spread can widen 10–50x!"},
+      {icon:"🕐", title:"When is liquidity at its peak?",
+       text:"The overlap of the London and New York sessions (16:00–<span class='local-time' data-utc='2026-03-09T17:00:00Z'>20:00 MSK</span>) — peak volume. The Asian session has minimal liquidity and a wide spread. Friday after 20:00 — the market «empties out»."},
+    ],
+    flowDiagramLabel:"HOW YOUR ORDER EXECUTION WORKS",
+    flowItems:[
+      {icon:"👤",label:"Trader",sub:"Clicks BUY"},
+      {icon:"🏢",label:"Broker / ECN",sub:"Routing"},
+      {icon:"📊",label:"Order Book (DOM)",sub:"Best price"},
+      {icon:"🏦",label:"Market maker",sub:"Sells the lot"},
+      {icon:"✅",label:"Execution",sub:"Order filled"},
+    ],
+
+    // Slippage table
+    slippageSub:"Slippage is the difference between the price you saw and the price at which your order actually filled.",
+    slippageTitle:"Slippage: real-world examples",
+    tableHeaders:["Scenario","Expected price","Actual price","Difference"],
+    slippageExamples:[
+      {scenario:"NFP comes in better than forecast",  before:"1.08500",after:"1.08535",diff:"+3.5 pips"},
+      {scenario:"Market order EUR/USD 10 lots",before:"1.08502",after:"1.08508",diff:"+0.6 pips"},
+      {scenario:"CPI news beats expectations",    before:"2505.00",after:"2507.80",diff:"+280 pts XAU"},
+      {scenario:"Regular order in a liquid market",before:"2505.00",after:"2505.02",diff:"+0.02 pts"},
+    ],
+
+    // Block 2
+    block2Sub:"An order is an instruction to your broker. The order type you choose determines the price and conditions at which your position opens.",
+    block2Title:"Order types: a trader's arsenal",
+    orderTypes:[
+      {icon:"⚡", title:"Market Order",
+       text:"Executes instantly at the best available price. Guaranteed execution, but not a guaranteed price. During low liquidity — heavy slippage.",
+       use:"When you need to enter immediately and liquidity is high"},
+      {icon:"📍", title:"Limit Order",
+       text:"Waits in the book until price reaches the specified level. Buys only at the set price or better. Guaranteed price, but not guaranteed execution.",
+       use:"BUY LIMIT — below the market. SELL LIMIT — above the market"},
+      {icon:"🚦", title:"Stop Order",
+       text:"Turns into a market order once the stop price is reached. BUY STOP — above the market (on a breakout). SELL STOP — below the market (on a downside breakout).",
+       use:"For entering on a level breakout or placing a Stop-Loss"},
+      {icon:"🎯", title:"Stop-Limit",
+       text:"A hybrid: once the stop price is reached, a limit order is placed at the specified price. Control over the execution price, but risk of not filling on a strong move.",
+       use:"For a precise entry on a breakout with price control"},
+    ],
+    pendingDiagramLabel:"WHERE TO PLACE PENDING ORDERS",
+    currentPriceLabel:"PRICE 2505",
+    aboveMarketLabel:"Above the market → SELL LIMIT / BUY STOP",
+    belowMarketLabel:"Below the market → BUY LIMIT / SELL STOP",
+
+    // Conclusions
+    conclusionsTag:"CHAPTER 4 TAKEAWAYS",
+    conclusionsTitle:"What you now know",
+    conclusions:[
+      "Market makers provide liquidity — they hold the book, earning on the spread",
+      "During major news releases, liquidity disappears — the spread widens and slippage occurs",
+      "Market Order = instant, but at the market price. Limit Order = at your price, but not guaranteed",
+      "BUY/SELL LIMIT — placed against the trend (waiting for a pullback). BUY/SELL STOP — for breakouts",
+      "Never place a large market order during low liquidity — you pay the entire spread",
+    ],
+
+    // Footer
+    askQuestionLabel:"Have a question? Write to an analyst",
+    nextChapterBtn:"Level 5: Global Clock →",
+  },
   ro: {
     // Contact popup (AskAnalystPopup)
     apTag:"— SCRIEȚI-NE",
@@ -169,7 +291,7 @@ const STRINGS = {
     mdTag:"INTERACTIV — FUNDAMENTAL",
     colPrice:"Preț", colVolume:"Volum", colCount:"Nr.",
     spreadLabel:"SPREAD: ",
-    newsAlertTitle:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-warning.png' alt='' width='20' height='20' /> PUBLICARE CPI — lichiditatea a dispărut!",
+    newsAlertTitle:"⚠️ PUBLICARE CPI — lichiditatea a dispărut!",
     normalTitle:"📖 Stare normală a pieței",
     newsAlertBody:"Market makerii și-au retras ordinele din centrul order book-ului. Spread-ul a crescut de la 0.20 la 8.00+. Orice Market Order se va executa la un preț îngrozitor — acest fenomen se numește slippage.",
     normalBody:"Market makerii mențin order book-ul dens. Spread-ul este minim, lichiditatea este mare. Ordinul dvs. de piață se va executa la un preț apropiat de cel curent.",
@@ -190,7 +312,7 @@ const STRINGS = {
     descSellLimit:"Vinde la un preț peste cel curent",
     descBuyStop:"Cumpără la un preț peste cel curent",
     descSellStop:"Vinde la un preț sub cel curent",
-    runningHint:(label)=>`<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-target.png' alt='' width='20' height='20' /> Trage linia ${label} la nivelul dorit. Prețul se va mișca automat.`,
+    runningHint:(label)=>`🎯 Trage linia ${label} la nivelul dorit. Prețul se va mișca automat.`,
     idleHint:"Apasă START, alege tipul ordinului și fixează linia la prețul dorit.",
 
     // Chapter4 — sticky header / hero
@@ -214,7 +336,7 @@ const STRINGS = {
        text:"Instituții financiare mari (bănci, firme HFT) obligate să afișeze permanent cotații bidirecționale (bid și ask). Ei câștigă din spread — diferența dintre prețul de cumpărare și cel de vânzare."},
       {icon:"💧", title:"De ce este importantă lichiditatea?",
        text:"Lichiditatea = capacitatea de a cumpăra sau vinde rapid un activ fără o modificare semnificativă a prețului. Lichiditate mare → spread îngust → costuri reduse. Lichiditate mică → spread larg → intrare scumpă."},
-      {icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-warning.png' alt='' width='20' height='20' />", title:"Alunecarea prețului (Slippage)",
+      {icon:"⚠️", title:"Alunecarea prețului (Slippage)",
        text:"Diferența dintre prețul așteptat și prețul real de execuție. Apare la ordinele de piață (Market Order) în perioadele de lichiditate scăzută. La publicarea NFP sau CPI, spread-ul poate crește de 10–50 de ori!"},
       {icon:"🕐", title:"Când este lichiditatea maximă?",
        text:"Suprapunerea sesiunilor Londra și New York (16:00–<span class='local-time' data-utc='2026-03-09T17:00:00Z'>20:00 MSK</span>) — vârful volumelor. Sesiunea asiatică — lichiditate minimă, spread larg. Vineri după ora 20:00 — piața „se golește”."},
@@ -223,9 +345,9 @@ const STRINGS = {
     flowItems:[
       {icon:"👤",label:"Trader",sub:"Apasă BUY"},
       {icon:"🏢",label:"Broker / ECN",sub:"Rutare"},
-      {icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-bar-chart.png' alt='' width='20' height='20' />",label:"Order Book (DOM)",sub:"Cel mai bun preț"},
+      {icon:"📊",label:"Order Book (DOM)",sub:"Cel mai bun preț"},
       {icon:"🏦",label:"Market Maker",sub:"Vinde lotul"},
-      {icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-check.png' alt='' width='20' height='20' />",label:"Execuție",sub:"Ordin completat"},
+      {icon:"✅",label:"Execuție",sub:"Ordin completat"},
     ],
 
     // Slippage table
@@ -243,7 +365,7 @@ const STRINGS = {
     block2Sub:"Ordinul este o instrucțiune dată brokerului. Tipul de ordin ales determină la ce preț și în ce condiții se va deschide poziția dvs.",
     block2Title:"Tipurile de ordine: arsenalul traderului",
     orderTypes:[
-      {icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-lightning.png' alt='' width='20' height='20' />", title:"Market Order (la piață)",
+      {icon:"⚡", title:"Market Order (la piață)",
        text:"Se execută instantaneu la cel mai bun preț disponibil. Garanție de execuție, dar nu garanție de preț. La lichiditate scăzută — slippage puternic.",
        use:"Când trebuie să intrați imediat, iar lichiditatea este ridicată"},
       {icon:"📍", title:"Limit Order (cu limită)",
@@ -252,7 +374,7 @@ const STRINGS = {
       {icon:"🚦", title:"Stop Order (stop)",
        text:"Se transformă într-un Market Order la atingerea prețului stop. BUY STOP — peste prețul pieței (pentru breakout). SELL STOP — sub prețul pieței (pentru breakout în jos).",
        use:"Pentru intrare la spargerea (breakout) unui nivel sau plasarea unui Stop-Loss"},
-      {icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-target.png' alt='' width='20' height='20' />", title:"Stop-Limit (stop-limită)",
+      {icon:"🎯", title:"Stop-Limit (stop-limită)",
        text:"Un hibrid: la atingerea prețului stop se plasează un ordin limit la prețul indicat. Control asupra prețului de execuție, dar risc de neexecutare la o mișcare puternică.",
        use:"Pentru o intrare precisă la breakout, cu control asupra prețului"},
     ],
@@ -332,8 +454,8 @@ function AskAnalystPopup({onClose}) {
           <p style={{fontSize:18,color:C.inkMid}}>{S.apSub}</p>
         </div>
         <div className="messenger-grid">
-          {[{href:tgLink,bg:"#0088cc",icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-rocket.png' alt='' width='20' height='20' />",name:"SBF Support",sub:S.tgOnlineLabel,btn:S.tgBtn},
-            {href:waLink,bg:"#25d366",icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-quote.png' alt='' width='20' height='20' />",name:"SBF Company",sub:S.waOnlineLabel,btn:S.waBtn}
+          {[{href:tgLink,bg:"#0088cc",icon:"🚀",name:"SBF Support",sub:S.tgOnlineLabel,btn:S.tgBtn},
+            {href:waLink,bg:"#25d366",icon:"💬",name:"SBF Company",sub:S.waOnlineLabel,btn:S.waBtn}
           ].map((m,i) => (
             <div key={i} style={{background:"#fff",border:"1px solid #e0e0e0",borderRadius:12,padding:"30px 25px",display:"flex",flexDirection:"column"}}>
               <div style={{display:"flex",alignItems:"center",gap:15,marginBottom:30}}>
@@ -934,23 +1056,25 @@ ReactDOM.createRoot(document.getElementById('sbf-book-root')).render(<Chapter4 /
 <script>
 // Скрипт для конвертации UTC времени в локальное время пользователя
 document.addEventListener('DOMContentLoaded', function() {
+    var _pageLang = "{{ lang }}";
+    var _intlLocale = _pageLang === 'ro' ? 'ro-RO' : _pageLang === 'en' ? 'en-US' : 'ru-RU';
     const utcTimes = document.querySelectorAll('.local-time[data-utc]');
-    
+
     utcTimes.forEach(function(element) {
         // Получаем UTC время из data-utc атрибута
         var utcString = element.getAttribute('data-utc');
-        
+
         try {
             // Парсим UTC дату и время
             var utcDate = new Date(utcString);
-            
+
             // Конвертируем в локальное время пользователя
             var localDate = new Date(utcDate.getTime() + utcDate.getTimezoneOffset() * 60000);
-            
+
             // Форматируем для отображения (например, "19:00 МСК")
             var hours = String(localDate.getHours()).padStart(2, '0');
             var minutes = String(localDate.getMinutes()).padStart(2, '0');
-            var timeZoneName = Intl.DateTimeFormat('ru-RU', { timeZoneName: 'long' }).format(localDate);
+            var timeZoneName = Intl.DateTimeFormat(_intlLocale, { timeZoneName: 'long' }).format(localDate);
             
             // Обновляем текст элемента с локальным временем
             element.innerHTML = '<span class="local-time-display">' + hours + ':' + minutes + ' ' + timeZoneName.replace(/\s/g, '') + '</span>';

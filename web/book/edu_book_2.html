@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>SBF | {% if lang == 'ro' %}Capitolul 2. Păpușarii Globali{% else %}Глава 2. Глобальные Кукловоды{% endif %}</title>
+  <title>SBF | {% if lang == 'ru' %}Глава 2. Глобальные Кукловоды{% elif lang == 'ro' %}Capitolul 2. Păpușarii Globali{% else %}Chapter 2. Global Puppeteers{% endif %}</title>
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
   <style>
@@ -77,7 +77,7 @@ const STRINGS = {
     fedRangeNeutral: "5% — Нейтральная",
     fedRangeTight: "10% — Жёсткая",
     fedModeRiskOn: "🟢 РИСК-ОН",
-    fedModeRiskOff: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-alert-dot.png' alt='' width='20' height='20' /> РИСК-ОФФ",
+    fedModeRiskOff: "🔴 РИСК-ОФФ",
     fedModeNeutral: "🟡 НЕЙТРАЛЬНЫЙ",
     fedDescRiskOn: "Дешёвые деньги текут в рисковые активы — акции, крипто, развивающиеся рынки. Печатный станок работает.",
     fedDescRiskOff: "Деньги дорогие. Инвесторы уходят в «тихую гавань»: доллар, US Treasuries. Акции и крипто под давлением.",
@@ -105,7 +105,7 @@ const STRINGS = {
     macro6Text: "Когда 2-летние US Treasuries доходнее 10-летних — исторически предшествует рецессии. Сработало 7 из 8 раз с 1970 года.",
     calNoteTitle: "Экономический календарь — ваш обязательный инструмент",
     calNoteBefore: "Перед каждой сессией проверяйте события с рейтингом ",
-    calNoteImportant: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-alert-dot.png' alt='' width='20' height='20' /> Высокая важность",
+    calNoteImportant: "🔴 Высокая важность",
     calNoteMiddle: ". За 15–30 минут до релиза крупные игроки закрывают позиции — рынок «замирает». После выхода данных — резкое движение. ",
     calNoteWarning: "Торговать в момент публикации без опыта крайне опасно.",
     // ── Block 3: Support & Resistance ──
@@ -159,6 +159,128 @@ const STRINGS = {
     navPrev: "← Глава 1: Инфраструктура",
     navNext: "Уровень 3: Арсенал и Защита →",
   },
+  en: {
+    // ── Sticky header ──
+    stickyLevel: "LEVEL 2",
+    stickyTitle: "Global Puppeteers",
+    stickyFA: "FA 60%",
+    stickyTA: "TA 40%",
+    // ── Hero ──
+    heroKicker: "SBF COMPANY — CHAPTER 2",
+    heroTitleLine1: "Global",
+    heroTitleLine2: "Puppeteers",
+    heroBody: "Why do charts even move? Because central banks change the cost of money — and the entire financial system reacts in a chain reaction.",
+    heroChipFA: "Fundamental 60%",
+    heroChipTA: "Technical 40%",
+    heroChipInteractive: "2 Interactives",
+    // ── Block 1: Central banks ──
+    sec1Title: "Central banks: who runs the world's money",
+    sec1Sub: "Central banks don't trade on the exchange — they set the rules of the game. The cost of money, access to credit, the level of inflation — it's all in their hands.",
+    cb1Abbr: "Fed", cb1Full: "Federal Reserve System", cb1Country: "USA 🇺🇸",
+    cb1Desc: "Manages the dollar — the world's reserve currency. FOMC decisions move every market on the planet at once.",
+    cb2Abbr: "ECB", cb2Full: "European Central Bank", cb2Country: "EU 🇪🇺",
+    cb2Desc: "Controls the euro for the 20 eurozone countries. ECB policy sets the tone for EUR/USD — the most traded currency pair.",
+    cb3Abbr: "Bank of Japan", cb3Full: "Bank of Japan (BOJ)", cb3Country: "Japan 🇯🇵",
+    cb3Desc: "Pioneer of negative rate policy. The yen (JPY) is a safe-haven currency and the main «funding» currency for the carry trade.",
+    cb4Abbr: "Bank of England", cb4Full: "Bank of England (BOE)", cb4Country: "United Kingdom 🇬🇧",
+    cb4Desc: "One of the oldest central banks in the world (1694). Manages the pound sterling — the third most important reserve currency.",
+    rateMechKicker: "HOW THE INTEREST RATE WORKS",
+    rateStep1Title: "The Fed raises the rate",
+    rateStep1Text: "The cost of credit rises. Borrowing becomes more expensive for businesses, and consumers spend less. Inflation slows down.",
+    rateStep2Title: "Investors reallocate",
+    rateStep2Text: "The risk-free yield on US Treasuries rises. Why risk it in stocks if the government pays 5%+?",
+    rateStep3Title: "Markets react",
+    rateStep3Text: "DXY rises — money flows into the dollar. Stocks, gold, and crypto come under pressure. Bonds get more expensive.",
+    // ── FED Simulator (interactive 1) ──
+    fedTitle: "Fed Simulator",
+    fedKicker: "INTERACTIVE — FUNDAMENTAL",
+    fedRateLabel: "Fed key interest rate",
+    fedRangeSoft: "0% — QE (Easy)",
+    fedRangeNeutral: "5% — Neutral",
+    fedRangeTight: "10% — Tight",
+    fedModeRiskOn: "🟢 RISK-ON",
+    fedModeRiskOff: "🔴 RISK-OFF",
+    fedModeNeutral: "🟡 NEUTRAL",
+    fedDescRiskOn: "Cheap money flows into risk assets — stocks, crypto, emerging markets. The printing press is running.",
+    fedDescRiskOff: "Money is expensive. Investors move into «safe havens»: the dollar, US Treasuries. Stocks and crypto come under pressure.",
+    fedDescNeutral: "Moderate policy. Markets are searching for direction, volatility is elevated.",
+    fedAssetDXYLabel: "DXY ($ Index)", fedAssetDXYDesc: "Dollar strength vs 6 currencies",
+    fedAssetSPXLabel: "S&P 500", fedAssetSPXDesc: "Index of 500 US stocks",
+    fedAssetGoldLabel: "Gold (XAU/USD)", fedAssetGoldDesc: "Troy ounce",
+    fedAssetBTCLabel: "Bitcoin", fedAssetBTCDesc: "Crypto = risk asset",
+    fedAssetBondLabel: "US 10Y Bond", fedAssetBondDesc: "Government bond yield",
+    fedFootnote: "* Simplified correlation model based on historical data 1990–2024",
+    // ── Block 2: Macro indicators ──
+    sec2Title: "Key macroeconomic indicators",
+    sec2Sub: "Before opening a trade, an experienced trader checks the economic calendar. Macro data releases are volatility «explosions».",
+    macro1Title: "Inflation (CPI)",
+    macro1Text: "Consumer Price Index. The Fed targets 2%. When CPI is above target — rates rise. Released monthly — one of the most «explosive» releases for markets.",
+    macro2Title: "Labor market (NFP)",
+    macro2Text: "Non-Farm Payrolls. The number of jobs added in the US per month. Released every first Friday. A strong NFP = higher rates = a stronger dollar.",
+    macro3Title: "GDP",
+    macro3Text: "Gross Domestic Product. The measure of economic growth. Two quarters of growth = a boom. Two quarters of decline = a recession.",
+    macro4Title: "Retail sales",
+    macro4Text: "Consumer spending = 70% of US GDP. A strong reading supports growth, a weak one signals a slowdown.",
+    macro5Title: "Housing market",
+    macro5Text: "Home sales, mortgage rates — the economy's «thermometer». As the Fed raises rates, mortgages get more expensive and the housing market cools.",
+    macro6Title: "Yield curve inversion",
+    macro6Text: "When 2-year US Treasuries yield more than 10-year ones — this has historically preceded a recession. It's held true 7 out of 8 times since 1970.",
+    calNoteTitle: "The economic calendar — your mandatory tool",
+    calNoteBefore: "Before every session, check events rated ",
+    calNoteImportant: "🔴 High importance",
+    calNoteMiddle: ". 15–30 minutes before the release, major players close their positions — the market «freezes». After the data comes out — a sharp move. ",
+    calNoteWarning: "Trading right at the moment of release without experience is extremely dangerous.",
+    // ── Block 3: Support & Resistance ──
+    sec3Title: "Support and Resistance: the market's memory",
+    sec3Sub: "Macroeconomics creates impulses — but price doesn't move in a vacuum. It interacts with levels that the market «remembers» for months and years.",
+    srIntroText: "When price reaches a certain level and reverses, it leaves a «mark» in the memory of market participants. Big players remember where they bought and sold. When price returns to that level, they place orders again — creating a zone of heightened activity. That's exactly what support and resistance levels are.",
+    srp1Title: "Resistance level",
+    srp1Text: "A price zone where sellers have historically outnumbered buyers. Price «bounces» from top to bottom. On a breakout, resistance becomes support.",
+    srp2Title: "Support level",
+    srp2Text: "A price zone where buyers have historically outnumbered sellers. Price «bounces» from bottom to top. On a breakout, support becomes resistance.",
+    srp3Title: "Role reversal",
+    srp3Text: "Broken resistance becomes support, and vice versa. This is one of the most important rules of technical analysis — the foundation of many trading strategies.",
+    srp4Title: "Psychological levels",
+    srp4Text: "Round numbers (2000, 2500, 50000) are powerful levels. Big players place orders at round marks, which turns them into self-fulfilling zones.",
+    // Static SR diagram (SVG)
+    diagKicker: "THE ROLE-REVERSAL PRINCIPLE",
+    diagResistanceLabel: "RESISTANCE 2,540",
+    diagSupportLabel: "SUPPORT 2,450",
+    diagBounceUp: "↑ bounce",
+    diagBounceDown: "↓ bounce",
+    diagBreakout: "↑ breakout",
+    diagNowSupport: "→ now support",
+    // ── SR Trainer (interactive 2) ──
+    srTitle: "Levels Trainer",
+    srKicker: "INTERACTIVE — TECHNICAL",
+    srZoneSupport: "Support",
+    srZoneResistance: "Resistance",
+    srReset: "Reset",
+    srCheck: "Check →",
+    srRetry: "Try again",
+    srInstrTask: "Task:",
+    srInstrBody1: "Click on the chart to draw a horizontal line at a support or resistance level. Find all ",
+    srInstrBody2: " levels. Drawn: ",
+    srScoreGreat: "Excellent!",
+    srScoreOk: "Not bad, but there's room to grow",
+    srScoreLow: "Keep studying",
+    srAccuracyLabel: "accuracy —",
+    srCorrectLevelsPrefix: "Correct levels: ",
+    srCorrectLevelsMid: " out of ",
+    srCorrectLevelsSuffix: ". Green lines — hit, red — miss.",
+    srFooter: "Instrument: XAU/USD (Gold) · Timeframe: 4H · Illustrative data for educational purposes",
+    // ── Conclusions ──
+    concKicker: "CHAPTER 2 TAKEAWAYS",
+    concTitle: "What you now know",
+    conc1: "The Fed is the main «puppeteer»: a single rate decision moves the dollar, stocks, bonds, gold, and crypto simultaneously",
+    conc2: "Rate up → DXY up, risk assets down. Rate down → money gets cheaper, risk assets rise",
+    conc3: "Macroeconomics (CPI, NFP, GDP) sets the context in which technical analysis operates",
+    conc4: "Support and resistance levels are the «market's memory»: price zones where big players made large trades",
+    conc5: "Broken resistance becomes support — the role-reversal principle works on every timeframe",
+    // ── Footer nav ──
+    navPrev: "← Chapter 1: Infrastructure",
+    navNext: "Level 3: Arsenal and Defense →",
+  },
   ro: {
     // ── Sticky header ──
     stickyLevel: "NIVEL 2",
@@ -199,7 +321,7 @@ const STRINGS = {
     fedRangeNeutral: "5% — Neutră",
     fedRangeTight: "10% — Restrictivă",
     fedModeRiskOn: "🟢 RISK-ON",
-    fedModeRiskOff: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-alert-dot.png' alt='' width='20' height='20' /> RISK-OFF",
+    fedModeRiskOff: "🔴 RISK-OFF",
     fedModeNeutral: "🟡 NEUTRU",
     fedDescRiskOn: "Banii ieftini curg spre activele riscante — acțiuni, cripto, piețe emergente. Tiparnița funcționează.",
     fedDescRiskOff: "Banii sunt scumpi. Investitorii se refugiază în «refugii sigure»: dolar, US Treasuries. Acțiunile și cripto sunt sub presiune.",
@@ -227,7 +349,7 @@ const STRINGS = {
     macro6Text: "Când randamentul US Treasuries pe 2 ani depășește randamentul celor pe 10 ani, istoric acest lucru precede o recesiune. S-a confirmat de 7 ori din 8 începând din 1970.",
     calNoteTitle: "Calendarul economic — instrumentul tău obligatoriu",
     calNoteBefore: "Înainte de fiecare sesiune, verifică evenimentele cu rating ",
-    calNoteImportant: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-alert-dot.png' alt='' width='20' height='20' /> Importanță ridicată",
+    calNoteImportant: "🔴 Importanță ridicată",
     calNoteMiddle: ". Cu 15–30 de minute înainte de publicare, jucătorii mari își închid pozițiile — piața «îngheață». După publicarea datelor urmează o mișcare bruscă. ",
     calNoteWarning: "Tranzacționarea chiar în momentul publicării, fără experiență, este extrem de periculoasă.",
     // ── Block 3: Support & Resistance ──
@@ -393,7 +515,7 @@ function FedSimulator() {
 
       {/* Mode badge */}
       <div style={{background:"rgba(255,255,255,0.06)",border:`1px solid rgba(255,255,255,0.1)`,borderRadius:6,padding:"16px 20px",marginBottom:24,display:"flex",gap:12,alignItems:"flex-start"}}>
-        <span style={{fontSize:22}}>{riskMode?"🟢":tightMode?"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-alert-dot.png' alt='' width='20' height='20' />":"🟡"}</span>
+        <span style={{fontSize:22}}>{riskMode?"🟢":tightMode?"🔴":"🟡"}</span>
         <div>
           <div style={{fontWeight:700,fontSize:15,marginBottom:4}}>{modeLabel}</div>
           <div style={{fontSize:13,color:"rgba(255,255,255,0.55)",lineHeight:1.6}}>{modeDesc}</div>
@@ -534,7 +656,7 @@ function SRTrainer() {
       {/* Score */}
       {checked && score !== null && (
         <div style={{background: score>=67?C.greenPale:score>=33?"#fff8e1":C.redPale, border:`1px solid ${score>=67?"#2d7a4f":score>=33?C.gold:C.red}`, borderRadius:4,padding:"14px 20px",marginBottom:16,display:"flex",gap:12,alignItems:"center"}}>
-          <span style={{fontSize:32}}>{score>=67?"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trophy.png' alt='' width='20' height='20' />":score>=33?"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-target.png' alt='' width='20' height='20' />":"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-books.png' alt='' width='20' height='20' />"}</span>
+          <span style={{fontSize:32}}>{score>=67?"🏆":score>=33?"🎯":"📚"}</span>
           <div>
             <div style={{fontWeight:700,fontSize:16,color:score>=67?C.green:score>=33?C.gold:C.red}}>
               {score}% {S.srAccuracyLabel} {score>=67?S.srScoreGreat:score>=33?S.srScoreOk:S.srScoreLow}
@@ -631,17 +753,17 @@ function Chapter2() {
   ];
 
   const macroIndicators = [
-    {icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-bar-chart.png' alt='' width='20' height='20' />", title:S.macro1Title, text:S.macro1Text},
-    {icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-briefcase.png' alt='' width='20' height='20' />", title:S.macro2Title, text:S.macro2Text},
+    {icon:"📊", title:S.macro1Title, text:S.macro1Text},
+    {icon:"💼", title:S.macro2Title, text:S.macro2Text},
     {icon:"🏭", title:S.macro3Title, text:S.macro3Text},
-    {icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-shopping.png' alt='' width='20' height='20' />", title:S.macro4Title, text:S.macro4Text},
-    {icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-house.png' alt='' width='20' height='20' />", title:S.macro5Title, text:S.macro5Text},
-    {icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-down.png' alt='' width='20' height='20' />", title:S.macro6Title, text:S.macro6Text},
+    {icon:"🛍️", title:S.macro4Title, text:S.macro4Text},
+    {icon:"🏠", title:S.macro5Title, text:S.macro5Text},
+    {icon:"📉", title:S.macro6Title, text:S.macro6Text},
   ];
 
   const srPrinciples = [
     {icon:"🏔️", title:S.srp1Title, text:S.srp1Text},
-    {icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-shield.png' alt='' width='20' height='20' />", title:S.srp2Title, text:S.srp2Text},
+    {icon:"🛡️", title:S.srp2Title, text:S.srp2Text},
     {icon:"🔄", title:S.srp3Title, text:S.srp3Text},
     {icon:"📐", title:S.srp4Title, text:S.srp4Text},
   ];
@@ -714,9 +836,9 @@ function Chapter2() {
           <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:20}}>{S.rateMechKicker}</Mono>
           <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:0}} className="grid-3">
             {[
-              {step:"01", title:S.rateStep1Title, text:S.rateStep1Text, icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-up.png' alt='' width='20' height='20' />"},
+              {step:"01", title:S.rateStep1Title, text:S.rateStep1Text, icon:"📈"},
               {step:"02", title:S.rateStep2Title, text:S.rateStep2Text, icon:"💸"},
-              {step:"03", title:S.rateStep3Title, text:S.rateStep3Text, icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-globe.png' alt='' width='20' height='20' />"},
+              {step:"03", title:S.rateStep3Title, text:S.rateStep3Text, icon:"🌍"},
             ].map((s,i) => (
               <div key={i} style={{padding:"20px 24px",borderLeft:i>0?"1px solid rgba(255,255,255,0.08)":"none"}}>
                 <div style={{display:"flex",gap:10,alignItems:"center",marginBottom:12}}>

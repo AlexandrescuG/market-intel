@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>SBF | {% if lang == 'ro' %}Capitolul 11. Dark Pools și HFT{% else %}Глава 11. Тёмные Пулы и HFT{% endif %}</title>
+  <title>SBF | {% if lang == 'ru' %}Глава 11. Тёмные Пулы и HFT{% elif lang == 'ro' %}Capitolul 11. Dark Pools și HFT{% else %}Chapter 11. Dark Pools and HFT{% endif %}</title>
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
   <style>
@@ -64,14 +64,14 @@ const STRINGS = {
     hftTitle: "Симулятор HFT Фронт-Раннинга",
     hftTag: "ИНТЕРАКТИВ — ФУНДАМЕНТАЛ",
     logSend: (qty, price) => `📤 Отправка заявки: BUY ${qty} AAPL @ $${price.toFixed(2)}`,
-    logDetect: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-lightning.png' alt='' width='20' height='20' /> HFT-алгоритм обнаружил заявку за 0.000043 сек!",
+    logDetect: "⚡ HFT-алгоритм обнаружил заявку за 0.000043 сек!",
     logBuyUp: (qty, price) => `🤖 Робот скупает ${qty} акций по $${price.toFixed(2)}…`,
     logSellBack: (hftSell, profit) => `💸 Робот продал вам по $${hftSell.toFixed(2)} (+$${profit} прибыль роботу)`,
-    logFilled: (fillPrice) => `<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-check.png' alt='' width='20' height='20' /> Ваша заявка исполнена по $${fillPrice.toFixed(2)} (хуже на $50)`,
-    logExplainer: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-bar-chart.png' alt='' width='20' height='20' /> Это называется фронт-раннинг. Повторяется миллиарды раз в день.",
+    logFilled: (fillPrice) => `✅ Ваша заявка исполнена по $${fillPrice.toFixed(2)} (хуже на $50)`,
+    logExplainer: "📊 Это называется фронт-раннинг. Повторяется миллиарды раз в день.",
     stateIdle: "Готов к отправке",
     stateSending: "Пакет летит к NASDAQ…",
-    stateIntercept: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-warning.png' alt='' width='20' height='20' /> HFT перехватывает!",
+    stateIntercept: "⚠️ HFT перехватывает!",
     stateExecute: "Робот извлекает прибыль…",
     stateDone: "Заявка исполнена",
     nodeYou: "Вы", nodeYouSub: "Брокер",
@@ -95,7 +95,7 @@ const STRINGS = {
     // VolumeProfileBuilder
     vpTitle: "Профиль Объёма (Volume Profile)",
     vpTag: "ИНТЕРАКТИВ — ТЕХНИКА",
-    vpTaskLabel: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-pin.png' alt='' width='20' height='20' /> Задание:",
+    vpTaskLabel: "📌 Задание:",
     vpTaskBody: " Выдели мышью зону накопления на графике (боковик в начале) — потяни рамку по свечам. Профиль объёма и POC отрисуются автоматически.",
     vpResultStrong: (poc) => `POC найден на уровне ~${poc}`,
     vpResultRest: " — это зона максимального объёма, где крупные игроки накапливали позицию. После выхода из боковика цена часто возвращается к POC как к поддержке.",
@@ -206,19 +206,166 @@ const STRINGS = {
     askAnalyst: "Остался вопрос? Напиши аналитику",
     nextChapter: "Уровень 12: Ишимоку →",
   },
+  en: {
+    // HFTSimulator
+    hftTitle: "HFT Front-Running Simulator",
+    hftTag: "INTERACTIVE — FUNDAMENTAL",
+    logSend: (qty, price) => `📤 Sending order: BUY ${qty} AAPL @ $${price.toFixed(2)}`,
+    logDetect: "⚡ HFT algorithm detected the order in 0.000043 sec!",
+    logBuyUp: (qty, price) => `🤖 The robot buys up ${qty} shares at $${price.toFixed(2)}…`,
+    logSellBack: (hftSell, profit) => `💸 The robot sold to you at $${hftSell.toFixed(2)} (+$${profit} profit for the robot)`,
+    logFilled: (fillPrice) => `✅ Your order filled at $${fillPrice.toFixed(2)} (worse by $50)`,
+    logExplainer: "📊 This is called front-running. It happens billions of times a day.",
+    stateIdle: "Ready to send",
+    stateSending: "Packet flying to NASDAQ…",
+    stateIntercept: "⚠️ HFT is intercepting!",
+    stateExecute: "Robot is extracting profit…",
+    stateDone: "Order filled",
+    nodeYou: "You", nodeYouSub: "Broker",
+    nodeNet: "Internet", nodeNetSub: "~20ms",
+    nodeHft: "HFT", nodeHftSub: "0.04μs",
+    nodeExch: "NASDAQ", nodeExchSub: "Exchange",
+    nodeFill: "Fill", nodeFillSub: "Fill",
+    hftBtnIdle: "📤 Send BUY 1000 AAPL",
+    hftBtnBusy: "Simulating...",
+    hftHintLine1: "Each click = one retail trader's order.",
+    hftHintLine2Pre: "Every time, the HFT robot earns ",
+    hftHintLine2Post: " at your expense.",
+    statProfit: "HFT Profit",
+    statRequests: "Your Requests",
+    statOverpay: "Your Overpay",
+    statInterceptTime: "Interception Time",
+    statInterceptVal: "0.043 μs",
+    logFeed: "EVENT FEED",
+    logEmpty: "Press the button to start…",
+
+    // VolumeProfileBuilder
+    vpTitle: "Volume Profile",
+    vpTag: "INTERACTIVE — TECHNIQUE",
+    vpTaskLabel: "📌 Task:",
+    vpTaskBody: " Use your mouse to highlight the accumulation zone on the chart (the sideways move at the start) — drag the frame across the candles. The volume profile and POC will be drawn automatically.",
+    vpResultStrong: (poc) => `POC found at level ~${poc}`,
+    vpResultRest: " — this is the zone of maximum volume, where large players accumulated their position. After breaking out of the range, price often returns to the POC as support.",
+    vpAccum: "◄ ACCUMULATION",
+    vpBreakout: "BREAKOUT ►",
+    vpVolAxis: "VOLUME →",
+    vpStatPoc: "POC Level",
+    vpStatCandles: "Candles in Zone",
+    vpStatTotalVol: "Total Volume",
+    vpStatPocVal: "POC Value",
+    vpLots: (n) => `${n} lots`,
+    vpDragHint: "← Drag the frame across the chart's candles →",
+
+    // darkPoolFacts
+    dpf1Title: "What is a Dark Pool?",
+    dpf1Text: "A private over-the-counter trading venue for institutional investors. Trades are executed outside the public order book — without affecting the market price at the moment of execution. Currently ~35–40% of US volume trades in dark pools.",
+    dpf2Title: "Why do whales need this?",
+    dpf2Text: "If JPMorgan sells 5 million Apple shares through the exchange — the order book collapses instantly. In a Dark Pool the trade finds a counterparty anonymously. The price is fixed at the midpoint of the spread. The whale sells without slippage.",
+    dpf3Title: "What is HFT?",
+    dpf3Text: "High-frequency trading — algorithms executing thousands of trades per second. Servers are located 10 meters from exchange servers (co-location). Reaction speed: 0.001–0.1 milliseconds. In the US, HFT accounts for ~50% of NYSE turnover.",
+    dpf4Title: "Front-running",
+    dpf4Text: 'The algorithm "sees" a large order even before its execution — through analysis of order flow, delays, and patterns. Within microseconds it buys up the asset and resells it at a profit. Legal in the form of HFT, illegal — through direct access to the order queue.',
+
+    // vpConcepts
+    vpc1Title: "Volume Profile",
+    vpc1Text: "A horizontal histogram of volume across price levels. It shows where the most trades took place — where institutions accumulated or distributed their position.",
+    vpc2Title: "POC — Point of Control",
+    vpc2Text: "The price level with the maximum volume over the selected period. It's the market's “center of gravity” — the zone of greatest agreement between buyers and sellers. Price often returns to the POC.",
+    vpc3Title: "Value Area (VA)",
+    vpc3Text: "The price range in which 70% of total volume occurred. VAH (Value Area High) and VAL (Value Area Low) are key levels. Price leaving the Value Area = the start of a new move.",
+    vpc4Title: "Footprint Chart (Cluster Analysis)",
+    vpc4Text: "A candle broken down into price cells with buy and sell volume. Lets you see the “footprint” of institutional volume inside each bar — absorption, initiative, imbalance.",
+
+    // hftStats
+    hs1Label: "of NYSE turnover goes to HFT",
+    hs2Label: "of US volume trades in Dark Pools",
+    hs3Label: "— speed of an HFT algorithm's trade",
+    hs3Val: "400 μs",
+    hs4Label: "— HFT industry's annual profit",
+    hs4Val: "$8B",
+
+    // conclusions
+    concl1: "Dark Pools let whales trade billions without moving the market — 35–40% of US volume is invisible",
+    concl2: "HFT algorithms react in 0.04 ms — faster than the blink of a human eye. Competing on speed is pointless",
+    concl3: "Front-running is a real problem: every market order is visible to algorithms before it executes",
+    concl4: "POC (Point of Control) — the level of maximum volume — works as strong support/resistance",
+    concl5: "The volume profile shows WHAT happened at each price level, not just when",
+
+    // header / hero
+    levelChip: "LEVEL 11",
+    headerTitle: "Dark Pools and HFT",
+    chipFA: "FA 35%",
+    chipTA: "TA 65%",
+    heroTag: "SBF COMPANY — CHAPTER 11",
+    heroH1Line1: "Dark Pools",
+    heroH1Line2Pre: "and ",
+    heroSub: "The hidden architecture of modern exchanges. Where the real whales trade — and how their footprint can be read on the chart through the volume profile.",
+    chipFund35: "Fundamental 35%",
+    chipTech65: "Technical 65%",
+    chip2Int: "2 Interactives",
+
+    // Section 1
+    sec1Title: "The Invisible Market: Dark Pools and Algorithms",
+    sec1Sub: "The public exchange is only part of the market. Most institutional volume flows through invisible channels inaccessible to the retail trader.",
+    statsBarTitle: "THE SCALE OF THE INVISIBLE MARKET",
+
+    // Retail vs institutional flow
+    flowTitle: "ORDER PATH: RETAIL vs INSTITUTIONAL",
+    retailLabel: "Retail Trader 👤",
+    retailStep1: "Taps “Buy” in the app",
+    retailStep2: "Order goes through the broker (STP/ECN)",
+    retailStep3: "Lands in the public NYSE/NASDAQ order book",
+    retailStep4: "Visible to HFT algorithms before execution",
+    retailStep5: "Fills at a slightly worse price",
+    instLabel: "Institutional 🏦",
+    instStep1: "Decision: sell $500M of Apple shares",
+    instStep2: "Broker splits it into thousands of small orders (VWAP algorithm)",
+    instStep3: "Part goes into a Dark Pool — anonymously, without moving the market",
+    instStep4: "Part is executed through “iceberg” orders",
+    instStep5: "Result: minimal slippage, the market doesn't suspect a thing",
+
+    // Defence tips
+    def1Title: "Use limit orders",
+    def1Text: "A limit order isn't visible to HFT in the same sense — it waits for a price instead of taking one immediately. You're not a victim of front-running.",
+    def2Title: "Trade during liquidity",
+    def2Text: "During the London–New York overlap (16–20 MSK), HFT competition compresses the spread. Slippage is minimal.",
+    def3Title: "Read the whales' footprint",
+    def3Text: "Abnormal volume in a sideways range = institutional accumulation. The volume profile and POC are your allies.",
+
+    // Section 2
+    sec2Title: "Volume Profile: An X-Ray of Market Structure",
+    sec2Sub: "Standard volume shows the number of trades over time. Volume profile shows it by price. It's a fundamentally different view of the market: not when, but where.",
+
+    // POC usage guide
+    pocGuideTitle: "HOW TO USE POC IN TRADING",
+    poc1Title: "POC as Support",
+    poc1Text: "After price breaks out of the accumulation zone to the upside, the POC becomes strong support. Price often returns to it for a retest before continuing higher.",
+    poc2Title: "No Volume = Movement",
+    poc2Text: "Zones with low volume (Low Volume Node) are “empty” corridors. Price moves through them quickly. This is where sharp, uninterrupted moves happen.",
+    poc3Title: "Value Area Expansion",
+    poc3Text: "If price breaks above the VAH (the upper boundary of the value area) and holds there — it's a trend continuation. A new POC forms higher — meaning buyers have shifted the “center of gravity”.",
+
+    // Conclusions block
+    conclTag: "CHAPTER 11 TAKEAWAYS",
+    conclTitle: "What You Know Now",
+
+    // Footer
+    askAnalyst: "Still have a question? Ask our analyst",
+    nextChapter: "Level 12: Ichimoku →",
+  },
   ro: {
     // HFTSimulator
     hftTitle: "Simulator HFT Front-Running",
     hftTag: "INTERACTIV — FUNDAMENTAL",
     logSend: (qty, price) => `📤 Trimitere ordin: BUY ${qty} AAPL @ $${price.toFixed(2)}`,
-    logDetect: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-lightning.png' alt='' width='20' height='20' /> Algoritmul HFT a detectat ordinul în 0.000043 sec!",
+    logDetect: "⚡ Algoritmul HFT a detectat ordinul în 0.000043 sec!",
     logBuyUp: (qty, price) => `🤖 Robotul cumpără ${qty} acțiuni la $${price.toFixed(2)}…`,
     logSellBack: (hftSell, profit) => `💸 Robotul ți-a vândut la $${hftSell.toFixed(2)} (+$${profit} profit pentru robot)`,
-    logFilled: (fillPrice) => `<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-check.png' alt='' width='20' height='20' /> Ordinul tău a fost executat la $${fillPrice.toFixed(2)} (mai rău cu $50)`,
-    logExplainer: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-bar-chart.png' alt='' width='20' height='20' /> Aceasta se numește front-running. Se repetă de miliarde de ori pe zi.",
+    logFilled: (fillPrice) => `✅ Ordinul tău a fost executat la $${fillPrice.toFixed(2)} (mai rău cu $50)`,
+    logExplainer: "📊 Aceasta se numește front-running. Se repetă de miliarde de ori pe zi.",
     stateIdle: "Gata de trimitere",
     stateSending: "Pachetul zboară spre NASDAQ…",
-    stateIntercept: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-warning.png' alt='' width='20' height='20' /> HFT intercepteaza!",
+    stateIntercept: "⚠️ HFT intercepteaza!",
     stateExecute: "Robotul extrage profit…",
     stateDone: "Ordin executat",
     nodeYou: "Tu", nodeYouSub: "Broker",
@@ -242,7 +389,7 @@ const STRINGS = {
     // VolumeProfileBuilder
     vpTitle: "Profil de Volum (Volume Profile)",
     vpTag: "INTERACTIV — TEHNICĂ",
-    vpTaskLabel: "<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-pin.png' alt='' width='20' height='20' /> Sarcină:",
+    vpTaskLabel: "📌 Sarcină:",
     vpTaskBody: " Selectează cu mouse-ul zona de acumulare de pe grafic (mișcarea laterală de la început) — trage rama peste lumânări. Profilul de volum și POC se vor desena automat.",
     vpResultStrong: (poc) => `POC găsit la nivelul ~${poc}`,
     vpResultRest: " — aceasta este zona de volum maxim, unde jucătorii mari au acumulat poziția. După ieșirea din mișcarea laterală, prețul revine adesea la POC ca suport.",
@@ -414,8 +561,8 @@ function AskAnalystPopup({onClose}) {
           <p style={{fontSize:18,color:C.inkMid}}>{tr.sub}</p>
         </div>
         <div className="messenger-grid">
-          {[{href:tgLink,bg:"#0088cc",icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-rocket.png' alt='' width='20' height='20' />",name:"SBF Support",sub:`Telegram · ${tr.online}`,btn:tr.btnTg},
-            {href:waLink,bg:"#25d366",icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-quote.png' alt='' width='20' height='20' />",name:"SBF Company",sub:`WhatsApp · ${tr.online}`,btn:tr.btnWa}
+          {[{href:tgLink,bg:"#0088cc",icon:"🚀",name:"SBF Support",sub:`Telegram · ${tr.online}`,btn:tr.btnTg},
+            {href:waLink,bg:"#25d366",icon:"💬",name:"SBF Company",sub:`WhatsApp · ${tr.online}`,btn:tr.btnWa}
           ].map((m,i)=>(
             <div key={i} style={{background:"#fff",border:"1px solid #e0e0e0",borderRadius:12,padding:"30px 25px",display:"flex",flexDirection:"column"}}>
               <div style={{display:"flex",alignItems:"center",gap:15,marginBottom:30}}>
@@ -533,7 +680,7 @@ function HFTSimulator() {
           {label:S.nodeNet,sub:S.nodeNetSub,     x:"28%", icon:"🌐", color:"rgba(255,255,255,0.3)"},
           {label:S.nodeHft,     sub:S.nodeHftSub,  x:"52%", icon:"🤖", color:phase==="intercept"||phase==="execute"?C.red:"rgba(255,255,255,0.4)", pulse:phase==="intercept"||phase==="execute"},
           {label:S.nodeExch,  sub:S.nodeExchSub,    x:"75%", icon:"🏛️", color:"rgba(255,255,255,0.4)"},
-          {label:S.nodeFill,sub:S.nodeFillSub,   x:"93%", icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-check.png' alt='' width='20' height='20' />", color:phase==="done"?C.gold:"rgba(255,255,255,0.3)"},
+          {label:S.nodeFill,sub:S.nodeFillSub,   x:"93%", icon:"✅", color:phase==="done"?C.gold:"rgba(255,255,255,0.3)"},
         ].map((n,i) => (
           <div key={i} style={{position:"absolute",left:n.x,top:"50%",transform:"translate(-50%,-50%)",textAlign:"center",zIndex:3}}>
             <div style={{
@@ -865,16 +1012,16 @@ function Chapter11() {
       text:S.dpf1Text },
     { icon:"🏦", title:S.dpf2Title, accent:C.blue,
       text:S.dpf2Text },
-    { icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-lightning.png' alt='' width='20' height='20' />", title:S.dpf3Title, accent:C.red,
+    { icon:"⚡", title:S.dpf3Title, accent:C.red,
       text:S.dpf3Text },
-    { icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-target.png' alt='' width='20' height='20' />", title:S.dpf4Title, accent:C.gold,
+    { icon:"🎯", title:S.dpf4Title, accent:C.gold,
       text:S.dpf4Text },
   ];
 
   const vpConcepts = [
-    { icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-bar-chart.png' alt='' width='20' height='20' />", title:S.vpc1Title, accent:C.cyan,
+    { icon:"📊", title:S.vpc1Title, accent:C.cyan,
       text:S.vpc1Text },
-    { icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-target.png' alt='' width='20' height='20' />", title:S.vpc2Title, accent:C.red,
+    { icon:"🎯", title:S.vpc2Title, accent:C.red,
       text:S.vpc2Text },
     { icon:"📐", title:S.vpc3Title, accent:C.gold,
       text:S.vpc3Text },
@@ -994,7 +1141,7 @@ function Chapter11() {
         {/* Defence tips */}
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:16,marginBottom:56}} className="g3">
           {[
-            {icon:"<img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-shield.png' alt='' width='20' height='20' />",title:S.def1Title,accent:C.greenD,text:S.def1Text},
+            {icon:"🛡️",title:S.def1Title,accent:C.greenD,text:S.def1Text},
             {icon:"⏰",title:S.def2Title,accent:C.gold,text:S.def2Text},
             {icon:"👣",title:S.def3Title,accent:C.purple,text:S.def3Text},
           ].map((t,i)=><InfoCard key={i} {...t}/>)}

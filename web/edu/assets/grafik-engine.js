@@ -13,9 +13,10 @@
     violet:'#B07CC6', teal:'#1D9E75', muted:'#7C7563'
   };
 
-  // ── RO/RU язык — тот же детект, что в i18n.js / sbf-glossary.js (без
+  // ── RO/EN/RU язык — тот же детект, что в i18n.js / sbf-glossary.js (без
   // зависимости от порядка загрузки других скриптов) ────────────────────────
-  var LANG = /^\/(ro)(\/|$)/.test(location.pathname) ? 'ro' : 'ru';
+  var _langM = location.pathname.match(/^\/(ro|en)(\/|$)/);
+  var LANG = _langM ? _langM[1] : 'ru';
 
   // Небольшой словарь для коротких надписей на самих SVG-диаграммах (линии
   // сопротивления/поддержки/шеи, TP/SL-строки и т.п.) — переводится по ТЕКСТУ
@@ -31,8 +32,20 @@
     'снятие':         'sweep',
     'BOS вниз':       'BOS jos'
   };
+  var EN_LABELS = {
+    'сопротивление':  'resistance',
+    'поддержка':      'support',
+    'линия шеи':      'Neckline',
+    'ликвидность':    'liquidity',
+    'последний HL':   'last HL',
+    'ордер-блок':     'Order Block',
+    'снятие':         'sweep',
+    'BOS вниз':       'BOS down'
+  };
   function trLbl(s) {
-    return (LANG === 'ro' && RO_LABELS.hasOwnProperty(s)) ? RO_LABELS[s] : s;
+    if (LANG === 'ro' && RO_LABELS.hasOwnProperty(s)) return RO_LABELS[s];
+    if (LANG === 'en' && EN_LABELS.hasOwnProperty(s)) return EN_LABELS[s];
+    return s;
   }
 
   // ---- ГПСЧ и генераторы цены ----
@@ -120,8 +133,10 @@
       s+='<rect x="'+padX+'" y="'+Math.min(yE,yT).toFixed(1)+'" width="'+zW.toFixed(1)+'" height="'+Math.abs(yE-yT).toFixed(1)+'" fill="'+P.up+'" opacity="0.09" rx="1"/>';
       var tpLabel = LANG==='ro'
         ? (TPMODE==='r2'?'Țintă 2R':TPMODE==='r1'?'Țintă 1R':'Țintă')
+        : LANG==='en'
+        ? (TPMODE==='r2'?'Target 2R':TPMODE==='r1'?'Target 1R':'Target')
         : (TPMODE==='r2'?'Цель 2R':TPMODE==='r1'?'Цель 1R':'Цель');
-      var entryLabel = LANG==='ro'?'Intrare':'Вход', slLabel = LANG==='ro'?'Stop':'Стоп';
+      var entryLabel = LANG==='ro'?'Intrare':LANG==='en'?'Entry':'Вход', slLabel = LANG==='ro'?'Stop':LANG==='en'?'Stop':'Стоп';
       var rows=[[entryLabel,lvE,P.gold],[slLabel,lvS,P.down],[tpLabel,lvT,P.up]];
       rows.forEach(function(rw,ri){var yy=Y(rw[1]),ln=W-padX-padR-padX;s+='<line class="ln" style="stroke-dasharray:'+ln+';stroke-dashoffset:'+ln+';animation-delay:'+(aft+260+ri*150)+'ms" x1="'+padX+'" y1="'+yy.toFixed(1)+'" x2="'+(W-padR)+'" y2="'+yy.toFixed(1)+'" stroke="'+rw[2]+'" stroke-width="1.2"/><text x="'+(W-padR+4)+'" y="'+(yy+3.5).toFixed(1)+'" font-family="JetBrains Mono,monospace" font-size="11" fill="'+rw[2]+'">'+rw[0]+'</text>';});
     }
@@ -232,6 +247,47 @@
   };
   var RO_CATS = {candle:'Modele de lumânări', chart:'Modele grafice', smc:'Structura pieței', ind:'Indicatori'};
 
+  // ── EN overlay — mirrors the RO overlay above exactly (same shape, same
+  // keys, same n/f/w/note fields, same application mechanism by item.key).
+  // See the RO overlay comment above for why this is safe against the
+  // fragile positional ITEMS.candle/ITEMS.chart arrays. ─────────────────────
+  var EN_PATTERNS = {
+    // -- candlestick (candle) --
+    bullEngulf:  {n:'Bullish Engulfing', f:'After a decline, a small bearish candle is followed by a larger bullish candle that fully engulfs its body.', w:'Buyers have seized the initiative — often a bullish reversal.', note:'Stop beyond the pattern; target is the measured move (pattern height).'},
+    bearEngulf:  {n:'Bearish Engulfing', f:'After a rally, a small bullish candle is followed by a larger bearish candle that fully engulfs its body.', w:'Sellers have seized the initiative — often a bearish reversal.', note:'Stop beyond the pattern; target is the measured move (pattern height).'},
+    hammer:      {n:'Hammer', f:'A small body near the top with a long lower wick, forming after a decline.', w:'Price was pushed down and then bought back up — selling pressure is fading.', note:'Stop beyond the pattern; target is the measured move (pattern height).'},
+    doji:        {n:'Doji', f:'Open and close are nearly equal — the body is tiny.', w:'A balance of forces, indecision — often a pause before the next move.', note:'Stop beyond the pattern; target is the measured move (pattern height).'},
+    morningStar: {n:'Morning Star', f:'Large bearish candle → small gapped star → large bullish candle.', w:'The decline has run out of steam — buyers take the initiative.', note:'Stop beyond the pattern; target is the measured move (pattern height).'},
+    eveningStar: {n:'Evening Star', f:'Large bullish candle → small gapped star → large bearish candle.', w:'The rally has run out of steam — sellers take the initiative.', note:'Stop beyond the pattern; target is the measured move (pattern height).'},
+    harami:      {n:'Harami', f:'A large candle followed by a small one contained within its body.', w:'Momentum has sharply contracted — a pause or reversal is possible.', note:'Stop beyond the pattern; target is the measured move (pattern height).'},
+    // -- chart patterns (chart) --
+    ascTri:  {n:'Ascending Triangle', f:'Horizontal resistance with rising higher lows.', w:'Buyers are compressing price — the breakout is more often to the upside.', note:'Stop beyond the structure; target is the pattern\'s measured move.'},
+    descTri: {n:'Descending Triangle', f:'Horizontal support with falling lower highs.', w:'Sellers are compressing price — the breakout is more often to the downside.', note:'Stop beyond the structure; target is the pattern\'s measured move.'},
+    pennant: {n:'Pennant', f:'A sharp flagpole move, followed by a contraction into a converging triangle.', w:'A pause within a strong move — often a continuation.', note:'Stop beyond the structure; target is the pattern\'s measured move.'},
+    hns:     {n:'Head & Shoulders', f:'Three peaks: the head higher than the two shoulders, sharing a common neckline.', w:'The uptrend structure is broken — target: the head\'s height measured from the neckline.', note:'Stop beyond the structure; target is the pattern\'s measured move.'},
+    dtop:    {n:'Double Top', f:'Two peaks at the same level, with a pullback between them.', w:'Resistance held twice — a bearish reversal.', note:'Stop beyond the structure; target is the pattern\'s measured move.'},
+    dbot:    {n:'Double Bottom', f:'Two lows at the same level, with a bounce between them.', w:'Support held twice — a bullish reversal.', note:'Stop beyond the structure; target is the pattern\'s measured move.'},
+    wedge:   {n:'Wedge', f:'Two converging trendlines sloping in the same direction.', w:'Momentum is fading — a reversal against the slope.', note:'Stop beyond the structure; target is the pattern\'s measured move.'},
+    flag:    {n:'Flag', f:'A sharp impulse move, followed by a sloping channel against it.', w:'A breather within the trend — often a continuation.', note:'Stop beyond the structure; target is the pattern\'s measured move.'},
+    // -- market structure (smc) --
+    structure: {n:'Market Structure (HH/HL)', f:'A sequence of progressively higher highs (HH) and higher lows (HL).', w:'As long as HH/HL continue, the trend is up; the appearance of LH/LL signals a break.', note:'Basic trend mapping. Context, not an entry point.'},
+    bos:       {n:'Break of Structure (BOS)', f:'Price breaks the last significant low of an uptrend structure.', w:'Break of Structure — the first confirmation of a possible trend change.', note:'A signal of a context change, not a ready-made trade.'},
+    sweep:     {n:'Liquidity Sweep', f:'Price pokes through a level of equal highs (where stops rest) and reverses.', w:'Liquidity has been collected — often a sharp reversal follows the sweep.', note:'Manipulation ahead of a move. Directional context.'},
+    fvg:       {n:'FVG / Imbalance', f:'Three candles of a strong impulse leave an unfilled gap.', w:'Price is often pulled back to “fill” the imbalance before continuing.', note:'A zone of interest that price may return to.'},
+    ob:        {n:'Order Block', f:'The last opposite-direction candle before a strong impulse move.', w:'A zone where large volume entered — often a reaction on return.', note:'A zone of interest, not a standalone signal.'},
+    // -- indicators (ind) --
+    ma:       {n:'Moving Averages', f:'The average price over N bars; the line slides forward with each new bar.', w:'Smooths out noise; a crossover of the fast and slow MA signals a trend change.', note:'Directional context, not an entry point.'},
+    bb:       {n:'Bollinger Bands', f:'A middle line (SMA20) with bands at ±2 standard deviations.', w:'Band width reflects volatility; a squeeze often precedes a move.', note:'Volatility, not an entry signal.'},
+    rsi:      {n:'RSI', f:'The ratio of average gains to losses over 14 bars, on a 0–100 scale.', w:'>70 overbought, <30 oversold; divergence signals weakening momentum.', note:'Context on the strength of the move.'},
+    stoch:    {n:'Stochastic', f:'%K shows where the close sits within the N-bar range; %D is its smoothed average.', w:'The >80/<20 zones and %K/%D crossovers give momentum context.', note:'A momentum oscillator, context only.'},
+    macd:     {n:'MACD', f:'EMA12−EMA26, plus a signal EMA9, plus a histogram of their difference.', w:'Crossovers and the histogram crossing zero signal a momentum shift.', note:'Momentum, not an entry level.'},
+    atr:      {n:'ATR', f:'The average true range over 14 bars — the typical candle size.', w:'A volatility measure; often used to size stop distance.', note:'Helps set the stop distance.'},
+    ichimoku: {n:'Ichimoku', f:'Tenkan, Kijun, and the cloud (Senkou A/B) — the system as a whole.', w:'Price above the cloud signals an uptrend; the cloud acts as dynamic support/resistance.', note:'Comprehensive trend context.'},
+    fib:      {n:'Fibonacci Levels', f:'Horizontal levels from 0–100% drawn over an impulse move.', w:'The 0.382–0.618 zone is a common pullback area before continuation.', note:'Zones of possible pullback, context.'},
+    volume:   {n:'Volume', f:'How many units changed hands during a bar.', w:'Rising volume confirms the move; weak volume raises doubt.', note:'Confirmation of the strength of a move.'}
+  };
+  var EN_CATS = {candle:'Candlestick Patterns', chart:'Chart Patterns', smc:'Market Structure', ind:'Indicators'};
+
   if (LANG === 'ro') {
     ['candle','chart','smc','ind'].forEach(function(cat){
       (ITEMS[cat]||[]).forEach(function(item){
@@ -240,6 +296,14 @@
       });
     });
     CATS.forEach(function(c){ if (RO_CATS[c[0]]) c[1] = RO_CATS[c[0]]; });
+  } else if (LANG === 'en') {
+    ['candle','chart','smc','ind'].forEach(function(cat){
+      (ITEMS[cat]||[]).forEach(function(item){
+        var tr = EN_PATTERNS[item.key];
+        if (tr) { item.n = tr.n; item.f = tr.f; item.w = tr.w; item.note = tr.note; }
+      });
+    });
+    CATS.forEach(function(c){ if (EN_CATS[c[0]]) c[1] = EN_CATS[c[0]]; });
   }
 
   function findItem(cat,key){var arr=ITEMS[cat]||[];for(var i=0;i<arr.length;i++)if(arr[i].key===key)return arr[i];return null;}
