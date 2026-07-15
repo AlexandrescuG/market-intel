@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>SBF | {% if lang == 'ro' %}Capitolul 8. Trend și Cicluri{% else %}Глава 8. Тренд и Циклы{% endif %}</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html,body{max-width:100vw;overflow-x:hidden;scroll-behavior:smooth}
+    body{background:#ffffff;font-family:'DM Sans',system-ui,sans-serif;color:#18181a}
+    #sbf-book-root{min-height:100vh}
+    .back-to-edu{
+      position:fixed;bottom:20px;right:20px;z-index:500;
+      background:#18181a;color:rgba(255,255,255,0.6);
+      font-family:'DM Sans',sans-serif;font-size:.75rem;letter-spacing:1.5px;text-transform:uppercase;
+      padding:7px 13px;text-decoration:none;transition:all .2s;
+      border:1px solid rgba(255,255,255,0.08);
+    }
+    .back-to-edu:hover{background:#c9973a;color:#fff}
+    .messenger-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:30px}
+    @media(max-width:768px){.messenger-grid{grid-template-columns:1fr}.hide-mobile{display:none!important}.g2{grid-template-columns:1fr!important}.g3{grid-template-columns:1fr!important}.g4{grid-template-columns:1fr 1fr!important}}
+  </style>
+</head>
+<body>
+
+
+<div id="sbf-book-root"></div>
+<a href="/edu" class="back-to-edu">← Edu</a>
+
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<script type="text/babel" data-presets="react">
+const INITIAL_LANG = "{{ lang }}";
+
+{% raw %}
+const STRINGS = {
+  ru: {
+    // Header / sticky nav
+    lvlChip: "УРОВЕНЬ 8",
+    lvlChapterName: "Тренд и Циклы (EMA)",
+    lvlFaChip: "ФА 40%",
+    lvlTaChip: "ТА 60%",
+
+    // Hero
+    heroTag: "SBF COMPANY — ГЛАВА 8",
+    heroTitle1: "Тренд",
+    heroAnd: "и",
+    heroTitle2: "Циклы",
+    heroSub: "Глобальный экономический цикл рождает тренд на графике. EMA — инструмент, который превращает этот цикл в торговые сигналы.",
+    heroChip1: "Фундаментал 40%",
+    heroChip2: "Техника 60%",
+    heroChip3: "2 Интерактива",
+
+    // Block 1: Economic cycle
+    cycSectionTitle: "Экономический цикл: четыре фазы капитала",
+    cycSectionSub: "Экономика никогда не стоит на месте — она движется по предсказуемому 4-фазному циклу длиной 7–11 лет. Понимание текущей фазы — ключ к правильной ротации портфеля.",
+    cycClockLabel: "ЧАСЫ ЭКОНОМИЧЕСКОГО ЦИКЛА",
+    cycClockCenterSub: "лет/цикл",
+    cycArcRecovery: "ВОССТАНОВЛЕНИЕ",
+    cycArcExpansion: "РАСШИРЕНИЕ",
+    cycArcSlowdown: "ЗАМЕДЛЕНИЕ",
+    cycArcRecession: "РЕЦЕССИЯ",
+
+    cycRowGdp: "ВВП",
+    cycRowInflation: "Инфляция",
+    cycRowRates: "Ставки",
+    cycRowBest: "Лучшие активы",
+    cycRowWorst: "Под давлением",
+
+    cycP1Phase: "Восстановление", cycP1Gdp: "Рост ↑", cycP1Inflation: "Низкая", cycP1Rates: "Снижаются",
+    cycP1Best: "IT, крипто, small-cap", cycP1Worst: "Кэш, облигации",
+    cycP1Why: "ФРС снижает ставки → дешёвые деньги → рисковые активы взлетают первыми",
+
+    cycP2Phase: "Расширение / Пик", cycP2Gdp: "Максимальный", cycP2Inflation: "Растёт", cycP2Rates: "Растут",
+    cycP2Best: "Нефть, сырьё, REIT", cycP2Worst: "Облигации (дорожает кредит)",
+    cycP2Why: "Перегрев экономики → спрос на реальные активы → инфляционная защита",
+
+    cycP3Phase: "Замедление", cycP3Gdp: "Замедляется", cycP3Inflation: "Высокая", cycP3Rates: "Пик",
+    cycP3Best: "Облигации, коммунальщики, медицина", cycP3Worst: "IT, крипто",
+    cycP3Why: "Ставки на пике → бегство в защитные активы с гарантированным доходом",
+
+    cycP4Phase: "Рецессия", cycP4Gdp: "Падение", cycP4Inflation: "Снижается", cycP4Rates: "Начинают снижаться",
+    cycP4Best: "Золото, USD, краткосрочные облигации", cycP4Worst: "Акции, нефть",
+    cycP4Why: "Страх и неопределённость → золото как «тихая гавань», ФРС снова смягчает",
+
+    // Interactive 1: Asset Rotation
+    rotTitle: "Ротация Активов",
+    rotBadge: "ИНТЕРАКТИВ — ФУНДАМЕНТАЛ",
+    rotReset: "Сбросить",
+    rotRetry: "Попробовать снова",
+    rotCheck: "Проверить →",
+    rotScoreLine: "верно {s} из {t}",
+    rotScoreNote: "Неверные позиции подсвечены красным. Правильные — зелёным.",
+    rotPoolLabel: "АКТИВЫ — ПЕРЕТАЩИ В НУЖНУЮ ФАЗУ:",
+    rotAllPlaced: "Все активы размещены",
+    rotDropHint: "Сюда…",
+    rotFooterHint: "Нажми на карточку в зоне, чтобы убрать её обратно",
+
+    rotPhRecoveryLabel: "Восстановление", rotPhRecoverySub: "ВВП растёт, инфляция низкая",
+    rotPhRecoveryHint: "Дешёвые деньги, ФРС мягкая → рисковые активы растут первыми",
+    rotPhExpansionLabel: "Расширение / Пик", rotPhExpansionSub: "Перегрев, инфляция ↑",
+    rotPhExpansionHint: "Сырьё и реальные активы — лучшая защита от инфляции",
+    rotPhSlowdownLabel: "Замедление", rotPhSlowdownSub: "Рост падает, ставки высоки",
+    rotPhSlowdownHint: "Инвесторы уходят в защитные активы и облигации",
+    rotPhRecessionLabel: "Рецессия", rotPhRecessionSub: "Спад ВВП, безработица ↑",
+    rotPhRecessionHint: "Золото и кэш — «тихая гавань» в панике рынков",
+
+    rotAssetTech: "Акции IT / NASDAQ",
+    rotAssetCrypto: "Криптовалюты",
+    rotAssetSmallcap: "Small-cap акции",
+    rotAssetOil: "Нефть (Oil)",
+    rotAssetCommodities: "Сырьё / Металлы",
+    rotAssetRealestate: "Недвижимость (REIT)",
+    rotAssetBonds: "US Treasuries",
+    rotAssetUtilities: "Коммунальный сектор",
+    rotAssetHealthcare: "Здравоохранение",
+    rotAssetGold: "Золото (Gold)",
+    rotAssetCash: "Наличные / USD",
+
+    // Interactive 2: EMA Configurator
+    emaTitle: "Настройка EMA",
+    emaBadge: "ИНТЕРАКТИВ — ТЕХНИКА",
+    emaSliderFastNote: "5 (быстрая)",
+    emaSliderSlowNote: "100 (медленная)",
+    emaSlider2LongNote: "200 (долгосрочная)",
+    emaShowCrossLabel: "Показать Golden/Death Cross",
+    emaLegendPrice: "Цена",
+    emaMetricFast: "EMA быстрая",
+    emaMetricSlow: "EMA медленная",
+    emaMetricOff: "Выкл.",
+    emaMetricLag: "Отставание",
+    emaMetricCrosses: "Пересечения цены",
+    emaTimesSuffix: "раз",
+    emaNoiseSlow: "Слишком медленная",
+    emaNoiseOptimal: "Оптимальная",
+    emaNoiseNoisy: "Слишком шумная",
+    emaHintLabel: "Подсказка:",
+    emaHintNoisy: "EMA {p} слишком быстрая — пересекает цену {n} раз, много ложных сигналов. Увеличь период.",
+    emaHintSlow: "EMA {p} слишком медленная — сильно запаздывает за ценой. Уменьши период или используй как долгосрочный фильтр.",
+    emaHintBalanced: "EMA {p} хорошо балансирует между шумом и запаздыванием. При пересечении с EMA {p2} — сигнал Golden/Death Cross.",
+
+    // Block 2: EMA theory
+    emaSectionTitle: "Скользящие средние (EMA): язык тренда",
+    emaSectionSub: "Скользящая средняя сглаживает ценовой шум и показывает направление тренда. EMA (экспоненциальная) реагирует быстрее — она придаёт больший вес последним барам.",
+    emaTheoryPara: "EMA рассчитывается с весовым коэффициентом: каждый следующий бар важнее предыдущего. Это делает EMA более чувствительной к свежим движениям цены, в отличие от простой SMA.",
+    emaFormulaLabel: "ФОРМУЛА EMA",
+    emaFormulaPeriod: "Период",
+    emaFormulaPrice: "Цена",
+    emaFormulaPrev: "EMA_пред",
+    emaFormulaNote: "При периоде 20: k = 2÷21 ≈ 0.095 — каждая новая свеча весит ~9.5%",
+    emaInfoCardTitle: "EMA как динамическая поддержка",
+    emaInfoCardText: "Крупные фонды используют EMA 20/50/200 как уровни для докупок на просадках. Когда цена касается EMA снизу вверх — это сигнал для входа в направлении тренда.",
+    emaPeriodsHeading: "Популярные периоды EMA",
+    emaRowNoiseLabel: "Шум",
+    emaRowLagLabel: "Запаздывание",
+
+    emaT1Speed: "Очень быстрая", emaT1Use: "Скальпинг, дейтрейдинг", emaT1Noise: "Высокий", emaT1Lag: "Минимальный",
+    emaT2Speed: "Быстрая", emaT2Use: "Свинг-трейдинг, 4H–1D", emaT2Noise: "Умеренный", emaT2Lag: "Малый",
+    emaT3Speed: "Средняя", emaT3Use: "Среднесрочные тренды", emaT3Noise: "Низкий", emaT3Lag: "Средний",
+    emaT4Speed: "Медленная", emaT4Use: "Долгосрочный тренд-фильтр", emaT4Noise: "Очень низкий", emaT4Lag: "Значительный",
+    emaT5Speed: "Очень медленная", emaT5Use: "Мастер-тренд. Всё выше = бычий рынок", emaT5Noise: "Минимальный", emaT5Lag: "Большой",
+
+    // Golden Cross / Death Cross
+    gcSectionLabel: "ЗОЛОТОЙ КРЕСТ И КРЕСТ СМЕРТИ",
+    gcGoldenTitle: "Golden Cross (Золотой крест)",
+    gcGoldenPre: "EMA 50 пересекает EMA 200",
+    gcGoldenBold: "снизу вверх",
+    gcGoldenPost: "Один из самых надёжных бычьих сигналов — подтверждение смены медвежьего рынка на бычий.",
+    gcGoldenExample: "Пример: S&P 500 Golden Cross в апреле 2020 → рост +100% за 2 года",
+    gcDeathTitle: "Death Cross (Крест смерти)",
+    gcDeathPre: "EMA 50 пересекает EMA 200",
+    gcDeathBold: "сверху вниз",
+    gcDeathPost: "Медвежий сигнал — подтверждение начала долгосрочного нисходящего тренда.",
+    gcDeathExample: "Пример: Bitcoin Death Cross в январе 2022 → падение -75%",
+
+    gcRulesLabel: "ПРАВИЛА ТОРГОВЛИ ПО EMA",
+    gcRule1: "Цена выше EMA 200 = глобальный аптренд. Торгуй только лонги.",
+    gcRule2: "Цена ниже EMA 200 = медвежий рынок. Лонги опасны — выжидай или шортируй.",
+    gcRule3: "Вход в лонг: цена откатила к EMA 20/50 и развернулась вверх.",
+    gcRule4: "Golden Cross на недельном таймфрейме — стратегический сигнал года.",
+    gcRule5: "EMA не предсказывает разворот — она подтверждает уже начавшийся тренд.",
+
+    // Conclusions
+    concLabel: "ИТОГИ ГЛАВЫ 8",
+    concHeading: "Что вы теперь знаете",
+    conc1: "Экономика движется по 4 фазам цикла: Восстановление → Расширение → Замедление → Рецессия — и так по кругу",
+    conc2: "Ротация секторов: IT и крипто растут в фазе восстановления, золото и USD — в рецессию",
+    conc3: "EMA (экспоненциальная скользящая) придаёт больший вес свежим данным — реагирует быстрее SMA",
+    conc4: "Золотой крест (EMA 50 пересекает EMA 200 снизу вверх) — один из сильнейших бычьих сигналов",
+    conc5: "EMA 200 = граница бычьего и медвежьего рынка: цена выше EMA 200 → глобальный аптренд",
+
+    // Footer nav
+    footerAsk: "Остался вопрос? Напиши аналитику",
+    footerNext: "Уровень 9: Отчётности и Осцилляторы →",
+  },
+  ro: {
+    // Header / sticky nav
+    lvlChip: "NIVELUL 8",
+    lvlChapterName: "Trend și Cicluri (EMA)",
+    lvlFaChip: "FA 40%",
+    lvlTaChip: "TA 60%",
+
+    // Hero
+    heroTag: "SBF COMPANY — CAPITOLUL 8",
+    heroTitle1: "Trend",
+    heroAnd: "și",
+    heroTitle2: "Cicluri",
+    heroSub: "Ciclul economic global naște trendul pe grafic. EMA este instrumentul care transformă acest ciclu în semnale de tranzacționare.",
+    heroChip1: "Fundamental 40%",
+    heroChip2: "Tehnic 60%",
+    heroChip3: "2 Interactive",
+
+    // Block 1: Economic cycle
+    cycSectionTitle: "Ciclul economic: patru faze ale capitalului",
+    cycSectionSub: "Economia nu stă niciodată pe loc — se mișcă printr-un ciclu previzibil de 4 faze, cu o durată de 7–11 ani. Înțelegerea fazei curente este cheia unei rotații corecte a portofoliului.",
+    cycClockLabel: "CEASUL CICLULUI ECONOMIC",
+    cycClockCenterSub: "ani/ciclu",
+    cycArcRecovery: "RECUPERARE",
+    cycArcExpansion: "EXPANSIUNE",
+    cycArcSlowdown: "ÎNCETINIRE",
+    cycArcRecession: "RECESIUNE",
+
+    cycRowGdp: "PIB",
+    cycRowInflation: "Inflație",
+    cycRowRates: "Dobânzi",
+    cycRowBest: "Cele mai bune active",
+    cycRowWorst: "Sub presiune",
+
+    cycP1Phase: "Recuperare", cycP1Gdp: "Creștere ↑", cycP1Inflation: "Scăzută", cycP1Rates: "Scad",
+    cycP1Best: "IT, crypto, small-cap", cycP1Worst: "Cash, obligațiuni",
+    cycP1Why: "FED reduce dobânzile → bani ieftini → activele riscante urcă primele",
+
+    cycP2Phase: "Expansiune / Vârf", cycP2Gdp: "Maxim", cycP2Inflation: "Crește", cycP2Rates: "Cresc",
+    cycP2Best: "Petrol, materii prime, REIT", cycP2Worst: "Obligațiuni (creditul se scumpește)",
+    cycP2Why: "Supraîncălzirea economiei → cerere pentru active reale → protecție împotriva inflației",
+
+    cycP3Phase: "Încetinire", cycP3Gdp: "Încetinește", cycP3Inflation: "Ridicată", cycP3Rates: "Vârf",
+    cycP3Best: "Obligațiuni, utilități, sănătate", cycP3Worst: "IT, crypto",
+    cycP3Why: "Dobânzile la vârf → refugiu în active defensive cu venit garantat",
+
+    cycP4Phase: "Recesiune", cycP4Gdp: "Scădere", cycP4Inflation: "Scade", cycP4Rates: "Încep să scadă",
+    cycP4Best: "Aur, USD, obligațiuni pe termen scurt", cycP4Worst: "Acțiuni, petrol",
+    cycP4Why: "Frică și incertitudine → aurul ca „refugiu sigur”, FED relaxează din nou politica",
+
+    // Interactive 1: Asset Rotation
+    rotTitle: "Rotația Activelor",
+    rotBadge: "INTERACTIV — FUNDAMENTAL",
+    rotReset: "Resetează",
+    rotRetry: "Încearcă din nou",
+    rotCheck: "Verifică →",
+    rotScoreLine: "corecte {s} din {t}",
+    rotScoreNote: "Pozițiile greșite sunt evidențiate cu roșu. Cele corecte — cu verde.",
+    rotPoolLabel: "ACTIVE — TRAGE ÎN FAZA POTRIVITĂ:",
+    rotAllPlaced: "Toate activele sunt plasate",
+    rotDropHint: "Aici…",
+    rotFooterHint: "Apasă pe card în zonă ca să-l scoți înapoi",
+
+    rotPhRecoveryLabel: "Recuperare", rotPhRecoverySub: "PIB crește, inflație scăzută",
+    rotPhRecoveryHint: "Bani ieftini, FED relaxat → activele riscante cresc primele",
+    rotPhExpansionLabel: "Expansiune / Vârf", rotPhExpansionSub: "Supraîncălzire, inflație ↑",
+    rotPhExpansionHint: "Materiile prime și activele reale — cea mai bună protecție împotriva inflației",
+    rotPhSlowdownLabel: "Încetinire", rotPhSlowdownSub: "Creșterea scade, dobânzile sunt ridicate",
+    rotPhSlowdownHint: "Investitorii se refugiază în active defensive și obligațiuni",
+    rotPhRecessionLabel: "Recesiune", rotPhRecessionSub: "Scădere PIB, șomaj ↑",
+    rotPhRecessionHint: "Aurul și cash-ul — „refugiu sigur” în panica piețelor",
+
+    rotAssetTech: "Acțiuni IT / NASDAQ",
+    rotAssetCrypto: "Criptomonede",
+    rotAssetSmallcap: "Acțiuni small-cap",
+    rotAssetOil: "Petrol (Oil)",
+    rotAssetCommodities: "Materii prime / Metale",
+    rotAssetRealestate: "Imobiliare (REIT)",
+    rotAssetBonds: "US Treasuries",
+    rotAssetUtilities: "Sectorul utilităților",
+    rotAssetHealthcare: "Sănătate",
+    rotAssetGold: "Aur (Gold)",
+    rotAssetCash: "Cash / USD",
+
+    // Interactive 2: EMA Configurator
+    emaTitle: "Configurare EMA",
+    emaBadge: "INTERACTIV — TEHNIC",
+    emaSliderFastNote: "5 (rapidă)",
+    emaSliderSlowNote: "100 (lentă)",
+    emaSlider2LongNote: "200 (pe termen lung)",
+    emaShowCrossLabel: "Afișează Golden/Death Cross",
+    emaLegendPrice: "Preț",
+    emaMetricFast: "EMA rapidă",
+    emaMetricSlow: "EMA lentă",
+    emaMetricOff: "Oprit",
+    emaMetricLag: "Întârziere",
+    emaMetricCrosses: "Intersecții cu prețul",
+    emaTimesSuffix: "ori",
+    emaNoiseSlow: "Prea lentă",
+    emaNoiseOptimal: "Optimă",
+    emaNoiseNoisy: "Prea zgomotoasă",
+    emaHintLabel: "Indiciu:",
+    emaHintNoisy: "EMA {p} este prea rapidă — intersectează prețul de {n} ori, multe semnale false. Mărește perioada.",
+    emaHintSlow: "EMA {p} este prea lentă — rămâne mult în urma prețului. Micșorează perioada sau folosește-o ca filtru pe termen lung.",
+    emaHintBalanced: "EMA {p} echilibrează bine zgomotul și întârzierea. La intersecția cu EMA {p2} — semnal Golden/Death Cross.",
+
+    // Block 2: EMA theory
+    emaSectionTitle: "Mediile mobile (EMA): limbajul trendului",
+    emaSectionSub: "Media mobilă netezește zgomotul de preț și arată direcția trendului. EMA (exponențială) reacționează mai repede — acordă o pondere mai mare barelor recente.",
+    emaTheoryPara: "EMA se calculează cu un coeficient de pondere: fiecare bară următoare contează mai mult decât precedenta. Asta face EMA mai sensibilă la mișcările recente de preț, spre deosebire de SMA simplă.",
+    emaFormulaLabel: "FORMULA EMA",
+    emaFormulaPeriod: "Perioadă",
+    emaFormulaPrice: "Preț",
+    emaFormulaPrev: "EMA_prec",
+    emaFormulaNote: "La perioada 20: k = 2÷21 ≈ 0,095 — fiecare lumânare nouă cântărește ~9,5%",
+    emaInfoCardTitle: "EMA ca suport dinamic",
+    emaInfoCardText: "Fondurile mari folosesc EMA 20/50/200 ca niveluri pentru cumpărări suplimentare la scăderi. Când prețul atinge EMA de jos în sus — este un semnal de intrare în direcția trendului.",
+    emaPeriodsHeading: "Perioadele EMA populare",
+    emaRowNoiseLabel: "Zgomot",
+    emaRowLagLabel: "Întârziere",
+
+    emaT1Speed: "Foarte rapidă", emaT1Use: "Scalping, day trading", emaT1Noise: "Ridicat", emaT1Lag: "Minimal",
+    emaT2Speed: "Rapidă", emaT2Use: "Swing trading, 4H–1D", emaT2Noise: "Moderat", emaT2Lag: "Mic",
+    emaT3Speed: "Medie", emaT3Use: "Trenduri pe termen mediu", emaT3Noise: "Scăzut", emaT3Lag: "Mediu",
+    emaT4Speed: "Lentă", emaT4Use: "Filtru de trend pe termen lung", emaT4Noise: "Foarte scăzut", emaT4Lag: "Semnificativ",
+    emaT5Speed: "Foarte lentă", emaT5Use: "Trendul master. Tot ce e deasupra = piață bullish", emaT5Noise: "Minim", emaT5Lag: "Mare",
+
+    // Golden Cross / Death Cross
+    gcSectionLabel: "GOLDEN CROSS ȘI DEATH CROSS",
+    gcGoldenTitle: "Golden Cross (Crucea de Aur)",
+    gcGoldenPre: "EMA 50 intersectează EMA 200",
+    gcGoldenBold: "de jos în sus",
+    gcGoldenPost: "Unul dintre cele mai fiabile semnale bullish — confirmă trecerea de la piața bearish la cea bullish.",
+    gcGoldenExample: "Exemplu: S&P 500 Golden Cross în aprilie 2020 → creștere +100% în 2 ani",
+    gcDeathTitle: "Death Cross (Crucea Morții)",
+    gcDeathPre: "EMA 50 intersectează EMA 200",
+    gcDeathBold: "de sus în jos",
+    gcDeathPost: "Semnal bearish — confirmă începutul unui trend descendent pe termen lung.",
+    gcDeathExample: "Exemplu: Bitcoin Death Cross în ianuarie 2022 → scădere -75%",
+
+    gcRulesLabel: "REGULI DE TRANZACȚIONARE CU EMA",
+    gcRule1: "Prețul deasupra EMA 200 = uptrend global. Tranzacționează doar long.",
+    gcRule2: "Prețul sub EMA 200 = piață bearish. Pozițiile long sunt riscante — așteaptă sau deschide short.",
+    gcRule3: "Intrare pe long: prețul a revenit la EMA 20/50 și s-a întors în sus.",
+    gcRule4: "Golden Cross pe timeframe săptămânal — semnalul strategic al anului.",
+    gcRule5: "EMA nu prezice o inversare — ea confirmă un trend deja început.",
+
+    // Conclusions
+    concLabel: "CONCLUZIILE CAPITOLULUI 8",
+    concHeading: "Ce știți acum",
+    conc1: "Economia trece prin 4 faze ale ciclului: Recuperare → Expansiune → Încetinire → Recesiune — și tot așa, în cerc",
+    conc2: "Rotația sectoarelor: IT și crypto cresc în faza de recuperare, aurul și USD — în recesiune",
+    conc3: "EMA (media mobilă exponențială) acordă o pondere mai mare datelor recente — reacționează mai repede decât SMA",
+    conc4: "Golden Cross (EMA 50 intersectează EMA 200 de jos în sus) — unul dintre cele mai puternice semnale bullish",
+    conc5: "EMA 200 = granița dintre piața bullish și cea bearish: prețul deasupra EMA 200 → uptrend global",
+
+    // Footer nav
+    footerAsk: "Mai ai o întrebare? Scrie analistului",
+    footerNext: "Nivelul 9: Rapoarte și Oscilatoare →",
+  },
+};
+
+const C = {
+  gold:"#c9973a", goldLight:"#f4d49f", goldPale:"#f7f0e3",
+  black:"#18181a", ink:"#18181a", inkMid:"#555555",
+  inkSoft:"rgba(24,24,26,0.58)", inkFaint:"rgba(24,24,26,0.28)",
+  white:"#ffffff", surface:"#faf8f5", surfaceMid:"#f0ebe0",
+  border:"rgba(24,24,26,0.1)", borderGold:"rgba(201,151,58,0.25)",
+  green:"#089981", greenD:"#2d7a4f", greenPale:"#eaf5ee",
+  red:"#f23645", redD:"#c0392b", redPale:"#fdecea",
+  blue:"#2563eb", bluePale:"#eff6ff",
+  purple:"#7c3aed", orange:"#d97706"
+};
+
+const MSG_TR = {
+  ru:{ tag:"НАПИСАТЬ НАМ", title:"Предпочитаете мессенджер?", sub:"Напишите в Telegram или WhatsApp — сообщение уже готово.", btnTg:"ОТКРЫТЬ TELEGRAM", btnWa:"ОТКРЫТЬ WHATSAPP", online:"онлайн" },
+  en:{ tag:"CONTACT US", title:"Prefer a messenger?", sub:"Write us on Telegram or WhatsApp.", btnTg:"OPEN TELEGRAM", btnWa:"OPEN WHATSAPP", online:"online" },
+  ro:{ tag:"CONTACTAȚI-NE", title:"Preferați un messenger?", sub:"Scrieți pe Telegram sau WhatsApp.", btnTg:"DESCHIDE TELEGRAM", btnWa:"DESCHIDE WHATSAPP", online:"online" }
+};
+
+const Mono = ({children,size=13,color=C.inkSoft,spacing=3,style={},className=""}) =>
+  <span className={className} style={{fontFamily:"'Courier New',monospace",fontSize:size,letterSpacing:spacing,color,...style}}>{children}</span>;
+const Chip = ({children,color=C.gold}) =>
+  <span style={{fontFamily:"'Courier New',monospace",fontSize:11,letterSpacing:3,color,border:`1px solid ${color}`,padding:"4px 11px",display:"inline-block",textTransform:"uppercase"}}>{children}</span>;
+const Rule = ({w="50%",my=32}) =>
+  <div style={{height:1,background:`linear-gradient(90deg,transparent,${C.gold},transparent)`,width:w,margin:`${my}px auto`,opacity:0.4}}/>;
+const SectionTitle = ({children,sub,align="left"}) => (
+  <div style={{textAlign:align,marginBottom:36}}>
+    <h2 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(24px,3.2vw,36px)",fontWeight:400,color:C.black,lineHeight:1.15,marginBottom:sub?10:0}}>{children}</h2>
+    {sub && <p style={{fontSize:15,color:C.inkSoft,lineHeight:1.65,maxWidth:680,margin:align==="center"?"0 auto":0}}>{sub}</p>}
+  </div>
+);
+const InfoCard = ({icon,title,text,accent=C.gold}) => (
+  <div style={{background:C.surface,border:`1px solid ${C.border}`,padding:"22px 26px",borderRadius:4,borderLeft:`3px solid ${accent}`}}>
+    <div style={{fontSize:20,marginBottom:8}}>{icon}</div>
+    <div style={{fontWeight:600,fontSize:13,color:C.black,letterSpacing:0.5,marginBottom:7,textTransform:"uppercase"}}>{title}</div>
+    <div style={{fontSize:13,color:C.inkMid,lineHeight:1.65}}>{text}</div>
+  </div>
+);
+const getChUrl = (ch) => {
+  const p = new URLSearchParams(window.location.search).get('path')||'explorer';
+  let base = INITIAL_LANG==='ru'?'/edu/b':`/edu/${INITIAL_LANG}/b`;
+  return `${base}/${ch}?path=${p}`;
+};
+
+// ─── AskAnalystPopup ──────────────────────────────────────────────────────────
+function AskAnalystPopup({onClose}) {
+  const tr = MSG_TR[INITIAL_LANG]||MSG_TR.ru;
+  const prefill = INITIAL_LANG==='ru'?`Здравствуйте, есть вопрос по главе 8`:INITIAL_LANG==='en'?`Hello, question on chapter 8`:`Bună ziua, întrebare cap 8`;
+  const tgLink = `https://t.me/SBF_Support?text=${encodeURIComponent(prefill)}`;
+  const waLink = `https://api.whatsapp.com/send/?phone=37369005200&text=${encodeURIComponent(prefill)}&type=phone_number&app_absent=0`;
+  return (
+    <div style={{position:"fixed",inset:0,zIndex:500,display:"flex",alignItems:"center",justifyContent:"center",padding:20,overflowY:"auto"}} onClick={onClose}>
+      <div style={{position:"fixed",inset:0,background:"rgba(250,248,245,0.98)"}}/>
+      <div onClick={e=>e.stopPropagation()} style={{position:"relative",width:"100%",maxWidth:900,zIndex:1,margin:"auto",padding:"40px 0"}}>
+        <button onClick={onClose} style={{position:"absolute",top:0,right:10,background:"none",border:"none",fontSize:35,cursor:"pointer",color:C.inkFaint,lineHeight:1}}>×</button>
+        <div style={{marginBottom:40,padding:"0 10px"}}>
+          <Mono size={13} color={C.gold} spacing={3} style={{display:"block",marginBottom:15}}>— {tr.tag}</Mono>
+          <h2 style={{fontSize:"clamp(30px,5vw,42px)",fontWeight:700,color:C.black,marginBottom:15,fontFamily:"'DM Serif Display',serif"}}>{tr.title}</h2>
+          <p style={{fontSize:18,color:C.inkMid}}>{tr.sub}</p>
+        </div>
+        <div className="messenger-grid">
+          {[{href:tgLink,bg:"#0088cc",icon:"🚀",name:"SBF Support",sub:`Telegram · ${tr.online}`,btn:tr.btnTg},
+            {href:waLink,bg:"#25d366",icon:"💬",name:"SBF Company",sub:`WhatsApp · ${tr.online}`,btn:tr.btnWa}
+          ].map((m,i)=>(
+            <div key={i} style={{background:"#fff",border:"1px solid #e0e0e0",borderRadius:12,padding:"30px 25px",display:"flex",flexDirection:"column"}}>
+              <div style={{display:"flex",alignItems:"center",gap:15,marginBottom:30}}>
+                <div style={{width:50,height:50,borderRadius:"50%",background:i===0?"#e1f3fb":"#e8f5ed",display:"flex",alignItems:"center",justifyContent:"center"}}>{m.icon}</div>
+                <div><div style={{fontSize:18,fontWeight:700}}>{m.name}</div><div style={{fontSize:14,color:C.inkFaint}}>{m.sub}</div></div>
+              </div>
+              <div style={{background:m.bg,padding:"15px 20px",borderRadius:"12px 12px 0 12px",marginBottom:30,alignSelf:"flex-end",maxWidth:"90%"}}>
+                <div style={{fontSize:14,color:"#fff"}}>{prefill}</div>
+              </div>
+              <a href={m.href} target="_blank" style={{marginTop:"auto",display:"block",background:m.bg,color:"#fff",textAlign:"center",padding:"18px",borderRadius:8,textDecoration:"none",fontWeight:700}}>{m.btn}</a>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Interactive 1: Asset Rotation Drag & Drop ───────────────────────────────
+function AssetRotation() {
+  const { useState } = React;
+  const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
+
+  const phases = [
+    { id:"recovery", label:S.rotPhRecoveryLabel, sub:S.rotPhRecoverySub, color:"#2563eb", bg:"rgba(37,99,235,0.08)", icon:"🌱",
+      correct:["tech","crypto","smallcap"], hint:S.rotPhRecoveryHint },
+    { id:"expansion", label:S.rotPhExpansionLabel, sub:S.rotPhExpansionSub, color:"#d97706", bg:"rgba(217,119,6,0.08)", icon:"🔥",
+      correct:["oil","commodities","realestate"], hint:S.rotPhExpansionHint },
+    { id:"slowdown", label:S.rotPhSlowdownLabel, sub:S.rotPhSlowdownSub, color:"#7c3aed", bg:"rgba(124,58,237,0.08)", icon:"🍂",
+      correct:["bonds","utilities","healthcare"], hint:S.rotPhSlowdownHint },
+    { id:"recession", label:S.rotPhRecessionLabel, sub:S.rotPhRecessionSub, color:"#c0392b", bg:"rgba(192,57,43,0.08)", icon:"❄️",
+      correct:["gold","cash","bonds"], hint:S.rotPhRecessionHint },
+  ];
+
+  const allAssets = [
+    { id:"tech",       label:S.rotAssetTech,        emoji:"💻", phase:"recovery"  },
+    { id:"crypto",     label:S.rotAssetCrypto,      emoji:"₿",  phase:"recovery"  },
+    { id:"smallcap",   label:S.rotAssetSmallcap,    emoji:"🚀", phase:"recovery"  },
+    { id:"oil",        label:S.rotAssetOil,         emoji:"🛢️", phase:"expansion" },
+    { id:"commodities",label:S.rotAssetCommodities, emoji:"⚙️", phase:"expansion" },
+    { id:"realestate", label:S.rotAssetRealestate,  emoji:"🏠", phase:"expansion" },
+    { id:"bonds",      label:S.rotAssetBonds,       emoji:"🏛️", phase:"slowdown"  },
+    { id:"utilities",  label:S.rotAssetUtilities,   emoji:"💡", phase:"slowdown"  },
+    { id:"healthcare", label:S.rotAssetHealthcare,  emoji:"🏥", phase:"slowdown"  },
+    { id:"gold",       label:S.rotAssetGold,        emoji:"🥇", phase:"recession" },
+    { id:"cash",       label:S.rotAssetCash,        emoji:"💵", phase:"recession" },
+  ];
+
+  const [placed, setPlaced] = useState({}); // assetId -> phaseId
+  const [dragging, setDragging] = useState(null);
+  const [checked, setChecked] = useState(false);
+  const [score, setScore] = useState(0);
+  const [dragOver, setDragOver] = useState(null);
+
+  const unplaced = allAssets.filter(a => !placed[a.id]);
+
+  const handleDrop = (phaseId) => {
+    if (!dragging) return;
+    setPlaced(prev => ({...prev, [dragging]: phaseId}));
+    setDragging(null);
+    setDragOver(null);
+    setChecked(false);
+  };
+
+  const removeFromPhase = (assetId) => {
+    if (checked) return;
+    setPlaced(prev => { const n={...prev}; delete n[assetId]; return n; });
+    setChecked(false);
+  };
+
+  const checkAnswers = () => {
+    let s = 0;
+    Object.entries(placed).forEach(([assetId, phaseId]) => {
+      const asset = allAssets.find(a=>a.id===assetId);
+      if (asset && asset.phase === phaseId) s++;
+    });
+    setScore(s);
+    setChecked(true);
+  };
+
+  const reset = () => { setPlaced({}); setChecked(false); setScore(0); };
+
+  const totalPlaced = Object.keys(placed).length;
+  const pct = checked ? Math.round(score/allAssets.length*100) : null;
+
+  return (
+    <div style={{background:C.black,borderRadius:8,padding:"36px 40px",color:C.white}}>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:28,flexWrap:"wrap",gap:12}}>
+        <div style={{display:"flex",alignItems:"center",gap:12}}>
+          <span style={{fontSize:28}}>🔁</span>
+          <div>
+            <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.gold}}>{S.rotTitle}</div>
+            <Mono size={11} color="rgba(255,255,255,0.4)" spacing={2}>{S.rotBadge}</Mono>
+          </div>
+        </div>
+        <div style={{display:"flex",gap:10}}>
+          {checked && <button onClick={reset} style={{padding:"9px 18px",background:"transparent",border:"1px solid rgba(255,255,255,0.2)",color:"rgba(255,255,255,0.6)",cursor:"pointer",fontFamily:"monospace",fontSize:12,borderRadius:3}}>{S.rotReset}</button>}
+          <button
+            onClick={checked ? reset : checkAnswers}
+            disabled={totalPlaced < 3}
+            style={{padding:"10px 20px",background:totalPlaced<3?"rgba(255,255,255,0.08)":checked?C.gold:C.greenD,color:totalPlaced<3?"rgba(255,255,255,0.3)":C.black,border:"none",cursor:totalPlaced<3?"not-allowed":"pointer",fontFamily:"monospace",fontSize:12,letterSpacing:1,fontWeight:700,borderRadius:3}}>
+            {checked?S.rotRetry:S.rotCheck}
+          </button>
+        </div>
+      </div>
+
+      {/* Score */}
+      {checked && (
+        <div style={{background:pct>=70?"rgba(45,122,79,0.2)":pct>=40?"rgba(201,151,58,0.2)":"rgba(192,57,43,0.2)",border:`1px solid ${pct>=70?C.greenD:pct>=40?C.gold:C.redD}`,borderRadius:4,padding:"14px 20px",marginBottom:24,display:"flex",gap:14,alignItems:"center"}}>
+          <span style={{fontSize:28}}>{pct>=70?"🏆":pct>=40?"📚":"🎯"}</span>
+          <div>
+            <div style={{fontWeight:700,fontSize:16,color:pct>=70?"#2ecc71":pct>=40?C.gold:"#e74c3c"}}>{pct}% — {S.rotScoreLine.replace("{s}",score).replace("{t}",allAssets.length)}</div>
+            <div style={{fontSize:12,color:"rgba(255,255,255,0.5)",marginTop:3}}>{S.rotScoreNote}</div>
+          </div>
+        </div>
+      )}
+
+      {/* Unplaced assets pool */}
+      <div style={{marginBottom:20}}>
+        <Mono size={10} color="rgba(255,255,255,0.3)" spacing={1} style={{display:"block",marginBottom:10}}>{S.rotPoolLabel}</Mono>
+        <div style={{display:"flex",flexWrap:"wrap",gap:8,minHeight:46,padding:"10px",background:"rgba(255,255,255,0.04)",borderRadius:4,border:"1px solid rgba(255,255,255,0.08)"}}>
+          {unplaced.length === 0
+            ? <span style={{fontSize:12,color:"rgba(255,255,255,0.2)",alignSelf:"center"}}>{S.rotAllPlaced}</span>
+            : unplaced.map(a => (
+              <div key={a.id}
+                draggable
+                onDragStart={()=>setDragging(a.id)}
+                onDragEnd={()=>setDragging(null)}
+                style={{padding:"6px 12px",background:"rgba(255,255,255,0.09)",border:"1px solid rgba(255,255,255,0.15)",borderRadius:3,cursor:"grab",fontSize:12,display:"flex",gap:6,alignItems:"center",userSelect:"none",opacity:dragging===a.id?0.4:1,transition:"opacity .15s"}}>
+                <span>{a.emoji}</span><span style={{color:"rgba(255,255,255,0.8)"}}>{a.label}</span>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+
+      {/* Phase drop zones */}
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}} className="g2">
+        {phases.map(ph => {
+          const phAssets = allAssets.filter(a=>placed[a.id]===ph.id);
+          const isOver = dragOver===ph.id;
+          return (
+            <div key={ph.id}
+              onDragOver={e=>{e.preventDefault();setDragOver(ph.id);}}
+              onDragLeave={()=>setDragOver(null)}
+              onDrop={()=>handleDrop(ph.id)}
+              style={{borderRadius:6,padding:"16px",border:`2px solid ${isOver?ph.color:"rgba(255,255,255,0.08)"}`,background:isOver?`rgba(${ph.color==='#2563eb'?'37,99,235':ph.color==='#d97706'?'217,119,6':ph.color==='#7c3aed'?'124,58,237':'192,57,43'},0.12)`:ph.bg,transition:"all .15s",minHeight:120}}>
+              <div style={{display:"flex",gap:8,alignItems:"center",marginBottom:8}}>
+                <span style={{fontSize:18}}>{ph.icon}</span>
+                <div>
+                  <div style={{fontWeight:700,fontSize:13,color:ph.color}}>{ph.label}</div>
+                  <div style={{fontSize:11,color:"rgba(255,255,255,0.35)"}}>{ph.sub}</div>
+                </div>
+              </div>
+              <div style={{display:"flex",flexWrap:"wrap",gap:6,minHeight:32}}>
+                {phAssets.length===0 && !isOver && (
+                  <span style={{fontSize:11,color:"rgba(255,255,255,0.15)",alignSelf:"center"}}>{S.rotDropHint}</span>
+                )}
+                {phAssets.map(a => {
+                  const correct = a.phase===ph.id;
+                  const borderCol = checked ? (correct?"#2ecc71":"#e74c3c") : "rgba(255,255,255,0.2)";
+                  const bgCol = checked ? (correct?"rgba(46,204,113,0.15)":"rgba(231,76,60,0.15)") : "rgba(255,255,255,0.07)";
+                  return (
+                    <div key={a.id}
+                      onClick={()=>removeFromPhase(a.id)}
+                      style={{padding:"5px 10px",background:bgCol,border:`1px solid ${borderCol}`,borderRadius:3,fontSize:11,cursor:checked?"default":"pointer",display:"flex",gap:5,alignItems:"center",transition:"all .2s"}}>
+                      <span>{a.emoji}</span>
+                      <span style={{color:"rgba(255,255,255,0.8)"}}>{a.label}</span>
+                      {checked && <span style={{color:correct?"#2ecc71":"#e74c3c",fontSize:13}}>{correct?"✓":"✗"}</span>}
+                    </div>
+                  );
+                })}
+              </div>
+              {checked && (
+                <div style={{marginTop:8,fontSize:11,color:"rgba(255,255,255,0.4)",lineHeight:1.5,borderTop:"1px solid rgba(255,255,255,0.06)",paddingTop:8}}>
+                  💡 {ph.hint}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      <p style={{fontSize:11,color:"rgba(255,255,255,0.2)",marginTop:14,textAlign:"center"}}>{S.rotFooterHint}</p>
+    </div>
+  );
+}
+
+// ─── Interactive 2: EMA Configurator ─────────────────────────────────────────
+function EMAConfigurator() {
+  const { useState, useMemo } = React;
+  const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
+
+  const W = 720, H = 280;
+  const PAD = {l:44,r:16,t:16,b:28};
+  const CW = W - PAD.l - PAD.r;
+  const CH = H - PAD.t - PAD.b;
+
+  // Fixed price series (120 bars, realistic uptrend with noise)
+  const prices = useMemo(() => {
+    const seed = [
+      100,102,99,104,101,107,105,110,108,106,112,115,111,109,116,
+      114,118,120,117,122,119,125,123,128,126,130,127,132,135,131,
+      129,134,138,136,140,137,143,141,145,148,144,142,147,150,146,
+      152,155,151,149,154,158,156,160,157,162,159,165,163,168,164,
+      161,166,170,167,172,169,174,171,176,173,178,175,180,177,183,
+      179,182,185,181,186,184,188,185,190,187,193,189,192,195,191,
+      194,198,196,200,197,203,199,202,205,201,206,203,208,204,207,
+      210,206,211,208,213,209,215,211,217,213,219,214,221,216,218
+    ];
+    return seed;
+  }, []);
+
+  const [ema1Period, setEma1Period] = useState(20);
+  const [ema2Period, setEma2Period] = useState(50);
+  const [showEma2, setShowEma2] = useState(true);
+  const [showGoldenCross, setShowGoldenCross] = useState(true);
+
+  const calcEMA = (data, period) => {
+    const k = 2 / (period + 1);
+    const result = new Array(data.length).fill(null);
+    let sum = 0;
+    for (let i = 0; i < Math.min(period, data.length); i++) sum += data[i];
+    result[period - 1] = sum / period;
+    for (let i = period; i < data.length; i++) {
+      result[i] = data[i] * k + result[i-1] * (1 - k);
+    }
+    return result;
+  };
+
+  const ema1 = useMemo(() => calcEMA(prices, ema1Period), [prices, ema1Period]);
+  const ema2 = useMemo(() => calcEMA(prices, ema2Period), [prices, ema2Period]);
+
+  const allVals = [...prices, ...ema1.filter(Boolean), ...ema2.filter(Boolean)];
+  const vMin = Math.min(...allVals) * 0.99;
+  const vMax = Math.max(...allVals) * 1.01;
+
+  const toX = i => PAD.l + (i / (prices.length - 1)) * CW;
+  const toY = v => PAD.t + CH - ((v - vMin) / (vMax - vMin)) * CH;
+
+  // Price path
+  const pricePath = prices.map((p,i) => `${i===0?'M':'L'}${toX(i)},${toY(p)}`).join(' ');
+
+  // EMA paths
+  const emaPath = (arr) => {
+    let d = '';
+    arr.forEach((v,i) => { if(v!==null) d += `${d===''||arr[i-1]===null?'M':'L'}${toX(i)},${toY(v)}`; });
+    return d;
+  };
+
+  // Golden cross / death cross detection
+  const crosses = useMemo(() => {
+    const result = [];
+    if (!showEma2 || !showGoldenCross) return result;
+    for (let i = 1; i < prices.length; i++) {
+      if (ema1[i]===null||ema2[i]===null||ema1[i-1]===null||ema2[i-1]===null) continue;
+      const wasBelowNowAbove = ema1[i-1] <= ema2[i-1] && ema1[i] > ema2[i];
+      const wasAboveNowBelow = ema1[i-1] >= ema2[i-1] && ema1[i] < ema2[i];
+      if (wasBelowNowAbove) result.push({i, type:'golden'});
+      if (wasAboveNowBelow) result.push({i, type:'death'});
+    }
+    return result;
+  }, [ema1, ema2, showEma2, showGoldenCross]);
+
+  // Lag metric: distance between last price and last EMA1
+  const lastEma1 = ema1[ema1.length-1];
+  const lastPrice = prices[prices.length-1];
+  const lagPct = lastEma1 ? Math.abs((lastPrice - lastEma1) / lastPrice * 100).toFixed(1) : '-';
+
+  // Noise filter score: how many price bars stay above/below EMA consistently
+  const noiseScore = useMemo(() => {
+    let crosses_count = 0;
+    for (let i = 1; i < prices.length; i++) {
+      if (ema1[i]===null||ema1[i-1]===null) continue;
+      const prev = prices[i-1] > ema1[i-1];
+      const curr = prices[i] > ema1[i];
+      if (prev !== curr) crosses_count++;
+    }
+    return crosses_count;
+  }, [ema1]);
+
+  const noiseRating = noiseScore < 8 ? {label:S.emaNoiseSlow, color:C.orange}
+    : noiseScore < 18 ? {label:S.emaNoiseOptimal, color:C.greenD}
+    : {label:S.emaNoiseNoisy, color:C.red};
+
+  // Grid prices
+  const gridPrices = [110,130,150,170,190,210].filter(p => p > vMin && p < vMax);
+
+  return (
+    <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"36px 40px"}}>
+      <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:28}}>
+        <span style={{fontSize:28}}>🎛️</span>
+        <div>
+          <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.black}}>{S.emaTitle}</div>
+          <Mono size={11} color={C.inkSoft} spacing={2}>{S.emaBadge}</Mono>
+        </div>
+      </div>
+
+      {/* Controls */}
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:28,marginBottom:20}} className="g2">
+        <div>
+          <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
+            <span style={{fontSize:13,color:C.inkMid,fontWeight:500}}>
+              <span style={{color:"#f59e0b",marginRight:6}}>━</span>EMA {ema1Period}
+            </span>
+            <div style={{display:"flex",gap:12,alignItems:"center"}}>
+              <span style={{fontSize:12,color:noiseRating.color,fontWeight:600}}>{noiseRating.label}</span>
+              <span style={{fontFamily:"monospace",fontSize:13,fontWeight:700,color:"#f59e0b"}}>EMA {ema1Period}</span>
+            </div>
+          </div>
+          <input type="range" min="5" max="100" value={ema1Period}
+            onChange={e=>setEma1Period(+e.target.value)}
+            style={{width:"100%",accentColor:"#f59e0b",cursor:"pointer"}}/>
+          <div style={{display:"flex",justifyContent:"space-between",fontSize:11,color:C.inkFaint,marginTop:4}}>
+            <span>{S.emaSliderFastNote}</span><span>{S.emaSliderSlowNote}</span>
+          </div>
+        </div>
+        <div>
+          <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
+            <label style={{fontSize:13,color:C.inkMid,fontWeight:500,display:"flex",alignItems:"center",gap:8,cursor:"pointer"}}>
+              <input type="checkbox" checked={showEma2} onChange={e=>setShowEma2(e.target.checked)} style={{accentColor:"#7c3aed"}}/>
+              <span style={{color:"#7c3aed",marginRight:4}}>━</span>EMA {ema2Period}
+            </label>
+            <span style={{fontFamily:"monospace",fontSize:13,fontWeight:700,color:"#7c3aed"}}>EMA {ema2Period}</span>
+          </div>
+          <input type="range" min="10" max="200" value={ema2Period}
+            onChange={e=>setEma2Period(+e.target.value)}
+            disabled={!showEma2}
+            style={{width:"100%",accentColor:"#7c3aed",cursor:showEma2?"pointer":"not-allowed",opacity:showEma2?1:0.4}}/>
+          <div style={{display:"flex",justifyContent:"space-between",fontSize:11,color:C.inkFaint,marginTop:4}}>
+            <span>10</span><span>{S.emaSlider2LongNote}</span>
+          </div>
+        </div>
+      </div>
+
+      <div style={{display:"flex",gap:16,marginBottom:16,flexWrap:"wrap"}}>
+        <label style={{display:"flex",alignItems:"center",gap:6,cursor:"pointer",fontSize:13,color:C.inkMid}}>
+          <input type="checkbox" checked={showGoldenCross} onChange={e=>setShowGoldenCross(e.target.checked)} style={{accentColor:C.gold}}/>
+          {S.emaShowCrossLabel}
+        </label>
+        {crosses.map((c,i) => (
+          <span key={i} style={{fontSize:12,padding:"3px 10px",background:c.type==='golden'?'rgba(45,122,79,0.1)':'rgba(192,57,43,0.1)',border:`1px solid ${c.type==='golden'?C.greenD:C.redD}`,borderRadius:3,color:c.type==='golden'?C.greenD:C.redD,fontFamily:"monospace"}}>
+            {c.type==='golden'?'⭐ Golden Cross':'💀 Death Cross'} @ bar {c.i}
+          </span>
+        ))}
+      </div>
+
+      {/* SVG Chart */}
+      <div style={{borderRadius:4,overflow:"hidden",border:`1px solid ${C.border}`,marginBottom:20}}>
+        <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",display:"block",background:"#131722"}}>
+          {/* Grid */}
+          {gridPrices.map(p => (
+            <g key={p}>
+              <line x1={PAD.l} y1={toY(p)} x2={W-PAD.r} y2={toY(p)} stroke="rgba(255,255,255,0.05)" strokeWidth="1"/>
+              <text x={PAD.l-4} y={toY(p)+4} fontSize="9" fill="rgba(255,255,255,0.25)" textAnchor="end" fontFamily="monospace">{p}</text>
+            </g>
+          ))}
+
+          {/* Area under price */}
+          <defs>
+            <linearGradient id="priceArea" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#c9973a" stopOpacity="0.15"/>
+              <stop offset="100%" stopColor="#c9973a" stopOpacity="0.01"/>
+            </linearGradient>
+          </defs>
+          <path d={`${pricePath} L${toX(prices.length-1)},${H} L${toX(0)},${H} Z`} fill="url(#priceArea)"/>
+
+          {/* Price line */}
+          <path d={pricePath} fill="none" stroke={C.gold} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+
+          {/* EMA 2 (slower, below) */}
+          {showEma2 && <path d={emaPath(ema2)} fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.8"/>}
+
+          {/* EMA 1 (faster) */}
+          <path d={emaPath(ema1)} fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+
+          {/* Cross markers */}
+          {crosses.map((c,idx) => (
+            <g key={idx}>
+              <line x1={toX(c.i)} y1={PAD.t} x2={toX(c.i)} y2={H-PAD.b}
+                stroke={c.type==='golden'?"#2ecc71":"#e74c3c"} strokeWidth="1" strokeDasharray="4 3" opacity="0.6"/>
+              <rect x={toX(c.i)-18} y={PAD.t+2} width={36} height={14} fill={c.type==='golden'?"#2d7a4f":"#c0392b"} rx="2" opacity="0.85"/>
+              <text x={toX(c.i)} y={PAD.t+12} fontSize="8" fill="#fff" textAnchor="middle" fontFamily="monospace">
+                {c.type==='golden'?"⭐ GC":"💀 DC"}
+              </text>
+            </g>
+          ))}
+
+          {/* Legend */}
+          <rect x={PAD.l} y={PAD.t+2} width={200} height={showEma2?46:32} fill="rgba(0,0,0,0.5)" rx="3"/>
+          <line x1={PAD.l+8} y1={PAD.t+12} x2={PAD.l+22} y2={PAD.t+12} stroke={C.gold} strokeWidth="1.5"/>
+          <text x={PAD.l+26} y={PAD.t+16} fontSize="10" fill="rgba(255,255,255,0.7)" fontFamily="monospace">{S.emaLegendPrice}</text>
+          <line x1={PAD.l+8} y1={PAD.t+24} x2={PAD.l+22} y2={PAD.t+24} stroke="#f59e0b" strokeWidth="2"/>
+          <text x={PAD.l+26} y={PAD.t+28} fontSize="10" fill="rgba(255,255,255,0.7)" fontFamily="monospace">EMA {ema1Period}</text>
+          {showEma2 && <>
+            <line x1={PAD.l+8} y1={PAD.t+36} x2={PAD.l+22} y2={PAD.t+36} stroke="#7c3aed" strokeWidth="2"/>
+            <text x={PAD.l+26} y={PAD.t+40} fontSize="10" fill="rgba(255,255,255,0.7)" fontFamily="monospace">EMA {ema2Period}</text>
+          </>}
+        </svg>
+      </div>
+
+      {/* Metrics */}
+      <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12}} className="g4">
+        {[
+          {label:S.emaMetricFast,  val:`EMA ${ema1Period}`, color:"#f59e0b"},
+          {label:S.emaMetricSlow,val:showEma2?`EMA ${ema2Period}`:S.emaMetricOff, color:"#7c3aed"},
+          {label:S.emaMetricLag,   val:`${lagPct}%`, color:+lagPct>3?C.orange:C.greenD},
+          {label:S.emaMetricCrosses,val:`${noiseScore} ${S.emaTimesSuffix}`, color:noiseRating.color},
+        ].map((m,i) => (
+          <div key={i} style={{background:C.surfaceMid,borderRadius:4,padding:"12px 14px",textAlign:"center"}}>
+            <div style={{fontSize:10,color:C.inkSoft,marginBottom:4,letterSpacing:0.5}}>{m.label}</div>
+            <div style={{fontSize:16,fontWeight:700,color:m.color,fontFamily:"monospace"}}>{m.val}</div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{marginTop:16,padding:"14px 18px",background:"rgba(201,151,58,0.06)",border:`1px solid ${C.borderGold}`,borderRadius:4}}>
+        <div style={{fontSize:12,color:C.inkMid,lineHeight:1.75}}>
+          <strong style={{color:C.gold}}>{S.emaHintLabel}</strong>{" "}
+          {noiseScore >= 18
+            ? S.emaHintNoisy.replace("{p}",ema1Period).replace("{n}",noiseScore)
+            : noiseScore < 8
+            ? S.emaHintSlow.replace("{p}",ema1Period)
+            : S.emaHintBalanced.replace("{p}",ema1Period).replace("{p2}",ema2Period)
+          }
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Main Chapter 8 ───────────────────────────────────────────────────────────
+function Chapter8() {
+  const { useState } = React;
+  const [askOpen, setAskOpen] = useState(false);
+  const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
+
+  const cyclePhasesDetail = [
+    { phase:S.cycP1Phase, icon:"🌱", color:"#2563eb",
+      gdp:S.cycP1Gdp, inflation:S.cycP1Inflation, rates:S.cycP1Rates,
+      best:S.cycP1Best, worst:S.cycP1Worst,
+      why:S.cycP1Why },
+    { phase:S.cycP2Phase, icon:"🔥", color:"#d97706",
+      gdp:S.cycP2Gdp, inflation:S.cycP2Inflation, rates:S.cycP2Rates,
+      best:S.cycP2Best, worst:S.cycP2Worst,
+      why:S.cycP2Why },
+    { phase:S.cycP3Phase, icon:"🍂", color:"#7c3aed",
+      gdp:S.cycP3Gdp, inflation:S.cycP3Inflation, rates:S.cycP3Rates,
+      best:S.cycP3Best, worst:S.cycP3Worst,
+      why:S.cycP3Why },
+    { phase:S.cycP4Phase, icon:"❄️", color:"#c0392b",
+      gdp:S.cycP4Gdp, inflation:S.cycP4Inflation, rates:S.cycP4Rates,
+      best:S.cycP4Best, worst:S.cycP4Worst,
+      why:S.cycP4Why },
+  ];
+
+  const emaTypes = [
+    { period:"EMA 9", speed:S.emaT1Speed, use:S.emaT1Use, noise:S.emaT1Noise, lag:S.emaT1Lag, color:"#ef4444" },
+    { period:"EMA 21", speed:S.emaT2Speed, use:S.emaT2Use, noise:S.emaT2Noise, lag:S.emaT2Lag, color:"#f59e0b" },
+    { period:"EMA 50", speed:S.emaT3Speed, use:S.emaT3Use, noise:S.emaT3Noise, lag:S.emaT3Lag, color:"#22c55e" },
+    { period:"EMA 100", speed:S.emaT4Speed, use:S.emaT4Use, noise:S.emaT4Noise, lag:S.emaT4Lag, color:"#3b82f6" },
+    { period:"EMA 200", speed:S.emaT5Speed, use:S.emaT5Use, noise:S.emaT5Noise, lag:S.emaT5Lag, color:"#7c3aed" },
+  ];
+
+  const conclusions = [
+    S.conc1,
+    S.conc2,
+    S.conc3,
+    S.conc4,
+    S.conc5,
+  ];
+
+  return (
+    <div style={{minHeight:"100vh",background:C.white,color:C.ink,fontFamily:"'DM Sans',sans-serif"}}>
+
+      {/* Sticky header */}
+      <div style={{position:"sticky",top:106,background:"rgba(255,255,255,0.96)",backdropFilter:"blur(10px)",borderBottom:`1px solid ${C.border}`,padding:"15px 5vw",display:"flex",alignItems:"center",justifyContent:"space-between",zIndex:50}}>
+        <div style={{display:"flex",alignItems:"center",gap:20}}>
+          <span onClick={()=>window.location.href=getChUrl(7)} style={{color:C.gold,cursor:"pointer",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</span>
+          <Chip>{S.lvlChip}</Chip>
+          <Mono size={14} color={C.inkSoft} spacing={0} className="hide-mobile">{S.lvlChapterName}</Mono>
+        </div>
+        <div style={{display:"flex",gap:8}}>
+          <Chip color={C.inkFaint}>{S.lvlFaChip}</Chip>
+          <Chip color={C.inkFaint}>{S.lvlTaChip}</Chip>
+        </div>
+      </div>
+
+      {/* HERO */}
+      <div style={{background:C.black,padding:"80px 5vw 70px",textAlign:"center",position:"relative",overflow:"hidden"}}>
+        <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 20% 60%, rgba(37,99,235,0.07) 0%,transparent 50%), radial-gradient(ellipse at 80% 40%, rgba(201,151,58,0.1) 0%,transparent 50%)"}}/>
+        <div style={{position:"relative"}}>
+          <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:20}}>{S.heroTag}</Mono>
+          <h1 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(36px,6vw,66px)",fontWeight:400,color:C.white,lineHeight:1.05,marginBottom:20}}>
+            {S.heroTitle1}<br/>{S.heroAnd} <span style={{color:C.gold}}>{S.heroTitle2}</span>
+          </h1>
+          <p style={{fontSize:"clamp(16px,2vw,20px)",color:"rgba(255,255,255,0.55)",maxWidth:620,margin:"0 auto 32px",lineHeight:1.65}}>
+            {S.heroSub}
+          </p>
+          <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
+            <Chip color={C.gold}>{S.heroChip1}</Chip>
+            <Chip color="rgba(255,255,255,0.3)">{S.heroChip2}</Chip>
+            <Chip color="rgba(255,255,255,0.3)">{S.heroChip3}</Chip>
+          </div>
+        </div>
+      </div>
+
+      <div style={{maxWidth:1060,margin:"0 auto",padding:"72px 5vw 120px"}}>
+
+        {/* ── BLOCK 1: Economic cycle ── */}
+        <SectionTitle sub={S.cycSectionSub}>
+          {S.cycSectionTitle}
+        </SectionTitle>
+
+        {/* Cycle clock diagram */}
+        <div style={{background:C.black,borderRadius:8,padding:"32px",marginBottom:40,overflow:"hidden"}}>
+          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:24,textAlign:"center"}}>{S.cycClockLabel}</Mono>
+          <div style={{position:"relative",margin:"0 auto",maxWidth:520}}>
+            <svg viewBox="0 0 520 300" style={{width:"100%",display:"block"}}>
+              {/* Clock circle */}
+              <circle cx="260" cy="150" r="110" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="1.5"/>
+              <circle cx="260" cy="150" r="60"  fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="1"/>
+
+              {/* Phase arcs */}
+              {[
+                {startAngle:-90, endAngle:0,   color:"#2563eb", label:S.cycArcRecovery, icon:"🌱", cx:330, cy:80},
+                {startAngle:0,   endAngle:90,  color:"#d97706", label:S.cycArcExpansion,     icon:"🔥", cx:330, cy:220},
+                {startAngle:90,  endAngle:180, color:"#7c3aed", label:S.cycArcSlowdown,     icon:"🍂", cx:190, cy:220},
+                {startAngle:180, endAngle:270, color:"#c0392b", label:S.cycArcRecession,       icon:"❄️", cx:190, cy:80},
+              ].map((s,i) => {
+                const sa = s.startAngle * Math.PI / 180;
+                const ea = s.endAngle * Math.PI / 180;
+                const r = 110, r2 = 65;
+                const x1 = 260 + r*Math.cos(sa), y1 = 150 + r*Math.sin(sa);
+                const x2 = 260 + r*Math.cos(ea), y2 = 150 + r*Math.sin(ea);
+                const x3 = 260 + r2*Math.cos(ea),y3 = 150 + r2*Math.sin(ea);
+                const x4 = 260 + r2*Math.cos(sa),y4 = 150 + r2*Math.sin(sa);
+                return (
+                  <g key={i}>
+                    <path d={`M${x4},${y4} L${x1},${y1} A${r},${r} 0 0,1 ${x2},${y2} L${x3},${y3} A${r2},${r2} 0 0,0 ${x4},${y4} Z`}
+                      fill={s.color} opacity="0.2"/>
+                    <path d={`M${x1},${y1} A${r},${r} 0 0,1 ${x2},${y2}`}
+                      fill="none" stroke={s.color} strokeWidth="3" opacity="0.8"/>
+                    <text x={s.cx} y={s.cy-6} fontSize="18" textAnchor="middle">{s.icon}</text>
+                    <text x={s.cx} y={s.cy+10} fontSize="9" fill={s.color} textAnchor="middle" fontFamily="monospace" fontWeight="bold">{s.label}</text>
+                  </g>
+                );
+              })}
+
+              {/* Center text */}
+              <circle cx="260" cy="150" r="55" fill="rgba(201,151,58,0.1)" stroke="rgba(201,151,58,0.3)" strokeWidth="1"/>
+              <text x="260" y="145" fontSize="12" fill={C.gold} textAnchor="middle" fontFamily="serif">7–11</text>
+              <text x="260" y="160" fontSize="10" fill="rgba(255,255,255,0.4)" textAnchor="middle" fontFamily="monospace">{S.cycClockCenterSub}</text>
+
+              {/* Arrow (clockwise) */}
+              <path d="M 350 100 A 110 110 0 0 1 370 150" fill="none" stroke={C.gold} strokeWidth="1.5" markerEnd="url(#arr)"/>
+              <defs>
+                <marker id="arr" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+                  <path d="M0,0 L6,3 L0,6 Z" fill={C.gold}/>
+                </marker>
+              </defs>
+            </svg>
+          </div>
+        </div>
+
+        {/* Phases detail grid */}
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,marginBottom:56}} className="g2">
+          {cyclePhasesDetail.map((ph,i) => (
+            <div key={i} style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:6,padding:"24px",borderTop:`3px solid ${ph.color}`}}>
+              <div style={{display:"flex",gap:10,alignItems:"center",marginBottom:14}}>
+                <span style={{fontSize:22}}>{ph.icon}</span>
+                <div style={{fontFamily:"'DM Serif Display',serif",fontSize:18,color:C.black}}>{ph.phase}</div>
+              </div>
+              {[
+                {k:S.cycRowGdp,k2:ph.gdp},{k:S.cycRowInflation,k2:ph.inflation},{k:S.cycRowRates,k2:ph.rates},
+                {k:S.cycRowBest,k2:ph.best,bold:true,color:C.greenD},
+                {k:S.cycRowWorst,k2:ph.worst,color:C.redD},
+              ].map((row,j) => (
+                <div key={j} style={{display:"flex",gap:8,marginBottom:7,fontSize:13}}>
+                  <span style={{color:C.inkSoft,minWidth:110,flexShrink:0}}>{row.k}:</span>
+                  <span style={{color:row.color||C.inkMid,fontWeight:row.bold?600:400,lineHeight:1.4}}>{row.k2}</span>
+                </div>
+              ))}
+              <div style={{marginTop:12,fontSize:12,color:C.inkSoft,lineHeight:1.65,padding:"10px 12px",background:C.surfaceMid,borderRadius:3}}>
+                💡 {ph.why}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* ── INTERACTIVE 1: Asset Rotation ── */}
+        <div style={{marginBottom:64}}>
+          <AssetRotation/>
+        </div>
+
+        <Rule/>
+
+        {/* ── BLOCK 2: EMA theory ── */}
+        <SectionTitle sub={S.emaSectionSub}>
+          {S.emaSectionTitle}
+        </SectionTitle>
+
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:24,marginBottom:48}} className="g2">
+          <div>
+            <p style={{fontSize:15,color:C.inkMid,lineHeight:1.75,marginBottom:20}}>
+              {S.emaTheoryPara}
+            </p>
+            <div style={{background:C.black,borderRadius:6,padding:"20px 24px",marginBottom:16}}>
+              <Mono size={10} color={C.gold} spacing={2} style={{display:"block",marginBottom:10}}>{S.emaFormulaLabel}</Mono>
+              <div style={{fontFamily:"monospace",fontSize:13,color:"rgba(255,255,255,0.8)",lineHeight:2}}>
+                <span style={{color:"#f59e0b"}}>k</span> = 2 ÷ ({S.emaFormulaPeriod} + 1)<br/>
+                <span style={{color:"#f59e0b"}}>EMA</span> = {S.emaFormulaPrice} × k + {S.emaFormulaPrev} × (1 − k)
+              </div>
+              <div style={{marginTop:10,fontSize:12,color:"rgba(255,255,255,0.4)"}}>
+                {S.emaFormulaNote}
+              </div>
+            </div>
+            <InfoCard icon="📏" title={S.emaInfoCardTitle}
+              text={S.emaInfoCardText}
+              accent={C.gold}/>
+          </div>
+          <div>
+            <div style={{fontWeight:600,fontSize:14,color:C.black,marginBottom:14}}>{S.emaPeriodsHeading}</div>
+            {emaTypes.map((e,i) => (
+              <div key={i} style={{display:"flex",gap:12,alignItems:"flex-start",padding:"12px 14px",borderBottom:`1px solid ${C.border}`,fontSize:13}}>
+                <span style={{fontFamily:"monospace",fontWeight:700,color:e.color,minWidth:68,flexShrink:0}}>{e.period}</span>
+                <div>
+                  <div style={{fontWeight:500,color:C.black,marginBottom:3}}>{e.use}</div>
+                  <div style={{fontSize:11,color:C.inkSoft}}>{S.emaRowNoiseLabel}: {e.noise} · {S.emaRowLagLabel}: {e.lag}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Golden Cross explanation */}
+        <div style={{background:C.black,borderRadius:6,padding:"28px 32px",marginBottom:56}}>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:32,alignItems:"start"}} className="g2">
+            <div>
+              <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:16}}>{S.gcSectionLabel}</Mono>
+              <div style={{marginBottom:20}}>
+                <div style={{display:"flex",gap:12,alignItems:"flex-start",marginBottom:16,padding:"14px",background:"rgba(45,122,79,0.12)",borderRadius:4,border:"1px solid rgba(45,122,79,0.3)"}}>
+                  <span style={{fontSize:22}}>⭐</span>
+                  <div>
+                    <div style={{fontWeight:700,fontSize:14,color:"#2ecc71",marginBottom:5}}>{S.gcGoldenTitle}</div>
+                    <div style={{fontSize:13,color:"rgba(255,255,255,0.6)",lineHeight:1.6}}>
+                      {S.gcGoldenPre} <strong style={{color:"#2ecc71"}}>{S.gcGoldenBold}</strong>.
+                      {S.gcGoldenPost}
+                    </div>
+                    <div style={{fontSize:11,color:"rgba(255,255,255,0.3)",marginTop:6}}>{S.gcGoldenExample}</div>
+                  </div>
+                </div>
+                <div style={{display:"flex",gap:12,alignItems:"flex-start",padding:"14px",background:"rgba(192,57,43,0.12)",borderRadius:4,border:"1px solid rgba(192,57,43,0.3)"}}>
+                  <span style={{fontSize:22}}>💀</span>
+                  <div>
+                    <div style={{fontWeight:700,fontSize:14,color:"#e74c3c",marginBottom:5}}>{S.gcDeathTitle}</div>
+                    <div style={{fontSize:13,color:"rgba(255,255,255,0.6)",lineHeight:1.6}}>
+                      {S.gcDeathPre} <strong style={{color:"#e74c3c"}}>{S.gcDeathBold}</strong>.
+                      {S.gcDeathPost}
+                    </div>
+                    <div style={{fontSize:11,color:"rgba(255,255,255,0.3)",marginTop:6}}>{S.gcDeathExample}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:16}}>{S.gcRulesLabel}</Mono>
+              {[
+                {n:"01", rule:S.gcRule1, color:"#2ecc71"},
+                {n:"02", rule:S.gcRule2, color:"#e74c3c"},
+                {n:"03", rule:S.gcRule3, color:"#f59e0b"},
+                {n:"04", rule:S.gcRule4, color:"#2ecc71"},
+                {n:"05", rule:S.gcRule5, color:"rgba(255,255,255,0.5)"},
+              ].map((r,i) => (
+                <div key={i} style={{display:"flex",gap:12,alignItems:"flex-start",padding:"10px 0",borderBottom:"1px solid rgba(255,255,255,0.06)"}}>
+                  <Mono size={11} color={C.gold} spacing={0} style={{flexShrink:0,marginTop:2}}>{r.n}</Mono>
+                  <span style={{fontSize:13,color:r.color,lineHeight:1.6}}>{r.rule}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* ── INTERACTIVE 2: EMA Configurator ── */}
+        <div style={{marginBottom:64}}>
+          <EMAConfigurator/>
+        </div>
+
+        <Rule/>
+
+        {/* ── CONCLUSIONS ── */}
+        <div style={{background:C.black,borderRadius:8,padding:"44px 48px"}}>
+          <div style={{textAlign:"center",marginBottom:32}}>
+            <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:12}}>{S.concLabel}</Mono>
+            <h3 style={{fontFamily:"'DM Serif Display',serif",fontSize:28,color:C.white,fontWeight:400}}>{S.concHeading}</h3>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+            {conclusions.map((c,i) => (
+              <div key={i} style={{display:"flex",gap:14,alignItems:"flex-start",padding:"14px 16px",background:"rgba(255,255,255,0.04)",borderRadius:4,border:"1px solid rgba(255,255,255,0.06)"}}>
+                <span style={{color:C.gold,fontFamily:"monospace",fontSize:11,marginTop:2,flexShrink:0}}>0{i+1}</span>
+                <span style={{fontSize:13,color:"rgba(255,255,255,0.7)",lineHeight:1.65}}>{c}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Footer navigation */}
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",paddingTop:48,marginTop:48,borderTop:`1px solid ${C.border}`}}>
+          <span onClick={()=>setAskOpen(true)} style={{fontSize:14,color:C.inkSoft,fontFamily:"monospace",borderBottom:`1px solid ${C.border}`,cursor:"pointer"}}>
+            {S.footerAsk}
+          </span>
+          <button
+            onClick={()=>window.location.href=getChUrl(9)}
+            style={{background:C.black,color:C.white,border:"none",padding:"18px 35px",cursor:"pointer",fontFamily:"monospace",fontSize:14,letterSpacing:2,fontWeight:700,transition:"background .2s"}}
+            onMouseEnter={e=>e.target.style.background=C.gold}
+            onMouseLeave={e=>e.target.style.background=C.black}>
+            {S.footerNext}
+          </button>
+        </div>
+
+      </div>
+
+      {askOpen && <AskAnalystPopup onClose={()=>setAskOpen(false)}/>}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('sbf-book-root')).render(<Chapter8/>);
+{% endraw %}
+</script>
+</body>
+</html>
