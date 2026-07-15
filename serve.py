@@ -207,8 +207,17 @@ def _precompile_all() -> None:
 
 def _edu_inject(ch: int, lang: str = i18n.DEFAULT_LANG) -> str:
     """Генерирует HTML инжекции для главы: nav, прогресс-бар, дисклеймер, live."""
-    prev_href  = f"/edu/b/{ch - 1}" if ch > 1  else "/edu/"
-    next_href  = f"/edu/b/{ch + 1}" if ch < 15 else "/edu/"
+    # Ссылки между главами должны сохранять текущий язык, иначе "Далее"/
+    # "Назад"/"Содержание" всегда уводят на русскую версию -- баг, из-за
+    # которого переход на новую страницу в ro/en "сбрасывал" в ru. Главы
+    # используют свою схему /edu/{lang}/b/N (см. _EDU_RE), а TOC-страница --
+    # общий префикс /ro/edu/ (см. i18n.lang_from_path в serve.py; /edu/*
+    # исключён из общего механизма, у книги своя схема, но сама TOC-страница
+    # index.html не является главой и живёт по общей /ro/-схеме).
+    _book_lang_seg = f"{lang}/" if lang in ("ro", "en") else ""
+    _toc_href = "/ro/edu/" if lang == "ro" else "/edu/"
+    prev_href  = f"/edu/{_book_lang_seg}b/{ch - 1}" if ch > 1  else _toc_href
+    next_href  = f"/edu/{_book_lang_seg}b/{ch + 1}" if ch < 15 else _toc_href
     prev_label = i18n.t("edu.chapter_n", lang, n=ch - 1) if ch > 1  else i18n.t("edu.toc", lang)
     next_label = i18n.t("edu.chapter_n", lang, n=ch + 1) if ch < 15 else i18n.t("edu.toc", lang)
     ticker     = _EDU_LIVE.get(ch, "^GSPC")
@@ -333,7 +342,7 @@ def _edu_inject(ch: int, lang: str = i18n.DEFAULT_LANG) -> str:
 <div class="edu-nav">
   <a class="nav-prev" href="{prev_href}">{prev_label}</a>
   <span class="nav-counter">{i18n.t("edu.chapter_counter", lang, ch=ch)}</span>
-  <a class="nav-toc" href="/edu/">{i18n.t("edu.toc", lang)}</a>
+  <a class="nav-toc" href="{_toc_href}">{i18n.t("edu.toc", lang)}</a>
   <a class="nav-next" href="{next_href}">{next_label}</a>
   <a class="nav-live" id="edu-live-btn" href="/chart.html?s={chart_key}" target="_blank">
     <span id="edu-live-price">{live_label}</span>

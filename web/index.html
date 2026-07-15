@@ -291,9 +291,9 @@ a:hover{text-decoration:underline;color:var(--glow)}
     </div>
   </div>
   <nav class="g-nav">
-    <a href="/" class="g-nav-item active">{{ t('nav.today', lang) }}</a>
-    <a href="/edu/" class="g-nav-item">{{ t('nav.edu', lang) }}</a>
-    <a href="/calendar" class="g-nav-item">{{ t('nav.calendar', lang) }}</a>
+    <a href="{{ '/ro' if lang == 'ro' else '' }}/" class="g-nav-item active">{{ t('nav.today', lang) }}</a>
+    <a href="{{ '/ro' if lang == 'ro' else '' }}/edu/" class="g-nav-item">{{ t('nav.edu', lang) }}</a>
+    <a href="{{ '/ro' if lang == 'ro' else '' }}/calendar" class="g-nav-item">{{ t('nav.calendar', lang) }}</a>
   </nav>
   <div class="right sbf-right">
     <div class="win"><span class="dot" id="liveDot"></span><span id="liveTxt">—</span></div>

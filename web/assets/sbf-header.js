@@ -193,19 +193,32 @@
     return isRo ? (path.replace(/^\/ro/, '') || '/') : path;
   }
 
+  // Ссылки в шапке/нижнем баре (Сегодня/Обучение/Календарь) раньше были
+  // жёстко "/", "/edu/", "/calendar" — переход с любой /ro/-страницы (или
+  // с книжной главы /edu/ro/b/N) сбрасывал язык на русский, т.к. href не
+  // сохранял текущий язык. На книжных страницах язык — bookLang (у них своя
+  // схема /edu/ro/b/N, отдельная от общего префикса /ro/); на остальных —
+  // смотрим, был ли у пути префикс /ro/. Для EN общего сайтового аналога нет
+  // (EN не поддерживается вне 2 глав), поэтому падает на RU — лучшего адреса
+  // всё равно нет.
+  var _navLang = bookLang || (path !== _bare ? 'ro' : 'ru');
+  function navHref(targetPath) {
+    return _navLang === 'ro' ? ('/ro' + (targetPath === '/' ? '' : targetPath)) : targetPath;
+  }
+
   // ── HTML ─────────────────────────────────────────────────────────────────
   var isCharts = path === '/chart.html' || path.includes('/chart');
 
   var _hdHtml = [
     '<header class="sbf-hd">',
-    '  <a href="/" class="sbf-brand">',
+    '  <a href="' + navHref('/') + '" class="sbf-brand">',
     '    <div class="logo-wrap"><img src="/assets/logo.png" alt="SBF"></div>',
     '    <div class="sbf-brand-text"><b>SBF INTELLIGENCE</b><span data-i18n="brand.tagline">' + t('brand.tagline', 'рыночная разведка · sbfconsult.com') + '</span></div>',
     '  </a>',
     '  <nav class="g-nav">',
-    '    <a href="/"           class="g-nav-item ' + navCls('today')    + '" data-i18n="nav.today">' + t('nav.today', 'Сегодня') + '</a>',
-    '    <a href="/edu/"       class="g-nav-item ' + navCls('edu')       + '" data-i18n="nav.edu">' + t('nav.edu', 'Обучение') + '</a>',
-    '    <a href="/calendar"   class="g-nav-item ' + navCls('calendar')  + '" data-i18n="nav.calendar">' + t('nav.calendar', 'Календарь') + '</a>',
+    '    <a href="' + navHref('/') + '"           class="g-nav-item ' + navCls('today')    + '" data-i18n="nav.today">' + t('nav.today', 'Сегодня') + '</a>',
+    '    <a href="' + navHref('/edu/') + '"       class="g-nav-item ' + navCls('edu')       + '" data-i18n="nav.edu">' + t('nav.edu', 'Обучение') + '</a>',
+    '    <a href="' + navHref('/calendar') + '"   class="g-nav-item ' + navCls('calendar')  + '" data-i18n="nav.calendar">' + t('nav.calendar', 'Календарь') + '</a>',
     '  </nav>',
     '  <div class="sbf-right">',
     '    <div class="sbf-win"><span class="dot" id="liveDot"></span><span id="liveTxt">Live</span></div>',
@@ -233,10 +246,10 @@
 
   // Bottom nav built separately so position:fixed is never trapped inside a stacking parent
   var _navHtml = [
-    '<a href="/"           class="g-bn-item ' + navCls('today')    + '"><span class="g-bn-ico">☀️</span><span class="g-bn-lbl" data-i18n="nav.today">' + t('nav.today', 'Сегодня') + '</span></a>',
+    '<a href="' + navHref('/') + '"           class="g-bn-item ' + navCls('today')    + '"><span class="g-bn-ico"><img class="mi-icon" src="/assets/icons/icon-sun.svg" alt="" width="20" height="20"></span><span class="g-bn-lbl" data-i18n="nav.today">' + t('nav.today', 'Сегодня') + '</span></a>',
     // Profile injected here as 2nd by sbf-profile.js
-    '<a href="/edu/"     class="g-bn-item ' + navCls('edu')       + '"><span class="g-bn-ico">📚</span><span class="g-bn-lbl" data-i18n="nav.edu">' + t('nav.edu', 'Обучение') + '</span></a>',
-    '<a href="/calendar" class="g-bn-item ' + navCls('calendar')  + '"><span class="g-bn-ico">📅</span><span class="g-bn-lbl" data-i18n="nav.calendar">' + t('nav.calendar', 'Календарь') + '</span></a>'
+    '<a href="' + navHref('/edu/') + '"     class="g-bn-item ' + navCls('edu')       + '"><span class="g-bn-ico"><img class="mi-icon" src="/assets/icons/icon-books.png" alt="" width="20" height="20"></span><span class="g-bn-lbl" data-i18n="nav.edu">' + t('nav.edu', 'Обучение') + '</span></a>',
+    '<a href="' + navHref('/calendar') + '" class="g-bn-item ' + navCls('calendar')  + '"><span class="g-bn-ico"><img class="mi-icon" src="/assets/icons/icon-calendar.png" alt="" width="20" height="20"></span><span class="g-bn-lbl" data-i18n="nav.calendar">' + t('nav.calendar', 'Календарь') + '</span></a>'
   ].join('\n');
 
   function inject() {
