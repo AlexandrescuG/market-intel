@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="{{ lang }}">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Глоссарий — SBF Intelligence</title>
+<title>{{ t('glossary.page_title', lang) }}</title>
 <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/design.css">
@@ -23,8 +23,8 @@ body{margin:0;background:var(--cream);color:var(--ink);font-family:Montserrat,sa
 <script src="/assets/sbf-header.js?v=15" defer></script>
 <div class="gl-page">
   <div class="gl-hero">
-    <h1>Глоссарий</h1>
-    <p>Термины трейдинга и финансовых рынков · <a href="/" style="color:var(--gold)">← На главную</a></p>
+    <h1>{{ t('glossary.h1', lang) }}</h1>
+    <p>{{ t('glossary.subtitle', lang) }} · <a href="/" style="color:var(--gold)">{{ t('glossary.back_home', lang) }}</a></p>
   </div>
   <div id="glContainer"></div>
 </div>

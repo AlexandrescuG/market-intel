@@ -2,11 +2,37 @@
 (function () {
   'use strict';
 
+  // Detect language directly (do NOT rely on window.sbfI18n — this script
+  // runs without `defer` and can execute before i18n.js's deferred code,
+  // so the shared client-side dictionary is not guaranteed to be ready yet).
+  var LANG = /^\/(ro)(\/|$)/.test(location.pathname) ? 'ro' : 'ru';
+
+  // Small self-contained dictionary for the handful of UI strings this file
+  // owns directly (search placeholder, popup chrome) — no need to pull in
+  // the server-side i18n dictionary for just 4 strings.
+  var STR = {
+    ru: {
+      etymology:      'Этимология',
+      more_in_glossary: 'Подробнее в глоссарии →',
+      search_placeholder: 'Поиск термина…',
+      related_prefix: 'По теме:'
+    },
+    ro: {
+      etymology:      'Etimologie',
+      more_in_glossary: 'Mai multe în glosar →',
+      search_placeholder: 'Caută un termen…',
+      related_prefix: 'Vezi și:'
+    }
+  };
+  function t(key) {
+    return (STR[LANG] && STR[LANG][key]) || STR.ru[key];
+  }
+
   var GLOSSARY = null;         // loaded lazily
   var _popup   = null;
   var _overlay = null;
 
-  var GLOSSARY_URL = '/assets/glossary.json';
+  var GLOSSARY_URL = LANG === 'ro' ? '/assets/glossary.ro.json' : '/assets/glossary.json';
 
   // ── Load glossary data ────────────────────────────────────────────────────
   function loadGlossary(cb) {
@@ -140,11 +166,11 @@
       '<div id="glShort" style="font-size:13px;line-height:1.6;color:var(--ink,#2B2B33)"></div>' +
       '<div id="glEtymWrap" style="margin-top:10px">' +
         '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;' +
-          'color:var(--gold,#C9A227);margin-bottom:3px">Этимология</div>' +
+          'color:var(--gold,#C9A227);margin-bottom:3px">' + t('etymology') + '</div>' +
         '<div id="glEtym" style="font-size:12px;line-height:1.5;color:var(--muted,#8A8275);font-style:italic"></div>' +
       '</div>' +
       '<a id="glMore" href="#" style="display:inline-block;margin-top:10px;font-size:12px;' +
-        'color:var(--gold,#C9A227);font-weight:600;text-decoration:none">Подробнее в глоссарии →</a>';
+        'color:var(--gold,#C9A227);font-weight:600;text-decoration:none">' + t('more_in_glossary') + '</a>';
     _popup.style.cssText =
       'display:none;position:fixed;z-index:1001;' +
       'background:var(--paper,#fff);border:1px solid var(--line,#E7DFCF);' +
@@ -241,7 +267,7 @@
       // Search input
       var searchHtml =
         '<div style="position:sticky;top:64px;z-index:30;background:var(--cream,#FBF6EF);padding:10px 0 6px">' +
-        '<input id="glSearch" type="search" placeholder="Поиск термина…"' +
+        '<input id="glSearch" type="search" placeholder="' + esc(t('search_placeholder')) + '"' +
         ' style="width:100%;padding:10px 14px;border:1.5px solid var(--line,#E7DFCF);border-radius:10px;' +
         'font-size:14px;font-family:Montserrat,sans-serif;background:var(--paper,#fff);color:var(--ink,#2B2B33);' +
         'outline:none;box-sizing:border-box">' +
@@ -269,12 +295,12 @@
               '<p style="margin:0 0 10px">' + esc(entry.full) + '</p>' +
               (entry.etym
                 ? '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;' +
-                    'color:var(--gold,#C9A227);margin-bottom:3px">Этимология</div>' +
+                    'color:var(--gold,#C9A227);margin-bottom:3px">' + t('etymology') + '</div>' +
                   '<p style="margin:0 0 10px;font-size:12px;font-style:italic;color:var(--muted,#8A8275)">' +
                     esc(entry.etym) + '</p>'
                 : '') +
               (entry.related && entry.related.length
-                ? '<div style="font-size:11px;color:var(--muted,#8A8275)">По теме: ' +
+                ? '<div style="font-size:11px;color:var(--muted,#8A8275)">' + esc(t('related_prefix')) + ' ' +
                   entry.related.map(function (slug) {
                     return '<a href="#gl-' + slug + '" class="gl-rel" style="color:var(--gold,#C9A227);' +
                       'text-decoration:none;margin-right:6px">' + slug + '</a>';
