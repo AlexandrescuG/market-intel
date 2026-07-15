@@ -309,8 +309,8 @@ a:hover{text-decoration:underline;color:var(--glow)}
 <div class="strip" id="strip"><div class="strip-inner" id="stripInner"></div></div>
 
 <div class="seg-wrap" id="segCtrl">
-  <button class="seg-btn active" data-v="fund">Фундаментальный</button>
-  <button class="seg-btn" data-v="tech">Технический</button>
+  <button class="seg-btn active" data-v="fund">{{ t('home.seg_fundamental', lang) }}</button>
+  <button class="seg-btn" data-v="tech">{{ t('home.seg_technical', lang) }}</button>
 </div>
 
 <div class="wrap" id="mainWrap" data-view="fund">
@@ -320,21 +320,21 @@ a:hover{text-decoration:underline;color:var(--glow)}
     <div class="view-fund">
       <section class="panel">
         <div class="panel-h">
-          <h2>Утренний отчёт</h2><span class="tag signal">LLM · 06:00</span>
+          <h2>{{ t('home.morning_report_title', lang) }}</h2><span class="tag signal">LLM · 06:00</span>
           <span class="fresh" id="reportFresh"></span>
         </div>
-        <div class="report" id="report"><div class="empty">Отчёт ещё не сгенерирован.</div></div>
+        <div class="report" id="report"><div class="empty">{{ t('home.report_not_generated', lang) }}</div></div>
       </section>
 
       <section class="panel">
         <div class="panel-h">
-          <h2>Лента сигналов</h2><span class="tag signal">SCRIPT · обнаружение</span>
+          <h2>{{ t('home.signal_feed_title', lang) }}</h2><span class="tag signal">{{ t('home.tag_script_detection', lang) }}</span>
           <span class="fresh" id="sigFresh"></span>
         </div>
         <div class="tabs" id="tabs">
-          <button class="tab chip active" data-d="economy">Экономика</button>
-          <button class="tab chip" data-d="geopolitics">Геополитика</button>
-          <button class="tab chip" data-d="crowd">Толпа</button>
+          <button class="tab chip active" data-d="economy">{{ t('home.tab_economy', lang) }}</button>
+          <button class="tab chip" data-d="geopolitics">{{ t('home.tab_geopolitics', lang) }}</button>
+          <button class="tab chip" data-d="crowd">{{ t('home.tab_crowd', lang) }}</button>
         </div>
         <div id="signals"></div>
       </section>
@@ -358,8 +358,8 @@ a:hover{text-decoration:underline;color:var(--glow)}
             <button class="tf" data-tf="W1">W1</button>
           </div>
           <div class="ctrl-tog" id="techTog" style="margin-left:8px">
-            <button class="chip on" data-t="piv">Пивоты</button>
-            <button class="chip" data-t="cndl">Паттерны</button>
+            <button class="chip on" data-t="piv">{{ t('home.pivots_toggle', lang) }}</button>
+            <button class="chip" data-t="cndl">{{ t('home.patterns_toggle', lang) }}</button>
             <button class="chip" data-t="smc">SMC</button>
           </div>
         </div>
@@ -373,7 +373,7 @@ a:hover{text-decoration:underline;color:var(--glow)}
       <!-- Детальный анализ активного актива из графика -->
       <section class="panel" id="techFocusSection" style="display:none">
         <div class="panel-h">
-          <h2 id="techFocusTitle">Анализ актива</h2><span class="tag verify">SCRIPT · факт</span>
+          <h2 id="techFocusTitle">{{ t('home.asset_analysis_title', lang) }}</h2><span class="tag verify">{{ t('home.tag_script_fact', lang) }}</span>
         </div>
         <div id="techFocusBlock"></div>
       </section>
@@ -382,7 +382,7 @@ a:hover{text-decoration:underline;color:var(--glow)}
       <!-- Библиотека паттернов (бывший /grafik) -->
       <section class="panel" id="techLib">
         <div class="panel-h">
-          <h2>Библиотека паттернов</h2><span class="tag">СХЕМА · учебная</span>
+          <h2>{{ t('home.pattern_library_title', lang) }}</h2><span class="tag">{{ t('home.tag_schema_educational', lang) }}</span>
         </div>
         <div class="gpills-row" id="gTabs"></div>
         <div class="gpills-row" id="gPills"></div>
@@ -393,15 +393,15 @@ a:hover{text-decoration:underline;color:var(--glow)}
           <div class="gschool" id="gSchool">
             <span class="gschool-lbl">TP/SL</span>
           </div>
-          <button class="greplay" id="gReplay">↺ Проиграть</button>
+          <button class="greplay" id="gReplay">{{ t('home.replay_button', lang) }}</button>
         </div>
         <div class="ghead-row"><h3 id="gNm">—</h3><span class="gprov" id="gPv"></span></div>
         <div class="gex-grid">
-          <div class="gex-card"><div class="gex-lbl">как формируется</div><p id="gFf"></p></div>
-          <div class="gex-card"><div class="gex-lbl">как работает</div><p id="gWw"></p></div>
-          <div class="gex-card"><div class="gex-lbl" id="gLvlLbl">вход · стоп · цель</div><p id="gLv"></p></div>
+          <div class="gex-card"><div class="gex-lbl">{{ t('home.how_it_forms', lang) }}</div><p id="gFf"></p></div>
+          <div class="gex-card"><div class="gex-lbl">{{ t('home.how_it_works', lang) }}</div><p id="gWw"></p></div>
+          <div class="gex-card"><div class="gex-lbl" id="gLvlLbl">{{ t('home.entry_stop_target', lang) }}</div><p id="gLv"></p></div>
         </div>
-        <div class="gfoot-note">Образец, схематичные данные. Показывает, как читать фигуру. Не является торговой рекомендацией.</div>
+        <div class="gfoot-note">{{ t('home.pattern_footnote', lang) }}</div>
       </section>
 
     </div>
@@ -412,7 +412,7 @@ a:hover{text-decoration:underline;color:var(--glow)}
     <!-- F&G — в sidebar (виден только в fund mode, т.к. в tech mode sidebar скрыт) -->
     <div>
       <section class="panel">
-        <div class="panel-h"><h2>Crypto Fear &amp; Greed</h2><span class="tag verify">факт</span></div>
+        <div class="panel-h"><h2>{{ t('home.crypto_fear_greed', lang) }}</h2><span class="tag verify">{{ t('home.tag_fact', lang) }}</span></div>
         <div id="fngBox" class="empty">—</div>
       </section>
     </div>
@@ -420,7 +420,7 @@ a:hover{text-decoration:underline;color:var(--glow)}
     <!-- Buzz → Фундаментальный -->
     <div class="view-fund">
       <section class="panel">
-        <div class="panel-h"><h2>Market Buzz</h2><span class="tag signal">24ч</span>
+        <div class="panel-h"><h2>{{ t('home.market_buzz', lang) }}</h2><span class="tag signal">{{ t('home.24h', lang) }}</span>
           <span class="fresh" id="buzzFresh"></span></div>
         <div class="buzz" id="buzz"></div>
       </section>
@@ -438,8 +438,14 @@ a:hover{text-decoration:underline;color:var(--glow)}
 <script>
 const DATA = './data/';
 const fmt = n => n==null?'—':(Math.abs(n)>=1000?n.toLocaleString('en-US',{maximumFractionDigits:2}):n);
+function fmt_(tpl, vars) { return tpl.replace(/\{(\w+)\}/g, (_, k) => (vars[k] != null ? vars[k] : '')); }
+const I18N_TIME = {
+  justNow: {{ t('home.time_just_now', lang) | tojson }},
+  minAgo: {{ t('home.time_min_ago', lang) | tojson }},
+  hoursAgo: {{ t('home.time_hours_ago', lang) | tojson }}
+};
 const ago = iso => { if(!iso)return''; const s=(Date.now()-new Date(iso))/1000;
-  return s<90?'только что':s<3600?Math.round(s/60)+' мин назад':Math.round(s/3600)+' ч назад'; };
+  return s<90?I18N_TIME.justNow:s<3600?fmt_(I18N_TIME.minAgo,{n:Math.round(s/60)}):fmt_(I18N_TIME.hoursAgo,{n:Math.round(s/3600)}); };
 const safeId = s => s.replace(/[^a-zA-Z0-9]/g,'_');
 
 async function get(f){ try{ const r=await fetch(DATA+f+'.json?t='+Date.now()); return r.ok?await r.json():null; }catch(e){ return null; } }
@@ -573,10 +579,15 @@ function renderFng(m){
     <div class="fng" style="padding:0"><div class="bar"></div><div class="mark" style="margin-left:${v}%"></div></div>`;
 }
 
+const I18N_REPORT = {
+  notGenerated: {{ t('home.report_not_generated', lang) | tojson }},
+  forDate: {{ t('home.report_for_date', lang) | tojson }},
+  summaryTitle: {{ t('home.summary_title', lang) | tojson }}
+};
 function renderReport(r){
   const el=document.getElementById('report');
-  if(!r||!r.markdown){el.innerHTML='<div class="empty">Отчёт ещё не сгенерирован.</div>';return;}
-  document.getElementById('reportFresh').textContent=r.date?('за '+r.date):'';
+  if(!r||!r.markdown){el.innerHTML='<div class="empty">'+I18N_REPORT.notGenerated+'</div>';return;}
+  document.getElementById('reportFresh').textContent=r.date?fmt_(I18N_REPORT.forDate,{date:r.date}):'';
 
   // Разбиваем по ## заголовкам
   var lines = r.markdown.split('\n');
@@ -597,7 +608,9 @@ function renderReport(r){
     return !/идеи\s+для\s+контента/i.test(s.title);
   });
   sections.forEach(function(s){
-    s.title = s.title.replace(/TL[;:]DR(\s*[-—]\s*краткое\s+резюме)?/i, 'Краткое содержание');
+    // Регекс match — против исходных русских markdown-заголовков LLM-отчёта
+    // (данные, не UI), НЕ трогать; на замену идёт уже переводимый UI-лейбл.
+    s.title = s.title.replace(/TL[;:]DR(\s*[-—]\s*краткое\s+резюме)?/i, I18N_REPORT.summaryTitle);
   });
 
   // Строим HTML
@@ -614,13 +627,39 @@ function renderReport(r){
   el.innerHTML = html || marked.parse(r.markdown);
 }
 
+const I18N_CARD = {
+  noCards: {{ t('home.no_cards', lang) | tojson }},
+  biasBuy: {{ t('home.bias_buy', lang) | tojson }},
+  biasSell: {{ t('home.bias_sell', lang) | tojson }},
+  biasNeutral: {{ t('home.bias_neutral', lang) | tojson }},
+  lastPrice: {{ t('home.last_price', lang) | tojson }},
+  keyLevels: {{ t('home.key_levels', lang) | tojson }},
+  pivotPoint: {{ t('home.pivot_point', lang) | tojson }},
+  resistance1: {{ t('home.resistance_1', lang) | tojson }},
+  resistance2: {{ t('home.resistance_2', lang) | tojson }},
+  support1: {{ t('home.support_1', lang) | tojson }},
+  support2: {{ t('home.support_2', lang) | tojson }},
+  expectedMove: {{ t('home.expected_move', lang) | tojson }},
+  buyLabel: {{ t('home.scenario_buy_label', lang) | tojson }},
+  sellLabel: {{ t('home.scenario_sell_label', lang) | tojson }},
+  observation: {{ t('home.trading_observation', lang) | tojson }},
+  openFullChart: {{ t('home.open_full_chart', lang) | tojson }},
+  and: {{ t('home.and_conjunction', lang) | tojson }},
+  scenLongTarget: {{ t('home.scenario_long_target', lang) | tojson }},
+  scenLongBreakout: {{ t('home.scenario_long_breakout', lang) | tojson }},
+  scenShortTarget: {{ t('home.scenario_short_target', lang) | tojson }},
+  scenShortSupport: {{ t('home.scenario_short_support', lang) | tojson }}
+};
+
 var _techCards = [];
 function renderTech(t){
   _techCards = (t && t.cards) || [];
   const el=document.getElementById('tcards');
   if(!el) return;
-  if(!t||!t.cards.length){el.innerHTML='<div class="empty">Нет карточек.</div>';return;}
+  if(!t||!t.cards.length){el.innerHTML='<div class="empty">'+I18N_CARD.noCards+'</div>';return;}
   el.innerHTML=t.cards.map(c=>{
+    // c.bias -- поле из бэкенд-данных, всегда на русском независимо от языка
+    // интерфейса; матчим как есть, переводим только итоговый лейбл ниже.
     const bull=c.bias.includes('быч');
     const bear=c.bias.includes('медвеж');
     const bc=bull?'bull':bear?'bear':'flat';
@@ -631,41 +670,43 @@ function renderTech(t){
     const s2=c.support&&c.support[1]?c.support[1]:'—';
     const pats=(c.patterns||[]).join(', ');
     const moveStr=c.expected_move?`${c.expected_move[0]}–${c.expected_move[1]} ${c.expected_unit||''}`.trim():'—';
+    const buyTargets=r1+(r2!=='—'?' '+I18N_CARD.and+' '+r2:'');
+    const sellTargets=s1+(s2!=='—'?' '+I18N_CARD.and+' '+s2:'');
     const scenBuy=bull
-      ? `Длинные позиции выше ${pp} с целями ${r1}${r2!=='—'?' и '+r2:''}.`
-      : `При пробое выше ${pp} — потенциальный разворот к ${r1}.`;
+      ? fmt_(I18N_CARD.scenLongTarget,{pp,targets:buyTargets})
+      : fmt_(I18N_CARD.scenLongBreakout,{pp,r1});
     const scenSell=bear
-      ? `Короткие позиции ниже ${pp} с целями ${s1}${s2!=='—'?' и '+s2:''}.`
-      : `Ниже ${pp} обратите внимание на поддержки ${s1}${s2!=='—'?' и '+s2:''}.`;
+      ? fmt_(I18N_CARD.scenShortTarget,{pp,targets:sellTargets})
+      : fmt_(I18N_CARD.scenShortSupport,{pp,targets:sellTargets});
     return `<div class="tcard">
       <div class="hd">
         <span class="sym">${c.name||c.ticker}</span>
-        <span class="bias ${bc}">${bull?'Покупка':bear?'Продажа':'Нейтрально'}</span>
+        <span class="bias ${bc}">${bull?I18N_CARD.biasBuy:bear?I18N_CARD.biasSell:I18N_CARD.biasNeutral}</span>
       </div>
-      <div class="lv" style="margin-bottom:8px"><span>Последн.</span>
+      <div class="lv" style="margin-bottom:8px"><span>${I18N_CARD.lastPrice}</span>
         <b id="tpx_${safeId(c.ticker)}">${fmt(c.price)}</b>
         <span style="margin-left:8px">RSI</span><b>${c.rsi}</b></div>
       <div style="border-top:1px solid var(--line);padding-top:8px;margin-bottom:8px">
-        <div style="font-size:10px;color:var(--muted);margin-bottom:5px;letter-spacing:.5px;text-transform:uppercase;font-weight:700">Ключевые уровни</div>
-        <div class="lv"><span>Точка разворота</span><b style="color:var(--gold)">${pp}</b></div>
-        <div class="lv"><span>Сопротивление 1</span><b style="color:var(--down)">${r1}</b></div>
-        <div class="lv"><span>Сопротивление 2</span><b style="color:var(--down)">${r2}</b></div>
-        <div class="lv"><span>Поддержка 1</span><b style="color:var(--up)">${s1}</b></div>
-        <div class="lv"><span>Поддержка 2</span><b style="color:var(--up)">${s2}</b></div>
-        <div class="lv"><span>Ожидаемый ход</span><b>${moveStr}</b></div>
+        <div style="font-size:10px;color:var(--muted);margin-bottom:5px;letter-spacing:.5px;text-transform:uppercase;font-weight:700">${I18N_CARD.keyLevels}</div>
+        <div class="lv"><span>${I18N_CARD.pivotPoint}</span><b style="color:var(--gold)">${pp}</b></div>
+        <div class="lv"><span>${I18N_CARD.resistance1}</span><b style="color:var(--down)">${r1}</b></div>
+        <div class="lv"><span>${I18N_CARD.resistance2}</span><b style="color:var(--down)">${r2}</b></div>
+        <div class="lv"><span>${I18N_CARD.support1}</span><b style="color:var(--up)">${s1}</b></div>
+        <div class="lv"><span>${I18N_CARD.support2}</span><b style="color:var(--up)">${s2}</b></div>
+        <div class="lv"><span>${I18N_CARD.expectedMove}</span><b>${moveStr}</b></div>
       </div>
       <div style="font-size:11px;margin-bottom:6px">
-        <div style="color:var(--up);font-weight:700;margin-bottom:2px;font-size:10px;letter-spacing:.3px">▲ ПОКУПКА</div>
+        <div style="color:var(--up);font-weight:700;margin-bottom:2px;font-size:10px;letter-spacing:.3px">${I18N_CARD.buyLabel}</div>
         <div style="color:var(--muted)">${scenBuy}</div>
       </div>
       <div style="font-size:11px;margin-bottom:6px">
-        <div style="color:var(--down);font-weight:700;margin-bottom:2px;font-size:10px;letter-spacing:.3px">▼ ПРОДАЖА</div>
+        <div style="color:var(--down);font-weight:700;margin-bottom:2px;font-size:10px;letter-spacing:.3px">${I18N_CARD.sellLabel}</div>
         <div style="color:var(--muted)">${scenSell}</div>
       </div>
       ${pats?`<div class="pat">◆ ${pats}</div>`:''}
       <div class="mini-chart" data-sym="${(CHART_LABEL_MAP[c.ticker]||c.ticker.replace(/[^a-zA-Z0-9]/g,''))}"></div>
-      <div class="obs">Наблюдение, не является торговой рекомендацией</div>
-      <button class="btn-secondary" style="margin-top:10px;width:100%;font-size:11px;letter-spacing:.4px" onclick="openChart('${c.ticker}')">Открыть полный график</button>
+      <div class="obs">${I18N_CARD.observation}</div>
+      <button class="btn-secondary" style="margin-top:10px;width:100%;font-size:11px;letter-spacing:.4px" onclick="openChart('${c.ticker}')">${I18N_CARD.openFullChart}</button>
     </div>`;
   }).join('');
   loadMiniCharts();
@@ -715,10 +756,14 @@ document.getElementById('chartOverlay').addEventListener('click',e=>{
 });
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeChart(); });
 
+const I18N_SIG = {
+  noSignals: {{ t('home.no_signals', lang) | tojson }},
+  noSignalsWindow: {{ t('home.no_signals_window', lang) | tojson }}
+};
 let SIG=null;
 function renderSignals(dim){
-  const el=document.getElementById('signals'); if(!SIG||!SIG[dim]){el.innerHTML='<div class="empty">Нет сигналов.</div>';return;}
-  const rows=SIG[dim]; if(!rows.length){el.innerHTML='<div class="empty">Нет сигналов за окно.</div>';return;}
+  const el=document.getElementById('signals'); if(!SIG||!SIG[dim]){el.innerHTML='<div class="empty">'+I18N_SIG.noSignals+'</div>';return;}
+  const rows=SIG[dim]; if(!rows.length){el.innerHTML='<div class="empty">'+I18N_SIG.noSignalsWindow+'</div>';return;}
   el.innerHTML=rows.map(s=>{
     const ct=(s.cashtags||[]).map(t=>'$'+t).join(' ');
     return `<div class="sig">
@@ -731,13 +776,14 @@ function renderSignals(dim){
   }).join('');
 }
 
+const I18N_BUZZ_MENTIONS = {{ t('home.mentions_abbr', lang) | tojson }};
 function renderBuzz(b){
   const el=document.getElementById('buzz'); if(!b||!b.tickers.length){el.innerHTML='<div class="empty">—</div>';return;}
   const max=Math.max(...b.tickers.map(t=>t.mentions));
   el.innerHTML=b.tickers.slice(0,24).map(t=>{
     const sz=Math.round(34+(t.mentions/max)*46);
     const hue=120*Math.min(t.importance/0.6,1);
-    return `<div class="bub" title="${t.tag}: ${t.mentions} упом · imp ${t.importance}"
+    return `<div class="bub" title="${t.tag}: ${t.mentions} ${I18N_BUZZ_MENTIONS} · imp ${t.importance}"
       style="width:${sz}px;height:${sz}px;font-size:${Math.max(9,sz/4)}px;
       background:hsl(${hue} 55% 55%)">${t.tag}</div>`;
   }).join('');
@@ -842,7 +888,7 @@ _tickerRAF = requestAnimationFrame(_tickerFrame);
     techTF = tf;
     var el = document.getElementById('techLW'); el.innerHTML = '';
     try { techData = await SBFGrafik.loadBars(techSym, tf); }
-    catch(e) { el.innerHTML='<div style="padding:20px;font-family:JetBrains Mono;color:var(--muted)">Нет данных: '+techSym+' '+tf+'</div>'; return; }
+    catch(e) { el.innerHTML='<div style="padding:20px;font-family:JetBrains Mono;color:var(--muted)">'+fmt_({{ t('home.no_data_for', lang) | tojson }},{sym:techSym+' '+tf})+'</div>'; return; }
     var m = techData.meta;
     var lbl = document.getElementById('techSymLabel');
     if (lbl) lbl.textContent = (m.label||techSym) + ' · ' + (m.interval||tf);
@@ -867,12 +913,40 @@ _tickerRAF = requestAnimationFrame(_tickerFrame);
     techApplyToggles();
   }
 
+  var I18N_TECH = {
+    bullShort: {{ t('home.bias_bull_short', lang) | tojson }},
+    bearShort: {{ t('home.bias_bear_short', lang) | tojson }},
+    neutrShort: {{ t('home.bias_neutr_short', lang) | tojson }},
+    nearest: {{ t('home.nearest_label', lang) | tojson }},
+    biasBuy: {{ t('home.bias_buy', lang) | tojson }},
+    biasSell: {{ t('home.bias_sell', lang) | tojson }},
+    biasNeutral: {{ t('home.bias_neutral', lang) | tojson }},
+    keyLevels: {{ t('home.key_levels', lang) | tojson }},
+    resistance1: {{ t('home.resistance_1', lang) | tojson }},
+    resistance2: {{ t('home.resistance_2', lang) | tojson }},
+    pivotPoint: {{ t('home.pivot_point', lang) | tojson }},
+    support1: {{ t('home.support_1', lang) | tojson }},
+    support2: {{ t('home.support_2', lang) | tojson }},
+    expectedMove: {{ t('home.expected_move', lang) | tojson }},
+    buyLabel: {{ t('home.scenario_buy_label', lang) | tojson }},
+    sellLabel: {{ t('home.scenario_sell_label', lang) | tojson }},
+    observation: {{ t('home.trading_observation', lang) | tojson }},
+    lastPrice: {{ t('home.last_price', lang) | tojson }},
+    and: {{ t('home.and_conjunction', lang) | tojson }},
+    scenLongTarget: {{ t('home.scenario_long_target', lang) | tojson }},
+    scenLongBreakout: {{ t('home.scenario_long_breakout', lang) | tojson }},
+    scenShortTarget: {{ t('home.scenario_short_target', lang) | tojson }},
+    scenShortSupport: {{ t('home.scenario_short_support', lang) | tojson }},
+    analysisSuffix: {{ t('home.analysis_suffix', lang) | tojson }}
+  };
+
   function renderTechAnalysisBlock(m) {
     var el = document.getElementById('techAnalysis'); if (!el||!techData) return;
     var rsi = m.rsi!=null?m.rsi:(SBFGrafik.calcRSI14(techData.bars)||'—');
     var bias = m.bias||SBFGrafik.calcBias(techData.bars);
+    // bias -- поле из бэкенд-данных (всегда на русском), матчим как есть
     var bCol = bias&&bias.includes('быч')?'var(--up)':bias&&bias.includes('медвеж')?'var(--down)':'var(--muted)';
-    var bTxt = bias&&bias.includes('быч')?'бычья':bias&&bias.includes('медвеж')?'медвежья':'нейтр';
+    var bTxt = bias&&bias.includes('быч')?I18N_TECH.bullShort:bias&&bias.includes('медвеж')?I18N_TECH.bearShort:I18N_TECH.neutrShort;
     var near = m.nearest;
     var pivs = SBFGrafik.calcPivots(techData.bars);
     if (!near&&pivs&&m.last) near = SBFGrafik.nearestPivot(m.last, pivs);
@@ -880,7 +954,7 @@ _tickerRAF = requestAnimationFrame(_tickerFrame);
     el.innerHTML = '<div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center">'+
       '<span>RSI <b>'+rsi+'</b></span>'+
       '<span>Bias <b style="color:'+bCol+'">'+bTxt+'</b></span>'+
-      (near?'<span>Ближайший <b>'+near.name+' '+(+near.price).toLocaleString('en')+'</b> ('+(near.dist_pct>0?'+':'')+near.dist_pct+'%)</span>':'')+
+      (near?'<span>'+I18N_TECH.nearest+' <b>'+near.name+' '+(+near.price).toLocaleString('en')+'</b> ('+(near.dist_pct>0?'+':'')+near.dist_pct+'%)</span>':'')+
       (lvls?'<span style="margin-left:auto;display:flex;flex-wrap:wrap;gap:6px">'+lvls+'</span>':'')+
       '</div>';
     renderTechFocus(m, rsi, bias);
@@ -894,7 +968,7 @@ _tickerRAF = requestAnimationFrame(_tickerFrame);
     var bull = bias && bias.includes('быч');
     var bear = bias && bias.includes('медвеж');
     var biasClass = bull?'bull':bear?'bear':'flat';
-    var biasLabel = bull?'Покупка':bear?'Продажа':'Нейтрально';
+    var biasLabel = bull?I18N_TECH.biasBuy:bear?I18N_TECH.biasSell:I18N_TECH.biasNeutral;
 
     // Уровни из techData.levels (PP, R1, R2, S1, S2)
     var lvlMap = {};
@@ -912,15 +986,17 @@ _tickerRAF = requestAnimationFrame(_tickerFrame);
     var pats = card?(card.patterns||[]).join(', '):'';
     var symLabel = m.label || techSym;
 
+    var focusBuyTargets = r1+(r2!=='—'?' '+I18N_TECH.and+' '+r2:'');
+    var focusSellTargets = s1+(s2!=='—'?' '+I18N_TECH.and+' '+s2:'');
     var scenBuy = bull
-      ? 'Длинные позиции выше '+pp+' с целями '+r1+(r2!=='—'?' и '+r2:'')+'.'
-      : 'При пробое выше '+pp+' — потенциальный разворот к '+r1+'.';
+      ? fmt_(I18N_TECH.scenLongTarget,{pp,targets:focusBuyTargets})
+      : fmt_(I18N_TECH.scenLongBreakout,{pp,r1});
     var scenSell = bear
-      ? 'Короткие позиции ниже '+pp+' с целями '+s1+(s2!=='—'?' и '+s2:'')+'.'
-      : 'Ниже '+pp+' обратите внимание на поддержки '+s1+(s2!=='—'?' и '+s2:'')+'.';
+      ? fmt_(I18N_TECH.scenShortTarget,{pp,targets:focusSellTargets})
+      : fmt_(I18N_TECH.scenShortSupport,{pp,targets:focusSellTargets});
 
     var titleEl = document.getElementById('techFocusTitle');
-    if (titleEl) titleEl.textContent = symLabel + ' · Анализ';
+    if (titleEl) titleEl.textContent = symLabel + ' · ' + I18N_TECH.analysisSuffix;
 
     el.innerHTML =
       '<div class="tfoc">'
@@ -928,32 +1004,32 @@ _tickerRAF = requestAnimationFrame(_tickerFrame);
         +'<span class="sym">'+symLabel+'</span>'
         +'<span class="bias '+biasClass+'">'+biasLabel+'</span>'
         +'<span style="margin-left:auto;font-family:\'JetBrains Mono\',monospace;font-size:12px;color:var(--muted)">'
-          +'Последн. <b style="color:var(--ink)">'+last+'</b>'
+          +I18N_TECH.lastPrice+' <b style="color:var(--ink)">'+last+'</b>'
           +'&nbsp;&nbsp;RSI <b style="color:var(--ink)">'+rsi+'</b>'
         +'</span>'
       +'</div>'
       +'<div class="tfoc-grid">'
         +'<div>'
-          +'<div class="tfoc-sec-lbl">Ключевые уровни</div>'
-          +'<div class="tfoc-lv"><span>Сопротивление 2</span><b style="color:var(--down)">'+r2+'</b></div>'
-          +'<div class="tfoc-lv"><span>Сопротивление 1</span><b style="color:var(--down)">'+r1+'</b></div>'
-          +'<div class="tfoc-lv"><span>Точка разворота</span><b style="color:var(--gold)">'+pp+'</b></div>'
-          +'<div class="tfoc-lv"><span>Поддержка 1</span><b style="color:var(--up)">'+s1+'</b></div>'
-          +'<div class="tfoc-lv"><span>Поддержка 2</span><b style="color:var(--up)">'+s2+'</b></div>'
-          +(moveStr?'<div class="tfoc-lv"><span>Ожидаемый ход</span><b>'+moveStr+'</b></div>':'')
+          +'<div class="tfoc-sec-lbl">'+I18N_TECH.keyLevels+'</div>'
+          +'<div class="tfoc-lv"><span>'+I18N_TECH.resistance2+'</span><b style="color:var(--down)">'+r2+'</b></div>'
+          +'<div class="tfoc-lv"><span>'+I18N_TECH.resistance1+'</span><b style="color:var(--down)">'+r1+'</b></div>'
+          +'<div class="tfoc-lv"><span>'+I18N_TECH.pivotPoint+'</span><b style="color:var(--gold)">'+pp+'</b></div>'
+          +'<div class="tfoc-lv"><span>'+I18N_TECH.support1+'</span><b style="color:var(--up)">'+s1+'</b></div>'
+          +'<div class="tfoc-lv"><span>'+I18N_TECH.support2+'</span><b style="color:var(--up)">'+s2+'</b></div>'
+          +(moveStr?'<div class="tfoc-lv"><span>'+I18N_TECH.expectedMove+'</span><b>'+moveStr+'</b></div>':'')
           +(pats?'<div class="pat" style="margin-top:10px">◆ '+pats+'</div>':'')
         +'</div>'
         +'<div>'
-          +'<div class="tfoc-sec-lbl">Сценарии</div>'
+          +'<div class="tfoc-sec-lbl">'+{{ t('home.scenarios_title', lang) | tojson }}+'</div>'
           +'<div class="tfoc-scen">'
-            +'<div style="color:var(--up);font-weight:700;font-size:10px;letter-spacing:.3px;margin-bottom:5px">▲ ПОКУПКА</div>'
+            +'<div style="color:var(--up);font-weight:700;font-size:10px;letter-spacing:.3px;margin-bottom:5px">'+I18N_TECH.buyLabel+'</div>'
             +'<div style="color:var(--muted);font-size:12px;line-height:1.5">'+scenBuy+'</div>'
           +'</div>'
           +'<div class="tfoc-scen" style="margin-top:10px">'
-            +'<div style="color:var(--down);font-weight:700;font-size:10px;letter-spacing:.3px;margin-bottom:5px">▼ ПРОДАЖА</div>'
+            +'<div style="color:var(--down);font-weight:700;font-size:10px;letter-spacing:.3px;margin-bottom:5px">'+I18N_TECH.sellLabel+'</div>'
             +'<div style="color:var(--muted);font-size:12px;line-height:1.5">'+scenSell+'</div>'
           +'</div>'
-          +'<div style="margin-top:14px;font-size:10px;color:var(--muted);opacity:.6">Наблюдение, не является торговой рекомендацией</div>'
+          +'<div style="margin-top:14px;font-size:10px;color:var(--muted);opacity:.6">'+I18N_TECH.observation+'</div>'
         +'</div>'
       +'</div>'
       +'</div>';
@@ -993,9 +1069,9 @@ _tickerRAF = requestAnimationFrame(_tickerFrame);
     return lines;
   }
   var TECH_TOG_HINTS = {
-    piv: '<b>Пивоты</b> — уровни поддержки/сопротивления по хаям и лоям предыдущих периодов. Зелёные — поддержка (S1, S2), красные — сопротивление (R1, R2), золотая — точка разворота PP.',
-    cndl: '<b>Паттерны</b> — значимые свечные формации на последних 40 барах. ↑ зелёная стрелка — бычий сигнал, ↓ красная — медвежий, ● жёлтый — нейтральный (доджи). Контекст, не сигнал к сделке.',
-    smc: '<b>SMC — структура рынка:</b> HH (Higher High) — новый максимум, тренд вверх; HL (Higher Low) — откат не пробивает лой; LH (Lower High) — максимум ниже предыдущего, слабость; LL (Lower Low) — новый минимум, тренд вниз. BOS — пробой структуры; OB — Order Block, зона ордеров; FVG — разрыв ликвидности.',
+    piv: {{ t('home.hint_pivots', lang) | tojson }},
+    cndl: {{ t('home.hint_patterns', lang) | tojson }},
+    smc: {{ t('home.hint_smc', lang) | tojson }},
   };
   function updateTechTogHints() {
     var el = document.getElementById('techTogHints'); if (!el) return;
@@ -1028,7 +1104,14 @@ _tickerRAF = requestAnimationFrame(_tickerFrame);
 
   // ── библиотека паттернов ─────────────────────────────────────────────────
   var gCurCat='candle', gCurItem=null;
-  var GPROV={candle:'свечной паттерн · образец',chart:'графический паттерн · образец',smc:'структура рынка · образец',ind:'индикатор · образец'};
+  var GPROV={
+    candle:{{ t('home.gprov_candle', lang) | tojson }},
+    chart:{{ t('home.gprov_chart', lang) | tojson }},
+    smc:{{ t('home.gprov_smc', lang) | tojson }},
+    ind:{{ t('home.gprov_ind', lang) | tojson }}
+  };
+  var GLVL_ENTRY = {{ t('home.entry_stop_target', lang) | tojson }};
+  var GLVL_USAGE = {{ t('home.how_to_use', lang) | tojson }};
 
   function buildGTabs(){
     var tabs=document.getElementById('gTabs'); if(!tabs)return; tabs.innerHTML='';
@@ -1054,7 +1137,7 @@ _tickerRAF = requestAnimationFrame(_tickerFrame);
     document.getElementById('gFf').textContent=it.f;
     document.getElementById('gWw').textContent=it.w;
     var isPat=gCurCat==='candle'||gCurCat==='chart';
-    document.getElementById('gLvlLbl').textContent=isPat?'вход · стоп · цель':'как использовать';
+    document.getElementById('gLvlLbl').textContent=isPat?GLVL_ENTRY:GLVL_USAGE;
     document.getElementById('gLv').textContent=it.note;
     if(history.replaceState)history.replaceState(null,'','#tech/'+gCurCat+'/'+it.key);
     gDraw();
@@ -1064,7 +1147,7 @@ _tickerRAF = requestAnimationFrame(_tickerFrame);
   function initGrafik(){
     var replay=document.getElementById('gReplay'); if(!replay||replay.dataset.ginit)return; replay.dataset.ginit='1';
     var school=document.getElementById('gSchool');
-    [['measured','Измеренное'],['r2','2R'],['r1','1R']].forEach(function(m,i){
+    [['measured',{{ t('home.measured_move', lang) | tojson }}],['r2','2R'],['r1','1R']].forEach(function(m,i){
       var b=document.createElement('button'); b.className='seg-btn'; b.textContent=m[1]; if(i===0)b.classList.add('on');
       b.onclick=function(){Array.from(school.querySelectorAll('button')).forEach(function(x){x.classList.remove('on');});b.classList.add('on');SBFGrafik.setTpMode(m[0]);gDraw();};
       school.appendChild(b);
