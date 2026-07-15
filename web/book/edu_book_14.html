@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>SBF | {% if lang == 'ro' %}Capitolul 14. Anatomia Scalpingului{% else %}Глава 14. Анатомия Скальпинга{% endif %}</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html,body{max-width:100vw;overflow-x:hidden;scroll-behavior:smooth}
+    body{background:#fff;font-family:'DM Sans',system-ui,sans-serif;color:#18181a}
+    #sbf-book-root{min-height:100vh}
+    .back-to-edu{
+      position:fixed;bottom:20px;right:20px;z-index:500;
+      background:#18181a;color:rgba(255,255,255,0.6);
+      font-family:'DM Sans',sans-serif;font-size:.75rem;letter-spacing:1.5px;text-transform:uppercase;
+      padding:7px 13px;text-decoration:none;transition:all .2s;
+      border:1px solid rgba(255,255,255,0.08);
+    }
+    .back-to-edu:hover{background:#c9973a;color:#fff}
+    .messenger-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:30px}
+    @media(max-width:768px){.messenger-grid{grid-template-columns:1fr}.hide-mobile{display:none!important}.g2{grid-template-columns:1fr!important}.g3{grid-template-columns:1fr!important}.g4{grid-template-columns:1fr 1fr!important}}
+    @keyframes priceTick{0%{opacity:.4}50%{opacity:1}100%{opacity:.7}}
+    @keyframes signalFlash{0%{transform:scale(1)}40%{transform:scale(1.08)}100%{transform:scale(1)}}
+    @keyframes resultPop{0%{opacity:0;transform:translateY(8px)}100%{opacity:1;transform:translateY(0)}}
+    @keyframes pulseRing{0%{box-shadow:0 0 0 0 rgba(201,151,58,.5)}70%{box-shadow:0 0 0 10px rgba(201,151,58,0)}100%{box-shadow:0 0 0 0 rgba(201,151,58,0)}}
+  </style>
+</head>
+<body>
+<div id="sbf-book-root"></div>
+<a href="/edu" class="back-to-edu">← Edu</a>
+
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script type="text/babel" data-presets="react">
+const INITIAL_LANG = "{{ lang }}";
+{% raw %}
+const STRINGS = {
+  ru: {
+    // SessionClock
+    clockCityTokyo:"Токио", clockCityLondon:"Лондон", clockCityNy:"Нью-Йорк",
+    clockMskTokyo:"03–12 МСК", clockMskLondon:"11–20 МСК", clockMskNy:"16–01 МСК",
+    mskAbbrev:"МСК",
+    qualPeak:"🔥 ПИКОВАЯ", qualGood:"✅ Хорошая", qualModerate:"🟡 Умеренная", qualWeak:"🔴 Слабая", qualNone:"⛔ Нет ликвидности",
+    clockFbSuccessLead:"✅ Отличный выбор!",
+    clockFbSuccessLondonNy:" + Нью-Йорк",
+    clockFbSuccessTail:"дают максимальные объёмы. Спред на XAU/USD минимален.",
+    clockFbWarnLead:"🟡 Сойдёт, но не идеально.",
+    clockFbWarnMid:"— умеренная ликвидность. Лучше подождать",
+    clockFbWarnTail:"UTC для пиковых объёмов.",
+    clockFbErrorLead:"⛔ Плохой выбор.",
+    clockFbErrorTail:"Азиатская ночь: спред XAU/USD расширяется до 3–8 пунктов, прибыль скальпа (3–6 пт) полностью съедается. Жди Лондона.",
+    clockTitle:"Тайм-Менеджмент Скальпера",
+    clockTag:"ИНТЕРАКТИВ — ФУНДАМЕНТАЛ",
+    clockPickHour:"ВЫБЕРИ ЧАС ДЛЯ СКАЛЬПИНГА (UTC)",
+    clockCenterLabel:"СКАЛЬПИНГ",
+    legendPeak:"Пик", legendGood:"Хорошо", legendModerate:"Умерен.", legendWeak:"Слабо",
+    clockSessionsLabel:"ТОРГОВЫЕ СЕССИИ",
+    chipPeak:"ПИКОВАЯ", chipLow:"НИЗКАЯ",
+    clockOverlapTitle:"⭐ Перекрытие Лондон–NY",
+    clockOverlapRange:"13–17 UTC / 16–20 МСК",
+    clockOverlapDesc:"Максимальный объём, минимальный спред XAU/USD (0.8–1.2 pt). Идеально для скальпинга.",
+    clockVolatilityLabel:"ВОЛАТИЛЬНОСТЬ XAU/USD ПО ЧАСАМ (UTC)",
+    clockHint:"← Кликни на сегмент часового циферблата",
+    // ScalpingSimulator
+    simSlMsg:"⛔ Стоп-лосс! -15 пунктов. Рынок пошёл против вас.",
+    simTpMsg:"✅ Тейк-профит! +5 пунктов. Отличный скальп!",
+    simOpenPrefix:"📥 Позиция открыта по",
+    simClosedProfit:"📤 Закрыто в плюс", simClosedLoss:"📤 Закрыто в минус",
+    unitPct:"пт",
+    simTitle:"Хардкор Скальпинг — M5",
+    simTag:"ИНТЕРАКТИВ — ТЕХНИКА · EMA 9/21 · RSI 14",
+    simResetBtn:"↺ Сброс",
+    simPauseBtn:"⏸ ПАУЗА", simStartBtn:"▶ СТАРТ",
+    simSignalAlert:"⚡ СИГНАЛ: EMA 9 × EMA 21 + RSI из 35 — момент для входа!",
+    simPositionPrefix:"📊 В ПОЗИЦИИ @", simPositionMid:"| P&L:",
+    simCloseBtn:"ЗАКРЫТЬ",
+    simLegendPrice:"Цена XAU/USD",
+    simInstructionsTitle:"Правила входа (стратегия Олега):",
+    simRule1:"1. EMA 9 пересекает EMA 21 снизу вверх",
+    simRule2:"2. RSI выходит из зоны ниже 35",
+    simRule3Prefix:"3. При сигнале", simRule3Suffix:"— нажать BUY",
+    simRule4:"4. TP: +5 пунктов | SL: -15 пунктов",
+    simWinRateNote:"WinRate стратегии: 92–95%",
+    simTradeLogLabel:"ЖУРНАЛ СДЕЛОК",
+    simNoTrades:"Сделок пока нет",
+    simTypeTp:"✅ TP", simTypeSl:"⛔ SL", simTypeManual:"📤 Ручной",
+    // Chapter14 main
+    stickyLevel:"УРОВЕНЬ 14",
+    stickyChapterLabel:"Анатомия Скальпинга (AvaTrade)",
+    chipFA:"ФА 30%", chipTA:"ТА 70%",
+    heroKicker:"SBF COMPANY — ГЛАВА 14",
+    heroTitleLine1:"Анатомия", heroTitleLine2:"Скальпинга",
+    heroSub:"Хирургическая точность внутри дня. Стратегия Олега на AvaTrade: EMA 9/21, RSI 35/65, WinRate 92–95%.",
+    heroChipFundamental:"Фундаментал 30%", heroChipTechnical:"Техника 70%", heroChipInteractive:"2 Интерактива",
+    sec1Title:"Скальпинг vs Свинг: два разных мира",
+    sec1Sub:"Скальпинг — это не просто «быстрые сделки». Это отдельная философия торговли с совершенно другими правилами, инструментами и психологией.",
+    tableLabel:"СРАВНЕНИЕ ПОДХОДОВ",
+    tableHeadParam:"Параметр", tableHeadScalp:"Скальпинг ⚡", tableHeadSwing:"Свинг 🌊",
+    rowTimeframe:"Таймфрейм", rowTradesPerDay:"Сделок в день", rowTarget:"Цель (TP)", rowStop:"Стоп (SL)",
+    rowTimeInTrade:"Время в сделке", rowWinRate:"WinRate", rowRequirements:"Требования", rowRiskPerTrade:"Риск на сделку",
+    targetScalp:"3–8 пунктов", targetSwing:"50–200 пунктов",
+    stopScalp:"10–20 пунктов", stopSwing:"30–100 пунктов",
+    timeScalp:"30 сек – 5 мин", timeSwing:"2–48 часов",
+    reqScalp:"Скорость, дисциплина", reqSwing:"Терпение, анализ",
+    info1Title:"Почему скальпинг работает",
+    info1Text:"Краткосрочные движения предсказуемее долгосрочных — рынок в микромасштабе следует простым паттернам. Высокая частота сделок при правильном WR создаёт стабильный доход.",
+    info2Title:"Главный враг скальпера",
+    info2Text:"Эмоции и промедление. У вас 3–5 секунд на решение. Нет сигнала — нет входа. Есть сигнал — входим без раздумий. Любое колебание = упущенная точка.",
+    info3Title:"Платформа AvaTrade",
+    info3Text:"Фиксированный спред на XAU/USD = 0.29 пунктов. Исполнение: 50–100 мс. Кредитное плечо до 1:400. Минимальный лот 0.01. Идеальные условия для скальпинга.",
+    sec2Title:"Стратегия Олега: 6 правил скальпинга",
+    sec2Sub:"Связка трёх инструментов: фильтр тренда (EMA 200) + импульс (EMA 9/21) + подтверждение перепроданности (RSI 35/65). Каждый компонент обязателен.",
+    rule1Title:"Фильтр тренда (EMA 200)",
+    rule1Text:"На M15 цена должна быть выше EMA 200. Торгуем только в сторону глобального тренда. Против тренда — пропускаем любые сигналы.",
+    rule2Title:"Импульс (EMA 9 × EMA 21)",
+    rule2Text:"EMA 9 пересекает EMA 21 снизу вверх = бычий импульс. Это базовое условие входа. На сильных трендах EMA 9 всё время выше EMA 21.",
+    rule3Title:"Осциллятор RSI (35/65)",
+    rule3Text:"RSI выходит из перепроданности (ниже 35) и пересекает уровень 35 вверх. Зоны 30/70 — слишком редкие для скальпинга. 35/65 дают больше сигналов при том же качестве.",
+    rule4Title:"Вход только в ликвидность",
+    rule4TextA:"Торгуем только в часы пересечения сессий: 08:00–",
+    rule4TextB:" (Лондон) и 13:00–",
+    rule4TextC:" (Лондон + NY). Азиатскую сессию — пропускаем.",
+    rule5Title:"Ювелирный тейк (+5 пт)",
+    rule5Text:"Цель всего 5 пунктов. Не жадничать. 10 сделок по +5 = +50 пт >> 1 сделка с целью +50 пт при WR 50%.",
+    rule6Title:"Жёсткий стоп (–15 пт)",
+    rule6Text:"R/R = 1:3 в пользу стопа, но WR компенсирует: при 90% успешных сделок математика работает. Никогда не двигать стоп дальше!",
+    mathLabel:"МАТЕМАТИКА СТРАТЕГИИ",
+    scenario1:"WinRate 90%, RR 1:3 (обратное)",
+    math1:"100 сделок × $10 риска:\n90 × +$3.33 = +$300\n10 × –$10 = –$100\n📈 Итог: +$200",
+    scenario2:"WinRate 92%, 20 сделок/день",
+    math2:"18.4 удачных × +5 пт = +92 пт\n1.6 убыточных × –15 пт = –24 пт\n📈 Итог: +68 пт/день",
+    scenario3:"WinRate 70% (без дисциплины)",
+    math3:"100 сделок × $10 риска:\n70 × +$3.33 = +$233\n30 × –$10 = –$300\n📉 Итог: –$67",
+    mathConclusionLabel:"Вывод:",
+    mathConclusionText:"При RR 1:3 (в сторону стопа) стратегия прибыльна только при WR ≥ 75%. Стратегия Олега с WR 92%+ обеспечивает стабильный результат даже при консервативных настройках.",
+    concludeLabel:"ИТОГИ ГЛАВЫ 14",
+    concludeTitle:"Что вы теперь знаете",
+    concl1:"Скальпинг требует ликвидности — торгуй только в часы перекрытия Лондон–NY (13–17 UTC)",
+    concl2:"EMA 9/21 на M5 = индикатор краткосрочного импульса. Пересечение снизу вверх — сигнал к покупке",
+    concl3:"RSI с зонами 35/65 (не 30/70) даёт больше сигналов при высоком WinRate на M5",
+    concl4:"TP = 3–6 пунктов, SL = 15 пунктов. Маленькая цель при высоком WR = стабильный доход",
+    concl5:"Психология скальпинга: нет места раздумьям — либо сигнал есть и входим, либо нет — пропускаем",
+    askQuestionLink:"Остался вопрос? Напиши аналитику",
+    nextChapterBtn:"Уровень 15: Проп-Трейдинг →",
+    askTag:"— НАПИСАТЬ НАМ",
+    askModalTitle:"Есть вопрос по главе 14?",
+    askPrefill:"Здравствуйте, вопрос по главе 14",
+  },
+  ro: {
+    // SessionClock
+    clockCityTokyo:"Tokyo", clockCityLondon:"Londra", clockCityNy:"New York",
+    clockMskTokyo:"03–12 MSK", clockMskLondon:"11–20 MSK", clockMskNy:"16–01 MSK",
+    mskAbbrev:"MSK",
+    qualPeak:"🔥 VÂRF", qualGood:"✅ Bună", qualModerate:"🟡 Moderată", qualWeak:"🔴 Slabă", qualNone:"⛔ Fără lichiditate",
+    clockFbSuccessLead:"✅ Alegere excelentă!",
+    clockFbSuccessLondonNy:" + New York",
+    clockFbSuccessTail:"oferă volumele maxime. Spread-ul la XAU/USD este minim.",
+    clockFbWarnLead:"🟡 Acceptabil, dar nu ideal.",
+    clockFbWarnMid:"— lichiditate moderată. Mai bine așteaptă",
+    clockFbWarnTail:"UTC pentru volumele maxime.",
+    clockFbErrorLead:"⛔ Alegere proastă.",
+    clockFbErrorTail:"Noaptea asiatică: spread-ul XAU/USD se extinde la 3–8 puncte, profitul scalpului (3–6 pct) este complet consumat. Așteaptă Londra.",
+    clockTitle:"Managementul Timpului Scalperului",
+    clockTag:"INTERACTIV — FUNDAMENTAL",
+    clockPickHour:"ALEGE ORA PENTRU SCALPING (UTC)",
+    clockCenterLabel:"SCALPING",
+    legendPeak:"Vârf", legendGood:"Bine", legendModerate:"Moderat.", legendWeak:"Slab",
+    clockSessionsLabel:"SESIUNI DE TRANZACȚIONARE",
+    chipPeak:"VÂRF", chipLow:"SCĂZUT",
+    clockOverlapTitle:"⭐ Suprapunere Londra–NY",
+    clockOverlapRange:"13–17 UTC / 16–20 MSK",
+    clockOverlapDesc:"Volum maxim, spread minim XAU/USD (0.8–1.2 pct). Ideal pentru scalping.",
+    clockVolatilityLabel:"VOLATILITATEA XAU/USD PE ORE (UTC)",
+    clockHint:"← Apasă pe un segment al cadranului orar",
+    // ScalpingSimulator
+    simSlMsg:"⛔ Stop-loss! -15 puncte. Piața a mers împotriva ta.",
+    simTpMsg:"✅ Take-profit! +5 puncte. Scalp excelent!",
+    simOpenPrefix:"📥 Poziție deschisă la",
+    simClosedProfit:"📤 Închis pe plus", simClosedLoss:"📤 Închis pe minus",
+    unitPct:"pct",
+    simTitle:"Scalping Hardcore — M5",
+    simTag:"INTERACTIV — TEHNICĂ · EMA 9/21 · RSI 14",
+    simResetBtn:"↺ Resetare",
+    simPauseBtn:"⏸ PAUZĂ", simStartBtn:"▶ START",
+    simSignalAlert:"⚡ SEMNAL: EMA 9 × EMA 21 + RSI din 35 — moment de intrare!",
+    simPositionPrefix:"📊 ÎN POZIȚIE @", simPositionMid:"| P&L:",
+    simCloseBtn:"ÎNCHIDE",
+    simLegendPrice:"Preț XAU/USD",
+    simInstructionsTitle:"Reguli de intrare (strategia lui Oleg):",
+    simRule1:"1. EMA 9 traversează EMA 21 de jos în sus",
+    simRule2:"2. RSI iese din zona sub 35",
+    simRule3Prefix:"3. La semnalul", simRule3Suffix:"— apasă BUY",
+    simRule4:"4. TP: +5 puncte | SL: -15 puncte",
+    simWinRateNote:"WinRate strategie: 92–95%",
+    simTradeLogLabel:"JURNAL DE TRANZACȚII",
+    simNoTrades:"Încă nu sunt tranzacții",
+    simTypeTp:"✅ TP", simTypeSl:"⛔ SL", simTypeManual:"📤 Manual",
+    // Chapter14 main
+    stickyLevel:"NIVELUL 14",
+    stickyChapterLabel:"Anatomia Scalpingului (AvaTrade)",
+    chipFA:"FA 30%", chipTA:"TA 70%",
+    heroKicker:"SBF COMPANY — CAPITOLUL 14",
+    heroTitleLine1:"Anatomia", heroTitleLine2:"Scalpingului",
+    heroSub:"Precizie chirurgicală în cadrul zilei. Strategia lui Oleg pe AvaTrade: EMA 9/21, RSI 35/65, WinRate 92–95%.",
+    heroChipFundamental:"Fundamental 30%", heroChipTechnical:"Tehnic 70%", heroChipInteractive:"2 Interactive",
+    sec1Title:"Scalping vs Swing: două lumi diferite",
+    sec1Sub:"Scalping-ul nu înseamnă doar «tranzacții rapide». Este o filozofie de tranzacționare separată, cu reguli, instrumente și psihologie complet diferite.",
+    tableLabel:"COMPARAȚIA ABORDĂRILOR",
+    tableHeadParam:"Parametru", tableHeadScalp:"Scalping ⚡", tableHeadSwing:"Swing 🌊",
+    rowTimeframe:"Interval de timp", rowTradesPerDay:"Tranzacții pe zi", rowTarget:"Țintă (TP)", rowStop:"Stop (SL)",
+    rowTimeInTrade:"Timp în tranzacție", rowWinRate:"WinRate", rowRequirements:"Cerințe", rowRiskPerTrade:"Risc per tranzacție",
+    targetScalp:"3–8 puncte", targetSwing:"50–200 puncte",
+    stopScalp:"10–20 puncte", stopSwing:"30–100 puncte",
+    timeScalp:"30 sec – 5 min", timeSwing:"2–48 ore",
+    reqScalp:"Viteză, disciplină", reqSwing:"Răbdare, analiză",
+    info1Title:"De ce funcționează scalping-ul",
+    info1Text:"Mișcările pe termen scurt sunt mai previzibile decât cele pe termen lung — piața urmează, la scară mică, tipare simple. Frecvența ridicată a tranzacțiilor, combinată cu un WinRate corect, generează un venit stabil.",
+    info2Title:"Principalul dușman al scalperului",
+    info2Text:"Emoțiile și ezitarea. Ai 3–5 secunde pentru decizie. Fără semnal — fără intrare. Cu semnal — intri fără să stai pe gânduri. Orice șovăire = punct de intrare pierdut.",
+    info3Title:"Platforma AvaTrade",
+    info3Text:"Spread fix la XAU/USD = 0.29 puncte. Execuție: 50–100 ms. Levier până la 1:400. Lot minim 0.01. Condiții ideale pentru scalping.",
+    sec2Title:"Strategia lui Oleg: 6 reguli de scalping",
+    sec2Sub:"Combinația a trei instrumente: filtru de tendință (EMA 200) + impuls (EMA 9/21) + confirmarea supravânzării (RSI 35/65). Fiecare componentă este obligatorie.",
+    rule1Title:"Filtru de tendință (EMA 200)",
+    rule1Text:"Pe M15, prețul trebuie să fie deasupra EMA 200. Tranzacționăm doar în direcția tendinței globale. Împotriva tendinței — ignorăm orice semnal.",
+    rule2Title:"Impuls (EMA 9 × EMA 21)",
+    rule2Text:"EMA 9 traversează EMA 21 de jos în sus = impuls bullish. Aceasta este condiția de bază pentru intrare. În tendințele puternice, EMA 9 este tot timpul deasupra EMA 21.",
+    rule3Title:"Oscilatorul RSI (35/65)",
+    rule3Text:"RSI iese din supravânzare (sub 35) și traversează nivelul 35 în sus. Zonele 30/70 sunt prea rare pentru scalping. 35/65 oferă mai multe semnale la aceeași calitate.",
+    rule4Title:"Intrare doar în lichiditate",
+    rule4TextA:"Tranzacționăm doar în orele de suprapunere a sesiunilor: 08:00–",
+    rule4TextB:" (Londra) și 13:00–",
+    rule4TextC:" (Londra + NY). Sesiunea asiatică — o ignorăm.",
+    rule5Title:"Take-profit de precizie (+5 pct)",
+    rule5Text:"Ținta este de doar 5 puncte. Nu fi lacom. 10 tranzacții de +5 = +50 pct >> 1 tranzacție cu ținta +50 pct la WR 50%.",
+    rule6Title:"Stop strict (–15 pct)",
+    rule6Text:"R/R = 1:3 în favoarea stopului, dar WR compensează: la 90% tranzacții reușite, matematica funcționează. Nu muta niciodată stopul mai departe!",
+    mathLabel:"MATEMATICA STRATEGIEI",
+    scenario1:"WinRate 90%, RR 1:3 (invers)",
+    math1:"100 tranzacții × $10 risc:\n90 × +$3.33 = +$300\n10 × –$10 = –$100\n📈 Total: +$200",
+    scenario2:"WinRate 92%, 20 tranzacții/zi",
+    math2:"18.4 câștigătoare × +5 pct = +92 pct\n1.6 pierzătoare × –15 pct = –24 pct\n📈 Total: +68 pct/zi",
+    scenario3:"WinRate 70% (fără disciplină)",
+    math3:"100 tranzacții × $10 risc:\n70 × +$3.33 = +$233\n30 × –$10 = –$300\n📉 Total: –$67",
+    mathConclusionLabel:"Concluzie:",
+    mathConclusionText:"La RR 1:3 (în favoarea stopului), strategia este profitabilă doar la WR ≥ 75%. Strategia lui Oleg cu WR 92%+ asigură un rezultat stabil chiar și în setări conservatoare.",
+    concludeLabel:"CONCLUZIILE CAPITOLULUI 14",
+    concludeTitle:"Ce știți acum",
+    concl1:"Scalping-ul necesită lichiditate — tranzacționează doar în orele de suprapunere Londra–NY (13–17 UTC)",
+    concl2:"EMA 9/21 pe M5 = indicator de impuls pe termen scurt. Traversarea de jos în sus — semnal de cumpărare",
+    concl3:"RSI cu zonele 35/65 (nu 30/70) oferă mai multe semnale la un WinRate ridicat pe M5",
+    concl4:"TP = 3–6 puncte, SL = 15 puncte. Țintă mică la WR ridicat = venit stabil",
+    concl5:"Psihologia scalping-ului: nu există loc pentru ezitare — fie există semnal și intri, fie nu — și ignori",
+    askQuestionLink:"Mai ai o întrebare? Scrie analistului",
+    nextChapterBtn:"Nivelul 15: Prop Trading →",
+    askTag:"— SCRIE-NE",
+    askModalTitle:"Aveți o întrebare despre capitolul 14?",
+    askPrefill:"Bună ziua, întrebare cap 14",
+  },
+};
+
+const C = {
+  gold:"#c9973a", goldPale:"#f7f0e3",
+  black:"#18181a", ink:"#18181a", inkMid:"#555",
+  inkSoft:"rgba(24,24,26,0.58)", inkFaint:"rgba(24,24,26,0.28)",
+  white:"#fff", surface:"#faf8f5", surfaceMid:"#f0ebe0",
+  border:"rgba(24,24,26,0.1)", borderGold:"rgba(201,151,58,0.25)",
+  green:"#089981", greenD:"#2d7a4f", greenPale:"#eaf5ee",
+  red:"#f23645", redD:"#c0392b", redPale:"#fdecea",
+  blue:"#2563eb", cyan:"#06b6d4", chart:"#0d1117"
+};
+
+const Mono = ({children,size=13,color=C.inkSoft,spacing=3,style={},className=""}) =>
+  <span className={className} style={{fontFamily:"'Courier New',monospace",fontSize:size,letterSpacing:spacing,color,...style}}>{children}</span>;
+const Chip = ({children,color=C.gold}) =>
+  <span style={{fontFamily:"'Courier New',monospace",fontSize:11,letterSpacing:3,color,border:`1px solid ${color}`,padding:"4px 11px",display:"inline-block",textTransform:"uppercase"}}>{children}</span>;
+const Rule = ({w="50%",my=32}) =>
+  <div style={{height:1,background:`linear-gradient(90deg,transparent,${C.gold},transparent)`,width:w,margin:`${my}px auto`,opacity:.4}}/>;
+const SectionTitle = ({children,sub,align="left"}) => (
+  <div style={{textAlign:align,marginBottom:36}}>
+    <h2 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(24px,3.2vw,36px)",fontWeight:400,color:C.black,lineHeight:1.15,marginBottom:sub?10:0}}>{children}</h2>
+    {sub && <p style={{fontSize:15,color:C.inkSoft,lineHeight:1.65,maxWidth:680,margin:align==="center"?"0 auto":0}}>{sub}</p>}
+  </div>
+);
+const InfoCard = ({icon,title,text,accent=C.gold}) => (
+  <div style={{background:C.surface,border:`1px solid ${C.border}`,padding:"22px 26px",borderRadius:4,borderLeft:`3px solid ${accent}`}}>
+    <div style={{fontSize:20,marginBottom:8}}>{icon}</div>
+    <div style={{fontWeight:600,fontSize:13,color:C.black,letterSpacing:.5,marginBottom:7,textTransform:"uppercase"}}>{title}</div>
+    <div style={{fontSize:13,color:C.inkMid,lineHeight:1.65}}>{text}</div>
+  </div>
+);
+const getChUrl = ch => {
+  const p = new URLSearchParams(window.location.search).get('path')||'explorer';
+  const base = INITIAL_LANG==='ru'?'/edu/b':`/edu/${INITIAL_LANG}/b`;
+  return `${base}/${ch}?path=${p}`;
+};
+
+// ─── Interactive 1: Session Clock ─────────────────────────────────────────────
+function SessionClock() {
+  const { useState } = React;
+  const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
+  const [selected, setSelected] = useState(null); // hour 0-23 UTC
+  const [feedback, setFeedback] = useState(null);
+
+  // Sessions in UTC hours
+  const sessions = [
+    { name:S.clockCityTokyo,  start:0,  end:9,  color:"#7c3aed", score:"low",    msk:S.clockMskTokyo },
+    { name:S.clockCityLondon, start:8,  end:17, color:"#2563eb", score:"peak",   msk:S.clockMskLondon },
+    { name:S.clockCityNy,     start:13, end:22, color:"#d97706", score:"peak",   msk:S.clockMskNy },
+  ];
+
+  // Quality per hour (0-23 UTC)
+  const hourQuality = [
+    1,1,1,0,0,0,0,0,          // 0-7  Asia / dead
+    3,4,5,5,5,5,               // 8-13 London open → peak
+    5,5,5,5,5,4,4,             // 14-20 NY overlap
+    3,2,1,1,                   // 21-23 close
+  ];
+
+  const qualColor = (q) => q===5?"#2ecc71":q===4?"#f59e0b":q===3?"#d97706":q===2?"rgba(255,255,255,0.3)":"rgba(255,255,255,0.1)";
+  const qualLabel = (q) => q===5?S.qualPeak:q===4?S.qualGood:q===3?S.qualModerate:q===2?S.qualWeak:S.qualNone;
+
+  const R = 130, r = 76, CX = 160, CY = 160;
+  const toAngle = h => (h / 24) * 360 - 90;
+  const toRad   = deg => deg * Math.PI / 180;
+
+  const arcPath = (startH, endH, radius) => {
+    const a1 = toRad(toAngle(startH));
+    const a2 = toRad(toAngle(endH));
+    const x1 = CX + radius * Math.cos(a1), y1 = CY + radius * Math.sin(a1);
+    const x2 = CX + radius * Math.cos(a2), y2 = CY + radius * Math.sin(a2);
+    const large = (endH - startH) > 12 ? 1 : 0;
+    return `M${x1},${y1} A${radius},${radius} 0 ${large},1 ${x2},${y2}`;
+  };
+
+  const handleHourClick = (h) => {
+    setSelected(h);
+    const q = hourQuality[h];
+    if (q >= 4) {
+      setFeedback({
+        type:"success",
+        msg:`${S.clockFbSuccessLead} ${h}:00 UTC (${h+3}:00 ${S.mskAbbrev}) — ${qualLabel(q)}. ${S.clockCityLondon}${h>=13?S.clockFbSuccessLondonNy:""} ${S.clockFbSuccessTail}`
+      });
+    } else if (q === 3) {
+      setFeedback({
+        type:"warn",
+        msg:`${S.clockFbWarnLead} ${h}:00 UTC ${S.clockFbWarnMid} ${h<8?"08:00":"14:00"} ${S.clockFbWarnTail}`
+      });
+    } else {
+      setFeedback({
+        type:"error",
+        msg:`${S.clockFbErrorLead} ${h}:00 UTC — ${qualLabel(q)}. ${S.clockFbErrorTail}`
+      });
+    }
+  };
+
+  return (
+    <div style={{background:C.black,borderRadius:8,padding:"36px 40px",color:C.white}}>
+      <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:28}}>
+        <span style={{fontSize:28}}>⏱️</span>
+        <div>
+          <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.gold}}>{S.clockTitle}</div>
+          <Mono size={11} color="rgba(255,255,255,0.4)" spacing={2}>{S.clockTag}</Mono>
+        </div>
+      </div>
+
+      <div style={{display:"grid",gridTemplateColumns:"320px 1fr",gap:36,alignItems:"start"}} className="g2">
+
+        {/* Clock SVG */}
+        <div>
+          <div style={{textAlign:"center",marginBottom:10}}>
+            <Mono size={10} color="rgba(255,255,255,0.3)" spacing={1}>{S.clockPickHour}</Mono>
+          </div>
+          <svg viewBox="0 0 320 320" style={{width:"100%",display:"block"}}>
+            <circle cx={CX} cy={CY} r={R+16} fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.05)" strokeWidth="1"/>
+
+            {/* Session arcs */}
+            {sessions.map((s,i) => (
+              <path key={i}
+                d={arcPath(s.start, s.end, R+8)}
+                fill="none" stroke={s.color} strokeWidth="12" strokeLinecap="butt" opacity="0.35"/>
+            ))}
+
+            {/* Hour segments */}
+            {Array.from({length:24},(_,h) => {
+              const a1 = toRad(toAngle(h));
+              const a2 = toRad(toAngle(h+0.85));
+              const x1=CX+r*Math.cos(a1), y1=CY+r*Math.sin(a1);
+              const x2=CX+R*Math.cos(a1), y2=CY+R*Math.sin(a1);
+              const x3=CX+R*Math.cos(a2), y3=CY+R*Math.sin(a2);
+              const x4=CX+r*Math.cos(a2), y4=CY+r*Math.sin(a2);
+              const q = hourQuality[h];
+              const isSelected = selected===h;
+              return (
+                <path key={h}
+                  d={`M${x1},${y1} L${x2},${y2} L${x3},${y3} L${x4},${y4} Z`}
+                  fill={isSelected?"#fff":qualColor(q)}
+                  stroke="rgba(0,0,0,0.3)" strokeWidth="1"
+                  style={{cursor:"pointer",transition:"fill .15s"}}
+                  onClick={()=>handleHourClick(h)}/>
+              );
+            })}
+
+            {/* Hour labels */}
+            {[0,3,6,9,12,15,18,21].map(h => {
+              const a = toRad(toAngle(h));
+              const lx = CX + (r-18)*Math.cos(a), ly = CY + (r-18)*Math.sin(a);
+              return <text key={h} x={lx} y={ly+4} fontSize="11" fill="rgba(255,255,255,0.35)" textAnchor="middle" fontFamily="monospace">{h}</text>;
+            })}
+
+            {/* Center */}
+            <circle cx={CX} cy={CY} r={r-2} fill={C.chart}/>
+            <text x={CX} y={CY-8}  fontSize="11" fill="rgba(255,255,255,0.5)" textAnchor="middle" fontFamily="monospace">XAU/USD</text>
+            <text x={CX} y={CY+8}  fontSize="13" fill={C.gold} textAnchor="middle" fontFamily="'DM Serif Display',serif">{S.clockCenterLabel}</text>
+            {selected!==null && (
+              <text x={CX} y={CY+24} fontSize="11" fill="#fff" textAnchor="middle" fontFamily="monospace">{selected}:00 UTC</text>
+            )}
+          </svg>
+
+          {/* Legend */}
+          <div style={{display:"flex",flexWrap:"wrap",gap:8,justifyContent:"center",marginTop:8}}>
+            {[{c:"#2ecc71",l:S.legendPeak},{c:"#f59e0b",l:S.legendGood},{c:"#d97706",l:S.legendModerate},{c:"rgba(255,255,255,0.15)",l:S.legendWeak}].map((lg,i)=>(
+              <div key={i} style={{display:"flex",gap:5,alignItems:"center",fontSize:11,color:"rgba(255,255,255,0.5)"}}>
+                <div style={{width:10,height:10,borderRadius:2,background:lg.c}}/>
+                {lg.l}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Right panel */}
+        <div>
+          {/* Sessions list */}
+          <div style={{marginBottom:20}}>
+            <Mono size={10} color="rgba(255,255,255,0.3)" spacing={1} style={{display:"block",marginBottom:12}}>{S.clockSessionsLabel}</Mono>
+            {sessions.map((s,i)=>(
+              <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 14px",marginBottom:8,background:"rgba(255,255,255,0.04)",borderRadius:4,border:`1px solid rgba(255,255,255,0.06)`,borderLeft:`3px solid ${s.color}`}}>
+                <div>
+                  <span style={{fontWeight:700,fontSize:13,color:s.color}}>{s.name}</span>
+                  <span style={{fontSize:11,color:"rgba(255,255,255,0.35)",marginLeft:8}}>{s.msk}</span>
+                </div>
+                <Chip color={s.score==="peak"?C.gold:"rgba(255,255,255,0.2)"}>{s.score==="peak"?S.chipPeak:S.chipLow}</Chip>
+              </div>
+            ))}
+            <div style={{padding:"10px 14px",background:"rgba(201,151,58,0.08)",borderRadius:4,border:`1px solid rgba(201,151,58,0.2)`,borderLeft:`3px solid ${C.gold}`}}>
+              <span style={{fontWeight:700,fontSize:13,color:C.gold}}>{S.clockOverlapTitle}</span>
+              <span style={{fontSize:11,color:"rgba(255,255,255,0.35)",marginLeft:8}}>{S.clockOverlapRange}</span>
+              <div style={{fontSize:12,color:"rgba(255,255,255,0.45)",marginTop:4}}>{S.clockOverlapDesc}</div>
+            </div>
+          </div>
+
+          {/* Volatility heatmap */}
+          <div style={{marginBottom:20}}>
+            <Mono size={10} color="rgba(255,255,255,0.3)" spacing={1} style={{display:"block",marginBottom:8}}>{S.clockVolatilityLabel}</Mono>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(12,1fr)",gap:2}}>
+              {hourQuality.map((q,h)=>(
+                <div key={h} title={`${h}:00 UTC`}
+                  style={{height:28,borderRadius:2,background:qualColor(q),cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",transition:"transform .1s"}}
+                  onClick={()=>handleHourClick(h)}
+                  onMouseEnter={e=>e.currentTarget.style.transform="scaleY(1.15)"}
+                  onMouseLeave={e=>e.currentTarget.style.transform="scaleY(1)"}>
+                  <span style={{fontSize:8,color:"rgba(0,0,0,0.5)",fontFamily:"monospace"}}>{h}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Feedback */}
+          {feedback ? (
+            <div style={{padding:"16px 20px",borderRadius:6,background:feedback.type==="success"?"rgba(45,122,79,0.15)":feedback.type==="warn"?"rgba(217,119,6,0.15)":"rgba(192,57,43,0.15)",border:`1px solid ${feedback.type==="success"?C.greenD:feedback.type==="warn"?"#d97706":C.redD}`,animation:"resultPop .3s ease"}}>
+              <div style={{fontSize:13,color:feedback.type==="success"?"#2ecc71":feedback.type==="warn"?"#f59e0b":"#e74c3c",lineHeight:1.7}}>{feedback.msg}</div>
+            </div>
+          ) : (
+            <div style={{padding:"16px 20px",borderRadius:4,background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.07)",fontSize:12,color:"rgba(255,255,255,0.3)",textAlign:"center"}}>
+              {S.clockHint}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Interactive 2: Live Scalping Simulator ───────────────────────────────────
+function ScalpingSimulator() {
+  const { useState, useEffect, useRef, useMemo, useCallback } = React;
+  const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
+
+  const W = 720, H = 300;
+  const RSI_H = 70;
+  const PAD = {l:48, r:16, t:12, b:24};
+  const N = 60; // visible bars
+
+  // EMA calculation
+  const calcEMA = (arr, p) => {
+    const k = 2/(p+1);
+    const res = new Array(arr.length).fill(null);
+    let s = 0, cnt = 0;
+    for (let i=0; i<arr.length; i++) {
+      s += arr[i]; cnt++;
+      if (cnt >= p) { res[i] = cnt===p ? s/p : arr[i]*k + res[i-1]*(1-k); }
+    }
+    return res;
+  };
+
+  // RSI calculation
+  const calcRSI = (closes, p=14) => {
+    const res = new Array(closes.length).fill(null);
+    if (closes.length < p+1) return res;
+    let avgG=0, avgL=0;
+    for (let i=1; i<=p; i++) { const d=closes[i]-closes[i-1]; d>0?avgG+=d:avgL-=d; }
+    avgG/=p; avgL/=p;
+    res[p] = avgL===0 ? 100 : 100-100/(1+avgG/avgL);
+    for (let i=p+1; i<closes.length; i++) {
+      const d=closes[i]-closes[i-1];
+      const g=d>0?d:0, l=d<0?-d:0;
+      avgG=(avgG*(p-1)+g)/p; avgL=(avgL*(p-1)+l)/p;
+      res[i] = avgL===0 ? 100 : 100-100/(1+avgG/avgL);
+    }
+    return res;
+  };
+
+  // Seed price series (realistic M5 XAU/USD)
+  const seedPrices = useRef((() => {
+    let p = 2510;
+    return Array.from({length:120}, () => {
+      p += (Math.random()-0.49)*2.2;
+      return Math.round(p*100)/100;
+    });
+  })());
+
+  const [bars, setBars]         = useState(seedPrices.current.slice(0,N));
+  const [running, setRunning]   = useState(false);
+  const [position, setPosition] = useState(null); // {entry, time}
+  const [results, setResults]   = useState([]);   // [{pnl, type}]
+  const [signal, setSignal]     = useState(null); // 'buy'|null
+  const [feedback, setFeedback] = useState(null);
+  const [streak, setStreak]     = useState(0);
+  const intervalRef = useRef(null);
+  const barIndexRef = useRef(N);
+  const posRef = useRef(null);
+
+  // Keep posRef in sync
+  useEffect(() => { posRef.current = position; }, [position]);
+
+  const addBar = useCallback(() => {
+    setBars(prev => {
+      const idx = barIndexRef.current;
+      let newClose;
+      if (idx < seedPrices.current.length) {
+        newClose = seedPrices.current[idx];
+      } else {
+        const last = prev[prev.length-1];
+        newClose = Math.round((last + (Math.random()-0.49)*2.2)*100)/100;
+        seedPrices.current.push(newClose);
+      }
+      barIndexRef.current++;
+      const next = [...prev.slice(1), newClose];
+
+      // Auto-close position by SL or TP
+      if (posRef.current) {
+        const pnl = Math.round((newClose - posRef.current.entry)*100)/100;
+        if (pnl <= -15) {
+          setResults(r => [...r, {pnl:-15, type:"sl"}]);
+          setStreak(0);
+          setFeedback({type:"sl", msg:S.simSlMsg});
+          setPosition(null);
+          setTimeout(()=>setFeedback(null), 2200);
+        } else if (pnl >= 5) {
+          setResults(r => [...r, {pnl:5, type:"tp"}]);
+          setStreak(s => s+1);
+          setFeedback({type:"tp", msg:S.simTpMsg});
+          setPosition(null);
+          setTimeout(()=>setFeedback(null), 2200);
+        }
+      }
+      return next;
+    });
+  }, []);
+
+  useEffect(() => {
+    if (running) { intervalRef.current = setInterval(addBar, 600); }
+    else         { clearInterval(intervalRef.current); }
+    return () => clearInterval(intervalRef.current);
+  }, [running, addBar]);
+
+  // Compute indicators
+  const closes = bars;
+  const ema9  = useMemo(() => calcEMA(closes, 9),  [closes]);
+  const ema21 = useMemo(() => calcEMA(closes, 21), [closes]);
+  const rsi   = useMemo(() => calcRSI(closes, 14), [closes]);
+
+  // Signal detection: EMA9 crosses above EMA21 + RSI comes out of 35
+  const lastRsi = rsi[rsi.length-1];
+  const prevRsi = rsi[rsi.length-2];
+  const lastE9  = ema9[ema9.length-1];
+  const prevE9  = ema9[ema9.length-2];
+  const lastE21 = ema21[ema21.length-1];
+  const prevE21 = ema21[ema21.length-2];
+  const hasSignal = useMemo(() => {
+    if (!lastE9||!prevE9||!lastE21||!prevE21||!lastRsi||!prevRsi) return false;
+    const emaCross = prevE9 <= prevE21 && lastE9 > lastE21;
+    const rsiConfirm = prevRsi < 35 && lastRsi >= 35;
+    return emaCross || rsiConfirm;
+  }, [lastE9,prevE9,lastE21,prevE21,lastRsi,prevRsi]);
+
+  useEffect(() => {
+    if (hasSignal && !position && running) setSignal("buy");
+    else if (position) setSignal(null);
+  }, [hasSignal, position, running]);
+
+  const handleBuy = () => {
+    if (position || !running) return;
+    const entry = closes[closes.length-1];
+    setPosition({entry, time: closes.length});
+    setSignal(null);
+    setFeedback({type:"open", msg:`${S.simOpenPrefix} ${entry}. SL: ${Math.round((entry-15)*100)/100} / TP: ${Math.round((entry+5)*100)/100}`});
+    setTimeout(()=>setFeedback(null), 2000);
+  };
+
+  const handleManualClose = () => {
+    if (!position) return;
+    const entry = position.entry;
+    const exit = closes[closes.length-1];
+    const pnl = Math.round((exit-entry)*100)/100;
+    setResults(r => [...r, {pnl, type:"manual"}]);
+    if (pnl > 0) setStreak(s=>s+1); else setStreak(0);
+    setFeedback({type:pnl>=0?"tp":"sl", msg:`${pnl>=0?S.simClosedProfit:S.simClosedLoss}: ${pnl>0?"+":""}${pnl} ${S.unitPct}`});
+    setPosition(null);
+    setTimeout(()=>setFeedback(null), 2000);
+  };
+
+  const reset = () => {
+    setRunning(false); setPosition(null); setResults([]);
+    setSignal(null); setFeedback(null); setStreak(0);
+    barIndexRef.current = N;
+    setBars(seedPrices.current.slice(0,N));
+  };
+
+  // Chart math
+  const visMin = Math.min(...closes)*0.9995;
+  const visMax = Math.max(...closes)*1.0005;
+  const CW = W - PAD.l - PAD.r;
+  const CH = H - PAD.t - PAD.b;
+  const toX = i => PAD.l + (i/(N-1))*CW;
+  const toY = v => PAD.t + CH - ((v-visMin)/(visMax-visMin))*CH;
+  const toRsiY = v => H + 8 + (RSI_H-8) - (v/100)*(RSI_H-16);
+
+  const pricePath = closes.map((v,i)=>`${i===0?"M":"L"}${toX(i)},${toY(v)}`).join(" ");
+  const emaPath = (arr,skip=0) => {
+    let d="";
+    arr.forEach((v,i)=>{ if(v!==null&&i>skip) d+=`${d===""||arr[i-1]===null?"M":"L"}${toX(i)},${toY(v)}`; });
+    return d;
+  };
+  const rsiPath = rsi.map((v,i)=>v!==null?`${rsi[i-1]===null||i===0?"M":"L"}${toX(i)},${toRsiY(v)}`:"").filter(Boolean).join(" ");
+
+  // Stats
+  const totalPnl = results.reduce((s,r)=>s+r.pnl,0);
+  const wins = results.filter(r=>r.pnl>0).length;
+  const wr = results.length ? Math.round(wins/results.length*100) : 0;
+  const curPrice = closes[closes.length-1];
+  const curPnl = position ? Math.round((curPrice-position.entry)*100)/100 : null;
+
+  return (
+    <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"36px 40px"}}>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:20,flexWrap:"wrap",gap:12}}>
+        <div style={{display:"flex",alignItems:"center",gap:12}}>
+          <span style={{fontSize:28}}>⚔️</span>
+          <div>
+            <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.black}}>{S.simTitle}</div>
+            <Mono size={11} color={C.inkSoft} spacing={2}>{S.simTag}</Mono>
+          </div>
+        </div>
+        <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
+          {/* Stats */}
+          <div style={{display:"flex",gap:12,fontFamily:"monospace",fontSize:12,alignItems:"center"}}>
+            <span style={{color:totalPnl>=0?C.greenD:C.redD,fontWeight:700}}>{totalPnl>=0?"+":""}{Math.round(totalPnl*100)/100} {S.unitPct}</span>
+            <span style={{color:C.inkSoft}}>{wins}W/{results.length-wins}L</span>
+            <span style={{color:C.inkMid}}>WR {wr}%</span>
+            {streak>1 && <span style={{color:C.gold}}>🔥{streak}</span>}
+          </div>
+          <button onClick={reset} style={{padding:"7px 14px",background:"transparent",border:`1px solid ${C.border}`,color:C.inkMid,cursor:"pointer",fontFamily:"monospace",fontSize:11,borderRadius:3}}>{S.simResetBtn}</button>
+          <button onClick={()=>setRunning(r=>!r)}
+            style={{padding:"9px 18px",background:running?C.black:C.greenD,color:"#fff",border:"none",cursor:"pointer",fontFamily:"monospace",fontSize:12,letterSpacing:1,fontWeight:700,borderRadius:3}}>
+            {running?S.simPauseBtn:S.simStartBtn}
+          </button>
+        </div>
+      </div>
+
+      {/* Signal alert */}
+      {signal && !position && (
+        <div style={{background:"rgba(201,151,58,0.12)",border:`2px solid ${C.gold}`,borderRadius:4,padding:"10px 16px",marginBottom:12,display:"flex",justifyContent:"space-between",alignItems:"center",animation:"pulseRing 1s infinite"}}>
+          <span style={{fontSize:13,fontWeight:700,color:C.gold}}>{S.simSignalAlert}</span>
+          <button onClick={handleBuy} style={{padding:"8px 18px",background:C.gold,color:C.black,border:"none",cursor:"pointer",fontFamily:"monospace",fontSize:12,fontWeight:700,borderRadius:3,animation:"signalFlash .6s ease infinite"}}>
+            BUY NOW
+          </button>
+        </div>
+      )}
+
+      {/* Position bar */}
+      {position && (
+        <div style={{background:curPnl>=0?"rgba(45,122,79,0.1)":"rgba(192,57,43,0.1)",border:`1px solid ${curPnl>=0?C.greenD:C.redD}`,borderRadius:4,padding:"10px 16px",marginBottom:12,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <span style={{fontSize:13,color:curPnl>=0?C.greenD:C.redD,fontFamily:"monospace",fontWeight:700}}>
+            {S.simPositionPrefix} {position.entry} → {curPrice} {S.simPositionMid} {curPnl>=0?"+":""}{curPnl} {S.unitPct}
+          </span>
+          <div style={{display:"flex",gap:8}}>
+            <span style={{fontSize:11,color:C.inkSoft,fontFamily:"monospace"}}>TP: +5 / SL: -15</span>
+            <button onClick={handleManualClose} style={{padding:"6px 14px",background:C.black,color:"#fff",border:"none",cursor:"pointer",fontFamily:"monospace",fontSize:11,fontWeight:700,borderRadius:3}}>{S.simCloseBtn}</button>
+          </div>
+        </div>
+      )}
+
+      {/* Feedback */}
+      {feedback && (
+        <div style={{background:feedback.type==="tp"?"rgba(45,122,79,0.1)":feedback.type==="sl"?"rgba(192,57,43,0.1)":"rgba(201,151,58,0.08)",border:`1px solid ${feedback.type==="tp"?C.greenD:feedback.type==="sl"?C.redD:C.gold}`,borderRadius:4,padding:"9px 16px",marginBottom:12,fontSize:13,color:feedback.type==="tp"?C.greenD:feedback.type==="sl"?C.redD:C.gold,animation:"resultPop .25s ease"}}>
+          {feedback.msg}
+        </div>
+      )}
+
+      {/* Chart */}
+      <div style={{borderRadius:4,overflow:"hidden",border:`1px solid ${C.border}`}}>
+        <svg viewBox={`0 0 ${W} ${H+RSI_H+8}`} style={{width:"100%",display:"block",background:C.chart,userSelect:"none"}}>
+          {/* Price grid */}
+          {[visMin+(visMax-visMin)*.25, visMin+(visMax-visMin)*.5, visMin+(visMax-visMin)*.75].map((p,i)=>(
+            <g key={i}>
+              <line x1={PAD.l} y1={toY(p)} x2={W-PAD.r} y2={toY(p)} stroke="rgba(255,255,255,0.04)" strokeWidth="1"/>
+              <text x={PAD.l-4} y={toY(p)+4} fontSize="9" fill="rgba(255,255,255,0.2)" textAnchor="end" fontFamily="monospace">{p.toFixed(0)}</text>
+            </g>
+          ))}
+
+          {/* Position entry line */}
+          {position && (
+            <line x1={PAD.l} y1={toY(position.entry)} x2={W-PAD.r} y2={toY(position.entry)}
+              stroke={C.gold} strokeWidth="1" strokeDasharray="5 3"/>
+          )}
+          {/* TP/SL zones */}
+          {position && (
+            <>
+              <rect x={PAD.l} y={toY(position.entry+5)} width={CW} height={toY(position.entry)-toY(position.entry+5)}
+                fill="rgba(45,122,79,0.07)"/>
+              <rect x={PAD.l} y={toY(position.entry)} width={CW} height={toY(position.entry-15)-toY(position.entry)}
+                fill="rgba(192,57,43,0.07)"/>
+              <line x1={PAD.l} y1={toY(position.entry+5)} x2={W-PAD.r} y2={toY(position.entry+5)}
+                stroke="#2ecc71" strokeWidth="1" strokeDasharray="4 3" opacity=".6"/>
+              <line x1={PAD.l} y1={toY(position.entry-15)} x2={W-PAD.r} y2={toY(position.entry-15)}
+                stroke="#e74c3c" strokeWidth="1" strokeDasharray="4 3" opacity=".6"/>
+              <text x={W-PAD.r-2} y={toY(position.entry+5)-3} fontSize="9" fill="#2ecc71" textAnchor="end" fontFamily="monospace">TP +5</text>
+              <text x={W-PAD.r-2} y={toY(position.entry-15)+11} fontSize="9" fill="#e74c3c" textAnchor="end" fontFamily="monospace">SL -15</text>
+            </>
+          )}
+
+          {/* Price area */}
+          <defs>
+            <linearGradient id="priceGrad14" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={C.gold} stopOpacity=".12"/>
+              <stop offset="100%" stopColor={C.gold} stopOpacity=".01"/>
+            </linearGradient>
+          </defs>
+          <path d={`${pricePath} L${toX(N-1)},${PAD.t+CH} L${toX(0)},${PAD.t+CH} Z`} fill="url(#priceGrad14)"/>
+          <path d={pricePath} fill="none" stroke={C.gold} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+
+          {/* EMA 9 */}
+          <path d={emaPath(ema9,8)} fill="none" stroke="#ef4444" strokeWidth="1.5" strokeLinecap="round"/>
+          {/* EMA 21 */}
+          <path d={emaPath(ema21,20)} fill="none" stroke="#3b82f6" strokeWidth="1.5" strokeLinecap="round"/>
+
+          {/* Current price dot */}
+          <circle cx={toX(N-1)} cy={toY(curPrice)} r="4" fill={C.gold}/>
+
+          {/* Legend */}
+          <rect x={PAD.l} y={PAD.t} width={120} height={38} fill="rgba(0,0,0,0.5)" rx="3"/>
+          <line x1={PAD.l+6} y1={PAD.t+10} x2={PAD.l+18} y2={PAD.t+10} stroke={C.gold} strokeWidth="1.5"/>
+          <text x={PAD.l+22} y={PAD.t+14} fontSize="9" fill="rgba(255,255,255,0.6)" fontFamily="monospace">{S.simLegendPrice}</text>
+          <line x1={PAD.l+6} y1={PAD.t+22} x2={PAD.l+18} y2={PAD.t+22} stroke="#ef4444" strokeWidth="1.5"/>
+          <text x={PAD.l+22} y={PAD.t+26} fontSize="9" fill="rgba(255,255,255,0.6)" fontFamily="monospace">EMA 9</text>
+          <line x1={PAD.l+60} y1={PAD.t+22} x2={PAD.l+72} y2={PAD.t+22} stroke="#3b82f6" strokeWidth="1.5"/>
+          <text x={PAD.l+76} y={PAD.t+26} fontSize="9" fill="rgba(255,255,255,0.6)" fontFamily="monospace">EMA 21</text>
+
+          {/* Divider */}
+          <line x1="0" y1={H+4} x2={W} y2={H+4} stroke="rgba(255,255,255,0.06)" strokeWidth="1"/>
+          <text x={PAD.l} y={H+16} fontSize="9" fill="rgba(255,255,255,0.25)" fontFamily="monospace">RSI 14</text>
+
+          {/* RSI panel */}
+          <line x1={PAD.l} y1={toRsiY(65)} x2={W-PAD.r} y2={toRsiY(65)} stroke="rgba(242,54,69,0.3)" strokeWidth="1" strokeDasharray="4 3"/>
+          <line x1={PAD.l} y1={toRsiY(35)} x2={W-PAD.r} y2={toRsiY(35)} stroke="rgba(8,153,129,0.4)" strokeWidth="1" strokeDasharray="4 3"/>
+          <line x1={PAD.l} y1={toRsiY(50)} x2={W-PAD.r} y2={toRsiY(50)} stroke="rgba(255,255,255,0.05)" strokeWidth="1"/>
+          <text x={PAD.l-4} y={toRsiY(65)+4} fontSize="8" fill="rgba(242,54,69,0.6)" textAnchor="end" fontFamily="monospace">65</text>
+          <text x={PAD.l-4} y={toRsiY(35)+4} fontSize="8" fill="rgba(8,153,129,0.7)" textAnchor="end" fontFamily="monospace">35</text>
+
+          {/* RSI fill zones */}
+          <rect x={PAD.l} y={toRsiY(35)} width={CW} height={RSI_H+H+8-toRsiY(35)} fill="rgba(8,153,129,0.05)"/>
+          <rect x={PAD.l} y={H+8} width={CW} height={toRsiY(65)-H-8} fill="rgba(242,54,69,0.05)"/>
+
+          <path d={rsiPath} fill="none"
+            stroke={lastRsi?lastRsi>65?C.red:lastRsi<35?C.green:"rgba(255,255,255,0.5)":"rgba(255,255,255,0.5)"}
+            strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+
+          {/* RSI current dot */}
+          {lastRsi && <circle cx={toX(N-1)} cy={toRsiY(lastRsi)} r="3"
+            fill={lastRsi>65?C.red:lastRsi<35?C.green:C.gold}/>}
+          {lastRsi && <text x={W-PAD.r-2} y={toRsiY(lastRsi)+4} fontSize="9" fill={lastRsi>65?C.red:lastRsi<35?C.green:C.gold} textAnchor="end" fontFamily="monospace">{Math.round(lastRsi)}</text>}
+        </svg>
+      </div>
+
+      {/* Instructions */}
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,marginTop:16}} className="g2">
+        <div style={{padding:"14px 16px",background:"rgba(201,151,58,0.06)",border:`1px solid ${C.borderGold}`,borderRadius:4,fontSize:12,color:C.inkMid,lineHeight:1.75}}>
+          <strong style={{color:C.gold}}>{S.simInstructionsTitle}</strong><br/>
+          {S.simRule1}<br/>
+          {S.simRule2}<br/>
+          {S.simRule3Prefix} <span style={{color:C.gold,fontWeight:700}}>⚡</span> {S.simRule3Suffix}<br/>
+          {S.simRule4}<br/>
+          <em>{S.simWinRateNote}</em>
+        </div>
+        <div style={{padding:"14px 16px",background:C.surface,border:`1px solid ${C.border}`,borderRadius:4}}>
+          <Mono size={10} color={C.inkSoft} spacing={1} style={{display:"block",marginBottom:10}}>{S.simTradeLogLabel}</Mono>
+          <div style={{maxHeight:90,overflowY:"auto"}}>
+            {results.length===0
+              ? <span style={{fontSize:12,color:C.inkFaint}}>{S.simNoTrades}</span>
+              : [...results].reverse().map((r,i)=>(
+                <div key={i} style={{display:"flex",justifyContent:"space-between",fontSize:12,padding:"3px 0",borderBottom:`1px solid ${C.border}`,fontFamily:"monospace"}}>
+                  <span style={{color:r.type==="tp"?C.greenD:r.type==="sl"?C.redD:C.inkMid}}>{r.type==="tp"?S.simTypeTp:r.type==="sl"?S.simTypeSl:S.simTypeManual}</span>
+                  <span style={{color:r.pnl>=0?C.greenD:C.redD,fontWeight:700}}>{r.pnl>=0?"+":""}{r.pnl} {S.unitPct}</span>
+                </div>
+              ))
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Main Chapter 14 ──────────────────────────────────────────────────────────
+function Chapter14() {
+  const { useState } = React;
+  const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
+  const [askOpen, setAskOpen] = useState(false);
+
+  const scalping_vs_swing = [
+    {param:S.rowTimeframe,    scalp:"M1–M15",       swing:"H1–D1"},
+    {param:S.rowTradesPerDay, scalp:"10–50",        swing:"1–5"},
+    {param:S.rowTarget,       scalp:S.targetScalp,  swing:S.targetSwing},
+    {param:S.rowStop,         scalp:S.stopScalp,    swing:S.stopSwing},
+    {param:S.rowTimeInTrade,  scalp:S.timeScalp,    swing:S.timeSwing},
+    {param:S.rowWinRate,      scalp:"85–95%",       swing:"50–65%"},
+    {param:S.rowRequirements, scalp:S.reqScalp,     swing:S.reqSwing},
+    {param:S.rowRiskPerTrade, scalp:"0.1–0.3%",     swing:"0.5–2%"},
+  ];
+
+  const setup_rules = [
+    {n:"01", title:S.rule1Title, color:C.gold,
+     text:S.rule1Text},
+    {n:"02", title:S.rule2Title, color:"#ef4444",
+     text:S.rule2Text},
+    {n:"03", title:S.rule3Title, color:"#3b82f6",
+     text:S.rule3Text},
+    {n:"04", title:S.rule4Title, color:C.cyan,
+     text:`${S.rule4TextA}<span class='local-time' data-utc='2026-03-09T10:00:00Z'>10:00 UTC</span>${S.rule4TextB}<span class='local-time' data-utc='2026-03-09T17:00:00Z'>17:00 UTC</span>${S.rule4TextC}`},
+    {n:"05", title:S.rule5Title, color:C.greenD,
+     text:S.rule5Text},
+    {n:"06", title:S.rule6Title, color:C.redD,
+     text:S.rule6Text},
+  ];
+
+  const conclusions = [
+    S.concl1,
+    S.concl2,
+    S.concl3,
+    S.concl4,
+    S.concl5,
+  ];
+
+  return (
+    <div style={{minHeight:"100vh",background:C.white,color:C.ink,fontFamily:"'DM Sans',sans-serif"}}>
+
+      {/* Sticky header */}
+      <div style={{position:"sticky",top:106,background:"rgba(255,255,255,0.96)",backdropFilter:"blur(10px)",borderBottom:`1px solid ${C.border}`,padding:"15px 5vw",display:"flex",alignItems:"center",justifyContent:"space-between",zIndex:50}}>
+        <div style={{display:"flex",alignItems:"center",gap:20}}>
+          <span onClick={()=>window.location.href=getChUrl(13)} style={{color:C.gold,cursor:"pointer",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</span>
+          <Chip>{S.stickyLevel}</Chip>
+          <Mono size={14} color={C.inkSoft} spacing={0} className="hide-mobile">{S.stickyChapterLabel}</Mono>
+        </div>
+        <div style={{display:"flex",gap:8}}>
+          <Chip color={C.inkFaint}>{S.chipFA}</Chip>
+          <Chip color={C.inkFaint}>{S.chipTA}</Chip>
+        </div>
+      </div>
+
+      {/* HERO */}
+      <div style={{background:C.black,padding:"80px 5vw 70px",textAlign:"center",position:"relative",overflow:"hidden"}}>
+        <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 120%, rgba(201,151,58,0.1) 0%,transparent 60%)"}}/>
+        {/* Ticker tape effect */}
+        <div style={{position:"absolute",top:0,left:0,right:0,height:3,background:`linear-gradient(90deg,transparent,${C.gold},transparent)`,opacity:.3}}/>
+        <div style={{position:"relative"}}>
+          <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:20}}>{S.heroKicker}</Mono>
+          <h1 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(36px,6vw,66px)",fontWeight:400,color:C.white,lineHeight:1.05,marginBottom:20}}>
+            {S.heroTitleLine1}<br/><span style={{color:C.gold}}>{S.heroTitleLine2}</span>
+          </h1>
+          <p style={{fontSize:"clamp(16px,2vw,20px)",color:"rgba(255,255,255,0.55)",maxWidth:620,margin:"0 auto 32px",lineHeight:1.65}}>
+            {S.heroSub}
+          </p>
+          <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
+            <Chip color={C.gold}>{S.heroChipFundamental}</Chip>
+            <Chip color="rgba(255,255,255,0.3)">{S.heroChipTechnical}</Chip>
+            <Chip color="rgba(255,255,255,0.3)">{S.heroChipInteractive}</Chip>
+          </div>
+        </div>
+      </div>
+
+      <div style={{maxWidth:1060,margin:"0 auto",padding:"72px 5vw 120px"}}>
+
+        {/* ── BLOCK 1: Scalping vs Swing ── */}
+        <SectionTitle sub={S.sec1Sub}>
+          {S.sec1Title}
+        </SectionTitle>
+
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:24,marginBottom:48,alignItems:"start"}} className="g2">
+          <div style={{background:C.black,borderRadius:6,padding:"24px 28px",overflow:"hidden"}}>
+            <Mono size={10} color={C.gold} spacing={2} style={{display:"block",marginBottom:16}}>{S.tableLabel}</Mono>
+            <table style={{width:"100%",borderCollapse:"collapse",fontSize:12}}>
+              <thead>
+                <tr>
+                  {[S.tableHeadParam,S.tableHeadScalp,S.tableHeadSwing].map(h=>(
+                    <th key={h} style={{textAlign:"left",padding:"6px 8px",fontSize:10,color:"rgba(255,255,255,0.3)",letterSpacing:1,borderBottom:"1px solid rgba(255,255,255,0.07)",textTransform:"uppercase"}}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {scalping_vs_swing.map((r,i)=>(
+                  <tr key={i} style={{borderBottom:"1px solid rgba(255,255,255,0.05)"}}>
+                    <td style={{padding:"8px 8px",color:"rgba(255,255,255,0.4)",fontSize:11}}>{r.param}</td>
+                    <td style={{padding:"8px 8px",color:C.gold,fontFamily:"monospace",fontSize:11,fontWeight:600}}>{r.scalp}</td>
+                    <td style={{padding:"8px 8px",color:"rgba(255,255,255,0.5)",fontFamily:"monospace",fontSize:11}}>{r.swing}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div style={{display:"flex",flexDirection:"column",gap:14}}>
+            <InfoCard icon="⚡" title={S.info1Title} accent={C.gold}
+              text={S.info1Text}/>
+            <InfoCard icon="🧠" title={S.info2Title} accent={C.redD}
+              text={S.info2Text}/>
+            <InfoCard icon="💻" title={S.info3Title} accent={C.blue}
+              text={S.info3Text}/>
+          </div>
+        </div>
+
+        {/* ── INTERACTIVE 1: Session Clock ── */}
+        <div style={{marginBottom:64}}>
+          <SessionClock/>
+        </div>
+
+        <Rule/>
+
+        {/* ── BLOCK 2: Oleg's strategy ── */}
+        <SectionTitle sub={S.sec2Sub}>
+          {S.sec2Title}
+        </SectionTitle>
+
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginBottom:48}} className="g2">
+          {setup_rules.map((r,i)=>(
+            <div key={i} style={{display:"flex",gap:14,padding:"16px 18px",background:C.surface,border:`1px solid ${C.border}`,borderRadius:4,borderLeft:`3px solid ${r.color}`}}>
+              <Mono size={11} color={C.gold} spacing={0} style={{flexShrink:0,marginTop:2}}>{r.n}</Mono>
+              <div>
+                <div style={{fontWeight:600,fontSize:13,color:r.color,marginBottom:5}}>{r.title}</div>
+                <div style={{fontSize:12,color:C.inkMid,lineHeight:1.65}}>{r.text}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Math proof */}
+        <div style={{background:C.black,borderRadius:6,padding:"28px 32px",marginBottom:56}}>
+          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:20}}>{S.mathLabel}</Mono>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:24}} className="g3">
+            {[
+              {scenario:S.scenario1,
+               math:S.math1,
+               color:C.greenD},
+              {scenario:S.scenario2,
+               math:S.math2,
+               color:C.gold},
+              {scenario:S.scenario3,
+               math:S.math3,
+               color:C.redD},
+            ].map((m,i)=>(
+              <div key={i} style={{padding:"18px",background:"rgba(255,255,255,0.04)",borderRadius:4,border:`1px solid rgba(255,255,255,0.06)`}}>
+                <div style={{fontWeight:600,fontSize:12,color:m.color,marginBottom:10}}>{m.scenario}</div>
+                <pre style={{fontSize:11,color:"rgba(255,255,255,0.5)",lineHeight:1.8,fontFamily:"monospace",whiteSpace:"pre-wrap"}}>{m.math}</pre>
+              </div>
+            ))}
+          </div>
+          <div style={{marginTop:20,padding:"14px",background:"rgba(201,151,58,0.08)",borderRadius:4,border:`1px solid rgba(201,151,58,0.2)`,fontSize:13,color:"rgba(255,255,255,0.6)",lineHeight:1.7}}>
+            💡 <strong style={{color:C.gold}}>{S.mathConclusionLabel}</strong> {S.mathConclusionText}
+          </div>
+        </div>
+
+        {/* ── INTERACTIVE 2: Live Scalping ── */}
+        <div style={{marginBottom:64}}>
+          <ScalpingSimulator/>
+        </div>
+
+        <Rule/>
+
+        {/* ── CONCLUSIONS ── */}
+        <div style={{background:C.black,borderRadius:8,padding:"44px 48px"}}>
+          <div style={{textAlign:"center",marginBottom:32}}>
+            <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:12}}>{S.concludeLabel}</Mono>
+            <h3 style={{fontFamily:"'DM Serif Display',serif",fontSize:28,color:C.white,fontWeight:400}}>{S.concludeTitle}</h3>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+            {conclusions.map((c,i)=>(
+              <div key={i} style={{display:"flex",gap:14,alignItems:"flex-start",padding:"14px 16px",background:"rgba(255,255,255,0.04)",borderRadius:4,border:"1px solid rgba(255,255,255,0.06)"}}>
+                <span style={{color:C.gold,fontFamily:"monospace",fontSize:11,marginTop:2,flexShrink:0}}>0{i+1}</span>
+                <span style={{fontSize:13,color:"rgba(255,255,255,0.7)",lineHeight:1.65}}>{c}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",paddingTop:48,marginTop:48,borderTop:`1px solid ${C.border}`}}>
+          <span onClick={()=>setAskOpen(true)} style={{fontSize:14,color:C.inkSoft,fontFamily:"monospace",borderBottom:`1px solid ${C.border}`,cursor:"pointer"}}>
+            {S.askQuestionLink}
+          </span>
+          <button
+            onClick={()=>window.location.href=getChUrl(15)}
+            style={{background:C.black,color:C.white,border:"none",padding:"18px 35px",cursor:"pointer",fontFamily:"monospace",fontSize:14,letterSpacing:2,fontWeight:700,transition:"background .2s"}}
+            onMouseEnter={e=>e.target.style.background=C.gold}
+            onMouseLeave={e=>e.target.style.background=C.black}>
+            {S.nextChapterBtn}
+          </button>
+        </div>
+
+      </div>
+
+      {askOpen && (
+        <div style={{position:"fixed",inset:0,zIndex:500,display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={()=>setAskOpen(false)}>
+          <div style={{position:"fixed",inset:0,background:"rgba(250,248,245,0.98)"}}/>
+          <div onClick={e=>e.stopPropagation()} style={{position:"relative",width:"100%",maxWidth:600,background:"#fff",border:`1px solid ${C.border}`,padding:40,borderRadius:8,zIndex:1}}>
+            <button onClick={()=>setAskOpen(false)} style={{position:"absolute",top:12,right:16,background:"none",border:"none",fontSize:28,cursor:"pointer",color:C.inkFaint}}>×</button>
+            <Mono size={13} color={C.gold} spacing={3} style={{display:"block",marginBottom:12}}>{S.askTag}</Mono>
+            <h2 style={{fontFamily:"'DM Serif Display',serif",fontSize:28,marginBottom:20,color:C.black}}>{S.askModalTitle}</h2>
+            <div className="messenger-grid">
+              {[
+                {href:`https://t.me/SBF_Support?text=${encodeURIComponent(S.askPrefill)}`,bg:"#0088cc",label:"TELEGRAM"},
+                {href:`https://api.whatsapp.com/send/?phone=37369005200&text=${encodeURIComponent(S.askPrefill)}`,bg:"#25d366",label:"WHATSAPP"},
+              ].map((m,i)=>(
+                <a key={i} href={m.href} target="_blank" style={{display:"block",background:m.bg,color:"#fff",textAlign:"center",padding:"18px",borderRadius:8,textDecoration:"none",fontWeight:700,fontFamily:"monospace",letterSpacing:1}}>{m.label}</a>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('sbf-book-root')).render(<Chapter14/>);
+{% endraw %}
+</script>
+</body>
+</html>
+<script>
+// Скрипт для конвертации UTC времени в локальное время пользователя
+document.addEventListener('DOMContentLoaded', function() {
+    var _pageLang = "{{ lang }}";
+    var _intlLocale = _pageLang === 'ro' ? 'ro-RO' : 'ru-RU';
+    const utcTimes = document.querySelectorAll('.local-time[data-utc]');
+
+    utcTimes.forEach(function(element) {
+        // Получаем UTC время из data-utc атрибута
+        var utcString = element.getAttribute('data-utc');
+
+        try {
+            // Парсим UTC дату и время
+            var utcDate = new Date(utcString);
+
+            // Конвертируем в локальное время пользователя
+            var localDate = new Date(utcDate.getTime() + utcDate.getTimezoneOffset() * 60000);
+
+            // Форматируем для отображения (например, "19:00 МСК")
+            var hours = String(localDate.getHours()).padStart(2, '0');
+            var minutes = String(localDate.getMinutes()).padStart(2, '0');
+            var timeZoneName = Intl.DateTimeFormat(_intlLocale, { timeZoneName: 'long' }).format(localDate);
+            
+            // Обновляем текст элемента с локальным временем
+            element.innerHTML = '<span class="local-time-display">' + hours + ':' + minutes + ' ' + timeZoneName.replace(/\s/g, '') + '</span>';
+        } catch (e) {
+            console.error('Ошибка конвертации времени:', e);
+        }
+    });
+});
+</script>
