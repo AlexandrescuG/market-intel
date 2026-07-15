@@ -205,21 +205,21 @@ def _precompile_all() -> None:
     print(f"Готово: {len(_COMPILED)}/15 глав скомпилированы", flush=True)
 
 
-def _edu_inject(ch: int) -> str:
+def _edu_inject(ch: int, lang: str = i18n.DEFAULT_LANG) -> str:
     """Генерирует HTML инжекции для главы: nav, прогресс-бар, дисклеймер, live."""
     prev_href  = f"/edu/b/{ch - 1}" if ch > 1  else "/edu/"
     next_href  = f"/edu/b/{ch + 1}" if ch < 15 else "/edu/"
-    prev_label = f"Глава {ch - 1}" if ch > 1  else "Содержание"
-    next_label = f"Глава {ch + 1}" if ch < 15 else "Содержание"
+    prev_label = i18n.t("edu.chapter_n", lang, n=ch - 1) if ch > 1  else i18n.t("edu.toc", lang)
+    next_label = i18n.t("edu.chapter_n", lang, n=ch + 1) if ch < 15 else i18n.t("edu.toc", lang)
     ticker     = _EDU_LIVE.get(ch, "^GSPC")
     live_label = _EDU_LIVE_LABEL.get(ch, "Live")
     chart_key  = _EDU_CHART_KEY.get(ch, "SPX")
     _WIDGET_MAP = {3: "risk-calc", 5: "session-clock", 10: "pattern-gallery"}
     _CTA_MAP = {
-        3:  ("Показать паттерн Двойное дно на графике", "/grafik#chart/dbot"),
-        10: ("Паттерны в деталях — интерактивный График", "/grafik#chart/hns"),
-        13: ("Разобрать Голову и плечи на Графике", "/grafik#chart/hns"),
-        14: ("Свечные паттерны — разбор на Графике", "/grafik#candle/bullEngulf"),
+        3:  (i18n.t("edu.cta.3", lang), "/grafik#chart/dbot"),
+        10: (i18n.t("edu.cta.10", lang), "/grafik#chart/hns"),
+        13: (i18n.t("edu.cta.13", lang), "/grafik#chart/hns"),
+        14: (i18n.t("edu.cta.14", lang), "/grafik#candle/bullEngulf"),
     }
     widget_html = (
         f'<div style="max-width:780px;margin:0 auto;padding:0 24px">'
@@ -237,62 +237,71 @@ def _edu_inject(ch: int) -> str:
     # ── Sbf-fig блоки (grafik-engine.js) — один источник правды для графики ──
     # ch 9 и 10 имеют отдельные JSX-правки; здесь только остальные главы
     _FIG_MAP: dict[int, list[tuple[str, str, str]]] = {
-        1:  [("candle","doji","Доджи — нерешительность рынка"),
-             ("candle","hammer","Молот — разворот после снижения")],
-        2:  [("ind","atr","ATR — волатильность на новостных релизах")],
-        3:  [("chart","dbot","Двойное дно — вход · стоп · цель")],
-        4:  [("smc","sweep","Ликвидностный sweep"),
-             ("smc","ob","Ордер-блок — зона интереса институционалов")],
-        6:  [("ind","bb","Bollinger Bands — сжатие перед взрывом"),
-             ("ind","atr","ATR — расширение волатильности после новости")],
-        7:  [("smc","fvg","Fair Value Gap — институциональный след"),
-             ("smc","ob","Ордер-блок"),
-             ("smc","sweep","Sweep ликвидности")],
-        8:  [("smc","structure","Структура рынка: HH · HL · LH · LL"),
-             ("smc","bos","Break of Structure"),
-             ("ind","ma","Скользящая средняя — направление тренда")],
-        11: [("ind","volume","Объём — след институционального движения")],
-        12: [("ind","ichimoku","Облако Ишимоку — пять линий на одном графике")],
-        13: [("chart","hns","Голова и плечи"),
-             ("chart","dtop","Двойная вершина"),
-             ("chart","flag","Флаг — продолжение тренда"),
-             ("ind","fib","Уровни Фибоначчи — коррекция в тренде")],
-        14: [("candle","hammer","Молот"),
-             ("candle","bullEngulf","Бычье поглощение"),
-             ("candle","bearEngulf","Медвежье поглощение"),
-             ("ind","ma","MA — направление скальпа"),
-             ("ind","bb","Bollinger Bands для скальпинга")],
-        15: [("chart","hns","Голова и плечи — ключевая фигура своинга"),
-             ("chart","dtop","Двойная вершина — подтверждение разворота"),
-             ("ind","rsi","RSI — подтверждение через осциллятор")],
+        1:  [("candle","doji",i18n.t("edu.fig.1.1", lang)),
+             ("candle","hammer",i18n.t("edu.fig.1.2", lang))],
+        2:  [("ind","atr",i18n.t("edu.fig.2.1", lang))],
+        3:  [("chart","dbot",i18n.t("edu.fig.3.1", lang))],
+        4:  [("smc","sweep",i18n.t("edu.fig.4.1", lang)),
+             ("smc","ob",i18n.t("edu.fig.4.2", lang))],
+        6:  [("ind","bb",i18n.t("edu.fig.6.1", lang)),
+             ("ind","atr",i18n.t("edu.fig.6.2", lang))],
+        7:  [("smc","fvg",i18n.t("edu.fig.7.1", lang)),
+             ("smc","ob",i18n.t("edu.fig.7.2", lang)),
+             ("smc","sweep",i18n.t("edu.fig.7.3", lang))],
+        8:  [("smc","structure",i18n.t("edu.fig.8.1", lang)),
+             ("smc","bos",i18n.t("edu.fig.8.2", lang)),
+             ("ind","ma",i18n.t("edu.fig.8.3", lang))],
+        11: [("ind","volume",i18n.t("edu.fig.11.1", lang))],
+        12: [("ind","ichimoku",i18n.t("edu.fig.12.1", lang))],
+        13: [("chart","hns",i18n.t("edu.fig.13.1", lang)),
+             ("chart","dtop",i18n.t("edu.fig.13.2", lang)),
+             ("chart","flag",i18n.t("edu.fig.13.3", lang)),
+             ("ind","fib",i18n.t("edu.fig.13.4", lang))],
+        14: [("candle","hammer",i18n.t("edu.fig.14.1", lang)),
+             ("candle","bullEngulf",i18n.t("edu.fig.14.2", lang)),
+             ("candle","bearEngulf",i18n.t("edu.fig.14.3", lang)),
+             ("ind","ma",i18n.t("edu.fig.14.4", lang)),
+             ("ind","bb",i18n.t("edu.fig.14.5", lang))],
+        15: [("chart","hns",i18n.t("edu.fig.15.1", lang)),
+             ("chart","dtop",i18n.t("edu.fig.15.2", lang)),
+             ("ind","rsi",i18n.t("edu.fig.15.3", lang))],
     }
     # Тех-карточки (sbfTechCard) — учебные примеры уровней (не сигналы)
+    _LVL = {
+        "entry":       i18n.t("edu.lvl.entry", lang),
+        "stop":        i18n.t("edu.lvl.stop", lang),
+        "target":      i18n.t("edu.lvl.target", lang),
+        "neckline":    i18n.t("edu.lvl.neckline", lang),
+        "target_h":    i18n.t("edu.lvl.target_h", lang),
+        "order_block": i18n.t("edu.lvl.order_block", lang),
+        "fvg_target":  i18n.t("edu.lvl.fvg_target", lang),
+    }
     _TCARD_MAP: dict[int, str] = {
         3: (
-            "sbfTechCard({sym:'EUR/USD · D1',bias:'bull',"
-            "levels:[['Вход','1.0850'],['Стоп','1.0790'],['Цель','1.0980']],"
-            "note:'Двойное дно + прорыв линии шеи. Учебный пример, не рекомендация.'}) +"
-            "sbfTechCard({sym:'XAU/USD · H4',bias:'bear',"
-            "levels:[['Вход','2020'],['Стоп','2045'],['Цель','1970']],"
-            "note:'Голова и плечи. Стоп за правое плечо. Учебный пример.'})"
+            f"sbfTechCard({{sym:'EUR/USD · D1',bias:'bull',"
+            f"levels:[['{_LVL['entry']}','1.0850'],['{_LVL['stop']}','1.0790'],['{_LVL['target']}','1.0980']],"
+            f"note:'{i18n.t('edu.tcard.n1', lang)}'}}) +"
+            f"sbfTechCard({{sym:'XAU/USD · H4',bias:'bear',"
+            f"levels:[['{_LVL['entry']}','2020'],['{_LVL['stop']}','2045'],['{_LVL['target']}','1970']],"
+            f"note:'{i18n.t('edu.tcard.n2', lang)}'}})"
         ),
         7: (
-            "sbfTechCard({sym:'GBP/USD · H1',bias:'bull',"
-            "levels:[['Ордер-блок','1.2640'],['Вход','1.2660'],['Стоп','1.2610'],['FVG-цель','1.2750']],"
-            "note:'Sweep ликвидности → OB → вход на ретесте. Учебный пример.'})"
+            f"sbfTechCard({{sym:'GBP/USD · H1',bias:'bull',"
+            f"levels:[['{_LVL['order_block']}','1.2640'],['{_LVL['entry']}','1.2660'],['{_LVL['stop']}','1.2610'],['{_LVL['fvg_target']}','1.2750']],"
+            f"note:'{i18n.t('edu.tcard.n3', lang)}'}})"
         ),
         13: (
-            "sbfTechCard({sym:'US500 · D1',bias:'bear',"
-            "levels:[['Линия шеи','5180'],['Цель (h)','5040']],"
-            "note:'Высота фигуры отложена вниз. Учебный пример.'}) +"
-            "sbfTechCard({sym:'BTCUSD · H4',bias:'bear',"
-            "levels:[['Линия шеи','61 200'],['Цель (h)','58 400']],"
-            "note:'Двойная вершина. Учебный пример.'})"
+            f"sbfTechCard({{sym:'US500 · D1',bias:'bear',"
+            f"levels:[['{_LVL['neckline']}','5180'],['{_LVL['target_h']}','5040']],"
+            f"note:'{i18n.t('edu.tcard.n4', lang)}'}}) +"
+            f"sbfTechCard({{sym:'BTCUSD · H4',bias:'bear',"
+            f"levels:[['{_LVL['neckline']}','61 200'],['{_LVL['target_h']}','58 400']],"
+            f"note:'{i18n.t('edu.tcard.n5', lang)}'}})"
         ),
         14: (
-            "sbfTechCard({sym:'EUR/USD · M5',bias:'bull',"
-            "levels:[['Вход','1.0902'],['Стоп','1.0893'],['Цель','1.0924']],"
-            "note:'Бычье поглощение на ключевой поддержке. Скальп, учебный пример.'})"
+            f"sbfTechCard({{sym:'EUR/USD · M5',bias:'bull',"
+            f"levels:[['{_LVL['entry']}','1.0902'],['{_LVL['stop']}','1.0893'],['{_LVL['target']}','1.0924']],"
+            f"note:'{i18n.t('edu.tcard.n6', lang)}'}})"
         ),
     }
     if ch in _FIG_MAP:
@@ -311,7 +320,7 @@ def _edu_inject(ch: int) -> str:
         ) if _tcard_js else ""
         figs_html = (
             f'<div style="max-width:780px;margin:0 auto;padding:24px 24px 0">'
-            f'<div class="sbf-widget-head">Учебные графики · образец</div>'
+            f'<div class="sbf-widget-head">{i18n.t("edu.widgets_head", lang)}</div>'
             f'{_figs_inner}{_tcard_block}</div>'
         )
     else:
@@ -323,8 +332,8 @@ def _edu_inject(ch: int) -> str:
 
 <div class="edu-nav">
   <a class="nav-prev" href="{prev_href}">{prev_label}</a>
-  <span class="nav-counter">Глава {ch}&nbsp;из&nbsp;15</span>
-  <a class="nav-toc" href="/edu/">Содержание</a>
+  <span class="nav-counter">{i18n.t("edu.chapter_counter", lang, ch=ch)}</span>
+  <a class="nav-toc" href="/edu/">{i18n.t("edu.toc", lang)}</a>
   <a class="nav-next" href="{next_href}">{next_label}</a>
   <a class="nav-live" id="edu-live-btn" href="/chart.html?s={chart_key}" target="_blank">
     <span id="edu-live-price">{live_label}</span>
@@ -333,29 +342,26 @@ def _edu_inject(ch: int) -> str:
 
 <div style="max-width:780px;margin:24px auto 0;padding:0 24px">
   <div style="border:1px solid #E7DFCF;border-radius:10px;padding:16px 20px;background:rgba(201,162,39,.04)">
-    <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#C9A227;margin-bottom:10px">Посмотреть концепт на реальном рынке</div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#C9A227;margin-bottom:10px">{i18n.t("edu.live_concept_title", lang)}</div>
     <div id="edu-live-widget" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-family:'JetBrains Mono',monospace;font-size:12px">
-      <span style="color:#8A8275">загрузка…</span>
+      <span style="color:#8A8275">{i18n.t("edu.loading", lang)}</span>
     </div>
     <a href="/chart.html?s={chart_key}" target="_blank"
        style="display:inline-flex;align-items:center;gap:6px;margin-top:12px;padding:7px 16px;background:#C9A227;color:#fff;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.5px;text-decoration:none;border-radius:6px">
-      Открыть {live_label} в терминале →
+      {i18n.t("edu.open_in_terminal", lang, live_label=live_label)}
     </a>
   </div>
 </div>
 
 <div class="edu-disclaimer">
-  <strong>Образовательный материал.</strong>
-  Данный курс предназначен исключительно для обучения и не является инвестиционной
-  рекомендацией, финансовым советом или предложением о покупке/продаже активов.
-  Все исторические результаты не гарантируют аналогичного результата в будущем.
-  SBF Company SRL.
+  <strong>{i18n.t("edu.disclaimer_title", lang)}</strong>
+  {i18n.t("edu.disclaimer_body", lang)}
 </div>
 
 <script src="/edu/concept_map.js"></script>
 <script src="/edu/widgets.js"></script>
 <script src="/edu/edu-live.js"></script>
-<div id="sbf-pro-toast" style="position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#2B2B33;color:#fff;font-family:'JetBrains Mono',monospace;font-size:12px;padding:10px 20px;border-radius:8px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:9999">PRO · Доступно позже</div>
+<div id="sbf-pro-toast" style="position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#2B2B33;color:#fff;font-family:'JetBrains Mono',monospace;font-size:12px;padding:10px 20px;border-radius:8px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:9999">{i18n.t("edu.pro_available_later", lang)}</div>
 <script>
 function sbfNavigate(tool) {{
   var routes = {{grafik:'/grafik',chart:'/grafik','risk-calc':'/grafik'}};
@@ -411,7 +417,7 @@ function sbfNavigate(tool) {{
     fetch('/data/'+ohlcFile).then(function(r){{return r.json();}}).then(function(o){{
       var rsi = o && o.rsi;
       if(rsi == null) return;
-      var zone = rsi>=70?'перекупленность':rsi<=30?'перепроданность':'нейтральная зона';
+      var zone = rsi>=70?'{i18n.t("edu.rsi_overbought", lang)}':rsi<=30?'{i18n.t("edu.rsi_oversold", lang)}':'{i18n.t("edu.rsi_neutral", lang)}';
       var zCol = rsi>=70?'#c0392b':rsi<=30?'#1e8e5a':'#8A8275';
       var wEl = document.getElementById('edu-live-widget');
       if(wEl){{
@@ -476,7 +482,7 @@ def _build_edu_page(ch: int, lang: str) -> bytes:
     # Хедер инжектирует sbf-header.js (добавлен через css_tags выше)
 
     # Инжектируем nav + прогресс + дисклеймер перед </body>
-    inject = _edu_inject(ch)
+    inject = _edu_inject(ch, lang)
     html = html.replace("</body>", f"{inject}\n</body>", 1)
 
     return html.encode("utf-8")
