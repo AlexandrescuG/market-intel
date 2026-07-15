@@ -67,13 +67,13 @@ body.embed .card{border-radius:0;box-shadow:none;border:none;max-width:100%}
 </head>
 <body>
 <div class="chart-top">
-  <a href="javascript:history.back()">← Назад</a>
+  <a href="javascript:history.back()" data-i18n="chart.back">← Назад</a>
   <span style="color:var(--line)">|</span>
   <a href="/" style="font-weight:700;color:var(--ink)">SBF</a>
   <nav class="g-nav" style="margin-left:auto">
-    <a href="/" class="g-nav-item">Сегодня</a>
-    <a href="/edu/" class="g-nav-item">Обучение</a>
-    <a href="/calendar" class="g-nav-item">Календарь</a>
+    <a href="/" class="g-nav-item" data-i18n="nav.today">Сегодня</a>
+    <a href="/edu/" class="g-nav-item" data-i18n="nav.edu">Обучение</a>
+    <a href="/calendar" class="g-nav-item" data-i18n="nav.calendar">Календарь</a>
   </nav>
 </div>
 <div class="chart-body">
@@ -84,7 +84,7 @@ body.embed .card{border-radius:0;box-shadow:none;border:none;max-width:100%}
     <span class="live"><span class="dot"></span>live</span>
     <span class="bias" id="bias">—</span>
     <span class="stat">RSI <b id="rsi">—</b></span>
-    <span class="stat">ближайший: <b id="near">—</b></span>
+    <span class="stat"><span data-i18n="chart.nearest_label">ближайший:</span> <b id="near">—</b></span>
   </div>
   <div class="ctrl-row">
     <div class="tf-grp" id="tf">
@@ -93,10 +93,10 @@ body.embed .card{border-radius:0;box-shadow:none;border:none;max-width:100%}
       <button class="tf" data-tf="W1">W1</button>
     </div>
     <div class="ctrl-sep"></div>
-    <span class="tog-label">слои</span>
+    <span class="tog-label" data-i18n="chart.layers_label">слои</span>
     <div class="tog" id="tog">
-      <button class="chip on" data-t="piv">Пивоты</button>
-      <button class="chip" data-t="cndl">Паттерны</button>
+      <button class="chip on" data-t="piv" data-i18n="home.pivots_toggle">Пивоты</button>
+      <button class="chip" data-t="cndl" data-i18n="home.patterns_toggle">Паттерны</button>
       <button class="chip" data-t="smc">SMC</button>
     </div>
   </div>
@@ -105,7 +105,7 @@ body.embed .card{border-radius:0;box-shadow:none;border:none;max-width:100%}
     <div id="chart"></div>
   </div>
   <div class="beginner"><span class="ic">&#9432;</span><div id="explain">…</div></div>
-  <div class="foot">образовательная подсветка паттернов — контекст, не инвестиционная рекомендация</div>
+  <div class="foot" data-i18n="chart.footer_disclaimer">образовательная подсветка паттернов — контекст, не инвестиционная рекомендация</div>
 </div>
 
 <script>
@@ -127,21 +127,53 @@ let _curData = null;           // результат SBFGrafik.loadBars
 let _curLines = [];            // priceLine refs (для удаления)
 let TOGGLES = {piv:true, cndl:false, smc:false};
 
+// ── i18n ───────────────────────────────────────────────────────────────────
+// Статическая страница (не Jinja) — тот же паттерн, что в journal.html: t()
+// смотрит на window.sbfI18n при каждом вызове (а не кэширует в замыкании),
+// т.к. этот <script> исполняется синхронно, ДО defer-скриптов i18n.js/
+// sbf-header.js. fmt_() — простая подстановка {ключ} в шаблон (как в index.html).
+function t(key, fallback) {
+  const i = window.sbfI18n;
+  return i ? i.t(key, fallback) : (fallback || key);
+}
+function fmt_(tpl, vars) { return tpl.replace(/\{(\w+)\}/g, (_, k) => (vars[k] != null ? vars[k] : '')); }
+
+function _patchI18n(root) {
+  if ((window.sbfI18n && window.sbfI18n.lang) === 'ru') return;
+  const tt = window.sbfI18n ? window.sbfI18n.t : (k, fb) => (fb || k);
+  (root || document).querySelectorAll('[data-i18n]').forEach(el => {
+    el.textContent = tt(el.getAttribute('data-i18n'), el.textContent);
+  });
+}
+window.sbfI18n
+  ? window.sbfI18n.ready.then(() => { _patchI18n(document); })
+  : document.addEventListener('DOMContentLoaded', () => {
+      if (window.sbfI18n) window.sbfI18n.ready.then(() => { _patchI18n(document); });
+    });
+
 // ── Шапка ──────────────────────────────────────────────────────────────────
 function buildExplain(meta, near) {
   if (!near) return '';
-  const side = near.name[0]==='S' ? 'поддержки' : near.name[0]==='R' ? 'сопротивления' : 'точки разворота';
+  const side = near.name[0]==='S' ? t('chart.side_support','поддержки')
+    : near.name[0]==='R' ? t('chart.side_resistance','сопротивления')
+    : t('chart.side_pivot','точки разворота');
   const where = Math.abs(near.dist_pct) < 0.5
-    ? `вплотную к ${side}`
-    : `в ${Math.abs(near.dist_pct)}% от ${side}`;
+    ? fmt_(t('chart.near_close_tpl','вплотную к {side}'), {side})
+    : fmt_(t('chart.near_far_tpl','в {pct}% от {side}'), {pct: Math.abs(near.dist_pct), side});
   const rsiV = meta.rsi;
-  const rsiTxt = rsiV < 30 ? 'ниже 30 — зона перепроданности (исторически возможен отскок)'
-    : rsiV > 70 ? 'выше 70 — зона перекупленности (исторически возможна коррекция)'
-    : `${rsiV} — нейтральная зона`;
-  const pats = (meta.patterns||[]).length ? ` Замечен паттерн: <b>${meta.patterns.join(', ')}</b>.` : '';
-  return `Цена <b>${where} ${near.name} ${(+near.price).toLocaleString('en')}</b> — уровень, у которого исторически разворачивалась цена.
-    Красные линии сверху — сопротивление, зелёные снизу — поддержка, золотая — точка разворота.
-    RSI <b>${rsiTxt}</b>.${pats}`;
+  const rsiTxt = rsiV < 30 ? t('chart.rsi_oversold_txt','ниже 30 — зона перепроданности (исторически возможен отскок)')
+    : rsiV > 70 ? t('chart.rsi_overbought_txt','выше 70 — зона перекупленности (исторически возможна коррекция)')
+    : fmt_(t('chart.rsi_neutral_txt','{v} — нейтральная зона'), {v: rsiV});
+  const pats = (meta.patterns||[]).length
+    ? fmt_(t('chart.pattern_spotted_tpl',' Замечен паттерн: <b>{list}</b>.'), {list: meta.patterns.join(', ')})
+    : '';
+  const mainLine = fmt_(t('chart.explain_main_tpl','Цена <b>{where} {name} {price}</b> — уровень, у которого исторически разворачивалась цена.'),
+    {where, name: near.name, price: (+near.price).toLocaleString('en')});
+  const legendLine = t('chart.explain_legend','Красные линии сверху — сопротивление, зелёные снизу — поддержка, золотая — точка разворота.');
+  const rsiLine = fmt_(t('chart.explain_rsi_tpl','RSI <b>{rsi}</b>.'), {rsi: rsiTxt});
+  return `${mainLine}
+    ${legendLine}
+    ${rsiLine}${pats}`;
 }
 
 function flash(el, up) {
@@ -233,18 +265,24 @@ function applySMCLines(evts) {
   return lines;
 }
 
-const TOG_HINTS = {
-  piv: '<b>Пивоты</b> — уровни поддержки/сопротивления, рассчитанные по хаям и лоям предыдущих периодов. <span style="color:#1e8e5a">Зелёные</span> — поддержка (S1, S2), <span style="color:#c0392b">красные</span> — сопротивление (R1, R2), <span style="color:#C9A227">золотая</span> — точка разворота PP.',
-  cndl: '<b>Паттерны</b> — значимые свечные формации на последних 40 барах. ↑ зелёная стрелка — бычий сигнал (молот, бычье поглощение и др.), ↓ красная — медвежий (харами, медвежье поглощение и др.), ● жёлтый — нейтральный (доджи). Не сигнал к сделке, контекст.',
-  smc: '<b>SMC — структура рынка:</b> <b>HH</b> (Higher High) — новый максимум выше предыдущего, тренд вверх; <b>HL</b> (Higher Low) — откат не пробивает предыдущий лой, тренд вверх; <b>LH</b> (Lower High) — максимум ниже предыдущего, слабость; <b>LL</b> (Lower Low) — новый минимум, тренд вниз. <b>BOS</b> — пробой структуры (подтверждение); <b>OB</b> — Order Block, зона крупных ордеров; <b>FVG</b> — разрыв ликвидности, цена часто его закрывает.',
-};
+// Функция (не статический объект) — вызывается заново при каждом рендере
+// тумблеров, чтобы t() всегда брал актуальный словарь (см. комментарий в
+// секции i18n выше про порядок исполнения синхронного/defer-скриптов).
+function getTogHints() {
+  return {
+    piv: t('chart.hint_pivots', '<b>Пивоты</b> — уровни поддержки/сопротивления, рассчитанные по хаям и лоям предыдущих периодов. <span style="color:#1e8e5a">Зелёные</span> — поддержка (S1, S2), <span style="color:#c0392b">красные</span> — сопротивление (R1, R2), <span style="color:#C9A227">золотая</span> — точка разворота PP.'),
+    cndl: t('chart.hint_patterns', '<b>Паттерны</b> — значимые свечные формации на последних 40 барах. ↑ зелёная стрелка — бычий сигнал (молот, бычье поглощение и др.), ↓ красная — медвежий (харами, медвежье поглощение и др.), ● жёлтый — нейтральный (доджи). Не сигнал к сделке, контекст.'),
+    smc: t('chart.hint_smc', '<b>SMC — структура рынка:</b> <b>HH</b> (Higher High) — новый максимум выше предыдущего, тренд вверх; <b>HL</b> (Higher Low) — откат не пробивает предыдущий лой, тренд вверх; <b>LH</b> (Lower High) — максимум ниже предыдущего, слабость; <b>LL</b> (Lower Low) — новый минимум, тренд вниз. <b>BOS</b> — пробой структуры (подтверждение); <b>OB</b> — Order Block, зона крупных ордеров; <b>FVG</b> — разрыв ликвидности, цена часто его закрывает.'),
+  };
+}
 
 function updateTogHints() {
   const el = document.getElementById('togHints');
   if (!el) return;
+  const hints = getTogHints();
   el.innerHTML = Object.entries(TOGGLES)
     .filter(([,v]) => v)
-    .map(([k]) => TOG_HINTS[k] ? `<span class="tog-hint-chip">${TOG_HINTS[k]}</span>` : '')
+    .map(([k]) => hints[k] ? `<span class="tog-hint-chip">${hints[k]}</span>` : '')
     .join('');
 }
 
@@ -284,6 +322,11 @@ function applyToggles() {
 async function drawOurs(tf) {
   curTF = tf;
   _curData = await SBFGrafik.loadBars(PARAM, tf);
+  // Дождаться словаря i18n (если он есть) ДО построения текста — на первом
+  // рендере этот async-код стартует раньше defer-скриптов (см. секцию i18n
+  // выше); loadBars() — сетевой запрос, поэтому к этому моменту window.sbfI18n
+  // уже обычно назначен, но его словарь (ready) может ещё грузиться.
+  if (window.sbfI18n && window.sbfI18n.ready) { try { await window.sbfI18n.ready; } catch(e){} }
   const m = _curData.meta;
 
   // Шапка
@@ -291,9 +334,14 @@ async function drawOurs(tf) {
   const pxEl = document.getElementById('px');
   pxEl.textContent = m.last != null ? m.last.toLocaleString('en') : '—';
 
+  // ВАЖНО: biasStr приходит из API/grafik-engine.js (SBFGrafik.calcBias) и
+  // ВСЕГДА на русском (см. calcBias — возвращает 'бычья'/'медвежья'/'нейтр'
+  // независимо от языка страницы; тот же движок используется index.html,
+  // который матчит те же 'быч'/'медвеж' подстроки). Поэтому сравнение ниже
+  // НЕ трогаем — переводим только то, что реально показываем пользователю.
   const biasStr = m.bias || SBFGrafik.calcBias(_curData.bars);
   const biasEl = document.getElementById('bias');
-  biasEl.textContent = biasStr.includes('быч') ? 'бычья' : biasStr.includes('медвеж') ? 'медвежья' : 'нейтр';
+  biasEl.textContent = biasStr.includes('быч') ? t('home.bias_bull_short','бычья') : biasStr.includes('медвеж') ? t('home.bias_bear_short','медвежья') : t('home.bias_neutr_short','нейтр');
   biasEl.className = 'bias ' + (biasStr.includes('быч') ? 'bull' : biasStr.includes('медвеж') ? 'bear' : 'flat');
 
   const rsiVal = m.rsi != null ? m.rsi : SBFGrafik.calcRSI14(_curData.bars);
