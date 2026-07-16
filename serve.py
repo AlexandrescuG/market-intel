@@ -477,7 +477,7 @@ def _build_edu_page(ch: int, lang: str) -> bytes:
         '<link rel="stylesheet" href="/assets/design.css">\n'
         '<link rel="stylesheet" href="/edu/edu.css">\n'
         '<link rel="stylesheet" href="/assets/sbf-nav.css">\n'
-        '<script src="/assets/i18n.js?v=1" defer></script>\n'
+        '<script src="/assets/i18n.js?v=2" defer></script>\n'
         '<script src="/assets/sbf-header.js?v=15" defer></script>'
     )
     if '/edu/edu.css' not in html:
@@ -485,7 +485,7 @@ def _build_edu_page(ch: int, lang: str) -> bytes:
     elif '/assets/sbf-header.js?v=15' not in html:
         html = html.replace("</head>",
             '<link rel="stylesheet" href="/assets/sbf-nav.css">\n'
-            '<script src="/assets/i18n.js?v=1" defer></script>\n'
+            '<script src="/assets/i18n.js?v=2" defer></script>\n'
             '<script src="/assets/sbf-header.js?v=15" defer></script>\n</head>', 1)
 
     grafik_tags = (

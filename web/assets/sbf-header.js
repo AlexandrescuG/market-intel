@@ -516,7 +516,7 @@
 // Автозагрузка виджета обратной связи
 (function () {
   var s = document.createElement('script');
-  s.src = '/assets/sbf-feedback.js?v=1';
+  s.src = '/assets/sbf-feedback.js?v=2';
   s.async = false;
   document.head.appendChild(s);
 })();
