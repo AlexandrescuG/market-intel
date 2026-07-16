@@ -81,6 +81,12 @@
 @media (min-width: 761px) {
   .sbf-fw-bubble { bottom: 24px; }
 }
+/* Поднимаем над .edu-nav (48px, fixed, bottom:0) на страницах глав курса --
+   иначе z-index:9000 рисует кнопку/пузырь поверх правого края нав-бара
+   (живая цена + соседняя "Глава N→"), см. buildDOM(). Без @media, чтобы
+   перебить оба варианта .sbf-fw-btn/.sbf-fw-bubble (мобильный и desktop). */
+.sbf-fw-btn-raised { bottom: 72px; }
+.sbf-fw-bubble-raised { bottom: 72px; }
 @keyframes sbf-fw-pop {
   from { opacity: 0; transform: scale(.85) translateY(8px); }
   to   { opacity: 1; transform: scale(1) translateY(0); }
@@ -327,6 +333,16 @@
     document.body.appendChild(_bubble);
     document.body.appendChild(_btn);
     document.body.appendChild(_form);
+
+    // Главы курса рисуют свой fixed-бар .edu-nav (48px, bottom:0, z-index:999)
+    // с прижатой к правому краю живой ценой (.nav-live). У кнопки обратной
+    // связи z-index:9000 -- без этого сдвига она рисуется ПОВЕРХ .edu-nav и
+    // закрывает/перекрывает правый край нав-бара (ссылку на живую цену и
+    // соседнюю "Глава N→").
+    if (document.querySelector('.edu-nav')) {
+      _btn.classList.add('sbf-fw-btn-raised');
+      _bubble.classList.add('sbf-fw-bubble-raised');
+    }
 
     _patchI18n(_adminBar);
     _patchI18n(_bubble);
