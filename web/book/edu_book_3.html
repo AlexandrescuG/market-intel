@@ -11,14 +11,6 @@
     html,body{max-width:100vw;overflow-x:hidden;scroll-behavior:smooth}
     body{background:#ffffff;font-family:'DM Sans',system-ui,sans-serif;color:#18181a}
     #sbf-book-root{min-height:100vh}
-    .back-to-edu{
-      position:fixed;bottom:20px;right:20px;z-index:500;
-      background:#18181a;color:rgba(255,255,255,0.6);
-      font-family:'DM Sans',sans-serif;font-size:.75rem;letter-spacing:1.5px;text-transform:uppercase;
-      padding:7px 13px;text-decoration:none;transition:all .2s;
-      border:1px solid rgba(255,255,255,0.08);
-    }
-    .back-to-edu:hover{background:#c9973a;color:#fff}
     .messenger-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:30px}
     @media(max-width:768px){.messenger-grid{grid-template-columns:1fr}.hide-mobile{display:none!important}.grid-2{grid-template-columns:1fr!important}.grid-3{grid-template-columns:1fr!important}.grid-4{grid-template-columns:1fr 1fr!important}}
   </style>
@@ -27,7 +19,6 @@
 
 
 <div id="sbf-book-root"></div>
-<a href="/edu" class="back-to-edu">← Edu</a>
 
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -523,7 +514,7 @@ function AskAnalystPopup({chapterNum, lang, onClose}) {
         <div className="messenger-grid">
           <div style={{background:"#fff",border:"1px solid #e0e0e0",borderRadius:12,padding:"30px 25px",display:"flex",flexDirection:"column"}}>
             <div style={{display:"flex",alignItems:"center",gap:15,marginBottom:30}}>
-              <div style={{width:50,height:50,borderRadius:"50%",background:"#e1f3fb",display:"flex",alignItems:"center",justifyContent:"center"}}><img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-rocket.png' alt='' width='20' height='20' /></div>
+              <div style={{width:50,height:50,borderRadius:"50%",background:"#e1f3fb",display:"flex",alignItems:"center",justifyContent:"center"}}><img class='mi-icon' style={{verticalAlign:'middle'}} src='/assets/icons/icon-rocket.png' alt='' width='20' height='20' /></div>
               <div><div style={{fontSize:18,fontWeight:700}}>SBF Support</div><div style={{fontSize:14,color:C.inkFaint}}>Telegram · {tr.online}</div></div>
             </div>
             <div style={{background:"#0088cc",padding:"15px 20px",borderRadius:"12px 12px 0 12px",marginBottom:30,alignSelf:"flex-end",maxWidth:"90%"}}>
@@ -533,7 +524,7 @@ function AskAnalystPopup({chapterNum, lang, onClose}) {
           </div>
           <div style={{background:"#fff",border:"1px solid #e0e0e0",borderRadius:12,padding:"30px 25px",display:"flex",flexDirection:"column"}}>
             <div style={{display:"flex",alignItems:"center",gap:15,marginBottom:30}}>
-              <div style={{width:50,height:50,borderRadius:"50%",background:"#e8f5ed",display:"flex",alignItems:"center",justifyContent:"center"}}><img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-quote.png' alt='' width='20' height='20' /></div>
+              <div style={{width:50,height:50,borderRadius:"50%",background:"#e8f5ed",display:"flex",alignItems:"center",justifyContent:"center"}}><img class='mi-icon' style={{verticalAlign:'middle'}} src='/assets/icons/icon-quote.png' alt='' width='20' height='20' /></div>
               <div><div style={{fontSize:18,fontWeight:700}}>SBF Company</div><div style={{fontSize:14,color:C.inkFaint}}>WhatsApp · {tr.online}</div></div>
             </div>
             <div style={{background:"#25d366",padding:"15px 20px",borderRadius:"12px 12px 0 12px",marginBottom:30,alignSelf:"flex-end",maxWidth:"90%"}}>

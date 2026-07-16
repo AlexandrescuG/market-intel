@@ -11,14 +11,6 @@
     html,body{max-width:100vw;overflow-x:hidden;scroll-behavior:smooth}
     body{background:#fff;font-family:'DM Sans',system-ui,sans-serif;color:#18181a}
     #sbf-book-root{min-height:100vh}
-    .back-to-edu{
-      position:fixed;bottom:20px;right:20px;z-index:500;
-      background:#18181a;color:rgba(255,255,255,0.6);
-      font-family:'DM Sans',sans-serif;font-size:.75rem;letter-spacing:1.5px;text-transform:uppercase;
-      padding:7px 13px;text-decoration:none;transition:all .2s;
-      border:1px solid rgba(255,255,255,0.08);
-    }
-    .back-to-edu:hover{background:#c9973a;color:#fff}
     .messenger-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:30px}
     @media(max-width:768px){.messenger-grid{grid-template-columns:1fr}.hide-mobile{display:none!important}.g2{grid-template-columns:1fr!important}.g3{grid-template-columns:1fr!important}.g4{grid-template-columns:1fr 1fr!important}}
     @keyframes priceTick{0%{opacity:.4}50%{opacity:1}100%{opacity:.7}}
@@ -29,7 +21,6 @@
 </head>
 <body>
 <div id="sbf-book-root"></div>
-<a href="/edu" class="back-to-edu">← Edu</a>
 
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -791,7 +782,7 @@ function ScalpingSimulator() {
             <span style={{color:totalPnl>=0?C.greenD:C.redD,fontWeight:700}}>{totalPnl>=0?"+":""}{Math.round(totalPnl*100)/100} {S.unitPct}</span>
             <span style={{color:C.inkSoft}}>{wins}W/{results.length-wins}L</span>
             <span style={{color:C.inkMid}}>WR {wr}%</span>
-            {streak>1 && <span style={{color:C.gold}}><img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-flame.png' alt='' width='20' height='20' />{streak}</span>}
+            {streak>1 && <span style={{color:C.gold}}><img class='mi-icon' style={{verticalAlign:'middle'}} src='/assets/icons/icon-flame.png' alt='' width='20' height='20' />{streak}</span>}
           </div>
           <button onClick={reset} style={{padding:"7px 14px",background:"transparent",border:`1px solid ${C.border}`,color:C.inkMid,cursor:"pointer",fontFamily:"monospace",fontSize:11,borderRadius:3}}>{S.simResetBtn}</button>
           <button onClick={()=>setRunning(r=>!r)}
@@ -922,7 +913,7 @@ function ScalpingSimulator() {
           <strong style={{color:C.gold}}>{S.simInstructionsTitle}</strong><br/>
           {S.simRule1}<br/>
           {S.simRule2}<br/>
-          {S.simRule3Prefix} <span style={{color:C.gold,fontWeight:700}}><img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-lightning.png' alt='' width='20' height='20' /></span> {S.simRule3Suffix}<br/>
+          {S.simRule3Prefix} <span style={{color:C.gold,fontWeight:700}}><img class='mi-icon' style={{verticalAlign:'middle'}} src='/assets/icons/icon-lightning.png' alt='' width='20' height='20' /></span> {S.simRule3Suffix}<br/>
           {S.simRule4}<br/>
           <em>{S.simWinRateNote}</em>
         </div>
@@ -1107,7 +1098,7 @@ function Chapter14() {
             ))}
           </div>
           <div style={{marginTop:20,padding:"14px",background:"rgba(201,151,58,0.08)",borderRadius:4,border:`1px solid rgba(201,151,58,0.2)`,fontSize:13,color:"rgba(255,255,255,0.6)",lineHeight:1.7}}>
-            <img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-idea.png' alt='' width='20' height='20' /> <strong style={{color:C.gold}}>{S.mathConclusionLabel}</strong> {S.mathConclusionText}
+            <img class='mi-icon' style={{verticalAlign:'middle'}} src='/assets/icons/icon-idea.png' alt='' width='20' height='20' /> <strong style={{color:C.gold}}>{S.mathConclusionLabel}</strong> {S.mathConclusionText}
           </div>
         </div>
 

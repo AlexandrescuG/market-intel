@@ -27,16 +27,6 @@
 
     /* ── КНИГА МОНТИРУЕТСЯ СЮДА ── */
     #sbf-book-root{min-height:100vh}
-
-    /* ── ССЫЛКА НАЗАД ── */
-    .back-to-edu{
-      position:fixed;bottom:20px;right:20px;z-index:500;
-      background:#18181a;color:rgba(255,255,255,0.6);
-      font-family:'DM Sans',sans-serif;font-size:.6rem;letter-spacing:1.5px;text-transform:uppercase;
-      padding:7px 13px;text-decoration:none;transition:all .2s;
-      border:1px solid rgba(255,255,255,0.08);
-    }
-    .back-to-edu:hover{background:#c9973a;color:#fff}
   </style>
 </head>
 <body>
@@ -45,9 +35,6 @@
 
 <!-- ── MOUNT POINT ── -->
 <div id="sbf-book-root"></div>
-
-<!-- ── НАЗАД НА EDU ── -->
-<a href="/edu" class="back-to-edu">← Education</a>
 
 <!-- ── REACT + BABEL (no npm, no build step) ── -->
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -1089,7 +1076,7 @@ function SkillTree({ path, onBack }) {
             </svg>
 
             <div style={{ width: 100, background: path==="trader"?C.goldPale:"#222", color: path==="trader"?C.black:"#888", padding: "12px", borderRadius: "8px", border: `1px solid ${path==="trader"?C.gold:"#444"}`, zIndex: 1 }}>
-              <div style={{ fontSize: 18, marginBottom: 4 }}><img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trend-up.png' alt='' width='20' height='20' /></div>
+              <div style={{ fontSize: 18, marginBottom: 4 }}><img class='mi-icon' style={{verticalAlign:'middle'}} src='/assets/icons/icon-trend-up.png' alt='' width='20' height='20' /></div>
               <div style={{ fontSize: 10, fontFamily: "monospace", fontWeight: 700 }}>{S.treeNodeTA}</div>
               <div style={{ fontSize: 9, marginTop: 4 }}>{S.treeUnlocked}</div>
             </div>
@@ -1101,7 +1088,7 @@ function SkillTree({ path, onBack }) {
             </div>
 
             <div style={{ width: 100, background: "#222", color: "#888", padding: "12px", borderRadius: "8px", border: "1px solid #444", zIndex: 1 }}>
-              <div style={{ fontSize: 18, marginBottom: 4 }}><img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-mindset.png' alt='' width='20' height='20' /></div>
+              <div style={{ fontSize: 18, marginBottom: 4 }}><img class='mi-icon' style={{verticalAlign:'middle'}} src='/assets/icons/icon-mindset.png' alt='' width='20' height='20' /></div>
               <div style={{ fontSize: 10, fontFamily: "monospace", fontWeight: 700 }}>{S.treeNodePsych}</div>
               <div style={{ fontSize: 9, marginTop: 4 }}>{S.treeLocked}</div>
             </div>

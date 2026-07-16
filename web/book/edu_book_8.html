@@ -11,14 +11,6 @@
     html,body{max-width:100vw;overflow-x:hidden;scroll-behavior:smooth}
     body{background:#ffffff;font-family:'DM Sans',system-ui,sans-serif;color:#18181a}
     #sbf-book-root{min-height:100vh}
-    .back-to-edu{
-      position:fixed;bottom:20px;right:20px;z-index:500;
-      background:#18181a;color:rgba(255,255,255,0.6);
-      font-family:'DM Sans',sans-serif;font-size:.75rem;letter-spacing:1.5px;text-transform:uppercase;
-      padding:7px 13px;text-decoration:none;transition:all .2s;
-      border:1px solid rgba(255,255,255,0.08);
-    }
-    .back-to-edu:hover{background:#c9973a;color:#fff}
     .messenger-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:30px}
     @media(max-width:768px){.messenger-grid{grid-template-columns:1fr}.hide-mobile{display:none!important}.g2{grid-template-columns:1fr!important}.g3{grid-template-columns:1fr!important}.g4{grid-template-columns:1fr 1fr!important}}
   </style>
@@ -27,7 +19,6 @@
 
 
 <div id="sbf-book-root"></div>
-<a href="/edu" class="back-to-edu">← Edu</a>
 
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -754,7 +745,7 @@ function AssetRotation() {
               </div>
               {checked && (
                 <div style={{marginTop:8,fontSize:11,color:"rgba(255,255,255,0.4)",lineHeight:1.5,borderTop:"1px solid rgba(255,255,255,0.06)",paddingTop:8}}>
-                  <img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-idea.png' alt='' width='20' height='20' /> {ph.hint}
+                  <img class='mi-icon' style={{verticalAlign:'middle'}} src='/assets/icons/icon-idea.png' alt='' width='20' height='20' /> {ph.hint}
                 </div>
               )}
             </div>
@@ -1162,7 +1153,7 @@ function Chapter8() {
                 </div>
               ))}
               <div style={{marginTop:12,fontSize:12,color:C.inkSoft,lineHeight:1.65,padding:"10px 12px",background:C.surfaceMid,borderRadius:3}}>
-                <img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-idea.png' alt='' width='20' height='20' /> {ph.why}
+                <img class='mi-icon' style={{verticalAlign:'middle'}} src='/assets/icons/icon-idea.png' alt='' width='20' height='20' /> {ph.why}
               </div>
             </div>
           ))}
@@ -1220,7 +1211,7 @@ function Chapter8() {
               <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:16}}>{S.gcSectionLabel}</Mono>
               <div style={{marginBottom:20}}>
                 <div style={{display:"flex",gap:12,alignItems:"flex-start",marginBottom:16,padding:"14px",background:"rgba(45,122,79,0.12)",borderRadius:4,border:"1px solid rgba(45,122,79,0.3)"}}>
-                  <span style={{fontSize:22}}><img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-star.png' alt='' width='20' height='20' /></span>
+                  <span style={{fontSize:22}}><img class='mi-icon' style={{verticalAlign:'middle'}} src='/assets/icons/icon-star.png' alt='' width='20' height='20' /></span>
                   <div>
                     <div style={{fontWeight:700,fontSize:14,color:"#2ecc71",marginBottom:5}}>{S.gcGoldenTitle}</div>
                     <div style={{fontSize:13,color:"rgba(255,255,255,0.6)",lineHeight:1.6}}>

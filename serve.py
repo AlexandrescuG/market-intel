@@ -450,8 +450,17 @@ def _build_edu_page(ch: int, lang: str) -> bytes:
         html = _CDN_BABEL.sub("", html)
 
         compiled_js = _COMPILED[ch].replace('"__LANG__"', f'"{lang}"')
+        # ВАЖНО: repl должен быть функцией, а не строкой. re.sub() парсит
+        # строковый repl на предмет backreference-последовательностей вида
+        # \n/\t/\1 -- и compiled_js (реальный JS с настоящими "\n"-эскейпами
+        # внутри строковых литералов) содержит их в изобилии. Со строковым
+        # repl каждый такой "\n" молча превращался в НАСТОЯЩИЙ перевод
+        # строки внутри JS string-литерала -- невидимая порча компилята,
+        # которая обычно не всплывала (движок иногда восстанавливался), но
+        # на главе 14 ломала весь <script> целиком (SyntaxError, пустой
+        # #sbf-book-root). Функция-repl вставляется как есть, без разбора.
         html = _BABEL_SCRIPT_RE.sub(
-            f'<script>\n{compiled_js}\n</script>',
+            lambda _m: f'<script>\n{compiled_js}\n</script>',
             html,
         )
     else:

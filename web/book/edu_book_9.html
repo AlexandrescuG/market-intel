@@ -11,21 +11,12 @@
     html,body{max-width:100vw;overflow-x:hidden;scroll-behavior:smooth}
     body{background:#fff;font-family:'DM Sans',system-ui,sans-serif;color:#18181a}
     #sbf-book-root{min-height:100vh}
-    .back-to-edu{
-      position:fixed;bottom:20px;right:20px;z-index:500;
-      background:#18181a;color:rgba(255,255,255,0.6);
-      font-family:'DM Sans',sans-serif;font-size:.75rem;letter-spacing:1.5px;text-transform:uppercase;
-      padding:7px 13px;text-decoration:none;transition:all .2s;
-      border:1px solid rgba(255,255,255,0.08);
-    }
-    .back-to-edu:hover{background:#c9973a;color:#fff}
     .messenger-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:30px}
     @media(max-width:768px){.messenger-grid{grid-template-columns:1fr}.hide-mobile{display:none!important}}
   </style>
 </head>
 <body>
 <div id="sbf-book-root"></div>
-<a href="/edu" class="back-to-edu">← Edu</a>
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -576,11 +567,11 @@ function EarningsSimulator({t}) {
 
   if (done) return (
     <div style={{background:C.surface,border:`1px solid ${C.border}`,padding:"36px 32px",textAlign:"center"}}>
-      <div style={{fontSize:48,marginBottom:12}}><img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-trophy.png' alt='' width='20' height='20' /></div>
+      <div style={{fontSize:48,marginBottom:12}}><img class='mi-icon' style={{verticalAlign:'middle'}} src='/assets/icons/icon-trophy.png' alt='' width='20' height='20' /></div>
       <div style={{fontFamily:"monospace",fontSize:28,color:C.gold,fontWeight:700,marginBottom:8}}>{score} / {cases.length}</div>
       <div style={{fontSize:14,color:C.inkSoft,marginBottom:24}}>{t.simFinish}</div>
       {score >= 2 && <div style={{background:"#fff",border:`1px solid ${C.borderGold}`,display:"inline-block",padding:"14px 28px"}}>
-        <span style={{fontFamily:"monospace",fontSize:11,color:C.gold,letterSpacing:3,display:"block",marginBottom:4}}><img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-target.png' alt='' width='20' height='20' /> EARNINGS READER</span>
+        <span style={{fontFamily:"monospace",fontSize:11,color:C.gold,letterSpacing:3,display:"block",marginBottom:4}}><img class='mi-icon' style={{verticalAlign:'middle'}} src='/assets/icons/icon-target.png' alt='' width='20' height='20' /> EARNINGS READER</span>
         <span style={{fontFamily:"monospace",fontSize:12,color:C.inkSoft}}>{score === 3 ? "+60 BONUS XP" : "+30 XP"}</span>
       </div>}
     </div>
@@ -1240,7 +1231,7 @@ function Chapter9() {
 
         {/* ── MYTH BLOCK ── */}
         <div style={{background:C.dark,color:"#fff",padding:"32px 36px",marginBottom:52,position:"relative",overflow:"hidden"}}>
-          <div style={{position:"absolute",top:-10,right:20,fontSize:90,opacity:.04,fontFamily:"monospace",pointerEvents:"none"}}><img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-bar-chart.png' alt='' width='20' height='20' /></div>
+          <div style={{position:"absolute",top:-10,right:20,fontSize:90,opacity:.04,fontFamily:"monospace",pointerEvents:"none"}}><img class='mi-icon' style={{verticalAlign:'middle'}} src='/assets/icons/icon-bar-chart.png' alt='' width='20' height='20' /></div>
           <Chip color={C.gold}>{t.mythTag}</Chip>
           <h2 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(18px,2.5vw,26px)",fontWeight:700,margin:"14px 0 12px",color:"#fff",lineHeight:1.25}}>{t.mythTitle}</h2>
           <p style={{fontSize:15,color:"#ccc",lineHeight:1.85}}>{t.mythBody}</p>
