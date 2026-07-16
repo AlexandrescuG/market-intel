@@ -541,12 +541,6 @@ class Handler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=DIRECTORY, **kwargs)
 
-    def end_headers(self):
-        # Prevent browser caching for all JS/CSS assets so updates apply immediately
-        if self.path.split("?")[0].startswith("/assets/") or self.path.split("?")[0].startswith("/edu/assets/"):
-            self.send_header("Cache-Control", "no-cache, must-revalidate")
-        super().end_headers()
-
     def do_OPTIONS(self):
         self.send_response(204)
         self.send_header("Access-Control-Allow-Origin", "*")
@@ -1060,7 +1054,6 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             body = toc_path.read_bytes()
             self.send_response(200)
             self.send_header("Content-Type", "text/html; charset=utf-8")
-            self.send_header("Cache-Control", "no-cache")
             self.end_headers()
             self.wfile.write(body)
         except Exception as e:
@@ -1080,7 +1073,6 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             body = _build_edu_page(ch, lang)
             self.send_response(200)
             self.send_header("Content-Type", "text/html; charset=utf-8")
-            self.send_header("Cache-Control", "no-cache")
             self.end_headers()
             self.wfile.write(body)
         except Exception as e:
@@ -1095,7 +1087,6 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             body = path.read_bytes()
             self.send_response(200)
             self.send_header("Content-Type", content_type)
-            self.send_header("Cache-Control", "no-cache")
             self.end_headers()
             self.wfile.write(body)
         except FileNotFoundError:
@@ -1121,7 +1112,6 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         body = html.encode("utf-8")
         self.send_response(200)
         self.send_header("Content-Type", "text/html; charset=utf-8")
-        self.send_header("Cache-Control", "no-cache")
         self.end_headers()
         self.wfile.write(body)
 
@@ -2417,11 +2407,15 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.wfile.write(body)
 
     def end_headers(self):
+        # no-store (не no-cache): без ETag/Last-Modified эти страницы нечем
+        # ревалидировать, и no-cache в таком виде на практике вело себя как
+        # "можно отдать из кэша/bfcache без обращения к серверу" -- главы
+        # курса (и вообще любая HTML-страница) обновлялись только через
+        # Hard Reload. no-store запрещает сохранение целиком, обычная
+        # навигация/обновление страницы всегда идёт на сервер.
         path = self.path.split("?")[0]
-        if path.startswith("/data/"):
+        if not path.startswith("/api/"):
             self.send_header("Cache-Control", "no-store")
-        elif not path.startswith("/api/"):
-            self.send_header("Cache-Control", "no-cache")
         super().end_headers()
 
     def log_message(self, fmt, *args):
