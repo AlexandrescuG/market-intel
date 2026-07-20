@@ -1661,7 +1661,21 @@ function onThermoChipClick(key, clickX, clickY) {
   if (key === 'dvol') { openThermoHistCard('dvol', clickX, clickY); return; }
   if (key === 'news') { openThermoNewsCard(clickX, clickY); return; }
   if (key === 'evt') { if (_curThermo.next_event) openEventCard([_curThermo.next_event], clickX, clickY); return; }
-  if (key === 'zone') { scrollToThermoZone(); return; }
+  if (key === 'zone') {
+    scrollToThermoZone();
+    // В отличие от остальных чипов, «До зоны» раньше только скроллил и
+    // подсвечивал полосы на графике -- без попапа это выглядело так, будто
+    // клик вообще ничего не делает (особенно если полосы вне области
+    // видимости). Открываем ту же карточку зоны, что и клик по полосе на
+    // графике (openZoneCard), если удаётся сопоставить её в _curConfluence.
+    if (_curThermo.nearest_zone_low != null) {
+      const z = _curConfluence.find(c =>
+        Math.abs(c.price_low - _curThermo.nearest_zone_low) < 1e-6 &&
+        Math.abs(c.price_high - _curThermo.nearest_zone_high) < 1e-6);
+      if (z) openZoneCard(z, clickX, clickY);
+    }
+    return;
+  }
 }
 
 async function refreshThermo() {
