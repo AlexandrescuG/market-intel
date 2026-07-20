@@ -8,8 +8,10 @@
 <link rel="stylesheet" href="/assets/design.css">
 <script src="/assets/i18n.js?v=2" defer></script>
 <script src="/assets/sbf-header.js?v=15" defer></script>
+<script src="/assets/sbf-auth.js?v=1"></script>
 <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
 <script src="/assets/grafik-engine.js"></script>
+<script src="/assets/sbf-thermo-widget.js"></script>
 <style>
 :root{
   --cream:#FBF6EF; --paper:#FFFFFF; --line:#E7DFCF; --grid:#F0E9DA;
@@ -63,6 +65,105 @@ body.embed .card{border-radius:0;box-shadow:none;border:none;max-width:100%}
 .tog-hint-chip{font-family:'JetBrains Mono';font-size:11px;color:#444;padding:6px 14px;line-height:1.55;border-bottom:1px solid rgba(231,223,207,.6)}
 .tog-hint-chip:last-child{border-bottom:none}
 .tog-hint-chip b{color:#2B2B33;font-weight:600}
+#newsLayer{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.news-zone{position:absolute;top:0;bottom:20px;background:var(--gold);opacity:.08;cursor:pointer;pointer-events:auto}
+.news-zone:hover{opacity:.14}
+#confluenceLayer{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.confluence-band{position:absolute;left:0;right:0;background:var(--gold);cursor:pointer;pointer-events:auto}
+.confluence-band.mid{opacity:.10}
+.confluence-band.strong{opacity:.18}
+.confluence-band:hover{opacity:.26}
+.confluence-band.flash-highlight{opacity:.4;transition:opacity .3s}
+
+/* Сессионная карта (Layer 3, Фаза 2) */
+#sessionLayer{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.sess-band{position:absolute;top:0;bottom:0}
+.sess-asia{background:var(--ink);opacity:.05}
+.sess-london{background:var(--gold);opacity:.05}
+.sess-ny{background:var(--up);opacity:.05}
+.sess-overlap{background:var(--gold);opacity:.10}
+.sess-label{position:absolute;top:3px;left:5px;font-size:9px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.3px;white-space:nowrap;pointer-events:none}
+.heat-strip-wrap{padding:0 18px 10px;display:none}
+.heat-strip{display:flex;height:6px;border-radius:3px;overflow:hidden}
+.heat-strip .hs-seg{flex:1;background:var(--gold);cursor:pointer}
+.heat-strip .hs-seg:hover{outline:1px solid var(--gold)}
+.hs-edu-link{color:var(--gold);font-weight:600;text-decoration:none}
+.hs-edu-link:hover{text-decoration:underline}
+
+/* Сентимент толпы (Layer 3, Фаза 3) */
+.sentiment-panel{border-top:1px solid var(--line);padding:8px 18px 0}
+.sentiment-hd{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;padding-bottom:6px;cursor:pointer;letter-spacing:.2px}
+.sentiment-badge{margin-left:auto;color:var(--gold);font-weight:700;cursor:pointer;font-size:11px}
+.sentiment-body{height:0;overflow:hidden;transition:height .15s ease}
+.sentiment-body.on{height:64px;margin-bottom:8px}
+.sentiment-lock{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px;padding:14px 0}
+
+/* Мои сделки (Layer 4, Фаза 2) */
+.trades-teaser{display:flex;align-items:center;gap:10px;padding:8px 18px;background:rgba(201,162,39,.08);border-bottom:1px solid var(--line);font-size:12px;color:var(--ink)}
+.trades-teaser a{color:var(--gold);font-weight:600;text-decoration:none}
+.trades-teaser a:hover{text-decoration:underline}
+.trades-teaser button{margin-left:auto;border:none;background:none;color:var(--muted);cursor:pointer;font-size:12px;padding:2px 4px}
+.evt-card .trade-context{margin-top:10px;padding:10px 12px;border-radius:10px;background:rgba(201,162,39,.07);border:1px solid rgba(201,162,39,.18);font-size:12px;line-height:1.6}
+.evt-card .trade-context div{margin-bottom:2px}
+#eventLayer{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.evt-line{position:absolute;top:0;bottom:20px;width:0;border-left:1px dashed rgba(43,43,51,.2);pointer-events:none}
+.evt-marker{position:absolute;bottom:4px;width:9px;height:9px;transform:translateX(-50%) rotate(45deg);cursor:pointer;pointer-events:auto;box-shadow:0 0 0 2px var(--paper)}
+.evt-marker.high{background:var(--gold)}
+.evt-marker.medium{background:rgba(43,43,51,.4)}
+.evt-badge{position:absolute;top:-14px;left:50%;transform:translateX(-50%) rotate(-45deg);font-family:'JetBrains Mono';font-size:9px;color:var(--muted);white-space:nowrap}
+.evt-card-backdrop{position:fixed;inset:0;background:rgba(43,43,51,.28);z-index:100;display:none}
+.evt-card-backdrop.on{display:block}
+.evt-card{position:fixed;background:var(--paper);border:1px solid var(--line);border-radius:14px;box-shadow:0 10px 34px rgba(43,43,51,.18);z-index:101;padding:16px 18px;font-family:'JetBrains Mono',monospace;width:300px;max-width:calc(100vw - 20px);max-height:70vh;overflow-y:auto;display:none}
+.evt-card.on{display:block}
+@media(max-width:760px){
+  .evt-card{left:0!important;right:0;bottom:0;top:auto!important;width:100%;max-width:100%;border-radius:16px 16px 0 0;box-shadow:0 -8px 30px rgba(43,43,51,.2)}
+}
+.evt-card .evt-close{position:absolute;top:8px;right:10px;cursor:pointer;color:var(--muted);font-size:15px;background:none;border:none;line-height:1;padding:4px}
+.evt-card .evt-item{padding:10px 0;border-top:1px solid var(--line)}
+.evt-card .evt-item:first-child{border-top:none}
+.evt-card h4{margin:0 0 6px;font-family:Montserrat,sans-serif;font-size:14px;line-height:1.35;padding-right:20px}
+.evt-card .evt-meta{font-size:11px;color:var(--muted);margin-bottom:8px}
+.evt-card .evt-countdown{font-size:12px;color:var(--gold);font-weight:600;margin-bottom:8px}
+.evt-card .evt-nums{display:flex;gap:18px;margin-bottom:6px}
+.evt-card .evt-nums div{font-size:11px;color:var(--muted)}
+.evt-card .evt-nums b{display:block;font-size:14px;color:var(--ink);font-weight:600}
+.evt-card .evt-actual{font-size:20px;font-weight:700;margin-top:2px}
+.evt-card .evt-actual.up{color:var(--up)}
+.evt-card .evt-actual.down{color:var(--down)}
+.evt-reaction{margin-top:10px;padding:10px 12px;border-radius:10px;background:rgba(201,162,39,.07);border:1px solid rgba(201,162,39,.18);font-size:12px;line-height:1.5}
+.evt-reaction.loading{color:var(--muted)}
+.evt-reaction.locked{display:flex;align-items:center;gap:8px;color:var(--muted)}
+.evt-reaction .evt-lock{font-size:13px}
+.evt-reaction-title{font-weight:700;color:var(--ink);margin-bottom:4px;font-family:'JetBrains Mono'}
+.evt-reaction-disclaimer{margin-top:6px;font-size:10px;color:var(--muted);font-style:italic}
+.pulse-feed-lock{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px;padding:8px 0}
+
+/* Термометр дня (Layer 3, Фаза 1) */
+.thermo{display:flex;align-items:center;gap:8px;padding:10px 18px;border-bottom:1px solid var(--line)}
+.thermo.collapsed .thermo-chips{display:none}
+.thermo-chips{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;flex:1;min-width:0}
+.thermo-chip{background:var(--grid);border-radius:10px;padding:7px 10px;cursor:pointer;min-width:0;transition:background .15s}
+.thermo-chip:hover{background:var(--line)}
+.thermo-chip .tc-label{font-size:9.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:'JetBrains Mono',monospace;letter-spacing:.2px}
+.thermo-chip .tc-value{font-size:12.5px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:'JetBrains Mono',monospace;margin-top:1px}
+.thermo-chip .tc-value.tc-hot{color:var(--up)}
+.thermo-chip .tc-value.tc-warm{color:var(--gold)}
+.thermo-chip .tc-value.tc-cold{color:var(--muted)}
+.thermo-chip .tc-bar{height:3px;border-radius:2px;background:var(--line);margin-top:5px;overflow:hidden}
+.thermo-chip .tc-bar i{display:block;height:100%;background:var(--gold)}
+.thermo-chevron{border:1px solid var(--line);background:var(--paper);color:var(--muted);cursor:pointer;font-size:13px;width:26px;height:26px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:transform .15s,background .15s,color .15s}
+.thermo-chevron:hover{background:var(--grid);color:var(--ink)}
+.thermo.collapsed .thermo-chevron{transform:rotate(-90deg)}
+.thermo-hist{display:flex;align-items:flex-end;gap:2px;height:56px;margin:10px 0 4px}
+.thermo-hist .bar{flex:1;background:var(--line);border-radius:2px 2px 0 0;min-height:2px}
+.thermo-hist .bar.today{background:var(--gold)}
+@media (max-width:760px){
+  .thermo-chips{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(2,1fr);gap:4px;max-height:64px;overflow:hidden}
+  .thermo-chip{padding:3px 7px;display:flex;flex-direction:column;justify-content:center}
+  .thermo-chip .tc-label{font-size:8.5px;line-height:1.15}
+  .thermo-chip .tc-value{font-size:11px;line-height:1.2;margin-top:0}
+  .thermo-chip .tc-bar{display:none}
+}
 </style>
 </head>
 <body>
@@ -98,20 +199,83 @@ body.embed .card{border-radius:0;box-shadow:none;border:none;max-width:100%}
       <button class="chip on" data-t="piv" data-i18n="home.pivots_toggle">Пивоты</button>
       <button class="chip" data-t="cndl" data-i18n="home.patterns_toggle">Паттерны</button>
       <button class="chip" data-t="smc">SMC</button>
+      <button class="chip on" data-t="evt" data-i18n="chart.events_toggle">События</button>
+      <button class="chip" data-t="news" data-i18n="chart.news_toggle">Новости</button>
+      <button class="chip on" data-t="lvl" data-i18n="chart.levels_toggle">Уровни</button>
+      <button class="chip" data-t="zone" data-i18n="chart.zones_toggle">Зоны</button>
+      <button class="chip" data-t="sess" data-i18n="chart.sessions_toggle">Сессии</button>
+      <button class="chip on" data-t="trades" data-i18n="chart.trades_toggle" style="display:none">Мои сделки</button>
     </div>
   </div>
   <div class="tog-hints" id="togHints"></div>
+  <div class="trades-teaser" id="tradesTeaser" style="display:none">
+    <span data-i18n="chart.trades_teaser_text">Записывай сделки в журнал — они появятся здесь, на графике.</span>
+    <a href="/journal.html#trades" data-i18n="chart.trades_teaser_link">Открыть журнал →</a>
+    <button id="tradesTeaserClose" aria-label="close">✕</button>
+  </div>
+  <div class="thermo" id="thermo">
+    <div class="thermo-chips" id="thermoChips"></div>
+    <button class="thermo-chevron" id="thermoChevron" aria-label="toggle">▾</button>
+  </div>
   <div id="chartContainer" style="position:relative">
     <div id="chart"></div>
+    <div id="sessionLayer"></div>
+    <div id="confluenceLayer"></div>
+    <div id="newsLayer"></div>
+    <div id="eventLayer"></div>
+    <svg id="tradesLayer" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:hidden"></svg>
+  </div>
+  <div class="sentiment-panel" id="sentimentPanel" style="display:none">
+    <div class="sentiment-hd" id="sentimentHd">
+      <span data-i18n="chart.sentiment_title">Настроение толпы</span>
+      <span class="sentiment-badge" id="sentimentBadge" style="display:none">⚡ <span data-i18n="chart.sentiment_divergence_short">расходится</span></span>
+      <button class="thermo-chevron" id="sentimentChevron" aria-label="toggle">▾</button>
+    </div>
+    <div class="sentiment-body" id="sentimentBody"></div>
+  </div>
+  <div class="heat-strip-wrap" id="heatStripWrap">
+    <div class="heat-strip" id="heatStrip"></div>
   </div>
   <div class="beginner"><span class="ic">&#9432;</span><div id="explain">…</div></div>
   <div class="foot" data-i18n="chart.footer_disclaimer">образовательная подсветка паттернов — контекст, не инвестиционная рекомендация</div>
 </div>
+<div class="evt-card-backdrop" id="evtBackdrop"></div>
+<div class="evt-card" id="evtCard"></div>
 
 <script>
 const _SP = new URLSearchParams(location.search);
-const PARAM = _SP.get('s') || 'GOLD';
+// SBF_Charts_Layer4_Spec, Фаза 1.2.3: без deep-link (?s=) — последний
+// просмотренный инструмент пользователя, иначе первый из ватчлиста, иначе
+// GOLD. Читаем localStorage-кэш auth-контекста (sbf-header.js) СИНХРОННО —
+// сетевой /api/auth/me асинхронный и пришёл бы слишком поздно (PARAM нужен
+// немедленно для первого рендера графика, ждать событие sbf:user-ready
+// означало бы пустой экран до его прихода).
+function _defaultChartSymbol() {
+  try {
+    const cached = JSON.parse(localStorage.getItem('sbf_user_cache') || 'null');
+    if (cached) {
+      const lastSym = cached.prefs && cached.prefs.last_symbol;
+      if (lastSym) return lastSym;
+      if (Array.isArray(cached.watchlist) && cached.watchlist.length) return cached.watchlist[0];
+    }
+  } catch (e) {}
+  return 'GOLD';
+}
+const PARAM = _SP.get('s') || _defaultChartSymbol();
 if (_SP.get('embed') === '1') document.body.classList.add('embed');
+// SBF_Charts_Layer4_Spec, Фаза 3: переход из утреннего отчёта — график на
+// M30/H1 (default_tf пользователя, иначе H1), диапазон "сегодня+вчера",
+// слой Событий принудительно ON, термометр раскрыт.
+const FOCUS_TODAY = _SP.get('focus') === 'today';
+if (FOCUS_TODAY) localStorage.setItem('sbf_thermo_collapsed', '0'); // термометр раскрыт (спека Ф3) — ставим ДО initThermoCollapse() ниже по файлу, тот читает это же значение при построении DOM
+function _focusTodayTF() {
+  try {
+    const cached = JSON.parse(localStorage.getItem('sbf_user_cache') || 'null');
+    const dtf = cached && cached.prefs && cached.prefs.default_tf;
+    if (dtf === 'M30' || dtf === 'H1') return dtf;
+  } catch (e) {}
+  return 'H1';
+}
 const YF = {
   GOLD:'GC=F', SILVER:'SI=F',
   BTC:'BTC-USD', ETH:'ETH-USD', SOL:'SOL-USD',
@@ -125,7 +289,17 @@ const BYBIT = {BTC:'BTCUSDT', ETH:'ETHUSDT', SOL:'SOLUSDT'};
 let chart = null, candleSeries = null, lastCandle = null, ws = null, curTF = 'D1';
 let _curData = null;           // результат SBFGrafik.loadBars
 let _curLines = [];            // priceLine refs (для удаления)
-let TOGGLES = {piv:true, cndl:false, smc:false};
+let _curEvents = [];           // события календаря для текущего symbol/tf (Фаза 1)
+let _curNewsBursts = [];       // зоны новостных всплесков для текущего symbol/tf (Фаза 3)
+let _curLevels = [];           // исторические S/R-уровни для текущего symbol (Layer 2, Фаза 1)
+let _curConfluence = [];       // зоны внимания для текущего symbol (Layer 2, Фаза 2)
+let _curPatterns = [];         // паттерны из core.patterns.detect() (Layer 2, Фаза 3)
+let _curPatternsShown = [];    // после дедупликации — то, что реально на графике (для хит-теста клика)
+let _evtRO = null;             // ResizeObserver слоя событий
+const TOGGLES = {piv:true, cndl:false, smc:false, evt: FOCUS_TODAY || localStorage.getItem('sbf_chart_evt') !== '0', news:false,
+  lvl: localStorage.getItem('sbf_chart_lvl') !== '0', zone:false, sess:false, trades:true};
+document.querySelector('#tog [data-t="evt"]').classList.toggle('on', TOGGLES.evt);
+document.querySelector('#tog [data-t="lvl"]').classList.toggle('on', TOGGLES.lvl);
 
 // ── i18n ───────────────────────────────────────────────────────────────────
 // Статическая страница (не Jinja) — тот же паттерн, что в journal.html: t()
@@ -182,30 +356,92 @@ function flash(el, up) {
 }
 
 // ── Тумблеры паттернов/SMC ─────────────────────────────────────────────────
+// Источник маркеров — core/patterns.py через /api/chart/patterns (Layer 2,
+// Фаза 3) — единый источник паттернов для рендера И бэктеста (см. Acceptance
+// спеки), НЕ SBFGrafik.detectCandles() (тот остаётся для образовательной
+// галереи паттернов на index.html/edu — отдельная задача, не трогали).
 function getCandleMarkers() {
-  if (!_curData) return [];
-  const evts = SBFGrafik.detectCandles(_curData.bars);
-  const start = Math.max(0, _curData.bars.length - 40);
-  const lastSeen = {}; // label → last bar index shown (дедупликация)
-  return evts
-    .filter(e => {
-      if (e.i < start) return false;
-      if (lastSeen[e.label] !== undefined && e.i - lastSeen[e.label] < 6) return false;
-      lastSeen[e.label] = e.i;
-      return true;
+  _curPatternsShown = [];
+  if (!_curPatterns.length) return [];
+  const minGap = (TF_SEC[curTF] || 86400) * 6; // дедупликация — как раньше "6 баров"
+  const lastSeen = {};
+  const shown = _curPatterns.filter(p => {
+    if (lastSeen[p.pattern_key] !== undefined && (p.ts - lastSeen[p.pattern_key]) < minGap) return false;
+    lastSeen[p.pattern_key] = p.ts;
+    return true;
+  });
+  _curPatternsShown = shown;
+  return shown.map(p => {
+    const col = p.direction === 'bullish' ? '#2E8B6F' : p.direction === 'bearish' ? '#C0504D' : '#C9A227';
+    return {
+      time: unixToBarTime(p.ts),
+      position: p.direction === 'bullish' ? 'belowBar' : p.direction === 'bearish' ? 'aboveBar' : 'inBar',
+      color: col,
+      shape: p.direction === 'bullish' ? 'arrowUp' : p.direction === 'bearish' ? 'arrowDown' : 'circle',
+      text: p.display_name_ru
+    };
+  });
+}
+
+async function refreshPatterns(tf) {
+  _curPatterns = [];
+  if (_curData && _curData.lw.length) {
+    const bars = _curData.lw;
+    const from = barTimeToUnix(bars[0].time);
+    const to = barTimeToUnix(bars[bars.length - 1].time) + (TF_SEC[tf] || 86400) * 6;
+    try {
+      const r = await fetch(`/api/chart/patterns?symbol=${encodeURIComponent(PARAM)}&tf=${tf}&from=${from}&to=${to}`);
+      const data = await r.json();
+      if (Array.isArray(data)) _curPatterns = data;
+    } catch (e) {}
+  }
+}
+
+function findPatternAtX(x) {
+  if (!chart || !_curPatternsShown.length) return null;
+  let best = null, bestDist = 8;
+  _curPatternsShown.forEach(p => {
+    const px = chart.timeScale().timeToCoordinate(unixToBarTime(p.ts));
+    if (px == null) return;
+    const d = Math.abs(px - x);
+    if (d <= bestDist) { bestDist = d; best = p; }
+  });
+  return best;
+}
+
+function openPatternCard(p, clickX, clickY) {
+  const card = document.getElementById('evtCard');
+  card.innerHTML = `<button class="evt-close" id="evtCardClose">✕</button>
+    <h4>${escapeHtml(p.display_name_ru)} · ${escapeHtml(PARAM)} · ${escapeHtml(curTF)}</h4>
+    <div id="patternStatsBody"></div>`;
+  document.getElementById('evtCardClose').addEventListener('click', closeEventCard);
+  card.classList.add('on');
+  document.getElementById('evtBackdrop').classList.add('on');
+  if (window.innerWidth > 760) {
+    const w = 300;
+    const left = Math.max(10, Math.min(clickX - w / 2, window.innerWidth - w - 10));
+    card.style.left = left + 'px';
+    card.style.top = Math.min(clickY + 14, window.innerHeight - 120) + 'px';
+  }
+  const body = document.getElementById('patternStatsBody');
+  if (!window.sbfAuth || !window.sbfAuth.isLoggedIn()) {
+    body.innerHTML = `<div class="pulse-feed-lock">🔒 ${escapeHtml(t('chart.pattern_stats_locked', 'Доступно после регистрации'))}</div>`;
+    return;
+  }
+  window.sbfAuth.fetch(`/api/chart/pattern-stats?pattern=${encodeURIComponent(p.pattern_key)}&symbol=${encodeURIComponent(PARAM)}&tf=${encodeURIComponent(curTF)}`)
+    .then(r => r.status === 404 ? null : r.json())
+    .then(stats => {
+      if (!stats) return; // n<15 или нет данных — карточка без блока статистики
+      const histDate = new Date(stats.history_from_ts * 1000).toLocaleDateString(undefined, {year: 'numeric', month: 'long'});
+      const pct = Math.round(stats.agree_share_5 * 100);
+      body.innerHTML = `<div class="evt-reaction">
+        <div>${fmt_(t('chart.pattern_summary_tpl',
+          'Встречался {n} раз с {histDate}. В {pct}% случаев через 5 свечей цена двигалась в направлении паттерна. Средний ход — {avg} п., средний максимальный ход против — {adverse} п.'),
+          {n: stats.n, histDate, pct, avg: stats.avg_move_5.toFixed(1), adverse: stats.max_adverse_5.toFixed(1)})}</div>
+        <div class="evt-reaction-disclaimer">${escapeHtml(t('chart.reaction_disclaimer', 'Историческая статистика, не прогноз и не рекомендация.'))}</div>
+      </div>`;
     })
-    .map(e => {
-      const lw = _curData.lw[e.i];
-      if (!lw) return null;
-      const col = e.dir==='bull' ? '#2E8B6F' : e.dir==='bear' ? '#C0504D' : '#C9A227';
-      return {
-        time: lw.time,
-        position: e.dir==='bull' ? 'belowBar' : 'aboveBar',
-        color: col,
-        shape: e.dir==='bull' ? 'arrowUp' : e.dir==='bear' ? 'arrowDown' : 'circle',
-        text: e.label
-      };
-    }).filter(Boolean);
+    .catch(() => {});
 }
 
 function getSMCMarkers() {
@@ -309,6 +545,21 @@ function applyToggles() {
     _curLines = _curLines.concat(applySMCLines(smcEvts));
   }
 
+  // Исторические S/R-уровни (Layer 2, Фаза 1) — сплошная линия (пивоты — пунктир),
+  // толщина по числу касаний. lightweight-charts принимает только целые
+  // lineWidth 1..4 — округляем градацию спеки (1/1.5/2.5px) до ближайших шагов.
+  if (TOGGLES.lvl && _curLevels.length) {
+    _curLevels.forEach(L => {
+      const width = L.touches >= 5 ? 3 : L.touches >= 3 ? 2 : 1;
+      const color = L.kind === 'support' ? 'rgba(30,142,90,.6)'
+        : L.kind === 'resistance' ? 'rgba(192,57,43,.6)' : 'rgba(201,162,39,.6)';
+      _curLines.push(candleSeries.createPriceLine({
+        price: L.price, color, lineWidth: width, lineStyle: 0,
+        axisLabelVisible: true, title: '×' + L.touches
+      }));
+    });
+  }
+
   // Маркеры (свечные паттерны + SMC свинги)
   let markers = [];
   if (TOGGLES.cndl) markers = markers.concat(getCandleMarkers());
@@ -318,9 +569,1141 @@ function applyToggles() {
   updateTogHints();
 }
 
+// ── Слой событий календаря (Фаза 1, SBF_Charts_Layer1_Spec) ────────────────
+const TF_SEC = {M30:1800, H1:3600, H4:14400, D1:86400, W1:604800};
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// D1/W1-бары приходят от loadBars как business-day строки 'YYYY-MM-DD'
+// (см. web/data/ohlc_*_D1.json), M30/H1/H4 — как unix-секунды. LightweightCharts
+// требует ровно тот же тип Time, каким был засеян candleSeries.setData(), иначе
+// timeToCoordinate/getVisibleRange возвращают/принимают несовместимый формат.
+function barTimeToUnix(time) {
+  return typeof time === 'number' ? time : Math.floor(Date.parse(time + 'T00:00:00Z') / 1000);
+}
+function unixToBarTime(ts) {
+  return (curTF === 'D1' || curTF === 'W1') ? new Date(ts * 1000).toISOString().slice(0, 10) : ts;
+}
+
+// Координата X события: сначала через API графика (точный маппинг по барам),
+// с фолбэком на линейную интерполяцию по видимому диапазону — нужно для
+// будущих событий за пределами последнего бара (visible range расширен на
+// 6 баров вправо, см. setVisibleLogicalRange в drawOurs).
+function tsToX(ts, width) {
+  if (!chart) return null;
+  let x = chart.timeScale().timeToCoordinate(unixToBarTime(ts));
+  if (x != null) return x;
+  const vr = chart.timeScale().getVisibleRange();
+  if (!vr) return null;
+  const vrFrom = barTimeToUnix(vr.from), vrTo = barTimeToUnix(vr.to);
+  if (ts < vrFrom || ts > vrTo) return null;
+  // Найдено на Layer4 Ф2 (сделки у самого правого края графика не ловились
+  // кликом): интерполяция ДОЛЖНА идти по ширине именно временнОй панели
+  // (chart.timeScale().width()), а не по ширине всего #chartContainer —
+  // тот шире на гуттер шкалы цен справа (~60-90px), из-за чего у правого
+  // края интерполированная X съезжала В гуттер, где канвас-график уже не
+  // перехватывает клики. Тот же баг был бы и у real-time событий/зон за
+  // последним баром (видимый диапазон расширен на 6 баров — см. drawOurs),
+  // просто раньше не попадали в тестовые сценарии Layer1-3.
+  const paneWidth = chart.timeScale().width() || width;
+  return (ts - vrFrom) / (vrTo - vrFrom) * paneWidth;
+}
+
+// Кластеризация событий ближе 8px по X в один маркер (см. Acceptance спеки)
+function clusterEvents(items) {
+  // Кластеризация по ЯКОРЮ (первая точка кластера), не по последней добавленной —
+  // сравнение с последней даёт неограниченно расползающуюся "цепочку" при плотных
+  // равномерных событиях (тот же баг нашёлся и был исправлен в Layer2 —
+  // sr_levels_job.py._cluster/confluence_job.py._cluster_factors — там на реальных
+  // данных кластер растягивался в 18 раз шире заявенного допуска). Здесь риск ниже
+  // (события реже расставлены так же равномерно плотно, как ценовые уровни/пивоты),
+  // но тот же класс ошибки, поэтому чинится тем же способом.
+  const clusters = [];
+  let cur = null;
+  items.forEach(it => {
+    if (cur && (it.x - cur.x) < 8) {
+      cur.items.push(it.ev);
+    } else {
+      cur = {x: it.x, items: [it.ev]};
+      clusters.push(cur);
+    }
+  });
+  return clusters;
+}
+
+function fmtCountdown(ts) {
+  const diff = ts - Math.floor(Date.now() / 1000);
+  if (diff <= 0) return null;
+  const h = Math.floor(diff / 3600), m = Math.floor((diff % 3600) / 60);
+  if (h >= 24) return fmt_(t('chart.event_in_days_tpl', 'через {d}д {h}ч'), {d: Math.floor(h / 24), h: h % 24});
+  if (h > 0)   return fmt_(t('chart.event_in_hm_tpl', 'через {h}ч {m}м'), {h, m});
+  return fmt_(t('chart.event_in_m_tpl', 'через {m}м'), {m});
+}
+
+function actualDir(ev) {
+  const a = parseFloat(String(ev.actual).replace(',', '.'));
+  const f = parseFloat(String(ev.forecast).replace(',', '.'));
+  if (isNaN(a) || isNaN(f)) return '';
+  return a > f ? 'up' : a < f ? 'down' : '';
+}
+
+// ── «Прошлые разы» — Фаза 2 (SBF_Charts_Layer1_Spec) ────────────────────────
+function _reactionElId(ev) { return 'rx-' + String(ev.id).replace(/[^a-zA-Z0-9_-]/g, ''); }
+
+function reactionBlockHtml(ev) {
+  const id = _reactionElId(ev);
+  if (!window.sbfAuth || !window.sbfAuth.isLoggedIn()) {
+    return `<div class="evt-reaction locked" id="${id}">
+      <span class="evt-lock">🔒</span> ${t('chart.reaction_locked','Доступно после регистрации')}
+    </div>`;
+  }
+  return `<div class="evt-reaction loading" id="${id}">…</div>`;
+}
+
+function renderReactionStats(stats) {
+  const avg = stats.avg_move_60m != null ? stats.avg_move_60m.toFixed(0) : '—';
+  const max = stats.max_move_60m != null ? stats.max_move_60m.toFixed(0) : '—';
+  return `<div class="evt-reaction-title">${t('chart.reaction_title','Прошлые разы')}</div>
+    <div>${fmt_(t('chart.reaction_summary_tpl','Последние {n} публикаций: средний ход {sym} за час — {avg} п., максимум — {max} п.'),
+      {n: stats.n, sym: PARAM, avg, max})}</div>
+    <div class="evt-reaction-disclaimer">${t('chart.reaction_disclaimer','Историческая статистика, не прогноз и не рекомендация.')}</div>`;
+}
+
+function loadReactionBlock(ev) {
+  if (!window.sbfAuth || !window.sbfAuth.isLoggedIn() || !ev.event_type) return;
+  const el = document.getElementById(_reactionElId(ev));
+  if (!el) return;
+  window.sbfAuth.fetch(`/api/chart/event-reaction?event_type=${encodeURIComponent(ev.event_type)}&symbol=${encodeURIComponent(PARAM)}`)
+    .then(r => (r.status === 404 || !r.ok) ? null : r.json())
+    .then(data => {
+      const stats = data && (data.n6 || data.n12);
+      if (!stats) { el.remove(); return; }  // < 4 публикаций — карточка без блока, не с прочерками
+      el.classList.remove('loading');
+      el.innerHTML = renderReactionStats(stats);
+    })
+    .catch(() => { el.remove(); });
+}
+
+function singleEventHtml(ev) {
+  const dt = new Date(ev.ts * 1000);
+  const timeStr = dt.toLocaleString(undefined, {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'});
+  const countdown = fmtCountdown(ev.ts);
+  const dir = actualDir(ev);
+  return `<div class="evt-item">
+    <h4>${escapeHtml(ev.title)}</h4>
+    <div class="evt-meta">${escapeHtml(ev.currency || ev.country)} · ${timeStr}</div>
+    ${countdown ? `<div class="evt-countdown">${countdown}</div>` : ''}
+    <div class="evt-nums">
+      <div>${t('chart.event_forecast','Прогноз')}<b>${ev.forecast || '—'}</b></div>
+      <div>${t('chart.event_previous','Пред.')}<b>${ev.previous || '—'}</b></div>
+    </div>
+    ${ev.actual ? `<div class="evt-actual ${dir}">${escapeHtml(String(ev.actual))}</div>` : ''}
+    ${reactionBlockHtml(ev)}
+  </div>`;
+}
+
+function closeEventCard() {
+  document.getElementById('evtCard').classList.remove('on');
+  document.getElementById('evtBackdrop').classList.remove('on');
+}
+document.getElementById('evtBackdrop').addEventListener('click', closeEventCard);
+
+function openEventCard(items, clickX, clickY) {
+  const card = document.getElementById('evtCard');
+  card.innerHTML = `<button class="evt-close" id="evtCardClose">✕</button>` +
+    items.map(singleEventHtml).join('');
+  document.getElementById('evtCardClose').addEventListener('click', closeEventCard);
+  card.classList.add('on');
+  document.getElementById('evtBackdrop').classList.add('on');
+  if (window.innerWidth > 760) {
+    const w = 300;
+    const left = Math.max(10, Math.min(clickX - w / 2, window.innerWidth - w - 10));
+    card.style.left = left + 'px';
+    card.style.top = Math.min(clickY + 14, window.innerHeight - 120) + 'px';
+  }
+  items.forEach(loadReactionBlock);
+}
+
+function redrawEventLayer() {
+  const layer = document.getElementById('eventLayer');
+  if (!layer) return;
+  layer.innerHTML = '';
+  if (!TOGGLES.evt || !chart || !_curEvents.length) return;
+  const width = document.getElementById('chartContainer').clientWidth;
+  const items = _curEvents
+    .filter(ev => ev.importance !== 'low')
+    .map(ev => ({ev, x: tsToX(ev.ts, width)}))
+    .filter(it => it.x != null)
+    .sort((a, b) => a.x - b.x);
+  clusterEvents(items).forEach(cl => {
+    const hasHigh = cl.items.some(e => e.importance === 'high');
+
+    const line = document.createElement('div');
+    line.className = 'evt-line';
+    line.style.left = cl.x + 'px';
+    layer.appendChild(line);
+
+    const marker = document.createElement('div');
+    marker.className = 'evt-marker ' + (hasHigh ? 'high' : 'medium');
+    marker.style.left = cl.x + 'px';
+    if (cl.items.length > 1) {
+      const badge = document.createElement('span');
+      badge.className = 'evt-badge';
+      badge.textContent = '×' + cl.items.length;
+      marker.appendChild(badge);
+    }
+    marker.addEventListener('click', ev => {
+      ev.stopPropagation();
+      openEventCard(cl.items, ev.clientX, ev.clientY);
+    });
+    layer.appendChild(marker);
+  });
+}
+
+async function refreshEvents(tf) {
+  _curEvents = [];
+  if (_curData && _curData.lw.length) {
+    const bars = _curData.lw;
+    const from = barTimeToUnix(bars[0].time);
+    const to = barTimeToUnix(bars[bars.length - 1].time) + (TF_SEC[tf] || 86400) * 6;
+    try {
+      const r = await fetch(`/api/chart/events?symbol=${encodeURIComponent(PARAM)}&tf=${tf}&from=${from}&to=${to}`);
+      const data = await r.json();
+      if (Array.isArray(data)) _curEvents = data;
+    } catch (e) {}
+  }
+  redrawEventLayer();
+}
+
+function setupEventLayerObservers() {
+  const redrawBoth = () => { redrawEventLayer(); redrawNewsLayer(); redrawConfluenceLayer(); redrawSessionLayer(); redrawTradesLayer(); };
+  chart.timeScale().subscribeVisibleTimeRangeChange(redrawBoth);
+  if (_evtRO) { try { _evtRO.disconnect(); } catch (e) {} }
+  _evtRO = new ResizeObserver(redrawBoth);
+  _evtRO.observe(document.getElementById('chartContainer'));
+}
+
+// ── Новостные всплески — Фаза 3 (SBF_Charts_Layer1_Spec) ───────────────────
+// Как и координата события в Фазе 1, но зона (прямоугольник), а не точка —
+// клэмпим края к видимому окну графика (в отличие от tsToX, которая для
+// отдельного маркера просто скрывает точку за пределами видимости).
+function tsToXClamp(ts, width) {
+  if (!chart) return null;
+  // См. комментарий в tsToX — паровый баг: клэмп/интерполяция должны идти по
+  // ширине временнОй панели графика (без гуттера шкалы цен справа), не по
+  // ширине всего #chartContainer, иначе элементы у правого края съезжают в
+  // некликабельную зону шкалы цен.
+  const paneWidth = chart.timeScale().width() || width;
+  let x = chart.timeScale().timeToCoordinate(unixToBarTime(ts));
+  if (x != null) return Math.max(0, Math.min(paneWidth, x));
+  const vr = chart.timeScale().getVisibleRange();
+  if (!vr) return null;
+  const vrFrom = barTimeToUnix(vr.from), vrTo = barTimeToUnix(vr.to);
+  if (vrTo === vrFrom) return null;
+  const frac = (ts - vrFrom) / (vrTo - vrFrom);
+  return Math.max(0, Math.min(paneWidth, frac * paneWidth));
+}
+
+function renderNewsHeadlines(items) {
+  if (!items.length) {
+    return `<div class="evt-item">${escapeHtml(t('chart.news_empty', 'Заголовки не найдены.'))}</div>`;
+  }
+  return items.map(n => {
+    const dt = new Date(n.ts * 1000);
+    const timeStr = dt.toLocaleString(undefined, {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'});
+    return `<div class="evt-item">
+      <h4><a href="${escapeHtml(n.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(n.title)}</a></h4>
+      <div class="evt-meta">${escapeHtml(n.source || '')} · ${timeStr}</div>
+    </div>`;
+  }).join('');
+}
+
+function openNewsCard(startTs, endTs, clickX, clickY) {
+  const card = document.getElementById('evtCard');
+  card.innerHTML = `<button class="evt-close" id="evtCardClose">✕</button>
+    <h4>${escapeHtml(t('chart.news_burst_title', 'Всплеск новостей'))}</h4>
+    <div class="evt-meta" id="newsCardBody">…</div>`;
+  document.getElementById('evtCardClose').addEventListener('click', closeEventCard);
+  card.classList.add('on');
+  document.getElementById('evtBackdrop').classList.add('on');
+  if (window.innerWidth > 760) {
+    const w = 300;
+    const left = Math.max(10, Math.min(clickX - w / 2, window.innerWidth - w - 10));
+    card.style.left = left + 'px';
+    card.style.top = Math.min(clickY + 14, window.innerHeight - 120) + 'px';
+  }
+  fetch(`/api/chart/news?symbol=${encodeURIComponent(PARAM)}&from=${startTs}&to=${endTs}`)
+    .then(r => r.ok ? r.json() : [])
+    .then(items => {
+      const body = document.getElementById('newsCardBody');
+      if (body) body.outerHTML = `<div id="newsCardBody">${renderNewsHeadlines(Array.isArray(items) ? items : [])}</div>`;
+    })
+    .catch(() => {});
+}
+
+function redrawNewsLayer() {
+  const layer = document.getElementById('newsLayer');
+  if (!layer) return;
+  layer.innerHTML = '';
+  if (!TOGGLES.news || curTF === 'D1' || curTF === 'W1' || !chart || !_curNewsBursts.length) return;
+  const width = document.getElementById('chartContainer').clientWidth;
+  _curNewsBursts.forEach(b => {
+    const x1 = tsToXClamp(b.start_ts, width);
+    const x2 = tsToXClamp(b.end_ts, width);
+    if (x1 == null || x2 == null) return;
+    const left = Math.min(x1, x2), w = Math.max(2, Math.abs(x2 - x1));
+    const zone = document.createElement('div');
+    zone.className = 'news-zone';
+    zone.style.left = left + 'px';
+    zone.style.width = w + 'px';
+    zone.title = fmt_(t('chart.news_burst_hint_tpl', '{count} новостей (база {baseline})'),
+      {count: b.count, baseline: (b.avg_baseline || 0).toFixed(1)});
+    zone.addEventListener('click', ev => {
+      ev.stopPropagation();
+      openNewsCard(b.start_ts, b.end_ts, ev.clientX, ev.clientY);
+    });
+    layer.appendChild(zone);
+  });
+}
+
+async function refreshNewsBursts(tf) {
+  _curNewsBursts = [];
+  if (_curData && _curData.lw.length && tf !== 'D1' && tf !== 'W1') {
+    const bars = _curData.lw;
+    const from = barTimeToUnix(bars[0].time);
+    const to = barTimeToUnix(bars[bars.length - 1].time) + (TF_SEC[tf] || 86400) * 6;
+    try {
+      const r = await fetch(`/api/chart/news-bursts?symbol=${encodeURIComponent(PARAM)}&tf=${tf}&from=${from}&to=${to}`);
+      const data = await r.json();
+      if (Array.isArray(data)) _curNewsBursts = data;
+    } catch (e) {}
+  }
+  redrawNewsLayer();
+}
+
+// ── Исторические S/R-уровни — Layer 2, Фаза 1 (SBF_Charts_Layer2_Spec) ──────
+// Уровни не зависят от TF (цена одна), фетчатся один раз на symbol — но т.к.
+// весь chart.html пересоздаётся на каждую смену TF всё равно, просто дёргаем
+// заново вместе с остальным для простоты (см. drawOurs).
+async function refreshLevels() {
+  _curLevels = [];
+  try {
+    const r = await fetch(`/api/chart/levels?symbol=${encodeURIComponent(PARAM)}`);
+    const data = await r.json();
+    if (Array.isArray(data)) _curLevels = data;
+  } catch (e) {}
+}
+
+function fmtDaysAgo(ts) {
+  const days = Math.floor((Date.now() / 1000 - ts) / 86400);
+  if (days <= 0) return t('chart.today', 'сегодня');
+  if (days === 1) return t('chart.yesterday', 'вчера');
+  return fmt_(t('chart.days_ago_tpl', '{n} дней назад'), {n: days});
+}
+
+function findLevelAtY(y) {
+  if (!candleSeries || !_curLevels.length) return null;
+  let best = null, bestDist = 6; // px
+  _curLevels.forEach(L => {
+    const ly = candleSeries.priceToCoordinate(L.price);
+    if (ly == null) return;
+    const d = Math.abs(ly - y);
+    if (d <= bestDist) { bestDist = d; best = L; }
+  });
+  return best;
+}
+
+function openLevelCard(L, clickX, clickY) {
+  const card = document.getElementById('evtCard');
+  const kindLabel = L.kind === 'support' ? t('chart.level_support', 'поддержка')
+    : L.kind === 'resistance' ? t('chart.level_resistance', 'сопротивление')
+    : t('chart.level_flip', 'бывший уровень (роль сменилась)');
+  const lastTouchTxt = L.last_touch_ts ? fmtDaysAgo(L.last_touch_ts) : '—';
+  card.innerHTML = `<button class="evt-close" id="evtCardClose">✕</button>
+    <h4>${fmt_(t('chart.level_title_tpl', 'Уровень {price}'), {price: (+L.price).toLocaleString('en')})}</h4>
+    <div class="evt-meta">${escapeHtml(kindLabel)}</div>
+    <div>${fmt_(t('chart.level_summary_tpl', '{touches} касаний · держится {age} дней · последнее касание {lastTouch}'),
+      {touches: L.touches, age: L.age_days, lastTouch: lastTouchTxt})}</div>`;
+  document.getElementById('evtCardClose').addEventListener('click', closeEventCard);
+  card.classList.add('on');
+  document.getElementById('evtBackdrop').classList.add('on');
+  if (window.innerWidth > 760) {
+    const w = 300;
+    const left = Math.max(10, Math.min(clickX - w / 2, window.innerWidth - w - 10));
+    card.style.left = left + 'px';
+    card.style.top = Math.min(clickY + 14, window.innerHeight - 120) + 'px';
+  }
+}
+
+function findZoneAtY(y) {
+  if (!candleSeries || !_curConfluence.length) return null;
+  for (const z of _curConfluence) {
+    const yLo = candleSeries.priceToCoordinate(z.price_low);
+    const yHi = candleSeries.priceToCoordinate(z.price_high);
+    if (yLo == null || yHi == null) continue;
+    const top = Math.min(yLo, yHi), bot = Math.max(yLo, yHi);
+    if (y >= top && y <= bot) return z;
+  }
+  return null;
+}
+
+function openZoneCard(z, clickX, clickY) {
+  const card = document.getElementById('evtCard');
+  const factorsHtml = z.factors.map(f => `<div class="evt-item">${escapeHtml(f)}</div>`).join('');
+  card.innerHTML = `<button class="evt-close" id="evtCardClose">✕</button>
+    <h4>${fmt_(t('chart.zone_title_tpl', 'Зона внимания {low}–{high}'),
+      {low: (+z.price_low).toLocaleString('en'), high: (+z.price_high).toLocaleString('en')})}</h4>
+    ${factorsHtml}`;
+  document.getElementById('evtCardClose').addEventListener('click', closeEventCard);
+  card.classList.add('on');
+  document.getElementById('evtBackdrop').classList.add('on');
+  if (window.innerWidth > 760) {
+    const w = 300;
+    const left = Math.max(10, Math.min(clickX - w / 2, window.innerWidth - w - 10));
+    card.style.left = left + 'px';
+    card.style.top = Math.min(clickY + 14, window.innerHeight - 120) + 'px';
+  }
+}
+
+// Один обработчик кликов на чарт для уровней (Ф1) и зон внимания (Ф2) — сначала
+// точный хит по уровню (±6px), иначе более широкий хит по диапазону зоны,
+// чтобы клик не открывал сразу две карточки одна поверх другой.
+// Приоритет хит-теста: сделка (Layer4 Ф2 — личные данные пользователя, самый
+// высокий приоритет) → паттерн (самый точечный) → уровень (±6px по Y) → зона
+// (широкий диапазон Y) — иначе клик по паттерну внутри зоны открыл бы карточку
+// зоны вместо паттерна.
+function setupLevelClickHandler() {
+  chart.subscribeClick(param => {
+    if (!param.point) return;
+    const rect = document.getElementById('chart').getBoundingClientRect();
+    const x = rect.left + param.point.x, y = rect.top + param.point.y;
+    if (TOGGLES.trades) {
+      const T = findTradeAt(param.point.x, param.point.y);
+      if (T) { openTradeCard(T, x, y); return; }
+    }
+    if (TOGGLES.cndl) {
+      const P = findPatternAtX(param.point.x);
+      if (P) { openPatternCard(P, x, y); return; }
+    }
+    if (TOGGLES.lvl) {
+      const L = findLevelAtY(param.point.y);
+      if (L) { openLevelCard(L, x, y); return; }
+    }
+    if (TOGGLES.zone) {
+      const Z = findZoneAtY(param.point.y);
+      if (Z) { openZoneCard(Z, x, y); return; }
+    }
+  });
+}
+
+// ── Зоны внимания — Layer 2, Фаза 2 (SBF_Charts_Layer2_Spec) ────────────────
+async function refreshConfluence() {
+  _curConfluence = [];
+  try {
+    const r = await fetch(`/api/chart/confluence?symbol=${encodeURIComponent(PARAM)}`);
+    const data = await r.json();
+    if (Array.isArray(data)) _curConfluence = data;
+  } catch (e) {}
+}
+
+function redrawConfluenceLayer() {
+  const layer = document.getElementById('confluenceLayer');
+  if (!layer) return;
+  layer.innerHTML = '';
+  if (!TOGGLES.zone || !chart || !_curConfluence.length) return;
+  _curConfluence.forEach(z => {
+    const yLo = candleSeries.priceToCoordinate(z.price_low);
+    const yHi = candleSeries.priceToCoordinate(z.price_high);
+    if (yLo == null || yHi == null) return;
+    const top = Math.min(yLo, yHi), height = Math.max(2, Math.abs(yHi - yLo));
+    const band = document.createElement('div');
+    band.className = 'confluence-band ' + (z.score > 3.5 ? 'strong' : 'mid');
+    band.style.top = top + 'px';
+    band.style.height = height + 'px';
+    band.title = fmt_(t('chart.zone_hint_tpl', 'Зона внимания, score {score}'), {score: z.score});
+    band.addEventListener('click', ev => {
+      ev.stopPropagation();
+      openZoneCard(z, ev.clientX, ev.clientY);
+    });
+    layer.appendChild(band);
+  });
+}
+
+// ── Сессионная карта — Layer 3, Фаза 2 (SBF_Charts_Layer3_Spec) ────────────
+// DST-правила продублированы из core/sessions.py намеренно (см. комментарий
+// там) — нужно уметь считать границы для ЛЮБОГО видимого дня графика при
+// скролле в историю, не только для «сегодня», которое отдаёт API.
+let _curSessionProfile = []; // 24 значения avg_range из hourly_vol_profile
+
+function nthSundayUTC(year, month, n) {
+  const d0 = new Date(Date.UTC(year, month - 1, 1));
+  const firstSunDay = 1 + ((7 - d0.getUTCDay()) % 7);
+  return new Date(Date.UTC(year, month - 1, firstSunDay + (n - 1) * 7));
+}
+function lastSundayUTC(year, month) {
+  const lastDay = new Date(Date.UTC(year, month, 0));
+  const lastSunDay = lastDay.getUTCDate() - lastDay.getUTCDay();
+  return new Date(Date.UTC(year, month - 1, lastSunDay));
+}
+function isEuDst(dateUTC) {
+  const y = dateUTC.getUTCFullYear();
+  return dateUTC >= lastSundayUTC(y, 3) && dateUTC < lastSundayUTC(y, 10);
+}
+function isUsDst(dateUTC) {
+  const y = dateUTC.getUTCFullYear();
+  return dateUTC >= nthSundayUTC(y, 3, 2) && dateUTC < nthSundayUTC(y, 11, 1);
+}
+function sessionBoundsUtc(dateUTC) {
+  const london = isEuDst(dateUTC) ? [7, 16] : [8, 17];
+  const ny = isUsDst(dateUTC) ? [12, 21] : [13, 22];
+  return {asia: [0, 8], london, ny};
+}
+// Разбивка на неперекрывающиеся сегменты + отдельный сегмент перекрытия
+// Лондон+NY (спека требует его визуально плотнее, не просто альфа-блендинг).
+function sessionSegmentsForDate(dateUTC) {
+  const b = sessionBoundsUtc(dateUTC);
+  const segs = [{name: 'asia', from: b.asia[0], to: b.asia[1]}];
+  const ovFrom = Math.max(b.london[0], b.ny[0]), ovTo = Math.min(b.london[1], b.ny[1]);
+  if (ovFrom < ovTo) {
+    if (b.london[0] < ovFrom) segs.push({name: 'london', from: b.london[0], to: ovFrom});
+    segs.push({name: 'overlap', from: ovFrom, to: ovTo});
+    if (ovTo < b.ny[1]) segs.push({name: 'ny', from: ovTo, to: b.ny[1]});
+  } else {
+    segs.push({name: 'london', from: b.london[0], to: b.london[1]});
+    segs.push({name: 'ny', from: b.ny[0], to: b.ny[1]});
+  }
+  return segs;
+}
+
+function redrawSessionLayer() {
+  const layer = document.getElementById('sessionLayer');
+  if (!layer) return;
+  layer.innerHTML = '';
+  if (!TOGGLES.sess || !chart || !(curTF === 'M30' || curTF === 'H1')) return;
+  const width = document.getElementById('chartContainer').clientWidth;
+  const vr = chart.timeScale().getVisibleRange();
+  if (!vr) return;
+  const fromTs = barTimeToUnix(vr.from), toTs = barTimeToUnix(vr.to);
+  const dayStart0 = Math.floor(fromTs / 86400) * 86400 - 86400;
+  for (let dayStart = dayStart0; dayStart <= toTs + 86400; dayStart += 86400) {
+    const dateUTC = new Date(dayStart * 1000);
+    sessionSegmentsForDate(dateUTC).forEach(seg => {
+      const x1 = tsToXClamp(dayStart + seg.from * 3600, width);
+      const x2 = tsToXClamp(dayStart + seg.to * 3600, width);
+      if (x1 == null || x2 == null || x2 <= x1) return;
+      const div = document.createElement('div');
+      div.className = 'sess-band sess-' + seg.name;
+      div.style.left = x1 + 'px';
+      div.style.width = (x2 - x1) + 'px';
+      if (x2 - x1 > 60 && seg.name !== 'overlap') {
+        const label = document.createElement('span');
+        label.className = 'sess-label';
+        label.textContent = t('chart.sess_' + seg.name, seg.name);
+        div.appendChild(label);
+      }
+      layer.appendChild(div);
+    });
+  }
+}
+
+function renderHeatStrip() {
+  const wrap = document.getElementById('heatStripWrap');
+  const strip = document.getElementById('heatStrip');
+  if (!wrap || !strip) return;
+  const show = TOGGLES.sess && (curTF === 'M30' || curTF === 'H1') && _curSessionProfile.length > 0;
+  wrap.style.display = show ? 'block' : 'none';
+  strip.innerHTML = '';
+  if (!show) return;
+  const byHour = {};
+  _curSessionProfile.forEach(r => { byHour[r.hour_utc] = r.avg_range; });
+  const maxRange = Math.max(...Object.values(byHour), 1e-9);
+  for (let h = 0; h < 24; h++) {
+    const v = byHour[h];
+    const seg = document.createElement('div');
+    seg.className = 'hs-seg';
+    seg.style.opacity = v != null ? Math.max(0.08, v / maxRange) : 0.03;
+    seg.addEventListener('click', ev => openHeatStripCard(h, byHour, maxRange, ev.clientX, ev.clientY));
+    strip.appendChild(seg);
+  }
+}
+
+function openHeatStripCard(hour, byHour, maxRange, clickX, clickY) {
+  const card = document.getElementById('evtCard');
+  const v = byHour[hour];
+  let peakHour = null;
+  Object.keys(byHour).forEach(h => { if (peakHour == null || byHour[h] > byHour[peakHour]) peakHour = h; });
+  const rangeTxt = `${String(hour).padStart(2, '0')}:00–${String((hour + 1) % 24).padStart(2, '0')}:00 UTC`;
+  const bodyTxt = v == null
+    ? t('chart.heat_no_data', 'Недостаточно данных за это время суток.')
+    : (Number(peakHour) === hour
+        ? fmt_(t('chart.heat_peak_tpl', 'Исторически самый активный час {sym}'), {sym: PARAM})
+        : fmt_(t('chart.heat_pct_tpl', '{pct}% от самого активного часа'), {pct: Math.round(100 * v / maxRange)}));
+  card.innerHTML = `<button class="evt-close" id="evtCardClose">✕</button>
+    <h4>${escapeHtml(rangeTxt)}</h4>
+    <div>${escapeHtml(bodyTxt)}</div>
+    <div class="evt-reaction-disclaimer">${escapeHtml(t('chart.reaction_disclaimer', 'Историческая статистика, не прогноз и не рекомендация.'))}</div>
+    <div style="margin-top:10px"><a class="hs-edu-link" href="/edu/b/5" target="_blank" rel="noopener">${escapeHtml(t('chart.heat_edu_link', 'Почему так? → Глава 5: Глобальные Часы'))}</a></div>`;
+  document.getElementById('evtCardClose').addEventListener('click', closeEventCard);
+  card.classList.add('on');
+  document.getElementById('evtBackdrop').classList.add('on');
+  if (window.innerWidth > 760) {
+    const w = 300;
+    const left = Math.max(10, Math.min(clickX - w / 2, window.innerWidth - w - 10));
+    card.style.left = left + 'px';
+    card.style.top = Math.min(clickY + 14, window.innerHeight - 120) + 'px';
+  }
+}
+
+async function refreshSessions() {
+  _curSessionProfile = [];
+  try {
+    const r = await fetch(`/api/chart/sessions?symbol=${encodeURIComponent(PARAM)}`);
+    const data = await r.json();
+    if (data && Array.isArray(data.profile)) _curSessionProfile = data.profile;
+  } catch (e) {}
+  renderHeatStrip();
+}
+
+// ── Сентимент толпы vs цена — Layer 3, Фаза 3 (SBF_Charts_Layer3_Spec) ─────
+// Символы = sentiment_job.py STARTER_SYMBOLS (продублировано намеренно —
+// нужно решить "показывать ли панель вообще" ДО авторизованного запроса,
+// анониму нельзя узнать это через сам гейтованный /api/chart/sentiment).
+const SENTIMENT_SYMBOLS = new Set(['BTC', 'ETH', 'GOLD', 'SPX', 'EURUSD']);
+let _sentimentChart = null, _sentimentSeries = null, _sentimentExpanded = false, _curSentiment = null;
+
+// Строит данные для lightweight-charts с явными "whitespace"-точками
+// (объект без value) на пропущенных часах — иначе библиотека по умолчанию
+// плавно соединит соседние реальные точки прямой линией через пропуск.
+// Acceptance спеки: "час с total=3 — разрыв линии, не нулевая точка".
+function buildSentimentSeriesData(points) {
+  if (!points.length) return [];
+  const byHour = {};
+  points.forEach(p => { byHour[p.ts_hour] = p; });
+  const hours = points.map(p => p.ts_hour).sort((a, b) => a - b);
+  const out = [];
+  for (let h = hours[0]; h <= hours[hours.length - 1]; h += 3600) {
+    const p = byHour[h];
+    out.push(p ? {time: h, value: p.score} : {time: h});
+  }
+  return out;
+}
+
+function renderSentimentLocked() {
+  document.getElementById('sentimentBody').innerHTML =
+    `<div class="sentiment-lock">🔒 ${escapeHtml(t('chart.sentiment_locked', 'Доступно после регистрации'))}</div>`;
+}
+
+function openSentimentExplainCard(clickX, clickY) {
+  const card = document.getElementById('evtCard');
+  card.innerHTML = `<button class="evt-close" id="evtCardClose">✕</button>
+    <h4>${escapeHtml(t('chart.sentiment_divergence_title', 'Настроение и цена расходятся'))}</h4>
+    <div>${escapeHtml(t('chart.sentiment_divergence_explain',
+      'Соцсети по этому инструменту устойчиво смещены в одну сторону (бычью или медвежью), а цена за последние сутки почти не сдвинулась. Это наблюдение о текущем состоянии рынка, не сигнал и не прогноз — настроение толпы может остаться правым, а может и нет.'))}</div>
+    <div class="evt-reaction-disclaimer">${escapeHtml(t('chart.reaction_disclaimer', 'Историческая статистика, не прогноз и не рекомендация.'))}</div>`;
+  document.getElementById('evtCardClose').addEventListener('click', closeEventCard);
+  card.classList.add('on');
+  document.getElementById('evtBackdrop').classList.add('on');
+  if (window.innerWidth > 760) {
+    const w = 300;
+    const left = Math.max(10, Math.min(clickX - w / 2, window.innerWidth - w - 10));
+    card.style.left = left + 'px';
+    card.style.top = Math.min(clickY + 14, window.innerHeight - 120) + 'px';
+  }
+}
+
+function renderSentimentChart() {
+  const body = document.getElementById('sentimentBody');
+  if (!_curSentiment || !_curSentiment.points.length) return;
+  body.innerHTML = '<div id="sentimentChartEl" style="width:100%;height:100%"></div>';
+  if (_sentimentChart) { try { _sentimentChart.remove(); } catch (e) {} }
+  _sentimentChart = LightweightCharts.createChart(document.getElementById('sentimentChartEl'), {
+    autoSize: true,
+    layout: {background: {type: 'solid', color: '#FFFFFF'}, textColor: '#8A8275', fontFamily: 'JetBrains Mono', fontSize: 9},
+    grid: {vertLines: {visible: false}, horzLines: {visible: false}},
+    rightPriceScale: {borderVisible: false, scaleMargins: {top: 0.15, bottom: 0.15}},
+    timeScale: {visible: false, rightOffset: 6},
+    crosshair: {mode: LightweightCharts.CrosshairMode.Normal},
+    handleScroll: false, handleScale: false,
+  });
+  _sentimentSeries = _sentimentChart.addBaselineSeries({
+    baseValue: {type: 'price', price: 0},
+    topLineColor: '#1e8e5a', topFillColor1: 'rgba(30,142,90,.05)', topFillColor2: 'rgba(30,142,90,.05)',
+    bottomLineColor: '#c0392b', bottomFillColor1: 'rgba(192,57,43,.05)', bottomFillColor2: 'rgba(192,57,43,.05)',
+    lineWidth: 2, priceLineVisible: false, lastValueVisible: false,
+  });
+  _sentimentSeries.setData(buildSentimentSeriesData(_curSentiment.points));
+  _sentimentSeries.setMarkers(
+    _curSentiment.points.filter(p => p.total >= 30).map(p => ({
+      time: p.ts_hour, position: 'inBar', color: '#C9A227', shape: 'circle', size: 1.4,
+    }))
+  );
+  syncSentimentWithMain();
+}
+
+let _syncingSentiment = false;
+function syncSentimentWithMain() {
+  if (!chart || !_sentimentChart) return;
+  chart.timeScale().subscribeVisibleLogicalRangeChange(range => {
+    if (_syncingSentiment || !range || !_sentimentChart) return;
+    _syncingSentiment = true;
+    try { _sentimentChart.timeScale().setVisibleLogicalRange(range); } catch (e) {}
+    _syncingSentiment = false;
+  });
+  const mainRange = chart.timeScale().getVisibleLogicalRange();
+  if (mainRange) { try { _sentimentChart.timeScale().setVisibleLogicalRange(mainRange); } catch (e) {} }
+}
+
+async function refreshSentimentPanel() {
+  const panel = document.getElementById('sentimentPanel');
+  if (!SENTIMENT_SYMBOLS.has(PARAM)) { panel.style.display = 'none'; return; }
+  if (!window.sbfAuth || !window.sbfAuth.isLoggedIn()) {
+    panel.style.display = '';
+    document.getElementById('sentimentBadge').style.display = 'none';
+    if (_sentimentExpanded) renderSentimentLocked();
+    return;
+  }
+  try {
+    const from = Math.floor(Date.now() / 1000) - 7 * 86400;
+    const to = Math.floor(Date.now() / 1000);
+    const r = await window.sbfAuth.fetch(`/api/chart/sentiment?symbol=${encodeURIComponent(PARAM)}&from=${from}&to=${to}`);
+    if (r.status === 401) {
+      panel.style.display = '';
+      document.getElementById('sentimentBadge').style.display = 'none';
+      if (_sentimentExpanded) renderSentimentLocked();
+      return;
+    }
+    const data = await r.json();
+    if (!data.points || !data.points.length) { panel.style.display = 'none'; return; }
+    _curSentiment = data;
+    panel.style.display = '';
+    document.getElementById('sentimentBadge').style.display = data.divergence ? '' : 'none';
+    if (_sentimentExpanded) renderSentimentChart();
+  } catch (e) {
+    panel.style.display = 'none';
+  }
+}
+
+document.getElementById('sentimentHd').addEventListener('click', ev => {
+  if (ev.target.closest('#sentimentBadge')) {
+    openSentimentExplainCard(ev.clientX, ev.clientY);
+    return;
+  }
+  _sentimentExpanded = !_sentimentExpanded;
+  document.getElementById('sentimentBody').classList.toggle('on', _sentimentExpanded);
+  if (_sentimentExpanded) {
+    if (!window.sbfAuth || !window.sbfAuth.isLoggedIn()) renderSentimentLocked();
+    else if (_curSentiment) renderSentimentChart();
+  }
+});
+
+// ── Мои сделки — Layer 4, Фаза 2 (SBF_Charts_Layer4_Spec) ──────────────────
+// ЯДРО слоя (спека): точки входа/выхода на том же графике, где уровни/зоны/
+// события/сессии. ВАЖНО (найдено на Фазе 1, см. память/vault): trades.
+// exit_price/close_ts NOT NULL в схеме БД — открытых (незакрытых) сделок в
+// текущей модели данных не существует, только пост-фактум журнал закрытых.
+// Ветка "пунктирная линия до текущей цены" из спеки поэтому недостижима
+// сейчас (hasExit всегда true на практике) — код её поддерживает НА БУДУЩЕЕ
+// (если схема когда-то расширится), но живьём не бывает.
+const SVG_NS = 'http://www.w3.org/2000/svg';
+const MAX_TRADES_WITH_LINES = 50;
+let _curMyTrades = [];
+
+function svgEl(tag, attrs) {
+  const el = document.createElementNS(SVG_NS, tag);
+  for (const k in attrs) el.setAttribute(k, attrs[k]);
+  return el;
+}
+
+function updateTradesChipVisibility() {
+  const chip = document.querySelector('#tog [data-t="trades"]');
+  if (chip) chip.style.display = _curMyTrades.length ? '' : 'none';
+}
+
+function renderTradesTeaser() {
+  const teaser = document.getElementById('tradesTeaser');
+  if (!teaser) return;
+  const user = window.SBF && window.SBF.user;
+  if (!user || _curMyTrades.length) { teaser.style.display = 'none'; return; }
+  let dismissed = false;
+  try {
+    const layers = user.prefs && JSON.parse(user.prefs.chart_layers || '{}');
+    dismissed = !!(layers && layers.trades_teaser_dismissed);
+  } catch (e) {}
+  teaser.style.display = dismissed ? 'none' : '';
+}
+
+async function refreshMyTrades() {
+  _curMyTrades = [];
+  if (!window.sbfAuth || !window.sbfAuth.isLoggedIn()) {
+    updateTradesChipVisibility(); renderTradesTeaser(); return;
+  }
+  try {
+    const r = await window.sbfAuth.fetch(`/api/chart/my-trades?symbol=${encodeURIComponent(PARAM)}`);
+    if (r.ok) _curMyTrades = await r.json();
+  } catch (e) {}
+  updateTradesChipVisibility();
+  renderTradesTeaser();
+}
+
+function redrawTradesLayer() {
+  const layer = document.getElementById('tradesLayer');
+  if (!layer) return;
+  layer.innerHTML = '';
+  if (!TOGGLES.trades || !chart || !candleSeries || !_curMyTrades.length) return;
+  const width = document.getElementById('chartContainer').clientWidth;
+  const withLines = _curMyTrades.length <= MAX_TRADES_WITH_LINES;
+  _curMyTrades.forEach(tr => {
+    const ex = tsToXClamp(tr.entry_ts, width);
+    const ey = candleSeries.priceToCoordinate(tr.entry_price);
+    if (ex == null || ey == null) return;
+    const isLong = tr.direction === 'long';
+    const dirColor = isLong ? '#1e8e5a' : '#c0392b';
+    const hasExit = tr.exit_ts != null && tr.exit_price != null;
+    let exX = null, exY = null;
+    if (hasExit) {
+      exX = tsToXClamp(tr.exit_ts, width);
+      exY = candleSeries.priceToCoordinate(tr.exit_price);
+    }
+
+    if (withLines && hasExit && exX != null && exY != null) {
+      const lineColor = (tr.r == null || tr.r >= 0) ? '#1e8e5a' : '#c0392b';
+      const line = svgEl('line', {
+        x1: ex, y1: ey, x2: exX, y2: exY, stroke: lineColor, 'stroke-width': 1.4, opacity: 0.65,
+      });
+      if (!hasExit) line.setAttribute('stroke-dasharray', '4,3'); // будущее: открытая сделка (см. комментарий выше)
+      layer.appendChild(line);
+    }
+
+    if (tr.sl != null) {
+      const slY = candleSeries.priceToCoordinate(tr.sl);
+      if (slY != null) {
+        layer.appendChild(svgEl('line', {
+          x1: ex - 7, y1: slY, x2: ex + 7, y2: slY,
+          stroke: '#c0392b', 'stroke-width': 1.4, 'stroke-dasharray': '2,2',
+        }));
+      }
+    }
+    if (tr.tp != null) {
+      const tpY = candleSeries.priceToCoordinate(tr.tp);
+      if (tpY != null) {
+        layer.appendChild(svgEl('line', {
+          x1: ex - 7, y1: tpY, x2: ex + 7, y2: tpY,
+          stroke: '#1e8e5a', 'stroke-width': 1.4, 'stroke-dasharray': '2,2',
+        }));
+      }
+    }
+
+    const s = 5;
+    const tri = isLong
+      ? `${ex - s},${ey + s} ${ex + s},${ey + s} ${ex},${ey - s}`
+      : `${ex - s},${ey - s} ${ex + s},${ey - s} ${ex},${ey + s}`;
+    layer.appendChild(svgEl('polygon', {points: tri, fill: dirColor, stroke: '#fff', 'stroke-width': 1}));
+
+    if (hasExit && exX != null && exY != null) {
+      const q = 4;
+      layer.appendChild(svgEl('rect', {
+        x: exX - q, y: exY - q, width: q * 2, height: q * 2,
+        fill: '#2B2B33', stroke: '#fff', 'stroke-width': 1,
+      }));
+    }
+  });
+}
+
+function findTradeAt(px, py) {
+  if (!candleSeries || !_curMyTrades.length) return null;
+  const width = document.getElementById('chartContainer').clientWidth;
+  let best = null, bestDist = 8;
+  _curMyTrades.forEach(tr => {
+    [[tr.entry_ts, tr.entry_price], [tr.exit_ts, tr.exit_price]].forEach(([ts, price]) => {
+      if (ts == null || price == null) return;
+      // tsToXClamp — та же функция, что redrawTradesLayer() использует для
+      // РЕНДЕРА маркеров; tsToX (без клэмпа) возвращает null у самого края
+      // видимого диапазона и хит-тест не находил бы маркер, который
+      // визуально ЕСТЬ на экране (нашёл на реальных данных — синтетическая
+      // сделка у правого края текущего окна не открывала карточку по тапу).
+      const x = tsToXClamp(ts, width), y = candleSeries.priceToCoordinate(price);
+      if (x == null || y == null) return;
+      const d = Math.hypot(x - px, y - py);
+      if (d <= bestDist) { bestDist = d; best = tr; }
+    });
+  });
+  return best;
+}
+
+function fmtTradeDate(ts) {
+  return new Date(ts * 1000).toLocaleString(undefined, {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'});
+}
+
+function renderTradeContextHtml(ctx) {
+  if (!ctx) return '';
+  const lines = [];
+  if (ctx.event) {
+    lines.push(`<div>📅 ${fmt_(t('chart.trade_ctx_event_tpl', 'вход за {m} мин до {title}'), {m: Math.abs(ctx.event.minutes_before), title: escapeHtml(ctx.event.title)})}</div>`);
+  }
+  if (ctx.zone) {
+    lines.push(`<div>🎯 ${fmt_(t('chart.trade_ctx_zone_tpl', 'вход внутри зоны {low}–{high}'), {low: (+ctx.zone.price_low).toLocaleString('en'), high: (+ctx.zone.price_high).toLocaleString('en')})}</div>`);
+  }
+  if (ctx.session) {
+    const sessLabel = ctx.session === 'overlap'
+      ? t('chart.trade_ctx_session_overlap', 'перекрытие Лондон+NY')
+      : t('chart.sess_' + ctx.session, ctx.session);
+    lines.push(`<div>🕐 ${fmt_(t('chart.trade_ctx_session_tpl', 'сессия: {s}'), {s: sessLabel})}</div>`);
+  }
+  if (!lines.length) return '';
+  return `<div class="trade-context">${lines.join('')}</div>`;
+}
+
+function openTradeCard(tr, clickX, clickY) {
+  const card = document.getElementById('evtCard');
+  const dirLabel = tr.direction === 'long' ? t('chart.trade_long', 'Long') : t('chart.trade_short', 'Short');
+  const dirCls = tr.direction === 'long' ? 'up' : 'down';
+  const rTxt = tr.r != null ? (tr.r >= 0 ? '+' : '') + (+tr.r).toFixed(2) + 'R' : '—';
+  card.innerHTML = `<button class="evt-close" id="evtCardClose">✕</button>
+    <h4><span class="evt-actual ${dirCls}" style="font-size:14px">${escapeHtml(dirLabel)}</span> · ${escapeHtml(PARAM)}</h4>
+    <div class="evt-meta">${fmtTradeDate(tr.entry_ts)} → ${tr.exit_ts ? fmtTradeDate(tr.exit_ts) : t('chart.trade_open', 'открыта')}</div>
+    <div class="evt-nums">
+      <div>${t('chart.trade_entry', 'Вход')}<b>${(+tr.entry_price).toLocaleString('en')}</b></div>
+      <div>${t('chart.trade_exit', 'Выход')}<b>${tr.exit_price != null ? (+tr.exit_price).toLocaleString('en') : '—'}</b></div>
+      <div>R<b>${rTxt}</b></div>
+    </div>
+    ${tr.setup ? `<div class="evt-meta">${t('chart.trade_setup', 'Сетап')}: ${escapeHtml(tr.setup)}</div>` : ''}
+    ${tr.note ? `<div style="margin-top:6px;font-size:12px">${escapeHtml(tr.note)}</div>` : ''}
+    <div id="tradeCtxBody"></div>
+    <a href="/journal.html?trade=${tr.id}#trades" class="hs-edu-link" style="display:block;margin-top:10px">${escapeHtml(t('chart.trade_open_journal', 'Открыть в журнале →'))}</a>`;
+  document.getElementById('evtCardClose').addEventListener('click', closeEventCard);
+  card.classList.add('on');
+  document.getElementById('evtBackdrop').classList.add('on');
+  if (window.innerWidth > 760) {
+    const w = 300;
+    const left = Math.max(10, Math.min(clickX - w / 2, window.innerWidth - w - 10));
+    card.style.left = left + 'px';
+    card.style.top = Math.min(clickY + 14, window.innerHeight - 120) + 'px';
+  }
+  window.sbfAuth.fetch(`/api/chart/trade-context?trade_id=${tr.id}`)
+    .then(r => r.ok ? r.json() : null)
+    .then(ctx => {
+      const body = document.getElementById('tradeCtxBody');
+      if (body && ctx) body.innerHTML = renderTradeContextHtml(ctx);
+    })
+    .catch(() => {});
+}
+
+document.getElementById('tradesTeaserClose').addEventListener('click', () => {
+  document.getElementById('tradesTeaser').style.display = 'none';
+  if (window.sbfAuth && window.sbfAuth.isLoggedIn()) {
+    window.sbfAuth.fetch('/api/user/chart-prefs', {
+      method: 'PUT', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({layers: {trades_teaser_dismissed: true}}),
+    }).catch(() => {});
+    if (window.SBF && window.SBF.user && window.SBF.user.prefs) {
+      try {
+        const layers = JSON.parse(window.SBF.user.prefs.chart_layers || '{}');
+        layers.trades_teaser_dismissed = true;
+        window.SBF.user.prefs.chart_layers = JSON.stringify(layers);
+      } catch (e) {}
+    }
+  }
+});
+
+// ── Термометр дня — Layer 3, Фаза 1 (SBF_Charts_Layer3_Spec) ────────────────
+// Карточка не зависит от TF (day_thermo — снапшот раз в 5 мин на symbol),
+// поэтому refreshThermo() безопасно дергать при каждом drawOurs(tf) — дёшево,
+// не требует отдельного одноразового пути инициализации.
+let _curThermo = null;
+const THERMO_COLLAPSED_KEY = 'sbf_thermo_collapsed';
+// Символы с валидной cashtag-категорией в pulse_scores (см. серверный
+// day_thermo_job._PULSE_CATEGORY) — GOLD сознательно НЕ входит (коллизия
+// с акцией Barrick Gold Corp), поэтому его новостная лента идёт через другой
+// эндпоинт (см. openThermoNewsCard).
+const _PULSE_FEED_SYMBOLS = new Set(['BTC', 'ETH', 'SOL', 'SPX', 'NASDAQ', 'DJI']);
+
+// Построение HTML чипов вынесено в общий web/assets/sbf-thermo-widget.js
+// (SBF_Charts_Layer4_Spec, Фаза 4 — акцептанс требует "Термометр на «Твоём
+// дне» и на графике — один компонент, изменение в одном месте меняет оба",
+// не копию). Здесь остаётся только то, что специфично для интерактивного
+// графика — data-fetch (refreshThermo) и обработчики тапов (popup-карточки,
+// гистограммы) ниже.
+function renderThermo() {
+  const wrap = document.getElementById('thermoChips');
+  if (!_curThermo) { wrap.innerHTML = ''; return; }
+  wrap.innerHTML = window.SBFThermoWidget.buildChipsHtml(_curThermo, PARAM, {t, fmt: fmt_, esc: escapeHtml});
+  wrap.querySelectorAll('.thermo-chip').forEach(el => {
+    el.addEventListener('click', ev => onThermoChipClick(el.dataset.k, ev.clientX, ev.clientY));
+  });
+}
+
+function thermoHistCardHtml(title) {
+  return `<button class="evt-close" id="evtCardClose">✕</button>
+    <h4>${escapeHtml(title)}</h4>
+    <div class="thermo-hist" id="thermoHistBody"><span class="pulse-feed-lock">${escapeHtml(t('chart.loading', 'Загрузка…'))}</span></div>`;
+}
+
+function openThermoPopoverShell(title, clickX, clickY) {
+  const card = document.getElementById('evtCard');
+  card.innerHTML = thermoHistCardHtml(title);
+  document.getElementById('evtCardClose').addEventListener('click', closeEventCard);
+  card.classList.add('on');
+  document.getElementById('evtBackdrop').classList.add('on');
+  if (window.innerWidth > 760) {
+    const w = 300;
+    const left = Math.max(10, Math.min(clickX - w / 2, window.innerWidth - w - 10));
+    card.style.left = left + 'px';
+    card.style.top = Math.min(clickY + 14, window.innerHeight - 120) + 'px';
+  }
+}
+
+function renderThermoHist(rows) {
+  const body = document.getElementById('thermoHistBody');
+  if (!body) return;
+  if (!rows || !rows.length) { body.innerHTML = `<span class="pulse-feed-lock">—</span>`; return; }
+  const max = Math.max(...rows.map(r => r.v), 1e-9);
+  body.innerHTML = rows.map((r, i) => {
+    const h = Math.max(2, Math.round(100 * r.v / max));
+    const isToday = i === rows.length - 1;
+    return `<div class="bar${isToday ? ' today' : ''}" style="height:${h}%" title="${escapeHtml(new Date(r.ts * 1000).toLocaleDateString())}: ${r.v.toFixed(4)}"></div>`;
+  }).join('');
+}
+
+function openThermoHistCard(kind, clickX, clickY) {
+  const title = kind === 'dvol'
+    ? fmt_(t('chart.thermo_dvol_hist_title_tpl', 'DVOL {sym}, 90 дней'), {sym: PARAM})
+    : t('chart.thermo_range_hist_title', 'Диапазон дня, 60 дней');
+  openThermoPopoverShell(title, clickX, clickY);
+  fetch(`/api/chart/thermo-hist?symbol=${encodeURIComponent(PARAM)}&kind=${kind}`)
+    .then(r => r.ok ? r.json() : [])
+    .then(renderThermoHist)
+    .catch(() => renderThermoHist([]));
+}
+
+function openThermoNewsCard(clickX, clickY) {
+  const card = document.getElementById('evtCard');
+  card.innerHTML = `<button class="evt-close" id="evtCardClose">✕</button>
+    <h4>${escapeHtml(t('chart.thermo_news_hist_title', 'Новостной фон'))} · ${escapeHtml(PARAM)}</h4>
+    <div id="thermoNewsBody"></div>`;
+  document.getElementById('evtCardClose').addEventListener('click', closeEventCard);
+  card.classList.add('on');
+  document.getElementById('evtBackdrop').classList.add('on');
+  if (window.innerWidth > 760) {
+    const w = 300;
+    const left = Math.max(10, Math.min(clickX - w / 2, window.innerWidth - w - 10));
+    card.style.left = left + 'px';
+    card.style.top = Math.min(clickY + 14, window.innerHeight - 120) + 'px';
+  }
+  const body = document.getElementById('thermoNewsBody');
+  if (!window.sbfAuth || !window.sbfAuth.isLoggedIn()) {
+    body.innerHTML = `<div class="pulse-feed-lock">🔒 ${escapeHtml(t('chart.pattern_stats_locked', 'Доступно после регистрации'))}</div>`;
+    return;
+  }
+  // GOLD: pulse_scores содержит cashtag $GOLD — это акция Barrick Gold Corp,
+  // а не товар XAU/USD этого графика (та же коллизия, что уже обошли в
+  // day_thermo_job._PULSE_CATEGORY для новостного фона). /api/pulse/feed для
+  // GOLD подмешал бы новости про акцию в ленту по товару — используем вместо
+  // этого /api/chart/news (тот же источник news_instrument_tags, без cashtag-
+  // ветки), тот же формат айтемов {title,url,source,ts}, так что рендер общий.
+  const newsUrl = _PULSE_FEED_SYMBOLS.has(PARAM)
+    ? `/api/pulse/feed?symbol=${encodeURIComponent(PARAM)}`
+    : `/api/chart/news?symbol=${encodeURIComponent(PARAM)}&from=${Math.floor(Date.now() / 1000) - 14 * 86400}&to=${Math.floor(Date.now() / 1000)}`;
+  window.sbfAuth.fetch(newsUrl)
+    .then(r => r.json())
+    .then(items => {
+      if (!Array.isArray(items) || !items.length) { body.innerHTML = `<div class="pulse-feed-lock">—</div>`; return; }
+      // /api/pulse/feed сортирует по убыванию ts, /api/chart/news — по возрастанию
+      // (окно всплеска, там порядок не важен) — сортируем сами, чтобы не зависеть
+      // от конвенции конкретного источника.
+      const sorted = items.slice().sort((a, b) => b.ts - a.ts);
+      body.innerHTML = sorted.slice(0, 15).map(it => `<div class="evt-item">
+        <div>${it.url ? `<a href="${escapeHtml(it.url)}" target="_blank" rel="noopener">${escapeHtml(it.title)}</a>` : escapeHtml(it.title)}</div>
+        <div class="evt-meta">${escapeHtml(it.source || '')} · ${fmtDaysAgo(it.ts)}</div>
+      </div>`).join('');
+    })
+    .catch(() => { body.innerHTML = `<div class="pulse-feed-lock">—</div>`; });
+}
+
+function scrollToThermoZone() {
+  if (!chart) return;
+  if (!TOGGLES.zone) {
+    TOGGLES.zone = true;
+    document.querySelector('#tog [data-t="zone"]').classList.toggle('on', true);
+    applyToggles();
+  }
+  try { chart.timeScale().scrollToRealTime(); } catch (e) {}
+  redrawConfluenceLayer();
+  const layer = document.getElementById('confluenceLayer');
+  const bands = layer ? layer.querySelectorAll('.confluence-band') : [];
+  bands.forEach(b => {
+    b.classList.add('flash-highlight');
+    setTimeout(() => b.classList.remove('flash-highlight'), 1200);
+  });
+}
+
+function onThermoChipClick(key, clickX, clickY) {
+  if (!_curThermo) return;
+  if (key === 'vol') { openThermoHistCard('range', clickX, clickY); return; }
+  if (key === 'dvol') { openThermoHistCard('dvol', clickX, clickY); return; }
+  if (key === 'news') { openThermoNewsCard(clickX, clickY); return; }
+  if (key === 'evt') { if (_curThermo.next_event) openEventCard([_curThermo.next_event], clickX, clickY); return; }
+  if (key === 'zone') { scrollToThermoZone(); return; }
+}
+
+async function refreshThermo() {
+  _curThermo = null;
+  try {
+    const r = await fetch(`/api/chart/thermo?symbol=${encodeURIComponent(PARAM)}`);
+    if (r.ok) _curThermo = await r.json();
+  } catch (e) {}
+  renderThermo();
+}
+
+(function initThermoCollapse() {
+  const el = document.getElementById('thermo');
+  const chevron = document.getElementById('thermoChevron');
+  // title меняется местами со смыслом клика (свернуть/развернуть) -- держим
+  // отдельно от data-i18n-title, тот выставляется только один раз при
+  // _patchI18n(), а тут состояние динамическое и меняется от клика к клику.
+  function syncTitle(collapsed) {
+    chevron.title = collapsed
+      ? t('chart.thermo_expand_title', 'Развернуть панель показателей дня')
+      : t('chart.thermo_collapse_title', 'Свернуть панель показателей дня');
+  }
+  const collapsed = localStorage.getItem(THERMO_COLLAPSED_KEY) === '1';
+  el.classList.toggle('collapsed', collapsed);
+  syncTitle(collapsed);
+  // t() тут же на первом вызове почти всегда попадёт на русский fallback --
+  // assets/i18n.js подключён через defer и ещё не выполнился на этом месте
+  // кода (см. аналогичный комментарий у _patchI18n выше). Один раз досчитываем
+  // правильный текст, когда словарь готов -- как и остальной i18n на странице.
+  (window.sbfI18n
+    ? window.sbfI18n.ready
+    : new Promise(res => document.addEventListener('DOMContentLoaded', () =>
+        (window.sbfI18n ? window.sbfI18n.ready : Promise.resolve()).then(res)))
+  ).then(() => syncTitle(el.classList.contains('collapsed')));
+  chevron.addEventListener('click', () => {
+    const next = !el.classList.contains('collapsed');
+    el.classList.toggle('collapsed', next);
+    syncTitle(next);
+    localStorage.setItem(THERMO_COLLAPSED_KEY, next ? '1' : '0');
+  });
+})();
+
+// Живой countdown в чипе события — обновляем текст раз в 30с без рефетча данных.
+setInterval(() => { if (_curThermo) renderThermo(); }, 30000);
+
 // ── Главный рендер «Наш» ───────────────────────────────────────────────────
 async function drawOurs(tf) {
   curTF = tf;
+  // По умолчанию ON на M30/H1, OFF на H4+ (см. спеку Фазы 3) — пересчитывается
+  // заново при каждой смене TF, ручной выбор пользователя между TF не хранится.
+  TOGGLES.news = (tf === 'M30' || tf === 'H1');
+  document.querySelector('#tog [data-t="news"]').classList.toggle('on', TOGGLES.news);
+  // Зоны внимания: ON на H1-D1, OFF на M30 (шум) и W1 (масштаб) — см. Фаза 2 спеки.
+  TOGGLES.zone = !(tf === 'M30' || tf === 'W1');
+  document.querySelector('#tog [data-t="zone"]').classList.toggle('on', TOGGLES.zone);
+  // Сессионная карта: ON только на M30/H1 (см. Layer3 Фаза2 — на H4+/D1/W1 сутки
+  // сжаты слишком сильно, полосы сессий были бы неразличимы).
+  TOGGLES.sess = (tf === 'M30' || tf === 'H1');
+  document.querySelector('#tog [data-t="sess"]').classList.toggle('on', TOGGLES.sess);
   _curData = await SBFGrafik.loadBars(PARAM, tf);
   // Дождаться словаря i18n (если он есть) ДО построения текста — на первом
   // рендере этот async-код стартует раньше defer-скриптов (см. секцию i18n
@@ -357,6 +1740,7 @@ async function drawOurs(tf) {
   );
 
   // Инициализация LightweightCharts
+  if (chart) { try { chart.remove(); } catch(e){} }
   document.getElementById('chart').innerHTML = '';
   chart = LightweightCharts.createChart(document.getElementById('chart'), {
     autoSize: true,
@@ -381,12 +1765,41 @@ async function drawOurs(tf) {
   chart.priceScale('vol').applyOptions({scaleMargins:{top:0.86, bottom:0}});
   vol.setData(_curData.volume);
 
-  // Последние ~120 баров, история доступна прокруткой
+  // Последние ~120 баров, история доступна прокруткой — если пришли по
+  // ссылке из отчёта (focus=today, SBF_Charts_Layer4_Spec Ф3), сужаем до
+  // "сегодня + вчера" по реальным меткам времени баров (не фиксированным
+  // числом баров — надёжнее на FX-парах с гэпами по выходным).
   const n = _curData.lw.length;
-  chart.timeScale().setVisibleLogicalRange({from: Math.max(0, n-120), to: n+6});
+  let visFrom = Math.max(0, n - 120);
+  if (FOCUS_TODAY) {
+    const dayStart = Math.floor(Date.now() / 86400000) * 86400 - 86400; // начало вчера, UTC
+    const idx = _curData.lw.findIndex(b => barTimeToUnix(b.time) >= dayStart);
+    if (idx >= 0) visFrom = idx;
+  }
+  chart.timeScale().setVisibleLogicalRange({from: visFrom, to: n+6});
 
-  // Слои (пивоты/паттерны/SMC)
+  // Исторические S/R-уровни (Layer 2, Фаза 1) + паттерны (Фаза 3) — до
+  // applyToggles(), т.к. их рендер идёт оттуда же.
+  await refreshLevels();
+  await refreshPatterns(tf);
+
+  // Слои (пивоты/паттерны/SMC/уровни)
   applyToggles();
+
+  // События календаря (Фаза 1) + новостные всплески (Фаза 3) — по одному фетчу
+  // на symbol/tf каждый.
+  setupEventLayerObservers();
+  setupLevelClickHandler();
+  await refreshEvents(tf);
+  await refreshNewsBursts(tf);
+  await refreshConfluence();
+  redrawConfluenceLayer();
+  await refreshSessions();
+  redrawSessionLayer();
+  await refreshThermo();
+  await refreshSentimentPanel();
+  await refreshMyTrades();
+  redrawTradesLayer();
 }
 
 // ── Живая цена ─────────────────────────────────────────────────────────────
@@ -443,7 +1856,26 @@ document.getElementById('tog').addEventListener('click', e => {
   const t = e.target.dataset.t;
   TOGGLES[t] = !TOGGLES[t];
   e.target.classList.toggle('on', TOGGLES[t]);
+  if (t === 'evt') localStorage.setItem('sbf_chart_evt', TOGGLES.evt ? '1' : '0');
+  if (t === 'lvl') localStorage.setItem('sbf_chart_lvl', TOGGLES.lvl ? '1' : '0');
+  // SBF_Charts_Layer4_Spec, Фаза 1.4: зеркалим в user_prefs.chart_layers для
+  // залогиненных — вход с нового устройства восстановит настройку. Только
+  // evt/lvl — единственные ДЕЙСТВИТЕЛЬНО персистентные тогглы в этом файле
+  // (zone/news/sess пересчитываются заново на каждый TF по спекам Layer2/3
+  // Фаза 2/3 — намеренно TF-зависимы без persistence, синхронизировать в
+  // user_prefs было бы тихим нарушением ИХ acceptance-критериев).
+  if ((t === 'evt' || t === 'lvl') && window.sbfAuth && window.sbfAuth.isLoggedIn()) {
+    window.sbfAuth.fetch('/api/user/chart-prefs', {
+      method: 'PUT', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({layers: {evt: TOGGLES.evt, lvl: TOGGLES.lvl}}),
+    }).catch(() => {});
+  }
   applyToggles();
+  redrawEventLayer();
+  redrawNewsLayer();
+  redrawConfluenceLayer();
+  redrawSessionLayer();
+  renderHeatStrip();
 });
 
 function _reportHeight() {
@@ -452,10 +1884,64 @@ function _reportHeight() {
 }
 
 // ── Старт ───────────────────────────────────────────────────────────────────
-render('D1').then(() => {
+const _initialTF = FOCUS_TODAY ? _focusTodayTF() : 'D1';
+if (FOCUS_TODAY) {
+  document.querySelectorAll('#tf .tf').forEach(b => b.classList.toggle('on', b.dataset.tf === _initialTF));
+}
+render(_initialTF).then(() => {
   if (!startCryptoWS()) { pollQuotes(); setInterval(pollQuotes, 8000); }
   SBFGrafik.chartFullscreenButton(document.querySelector('.card'));
   _reportHeight();
+});
+
+// SBF_Charts_Layer4_Spec, Фаза 1.2.3: запомнить текущий инструмент как
+// последний просмотренный (fire-and-forget, не блокирует рендер графика).
+// _sbfLoadUserContext (sbf-header.js) может ещё не отработать в момент
+// загрузки страницы — ждём sbf:user-ready, а не проверяем isLoggedIn() сразу.
+document.addEventListener('sbf:user-ready', ev => {
+  if (!ev.detail) return; // анонимный визитёр
+  window.sbfAuth.fetch('/api/user/chart-prefs', {
+    method: 'PUT', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({last_symbol: PARAM}),
+  }).catch(() => {});
+});
+
+// SBF_Charts_Layer4_Spec, Фаза 1.4: восстановить сохранённые тогглы evt/lvl
+// с сервера (вход с нового устройства) — localStorage уже применён к TOGGLES
+// синхронно при определении начального состояния (см. `const TOGGLES =` выше),
+// но серверная версия для залогиненного пользователя имеет приоритет, раз уж
+// она пришла позже первого рендера — перерисовываем задетые слои, не весь график.
+document.addEventListener('sbf:user-ready', ev => {
+  if (!ev.detail) return;
+  const raw = ev.detail.prefs && ev.detail.prefs.chart_layers;
+  if (!raw) return;
+  let saved;
+  try { saved = JSON.parse(raw); } catch (e) { return; }
+  let changed = false;
+  if (typeof saved.evt === 'boolean' && saved.evt !== TOGGLES.evt) {
+    TOGGLES.evt = saved.evt;
+    localStorage.setItem('sbf_chart_evt', TOGGLES.evt ? '1' : '0');
+    changed = true;
+  }
+  if (typeof saved.lvl === 'boolean' && saved.lvl !== TOGGLES.lvl) {
+    TOGGLES.lvl = saved.lvl;
+    localStorage.setItem('sbf_chart_lvl', TOGGLES.lvl ? '1' : '0');
+    changed = true;
+  }
+  if (!changed) return;
+  document.querySelector('#tog [data-t="evt"]').classList.toggle('on', TOGGLES.evt);
+  document.querySelector('#tog [data-t="lvl"]').classList.toggle('on', TOGGLES.lvl);
+  applyToggles();
+  redrawEventLayer();
+});
+
+// SBF_Charts_Layer4_Spec, Фаза 2: drawOurs() на первом рендере мог отработать
+// ДО того, как auth-контекст пришёл (sbf:user-ready асинхронный) — тогда
+// _curMyTrades осталась бы пустой навсегда для только что вошедшего
+// пользователя без перезагрузки. Досчитываем при готовности контекста.
+document.addEventListener('sbf:user-ready', async ev => {
+  await refreshMyTrades();
+  redrawTradesLayer();
 });
 </script>
 </div><!-- /.chart-body -->
