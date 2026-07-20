@@ -154,6 +154,7 @@ body.embed .card{border-radius:0;box-shadow:none;border:none;max-width:100%}
 .thermo-chevron{border:1px solid var(--line);background:var(--paper);color:var(--muted);cursor:pointer;font-size:13px;width:26px;height:26px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:transform .15s,background .15s,color .15s}
 .thermo-chevron:hover{background:var(--grid);color:var(--ink)}
 .thermo.collapsed .thermo-chevron{transform:rotate(-90deg)}
+.thermo-hist-caption{font-size:11px;color:var(--muted);line-height:1.4;margin-top:4px}
 .thermo-hist{display:flex;align-items:flex-end;gap:2px;height:56px;margin:10px 0 4px}
 .thermo-hist .bar{flex:1;background:var(--line);border-radius:2px 2px 0 0;min-height:2px}
 .thermo-hist .bar.today{background:var(--gold)}
@@ -311,6 +312,16 @@ function t(key, fallback) {
   return i ? i.t(key, fallback) : (fallback || key);
 }
 function fmt_(tpl, vars) { return tpl.replace(/\{(\w+)\}/g, (_, k) => (vars[k] != null ? vars[k] : '')); }
+// Голый .toLocaleString('en') без опций режет дробную часть до 3 знаков
+// (дефолт Intl) -- для форекс-мажоров вроде EURUSD (нужен 4-й знак, пипс)
+// это схлопывало РАЗНЫЕ уровни (R2/R1/PP/S1/S2 и т.п.) в одинаковый текст
+// "1.14". Та же магнитудная эвристика, что и priceFormat графика ниже.
+function fmtPrice(v) {
+  if (v == null) return '—';
+  const av = Math.abs(+v);
+  const prec = av < 10 ? 4 : av < 1000 ? 2 : 1;
+  return (+v).toLocaleString('en', {minimumFractionDigits: prec, maximumFractionDigits: prec});
+}
 
 function _patchI18n(root) {
   if ((window.sbfI18n && window.sbfI18n.lang) === 'ru') return;
@@ -342,7 +353,7 @@ function buildExplain(meta, near) {
     ? fmt_(t('chart.pattern_spotted_tpl',' Замечен паттерн: <b>{list}</b>.'), {list: meta.patterns.join(', ')})
     : '';
   const mainLine = fmt_(t('chart.explain_main_tpl','Цена <b>{where} {name} {price}</b> — уровень, у которого исторически разворачивалась цена.'),
-    {where, name: near.name, price: (+near.price).toLocaleString('en')});
+    {where, name: near.name, price: fmtPrice(near.price)});
   const legendLine = t('chart.explain_legend','Красные линии сверху — сопротивление, зелёные снизу — поддержка, золотая — точка разворота.');
   const rsiLine = fmt_(t('chart.explain_rsi_tpl','RSI <b>{rsi}</b>.'), {rsi: rsiTxt});
   return `${mainLine}
@@ -666,7 +677,7 @@ function renderReactionStats(stats) {
   const avg = stats.avg_move_60m != null ? stats.avg_move_60m.toFixed(0) : '—';
   const max = stats.max_move_60m != null ? stats.max_move_60m.toFixed(0) : '—';
   return `<div class="evt-reaction-title">${t('chart.reaction_title','Прошлые разы')}</div>
-    <div>${fmt_(t('chart.reaction_summary_tpl','Последние {n} публикаций: средний ход {sym} за час — {avg} п., максимум — {max} п.'),
+    <div>${fmt_(t('chart.reaction_summary_tpl','За последние {n} публикаций {sym} в среднем двигался на {avg} п. в течение часа после выхода (максимум — {max} п.)'),
       {n: stats.n, sym: PARAM, avg, max})}</div>
     <div class="evt-reaction-disclaimer">${t('chart.reaction_disclaimer','Историческая статистика, не прогноз и не рекомендация.')}</div>`;
 }
@@ -712,7 +723,8 @@ document.getElementById('evtBackdrop').addEventListener('click', closeEventCard)
 
 function openEventCard(items, clickX, clickY) {
   const card = document.getElementById('evtCard');
-  card.innerHTML = `<button class="evt-close" id="evtCardClose">✕</button>` +
+  card.innerHTML = `<button class="evt-close" id="evtCardClose">✕</button>
+    <div class="thermo-hist-caption">${escapeHtml(t('chart.event_card_caption', 'Экономический релиз, способный сдвинуть цену. Прогноз/Пред. — ожидаемое и предыдущее значение показателя.'))}</div>` +
     items.map(singleEventHtml).join('');
   document.getElementById('evtCardClose').addEventListener('click', closeEventCard);
   card.classList.add('on');
@@ -922,7 +934,7 @@ function openLevelCard(L, clickX, clickY) {
     : t('chart.level_flip', 'бывший уровень (роль сменилась)');
   const lastTouchTxt = L.last_touch_ts ? fmtDaysAgo(L.last_touch_ts) : '—';
   card.innerHTML = `<button class="evt-close" id="evtCardClose">✕</button>
-    <h4>${fmt_(t('chart.level_title_tpl', 'Уровень {price}'), {price: (+L.price).toLocaleString('en')})}</h4>
+    <h4>${fmt_(t('chart.level_title_tpl', 'Уровень {price}'), {price: fmtPrice(L.price)})}</h4>
     <div class="evt-meta">${escapeHtml(kindLabel)}</div>
     <div>${fmt_(t('chart.level_summary_tpl', '{touches} касаний · держится {age} дней · последнее касание {lastTouch}'),
       {touches: L.touches, age: L.age_days, lastTouch: lastTouchTxt})}</div>`;
@@ -954,7 +966,7 @@ function openZoneCard(z, clickX, clickY) {
   const factorsHtml = z.factors.map(f => `<div class="evt-item">${escapeHtml(f)}</div>`).join('');
   card.innerHTML = `<button class="evt-close" id="evtCardClose">✕</button>
     <h4>${fmt_(t('chart.zone_title_tpl', 'Зона внимания {low}–{high}'),
-      {low: (+z.price_low).toLocaleString('en'), high: (+z.price_high).toLocaleString('en')})}</h4>
+      {low: fmtPrice(z.price_low), high: fmtPrice(z.price_high)})}</h4>
     ${factorsHtml}`;
   document.getElementById('evtCardClose').addEventListener('click', closeEventCard);
   card.classList.add('on');
@@ -1443,7 +1455,7 @@ function renderTradeContextHtml(ctx) {
     lines.push(`<div>📅 ${fmt_(t('chart.trade_ctx_event_tpl', 'вход за {m} мин до {title}'), {m: Math.abs(ctx.event.minutes_before), title: escapeHtml(ctx.event.title)})}</div>`);
   }
   if (ctx.zone) {
-    lines.push(`<div>🎯 ${fmt_(t('chart.trade_ctx_zone_tpl', 'вход внутри зоны {low}–{high}'), {low: (+ctx.zone.price_low).toLocaleString('en'), high: (+ctx.zone.price_high).toLocaleString('en')})}</div>`);
+    lines.push(`<div>🎯 ${fmt_(t('chart.trade_ctx_zone_tpl', 'вход внутри зоны {low}–{high}'), {low: fmtPrice(ctx.zone.price_low), high: fmtPrice(ctx.zone.price_high)})}</div>`);
   }
   if (ctx.session) {
     const sessLabel = ctx.session === 'overlap'
@@ -1464,8 +1476,8 @@ function openTradeCard(tr, clickX, clickY) {
     <h4><span class="evt-actual ${dirCls}" style="font-size:14px">${escapeHtml(dirLabel)}</span> · ${escapeHtml(PARAM)}</h4>
     <div class="evt-meta">${fmtTradeDate(tr.entry_ts)} → ${tr.exit_ts ? fmtTradeDate(tr.exit_ts) : t('chart.trade_open', 'открыта')}</div>
     <div class="evt-nums">
-      <div>${t('chart.trade_entry', 'Вход')}<b>${(+tr.entry_price).toLocaleString('en')}</b></div>
-      <div>${t('chart.trade_exit', 'Выход')}<b>${tr.exit_price != null ? (+tr.exit_price).toLocaleString('en') : '—'}</b></div>
+      <div>${t('chart.trade_entry', 'Вход')}<b>${fmtPrice(tr.entry_price)}</b></div>
+      <div>${t('chart.trade_exit', 'Выход')}<b>${tr.exit_price != null ? fmtPrice(tr.exit_price) : '—'}</b></div>
       <div>R<b>${rTxt}</b></div>
     </div>
     ${tr.setup ? `<div class="evt-meta">${t('chart.trade_setup', 'Сетап')}: ${escapeHtml(tr.setup)}</div>` : ''}
@@ -1534,15 +1546,16 @@ function renderThermo() {
   });
 }
 
-function thermoHistCardHtml(title) {
+function thermoHistCardHtml(title, caption) {
   return `<button class="evt-close" id="evtCardClose">✕</button>
     <h4>${escapeHtml(title)}</h4>
+    <div class="thermo-hist-caption">${escapeHtml(caption)}</div>
     <div class="thermo-hist" id="thermoHistBody"><span class="pulse-feed-lock">${escapeHtml(t('chart.loading', 'Загрузка…'))}</span></div>`;
 }
 
-function openThermoPopoverShell(title, clickX, clickY) {
+function openThermoPopoverShell(title, clickX, clickY, caption) {
   const card = document.getElementById('evtCard');
-  card.innerHTML = thermoHistCardHtml(title);
+  card.innerHTML = thermoHistCardHtml(title, caption);
   document.getElementById('evtCardClose').addEventListener('click', closeEventCard);
   card.classList.add('on');
   document.getElementById('evtBackdrop').classList.add('on');
@@ -1570,7 +1583,10 @@ function openThermoHistCard(kind, clickX, clickY) {
   const title = kind === 'dvol'
     ? fmt_(t('chart.thermo_dvol_hist_title_tpl', 'DVOL {sym}, 90 дней'), {sym: PARAM})
     : t('chart.thermo_range_hist_title', 'Диапазон дня, 60 дней');
-  openThermoPopoverShell(title, clickX, clickY);
+  const caption = kind === 'dvol'
+    ? t('chart.thermo_dvol_hist_caption', 'Каждый столбик — подразумеваемая волатильность за один день. Выше — рынок закладывал более резкие движения. Золотой столбик справа — сегодня.')
+    : t('chart.thermo_range_hist_caption', 'Каждый столбик — дневной диапазон (максимум−минимум) за один день. Выше — день был более волатильным. Золотой столбик справа — сегодня.');
+  openThermoPopoverShell(title, clickX, clickY, caption);
   fetch(`/api/chart/thermo-hist?symbol=${encodeURIComponent(PARAM)}&kind=${kind}`)
     .then(r => r.ok ? r.json() : [])
     .then(renderThermoHist)
@@ -1581,6 +1597,7 @@ function openThermoNewsCard(clickX, clickY) {
   const card = document.getElementById('evtCard');
   card.innerHTML = `<button class="evt-close" id="evtCardClose">✕</button>
     <h4>${escapeHtml(t('chart.thermo_news_hist_title', 'Новостной фон'))} · ${escapeHtml(PARAM)}</h4>
+    <div class="thermo-hist-caption">${escapeHtml(t('chart.thermo_news_hist_caption', 'Публикации по этому инструменту за последние дни — их количество и определяет счётчик «Новостной фон». Заголовки — с оригинальных источников, обычно на английском.'))}</div>
     <div id="thermoNewsBody"></div>`;
   document.getElementById('evtCardClose').addEventListener('click', closeEventCard);
   card.classList.add('on');
@@ -1715,7 +1732,7 @@ async function drawOurs(tf) {
   // Шапка
   document.getElementById('sym').textContent = m.label + ' · ' + m.interval;
   const pxEl = document.getElementById('px');
-  pxEl.textContent = m.last != null ? m.last.toLocaleString('en') : '—';
+  pxEl.textContent = m.last != null ? fmtPrice(m.last) : '—';
 
   // ВАЖНО: biasStr приходит из API/grafik-engine.js (SBFGrafik.calcBias) и
   // ВСЕГДА на русском (см. calcBias — возвращает 'бычья'/'медвежья'/'нейтр'
@@ -1732,7 +1749,7 @@ async function drawOurs(tf) {
 
   const near = m.nearest || SBFGrafik.nearestPivot(m.last, SBFGrafik.calcPivots(_curData.bars));
   document.getElementById('near').textContent = near
-    ? `${near.name} ${(+near.price).toLocaleString('en')} (${near.dist_pct > 0 ? '+' : ''}${near.dist_pct}%)`
+    ? `${near.name} ${fmtPrice(near.price)} (${near.dist_pct > 0 ? '+' : ''}${near.dist_pct}%)`
     : '—';
 
   document.getElementById('explain').innerHTML = buildExplain(
@@ -1753,9 +1770,19 @@ async function drawOurs(tf) {
       vertLine:{color:'#C9A227', labelBackgroundColor:'#C9A227'},
       horzLine:{color:'#C9A227', labelBackgroundColor:'#C9A227'}},
   });
+  // Без явного priceFormat Lightweight Charts берёт дефолт precision:2 —
+  // ось цены, ценовые линии (R2/R1/PP/S1/S2) и крестик показывали 1.14 для
+  // EURUSD вместо 1.1438, и несколько РАЗНЫХ уровней визуально схлопывались
+  // в одно и то же "1.14". Precision по порядку цены: форекс-мажоры вроде
+  // EURUSD (<10) нужен пипс = 4-й знак, JPY-пары/сырьё/VIX (10-1000) — 2-3,
+  // индексы/крипта/золото (>=1000) — 1-2. Точной карты по символам нет,
+  // магнитудная эвристика — простой и достаточно надёжный прокси.
+  const _refPx = Math.abs(m && m.last != null ? m.last : (_curData.lw.length ? _curData.lw[_curData.lw.length-1].close : 1));
+  const _pxPrecision = _refPx < 10 ? 4 : _refPx < 1000 ? 2 : 1;
   candleSeries = chart.addCandlestickSeries({
     upColor:'#1e8e5a', downColor:'#c0392b', borderVisible:false,
-    wickUpColor:'#1e8e5a', wickDownColor:'#c0392b'
+    wickUpColor:'#1e8e5a', wickDownColor:'#c0392b',
+    priceFormat: {type:'price', precision:_pxPrecision, minMove: 1/Math.pow(10,_pxPrecision)}
   });
   candleSeries.setData(_curData.lw);
   lastCandle = _curData.lw.length ? Object.assign({}, _curData.lw[_curData.lw.length-1]) : null;
@@ -1807,7 +1834,7 @@ function applyLive(price) {
   if (price == null) return;
   const pxEl = document.getElementById('px');
   const prev = parseFloat(pxEl.textContent.replace(/,/g,''));
-  pxEl.textContent = price.toLocaleString('en');
+  pxEl.textContent = fmtPrice(price);
   if (!isNaN(prev) && price !== prev) flash(pxEl, price > prev);
   if (lastCandle && candleSeries) {
     lastCandle.close = price;

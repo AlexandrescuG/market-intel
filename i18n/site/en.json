@@ -1159,7 +1159,7 @@
   "chart.event_in_days_tpl": "in {d}d {h}h",
   "chart.reaction_locked": "Available after registration",
   "chart.reaction_title": "Past releases",
-  "chart.reaction_summary_tpl": "Last {n} releases: average hourly move for {sym} — {avg} pts, max — {max} pts.",
+  "chart.reaction_summary_tpl": "Over the last {n} releases, {sym} moved {avg} pts on average within an hour of release (max — {max} pts)",
   "chart.reaction_disclaimer": "Historical statistics, not a forecast or recommendation.",
   "chart.news_toggle": "News",
   "chart.news_empty": "No headlines found.",
@@ -1357,5 +1357,9 @@
   "chart.thermo_zone_hint": "Distance in points to the nearest \"attention zone\" — a price range where price has historically reversed most often (shown as gold lines on the chart). The closer price gets to the zone, the higher the chance of a reaction.",
   "chart.thermo_zone_hint_empty": "No significant reversal zones found near the current price.",
   "chart.thermo_collapse_title": "Collapse the day's indicators panel",
-  "chart.thermo_expand_title": "Expand the day's indicators panel"
+  "chart.thermo_expand_title": "Expand the day's indicators panel",
+  "chart.thermo_range_hist_caption": "Each bar is one day's range (high−low). Taller — the day was more volatile. The gold bar on the right is today.",
+  "chart.thermo_dvol_hist_caption": "Each bar is one day's implied volatility. Taller — the market was pricing in sharper moves. The gold bar on the right is today.",
+  "chart.thermo_news_hist_caption": "Recent publications about this instrument — their count drives the \"News backdrop\" score. Headlines are from their original sources, usually in English.",
+  "chart.event_card_caption": "An economic release that could move the price. Forecast/Prev. — the expected and previous value of the indicator."
 }

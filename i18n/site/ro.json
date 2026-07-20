@@ -1159,7 +1159,7 @@
   "chart.event_in_days_tpl": "peste {d}z {h}h",
   "chart.reaction_locked": "Disponibil după înregistrare",
   "chart.reaction_title": "Ultimele publicații",
-  "chart.reaction_summary_tpl": "Ultimele {n} publicații: mișcarea medie pe oră pentru {sym} — {avg} p., maxim — {max} p.",
+  "chart.reaction_summary_tpl": "În ultimele {n} publicații, {sym} s-a mișcat în medie cu {avg} p. în ora de după publicare (maxim — {max} p.)",
   "chart.reaction_disclaimer": "Statistică istorică, nu este o prognoză sau recomandare.",
   "chart.news_toggle": "Știri",
   "chart.news_empty": "Nu s-au găsit titluri.",
@@ -1357,5 +1357,9 @@
   "chart.thermo_zone_hint": "Distanța în puncte până la cea mai apropiată „zonă de atenție” — un interval de preț unde prețul s-a inversat cel mai des istoric (pe grafic — liniile aurii). Cu cât prețul e mai aproape de zonă, cu atât crește șansa unei reacții.",
   "chart.thermo_zone_hint_empty": "Nu s-au găsit zone de inversare semnificative aproape de prețul curent.",
   "chart.thermo_collapse_title": "Restrângeți panoul indicatorilor zilei",
-  "chart.thermo_expand_title": "Extindeți panoul indicatorilor zilei"
+  "chart.thermo_expand_title": "Extindeți panoul indicatorilor zilei",
+  "chart.thermo_range_hist_caption": "Fiecare bară este intervalul zilei (maxim−minim) pentru o zi. Mai mare — ziua a fost mai volatilă. Bara aurie din dreapta — azi.",
+  "chart.thermo_dvol_hist_caption": "Fiecare bară este volatilitatea implicită pentru o zi. Mai mare — piața se aștepta la mișcări mai bruște. Bara aurie din dreapta — azi.",
+  "chart.thermo_news_hist_caption": "Publicații despre acest instrument din ultimele zile — numărul lor determină indicatorul „Fond de știri”. Titlurile provin din sursele originale, de obicei în engleză.",
+  "chart.event_card_caption": "Un eveniment economic care poate mișca prețul. Prognoză/Anterior — valoarea așteptată și cea anterioară a indicatorului."
 }
