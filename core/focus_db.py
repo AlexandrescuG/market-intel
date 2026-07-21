@@ -15,7 +15,7 @@ import sqlite3
 from datetime import date, datetime, timezone
 from pathlib import Path
 
-from core.focus import DEFAULT_UNIVERSE, NO_LIVE_FEED, FocusState
+from core.focus import DEFAULT_UNIVERSE, NO_LIVE_FEED, FocusState, anomaly, running_tr
 from core.sessions import us_dst_active
 
 _BOT_DB = Path("/mnt/sbfdata/sbf-platform/SBFAcademy_bot/bot.db")
@@ -232,3 +232,31 @@ def save_focus_state(state: FocusState) -> None:
 
 def today_str(now_utc: datetime | None = None) -> str:
     return (now_utc or datetime.now(timezone.utc)).strftime("%Y-%m-%d")
+
+
+def build_candidates(symbols: list[str], today: str) -> list[tuple[str, float | None]]:
+    """§10: "live = load_live(w.symbol); atr = load_atr_today(w.symbol); if
+    not live or live.session_state != 'open': continue; if atr is None:
+    continue; runningTR = ...; cands.append((w.symbol, runningTR/atr.atr))".
+    Общая сборка кандидатов для select_focus() -- используется и batch
+    (scope='default', current=None), и live (каждый scope) джобами, чтобы
+    фильтрация session_state/ATR не дублировалась в двух местах."""
+    con = _connect()
+    try:
+        out = []
+        for symbol in symbols:
+            live = con.execute(
+                "SELECT * FROM instrument_live WHERE symbol=?", (symbol,)
+            ).fetchone()
+            if not live or live["session_state"] != "open":
+                continue
+            atr_row = con.execute(
+                "SELECT * FROM atr_cache WHERE symbol=? AND date=?", (symbol, today)
+            ).fetchone()
+            if atr_row is None or atr_row["atr"] is None:
+                continue
+            tr = running_tr(live["day_high"], live["day_low"], atr_row["prev_close"])
+            out.append((symbol, anomaly(tr, atr_row["atr"])))
+        return out
+    finally:
+        con.close()
