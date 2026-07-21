@@ -185,6 +185,9 @@ def publish_charts() -> None:
         "EURUSD": "EURUSD=X", "GBPUSD": "GBPUSD=X",
         "SPX": "^GSPC", "NASDAQ": "^IXIC", "DJI": "^DJI",
         "WTI": "CL=F", "NG": "NG=F",
+        "DXY": "DX-Y.NYB",  # Focus Engine DEFAULT_UNIVERSE (core/focus.py) -- уже
+                            # в core.market.DASHBOARD/quotes.json, не хватало
+                            # только дневного OHLC для ATR.
     }
     # (period, interval) — глубина истории под прокрутку назад
     NATIVE = {
