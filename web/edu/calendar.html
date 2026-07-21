@@ -877,7 +877,13 @@ function renderRows(events){
     var imp = impCls(ev.impact);
     var flag = FLAGS[ev.country] || '🌐';
     var time = fmtTime(ev.ts_utc);
-    var key = eventKey(ev);
+    // Бэкенд уже кладёт свой event_key в саму запись (та же колонка, что
+    // группирует econ_event_history) -- используем его, а не пересчитываем
+    // свой slug: два независимых алгоритма НИКОГДА не совпадали (хэш на
+    // бэкенде vs текстовый slug тут), поэтому /api/event/{key}/history не
+    // находил вообще ничего, даже когда данные были. eventKey() оставлен
+    // только как аварийный фоллбек на случай отсутствующего поля.
+    var key = ev.event_key || eventKey(ev);
     var defSym = COUNTRY_SYM[ev.country] || 'EURUSD';
 
     var surpriseCls = '';
