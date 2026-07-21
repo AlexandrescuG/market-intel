@@ -50,7 +50,7 @@ if (new URLSearchParams(location.search).get("embed") === "1") {
 </script>
 <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Merriweather:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/design.css">
 <script src="/assets/i18n.js?v=2" defer></script>
 <script src="/assets/sbf-header.js?v=15" defer></script>
@@ -127,21 +127,25 @@ a:hover{text-decoration:underline;color:var(--glow)}
 .rep-instrument-link:hover{background:rgba(201,162,39,.12)}
 .personal-block{margin-bottom:14px;padding:10px 14px;border-radius:10px;background:rgba(201,162,39,.07);border:1px solid rgba(201,162,39,.18);font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.8;display:none}
 .personal-block b{color:var(--ink)}
-/* «В фокусе» — визуальный язык из раннего макета sbf_briefing_v1.html §03
-   (тикер-бейдж, цветной индикатор движения, disclaimer с левой чертой),
-   перенесён на уже существующую механику карточки (см. renderFocusCard) —
-   шрифты Montserrat/JetBrains Mono те же, что уже грузит вся страница,
-   Merriweather из макета не подключаем (использовался бы только здесь).
-   Скоуп через .focus-card, чтобы не задеть .panel-h h2 остальных панелей. */
-.focus-card .panel-h h2{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.22em;color:var(--muted)}
-.focus-item__head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:8px}
+/* «В фокусе» — sbf_briefing_v1.html §03. Первая попытка перенесла только
+   мелкие детали (бейдж/цвет) НА обычную карточку-панель сайта — то, из-за
+   чего макет выглядит спокойным, это как раз ОТСУТСТВИЕ рамки/фона/тени:
+   просто текст в потоке, с воздухом, без коробки. Поэтому здесь снимаем
+   .panel-оформление явно (осознанно расходится с остальными панелями
+   страницы — это правильно, макет тоже не похож на них). Merriweather
+   добавлен намеренно (только для .focus-item__body) — без него текст не
+   передаёт тот же спокойный editorial-тон, что в макете. */
+.focus-card.panel{background:transparent;border:none;box-shadow:none;border-radius:0;padding:26px 2px 30px;margin-bottom:6px;border-bottom:1px solid var(--line)}
+.focus-card .panel-h{margin-bottom:18px}
+.focus-card .panel-h h2{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.22em;color:var(--muted);text-transform:uppercase}
+.focus-item__head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:12px}
 .focus-item__tick{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px;letter-spacing:.06em;color:var(--ink);background:var(--grid);padding:3px 9px;border-radius:5px}
 .focus-item__move{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--muted)}
 .focus-item__move.up{color:var(--up)}
 .focus-item__move.down{color:var(--down)}
-.focus-item__body{font-size:15px;line-height:1.6;color:var(--ink)}
-.focus-disclaimer{font-family:'JetBrains Mono',monospace;font-size:10.5px;line-height:1.5;color:var(--faint);letter-spacing:.02em;margin-top:10px;padding-left:11px;border-left:2px solid var(--line)}
-.focus-link{font-family:'JetBrains Mono',monospace;font-size:12px;display:inline-block;margin-top:10px}
+.focus-item__body{font-family:'Merriweather',Georgia,serif;font-weight:300;font-size:17px;line-height:1.65;letter-spacing:-.005em;color:var(--ink)}
+.focus-disclaimer{font-family:'JetBrains Mono',monospace;font-size:10.5px;line-height:1.5;color:var(--faint);letter-spacing:.02em;margin-top:16px;padding-left:11px;border-left:2px solid var(--line)}
+.focus-link{font-family:'JetBrains Mono',monospace;font-size:12px;display:inline-block;margin-top:16px}
 .personal-block a{color:inherit;text-decoration:none}
 .personal-block a:hover{text-decoration:underline}
 .personal-block .pb-sep{color:var(--muted);margin:0 8px}
