@@ -28,7 +28,11 @@
     return av < 1 ? v.toFixed(4) : av < 10 ? v.toFixed(2) : Math.round(v).toLocaleString('en');
   }
   function weekdayShort(ts) {
-    return new Date(ts * 1000).toLocaleDateString(undefined, {weekday: 'short'});
+    // toLocaleDateString(undefined, ...) берёт локаль БРАУЗЕРА, а не выбранный
+    // язык сайта -- день недели всегда был на английском независимо от ru/ro/en.
+    const lang = (window.sbfI18n && window.sbfI18n.lang) || 'ru';
+    const locale = lang === 'ro' ? 'ro-RO' : lang === 'en' ? 'en-GB' : 'ru-RU';
+    return new Date(ts * 1000).toLocaleDateString(locale, {weekday: 'short'});
   }
   function fmtCountdown(ts, t) {
     const diff = ts - Math.floor(Date.now() / 1000);
@@ -66,17 +70,24 @@
 
     const now = Date.now() / 1000;
     const within48h = data.next_event_ts && (data.next_event_ts - now) > 0 && (data.next_event_ts - now) <= 172800;
-    let evVal;
+    // Метка чипа тоже зависит от состояния -- иначе "Ближайшее событие: Спокоен
+    // до Tue" читается как бессмыслица (значение говорит "нет события", а
+    // подпись утверждает обратное). "Календарь" корректно подходит к обеим
+    // веткам ниже (и "спокоен до ...", и "календарь спокоен").
+    let evVal, evLabel;
     if (within48h && data.next_event) {
       const cd = fmtCountdown(data.next_event_ts, t);
       evVal = esc(data.next_event.title || data.next_event.event_type) + (cd ? ' · ' + cd : '');
+      evLabel = t('chart.thermo_event_label', 'Ближайшее событие');
     } else if (data.next_event_ts) {
       evVal = fmt(t('chart.thermo_calm_until_tpl', 'Спокоен до {day}'), {day: weekdayShort(data.next_event_ts)});
+      evLabel = t('chart.thermo_calendar_label', 'Календарь');
     } else {
       evVal = t('chart.thermo_calm', 'Календарь спокоен');
+      evLabel = t('chart.thermo_calendar_label', 'Календарь');
     }
-    const chip3 = thermoChipHtml('evt', t('chart.thermo_event_label', 'Ближайшее событие'), evVal, '', '', esc,
-      t('chart.thermo_event_hint', 'Ближайший важный экономический релиз или выступление, способные резко сдвинуть цену. Нажмите, чтобы посмотреть, как инструмент реагировал на это событие раньше.'));
+    const chip3 = thermoChipHtml('evt', evLabel, evVal, '', '', esc,
+      t('chart.thermo_event_hint', 'Ближайший важный экономический релиз или выступление, способные резко сдвинуть цену. Если рядом ничего нет — показываем, до какого дня спокойно. Нажмите, чтобы посмотреть, как инструмент реагировал на такие события раньше.'));
 
     let chip4;
     if (data.dvol_pctl != null) {
