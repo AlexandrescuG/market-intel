@@ -176,3 +176,48 @@
    остальные цветовые решения в этой миграции (см. tokens.css). Критерий
    приёмки Этапа 5 (переключение таймфреймов/режимов, live-обновление,
    индикатор Live) не упоминает цвет свечей вовсе. */
+
+/* ===== Этап 6 — Библиотека паттернов (риск: высокий, последний) =====
+   #techLib — существующий id (index.html-only, chart.html этот блок не
+   содержит вовсе, см. отдельную проверку grep). #gTabs/#gPills —
+   существующие id-обёртки категорий/паттернов, их .chip-кнопки (класс
+   "gpill chip"/"gpill chip gcat") создаёт buildGTabs()/buildGPills() в
+   index.html — переиспользуют общий .chip из design.css, но #gTabs/
+   #gPills делают выбор уникальным, никакой другой .chip на странице не
+   заденут. .g-chart/.gschool/.greplay/.ghead-row/.gex-*/.gfoot-note — все
+   уникальны для этой панели (проверено grep, не встречаются на
+   chart.html и не переиспользуются другими блоками index.html).
+   Собственно SVG-отрисовка образца внутри #gChart (grafik-engine.js:
+   ITEMS/CATS/.build(), палитра P.up/P.down/P.gold и т.д.) не тронута —
+   у неё СВОЯ, отдельная от --up/--down палитра (P.up:#2E8B6F ≠
+   --up:#1e8e5a), и спека прямо требует не трогать движок отрисовки;
+   меняется только окружающая обёртка. .gex-card оставлены с лёгкой
+   рамкой (не как .rep-sec/Focus — там de-box уместен для одной
+   вертикальной ленты секций, здесь три карточки в ряд и рамка нужна,
+   чтобы визуально разделить колонки). */
+[data-design="v2"] #techLib .panel-h h2{
+  font-family:var(--f-disp);font-size:11px;font-weight:600;
+  letter-spacing:.22em;color:var(--ink-2);text-transform:uppercase;
+}
+[data-design="v2"] #gTabs .chip,
+[data-design="v2"] #gPills .chip{
+  font-family:var(--f-data);letter-spacing:.04em;
+  border-color:var(--rule);border-radius:2px;
+}
+[data-design="v2"] .g-chart{
+  background:var(--paper-2);border-color:var(--rule);border-radius:4px;
+}
+[data-design="v2"] .gschool{border-color:var(--rule);border-radius:2px}
+[data-design="v2"] .gschool-lbl{font-family:var(--f-data);letter-spacing:.12em}
+[data-design="v2"] .greplay{
+  font-family:var(--f-disp);font-weight:600;font-size:11px;
+  letter-spacing:.06em;text-transform:uppercase;
+  border-color:var(--rule);border-radius:2px;
+}
+[data-design="v2"] .ghead-row h3{font-family:var(--f-disp);font-weight:700}
+[data-design="v2"] .ghead-row .gprov{font-family:var(--f-data);letter-spacing:.12em}
+[data-design="v2"] .gex-card{
+  background:var(--paper-2);border-color:var(--rule);border-radius:4px;
+}
+[data-design="v2"] .gex-lbl{font-family:var(--f-data);letter-spacing:.14em}
+[data-design="v2"] .gfoot-note{font-family:var(--f-data);letter-spacing:.02em}
