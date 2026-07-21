@@ -127,6 +127,21 @@ a:hover{text-decoration:underline;color:var(--glow)}
 .rep-instrument-link:hover{background:rgba(201,162,39,.12)}
 .personal-block{margin-bottom:14px;padding:10px 14px;border-radius:10px;background:rgba(201,162,39,.07);border:1px solid rgba(201,162,39,.18);font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.8;display:none}
 .personal-block b{color:var(--ink)}
+/* «В фокусе» — визуальный язык из раннего макета sbf_briefing_v1.html §03
+   (тикер-бейдж, цветной индикатор движения, disclaimer с левой чертой),
+   перенесён на уже существующую механику карточки (см. renderFocusCard) —
+   шрифты Montserrat/JetBrains Mono те же, что уже грузит вся страница,
+   Merriweather из макета не подключаем (использовался бы только здесь).
+   Скоуп через .focus-card, чтобы не задеть .panel-h h2 остальных панелей. */
+.focus-card .panel-h h2{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.22em;color:var(--muted)}
+.focus-item__head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:8px}
+.focus-item__tick{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px;letter-spacing:.06em;color:var(--ink);background:var(--grid);padding:3px 9px;border-radius:5px}
+.focus-item__move{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--muted)}
+.focus-item__move.up{color:var(--up)}
+.focus-item__move.down{color:var(--down)}
+.focus-item__body{font-size:15px;line-height:1.6;color:var(--ink)}
+.focus-disclaimer{font-family:'JetBrains Mono',monospace;font-size:10.5px;line-height:1.5;color:var(--faint);letter-spacing:.02em;margin-top:10px;padding-left:11px;border-left:2px solid var(--line)}
+.focus-link{font-family:'JetBrains Mono',monospace;font-size:12px;display:inline-block;margin-top:10px}
 .personal-block a{color:inherit;text-decoration:none}
 .personal-block a:hover{text-decoration:underline}
 .personal-block .pb-sep{color:var(--muted);margin:0 8px}
@@ -675,7 +690,8 @@ const I18N_REPORT = {
   focusHeadlineTpl: {{ t('home.focus_headline_tpl', lang) | tojson }},
   focusCalm: {{ t('home.focus_calm', lang) | tojson }},
   focusPinnedNote: {{ t('home.focus_pinned_note', lang) | tojson }},
-  focusViewChart: {{ t('home.focus_view_chart', lang) | tojson }}
+  focusViewChart: {{ t('home.focus_view_chart', lang) | tojson }},
+  focusDisclaimer: {{ t('home.focus_disclaimer', lang) | tojson }}
 };
 function renderReport(r){
   const el=document.getElementById('report');
@@ -816,27 +832,47 @@ async function renderFocusCard() {
     const data = r.ok ? await r.json() : null;
     if (!data) { card.style.display = 'none'; return; }
 
-    let html;
+    if (data.source === 'calm' || !data.symbol) {
+      body.innerHTML = `<div class="focus-item__body">${I18N_REPORT.focusCalm}</div>`;
+      card.style.display = 'block';
+      return;
+    }
+
+    // Бейдж тикер + движение — визуальный язык из раннего макета
+    // sbf_briefing_v1.html §03 (item__tick/item__move), перенесённый на уже
+    // рабочую механику карточки. Движение не часть буквальной спеки §9 --
+    // last/change_pct добавлены в /api/focus поверх спеки, т.к. данные уже
+    // были в instrument_live, не хватало только отдать их наружу.
+    const tick = `<span class="focus-item__tick">${escapeHtmlIdx(data.symbol)}</span>`;
+    let move = '';
+    if (data.change_pct != null) {
+      const sign = data.change_pct > 0 ? '+' : '';
+      const dir = data.change_pct > 0 ? 'up' : data.change_pct < 0 ? 'down' : '';
+      const pct = (_PAGE_LANG === 'en' ? data.change_pct.toFixed(2) : data.change_pct.toFixed(2).replace('.', ','));
+      const priceStr = data.last != null
+        ? ' · ' + (_PAGE_LANG === 'en' ? data.last : String(data.last).replace('.', ','))
+        : '';
+      move = `<span class="focus-item__move ${dir}">${sign}${pct}%${priceStr}</span>`;
+    }
+
+    let bodyText;
     if (data.source === 'pin') {
-      html = `<div class="focus-line"><b>${escapeHtmlIdx(data.name || data.symbol || '')}</b></div>
-        <div class="focus-note">${I18N_REPORT.focusPinnedNote}</div>`;
-    } else if (data.source === 'calm' || !data.symbol) {
-      html = `<div class="focus-note">${I18N_REPORT.focusCalm}</div>`;
+      bodyText = I18N_REPORT.focusPinnedNote;
     } else if (data.has_llm_analysis && data.analysis) {
-      html = `<div class="focus-line"><b>${escapeHtmlIdx(data.name || data.symbol)}</b></div>
-        <div class="focus-analysis">${escapeHtmlIdx(data.analysis)}</div>`;
+      bodyText = escapeHtmlIdx(data.analysis);
     } else {
       // §9: "{mult} — с запятой-десятичным (ru), 1 знак" -- ro тоже запятая
       // (та же конвенция, что родной язык), en -- точка (стандартный english).
       const mult = data.anomaly != null
         ? (_PAGE_LANG === 'en' ? data.anomaly.toFixed(1) : data.anomaly.toFixed(1).replace('.', ','))
         : '';
-      const headline = fmt_(I18N_REPORT.focusHeadlineTpl, {name: data.name || data.symbol, mult: mult});
-      html = `<div class="focus-line">${escapeHtmlIdx(headline)}</div>`;
+      bodyText = escapeHtmlIdx(fmt_(I18N_REPORT.focusHeadlineTpl, {name: data.name || data.symbol, mult: mult}));
     }
-    if (data.symbol) {
-      html += `<a class="focus-link" href="/chart.html?s=${encodeURIComponent(data.symbol)}&focus=today">${I18N_REPORT.focusViewChart} →</a>`;
-    }
+
+    let html = `<div class="focus-item__head">${tick}${move}</div>
+      <div class="focus-item__body">${bodyText}</div>
+      <div class="focus-disclaimer">${I18N_REPORT.focusDisclaimer}</div>
+      <a class="focus-link" href="/chart.html?s=${encodeURIComponent(data.symbol)}&focus=today">${I18N_REPORT.focusViewChart} →</a>`;
     body.innerHTML = html;
     card.style.display = 'block';
   } catch (e) {

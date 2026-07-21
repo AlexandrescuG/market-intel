@@ -1712,11 +1712,13 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             if pinned_raw:
                 pinned_sym = to_chart_symbol(pinned_raw) or pinned_raw
                 inst = focus_db.load_instrument(pinned_sym)
+                last, change_pct = self._focus_move(pinned_sym, inst)
                 self._send_json({
                     "symbol": pinned_sym, "name": inst["name"] if inst else pinned_sym,
                     "anomaly": None, "session_state": None,
                     "headline": "Фокус закреплён вручную.", "source": "pin",
                     "has_llm_analysis": False, "analysis": None, "updated_at": now_ts,
+                    "last": last, "change_pct": change_pct,
                 })
                 return
 
@@ -1739,7 +1741,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                     "symbol": None, "name": None, "anomaly": None, "session_state": None,
                     "headline": "Рынок спокоен — ни один инструмент не выходит за пределы нормы.",
                     "source": "calm", "has_llm_analysis": False, "analysis": None,
-                    "updated_at": state.decided_at,
+                    "updated_at": state.decided_at, "last": None, "change_pct": None,
                 })
                 return
 
@@ -1768,13 +1770,30 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                         analysis = None
                 has_llm = analysis is not None
 
+            last, change_pct = self._focus_move(state.symbol, inst)
             self._send_json({
                 "symbol": state.symbol, "name": name, "anomaly": state.anomaly,
                 "session_state": session_state, "headline": headline, "source": state.source,
                 "has_llm_analysis": has_llm, "analysis": analysis, "updated_at": state.decided_at,
+                "last": last, "change_pct": change_pct,
             })
         except Exception as e:
             self._send_json({"error": str(e)}, 500)
+
+    def _focus_move(self, symbol: str, inst) -> tuple[float | None, float | None]:
+        """Текущая цена (округлённая по instrument.decimals) + дневное
+        изменение в % от day_open -- для бейджа "тикер · движение" на
+        карточке (визуальный ориентир из sbf_briefing_v1.html §03, не часть
+        буквальной спеки §9, но данные уже есть в instrument_live)."""
+        live = focus_db.load_instrument_live(symbol)
+        if not live or live["last"] is None:
+            return None, None
+        decimals = inst["decimals"] if inst and inst["decimals"] is not None else 2
+        last = round(live["last"], decimals)
+        change_pct = None
+        if live["day_open"]:
+            change_pct = round((live["last"] - live["day_open"]) / live["day_open"] * 100, 2)
+        return last, change_pct
 
     def _handle_chart_thermo_hist(self) -> None:
         """SBF_Charts_Layer3_Spec, Фаза 1: мини-гистограмма по тапу на чип
