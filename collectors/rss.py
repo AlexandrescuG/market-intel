@@ -72,6 +72,18 @@ def collect() -> tuple[int, list[dict]]:
             title = (e.get("title") or "").strip()
             summary = (e.get("summary") or "").strip()
             text = summary[:600]
+            # Google News ("Google News: EURUSD" и т.п.) — это агрегатор, а не
+            # издание: каждый entry несёт свой <source> (реальный публикатор,
+            # напр. "Reuters"), а title приходит вида "Заголовок - Publisher".
+            # Показываем реального публикатора вместо "Google News: ..." и
+            # убираем дублирующий суффикс из заголовка.
+            source_hint = name
+            gsrc = e.get("source")
+            if gsrc and gsrc.get("title"):
+                source_hint = gsrc["title"].strip()
+                suffix = f" - {source_hint}"
+                if title.endswith(suffix):
+                    title = title[: -len(suffix)].strip()
             blob = f"{title}\n{text}"
             er = scoring.econ_relevance(blob)
             if er < STORE_MIN_ECON_RELEVANCE:
@@ -84,7 +96,7 @@ def collect() -> tuple[int, list[dict]]:
                 text=text,
                 url=e.get("link", ""),
                 engagement=0,
-                topic_hint=name,
+                topic_hint=source_hint,
                 raw={"published": _entry_time(e)},
             )
             saved += 1

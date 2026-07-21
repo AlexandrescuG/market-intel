@@ -80,5 +80,36 @@ RSS_FEEDS = {
     "Interfax":       "https://www.interfax.ru/rss.asp",
     # markets EN econ
     "Investing.com":  "https://www.investing.com/rss/news_25.rss",
+    # форекс-специализированные (проверены curl -- отдают ленту)
+    "FXStreet":       "https://www.fxstreet.com/rss/news",
+    "ForexLive":      "https://www.forexlive.com/feed/news",
+    # крипто-специализированные
+    "CoinDesk":       "https://www.coindesk.com/arc/outboundfeeds/rss/",
+    "CoinTelegraph":  "https://cointelegraph.com/rss",
+    # центробанки напрямую (официальные пресс-релизы, без интерпретации)
+    "Fed press":      "https://www.federalreserve.gov/feeds/press_all.xml",
+    "ECB press":      "https://www.ecb.europa.eu/rss/press.html",
+    "BoE press":      "https://www.bankofengland.co.uk/rss/news",
 }
+
+# Google News "поиск как RSS-лента" -- агрегирует тысячи изданий по ключевому
+# слову вместо одного конкретного сайта (см. rss.py: entry.source.title даёт
+# РЕАЛЬНОГО публикатора каждой статьи, не "Google News"). when:2d -- не тащить
+# старые вечнозелёные SEO-статьи, коллектор и так опрашивает раз в 20 мин.
+def _google_news(query: str) -> str:
+    from urllib.parse import quote_plus
+    return (f"https://news.google.com/rss/search?q={quote_plus(query)}+when:2d"
+            f"&hl=en-US&gl=US&ceid=US:en")
+
+GOOGLE_NEWS_TOPICS = {
+    "Google News: EURUSD":  "EURUSD",
+    "Google News: GBPUSD":  "GBPUSD",
+    "Google News: USDJPY":  "USDJPY",
+    "Google News: Gold":    "gold price",
+    "Google News: Oil":     "WTI crude oil",
+    "Google News: Bitcoin": "Bitcoin",
+    "Google News: Fed":     "Federal Reserve",
+    "Google News: ECB":     "ECB interest rate",
+}
+RSS_FEEDS.update({name: _google_news(q) for name, q in GOOGLE_NEWS_TOPICS.items()})
 RSS_TREND_WINDOW_HOURS = int(os.getenv("RSS_TREND_WINDOW_HOURS", "24"))
