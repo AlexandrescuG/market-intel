@@ -1151,6 +1151,7 @@
   "chart.hint_pivots": "<b>Pivots</b> — support/resistance levels calculated from the highs and lows of previous periods. <span style=\"color:#1e8e5a\">Green</span> — support (S1, S2), <span style=\"color:#c0392b\">red</span> — resistance (R1, R2), <span style=\"color:#C9A227\">gold</span> — the pivot point (PP).",
   "chart.hint_patterns": "<b>Patterns</b> — notable candlestick formations over the last 40 bars. ↑ green arrow — bullish signal (hammer, bullish engulfing, etc.), ↓ red — bearish (harami, bearish engulfing, etc.), ● yellow — neutral (doji). Context, not a trade signal.",
   "chart.hint_smc": "<b>SMC — market structure:</b> <b>HH</b> (Higher High) — a new high above the previous one, uptrend; <b>HL</b> (Higher Low) — the pullback doesn't break the previous low, uptrend; <b>LH</b> (Lower High) — a high below the previous one, weakness; <b>LL</b> (Lower Low) — a new low, downtrend. <b>BOS</b> — break of structure (confirmation); <b>OB</b> — Order Block, a zone of large orders; <b>FVG</b> — a liquidity gap that price often fills.",
+  "chart.hint_levels": "<b>Levels</b> — historical support/resistance zones from past price reversals (not today's pivots). A number like <b>×30</b> is how many times price reversed at that level: more touches — stronger level. Only the 6 strongest are shown to avoid clutter — the rest appear when you click a nearby level. Click the line for details.",
   "chart.events_toggle": "Events",
   "chart.event_forecast": "Forecast",
   "chart.event_previous": "Prev.",

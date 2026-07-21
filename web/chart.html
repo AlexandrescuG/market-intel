@@ -293,6 +293,7 @@ let _curLines = [];            // priceLine refs (для удаления)
 let _curEvents = [];           // события календаря для текущего symbol/tf (Фаза 1)
 let _curNewsBursts = [];       // зоны новостных всплесков для текущего symbol/tf (Фаза 3)
 let _curLevels = [];           // исторические S/R-уровни для текущего symbol (Layer 2, Фаза 1)
+let _curLevelsShown = [];      // после top-N фильтра — то, что реально нарисовано (для хит-теста клика)
 let _curConfluence = [];       // зоны внимания для текущего symbol (Layer 2, Фаза 2)
 let _curPatterns = [];         // паттерны из core.patterns.detect() (Layer 2, Фаза 3)
 let _curPatternsShown = [];    // после дедупликации — то, что реально на графике (для хит-теста клика)
@@ -520,6 +521,7 @@ function getTogHints() {
     piv: t('chart.hint_pivots', '<b>Пивоты</b> — уровни поддержки/сопротивления, рассчитанные по хаям и лоям предыдущих периодов. <span style="color:#1e8e5a">Зелёные</span> — поддержка (S1, S2), <span style="color:#c0392b">красные</span> — сопротивление (R1, R2), <span style="color:#C9A227">золотая</span> — точка разворота PP.'),
     cndl: t('chart.hint_patterns', '<b>Паттерны</b> — значимые свечные формации на последних 40 барах. ↑ зелёная стрелка — бычий сигнал (молот, бычье поглощение и др.), ↓ красная — медвежий (харами, медвежье поглощение и др.), ● жёлтый — нейтральный (доджи). Не сигнал к сделке, контекст.'),
     smc: t('chart.hint_smc', '<b>SMC — структура рынка:</b> <b>HH</b> (Higher High) — новый максимум выше предыдущего, тренд вверх; <b>HL</b> (Higher Low) — откат не пробивает предыдущий лой, тренд вверх; <b>LH</b> (Lower High) — максимум ниже предыдущего, слабость; <b>LL</b> (Lower Low) — новый минимум, тренд вниз. <b>BOS</b> — пробой структуры (подтверждение); <b>OB</b> — Order Block, зона крупных ордеров; <b>FVG</b> — разрыв ликвидности, цена часто его закрывает.'),
+    lvl: t('chart.hint_levels', '<b>Уровни</b> — исторические зоны поддержки/сопротивления по прошлым разворотам цены (не текущие пивоты). Число вида <b>×30</b> — сколько раз цена разворачивалась у этого уровня: больше касаний — сильнее уровень. Показаны только 6 самых сильных, чтобы не перегружать график — остальные видны при клике на близкий уровень. Нажмите на линию для деталей.'),
   };
 }
 
@@ -560,7 +562,16 @@ function applyToggles() {
   // толщина по числу касаний. lightweight-charts принимает только целые
   // lineWidth 1..4 — округляем градацию спеки (1/1.5/2.5px) до ближайших шагов.
   if (TOGGLES.lvl && _curLevels.length) {
-    _curLevels.forEach(L => {
+    // При широком лукбэке (2+ года) уровни нередко ложатся кучно (в 20-30
+    // пунктах друг от друга) -- на масштабе всей истории их подписи на оси
+    // визуально слипаются в нечитаемую кашу. Показываем только top-N по
+    // числу касаний (сила уровня), остальные остаются в данных (доступны
+    // через API/openLevelCard), просто не рисуются линией здесь.
+    const MAX_LEVEL_LINES = 6;
+    _curLevelsShown = _curLevels.slice()
+      .sort((a, b) => b.touches - a.touches)
+      .slice(0, MAX_LEVEL_LINES);
+    _curLevelsShown.forEach(L => {
       const width = L.touches >= 5 ? 3 : L.touches >= 3 ? 2 : 1;
       const color = L.kind === 'support' ? 'rgba(30,142,90,.6)'
         : L.kind === 'resistance' ? 'rgba(192,57,43,.6)' : 'rgba(201,162,39,.6)';
@@ -569,6 +580,8 @@ function applyToggles() {
         axisLabelVisible: true, title: '×' + L.touches
       }));
     });
+  } else {
+    _curLevelsShown = [];
   }
 
   // Маркеры (свечные паттерны + SMC свинги)
@@ -916,9 +929,9 @@ function fmtDaysAgo(ts) {
 }
 
 function findLevelAtY(y) {
-  if (!candleSeries || !_curLevels.length) return null;
+  if (!candleSeries || !_curLevelsShown.length) return null;
   let best = null, bestDist = 6; // px
-  _curLevels.forEach(L => {
+  _curLevelsShown.forEach(L => {
     const ly = candleSeries.priceToCoordinate(L.price);
     if (ly == null) return;
     const d = Math.abs(ly - y);
