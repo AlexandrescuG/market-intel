@@ -1,20 +1,36 @@
 """Static server + /api/quotes proxy + /edu book renderer.
 JSX компилируется серверно при старте (Node.js + Babel). Браузер получает чистый JS."""
+import glob
 import http.server
 import json
+import math
 import re
 import sqlite3
 import subprocess
 import socketserver
 import os
 import sys
-from datetime import datetime
+import time
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from urllib.parse import urlparse, parse_qs
 
 # Journal modules (добавляем core/ в path)
 sys.path.insert(0, str(Path(__file__).parent))
 from core import journal_db, journal_crypto, journal_ocr, journal_csv, journal_meta, journal_discipline, journal_alerts, journal_brief, journal_setups, journal_tilt, journal_gamification, journal_goals, journal_account, journal_auth, journal_feedback, journal_import, journal_analytics, journal_review, journal_cooldown, i18n
+from core.event_types import normalize_event_type
+from core.config import DB_PATH as _SIGNALS_DB
+from core.patterns import PATTERNS, detect as _detect_patterns
+from day_thermo_job import _load_d1 as _thermo_load_d1, _range_series as _thermo_range_series, \
+    _dvol_series as _thermo_dvol_series, CRYPTO_SYMBOLS as _THERMO_CRYPTO, \
+    DVOL_CURRENCIES as _THERMO_DVOL_CCY
+from core.sessions import session_bounds_utc, session_at
+from core.journal_symbols import to_chart_symbol, chart_symbol_aliases
+from core import focus_db
+from core.focus import DEFAULT_UNIVERSE, select_focus
+from core.sentiment_lexicon import detect_divergence
+from sr_levels_job import _atr14, _load_d1_candles
+from sentiment_job import STARTER_SYMBOLS as _SENTIMENT_SYMBOLS
 
 from jinja2 import Environment, FileSystemLoader
 from markupsafe import Markup
@@ -24,12 +40,29 @@ DIRECTORY = os.path.join(os.path.dirname(os.path.abspath(__file__)), "web")
 BOOK_DIR = Path(__file__).parent / "web" / "book"
 EDU_DIR  = Path(__file__).parent / "web" / "edu"
 WEB_DIR  = Path(__file__).parent / "web"
+
+
+def _chart_symbols() -> set:
+    """Список инструментов графика — те же 15, что day_thermo_job.py/
+    sr_levels_job.py используют как "все инструменты" (glob по ohlc_*_D1.json).
+    SBF_Charts_Layer4_Spec, Фаза 1.3: валидация ватчлиста ДОЛЖНА идти против
+    этого списка, не journal_brief.get_available_symbols() (тот читает
+    price_bars — другой, гораздо более узкий и по-другому именованный набор:
+    XAUUSD вместо GOLD, нет крипты/индексов/commodities вовсе — не тот домен)."""
+    return {Path(f).stem.replace("ohlc_", "").replace("_D1", "")
+            for f in glob.glob(str(WEB_DIR / "data" / "ohlc_*_D1.json"))}
 _BOT_DB  = Path("/mnt/sbfdata/sbf-platform/SBFAcademy_bot/bot.db")
 
 _COUNTRY_SYM = {
     "US": "EURUSD", "EU": "EURUSD", "EA": "EURUSD",
     "GB": "GBPUSD", "JP": "USDJPY", "CN": "USDCNY",
     "RU": "USDRUB", "ZA": "USDZAR", "AE": "USDAED", "KZ": "USDKZT",
+}
+
+_COUNTRY_CURRENCY = {
+    "US": "USD", "EU": "EUR", "EA": "EUR", "GB": "GBP", "JP": "JPY",
+    "CN": "CNY", "RU": "RUB", "ZA": "ZAR", "AE": "AED", "KZ": "KZT",
+    "CA": "CAD", "AU": "AUD", "NZ": "NZD", "CH": "CHF",
 }
 
 def _ensure_schema() -> None:
@@ -55,6 +88,16 @@ def _ensure_schema() -> None:
             pips REAL, true_range REAL, dir TEXT, close_dir TEXT,
             PRIMARY KEY(event_key, symbol, release_ts, window)
         );
+        CREATE TABLE IF NOT EXISTS event_instrument_map (
+            country TEXT NOT NULL, symbol TEXT NOT NULL, weight INT NOT NULL,
+            PRIMARY KEY(country, symbol)
+        );
+        CREATE TABLE IF NOT EXISTS event_reaction_stats (
+            event_type TEXT NOT NULL, symbol TEXT NOT NULL, n INT NOT NULL,
+            avg_move_30m REAL, avg_move_60m REAL, max_move_60m REAL,
+            volatile_share REAL, computed_ts INT,
+            PRIMARY KEY(event_type, symbol, n)
+        );
     """)
     con.executemany(
         "INSERT OR IGNORE INTO symbol_map(our_key, twelvedata, mt5, yahoo) VALUES(?,?,?,?)",
@@ -68,6 +111,22 @@ def _ensure_schema() -> None:
             ("USDAED", "USD/AED", "USDAED",  "AED=X"),
             ("USDZAR", "USD/ZAR", "USDZAR",  "ZAR=X"),
             ("USDKZT", "USD/KZT", "USDKZT",  "KZT=X"),
+        ],
+    )
+    # event→instrument веса: 2 = прямое влияние (валюта — плечо пары),
+    # 1 = косвенное (риск-сентимент/сырьё/индексы/крипта реагируют на USD и т.п.)
+    con.executemany(
+        "INSERT OR IGNORE INTO event_instrument_map(country, symbol, weight) VALUES(?,?,?)",
+        [
+            ("US", "EURUSD", 2), ("US", "GBPUSD", 2), ("US", "USDJPY", 2), ("US", "DXY", 2),
+            ("US", "GOLD", 1), ("US", "SILVER", 1), ("US", "SPX", 1), ("US", "NASDAQ", 1),
+            ("US", "DJI", 1), ("US", "VIX", 1), ("US", "BTC", 1), ("US", "ETH", 1),
+            ("US", "SOL", 1), ("US", "WTI", 1),
+            ("EU", "EURUSD", 2), ("EU", "DXY", 1),
+            ("EA", "EURUSD", 2), ("EA", "DXY", 1),
+            ("GB", "GBPUSD", 2),
+            ("JP", "USDJPY", 2),
+            ("CN", "GOLD", 1), ("CN", "WTI", 1), ("CN", "SPX", 1),
         ],
     )
     con.commit()
@@ -550,6 +609,18 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 
     def do_PUT(self):
         path_clean = self.path.split("?")[0]
+        # /api/user/* — SBF_Charts_Layer4_Spec Фаза 1: строго auth (401 без
+        # токена, acceptance спеки), в отличие от /api/journal/* выше, где
+        # _current_user_id() исторически подставляет "default" для анонима.
+        if path_clean == "/api/user/watchlist":
+            self._handle_user_watchlist_put()
+            return
+        if path_clean == "/api/user/watchlist/pin":
+            self._handle_user_watchlist_pin_put()
+            return
+        if path_clean == "/api/user/chart-prefs":
+            self._handle_user_chart_prefs_put()
+            return
         user_id = self._current_user_id()
         if re.match(r"^/api/journal/setups/\d+$", path_clean):
             setup_id = int(path_clean.split("/")[-1])
@@ -1000,6 +1071,42 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 self._send_json({"error": "not found"}, 404)
         elif path_clean == "/api/price":
             self._handle_price_api()
+        elif path_clean == "/api/chart/events":
+            self._handle_chart_events()
+        elif path_clean == "/api/chart/event-reaction":
+            self._handle_chart_event_reaction()
+        elif path_clean == "/api/chart/news-bursts":
+            self._handle_chart_news_bursts()
+        elif path_clean == "/api/chart/news":
+            self._handle_chart_news()
+        elif path_clean == "/api/pulse":
+            self._handle_pulse()
+        elif path_clean == "/api/pulse/feed":
+            self._handle_pulse_feed()
+        elif path_clean == "/api/chart/levels":
+            self._handle_chart_levels()
+        elif path_clean == "/api/chart/confluence":
+            self._handle_chart_confluence()
+        elif path_clean == "/api/chart/patterns":
+            self._handle_chart_patterns()
+        elif path_clean == "/api/chart/pattern-stats":
+            self._handle_chart_pattern_stats()
+        elif path_clean == "/api/chart/thermo":
+            self._handle_chart_thermo()
+        elif path_clean == "/api/chart/thermo-hist":
+            self._handle_chart_thermo_hist()
+        elif path_clean == "/api/chart/sessions":
+            self._handle_chart_sessions()
+        elif path_clean == "/api/chart/sentiment":
+            self._handle_chart_sentiment()
+        elif path_clean == "/api/chart/symbols":
+            self._send_json(sorted(_chart_symbols()))
+        elif path_clean == "/api/focus":
+            self._handle_focus(user_id)
+        elif path_clean == "/api/chart/my-trades":
+            self._handle_chart_my_trades()
+        elif path_clean == "/api/chart/trade-context":
+            self._handle_chart_trade_context()
         elif _EDU_TOC_RE.match(self.path):
             self._handle_edu_toc()
         elif _EDU_RE.match(self.path):
@@ -1123,6 +1230,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         to_d    = params.get("to",      [None])[0]
         impact  = params.get("impact",  [None])[0]
         country = params.get("country", [None])[0]
+        symbols = params.get("symbols", [None])[0]  # Layer4 Ф1.2.2: тумблер «Мои инструменты»
         try:
             con = sqlite3.connect(str(_BOT_DB))
             con.row_factory = sqlite3.Row
@@ -1161,6 +1269,12 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             if country:
                 query += " AND country = ?"
                 args.append(country)
+            if symbols:
+                syms = [s.upper().strip() for s in symbols.split(",") if s.strip()]
+                if syms:
+                    placeholders = ",".join("?" * len(syms))
+                    query += f" AND country IN (SELECT country FROM event_instrument_map WHERE symbol IN ({placeholders}))"
+                    args.extend(syms)
             query += " ORDER BY COALESCE(scheduled_ts, 0) ASC LIMIT 2000"
             rows = [dict(r) for r in con.execute(query, args).fetchall()]
             con.close()
@@ -1221,6 +1335,746 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             ).fetchall()
             con.close()
             self._send_json([dict(r) for r in rows])
+        except Exception as e:
+            self._send_json({"error": str(e)}, 500)
+
+    def _handle_chart_events(self) -> None:
+        """Фаза 1: события календаря для оверлея на живом графике chart.html.
+        Фильтр по event_instrument_map (weight>=1) + скрываем impact='low' всегда;
+        на D1/W1 отдаём только impact='high' (иначе шум, см. SBF_Charts_Layer1_Spec)."""
+        params = parse_qs(urlparse(self.path).query)
+        symbol = params.get("symbol", [None])[0]
+        tf     = params.get("tf", ["D1"])[0]
+        if not symbol:
+            self._send_json({"error": "symbol required"}, 400)
+            return
+        try:
+            from_ts = int(params.get("from", [None])[0] or (int(time.time()) - 30 * 86400))
+            to_ts   = int(params.get("to",   [None])[0] or (int(time.time()) + 14 * 86400))
+        except ValueError:
+            self._send_json({"error": "invalid from/to"}, 400)
+            return
+        try:
+            con = sqlite3.connect(str(_BOT_DB))
+            con.row_factory = sqlite3.Row
+            query = """
+                SELECT e.id, e.scheduled_ts AS ts, e.title, e.indicator, e.country, e.impact,
+                       e.forecast, e.previous, e.actual, m.weight
+                FROM econ_events e
+                JOIN event_instrument_map m ON m.country = e.country
+                WHERE m.symbol = ? AND m.weight >= 1
+                  AND e.impact != 'low'
+                  AND e.scheduled_ts BETWEEN ? AND ?
+            """
+            args = [symbol, from_ts, to_ts]
+            if tf in ("D1", "W1"):
+                query += " AND e.impact = 'high'"
+            query += " ORDER BY e.scheduled_ts ASC LIMIT 500"
+            rows = [dict(r) for r in con.execute(query, args).fetchall()]
+            con.close()
+            for r in rows:
+                r["importance"] = r.pop("impact")
+                r["currency"] = _COUNTRY_CURRENCY.get(r["country"], r["country"])
+                # Для блока "Прошлые разы" (Фаза 2) — фронтенд передаёт это как
+                # есть в /api/chart/event-reaction, не дублируя regex-словарь.
+                r["event_type"] = normalize_event_type(r.pop("indicator") or r["title"])
+            self._send_json(rows)
+        except Exception as e:
+            self._send_json({"error": str(e)}, 500)
+
+    def _handle_chart_event_reaction(self) -> None:
+        """Фаза 2: агрегаты статистики реакций из event_reaction_stats
+        (считает event_reactions_job.py раз в сутки). Только залогиненным."""
+        if not self._lp_require_auth():
+            return
+        params = parse_qs(urlparse(self.path).query)
+        event_type = params.get("event_type", [None])[0]
+        symbol = params.get("symbol", [None])[0]
+        if not event_type or not symbol:
+            self._send_json({"error": "event_type and symbol required"}, 400)
+            return
+        try:
+            con = sqlite3.connect(str(_BOT_DB))
+            con.row_factory = sqlite3.Row
+            rows = con.execute(
+                """SELECT n, avg_move_30m, avg_move_60m, max_move_60m, volatile_share, computed_ts
+                   FROM event_reaction_stats WHERE event_type=? AND symbol=? ORDER BY n ASC""",
+                (event_type, symbol),
+            ).fetchall()
+            con.close()
+            if not rows:
+                self._send_json({"error": "not found"}, 404)
+                return
+            # n6 = наименьшее доступное n (цель 6), n12 = наибольшее (цель 12).
+            # Если истории < 12 публикаций, обе тира могут указывать на одну и ту
+            # же строку (n6 и n12 совпадают) — это ожидаемо, не баг.
+            smallest, largest = dict(rows[0]), dict(rows[-1])
+            self._send_json({"n6": smallest, "n12": largest})
+        except Exception as e:
+            self._send_json({"error": str(e)}, 500)
+
+    def _handle_chart_news_bursts(self) -> None:
+        """Фаза 3: зоны новостных всплесков (news_burst_job.py, раз в 15 мин).
+        Никогда не рендерятся на D1/W1 (см. SBF_Charts_Layer1_Spec) — сервер
+        сам это соблюдает, не полагаясь только на фронтенд."""
+        params = parse_qs(urlparse(self.path).query)
+        symbol = params.get("symbol", [None])[0]
+        tf = params.get("tf", ["D1"])[0]
+        if not symbol:
+            self._send_json({"error": "symbol required"}, 400)
+            return
+        if tf in ("D1", "W1"):
+            self._send_json([])
+            return
+        try:
+            from_ts = int(params.get("from", [None])[0] or (int(time.time()) - 2 * 86400))
+            to_ts   = int(params.get("to",   [None])[0] or int(time.time()))
+        except ValueError:
+            self._send_json({"error": "invalid from/to"}, 400)
+            return
+        try:
+            con = sqlite3.connect(str(_SIGNALS_DB))
+            con.row_factory = sqlite3.Row
+            rows = con.execute(
+                """SELECT symbol, start_ts, end_ts, count, avg_baseline FROM news_bursts
+                   WHERE symbol = ? AND start_ts <= ? AND end_ts >= ?
+                   ORDER BY start_ts ASC""",
+                (symbol, to_ts, from_ts),
+            ).fetchall()
+            con.close()
+            self._send_json([dict(r) for r in rows])
+        except Exception as e:
+            self._send_json({"error": str(e)}, 500)
+
+    def _handle_chart_news(self) -> None:
+        """Фаза 3: заголовки новостей в окне всплеска (тап по зоне). Отдаём как
+        есть из RSS (title+url+источник) — без пересказа, см. compliance спеки."""
+        params = parse_qs(urlparse(self.path).query)
+        symbol = params.get("symbol", [None])[0]
+        if not symbol:
+            self._send_json({"error": "symbol required"}, 400)
+            return
+        try:
+            from_ts = int(params.get("from", [None])[0] or (int(time.time()) - 3600))
+            to_ts   = int(params.get("to",   [None])[0] or int(time.time()))
+        except ValueError:
+            self._send_json({"error": "invalid from/to"}, 400)
+            return
+        try:
+            con = sqlite3.connect(str(_SIGNALS_DB))
+            con.row_factory = sqlite3.Row
+            rows = con.execute(
+                """SELECT s.title, s.url, s.topic_hint AS source, s.raw, s.first_seen
+                   FROM news_instrument_tags t JOIN signals s ON s.uid = t.news_uid
+                   WHERE t.symbol = ?""",
+                (symbol,),
+            ).fetchall()
+            con.close()
+            items = []
+            for r in rows:
+                try:
+                    ts = float(json.loads(r["raw"] or "{}").get("published") or 0)
+                except (ValueError, TypeError):
+                    ts = 0
+                if not ts:
+                    try:
+                        ts = datetime.fromisoformat(r["first_seen"]).timestamp()
+                    except (ValueError, TypeError):
+                        continue
+                if from_ts <= ts <= to_ts:
+                    items.append({"title": r["title"], "url": r["url"], "source": r["source"], "ts": int(ts)})
+            items.sort(key=lambda x: x["ts"])
+            self._send_json(items)
+        except Exception as e:
+            self._send_json({"error": str(e)}, 500)
+
+    def _handle_pulse(self) -> None:
+        """Фаза 4: топ-8 обсуждаемости по вкладке (pulse_job.py, раз в 15 мин).
+        Публично (витрина). Ночью/без активности — фолбэк на топ-8 по
+        абсолютным упоминаниям с флагом calm, чтобы вкладка не была пустой."""
+        params = parse_qs(urlparse(self.path).query)
+        category = params.get("category", [None])[0]
+        if category not in ("crypto", "stocks", "indices"):
+            self._send_json({"error": "category must be crypto|stocks|indices"}, 400)
+            return
+        try:
+            con = sqlite3.connect(str(_SIGNALS_DB))
+            con.row_factory = sqlite3.Row
+            latest_ts = con.execute(
+                "SELECT MAX(ts) FROM pulse_scores WHERE category=?", (category,)
+            ).fetchone()[0]
+            if latest_ts is None:
+                self._send_json({"category": category, "calm": True, "items": []})
+                con.close()
+                return
+            snapshot = con.execute(
+                "SELECT symbol, mentions, baseline, score FROM pulse_scores WHERE category=? AND ts=?",
+                (category, latest_ts),
+            ).fetchall()
+            top_by_score = sorted(snapshot, key=lambda r: r["score"], reverse=True)[:8]
+            calm = not top_by_score or top_by_score[0]["score"] <= 0
+            chosen = top_by_score if not calm else sorted(snapshot, key=lambda r: r["mentions"], reverse=True)[:8]
+
+            since = latest_ts - 24 * 3600
+            items = []
+            for r in chosen:
+                spark = con.execute(
+                    "SELECT score FROM pulse_scores WHERE symbol=? AND category=? AND ts>=? ORDER BY ts ASC",
+                    (r["symbol"], category, since),
+                ).fetchall()
+                items.append({
+                    "symbol": r["symbol"], "mentions": r["mentions"],
+                    "baseline": round(r["baseline"], 2), "score": round(r["score"], 2),
+                    "sparkline": [round(s["score"], 2) for s in spark],
+                })
+            con.close()
+            updated = datetime.fromtimestamp(latest_ts, timezone.utc).isoformat()
+            self._send_json({"category": category, "calm": calm, "updated": updated, "items": items})
+        except Exception as e:
+            self._send_json({"error": str(e)}, 500)
+
+    def _handle_pulse_feed(self) -> None:
+        """Фаза 4: лента упоминаний по тикеру (тап на карточку) — за регистрацией,
+        консистентно с /api/chart/event-reaction (см. _lp_require_auth)."""
+        if not self._lp_require_auth():
+            return
+        params = parse_qs(urlparse(self.path).query)
+        symbol = params.get("symbol", [None])[0]
+        if not symbol:
+            self._send_json({"error": "symbol required"}, 400)
+            return
+        try:
+            con = sqlite3.connect(str(_SIGNALS_DB))
+            con.row_factory = sqlite3.Row
+            cutoff_iso = (datetime.now(timezone.utc) - timedelta(days=14)).isoformat()
+            rows = con.execute(
+                """SELECT source, title, text, url, topic_hint, cashtags, last_seen
+                   FROM signals WHERE last_seen >= ? ORDER BY last_seen DESC LIMIT 800""",
+                (cutoff_iso,),
+            ).fetchall()
+            items = []
+            for r in rows:
+                try:
+                    tags = json.loads(r["cashtags"] or "[]")
+                except (ValueError, TypeError):
+                    tags = []
+                if symbol not in tags:
+                    continue
+                try:
+                    ts = int(datetime.fromisoformat(r["last_seen"]).timestamp())
+                except (ValueError, TypeError):
+                    continue
+                items.append({
+                    "title": r["title"] or (r["text"] or "")[:140],
+                    "url": r["url"], "source": r["source"] or r["topic_hint"], "ts": ts,
+                })
+            # + RSS-заголовки с тегом инструмента (Фаза 3), релевантно для индексов
+            try:
+                news_rows = con.execute(
+                    """SELECT s.title, s.url, s.topic_hint AS source, s.raw, s.first_seen
+                       FROM news_instrument_tags t JOIN signals s ON s.uid = t.news_uid
+                       WHERE t.symbol = ?""",
+                    (symbol,),
+                ).fetchall()
+                for r in news_rows:
+                    try:
+                        ts = float(json.loads(r["raw"] or "{}").get("published") or 0) \
+                             or datetime.fromisoformat(r["first_seen"]).timestamp()
+                    except (ValueError, TypeError):
+                        continue
+                    items.append({"title": r["title"], "url": r["url"], "source": r["source"], "ts": int(ts)})
+            except sqlite3.OperationalError:
+                pass
+            con.close()
+            items.sort(key=lambda x: x["ts"], reverse=True)
+            self._send_json(items[:30])
+        except Exception as e:
+            self._send_json({"error": str(e)}, 500)
+
+    def _handle_chart_levels(self) -> None:
+        """SBF_Charts_Layer2_Spec, Фаза 1: исторические S/R-уровни (sr_levels_job.py,
+        раз в сутки). Публично — расчётные факты без направленных утверждений
+        (см. compliance спеки), топ-12 активных (broken=0) по score."""
+        params = parse_qs(urlparse(self.path).query)
+        symbol = params.get("symbol", [None])[0]
+        if not symbol:
+            self._send_json({"error": "symbol required"}, 400)
+            return
+        try:
+            con = sqlite3.connect(str(_BOT_DB))
+            con.row_factory = sqlite3.Row
+            rows = con.execute(
+                """SELECT price, kind, touches, age_days, last_touch_ts FROM sr_levels
+                   WHERE symbol=? AND broken=0""",
+                (symbol,),
+            ).fetchall()
+            con.close()
+            items = [dict(r) for r in rows]
+            for it in items:
+                it["score"] = round(it["touches"] * math.log(it["age_days"] + 1), 3)
+            items.sort(key=lambda x: x["score"], reverse=True)
+            self._send_json(items[:12])
+        except Exception as e:
+            self._send_json({"error": str(e)}, 500)
+
+    def _handle_chart_confluence(self) -> None:
+        """SBF_Charts_Layer2_Spec, Фаза 2: зоны внимания (confluence_job.py,
+        раз в сутки вслед за sr_levels_job.py). Публично — расчётные факты."""
+        params = parse_qs(urlparse(self.path).query)
+        symbol = params.get("symbol", [None])[0]
+        if not symbol:
+            self._send_json({"error": "symbol required"}, 400)
+            return
+        try:
+            con = sqlite3.connect(str(_BOT_DB))
+            con.row_factory = sqlite3.Row
+            rows = con.execute(
+                "SELECT price_low, price_high, score, factors FROM confluence_zones WHERE symbol=? ORDER BY score DESC",
+                (symbol,),
+            ).fetchall()
+            con.close()
+            items = []
+            for r in rows:
+                d = dict(r)
+                try:
+                    d["factors"] = json.loads(d["factors"] or "[]")
+                except (ValueError, TypeError):
+                    d["factors"] = []
+                items.append(d)
+            self._send_json(items)
+        except Exception as e:
+            self._send_json({"error": str(e)}, 500)
+
+    def _handle_chart_thermo(self) -> None:
+        """SBF_Charts_Layer3_Spec, Фаза 1: «Термометр дня» (day_thermo_job.py,
+        раз в 5 мин). Публично — расчётные факты, витринная ценность выше
+        гейт-ценности (см. спеку). next_event отдаём развёрнуто (не только id) —
+        та же форма, что /api/chart/events, чтобы фронт мог открыть карточку
+        события напрямую, не полагаясь на то, что событие уже есть в кэше
+        _curEvents текущего графика (для D1/W1 там фильтр impact='high', а
+        термометр берёт medium+ — событие может отсутствовать в кэше)."""
+        params = parse_qs(urlparse(self.path).query)
+        symbol = params.get("symbol", [None])[0]
+        if not symbol:
+            self._send_json({"error": "symbol required"}, 400)
+            return
+        try:
+            con = sqlite3.connect(str(_BOT_DB))
+            con.row_factory = sqlite3.Row
+            row = con.execute("SELECT * FROM day_thermo WHERE symbol=?", (symbol,)).fetchone()
+            if not row:
+                # Вызывающая сторона может передать символ journal-домена
+                # (watchlist из дневника хранит XAUUSD/EURUSD/..., не GOLD —
+                # см. core/journal_symbols.py). day_thermo индексирован по
+                # символам графика, поэтому пробуем конвертировать перед 404.
+                chart_sym = to_chart_symbol(symbol)
+                if chart_sym and chart_sym != symbol:
+                    row = con.execute("SELECT * FROM day_thermo WHERE symbol=?", (chart_sym,)).fetchone()
+            if not row:
+                con.close()
+                self._send_json({"error": "not found"}, 404)
+                return
+            out = dict(row)
+            if out.get("next_event_id"):
+                ev = con.execute(
+                    """SELECT e.id, e.scheduled_ts AS ts, e.title, e.indicator, e.country,
+                              e.impact, e.forecast, e.previous, e.actual
+                       FROM econ_events e WHERE e.id = ?""",
+                    (out["next_event_id"],),
+                ).fetchone()
+                if ev:
+                    ev = dict(ev)
+                    ev["importance"] = ev.pop("impact")
+                    ev["currency"] = _COUNTRY_CURRENCY.get(ev["country"], ev["country"])
+                    ev["event_type"] = normalize_event_type(ev.pop("indicator") or ev["title"])
+                    out["next_event"] = ev
+            con.close()
+            self._send_json(out)
+        except Exception as e:
+            self._send_json({"error": str(e)}, 500)
+
+    def _handle_focus(self, user_id: str) -> None:
+        """SPEC_focus_engine.md §9. Публично, как /api/chart/thermo — фокус
+        для scope='default' не привязан к пользователю; scope=me резолвит
+        персональный watchlist/пин через уже посчитанный user_id (нет смысла
+        второй раз резолвить токен, _current_user_id() один раз на весь GET)."""
+        params = parse_qs(urlparse(self.path).query)
+        scope_param = params.get("scope", ["me"])[0]
+        is_anon = user_id == "default"
+        if scope_param == "default" or is_anon:
+            scope_key, pin_user = "default", None
+        else:
+            scope_key, pin_user = f"user:{user_id}", user_id
+
+        try:
+            now_ts = int(time.time())
+            pinned_raw = journal_brief.get_pinned(pin_user) if pin_user else None
+            if pinned_raw:
+                pinned_sym = to_chart_symbol(pinned_raw) or pinned_raw
+                inst = focus_db.load_instrument(pinned_sym)
+                self._send_json({
+                    "symbol": pinned_sym, "name": inst["name"] if inst else pinned_sym,
+                    "anomaly": None, "session_state": None,
+                    "headline": "Фокус закреплён вручную.", "source": "pin",
+                    "has_llm_analysis": False, "analysis": None, "updated_at": now_ts,
+                })
+                return
+
+            state = focus_db.load_focus_state(scope_key)
+            if state is None:
+                # Живой поллер ещё не тикнул этот scope (новый пользователь,
+                # §11 edge case) — считаем на лету вместо 404.
+                if scope_key == "default":
+                    symbols = DEFAULT_UNIVERSE
+                else:
+                    raw = journal_brief.get_watchlist(pin_user)
+                    symbols = [to_chart_symbol(s) or s for s in raw] or DEFAULT_UNIVERSE
+                today = focus_db.today_str()
+                candidates = focus_db.build_candidates(symbols, today)
+                state = select_focus(scope_key, candidates, None, None, now_ts, new_source="live")
+                focus_db.save_focus_state(state)
+
+            if state.symbol is None:
+                self._send_json({
+                    "symbol": None, "name": None, "anomaly": None, "session_state": None,
+                    "headline": "Рынок спокоен — ни один инструмент не выходит за пределы нормы.",
+                    "source": "calm", "has_llm_analysis": False, "analysis": None,
+                    "updated_at": state.decided_at,
+                })
+                return
+
+            inst = focus_db.load_instrument(state.symbol)
+            name = inst["name"] if inst else state.symbol
+            mult = round(state.anomaly, 1) if state.anomaly is not None else None
+            headline = (f"{name} сегодня движется в {mult}× своей нормы"
+                        if mult is not None else name)
+            live_row = focus_db.load_instrument_live(state.symbol)
+            session_state = live_row["session_state"] if live_row else None
+
+            # has_llm_analysis (§9): true только когда source=batch И файл с
+            # разбором реально существует (build_brief.py/prompt.md пишут
+            # его для scope='default' только -- см. план шаг 10). Смена на
+            # source="live" в течение дня естественно гасит has_llm_analysis,
+            # т.к. condition ниже проверяет ИМЕННО текущий source, не то,
+            # каким он был при первом коммите.
+            analysis = None
+            has_llm = state.source == "batch"
+            if has_llm:
+                f = Path(__file__).parent / "data" / "focus" / f"analysis_{focus_db.today_str()}.txt"
+                if f.exists():
+                    try:
+                        analysis = f.read_text(encoding="utf-8").strip() or None
+                    except OSError:
+                        analysis = None
+                has_llm = analysis is not None
+
+            self._send_json({
+                "symbol": state.symbol, "name": name, "anomaly": state.anomaly,
+                "session_state": session_state, "headline": headline, "source": state.source,
+                "has_llm_analysis": has_llm, "analysis": analysis, "updated_at": state.decided_at,
+            })
+        except Exception as e:
+            self._send_json({"error": str(e)}, 500)
+
+    def _handle_chart_thermo_hist(self) -> None:
+        """SBF_Charts_Layer3_Spec, Фаза 1: мини-гистограмма по тапу на чип
+        «волатильность» (kind=range, 60 дневных диапазонов) или «DVOL»
+        (kind=dvol, 90-дневная серия Deribit). Живой расчёт по запросу — НЕ
+        часть 5-минутного снапшота day_thermo (сеть до Deribit не должна
+        замедлять основной /api/chart/thermo, который должен отвечать быстро,
+        см. спеку "за 3 секунды")."""
+        params = parse_qs(urlparse(self.path).query)
+        symbol = params.get("symbol", [None])[0]
+        kind = params.get("kind", ["range"])[0]
+        if not symbol:
+            self._send_json({"error": "symbol required"}, 400)
+            return
+        try:
+            if kind == "dvol":
+                if symbol not in _THERMO_CRYPTO or symbol not in _THERMO_DVOL_CCY:
+                    self._send_json({"error": "no dvol for symbol"}, 404)
+                    return
+                series = _thermo_dvol_series(symbol)
+                if not series:
+                    self._send_json({"error": "not found"}, 404)
+                    return
+                self._send_json([{"ts": ts, "v": v} for ts, v in series])
+            else:
+                d1 = _thermo_load_d1(symbol)
+                if not d1 or not d1["candles"]:
+                    self._send_json({"error": "not found"}, 404)
+                    return
+                series = _thermo_range_series(d1["candles"])
+                self._send_json([{"ts": ts, "v": v} for ts, v in series])
+        except Exception as e:
+            self._send_json({"error": str(e)}, 500)
+
+    def _handle_chart_sessions(self) -> None:
+        """SBF_Charts_Layer3_Spec, Фаза 2: границы торговых сессий (Азия/Лондон/NY,
+        DST на сегодня — см. core/sessions.py) + 24-часовой профиль типичной
+        волатильности (hourly_vol_job.py, еженедельно). Публично — факты.
+        sessions_today отдаётся для удобства (акцептанс спеки прямо просит
+        «границы сессий с учётом DST на сегодня»), но рендер полос на графике
+        для ПРОИЗВОЛЬНОГО видимого дня фронтенд считает сам теми же правилами
+        (см. комментарий в core/sessions.py) — иначе прокрутка к историческим
+        датам через переход DST показывала бы неверные границы."""
+        params = parse_qs(urlparse(self.path).query)
+        symbol = params.get("symbol", [None])[0]
+        if not symbol:
+            self._send_json({"error": "symbol required"}, 400)
+            return
+        try:
+            bounds = session_bounds_utc(datetime.now(timezone.utc).date())
+            con = sqlite3.connect(str(_BOT_DB))
+            rows = con.execute(
+                "SELECT hour_utc, avg_range FROM hourly_vol_profile WHERE symbol=? ORDER BY hour_utc",
+                (symbol,),
+            ).fetchall()
+            con.close()
+            self._send_json({
+                "sessions_today": {name: {"from_hour": fh, "to_hour": th} for name, (fh, th) in bounds.items()},
+                "profile": [{"hour_utc": h, "avg_range": r} for h, r in rows],
+            })
+        except Exception as e:
+            self._send_json({"error": str(e)}, 500)
+
+    def _handle_chart_sentiment(self) -> None:
+        """SBF_Charts_Layer3_Spec, Фаза 3: сентимент толпы по часам (twitter+
+        telegram, словарная разметка bull/bear) + флаг дивергенции с ценой.
+        За регистрацией (спека). Источники см. sentiment_job.py — StockTwits/
+        Reddit/Telegram-алерты, заявленные спекой, сейчас не работают."""
+        if not self._lp_require_auth():
+            return
+        params = parse_qs(urlparse(self.path).query)
+        symbol = params.get("symbol", [None])[0]
+        if not symbol:
+            self._send_json({"error": "symbol required"}, 400)
+            return
+        try:
+            now = int(time.time())
+            from_ts = int(params.get("from", [None])[0] or (now - 7 * 86400))
+            to_ts = int(params.get("to", [None])[0] or now)
+        except ValueError:
+            self._send_json({"error": "invalid from/to"}, 400)
+            return
+        try:
+            con = sqlite3.connect(str(_BOT_DB))
+            rows = con.execute(
+                "SELECT ts_hour, score, total FROM sentiment_hourly WHERE symbol=? AND ts_hour BETWEEN ? AND ? ORDER BY ts_hour",
+                (symbol, from_ts, to_ts),
+            ).fetchall()
+            con.close()
+            points = [{"ts_hour": r[0], "score": r[1], "total": r[2]} for r in rows]
+
+            # Дивергенция — всегда по последним 24ч (снапшот-флаг, не зависит
+            # от запрошенного окна графика), только по часам БЕЗ пропусков.
+            con2 = sqlite3.connect(str(_BOT_DB))
+            recent = con2.execute(
+                "SELECT score FROM sentiment_hourly WHERE symbol=? AND ts_hour >= ?",
+                (symbol, now - 24 * 3600),
+            ).fetchall()
+            con2.close()
+            scores_24h = [r[0] for r in recent]
+
+            price_change = None
+            atr = None
+            h1_file = WEB_DIR / "data" / f"ohlc_{symbol}_H1.json"
+            if h1_file.exists():
+                try:
+                    h1 = json.loads(h1_file.read_text())
+                    candles = h1.get("candles") or []
+                    if len(candles) >= 25:
+                        price_change = float(candles[-1]["close"]) - float(candles[-25]["close"])
+                except (ValueError, TypeError, KeyError, json.JSONDecodeError):
+                    pass
+            d1_candles = _load_d1_candles(symbol)
+            if d1_candles:
+                atr = _atr14(d1_candles)
+
+            divergence = detect_divergence(scores_24h, price_change or 0.0, atr) if price_change is not None else False
+            self._send_json({"points": points, "divergence": bool(divergence)})
+        except Exception as e:
+            self._send_json({"error": str(e)}, 500)
+
+    def _handle_chart_my_trades(self) -> None:
+        """SBF_Charts_Layer4_Spec, Фаза 2: сделки пользователя на графике.
+        Auth strict (own trades only — WHERE user_id=? внутри journal_db,
+        см. list_trades_for_chart), private/no-store (уже дефолт _send_json).
+
+        ВАЖНО (найдено на Фазе 1, не переоткрывать): trades.exit_price и
+        close_ts — NOT NULL в схеме БД (core/journal_db.py) — это чисто
+        пост-фактум журнал закрытых сделок, "открытых" сделок в текущей
+        модели данных не существует. exit_ts/exit_price в ответе поэтому
+        НИКОГДА не будут null на практике, хотя спека это допускает."""
+        user_id = self._lp_require_auth()
+        if not user_id:
+            return
+        params = parse_qs(urlparse(self.path).query)
+        symbol = params.get("symbol", [None])[0]
+        if not symbol:
+            self._send_json({"error": "symbol required"}, 400)
+            return
+        try:
+            now = int(time.time())
+            from_ts = int(params.get("from", [None])[0] or (now - 180 * 86400))
+            to_ts = int(params.get("to", [None])[0] or (now + 86400))
+        except ValueError:
+            self._send_json({"error": "invalid from/to"}, 400)
+            return
+        try:
+            aliases = chart_symbol_aliases(symbol.upper())
+            from_iso = datetime.fromtimestamp(from_ts, timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
+            to_iso = datetime.fromtimestamp(to_ts, timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
+            rows = journal_db.list_trades_for_chart(user_id, aliases, from_iso, to_iso)
+            out = []
+            for r in rows:
+                try:
+                    entry_ts = int(datetime.fromisoformat(r["open_ts"]).replace(tzinfo=timezone.utc).timestamp())
+                    exit_ts = int(datetime.fromisoformat(r["close_ts"]).replace(tzinfo=timezone.utc).timestamp())
+                except (ValueError, TypeError):
+                    continue
+                out.append({
+                    "id": r["id"], "direction": "long" if r["dir"] == "buy" else "short",
+                    "entry_ts": entry_ts, "entry_price": r["entry_price"],
+                    "exit_ts": exit_ts, "exit_price": r["exit_price"],
+                    "sl": r["stop_loss"], "tp": None, "r": r["pnl_r"],
+                    "setup": r["setup_tag"], "note": (r["note"] or "")[:140],
+                })
+            self._send_json(out)
+        except Exception as e:
+            self._send_json({"error": str(e)}, 500)
+
+    def _handle_chart_trade_context(self) -> None:
+        """SBF_Charts_Layer4_Spec, Фаза 2: контекст-строка карточки сделки —
+        ближайшее событие ±60 мин, попадание входа в зону внимания, сессия на
+        момент входа. Все три — запросы к уже готовым таблицам/модулям
+        Layer1-3, ни одного нового расчёта (буквально по спеке)."""
+        user_id = self._lp_require_auth()
+        if not user_id:
+            return
+        params = parse_qs(urlparse(self.path).query)
+        trade_id = params.get("trade_id", [None])[0]
+        if not trade_id:
+            self._send_json({"error": "trade_id required"}, 400)
+            return
+        try:
+            trade_id = int(trade_id)
+        except ValueError:
+            self._send_json({"error": "invalid trade_id"}, 400)
+            return
+        try:
+            trade = journal_db.get_trade(trade_id, user_id)
+            if not trade:
+                self._send_json({"error": "not found"}, 404)
+                return
+            chart_symbol = to_chart_symbol(trade["symbol"])
+            entry_ts = int(datetime.fromisoformat(trade["open_ts"]).replace(tzinfo=timezone.utc).timestamp())
+            entry_price = trade["entry_price"]
+
+            event = None
+            zone = None
+            session = None
+            if chart_symbol:
+                con = sqlite3.connect(str(_BOT_DB))
+                con.row_factory = sqlite3.Row
+                ev_row = con.execute(
+                    """SELECT e.id, e.scheduled_ts AS ts, e.title, e.country, e.impact
+                       FROM econ_events e JOIN event_instrument_map m ON m.country = e.country
+                       WHERE m.symbol = ? AND e.scheduled_ts BETWEEN ? AND ?
+                       ORDER BY ABS(e.scheduled_ts - ?) ASC,
+                                CASE e.impact WHEN 'high' THEN 0 WHEN 'medium' THEN 1 ELSE 2 END ASC
+                       LIMIT 1""",
+                    (chart_symbol, entry_ts - 3600, entry_ts + 3600, entry_ts),
+                ).fetchone()
+                if ev_row:
+                    event = {"id": ev_row["id"], "ts": ev_row["ts"], "title": ev_row["title"],
+                              "country": ev_row["country"], "importance": ev_row["impact"],
+                              "minutes_before": round((ev_row["ts"] - entry_ts) / 60)}
+                zone_row = con.execute(
+                    "SELECT price_low, price_high, score FROM confluence_zones WHERE symbol=? AND price_low<=? AND price_high>=?",
+                    (chart_symbol, entry_price, entry_price),
+                ).fetchone()
+                if zone_row:
+                    zone = {"price_low": zone_row["price_low"], "price_high": zone_row["price_high"], "score": zone_row["score"]}
+                con.close()
+                dt = datetime.fromtimestamp(entry_ts, timezone.utc)
+                session = session_at(dt.date(), dt.hour)
+
+            self._send_json({"event": event, "zone": zone, "session": session, "chart_symbol": chart_symbol})
+        except Exception as e:
+            self._send_json({"error": str(e)}, 500)
+
+    def _handle_chart_patterns(self) -> None:
+        """SBF_Charts_Layer2_Spec, Фаза 3: маркеры паттернов для рендера (слой
+        «Паттерны» — публичный, гейт только на статистику ниже). Детект живой,
+        через core.patterns.detect() — единый источник с pattern_stats_job.py."""
+        params = parse_qs(urlparse(self.path).query)
+        symbol = params.get("symbol", [None])[0]
+        tf = params.get("tf", ["D1"])[0]
+        if not symbol:
+            self._send_json({"error": "symbol required"}, 400)
+            return
+        try:
+            from_ts = int(params.get("from", [None])[0] or 0)
+            to_ts = int(params.get("to", [None])[0] or int(time.time()) + 365 * 86400)
+        except ValueError:
+            self._send_json({"error": "invalid from/to"}, 400)
+            return
+        try:
+            from pattern_stats_job import _load_candles as _load_ohlc
+            candles = _load_ohlc(symbol, tf)
+            if not candles:
+                self._send_json([])
+                return
+            levels = []
+            try:
+                con = sqlite3.connect(str(_BOT_DB))
+                con.row_factory = sqlite3.Row
+                levels = [dict(r) for r in con.execute(
+                    "SELECT price, tolerance, kind FROM sr_levels WHERE symbol=? AND broken=0", (symbol,)
+                ).fetchall()]
+                con.close()
+            except sqlite3.OperationalError:
+                pass
+            events = _detect_patterns(candles, levels)
+            items = [
+                {"pattern_key": e["pattern_key"], "ts": e["ts"], "direction": e["direction"],
+                 "display_name_ru": PATTERNS.get(e["pattern_key"], {}).get("display_name_ru", e["pattern_key"])}
+                for e in events if from_ts <= e["ts"] <= to_ts
+            ]
+            self._send_json(items)
+        except Exception as e:
+            self._send_json({"error": str(e)}, 500)
+
+    def _handle_chart_pattern_stats(self) -> None:
+        """SBF_Charts_Layer2_Spec, Фаза 3: статистика отработки паттерна
+        (pattern_stats_job.py, еженедельно). За регистрацией — как event-reaction
+        Фазы 2. n<15 — 404 (порог публикации, см. compliance спеки)."""
+        if not self._lp_require_auth():
+            return
+        params = parse_qs(urlparse(self.path).query)
+        pattern = params.get("pattern", [None])[0]
+        symbol = params.get("symbol", [None])[0]
+        tf = params.get("tf", [None])[0]
+        if not pattern or not symbol or not tf:
+            self._send_json({"error": "pattern, symbol and tf required"}, 400)
+            return
+        try:
+            con = sqlite3.connect(str(_BOT_DB))
+            con.row_factory = sqlite3.Row
+            row = con.execute(
+                """SELECT n, agree_share_3, agree_share_5, agree_share_10, avg_move_5,
+                   max_adverse_5, history_from_ts, computed_ts FROM pattern_stats
+                   WHERE pattern_key=? AND symbol=? AND tf=?""",
+                (pattern, symbol, tf),
+            ).fetchone()
+            con.close()
+            if not row or row["n"] < 15:
+                self._send_json({"error": "not found"}, 404)
+                return
+            d = dict(row)
+            d["display_name_ru"] = PATTERNS.get(pattern, {}).get("display_name_ru", pattern)
+            self._send_json(d)
         except Exception as e:
             self._send_json({"error": str(e)}, 500)
 
@@ -1704,13 +2558,99 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         self._send_json({"ok": journal_auth.logout(token)})
 
     def _handle_auth_me(self) -> None:
+        """SBF_Charts_Layer4_Spec, Фаза 1.1: единый auth-контекст на всех
+        экранах. Базовая форма — уже существующий journal_auth.get_user()
+        (id/email/first_name/.../prefs) — здесь только добавлен ЖИВОЙ ватчлист
+        (journal_brief.watchlist — та же таблица, что уже использует
+        journal_alerts.py) верхним полем `watchlist`, а НЕ user_prefs.
+        watchlist_markets (тот заполняется один раз при онбординге и с тех пор
+        не читается ни одной другой фичей проекта — снапшот, не источник
+        истины)."""
         token = self._auth_token()
         user_id = journal_auth.validate_session(token)
         if not user_id:
             self._send_json({"error": "unauthorized"}, 401)
             return
         user = journal_auth.get_user(user_id)
+        if user:
+            user["watchlist"] = journal_brief.get_watchlist(user_id)
+            user["pinned"] = journal_brief.get_pinned(user_id)  # Focus Engine §6
         self._send_json(user or {"error": "not found"})
+
+    def _handle_user_watchlist_put(self) -> None:
+        """SBF_Charts_Layer4_Spec, Фаза 1.3: PUT — полная замена ватчлиста
+        (редактор — чипы+drag, не инкрементальный add/remove, отсюда PUT а не
+        POST/DELETE как в старом /api/journal/watchlist). Валидация — против
+        символов ГРАФИКА (_chart_symbols()), не journal_brief.
+        get_available_symbols() (тот из другого домена, см. комментарий в
+        _chart_symbols)."""
+        user_id = self._lp_require_auth()
+        if not user_id:
+            return
+        body = self._read_body_json()
+        if body is None:
+            return
+        symbols = body.get("symbols")
+        if not isinstance(symbols, list):
+            self._send_json({"error": "symbols must be a list"}, 400)
+            return
+        if len(symbols) > 10:
+            self._send_json({"error": "max 10 symbols"}, 400)
+            return
+        valid = _chart_symbols()
+        cleaned = []
+        for s in symbols:
+            if not isinstance(s, str):
+                continue
+            su = s.upper().strip()
+            if su in valid and su not in cleaned:
+                cleaned.append(su)
+        result = journal_brief.set_watchlist(cleaned, user_id)
+        self._send_json({"ok": True, "watchlist": result})
+
+    def _handle_user_watchlist_pin_put(self) -> None:
+        """SPEC_focus_engine.md §6: {"symbol": "GOLD"} закрепляет (снимая
+        любой прежний пин у этого пользователя — максимум один), {"symbol":
+        null} снимает. Анонимам недоступно (_lp_require_auth, как и обычный
+        watchlist PUT) -- пин это приватное намерение пользователя, не
+        публичный факт рынка."""
+        user_id = self._lp_require_auth()
+        if not user_id:
+            return
+        body = self._read_body_json()
+        if body is None:
+            return
+        symbol = body.get("symbol")
+        if symbol is not None and not isinstance(symbol, str):
+            self._send_json({"error": "symbol must be a string or null"}, 400)
+            return
+        ok = journal_brief.set_pinned(symbol, user_id)
+        if not ok:
+            self._send_json({"error": "symbol not in watchlist"}, 400)
+            return
+        self._send_json({"ok": True, "pinned": journal_brief.get_pinned(user_id)})
+
+    def _handle_user_chart_prefs_put(self) -> None:
+        """SBF_Charts_Layer4_Spec, Фаза 1.4 (тогглы слоёв) + 1.2.3 (последний
+        просмотренный инструмент) — см. journal_auth.update_chart_prefs()."""
+        user_id = self._lp_require_auth()
+        if not user_id:
+            return
+        body = self._read_body_json()
+        if body is None:
+            return
+        layers = body.get("layers")
+        last_symbol = body.get("last_symbol")
+        if layers is not None and not isinstance(layers, dict):
+            self._send_json({"error": "layers must be an object"}, 400)
+            return
+        if last_symbol is not None:
+            if not isinstance(last_symbol, str) or last_symbol.upper() not in _chart_symbols():
+                self._send_json({"error": "invalid last_symbol"}, 400)
+                return
+            last_symbol = last_symbol.upper()
+        result = journal_auth.update_chart_prefs(user_id, layers=layers, last_symbol=last_symbol)
+        self._send_json(result, 200 if result.get("ok") else 400)
 
     def _handle_auth_my_path(self) -> None:
         token = self._auth_token()

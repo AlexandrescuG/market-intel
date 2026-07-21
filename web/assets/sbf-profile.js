@@ -89,6 +89,12 @@
     'button.sbf-av{cursor:pointer;padding:0;outline:none;}',
     'button.sbf-av:hover{box-shadow:0 0 0 3px rgba(201,162,39,.3);transform:scale(1.06);}',
     'button.sbf-av:focus-visible{box-shadow:0 0 0 3px rgba(201,162,39,.5);}',
+
+    '.sbf-login-link{margin-left:10px;padding:7px 16px;border-radius:8px;',
+    'background:var(--gold,#C9A227);color:#fff;font-family:Montserrat,sans-serif;',
+    'font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap;',
+    'transition:background .12s;}',
+    '.sbf-login-link:hover{background:#B8931F;}',
     '.sbf-av img{width:100%;height:100%;object-fit:cover;display:block;}',
     // Аватар внутри кнопки (не кликабельный сам по себе)
     '.sbf-av-in{pointer-events:none;}',
@@ -196,6 +202,24 @@
     'background:var(--surface,#FCFAF5);transition:border-color .14s;outline:none;}',
     '.sbf-pp-f input:focus{border-color:var(--gold,#C9A227);}',
     '.sbf-pp-f input::placeholder{color:var(--muted,#8A8275);opacity:.55;}',
+
+    // Ватчлист (Layer4 Ф1.3)
+    '.sbf-pp-wl{margin-bottom:14px;}',
+    '.sbf-pp-wl label{display:block;font-family:"JetBrains Mono",monospace;',
+    'font-size:11px;color:var(--muted,#8A8275);margin-bottom:6px;letter-spacing:.2px;}',
+    '.sbf-pp-wl-summary{display:flex;align-items:center;gap:8px;cursor:pointer;',
+    'font-size:13px;color:var(--ink,#2B2B33);padding:8px 0;}',
+    '.sbf-pp-wl-summary .sbf-pp-wl-edit-ico{margin-left:auto;color:var(--gold,#C9A227);font-size:13px;}',
+    '.sbf-pp-wl-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;}',
+    '.sbf-pp-wl-chip{display:flex;align-items:center;gap:4px;background:var(--grid,#F0E9DA);',
+    'border-radius:8px;padding:5px 6px 5px 10px;font-family:"JetBrains Mono",monospace;font-size:12px;}',
+    '.sbf-pp-wl-chip button{border:none;background:none;cursor:pointer;color:var(--muted,#8A8275);',
+    'font-size:11px;padding:2px 4px;line-height:1;}',
+    '.sbf-pp-wl-chip button:hover{color:var(--ink,#2B2B33);}',
+    '.sbf-pp-wl-add select{width:100%;box-sizing:border-box;padding:8px 10px;',
+    'border:1px solid var(--line,#E7DFCF);border-radius:8px;font-family:"JetBrains Mono",monospace;',
+    'font-size:12px;background:#fff;color:var(--ink,#2B2B33);}',
+    '.sbf-pp-wl-hint{font-size:10px;color:var(--muted,#8A8275);margin-top:6px;line-height:1.4;}',
 
     // Кнопка сохранить
     '.sbf-pp-save{width:100%;margin-top:8px;padding:12px;',
@@ -472,6 +496,22 @@
       '    <input type="text" id="sbfPpFn" data-i18n-ph="profile.placeholder_first_name" placeholder="' + t('profile.placeholder_first_name', 'Введите имя') + '" autocomplete="given-name"></div>',
       '  <div class="sbf-pp-f"><label for="sbfPpLa" data-i18n="profile.field_last_name">' + t('profile.field_last_name', 'Фамилия') + '</label>',
       '    <input type="text" id="sbfPpLa" data-i18n-ph="profile.placeholder_last_name" placeholder="' + t('profile.placeholder_last_name', 'Введите фамилию') + '" autocomplete="family-name"></div>',
+      // Ватчлист (SBF_Charts_Layer4_Spec, Фаза 1.3) — только для залогиненных,
+      // скрыт для анонима (сама панель профиля доступна и гостю — локальный
+      // геймификационный профиль, см. load()/save() выше; ватчлист же —
+      // серверная, auth-only фича, здесь читаем window.SBF.user, не local `p`).
+      '  <div class="sbf-pp-wl" id="sbfPpWl" style="display:none">',
+      '    <label data-i18n="profile.watchlist_label">' + t('profile.watchlist_label', 'Мои инструменты') + '</label>',
+      '    <div class="sbf-pp-wl-summary" id="sbfPpWlSummary"></div>',
+      '    <div class="sbf-pp-wl-editor" id="sbfPpWlEditor" style="display:none">',
+      '      <div class="sbf-pp-wl-chips" id="sbfPpWlChips"></div>',
+      '      <div class="sbf-pp-wl-add">',
+      '        <select id="sbfPpWlAdd"><option value="" data-i18n="profile.watchlist_add_placeholder">' + t('profile.watchlist_add_placeholder', '+ добавить инструмент') + '</option></select>',
+      '      </div>',
+      '      <div class="sbf-pp-wl-hint" id="sbfPpWlHint" data-i18n="profile.watchlist_hint">' + t('profile.watchlist_hint', 'До 10 инструментов. Стрелки — порядок (первый попадёт в шапку и график по умолчанию).') + '</div>',
+      '    </div>',
+      '  </div>',
+
       '  <button class="sbf-pp-save" id="sbfPpSv" data-i18n="profile.save_button">' + t('profile.save_button', 'Сохранить') + '</button>',
       '</div>',
 
@@ -589,6 +629,18 @@
     document.getElementById('sbfPpLa').addEventListener('input', onNameInput);
     document.getElementById('sbfPpSv').addEventListener('click', onSave);
     fileInput.addEventListener('change', onFile);
+    document.getElementById('sbfPpWlSummary').addEventListener('click', function () {
+      var ed = document.getElementById('sbfPpWlEditor');
+      ed.style.display = ed.style.display === 'none' ? '' : 'none';
+    });
+    document.getElementById('sbfPpWlAdd').addEventListener('change', function () {
+      if (!this.value) return;
+      if (_wlSymbols.length >= 10) { this.value = ''; return; }
+      _wlSymbols.push(this.value);
+      this.value = '';
+      renderWlChips(); renderWlSummary(); renderWlAddOptions();
+      saveWatchlist();
+    });
 
     // Survey promo dismiss
     var surveyDismiss = document.getElementById('sbfSurveyDismiss');
@@ -670,6 +722,137 @@
     _checkSurveyPromo();
   }
 
+  // ── Ватчлист (SBF_Charts_Layer4_Spec, Фаза 1.3) ─────────────────────────
+  var _wlSymbols = [];
+  var _wlAvailable = null;
+  var _wlPinned = null;   // Focus Engine (SPEC_focus_engine.md §6)
+
+  function fillWatchlist() {
+    var wrap = document.getElementById('sbfPpWl');
+    if (!wrap) return;
+    var user = window.SBF && window.SBF.user;
+    if (!user) { wrap.style.display = 'none'; return; }
+    wrap.style.display = '';
+    _wlSymbols = (user.watchlist || []).slice();
+    _wlPinned = user.pinned || null;
+    renderWlSummary();
+    renderWlChips();
+    if (_wlAvailable) { renderWlAddOptions(); return; }
+    fetch('/api/chart/symbols').then(function (r) { return r.json(); }).then(function (list) {
+      _wlAvailable = list;
+      renderWlAddOptions();
+    }).catch(function () {});
+  }
+
+  function renderWlSummary() {
+    var el = document.getElementById('sbfPpWlSummary');
+    if (!el) return;
+    el.innerHTML = '';
+    var txt = document.createElement('span');
+    txt.textContent = _wlSymbols.length ? _wlSymbols.join(', ') : t('profile.watchlist_empty', 'не выбрано');
+    var ico = document.createElement('span');
+    ico.className = 'sbf-pp-wl-edit-ico';
+    ico.textContent = '✎';
+    el.appendChild(txt);
+    el.appendChild(ico);
+  }
+
+  function renderWlChips() {
+    var box = document.getElementById('sbfPpWlChips');
+    if (!box) return;
+    box.innerHTML = '';
+    _wlSymbols.forEach(function (sym, idx) {
+      var chip = document.createElement('div');
+      chip.className = 'sbf-pp-wl-chip';
+      var label = document.createElement('span');
+      label.textContent = sym;
+      chip.appendChild(label);
+      if (idx > 0) {
+        var up = document.createElement('button');
+        up.type = 'button'; up.textContent = '↑';
+        up.setAttribute('aria-label', t('profile.watchlist_move_up', 'Выше'));
+        up.addEventListener('click', function () { moveWl(idx, -1); });
+        chip.appendChild(up);
+      }
+      if (idx < _wlSymbols.length - 1) {
+        var down = document.createElement('button');
+        down.type = 'button'; down.textContent = '↓';
+        down.setAttribute('aria-label', t('profile.watchlist_move_down', 'Ниже'));
+        down.addEventListener('click', function () { moveWl(idx, 1); });
+        chip.appendChild(down);
+      }
+      var pin = document.createElement('button');
+      pin.type = 'button';
+      pin.className = 'sbf-pp-wl-pin' + (sym === _wlPinned ? ' on' : '');
+      pin.textContent = sym === _wlPinned ? '★' : '☆';
+      pin.title = sym === _wlPinned
+        ? t('profile.watchlist_unpin', 'Открепить (вернуть авто-выбор фокуса)')
+        : t('profile.watchlist_pin', 'Закрепить как фокус дня');
+      pin.addEventListener('click', function () { togglePin(sym); });
+      chip.appendChild(pin);
+      var rm = document.createElement('button');
+      rm.type = 'button'; rm.textContent = '×';
+      rm.setAttribute('aria-label', t('profile.watchlist_remove', 'Убрать'));
+      rm.addEventListener('click', function () { removeWl(idx); });
+      chip.appendChild(rm);
+      box.appendChild(chip);
+    });
+  }
+
+  function togglePin(sym) {
+    if (!window.sbfAuth || !window.sbfAuth.isLoggedIn()) return;
+    var next = sym === _wlPinned ? null : sym;
+    window.sbfAuth.fetch('/api/user/watchlist/pin', {
+      method: 'PUT', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({symbol: next}),
+    }).then(function (r) { return r.json(); }).then(function (d) {
+      if (!d || !d.ok) return;
+      _wlPinned = d.pinned;
+      if (window.SBF && window.SBF.user) window.SBF.user.pinned = d.pinned;
+      renderWlChips();
+    }).catch(function () {});
+  }
+
+  function renderWlAddOptions() {
+    var sel = document.getElementById('sbfPpWlAdd');
+    if (!sel || !_wlAvailable) return;
+    sel.innerHTML = '<option value="">' + t('profile.watchlist_add_placeholder', '+ добавить инструмент') + '</option>';
+    _wlAvailable.filter(function (s) { return _wlSymbols.indexOf(s) === -1; }).forEach(function (s) {
+      var o = document.createElement('option');
+      o.value = s; o.textContent = s;
+      sel.appendChild(o);
+    });
+    sel.disabled = _wlSymbols.length >= 10;
+  }
+
+  function moveWl(idx, dir) {
+    var j = idx + dir;
+    if (j < 0 || j >= _wlSymbols.length) return;
+    var tmp = _wlSymbols[idx]; _wlSymbols[idx] = _wlSymbols[j]; _wlSymbols[j] = tmp;
+    renderWlChips(); renderWlSummary();
+    saveWatchlist();
+  }
+
+  function removeWl(idx) {
+    _wlSymbols.splice(idx, 1);
+    renderWlChips(); renderWlSummary(); renderWlAddOptions();
+    saveWatchlist();
+  }
+
+  function saveWatchlist() {
+    if (!window.sbfAuth || !window.sbfAuth.isLoggedIn()) return;
+    window.sbfAuth.fetch('/api/user/watchlist', {
+      method: 'PUT', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({symbols: _wlSymbols}),
+    }).then(function (r) { return r.json(); }).then(function (d) {
+      if (!d || !d.watchlist) return;
+      _wlSymbols = d.watchlist;
+      if (window.SBF && window.SBF.user) window.SBF.user.watchlist = d.watchlist;
+      renderWlChips(); renderWlSummary(); renderWlAddOptions();
+      document.dispatchEvent(new CustomEvent('sbf:user-ready', {detail: window.SBF.user}));
+    }).catch(function () {});
+  }
+
   function fillPanel(p) {
     var lvl = calcLevel(p.xp || 0);
     var pct = Math.round(lvl.progress * 100);
@@ -723,6 +906,7 @@
   function openPanel() {
     if (!_built) buildPanel();
     fillPanel(load());
+    fillWatchlist();
     _loadPanelStats();
     overlay.classList.add('open');
     panel.classList.add('open');
@@ -822,10 +1006,29 @@
     return div;
   }
 
+  // Без этого анонимный посетитель сайта (не через Telegram Mini App, где
+  // сессия уже есть) не имел НИКАКОГО видимого пути залогиниться —
+  // /login.html и /register.html существуют и рабочие, но нигде не были
+  // связаны из обычной навигации. Аватар в шапке для гостя открывал только
+  // локальный гостевой профиль (геймификация), что выглядело как "я уже
+  // вошёл", а входа на самом деле не было. Найдено пользователем вживую.
+  function makeLoginLink() {
+    var a = document.createElement('a');
+    a.className = 'sbf-login-link';
+    a.href = '/login.html';
+    a.setAttribute('data-i18n', 'nav.login');
+    a.textContent = t('nav.login', 'Войти');
+    return a;
+  }
+
   function injectIntoStandardHeader() {
     var right = document.querySelector('.sbf-right');
-    if (!right || right.querySelector('.sbf-av')) return false;
-    right.appendChild(makeHeaderAvatar());
+    if (!right || right.querySelector('.sbf-av') || right.querySelector('.sbf-login-link')) return false;
+    if (window.sbfAuth && window.sbfAuth.isLoggedIn()) {
+      right.appendChild(makeHeaderAvatar());
+    } else {
+      right.appendChild(makeLoginLink());
+    }
     return true;
   }
 

@@ -54,10 +54,12 @@ if (new URLSearchParams(location.search).get("embed") === "1") {
 <link rel="stylesheet" href="/assets/design.css">
 <script src="/assets/i18n.js?v=2" defer></script>
 <script src="/assets/sbf-header.js?v=15" defer></script>
+<script src="/assets/sbf-auth.js?v=1" defer></script>
 <script src="/assets/sbf-profile.js?v=2" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.0/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
 <script src="/assets/grafik-engine.js"></script>
+<script src="/assets/sbf-glossary.js?v=2" defer></script>
 <style>
 :root{
   --cream:#FBF6EF; --paper:#FFFFFF; --line:#E7DFCF; --grid:#F0E9DA;
@@ -121,6 +123,13 @@ a:hover{text-decoration:underline;color:var(--glow)}
 
 /* report */
 .report{font-family:Montserrat}
+.rep-instrument-link{color:var(--gold);font-weight:600;text-decoration:none;border-bottom:1.5px dotted var(--gold)}
+.rep-instrument-link:hover{background:rgba(201,162,39,.12)}
+.personal-block{margin-bottom:14px;padding:10px 14px;border-radius:10px;background:rgba(201,162,39,.07);border:1px solid rgba(201,162,39,.18);font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.8;display:none}
+.personal-block b{color:var(--ink)}
+.personal-block a{color:inherit;text-decoration:none}
+.personal-block a:hover{text-decoration:underline}
+.personal-block .pb-sep{color:var(--muted);margin:0 8px}
 .report h1{font-size:19px;margin:4px 0 14px;color:var(--ink)}
 .report h3{font-size:13px;margin:10px 0 5px;color:var(--gold);font-weight:700}
 .report table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13px}
@@ -172,10 +181,34 @@ a:hover{text-decoration:underline;color:var(--glow)}
 .sig .t a{color:var(--ink)}
 .sig .t a:hover{color:var(--gold);text-decoration:underline}
 
-/* buzz */
-.buzz{display:flex;flex-wrap:wrap;gap:7px;align-items:center;justify-content:center;padding:4px 0}
-.bub{border-radius:50%;display:grid;place-items:center;font-family:'JetBrains Mono';
-  font-weight:700;color:var(--paper);border:none}
+/* pulse (Фаза 4 — заменяет старое облако-«buzz») */
+.pulse-list{display:flex;flex-direction:column;gap:1px;padding:4px 0}
+.pulse-row{display:flex;align-items:center;gap:10px;padding:7px 4px;border-radius:8px;cursor:pointer;transition:background var(--dur) var(--ease)}
+.pulse-row:hover{background:var(--surface)}
+.pulse-sym{font-family:'JetBrains Mono';font-weight:700;font-size:13px;min-width:52px;color:var(--ink)}
+.pulse-spark{flex:1;height:22px;display:block}
+.pulse-score{font-family:'JetBrains Mono';font-size:12px;font-weight:600;min-width:40px;text-align:right;display:flex;align-items:center;justify-content:flex-end;gap:5px}
+.pulse-score.hot{color:var(--up)}
+.pulse-score.warm{color:var(--gold-text)}
+.pulse-score.cold{color:var(--muted)}
+.pulse-dot{width:6px;height:6px;border-radius:50%;background:var(--up);box-shadow:0 0 6px var(--up);animation:pulseDot 1.4s infinite}
+@keyframes pulseDot{50%{opacity:.3}}
+.pulse-calm{font-size:11px;color:var(--muted);padding:0 4px 8px;font-style:italic}
+.pulse-feed-backdrop{position:fixed;inset:0;background:rgba(43,43,51,.28);z-index:200;display:none}
+.pulse-feed-backdrop.on{display:block}
+.pulse-feed-card{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:340px;max-width:calc(100vw - 24px);
+  max-height:70vh;overflow-y:auto;background:var(--paper);border:1px solid var(--line);border-radius:14px;
+  box-shadow:0 10px 34px rgba(43,43,51,.18);z-index:201;padding:16px 18px;font-family:'JetBrains Mono',monospace;display:none}
+.pulse-feed-card.on{display:block}
+@media(max-width:760px){.pulse-feed-card{left:0;right:0;bottom:0;top:auto;transform:none;width:100%;max-width:100%;border-radius:16px 16px 0 0;max-height:75vh}}
+.pulse-feed-card .pf-close{position:absolute;top:8px;right:10px;cursor:pointer;color:var(--muted);font-size:15px;background:none;border:none;padding:4px}
+.pulse-feed-card h4{margin:0 0 10px;font-family:var(--font-sans);font-size:14px;padding-right:20px}
+.pulse-feed-card .pf-item{padding:9px 0;border-top:1px solid var(--line)}
+.pulse-feed-card .pf-item:first-child{border-top:none}
+.pulse-feed-card .pf-item a{color:var(--ink);font-family:var(--font-sans);font-size:12.5px;line-height:1.4}
+.pulse-feed-card .pf-item a:hover{color:var(--gold)}
+.pulse-feed-card .pf-meta{font-size:10px;color:var(--muted);margin-top:3px}
+.pulse-feed-lock{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px;padding:8px 0}
 
 .sidebar .panel{margin-bottom:18px}
 .empty{color:var(--faint);font-size:12px;padding:8px 0}
@@ -326,11 +359,20 @@ a:hover{text-decoration:underline;color:var(--glow)}
 
     <!-- ── ФУНДАМЕНТАЛЬНЫЙ ──────────────────────────────────── -->
     <div class="view-fund">
+      <section class="panel focus-card" id="focusCard" style="display:none">
+        <div class="panel-h">
+          <h2>{{ t('home.focus_title', lang) }}</h2>
+          <span class="fresh" id="focusFresh"></span>
+        </div>
+        <div id="focusBody"></div>
+      </section>
+
       <section class="panel">
         <div class="panel-h">
           <h2>{{ t('home.morning_report_title', lang) }}</h2>
           <span class="fresh" id="reportFresh"></span>
         </div>
+        <div class="personal-block" id="personalBlock"></div>
         <div class="report" id="report"><div class="empty">{{ t('home.report_not_generated', lang) }}</div></div>
       </section>
 
@@ -425,16 +467,25 @@ a:hover{text-decoration:underline;color:var(--glow)}
       </section>
     </div>
 
-    <!-- Buzz → Фундаментальный -->
+    <!-- Пульс Рынка → Фундаментальный (SBF_Charts_Layer1_Spec, Фаза 4) -->
     <div class="view-fund">
       <section class="panel">
-        <div class="panel-h"><h2>{{ t('home.market_buzz', lang) }}</h2><span class="tag signal">{{ t('home.24h', lang) }}</span>
+        <div class="panel-h"><h2>{{ t('home.market_buzz', lang) }}</h2>
           <span class="fresh" id="buzzFresh"></span></div>
-        <div class="buzz" id="buzz"></div>
+        <div class="tabs" id="pulseTabs">
+          <button class="tab chip active" data-cat="crypto">{{ t('home.pulse_tab_crypto', lang) }}</button>
+          <button class="tab chip" data-cat="stocks">{{ t('home.pulse_tab_stocks', lang) }}</button>
+          <button class="tab chip" data-cat="indices">{{ t('home.pulse_tab_indices', lang) }}</button>
+        </div>
+        <div class="pulse-calm" id="pulseCalm" hidden>{{ t('home.pulse_calm', lang) }}</div>
+        <div class="pulse-list" id="pulseList"></div>
       </section>
     </div>
   </aside>
 </div>
+
+<div class="pulse-feed-backdrop" id="pulseFeedBackdrop"></div>
+<div class="pulse-feed-card" id="pulseFeedCard"></div>
 
 <div class="chart-overlay" id="chartOverlay">
   <div class="chart-box">
@@ -477,6 +528,32 @@ const NAMES = {
 
 // Bybit WebSocket: крипто → yfinance символ
 const BYBIT_MAP = {'BTCUSDT':'BTC-USD','ETHUSDT':'ETH-USD','SOLUSDT':'SOL-USD'};
+
+// SBF_Charts_Layer4_Spec, Фаза 1.2.1: инструменты ватчлиста первыми в тикере.
+// Зеркалирует ту же логику sbf-header.js (там — для не-главных страниц; здесь
+// — отдельная копия ленты специально для index.html, см. комментарий вверху
+// sbf-header.js "На главной странице index.html сам управляет данными").
+const TICKER_TO_CHART_SYMBOL = {
+  'GC=F':'GOLD', 'SI=F':'SILVER', 'CL=F':'WTI', 'NG=F':'NG',
+  'BTC-USD':'BTC', 'ETH-USD':'ETH', 'SOL-USD':'SOL',
+  'EURUSD=X':'EURUSD', 'GBPUSD=X':'GBPUSD',
+  '^GSPC':'SPX', '^IXIC':'NASDAQ', '^DJI':'DJI', '^VIX':'VIX', 'DX-Y.NYB':'DXY',
+};
+function reorderByWatchlist(items) {
+  const wl = (window.SBF && window.SBF.user && window.SBF.user.watchlist) || [];
+  if (!wl.length) return items;
+  const rank = {};
+  wl.forEach((sym, i) => { rank[sym] = i; });
+  return items.map((it, idx) => {
+    const chartSym = TICKER_TO_CHART_SYMBOL[it.ticker];
+    const r = (chartSym && (chartSym in rank)) ? rank[chartSym] : 1000 + idx;
+    return {it, r};
+  }).sort((a, b) => a.r - b.r).map(x => x.it);
+}
+let _lastMarketItems = null;
+document.addEventListener('sbf:user-ready', () => {
+  if (_lastMarketItems) buildStrip(reorderByWatchlist(_lastMarketItems));
+});
 
 let _fng = null;
 const _live = {};  // sym → текущая цена (для flash)
@@ -576,7 +653,7 @@ function startBybitStrip() {
 
 function renderMarket(m) {
   if (m && m.fear_greed) _fng = m.fear_greed;
-  if (m && m.items) buildStrip(m.items);
+  if (m && m.items) { _lastMarketItems = m.items; buildStrip(reorderByWatchlist(m.items)); }
 }
 
 function renderFng(m){
@@ -592,7 +669,13 @@ function renderFng(m){
 const I18N_REPORT = {
   notGenerated: {{ t('home.report_not_generated', lang) | tojson }},
   forDate: {{ t('home.report_for_date', lang) | tojson }},
-  summaryTitle: {{ t('home.summary_title', lang) | tojson }}
+  summaryTitle: {{ t('home.summary_title', lang) | tojson }},
+  personalPrefix: {{ t('home.personal_block_prefix', lang) | tojson }},
+  calmToday: {{ t('home.personal_block_calm', lang) | tojson }},
+  focusHeadlineTpl: {{ t('home.focus_headline_tpl', lang) | tojson }},
+  focusCalm: {{ t('home.focus_calm', lang) | tojson }},
+  focusPinnedNote: {{ t('home.focus_pinned_note', lang) | tojson }},
+  focusViewChart: {{ t('home.focus_view_chart', lang) | tojson }}
 };
 function renderReport(r){
   const el=document.getElementById('report');
@@ -635,6 +718,194 @@ function renderReport(r){
   });
 
   el.innerHTML = html || marked.parse(r.markdown);
+
+  // SBF_Charts_Layer4_Spec, Фаза 3: инструментальные ссылки — ДО глоссария
+  // (тот уже сам пропускает текст внутри <a>, см. sbf-glossary.js highlightBlock —
+  // порядок "сначала ссылки инструментов, потом глоссарий" получается бесплатно
+  // просто вызовом в правильной последовательности, ничего не пришлось
+  // дорабатывать в самом glossary-модуле).
+  linkInstrumentsInReport(el);
+  if (window.SBFGlossary) window.SBFGlossary.highlight(el);
+}
+
+// Тот же словарь символов, что news_burst_job.py:_SYMBOL_PATTERNS (Layer1
+// Ф3) — продублирован в JS (та же необходимость, что DST-логика Layer3 Ф2:
+// нет общего модуля между Python-джобами и клиентским JS). DXY/VIX
+// сознательно не включены — не символы графика (нет ohlc_*.json), ссылка
+// вела бы в никуда. USDKZT/USDRUB тоже отсутствуют — для них паттерна нет и
+// в оригинальном словаре (проверено при работе над Layer3 Ф1).
+const REPORT_SYMBOL_PATTERNS = {
+  GOLD:   /\bgold\b|золот|\bxau\b/i,
+  SILVER: /\bsilver\b|серебр|\bxag\b/i,
+  BTC:    /\bbitcoin\b|биткои|биткойн|\bbtc\b/i,
+  ETH:    /\bethereum\b|эфириум|\beth\b/i,
+  SOL:    /\bsolana\b/i,
+  SPX:    /s&p\s*500|\bs&p\b|\bspx\b|standard\s*&\s*poor/i,
+  NASDAQ: /\bnasdaq\b|\bnas100\b/i,
+  DJI:    /dow\s+jones|\bdow\s*30\b|\bus30\b/i,
+  WTI:    /\bwti\b|crude oil|нефт[ьи]/i,
+  NG:     /natural gas|природн\w*\s*газ|henry hub/i,
+  EURUSD: /eur\s*\/\s*usd|\beurusd\b|евро.{0,15}доллар/i,
+  GBPUSD: /gbp\s*\/\s*usd|\bgbpusd\b|\bcable\b|фунт.{0,15}доллар/i,
+  USDJPY: /usd\s*\/\s*jpy|\busdjpy\b|доллар.{0,15}йен/i,
+};
+const REPORT_LINK_LIMIT = 12; // как в глоссарии — не гирлянда (спека)
+
+// SBF_Charts_Layer4_Spec, Фаза 3: персональный блок «По твоим инструментам
+// сегодня» — детерминированно из календаря × ватчлист, БЕЗ LLM (спека прямым
+// текстом требует). Переиспользует уже готовый /api/chart/thermo (Layer3
+// Ф1) вместо отдельного расчёта — next_event там уже посчитан джобом раз в
+// 5 мин по каждому инструменту (weight=2, importance medium+, см. память
+// Layer3 Ф1 про ограниченное покрытие weight=2 — для большинства
+// инструментов кроме DXY/EURUSD/GBPUSD/USDJPY эта строка почти всегда будет
+// "спокойно", это честное отражение данных, не баг персонального блока).
+async function renderPersonalBlock() {
+  const block = document.getElementById('personalBlock');
+  if (!block) return;
+  const user = window.SBF && window.SBF.user;
+  const wl = (user && user.watchlist) || [];
+  if (!wl.length) { block.style.display = 'none'; return; }
+  const symbols = wl.slice(0, 5);
+  try {
+    const results = await Promise.all(symbols.map(sym =>
+      fetch(`/api/chart/thermo?symbol=${encodeURIComponent(sym)}`).then(r => r.ok ? r.json() : null).catch(() => null)
+    ));
+    const now = Math.floor(Date.now() / 1000);
+    const endOfDay = now - (now % 86400) + 86400;
+    const parts = results.map((data, i) => {
+      const sym = symbols[i];
+      const href = `/chart.html?s=${encodeURIComponent(sym)}&focus=today`;
+      let txt;
+      if (data && data.next_event_ts && data.next_event_ts <= endOfDay && data.next_event) {
+        const time = new Date(data.next_event_ts * 1000).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+        txt = `<b>${sym}</b> — ${escapeHtmlIdx(data.next_event.title || data.next_event.event_type)} ${time}`;
+      } else {
+        txt = `<b>${sym}</b> — ${I18N_REPORT.calmToday || 'спокойно'}`;
+      }
+      return `<a href="${href}">${txt}</a>`;
+    });
+    block.innerHTML = (I18N_REPORT.personalPrefix || 'По твоим инструментам сегодня:') + ' ' +
+      parts.join('<span class="pb-sep">·</span>');
+    block.style.display = 'block';
+  } catch (e) {
+    block.style.display = 'none';
+  }
+}
+document.addEventListener('sbf:user-ready', renderPersonalBlock);
+
+// SPEC_focus_engine.md §9: карточка «В фокусе». headline/calm/pinned строятся
+// клиентом из I18N_REPORT (Jinja-переведённые шаблоны) + сырых фактов API
+// (symbol/anomaly) — так же, как renderPersonalBlock строит статичное
+// "спокойно" из I18N_REPORT, но оставляет динамическое event.title как есть.
+// analysis (LLM-разбор) не переведён — это сырой текст модели на русском
+// (см. analyze/prompt.md), как и raw event.title там же.
+async function renderFocusCard() {
+  const card = document.getElementById('focusCard');
+  const body = document.getElementById('focusBody');
+  if (!card || !body) return;
+  try {
+    // Обычный fetch() не проставляет Authorization -- scope=me на сервере
+    // тогда всегда резолвится в анонимного "default" (нашёл ровно эту ошибку
+    // при живой проверке: залогиненный пользователь с личным пином видел
+    // общую default-карточку вместо своей). sbfAuth.fetch подставляет токен
+    // сам (см. sbf-profile.js, тот же паттерн для watchlist/pin).
+    const doFetch = (window.sbfAuth && window.sbfAuth.isLoggedIn())
+      ? window.sbfAuth.fetch('/api/focus?scope=me')
+      : fetch('/api/focus?scope=default');
+    const r = await doFetch;
+    const data = r.ok ? await r.json() : null;
+    if (!data) { card.style.display = 'none'; return; }
+
+    let html;
+    if (data.source === 'pin') {
+      html = `<div class="focus-line"><b>${escapeHtmlIdx(data.name || data.symbol || '')}</b></div>
+        <div class="focus-note">${I18N_REPORT.focusPinnedNote}</div>`;
+    } else if (data.source === 'calm' || !data.symbol) {
+      html = `<div class="focus-note">${I18N_REPORT.focusCalm}</div>`;
+    } else if (data.has_llm_analysis && data.analysis) {
+      html = `<div class="focus-line"><b>${escapeHtmlIdx(data.name || data.symbol)}</b></div>
+        <div class="focus-analysis">${escapeHtmlIdx(data.analysis)}</div>`;
+    } else {
+      // §9: "{mult} — с запятой-десятичным (ru), 1 знак" -- ro тоже запятая
+      // (та же конвенция, что родной язык), en -- точка (стандартный english).
+      const mult = data.anomaly != null
+        ? (_PAGE_LANG === 'en' ? data.anomaly.toFixed(1) : data.anomaly.toFixed(1).replace('.', ','))
+        : '';
+      const headline = fmt_(I18N_REPORT.focusHeadlineTpl, {name: data.name || data.symbol, mult: mult});
+      html = `<div class="focus-line">${escapeHtmlIdx(headline)}</div>`;
+    }
+    if (data.symbol) {
+      html += `<a class="focus-link" href="/chart.html?s=${encodeURIComponent(data.symbol)}&focus=today">${I18N_REPORT.focusViewChart} →</a>`;
+    }
+    body.innerHTML = html;
+    card.style.display = 'block';
+  } catch (e) {
+    card.style.display = 'none';
+  }
+}
+document.addEventListener('sbf:user-ready', renderFocusCard);
+
+// SBF_Charts_Layer4_Spec, Фаза 3: первое вхождение каждого инструмента В
+// КАЖДОМ РАЗДЕЛЕ (не во всём отчёте — глоссарий выше дедупит на весь
+// переданный элемент, у ссылок инструментов дедуп мельче по спеке), ссылки
+// не внутри <a>/цитат/заголовков — тот же обход дерева, что glossary.js
+// (сознательно продублирован, а не переиспользован напрямую: у glossary.js
+// нет публичного API для одиночного текстового узла, только для целого
+// блока со своим счётчиком/индексом терминов).
+function linkInstrumentsInReport(reportEl) {
+  let totalLinks = 0;
+  const sections = reportEl.querySelectorAll('.rep-body');
+  const bodies = sections.length ? sections : [reportEl];
+  bodies.forEach(body => {
+    if (totalLinks >= REPORT_LINK_LIMIT) return;
+    const seenInSection = new Set();
+    walkAndLink(body);
+
+    function walkAndLink(node) {
+      if (totalLinks >= REPORT_LINK_LIMIT) return;
+      if (node.nodeType === 1) {
+        const tag = node.tagName.toLowerCase();
+        if (tag === 'a' || tag === 'blockquote' || /^h[1-6]$/.test(tag)) return;
+        Array.prototype.slice.call(node.childNodes).forEach(walkAndLink);
+        return;
+      }
+      if (node.nodeType !== 3) return;
+      const text = node.nodeValue;
+      if (!text || text.trim().length < 2) return;
+
+      let matchSym = null, matchStart = -1, matchLen = 0;
+      for (const sym in REPORT_SYMBOL_PATTERNS) {
+        if (seenInSection.has(sym)) continue;
+        const m = REPORT_SYMBOL_PATTERNS[sym].exec(text);
+        if (m && (matchStart === -1 || m.index < matchStart)) {
+          matchStart = m.index; matchSym = sym; matchLen = m[0].length;
+        }
+      }
+      if (!matchSym) return;
+      seenInSection.add(matchSym);
+      totalLinks++;
+
+      const before = text.substring(0, matchStart);
+      const matched = text.substring(matchStart, matchStart + matchLen);
+      const after = text.substring(matchStart + matchLen);
+      const frag = document.createDocumentFragment();
+      if (before) frag.appendChild(document.createTextNode(before));
+      const a = document.createElement('a');
+      a.className = 'rep-instrument-link';
+      a.href = '/chart.html?s=' + encodeURIComponent(matchSym) + '&focus=today';
+      a.textContent = matched;
+      frag.appendChild(a);
+      const parent = node.parentNode;
+      if (!parent) return;
+      parent.insertBefore(frag, node);
+      if (after) {
+        const rest = document.createTextNode(after);
+        parent.insertBefore(rest, node);
+        walkAndLink(rest);
+      }
+      parent.removeChild(node);
+    }
+  });
 }
 
 const I18N_CARD = {
@@ -786,36 +1057,113 @@ function renderSignals(dim){
   }).join('');
 }
 
-const I18N_BUZZ_MENTIONS = {{ t('home.mentions_abbr', lang) | tojson }};
-function renderBuzz(b){
-  const el=document.getElementById('buzz'); if(!b||!b.tickers.length){el.innerHTML='<div class="empty">—</div>';return;}
-  const max=Math.max(...b.tickers.map(t=>t.mentions));
-  el.innerHTML=b.tickers.slice(0,24).map(t=>{
-    const sz=Math.round(34+(t.mentions/max)*46);
-    const hue=120*Math.min(t.importance/0.6,1);
-    return `<div class="bub" title="${t.tag}: ${t.mentions} ${I18N_BUZZ_MENTIONS} · imp ${t.importance}"
-      style="width:${sz}px;height:${sz}px;font-size:${Math.max(9,sz/4)}px;
-      background:hsl(${hue} 55% 55%)">${t.tag}</div>`;
-  }).join('');
+// ── Пульс Рынка (Фаза 4) — заменяет старое облако-«buzz» ────────────────────
+const I18N_PULSE = {
+  locked: {{ t('home.pulse_feed_locked', lang) | tojson }},
+  empty:  {{ t('home.pulse_feed_empty', lang) | tojson }},
+};
+
+function escapeHtmlIdx(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function sparklineSvg(values){
+  if(!values || values.length<2) return '<svg class="pulse-spark" viewBox="0 0 100 24" preserveAspectRatio="none"></svg>';
+  const max=Math.max(...values,0.01), min=Math.min(...values,0), range=(max-min)||1;
+  const pts=values.map((v,i)=>{
+    const x=(i/(values.length-1))*100, y=22-((v-min)/range)*20;
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(' ');
+  return `<svg class="pulse-spark" viewBox="0 0 100 24" preserveAspectRatio="none"><polyline points="${pts}" fill="none" stroke="var(--gold)" stroke-width="1.5"/></svg>`;
 }
+
+const scoreClass = score => score>3 ? 'hot' : score>=1.5 ? 'warm' : 'cold';
+
+function renderPulseList(data){
+  const listEl=document.getElementById('pulseList'), calmEl=document.getElementById('pulseCalm');
+  calmEl.hidden = !data.calm;
+  if(!data.items || !data.items.length){ listEl.innerHTML='<div class="empty">—</div>'; return; }
+  listEl.innerHTML=data.items.map(it=>{
+    const cls=scoreClass(it.score), dot=cls==='hot'?'<span class="pulse-dot"></span>':'';
+    return `<div class="pulse-row" data-symbol="${escapeHtmlIdx(it.symbol)}">
+      <span class="pulse-sym">${escapeHtmlIdx(it.symbol)}</span>
+      ${sparklineSvg(it.sparkline)}
+      <span class="pulse-score ${cls}">${dot}×${it.score.toFixed(1)}</span>
+    </div>`;
+  }).join('');
+  listEl.querySelectorAll('.pulse-row').forEach(row=>{
+    row.addEventListener('click', ()=>openPulseFeed(row.dataset.symbol));
+  });
+}
+
+let _pulseCat='crypto';
+async function loadPulse(cat){
+  _pulseCat=cat;
+  try{
+    const r=await fetch('/api/pulse?category='+encodeURIComponent(cat));
+    const data=await r.json();
+    renderPulseList(data);
+    const fresh=document.getElementById('buzzFresh');
+    if(fresh) fresh.textContent = data.updated ? ago(data.updated) : '';
+  }catch(e){ renderPulseList({items:[],calm:false}); }
+}
+
+function closePulseFeed(){
+  document.getElementById('pulseFeedCard').classList.remove('on');
+  document.getElementById('pulseFeedBackdrop').classList.remove('on');
+}
+document.getElementById('pulseFeedBackdrop').addEventListener('click', closePulseFeed);
+
+function openPulseFeed(symbol){
+  const card=document.getElementById('pulseFeedCard'), backdrop=document.getElementById('pulseFeedBackdrop');
+  if(!window.sbfAuth || !window.sbfAuth.isLoggedIn()){
+    card.innerHTML=`<button class="pf-close" id="pfClose">✕</button><h4>${escapeHtmlIdx(symbol)}</h4>
+      <div class="pulse-feed-lock">🔒 ${escapeHtmlIdx(I18N_PULSE.locked)}</div>`;
+    document.getElementById('pfClose').addEventListener('click', closePulseFeed);
+    card.classList.add('on'); backdrop.classList.add('on');
+    return;
+  }
+  card.innerHTML=`<button class="pf-close" id="pfClose">✕</button><h4>${escapeHtmlIdx(symbol)}</h4><div id="pfBody">…</div>`;
+  document.getElementById('pfClose').addEventListener('click', closePulseFeed);
+  card.classList.add('on'); backdrop.classList.add('on');
+  window.sbfAuth.fetch('/api/pulse/feed?symbol='+encodeURIComponent(symbol))
+    .then(r=>r.ok?r.json():[])
+    .then(items=>{
+      const body=document.getElementById('pfBody'); if(!body)return;
+      if(!Array.isArray(items) || !items.length){ body.innerHTML=`<div class="pf-item">${escapeHtmlIdx(I18N_PULSE.empty)}</div>`; return; }
+      body.innerHTML=items.map(n=>{
+        const dt=new Date(n.ts*1000);
+        const timeStr=dt.toLocaleString(undefined,{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+        return `<div class="pf-item">
+          <a href="${escapeHtmlIdx(n.url||'#')}" target="_blank" rel="noopener noreferrer">${escapeHtmlIdx(n.title)}</a>
+          <div class="pf-meta">${escapeHtmlIdx(n.source||'')} · ${timeStr}</div>
+        </div>`;
+      }).join('');
+    })
+    .catch(()=>{});
+}
+
+document.getElementById('pulseTabs').addEventListener('click', e=>{
+  if(!e.target.dataset.cat) return;
+  document.querySelectorAll('#pulseTabs .tab').forEach(x=>x.classList.remove('active'));
+  e.target.classList.add('active');
+  loadPulse(e.target.dataset.cat);
+});
 
 async function load(){
   clockWindow();
-  const [m,t,s,b,r,meta]=await Promise.all(
-    ['market','technical','signals','buzz','report','meta'].map(get));
+  const [m,t,s,r,meta]=await Promise.all(
+    ['market','technical','signals','report','meta'].map(get));
   renderMarket(m); renderFng(m||{}); renderReport(r);
   try { renderTech(t); } catch(e) { /* tcards may not exist in current layout */ }
-  renderBuzz(b);
+  loadPulse(_pulseCat);
   SIG=s; renderSignals('economy');
   const techFreshEl=document.getElementById('techFresh');
   if(t&&techFreshEl)techFreshEl.textContent=ago(t.updated);
   if(s)document.getElementById('sigFresh').textContent=ago(s.updated);
-  if(b)document.getElementById('buzzFresh').textContent=ago(b.updated);
 }
 
 document.getElementById('tabs').addEventListener('click',e=>{
   if(!e.target.dataset.d)return;
-  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('#tabs .tab').forEach(x=>x.classList.remove('active'));
   e.target.classList.add('active');
   renderSignals(e.target.dataset.d);
 });
