@@ -3,9 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+// SPEC_visual_migration.md §1: ?design=v2 -- флаг рескина, persisted в
+// localStorage (та же логика, что index.html -- нужна здесь тоже, т.к. хром
+// живого графика на этой странице участвует в Этапе 5 миграции). Синхронно
+// в <head>, до первого рендера, тот же паттерн, что ?embed=1 в index.html.
+(function(){
+  var qp = new URLSearchParams(location.search).get('design');
+  if (qp === 'v2') localStorage.setItem('sbf_design', 'v2');
+  else if (qp === 'v1') localStorage.removeItem('sbf_design');
+  var v = qp || localStorage.getItem('sbf_design');
+  if (v === 'v2') document.documentElement.setAttribute('data-design', 'v2');
+})();
+</script>
 <title>SBF Chart</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/design.css">
+<link rel="stylesheet" href="/assets/tokens.css?v=1">
 <script src="/assets/i18n.js?v=2" defer></script>
 <script src="/assets/sbf-header.js?v=15" defer></script>
 <script src="/assets/sbf-auth.js?v=1"></script>
@@ -166,6 +180,8 @@ body.embed .card{border-radius:0;box-shadow:none;border:none;max-width:100%}
   .thermo-chip .tc-bar{display:none}
 }
 </style>
+<!-- SPEC_visual_migration.md: последним в <head> для тай-брейка по специфичности. -->
+<link rel="stylesheet" href="/assets/design-v2.css?v=1">
 </head>
 <body>
 <div class="chart-top">

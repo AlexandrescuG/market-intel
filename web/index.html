@@ -12,6 +12,19 @@ if (new URLSearchParams(location.search).get("embed") === "1") {
   document.documentElement.classList.add("sbf-embed");
 }
 </script>
+<script>
+// SPEC_visual_migration.md §1: ?design=v2 -- флаг рескина, persisted в
+// localStorage (иначе умирает при переходе на chart.html из карточки/модалки
+// живого графика, где тоже проверяется этот же хром). ?design=v1 сбрасывает
+// (откат = снять параметр, см. спека §5). Синхронно в <head>, до первого рендера.
+(function(){
+  var qp = new URLSearchParams(location.search).get('design');
+  if (qp === 'v2') localStorage.setItem('sbf_design', 'v2');
+  else if (qp === 'v1') localStorage.removeItem('sbf_design');
+  var v = qp || localStorage.getItem('sbf_design');
+  if (v === 'v2') document.documentElement.setAttribute('data-design', 'v2');
+})();
+</script>
 <title>{{ t('home.page_title', lang) }}</title>
 <meta name="description" content="SBF Consult: аналитика финансовых рынков в реальном времени. Сопровождение счёта, анализ рынка и подбор брокера. Офисы: Молдова, Казахстан, ЮАР, ОАЭ, Швейцария, Португалия.">
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
@@ -52,6 +65,7 @@ if (new URLSearchParams(location.search).get("embed") === "1") {
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Merriweather:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/design.css">
+<link rel="stylesheet" href="/assets/tokens.css?v=1">
 <script src="/assets/i18n.js?v=2" defer></script>
 <script src="/assets/sbf-header.js?v=15" defer></script>
 <script src="/assets/sbf-auth.js?v=1" defer></script>
@@ -330,6 +344,9 @@ a:hover{text-decoration:underline;color:var(--glow)}
 .sbf-embed .sbf-fw-btn, .sbf-embed .sbf-fw-bubble, .sbf-embed .g-bottom-nav { display: none !important; }
 .sbf-embed .wrap { padding-top: 0; }
 </style>
+<!-- SPEC_visual_migration.md: последним в <head>, чтобы выигрывать тай-брейки
+     на одинаковой специфичности (напр. .sbf-embed .top { .. } выше) — см. план. -->
+<link rel="stylesheet" href="/assets/design-v2.css?v=1">
 </head>
 <body>
 
