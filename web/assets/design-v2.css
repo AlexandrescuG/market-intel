@@ -24,3 +24,37 @@
    нужно только для тай-брейка с .sbf-embed-правилами той же специфичности,
    для всего остального в этом файле порядок подключения не имеет значения
    благодаря разнице в специфичности выше. */
+
+/* ===== Этап 1 — шапка, тикер-лента, табы (риск: нулевой) =====
+   .brand-text — только index.html (sbf-header.js использует другое имя,
+   .sbf-brand-text, там, где он реально рендерит шапку сам, т.е. НЕ на
+   index.html — см. isMain-проверку в sbf-header.js). .g-nav-item/.sbf-lang-sw
+   — общие с sbf-header.js, значит меняются и на chart.html тоже (см. план,
+   проверять обе страницы). .tick/.seg-btn — только index.html. */
+[data-design="v2"] .brand-text b{
+  font-family:var(--f-disp);font-weight:700;font-size:15px;
+  letter-spacing:.01em;color:var(--ink);
+}
+[data-design="v2"] .brand-text span{
+  font-family:var(--f-data);font-size:9.5px;font-weight:500;
+  letter-spacing:.28em;text-transform:uppercase;color:var(--ink-2);
+  margin-top:3px;
+}
+[data-design="v2"] header.sbf-hd{border-bottom:1px solid var(--ink)}
+
+[data-design="v2"] .strip .tick .k{
+  font-family:var(--f-data);letter-spacing:.14em;font-weight:600;
+}
+[data-design="v2"] .strip .tick .v{font-family:var(--f-data)}
+
+[data-design="v2"] .g-nav .g-nav-item{
+  font-family:var(--f-disp);font-size:12.5px;font-weight:600;
+  letter-spacing:.03em;text-transform:uppercase;
+}
+[data-design="v2"] .sbf-lang-sw a{font-family:var(--f-data);letter-spacing:.03em}
+
+[data-design="v2"] #segCtrl .seg-btn{
+  font-family:var(--f-data);font-size:11px;font-weight:600;
+  letter-spacing:.08em;text-transform:uppercase;
+  border-color:var(--rule);
+}
