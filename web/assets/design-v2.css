@@ -58,3 +58,33 @@
   letter-spacing:.08em;text-transform:uppercase;
   border-color:var(--rule);
 }
+
+/* ===== Этап 3 — Fear & Greed, Эпицентр (риск: низкий) =====
+   .fng-num/.fng-label — новые классы, введены этим этапом (были инлайн-style
+   в renderFng(), см. index.html — базовое v1-поведение сохранено байт-в-байт
+   отдельным правилом в собственном <style> index.html, здесь только v2-оверрайд).
+   #fngBox — единственный сайт с этими классами (панель), в отличие от .fng
+   в .strip (компактный тикер, buildStrip()) — оба размечены раздельно ниже,
+   не задевая друг друга. #pulseTabs/#pulseList/#pulseCalm — существующие id,
+   Эпицентр (Пульс Рынка), не пересекаются ни с #tabs (Этап 4), ни с #segCtrl
+   (Этап 1). .pulse-line — новый класс вместо инлайн stroke="var(--gold)" в
+   sparklineSvg() (v1-цвет сохранён отдельным правилом в index.html, здесь
+   только v2-оверрайд), математика точек не тронута. */
+[data-design="v2"] #fngBox .fng-num{font-family:var(--f-data);font-weight:700}
+[data-design="v2"] #fngBox .fng-label{
+  font-family:var(--f-data);font-size:11px;font-weight:600;
+  letter-spacing:.08em;text-transform:uppercase;
+}
+
+[data-design="v2"] .strip .fng .k{font-family:var(--f-data);letter-spacing:.14em;font-weight:600}
+[data-design="v2"] .strip .fng .v{font-family:var(--f-data)}
+
+[data-design="v2"] #pulseTabs .tab.chip{
+  font-family:var(--f-data);font-size:11px;font-weight:600;
+  letter-spacing:.08em;text-transform:uppercase;
+  border-color:var(--rule);
+}
+[data-design="v2"] #pulseList .pulse-sym{font-family:var(--f-data);letter-spacing:.02em}
+[data-design="v2"] #pulseList .pulse-score{font-family:var(--f-data)}
+[data-design="v2"] #pulseList .pulse-line{stroke:var(--ink-2)}
+[data-design="v2"] #pulseCalm{font-family:var(--f-data);letter-spacing:.02em}

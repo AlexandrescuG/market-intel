@@ -124,6 +124,8 @@ a:hover{text-decoration:underline;color:var(--glow)}
 .fng .bar{height:5px;border-radius:3px;margin-top:7px;
   background:linear-gradient(90deg,var(--down),var(--gold),var(--up))}
 .fng .mark{width:2px;height:9px;background:var(--ink);position:relative;top:-7px;border-radius:1px}
+.fng-num{font-family:'JetBrains Mono';font-size:36px;font-weight:700}
+.fng-label{color:var(--muted);margin-bottom:10px;font-weight:600}
 
 /* layout */
 .wrap{max-width:1340px;margin:0 auto;padding:24px;display:grid;
@@ -227,6 +229,7 @@ a:hover{text-decoration:underline;color:var(--glow)}
 .pulse-dot{width:6px;height:6px;border-radius:50%;background:var(--up);box-shadow:0 0 6px var(--up);animation:pulseDot 1.4s infinite}
 @keyframes pulseDot{50%{opacity:.3}}
 .pulse-calm{font-size:11px;color:var(--muted);padding:0 4px 8px;font-style:italic}
+.pulse-line{stroke:var(--gold)}
 .pulse-feed-backdrop{position:fixed;inset:0;background:rgba(43,43,51,.28);z-index:200;display:none}
 .pulse-feed-backdrop.on{display:block}
 .pulse-feed-card{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:340px;max-width:calc(100vw - 24px);
@@ -697,8 +700,8 @@ function renderFng(m){
   _fng=m.fear_greed;
   const v=m.fear_greed.value;
   const col=v<30?'var(--down)':v>70?'var(--up)':'var(--gold)';
-  b.innerHTML=`<div style="font-family:'JetBrains Mono';font-size:36px;font-weight:700;color:${col}">${v}</div>
-    <div style="color:var(--muted);margin-bottom:10px;font-weight:600">${m.fear_greed.label}</div>
+  b.innerHTML=`<div class="fng-num" style="color:${col}">${v}</div>
+    <div class="fng-label">${m.fear_greed.label}</div>
     <div class="fng" style="padding:0"><div class="bar"></div><div class="mark" style="margin-left:${v}%"></div></div>`;
 }
 
@@ -1129,7 +1132,7 @@ function sparklineSvg(values){
     const x=(i/(values.length-1))*100, y=22-((v-min)/range)*20;
     return `${x.toFixed(1)},${y.toFixed(1)}`;
   }).join(' ');
-  return `<svg class="pulse-spark" viewBox="0 0 100 24" preserveAspectRatio="none"><polyline points="${pts}" fill="none" stroke="var(--gold)" stroke-width="1.5"/></svg>`;
+  return `<svg class="pulse-spark" viewBox="0 0 100 24" preserveAspectRatio="none"><polyline class="pulse-line" points="${pts}" fill="none" stroke-width="1.5"/></svg>`;
 }
 
 const scoreClass = score => score>3 ? 'hot' : score>=1.5 ? 'warm' : 'cold';
