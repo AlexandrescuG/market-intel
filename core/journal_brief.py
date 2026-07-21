@@ -120,7 +120,12 @@ def set_watchlist(symbols: list[str], user_id: str = "default") -> list[str]:
     через порядок INSERT (таблица не имеет отдельной колонки позиции —
     created_at монотонно растёт внутри одного вызова, этого достаточно для
     ORDER BY created_at в get_watchlist()). Дедуп регистронезависимо; лимит на
-    10 проверяет вызывающая сторона (API) — это чистый CRUD-примитив."""
+    10 проверяет вызывающая сторона (API) — это чистый CRUD-примитив.
+
+    Focus Engine (§11, edge case «пин ссылается на удалённый символ»): если
+    закреплённый символ не попал в новый набор, пин будет молча потерян
+    вместе со строкой (DELETE ниже) — отдельно чистить нечего, т.к. pinned
+    живёт в той же строке."""
     conn = _get_conn()
     seen = set()
     ordered = []
@@ -135,6 +140,42 @@ def set_watchlist(symbols: list[str], user_id: str = "default") -> list[str]:
     conn.commit()
     conn.close()
     return ordered
+
+
+# ── Focus Engine: пин (§6) ───────────────────────────────────────────────────
+def get_pinned(user_id: str = "default") -> str | None:
+    """Сырое значение из watchlist.symbol (может быть journal-доменом, напр.
+    'XAUUSD') — вызывающая сторона обязана прогнать через
+    core.journal_symbols.to_chart_symbol(), как и любое другое чтение
+    watchlist в этом кодовой базе."""
+    conn = _get_conn()
+    row = conn.execute(
+        "SELECT symbol FROM watchlist WHERE user_id=? AND pinned=1 LIMIT 1", (user_id,)
+    ).fetchone()
+    conn.close()
+    return row["symbol"] if row else None
+
+
+def set_pinned(symbol: str | None, user_id: str = "default") -> bool:
+    """symbol=None снимает пин. Максимум один пин на пользователя — сначала
+    гарантированно снимаем все существующие. Пин можно поставить только на
+    символ, уже присутствующий в ватчлисте (иначе тихо не делаем ничего —
+    не заводим "призрачный" пин на несуществующую строку)."""
+    conn = _get_conn()
+    try:
+        conn.execute("UPDATE watchlist SET pinned=0 WHERE user_id=?", (user_id,))
+        if symbol is not None:
+            cur = conn.execute(
+                "UPDATE watchlist SET pinned=1 WHERE user_id=? AND symbol=?",
+                (user_id, symbol.upper().strip()),
+            )
+            if cur.rowcount == 0:
+                conn.rollback()
+                return False
+        conn.commit()
+        return True
+    finally:
+        conn.close()
 
 
 def get_available_symbols() -> list[str]:
