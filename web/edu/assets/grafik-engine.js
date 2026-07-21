@@ -314,25 +314,55 @@
 
   function renderEventHistory(data){
     if(!data||!data.length)return'<div style="padding:30px;text-align:center;color:'+P.muted+';font-family:JetBrains Mono,monospace;font-size:12px">История нарастает по мере выхода релизов</div>';
-    var W=600,H=160,pL=38,pR=12,pT=14,pB=22,plotW=W-pL-pR,plotH=H-pT-pB,n=data.length;
+    var W=600,H=170,pL=38,pR=12,pT=14,pB=22,plotW=W-pL-pR,plotH=H-pT-pB,n=data.length;
     var vals=[];data.forEach(function(d){if(d.actual!=null)vals.push(+d.actual);if(d.forecast!=null)vals.push(+d.forecast);});
     if(!vals.length)return'<div style="padding:30px;text-align:center;color:'+P.muted+';font-family:JetBrains Mono,monospace;font-size:12px">Нет данных</div>';
     var lo=Math.min.apply(null,vals),hi=Math.max.apply(null,vals),pad=(hi-lo)*0.18||0.4;lo-=pad;hi+=pad;
-    var BW=Math.max(4,Math.min(plotW/n*0.38,18));
+    var BW=Math.max(5,Math.min(plotW/n*0.5,22));
     var X=function(i){return pL+(i+0.5)*(plotW/n);},Y=function(v){return pT+(hi-v)/(hi-lo)*plotH;},Y0=Math.max(pT,Math.min(pT+plotH,Y(0)));
+    var hasForecast=data.some(function(d){return d.forecast!=null;});
+    // Без прогноза сравнивать факт не с чем -- раньше цвет столбика (рост/спад)
+    // в этом случае брался просто по знаку самого факта, а у большинства
+    // индикаторов (индексы, счётчики занятости и т.п.) факт почти всегда
+    // положителен -- все столбики красились в один и тот же зелёный,
+    // независимо от того, вышла цифра сильной или слабой. Фолбэк на
+    // "предыдущее" (оно почти всегда есть, в отличие от прогноза) даёт
+    // содержательный цвет вместо декоративного.
+    function surpriseOf(d){
+      if(d.actual==null)return null;
+      if(d.forecast!=null)return(+d.actual)-(+d.forecast);
+      if(d.previous!=null)return(+d.actual)-(+d.previous);
+      return+d.actual;
+    }
+    var gid='eh'+Math.random().toString(36).slice(2,8);
     var s='<svg viewBox="0 0 '+W+' '+H+'" style="display:block;width:100%;height:auto" xmlns="http://www.w3.org/2000/svg">';
+    s+='<defs><linearGradient id="'+gid+'-up" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+P.up+'" stop-opacity="0.95"/><stop offset="1" stop-color="'+P.up+'" stop-opacity="0.62"/></linearGradient>'
+      +'<linearGradient id="'+gid+'-down" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+P.down+'" stop-opacity="0.95"/><stop offset="1" stop-color="'+P.down+'" stop-opacity="0.62"/></linearGradient></defs>';
     var unit=data[data.length-1].unit||'';
-    [[lo+pad,''],[(lo+hi)/2,''],[hi-pad,'']].forEach(function(g){var yy=Y(g[0]);s+='<line x1="'+pL+'" y1="'+yy.toFixed(1)+'" x2="'+(W-pR)+'" y2="'+yy.toFixed(1)+'" stroke="'+P.muted+'" stroke-width="0.5" opacity="0.25"/><text x="'+(pL-3).toFixed(1)+'" y="'+(yy+3.5).toFixed(1)+'" font-family="JetBrains Mono,monospace" font-size="11" fill="'+P.muted+'" text-anchor="end">'+g[0].toFixed(1)+'</text>';});
+    [[lo+pad,''],[(lo+hi)/2,''],[hi-pad,'']].forEach(function(g){var yy=Y(g[0]);s+='<line x1="'+pL+'" y1="'+yy.toFixed(1)+'" x2="'+(W-pR)+'" y2="'+yy.toFixed(1)+'" stroke="'+P.muted+'" stroke-width="0.5" opacity="0.22"/><text x="'+(pL-3).toFixed(1)+'" y="'+(yy+3.5).toFixed(1)+'" font-family="JetBrains Mono,monospace" font-size="11" fill="'+P.muted+'" text-anchor="end">'+g[0].toFixed(1)+'</text>';});
     if(lo<0&&hi>0)s+='<line x1="'+pL+'" y1="'+Y0.toFixed(1)+'" x2="'+(W-pR)+'" y2="'+Y0.toFixed(1)+'" stroke="'+P.muted+'" stroke-width="0.8" opacity="0.5"/>';
     data.forEach(function(d,i){
-      var xx=X(i);
-      if(d.forecast!=null){var fy0=Math.min(Y(+d.forecast),Y0),fy1=Math.max(Y(+d.forecast),Y0)+1;s+='<rect x="'+(xx-BW-1).toFixed(1)+'" y="'+fy0.toFixed(1)+'" width="'+BW.toFixed(1)+'" height="'+(fy1-fy0).toFixed(1)+'" fill="none" stroke="'+P.muted+'" stroke-width="1.2" opacity="0.6" rx="1.5"/>';}
-      if(d.actual!=null){var surp=d.forecast!=null?(+d.actual)-(+d.forecast):+d.actual;var col=surp>=0?P.up:P.down;var ay0=Math.min(Y(+d.actual),Y0),ay1=Math.max(Y(+d.actual),Y0)+1;s+='<rect class="cn" style="animation-delay:'+(i*35)+'ms" x="'+(xx+1).toFixed(1)+'" y="'+ay0.toFixed(1)+'" width="'+BW.toFixed(1)+'" height="'+(ay1-ay0).toFixed(1)+'" fill="'+col+'" opacity="0.82" rx="1.5"/>';}
-      if(i===n-1&&d.actual!=null){var col2=(d.forecast!=null&&(+d.actual)>=(+d.forecast))?P.up:P.down;s+='<text x="'+(X(i)+BW/2+3).toFixed(1)+'" y="'+(Math.min(Y(+d.actual),Y0)-3).toFixed(1)+'" font-family="JetBrains Mono,monospace" font-size="11" fill="'+col2+'">'+((+d.actual).toFixed(2))+unit+'</text>';}
+      var xx=X(i),surp=surpriseOf(d);
+      if(d.actual!=null){
+        var fill='url(#'+gid+(surp>=0?'-up':'-down')+')';
+        var ay0=Math.min(Y(+d.actual),Y0),ay1=Math.max(Y(+d.actual),Y0)+1;
+        s+='<rect class="cn" style="animation-delay:'+(i*35)+'ms" x="'+(xx-BW/2).toFixed(1)+'" y="'+ay0.toFixed(1)+'" width="'+BW.toFixed(1)+'" height="'+(ay1-ay0).toFixed(1)+'" fill="'+fill+'" rx="2"/>';
+      }
+      // Прогноз -- тонкая золотая насечка-ориентир поверх столбика (как PP/
+      // fib-уровни на ценовом графике: тот же P.gold = "заданная точка
+      // отсчёта"), а не отдельный конкурирующий прямоугольник-призрак.
+      if(d.forecast!=null){
+        var fy=Y(+d.forecast);
+        s+='<line x1="'+(xx-BW/2-3).toFixed(1)+'" y1="'+fy.toFixed(1)+'" x2="'+(xx+BW/2+3).toFixed(1)+'" y2="'+fy.toFixed(1)+'" stroke="'+P.gold+'" stroke-width="1.6" stroke-linecap="round" opacity="0.9"/>';
+      }
+      if(i===n-1&&d.actual!=null){var col2=surp>=0?P.up:P.down;s+='<text x="'+(xx+BW/2+4).toFixed(1)+'" y="'+(Math.min(Y(+d.actual),Y0)-3).toFixed(1)+'" font-family="JetBrains Mono,monospace" font-size="11" fill="'+col2+'">'+((+d.actual).toFixed(2))+unit+'</text>';}
       var dt=new Date(d.ts*1000);s+='<text x="'+xx.toFixed(1)+'" y="'+(H-5)+'" font-family="JetBrains Mono,monospace" font-size="11" fill="'+P.muted+'" text-anchor="middle">'+MONTHS_RU[dt.getUTCMonth()]+' \''+String(dt.getUTCFullYear()).slice(2)+'</text>';
     });
-    s+='<rect x="'+(W-pR-52)+'" y="'+pT+'" width="7" height="7" fill="'+P.up+'" opacity="0.82" rx="1.5"/><text x="'+(W-pR-42)+'" y="'+(pT+6)+'" font-family="JetBrains Mono,monospace" font-size="11" fill="'+P.muted+'">Факт</text>';
-    s+='<rect x="'+(W-pR-52)+'" y="'+(pT+10)+'" width="7" height="7" fill="none" stroke="'+P.muted+'" stroke-width="1.2" rx="1.5"/><text x="'+(W-pR-42)+'" y="'+(pT+16)+'" font-family="JetBrains Mono,monospace" font-size="11" fill="'+P.muted+'">Прогноз</text>';
+    s+='<rect x="'+(W-pR-52)+'" y="'+pT+'" width="8" height="8" fill="url(#'+gid+'-up)" rx="2"/><text x="'+(W-pR-41)+'" y="'+(pT+7)+'" font-family="JetBrains Mono,monospace" font-size="11" fill="'+P.muted+'">Факт</text>';
+    // Легенда прогноза -- только если хоть у одной точки он реально есть
+    // (иначе показываем ключ, который ни разу не используется — выглядит
+    // как неиспользуемый плейсхолдер).
+    if(hasForecast)s+='<line x1="'+(W-pR-52)+'" y1="'+(pT+15)+'" x2="'+(W-pR-44)+'" y2="'+(pT+15)+'" stroke="'+P.gold+'" stroke-width="1.6" stroke-linecap="round"/><text x="'+(W-pR-41)+'" y="'+(pT+18)+'" font-family="JetBrains Mono,monospace" font-size="11" fill="'+P.muted+'">Прогноз</text>';
     return s+'</svg>';
   }
 
