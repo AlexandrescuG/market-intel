@@ -143,6 +143,21 @@ def set_watchlist(symbols: list[str], user_id: str = "default") -> list[str]:
 
 
 # ── Focus Engine: пин (§6) ───────────────────────────────────────────────────
+def list_watchlist_user_ids(exclude_default: bool = True) -> list[str]:
+    """Различные user_id с непустым ватчлистом -- focus_live.py гоняет
+    select_focus() по каждому такому scope. exclude_default=True пропускает
+    сентинел 'default' (анонимные локальные ватчлисты) -- это отдельное
+    понятие от Focus Engine's scope_key='default'/DEFAULT_UNIVERSE, которое
+    и так считается один раз, не per-user."""
+    conn = _get_conn()
+    q = "SELECT DISTINCT user_id FROM watchlist"
+    if exclude_default:
+        q += " WHERE user_id != 'default'"
+    rows = conn.execute(q).fetchall()
+    conn.close()
+    return [r["user_id"] for r in rows]
+
+
 def get_pinned(user_id: str = "default") -> str | None:
     """Сырое значение из watchlist.symbol (может быть journal-доменом, напр.
     'XAUUSD') — вызывающая сторона обязана прогнать через
