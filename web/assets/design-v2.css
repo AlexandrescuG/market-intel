@@ -128,3 +128,38 @@
   padding:2px 0 20px;
   font-family:var(--f-read);font-weight:300;font-size:15.5px;line-height:1.7;
 }
+
+/* ===== Этап 5а — Хром живого графика: рамка/подписи/кнопки (риск: средний) =====
+   #techTf/#techTog/#techChartPanel — index.html (.view-tech, живой график).
+   #tf/#tog/.card — их аналоги на отдельной странице chart.html (та же самая
+   .tf/.chip разметка стилизуется из ОБЩЕГО design.css — отсюда общий
+   блаcт-радиус, план осознанно принял: chart.html получает тот же
+   апгрейд бонусом, а не отдельную развилку/новые классы ради развязки).
+   .view-tech .tag.verify — Live-бейдж на index.html (тот же селектор
+   попадает и на соседний tech-analysis fact-tag внутри .view-tech — тоже
+   нормально, тот же визуальный паттерн, не Fear&Greed-бейдж — тот вне
+   .view-tech, Этап 3). .live — архитектурно другой Live-индикатор именно
+   на chart.html (не .tag.verify), стилизуется отдельно. Движок отрисовки
+   свечей (LightweightCharts/grafik-engine.js), live-соединение,
+   переключение таймфрейма/режима — не тронуты, только CSS. Перекраска
+   свечей — отдельный под-шаг ПОСЛЕ проверки этого. */
+[data-design="v2"] #techChartPanel{border-color:var(--rule);border-radius:4px}
+[data-design="v2"] .card{border-color:var(--rule);border-radius:4px}
+
+[data-design="v2"] #techTf .tf,
+[data-design="v2"] #tf .tf{
+  font-family:var(--f-data);font-weight:600;letter-spacing:.06em;
+  border-color:var(--rule);border-radius:2px;
+}
+[data-design="v2"] #techTog .chip,
+[data-design="v2"] #tog .chip{
+  font-family:var(--f-data);font-weight:600;letter-spacing:.04em;
+  border-color:var(--rule);border-radius:2px;
+}
+
+[data-design="v2"] .view-tech .tag.verify{
+  font-family:var(--f-data);font-weight:600;letter-spacing:.08em;
+}
+[data-design="v2"] .live{
+  font-family:var(--f-data);letter-spacing:.08em;text-transform:uppercase;
+}
