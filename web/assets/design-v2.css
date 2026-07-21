@@ -88,3 +88,43 @@
 [data-design="v2"] #pulseList .pulse-score{font-family:var(--f-data)}
 [data-design="v2"] #pulseList .pulse-line{stroke:var(--ink-2)}
 [data-design="v2"] #pulseCalm{font-family:var(--f-data);letter-spacing:.02em}
+
+/* ===== Этап 4 — Утренний отчёт (риск: средний) =====
+   #reportPanel — новый id на <section>, нужен только чтобы дотянуться до
+   .panel-h h2 (сам .panel-h h2 переиспользуется на ВСЕХ панелях страницы —
+   Focus/F&G/Эпицентр/Signal-feed — без явного id один общий .panel-h h2
+   задел бы все разом). #report/#reportFresh — существующие уникальные id.
+   .rep-sec/summary/.rep-chev/.rep-body внутри #report больше нигде на
+   странице не переиспользуются (проверено, нет и на chart.html).
+   renderReport() не тронут — разбиение markdown на секции, порядок,
+   состав и парсинг остаются как есть, здесь только CSS. Убираем
+   рамку/фон/тень у .rep-sec в пользу нижней линии-разделителя — тот же
+   принцип, что уже подтверждён на карточке «В фокусе» (без коробки
+   спокойнее; макет sbf_briefing_v1.html строит свои секции ровно так же,
+   см. .block/.eyebrow). Никаких fixed/max-height — реальный текст отчёта
+   варьируется 1.3x-2.9x по секциям (Геополитика/Экономика качаются
+   сильнее всего), проверено на нескольких реальных data/reports/*.md. */
+[data-design="v2"] #reportPanel .panel-h h2{
+  font-family:var(--f-disp);font-size:11px;font-weight:600;
+  letter-spacing:.22em;color:var(--ink-2);text-transform:uppercase;
+}
+[data-design="v2"] #reportFresh{font-family:var(--f-data);letter-spacing:.02em}
+
+[data-design="v2"] #report .rep-sec{
+  border:none;border-radius:0;background:transparent;
+  border-bottom:1px solid var(--rule-soft);margin:0;
+}
+[data-design="v2"] #report .rep-sec:last-child{border-bottom:none}
+[data-design="v2"] #report .rep-sec summary{
+  padding:16px 0;background:transparent;
+  font-family:var(--f-disp);font-size:15px;font-weight:600;letter-spacing:.01em;
+}
+[data-design="v2"] #report .rep-sec summary:hover{background:transparent;color:var(--ink)}
+[data-design="v2"] #report .rep-sec[open] summary{
+  background:transparent;border-bottom:1px solid var(--rule-soft);
+}
+[data-design="v2"] #report .rep-sec[open]{box-shadow:none}
+[data-design="v2"] #report .rep-body{
+  padding:2px 0 20px;
+  font-family:var(--f-read);font-weight:300;font-size:15.5px;line-height:1.7;
+}
