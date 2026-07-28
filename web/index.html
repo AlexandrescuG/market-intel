@@ -161,6 +161,12 @@ a:hover{text-decoration:underline;color:var(--glow)}
 .focus-item__move.up{color:var(--up)}
 .focus-item__move.down{color:var(--down)}
 .focus-item__body{font-family:'Merriweather',Georgia,serif;font-weight:300;font-size:17px;line-height:1.65;letter-spacing:-.005em;color:var(--ink)}
+.focus-item__more{margin-top:2px}
+.focus-item__more summary{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--gold);cursor:pointer;list-style:none;margin-top:8px}
+.focus-item__more summary::-webkit-details-marker{display:none}
+.focus-item__more summary::before{content:"+ ";}
+.focus-item__more[open] summary::before{content:"− ";}
+.focus-item__more-body{margin-top:10px}
 .focus-disclaimer{font-family:'JetBrains Mono',monospace;font-size:10.5px;line-height:1.5;color:var(--faint);letter-spacing:.02em;margin-top:16px;padding-left:11px;border-left:2px solid var(--line)}
 .focus-link{font-family:'JetBrains Mono',monospace;font-size:12px;display:inline-block;margin-top:16px}
 .personal-block a{color:inherit;text-decoration:none}
@@ -724,7 +730,8 @@ const I18N_REPORT = {
   focusCalm: {{ t('home.focus_calm', lang) | tojson }},
   focusPinnedNote: {{ t('home.focus_pinned_note', lang) | tojson }},
   focusViewChart: {{ t('home.focus_view_chart', lang) | tojson }},
-  focusDisclaimer: {{ t('home.focus_disclaimer', lang) | tojson }}
+  focusDisclaimer: {{ t('home.focus_disclaimer', lang) | tojson }},
+  focusMore: {{ t('home.focus_more_label', lang) | tojson }}
 };
 function renderReport(r){
   const el=document.getElementById('report');
@@ -902,8 +909,22 @@ async function renderFocusCard() {
       bodyText = escapeHtmlIdx(fmt_(I18N_REPORT.focusHeadlineTpl, {name: data.name || data.symbol, mult: mult}));
     }
 
+    // P2.5: на 390px это была сплошная простыня серифного текста на
+    // несколько экранов (живой Playwright-скриншот подтвердил — 869px
+    // высотой на 844px viewport). Первое предложение — всегда видимый
+    // вывод одной строкой, остальное — под "подробнее". bodyText уже
+    // экранирован (escapeHtmlIdx) выше по функции, режем по первому
+    // ".!?" — простая эвристика по готовым предложениям, не NLP.
+    const _fm = bodyText.match(/^(.+?[.!?])(\s+|$)/);
+    const focusHeadline = _fm ? _fm[1] : bodyText;
+    const focusRest = _fm ? bodyText.slice(_fm[0].length).trim() : '';
+    const focusBodyHtml = focusRest
+      ? `<div class="focus-item__body">${focusHeadline}</div>
+         <details class="focus-item__more"><summary>${I18N_REPORT.focusMore}</summary><div class="focus-item__body focus-item__more-body">${focusRest}</div></details>`
+      : `<div class="focus-item__body">${focusHeadline}</div>`;
+
     let html = `<div class="focus-item__head">${tick}${move}</div>
-      <div class="focus-item__body">${bodyText}</div>
+      ${focusBodyHtml}
       <div class="focus-disclaimer">${I18N_REPORT.focusDisclaimer}</div>
       <a class="focus-link" href="/chart.html?s=${encodeURIComponent(data.symbol)}&focus=today">${I18N_REPORT.focusViewChart} →</a>`;
     body.innerHTML = html;
