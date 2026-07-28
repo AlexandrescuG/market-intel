@@ -51,6 +51,12 @@
     "traffic-light": '<rect x="8" y="2" width="8" height="18" rx="3"/><circle cx="12" cy="6.5" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="11" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="15.5" r="1.5" fill="currentColor" stroke="none"/><line x1="12" y1="20" x2="12" y2="22"/>',
     "shuffle": '<polyline points="16,3 21,3 21,8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21,16 21,21 16,21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/>',
     "game": '<rect x="2" y="8" width="20" height="10" rx="5"/><line x1="7" y1="11" x2="7" y2="15"/><line x1="5" y1="13" x2="9" y2="13"/><circle cx="16" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="18" cy="14" r="1" fill="currentColor" stroke="none"/>',
+    // ── дорисованы для §3.2 главы 3 (SPEC_icon_system.md §6 шаг5) ──
+    "gold-bar": '<path d="M5 8 L19 8 L21 16 L3 16 Z"/><line x1="7" y1="8" x2="8.3" y2="16"/><line x1="17" y1="8" x2="15.7" y2="16"/>',
+    "virus": '<circle cx="12" cy="12" r="5.5"/><line x1="12" y1="2" x2="12" y2="4.5"/><line x1="12" y1="19.5" x2="12" y2="22"/><line x1="2" y1="12" x2="4.5" y2="12"/><line x1="19.5" y1="12" x2="22" y2="12"/><line x1="5" y1="5" x2="6.8" y2="6.8"/><line x1="17.2" y1="17.2" x2="19" y2="19"/><line x1="19" y1="5" x2="17.2" y2="6.8"/><line x1="6.8" y1="17.2" x2="5" y2="19"/>',
+    "snowflake": '<line x1="12" y1="2" x2="12" y2="22"/><line x1="4" y1="7" x2="20" y2="17"/><line x1="4" y1="17" x2="20" y2="7"/><line x1="12" y1="2" x2="9.5" y2="4.5"/><line x1="12" y1="2" x2="14.5" y2="4.5"/><line x1="12" y1="22" x2="9.5" y2="19.5"/><line x1="12" y1="22" x2="14.5" y2="19.5"/>',
+    "calculator": '<rect x="5" y="2" width="14" height="20" rx="1.5"/><line x1="7.5" y1="5.5" x2="16.5" y2="5.5"/><line x1="7.5" y1="9.5" x2="7.5" y2="9.51"/><line x1="12" y1="9.5" x2="12" y2="9.51"/><line x1="16.5" y1="9.5" x2="16.5" y2="9.51"/><line x1="7.5" y1="13" x2="7.5" y2="13.01"/><line x1="12" y1="13" x2="12" y2="13.01"/><line x1="16.5" y1="13" x2="16.5" y2="13.01"/><line x1="7.5" y1="16.5" x2="7.5" y2="16.51"/><line x1="12" y1="16.5" x2="12" y2="16.51"/><line x1="16.5" y1="15.5" x2="16.5" y2="18.5"/>',
+    "stop-sign": '<path d="M8 3 H16 L21 8 V16 L16 21 H8 L3 16 V8 Z"/><line x1="8.5" y1="12" x2="15.5" y2="12"/>',
   };
 
   function injectSprite() {
