@@ -561,20 +561,98 @@ function CoreMeasureBlock({ ema_, vars }) {
   );
 }
 
-// ─── Для чего EMA годится ───────────────────────────────────────────────────
-function WhatMaIsFor() {
+// ─── Для чего EMA годится — один график, три режима ────────────────────────
+function EmaUsageModes({ candles }) {
+  const { useState, useMemo } = React;
   const T8 = window.Ch8Content[INITIAL_LANG] || window.Ch8Content.ru;
   const w = T8.whatMaIsFor;
+  const [mode, setMode] = useState("definition");
+
+  const closes = useMemo(() => candles ? candles.map(c => +c.close) : [], [candles]);
+  const e20 = useMemo(() => closes.length ? ema(closes, 20) : [], [closes]);
+  const e50 = useMemo(() => closes.length ? ema(closes, 50) : [], [closes]);
+  const e200 = useMemo(() => closes.length ? ema(closes, 200) : [], [closes]);
+
+  if (closes.length < 210) {
+    return <div style={{background:C.surface,borderRadius:6,minHeight:260,marginBottom:48}}/>;
+  }
+
+  const W = 680, H = 220;
+  const visible = mode === "language" ? closes.slice(-260) : closes.slice(-200);
+  const n = visible.length;
+  const seriesForRange = (full) => full.slice(full.length - n);
+  const lo = Math.min(...visible), hi = Math.max(...visible);
+  const toY = p => H - ((p - lo) / (hi - lo || 1)) * H;
+  const toX = i => (i / (n - 1)) * W;
+  const pathFor = (series) => {
+    let started = false;
+    return series.map((v, i) => {
+      if (v == null) return null;
+      const cmd = started ? 'L' : 'M';
+      started = true;
+      return `${cmd}${toX(i)},${toY(v)}`;
+    }).filter(Boolean).join(' ');
+  };
+
+  const lastClose = closes[closes.length - 1];
+  const lastE20 = e20[e20.length - 1];
+  const above = lastClose >= lastE20;
+  const distPct = lastE20 ? ((lastClose - lastE20) / lastE20 * 100) : null;
+  const e20_10ago = e20[e20.length - 11];
+  const slopePct = (e20_10ago != null && lastE20 != null) ? ((lastE20 - e20_10ago) / e20_10ago * 100) : null;
+
+  const modes = [["definition", w.modeDefinition], ["regime", w.modeRegime], ["language", w.modeLanguage]];
+
   return (
     <div style={{marginBottom:48}}>
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:14,marginBottom:24}} className="g3">
-        {[[w.c1Title,w.c1Text],[w.c2Title,w.c2Text],[w.c3Title,w.c3Text]].map(([t,x],i) => (
-          <div key={i} style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:6,padding:"18px 20px",borderTop:`3px solid ${C.gold}`}}>
-            <div style={{fontWeight:600,fontSize:13,color:C.black,marginBottom:8}}>{t}</div>
-            <p style={{fontSize:12,color:C.inkMid,lineHeight:1.65,margin:0}}>{x}</p>
-          </div>
+      <div style={{display:"flex",gap:6,marginBottom:16,flexWrap:"wrap"}}>
+        {modes.map(([k, label]) => (
+          <button key={k} onClick={()=>setMode(k)} style={{fontFamily:"monospace",fontSize:11,padding:"7px 14px",cursor:"pointer",background:k===mode?C.gold:"#fff",color:k===mode?"#18181a":C.inkMid,border:`1px solid ${k===mode?C.gold:C.border}`,borderRadius:4,fontWeight:600}}>{label}</button>
         ))}
       </div>
+
+      <div style={{background:C.black,borderRadius:8,padding:"22px 5vw 26px",marginBottom:16}}>
+        <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",display:"block"}}>
+          {mode === "definition" && (
+            <rect x="0" y="0" width={W} height={H} fill={above ? "rgba(8,153,129,0.08)" : "rgba(242,54,69,0.08)"}/>
+          )}
+          <path d={pathFor(seriesForRange(closes))} fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5"/>
+          {mode !== "language" && <path d={pathFor(seriesForRange(e20))} fill="none" stroke={C.gold} strokeWidth="2"/>}
+          {mode === "language" && <>
+            <path d={pathFor(seriesForRange(e50))} fill="none" stroke={C.gold} strokeWidth="2"/>
+            <path d={pathFor(seriesForRange(e200))} fill="none" stroke="#6ea8fe" strokeWidth="2"/>
+          </>}
+        </svg>
+
+        {mode === "definition" && (
+          <p style={{fontSize:13,color:above?"#4ade80":"#f87171",fontFamily:"monospace",textAlign:"center",marginTop:14,marginBottom:0}}>
+            {above ? w.aboveLabel : w.belowLabel}
+          </p>
+        )}
+        {mode === "regime" && (
+          <div style={{display:"flex",gap:32,justifyContent:"center",marginTop:14}}>
+            <div style={{textAlign:"center"}}>
+              <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.gold}}>{distPct!=null?(distPct>0?"+":"")+distPct.toFixed(2)+"%":"—"}</div>
+              <Mono size={9} color="rgba(255,255,255,0.5)" spacing={0.5}>{w.distLabel}</Mono>
+            </div>
+            <div style={{textAlign:"center"}}>
+              <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:"#fff"}}>{slopePct!=null?(slopePct>0?"+":"")+slopePct.toFixed(2)+"%":"—"}</div>
+              <Mono size={9} color="rgba(255,255,255,0.5)" spacing={0.5}>{w.slopeLabel}</Mono>
+            </div>
+          </div>
+        )}
+        {mode === "language" && (
+          <div style={{display:"flex",gap:20,justifyContent:"center",marginTop:14}}>
+            <div style={{display:"flex",alignItems:"center",gap:6}}><span style={{width:10,height:10,borderRadius:2,background:C.gold,display:"inline-block"}}/><Mono size={9.5} color="rgba(255,255,255,0.6)" spacing={0}>EMA 50</Mono></div>
+            <div style={{display:"flex",alignItems:"center",gap:6}}><span style={{width:10,height:10,borderRadius:2,background:"#6ea8fe",display:"inline-block"}}/><Mono size={9.5} color="rgba(255,255,255,0.6)" spacing={0}>EMA 200</Mono></div>
+          </div>
+        )}
+      </div>
+
+      <p style={{fontSize:12.5,color:C.inkMid,lineHeight:1.65,marginBottom:20,maxWidth:800}}>
+        {mode === "definition" ? w.c1Text : mode === "regime" ? w.c2Text : w.c3Text}
+      </p>
+
       <div style={{background:C.redPale,border:"1px solid rgba(192,57,43,.25)",borderRadius:6,padding:"18px 22px"}}>
         <div style={{fontWeight:600,fontSize:12.5,color:"#7a2418",marginBottom:10}}>{w.notTitle}</div>
         {w.notList.map((t,i) => <p key={i} style={{fontSize:12.5,color:C.inkMid,lineHeight:1.6,marginBottom:6}}>· {t}</p>)}
@@ -686,7 +764,7 @@ function Chapter8() {
         <CoreMeasureBlock ema_={ema_} vars={vars}/>
 
         <SectionTitle sub={S.whatForSub}>{T8.whatMaIsFor.tag}</SectionTitle>
-        <WhatMaIsFor/>
+        <EmaUsageModes candles={candles}/>
 
         <Rule/>
 

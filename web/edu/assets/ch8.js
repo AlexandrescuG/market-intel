@@ -105,6 +105,9 @@ window.Ch8Content = {
       c1Title: "📐 Определение, а не прогноз", c1Text: "«Тренд вверх» — расплывчато и меняется в зависимости от настроения. «Цена выше средней за N периодов» — арифметика, одинаковая вчера и сегодня. Ценность средней в том, что она фиксирует определение и не даёт спорить с собой задним числом. Это дисциплина, а не предсказание.",
       c2Title: "🔍 Описание режима", c2Text: "Расстояние цены от средней и наклон средней описывают, в каком состоянии инструмент находится сейчас: далеко ушёл или колеблется вокруг. Это контекст для всего остального — в том числе для того, чему учат следующие главы. Описание настоящего, не будущего.",
       c3Title: "🗣 Общий язык", c3Text: "Когда двое говорят «цена под двухсотой», они понимают друг друга однозначно. Это единственная причина, по которой стоит знать про 50 и 200: не потому что числа особенные, а потому что на них смотрят многие, и разговор становится возможен.",
+      modeDefinition: "Определение", modeRegime: "Режим", modeLanguage: "Общий язык",
+      aboveLabel: "Цена выше средней", belowLabel: "Цена ниже средней",
+      distLabel: "Расстояние от средней", slopeLabel: "Наклон за 10 баров",
       notTitle: "Чего скользящая средняя не делает",
       notList: [
         "не предсказывает разворот;",
@@ -244,6 +247,9 @@ window.Ch8Content = {
       c1Title: "📐 O definiție, nu o prognoză", c1Text: "„Trend ascendent” e vag și se schimbă în funcție de dispoziție. „Prețul e peste media pe N perioade” e aritmetică, identică ieri și azi. Valoarea mediei stă în faptul că fixează o definiție și nu te lasă să te contrazici retroactiv. E disciplină, nu predicție.",
       c2Title: "🔍 Descrierea regimului", c2Text: "Distanța prețului față de medie și panta mediei descriu în ce stare se află instrumentul acum: s-a îndepărtat mult sau oscilează în jur. E context pentru tot restul — inclusiv pentru ce predau capitolele următoare. O descriere a prezentului, nu a viitorului.",
       c3Title: "🗣 Un limbaj comun", c3Text: "Când doi oameni spun „prețul e sub două sute”, se înțeleg fără echivoc. E singurul motiv pentru care merită să știi despre 50 și 200: nu pentru că cifrele sunt speciale, ci pentru că mulți se uită la ele, iar conversația devine posibilă.",
+      modeDefinition: "Definiție", modeRegime: "Regim", modeLanguage: "Limbaj comun",
+      aboveLabel: "Prețul e peste medie", belowLabel: "Prețul e sub medie",
+      distLabel: "Distanță față de medie", slopeLabel: "Pantă pe 10 bare",
       notTitle: "Ce NU face media mobilă",
       notList: [
         "nu prezice o întoarcere;",
@@ -383,6 +389,9 @@ window.Ch8Content = {
       c1Title: "📐 A definition, not a forecast", c1Text: "«Uptrend» is vague and shifts with mood. «Price above its N-period average» is arithmetic, the same yesterday and today. The average's value is that it fixes a definition and doesn't let you argue with yourself after the fact. That's discipline, not prediction.",
       c2Title: "🔍 Describing the regime", c2Text: "The price's distance from the average and the average's slope describe what state the instrument is in right now: has it drifted far, or is it oscillating around it. That's context for everything else — including what the following chapters teach. A description of the present, not the future.",
       c3Title: "🗣 A shared language", c3Text: "When two people say «price is below the two-hundred», they understand each other exactly. That's the only reason it's worth knowing about 50 and 200 — not because the numbers are special, but because plenty of people watch them, and that makes conversation possible.",
+      modeDefinition: "Definition", modeRegime: "Regime", modeLanguage: "Shared language",
+      aboveLabel: "Price is above the average", belowLabel: "Price is below the average",
+      distLabel: "Distance from the average", slopeLabel: "Slope over 10 bars",
       notTitle: "What a moving average does NOT do",
       notList: [
         "it doesn't predict a reversal;",
