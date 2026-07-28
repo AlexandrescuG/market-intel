@@ -1,0 +1,11 @@
+/* SBF icon sprite sizing — SPEC_icon_system.md §2.2. Five sizes, nothing between. */
+.ic { display: inline-block; vertical-align: -0.125em; flex-shrink: 0; }
+.ic-16 { width: 16px; height: 16px; }
+.ic-20 { width: 20px; height: 20px; }
+.ic-24 { width: 24px; height: 24px; }
+.ic-32 { width: 32px; height: 32px; }
+.ic-48 { width: 48px; height: 48px; }
+
+/* Правило контейнера §2.3: контейнер = размер иконки × 2. */
+.ic-box-24 { width: 48px; height: 48px; border-radius: 4px; display: flex; align-items: center; justify-content: center; }
+.ic-box-32 { width: 64px; height: 64px; border-radius: 4px; display: flex; align-items: center; justify-content: center; }

@@ -7,6 +7,7 @@
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/edu/assets/history.css">
+  <link rel="stylesheet" href="/assets/sbf-icons.css">
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     html,body{max-width:100vw;overflow-x:hidden;scroll-behavior:smooth}
@@ -44,6 +45,7 @@
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"></script>
 <script src="/edu/assets/scene-engine.js"></script>
+<script src="/assets/sbf-icons.js"></script>
 <script src="/edu/assets/ch4.js"></script>
 
 <script type="text/babel" data-presets="react">
@@ -58,12 +60,12 @@ const STRINGS = {
     mdTag:"ИНТЕРАКТИВ — ФУНДАМЕНТАЛ",
     colPrice:"Цена", colVolume:"Объём", colCount:"Кол",
     spreadLabel:"СПРЕД: ",
-    newsAlertTitle:"⚠️ ВЫХОД CPI — ликвидность исчезла!",
-    normalTitle:"📖 Нормальное состояние рынка",
+    newsAlertTitle:"ВЫХОД CPI — ликвидность исчезла!",
+    normalTitle:"Нормальное состояние рынка",
     newsAlertBody:"Маркет-мейкеры убрали свои ордера из центра стакана. Спред вырос с 0.20 до 8.00+. Любой рыночный ордер будет исполнен по ужасной цене — это называется проскальзывание (Slippage).",
     normalBody:"Маркет-мейкеры плотно держат стакан. Спред минимальный, ликвидности много. Ваш рыночный ордер исполнится по цене, близкой к текущей.",
     resetBtn:"↺ Вернуть ликвидность",
-    triggerBtn:"💣 Выпустить CPI (новость)",
+    triggerBtn:"Выпустить CPI (новость)",
     spreadVizLabel:"ВИЗУАЛИЗАЦИЯ СПРЕДА",
     spreadWordLower:"спред",
     tapeLabel:"ЛЕНТА СДЕЛОК",
@@ -81,8 +83,8 @@ const STRINGS = {
     descSellStop:"Продать по цене ниже текущей",
     descStopLimit:"Стоп сработал → лимит в 1.5 пт",
     descTrailingStop:"Стоп сам следует за ценой",
-    runningHint:(label)=>`🎯 Тяни линию ${label} на нужный уровень. Цена будет двигаться автоматически.`,
-    runningHintTrail:"🎯 Потяни линию, чтобы задать дистанцию трейлинга. Дальше стоп сам подтянется за ценой вверх — но никогда не опустится.",
+    runningHint:(label)=>`Тяни линию ${label} на нужный уровень. Цена будет двигаться автоматически.`,
+    runningHintTrail:"Потяни линию, чтобы задать дистанцию трейлинга. Дальше стоп сам подтянется за ценой вверх — но никогда не опустится.",
     idleHint:"Нажми СТАРТ, выбери тип ордера и установи линию на нужную цену.",
 
     // Chapter4 — sticky header / hero
@@ -103,22 +105,22 @@ const STRINGS = {
     block1Sub:"Биржа — это не абстрактный экран с цифрами. Это очередь из реальных участников. Чтобы вы могли купить 1 лот золота прямо сейчас, кто-то должен вам его продать.",
     block1Title:"Маркет-мейкеры: кто обеспечивает ликвидность",
     mmFacts:[
-      {icon:"🏦", title:"Кто такие маркет-мейкеры?",
+      {icon:"bank", title:"Кто такие маркет-мейкеры?",
        text:"Крупные финансовые институты (банки, HFT-фирмы), обязанные постоянно выставлять двусторонние котировки. Они зарабатывают на спреде — разнице между ценой покупки и продажи."},
-      {icon:"💧", title:"Почему ликвидность важна?",
+      {icon:"droplet", title:"Почему ликвидность важна?",
        text:"Ликвидность = способность быстро купить или продать актив без значительного изменения цены. Высокая ликвидность → узкий спред → низкие издержки. Низкая ликвидность → широкий спред → дорогой вход."},
-      {icon:"⚠️", title:"Проскальзывание (Slippage)",
+      {icon:"warning", title:"Проскальзывание (Slippage)",
        text:"Разница между ожидаемой и реальной ценой исполнения. Возникает при рыночных ордерах в период низкой ликвидности. При выходе NFP или CPI спред может вырасти в 10–50 раз!"},
-      {icon:"🕐", title:"Когда ликвидность максимальна?",
-       text:"Пересечение Лондонской и Нью-Йоркской сессий (16:00–<span class='local-time' data-utc='2026-03-09T17:00:00Z'>20:00 МСК</span>) — пик объёмов. Азиатская сессия — минимальная ликвидность, широкий спред. Пятница после 20:00 — рынок «пустеет»."},
+      {icon:"clock", title:"Когда ликвидность максимальна?",
+       text:"Пересечение Лондонской и Нью-Йоркской сессий (16:00–20:00 UTC) — пик объёмов. Азиатская сессия — минимальная ликвидность, широкий спред. Пятница после 20:00 — рынок «пустеет»."},
     ],
     flowDiagramLabel:"КАК РАБОТАЕТ ИСПОЛНЕНИЕ ВАШЕГО ОРДЕРА",
     flowItems:[
-      {icon:"👤",label:"Трейдер",sub:"Нажимает BUY"},
-      {icon:"🏢",label:"Брокер / ECN",sub:"Маршрутизация"},
-      {icon:"📊",label:"Стакан (DOM)",sub:"Лучшая цена"},
-      {icon:"🏦",label:"Маркет-мейкер",sub:"Продаёт лот"},
-      {icon:"✅",label:"Исполнение",sub:"Ордер заполнен"},
+      {icon:"person",label:"Трейдер",sub:"Нажимает BUY"},
+      {icon:"building",label:"Брокер / ECN",sub:"Маршрутизация"},
+      {icon:"bar-chart",label:"Стакан (DOM)",sub:"Лучшая цена"},
+      {icon:"bank",label:"Маркет-мейкер",sub:"Продаёт лот"},
+      {icon:"check",label:"Исполнение",sub:"Ордер заполнен"},
     ],
     flowExchangeNote:"Так устроено исполнение на бирже. У розничного счёта CFD путь короче — часть узлов в нём отсутствует, разберём в главе 11.",
 
@@ -138,22 +140,22 @@ const STRINGS = {
     block2Sub:"Ордер — это инструкция брокеру. Выбор типа ордера определяет, по какой цене и при каких условиях откроется ваша позиция.",
     block2Title:"Типы ордеров: арсенал трейдера",
     orderTypes:[
-      {icon:"⚡", title:"Market Order (Рыночный)",
+      {icon:"lightning", title:"Market Order (Рыночный)",
        text:"Исполняется мгновенно по лучшей доступной цене. Гарантия исполнения, но не гарантия цены. При низкой ликвидности — сильное проскальзывание.",
        use:"Когда нужно войти немедленно, ликвидность высокая"},
-      {icon:"📍", title:"Limit Order (Лимитный)",
+      {icon:"pin", title:"Limit Order (Лимитный)",
        text:"Ждёт в стакане, пока цена не достигнет указанного уровня. Покупает только по заданной цене или лучше. Гарантия цены, но не гарантия исполнения.",
        use:"BUY LIMIT — ниже рынка. SELL LIMIT — выше рынка"},
-      {icon:"🚦", title:"Stop Order (Стоп)",
+      {icon:"traffic-light", title:"Stop Order (Стоп)",
        text:"Превращается в рыночный ордер при достижении стоп-цены. BUY STOP — выше рынка (на пробой). SELL STOP — ниже рынка (на пробой вниз).",
        use:"Для входа на пробое уровня или постановки Stop-Loss"},
-      {icon:"🎯", title:"Stop-Limit (Стоп-Лимит)",
+      {icon:"target", title:"Stop-Limit (Стоп-Лимит)",
        text:"Гибрид: при достижении стоп-цены выставляется лимитный ордер по указанной цене. Контроль цены исполнения, но риск не исполниться при сильном движении.",
        use:"Для точного входа на пробое с контролем цены"},
-      {icon:"📉", title:"Trailing Stop (Подвижный стоп)",
+      {icon:"trend-down", title:"Trailing Stop (Подвижный стоп)",
        text:"Стоп, который сам подтягивается за ценой на заданном расстоянии и не двигается назад. Единственный тип ордера, который меняет своё положение сам — именно поэтому его чаще всего понимают неправильно. У большинства площадок трейлинг считается на стороне терминала, а не сервера: закрыли терминал — трейлинг не работает.",
        use:"Чтобы запирать прибыль в тренде, не выставляя стоп вручную на каждом шаге"},
-      {icon:"🔀", title:"OCO (Один отменяет другой)",
+      {icon:"shuffle", title:"OCO (Один отменяет другой)",
        text:"Два ордера сразу, и исполнение любого из них автоматически снимает второй. Позволяет поставить вход на пробой в обе стороны, не рискуя случайно оказаться в двух противоположных позициях одновременно.",
        use:"Вход на пробой уровня, когда направление пробоя заранее не известно"},
     ],
@@ -187,12 +189,12 @@ const STRINGS = {
     mdTag:"INTERACTIVE — FUNDAMENTAL",
     colPrice:"Price", colVolume:"Volume", colCount:"Cnt",
     spreadLabel:"SPREAD: ",
-    newsAlertTitle:"⚠️ CPI RELEASE — liquidity has vanished!",
-    normalTitle:"📖 Normal market state",
+    newsAlertTitle:"CPI RELEASE — liquidity has vanished!",
+    normalTitle:"Normal market state",
     newsAlertBody:"Market makers pulled their orders out of the center of the book. The spread widened from 0.20 to 8.00+. Any market order will fill at a terrible price — this is called slippage.",
     normalBody:"Market makers keep the book tightly packed. The spread is minimal, liquidity is plentiful. Your market order will fill close to the current price.",
     resetBtn:"↺ Restore liquidity",
-    triggerBtn:"💣 Release CPI (news)",
+    triggerBtn:"Release CPI (news)",
     spreadVizLabel:"SPREAD VISUALIZATION",
     spreadWordLower:"spread",
     tapeLabel:"TIME & SALES",
@@ -210,8 +212,8 @@ const STRINGS = {
     descSellStop:"Sell below the current price",
     descStopLimit:"Stop triggers → limit 1.5 pt away",
     descTrailingStop:"Stop follows price on its own",
-    runningHint:(label)=>`🎯 Drag the ${label} line to the level you want. The price will move automatically.`,
-    runningHintTrail:"🎯 Drag the line to set the trailing distance. From here the stop follows the price upward on its own — but never moves back down.",
+    runningHint:(label)=>`Drag the ${label} line to the level you want. The price will move automatically.`,
+    runningHintTrail:"Drag the line to set the trailing distance. From here the stop follows the price upward on its own — but never moves back down.",
     idleHint:"Press START, choose an order type, and set the line at the price you want.",
 
     // Chapter4 — sticky header / hero
@@ -232,22 +234,22 @@ const STRINGS = {
     block1Sub:"An exchange isn't an abstract screen full of numbers. It's a queue of real participants. For you to buy 1 lot of gold right now, someone has to sell it to you.",
     block1Title:"Market makers: who provides liquidity",
     mmFacts:[
-      {icon:"🏦", title:"Who are market makers?",
+      {icon:"bank", title:"Who are market makers?",
        text:"Large financial institutions (banks, HFT firms) obligated to continuously quote two-sided prices. They earn on the spread — the difference between the buy and sell price."},
-      {icon:"💧", title:"Why does liquidity matter?",
+      {icon:"droplet", title:"Why does liquidity matter?",
        text:"Liquidity = the ability to quickly buy or sell an asset without a significant change in price. High liquidity → tight spread → low costs. Low liquidity → wide spread → expensive entry."},
-      {icon:"⚠️", title:"Slippage",
+      {icon:"warning", title:"Slippage",
        text:"The difference between the expected and actual execution price. It occurs on market orders during periods of low liquidity. On an NFP or CPI release, the spread can widen 10–50x!"},
-      {icon:"🕐", title:"When is liquidity at its peak?",
-       text:"The overlap of the London and New York sessions (16:00–<span class='local-time' data-utc='2026-03-09T17:00:00Z'>20:00 MSK</span>) — peak volume. The Asian session has minimal liquidity and a wide spread. Friday after 20:00 — the market «empties out»."},
+      {icon:"clock", title:"When is liquidity at its peak?",
+       text:"The overlap of the London and New York sessions (16:00–20:00 UTC) — peak volume. The Asian session has minimal liquidity and a wide spread. Friday after 20:00 — the market «empties out»."},
     ],
     flowDiagramLabel:"HOW YOUR ORDER EXECUTION WORKS",
     flowItems:[
-      {icon:"👤",label:"Trader",sub:"Clicks BUY"},
-      {icon:"🏢",label:"Broker / ECN",sub:"Routing"},
-      {icon:"📊",label:"Order Book (DOM)",sub:"Best price"},
-      {icon:"🏦",label:"Market maker",sub:"Sells the lot"},
-      {icon:"✅",label:"Execution",sub:"Order filled"},
+      {icon:"person",label:"Trader",sub:"Clicks BUY"},
+      {icon:"building",label:"Broker / ECN",sub:"Routing"},
+      {icon:"bar-chart",label:"Order Book (DOM)",sub:"Best price"},
+      {icon:"bank",label:"Market maker",sub:"Sells the lot"},
+      {icon:"check",label:"Execution",sub:"Order filled"},
     ],
     flowExchangeNote:"This is how exchange execution works. A retail CFD account's path is shorter — some of these hops don't exist for it — we'll unpack that in chapter 11.",
 
@@ -267,22 +269,22 @@ const STRINGS = {
     block2Sub:"An order is an instruction to your broker. The order type you choose determines the price and conditions at which your position opens.",
     block2Title:"Order types: a trader's arsenal",
     orderTypes:[
-      {icon:"⚡", title:"Market Order",
+      {icon:"lightning", title:"Market Order",
        text:"Executes instantly at the best available price. Guaranteed execution, but not a guaranteed price. During low liquidity — heavy slippage.",
        use:"When you need to enter immediately and liquidity is high"},
-      {icon:"📍", title:"Limit Order",
+      {icon:"pin", title:"Limit Order",
        text:"Waits in the book until price reaches the specified level. Buys only at the set price or better. Guaranteed price, but not guaranteed execution.",
        use:"BUY LIMIT — below the market. SELL LIMIT — above the market"},
-      {icon:"🚦", title:"Stop Order",
+      {icon:"traffic-light", title:"Stop Order",
        text:"Turns into a market order once the stop price is reached. BUY STOP — above the market (on a breakout). SELL STOP — below the market (on a downside breakout).",
        use:"For entering on a level breakout or placing a Stop-Loss"},
-      {icon:"🎯", title:"Stop-Limit",
+      {icon:"target", title:"Stop-Limit",
        text:"A hybrid: once the stop price is reached, a limit order is placed at the specified price. Control over the execution price, but risk of not filling on a strong move.",
        use:"For a precise entry on a breakout with price control"},
-      {icon:"📉", title:"Trailing Stop",
+      {icon:"trend-down", title:"Trailing Stop",
        text:"A stop that follows the price at a fixed distance and never moves backward. The only order type that repositions itself — which is exactly why it's the most commonly misunderstood. On most platforms trailing is calculated on the terminal side, not the server's: close the terminal, and it stops working.",
        use:"To lock in profit through a trend without manually moving the stop"},
-      {icon:"🔀", title:"OCO (One Cancels the Other)",
+      {icon:"shuffle", title:"OCO (One Cancels the Other)",
        text:"Two orders placed at once; filling either one automatically cancels the other. Lets you place a breakout entry on both sides of the price without risking ending up in two opposite positions at once.",
        use:"Breakout entries when the direction of the breakout isn't known in advance"},
     ],
@@ -316,12 +318,12 @@ const STRINGS = {
     mdTag:"INTERACTIV — FUNDAMENTAL",
     colPrice:"Preț", colVolume:"Volum", colCount:"Nr.",
     spreadLabel:"SPREAD: ",
-    newsAlertTitle:"⚠️ PUBLICARE CPI — lichiditatea a dispărut!",
-    normalTitle:"📖 Stare normală a pieței",
+    newsAlertTitle:"PUBLICARE CPI — lichiditatea a dispărut!",
+    normalTitle:"Stare normală a pieței",
     newsAlertBody:"Market makerii și-au retras ordinele din centrul order book-ului. Spread-ul a crescut de la 0.20 la 8.00+. Orice Market Order se va executa la un preț îngrozitor — acest fenomen se numește slippage.",
     normalBody:"Market makerii mențin order book-ul dens. Spread-ul este minim, lichiditatea este mare. Ordinul dvs. de piață se va executa la un preț apropiat de cel curent.",
     resetBtn:"↺ Restabilește lichiditatea",
-    triggerBtn:"💣 Publică CPI (știre)",
+    triggerBtn:"Publică CPI (știre)",
     spreadVizLabel:"VIZUALIZAREA SPREAD-ULUI",
     spreadWordLower:"spread",
     tapeLabel:"BANDA TRANZACȚIILOR",
@@ -339,8 +341,8 @@ const STRINGS = {
     descSellStop:"Vinde la un preț sub cel curent",
     descStopLimit:"Stop declanșează → limită la 1.5 pct",
     descTrailingStop:"Stop-ul urmărește prețul singur",
-    runningHint:(label)=>`🎯 Trage linia ${label} la nivelul dorit. Prețul se va mișca automat.`,
-    runningHintTrail:"🎯 Trage linia pentru a seta distanța de trailing. De aici stop-ul urmărește singur prețul în sus — dar nu coboară niciodată înapoi.",
+    runningHint:(label)=>`Trage linia ${label} la nivelul dorit. Prețul se va mișca automat.`,
+    runningHintTrail:"Trage linia pentru a seta distanța de trailing. De aici stop-ul urmărește singur prețul în sus — dar nu coboară niciodată înapoi.",
     idleHint:"Apasă START, alege tipul ordinului și fixează linia la prețul dorit.",
 
     // Chapter4 — sticky header / hero
@@ -361,22 +363,22 @@ const STRINGS = {
     block1Sub:"Bursa nu este un ecran abstract cu cifre. Este o coadă de participanți reali. Ca să puteți cumpăra 1 lot de aur chiar acum, cineva trebuie să vi-l vândă.",
     block1Title:"Market Makerii: cine asigură lichiditatea",
     mmFacts:[
-      {icon:"🏦", title:"Cine sunt market makerii?",
+      {icon:"bank", title:"Cine sunt market makerii?",
        text:"Instituții financiare mari (bănci, firme HFT) obligate să afișeze permanent cotații bidirecționale (bid și ask). Ei câștigă din spread — diferența dintre prețul de cumpărare și cel de vânzare."},
-      {icon:"💧", title:"De ce este importantă lichiditatea?",
+      {icon:"droplet", title:"De ce este importantă lichiditatea?",
        text:"Lichiditatea = capacitatea de a cumpăra sau vinde rapid un activ fără o modificare semnificativă a prețului. Lichiditate mare → spread îngust → costuri reduse. Lichiditate mică → spread larg → intrare scumpă."},
-      {icon:"⚠️", title:"Alunecarea prețului (Slippage)",
+      {icon:"warning", title:"Alunecarea prețului (Slippage)",
        text:"Diferența dintre prețul așteptat și prețul real de execuție. Apare la ordinele de piață (Market Order) în perioadele de lichiditate scăzută. La publicarea NFP sau CPI, spread-ul poate crește de 10–50 de ori!"},
-      {icon:"🕐", title:"Când este lichiditatea maximă?",
-       text:"Suprapunerea sesiunilor Londra și New York (16:00–<span class='local-time' data-utc='2026-03-09T17:00:00Z'>20:00 MSK</span>) — vârful volumelor. Sesiunea asiatică — lichiditate minimă, spread larg. Vineri după ora 20:00 — piața „se golește”."},
+      {icon:"clock", title:"Când este lichiditatea maximă?",
+       text:"Suprapunerea sesiunilor Londra și New York (16:00–20:00 UTC) — vârful volumelor. Sesiunea asiatică — lichiditate minimă, spread larg. Vineri după ora 20:00 — piața „se golește”."},
     ],
     flowDiagramLabel:"CUM FUNCȚIONEAZĂ EXECUȚIA ORDINULUI DVS.",
     flowItems:[
-      {icon:"👤",label:"Trader",sub:"Apasă BUY"},
-      {icon:"🏢",label:"Broker / ECN",sub:"Rutare"},
-      {icon:"📊",label:"Order Book (DOM)",sub:"Cel mai bun preț"},
-      {icon:"🏦",label:"Market Maker",sub:"Vinde lotul"},
-      {icon:"✅",label:"Execuție",sub:"Ordin completat"},
+      {icon:"person",label:"Trader",sub:"Apasă BUY"},
+      {icon:"building",label:"Broker / ECN",sub:"Rutare"},
+      {icon:"bar-chart",label:"Order Book (DOM)",sub:"Cel mai bun preț"},
+      {icon:"bank",label:"Market Maker",sub:"Vinde lotul"},
+      {icon:"check",label:"Execuție",sub:"Ordin completat"},
     ],
     flowExchangeNote:"Așa funcționează execuția la bursă. Un cont CFD de retail are un traseu mai scurt — o parte din aceste noduri nu există pentru el — analizăm asta în capitolul 11.",
 
@@ -396,22 +398,22 @@ const STRINGS = {
     block2Sub:"Ordinul este o instrucțiune dată brokerului. Tipul de ordin ales determină la ce preț și în ce condiții se va deschide poziția dvs.",
     block2Title:"Tipurile de ordine: arsenalul traderului",
     orderTypes:[
-      {icon:"⚡", title:"Market Order (la piață)",
+      {icon:"lightning", title:"Market Order (la piață)",
        text:"Se execută instantaneu la cel mai bun preț disponibil. Garanție de execuție, dar nu garanție de preț. La lichiditate scăzută — slippage puternic.",
        use:"Când trebuie să intrați imediat, iar lichiditatea este ridicată"},
-      {icon:"📍", title:"Limit Order (cu limită)",
+      {icon:"pin", title:"Limit Order (cu limită)",
        text:"Așteaptă în order book până când prețul atinge nivelul indicat. Cumpără doar la prețul stabilit sau mai bun. Garanție de preț, dar nu garanție de execuție.",
        use:"BUY LIMIT — sub prețul pieței. SELL LIMIT — peste prețul pieței"},
-      {icon:"🚦", title:"Stop Order (stop)",
+      {icon:"traffic-light", title:"Stop Order (stop)",
        text:"Se transformă într-un Market Order la atingerea prețului stop. BUY STOP — peste prețul pieței (pentru breakout). SELL STOP — sub prețul pieței (pentru breakout în jos).",
        use:"Pentru intrare la spargerea (breakout) unui nivel sau plasarea unui Stop-Loss"},
-      {icon:"🎯", title:"Stop-Limit (stop-limită)",
+      {icon:"target", title:"Stop-Limit (stop-limită)",
        text:"Un hibrid: la atingerea prețului stop se plasează un ordin limit la prețul indicat. Control asupra prețului de execuție, dar risc de neexecutare la o mișcare puternică.",
        use:"Pentru o intrare precisă la breakout, cu control asupra prețului"},
-      {icon:"📉", title:"Trailing Stop (Stop mobil)",
+      {icon:"trend-down", title:"Trailing Stop (Stop mobil)",
        text:"Un stop care urmărește prețul la o distanță fixă și nu se mișcă niciodată înapoi. Singurul tip de ordin care își schimbă singur poziția — tocmai de aceea e cel mai des înțeles greșit. Pe majoritatea platformelor, trailing-ul se calculează pe partea terminalului, nu a serverului: închizi terminalul, trailing-ul nu mai funcționează.",
        use:"Ca să blochezi profitul într-un trend fără să muți stopul manual la fiecare pas"},
-      {icon:"🔀", title:"OCO (Una anulează cealaltă)",
+      {icon:"shuffle", title:"OCO (Una anulează cealaltă)",
        text:"Două ordine deodată, iar execuția oricăreia dintre ele anulează automat cealaltă. Permite plasarea unei intrări pe breakout în ambele direcții, fără riscul de a ajunge accidental în două poziții opuse simultan.",
        use:"Intrare pe breakout când direcția spargerii nu e cunoscută dinainte"},
     ],
@@ -518,6 +520,7 @@ const GLOSSARY = {
 // integration.md §3/§7 -- вынос в общий файл, попап канонизирован на версию
 // из Глав 1-3, она полнее версии, которая была здесь).
 const {C, Mono, Chip, Rule, GlossWord, withGlossTerms, AskAnalystBtn, getChUrl, QuizBlock, ComplianceFootnote} = window.AcademyShared;
+const Icon = window.SBFIcons.Icon;
 
 const SectionTitle = ({children,sub,align="left",id}) => (
   <div id={id} style={{textAlign:align,marginBottom:36,scrollMarginTop:130}}>
@@ -527,7 +530,7 @@ const SectionTitle = ({children,sub,align="left",id}) => (
 );
 const InfoCard = ({icon,title,text,accent=C.gold,html=false}) => (
   <div style={{background:C.surface,border:`1px solid ${C.border}`,padding:"22px 26px",borderRadius:4,borderLeft:`3px solid ${accent}`}}>
-    <div style={{fontSize:20,marginBottom:8}}>{icon}</div>
+    <div style={{marginBottom:8}}><Icon name={icon} size={24} color={accent}/></div>
     <div style={{fontWeight:600,fontSize:13,color:C.black,letterSpacing:0.5,marginBottom:7,textTransform:"uppercase"}}>{title}</div>
     {html
       ? <div style={{fontSize:13,color:C.inkMid,lineHeight:1.65}} dangerouslySetInnerHTML={{__html:text}}/>
@@ -622,7 +625,7 @@ function MarketDepthSimulator() {
       <div style={{background:C.black,borderRadius:8,padding:"36px 40px",color:C.white}}>
         <StepTag n="3" label={S.stepDo}/>
         <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:20}}>
-          <span style={{fontSize:28}}><img class='mi-icon' style={{verticalAlign:'middle'}} src='/assets/icons/icon-bar-chart.png' alt='' width='20' height='20' /></span>
+          <span style={{display:"inline-flex"}}><Icon name="bar-chart" size={24} color={C.gold}/></span>
           <div>
             <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.gold}}>{S.mdTitle}</div>
             <Mono size={11} color="rgba(255,255,255,0.4)" spacing={2}>{S.mdTag}</Mono>
@@ -636,7 +639,7 @@ function MarketDepthSimulator() {
               style={{flex:"1 1 220px",textAlign:"left",padding:"10px 14px",borderRadius:6,cursor:"pointer",
                 background:mode===m?"rgba(201,151,58,0.15)":"rgba(255,255,255,0.04)",
                 border:mode===m?`1px solid ${C.gold}`:"1px solid rgba(255,255,255,0.08)",color:"#fff",fontFamily:"'DM Sans',sans-serif"}}>
-              <div style={{fontWeight:600,fontSize:13}}>{ds.presets[m].emoji} {ds.presets[m].label}</div>
+              <div style={{fontWeight:600,fontSize:13,display:"flex",alignItems:"center",gap:6}}><Icon name={ds.presets[m].icon} size={16}/> {ds.presets[m].label}</div>
               <div style={{fontSize:11,color:"rgba(255,255,255,0.4)",marginTop:3}}>{ds.presets[m].desc}</div>
             </button>
           ))}
@@ -678,7 +681,7 @@ function MarketDepthSimulator() {
           {/* Explanation + task */}
           <div>
             <div style={{marginBottom:20}}>
-              <div style={{fontWeight:600,fontSize:15,marginBottom:10,color:titleColor}}>{presetMeta.emoji} {presetMeta.label}</div>
+              <div style={{fontWeight:600,fontSize:15,marginBottom:10,color:titleColor,display:"flex",alignItems:"center",gap:8}}><Icon name={presetMeta.icon} size={20}/> {presetMeta.label}</div>
               <p style={{fontSize:13,color:"rgba(255,255,255,0.6)",lineHeight:1.75,marginBottom:16}}>{presetMeta.desc}</p>
               {mode !== "normal" && (
                 <div style={{padding:"10px 14px",background:"rgba(201,151,58,0.08)",border:`1px solid ${C.borderGold}`,borderRadius:4}}>
@@ -994,7 +997,7 @@ function LimitCatcher() {
     <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"36px 40px"}}>
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:24,flexWrap:"wrap",gap:12}}>
         <div style={{display:"flex",alignItems:"center",gap:12}}>
-          <span style={{fontSize:28}}>🎮</span>
+          <Icon name="game" size={24} color={C.gold}/>
           <div>
             <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.black}}>{S.gameTitle}</div>
             <Mono size={11} color={C.inkSoft} spacing={2}>{S.gameTag}</Mono>
@@ -1077,7 +1080,7 @@ function LimitCatcher() {
           {hits.map((h,i) => (
             <g key={i}>
               <circle cx={h.x} cy={toY(h.price)} r="6" fill={curOrder.color} opacity="0.8"/>
-              <text x={h.x} y={toY(h.price)+4} fontSize="9" fill="#fff" textAnchor="middle">✓</text>
+              <use href="#ic-check" x={h.x-4} y={toY(h.price)-4} width="8" height="8" color="#fff"/>
             </g>
           ))}
 
@@ -1124,13 +1127,14 @@ function LimitCatcher() {
       </div>
 
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:12}}>
-        <p style={{fontSize:13,color:C.inkMid}}>
+        <p style={{fontSize:13,color:C.inkMid,display:"flex",alignItems:"center",gap:6}}>
+          {running && <Icon name="target" size={16} color={C.gold}/>}
           {running
             ? (orderType === "trailing_stop" ? S.runningHintTrail : S.runningHint(curOrder.label))
             : S.idleHint}
         </p>
         <div style={{display:"flex",gap:16,fontFamily:"monospace",fontSize:12}}>
-          <span style={{color:C.green}}>✓ {S.executedInlineLabel}: {score}</span>
+          <span style={{color:C.green,display:"inline-flex",alignItems:"center",gap:4}}><Icon name="check" size={14}/> {S.executedInlineLabel}: {score}</span>
         </div>
       </div>
     </div>
@@ -1200,12 +1204,6 @@ function Chapter4() {
       const term = lang==="ru" ? "спред" : "spread";
       return {...f, text: withGlossTerms(f.text, [{term, word:term}], GLOSSARY, lang)};
     }
-    // f.text (индекс 3, "Когда ликвидность максимальна") содержит встроенный
-    // <span class='local-time' data-utc=...> -- без dangerouslySetInnerHTML
-    // React экранировал бы разметку в видимый текст, и виджет конвертации
-    // времени никогда не находил бы реальный DOM-узел по .local-time (нашёл
-    // при проверке -- баг не описан в спеке, отдельный от §5.1/§5.2).
-    if (i === 3) return {...f, html:true};
     return f;
   });
 
@@ -1305,7 +1303,7 @@ function Chapter4() {
             <div className="ch4-flow-line"/>
             {flowItems.map((item,i) => (
               <div key={i} className="ch4-flow-step">
-                <div className="ch4-flow-badge">{item.icon}</div>
+                <div className="ch4-flow-badge"><Icon name={item.icon} size={24} color="#fff"/></div>
                 <div style={{fontSize:11,fontWeight:600,color:C.white}}><span className="ch4-flow-num">{i+1}.</span>{item.label}</div>
                 <div style={{fontSize:10,color:"rgba(255,255,255,0.35)",marginTop:2}}>{item.sub}</div>
               </div>
@@ -1379,7 +1377,7 @@ function Chapter4() {
           {orderTypes.map((o,i) => (
             <div key={i} style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:4,padding:"24px 28px",borderTop:`3px solid ${o.accent}`}}>
               <div style={{display:"flex",gap:10,alignItems:"center",marginBottom:12}}>
-                <span style={{fontSize:22}}>{o.icon}</span>
+                <Icon name={o.icon} size={24} color={o.accent}/>
                 <div style={{fontFamily:"'DM Serif Display',serif",fontSize:17,color:C.black}}>{o.title}</div>
               </div>
               <p style={{fontSize:13,color:C.inkMid,lineHeight:1.65,marginBottom:12}}>{o.text}</p>
@@ -1480,40 +1478,6 @@ function Chapter4() {
 
 ReactDOM.createRoot(document.getElementById('sbf-book-root')).render(<Chapter4 />);
 {% endraw %}
-</script>
-
-<script>
-// Скрипт для конвертации UTC времени в локальное время пользователя
-document.addEventListener('DOMContentLoaded', function() {
-    var _pageLang = "{{ lang }}";
-    var _intlLocale = _pageLang === 'ro' ? 'ro-RO' : _pageLang === 'en' ? 'en-US' : 'ru-RU';
-    const utcTimes = document.querySelectorAll('.local-time[data-utc]');
-
-    utcTimes.forEach(function(element) {
-        // Получаем UTC время из data-utc атрибута
-        var utcString = element.getAttribute('data-utc');
-
-        try {
-            // Парсим UTC дату и время
-            var utcDate = new Date(utcString);
-
-            // new Date(utcString) уже хранит корректный момент времени;
-            // .getHours()/.getMinutes() на нём уже возвращают время в часовом
-            // поясе браузера -- доп. коррекция смещения здесь была лишней и
-            // удваивала сдвиг (см. SPEC_academy_chapter4_integration.md §5.1).
-
-            // Форматируем для отображения (например, "19:00 МСК")
-            var hours = String(utcDate.getHours()).padStart(2, '0');
-            var minutes = String(utcDate.getMinutes()).padStart(2, '0');
-            var timeZoneName = Intl.DateTimeFormat(_intlLocale, { timeZoneName: 'long' }).format(utcDate);
-
-            // Обновляем текст элемента с локальным временем
-            element.innerHTML = '<span class="local-time-display">' + hours + ':' + minutes + ' ' + timeZoneName.replace(/\s/g, '') + '</span>';
-        } catch (e) {
-            console.error('Ошибка конвертации времени:', e);
-        }
-    });
-});
 </script>
 </body>
 </html>
