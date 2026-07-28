@@ -1220,8 +1220,33 @@ function Chapter5() {
 
         <div style={{marginBottom:32}}>
           <Mono size={10} color={C.inkFaint} spacing={2} style={{display:"block",marginBottom:10,textTransform:"uppercase"}}>{T5.sources.tag}</Mono>
-          <ol style={{fontSize:11.5,color:C.inkFaint,lineHeight:1.8,paddingLeft:18,marginBottom:8}}>
+          {/* SPEC_ch5_debug.md §8: последний источник был путём к файлу в
+              закрытом репозитории вместо реквизитов + ссылки на CSV. Числа --
+              из _meta/coverage самого hourly_profile.json (руками не пишем,
+              спека это прямо требует), не только у этого пункта -- у всего
+              списка был контраст inkFaint (~0.28 альфа) на белом, ниже 4.5:1
+              -- то же нарушение, что нашлось и починилось в главе 4 §2. */}
+          <ol style={{fontSize:11.5,color:C.inkMid,lineHeight:1.8,paddingLeft:18,marginBottom:8}}>
             {T5.sources.list.map((s,i) => <li key={i}>{s}</li>)}
+            {hp && (() => {
+              const keys = Object.keys(hp).filter(k => k !== "_meta");
+              const covs = keys.map(k => hp[k].coverage).filter(Boolean);
+              if (!covs.length) return null;
+              const ddmmyyyy = iso => { const [y,m,d] = iso.split("-"); return `${d}.${m}.${y}`; };
+              const first = ddmmyyyy(covs.map(c => c.first).sort()[0]);
+              const last = ddmmyyyy(covs.map(c => c.last).sort().slice(-1)[0]);
+              const n = covs.reduce((a,c) => a + c.n_bars, 0).toLocaleString();
+              const built = hp._meta && hp._meta.built ? ddmmyyyy(hp._meta.built) : "";
+              const text = T5.sources.ownTemplate
+                .replace("{{first}}", first).replace("{{last}}", last)
+                .replace("{{n}}", n).replace("{{assets}}", keys.length).replace("{{built}}", built);
+              return (
+                <li>
+                  {text}{" "}
+                  <a href="/data/edu_stats/hourly_profile.csv" download style={{color:C.gold}}>{T5.sources.csvLabel}</a>
+                </li>
+              );
+            })()}
           </ol>
           <p style={{fontSize:11,color:C.inkFaint,fontStyle:"italic"}}>{T5.sources.checked}</p>
         </div>
