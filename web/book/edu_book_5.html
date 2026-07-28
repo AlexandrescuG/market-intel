@@ -1143,6 +1143,88 @@ function PredictHour({ vars }) {
   );
 }
 
+// ─── Анти-миф с переключателем края ────────────────────────────────────────
+function AntiMythBlock() {
+  const { useState } = React;
+  const T5 = window.Ch5Content[INITIAL_LANG] || window.Ch5Content.ru;
+  const am = T5.antiMyth;
+  const [edge, setEdge] = useState(1);
+  return (
+    <div style={{marginBottom:48}}>
+      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{am.tag}</Mono>
+      <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px"}}>
+        <p style={{fontWeight:600,fontSize:14.5,color:C.black,marginBottom:16}}>{am.title}</p>
+        <div style={{display:"flex",gap:6,marginBottom:16}}>
+          <button onClick={()=>setEdge(1)} style={{fontFamily:"monospace",fontSize:11,padding:"7px 14px",cursor:"pointer",background:edge===1?C.gold:"#fff",color:edge===1?"#18181a":C.inkMid,border:`1px solid ${edge===1?C.gold:C.border}`,borderRadius:4,fontWeight:600}}>{am.edge1Label}</button>
+          <button onClick={()=>setEdge(2)} style={{fontFamily:"monospace",fontSize:11,padding:"7px 14px",cursor:"pointer",background:edge===2?C.gold:"#fff",color:edge===2?"#18181a":C.inkMid,border:`1px solid ${edge===2?C.gold:C.border}`,borderRadius:4,fontWeight:600}}>{am.edge2Label}</button>
+        </div>
+        <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,margin:0}}>{edge===1?am.body1:am.body2}</p>
+      </div>
+    </div>
+  );
+}
+
+// ─── Голос SBF (свёрнут) → калькулятор «цена незнания» ─────────────────────
+function VoiceAndPriceBlock({ vars }) {
+  const { useState } = React;
+  const T5 = window.Ch5Content[INITIAL_LANG] || window.Ch5Content.ru;
+  const vs = T5.voiceSbf, p = T5.priceOfNotKnowing;
+  const [expanded, setExpanded] = useState(false);
+  const paras = vs.body.split("\n\n");
+  const [trades, setTrades] = useState(15);
+  const [overpay, setOverpay] = useState(0.9);
+  const [target, setTarget] = useState(20);
+  const result = trades * overpay;
+  const expected = trades * target;
+
+  return (
+    <div style={{marginBottom:48}}>
+      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{vs.tag}</Mono>
+      <div style={{borderLeft:`4px solid ${C.gold}`,paddingLeft:24,marginBottom:28}}>
+        <p style={{fontSize:16,fontStyle:"italic",color:C.inkMid,lineHeight:1.7,fontFamily:"'DM Serif Display',serif",marginBottom:12}}>{paras[0]}</p>
+        {expanded && paras.slice(1).map((pp,i) => <p key={i} style={{fontSize:16,fontStyle:"italic",color:C.inkMid,lineHeight:1.7,fontFamily:"'DM Serif Display',serif",marginBottom:12}}>{pp}</p>)}
+        {paras.length > 1 && (
+          <button onClick={()=>setExpanded(e=>!e)} style={{background:"none",border:"none",color:C.gold,fontFamily:"monospace",fontSize:11,cursor:"pointer",padding:0,letterSpacing:0.5}}>
+            {expanded ? vs.readLessLabel : vs.readMoreLabel}
+          </button>
+        )}
+      </div>
+
+      <div style={{background:C.black,borderRadius:8,padding:"26px 30px",color:C.white}}>
+        <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{p.tag}</Mono>
+        <div style={{fontFamily:"'DM Serif Display',serif",fontSize:20,color:C.white,marginBottom:12}}>{p.title}</div>
+        {p.bodyIntro.split("\n\n").map((pp,i) => <p key={i} style={{fontSize:13.5,lineHeight:1.75,color:"rgba(255,255,255,0.7)",marginBottom:10}}>{vars ? fillTemplate(pp, vars) : pp}</p>)}
+
+        <div style={{background:"rgba(255,255,255,0.05)",borderRadius:6,padding:"18px 20px",margin:"16px 0"}}>
+          <p style={{fontSize:11.5,color:"rgba(255,255,255,0.5)",marginBottom:14}}>{p.calcIntro}</p>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:12,marginBottom:16}} className="g3">
+            <div>
+              <Mono size={9.5} color="rgba(255,255,255,0.4)" spacing={0.5} style={{display:"block",marginBottom:5}}>{p.tradesLabel}</Mono>
+              <input type="number" value={trades} min="1" onChange={e=>setTrades(+e.target.value)} style={{width:"100%",padding:"8px 10px",background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.2)",borderRadius:4,color:"#fff",fontFamily:"monospace",fontSize:13}}/>
+            </div>
+            <div>
+              <Mono size={9.5} color="rgba(255,255,255,0.4)" spacing={0.5} style={{display:"block",marginBottom:5}}>{p.overpayLabel}</Mono>
+              <input type="number" value={overpay} step="0.1" min="0" onChange={e=>setOverpay(+e.target.value)} style={{width:"100%",padding:"8px 10px",background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.2)",borderRadius:4,color:"#fff",fontFamily:"monospace",fontSize:13}}/>
+            </div>
+            <div>
+              <Mono size={9.5} color="rgba(255,255,255,0.4)" spacing={0.5} style={{display:"block",marginBottom:5}}>{p.targetLabel}</Mono>
+              <input type="number" value={target} min="1" onChange={e=>setTarget(+e.target.value)} style={{width:"100%",padding:"8px 10px",background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.2)",borderRadius:4,color:"#fff",fontFamily:"monospace",fontSize:13}}/>
+            </div>
+          </div>
+          <div style={{textAlign:"center"}}>
+            <div style={{fontFamily:"'DM Serif Display',serif",fontSize:30,color:C.gold}}>{result.toFixed(1)}</div>
+            <p style={{fontSize:12,color:"rgba(255,255,255,0.65)",marginTop:4,marginBottom:2}}>{p.resultLabel}</p>
+            <Mono size={10} color="rgba(255,255,255,0.4)" spacing={0}>{p.resultOfLabel(expected)}</Mono>
+          </div>
+        </div>
+
+        <p style={{fontSize:13.5,lineHeight:1.75,color:"rgba(255,255,255,0.7)",marginBottom:10}}>{p.calcNote}</p>
+        <p style={{fontSize:13.5,lineHeight:1.75,color:"rgba(255,255,255,0.7)",margin:0}}>{p.bodyClosing}</p>
+      </div>
+    </div>
+  );
+}
+
 // ─── Main Chapter 5 ────────────────────────────────────────────────────────────
 function Chapter5() {
   const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
@@ -1196,39 +1278,24 @@ function Chapter5() {
 
         <div style={{padding:"0 5vw"}}>
 
-        {/* ── АНТИ-МИФ → ГОЛОС SBF → ЦЕНА НЕЗНАНИЯ ── */}
-        <div style={{marginBottom:48}}>
-          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T5.antiMyth.tag}</Mono>
-          <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px",marginBottom:28}}>
-            <p style={{fontWeight:600,fontSize:14.5,color:C.black,marginBottom:10}}>{T5.antiMyth.title}</p>
-            <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,marginBottom:12}}>{T5.antiMyth.body1}</p>
-            <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,margin:0}}>{T5.antiMyth.body2}</p>
-          </div>
-
-          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T5.voiceSbf.tag}</Mono>
-          <div style={{borderLeft:`4px solid ${C.gold}`,paddingLeft:24,marginBottom:28}}>
-            {T5.voiceSbf.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:16,fontStyle:"italic",color:C.inkMid,lineHeight:1.7,fontFamily:"'DM Serif Display',serif",marginBottom:12}}>{p}</p>)}
-          </div>
-
-          <div style={{background:C.black,borderRadius:8,padding:"26px 30px",color:C.white}}>
-            <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T5.priceOfNotKnowing.tag}</Mono>
-            <div style={{fontFamily:"'DM Serif Display',serif",fontSize:20,color:C.white,marginBottom:12}}>{T5.priceOfNotKnowing.title}</div>
-            {T5.priceOfNotKnowing.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:13.5,lineHeight:1.75,color:"rgba(255,255,255,0.7)",marginBottom:10}}>{vars ? fillTemplate(p, vars) : p}</p>)}
-          </div>
-        </div>
+        {/* ── АНТИ-МИФ (переключатель края) ── */}
+        <AntiMythBlock/>
 
         {/* ── Часы планеты ── */}
         <SectionTitle id="secClocks">{T5.clocks.title}</SectionTitle>
         <ClocksBlock/>
+
+        {/* ── Почему сессии существуют ── */}
+        <SectionTitle id="secWhySessions">{T5.whySessions.tag}</SectionTitle>
+        <WhySessionsCards/>
 
         {/* ── Глобус ликвидности ── */}
         <SectionTitle sub={S.globeSub}>{T5.globe.title}</SectionTitle>
         <div style={{marginBottom:24}}><StepTag n="1-3" label={S.stepExplain+" → "+S.stepShow+" → "+S.stepDo}/></div>
         <div style={{marginBottom:56}}><LiquidityGlobe hp={hp}/></div>
 
-        {/* ── Почему сессии существуют ── */}
-        <SectionTitle id="secWhySessions">{T5.whySessions.tag}</SectionTitle>
-        <WhySessionsCards/>
+        {/* ── ГОЛОС SBF (свёрнут) → ЦЕНА НЕЗНАНИЯ (калькулятор) ── */}
+        <VoiceAndPriceBlock vars={vars}/>
 
         {/* ── Наши сутки — почасовая карта ── */}
         <SectionTitle id="secHourStats">{T5.hourStats.title}</SectionTitle>
@@ -1238,6 +1305,10 @@ function Chapter5() {
         <SectionTitle>{T5.threeEngines.tag}</SectionTitle>
         <ThreeEngines vars={vars}/>
 
+        {/* ── Сцена: реальный прокол ── */}
+        <SectionTitle sub={S.sweepSub}>{T5.sweepScene.tag}</SectionTitle>
+        <SweepScene vars={vars}/>
+
         {/* ── Где живут стопы ── */}
         <SectionTitle id="secStops">{T5.stops.title}</SectionTitle>
         <StopsSection/>
@@ -1245,10 +1316,6 @@ function Chapter5() {
         {/* ── AMD как карта ── */}
         <SectionTitle>{T5.amd.title}</SectionTitle>
         <AmdHonestBlock as={as} vars={vars}/>
-
-        {/* ── Сцена: реальный прокол ── */}
-        <SectionTitle sub={S.sweepSub}>{T5.sweepScene.tag}</SectionTitle>
-        <SweepScene vars={vars}/>
 
         {/* ── Тренажёр «Коробка Азии» v2 ── */}
         <SectionTitle sub={S.trainerSub}>{T5.trainer.tag}</SectionTitle>
