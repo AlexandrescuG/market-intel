@@ -442,19 +442,37 @@ function CoreMeasureBlock({ patterns, vars }) {
 }
 
 // ─── Подтверждено / нарратив (два столбца, как AMD в главе 5) ─────────────────
+function DisclosureItem({ item, idx, colKey, open, onToggle, accent }) {
+  const isOpen = open === colKey + idx;
+  return (
+    <div style={{marginBottom:10}}>
+      <div onClick={()=>onToggle(isOpen ? null : colKey + idx)} style={{cursor:"pointer",display:"flex",gap:8,alignItems:"flex-start"}}>
+        <span style={{color:accent,fontFamily:"monospace",fontSize:11,marginTop:1}}>{isOpen ? "−" : "+"}</span>
+        <p style={{fontSize:12.5,color:C.inkMid,lineHeight:1.65,margin:0}}>{item.claim}</p>
+      </div>
+      {isOpen && (
+        <p style={{fontSize:11.5,color:C.inkSoft,lineHeight:1.6,margin:"6px 0 0 19px",paddingLeft:10,borderLeft:`2px solid ${accent}`,fontStyle:"italic"}}>{item.disclosure}</p>
+      )}
+    </div>
+  );
+}
+
 function NarrativeVsMeasured() {
+  const { useState } = React;
   const T7 = window.Ch7Content[INITIAL_LANG] || window.Ch7Content.ru;
   const nv = T7.narrativeVsMeasured;
+  const [open, setOpen] = useState(null);
   return (
     <div style={{marginBottom:48}}>
+      <p style={{fontSize:11,color:C.inkFaint,fontStyle:"italic",marginBottom:14}}>{nv.disclosureLabel}</p>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,marginBottom:24}} className="g2">
         <div style={{background:C.greenPale,border:"1px solid rgba(45,122,79,.25)",borderRadius:8,padding:"20px 24px"}}>
           <Mono size={11} color={C.green} spacing={2} style={{display:"block",marginBottom:12}}>✓ {nv.confirmedTitle}</Mono>
-          {nv.confirmed.map((t,i) => <p key={i} style={{fontSize:12.5,color:C.inkMid,lineHeight:1.65,marginBottom:10}}>{t}</p>)}
+          {nv.confirmed.map((it,i) => <DisclosureItem key={i} item={it} idx={i} colKey="c" open={open} onToggle={setOpen} accent={C.green}/>)}
         </div>
         <div style={{background:C.redPale,border:"1px solid rgba(242,54,69,.25)",borderRadius:8,padding:"20px 24px"}}>
           <Mono size={11} color="#c0392b" spacing={2} style={{display:"block",marginBottom:12}}>✗ {nv.narrativeTitle}</Mono>
-          {nv.narrative.map((t,i) => <p key={i} style={{fontSize:12.5,color:C.inkMid,lineHeight:1.65,marginBottom:10}}>{t}</p>)}
+          {nv.narrative.map((it,i) => <DisclosureItem key={i} item={it} idx={i} colKey="n" open={open} onToggle={setOpen} accent="#c0392b"/>)}
         </div>
       </div>
       <div style={{textAlign:"center",fontFamily:"'DM Serif Display',serif",fontStyle:"italic",fontSize:16,color:C.black,padding:"20px 0",borderTop:`1px solid ${C.border}`}}>{nv.finalPlate}</div>
