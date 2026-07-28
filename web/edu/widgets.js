@@ -202,7 +202,11 @@ function mountWidget(el, type, opts) {
   if(type==='pattern-gallery') mountPatternGallery(el,opts);
   else if(type==='risk-calc')  mountRiskCalc(el);
   else if(type==='session-clock'){
-    el.innerHTML='<div class="sbf-widget"><div class="sbf-widget-head">'+t('eduindex.widgets.session_head','Сессии рынка')+'</div><p style="color:var(--muted);font-size:13px;margin:0">'+t('eduindex.widgets.session_placeholder','Виджет сессий появится здесь в следующем обновлении.')+'</p></div>';
+    // Готового виджета сессий здесь нет (таблица сессий уже есть и работает
+    // в главе 5 — SBFSessionTable), а анонсировать "появится в следующем
+    // обновлении" запрещено правилом §3.3: неготовое не анонсируем. Не рендерим
+    // ничего, а не обещание.
+    el.style.display='none';
   }
 }
 
