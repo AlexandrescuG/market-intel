@@ -216,25 +216,31 @@ const BIG_ORDER_BOOK = (() => {
 })();
 
 function BigOrderBridge() {
-  const { useState } = React;
+  const { useState, useMemo } = React;
   const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
   const T7 = window.Ch7Content[INITIAL_LANG] || window.Ch7Content.ru;
   const bo = T7.bigOrderTask;
-  const [filled, setFilled] = useState(false);
+  const [touched, setTouched] = useState(false);
+  const [size, setSize] = useState(100);
 
   const { asks, bids, mid } = BIG_ORDER_BOOK;
   const maxVol = Math.max(...asks.map(a=>a.v), ...bids.map(b=>b.v));
+  const totalDepth = asks.reduce((s,a) => s+a.v, 0);
 
-  const fill500 = () => {
-    let remaining = 500, cost = 0, filledQty = 0;
+  // SPEC_ch7_debug.md §6: раньше кнопка исполняла ровно 500 лотов и ничего
+  // больше -- дешёвое добавление, о котором просит спека, это сделать размер
+  // заявки ползунком, чтобы среднюю цену/проскальзывание было видно живьём,
+  // а не одной зафиксированной точкой.
+  const filled = useMemo(() => {
+    let remaining = size, cost = 0, filledQty = 0;
     for (const a of asks) {
-      const take = Math.min(remaining, a.v); // объём уровня в тех же единицах, что цель в 500 лотов -- ордер должен реально пройти сквозь несколько уровней, не закрыться одним
+      const take = Math.min(remaining, a.v);
       cost += take * a.p; filledQty += take; remaining -= take;
       if (remaining <= 0) break;
     }
-    const avg = cost / filledQty;
-    setFilled({ avg, remaining, topOfBook: asks[0].p, slippage: avg - asks[0].p });
-  };
+    const avg = filledQty ? cost / filledQty : asks[0].p;
+    return { avg, remaining, topOfBook: asks[0].p, slippage: avg - asks[0].p, filledQty };
+  }, [size]);
 
   return (
     <div style={{marginBottom:48}}>
@@ -271,18 +277,26 @@ function BigOrderBridge() {
             ))}
           </div>
         </div>
-        {!filled ? (
-          <button onClick={fill500} style={{display:"block",margin:"0 auto",padding:"14px 32px",background:C.gold,color:"#18181a",border:"none",borderRadius:4,cursor:"pointer",fontFamily:"monospace",fontSize:13,letterSpacing:1.5,fontWeight:700}}>{bo.bridgeBtn}</button>
-        ) : (
-          <div style={{textAlign:"center"}}>
-            <div style={{display:"flex",justifyContent:"center",gap:28,flexWrap:"wrap",marginBottom:14,fontFamily:"monospace",fontSize:13}}>
-              <span>{bo.topOfBook}: <b>{filled.topOfBook.toFixed(2)}</b></span>
-              <span>{bo.avgFill}: <b style={{color:C.gold}}>{filled.avg.toFixed(2)}</b></span>
-              <span>{bo.slippage}: <b style={{color:C.red}}>+{filled.slippage.toFixed(2)}</b></span>
-            </div>
-            <p style={{fontSize:13,color:C.gold,fontStyle:"italic",margin:0}}>{bo.bridgeResultLabel}</p>
+        <div style={{maxWidth:420,margin:"0 auto 18px"}}>
+          <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
+            <span style={{fontSize:11.5,color:"rgba(255,255,255,0.55)",fontFamily:"monospace"}}>{bo.sizeLabel}</span>
+            <span style={{fontSize:13,fontWeight:700,color:C.gold,fontFamily:"monospace"}}>{size} {bo.lotsUnit}</span>
           </div>
-        )}
+          <input type="range" min="20" max={Math.round(totalDepth*1.3)} step="10" value={size}
+            onChange={e => { setTouched(true); setSize(+e.target.value); }}
+            style={{width:"100%",accentColor:C.gold,cursor:"pointer"}}/>
+        </div>
+        <div style={{textAlign:"center"}}>
+          <div style={{display:"flex",justifyContent:"center",gap:28,flexWrap:"wrap",marginBottom:14,fontFamily:"monospace",fontSize:13}}>
+            <span>{bo.topOfBook}: <b>{filled.topOfBook.toFixed(2)}</b></span>
+            <span>{bo.avgFill}: <b style={{color:C.gold}}>{filled.avg.toFixed(2)}</b></span>
+            <span>{bo.slippage}: <b style={{color: filled.slippage>0 ? C.red : "rgba(255,255,255,0.4)"}}>+{filled.slippage.toFixed(2)}</b></span>
+          </div>
+          {filled.remaining > 0 && (
+            <p style={{fontSize:12,color:"#e74c3c",fontFamily:"monospace",marginBottom:8}}>{fillTemplate(bo.beyondBookNote, {remaining: filled.remaining})}</p>
+          )}
+          <p style={{fontSize:13,color:C.gold,fontStyle:"italic",margin:0}}>{touched ? bo.bridgeResultLabel : bo.dragHint}</p>
+        </div>
       </div>
     </div>
   );
@@ -683,8 +697,23 @@ function Chapter7() {
 
         <div style={{marginBottom:32}}>
           <Mono size={10} color={C.inkFaint} spacing={2} style={{display:"block",marginBottom:10,textTransform:"uppercase"}}>{T7.sources.tag}</Mono>
-          <ol style={{fontSize:11.5,color:C.inkFaint,lineHeight:1.8,paddingLeft:18,marginBottom:8}}>
+          {/* SPEC_ch7_debug.md §9 (сквозное, здесь только для главы 7): был
+              путь к джобе/скриптам вместо реквизитов; inkFaint→inkMid — тот
+              же контраст-фикс, что в главах 4/5/6. */}
+          <ol style={{fontSize:11.5,color:C.inkMid,lineHeight:1.8,paddingLeft:18,marginBottom:8}}>
             {T7.sources.list.map((s,i) => <li key={i}>{s}</li>)}
+            {patterns && patterns._meta && (() => {
+              const m = patterns._meta;
+              const ddmmyyyy = iso => { const [y,mo,d] = iso.split("-"); return `${d}.${mo}.${y}`; };
+              const text = T7.sources.ownTemplate
+                .replace("{{n}}", m.n_total.toLocaleString()).replace("{{built}}", ddmmyyyy(m.built));
+              return (
+                <li>
+                  {text}{" "}
+                  <a href="/data/edu_stats/pattern_reality.csv" download style={{color:C.gold}}>{T7.sources.csvLabel}</a>
+                </li>
+              );
+            })()}
           </ol>
           <p style={{fontSize:11,color:C.inkFaint,fontStyle:"italic"}}>{T7.sources.checked}</p>
         </div>
