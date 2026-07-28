@@ -157,7 +157,7 @@ function SceneMount({ url, mode, symbol, copy }) {
 }
 
 // SBFSessionTable mounting helper -- same ref-callback pattern as SceneMount.
-function SessionTableMount({ lang, zone, mode }) {
+function SessionTableMount({ lang, zone, mode, id }) {
   const { useRef, useEffect } = React;
   const ref = useRef(null);
   useEffect(() => {
@@ -167,7 +167,7 @@ function SessionTableMount({ lang, zone, mode }) {
     }
     return () => { cancelled = true; };
   }, [lang, zone, mode]);
-  return <div ref={ref} style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 24px"}}/>;
+  return <div ref={ref} id={id} style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 24px"}}/>;
 }
 
 // ── fillTemplate: единственное место, где числа главы попадают в текст.
@@ -537,7 +537,7 @@ function ClocksBlock() {
   return (
     <div style={{marginBottom:36}}>
       <p style={{fontSize:14,color:C.inkMid,lineHeight:1.75,marginBottom:20,maxWidth:820}}>{cl.preamble}</p>
-      <SessionTableMount lang={INITIAL_LANG} mode="summer"/>
+      <SessionTableMount lang={INITIAL_LANG} mode="summer" id="ch5-session-table-main"/>
       <p style={{fontSize:11,color:C.inkFaint,fontStyle:"italic",marginTop:10,maxWidth:820}}>{cl.tableCaption}</p>
     </div>
   );
@@ -955,7 +955,19 @@ function DstTrapBlock({ vars }) {
         <p style={{fontSize:13,color:C.inkMid,lineHeight:1.7,margin:0}}>{d.point3}</p>
       </div>
       <p style={{fontSize:14,color:C.black,fontWeight:600,lineHeight:1.7,marginBottom:20,maxWidth:820}}>{d.conclusion}</p>
-      <SessionTableMount lang={INITIAL_LANG} mode="desync"/>
+      {/* SPEC_ch5_debug.md §5: раньше здесь монтировалась ВТОРАЯ полная
+          таблица сессий в режиме "неделя рассинхрона" -- шестнадцать строк
+          заново, дублирование, из-за которого блок не помещался в экран.
+          Переключаем режим уже смонтированной таблицы выше вместо повторного
+          рендера: скроллим к ней и на секунду подсвечиваем рамку золотом. */}
+      <button onClick={() => {
+        const table = document.getElementById("ch5-session-table-main");
+        if (!table) return;
+        table.scrollIntoView({behavior:"smooth", block:"center"});
+        if (window.SBFSessionTable) window.SBFSessionTable.setMode(table, "desync");
+      }} style={{display:"block",fontFamily:"monospace",fontSize:12.5,color:C.gold,background:"transparent",border:`1px solid ${C.gold}`,borderRadius:4,padding:"10px 16px",cursor:"pointer",marginBottom:16}}>
+        {d.seeTableLink}
+      </button>
       <p style={{fontSize:11,color:C.inkFaint,fontStyle:"italic",marginTop:10,maxWidth:820}}>{d.calendarFootnote}</p>
     </div>
   );

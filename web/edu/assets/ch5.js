@@ -237,6 +237,7 @@ window.Ch5Content = {
       point3: "Третье, главное: три недели в году всё разъезжается. В 2026-м это 8–29 марта и 25 октября — 1 ноября. В эти дни разница между Лондоном и Нью-Йорком меняется на час, а привычное «новости в полчетвёртого» врёт. Каждый год в эти недели кто-нибудь пропускает NFP, потому что будильник стоял на прошлогоднем времени.",
       conclusion: "Время события живёт в календаре, а не у тебя в голове. Профессионал не запоминает «NFP в 15:30». Он смотрит в календарь, где событие лежит в UTC и отображается в его локали.",
       calendarFootnote: "Даты перехода 2026 года: США — 8 марта и 1 ноября; ЕС и Молдова — 29 марта и 25 октября. В 2027-м: США — 14 марта и 7 ноября; ЕС — 28 марта и 31 октября.",
+      seeTableLink: "Посмотреть в таблице выше, в режиме «неделя рассинхрона» ↑",
     },
     myWindow: {
       tag: "ТВОЁ ОКНО",
@@ -532,6 +533,7 @@ window.Ch5Content = {
       point3: "Al treilea, cel mai important: trei săptămâni pe an totul se dă peste cap. În 2026 sunt 8–29 martie și 25 octombrie – 1 noiembrie. În aceste zile diferența dintre Londra și New York se schimbă cu o oră, iar obișnuitul „știri la trei și jumătate” minte. În fiecare an, cineva ratează NFP pentru că alarma era pusă pe ora de anul trecut.",
       conclusion: "Ora unui eveniment trăiește în calendar, nu în capul tău. Un profesionist nu memorează „NFP la 15:30”. Se uită în calendar, unde evenimentul stă în UTC și se afișează în ora sa locală.",
       calendarFootnote: "Datele schimbării orei în 2026: SUA — 8 martie și 1 noiembrie; UE și Moldova — 29 martie și 25 octombrie. În 2027: SUA — 14 martie și 7 noiembrie; UE — 28 martie și 31 octombrie.",
+      seeTableLink: "Vezi în tabelul de mai sus, în regimul „săptămâna de decalaj” ↑",
     },
     myWindow: {
       tag: "FEREASTRA TA",
@@ -819,6 +821,7 @@ window.Ch5Content = {
       point3: "Third, and most important: three weeks a year, everything shifts out of sync. In 2026 that's 8–29 March and 25 October – 1 November. During these days the gap between London and New York changes by an hour, and the usual \"news at half past three\" is wrong. Every year, someone misses NFP because their alarm was still set to last year's time.",
       conclusion: "An event's time lives in a calendar, not in your head. A professional doesn't memorise \"NFP at 15:30.\" They check a calendar where the event sits in UTC and renders in their own locale.",
       calendarFootnote: "2026 clock-change dates: US — 8 March and 1 November; EU and Moldova — 29 March and 25 October. In 2027: US — 14 March and 7 November; EU — 28 March and 31 October.",
+      seeTableLink: "See it in the table above, in \"desync week\" mode ↑",
     },
     myWindow: {
       tag: "YOUR WINDOW",
