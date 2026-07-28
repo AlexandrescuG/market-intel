@@ -143,6 +143,12 @@ const STRINGS = {
       {icon:"🎯", title:"Stop-Limit (Стоп-Лимит)",
        text:"Гибрид: при достижении стоп-цены выставляется лимитный ордер по указанной цене. Контроль цены исполнения, но риск не исполниться при сильном движении.",
        use:"Для точного входа на пробое с контролем цены"},
+      {icon:"📉", title:"Trailing Stop (Подвижный стоп)",
+       text:"Стоп, который сам подтягивается за ценой на заданном расстоянии и не двигается назад. Единственный тип ордера, который меняет своё положение сам — именно поэтому его чаще всего понимают неправильно. У большинства площадок трейлинг считается на стороне терминала, а не сервера: закрыли терминал — трейлинг не работает.",
+       use:"Чтобы запирать прибыль в тренде, не выставляя стоп вручную на каждом шаге"},
+      {icon:"🔀", title:"OCO (Один отменяет другой)",
+       text:"Два ордера сразу, и исполнение любого из них автоматически снимает второй. Позволяет поставить вход на пробой в обе стороны, не рискуя случайно оказаться в двух противоположных позициях одновременно.",
+       use:"Вход на пробой уровня, когда направление пробоя заранее не известно"},
     ],
     pendingDiagramLabel:"ГДЕ СТАВИТЬ ОТЛОЖЕННЫЕ ОРДЕРА",
     currentPriceLabel:"ЦЕНА 2505",
@@ -268,6 +274,12 @@ const STRINGS = {
       {icon:"🎯", title:"Stop-Limit",
        text:"A hybrid: once the stop price is reached, a limit order is placed at the specified price. Control over the execution price, but risk of not filling on a strong move.",
        use:"For a precise entry on a breakout with price control"},
+      {icon:"📉", title:"Trailing Stop",
+       text:"A stop that follows the price at a fixed distance and never moves backward. The only order type that repositions itself — which is exactly why it's the most commonly misunderstood. On most platforms trailing is calculated on the terminal side, not the server's: close the terminal, and it stops working.",
+       use:"To lock in profit through a trend without manually moving the stop"},
+      {icon:"🔀", title:"OCO (One Cancels the Other)",
+       text:"Two orders placed at once; filling either one automatically cancels the other. Lets you place a breakout entry on both sides of the price without risking ending up in two opposite positions at once.",
+       use:"Breakout entries when the direction of the breakout isn't known in advance"},
     ],
     pendingDiagramLabel:"WHERE TO PLACE PENDING ORDERS",
     currentPriceLabel:"PRICE 2505",
@@ -393,6 +405,12 @@ const STRINGS = {
       {icon:"🎯", title:"Stop-Limit (stop-limită)",
        text:"Un hibrid: la atingerea prețului stop se plasează un ordin limit la prețul indicat. Control asupra prețului de execuție, dar risc de neexecutare la o mișcare puternică.",
        use:"Pentru o intrare precisă la breakout, cu control asupra prețului"},
+      {icon:"📉", title:"Trailing Stop (Stop mobil)",
+       text:"Un stop care urmărește prețul la o distanță fixă și nu se mișcă niciodată înapoi. Singurul tip de ordin care își schimbă singur poziția — tocmai de aceea e cel mai des înțeles greșit. Pe majoritatea platformelor, trailing-ul se calculează pe partea terminalului, nu a serverului: închizi terminalul, trailing-ul nu mai funcționează.",
+       use:"Ca să blochezi profitul într-un trend fără să muți stopul manual la fiecare pas"},
+      {icon:"🔀", title:"OCO (Una anulează cealaltă)",
+       text:"Două ordine deodată, iar execuția oricăreia dintre ele anulează automat cealaltă. Permite plasarea unei intrări pe breakout în ambele direcții, fără riscul de a ajunge accidental în două poziții opuse simultan.",
+       use:"Intrare pe breakout când direcția spargerii nu e cunoscută dinainte"},
     ],
     pendingDiagramLabel:"UNDE SE PLASEAZĂ ORDINELE PENDING",
     currentPriceLabel:"PREȚ 2505",
@@ -1055,7 +1073,7 @@ function Chapter4() {
   const lang = INITIAL_LANG;
   const T4 = window.Ch4Content[lang] || window.Ch4Content.ru;
 
-  const orderTypeAccents = [C.gold, C.chartGreen, C.chartRed, C.blue];
+  const orderTypeAccents = [C.gold, C.chartGreen, C.chartRed, C.blue, "#14b8a6", "#8b5cf6"];
   const orderTypes = S.orderTypes.map((o,i) => ({...o, accent:orderTypeAccents[i]}));
 
   const mmFacts = S.mmFacts.map((f,i) => {
@@ -1238,7 +1256,7 @@ function Chapter4() {
           <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,margin:0}}>{T4.orderTools.legendPreamble}</p>
         </div>
 
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,marginBottom:40}} className="g2">
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:16,marginBottom:40}} className="g3">
           {orderTypes.map((o,i) => (
             <div key={i} style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:4,padding:"24px 28px",borderTop:`3px solid ${o.accent}`}}>
               <div style={{display:"flex",gap:10,alignItems:"center",marginBottom:12}}>
@@ -1246,7 +1264,7 @@ function Chapter4() {
                 <div style={{fontFamily:"'DM Serif Display',serif",fontSize:17,color:C.black}}>{o.title}</div>
               </div>
               <p style={{fontSize:13,color:C.inkMid,lineHeight:1.65,marginBottom:12}}>{o.text}</p>
-              <div style={{fontSize:11,color:o.accent,fontFamily:"monospace",letterSpacing:0.5,padding:"8px 12px",background:`rgba(${o.accent===C.chartGreen?'8,153,129':o.accent===C.chartRed?'242,54,69':o.accent===C.blue?'37,99,235':'201,151,58'},0.08)`,borderRadius:3}}>
+              <div style={{fontSize:11,color:o.accent,fontFamily:"monospace",letterSpacing:0.5,padding:"8px 12px",background:`rgba(${o.accent===C.chartGreen?'8,153,129':o.accent===C.chartRed?'242,54,69':o.accent===C.blue?'37,99,235':o.accent==="#14b8a6"?'20,184,166':o.accent==="#8b5cf6"?'139,92,246':'201,151,58'},0.08)`,borderRadius:3}}>
                 → {o.use}
               </div>
             </div>
