@@ -1,0 +1,475 @@
+/**
+ * Chapter 10 "Психология и Паттерны" content — SPEC_edu_level10_psychology_patterns.md.
+ * RU is the master text; RO/EN are translations in the same register as ch1-9.
+ * window.Ch10Content = {ru, ro, en}.
+ *
+ * [ДОПУЩЕНИЕ, важное] `/api/journal/self-stats` и `/api/journal/aggregate-stats`
+ * НЕ построены в этом проходе. Причина отличается от предыдущих глав: дело
+ * не только в отсутствующем связующем слое лестницы, а в том, что (1) спека
+ * сама требует живого теста авторизации на ДВУХ реальных пользователях —
+ * невозможно выполнить прямо сейчас; (2) реальная таблица `trades` в
+ * data/journal.db существует, но содержит 0 (ноль) записей у всех
+ * пользователей — персональную статистику неоткуда взять даже теоретически;
+ * агрегатные пороги спеки (n≥50 пользователей, n≥1000 сделок) тоже не
+ * достигнуты (в базе 4 пользователя). Компонент SelfStats пытается
+ * реальный fetch к обоим эндпоинтам (форвард-совместимо на будущее), но
+ * поскольку их нет, всегда красиво откатывается в состояние C — которое
+ * СЕЙЧАС и есть единственное технически честное состояние для всех
+ * реальных пользователей платформы. Это задокументировано отдельно.
+ *
+ * §3.6 "что мы измерили по фигурам" переиспользует РЕАЛЬНЫЙ
+ * pattern_reality.json из главы 7 (те же 7 детектируемых паттернов),
+ * новых расчётов не потребовалось.
+ */
+window.Ch10Content = {
+  ru: {
+    coldOpen: {
+      tag: "ГЛАВА 10 — ДВЕ ОДИНАКОВЫЕ СДЕЛКИ",
+      lines: [
+        "Слева и справа — одна и та же сделка. Один инструмент, вход в пределах нескольких пунктов, оба раза стоп сработал.",
+        "Разница одна, и она не на графике. Левая была первой сделкой дня. Правая — третьей подряд после двух убытков, и объём в ней был вдвое больше.",
+        "Первая — рабочий момент. Вторая — начало серии, которая заканчивается одинаково у всех и называется по-разному: тильт, отыгрыш, «сегодня я всё верну».",
+        "Про это невозможно рассказать так, чтобы человек узнал себя: все читают такие абзацы про кого-то другого. Поэтому дальше будет не рассказ, а твои собственные цифры — если ты привязал журнал в главе 8. И четыре конкретных признака, каждый из которых виден в записях и ни один не виден в ощущениях.",
+        "И отдельно: в этой главе мы ничего не предлагаем и никуда не ведём. Ни одной ссылки. Причину скажем в конце.",
+      ],
+      cta: "Показать цифры ↓",
+    },
+    antiMyth: {
+      tag: "АНТИ-МИФ",
+      title: "«Я знаю свои слабости и держу их под контролем»",
+      body1: "Проблема не в том, что это неправда, а в том, что это непроверяемо изнутри. Человек, увеличивший объём после убытка, в момент решения не чувствует, что мстит рынку: он чувствует, что «ситуация очевидная» и «надо использовать». Ощущение уверенности — не индикатор состояния; оно у тильта и у трезвого расчёта одинаковое.",
+      body2: "Обратный край мифа не менее вреден: «у меня проблемы с психологией, надо сначала её починить». Это превращается в бесконечную подготовку. Психология не чинится размышлением о психологии; она чинится процедурой: правило, записанное заранее, и цифра, посмотренная потом.",
+      body3: "Правда посередине: эмоции измеримы косвенно — по следам в решениях. Ты не можешь наблюдать за собой в момент, но можешь посмотреть на записи через неделю. И тогда «я так не делаю» превращается в «я делаю так в среднем несколько раз в месяц».",
+    },
+    voiceSbf: {
+      tag: "ГОЛОС SBF",
+      body: "Разговоры про дисциплину не работают — потому и текст ими не занимается. Работает конкретное: после двух убытков подряд закрыть терминал до завтра, потому что третья сделка после такой серии в среднем вдвое больше объёмом и хуже результатом. Решение принимается до открытия терминала, а не в моменте — в моменте только исполняем. Самое тяжёлое действие во всей профессии — открыть журнал и посчитать в первый раз; дальше легче.",
+    },
+    priceOfNotKnowing: {
+      tag: "ЦЕНА НЕЗНАНИЯ",
+      title: "Арифметика серии",
+      body: "Трейдер работает с риском 1% на сделку — как учила глава 3. После двух убытков он увеличивает объём вдвое, чтобы «отыграться одной сделкой». Он делает это не каждый раз, а примерно в трети таких случаев.\n\nСчитаем, что происходит с математикой. При риске 1% серия из трёх убытков стоит около 3% депозита — неприятно, но восстанавливается. При удвоении на третьей — около 4%, тоже терпимо. Проблема начинается, когда удвоение не помогло: следующее решение принимается уже из более глубокой просадки и с более сильным желанием вернуть, и размер растёт снова. Три-четыре итерации — и риск на сделку отличается от исходного в несколько раз, а решение принимает человек, который семь сделок назад был спокоен.\n\nЦифра, которую стоит запомнить: чтобы отыграть просадку в 20%, нужно заработать 25%. Чтобы отыграть 50% — заработать 100%. Асимметрия работает против отыгрыша всегда, и именно поэтому «одна большая сделка, чтобы вернуть» — самое дорогое решение в этой профессии.\n\nЧестная вторая половина: это не про силу воли. Это про процедуру. Правило «после двух убытков — стоп на сегодня» не требует характера, оно требует только, чтобы оно было записано заранее и чтобы кто-то — журнал — считал случаи его нарушения.",
+    },
+    whyControlFails: {
+      tag: "ПОЧЕМУ «КОНТРОЛИРУЙ ЭМОЦИИ» НЕ РАБОТАЕТ",
+      intro: "Совет бесполезен по устройству: он адресован человеку в том состоянии, в котором тот наименее способен ему следовать. Это как советовать не паниковать во время паники.",
+      subhead: "Что работает вместо — три вещи, ни одна не про характер:",
+      items: [
+        "Решение принимается заранее и записывается. В момент исполняется, а не пересматривается.",
+        "Есть автоматическое условие остановки, не зависящее от самочувствия: число убытков подряд, дневной лимит потерь, время.",
+        "Есть цифра, которую смотрят потом. Без обратной связи любая процедура разваливается за месяц.",
+      ],
+      outro: "Курс уже дал первое (глава 3) и сейчас даёт третье. Второе — предмет этой главы.",
+    },
+    selfStats: {
+      tag: "ТВОЯ ПЕРСОНАЛЬНАЯ СТАТИСТИКА",
+      loadingLabel: "Проверяем твой журнал…",
+      stateC: {
+        title: "Персональная версия этого блока строится из записей журнала",
+        body: "Если решишь его завести — он в разделе «Журнал», это бесплатно и не связано ни с каким счётом. Мы не будем возвращаться к этому предложению.",
+        promiseTitle: "Обещание из главы 5",
+        promiseBody: "Мы сказали: «через тридцать сделок дневник покажет, в какие часы ты входишь и в какие зарабатываешь — очень часто это разные часы». Мы обещали это пять глав назад, и вот ровно то место, где это должно было появиться — как только в журнале накопятся записи.",
+      },
+    },
+    fourMistakes: {
+      tag: "ЧЕТЫРЕ ОШИБКИ, ВИДИМЫЕ В ЦИФРАХ",
+      m1Title: "1 · Рост риска после убытка", m1Calc: "Средний риск в сделках, следующих за убыточной, против общего среднего.", m1Fix: "Жёсткий предел размера, заданный до сессии; правило остановки после N убытков подряд.",
+      m2Title: "2 · Сокращение паузы после убытка", m2Calc: "Медианный интервал между сделками после убытка против общего. Сжатие интервала — самый ранний признак тильта, раньше роста объёма.", m2Fix: "Минимальная пауза, встроенная в правила, а не в намерения.",
+      m3Title: "3 · Смещение по часам", m3Calc: "Распределение входов по часам против распределения результата по часам. Связка с главой 5: ты помнишь своё окно; теперь видно, совпадает ли оно с тем, где ты действительно зарабатываешь.", m3Fix: "—",
+      m4Title: "4 · Асимметрия удержания", m4Calc: "Медианное время удержания убыточных против прибыльных. Если убыточные держатся дольше — работает нежелание фиксировать потерю.", m4Fix: "Выход задаётся заранее и не пересматривается в позиции.",
+      calcLabel: "Как считается", fixLabel: "Процедура",
+      footer: "Ни одна из четырёх — не диагноз и не приговор. Это наблюдаемые величины. Смысл не в том, чтобы получить хорошие числа, а в том, чтобы знать свои: человек, который знает, что после убытка удваивается, может поставить себе предел; человек, который уверен, что он так не делает, не может ничего.",
+    },
+    patternsAsCrowd: {
+      tag: "ФИГУРЫ КАК ОПИСАНИЕ ПОВЕДЕНИЯ ТОЛПЫ",
+      intro: "Фигура — это имя для конфигурации, которая уже сложилась. Ценность имени в том, что оно позволяет говорить и вспоминать; ценность конфигурации — в том, что под ней часто лежит понятная механика скученности заявок (глава 5, Ослер). Ни то, ни другое не является предсказанием.",
+      confirmedTitle: "Что говорим про механику — то, что подтверждено",
+      confirmed: [
+        "за очевидными границами фигур скапливаются заявки, и их срабатывание вызывает каскад — это измерено Ослер и объяснено в главе 5;",
+        "ускорение после пробоя — следствие каскада, а не «подтверждение фигуры»;",
+        "чем очевиднее граница, тем больше на ней скученность — поэтому «все видят одно и то же» это не недостаток, а сам механизм.",
+      ],
+      notTitle: "Чего не говорим",
+      not: [
+        "что фигура «отрабатывает» с какой-то вероятностью, если мы её не измеряли;",
+        "что цель по фигуре равна высоте структуры — методика расчёта цели удалена до измерения;",
+        "что за фигурой стоит чьё-то намерение (глава 7).",
+      ],
+    },
+    patternScreens: {
+      tag: "ФИГУРА — ЭТО ИМЯ ДЛЯ ПОВЕДЕНИЯ",
+      intro: "У каждой классической фигуры внизу лежит конкретное поведение толпы. Цифра рядом — согласованность с направлением движения через 5 баров после появления, на нашей истории, против опорной линии 50%.",
+      items: [
+        { behavior: "Не хочет признавать, что цена дальше не идёт, и пробует ещё раз — так на графике появляется вторая вершина или второе основание.", label: "Двойная вершина / двойное дно", keys: ["double_top","double_bottom"] },
+        { behavior: "Державшиеся против движения сдаются разом — одна свеча перекрывает несколько предыдущих: поглощение.", label: "Бычье / медвежье поглощение", keys: ["bullish_engulfing","bearish_engulfing"] },
+        { behavior: "Цена сходила проверить уровень и вернулась — отказ виден в одной свече с длинной тенью: пин-бар.", label: "Пин-бар сверху / снизу", keys: ["pin_bar_top","pin_bar_bottom"] },
+        { behavior: "За очевидной границей скапливаются заявки; их срабатывание и повторная проверка уровня — пробой с ретестом.", label: "Пробой с ретестом", keys: ["break_retest"], mechanic: true },
+      ],
+      mechanicNote: "Это не психология, а механика — глава 5, скученность заявок Ослер.",
+      statLabel: "согласованность", nLabel: "n", baselineNote: "опорная линия — 50%",
+      openOnChart: "Открыть USDJPY на графике →",
+    },
+    coreMeasure: {
+      tag: "РАЗБИВКА ПО ИНСТРУМЕНТАМ",
+      preamble: "Те же измерения, по каждому инструменту отдельно.",
+      honestLine: "Голова и Плечи, флаги, вымпелы, клинья, внутренний бар — мы про них ничего не измерили, потому что не детектируем их формально. Значит, и утверждать про их отработку не будем. Описать логику скученности заявок под линией шеи можем — это та же механика, что у остальных. Сказать, как часто это заканчивается движением вниз, — нет.",
+      downloadCsv: "⬇ Скачать наши числа (CSV)",
+      patternLabel: "Паттерн", instrumentLabel: "Инструмент",
+    },
+    sentiment: {
+      tag: "ИНДЕКСЫ НАСТРОЕНИЙ — КОНТЕКСТ, НЕ РЕКОМЕНДАЦИЯ",
+      vixTitle: "VIX",
+      vixBody1: "Это ожидаемая волатильность S&P 500 на 30 дней вперёд, посчитанная из цен опционов. Он измеряет ожидаемый размах, а не направление, и в этом смысле он ровно то же самое, чем была для нас глава 5: расписание способности рынка двигаться, а не его намерения.",
+      vixBody2: "Высокий VIX означает, что участники платят дороже за защиту. Это описание текущего состояния, и оно полезно ровно как контекст: при высоком VIX твой обычный стоп относительно ожидаемого движения стал теснее, чем был, — а значит, разговор идёт про размер позиции, а не про направление.",
+      removedTitle: "Почему здесь нет «зона покупки»",
+      removedBody: "В прошлой редакции этой главы стояло, что VIX выше тридцати — исторически зона покупки. Мы это убрали. Не потому что утверждение обязательно ложное, а потому что мы его не измеряли, а рядом в той же главе у нас же было написано, что индексы настроений — контекст, а не сигналы. Из двух противоречащих строк одна лишняя, и лишней была та, которая советовала покупать.",
+    },
+    noOffer: {
+      title: "В этой главе мы ничего не предлагаем",
+      body1: "Ты, наверное, заметил: в предыдущих главах в этом месте была карточка с предложением — посмотреть календарь, открыть демо, привязать журнал. Здесь её нет, и это не потому, что мы забыли.",
+      body2: "В этой главе мы разбирали твои собственные ошибки. Любая ссылка в этом месте выглядела бы так, будто мы на них зарабатываем, — и, честно говоря, так бы оно и читалось.",
+      body3: "Мы зарабатываем на партнёрских программах, и об этом написано на отдельной странице без всякой регистрации. Но не здесь и не на этом.",
+      body4: "Дальше — глава 11, и там предложение будет. Заранее говорим какое: инструмент сравнения площадок, где видно, чем они отличаются по условиям, регулятору и проценту теряющих клиентов. Он тебе понадобится, если дойдёшь до реального счёта; если не дойдёшь — не понадобится, и это нормальный исход.",
+    },
+    quiz: [
+      { id: "q1", section: "secFourMistakes", prompt: "Самый ранний признак тильта в записях журнала?",
+        options: [{ text: "Рост убытков", correct: false }, { text: "Сокращение паузы между сделками", correct: true }, { text: "Смена инструмента", correct: false }],
+        feedbackCorrect: "Верно. Сжатие паузы происходит раньше, чем растёт объём.",
+        feedbackWrong: "Не совсем. Пауза между сделками сокращается раньше, чем растёт риск — это самый ранний признак." },
+      { id: "q2", section: "secPriceOfNotKnowing10", prompt: "Чтобы отыграть просадку 50%, нужно заработать…",
+        options: [{ text: "50%", correct: false }, { text: "100%", correct: true }, { text: "75%", correct: false }],
+        feedbackCorrect: "Верно. Асимметрия работает против отыгрыша всегда.",
+        feedbackWrong: "Не совсем. От 50 упавшего капитала нужно вырасти на 100%, чтобы вернуться к исходной сумме." },
+      { id: "q3", section: "secSelfStats", prompt: "Твоё окно из главы 5 и час, в котором ты реально зарабатываешь, — это…",
+        options: [{ text: "Всегда одно и то же", correct: false }, { text: "Часто разные часы, и увидеть это можно только по записям", correct: true }, { text: "Не связано", correct: false }],
+        feedbackCorrect: "Верно — обещание главы 5, закрытое здесь.",
+        feedbackWrong: "Не совсем. Час входа и час результата часто расходятся — увидеть это можно только по своим записям." },
+      { id: "q4", section: "secPatternsAsCrowd", prompt: "Фигура на графике — это…",
+        options: [{ text: "След институтов", correct: false }, { text: "Имя для уже сложившейся конфигурации; под ней бывает механика скученности заявок", correct: true }, { text: "Самосбывающееся пророчество", correct: false }],
+        feedbackCorrect: "Верно — глава 7.",
+        feedbackWrong: "Не совсем. Фигура — имя для конфигурации, под которой иногда лежит измеримая механика (глава 7)." },
+    ],
+    predict: {
+      tag: "ПРЕДИКТ НЕДЕЛИ",
+      question: "Как думаешь, у большинства трейдеров убыточные позиции держатся дольше прибыльных или короче?",
+      options: ["Дольше", "Короче", "Примерно одинаково"],
+      xpNote: "+15 XP за участие. Про поведение, не про цену.",
+    },
+    cliffhanger: {
+      tag: "КЛИФФХЭНГЕР → ГЛАВА 11",
+      body: "Ты посмотрел на свои цифры. Дальше курс поворачивает наружу — к тому, как устроен рынок в тех местах, куда обычный участник не заглядывает.\n\nСледующий эпизод — про тёмные пулы и высокочастотную торговлю. Про то, что заметная доля сделок вообще не проходит через открытую книгу, и про то, что скорость исполнения измеряется в микросекундах, а расстояние до сервера биржи стоит денег.\n\nИ там же — цифра, которую площадки обязаны публиковать по закону и которую почти никто не читает: процент розничных счетов, теряющих деньги. У каждой площадки он свой, отличается ощутимо, и пересчитывается каждый квартал. Мы соберём их в одном месте.",
+    },
+    sources: {
+      tag: "ИСТОЧНИКИ ГЛАВЫ",
+      list: [
+        "Kahneman D., Tversky A. — теория перспектив: асимметрия отношения к прибыли и убытку, эффект расположения (disposition effect).",
+        "Odean T. (1998) — «Are Investors Reluctant to Realize Their Losses?»: эмпирика того, что убыточные позиции держат дольше прибыльных.",
+        "Osler C. (2003) — кластеризация заявок и ценовые каскады, механика за очевидными границами фигур.",
+        "CBOE — методика расчёта индекса VIX как ожидаемой волатильности из цен опционов.",
+      ],
+      ownTemplate: "SBF Company SRL. Согласованность классических фигур с направлением цены через 5 баров после появления (переиспользование измерений главы 7). Данные: таймфреймы H1/H4/D1, {{n_total}} размеченных баров, минимум n = {{min_n_shown}} для показа ячейки. Метод: доля случаев, когда цена через 5 баров пошла в сторону, которую фигура «предполагает», против базовой линии 50%. Пересчёт от {{built}}.",
+      csvLabel: "Скачать данные (CSV)",
+      checked: "Проверено на 27.07.2026.",
+    },
+  },
+  ro: {
+    coldOpen: {
+      tag: "CAPITOLUL 10 — DOUĂ TRANZACȚII IDENTICE",
+      lines: [
+        "În stânga și în dreapta — aceeași tranzacție. Un singur instrument, intrare în limita câtorva puncte, de ambele ori stopul s-a declanșat.",
+        "Există o singură diferență, și nu e pe grafic. Cea din stânga a fost prima tranzacție a zilei. Cea din dreapta — a treia la rând după două pierderi, iar volumul ei a fost dublu.",
+        "Prima e un moment normal de lucru. A doua e începutul unei serii care se termină la fel pentru toată lumea și se numește diferit: tilt, recuperare disperată, „azi recuperez tot”.",
+        "Despre asta e imposibil să povestești în așa fel încât cineva să se recunoască: toată lumea citește astfel de paragrafe despre altcineva. De aceea, ce urmează nu va fi o poveste, ci propriile tale cifre — dacă ai legat jurnalul în capitolul 8. Și patru semne concrete, fiecare vizibil în înregistrări și niciunul vizibil în senzații.",
+        "Și separat: în acest capitol nu propunem nimic și nu te ducem nicăieri. Niciun link. Motivul îl spunem la final.",
+      ],
+      cta: "Arată cifrele ↓",
+    },
+    antiMyth: {
+      tag: "ANTI-MIT",
+      title: "„Îmi cunosc slăbiciunile și le țin sub control”",
+      body1: "Problema nu e că e fals, ci că nu poate fi verificat din interior. Cineva care și-a mărit volumul după o pierdere nu simte, în momentul deciziei, că se răzbună pe piață: simte că „situația e evidentă” și că „trebuie profitat de ea”. Sentimentul de încredere nu e un indicator al stării; e identic la tilt și la calculul lucid.",
+      body2: "Extrema opusă a mitului e la fel de dăunătoare: „am probleme cu psihologia, trebuie s-o repar mai întâi”. Asta se transformă într-o pregătire infinită. Psihologia nu se repară gândindu-te la psihologie; se repară printr-o procedură: o regulă notată dinainte și o cifră analizată ulterior.",
+      body3: "Adevărul e la mijloc: emoțiile sunt măsurabile indirect — prin urmele din decizii. Nu te poți observa pe tine însuți în momentul respectiv, dar poți privi înregistrările peste o săptămână. Și atunci „eu nu fac asta” devine „fac asta în medie de câteva ori pe lună”.",
+    },
+    voiceSbf: {
+      tag: "VOCEA SBF",
+      body: "Discuțiile despre disciplină nu funcționează — de-aia textul nu se ocupă de ele. Funcționează ceva concret: după două pierderi la rând, închide terminalul până a doua zi, pentru că a treia tranzacție după o astfel de serie e, în medie, de două ori mai mare ca volum și mai slabă ca rezultat. Decizia se ia înainte de a deschide terminalul, nu în momentul respectiv — atunci doar execuți. Cel mai greu act din toată profesia e să deschizi jurnalul și să calculezi pentru prima dată; după aceea e mai ușor.",
+    },
+    priceOfNotKnowing: {
+      tag: "PREȚUL NEȘTIINȚEI",
+      title: "Aritmetica unei serii",
+      body: "Un trader lucrează cu un risc de 1% pe tranzacție — cum a învățat în capitolul 3. După două pierderi, își dublează volumul ca să „recupereze dintr-o singură tranzacție”. Nu o face de fiecare dată, ci în aproximativ o treime din astfel de cazuri.\n\nSă calculăm ce se întâmplă cu matematica. La un risc de 1%, o serie de trei pierderi costă circa 3% din depozit — neplăcut, dar recuperabil. La dublare pe a treia — circa 4%, tot tolerabil. Problema începe când dublarea n-a ajutat: următoarea decizie se ia dintr-o pierdere deja mai adâncă și cu o dorință mai puternică de recuperare, iar mărimea crește din nou. Trei-patru iterații — și riscul pe tranzacție diferă de cel inițial de câteva ori, iar decizia o ia o persoană care, cu șapte tranzacții în urmă, era calmă.\n\nO cifră care merită reținută: ca să recuperezi o pierdere de 20%, trebuie să câștigi 25%. Ca să recuperezi 50% — trebuie să câștigi 100%. Asimetria lucrează mereu împotriva recuperării, și exact de aceea „o singură tranzacție mare, ca să recuperez” e cea mai scumpă decizie din această meserie.\n\nA doua jumătate, onestă: nu ține de voință. Ține de procedură. Regula „după două pierderi — stop pentru azi” nu cere caracter, cere doar să fie notată dinainte și ca cineva — jurnalul — să numere cazurile de încălcare.",
+    },
+    whyControlFails: {
+      tag: "DE CE NU FUNCȚIONEAZĂ „CONTROLEAZĂ-ȚI EMOȚIILE”",
+      intro: "Sfatul e inutil prin construcție: se adresează unei persoane exact în starea în care e cel mai puțin capabilă să-l urmeze. E ca și cum ai sfătui pe cineva să nu intre în panică în timpul panicii.",
+      subhead: "Ce funcționează în schimb — trei lucruri, niciunul despre caracter:",
+      items: [
+        "Decizia se ia dinainte și se notează. În momentul respectiv se execută, nu se reconsideră.",
+        "Există o condiție automată de oprire, independentă de starea de spirit: numărul de pierderi consecutive, limita zilnică de pierdere, timpul.",
+        "Există o cifră care se analizează ulterior. Fără feedback, orice procedură se destramă într-o lună.",
+      ],
+      outro: "Cursul a dat deja primul lucru (capitolul 3) și îl dă acum pe al treilea. Al doilea e subiectul acestui capitol.",
+    },
+    selfStats: {
+      tag: "STATISTICA TA PERSONALĂ",
+      loadingLabel: "Verificăm jurnalul tău…",
+      stateC: {
+        title: "Versiunea personală a acestui bloc se construiește din înregistrările jurnalului",
+        body: "Dacă te hotărăști să-l ții — e în secțiunea „Jurnal”, e gratuit și nu ține de niciun cont. Nu ne vom mai întoarce la această propunere.",
+        promiseTitle: "Promisiunea din capitolul 5",
+        promiseBody: "Am spus: „după treizeci de tranzacții, jurnalul va arăta în ce ore intri și în care câștigi — foarte des sunt ore diferite”. Am promis asta cu cinci capitole în urmă, și exact acesta e locul unde ar fi trebuit să apară — de îndată ce se acumulează înregistrări în jurnal.",
+      },
+    },
+    fourMistakes: {
+      tag: "PATRU GREȘELI VIZIBILE ÎN CIFRE",
+      m1Title: "1 · Creșterea riscului după o pierdere", m1Calc: "Riscul mediu în tranzacțiile care urmează uneia pierdute, față de media generală.", m1Fix: "Limită strictă de mărime, stabilită înainte de sesiune; regulă de oprire după N pierderi consecutive.",
+      m2Title: "2 · Reducerea pauzei după o pierdere", m2Calc: "Intervalul median dintre tranzacții după o pierdere, față de cel general. Comprimarea intervalului e cel mai timpuriu semn de tilt, înaintea creșterii volumului.", m2Fix: "O pauză minimă, integrată în reguli, nu în intenții.",
+      m3Title: "3 · Deplasare pe ore", m3Calc: "Distribuția intrărilor pe ore față de distribuția rezultatului pe ore. Legătură cu capitolul 5: îți amintești fereastra ta; acum se vede dacă ea coincide cu momentul în care câștigi cu adevărat.", m3Fix: "—",
+      m4Title: "4 · Asimetria menținerii", m4Calc: "Timpul median de menținere a pozițiilor pierzătoare față de cele câștigătoare. Dacă cele pierzătoare se țin mai mult — funcționează reticența de a accepta pierderea.", m4Fix: "Ieșirea se stabilește dinainte și nu se reconsideră în poziție.",
+      calcLabel: "Cum se calculează", fixLabel: "Procedură",
+      footer: "Niciuna din cele patru nu e un diagnostic sau o condamnare. Sunt mărimi observabile. Sensul nu e să obții cifre bune, ci să le cunoști pe ale tale: cineva care știe că își dublează volumul după o pierdere își poate stabili o limită; cineva convins că nu face asta nu poate face nimic.",
+    },
+    patternsAsCrowd: {
+      tag: "FIGURILE CA DESCRIERE A COMPORTAMENTULUI MULȚIMII",
+      intro: "O figură e un nume pentru o configurație deja formată. Valoarea numelui stă în faptul că permite să vorbești și să-ți amintești; valoarea configurației stă în faptul că sub ea stă adesea o mecanică inteligibilă de aglomerare a ordinelor (capitolul 5, Osler). Niciuna dintre ele nu e o predicție.",
+      confirmedTitle: "Ce spunem despre mecanică — ce e confirmat",
+      confirmed: [
+        "în spatele marginilor evidente ale figurilor se aglomerează ordine, iar declanșarea lor provoacă o cascadă — asta a măsurat Osler și s-a explicat în capitolul 5;",
+        "accelerarea după o spargere e o consecință a cascadei, nu o „confirmare a figurii”;",
+        "cu cât marginea e mai evidentă, cu atât aglomerarea de pe ea e mai mare — de aceea „toată lumea vede același lucru” nu e un neajuns, ci chiar mecanismul.",
+      ],
+      notTitle: "Ce nu spunem",
+      not: [
+        "că o figură „funcționează” cu o anumită probabilitate, dacă n-am măsurat-o;",
+        "că ținta unei figuri e egală cu înălțimea structurii — metoda de calcul a țintei a fost eliminată până la măsurare;",
+        "că în spatele unei figuri stă intenția cuiva (capitolul 7).",
+      ],
+    },
+    patternScreens: {
+      tag: "O FIGURĂ E UN NUME PENTRU UN COMPORTAMENT",
+      intro: "Sub fiecare figură clasică stă un comportament concret al mulțimii. Cifra de lângă e concordanța cu direcția mișcării la 5 bare după apariție, pe istoricul nostru, față de linia de bază de 50%.",
+      items: [
+        { behavior: "Nu vrea să recunoască faptul că prețul nu mai merge înainte și mai încearcă o dată — așa apare pe grafic un al doilea vârf sau un al doilea fund.", label: "Vârf dublu / fund dublu", keys: ["double_top","double_bottom"] },
+        { behavior: "Cei care țineau împotriva mișcării cedează dintr-o dată — o singură lumânare acoperă mai multe anterioare: înghițire.", label: "Înghițire bullish / bearish", keys: ["bullish_engulfing","bearish_engulfing"] },
+        { behavior: "Prețul s-a dus să verifice un nivel și s-a întors — refuzul se vede într-o singură lumânare cu umbră lungă: pin-bar.", label: "Pin-bar sus / jos", keys: ["pin_bar_top","pin_bar_bottom"] },
+        { behavior: "În spatele unei margini evidente se aglomerează ordine; declanșarea lor și retestarea nivelului — spargere cu retest.", label: "Spargere cu retest", keys: ["break_retest"], mechanic: true },
+      ],
+      mechanicNote: "Asta nu e psihologie, e mecanică — capitolul 5, aglomerarea ordinelor, Osler.",
+      statLabel: "concordanță", nLabel: "n", baselineNote: "linia de bază — 50%",
+      openOnChart: "Deschide USDJPY pe grafic →",
+    },
+    coreMeasure: {
+      tag: "DEFALCARE PE INSTRUMENTE",
+      preamble: "Aceleași măsurători, pe fiecare instrument separat.",
+      honestLine: "Cap-Umeri, steaguri, fanioane, pene, bara interioară — n-am măsurat nimic despre ele, pentru că nu le detectăm formal. Deci nu vom afirma nimic despre funcționarea lor. Putem descrie logica aglomerării de ordine sub linia gâtului — e aceeași mecanică ca la celelalte. Cât de des se termină cu o mișcare în jos — nu.",
+      downloadCsv: "⬇ Descarcă cifrele noastre (CSV)",
+      patternLabel: "Pattern", instrumentLabel: "Instrument",
+    },
+    sentiment: {
+      tag: "INDICII DE SENTIMENT — CONTEXT, NU RECOMANDARE",
+      vixTitle: "VIX",
+      vixBody1: "E volatilitatea așteptată a S&P 500 pe 30 de zile înainte, calculată din prețurile opțiunilor. Măsoară amploarea așteptată, nu direcția, și în acest sens e exact ce a fost pentru noi capitolul 5: un program al capacității pieței de a se mișca, nu al intenției ei.",
+      vixBody2: "Un VIX ridicat înseamnă că participanții plătesc mai scump pentru protecție. E o descriere a stării curente, și e utilă exact ca context: la un VIX ridicat, stopul tău obișnuit, raportat la mișcarea așteptată, a devenit mai strâns decât era — deci discuția e despre mărimea poziției, nu despre direcție.",
+      removedTitle: "De ce nu mai apare „zonă de cumpărare”",
+      removedBody: "În ediția anterioară a acestui capitol scria că VIX peste treizeci e, istoric, o zonă de cumpărare. Am eliminat asta. Nu pentru că afirmația e neapărat falsă, ci pentru că n-am măsurat-o, iar alături, în același capitol, era scris că indicii de sentiment sunt context, nu semnale. Din două rânduri contradictorii, unul e de prisos, iar cel de prisos era cel care sfătuia să cumperi.",
+    },
+    noOffer: {
+      title: "În acest capitol nu propunem nimic",
+      body1: "Probabil ai observat: în capitolele anterioare, în acest loc era un card cu o propunere — verifică calendarul, deschide un demo, leagă jurnalul. Aici nu există, și nu pentru că am uitat.",
+      body2: "În acest capitol am analizat propriile tale greșeli. Orice link în acest loc ar fi arătat de parcă am câștiga din ele — și, sincer, chiar așa s-ar fi citit.",
+      body3: "Câștigăm din programe de parteneriat, și despre asta scrie pe o pagină separată, fără nicio înregistrare. Dar nu aici și nu pe baza asta.",
+      body4: "Mai departe — capitolul 11, și acolo va exista o propunere. Îți spunem dinainte care: un instrument de comparare a platformelor, unde se vede prin ce diferă la condiții, reglementator și procentul de clienți care pierd bani. Vei avea nevoie de el dacă ajungi la un cont real; dacă nu ajungi — n-ai nevoie, și e un rezultat normal.",
+    },
+    quiz: [
+      { id: "q1", section: "secFourMistakes", prompt: "Cel mai timpuriu semn de tilt în înregistrările jurnalului?",
+        options: [{ text: "Creșterea pierderilor", correct: false }, { text: "Reducerea pauzei dintre tranzacții", correct: true }, { text: "Schimbarea instrumentului", correct: false }],
+        feedbackCorrect: "Corect. Comprimarea pauzei apare înaintea creșterii volumului.",
+        feedbackWrong: "Nu chiar. Pauza dintre tranzacții se reduce înaintea creșterii riscului — e cel mai timpuriu semn." },
+      { id: "q2", section: "secPriceOfNotKnowing10", prompt: "Ca să recuperezi o pierdere de 50%, trebuie să câștigi…",
+        options: [{ text: "50%", correct: false }, { text: "100%", correct: true }, { text: "75%", correct: false }],
+        feedbackCorrect: "Corect. Asimetria lucrează mereu împotriva recuperării.",
+        feedbackWrong: "Nu chiar. De la un capital scăzut cu 50%, ai nevoie de o creștere de 100% ca să revii la suma inițială." },
+      { id: "q3", section: "secSelfStats", prompt: "Fereastra ta din capitolul 5 și ora în care câștigi cu adevărat sunt…",
+        options: [{ text: "Mereu aceleași", correct: false }, { text: "Adesea ore diferite, și poți vedea asta doar din înregistrări", correct: true }, { text: "Fără legătură", correct: false }],
+        feedbackCorrect: "Corect — promisiunea capitolului 5, închisă aici.",
+        feedbackWrong: "Nu chiar. Ora de intrare și ora rezultatului diferă adesea — poți vedea asta doar din propriile înregistrări." },
+      { id: "q4", section: "secPatternsAsCrowd", prompt: "O figură pe grafic este…",
+        options: [{ text: "Urma instituțiilor", correct: false }, { text: "Un nume pentru o configurație deja formată; sub ea stă uneori o mecanică de aglomerare a ordinelor", correct: true }, { text: "O profeție autoîmplinită", correct: false }],
+        feedbackCorrect: "Corect — capitolul 7.",
+        feedbackWrong: "Nu chiar. O figură e un nume pentru o configurație sub care uneori stă o mecanică măsurabilă (capitolul 7)." },
+    ],
+    predict: {
+      tag: "PREDICȚIA SĂPTĂMÂNII",
+      question: "Crezi că, la majoritatea traderilor, pozițiile pierzătoare se țin mai mult sau mai puțin decât cele câștigătoare?",
+      options: ["Mai mult", "Mai puțin", "Aproximativ la fel"],
+      xpNote: "+15 XP pentru participare. Despre comportament, nu despre preț.",
+    },
+    cliffhanger: {
+      tag: "CLIFFHANGER → CAPITOLUL 11",
+      body: "Te-ai uitat la propriile tale cifre. Mai departe, cursul se întoarce spre exterior — spre modul în care e construită piața în locurile în care un participant obișnuit nu se uită.\n\nEpisodul următor — despre dark pools și tranzacționarea de mare frecvență. Despre faptul că o parte semnificativă din tranzacții nu trece deloc prin cartea deschisă, și despre faptul că viteza de execuție se măsoară în microsecunde, iar distanța până la serverul bursei costă bani.\n\nȘi tot acolo — o cifră pe care platformele sunt obligate prin lege s-o publice și pe care aproape nimeni n-o citește: procentul de conturi retail care pierd bani. La fiecare platformă e diferit, diferă sensibil, și se recalculează în fiecare trimestru. Le vom aduna într-un singur loc.",
+    },
+    sources: {
+      tag: "SURSELE CAPITOLULUI",
+      list: [
+        "Kahneman D., Tversky A. — teoria perspectivei: asimetria atitudinii față de câștig și pierdere, efectul de dispoziție (disposition effect).",
+        "Odean T. (1998) — „Are Investors Reluctant to Realize Their Losses?”: dovezi empirice că pozițiile pierzătoare se țin mai mult decât cele câștigătoare.",
+        "Osler C. (2003) — clusterizarea ordinelor și cascadele de preț, mecanica din spatele marginilor evidente ale figurilor.",
+        "CBOE — metodologia de calcul a indicelui VIX ca volatilitate așteptată din prețurile opțiunilor.",
+      ],
+      ownTemplate: "SBF Company SRL. Concordanța figurilor clasice cu direcția prețului la 5 bare după apariție (reutilizarea măsurătorilor din capitolul 7). Date: timeframe-uri H1/H4/D1, {{n_total}} bare etichetate, minimum n = {{min_n_shown}} pentru afișarea celulei. Metodă: ponderea cazurilor în care prețul, la 5 bare, s-a mișcat în direcția „presupusă” de figură, față de linia de bază de 50%. Recalculat la {{built}}.",
+      csvLabel: "Descarcă datele (CSV)",
+      checked: "Verificat la 27.07.2026.",
+    },
+  },
+  en: {
+    coldOpen: {
+      tag: "CHAPTER 10 — TWO IDENTICAL TRADES",
+      lines: [
+        "On the left and the right — the same trade. One instrument, entry within a few points of each other, the stop hit both times.",
+        "There's exactly one difference, and it isn't on the chart. The left one was the first trade of the day. The right one was the third in a row after two losses, and its size was double.",
+        "The first is a normal working moment. The second is the start of a streak that ends the same way for everyone and gets called different things: tilt, chasing losses, «today I'm getting it all back».",
+        "It's impossible to tell this story in a way that makes someone recognize themselves in it: everyone reads paragraphs like this as being about someone else. So what follows isn't a story — it's your own numbers, if you linked your journal back in chapter 8. And four concrete tells, each visible in the records and none visible in how it feels.",
+        "And separately: in this chapter we offer nothing and lead you nowhere. Not a single link. We'll explain why at the end.",
+      ],
+      cta: "Show the numbers ↓",
+    },
+    antiMyth: {
+      tag: "ANTI-MYTH",
+      title: "«I know my weaknesses and keep them under control»",
+      body1: "The problem isn't that this is false — it's that it's unverifiable from the inside. Someone who's just doubled their size after a loss doesn't feel, at the moment of the decision, like they're getting even with the market: they feel like «the situation is obvious» and «this needs to be seized». The feeling of confidence isn't an indicator of state — it's identical whether you're tilting or thinking clearly.",
+      body2: "The opposite edge of the myth is just as harmful: «I have psychology problems, I need to fix that first». This turns into endless preparation. Psychology doesn't get fixed by thinking about psychology — it gets fixed by a procedure: a rule written down ahead of time, and a number looked at afterward.",
+      body3: "The truth sits in between: emotions are measurable indirectly — through the traces they leave in decisions. You can't observe yourself in the moment, but you can look at the record a week later. And then «I don't do that» turns into «I do that, on average, a few times a month».",
+    },
+    voiceSbf: {
+      tag: "SBF VOICE",
+      body: "Talk about discipline doesn't work — that's why this text skips it. What works is concrete: after two losses in a row, close the terminal until tomorrow, because the third trade after a run like that is, on average, double the size and worse in outcome. The decision gets made before you open the terminal, not in the moment — in the moment you only execute. The hardest single act in this whole profession is opening the journal and doing the math for the first time; after that, it's easier.",
+    },
+    priceOfNotKnowing: {
+      tag: "THE PRICE OF NOT KNOWING",
+      title: "The arithmetic of a losing streak",
+      body: "A trader works with 1% risk per trade — as chapter 3 taught. After two losses, they double their size to «make it back in one trade». They don't do this every time — only in about a third of such cases.\n\nLet's work out what that does to the math. At 1% risk, a streak of three losses costs about 3% of the account — unpleasant, but recoverable. Doubling on the third one costs about 4% — still tolerable. The trouble starts when the doubled trade doesn't help: the next decision gets made from an already deeper drawdown and a stronger urge to get it back, and the size grows again. Three or four iterations in, and the risk per trade is several times the original — decided by someone who was calm seven trades ago.\n\nA number worth remembering: to claw back a 20% drawdown, you need to earn 25%. To claw back 50%, you need to earn 100%. The asymmetry always works against clawing back losses, which is exactly why «one big trade to get it all back» is the most expensive decision in this profession.\n\nThe honest second half: this isn't about willpower. It's about procedure. The rule «after two losses, stop for the day» doesn't require character — it only requires that it be written down ahead of time, and that something — a journal — counts the times it gets broken.",
+    },
+    whyControlFails: {
+      tag: "WHY «CONTROL YOUR EMOTIONS» DOESN'T WORK",
+      intro: "The advice is useless by design: it's aimed at a person in exactly the state where they're least able to follow it. It's like telling someone not to panic during a panic.",
+      subhead: "What works instead — three things, none of them about character:",
+      items: [
+        "The decision gets made ahead of time and written down. In the moment, it's executed, not reconsidered.",
+        "There's an automatic stopping condition, independent of how you feel: a number of consecutive losses, a daily loss limit, a time cutoff.",
+        "There's a number that gets looked at afterward. Without feedback, any procedure falls apart within a month.",
+      ],
+      outro: "The course has already given you the first (chapter 3), and is giving you the third right now. The second is this chapter's subject.",
+    },
+    selfStats: {
+      tag: "YOUR OWN PERSONAL STATISTICS",
+      loadingLabel: "Checking your journal…",
+      stateC: {
+        title: "The personal version of this block is built from journal entries",
+        body: "If you decide to start one, it's in the «Journal» section — it's free and isn't tied to any account. We won't bring up this offer again.",
+        promiseTitle: "A promise from chapter 5",
+        promiseBody: "We said: «after thirty trades, the journal will show which hours you enter, and which hours you actually make money — very often those are different hours». We promised that five chapters ago, and this is exactly the spot where it was supposed to show up — as soon as entries accumulate in the journal.",
+      },
+    },
+    fourMistakes: {
+      tag: "FOUR MISTAKES VISIBLE IN THE NUMBERS",
+      m1Title: "1 · Risk increasing after a loss", m1Calc: "Average risk on trades following a losing one, versus the overall average.", m1Fix: "A hard size limit set before the session; a stop rule after N consecutive losses.",
+      m2Title: "2 · The gap shrinking after a loss", m2Calc: "Median interval between trades after a loss, versus the overall interval. A shrinking gap is the earliest tell of tilt, earlier than the size increase.", m2Fix: "A minimum gap built into the rules, not into intentions.",
+      m3Title: "3 · Hour drift", m3Calc: "The distribution of entries by hour versus the distribution of results by hour. Ties to chapter 5: you remember your window; now you can see whether it matches where you actually make money.", m3Fix: "—",
+      m4Title: "4 · Holding-time asymmetry", m4Calc: "Median hold time on losing trades versus winning ones. If losers get held longer, reluctance to lock in a loss is at work.", m4Fix: "The exit is set ahead of time and doesn't get reconsidered while in the position.",
+      calcLabel: "How it's calculated", fixLabel: "The fix",
+      footer: "None of these four is a diagnosis or a verdict. They're observable quantities. The point isn't to get good numbers — it's to know your own: someone who knows they double their size after a loss can set themselves a limit; someone who's certain they don't do that can't do anything.",
+    },
+    patternsAsCrowd: {
+      tag: "CHART PATTERNS AS A DESCRIPTION OF CROWD BEHAVIOR",
+      intro: "A pattern is a name for a configuration that's already formed. The value of the name is that it lets you talk and remember; the value of the configuration is that an understandable order-clustering mechanic often sits underneath it (chapter 5, Osler). Neither one is a prediction.",
+      confirmedTitle: "What we say about the mechanics — what's confirmed",
+      confirmed: [
+        "orders cluster behind a pattern's obvious edges, and that cluster firing triggers a cascade — Osler measured this, and chapter 5 explained it;",
+        "acceleration after a breakout is a consequence of the cascade, not «confirmation of the pattern»;",
+        "the more obvious the edge, the more crowding sits on it — so «everyone sees the same thing» isn't a flaw, it's the mechanism itself.",
+      ],
+      notTitle: "What we don't say",
+      not: [
+        "that a pattern «works» with some probability, if we haven't measured it;",
+        "that a pattern's target equals the height of the structure — the target-calculation method was removed pending measurement;",
+        "that someone's intent sits behind a pattern (chapter 7).",
+      ],
+    },
+    patternScreens: {
+      tag: "A PATTERN IS A NAME FOR A BEHAVIOR",
+      intro: "Underneath every classic pattern sits a concrete crowd behavior. The number next to it is agreement with the direction of the move 5 bars after it appears, on our history, against a 50% baseline.",
+      items: [
+        { behavior: "Won't accept that price isn't going any further, and tries again — that's how a second top or a second bottom shows up on the chart.", label: "Double top / double bottom", keys: ["double_top","double_bottom"] },
+        { behavior: "Everyone holding against the move gives up at once — one candle swallows several before it: engulfing.", label: "Bullish / bearish engulfing", keys: ["bullish_engulfing","bearish_engulfing"] },
+        { behavior: "Price went to test a level and came back — the rejection shows up in a single long-wicked candle: a pin bar.", label: "Pin bar top / bottom", keys: ["pin_bar_top","pin_bar_bottom"] },
+        { behavior: "Orders cluster behind an obvious edge; their firing, followed by a retest of the level, is a break and retest.", label: "Break and retest", keys: ["break_retest"], mechanic: true },
+      ],
+      mechanicNote: "This isn't psychology, it's mechanics — chapter 5, order clustering, Osler.",
+      statLabel: "agreement", nLabel: "n", baselineNote: "baseline — 50%",
+      openOnChart: "Open USDJPY on the chart →",
+    },
+    coreMeasure: {
+      tag: "BREAKDOWN BY INSTRUMENT",
+      preamble: "The same measurements, by instrument.",
+      honestLine: "Head and shoulders, flags, pennants, wedges, inside bars — we haven't measured anything about them, because we don't detect them formally. So we won't make claims about how well they work either. We can describe the order-clustering logic under the neckline — it's the same mechanic as the rest. Whether it usually ends in a move down — no.",
+      downloadCsv: "⬇ Download our numbers (CSV)",
+      patternLabel: "Pattern", instrumentLabel: "Instrument",
+    },
+    sentiment: {
+      tag: "SENTIMENT INDICES — CONTEXT, NOT A RECOMMENDATION",
+      vixTitle: "VIX",
+      vixBody1: "This is the S&P 500's expected volatility over the next 30 days, calculated from option prices. It measures expected magnitude, not direction — and in that sense it's exactly what chapter 5 was for us: a schedule of the market's ability to move, not its intent.",
+      vixBody2: "A high VIX means participants are paying more for protection. That's a description of the current state, and it's useful exactly as context: at a high VIX, your usual stop, relative to the expected move, has gotten tighter than it used to be — so the conversation is about position size, not direction.",
+      removedTitle: "Why «buy zone» isn't here anymore",
+      removedBody: "The previous edition of this chapter said VIX above thirty is, historically, a buy zone. We removed that. Not because the claim is necessarily false, but because we never measured it, and right next to it, in the same chapter, we'd also written that sentiment indices are context, not signals. Of two contradicting lines, one is redundant, and the redundant one was the one telling you to buy.",
+    },
+    noOffer: {
+      title: "In this chapter, we're offering nothing",
+      body1: "You've probably noticed: in previous chapters, this spot held a card with an offer — check the calendar, open a demo, link your journal. It isn't here, and that's not because we forgot.",
+      body2: "In this chapter we broke down your own mistakes. Any link in this spot would look exactly like we were profiting from them — and honestly, that's exactly how it would read.",
+      body3: "We do make money from partner programs, and that's written up on a separate page, no sign-up required. Just not here, and not on the back of this.",
+      body4: "Next is chapter 11, and there will be an offer there. We'll tell you now what it is: a tool for comparing platforms, showing how they differ on terms, regulator, and the share of clients losing money. You'll need it if you get as far as a funded account; if you don't, you won't — and that's a perfectly normal outcome.",
+    },
+    quiz: [
+      { id: "q1", section: "secFourMistakes", prompt: "The earliest tell of tilt in journal records?",
+        options: [{ text: "Growing losses", correct: false }, { text: "A shrinking gap between trades", correct: true }, { text: "Switching instruments", correct: false }],
+        feedbackCorrect: "Correct. The gap shrinks before size grows.",
+        feedbackWrong: "Not quite. The gap between trades shrinks before risk grows — that's the earliest tell." },
+      { id: "q2", section: "secPriceOfNotKnowing10", prompt: "To claw back a 50% drawdown, you need to earn…",
+        options: [{ text: "50%", correct: false }, { text: "100%", correct: true }, { text: "75%", correct: false }],
+        feedbackCorrect: "Correct. The asymmetry always works against clawing back losses.",
+        feedbackWrong: "Not quite. From capital down 50%, you need a 100% gain to get back to the starting amount." },
+      { id: "q3", section: "secSelfStats", prompt: "Your window from chapter 5, and the hour you actually make money — those are…",
+        options: [{ text: "Always the same", correct: false }, { text: "Often different hours, and you can only see that from your own records", correct: true }, { text: "Unrelated", correct: false }],
+        feedbackCorrect: "Correct — chapter 5's promise, closed out here.",
+        feedbackWrong: "Not quite. Entry hour and best-result hour often diverge — you can only see that from your own records." },
+      { id: "q4", section: "secPatternsAsCrowd", prompt: "A chart pattern is…",
+        options: [{ text: "An institutional footprint", correct: false }, { text: "A name for a configuration that's already formed, sometimes with a measurable order-clustering mechanic underneath", correct: true }, { text: "A self-fulfilling prophecy", correct: false }],
+        feedbackCorrect: "Correct — chapter 7.",
+        feedbackWrong: "Not quite. A pattern is a name for a configuration, sometimes with a measurable mechanic underneath it (chapter 7)." },
+    ],
+    predict: {
+      tag: "PREDICTION OF THE WEEK",
+      question: "Do you think most traders hold losing positions longer than winning ones, or shorter?",
+      options: ["Longer", "Shorter", "About the same"],
+      xpNote: "+15 XP for participating. About behavior, not price.",
+    },
+    cliffhanger: {
+      tag: "CLIFFHANGER → CHAPTER 11",
+      body: "You looked at your own numbers. From here, the course turns outward — toward how the market is built in the places an ordinary participant never looks.\n\nThe next episode is about dark pools and high-frequency trading. About the fact that a meaningful share of trades never touches the open book at all, and that execution speed is measured in microseconds, and that distance to the exchange's server costs real money.\n\nAnd in the same place — a number platforms are legally required to publish and that almost no one reads: the share of retail accounts losing money. Every platform's number is different, the gap is real, and it gets recalculated every quarter. We'll collect them in one place.",
+    },
+    sources: {
+      tag: "CHAPTER SOURCES",
+      list: [
+        "Kahneman D., Tversky A. — prospect theory: the asymmetry between how gains and losses are treated, the disposition effect.",
+        "Odean T. (1998) — \"Are Investors Reluctant to Realize Their Losses?\": empirical evidence that losing positions get held longer than winning ones.",
+        "Osler C. (2003) — order clustering and price cascades, the mechanics behind a pattern's obvious edges.",
+        "CBOE — the methodology for calculating the VIX index as expected volatility from option prices.",
+      ],
+      ownTemplate: "SBF Company SRL. Agreement of classic chart patterns with price direction 5 bars after they appear (reusing chapter 7's measurements). Data: H1/H4/D1 timeframes, {{n_total}} labeled bars, a minimum of n = {{min_n_shown}} to show a cell. Method: the share of cases where price, 5 bars later, moved in the direction the pattern «implies», against a 50% baseline. Recomputed as of {{built}}.",
+      csvLabel: "Download the data (CSV)",
+      checked: "Checked on 2026-07-27.",
+    },
+  },
+};
