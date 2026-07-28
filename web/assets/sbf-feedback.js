@@ -87,6 +87,13 @@
    перебить оба варианта .sbf-fw-btn/.sbf-fw-bubble (мобильный и desktop). */
 .sbf-fw-btn-raised { bottom: 72px; }
 .sbf-fw-bubble-raised { bottom: 72px; }
+/* P2.6: на узких экранах кнопка (position:fixed) неизбежно оказывается
+   поверх какого-то текста при длинной прокрутке -- нижней навигации
+   уже избегает -raised выше, но абзацы страницы не знают о кнопке вообще.
+   Прячем при активной прокрутке вниз (см. addEventListener('scroll') ниже),
+   возвращаем при прокрутке вверх -- кнопка не перекрывает контент, который
+   читатель как раз читает. */
+.sbf-fw-btn-hidden { transform: translateY(120px); }
 @keyframes sbf-fw-pop {
   from { opacity: 0; transform: scale(.85) translateY(8px); }
   to   { opacity: 1; transform: scale(1) translateY(0); }
@@ -343,6 +350,21 @@
       _btn.classList.add('sbf-fw-btn-raised');
       _bubble.classList.add('sbf-fw-bubble-raised');
     }
+
+    // P2.6: прячем кнопку при прокрутке вниз, возвращаем при прокрутке вверх
+    // -- иначе fixed-кнопка неизбежно наезжает на текст под ней на длинных
+    // страницах (живой пример: "В фокусе" на главной, 390px). Не трогаем,
+    // пока открыт бабл/форма (_STATE !== 0) -- не прятать то, чем пользуются.
+    var _lastScrollY = window.scrollY || window.pageYOffset || 0;
+    window.addEventListener('scroll', function () {
+      if (_STATE !== 0) return;
+      var y = window.scrollY || window.pageYOffset || 0;
+      var delta = y - _lastScrollY;
+      if (Math.abs(delta) < 10) return;
+      if (delta > 0 && y > 80) _btn.classList.add('sbf-fw-btn-hidden');
+      else _btn.classList.remove('sbf-fw-btn-hidden');
+      _lastScrollY = y;
+    }, { passive: true });
 
     _patchI18n(_adminBar);
     _patchI18n(_bubble);
