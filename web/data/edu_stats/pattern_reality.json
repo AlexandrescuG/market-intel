@@ -1,0 +1,5140 @@
+{
+  "_meta": {
+    "built": "2026-07-27",
+    "tfs": [
+      "H1",
+      "H4",
+      "D1"
+    ],
+    "n_total": 275469,
+    "min_n_shown": 15,
+    "lookahead_fix_note_ru": "double_top/double_bottom считаются от подтверждения фрактала (confirm_idx = пик + FRACTAL_CONFIRM свечей), а не от самого пика — иначе agree_share на этих двух паттернах выходил ~70-77% вместо честных ~45-54%, потому что часть будущего уже была заложена в момент детекции."
+  },
+  "cells": [
+    {
+      "pattern_key": "bullish_engulfing",
+      "display_name_ru": "Бычье поглощение",
+      "display_name_ro": "Înghițire bullish",
+      "display_name_en": "Bullish engulfing",
+      "symbol": "EURUSD",
+      "tf": "D1",
+      "n": 1,
+      "agree_5": 0.0,
+      "ci95": [
+        null,
+        null
+      ],
+      "avg_move_5": 41.0,
+      "max_adverse_5": 60.0,
+      "shown": false
+    },
+    {
+      "pattern_key": "break_retest",
+      "display_name_ru": "Пробой с ретестом",
+      "display_name_ro": "Spargere cu retest",
+      "display_name_en": "Break and retest",
+      "symbol": "BTC",
+      "tf": "H1",
+      "n": 6531,
+      "agree_5": 0.5132,
+      "ci95": [
+        50.1,
+        52.5
+      ],
+      "avg_move_5": 757.871,
+      "max_adverse_5": 754.7063,
+      "shown": true
+    },
+    {
+      "pattern_key": "bullish_engulfing",
+      "display_name_ru": "Бычье поглощение",
+      "display_name_ro": "Înghițire bullish",
+      "display_name_en": "Bullish engulfing",
+      "symbol": "BTC",
+      "tf": "H1",
+      "n": 1004,
+      "agree_5": 0.502,
+      "ci95": [
+        47.1,
+        53.3
+      ],
+      "avg_move_5": 606.509,
+      "max_adverse_5": 614.2169,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_top",
+      "display_name_ru": "Пин-бар сверху",
+      "display_name_ro": "Pin-bar sus",
+      "display_name_en": "Pin bar top",
+      "symbol": "BTC",
+      "tf": "H1",
+      "n": 1036,
+      "agree_5": 0.501,
+      "ci95": [
+        47.1,
+        53.1
+      ],
+      "avg_move_5": 624.9218,
+      "max_adverse_5": 596.9942,
+      "shown": true
+    },
+    {
+      "pattern_key": "bearish_engulfing",
+      "display_name_ru": "Медвежье поглощение",
+      "display_name_ro": "Înghițire bearish",
+      "display_name_en": "Bearish engulfing",
+      "symbol": "BTC",
+      "tf": "H1",
+      "n": 961,
+      "agree_5": 0.4475,
+      "ci95": [
+        41.6,
+        47.9
+      ],
+      "avg_move_5": 640.607,
+      "max_adverse_5": 636.5487,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_bottom",
+      "display_name_ru": "Пин-бар снизу",
+      "display_name_ro": "Pin-bar jos",
+      "display_name_en": "Pin bar bottom",
+      "symbol": "BTC",
+      "tf": "H1",
+      "n": 1080,
+      "agree_5": 0.4981,
+      "ci95": [
+        46.8,
+        52.8
+      ],
+      "avg_move_5": 622.6763,
+      "max_adverse_5": 655.9195,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_bottom",
+      "display_name_ru": "Двойное дно",
+      "display_name_ro": "Fund dublu",
+      "display_name_en": "Double bottom",
+      "symbol": "BTC",
+      "tf": "H1",
+      "n": 168,
+      "agree_5": 0.5714,
+      "ci95": [
+        49.6,
+        64.4
+      ],
+      "avg_move_5": 553.1819,
+      "max_adverse_5": 464.3079,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_top",
+      "display_name_ru": "Двойная вершина",
+      "display_name_ro": "Vârf dublu",
+      "display_name_en": "Double top",
+      "symbol": "BTC",
+      "tf": "H1",
+      "n": 197,
+      "agree_5": 0.4315,
+      "ci95": [
+        36.4,
+        50.1
+      ],
+      "avg_move_5": 524.2549,
+      "max_adverse_5": 474.961,
+      "shown": true
+    },
+    {
+      "pattern_key": "break_retest",
+      "display_name_ru": "Пробой с ретестом",
+      "display_name_ro": "Spargere cu retest",
+      "display_name_en": "Break and retest",
+      "symbol": "BTC",
+      "tf": "H4",
+      "n": 3339,
+      "agree_5": 0.507,
+      "ci95": [
+        49.0,
+        52.4
+      ],
+      "avg_move_5": 1439.0685,
+      "max_adverse_5": 1502.6075,
+      "shown": true
+    },
+    {
+      "pattern_key": "bullish_engulfing",
+      "display_name_ru": "Бычье поглощение",
+      "display_name_ro": "Înghițire bullish",
+      "display_name_en": "Bullish engulfing",
+      "symbol": "BTC",
+      "tf": "H4",
+      "n": 264,
+      "agree_5": 0.4545,
+      "ci95": [
+        39.6,
+        51.5
+      ],
+      "avg_move_5": 1291.0919,
+      "max_adverse_5": 1445.0472,
+      "shown": true
+    },
+    {
+      "pattern_key": "bearish_engulfing",
+      "display_name_ru": "Медвежье поглощение",
+      "display_name_ro": "Înghițire bearish",
+      "display_name_en": "Bearish engulfing",
+      "symbol": "BTC",
+      "tf": "H4",
+      "n": 292,
+      "agree_5": 0.4692,
+      "ci95": [
+        41.3,
+        52.6
+      ],
+      "avg_move_5": 1251.6782,
+      "max_adverse_5": 1185.8521,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_bottom",
+      "display_name_ru": "Пин-бар снизу",
+      "display_name_ro": "Pin-bar jos",
+      "display_name_en": "Pin bar bottom",
+      "symbol": "BTC",
+      "tf": "H4",
+      "n": 253,
+      "agree_5": 0.4941,
+      "ci95": [
+        43.3,
+        55.5
+      ],
+      "avg_move_5": 1236.6891,
+      "max_adverse_5": 1430.6328,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_top",
+      "display_name_ru": "Пин-бар сверху",
+      "display_name_ro": "Pin-bar sus",
+      "display_name_en": "Pin bar top",
+      "symbol": "BTC",
+      "tf": "H4",
+      "n": 219,
+      "agree_5": 0.5342,
+      "ci95": [
+        46.8,
+        59.9
+      ],
+      "avg_move_5": 1306.8324,
+      "max_adverse_5": 1213.3208,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_top",
+      "display_name_ru": "Двойная вершина",
+      "display_name_ro": "Vârf dublu",
+      "display_name_en": "Double top",
+      "symbol": "BTC",
+      "tf": "H4",
+      "n": 65,
+      "agree_5": 0.5077,
+      "ci95": [
+        38.9,
+        62.5
+      ],
+      "avg_move_5": 1102.2048,
+      "max_adverse_5": 1139.907,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_bottom",
+      "display_name_ru": "Двойное дно",
+      "display_name_ro": "Fund dublu",
+      "display_name_en": "Double bottom",
+      "symbol": "BTC",
+      "tf": "H4",
+      "n": 58,
+      "agree_5": 0.4655,
+      "ci95": [
+        34.3,
+        59.2
+      ],
+      "avg_move_5": 1280.7263,
+      "max_adverse_5": 1406.0869,
+      "shown": true
+    },
+    {
+      "pattern_key": "break_retest",
+      "display_name_ru": "Пробой с ретестом",
+      "display_name_ro": "Spargere cu retest",
+      "display_name_en": "Break and retest",
+      "symbol": "BTC",
+      "tf": "D1",
+      "n": 2861,
+      "agree_5": 0.5135,
+      "ci95": [
+        49.5,
+        53.2
+      ],
+      "avg_move_5": 2714.7106,
+      "max_adverse_5": 2864.946,
+      "shown": true
+    },
+    {
+      "pattern_key": "bullish_engulfing",
+      "display_name_ru": "Бычье поглощение",
+      "display_name_ro": "Înghițire bullish",
+      "display_name_en": "Bullish engulfing",
+      "symbol": "BTC",
+      "tf": "D1",
+      "n": 134,
+      "agree_5": 0.4776,
+      "ci95": [
+        39.5,
+        56.2
+      ],
+      "avg_move_5": 2351.5433,
+      "max_adverse_5": 2396.441,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_top",
+      "display_name_ru": "Пин-бар сверху",
+      "display_name_ro": "Pin-bar sus",
+      "display_name_en": "Pin bar top",
+      "symbol": "BTC",
+      "tf": "D1",
+      "n": 80,
+      "agree_5": 0.45,
+      "ci95": [
+        34.6,
+        55.9
+      ],
+      "avg_move_5": 2424.5767,
+      "max_adverse_5": 2406.1484,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_bottom",
+      "display_name_ru": "Пин-бар снизу",
+      "display_name_ro": "Pin-bar jos",
+      "display_name_en": "Pin bar bottom",
+      "symbol": "BTC",
+      "tf": "D1",
+      "n": 96,
+      "agree_5": 0.5625,
+      "ci95": [
+        46.3,
+        65.7
+      ],
+      "avg_move_5": 2667.8762,
+      "max_adverse_5": 2458.1935,
+      "shown": true
+    },
+    {
+      "pattern_key": "bearish_engulfing",
+      "display_name_ru": "Медвежье поглощение",
+      "display_name_ro": "Înghițire bearish",
+      "display_name_en": "Bearish engulfing",
+      "symbol": "BTC",
+      "tf": "D1",
+      "n": 114,
+      "agree_5": 0.4737,
+      "ci95": [
+        38.4,
+        56.5
+      ],
+      "avg_move_5": 2485.2655,
+      "max_adverse_5": 2297.741,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_bottom",
+      "display_name_ru": "Двойное дно",
+      "display_name_ro": "Fund dublu",
+      "display_name_en": "Double bottom",
+      "symbol": "BTC",
+      "tf": "D1",
+      "n": 70,
+      "agree_5": 0.5429,
+      "ci95": [
+        42.7,
+        65.4
+      ],
+      "avg_move_5": 1375.3421,
+      "max_adverse_5": 1482.2162,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_top",
+      "display_name_ru": "Двойная вершина",
+      "display_name_ro": "Vârf dublu",
+      "display_name_en": "Double top",
+      "symbol": "BTC",
+      "tf": "D1",
+      "n": 57,
+      "agree_5": 0.5439,
+      "ci95": [
+        41.6,
+        66.6
+      ],
+      "avg_move_5": 2047.2329,
+      "max_adverse_5": 1529.4849,
+      "shown": true
+    },
+    {
+      "pattern_key": "break_retest",
+      "display_name_ru": "Пробой с ретестом",
+      "display_name_ro": "Spargere cu retest",
+      "display_name_en": "Break and retest",
+      "symbol": "DJI",
+      "tf": "H1",
+      "n": 2027,
+      "agree_5": 0.5294,
+      "ci95": [
+        50.8,
+        55.1
+      ],
+      "avg_move_5": 233.2127,
+      "max_adverse_5": 219.7442,
+      "shown": true
+    },
+    {
+      "pattern_key": "bearish_engulfing",
+      "display_name_ru": "Медвежье поглощение",
+      "display_name_ro": "Înghițire bearish",
+      "display_name_en": "Bearish engulfing",
+      "symbol": "DJI",
+      "tf": "H1",
+      "n": 299,
+      "agree_5": 0.4749,
+      "ci95": [
+        41.9,
+        53.1
+      ],
+      "avg_move_5": 216.1602,
+      "max_adverse_5": 210.5974,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_bottom",
+      "display_name_ru": "Пин-бар снизу",
+      "display_name_ro": "Pin-bar jos",
+      "display_name_en": "Pin bar bottom",
+      "symbol": "DJI",
+      "tf": "H1",
+      "n": 303,
+      "agree_5": 0.5875,
+      "ci95": [
+        53.1,
+        64.1
+      ],
+      "avg_move_5": 219.1796,
+      "max_adverse_5": 173.7942,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_top",
+      "display_name_ru": "Двойная вершина",
+      "display_name_ro": "Vârf dublu",
+      "display_name_en": "Double top",
+      "symbol": "DJI",
+      "tf": "H1",
+      "n": 193,
+      "agree_5": 0.4663,
+      "ci95": [
+        39.7,
+        53.7
+      ],
+      "avg_move_5": 206.1209,
+      "max_adverse_5": 220.876,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_bottom",
+      "display_name_ru": "Двойное дно",
+      "display_name_ro": "Fund dublu",
+      "display_name_en": "Double bottom",
+      "symbol": "DJI",
+      "tf": "H1",
+      "n": 178,
+      "agree_5": 0.5787,
+      "ci95": [
+        50.5,
+        64.9
+      ],
+      "avg_move_5": 228.7605,
+      "max_adverse_5": 201.8278,
+      "shown": true
+    },
+    {
+      "pattern_key": "bullish_engulfing",
+      "display_name_ru": "Бычье поглощение",
+      "display_name_ro": "Înghițire bullish",
+      "display_name_en": "Bullish engulfing",
+      "symbol": "DJI",
+      "tf": "H1",
+      "n": 278,
+      "agree_5": 0.482,
+      "ci95": [
+        42.4,
+        54.1
+      ],
+      "avg_move_5": 221.7842,
+      "max_adverse_5": 214.371,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_top",
+      "display_name_ru": "Пин-бар сверху",
+      "display_name_ro": "Pin-bar sus",
+      "display_name_en": "Pin bar top",
+      "symbol": "DJI",
+      "tf": "H1",
+      "n": 267,
+      "agree_5": 0.4232,
+      "ci95": [
+        36.5,
+        48.3
+      ],
+      "avg_move_5": 227.2079,
+      "max_adverse_5": 228.6983,
+      "shown": true
+    },
+    {
+      "pattern_key": "bearish_engulfing",
+      "display_name_ru": "Медвежье поглощение",
+      "display_name_ro": "Înghițire bearish",
+      "display_name_en": "Bearish engulfing",
+      "symbol": "DJI",
+      "tf": "H4",
+      "n": 74,
+      "agree_5": 0.4324,
+      "ci95": [
+        32.6,
+        54.6
+      ],
+      "avg_move_5": 358.9761,
+      "max_adverse_5": 406.1532,
+      "shown": true
+    },
+    {
+      "pattern_key": "break_retest",
+      "display_name_ru": "Пробой с ретестом",
+      "display_name_ro": "Spargere cu retest",
+      "display_name_en": "Break and retest",
+      "symbol": "DJI",
+      "tf": "H4",
+      "n": 1266,
+      "agree_5": 0.5047,
+      "ci95": [
+        47.7,
+        53.2
+      ],
+      "avg_move_5": 435.0581,
+      "max_adverse_5": 409.9601,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_top",
+      "display_name_ru": "Пин-бар сверху",
+      "display_name_ro": "Pin-bar sus",
+      "display_name_en": "Pin bar top",
+      "symbol": "DJI",
+      "tf": "H4",
+      "n": 83,
+      "agree_5": 0.3855,
+      "ci95": [
+        28.8,
+        49.3
+      ],
+      "avg_move_5": 362.1664,
+      "max_adverse_5": 373.8694,
+      "shown": true
+    },
+    {
+      "pattern_key": "bullish_engulfing",
+      "display_name_ru": "Бычье поглощение",
+      "display_name_ro": "Înghițire bullish",
+      "display_name_en": "Bullish engulfing",
+      "symbol": "DJI",
+      "tf": "H4",
+      "n": 83,
+      "agree_5": 0.6024,
+      "ci95": [
+        49.5,
+        70.1
+      ],
+      "avg_move_5": 369.3449,
+      "max_adverse_5": 351.0341,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_bottom",
+      "display_name_ru": "Пин-бар снизу",
+      "display_name_ro": "Pin-bar jos",
+      "display_name_en": "Pin bar bottom",
+      "symbol": "DJI",
+      "tf": "H4",
+      "n": 110,
+      "agree_5": 0.6091,
+      "ci95": [
+        51.6,
+        69.5
+      ],
+      "avg_move_5": 378.8203,
+      "max_adverse_5": 343.9131,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_top",
+      "display_name_ru": "Двойная вершина",
+      "display_name_ro": "Vârf dublu",
+      "display_name_en": "Double top",
+      "symbol": "DJI",
+      "tf": "H4",
+      "n": 51,
+      "agree_5": 0.2941,
+      "ci95": [
+        18.7,
+        43.0
+      ],
+      "avg_move_5": 338.3022,
+      "max_adverse_5": 338.0104,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_bottom",
+      "display_name_ru": "Двойное дно",
+      "display_name_ro": "Fund dublu",
+      "display_name_en": "Double bottom",
+      "symbol": "DJI",
+      "tf": "H4",
+      "n": 39,
+      "agree_5": 0.6154,
+      "ci95": [
+        45.9,
+        75.1
+      ],
+      "avg_move_5": 372.9683,
+      "max_adverse_5": 294.218,
+      "shown": true
+    },
+    {
+      "pattern_key": "break_retest",
+      "display_name_ru": "Пробой с ретестом",
+      "display_name_ro": "Spargere cu retest",
+      "display_name_en": "Break and retest",
+      "symbol": "DJI",
+      "tf": "D1",
+      "n": 1643,
+      "agree_5": 0.4863,
+      "ci95": [
+        46.2,
+        51.0
+      ],
+      "avg_move_5": 641.0182,
+      "max_adverse_5": 607.447,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_bottom",
+      "display_name_ru": "Пин-бар снизу",
+      "display_name_ro": "Pin-bar jos",
+      "display_name_en": "Pin bar bottom",
+      "symbol": "DJI",
+      "tf": "D1",
+      "n": 85,
+      "agree_5": 0.5059,
+      "ci95": [
+        40.2,
+        61.0
+      ],
+      "avg_move_5": 576.1344,
+      "max_adverse_5": 552.499,
+      "shown": true
+    },
+    {
+      "pattern_key": "bullish_engulfing",
+      "display_name_ru": "Бычье поглощение",
+      "display_name_ro": "Înghițire bullish",
+      "display_name_en": "Bullish engulfing",
+      "symbol": "DJI",
+      "tf": "D1",
+      "n": 51,
+      "agree_5": 0.4314,
+      "ci95": [
+        30.5,
+        56.7
+      ],
+      "avg_move_5": 662.6531,
+      "max_adverse_5": 690.1762,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_top",
+      "display_name_ru": "Пин-бар сверху",
+      "display_name_ro": "Pin-bar sus",
+      "display_name_en": "Pin bar top",
+      "symbol": "DJI",
+      "tf": "D1",
+      "n": 48,
+      "agree_5": 0.375,
+      "ci95": [
+        25.2,
+        51.6
+      ],
+      "avg_move_5": 613.5225,
+      "max_adverse_5": 715.6474,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_bottom",
+      "display_name_ru": "Двойное дно",
+      "display_name_ro": "Fund dublu",
+      "display_name_en": "Double bottom",
+      "symbol": "DJI",
+      "tf": "D1",
+      "n": 25,
+      "agree_5": 0.6,
+      "ci95": [
+        40.7,
+        76.6
+      ],
+      "avg_move_5": 781.5644,
+      "max_adverse_5": 566.6823,
+      "shown": true
+    },
+    {
+      "pattern_key": "bearish_engulfing",
+      "display_name_ru": "Медвежье поглощение",
+      "display_name_ro": "Înghițire bearish",
+      "display_name_en": "Bearish engulfing",
+      "symbol": "DJI",
+      "tf": "D1",
+      "n": 49,
+      "agree_5": 0.4082,
+      "ci95": [
+        28.2,
+        54.8
+      ],
+      "avg_move_5": 635.3065,
+      "max_adverse_5": 682.0753,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_top",
+      "display_name_ru": "Двойная вершина",
+      "display_name_ro": "Vârf dublu",
+      "display_name_en": "Double top",
+      "symbol": "DJI",
+      "tf": "D1",
+      "n": 29,
+      "agree_5": 0.3448,
+      "ci95": [
+        19.9,
+        52.7
+      ],
+      "avg_move_5": 648.9343,
+      "max_adverse_5": 638.9254,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_top",
+      "display_name_ru": "Пин-бар сверху",
+      "display_name_ro": "Pin-bar sus",
+      "display_name_en": "Pin bar top",
+      "symbol": "ETH",
+      "tf": "H1",
+      "n": 960,
+      "agree_5": 0.4781,
+      "ci95": [
+        44.7,
+        51.0
+      ],
+      "avg_move_5": 29.108,
+      "max_adverse_5": 28.3334,
+      "shown": true
+    },
+    {
+      "pattern_key": "break_retest",
+      "display_name_ru": "Пробой с ретестом",
+      "display_name_ro": "Spargere cu retest",
+      "display_name_en": "Break and retest",
+      "symbol": "ETH",
+      "tf": "H1",
+      "n": 9362,
+      "agree_5": 0.5138,
+      "ci95": [
+        50.4,
+        52.4
+      ],
+      "avg_move_5": 36.3676,
+      "max_adverse_5": 36.7432,
+      "shown": true
+    },
+    {
+      "pattern_key": "bullish_engulfing",
+      "display_name_ru": "Бычье поглощение",
+      "display_name_ro": "Înghițire bullish",
+      "display_name_en": "Bullish engulfing",
+      "symbol": "ETH",
+      "tf": "H1",
+      "n": 973,
+      "agree_5": 0.5128,
+      "ci95": [
+        48.1,
+        54.4
+      ],
+      "avg_move_5": 30.0369,
+      "max_adverse_5": 29.2865,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_bottom",
+      "display_name_ru": "Двойное дно",
+      "display_name_ro": "Fund dublu",
+      "display_name_en": "Double bottom",
+      "symbol": "ETH",
+      "tf": "H1",
+      "n": 146,
+      "agree_5": 0.589,
+      "ci95": [
+        50.8,
+        66.6
+      ],
+      "avg_move_5": 24.4048,
+      "max_adverse_5": 20.8698,
+      "shown": true
+    },
+    {
+      "pattern_key": "bearish_engulfing",
+      "display_name_ru": "Медвежье поглощение",
+      "display_name_ro": "Înghițire bearish",
+      "display_name_en": "Bearish engulfing",
+      "symbol": "ETH",
+      "tf": "H1",
+      "n": 949,
+      "agree_5": 0.4847,
+      "ci95": [
+        45.3,
+        51.7
+      ],
+      "avg_move_5": 30.6809,
+      "max_adverse_5": 28.044,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_bottom",
+      "display_name_ru": "Пин-бар снизу",
+      "display_name_ro": "Pin-bar jos",
+      "display_name_en": "Pin bar bottom",
+      "symbol": "ETH",
+      "tf": "H1",
+      "n": 1105,
+      "agree_5": 0.5122,
+      "ci95": [
+        48.3,
+        54.2
+      ],
+      "avg_move_5": 29.9478,
+      "max_adverse_5": 32.3332,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_top",
+      "display_name_ru": "Двойная вершина",
+      "display_name_ro": "Vârf dublu",
+      "display_name_en": "Double top",
+      "symbol": "ETH",
+      "tf": "H1",
+      "n": 148,
+      "agree_5": 0.5338,
+      "ci95": [
+        45.4,
+        61.2
+      ],
+      "avg_move_5": 22.7746,
+      "max_adverse_5": 20.3224,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_top",
+      "display_name_ru": "Пин-бар сверху",
+      "display_name_ro": "Pin-bar sus",
+      "display_name_en": "Pin bar top",
+      "symbol": "ETH",
+      "tf": "H4",
+      "n": 213,
+      "agree_5": 0.5164,
+      "ci95": [
+        45.0,
+        58.3
+      ],
+      "avg_move_5": 64.0899,
+      "max_adverse_5": 62.3433,
+      "shown": true
+    },
+    {
+      "pattern_key": "break_retest",
+      "display_name_ru": "Пробой с ретестом",
+      "display_name_ro": "Spargere cu retest",
+      "display_name_en": "Break and retest",
+      "symbol": "ETH",
+      "tf": "H4",
+      "n": 4892,
+      "agree_5": 0.5211,
+      "ci95": [
+        50.7,
+        53.5
+      ],
+      "avg_move_5": 74.0669,
+      "max_adverse_5": 75.5801,
+      "shown": true
+    },
+    {
+      "pattern_key": "bullish_engulfing",
+      "display_name_ru": "Бычье поглощение",
+      "display_name_ro": "Înghițire bullish",
+      "display_name_en": "Bullish engulfing",
+      "symbol": "ETH",
+      "tf": "H4",
+      "n": 254,
+      "agree_5": 0.4803,
+      "ci95": [
+        42.0,
+        54.2
+      ],
+      "avg_move_5": 60.5151,
+      "max_adverse_5": 59.4538,
+      "shown": true
+    },
+    {
+      "pattern_key": "bearish_engulfing",
+      "display_name_ru": "Медвежье поглощение",
+      "display_name_ro": "Înghițire bearish",
+      "display_name_en": "Bearish engulfing",
+      "symbol": "ETH",
+      "tf": "H4",
+      "n": 237,
+      "agree_5": 0.4557,
+      "ci95": [
+        39.3,
+        51.9
+      ],
+      "avg_move_5": 61.7253,
+      "max_adverse_5": 60.6883,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_bottom",
+      "display_name_ru": "Пин-бар снизу",
+      "display_name_ro": "Pin-bar jos",
+      "display_name_en": "Pin bar bottom",
+      "symbol": "ETH",
+      "tf": "H4",
+      "n": 266,
+      "agree_5": 0.5113,
+      "ci95": [
+        45.1,
+        57.1
+      ],
+      "avg_move_5": 66.5178,
+      "max_adverse_5": 72.0717,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_top",
+      "display_name_ru": "Двойная вершина",
+      "display_name_ro": "Vârf dublu",
+      "display_name_en": "Double top",
+      "symbol": "ETH",
+      "tf": "H4",
+      "n": 57,
+      "agree_5": 0.4737,
+      "ci95": [
+        35.0,
+        60.1
+      ],
+      "avg_move_5": 60.0716,
+      "max_adverse_5": 54.8009,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_bottom",
+      "display_name_ru": "Двойное дно",
+      "display_name_ro": "Fund dublu",
+      "display_name_en": "Double bottom",
+      "symbol": "ETH",
+      "tf": "H4",
+      "n": 39,
+      "agree_5": 0.4359,
+      "ci95": [
+        29.3,
+        59.0
+      ],
+      "avg_move_5": 49.4159,
+      "max_adverse_5": 42.8277,
+      "shown": true
+    },
+    {
+      "pattern_key": "break_retest",
+      "display_name_ru": "Пробой с ретестом",
+      "display_name_ro": "Spargere cu retest",
+      "display_name_en": "Break and retest",
+      "symbol": "ETH",
+      "tf": "D1",
+      "n": 4888,
+      "agree_5": 0.5272,
+      "ci95": [
+        51.3,
+        54.1
+      ],
+      "avg_move_5": 167.8307,
+      "max_adverse_5": 177.1187,
+      "shown": true
+    },
+    {
+      "pattern_key": "bullish_engulfing",
+      "display_name_ru": "Бычье поглощение",
+      "display_name_ro": "Înghițire bullish",
+      "display_name_en": "Bullish engulfing",
+      "symbol": "ETH",
+      "tf": "D1",
+      "n": 119,
+      "agree_5": 0.4958,
+      "ci95": [
+        40.8,
+        58.4
+      ],
+      "avg_move_5": 160.9389,
+      "max_adverse_5": 156.6151,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_bottom",
+      "display_name_ru": "Пин-бар снизу",
+      "display_name_ro": "Pin-bar jos",
+      "display_name_en": "Pin bar bottom",
+      "symbol": "ETH",
+      "tf": "D1",
+      "n": 92,
+      "agree_5": 0.5761,
+      "ci95": [
+        47.4,
+        67.2
+      ],
+      "avg_move_5": 131.6206,
+      "max_adverse_5": 128.6984,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_top",
+      "display_name_ru": "Пин-бар сверху",
+      "display_name_ro": "Pin-bar sus",
+      "display_name_en": "Pin bar top",
+      "symbol": "ETH",
+      "tf": "D1",
+      "n": 87,
+      "agree_5": 0.4253,
+      "ci95": [
+        32.7,
+        53.0
+      ],
+      "avg_move_5": 142.0676,
+      "max_adverse_5": 140.607,
+      "shown": true
+    },
+    {
+      "pattern_key": "bearish_engulfing",
+      "display_name_ru": "Медвежье поглощение",
+      "display_name_ro": "Înghițire bearish",
+      "display_name_en": "Bearish engulfing",
+      "symbol": "ETH",
+      "tf": "D1",
+      "n": 99,
+      "agree_5": 0.4545,
+      "ci95": [
+        36.0,
+        55.2
+      ],
+      "avg_move_5": 142.2281,
+      "max_adverse_5": 147.3857,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_bottom",
+      "display_name_ru": "Двойное дно",
+      "display_name_ro": "Fund dublu",
+      "display_name_en": "Double bottom",
+      "symbol": "ETH",
+      "tf": "D1",
+      "n": 45,
+      "agree_5": 0.6,
+      "ci95": [
+        45.5,
+        73.0
+      ],
+      "avg_move_5": 148.458,
+      "max_adverse_5": 102.3275,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_top",
+      "display_name_ru": "Двойная вершина",
+      "display_name_ro": "Vârf dublu",
+      "display_name_en": "Double top",
+      "symbol": "ETH",
+      "tf": "D1",
+      "n": 33,
+      "agree_5": 0.4848,
+      "ci95": [
+        32.5,
+        64.8
+      ],
+      "avg_move_5": 128.7094,
+      "max_adverse_5": 125.0473,
+      "shown": true
+    },
+    {
+      "pattern_key": "bearish_engulfing",
+      "display_name_ru": "Медвежье поглощение",
+      "display_name_ro": "Înghițire bearish",
+      "display_name_en": "Bearish engulfing",
+      "symbol": "EURUSD",
+      "tf": "H1",
+      "n": 1055,
+      "agree_5": 0.473,
+      "ci95": [
+        44.3,
+        50.3
+      ],
+      "avg_move_5": 15.6019,
+      "max_adverse_5": 14.9659,
+      "shown": true
+    },
+    {
+      "pattern_key": "break_retest",
+      "display_name_ru": "Пробой с ретестом",
+      "display_name_ro": "Spargere cu retest",
+      "display_name_en": "Break and retest",
+      "symbol": "EURUSD",
+      "tf": "H1",
+      "n": 6422,
+      "agree_5": 0.4924,
+      "ci95": [
+        48.0,
+        50.5
+      ],
+      "avg_move_5": 17.1387,
+      "max_adverse_5": 16.8267,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_top",
+      "display_name_ru": "Пин-бар сверху",
+      "display_name_ro": "Pin-bar sus",
+      "display_name_en": "Pin bar top",
+      "symbol": "EURUSD",
+      "tf": "H1",
+      "n": 890,
+      "agree_5": 0.4528,
+      "ci95": [
+        42.0,
+        48.6
+      ],
+      "avg_move_5": 15.4978,
+      "max_adverse_5": 15.8483,
+      "shown": true
+    },
+    {
+      "pattern_key": "bullish_engulfing",
+      "display_name_ru": "Бычье поглощение",
+      "display_name_ro": "Înghițire bullish",
+      "display_name_en": "Bullish engulfing",
+      "symbol": "EURUSD",
+      "tf": "H1",
+      "n": 1080,
+      "agree_5": 0.4537,
+      "ci95": [
+        42.4,
+        48.4
+      ],
+      "avg_move_5": 15.2741,
+      "max_adverse_5": 14.8676,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_bottom",
+      "display_name_ru": "Пин-бар снизу",
+      "display_name_ro": "Pin-bar jos",
+      "display_name_en": "Pin bar bottom",
+      "symbol": "EURUSD",
+      "tf": "H1",
+      "n": 845,
+      "agree_5": 0.4994,
+      "ci95": [
+        46.6,
+        53.3
+      ],
+      "avg_move_5": 15.3515,
+      "max_adverse_5": 13.9846,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_bottom",
+      "display_name_ru": "Двойное дно",
+      "display_name_ro": "Fund dublu",
+      "display_name_en": "Double bottom",
+      "symbol": "EURUSD",
+      "tf": "H1",
+      "n": 590,
+      "agree_5": 0.4831,
+      "ci95": [
+        44.3,
+        52.3
+      ],
+      "avg_move_5": 15.3593,
+      "max_adverse_5": 14.5271,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_top",
+      "display_name_ru": "Двойная вершина",
+      "display_name_ro": "Vârf dublu",
+      "display_name_en": "Double top",
+      "symbol": "EURUSD",
+      "tf": "H1",
+      "n": 596,
+      "agree_5": 0.5268,
+      "ci95": [
+        48.7,
+        56.7
+      ],
+      "avg_move_5": 14.7064,
+      "max_adverse_5": 13.0285,
+      "shown": true
+    },
+    {
+      "pattern_key": "break_retest",
+      "display_name_ru": "Пробой с ретестом",
+      "display_name_ro": "Spargere cu retest",
+      "display_name_en": "Break and retest",
+      "symbol": "EURUSD",
+      "tf": "H4",
+      "n": 3235,
+      "agree_5": 0.4934,
+      "ci95": [
+        47.6,
+        51.1
+      ],
+      "avg_move_5": 33.2813,
+      "max_adverse_5": 33.7997,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_top",
+      "display_name_ru": "Пин-бар сверху",
+      "display_name_ro": "Pin-bar sus",
+      "display_name_en": "Pin bar top",
+      "symbol": "EURUSD",
+      "tf": "H4",
+      "n": 192,
+      "agree_5": 0.4531,
+      "ci95": [
+        38.4,
+        52.4
+      ],
+      "avg_move_5": 30.2396,
+      "max_adverse_5": 29.7969,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_bottom",
+      "display_name_ru": "Пин-бар снизу",
+      "display_name_ro": "Pin-bar jos",
+      "display_name_en": "Pin bar bottom",
+      "symbol": "EURUSD",
+      "tf": "H4",
+      "n": 222,
+      "agree_5": 0.4685,
+      "ci95": [
+        40.4,
+        53.4
+      ],
+      "avg_move_5": 32.4009,
+      "max_adverse_5": 33.8468,
+      "shown": true
+    },
+    {
+      "pattern_key": "bullish_engulfing",
+      "display_name_ru": "Бычье поглощение",
+      "display_name_ro": "Înghițire bullish",
+      "display_name_en": "Bullish engulfing",
+      "symbol": "EURUSD",
+      "tf": "H4",
+      "n": 313,
+      "agree_5": 0.508,
+      "ci95": [
+        45.3,
+        56.3
+      ],
+      "avg_move_5": 30.9936,
+      "max_adverse_5": 29.2652,
+      "shown": true
+    },
+    {
+      "pattern_key": "bearish_engulfing",
+      "display_name_ru": "Медвежье поглощение",
+      "display_name_ro": "Înghițire bearish",
+      "display_name_en": "Bearish engulfing",
+      "symbol": "EURUSD",
+      "tf": "H4",
+      "n": 339,
+      "agree_5": 0.5398,
+      "ci95": [
+        48.7,
+        59.2
+      ],
+      "avg_move_5": 31.7316,
+      "max_adverse_5": 29.354,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_top",
+      "display_name_ru": "Двойная вершина",
+      "display_name_ro": "Vârf dublu",
+      "display_name_en": "Double top",
+      "symbol": "EURUSD",
+      "tf": "H4",
+      "n": 116,
+      "agree_5": 0.4741,
+      "ci95": [
+        38.6,
+        56.4
+      ],
+      "avg_move_5": 28.9914,
+      "max_adverse_5": 32.3103,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_bottom",
+      "display_name_ru": "Двойное дно",
+      "display_name_ro": "Fund dublu",
+      "display_name_en": "Double bottom",
+      "symbol": "EURUSD",
+      "tf": "H4",
+      "n": 113,
+      "agree_5": 0.4336,
+      "ci95": [
+        34.6,
+        52.6
+      ],
+      "avg_move_5": 38.6018,
+      "max_adverse_5": 32.5664,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_bottom",
+      "display_name_ru": "Пин-бар снизу",
+      "display_name_ro": "Pin-bar jos",
+      "display_name_en": "Pin bar bottom",
+      "symbol": "EURUSD",
+      "tf": "D1",
+      "n": 93,
+      "agree_5": 0.2581,
+      "ci95": [
+        18.0,
+        35.5
+      ],
+      "avg_move_5": 79.6559,
+      "max_adverse_5": 123.3441,
+      "shown": true
+    },
+    {
+      "pattern_key": "break_retest",
+      "display_name_ru": "Пробой с ретестом",
+      "display_name_ro": "Spargere cu retest",
+      "display_name_en": "Break and retest",
+      "symbol": "EURUSD",
+      "tf": "D1",
+      "n": 2394,
+      "agree_5": 0.4311,
+      "ci95": [
+        41.1,
+        45.1
+      ],
+      "avg_move_5": 91.9524,
+      "max_adverse_5": 109.9386,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_top",
+      "display_name_ru": "Пин-бар сверху",
+      "display_name_ro": "Pin-bar sus",
+      "display_name_en": "Pin bar top",
+      "symbol": "EURUSD",
+      "tf": "D1",
+      "n": 78,
+      "agree_5": 0.359,
+      "ci95": [
+        26.1,
+        47.0
+      ],
+      "avg_move_5": 77.2821,
+      "max_adverse_5": 109.4359,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_top",
+      "display_name_ru": "Двойная вершина",
+      "display_name_ro": "Vârf dublu",
+      "display_name_en": "Double top",
+      "symbol": "EURUSD",
+      "tf": "D1",
+      "n": 35,
+      "agree_5": 0.4571,
+      "ci95": [
+        30.5,
+        61.8
+      ],
+      "avg_move_5": 86.8857,
+      "max_adverse_5": 98.3714,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_bottom",
+      "display_name_ru": "Двойное дно",
+      "display_name_ro": "Fund dublu",
+      "display_name_en": "Double bottom",
+      "symbol": "EURUSD",
+      "tf": "D1",
+      "n": 20,
+      "agree_5": 0.75,
+      "ci95": [
+        53.1,
+        88.8
+      ],
+      "avg_move_5": 79.25,
+      "max_adverse_5": 66.5,
+      "shown": true
+    },
+    {
+      "pattern_key": "bullish_engulfing",
+      "display_name_ru": "Бычье поглощение",
+      "display_name_ro": "Înghițire bullish",
+      "display_name_en": "Bullish engulfing",
+      "symbol": "GBPUSD",
+      "tf": "H1",
+      "n": 1103,
+      "agree_5": 0.4923,
+      "ci95": [
+        46.3,
+        52.2
+      ],
+      "avg_move_5": 18.9791,
+      "max_adverse_5": 18.4932,
+      "shown": true
+    },
+    {
+      "pattern_key": "bearish_engulfing",
+      "display_name_ru": "Медвежье поглощение",
+      "display_name_ro": "Înghițire bearish",
+      "display_name_en": "Bearish engulfing",
+      "symbol": "GBPUSD",
+      "tf": "H1",
+      "n": 1069,
+      "agree_5": 0.4733,
+      "ci95": [
+        44.4,
+        50.3
+      ],
+      "avg_move_5": 19.0384,
+      "max_adverse_5": 18.9036,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_top",
+      "display_name_ru": "Пин-бар сверху",
+      "display_name_ro": "Pin-bar sus",
+      "display_name_en": "Pin bar top",
+      "symbol": "GBPUSD",
+      "tf": "H1",
+      "n": 910,
+      "agree_5": 0.4549,
+      "ci95": [
+        42.3,
+        48.7
+      ],
+      "avg_move_5": 18.6121,
+      "max_adverse_5": 18.5176,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_bottom",
+      "display_name_ru": "Пин-бар снизу",
+      "display_name_ro": "Pin-bar jos",
+      "display_name_en": "Pin bar bottom",
+      "symbol": "GBPUSD",
+      "tf": "H1",
+      "n": 895,
+      "agree_5": 0.505,
+      "ci95": [
+        47.2,
+        53.8
+      ],
+      "avg_move_5": 17.3989,
+      "max_adverse_5": 16.5307,
+      "shown": true
+    },
+    {
+      "pattern_key": "break_retest",
+      "display_name_ru": "Пробой с ретестом",
+      "display_name_ro": "Spargere cu retest",
+      "display_name_en": "Break and retest",
+      "symbol": "GBPUSD",
+      "tf": "H1",
+      "n": 5944,
+      "agree_5": 0.4973,
+      "ci95": [
+        48.5,
+        51.0
+      ],
+      "avg_move_5": 20.4458,
+      "max_adverse_5": 19.7,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_bottom",
+      "display_name_ru": "Двойное дно",
+      "display_name_ro": "Fund dublu",
+      "display_name_en": "Double bottom",
+      "symbol": "GBPUSD",
+      "tf": "H1",
+      "n": 525,
+      "agree_5": 0.4952,
+      "ci95": [
+        45.3,
+        53.8
+      ],
+      "avg_move_5": 18.7448,
+      "max_adverse_5": 17.4286,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_top",
+      "display_name_ru": "Двойная вершина",
+      "display_name_ro": "Vârf dublu",
+      "display_name_en": "Double top",
+      "symbol": "GBPUSD",
+      "tf": "H1",
+      "n": 514,
+      "agree_5": 0.4922,
+      "ci95": [
+        44.9,
+        53.5
+      ],
+      "avg_move_5": 17.358,
+      "max_adverse_5": 17.4961,
+      "shown": true
+    },
+    {
+      "pattern_key": "break_retest",
+      "display_name_ru": "Пробой с ретестом",
+      "display_name_ro": "Spargere cu retest",
+      "display_name_en": "Break and retest",
+      "symbol": "GBPUSD",
+      "tf": "H4",
+      "n": 3004,
+      "agree_5": 0.501,
+      "ci95": [
+        48.3,
+        51.9
+      ],
+      "avg_move_5": 39.5453,
+      "max_adverse_5": 38.8522,
+      "shown": true
+    },
+    {
+      "pattern_key": "bearish_engulfing",
+      "display_name_ru": "Медвежье поглощение",
+      "display_name_ro": "Înghițire bearish",
+      "display_name_en": "Bearish engulfing",
+      "symbol": "GBPUSD",
+      "tf": "H4",
+      "n": 304,
+      "agree_5": 0.4836,
+      "ci95": [
+        42.8,
+        54.0
+      ],
+      "avg_move_5": 38.5658,
+      "max_adverse_5": 37.0197,
+      "shown": true
+    },
+    {
+      "pattern_key": "bullish_engulfing",
+      "display_name_ru": "Бычье поглощение",
+      "display_name_ro": "Înghițire bullish",
+      "display_name_en": "Bullish engulfing",
+      "symbol": "GBPUSD",
+      "tf": "H4",
+      "n": 284,
+      "agree_5": 0.493,
+      "ci95": [
+        43.5,
+        55.1
+      ],
+      "avg_move_5": 38.419,
+      "max_adverse_5": 37.3803,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_top",
+      "display_name_ru": "Пин-бар сверху",
+      "display_name_ro": "Pin-bar sus",
+      "display_name_en": "Pin bar top",
+      "symbol": "GBPUSD",
+      "tf": "H4",
+      "n": 205,
+      "agree_5": 0.4244,
+      "ci95": [
+        35.9,
+        49.3
+      ],
+      "avg_move_5": 41.0683,
+      "max_adverse_5": 41.5902,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_bottom",
+      "display_name_ru": "Пин-бар снизу",
+      "display_name_ro": "Pin-bar jos",
+      "display_name_en": "Pin bar bottom",
+      "symbol": "GBPUSD",
+      "tf": "H4",
+      "n": 251,
+      "agree_5": 0.5538,
+      "ci95": [
+        49.2,
+        61.4
+      ],
+      "avg_move_5": 36.6255,
+      "max_adverse_5": 35.9681,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_bottom",
+      "display_name_ru": "Двойное дно",
+      "display_name_ro": "Fund dublu",
+      "display_name_en": "Double bottom",
+      "symbol": "GBPUSD",
+      "tf": "H4",
+      "n": 129,
+      "agree_5": 0.4031,
+      "ci95": [
+        32.2,
+        48.9
+      ],
+      "avg_move_5": 40.4884,
+      "max_adverse_5": 43.1163,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_top",
+      "display_name_ru": "Двойная вершина",
+      "display_name_ro": "Vârf dublu",
+      "display_name_en": "Double top",
+      "symbol": "GBPUSD",
+      "tf": "H4",
+      "n": 141,
+      "agree_5": 0.4752,
+      "ci95": [
+        39.5,
+        55.7
+      ],
+      "avg_move_5": 40.2695,
+      "max_adverse_5": 40.5461,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_bottom",
+      "display_name_ru": "Пин-бар снизу",
+      "display_name_ro": "Pin-bar jos",
+      "display_name_en": "Pin bar bottom",
+      "symbol": "GBPUSD",
+      "tf": "D1",
+      "n": 341,
+      "agree_5": 0.3109,
+      "ci95": [
+        26.4,
+        36.2
+      ],
+      "avg_move_5": 114.6305,
+      "max_adverse_5": 172.956,
+      "shown": true
+    },
+    {
+      "pattern_key": "break_retest",
+      "display_name_ru": "Пробой с ретестом",
+      "display_name_ro": "Spargere cu retest",
+      "display_name_en": "Break and retest",
+      "symbol": "GBPUSD",
+      "tf": "D1",
+      "n": 2108,
+      "agree_5": 0.4132,
+      "ci95": [
+        39.2,
+        43.4
+      ],
+      "avg_move_5": 111.1727,
+      "max_adverse_5": 134.9331,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_top",
+      "display_name_ru": "Пин-бар сверху",
+      "display_name_ro": "Pin-bar sus",
+      "display_name_en": "Pin bar top",
+      "symbol": "GBPUSD",
+      "tf": "D1",
+      "n": 335,
+      "agree_5": 0.3701,
+      "ci95": [
+        32.0,
+        42.3
+      ],
+      "avg_move_5": 114.9433,
+      "max_adverse_5": 157.3224,
+      "shown": true
+    },
+    {
+      "pattern_key": "bearish_engulfing",
+      "display_name_ru": "Медвежье поглощение",
+      "display_name_ro": "Înghițire bearish",
+      "display_name_en": "Bearish engulfing",
+      "symbol": "GBPUSD",
+      "tf": "D1",
+      "n": 2,
+      "agree_5": 0.5,
+      "ci95": [
+        null,
+        null
+      ],
+      "avg_move_5": 162.0,
+      "max_adverse_5": 102.5,
+      "shown": false
+    },
+    {
+      "pattern_key": "double_bottom",
+      "display_name_ru": "Двойное дно",
+      "display_name_ro": "Fund dublu",
+      "display_name_en": "Double bottom",
+      "symbol": "GBPUSD",
+      "tf": "D1",
+      "n": 24,
+      "agree_5": 0.3333,
+      "ci95": [
+        18.0,
+        53.3
+      ],
+      "avg_move_5": 85.0833,
+      "max_adverse_5": 103.4167,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_top",
+      "display_name_ru": "Двойная вершина",
+      "display_name_ro": "Vârf dublu",
+      "display_name_en": "Double top",
+      "symbol": "GBPUSD",
+      "tf": "D1",
+      "n": 41,
+      "agree_5": 0.6098,
+      "ci95": [
+        45.7,
+        74.3
+      ],
+      "avg_move_5": 97.878,
+      "max_adverse_5": 100.6341,
+      "shown": true
+    },
+    {
+      "pattern_key": "bullish_engulfing",
+      "display_name_ru": "Бычье поглощение",
+      "display_name_ro": "Înghițire bullish",
+      "display_name_en": "Bullish engulfing",
+      "symbol": "GBPUSD",
+      "tf": "D1",
+      "n": 1,
+      "agree_5": 0.0,
+      "ci95": [
+        null,
+        null
+      ],
+      "avg_move_5": 29.0,
+      "max_adverse_5": 211.0,
+      "shown": false
+    },
+    {
+      "pattern_key": "break_retest",
+      "display_name_ru": "Пробой с ретестом",
+      "display_name_ro": "Spargere cu retest",
+      "display_name_en": "Break and retest",
+      "symbol": "GOLD",
+      "tf": "H1",
+      "n": 1828,
+      "agree_5": 0.4787,
+      "ci95": [
+        45.6,
+        50.2
+      ],
+      "avg_move_5": 19.1468,
+      "max_adverse_5": 26.5994,
+      "shown": true
+    },
+    {
+      "pattern_key": "bearish_engulfing",
+      "display_name_ru": "Медвежье поглощение",
+      "display_name_ro": "Înghițire bearish",
+      "display_name_en": "Bearish engulfing",
+      "symbol": "GOLD",
+      "tf": "H1",
+      "n": 983,
+      "agree_5": 0.4771,
+      "ci95": [
+        44.6,
+        50.8
+      ],
+      "avg_move_5": 16.1992,
+      "max_adverse_5": 15.3467,
+      "shown": true
+    },
+    {
+      "pattern_key": "bullish_engulfing",
+      "display_name_ru": "Бычье поглощение",
+      "display_name_ro": "Înghițire bullish",
+      "display_name_en": "Bullish engulfing",
+      "symbol": "GOLD",
+      "tf": "H1",
+      "n": 1023,
+      "agree_5": 0.5288,
+      "ci95": [
+        49.8,
+        55.9
+      ],
+      "avg_move_5": 15.2673,
+      "max_adverse_5": 19.2541,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_top",
+      "display_name_ru": "Двойная вершина",
+      "display_name_ro": "Vârf dublu",
+      "display_name_en": "Double top",
+      "symbol": "GOLD",
+      "tf": "H1",
+      "n": 678,
+      "agree_5": 0.4941,
+      "ci95": [
+        45.7,
+        53.2
+      ],
+      "avg_move_5": 12.8059,
+      "max_adverse_5": 11.5211,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_bottom",
+      "display_name_ru": "Пин-бар снизу",
+      "display_name_ro": "Pin-bar jos",
+      "display_name_en": "Pin bar bottom",
+      "symbol": "GOLD",
+      "tf": "H1",
+      "n": 1778,
+      "agree_5": 0.5405,
+      "ci95": [
+        51.7,
+        56.4
+      ],
+      "avg_move_5": 12.9609,
+      "max_adverse_5": 29.4127,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_top",
+      "display_name_ru": "Пин-бар сверху",
+      "display_name_ro": "Pin-bar sus",
+      "display_name_en": "Pin bar top",
+      "symbol": "GOLD",
+      "tf": "H1",
+      "n": 528,
+      "agree_5": 0.464,
+      "ci95": [
+        42.2,
+        50.7
+      ],
+      "avg_move_5": 18.0227,
+      "max_adverse_5": 17.0513,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_bottom",
+      "display_name_ru": "Двойное дно",
+      "display_name_ro": "Fund dublu",
+      "display_name_en": "Double bottom",
+      "symbol": "GOLD",
+      "tf": "H1",
+      "n": 746,
+      "agree_5": 0.508,
+      "ci95": [
+        47.2,
+        54.4
+      ],
+      "avg_move_5": 13.4571,
+      "max_adverse_5": 18.5488,
+      "shown": true
+    },
+    {
+      "pattern_key": "bullish_engulfing",
+      "display_name_ru": "Бычье поглощение",
+      "display_name_ro": "Înghițire bullish",
+      "display_name_en": "Bullish engulfing",
+      "symbol": "GOLD",
+      "tf": "H4",
+      "n": 278,
+      "agree_5": 0.5719,
+      "ci95": [
+        51.3,
+        62.9
+      ],
+      "avg_move_5": 31.1342,
+      "max_adverse_5": 32.5266,
+      "shown": true
+    },
+    {
+      "pattern_key": "break_retest",
+      "display_name_ru": "Пробой с ретестом",
+      "display_name_ro": "Spargere cu retest",
+      "display_name_en": "Break and retest",
+      "symbol": "GOLD",
+      "tf": "H4",
+      "n": 880,
+      "agree_5": 0.4636,
+      "ci95": [
+        43.1,
+        49.7
+      ],
+      "avg_move_5": 38.7089,
+      "max_adverse_5": 47.3418,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_top",
+      "display_name_ru": "Пин-бар сверху",
+      "display_name_ro": "Pin-bar sus",
+      "display_name_en": "Pin bar top",
+      "symbol": "GOLD",
+      "tf": "H4",
+      "n": 144,
+      "agree_5": 0.4792,
+      "ci95": [
+        39.9,
+        56.0
+      ],
+      "avg_move_5": 33.3507,
+      "max_adverse_5": 35.4014,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_top",
+      "display_name_ru": "Двойная вершина",
+      "display_name_ro": "Vârf dublu",
+      "display_name_en": "Double top",
+      "symbol": "GOLD",
+      "tf": "H4",
+      "n": 197,
+      "agree_5": 0.4112,
+      "ci95": [
+        34.5,
+        48.1
+      ],
+      "avg_move_5": 22.7985,
+      "max_adverse_5": 22.8726,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_bottom",
+      "display_name_ru": "Пин-бар снизу",
+      "display_name_ro": "Pin-bar jos",
+      "display_name_en": "Pin bar bottom",
+      "symbol": "GOLD",
+      "tf": "H4",
+      "n": 506,
+      "agree_5": 0.5573,
+      "ci95": [
+        51.4,
+        60.0
+      ],
+      "avg_move_5": 27.8526,
+      "max_adverse_5": 41.7227,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_bottom",
+      "display_name_ru": "Двойное дно",
+      "display_name_ro": "Fund dublu",
+      "display_name_en": "Double bottom",
+      "symbol": "GOLD",
+      "tf": "H4",
+      "n": 174,
+      "agree_5": 0.5517,
+      "ci95": [
+        47.8,
+        62.4
+      ],
+      "avg_move_5": 20.0971,
+      "max_adverse_5": 23.1799,
+      "shown": true
+    },
+    {
+      "pattern_key": "bearish_engulfing",
+      "display_name_ru": "Медвежье поглощение",
+      "display_name_ro": "Înghițire bearish",
+      "display_name_en": "Bearish engulfing",
+      "symbol": "GOLD",
+      "tf": "H4",
+      "n": 265,
+      "agree_5": 0.4566,
+      "ci95": [
+        39.8,
+        51.7
+      ],
+      "avg_move_5": 30.7472,
+      "max_adverse_5": 30.4102,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_top",
+      "display_name_ru": "Пин-бар сверху",
+      "display_name_ro": "Pin-bar sus",
+      "display_name_en": "Pin bar top",
+      "symbol": "GOLD",
+      "tf": "D1",
+      "n": 64,
+      "agree_5": 0.3125,
+      "ci95": [
+        21.2,
+        43.4
+      ],
+      "avg_move_5": 48.1844,
+      "max_adverse_5": 59.0297,
+      "shown": true
+    },
+    {
+      "pattern_key": "break_retest",
+      "display_name_ru": "Пробой с ретестом",
+      "display_name_ro": "Spargere cu retest",
+      "display_name_en": "Break and retest",
+      "symbol": "GOLD",
+      "tf": "D1",
+      "n": 649,
+      "agree_5": 0.4838,
+      "ci95": [
+        44.6,
+        52.2
+      ],
+      "avg_move_5": 54.0393,
+      "max_adverse_5": 48.2843,
+      "shown": true
+    },
+    {
+      "pattern_key": "bearish_engulfing",
+      "display_name_ru": "Медвежье поглощение",
+      "display_name_ro": "Înghițire bearish",
+      "display_name_en": "Bearish engulfing",
+      "symbol": "GOLD",
+      "tf": "D1",
+      "n": 45,
+      "agree_5": 0.4667,
+      "ci95": [
+        32.9,
+        60.9
+      ],
+      "avg_move_5": 37.84,
+      "max_adverse_5": 43.8467,
+      "shown": true
+    },
+    {
+      "pattern_key": "bullish_engulfing",
+      "display_name_ru": "Бычье поглощение",
+      "display_name_ro": "Înghițire bullish",
+      "display_name_en": "Bullish engulfing",
+      "symbol": "GOLD",
+      "tf": "D1",
+      "n": 34,
+      "agree_5": 0.6471,
+      "ci95": [
+        47.9,
+        78.5
+      ],
+      "avg_move_5": 56.9177,
+      "max_adverse_5": 35.3794,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_bottom",
+      "display_name_ru": "Пин-бар снизу",
+      "display_name_ro": "Pin-bar jos",
+      "display_name_en": "Pin bar bottom",
+      "symbol": "GOLD",
+      "tf": "D1",
+      "n": 61,
+      "agree_5": 0.541,
+      "ci95": [
+        41.7,
+        66.0
+      ],
+      "avg_move_5": 39.059,
+      "max_adverse_5": 40.0541,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_top",
+      "display_name_ru": "Двойная вершина",
+      "display_name_ro": "Vârf dublu",
+      "display_name_en": "Double top",
+      "symbol": "GOLD",
+      "tf": "D1",
+      "n": 72,
+      "agree_5": 0.4167,
+      "ci95": [
+        31.0,
+        53.2
+      ],
+      "avg_move_5": 39.2417,
+      "max_adverse_5": 30.5792,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_bottom",
+      "display_name_ru": "Двойное дно",
+      "display_name_ro": "Fund dublu",
+      "display_name_en": "Double bottom",
+      "symbol": "GOLD",
+      "tf": "D1",
+      "n": 69,
+      "agree_5": 0.6522,
+      "ci95": [
+        53.4,
+        75.4
+      ],
+      "avg_move_5": 40.2855,
+      "max_adverse_5": 22.7246,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_top",
+      "display_name_ru": "Пин-бар сверху",
+      "display_name_ro": "Pin-bar sus",
+      "display_name_en": "Pin bar top",
+      "symbol": "NASDAQ",
+      "tf": "H1",
+      "n": 232,
+      "agree_5": 0.4181,
+      "ci95": [
+        35.6,
+        48.2
+      ],
+      "avg_move_5": 136.301,
+      "max_adverse_5": 134.2591,
+      "shown": true
+    },
+    {
+      "pattern_key": "bullish_engulfing",
+      "display_name_ru": "Бычье поглощение",
+      "display_name_ro": "Înghițire bullish",
+      "display_name_en": "Bullish engulfing",
+      "symbol": "NASDAQ",
+      "tf": "H1",
+      "n": 262,
+      "agree_5": 0.6031,
+      "ci95": [
+        54.3,
+        66.0
+      ],
+      "avg_move_5": 126.5865,
+      "max_adverse_5": 115.0518,
+      "shown": true
+    },
+    {
+      "pattern_key": "break_retest",
+      "display_name_ru": "Пробой с ретестом",
+      "display_name_ro": "Spargere cu retest",
+      "display_name_en": "Break and retest",
+      "symbol": "NASDAQ",
+      "tf": "H1",
+      "n": 1513,
+      "agree_5": 0.505,
+      "ci95": [
+        48.0,
+        53.0
+      ],
+      "avg_move_5": 160.2849,
+      "max_adverse_5": 147.1155,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_bottom",
+      "display_name_ru": "Пин-бар снизу",
+      "display_name_ro": "Pin-bar jos",
+      "display_name_en": "Pin bar bottom",
+      "symbol": "NASDAQ",
+      "tf": "H1",
+      "n": 337,
+      "agree_5": 0.5549,
+      "ci95": [
+        50.2,
+        60.7
+      ],
+      "avg_move_5": 141.9065,
+      "max_adverse_5": 118.0413,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_top",
+      "display_name_ru": "Двойная вершина",
+      "display_name_ro": "Vârf dublu",
+      "display_name_en": "Double top",
+      "symbol": "NASDAQ",
+      "tf": "H1",
+      "n": 271,
+      "agree_5": 0.4686,
+      "ci95": [
+        41.0,
+        52.8
+      ],
+      "avg_move_5": 134.4608,
+      "max_adverse_5": 121.3795,
+      "shown": true
+    },
+    {
+      "pattern_key": "bearish_engulfing",
+      "display_name_ru": "Медвежье поглощение",
+      "display_name_ro": "Înghițire bearish",
+      "display_name_en": "Bearish engulfing",
+      "symbol": "NASDAQ",
+      "tf": "H1",
+      "n": 263,
+      "agree_5": 0.4601,
+      "ci95": [
+        40.1,
+        52.0
+      ],
+      "avg_move_5": 154.9291,
+      "max_adverse_5": 133.1799,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_bottom",
+      "display_name_ru": "Двойное дно",
+      "display_name_ro": "Fund dublu",
+      "display_name_en": "Double bottom",
+      "symbol": "NASDAQ",
+      "tf": "H1",
+      "n": 194,
+      "agree_5": 0.6082,
+      "ci95": [
+        53.8,
+        67.4
+      ],
+      "avg_move_5": 147.4619,
+      "max_adverse_5": 114.1686,
+      "shown": true
+    },
+    {
+      "pattern_key": "break_retest",
+      "display_name_ru": "Пробой с ретестом",
+      "display_name_ro": "Spargere cu retest",
+      "display_name_en": "Break and retest",
+      "symbol": "NASDAQ",
+      "tf": "H4",
+      "n": 950,
+      "agree_5": 0.4979,
+      "ci95": [
+        46.6,
+        53.0
+      ],
+      "avg_move_5": 281.2087,
+      "max_adverse_5": 252.1831,
+      "shown": true
+    },
+    {
+      "pattern_key": "bearish_engulfing",
+      "display_name_ru": "Медвежье поглощение",
+      "display_name_ro": "Înghițire bearish",
+      "display_name_en": "Bearish engulfing",
+      "symbol": "NASDAQ",
+      "tf": "H4",
+      "n": 72,
+      "agree_5": 0.375,
+      "ci95": [
+        27.2,
+        49.0
+      ],
+      "avg_move_5": 232.4054,
+      "max_adverse_5": 214.7794,
+      "shown": true
+    },
+    {
+      "pattern_key": "bullish_engulfing",
+      "display_name_ru": "Бычье поглощение",
+      "display_name_ro": "Înghițire bullish",
+      "display_name_en": "Bullish engulfing",
+      "symbol": "NASDAQ",
+      "tf": "H4",
+      "n": 62,
+      "agree_5": 0.5,
+      "ci95": [
+        37.9,
+        62.1
+      ],
+      "avg_move_5": 239.8112,
+      "max_adverse_5": 226.9771,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_top",
+      "display_name_ru": "Пин-бар сверху",
+      "display_name_ro": "Pin-bar sus",
+      "display_name_en": "Pin bar top",
+      "symbol": "NASDAQ",
+      "tf": "H4",
+      "n": 61,
+      "agree_5": 0.4754,
+      "ci95": [
+        35.5,
+        59.8
+      ],
+      "avg_move_5": 216.4882,
+      "max_adverse_5": 203.3029,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_top",
+      "display_name_ru": "Двойная вершина",
+      "display_name_ro": "Vârf dublu",
+      "display_name_en": "Double top",
+      "symbol": "NASDAQ",
+      "tf": "H4",
+      "n": 60,
+      "agree_5": 0.5167,
+      "ci95": [
+        39.3,
+        63.8
+      ],
+      "avg_move_5": 257.7733,
+      "max_adverse_5": 193.9439,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_bottom",
+      "display_name_ru": "Пин-бар снизу",
+      "display_name_ro": "Pin-bar jos",
+      "display_name_en": "Pin bar bottom",
+      "symbol": "NASDAQ",
+      "tf": "H4",
+      "n": 115,
+      "agree_5": 0.6174,
+      "ci95": [
+        52.6,
+        70.1
+      ],
+      "avg_move_5": 275.4273,
+      "max_adverse_5": 249.0848,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_bottom",
+      "display_name_ru": "Двойное дно",
+      "display_name_ro": "Fund dublu",
+      "display_name_en": "Double bottom",
+      "symbol": "NASDAQ",
+      "tf": "H4",
+      "n": 42,
+      "agree_5": 0.4762,
+      "ci95": [
+        33.4,
+        62.3
+      ],
+      "avg_move_5": 242.9186,
+      "max_adverse_5": 267.7763,
+      "shown": true
+    },
+    {
+      "pattern_key": "break_retest",
+      "display_name_ru": "Пробой с ретестом",
+      "display_name_ro": "Spargere cu retest",
+      "display_name_en": "Break and retest",
+      "symbol": "NASDAQ",
+      "tf": "D1",
+      "n": 1214,
+      "agree_5": 0.5198,
+      "ci95": [
+        49.2,
+        54.8
+      ],
+      "avg_move_5": 408.8254,
+      "max_adverse_5": 363.165,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_top",
+      "display_name_ru": "Пин-бар сверху",
+      "display_name_ro": "Pin-bar sus",
+      "display_name_en": "Pin bar top",
+      "symbol": "NASDAQ",
+      "tf": "D1",
+      "n": 45,
+      "agree_5": 0.4,
+      "ci95": [
+        27.0,
+        54.5
+      ],
+      "avg_move_5": 409.9661,
+      "max_adverse_5": 365.3333,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_bottom",
+      "display_name_ru": "Пин-бар снизу",
+      "display_name_ro": "Pin-bar jos",
+      "display_name_en": "Pin bar bottom",
+      "symbol": "NASDAQ",
+      "tf": "D1",
+      "n": 74,
+      "agree_5": 0.6486,
+      "ci95": [
+        53.5,
+        74.8
+      ],
+      "avg_move_5": 364.1518,
+      "max_adverse_5": 282.9442,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_bottom",
+      "display_name_ru": "Двойное дно",
+      "display_name_ro": "Fund dublu",
+      "display_name_en": "Double bottom",
+      "symbol": "NASDAQ",
+      "tf": "D1",
+      "n": 36,
+      "agree_5": 0.6389,
+      "ci95": [
+        47.6,
+        77.5
+      ],
+      "avg_move_5": 308.1276,
+      "max_adverse_5": 316.1099,
+      "shown": true
+    },
+    {
+      "pattern_key": "bearish_engulfing",
+      "display_name_ru": "Медвежье поглощение",
+      "display_name_ro": "Înghițire bearish",
+      "display_name_en": "Bearish engulfing",
+      "symbol": "NASDAQ",
+      "tf": "D1",
+      "n": 55,
+      "agree_5": 0.4364,
+      "ci95": [
+        31.4,
+        56.7
+      ],
+      "avg_move_5": 427.0872,
+      "max_adverse_5": 411.8734,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_top",
+      "display_name_ru": "Двойная вершина",
+      "display_name_ro": "Vârf dublu",
+      "display_name_en": "Double top",
+      "symbol": "NASDAQ",
+      "tf": "D1",
+      "n": 44,
+      "agree_5": 0.4091,
+      "ci95": [
+        27.7,
+        55.6
+      ],
+      "avg_move_5": 370.8901,
+      "max_adverse_5": 353.7615,
+      "shown": true
+    },
+    {
+      "pattern_key": "bullish_engulfing",
+      "display_name_ru": "Бычье поглощение",
+      "display_name_ro": "Înghițire bullish",
+      "display_name_en": "Bullish engulfing",
+      "symbol": "NASDAQ",
+      "tf": "D1",
+      "n": 35,
+      "agree_5": 0.5429,
+      "ci95": [
+        38.2,
+        69.5
+      ],
+      "avg_move_5": 293.9114,
+      "max_adverse_5": 315.6112,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_bottom",
+      "display_name_ru": "Пин-бар снизу",
+      "display_name_ro": "Pin-bar jos",
+      "display_name_en": "Pin bar bottom",
+      "symbol": "NG",
+      "tf": "H1",
+      "n": 734,
+      "agree_5": 0.4523,
+      "ci95": [
+        41.7,
+        48.8
+      ],
+      "avg_move_5": 0.0484,
+      "max_adverse_5": 0.0749,
+      "shown": true
+    },
+    {
+      "pattern_key": "break_retest",
+      "display_name_ru": "Пробой с ретестом",
+      "display_name_ro": "Spargere cu retest",
+      "display_name_en": "Break and retest",
+      "symbol": "NG",
+      "tf": "H1",
+      "n": 6084,
+      "agree_5": 0.4944,
+      "ci95": [
+        48.2,
+        50.7
+      ],
+      "avg_move_5": 0.0566,
+      "max_adverse_5": 0.0629,
+      "shown": true
+    },
+    {
+      "pattern_key": "bearish_engulfing",
+      "display_name_ru": "Медвежье поглощение",
+      "display_name_ro": "Înghițire bearish",
+      "display_name_en": "Bearish engulfing",
+      "symbol": "NG",
+      "tf": "H1",
+      "n": 1000,
+      "agree_5": 0.509,
+      "ci95": [
+        47.8,
+        54.0
+      ],
+      "avg_move_5": 0.0444,
+      "max_adverse_5": 0.0437,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_bottom",
+      "display_name_ru": "Двойное дно",
+      "display_name_ro": "Fund dublu",
+      "display_name_en": "Double bottom",
+      "symbol": "NG",
+      "tf": "H1",
+      "n": 430,
+      "agree_5": 0.4023,
+      "ci95": [
+        35.7,
+        44.9
+      ],
+      "avg_move_5": 0.0361,
+      "max_adverse_5": 0.047,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_top",
+      "display_name_ru": "Пин-бар сверху",
+      "display_name_ro": "Pin-bar sus",
+      "display_name_en": "Pin bar top",
+      "symbol": "NG",
+      "tf": "H1",
+      "n": 628,
+      "agree_5": 0.5175,
+      "ci95": [
+        47.8,
+        55.6
+      ],
+      "avg_move_5": 0.043,
+      "max_adverse_5": 0.0393,
+      "shown": true
+    },
+    {
+      "pattern_key": "bullish_engulfing",
+      "display_name_ru": "Бычье поглощение",
+      "display_name_ro": "Înghițire bullish",
+      "display_name_en": "Bullish engulfing",
+      "symbol": "NG",
+      "tf": "H1",
+      "n": 1033,
+      "agree_5": 0.4724,
+      "ci95": [
+        44.2,
+        50.3
+      ],
+      "avg_move_5": 0.0468,
+      "max_adverse_5": 0.0455,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_top",
+      "display_name_ru": "Двойная вершина",
+      "display_name_ro": "Vârf dublu",
+      "display_name_en": "Double top",
+      "symbol": "NG",
+      "tf": "H1",
+      "n": 289,
+      "agree_5": 0.4948,
+      "ci95": [
+        43.8,
+        55.2
+      ],
+      "avg_move_5": 0.0371,
+      "max_adverse_5": 0.0354,
+      "shown": true
+    },
+    {
+      "pattern_key": "break_retest",
+      "display_name_ru": "Пробой с ретестом",
+      "display_name_ro": "Spargere cu retest",
+      "display_name_en": "Break and retest",
+      "symbol": "NG",
+      "tf": "H4",
+      "n": 3043,
+      "agree_5": 0.4933,
+      "ci95": [
+        47.6,
+        51.1
+      ],
+      "avg_move_5": 0.112,
+      "max_adverse_5": 0.1092,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_bottom",
+      "display_name_ru": "Пин-бар снизу",
+      "display_name_ro": "Pin-bar jos",
+      "display_name_en": "Pin bar bottom",
+      "symbol": "NG",
+      "tf": "H4",
+      "n": 193,
+      "agree_5": 0.4922,
+      "ci95": [
+        42.3,
+        56.2
+      ],
+      "avg_move_5": 0.0944,
+      "max_adverse_5": 0.1144,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_top",
+      "display_name_ru": "Пин-бар сверху",
+      "display_name_ro": "Pin-bar sus",
+      "display_name_en": "Pin bar top",
+      "symbol": "NG",
+      "tf": "H4",
+      "n": 145,
+      "agree_5": 0.4828,
+      "ci95": [
+        40.3,
+        56.3
+      ],
+      "avg_move_5": 0.0945,
+      "max_adverse_5": 0.094,
+      "shown": true
+    },
+    {
+      "pattern_key": "bearish_engulfing",
+      "display_name_ru": "Медвежье поглощение",
+      "display_name_ro": "Înghițire bearish",
+      "display_name_en": "Bearish engulfing",
+      "symbol": "NG",
+      "tf": "H4",
+      "n": 253,
+      "agree_5": 0.5455,
+      "ci95": [
+        48.4,
+        60.6
+      ],
+      "avg_move_5": 0.0851,
+      "max_adverse_5": 0.0817,
+      "shown": true
+    },
+    {
+      "pattern_key": "bullish_engulfing",
+      "display_name_ru": "Бычье поглощение",
+      "display_name_ro": "Înghițire bullish",
+      "display_name_en": "Bullish engulfing",
+      "symbol": "NG",
+      "tf": "H4",
+      "n": 307,
+      "agree_5": 0.4788,
+      "ci95": [
+        42.4,
+        53.5
+      ],
+      "avg_move_5": 0.0986,
+      "max_adverse_5": 0.0921,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_top",
+      "display_name_ru": "Двойная вершина",
+      "display_name_ro": "Vârf dublu",
+      "display_name_en": "Double top",
+      "symbol": "NG",
+      "tf": "H4",
+      "n": 77,
+      "agree_5": 0.5584,
+      "ci95": [
+        44.7,
+        66.4
+      ],
+      "avg_move_5": 0.0894,
+      "max_adverse_5": 0.0988,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_bottom",
+      "display_name_ru": "Двойное дно",
+      "display_name_ro": "Fund dublu",
+      "display_name_en": "Double bottom",
+      "symbol": "NG",
+      "tf": "H4",
+      "n": 94,
+      "agree_5": 0.4362,
+      "ci95": [
+        34.0,
+        53.7
+      ],
+      "avg_move_5": 0.0724,
+      "max_adverse_5": 0.0654,
+      "shown": true
+    },
+    {
+      "pattern_key": "break_retest",
+      "display_name_ru": "Пробой с ретестом",
+      "display_name_ro": "Spargere cu retest",
+      "display_name_en": "Break and retest",
+      "symbol": "NG",
+      "tf": "D1",
+      "n": 2737,
+      "agree_5": 0.4991,
+      "ci95": [
+        48.0,
+        51.8
+      ],
+      "avg_move_5": 0.3686,
+      "max_adverse_5": 0.3473,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_top",
+      "display_name_ru": "Двойная вершина",
+      "display_name_ro": "Vârf dublu",
+      "display_name_en": "Double top",
+      "symbol": "NG",
+      "tf": "D1",
+      "n": 23,
+      "agree_5": 0.3913,
+      "ci95": [
+        22.2,
+        59.2
+      ],
+      "avg_move_5": 0.3315,
+      "max_adverse_5": 0.3367,
+      "shown": true
+    },
+    {
+      "pattern_key": "bullish_engulfing",
+      "display_name_ru": "Бычье поглощение",
+      "display_name_ro": "Înghițire bullish",
+      "display_name_en": "Bullish engulfing",
+      "symbol": "NG",
+      "tf": "D1",
+      "n": 49,
+      "agree_5": 0.4082,
+      "ci95": [
+        28.2,
+        54.8
+      ],
+      "avg_move_5": 0.3434,
+      "max_adverse_5": 0.3452,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_top",
+      "display_name_ru": "Пин-бар сверху",
+      "display_name_ro": "Pin-bar sus",
+      "display_name_en": "Pin bar top",
+      "symbol": "NG",
+      "tf": "D1",
+      "n": 45,
+      "agree_5": 0.6222,
+      "ci95": [
+        47.6,
+        74.9
+      ],
+      "avg_move_5": 0.3725,
+      "max_adverse_5": 0.3768,
+      "shown": true
+    },
+    {
+      "pattern_key": "bearish_engulfing",
+      "display_name_ru": "Медвежье поглощение",
+      "display_name_ro": "Înghițire bearish",
+      "display_name_en": "Bearish engulfing",
+      "symbol": "NG",
+      "tf": "D1",
+      "n": 58,
+      "agree_5": 0.6379,
+      "ci95": [
+        50.9,
+        74.9
+      ],
+      "avg_move_5": 0.2543,
+      "max_adverse_5": 0.27,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_bottom",
+      "display_name_ru": "Пин-бар снизу",
+      "display_name_ro": "Pin-bar jos",
+      "display_name_en": "Pin bar bottom",
+      "symbol": "NG",
+      "tf": "D1",
+      "n": 33,
+      "agree_5": 0.5758,
+      "ci95": [
+        40.8,
+        72.8
+      ],
+      "avg_move_5": 0.3583,
+      "max_adverse_5": 0.2956,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_bottom",
+      "display_name_ru": "Двойное дно",
+      "display_name_ro": "Fund dublu",
+      "display_name_en": "Double bottom",
+      "symbol": "NG",
+      "tf": "D1",
+      "n": 28,
+      "agree_5": 0.6429,
+      "ci95": [
+        45.8,
+        79.3
+      ],
+      "avg_move_5": 0.1244,
+      "max_adverse_5": 0.1454,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_bottom",
+      "display_name_ru": "Двойное дно",
+      "display_name_ro": "Fund dublu",
+      "display_name_en": "Double bottom",
+      "symbol": "SILVER",
+      "tf": "H1",
+      "n": 886,
+      "agree_5": 0.5339,
+      "ci95": [
+        50.1,
+        56.6
+      ],
+      "avg_move_5": 0.263,
+      "max_adverse_5": 0.3007,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_bottom",
+      "display_name_ru": "Пин-бар снизу",
+      "display_name_ro": "Pin-bar jos",
+      "display_name_en": "Pin bar bottom",
+      "symbol": "SILVER",
+      "tf": "H1",
+      "n": 1311,
+      "agree_5": 0.4966,
+      "ci95": [
+        47.0,
+        52.4
+      ],
+      "avg_move_5": 0.39,
+      "max_adverse_5": 0.5562,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_top",
+      "display_name_ru": "Пин-бар сверху",
+      "display_name_ro": "Pin-bar sus",
+      "display_name_en": "Pin bar top",
+      "symbol": "SILVER",
+      "tf": "H1",
+      "n": 563,
+      "agree_5": 0.4725,
+      "ci95": [
+        43.2,
+        51.4
+      ],
+      "avg_move_5": 0.5024,
+      "max_adverse_5": 0.476,
+      "shown": true
+    },
+    {
+      "pattern_key": "bearish_engulfing",
+      "display_name_ru": "Медвежье поглощение",
+      "display_name_ro": "Înghițire bearish",
+      "display_name_en": "Bearish engulfing",
+      "symbol": "SILVER",
+      "tf": "H1",
+      "n": 1045,
+      "agree_5": 0.4421,
+      "ci95": [
+        41.2,
+        47.2
+      ],
+      "avg_move_5": 0.4663,
+      "max_adverse_5": 0.4527,
+      "shown": true
+    },
+    {
+      "pattern_key": "bullish_engulfing",
+      "display_name_ru": "Бычье поглощение",
+      "display_name_ro": "Înghițire bullish",
+      "display_name_en": "Bullish engulfing",
+      "symbol": "SILVER",
+      "tf": "H1",
+      "n": 1066,
+      "agree_5": 0.5253,
+      "ci95": [
+        49.5,
+        55.5
+      ],
+      "avg_move_5": 0.3839,
+      "max_adverse_5": 0.4698,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_top",
+      "display_name_ru": "Двойная вершина",
+      "display_name_ro": "Vârf dublu",
+      "display_name_en": "Double top",
+      "symbol": "SILVER",
+      "tf": "H1",
+      "n": 965,
+      "agree_5": 0.486,
+      "ci95": [
+        45.5,
+        51.8
+      ],
+      "avg_move_5": 0.2708,
+      "max_adverse_5": 0.2398,
+      "shown": true
+    },
+    {
+      "pattern_key": "break_retest",
+      "display_name_ru": "Пробой с ретестом",
+      "display_name_ro": "Spargere cu retest",
+      "display_name_en": "Break and retest",
+      "symbol": "SILVER",
+      "tf": "H1",
+      "n": 2272,
+      "agree_5": 0.4974,
+      "ci95": [
+        47.7,
+        51.8
+      ],
+      "avg_move_5": 0.5265,
+      "max_adverse_5": 0.578,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_bottom",
+      "display_name_ru": "Пин-бар снизу",
+      "display_name_ro": "Pin-bar jos",
+      "display_name_en": "Pin bar bottom",
+      "symbol": "SILVER",
+      "tf": "H4",
+      "n": 367,
+      "agree_5": 0.5722,
+      "ci95": [
+        52.1,
+        62.2
+      ],
+      "avg_move_5": 0.846,
+      "max_adverse_5": 0.9067,
+      "shown": true
+    },
+    {
+      "pattern_key": "break_retest",
+      "display_name_ru": "Пробой с ретестом",
+      "display_name_ro": "Spargere cu retest",
+      "display_name_en": "Break and retest",
+      "symbol": "SILVER",
+      "tf": "H4",
+      "n": 1150,
+      "agree_5": 0.5157,
+      "ci95": [
+        48.7,
+        54.4
+      ],
+      "avg_move_5": 0.9679,
+      "max_adverse_5": 1.0826,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_top",
+      "display_name_ru": "Пин-бар сверху",
+      "display_name_ro": "Pin-bar sus",
+      "display_name_en": "Pin bar top",
+      "symbol": "SILVER",
+      "tf": "H4",
+      "n": 130,
+      "agree_5": 0.4308,
+      "ci95": [
+        34.9,
+        51.7
+      ],
+      "avg_move_5": 0.7635,
+      "max_adverse_5": 0.9044,
+      "shown": true
+    },
+    {
+      "pattern_key": "bullish_engulfing",
+      "display_name_ru": "Бычье поглощение",
+      "display_name_ro": "Înghițire bullish",
+      "display_name_en": "Bullish engulfing",
+      "symbol": "SILVER",
+      "tf": "H4",
+      "n": 257,
+      "agree_5": 0.5603,
+      "ci95": [
+        49.9,
+        62.0
+      ],
+      "avg_move_5": 0.8822,
+      "max_adverse_5": 0.8617,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_bottom",
+      "display_name_ru": "Двойное дно",
+      "display_name_ro": "Fund dublu",
+      "display_name_en": "Double bottom",
+      "symbol": "SILVER",
+      "tf": "H4",
+      "n": 254,
+      "agree_5": 0.5472,
+      "ci95": [
+        48.6,
+        60.7
+      ],
+      "avg_move_5": 0.5061,
+      "max_adverse_5": 0.4658,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_top",
+      "display_name_ru": "Двойная вершина",
+      "display_name_ro": "Vârf dublu",
+      "display_name_en": "Double top",
+      "symbol": "SILVER",
+      "tf": "H4",
+      "n": 213,
+      "agree_5": 0.4742,
+      "ci95": [
+        40.8,
+        54.1
+      ],
+      "avg_move_5": 0.5799,
+      "max_adverse_5": 0.4984,
+      "shown": true
+    },
+    {
+      "pattern_key": "bearish_engulfing",
+      "display_name_ru": "Медвежье поглощение",
+      "display_name_ro": "Înghițire bearish",
+      "display_name_en": "Bearish engulfing",
+      "symbol": "SILVER",
+      "tf": "H4",
+      "n": 283,
+      "agree_5": 0.4134,
+      "ci95": [
+        35.8,
+        47.2
+      ],
+      "avg_move_5": 0.9804,
+      "max_adverse_5": 0.8572,
+      "shown": true
+    },
+    {
+      "pattern_key": "break_retest",
+      "display_name_ru": "Пробой с ретестом",
+      "display_name_ro": "Spargere cu retest",
+      "display_name_en": "Break and retest",
+      "symbol": "SILVER",
+      "tf": "D1",
+      "n": 713,
+      "agree_5": 0.4881,
+      "ci95": [
+        45.2,
+        52.5
+      ],
+      "avg_move_5": 1.3972,
+      "max_adverse_5": 1.4034,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_bottom",
+      "display_name_ru": "Пин-бар снизу",
+      "display_name_ro": "Pin-bar jos",
+      "display_name_en": "Pin bar bottom",
+      "symbol": "SILVER",
+      "tf": "D1",
+      "n": 59,
+      "agree_5": 0.4915,
+      "ci95": [
+        36.8,
+        61.6
+      ],
+      "avg_move_5": 1.666,
+      "max_adverse_5": 1.2172,
+      "shown": true
+    },
+    {
+      "pattern_key": "bearish_engulfing",
+      "display_name_ru": "Медвежье поглощение",
+      "display_name_ro": "Înghițire bearish",
+      "display_name_en": "Bearish engulfing",
+      "symbol": "SILVER",
+      "tf": "D1",
+      "n": 33,
+      "agree_5": 0.5152,
+      "ci95": [
+        35.2,
+        67.5
+      ],
+      "avg_move_5": 1.0971,
+      "max_adverse_5": 1.0435,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_top",
+      "display_name_ru": "Пин-бар сверху",
+      "display_name_ro": "Pin-bar sus",
+      "display_name_en": "Pin bar top",
+      "symbol": "SILVER",
+      "tf": "D1",
+      "n": 62,
+      "agree_5": 0.4194,
+      "ci95": [
+        30.5,
+        54.3
+      ],
+      "avg_move_5": 1.7558,
+      "max_adverse_5": 1.9925,
+      "shown": true
+    },
+    {
+      "pattern_key": "bullish_engulfing",
+      "display_name_ru": "Бычье поглощение",
+      "display_name_ro": "Înghițire bullish",
+      "display_name_en": "Bullish engulfing",
+      "symbol": "SILVER",
+      "tf": "D1",
+      "n": 30,
+      "agree_5": 0.6,
+      "ci95": [
+        42.3,
+        75.4
+      ],
+      "avg_move_5": 1.3226,
+      "max_adverse_5": 0.7383,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_top",
+      "display_name_ru": "Двойная вершина",
+      "display_name_ro": "Vârf dublu",
+      "display_name_en": "Double top",
+      "symbol": "SILVER",
+      "tf": "D1",
+      "n": 86,
+      "agree_5": 0.4884,
+      "ci95": [
+        38.6,
+        59.2
+      ],
+      "avg_move_5": 0.9519,
+      "max_adverse_5": 0.8726,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_bottom",
+      "display_name_ru": "Двойное дно",
+      "display_name_ro": "Fund dublu",
+      "display_name_en": "Double bottom",
+      "symbol": "SILVER",
+      "tf": "D1",
+      "n": 73,
+      "agree_5": 0.6986,
+      "ci95": [
+        58.6,
+        79.2
+      ],
+      "avg_move_5": 0.6841,
+      "max_adverse_5": 0.4342,
+      "shown": true
+    },
+    {
+      "pattern_key": "break_retest",
+      "display_name_ru": "Пробой с ретестом",
+      "display_name_ro": "Spargere cu retest",
+      "display_name_en": "Break and retest",
+      "symbol": "SOL",
+      "tf": "H1",
+      "n": 10217,
+      "agree_5": 0.5135,
+      "ci95": [
+        50.4,
+        52.3
+      ],
+      "avg_move_5": 2.4348,
+      "max_adverse_5": 2.2877,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_top",
+      "display_name_ru": "Пин-бар сверху",
+      "display_name_ro": "Pin-bar sus",
+      "display_name_en": "Pin bar top",
+      "symbol": "SOL",
+      "tf": "H1",
+      "n": 1017,
+      "agree_5": 0.4985,
+      "ci95": [
+        46.8,
+        52.9
+      ],
+      "avg_move_5": 2.093,
+      "max_adverse_5": 1.8598,
+      "shown": true
+    },
+    {
+      "pattern_key": "bearish_engulfing",
+      "display_name_ru": "Медвежье поглощение",
+      "display_name_ro": "Înghițire bearish",
+      "display_name_en": "Bearish engulfing",
+      "symbol": "SOL",
+      "tf": "H1",
+      "n": 1003,
+      "agree_5": 0.4885,
+      "ci95": [
+        45.8,
+        51.9
+      ],
+      "avg_move_5": 2.1365,
+      "max_adverse_5": 1.782,
+      "shown": true
+    },
+    {
+      "pattern_key": "bullish_engulfing",
+      "display_name_ru": "Бычье поглощение",
+      "display_name_ro": "Înghițire bullish",
+      "display_name_en": "Bullish engulfing",
+      "symbol": "SOL",
+      "tf": "H1",
+      "n": 991,
+      "agree_5": 0.4924,
+      "ci95": [
+        46.1,
+        52.4
+      ],
+      "avg_move_5": 1.9415,
+      "max_adverse_5": 1.8608,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_bottom",
+      "display_name_ru": "Пин-бар снизу",
+      "display_name_ro": "Pin-bar jos",
+      "display_name_en": "Pin bar bottom",
+      "symbol": "SOL",
+      "tf": "H1",
+      "n": 1091,
+      "agree_5": 0.506,
+      "ci95": [
+        47.6,
+        53.6
+      ],
+      "avg_move_5": 1.9677,
+      "max_adverse_5": 1.9098,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_bottom",
+      "display_name_ru": "Двойное дно",
+      "display_name_ro": "Fund dublu",
+      "display_name_en": "Double bottom",
+      "symbol": "SOL",
+      "tf": "H1",
+      "n": 125,
+      "agree_5": 0.608,
+      "ci95": [
+        52.0,
+        68.9
+      ],
+      "avg_move_5": 1.6492,
+      "max_adverse_5": 1.1958,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_top",
+      "display_name_ru": "Двойная вершина",
+      "display_name_ro": "Vârf dublu",
+      "display_name_en": "Double top",
+      "symbol": "SOL",
+      "tf": "H1",
+      "n": 136,
+      "agree_5": 0.4853,
+      "ci95": [
+        40.3,
+        56.9
+      ],
+      "avg_move_5": 1.4528,
+      "max_adverse_5": 1.2459,
+      "shown": true
+    },
+    {
+      "pattern_key": "break_retest",
+      "display_name_ru": "Пробой с ретестом",
+      "display_name_ro": "Spargere cu retest",
+      "display_name_en": "Break and retest",
+      "symbol": "SOL",
+      "tf": "H4",
+      "n": 5405,
+      "agree_5": 0.5006,
+      "ci95": [
+        48.7,
+        51.4
+      ],
+      "avg_move_5": 4.7895,
+      "max_adverse_5": 4.8893,
+      "shown": true
+    },
+    {
+      "pattern_key": "bullish_engulfing",
+      "display_name_ru": "Бычье поглощение",
+      "display_name_ro": "Înghițire bullish",
+      "display_name_en": "Bullish engulfing",
+      "symbol": "SOL",
+      "tf": "H4",
+      "n": 258,
+      "agree_5": 0.4884,
+      "ci95": [
+        42.8,
+        54.9
+      ],
+      "avg_move_5": 4.1661,
+      "max_adverse_5": 4.0233,
+      "shown": true
+    },
+    {
+      "pattern_key": "bearish_engulfing",
+      "display_name_ru": "Медвежье поглощение",
+      "display_name_ro": "Înghițire bearish",
+      "display_name_en": "Bearish engulfing",
+      "symbol": "SOL",
+      "tf": "H4",
+      "n": 254,
+      "agree_5": 0.4646,
+      "ci95": [
+        40.4,
+        52.6
+      ],
+      "avg_move_5": 4.0501,
+      "max_adverse_5": 3.9052,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_bottom",
+      "display_name_ru": "Двойное дно",
+      "display_name_ro": "Fund dublu",
+      "display_name_en": "Double bottom",
+      "symbol": "SOL",
+      "tf": "H4",
+      "n": 31,
+      "agree_5": 0.5161,
+      "ci95": [
+        34.8,
+        68.0
+      ],
+      "avg_move_5": 3.2778,
+      "max_adverse_5": 3.3292,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_top",
+      "display_name_ru": "Пин-бар сверху",
+      "display_name_ro": "Pin-bar sus",
+      "display_name_en": "Pin bar top",
+      "symbol": "SOL",
+      "tf": "H4",
+      "n": 190,
+      "agree_5": 0.5158,
+      "ci95": [
+        44.5,
+        58.6
+      ],
+      "avg_move_5": 4.3262,
+      "max_adverse_5": 4.1707,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_bottom",
+      "display_name_ru": "Пин-бар снизу",
+      "display_name_ro": "Pin-bar jos",
+      "display_name_en": "Pin bar bottom",
+      "symbol": "SOL",
+      "tf": "H4",
+      "n": 284,
+      "agree_5": 0.4754,
+      "ci95": [
+        41.8,
+        53.3
+      ],
+      "avg_move_5": 4.2903,
+      "max_adverse_5": 4.1128,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_top",
+      "display_name_ru": "Двойная вершина",
+      "display_name_ro": "Vârf dublu",
+      "display_name_en": "Double top",
+      "symbol": "SOL",
+      "tf": "H4",
+      "n": 21,
+      "agree_5": 0.4762,
+      "ci95": [
+        28.3,
+        67.6
+      ],
+      "avg_move_5": 3.8448,
+      "max_adverse_5": 3.6354,
+      "shown": true
+    },
+    {
+      "pattern_key": "break_retest",
+      "display_name_ru": "Пробой с ретестом",
+      "display_name_ro": "Spargere cu retest",
+      "display_name_en": "Break and retest",
+      "symbol": "SOL",
+      "tf": "D1",
+      "n": 5284,
+      "agree_5": 0.5095,
+      "ci95": [
+        49.6,
+        52.3
+      ],
+      "avg_move_5": 11.4684,
+      "max_adverse_5": 12.5593,
+      "shown": true
+    },
+    {
+      "pattern_key": "bullish_engulfing",
+      "display_name_ru": "Бычье поглощение",
+      "display_name_ro": "Înghițire bullish",
+      "display_name_en": "Bullish engulfing",
+      "symbol": "SOL",
+      "tf": "D1",
+      "n": 117,
+      "agree_5": 0.5043,
+      "ci95": [
+        41.5,
+        59.3
+      ],
+      "avg_move_5": 9.7834,
+      "max_adverse_5": 7.8684,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_bottom",
+      "display_name_ru": "Пин-бар снизу",
+      "display_name_ro": "Pin-bar jos",
+      "display_name_en": "Pin bar bottom",
+      "symbol": "SOL",
+      "tf": "D1",
+      "n": 84,
+      "agree_5": 0.4762,
+      "ci95": [
+        37.3,
+        58.2
+      ],
+      "avg_move_5": 9.3762,
+      "max_adverse_5": 10.5723,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_top",
+      "display_name_ru": "Пин-бар сверху",
+      "display_name_ro": "Pin-bar sus",
+      "display_name_en": "Pin bar top",
+      "symbol": "SOL",
+      "tf": "D1",
+      "n": 106,
+      "agree_5": 0.4717,
+      "ci95": [
+        37.9,
+        56.6
+      ],
+      "avg_move_5": 8.9109,
+      "max_adverse_5": 9.9249,
+      "shown": true
+    },
+    {
+      "pattern_key": "bearish_engulfing",
+      "display_name_ru": "Медвежье поглощение",
+      "display_name_ro": "Înghițire bearish",
+      "display_name_en": "Bearish engulfing",
+      "symbol": "SOL",
+      "tf": "D1",
+      "n": 106,
+      "agree_5": 0.5,
+      "ci95": [
+        40.6,
+        59.4
+      ],
+      "avg_move_5": 9.347,
+      "max_adverse_5": 7.9222,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_top",
+      "display_name_ru": "Двойная вершина",
+      "display_name_ro": "Vârf dublu",
+      "display_name_en": "Double top",
+      "symbol": "SOL",
+      "tf": "D1",
+      "n": 27,
+      "agree_5": 0.4815,
+      "ci95": [
+        30.7,
+        66.0
+      ],
+      "avg_move_5": 3.1675,
+      "max_adverse_5": 3.6135,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_bottom",
+      "display_name_ru": "Двойное дно",
+      "display_name_ro": "Fund dublu",
+      "display_name_en": "Double bottom",
+      "symbol": "SOL",
+      "tf": "D1",
+      "n": 40,
+      "agree_5": 0.5,
+      "ci95": [
+        35.2,
+        64.8
+      ],
+      "avg_move_5": 4.3217,
+      "max_adverse_5": 4.2802,
+      "shown": true
+    },
+    {
+      "pattern_key": "break_retest",
+      "display_name_ru": "Пробой с ретестом",
+      "display_name_ro": "Spargere cu retest",
+      "display_name_en": "Break and retest",
+      "symbol": "SPX",
+      "tf": "H1",
+      "n": 1474,
+      "agree_5": 0.5149,
+      "ci95": [
+        48.9,
+        54.0
+      ],
+      "avg_move_5": 35.1732,
+      "max_adverse_5": 33.2192,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_top",
+      "display_name_ru": "Пин-бар сверху",
+      "display_name_ro": "Pin-bar sus",
+      "display_name_en": "Pin bar top",
+      "symbol": "SPX",
+      "tf": "H1",
+      "n": 211,
+      "agree_5": 0.4313,
+      "ci95": [
+        36.6,
+        49.9
+      ],
+      "avg_move_5": 29.3985,
+      "max_adverse_5": 31.3331,
+      "shown": true
+    },
+    {
+      "pattern_key": "bullish_engulfing",
+      "display_name_ru": "Бычье поглощение",
+      "display_name_ro": "Înghițire bullish",
+      "display_name_en": "Bullish engulfing",
+      "symbol": "SPX",
+      "tf": "H1",
+      "n": 285,
+      "agree_5": 0.5614,
+      "ci95": [
+        50.3,
+        61.8
+      ],
+      "avg_move_5": 35.1964,
+      "max_adverse_5": 30.0427,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_bottom",
+      "display_name_ru": "Пин-бар снизу",
+      "display_name_ro": "Pin-bar jos",
+      "display_name_en": "Pin bar bottom",
+      "symbol": "SPX",
+      "tf": "H1",
+      "n": 345,
+      "agree_5": 0.5971,
+      "ci95": [
+        54.5,
+        64.8
+      ],
+      "avg_move_5": 29.1387,
+      "max_adverse_5": 24.272,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_top",
+      "display_name_ru": "Двойная вершина",
+      "display_name_ro": "Vârf dublu",
+      "display_name_en": "Double top",
+      "symbol": "SPX",
+      "tf": "H1",
+      "n": 209,
+      "agree_5": 0.4402,
+      "ci95": [
+        37.5,
+        50.8
+      ],
+      "avg_move_5": 29.6106,
+      "max_adverse_5": 25.8634,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_bottom",
+      "display_name_ru": "Двойное дно",
+      "display_name_ro": "Fund dublu",
+      "display_name_en": "Double bottom",
+      "symbol": "SPX",
+      "tf": "H1",
+      "n": 175,
+      "agree_5": 0.5886,
+      "ci95": [
+        51.5,
+        65.9
+      ],
+      "avg_move_5": 32.3759,
+      "max_adverse_5": 25.0503,
+      "shown": true
+    },
+    {
+      "pattern_key": "bearish_engulfing",
+      "display_name_ru": "Медвежье поглощение",
+      "display_name_ro": "Înghițire bearish",
+      "display_name_en": "Bearish engulfing",
+      "symbol": "SPX",
+      "tf": "H1",
+      "n": 274,
+      "agree_5": 0.4635,
+      "ci95": [
+        40.5,
+        52.3
+      ],
+      "avg_move_5": 32.0166,
+      "max_adverse_5": 29.7871,
+      "shown": true
+    },
+    {
+      "pattern_key": "break_retest",
+      "display_name_ru": "Пробой с ретестом",
+      "display_name_ro": "Spargere cu retest",
+      "display_name_en": "Break and retest",
+      "symbol": "SPX",
+      "tf": "H4",
+      "n": 927,
+      "agree_5": 0.5027,
+      "ci95": [
+        47.1,
+        53.5
+      ],
+      "avg_move_5": 64.006,
+      "max_adverse_5": 60.7411,
+      "shown": true
+    },
+    {
+      "pattern_key": "bearish_engulfing",
+      "display_name_ru": "Медвежье поглощение",
+      "display_name_ro": "Înghițire bearish",
+      "display_name_en": "Bearish engulfing",
+      "symbol": "SPX",
+      "tf": "H4",
+      "n": 73,
+      "agree_5": 0.3562,
+      "ci95": [
+        25.6,
+        47.1
+      ],
+      "avg_move_5": 54.0727,
+      "max_adverse_5": 51.4189,
+      "shown": true
+    },
+    {
+      "pattern_key": "bullish_engulfing",
+      "display_name_ru": "Бычье поглощение",
+      "display_name_ro": "Înghițire bullish",
+      "display_name_en": "Bullish engulfing",
+      "symbol": "SPX",
+      "tf": "H4",
+      "n": 75,
+      "agree_5": 0.56,
+      "ci95": [
+        44.7,
+        66.7
+      ],
+      "avg_move_5": 55.8612,
+      "max_adverse_5": 45.5328,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_top",
+      "display_name_ru": "Пин-бар сверху",
+      "display_name_ro": "Pin-bar sus",
+      "display_name_en": "Pin bar top",
+      "symbol": "SPX",
+      "tf": "H4",
+      "n": 49,
+      "agree_5": 0.3878,
+      "ci95": [
+        26.4,
+        52.8
+      ],
+      "avg_move_5": 53.9784,
+      "max_adverse_5": 55.5051,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_bottom",
+      "display_name_ru": "Пин-бар снизу",
+      "display_name_ro": "Pin-bar jos",
+      "display_name_en": "Pin bar bottom",
+      "symbol": "SPX",
+      "tf": "H4",
+      "n": 126,
+      "agree_5": 0.6349,
+      "ci95": [
+        54.8,
+        71.4
+      ],
+      "avg_move_5": 64.5593,
+      "max_adverse_5": 55.3543,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_bottom",
+      "display_name_ru": "Двойное дно",
+      "display_name_ro": "Fund dublu",
+      "display_name_en": "Double bottom",
+      "symbol": "SPX",
+      "tf": "H4",
+      "n": 33,
+      "agree_5": 0.4848,
+      "ci95": [
+        32.5,
+        64.8
+      ],
+      "avg_move_5": 46.677,
+      "max_adverse_5": 45.8609,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_top",
+      "display_name_ru": "Двойная вершина",
+      "display_name_ro": "Vârf dublu",
+      "display_name_en": "Double top",
+      "symbol": "SPX",
+      "tf": "H4",
+      "n": 50,
+      "agree_5": 0.54,
+      "ci95": [
+        40.4,
+        67.0
+      ],
+      "avg_move_5": 59.0771,
+      "max_adverse_5": 41.4016,
+      "shown": true
+    },
+    {
+      "pattern_key": "break_retest",
+      "display_name_ru": "Пробой с ретестом",
+      "display_name_ro": "Spargere cu retest",
+      "display_name_en": "Break and retest",
+      "symbol": "SPX",
+      "tf": "D1",
+      "n": 1206,
+      "agree_5": 0.5075,
+      "ci95": [
+        47.9,
+        53.6
+      ],
+      "avg_move_5": 98.8128,
+      "max_adverse_5": 90.7229,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_top",
+      "display_name_ru": "Пин-бар сверху",
+      "display_name_ro": "Pin-bar sus",
+      "display_name_en": "Pin bar top",
+      "symbol": "SPX",
+      "tf": "D1",
+      "n": 35,
+      "agree_5": 0.4,
+      "ci95": [
+        25.6,
+        56.4
+      ],
+      "avg_move_5": 91.0417,
+      "max_adverse_5": 88.138,
+      "shown": true
+    },
+    {
+      "pattern_key": "bearish_engulfing",
+      "display_name_ru": "Медвежье поглощение",
+      "display_name_ro": "Înghițire bearish",
+      "display_name_en": "Bearish engulfing",
+      "symbol": "SPX",
+      "tf": "D1",
+      "n": 40,
+      "agree_5": 0.475,
+      "ci95": [
+        32.9,
+        62.5
+      ],
+      "avg_move_5": 90.9395,
+      "max_adverse_5": 95.8013,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_bottom",
+      "display_name_ru": "Пин-бар снизу",
+      "display_name_ro": "Pin-bar jos",
+      "display_name_en": "Pin bar bottom",
+      "symbol": "SPX",
+      "tf": "D1",
+      "n": 76,
+      "agree_5": 0.6447,
+      "ci95": [
+        53.3,
+        74.3
+      ],
+      "avg_move_5": 76.8226,
+      "max_adverse_5": 68.7893,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_bottom",
+      "display_name_ru": "Двойное дно",
+      "display_name_ro": "Fund dublu",
+      "display_name_en": "Double bottom",
+      "symbol": "SPX",
+      "tf": "D1",
+      "n": 23,
+      "agree_5": 0.4783,
+      "ci95": [
+        29.2,
+        67.0
+      ],
+      "avg_move_5": 53.8291,
+      "max_adverse_5": 66.1743,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_top",
+      "display_name_ru": "Двойная вершина",
+      "display_name_ro": "Vârf dublu",
+      "display_name_en": "Double top",
+      "symbol": "SPX",
+      "tf": "D1",
+      "n": 28,
+      "agree_5": 0.4286,
+      "ci95": [
+        26.5,
+        60.9
+      ],
+      "avg_move_5": 93.6675,
+      "max_adverse_5": 84.0257,
+      "shown": true
+    },
+    {
+      "pattern_key": "bullish_engulfing",
+      "display_name_ru": "Бычье поглощение",
+      "display_name_ro": "Înghițire bullish",
+      "display_name_en": "Bullish engulfing",
+      "symbol": "SPX",
+      "tf": "D1",
+      "n": 45,
+      "agree_5": 0.4667,
+      "ci95": [
+        32.9,
+        60.9
+      ],
+      "avg_move_5": 85.3967,
+      "max_adverse_5": 97.2562,
+      "shown": true
+    },
+    {
+      "pattern_key": "break_retest",
+      "display_name_ru": "Пробой с ретестом",
+      "display_name_ro": "Spargere cu retest",
+      "display_name_en": "Break and retest",
+      "symbol": "USDJPY",
+      "tf": "H1",
+      "n": 21445,
+      "agree_5": 0.5038,
+      "ci95": [
+        49.7,
+        51.0
+      ],
+      "avg_move_5": 25.8128,
+      "max_adverse_5": 26.4406,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_bottom",
+      "display_name_ru": "Пин-бар снизу",
+      "display_name_ro": "Pin-bar jos",
+      "display_name_en": "Pin bar bottom",
+      "symbol": "USDJPY",
+      "tf": "H1",
+      "n": 3361,
+      "agree_5": 0.5094,
+      "ci95": [
+        49.2,
+        52.6
+      ],
+      "avg_move_5": 20.6436,
+      "max_adverse_5": 22.3019,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_top",
+      "display_name_ru": "Пин-бар сверху",
+      "display_name_ro": "Pin-bar sus",
+      "display_name_en": "Pin bar top",
+      "symbol": "USDJPY",
+      "tf": "H1",
+      "n": 2529,
+      "agree_5": 0.4749,
+      "ci95": [
+        45.5,
+        49.4
+      ],
+      "avg_move_5": 21.1285,
+      "max_adverse_5": 20.6811,
+      "shown": true
+    },
+    {
+      "pattern_key": "bearish_engulfing",
+      "display_name_ru": "Медвежье поглощение",
+      "display_name_ro": "Înghițire bearish",
+      "display_name_en": "Bearish engulfing",
+      "symbol": "USDJPY",
+      "tf": "H1",
+      "n": 4628,
+      "agree_5": 0.4654,
+      "ci95": [
+        45.1,
+        48.0
+      ],
+      "avg_move_5": 20.8445,
+      "max_adverse_5": 20.3396,
+      "shown": true
+    },
+    {
+      "pattern_key": "bullish_engulfing",
+      "display_name_ru": "Бычье поглощение",
+      "display_name_ro": "Înghițire bullish",
+      "display_name_en": "Bullish engulfing",
+      "symbol": "USDJPY",
+      "tf": "H1",
+      "n": 4677,
+      "agree_5": 0.5112,
+      "ci95": [
+        49.7,
+        52.6
+      ],
+      "avg_move_5": 20.1128,
+      "max_adverse_5": 20.7578,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_top",
+      "display_name_ru": "Двойная вершина",
+      "display_name_ro": "Vârf dublu",
+      "display_name_en": "Double top",
+      "symbol": "USDJPY",
+      "tf": "H1",
+      "n": 1313,
+      "agree_5": 0.4509,
+      "ci95": [
+        42.4,
+        47.8
+      ],
+      "avg_move_5": 15.9221,
+      "max_adverse_5": 15.7338,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_bottom",
+      "display_name_ru": "Двойное дно",
+      "display_name_ro": "Fund dublu",
+      "display_name_en": "Double bottom",
+      "symbol": "USDJPY",
+      "tf": "H1",
+      "n": 1113,
+      "agree_5": 0.5409,
+      "ci95": [
+        51.2,
+        57.0
+      ],
+      "avg_move_5": 14.2829,
+      "max_adverse_5": 15.467,
+      "shown": true
+    },
+    {
+      "pattern_key": "break_retest",
+      "display_name_ru": "Пробой с ретестом",
+      "display_name_ro": "Spargere cu retest",
+      "display_name_en": "Break and retest",
+      "symbol": "USDJPY",
+      "tf": "H4",
+      "n": 10726,
+      "agree_5": 0.4972,
+      "ci95": [
+        48.8,
+        50.7
+      ],
+      "avg_move_5": 52.2783,
+      "max_adverse_5": 53.0683,
+      "shown": true
+    },
+    {
+      "pattern_key": "bullish_engulfing",
+      "display_name_ru": "Бычье поглощение",
+      "display_name_ro": "Înghițire bullish",
+      "display_name_en": "Bullish engulfing",
+      "symbol": "USDJPY",
+      "tf": "H4",
+      "n": 1176,
+      "agree_5": 0.54,
+      "ci95": [
+        51.1,
+        56.8
+      ],
+      "avg_move_5": 43.8853,
+      "max_adverse_5": 45.17,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_bottom",
+      "display_name_ru": "Пин-бар снизу",
+      "display_name_ro": "Pin-bar jos",
+      "display_name_en": "Pin bar bottom",
+      "symbol": "USDJPY",
+      "tf": "H4",
+      "n": 908,
+      "agree_5": 0.565,
+      "ci95": [
+        53.3,
+        59.7
+      ],
+      "avg_move_5": 43.0563,
+      "max_adverse_5": 42.2108,
+      "shown": true
+    },
+    {
+      "pattern_key": "bearish_engulfing",
+      "display_name_ru": "Медвежье поглощение",
+      "display_name_ro": "Înghițire bearish",
+      "display_name_en": "Bearish engulfing",
+      "symbol": "USDJPY",
+      "tf": "H4",
+      "n": 1169,
+      "agree_5": 0.4696,
+      "ci95": [
+        44.1,
+        49.8
+      ],
+      "avg_move_5": 44.2644,
+      "max_adverse_5": 42.2191,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_top",
+      "display_name_ru": "Пин-бар сверху",
+      "display_name_ro": "Pin-bar sus",
+      "display_name_en": "Pin bar top",
+      "symbol": "USDJPY",
+      "tf": "H4",
+      "n": 604,
+      "agree_5": 0.4487,
+      "ci95": [
+        40.9,
+        48.9
+      ],
+      "avg_move_5": 43.1732,
+      "max_adverse_5": 43.2699,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_top",
+      "display_name_ru": "Двойная вершина",
+      "display_name_ro": "Vârf dublu",
+      "display_name_en": "Double top",
+      "symbol": "USDJPY",
+      "tf": "H4",
+      "n": 325,
+      "agree_5": 0.4185,
+      "ci95": [
+        36.6,
+        47.3
+      ],
+      "avg_move_5": 33.0714,
+      "max_adverse_5": 33.7791,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_bottom",
+      "display_name_ru": "Двойное дно",
+      "display_name_ro": "Fund dublu",
+      "display_name_en": "Double bottom",
+      "symbol": "USDJPY",
+      "tf": "H4",
+      "n": 267,
+      "agree_5": 0.5468,
+      "ci95": [
+        48.7,
+        60.5
+      ],
+      "avg_move_5": 38.7468,
+      "max_adverse_5": 36.6831,
+      "shown": true
+    },
+    {
+      "pattern_key": "break_retest",
+      "display_name_ru": "Пробой с ретестом",
+      "display_name_ro": "Spargere cu retest",
+      "display_name_en": "Break and retest",
+      "symbol": "USDJPY",
+      "tf": "D1",
+      "n": 4626,
+      "agree_5": 0.4885,
+      "ci95": [
+        47.4,
+        50.3
+      ],
+      "avg_move_5": 119.3624,
+      "max_adverse_5": 123.5417,
+      "shown": true
+    },
+    {
+      "pattern_key": "bullish_engulfing",
+      "display_name_ru": "Бычье поглощение",
+      "display_name_ro": "Înghițire bullish",
+      "display_name_en": "Bullish engulfing",
+      "symbol": "USDJPY",
+      "tf": "D1",
+      "n": 208,
+      "agree_5": 0.5769,
+      "ci95": [
+        50.9,
+        64.2
+      ],
+      "avg_move_5": 105.3226,
+      "max_adverse_5": 101.013,
+      "shown": true
+    },
+    {
+      "pattern_key": "bearish_engulfing",
+      "display_name_ru": "Медвежье поглощение",
+      "display_name_ro": "Înghițire bearish",
+      "display_name_en": "Bearish engulfing",
+      "symbol": "USDJPY",
+      "tf": "D1",
+      "n": 192,
+      "agree_5": 0.474,
+      "ci95": [
+        40.5,
+        54.4
+      ],
+      "avg_move_5": 99.8083,
+      "max_adverse_5": 102.6594,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_bottom",
+      "display_name_ru": "Пин-бар снизу",
+      "display_name_ro": "Pin-bar jos",
+      "display_name_en": "Pin bar bottom",
+      "symbol": "USDJPY",
+      "tf": "D1",
+      "n": 146,
+      "agree_5": 0.5137,
+      "ci95": [
+        43.3,
+        59.3
+      ],
+      "avg_move_5": 97.463,
+      "max_adverse_5": 102.75,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_top",
+      "display_name_ru": "Пин-бар сверху",
+      "display_name_ro": "Pin-bar sus",
+      "display_name_en": "Pin bar top",
+      "symbol": "USDJPY",
+      "tf": "D1",
+      "n": 91,
+      "agree_5": 0.4176,
+      "ci95": [
+        32.2,
+        52.0
+      ],
+      "avg_move_5": 100.8231,
+      "max_adverse_5": 115.6659,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_bottom",
+      "display_name_ru": "Двойное дно",
+      "display_name_ro": "Fund dublu",
+      "display_name_en": "Double bottom",
+      "symbol": "USDJPY",
+      "tf": "D1",
+      "n": 66,
+      "agree_5": 0.5303,
+      "ci95": [
+        41.2,
+        64.6
+      ],
+      "avg_move_5": 81.3773,
+      "max_adverse_5": 87.7758,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_top",
+      "display_name_ru": "Двойная вершина",
+      "display_name_ro": "Vârf dublu",
+      "display_name_en": "Double top",
+      "symbol": "USDJPY",
+      "tf": "D1",
+      "n": 80,
+      "agree_5": 0.4,
+      "ci95": [
+        30.0,
+        51.0
+      ],
+      "avg_move_5": 78.2013,
+      "max_adverse_5": 81.03,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_top",
+      "display_name_ru": "Пин-бар сверху",
+      "display_name_ro": "Pin-bar sus",
+      "display_name_en": "Pin bar top",
+      "symbol": "USDKZT",
+      "tf": "D1",
+      "n": 31,
+      "agree_5": 0.4516,
+      "ci95": [
+        29.2,
+        62.2
+      ],
+      "avg_move_5": 4.9374,
+      "max_adverse_5": 6.002,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_bottom",
+      "display_name_ru": "Пин-бар снизу",
+      "display_name_ro": "Pin-bar jos",
+      "display_name_en": "Pin bar bottom",
+      "symbol": "USDKZT",
+      "tf": "D1",
+      "n": 33,
+      "agree_5": 0.2121,
+      "ci95": [
+        10.7,
+        37.8
+      ],
+      "avg_move_5": 7.4215,
+      "max_adverse_5": 9.0013,
+      "shown": true
+    },
+    {
+      "pattern_key": "bullish_engulfing",
+      "display_name_ru": "Бычье поглощение",
+      "display_name_ro": "Înghițire bullish",
+      "display_name_en": "Bullish engulfing",
+      "symbol": "USDKZT",
+      "tf": "D1",
+      "n": 5,
+      "agree_5": 0.2,
+      "ci95": [
+        null,
+        null
+      ],
+      "avg_move_5": 4.6294,
+      "max_adverse_5": 9.6634,
+      "shown": false
+    },
+    {
+      "pattern_key": "bearish_engulfing",
+      "display_name_ru": "Медвежье поглощение",
+      "display_name_ro": "Înghițire bearish",
+      "display_name_en": "Bearish engulfing",
+      "symbol": "USDKZT",
+      "tf": "D1",
+      "n": 7,
+      "agree_5": 0.5714,
+      "ci95": [
+        null,
+        null
+      ],
+      "avg_move_5": 6.2506,
+      "max_adverse_5": 5.8767,
+      "shown": false
+    },
+    {
+      "pattern_key": "break_retest",
+      "display_name_ru": "Пробой с ретестом",
+      "display_name_ro": "Spargere cu retest",
+      "display_name_en": "Break and retest",
+      "symbol": "USDKZT",
+      "tf": "D1",
+      "n": 43,
+      "agree_5": 0.4186,
+      "ci95": [
+        28.4,
+        56.7
+      ],
+      "avg_move_5": 7.9601,
+      "max_adverse_5": 6.2891,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_top",
+      "display_name_ru": "Двойная вершина",
+      "display_name_ro": "Vârf dublu",
+      "display_name_en": "Double top",
+      "symbol": "USDKZT",
+      "tf": "D1",
+      "n": 1,
+      "agree_5": 1.0,
+      "ci95": [
+        null,
+        null
+      ],
+      "avg_move_5": 4.5511,
+      "max_adverse_5": 0.2029,
+      "shown": false
+    },
+    {
+      "pattern_key": "pin_bar_bottom",
+      "display_name_ru": "Пин-бар снизу",
+      "display_name_ro": "Pin-bar jos",
+      "display_name_en": "Pin bar bottom",
+      "symbol": "USDRUB",
+      "tf": "H1",
+      "n": 2117,
+      "agree_5": 0.4709,
+      "ci95": [
+        45.0,
+        49.2
+      ],
+      "avg_move_5": 0.6318,
+      "max_adverse_5": 1.3483,
+      "shown": true
+    },
+    {
+      "pattern_key": "bearish_engulfing",
+      "display_name_ru": "Медвежье поглощение",
+      "display_name_ro": "Înghițire bearish",
+      "display_name_en": "Bearish engulfing",
+      "symbol": "USDRUB",
+      "tf": "H1",
+      "n": 1191,
+      "agree_5": 0.4467,
+      "ci95": [
+        41.9,
+        47.5
+      ],
+      "avg_move_5": 0.4609,
+      "max_adverse_5": 0.5428,
+      "shown": true
+    },
+    {
+      "pattern_key": "break_retest",
+      "display_name_ru": "Пробой с ретестом",
+      "display_name_ro": "Spargere cu retest",
+      "display_name_en": "Break and retest",
+      "symbol": "USDRUB",
+      "tf": "H1",
+      "n": 13110,
+      "agree_5": 0.5113,
+      "ci95": [
+        50.3,
+        52.0
+      ],
+      "avg_move_5": 0.8641,
+      "max_adverse_5": 1.2403,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_top",
+      "display_name_ru": "Двойная вершина",
+      "display_name_ro": "Vârf dublu",
+      "display_name_en": "Double top",
+      "symbol": "USDRUB",
+      "tf": "H1",
+      "n": 1224,
+      "agree_5": 0.4436,
+      "ci95": [
+        41.6,
+        47.2
+      ],
+      "avg_move_5": 0.3566,
+      "max_adverse_5": 0.3904,
+      "shown": true
+    },
+    {
+      "pattern_key": "bullish_engulfing",
+      "display_name_ru": "Бычье поглощение",
+      "display_name_ro": "Înghițire bullish",
+      "display_name_en": "Bullish engulfing",
+      "symbol": "USDRUB",
+      "tf": "H1",
+      "n": 1214,
+      "agree_5": 0.4596,
+      "ci95": [
+        43.2,
+        48.8
+      ],
+      "avg_move_5": 0.4698,
+      "max_adverse_5": 0.6656,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_bottom",
+      "display_name_ru": "Двойное дно",
+      "display_name_ro": "Fund dublu",
+      "display_name_en": "Double bottom",
+      "symbol": "USDRUB",
+      "tf": "H1",
+      "n": 1227,
+      "agree_5": 0.4711,
+      "ci95": [
+        44.3,
+        49.9
+      ],
+      "avg_move_5": 0.3523,
+      "max_adverse_5": 0.4805,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_top",
+      "display_name_ru": "Пин-бар сверху",
+      "display_name_ro": "Pin-bar sus",
+      "display_name_en": "Pin bar top",
+      "symbol": "USDRUB",
+      "tf": "H1",
+      "n": 1010,
+      "agree_5": 0.4693,
+      "ci95": [
+        43.9,
+        50.0
+      ],
+      "avg_move_5": 0.6789,
+      "max_adverse_5": 1.0411,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_bottom",
+      "display_name_ru": "Пин-бар снизу",
+      "display_name_ro": "Pin-bar jos",
+      "display_name_en": "Pin bar bottom",
+      "symbol": "USDRUB",
+      "tf": "H4",
+      "n": 627,
+      "agree_5": 0.4625,
+      "ci95": [
+        42.4,
+        50.2
+      ],
+      "avg_move_5": 0.9766,
+      "max_adverse_5": 1.6076,
+      "shown": true
+    },
+    {
+      "pattern_key": "break_retest",
+      "display_name_ru": "Пробой с ретестом",
+      "display_name_ro": "Spargere cu retest",
+      "display_name_en": "Break and retest",
+      "symbol": "USDRUB",
+      "tf": "H4",
+      "n": 7031,
+      "agree_5": 0.507,
+      "ci95": [
+        49.5,
+        51.9
+      ],
+      "avg_move_5": 1.2815,
+      "max_adverse_5": 1.6571,
+      "shown": true
+    },
+    {
+      "pattern_key": "bearish_engulfing",
+      "display_name_ru": "Медвежье поглощение",
+      "display_name_ro": "Înghițire bearish",
+      "display_name_en": "Bearish engulfing",
+      "symbol": "USDRUB",
+      "tf": "H4",
+      "n": 351,
+      "agree_5": 0.4558,
+      "ci95": [
+        40.4,
+        50.8
+      ],
+      "avg_move_5": 0.8561,
+      "max_adverse_5": 1.037,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_top",
+      "display_name_ru": "Пин-бар сверху",
+      "display_name_ro": "Pin-bar sus",
+      "display_name_en": "Pin bar top",
+      "symbol": "USDRUB",
+      "tf": "H4",
+      "n": 311,
+      "agree_5": 0.4662,
+      "ci95": [
+        41.2,
+        52.2
+      ],
+      "avg_move_5": 1.0146,
+      "max_adverse_5": 1.3706,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_bottom",
+      "display_name_ru": "Двойное дно",
+      "display_name_ro": "Fund dublu",
+      "display_name_en": "Double bottom",
+      "symbol": "USDRUB",
+      "tf": "H4",
+      "n": 265,
+      "agree_5": 0.4755,
+      "ci95": [
+        41.6,
+        53.6
+      ],
+      "avg_move_5": 0.519,
+      "max_adverse_5": 0.6382,
+      "shown": true
+    },
+    {
+      "pattern_key": "bullish_engulfing",
+      "display_name_ru": "Бычье поглощение",
+      "display_name_ro": "Înghițire bullish",
+      "display_name_en": "Bullish engulfing",
+      "symbol": "USDRUB",
+      "tf": "H4",
+      "n": 421,
+      "agree_5": 0.4323,
+      "ci95": [
+        38.6,
+        48.0
+      ],
+      "avg_move_5": 0.7549,
+      "max_adverse_5": 0.9937,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_top",
+      "display_name_ru": "Двойная вершина",
+      "display_name_ro": "Vârf dublu",
+      "display_name_en": "Double top",
+      "symbol": "USDRUB",
+      "tf": "H4",
+      "n": 270,
+      "agree_5": 0.4481,
+      "ci95": [
+        39.0,
+        50.8
+      ],
+      "avg_move_5": 0.5747,
+      "max_adverse_5": 0.6045,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_bottom",
+      "display_name_ru": "Пин-бар снизу",
+      "display_name_ro": "Pin-bar jos",
+      "display_name_en": "Pin bar bottom",
+      "symbol": "USDRUB",
+      "tf": "D1",
+      "n": 146,
+      "agree_5": 0.4932,
+      "ci95": [
+        41.3,
+        57.3
+      ],
+      "avg_move_5": 1.276,
+      "max_adverse_5": 1.8783,
+      "shown": true
+    },
+    {
+      "pattern_key": "break_retest",
+      "display_name_ru": "Пробой с ретестом",
+      "display_name_ro": "Spargere cu retest",
+      "display_name_en": "Break and retest",
+      "symbol": "USDRUB",
+      "tf": "D1",
+      "n": 3540,
+      "agree_5": 0.5073,
+      "ci95": [
+        49.1,
+        52.4
+      ],
+      "avg_move_5": 2.171,
+      "max_adverse_5": 2.5323,
+      "shown": true
+    },
+    {
+      "pattern_key": "bearish_engulfing",
+      "display_name_ru": "Медвежье поглощение",
+      "display_name_ro": "Înghițire bearish",
+      "display_name_en": "Bearish engulfing",
+      "symbol": "USDRUB",
+      "tf": "D1",
+      "n": 65,
+      "agree_5": 0.4308,
+      "ci95": [
+        31.8,
+        55.2
+      ],
+      "avg_move_5": 1.3987,
+      "max_adverse_5": 1.5834,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_top",
+      "display_name_ru": "Пин-бар сверху",
+      "display_name_ro": "Pin-bar sus",
+      "display_name_en": "Pin bar top",
+      "symbol": "USDRUB",
+      "tf": "D1",
+      "n": 110,
+      "agree_5": 0.4909,
+      "ci95": [
+        39.9,
+        58.3
+      ],
+      "avg_move_5": 1.4359,
+      "max_adverse_5": 1.6255,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_top",
+      "display_name_ru": "Двойная вершина",
+      "display_name_ro": "Vârf dublu",
+      "display_name_en": "Double top",
+      "symbol": "USDRUB",
+      "tf": "D1",
+      "n": 85,
+      "agree_5": 0.5529,
+      "ci95": [
+        44.7,
+        65.4
+      ],
+      "avg_move_5": 1.0573,
+      "max_adverse_5": 1.1466,
+      "shown": true
+    },
+    {
+      "pattern_key": "bullish_engulfing",
+      "display_name_ru": "Бычье поглощение",
+      "display_name_ro": "Înghițire bullish",
+      "display_name_en": "Bullish engulfing",
+      "symbol": "USDRUB",
+      "tf": "D1",
+      "n": 104,
+      "agree_5": 0.5673,
+      "ci95": [
+        47.1,
+        65.8
+      ],
+      "avg_move_5": 1.935,
+      "max_adverse_5": 1.7825,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_bottom",
+      "display_name_ru": "Двойное дно",
+      "display_name_ro": "Fund dublu",
+      "display_name_en": "Double bottom",
+      "symbol": "USDRUB",
+      "tf": "D1",
+      "n": 102,
+      "agree_5": 0.4804,
+      "ci95": [
+        38.6,
+        57.6
+      ],
+      "avg_move_5": 0.9704,
+      "max_adverse_5": 0.8539,
+      "shown": true
+    },
+    {
+      "pattern_key": "break_retest",
+      "display_name_ru": "Пробой с ретестом",
+      "display_name_ro": "Spargere cu retest",
+      "display_name_en": "Break and retest",
+      "symbol": "WTI",
+      "tf": "H1",
+      "n": 4126,
+      "agree_5": 0.5034,
+      "ci95": [
+        48.8,
+        51.9
+      ],
+      "avg_move_5": 0.8777,
+      "max_adverse_5": 0.9423,
+      "shown": true
+    },
+    {
+      "pattern_key": "bearish_engulfing",
+      "display_name_ru": "Медвежье поглощение",
+      "display_name_ro": "Înghițire bearish",
+      "display_name_en": "Bearish engulfing",
+      "symbol": "WTI",
+      "tf": "H1",
+      "n": 1123,
+      "agree_5": 0.4978,
+      "ci95": [
+        46.9,
+        52.7
+      ],
+      "avg_move_5": 0.552,
+      "max_adverse_5": 0.5739,
+      "shown": true
+    },
+    {
+      "pattern_key": "bullish_engulfing",
+      "display_name_ru": "Бычье поглощение",
+      "display_name_ro": "Înghițire bullish",
+      "display_name_en": "Bullish engulfing",
+      "symbol": "WTI",
+      "tf": "H1",
+      "n": 1062,
+      "agree_5": 0.5282,
+      "ci95": [
+        49.8,
+        55.8
+      ],
+      "avg_move_5": 0.5639,
+      "max_adverse_5": 0.5989,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_top",
+      "display_name_ru": "Пин-бар сверху",
+      "display_name_ro": "Pin-bar sus",
+      "display_name_en": "Pin bar top",
+      "symbol": "WTI",
+      "tf": "H1",
+      "n": 641,
+      "agree_5": 0.4696,
+      "ci95": [
+        43.1,
+        50.8
+      ],
+      "avg_move_5": 0.6125,
+      "max_adverse_5": 0.6281,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_bottom",
+      "display_name_ru": "Пин-бар снизу",
+      "display_name_ro": "Pin-bar jos",
+      "display_name_en": "Pin bar bottom",
+      "symbol": "WTI",
+      "tf": "H1",
+      "n": 701,
+      "agree_5": 0.5093,
+      "ci95": [
+        47.2,
+        54.6
+      ],
+      "avg_move_5": 0.7026,
+      "max_adverse_5": 0.6494,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_top",
+      "display_name_ru": "Двойная вершина",
+      "display_name_ro": "Vârf dublu",
+      "display_name_en": "Double top",
+      "symbol": "WTI",
+      "tf": "H1",
+      "n": 681,
+      "agree_5": 0.5213,
+      "ci95": [
+        48.4,
+        55.9
+      ],
+      "avg_move_5": 0.5529,
+      "max_adverse_5": 0.5221,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_bottom",
+      "display_name_ru": "Двойное дно",
+      "display_name_ro": "Fund dublu",
+      "display_name_en": "Double bottom",
+      "symbol": "WTI",
+      "tf": "H1",
+      "n": 676,
+      "agree_5": 0.4985,
+      "ci95": [
+        46.1,
+        53.6
+      ],
+      "avg_move_5": 0.4684,
+      "max_adverse_5": 0.4816,
+      "shown": true
+    },
+    {
+      "pattern_key": "break_retest",
+      "display_name_ru": "Пробой с ретестом",
+      "display_name_ro": "Spargere cu retest",
+      "display_name_en": "Break and retest",
+      "symbol": "WTI",
+      "tf": "H4",
+      "n": 2125,
+      "agree_5": 0.5125,
+      "ci95": [
+        49.1,
+        53.4
+      ],
+      "avg_move_5": 1.7136,
+      "max_adverse_5": 1.7688,
+      "shown": true
+    },
+    {
+      "pattern_key": "bullish_engulfing",
+      "display_name_ru": "Бычье поглощение",
+      "display_name_ro": "Înghițire bullish",
+      "display_name_en": "Bullish engulfing",
+      "symbol": "WTI",
+      "tf": "H4",
+      "n": 298,
+      "agree_5": 0.5101,
+      "ci95": [
+        45.4,
+        56.6
+      ],
+      "avg_move_5": 1.2081,
+      "max_adverse_5": 1.187,
+      "shown": true
+    },
+    {
+      "pattern_key": "bearish_engulfing",
+      "display_name_ru": "Медвежье поглощение",
+      "display_name_ro": "Înghițire bearish",
+      "display_name_en": "Bearish engulfing",
+      "symbol": "WTI",
+      "tf": "H4",
+      "n": 309,
+      "agree_5": 0.4951,
+      "ci95": [
+        44.0,
+        55.1
+      ],
+      "avg_move_5": 1.1937,
+      "max_adverse_5": 1.1625,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_bottom",
+      "display_name_ru": "Пин-бар снизу",
+      "display_name_ro": "Pin-bar jos",
+      "display_name_en": "Pin bar bottom",
+      "symbol": "WTI",
+      "tf": "H4",
+      "n": 190,
+      "agree_5": 0.5316,
+      "ci95": [
+        46.1,
+        60.1
+      ],
+      "avg_move_5": 1.3026,
+      "max_adverse_5": 1.3105,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_top",
+      "display_name_ru": "Пин-бар сверху",
+      "display_name_ro": "Pin-bar sus",
+      "display_name_en": "Pin bar top",
+      "symbol": "WTI",
+      "tf": "H4",
+      "n": 162,
+      "agree_5": 0.5123,
+      "ci95": [
+        43.6,
+        58.8
+      ],
+      "avg_move_5": 1.0891,
+      "max_adverse_5": 1.2741,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_top",
+      "display_name_ru": "Двойная вершина",
+      "display_name_ro": "Vârf dublu",
+      "display_name_en": "Double top",
+      "symbol": "WTI",
+      "tf": "H4",
+      "n": 235,
+      "agree_5": 0.4255,
+      "ci95": [
+        36.4,
+        48.9
+      ],
+      "avg_move_5": 0.9159,
+      "max_adverse_5": 0.9716,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_bottom",
+      "display_name_ru": "Двойное дно",
+      "display_name_ro": "Fund dublu",
+      "display_name_en": "Double bottom",
+      "symbol": "WTI",
+      "tf": "H4",
+      "n": 219,
+      "agree_5": 0.5068,
+      "ci95": [
+        44.1,
+        57.2
+      ],
+      "avg_move_5": 0.9105,
+      "max_adverse_5": 0.916,
+      "shown": true
+    },
+    {
+      "pattern_key": "break_retest",
+      "display_name_ru": "Пробой с ретестом",
+      "display_name_ro": "Spargere cu retest",
+      "display_name_en": "Break and retest",
+      "symbol": "WTI",
+      "tf": "D1",
+      "n": 1962,
+      "agree_5": 0.4883,
+      "ci95": [
+        46.6,
+        51.0
+      ],
+      "avg_move_5": 3.7411,
+      "max_adverse_5": 4.1716,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_bottom",
+      "display_name_ru": "Пин-бар снизу",
+      "display_name_ro": "Pin-bar jos",
+      "display_name_en": "Pin bar bottom",
+      "symbol": "WTI",
+      "tf": "D1",
+      "n": 47,
+      "agree_5": 0.3617,
+      "ci95": [
+        24.0,
+        50.5
+      ],
+      "avg_move_5": 2.6491,
+      "max_adverse_5": 3.6179,
+      "shown": true
+    },
+    {
+      "pattern_key": "bullish_engulfing",
+      "display_name_ru": "Бычье поглощение",
+      "display_name_ro": "Înghițire bullish",
+      "display_name_en": "Bullish engulfing",
+      "symbol": "WTI",
+      "tf": "D1",
+      "n": 60,
+      "agree_5": 0.5,
+      "ci95": [
+        37.7,
+        62.3
+      ],
+      "avg_move_5": 3.109,
+      "max_adverse_5": 3.8777,
+      "shown": true
+    },
+    {
+      "pattern_key": "bearish_engulfing",
+      "display_name_ru": "Медвежье поглощение",
+      "display_name_ro": "Înghițire bearish",
+      "display_name_en": "Bearish engulfing",
+      "symbol": "WTI",
+      "tf": "D1",
+      "n": 83,
+      "agree_5": 0.5422,
+      "ci95": [
+        43.5,
+        64.5
+      ],
+      "avg_move_5": 4.027,
+      "max_adverse_5": 3.9784,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_bottom",
+      "display_name_ru": "Двойное дно",
+      "display_name_ro": "Fund dublu",
+      "display_name_en": "Double bottom",
+      "symbol": "WTI",
+      "tf": "D1",
+      "n": 46,
+      "agree_5": 0.5435,
+      "ci95": [
+        40.2,
+        67.8
+      ],
+      "avg_move_5": 2.3237,
+      "max_adverse_5": 2.5409,
+      "shown": true
+    },
+    {
+      "pattern_key": "pin_bar_top",
+      "display_name_ru": "Пин-бар сверху",
+      "display_name_ro": "Pin-bar sus",
+      "display_name_en": "Pin bar top",
+      "symbol": "WTI",
+      "tf": "D1",
+      "n": 39,
+      "agree_5": 0.2308,
+      "ci95": [
+        12.6,
+        38.3
+      ],
+      "avg_move_5": 3.7838,
+      "max_adverse_5": 4.7049,
+      "shown": true
+    },
+    {
+      "pattern_key": "double_top",
+      "display_name_ru": "Двойная вершина",
+      "display_name_ro": "Vârf dublu",
+      "display_name_en": "Double top",
+      "symbol": "WTI",
+      "tf": "D1",
+      "n": 41,
+      "agree_5": 0.439,
+      "ci95": [
+        29.9,
+        59.0
+      ],
+      "avg_move_5": 3.1612,
+      "max_adverse_5": 2.8832,
+      "shown": true
+    }
+  ],
+  "pattern_pooled": {
+    "break_retest": {
+      "agree_5": 0.5027,
+      "n": 176196
+    },
+    "bullish_engulfing": {
+      "agree_5": 0.5053,
+      "n": 21367
+    },
+    "pin_bar_top": {
+      "agree_5": 0.4681,
+      "n": 15386
+    },
+    "bearish_engulfing": {
+      "agree_5": 0.4716,
+      "n": 21057
+    },
+    "pin_bar_bottom": {
+      "agree_5": 0.5084,
+      "n": 21887
+    },
+    "double_bottom": {
+      "agree_5": 0.5133,
+      "n": 9603
+    },
+    "double_top": {
+      "agree_5": 0.4722,
+      "n": 9973
+    }
+  },
+  "summary": {
+    "agree_min": 46.8,
+    "agree_max": 51.3,
+    "n_total": 275469,
+    "verdict_key": "coin_flip",
+    "adverse_move_ratio": 0.988,
+    "highlight": {
+      "pattern_key": "break_retest",
+      "agree_5": 50.3,
+      "n": 176196
+    }
+  }
+}

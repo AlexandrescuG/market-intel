@@ -11,8 +11,7 @@
     html,body{max-width:100vw;overflow-x:hidden;scroll-behavior:smooth}
     body{background:#ffffff;font-family:'DM Sans',system-ui,sans-serif;color:#18181a}
     #sbf-book-root{min-height:100vh}
-    .messenger-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:30px}
-    @media(max-width:768px){.messenger-grid{grid-template-columns:1fr}.hide-mobile{display:none!important}.g2{grid-template-columns:1fr!important}.g3{grid-template-columns:1fr!important}}
+    @media(max-width:768px){.hide-mobile{display:none!important}.g2{grid-template-columns:1fr!important}.g3{grid-template-columns:1fr!important}}
   </style>
 </head>
 <body>
@@ -22,7 +21,8 @@
 
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"></script>
+<script src="/edu/assets/ch7.js"></script>
 
 <script type="text/babel" data-presets="react">
 const INITIAL_LANG = "{{ lang }}";
@@ -30,1465 +30,671 @@ const INITIAL_LANG = "{{ lang }}";
 {% raw %}
 const STRINGS = {
   ru: {
-    // Ask-analyst contact popup
-    askTag: `— НАПИСАТЬ НАМ`,
-    askTitle: `Предпочитаете мессенджер?`,
-    askBody: `Напишите в Telegram или WhatsApp — сообщение уже готово.`,
-    askTgSub: `Telegram · онлайн`,
-    askTgBtn: `ОТКРЫТЬ TELEGRAM`,
-    askWaSub: `WhatsApp · онлайн`,
-    askWaBtn: `ОТКРЫТЬ WHATSAPP`,
-
-    // Interactive 1: Hedge Fund Position Builder
-    hedgeMsgInitial: `Фонду нужно купить 100 000 лотов. В рынке только 20 500 — этого мало.`,
-    hedgeMsgTryBuy: `Пробуем купить по рынку... Доступно только 20 500 лотов. Цена уже сдвигается вверх!`,
-    hedgeMsgInsufficient: `⚠️ Мы купили 20 500 лотов, но цена выросла на 0.75 — ещё 79 500 лотов стали дороже. Нужно другое решение.`,
-    hedgeMsgSweepStart: `🎭 Инициируем ложное падение... Продаём крупный блок чтобы испугать толпу...`,
-    hedgeMsgPanic: `😱 Цена падает... Ритейл-трейдеры в панике! Их стоп-лоссы активируются как рыночные ордера на ПРОДАЖУ!`,
-    hedgeMsgStopsHit: `💰 Стопы сработали! 72 000 рыночных ордеров на продажу хлынули в рынок. Скупаем их всех по своим лимиткам!`,
-    hedgeMsgDone: `✅ Позиция собрана! 100 000 лотов куплено по средней цене 2504–2506. Теперь фонд разворачивает рынок вверх.`,
-    hedgeTitle: `Сбор Позиции Хедж-Фонда`,
-    hedgeSubtitle: `ИНТЕРАКТИВ — ФУНДАМЕНТАЛ · СИМУЛЯТОР`,
-    hedgeReset: `↺ СБРОС`,
-    hedgeTaskLabel: `ЗАДАЧА ФОНДА`,
-    hedgeTaskValue: `КУПИТЬ 100 000 ЛОТОВ XAU/USD`,
-    hedgeFilledLabel: `ИСПОЛНЕНО`,
-    hedgeChartLabel: `ЦЕНА XAU/USD`,
-    hedgeStopsActiveLabel: `СТОПЫ АКТИВИРОВАНЫ ✓`,
-    hedgeBookLabel: `СТАКАН (ASK)`,
-    hedgeColPrice: `Цена`,
-    hedgeColVolume: `Объём`,
-    hedgeTotalPrefix: `Итого:`,
-    hedgeTotalSuffix: `лот`,
-    hedgeStopsBelowLabel: `СТОП-ЛОССЫ (ниже рынка)`,
-    hedgeStopsBelowValue: `≈2503.50 · 72 000 лот`,
-    hedgeStopsBelowNote: `скрытая ликвидность толпы`,
-    hedgeBoughtSuffix: `куплено`,
-    hedgeBoughtNote: `из стопов толпы`,
-    hedgeBtn1: `1. Купить по рынку`,
-    hedgeBtn2: `2. Инициировать Sweep ↓`,
-    hedgeBtnRepeat: `↺ Повторить симуляцию`,
-    hedgeResultTitle: `💡 Именно так работает Liquidity Sweep`,
-    hedgeResultBody: `Фонд использовал стоп-лоссы розничных трейдеров как источник ликвидности. Падение было инструментом, а не случайностью. После сбора позиции цена разворачивается — теперь в интересах фонда.`,
-
-    // Interactive 2: X-Ray Chart Trainer
-    xraySupport1: `Поддержка`,
-    xraySupport2: `Поддержка 2`,
-    xrayStopLong: `Стоп-лоссы лонгистов`,
-    xrayStopShort: `Стоп-лоссы шортистов`,
-    xrayTitle: `Рентген Графика`,
-    xraySubtitle: `ИНТЕРАКТИВ — ТЕХНИКА · X-RAY MODE`,
-    xrayReset: `↺ СНАЧАЛА`,
-    xrayInstructExplore: `Зажмите кнопку «РЕНТГЕН» чтобы увидеть скрытую ликвидность. Затем предскажите следующее движение цены.`,
-    xrayInstructGuess: `Куда пойдёт цена следующей свечой?`,
-    xrayBtnUp: `↑ ВВЕРХ`,
-    xrayBtnDown: `↓ ВНИЗ`,
-    xrayBtnSideways: `→ БОКОМ`,
-    xrayResultCorrect: `✅ Верно! Цена пойдёт вверх — к Fair Value Gap.`,
-    xrayResultWrong: `❌ Не совсем. Правильный ответ — вверх.`,
-    xrayResultBody: `Sweep сработал: длинная тень пробила зону стоп-лоссов лонгистов (2503–2509), забрала ликвидность. После Sweep маркет-мейкер закрыл шорт и развернулся вверх. FVG на 2522–2530 — незакрытый дисбаланс, притягивает цену как магнит.`,
-    xrayModeActive: `X-RAY РЕЖИМ АКТИВЕН`,
-    xrayLegendStops: `Стоп-лоссы (скрытая ликвидность)`,
-    xrayBtnHold: `🩻 ЗАЖАТЬ: X-RAY`,
-    xrayBtnActive: `🩻 X-RAY АКТИВЕН`,
-    xrayHintExplore: `← Зажмите и отпустите для перехода к вопросу`,
-    xrayHintGuess: `← Выберите направление выше`,
-    xrayHintResult: `← Верно: цена идёт заполнять FVG ↑`,
-
-    // Chapter 7 — sticky header
-    chipLevel: `УРОВЕНЬ 7`,
-    headerChapterName: `Институциональный след`,
-    chipFA: `ФА 40%`,
-    chipTA: `ТА 60%`,
-
-    // HERO
-    heroTag: `SBF COMPANY — ГЛАВА 7`,
-    heroTitle1: `Институциональный`,
-    heroTitle2: `след —`,
-    heroSub: `Почему рынок всегда пробивает ваш стоп перед ростом? Кто двигает цену? Как читать след институционального капитала?`,
-    chipFundamental: `Фундаментал 40%`,
-    chipTechnical: `Техника 60%`,
-    chipInteractive: `2 Интерактива`,
-
-    // ANTI-MYTH
-    mythTag: `РАСПРОСТРАНЁННОЕ ЗАБЛУЖДЕНИЕ`,
-    mythTitle: `«Рынок пробил мой стоп случайно — это просто не моя торговля.»`,
-    mythBody: `Это не случайность. Ваш стоп стоит именно там, где институты запланировали взять ликвидность. Очевидные уровни поддержки — это не защита. Это мишень. Понимание механики «охоты за стопами» меняет то, как вы видите каждое движение цены.`,
-
-    // SBF VOICE
-    voiceTag: `— АНАЛИТИК SBF · ОЛЕГ`,
-    voiceQuote: `«Когда ваш стоп выбивается перед разворотом — вы не проиграли из-за плохой точки входа. Вы стали частью механизма. Ваш стоп-лосс был нужен кому-то очень крупному.»`,
-    voiceBody: `После этой главы вы перестанете ставить стопы в "очевидных" местах. Вы начнёте искать вход после Sweep — там, где толпа уже выброшена.`,
-
-    // PRICE OF IGNORANCE
-    ignoranceTag: `Цена незнания`,
-    ignoranceBodyA: `Трейдер видит чёткую поддержку, покупает прямо у уровня, ставит стоп ниже. Цена пробивает уровень, выбивает стоп — и тут же разворачивается вверх. Это не невезение. Это `,
-    ignoranceBodyB: `. Он мог войти после разворота с маленьким стопом и прибылью. Вместо этого — убыток и фрустрация.`,
-
-    // THEORY 1 (FA)
-    fa1Sub: `Крупный капитал работает иначе, чем розничный трейдер. Понимание его логики — ключ к чтению рынка.`,
-    fa1Title: `Как думает институциональный капитал`,
-    smc1Title: `Проблема ликвидности у китов`,
-    smc1Text: `Хедж-фонд с $10 млрд не может нажать «Buy» как розничный трейдер. Его ордер на 100 000 лотов мгновенно двинет рынок против него. Нужен продавец огромного объёма — и этим продавцом делают толпу.`,
-    smc2Title: `Стоп-лоссы как наживка`,
-    smc2Text: `Розничные трейдеры ставят стопы в очевидных местах: под поддержками, за локальными минимумами. Именно там скапливается ликвидность. Институт знает эти уровни — он заставляет цену достичь их, активировать стопы и забрать объём.`,
-    smc3Title: `Liquidity Sweep — Съём ликвидности`,
-    smc3Text: `Цена «прокалывает» уровень поддержки или сопротивления, активирует стоп-лоссы (превращая их в рыночные ордера) и немедленно разворачивается. На графике это выглядит как длинная тень свечи ниже уровня.`,
-    smc4Title: `Fair Value Gap (FVG)`,
-    smc4Text: `При резком импульсном движении возникает «разрыв» — три свечи, где средняя свеча не перекрыта телами двух крайних. Маркет-мейкер всегда возвращается к FVG, чтобы закрыть дисбаланс. Это магнит для цены.`,
-
-    // Liquidity diagram
-    diagTitle: `СХЕМА: КАК ИНСТИТУТ СОБИРАЕТ ПОЗИЦИЮ`,
-    diagAccumTitle: `НАКОПЛЕНИЕ`,
-    diagAccumSub1: `Боковик`,
-    diagAccumSub2: `Фонд набирает`,
-    diagSweepTitle: `SWEEP (ОХОТА)`,
-    diagSweepSub1: `Пробой уровня`,
-    diagSweepSub2: `Стопы активируются`,
-    diagSweepNote: `← Ваш SL здесь`,
-    diagReversalTitle: `РАЗВОРОТ`,
-    diagReversalSub1: `Фонд скупает стопы`,
-    diagReversalSub2: `Позиция собрана`,
-    diagTrendTitle: `ТРЕНД ↑`,
-    diagTrendSub1: `Цена растёт`,
-    diagTrendSub2: `Фонд в профите`,
-    diagPlanNote: `Институциональный план`,
-
-    // THEORY 2 (TA)
-    ta2Sub: `Два ключевых паттерна Smart Money на графике: Liquidity Sweep и Fair Value Gap.`,
-    ta2Title: `Как читать след Smart Money на графике`,
-
-    // Sweep anatomy
-    sweepAnatomyTitle: `АНАТОМИЯ LIQUIDITY SWEEP`,
-    sweepSupportLabel: `ПОДДЕРЖКА (виден всем)`,
-    sweepZoneLabel: `STOP-LOSS ZONE (скрыта от розницы)`,
-    sweepActivatedLabel: `Стопы активированы`,
-    sweepWickNote: `Длинная тень = охота`,
-    sweepTrueMoveLabel: `↑ ИСТИННОЕ ДВИЖЕНИЕ`,
-    sweepEntryLabel: `ВХОД SMART MONEY`,
-
-    // FVG anatomy
-    fvgAnatomyTitle: `АНАТОМИЯ FAIR VALUE GAP (FVG)`,
-    fvgReturnLabel1: `Цена возвращается`,
-    fvgReturnLabel2: `закрыть FVG`,
-    fvgUsageStrong: `Как использовать FVG:`,
-    fvgUsageBody: `после импульсного движения цена часто возвращается в зону разрыва (FVG) для «балансировки». Это зона потенциального входа в направлении импульса — с коротким стопом за нижней границей FVG.`,
-
-    // Checklist
-    checklistSub: `Отметьте каждый пункт, который вы поняли.`,
-    checklistTitle: `Чек-лист главы 7`,
-    checklist1: `Крупный капитал не может купить без ликвидности — ему нужны продавцы`,
-    checklist2: `Стоп-лоссы розничных трейдеров = ликвидность для институтов`,
-    checklist3: `Liquidity Sweep: ложный пробой уровня с длинной тенью = охота за стопами`,
-    checklist4: `После Sweep цена разворачивается в истинном направлении`,
-    checklist5: `Fair Value Gap — импульсный разрыв, к которому цена всегда возвращается`,
-    checklist6: `Smart Money не угадывает рынок — они его создают`,
-    checklistDoneTitle: `✅ Глава 7 освоена!`,
-    checklistDoneBody: `Вы видите рынок глазами Smart Money. Sweep и FVG — ваши новые инструменты.`,
-
-    // Conclusions
-    conclusionsTitle: `ИТОГИ ГЛАВЫ 7`,
-    conclusionsSub: `Что вы теперь знаете`,
-    conclusion1: `Рынок движется туда, где стоят стопы — там ликвидность`,
-    conclusion2: `Длинная тень свечи под поддержкой — признак Sweep, не пробоя`,
-    conclusion3: `FVG после импульса = зона притяжения цены при откате`,
-    conclusion4: `Институты используют страх толпы как топливо для роста`,
-    conclusion5: `Покупать после Sweep + FVG — вот где входят Smart Money`,
-    conclusion6: `«Очевидная» поддержка — ловушка. Настоящий вход — после Sweep`,
-
-    // Footer
-    askQuestionFooter: `Остался вопрос? Напиши аналитику`,
-    nextChapterBtn: `Уровень 8: Тренд и Циклы →`,
-  },
-  en: {
-    // Ask-analyst contact popup
-    askTag: `— CONTACT US`,
-    askTitle: `Prefer a messenger?`,
-    askBody: `Write to us on Telegram or WhatsApp — the message is already prepared.`,
-    askTgSub: `Telegram · online`,
-    askTgBtn: `OPEN TELEGRAM`,
-    askWaSub: `WhatsApp · online`,
-    askWaBtn: `OPEN WHATSAPP`,
-
-    // Interactive 1: Hedge Fund Position Builder
-    hedgeMsgInitial: `The fund needs to buy 100,000 lots. Only 20,500 are available in the market — not enough.`,
-    hedgeMsgTryBuy: `Trying to buy at market... Only 20,500 lots available. The price is already moving up!`,
-    hedgeMsgInsufficient: `⚠️ We bought 20,500 lots, but the price rose by 0.75 — another 79,500 lots just got more expensive. We need a different approach.`,
-    hedgeMsgSweepStart: `🎭 Initiating a false drop... Selling a large block to scare the crowd...`,
-    hedgeMsgPanic: `😱 The price is falling... Retail traders are panicking! Their stop-losses are triggering as market SELL orders!`,
-    hedgeMsgStopsHit: `💰 The stops got hit! 72,000 market sell orders flooded into the market. We're buying them all up with our limit orders!`,
-    hedgeMsgDone: `✅ Position built! 100,000 lots bought at an average price of 2504–2506. Now the fund turns the market upward.`,
-    hedgeTitle: `Building a Hedge Fund Position`,
-    hedgeSubtitle: `INTERACTIVE — FUNDAMENTALS · SIMULATOR`,
-    hedgeReset: `↺ RESET`,
-    hedgeTaskLabel: `FUND'S TASK`,
-    hedgeTaskValue: `BUY 100,000 LOTS XAU/USD`,
-    hedgeFilledLabel: `FILLED`,
-    hedgeChartLabel: `XAU/USD PRICE`,
-    hedgeStopsActiveLabel: `STOPS ACTIVATED ✓`,
-    hedgeBookLabel: `ORDER BOOK (ASK)`,
-    hedgeColPrice: `Price`,
-    hedgeColVolume: `Volume`,
-    hedgeTotalPrefix: `Total:`,
-    hedgeTotalSuffix: `lots`,
-    hedgeStopsBelowLabel: `STOP-LOSSES (below market)`,
-    hedgeStopsBelowValue: `≈2503.50 · 72,000 lots`,
-    hedgeStopsBelowNote: `hidden liquidity of the crowd`,
-    hedgeBoughtSuffix: `bought`,
-    hedgeBoughtNote: `from the crowd's stops`,
-    hedgeBtn1: `1. Buy at market`,
-    hedgeBtn2: `2. Initiate Sweep ↓`,
-    hedgeBtnRepeat: `↺ Repeat simulation`,
-    hedgeResultTitle: `💡 This is exactly how a Liquidity Sweep works`,
-    hedgeResultBody: `The fund used retail traders' stop-losses as a source of liquidity. The drop was a tool, not a coincidence. Once the position is built, the price reverses — now in the fund's favor.`,
-
-    // Interactive 2: X-Ray Chart Trainer
-    xraySupport1: `Support`,
-    xraySupport2: `Support 2`,
-    xrayStopLong: `Long traders' stop-losses`,
-    xrayStopShort: `Short traders' stop-losses`,
-    xrayTitle: `Chart X-Ray`,
-    xraySubtitle: `INTERACTIVE — TECHNICALS · X-RAY MODE`,
-    xrayReset: `↺ START OVER`,
-    xrayInstructExplore: `Hold the "X-RAY" button to see the hidden liquidity. Then predict the next price move.`,
-    xrayInstructGuess: `Which way will the price go on the next candle?`,
-    xrayBtnUp: `↑ UP`,
-    xrayBtnDown: `↓ DOWN`,
-    xrayBtnSideways: `→ SIDEWAYS`,
-    xrayResultCorrect: `✅ Correct! The price will go up — toward the Fair Value Gap.`,
-    xrayResultWrong: `❌ Not quite. The correct answer is — up.`,
-    xrayResultBody: `The Sweep triggered: a long wick pierced the long traders' stop-loss zone (2503–2509) and took the liquidity. After the Sweep, the market maker closed the short and reversed upward. The FVG at 2522–2530 is an unclosed imbalance, pulling the price like a magnet.`,
-    xrayModeActive: `X-RAY MODE ACTIVE`,
-    xrayLegendStops: `Stop-losses (hidden liquidity)`,
-    xrayBtnHold: `🩻 HOLD: X-RAY`,
-    xrayBtnActive: `🩻 X-RAY ACTIVE`,
-    xrayHintExplore: `← Hold and release to move to the question`,
-    xrayHintGuess: `← Choose a direction above`,
-    xrayHintResult: `← Correct: the price is heading to fill the FVG ↑`,
-
-    // Chapter 7 — sticky header
-    chipLevel: `LEVEL 7`,
-    headerChapterName: `Institutional Footprint`,
-    chipFA: `FA 40%`,
-    chipTA: `TA 60%`,
-
-    // HERO
-    heroTag: `SBF COMPANY — CHAPTER 7`,
-    heroTitle1: `Institutional`,
-    heroTitle2: `footprint —`,
-    heroSub: `Why does the market always break your stop right before rallying? Who moves the price? How do you read the footprint of institutional capital?`,
-    chipFundamental: `Fundamentals 40%`,
-    chipTechnical: `Technicals 60%`,
-    chipInteractive: `2 Interactives`,
-
-    // ANTI-MYTH
-    mythTag: `COMMON MISCONCEPTION`,
-    mythTitle: `"The market hit my stop by accident — it just wasn't my trade."`,
-    mythBody: `This is not an accident. Your stop sits exactly where institutions planned to take liquidity. Obvious support levels are not protection. They're a target. Understanding the mechanics of "stop hunting" changes the way you see every price move.`,
-
-    // SBF VOICE
-    voiceTag: `— SBF ANALYST · OLEG`,
-    voiceQuote: `"When your stop gets taken right before the reversal, you didn't lose because of a bad entry. You became part of the mechanism. Someone very large needed your stop-loss."`,
-    voiceBody: `After this chapter, you'll stop placing stops in "obvious" spots. You'll start looking for entries after the Sweep — where the crowd has already been shaken out.`,
-
-    // PRICE OF IGNORANCE
-    ignoranceTag: `The cost of not knowing`,
-    ignoranceBodyA: `A trader sees a clear support level, buys right at it, places a stop below. The price breaks the level, hits the stop — and immediately reverses upward. This isn't bad luck. This is `,
-    ignoranceBodyB: `. He could have entered after the reversal with a small stop and profit. Instead — a loss and frustration.`,
-
-    // THEORY 1 (FA)
-    fa1Sub: `Big capital operates differently than a retail trader. Understanding its logic is the key to reading the market.`,
-    fa1Title: `How institutional capital thinks`,
-    smc1Title: `The liquidity problem of whales`,
-    smc1Text: `A hedge fund with $10 billion can't just click "Buy" like a retail trader. Its order for 100,000 lots would instantly move the market against it. It needs a seller with enormous volume — and the crowd is turned into that seller.`,
-    smc2Title: `Stop-losses as bait`,
-    smc2Text: `Retail traders place stops in obvious spots: below support levels, beyond local lows. That's exactly where liquidity accumulates. Institutions know these levels — they push the price to reach them, trigger the stops, and take the volume.`,
-    smc3Title: `Liquidity Sweep — Taking the liquidity`,
-    smc3Text: `The price "pierces" a support or resistance level, triggers stop-losses (turning them into market orders), and immediately reverses. On the chart, this looks like a long candle wick beyond the level.`,
-    smc4Title: `Fair Value Gap (FVG)`,
-    smc4Text: `A sharp impulsive move creates a "gap" — three candles where the middle candle's body isn't overlapped by the two outer candles. The market maker always returns to the FVG to close the imbalance. It's a magnet for price.`,
-
-    // Liquidity diagram
-    diagTitle: `DIAGRAM: HOW AN INSTITUTION BUILDS A POSITION`,
-    diagAccumTitle: `ACCUMULATION`,
-    diagAccumSub1: `Range-bound`,
-    diagAccumSub2: `Fund accumulates`,
-    diagSweepTitle: `SWEEP (HUNT)`,
-    diagSweepSub1: `Level break`,
-    diagSweepSub2: `Stops trigger`,
-    diagSweepNote: `← Your SL here`,
-    diagReversalTitle: `REVERSAL`,
-    diagReversalSub1: `Fund buys up the stops`,
-    diagReversalSub2: `Position built`,
-    diagTrendTitle: `TREND ↑`,
-    diagTrendSub1: `Price rises`,
-    diagTrendSub2: `Fund is in profit`,
-    diagPlanNote: `Institutional plan`,
-
-    // THEORY 2 (TA)
-    ta2Sub: `Two key Smart Money patterns on the chart: Liquidity Sweep and Fair Value Gap.`,
-    ta2Title: `How to read the Smart Money footprint on the chart`,
-
-    // Sweep anatomy
-    sweepAnatomyTitle: `ANATOMY OF A LIQUIDITY SWEEP`,
-    sweepSupportLabel: `SUPPORT (visible to everyone)`,
-    sweepZoneLabel: `STOP-LOSS ZONE (hidden from retail)`,
-    sweepActivatedLabel: `Stops activated`,
-    sweepWickNote: `Long wick = hunt`,
-    sweepTrueMoveLabel: `↑ TRUE MOVE`,
-    sweepEntryLabel: `SMART MONEY ENTRY`,
-
-    // FVG anatomy
-    fvgAnatomyTitle: `ANATOMY OF A FAIR VALUE GAP (FVG)`,
-    fvgReturnLabel1: `Price returns`,
-    fvgReturnLabel2: `to close the FVG`,
-    fvgUsageStrong: `How to use the FVG:`,
-    fvgUsageBody: `after an impulsive move, the price often returns to the gap zone (FVG) to "rebalance." This is a zone of potential entry in the direction of the impulse — with a tight stop beyond the lower boundary of the FVG.`,
-
-    // Checklist
-    checklistSub: `Check off each point you understood.`,
-    checklistTitle: `Chapter 7 checklist`,
-    checklist1: `Big capital can't buy without liquidity — it needs sellers`,
-    checklist2: `Retail traders' stop-losses = liquidity for institutions`,
-    checklist3: `Liquidity Sweep: a false level break with a long wick = a stop hunt`,
-    checklist4: `After the Sweep, the price reverses in the true direction`,
-    checklist5: `Fair Value Gap — an impulsive gap the price always returns to`,
-    checklist6: `Smart Money doesn't guess the market — they create it`,
-    checklistDoneTitle: `✅ Chapter 7 mastered!`,
-    checklistDoneBody: `You now see the market through Smart Money's eyes. Sweep and FVG are your new tools.`,
-
-    // Conclusions
-    conclusionsTitle: `CHAPTER 7 SUMMARY`,
-    conclusionsSub: `What you now know`,
-    conclusion1: `The market moves to where the stops are — that's where the liquidity is`,
-    conclusion2: `A long candle wick below support is a sign of a Sweep, not a breakdown`,
-    conclusion3: `FVG after an impulse = a price-attraction zone on the pullback`,
-    conclusion4: `Institutions use the crowd's fear as fuel for the rally`,
-    conclusion5: `Buying after Sweep + FVG — that's where Smart Money enters`,
-    conclusion6: `"Obvious" support is a trap. The real entry is after the Sweep`,
-
-    // Footer
-    askQuestionFooter: `Have a question? Write to an analyst`,
-    nextChapterBtn: `Level 8: Trend and Cycles →`,
+    levelChip: "УРОВЕНЬ 7", chapterNameShort: "Институциональный след", faTag: "ФА 55%", taTag: "ТА 45%",
+    stepExplain: "ОБЪЯСНИ", stepShow: "ПОКАЖИ", stepDo: "ДАЙ СДЕЛАТЬ",
+    heroEyebrow: "SBF COMPANY — ГЛАВА 7",
+    heroTitleLine1: "Институциональный", heroTitleLine2: "След",
+    heroSubtitle: "Кто-то же двигает рынок на дневной диапазон за тридцать минут. Это не заговор против твоего стопа. Это осторожность, которую можно увидеть — если знать, куда смотреть.",
+    fundamentalChip: "Фундаментал 55%", technicalChip: "Техника 45%", interactiveChip: "3 Интерактива",
+    bigOrderSub: "Почувствуй задачу института на той же панели стакана, что в главе 4.",
+    executionSub: "Дробление, алгоритмы, айсберги, сделки вне книги — документировано и проверяемо.",
+    placesSub: "Самый практичный блок главы.",
+    coreMeasureSub: "Ядро главы: проверили утверждение «смарт-мани оставляют читаемые следы» на своих данных.",
+    narrativeSub: "Две колонки: что подтверждено измерением, а что — красивая история.",
+    xraySub: "Тот же интерактив, что учил видеть невидимое. Теперь он учит не верить в это.",
+    quizKicker: "ПРОВЕРЬ СЕБЯ", quizTitle: "Что ты узнал в этой главе", quizNext: "Дальше →",
+    quizStuckAll: "Всё закрепилось.", quizStuckSome: "Почти всё закрепилось.",
+    quizBackToSection: "← Вернуться к разделу",
+    askQuestionLabel: "Остался вопрос? Напиши аналитику",
+    nextChapterBtn: "Уровень 8: Тренды и Циклы →",
+    loadingLabel: "Загружаю наши измерения…",
+    loadErrorLabel: "Не удалось загрузить данные главы — часть блоков не отрисована. Это блокирующая ошибка, а не предупреждение.",
   },
   ro: {
-    // Ask-analyst contact popup
-    askTag: `— CONTACTAȚI-NE`,
-    askTitle: `Preferați un messenger?`,
-    askBody: `Scrieți pe Telegram sau WhatsApp — mesajul este deja pregătit.`,
-    askTgSub: `Telegram · online`,
-    askTgBtn: `DESCHIDE TELEGRAM`,
-    askWaSub: `WhatsApp · online`,
-    askWaBtn: `DESCHIDE WHATSAPP`,
-
-    // Interactive 1: Hedge Fund Position Builder
-    hedgeMsgInitial: `Fondul trebuie să cumpere 100.000 de loturi. Pe piață sunt disponibile doar 20.500 — insuficient.`,
-    hedgeMsgTryBuy: `Încercăm să cumpărăm la piață... Sunt disponibile doar 20.500 de loturi. Prețul deja se mișcă în sus!`,
-    hedgeMsgInsufficient: `⚠️ Am cumpărat 20.500 de loturi, dar prețul a crescut cu 0,75 — încă 79.500 de loturi au devenit mai scumpe. Este nevoie de altă soluție.`,
-    hedgeMsgSweepStart: `🎭 Inițiem o cădere falsă... Vindem un bloc masiv ca să speriem mulțimea...`,
-    hedgeMsgPanic: `😱 Prețul scade... Traderii de retail intră în panică! Stop-loss-urile lor se activează ca ordine de piață de VÂNZARE!`,
-    hedgeMsgStopsHit: `💰 Stopurile au fost declanșate! 72.000 de ordine de piață de vânzare au inundat piața. Le cumpărăm pe toate cu ordinele noastre limită!`,
-    hedgeMsgDone: `✅ Poziția a fost construită! 100.000 de loturi cumpărate la prețul mediu 2504–2506. Acum fondul întoarce piața în sus.`,
-    hedgeTitle: `Construirea Poziției unui Hedge Fund`,
-    hedgeSubtitle: `INTERACTIV — FUNDAMENTAL · SIMULATOR`,
-    hedgeReset: `↺ RESETARE`,
-    hedgeTaskLabel: `SARCINA FONDULUI`,
-    hedgeTaskValue: `CUMPĂRĂ 100.000 DE LOTURI XAU/USD`,
-    hedgeFilledLabel: `EXECUTAT`,
-    hedgeChartLabel: `PREȚ XAU/USD`,
-    hedgeStopsActiveLabel: `STOPURI ACTIVATE ✓`,
-    hedgeBookLabel: `BOOK DE ORDINE (ASK)`,
-    hedgeColPrice: `Preț`,
-    hedgeColVolume: `Volum`,
-    hedgeTotalPrefix: `Total:`,
-    hedgeTotalSuffix: `loturi`,
-    hedgeStopsBelowLabel: `STOP-LOSS-URI (sub piață)`,
-    hedgeStopsBelowValue: `≈2503.50 · 72.000 loturi`,
-    hedgeStopsBelowNote: `lichiditatea ascunsă a mulțimii`,
-    hedgeBoughtSuffix: `cumpărat`,
-    hedgeBoughtNote: `din stopurile mulțimii`,
-    hedgeBtn1: `1. Cumpără la piață`,
-    hedgeBtn2: `2. Inițiază Sweep ↓`,
-    hedgeBtnRepeat: `↺ Repetă simularea`,
-    hedgeResultTitle: `💡 Exact așa funcționează un Liquidity Sweep`,
-    hedgeResultBody: `Fondul a folosit stop-loss-urile traderilor de retail ca sursă de lichiditate. Căderea a fost un instrument, nu o coincidență. După ce poziția este construită, prețul se întoarce — acum în interesul fondului.`,
-
-    // Interactive 2: X-Ray Chart Trainer
-    xraySupport1: `Suport`,
-    xraySupport2: `Suport 2`,
-    xrayStopLong: `Stop-loss-urile pozițiilor long`,
-    xrayStopShort: `Stop-loss-urile pozițiilor short`,
-    xrayTitle: `Radiografia Graficului`,
-    xraySubtitle: `INTERACTIV — TEHNIC · X-RAY MODE`,
-    xrayReset: `↺ DE LA ÎNCEPUT`,
-    xrayInstructExplore: `Țineți apăsat butonul „X-RAY” ca să vedeți lichiditatea ascunsă. Apoi preziceți următoarea mișcare a prețului.`,
-    xrayInstructGuess: `Încotro va merge prețul la următoarea lumânare?`,
-    xrayBtnUp: `↑ SUS`,
-    xrayBtnDown: `↓ JOS`,
-    xrayBtnSideways: `→ LATERAL`,
-    xrayResultCorrect: `✅ Corect! Prețul va urca — spre Fair Value Gap.`,
-    xrayResultWrong: `❌ Nu chiar. Răspunsul corect este — în sus.`,
-    xrayResultBody: `Sweep-ul s-a declanșat: fitilul lung a străpuns zona stop-loss-urilor pozițiilor long (2503–2509) și a preluat lichiditatea. După Sweep, market maker-ul și-a închis poziția short și a întors prețul în sus. FVG-ul de la 2522–2530 este un dezechilibru neînchis, care atrage prețul ca un magnet.`,
-    xrayModeActive: `MOD X-RAY ACTIV`,
-    xrayLegendStops: `Stop-loss-uri (lichiditate ascunsă)`,
-    xrayBtnHold: `🩻 ȚINE APĂSAT: X-RAY`,
-    xrayBtnActive: `🩻 X-RAY ACTIV`,
-    xrayHintExplore: `← Țineți apăsat și eliberați pentru a trece la întrebare`,
-    xrayHintGuess: `← Alegeți direcția mai sus`,
-    xrayHintResult: `← Corect: prețul merge să completeze FVG ↑`,
-
-    // Chapter 7 — sticky header
-    chipLevel: `NIVELUL 7`,
-    headerChapterName: `Urma instituțională`,
-    chipFA: `FA 40%`,
-    chipTA: `TA 60%`,
-
-    // HERO
-    heroTag: `SBF COMPANY — CAPITOLUL 7`,
-    heroTitle1: `Urma`,
-    heroTitle2: `instituțională —`,
-    heroSub: `De ce piața îți sparge mereu stopul chiar înainte de creștere? Cine mișcă prețul? Cum citești urma capitalului instituțional?`,
-    chipFundamental: `Fundamental 40%`,
-    chipTechnical: `Tehnic 60%`,
-    chipInteractive: `2 Module Interactive`,
-
-    // ANTI-MYTH
-    mythTag: `CONCEPȚIE GREȘITĂ FRECVENTĂ`,
-    mythTitle: `«Piața mi-a spart stopul din întâmplare — pur și simplu nu a fost ziua mea.»`,
-    mythBody: `Nu este întâmplare. Stopul tău este plasat exact acolo unde instituțiile au planificat să preia lichiditate. Nivelurile de suport evidente nu sunt o protecție. Sunt o țintă. Înțelegerea mecanismului „vânătorii de stopuri” schimbă modul în care vezi fiecare mișcare a prețului.`,
-
-    // SBF VOICE
-    voiceTag: `— ANALIST SBF · OLEG`,
-    voiceQuote: `«Când stopul tău este scos chiar înainte de întoarcere — nu ai pierdut din cauza unui punct de intrare prost. Ai devenit parte din mecanism. Cineva foarte mare avea nevoie exact de stop-loss-ul tău.»`,
-    voiceBody: `După acest capitol, vei renunța să mai plasezi stopuri în locuri "evidente". Vei începe să cauți intrarea după Sweep — acolo unde mulțimea a fost deja scoasă din piață.`,
-
-    // PRICE OF IGNORANCE
-    ignoranceTag: `Prețul ignoranței`,
-    ignoranceBodyA: `Un trader vede un suport clar, cumpără chiar la nivel, pune stopul mai jos. Prețul sparge nivelul, îi scoate stopul — și imediat se întoarce în sus. Nu este ghinion. Este `,
-    ignoranceBodyB: `. Ar fi putut intra după întoarcere cu un stop mic și profit. În schimb — pierdere și frustrare.`,
-
-    // THEORY 1 (FA)
-    fa1Sub: `Capitalul mare funcționează diferit față de traderul de retail. Înțelegerea logicii sale este cheia pentru a citi piața.`,
-    fa1Title: `Cum gândește capitalul instituțional`,
-    smc1Title: `Problema lichidității la „balene”`,
-    smc1Text: `Un hedge fund cu $10 miliarde nu poate apăsa pur și simplu „Buy” ca un trader de retail. Ordinul său de 100.000 de loturi ar mișca instantaneu piața împotriva lui. Are nevoie de un vânzător cu volum uriaș — și acest vânzător este creat din mulțime.`,
-    smc2Title: `Stop-loss-urile ca momeală`,
-    smc2Text: `Traderii de retail plasează stopurile în locuri evidente: sub suporturi, dincolo de minimele locale. Exact acolo se adună lichiditatea. Instituția cunoaște aceste niveluri — face prețul să le atingă, să activeze stopurile și să preia volumul.`,
-    smc3Title: `Liquidity Sweep — Preluarea lichidității`,
-    smc3Text: `Prețul „străpunge” un nivel de suport sau rezistență, activează stop-loss-urile (transformându-le în ordine de piață) și se întoarce imediat. Pe grafic, asta arată ca un fitil lung de lumânare dincolo de nivel.`,
-    smc4Title: `Fair Value Gap (FVG)`,
-    smc4Text: `La o mișcare impulsivă bruscă apare un „decalaj” — trei lumânări, în care lumânarea din mijloc nu este acoperită de corpurile celorlalte două. Market maker-ul revine mereu la FVG pentru a închide dezechilibrul. Este un magnet pentru preț.`,
-
-    // Liquidity diagram
-    diagTitle: `SCHEMĂ: CUM ÎȘI CONSTRUIEȘTE POZIȚIA O INSTITUȚIE`,
-    diagAccumTitle: `ACUMULARE`,
-    diagAccumSub1: `Consolidare`,
-    diagAccumSub2: `Fondul acumulează`,
-    diagSweepTitle: `SWEEP (VÂNĂTOARE)`,
-    diagSweepSub1: `Spargere de nivel`,
-    diagSweepSub2: `Stopurile se activează`,
-    diagSweepNote: `← SL-ul tău aici`,
-    diagReversalTitle: `ÎNTOARCERE`,
-    diagReversalSub1: `Fondul cumpără stopurile`,
-    diagReversalSub2: `Poziția este construită`,
-    diagTrendTitle: `TREND ↑`,
-    diagTrendSub1: `Prețul crește`,
-    diagTrendSub2: `Fondul e pe profit`,
-    diagPlanNote: `Planul instituțional`,
-
-    // THEORY 2 (TA)
-    ta2Sub: `Două tipare-cheie ale Smart Money pe grafic: Liquidity Sweep și Fair Value Gap.`,
-    ta2Title: `Cum citești urma Smart Money pe grafic`,
-
-    // Sweep anatomy
-    sweepAnatomyTitle: `ANATOMIA UNUI LIQUIDITY SWEEP`,
-    sweepSupportLabel: `SUPORT (vizibil pentru toți)`,
-    sweepZoneLabel: `STOP-LOSS ZONE (ascunsă de retail)`,
-    sweepActivatedLabel: `Stopuri activate`,
-    sweepWickNote: `Fitil lung = vânătoare`,
-    sweepTrueMoveLabel: `↑ MIȘCAREA REALĂ`,
-    sweepEntryLabel: `INTRARE SMART MONEY`,
-
-    // FVG anatomy
-    fvgAnatomyTitle: `ANATOMIA UNUI FAIR VALUE GAP (FVG)`,
-    fvgReturnLabel1: `Prețul revine`,
-    fvgReturnLabel2: `să închidă FVG`,
-    fvgUsageStrong: `Cum folosești FVG:`,
-    fvgUsageBody: `după o mișcare impulsivă, prețul revine adesea în zona decalajului (FVG) pentru „echilibrare”. Aceasta este o zonă de intrare potențială în direcția impulsului — cu un stop scurt dincolo de marginea inferioară a FVG.`,
-
-    // Checklist
-    checklistSub: `Bifează fiecare punct pe care l-ai înțeles.`,
-    checklistTitle: `Checklist-ul capitolului 7`,
-    checklist1: `Capitalul mare nu poate cumpăra fără lichiditate — are nevoie de vânzători`,
-    checklist2: `Stop-loss-urile traderilor de retail = lichiditate pentru instituții`,
-    checklist3: `Liquidity Sweep: spargere falsă de nivel cu fitil lung = vânătoare de stopuri`,
-    checklist4: `După Sweep, prețul se întoarce în direcția reală`,
-    checklist5: `Fair Value Gap — decalajul impulsiv la care prețul revine mereu`,
-    checklist6: `Smart Money nu ghicește piața — o creează`,
-    checklistDoneTitle: `✅ Capitolul 7 asimilat!`,
-    checklistDoneBody: `Vezi piața cu ochii Smart Money. Sweep și FVG sunt acum instrumentele tale noi.`,
-
-    // Conclusions
-    conclusionsTitle: `CONCLUZIILE CAPITOLULUI 7`,
-    conclusionsSub: `Ce știi acum`,
-    conclusion1: `Piața se mișcă acolo unde sunt stopurile — acolo este lichiditatea`,
-    conclusion2: `Fitilul lung sub suport este semnul unui Sweep, nu al unei spargeri reale`,
-    conclusion3: `FVG după impuls = zona de atracție a prețului la retragere`,
-    conclusion4: `Instituțiile folosesc frica mulțimii ca și combustibil pentru creștere`,
-    conclusion5: `Cumpărarea după Sweep + FVG — acolo intră Smart Money`,
-    conclusion6: `Suportul „evident” este o capcană. Intrarea reală este după Sweep`,
-
-    // Footer
-    askQuestionFooter: `Mai ai o întrebare? Scrie analistului`,
-    nextChapterBtn: `Nivelul 8: Trend și Cicluri →`,
+    levelChip: "NIVEL 7", chapterNameShort: "Amprenta Instituțională", faTag: "AF 55%", taTag: "AT 45%",
+    stepExplain: "EXPLICĂ", stepShow: "ARATĂ", stepDo: "LASĂ SĂ ÎNCERCE",
+    heroEyebrow: "SBF COMPANY — CAPITOLUL 7",
+    heroTitleLine1: "Amprenta", heroTitleLine2: "Instituțională",
+    heroSubtitle: "Cineva mișcă totuși piața pe intervalul unei zile în treizeci de minute. Nu e o conspirație împotriva stopului tău. E o prudență care poate fi văzută — dacă știi unde să te uiți.",
+    fundamentalChip: "Fundamental 55%", technicalChip: "Tehnic 45%", interactiveChip: "3 Module Interactive",
+    bigOrderSub: "Simte sarcina unei instituții pe același panou al cărții de ordine din capitolul 4.",
+    executionSub: "Fragmentare, algoritmi, iceberguri, tranzacții în afara cărții — documentat și verificabil.",
+    placesSub: "Cel mai practic bloc al capitolului.",
+    coreMeasureSub: "Nucleul capitolului: am verificat pe datele noastre afirmația «banii deștepți lasă urme lizibile».",
+    narrativeSub: "Două coloane: ce e confirmat prin măsurătoare și ce e doar o poveste frumoasă.",
+    xraySub: "Același interactiv care te-a învățat să vezi invizibilul. Acum te învață să nu crezi în el.",
+    quizKicker: "TESTEAZĂ-TE", quizTitle: "Ce ai învățat în acest capitol", quizNext: "Continuă →",
+    quizStuckAll: "Totul s-a fixat.", quizStuckSome: "Aproape totul s-a fixat.",
+    quizBackToSection: "← Înapoi la secțiune",
+    askQuestionLabel: "Mai aveți o întrebare? Scrieți analistului",
+    nextChapterBtn: "Nivelul 8: Tendințe și Cicluri →",
+    loadingLabel: "Se încarcă măsurătorile noastre…",
+    loadErrorLabel: "Datele capitolului nu s-au încărcat — unele blocuri nu sunt afișate. Aceasta e o eroare blocantă, nu un avertisment.",
+  },
+  en: {
+    levelChip: "LEVEL 7", chapterNameShort: "Institutional Footprint", faTag: "FA 55%", taTag: "TA 45%",
+    stepExplain: "EXPLAIN", stepShow: "SHOW", stepDo: "LET YOU TRY",
+    heroEyebrow: "SBF COMPANY — CHAPTER 7",
+    heroTitleLine1: "Institutional", heroTitleLine2: "Footprint",
+    heroSubtitle: "Something moves the market across a full day's range in thirty minutes. It isn't a conspiracy against your stop. It's caution you can actually see — if you know where to look.",
+    fundamentalChip: "Fundamental 55%", technicalChip: "Technical 45%", interactiveChip: "3 Interactives",
+    bigOrderSub: "Feel an institution's problem on the same order-book panel from chapter 4.",
+    executionSub: "Slicing, algorithms, icebergs, off-book trades — documented and verifiable.",
+    placesSub: "The most practical block in the chapter.",
+    coreMeasureSub: "The chapter's core: we tested the claim «smart money leaves readable footprints» against our own data.",
+    narrativeSub: "Two columns: what's confirmed by measurement and what's just a good story.",
+    xraySub: "The same interactive that taught you to see the invisible. Now it teaches you not to believe it.",
+    quizKicker: "TEST YOURSELF", quizTitle: "What you learned in this chapter", quizNext: "Next →",
+    quizStuckAll: "Everything stuck.", quizStuckSome: "Almost everything stuck.",
+    quizBackToSection: "← Back to the section",
+    askQuestionLabel: "Have a question? Write to an analyst",
+    nextChapterBtn: "Level 8: Trends and Cycles →",
+    loadingLabel: "Loading our measurements…",
+    loadErrorLabel: "Chapter data failed to load — some blocks aren't rendered. This is a blocking error, not a warning.",
   },
 };
 
-const C = {
-  gold:"#c9973a", goldLight:"#f4d49f", goldPale:"#f7f0e3",
-  black:"#18181a", ink:"#18181a", inkMid:"#555555",
-  inkSoft:"rgba(24,24,26,0.58)", inkFaint:"rgba(24,24,26,0.28)",
-  white:"#ffffff", surface:"#faf8f5", surfaceMid:"#f0ebe0",
-  border:"rgba(24,24,26,0.1)", borderGold:"rgba(201,151,58,0.25)",
-  green:"#089981", greenD:"#2d7a4f", greenPale:"#eaf5ee",
-  red:"#f23645", redD:"#c0392b", redPale:"#fdecea",
-  blue:"#2563eb", chart:"#131722"
-};
+const {C, Mono, Chip, Rule, AskAnalystBtn, getChUrl, QuizBlock, ComplianceFootnote} = window.AcademyShared;
 
-const Mono = ({children,size=13,color=C.inkSoft,spacing=3,style={},className=""}) =>
-  <span className={className} style={{fontFamily:"'Courier New',monospace",fontSize:size,letterSpacing:spacing,color,...style}}>{children}</span>;
-const Chip = ({children,color=C.gold}) =>
-  <span style={{fontFamily:"'Courier New',monospace",fontSize:11,letterSpacing:3,color,border:`1px solid ${color}`,padding:"4px 11px",display:"inline-block",textTransform:"uppercase"}}>{children}</span>;
-const Rule = ({w="50%",my=32}) =>
-  <div style={{height:1,background:`linear-gradient(90deg,transparent,${C.gold},transparent)`,width:w,margin:`${my}px auto`,opacity:0.4}}/>;
-const SectionTitle = ({children,sub,align="left"}) => (
-  <div style={{textAlign:align,marginBottom:36}}>
+const SectionTitle = ({children,sub,align="left",id}) => (
+  <div id={id} style={{textAlign:align,marginBottom:36,scrollMarginTop:130}}>
     <h2 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(24px,3.2vw,36px)",fontWeight:400,color:C.black,lineHeight:1.15,marginBottom:sub?10:0}}>{children}</h2>
     {sub && <p style={{fontSize:15,color:C.inkSoft,lineHeight:1.65,maxWidth:680,margin:align==="center"?"0 auto":0}}>{sub}</p>}
   </div>
 );
-const InfoCard = ({icon,title,text,accent=C.gold}) => (
-  <div style={{background:C.surface,border:`1px solid ${C.border}`,padding:"22px 26px",borderRadius:4,borderLeft:`3px solid ${accent}`}}>
-    <div style={{fontSize:20,marginBottom:8}}>{icon}</div>
-    <div style={{fontWeight:600,fontSize:13,color:C.black,letterSpacing:0.5,marginBottom:7,textTransform:"uppercase"}}>{title}</div>
-    <div style={{fontSize:13,color:C.inkMid,lineHeight:1.65}}>{text}</div>
-  </div>
+const StepTag = ({n,label}) => (
+  <Mono size={9.5} color={C.inkFaint} spacing={2} style={{display:"block",marginBottom:8,textTransform:"uppercase"}}>{n} · {label}</Mono>
 );
-const getChUrl = (ch) => {
-  const p = new URLSearchParams(window.location.search).get('path')||'explorer';
-  let base = INITIAL_LANG==='ru'?'/edu/b':`/edu/${INITIAL_LANG}/b`;
-  return `${base}/${ch}?path=${p}`;
-};
 
-// ─── AskAnalystPopup ──────────────────────────────────────────────────────────
-function AskAnalystPopup({onClose}) {
-  const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
-  const prefill = INITIAL_LANG==='ru' ? "Здравствуйте, есть вопрос по главе 7"
-    : INITIAL_LANG==='en' ? "Hello, question on chapter 7" : "Bună ziua, întrebare cap 7";
-  const tgLink = `https://t.me/SBF_Support?text=${encodeURIComponent(prefill)}`;
-  const waLink = `https://api.whatsapp.com/send/?phone=37369005200&text=${encodeURIComponent(prefill)}&type=phone_number&app_absent=0`;
+function fillTemplate(str, vars) {
+  if (!str) return str;
+  return str.replace(/\{\{(\w+)\}\}/g, (m, key) => {
+    const v = vars ? vars[key] : undefined;
+    if (v === undefined || v === null || (typeof v === "number" && isNaN(v))) {
+      console.error("[ch7] отсутствует значение для {{" + key + "}}");
+      return "—";
+    }
+    return String(v);
+  });
+}
+
+// ── Загрузка данных главы: pattern_reality.json (ядро) + xray_days.json (рентген).
+function useCh7Data() {
+  const { useState, useEffect } = React;
+  const [state, setState] = useState({ loading: true, error: null, patterns: null, xray: null });
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all([
+      fetch("/data/edu_stats/pattern_reality.json").then(r => { if (!r.ok) throw new Error("pattern_reality.json HTTP " + r.status); return r.json(); }),
+      fetch("/data/edu_scenes/ch7_xray.json").then(r => { if (!r.ok) throw new Error("ch7_xray.json HTTP " + r.status); return r.json(); }),
+    ]).then(([patterns, xray]) => {
+      if (!cancelled) setState({ loading: false, error: null, patterns, xray });
+    }).catch(err => {
+      console.error("[ch7] load failed:", err);
+      if (!cancelled) setState({ loading: false, error: err, patterns: null, xray: null });
+    });
+    return () => { cancelled = true; };
+  }, []);
+  return state;
+}
+
+function buildVars(patterns, xray, lang) {
+  if (!patterns || !xray) return null;
+  const T7 = window.Ch7Content[lang] || window.Ch7Content.ru;
+  const sum = patterns.summary || {};
+  const verdictText = sum.verdict_key === "coin_flip" ? T7.coreMeasure.verdictCoinFlip
+    : sum.verdict_key === "weak_tilt" ? T7.coreMeasure.verdictWeakTilt : T7.coreMeasure.verdictMixed;
+  return {
+    agree_min: sum.agree_min, agree_max: sum.agree_max, n_total: sum.n_total,
+    verdict_line: verdictText,
+    break_retest_agree: sum.highlight ? sum.highlight.agree_5 : null,
+    break_retest_n: sum.highlight ? sum.highlight.n : null,
+    adverse_ratio: sum.adverse_move_ratio,
+    n_days: xray.meta.n_days, xray_hit: xray.meta.xray_hit,
+  };
+}
+
+// ─── Cold open ──────────────────────────────────────────────────────────────
+function ColdOpen7() {
+  const T7 = window.Ch7Content[INITIAL_LANG] || window.Ch7Content.ru;
+  const co = T7.coldOpen;
   return (
-    <div style={{position:"fixed",inset:0,zIndex:1000,display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={onClose}>
-      <div style={{position:"fixed",inset:0,background:"rgba(250,248,245,0.98)"}}/>
-      <div onClick={e=>e.stopPropagation()} style={{position:"relative",width:"100%",maxWidth:900,zIndex:1,margin:"auto",padding:"40px 0"}}>
-        <button onClick={onClose} style={{position:"absolute",top:0,right:10,background:"none",border:"none",fontSize:35,cursor:"pointer",color:C.inkFaint,lineHeight:1}}>×</button>
-        <div style={{marginBottom:40}}>
-          <Mono size={13} color={C.gold} spacing={3} style={{display:"block",marginBottom:15}}>{S.askTag}</Mono>
-          <h2 style={{fontSize:"clamp(30px,5vw,42px)",fontWeight:700,color:C.black,marginBottom:15,fontFamily:"'DM Serif Display',serif"}}>{S.askTitle}</h2>
-          <p style={{fontSize:18,color:C.inkMid}}>{S.askBody}</p>
-        </div>
-        <div className="messenger-grid">
-          {[{href:tgLink,bg:"#0088cc",icon:"🚀",name:"SBF Support",sub:S.askTgSub,btn:S.askTgBtn},
-            {href:waLink,bg:"#25d366",icon:"💬",name:"SBF Company",sub:S.askWaSub,btn:S.askWaBtn}
-          ].map((m,i) => (
-            <div key={i} style={{background:"#fff",border:"1px solid #e0e0e0",borderRadius:12,padding:"30px 25px",display:"flex",flexDirection:"column"}}>
-              <div style={{display:"flex",alignItems:"center",gap:15,marginBottom:30}}>
-                <div style={{width:50,height:50,borderRadius:"50%",background:i===0?"#e1f3fb":"#e8f5ed",display:"flex",alignItems:"center",justifyContent:"center"}}>{m.icon}</div>
-                <div><div style={{fontSize:18,fontWeight:700}}>{m.name}</div><div style={{fontSize:14,color:C.inkFaint}}>{m.sub}</div></div>
-              </div>
-              <div style={{background:m.bg,padding:"15px 20px",borderRadius:"12px 12px 0 12px",marginBottom:30,alignSelf:"flex-end",maxWidth:"90%"}}>
-                <div style={{fontSize:14,color:"#fff"}}>{prefill}</div>
-              </div>
-              <a href={m.href} target="_blank" style={{marginTop:"auto",display:"block",background:m.bg,color:"#fff",textAlign:"center",padding:"18px",borderRadius:8,textDecoration:"none",fontWeight:700}}>{m.btn}</a>
-            </div>
-          ))}
-        </div>
+    <div style={{background:C.black,padding:"70px 5vw 56px",color:"#fff"}}>
+      <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:24,textAlign:"center"}}>{co.tag}</Mono>
+      <div style={{maxWidth:840,margin:"0 auto 20px"}}>
+        {co.lines.map((line,i) => (
+          <p key={i} style={{fontSize: i<2 ? 15 : i===co.lines.length-1 ? 17 : 15.5, color: i>=3?"#fff":"rgba(255,255,255,0.72)", fontWeight: i>=3?600:400, lineHeight:1.75, marginBottom:14, fontFamily: i===co.lines.length-1 ? "'DM Serif Display',serif" : "inherit"}}>{line}</p>
+        ))}
+      </div>
+      <p style={{textAlign:"center",fontFamily:"monospace",fontSize:12,color:C.gold}}>{co.cta}</p>
+    </div>
+  );
+}
+
+// ─── Анти-миф → Голос SBF → Цена незнания ──────────────────────────────────────
+function IntroBlock() {
+  const T7 = window.Ch7Content[INITIAL_LANG] || window.Ch7Content.ru;
+  return (
+    <div id="secAntiMyth" style={{marginBottom:48,scrollMarginTop:130}}>
+      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T7.antiMyth.tag}</Mono>
+      <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px",marginBottom:28}}>
+        <p style={{fontWeight:600,fontSize:14.5,color:C.black,marginBottom:10}}>{T7.antiMyth.title}</p>
+        <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,marginBottom:12}}>{T7.antiMyth.body1}</p>
+        <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,marginBottom:12}}>{T7.antiMyth.body2}</p>
+        <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,marginBottom:12}}>{T7.antiMyth.body3}</p>
+        <p style={{fontSize:13.5,color:C.black,lineHeight:1.7,margin:0,fontWeight:600}}>{T7.antiMyth.body4}</p>
+      </div>
+
+      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T7.voiceSbf.tag}</Mono>
+      <div style={{borderLeft:`4px solid ${C.gold}`,paddingLeft:24,marginBottom:28}}>
+        {T7.voiceSbf.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:16,fontStyle:"italic",color:C.inkMid,lineHeight:1.7,fontFamily:"'DM Serif Display',serif",marginBottom:12}}>{p}</p>)}
+      </div>
+
+      <div style={{background:C.black,borderRadius:8,padding:"26px 30px",color:C.white}}>
+        <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T7.priceOfNotKnowing.tag}</Mono>
+        <div style={{fontFamily:"'DM Serif Display',serif",fontSize:20,color:C.white,marginBottom:12}}>{T7.priceOfNotKnowing.title}</div>
+        {T7.priceOfNotKnowing.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:13.5,lineHeight:1.75,color:"rgba(255,255,255,0.7)",marginBottom:10}}>{p}</p>)}
       </div>
     </div>
   );
 }
 
-// ─── Interactive 1: Hedge Fund Position Builder (Liquidity Sweep) ─────────────
-function HedgeFundSim() {
-  const { useState, useEffect, useRef } = React;
+// ─── Задача крупного участника — мост со стаканом главы 4 ─────────────────────
+const BIG_ORDER_BOOK = (() => {
+  const mid = 4079.4;
+  const asks = [], bids = [];
+  // 16 уровней с полом объёма 35 (мин. суммарная глубина 16*35=560) --
+  // гарантирует, что заявка на 500 лотов реально проходит сквозь НЕСКОЛЬКО
+  // уровней и никогда не закрывается одним верхним уровнем целиком (баг,
+  // пойманный на скриншоте: с *10-масштабом и 12 уровнями топ оф бук иногда
+  // в одиночку перекрывал весь объём, и slippage выходил 0.00).
+  for (let i = 0; i < 16; i++) {
+    asks.push({ p: mid + 0.10 + i * 0.10, v: Math.round(35 + Math.random() * 45) });
+    bids.push({ p: mid - 0.10 - i * 0.10, v: Math.round(35 + Math.random() * 45) });
+  }
+  return { asks, bids, mid };
+})();
+
+function BigOrderBridge() {
+  const { useState } = React;
   const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
+  const T7 = window.Ch7Content[INITIAL_LANG] || window.Ch7Content.ru;
+  const bo = T7.bigOrderTask;
+  const [filled, setFilled] = useState(false);
 
-  // State
-  const [phase, setPhase] = useState("idle"); // idle | accumulating | sweeping | buying | done
-  const [fundFilled, setFundFilled] = useState(0);   // 0..100000 — fund's target
-  const [retailStops, setRetailStops] = useState(true); // stops still in the book
-  const [sweepActive, setSweepActive] = useState(false);
-  const [price, setPrice] = useState(2510.00);
-  const [priceHistory, setPriceHistory] = useState(Array.from({length:30},(_,i)=>2510 + Math.sin(i*0.4)*1.5));
-  const [bookAsks, setBookAsks] = useState([
-    {p:2510.20,v:8000},{p:2510.50,v:5000},{p:2511.00,v:3000},
-    {p:2511.50,v:2000},{p:2512.00,v:1500},{p:2513.00,v:1000},
-  ]);
-  const [message, setMessage] = useState(S.hedgeMsgInitial);
-  const [msgColor, setMsgColor] = useState(C.gold);
-  const [stopBought, setStopBought] = useState(0);
-  const [animFlash, setAnimFlash] = useState(null); // 'up'|'down'
-  const timerRef = useRef(null);
+  const { asks, bids, mid } = BIG_ORDER_BOOK;
+  const maxVol = Math.max(...asks.map(a=>a.v), ...bids.map(b=>b.v));
 
-  const FUND_TARGET = 100000;
-  const RETAIL_STOP_VOLUME = 72000; // volume freed when stops hit
-  const STOP_LEVEL = 2503.50;
-
-  const totalAsk = bookAsks.reduce((a,b)=>a+b.v,0);
-
-  // Phase: try buy from book — insufficient
-  const tryBuyMarket = () => {
-    if (phase !== "idle") return;
-    setPhase("accumulating");
-    setMessage(S.hedgeMsgTryBuy);
-    setMsgColor(C.red);
-    // animate price up slightly as buying pushes market
-    let t = 0;
-    timerRef.current = setInterval(() => {
-      t++;
-      setPrice(p => +(p + 0.15).toFixed(2));
-      setPriceHistory(h => [...h.slice(1), price + t*0.15]);
-      if (t >= 5) {
-        clearInterval(timerRef.current);
-        setPhase("need_sweep");
-        setMessage(S.hedgeMsgInsufficient);
-        setMsgColor(C.red);
-        setFundFilled(20500);
-      }
-    }, 300);
+  const fill500 = () => {
+    let remaining = 500, cost = 0, filledQty = 0;
+    for (const a of asks) {
+      const take = Math.min(remaining, a.v); // объём уровня в тех же единицах, что цель в 500 лотов -- ордер должен реально пройти сквозь несколько уровней, не закрыться одним
+      cost += take * a.p; filledQty += take; remaining -= take;
+      if (remaining <= 0) break;
+    }
+    const avg = cost / filledQty;
+    setFilled({ avg, remaining, topOfBook: asks[0].p, slippage: avg - asks[0].p });
   };
-
-  // Phase: initiate sweep — fake sell pressure
-  const initiateSweep = () => {
-    if (phase !== "need_sweep") return;
-    setPhase("sweeping");
-    setSweepActive(true);
-    setMessage(S.hedgeMsgSweepStart);
-    setMsgColor("#f59e0b");
-    let t = 0;
-    timerRef.current = setInterval(() => {
-      t++;
-      const drop = t <= 8 ? -0.6 : 0.0;
-      setPrice(p => +(p + drop).toFixed(2));
-      setPriceHistory(h => {
-        const last = h[h.length-1];
-        return [...h.slice(1), +(last + drop).toFixed(2)];
-      });
-      if (t === 6) {
-        setMessage(S.hedgeMsgPanic);
-        setRetailStops(false);
-      }
-      if (t >= 8) {
-        clearInterval(timerRef.current);
-        setPhase("buying");
-        setMessage(S.hedgeMsgStopsHit);
-        setMsgColor(C.green);
-        setSweepActive(false);
-        startBuying();
-      }
-    }, 280);
-  };
-
-  const startBuying = () => {
-    let bought = 20500;
-    let t = 0;
-    timerRef.current = setInterval(() => {
-      t++;
-      const chunk = Math.floor(Math.random() * 6000 + 3000);
-      bought = Math.min(FUND_TARGET, bought + chunk);
-      setFundFilled(bought);
-      setStopBought(b => b + chunk);
-      // price recovering
-      setPrice(p => +(p + 0.4 + Math.random()*0.2).toFixed(2));
-      setPriceHistory(h => {
-        const last = h[h.length-1];
-        return [...h.slice(1), +(last + 0.4 + Math.random()*0.2).toFixed(2)];
-      });
-      if (bought >= FUND_TARGET) {
-        clearInterval(timerRef.current);
-        setPhase("done");
-        setMessage(S.hedgeMsgDone);
-        setMsgColor(C.green);
-        setAnimFlash("up");
-        setTimeout(() => setAnimFlash(null), 800);
-      }
-    }, 350);
-  };
-
-  const reset = () => {
-    clearInterval(timerRef.current);
-    setPhase("idle");
-    setFundFilled(0);
-    setRetailStops(true);
-    setSweepActive(false);
-    setPrice(2510.00);
-    setPriceHistory(Array.from({length:30},(_,i)=>2510 + Math.sin(i*0.4)*1.5));
-    setBookAsks([{p:2510.20,v:8000},{p:2510.50,v:5000},{p:2511.00,v:3000},{p:2511.50,v:2000},{p:2512.00,v:1500},{p:2513.00,v:1000}]);
-    setMessage(S.hedgeMsgInitial);
-    setMsgColor(C.gold);
-    setStopBought(0);
-    setAnimFlash(null);
-  };
-
-  const W = 680, H = 120;
-  const minP = Math.min(...priceHistory) - 1;
-  const maxP = Math.max(...priceHistory) + 1;
-  const toY = p => H - ((p - minP) / (maxP - minP)) * H;
-  const pts = priceHistory.map((p,i) => `${i*(W/(priceHistory.length-1))},${toY(p)}`).join(" ");
-  const stopY = toY(STOP_LEVEL);
-
-  const fillPct = Math.round((fundFilled / FUND_TARGET) * 100);
 
   return (
-    <div style={{background:C.black,borderRadius:8,padding:"36px 40px",color:C.white}}>
-      <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:28}}>
-        <span style={{fontSize:28}}>🐳</span>
-        <div>
-          <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.gold}}>{S.hedgeTitle}</div>
-          <Mono size={11} color="rgba(255,255,255,0.4)" spacing={2}>{S.hedgeSubtitle}</Mono>
-        </div>
-        {phase !== "idle" && (
-          <button onClick={reset} style={{marginLeft:"auto",padding:"7px 14px",background:"rgba(255,255,255,0.07)",color:"rgba(255,255,255,0.5)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:3,cursor:"pointer",fontFamily:"monospace",fontSize:11}}>{S.hedgeReset}</button>
-        )}
-      </div>
-
-      {/* Mission bar */}
-      <div style={{background:"rgba(255,255,255,0.04)",borderRadius:4,padding:"14px 18px",marginBottom:24,display:"flex",gap:20,alignItems:"center",flexWrap:"wrap"}}>
-        <div>
-          <div style={{fontSize:10,fontFamily:"monospace",color:"rgba(255,255,255,0.35)",letterSpacing:1,marginBottom:4}}>{S.hedgeTaskLabel}</div>
-          <div style={{fontWeight:700,fontSize:16,color:C.gold,fontFamily:"monospace"}}>{S.hedgeTaskValue}</div>
-        </div>
-        <div style={{marginLeft:"auto",textAlign:"right"}}>
-          <div style={{fontSize:10,fontFamily:"monospace",color:"rgba(255,255,255,0.35)",letterSpacing:1,marginBottom:4}}>{S.hedgeFilledLabel}</div>
-          <div style={{fontWeight:700,fontSize:22,color: fillPct>=100?C.green:fillPct>20?C.gold:C.red,fontFamily:"monospace"}}>{fillPct}%</div>
-        </div>
-      </div>
-
-      {/* Progress bar */}
-      <div style={{background:"rgba(255,255,255,0.06)",borderRadius:3,height:8,marginBottom:28,overflow:"hidden"}}>
-        <div style={{height:"100%",background: fillPct>=100?C.green:C.gold,width:`${fillPct}%`,transition:"width .4s",borderRadius:3}}/>
-      </div>
-
-      <div style={{display:"grid",gridTemplateColumns:"1fr 220px",gap:24,alignItems:"start",marginBottom:24}} className="g2">
-
-        {/* Chart */}
-        <div>
-          <Mono size={9} color="rgba(255,255,255,0.3)" spacing={1} style={{display:"block",marginBottom:8}}>{S.hedgeChartLabel}</Mono>
-          <div style={{borderRadius:4,overflow:"hidden",border:"1px solid rgba(255,255,255,0.08)"}}>
-            <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",display:"block",background:C.chart}}>
-              {/* Stop level zone */}
-              <rect x="0" y={stopY-20} width={W} height={20} fill="rgba(242,54,69,0.08)"/>
-              <line x1="0" y1={stopY} x2={W} y2={stopY} stroke={C.red} strokeWidth="1" strokeDasharray="5 3" opacity="0.6"/>
-              {retailStops && (
-                <>
-                  {[0.15,0.35,0.55,0.75,0.88].map((pct,i) => (
-                    <g key={i}>
-                      <rect x={W*pct-15} y={stopY-14} width={30} height={12} fill="rgba(242,54,69,0.25)" rx="2"/>
-                      <text x={W*pct} y={stopY-5} fontSize="7" fill={C.red} textAnchor="middle" fontFamily="monospace">SL</text>
-                    </g>
-                  ))}
-                  <text x={W-4} y={stopY-4} fontSize="8" fill={C.red} textAnchor="end" fontFamily="monospace">STOP-LOSS ZONE</text>
-                </>
-              )}
-              {!retailStops && (
-                <text x={W-4} y={stopY-4} fontSize="8" fill={C.green} textAnchor="end" fontFamily="monospace">{S.hedgeStopsActiveLabel}</text>
-              )}
-              {/* Price line */}
-              <polyline points={pts} fill="none" stroke={animFlash==="up"?C.green:C.gold} strokeWidth="2"/>
-              {/* Current price dot */}
-              <circle cx={W-1} cy={toY(price)} r="4" fill={animFlash==="up"?C.green:C.gold}/>
-              {/* Price label */}
-              <rect x={W-70} y={toY(price)-10} width={68} height={18} fill="rgba(201,151,58,0.2)" rx="2"/>
-              <text x={W-36} y={toY(price)+3} fontSize="10" fill={C.gold} textAnchor="middle" fontFamily="monospace" fontWeight="700">{price.toFixed(2)}</text>
-            </svg>
+    <div style={{marginBottom:48}}>
+      <p style={{fontSize:14,color:C.inkMid,lineHeight:1.75,marginBottom:10,maxWidth:820}}>{bo.preamble}</p>
+      <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,marginBottom:24,maxWidth:820}}>{bo.keyPoint}</p>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:14,marginBottom:28}} className="g3">
+        {[[bo.c1Title,bo.c1Text],[bo.c2Title,bo.c2Text],[bo.c3Title,bo.c3Text]].map(([t,x],i) => (
+          <div key={i} style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:6,padding:"18px 20px",borderTop:`3px solid ${C.gold}`}}>
+            <div style={{fontWeight:600,fontSize:13,color:C.black,marginBottom:8}}>{t}</div>
+            <p style={{fontSize:12,color:C.inkMid,lineHeight:1.65,margin:0}}>{x}</p>
           </div>
-        </div>
+        ))}
+      </div>
 
-        {/* Order book */}
-        <div>
-          <Mono size={9} color="rgba(255,255,255,0.3)" spacing={1} style={{display:"block",marginBottom:8}}>{S.hedgeBookLabel}</Mono>
-          <div style={{background:"rgba(255,255,255,0.03)",borderRadius:4,overflow:"hidden",border:"1px solid rgba(255,255,255,0.07)"}}>
-            <div style={{padding:"8px 12px",borderBottom:"1px solid rgba(255,255,255,0.06)",display:"grid",gridTemplateColumns:"1fr 1fr"}}>
-              <Mono size={9} color="rgba(255,255,255,0.3)" spacing={0}>{S.hedgeColPrice}</Mono>
-              <Mono size={9} color="rgba(255,255,255,0.3)" spacing={0}>{S.hedgeColVolume}</Mono>
-            </div>
-            {bookAsks.map((a,i) => (
-              <div key={i} style={{padding:"6px 12px",display:"grid",gridTemplateColumns:"1fr 1fr",position:"relative"}}>
-                <div style={{position:"absolute",right:0,top:0,bottom:0,background:`rgba(242,54,69,${a.v/8000*0.2})`,transition:"all .3s"}}/>
-                <Mono size={11} color={C.red} spacing={0}>{a.p.toFixed(2)}</Mono>
-                <Mono size={11} color="rgba(255,255,255,0.5)" spacing={0}>{a.v.toLocaleString()}</Mono>
+      <div style={{background:C.black,borderRadius:8,padding:"28px 32px",color:"#fff"}}>
+        <p style={{fontSize:12.5,color:"rgba(255,255,255,0.5)",marginBottom:18}}>{bo.bridgeIntro}</p>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:2,marginBottom:18}} className="g2">
+          <div>
+            {[...asks].reverse().slice(-8).map((a,i) => (
+              <div key={i} style={{display:"flex",justifyContent:"space-between",padding:"3px 10px",position:"relative"}}>
+                <div style={{position:"absolute",right:0,top:0,bottom:0,width:`${a.v/maxVol*100}%`,background:"rgba(242,54,69,0.18)"}}/>
+                <Mono size={11} color={C.chartRed} spacing={0} style={{position:"relative"}}>{a.p.toFixed(2)}</Mono>
+                <Mono size={10} color="rgba(255,255,255,0.35)" spacing={0} style={{position:"relative"}}>{a.v}</Mono>
               </div>
             ))}
-            <div style={{padding:"10px 12px",background:"rgba(201,151,58,0.08)",borderTop:"1px solid rgba(201,151,58,0.15)",textAlign:"center"}}>
-              <Mono size={10} color={C.gold} spacing={0}>{S.hedgeTotalPrefix} {totalAsk.toLocaleString()} {S.hedgeTotalSuffix}</Mono>
-            </div>
-            {/* Retail stops in book (below) */}
-            {retailStops && (
-              <div style={{padding:"8px 12px",borderTop:"1px solid rgba(255,255,255,0.05)"}}>
-                <Mono size={9} color="rgba(255,255,255,0.25)" spacing={0} style={{display:"block",marginBottom:4}}>{S.hedgeStopsBelowLabel}</Mono>
-                <div style={{padding:"6px 10px",background:"rgba(242,54,69,0.08)",borderRadius:3,border:"1px solid rgba(242,54,69,0.15)"}}>
-                  <Mono size={10} color={C.red} spacing={0}>{S.hedgeStopsBelowValue}</Mono>
-                  <div style={{fontSize:9,color:"rgba(255,255,255,0.25)",marginTop:2,fontFamily:"monospace"}}>{S.hedgeStopsBelowNote}</div>
-                </div>
+          </div>
+          <div>
+            {bids.slice(0,8).map((b,i) => (
+              <div key={i} style={{display:"flex",justifyContent:"space-between",padding:"3px 10px",position:"relative"}}>
+                <div style={{position:"absolute",left:0,top:0,bottom:0,width:`${b.v/maxVol*100}%`,background:"rgba(8,153,129,0.18)"}}/>
+                <Mono size={11} color={C.chartGreen} spacing={0} style={{position:"relative"}}>{b.p.toFixed(2)}</Mono>
+                <Mono size={10} color="rgba(255,255,255,0.35)" spacing={0} style={{position:"relative"}}>{b.v}</Mono>
               </div>
-            )}
-            {!retailStops && stopBought > 0 && (
-              <div style={{padding:"8px 12px",borderTop:"1px solid rgba(255,255,255,0.05)"}}>
-                <div style={{padding:"6px 10px",background:"rgba(8,153,129,0.1)",borderRadius:3,border:`1px solid ${C.green}33`}}>
-                  <Mono size={10} color={C.green} spacing={0}>+{stopBought.toLocaleString()} {S.hedgeBoughtSuffix}</Mono>
-                  <div style={{fontSize:9,color:"rgba(255,255,255,0.25)",marginTop:2,fontFamily:"monospace"}}>{S.hedgeBoughtNote}</div>
-                </div>
-              </div>
-            )}
+            ))}
           </div>
         </div>
-      </div>
-
-      {/* Message */}
-      <div style={{background:"rgba(255,255,255,0.04)",borderRadius:4,padding:"14px 18px",marginBottom:20,minHeight:52}}>
-        <p style={{fontSize:13,color:msgColor,lineHeight:1.65,fontFamily:"monospace",transition:"color .3s"}}>{message}</p>
-      </div>
-
-      {/* Action buttons */}
-      <div style={{display:"flex",gap:12,flexWrap:"wrap"}}>
-        <button
-          onClick={tryBuyMarket}
-          disabled={phase !== "idle"}
-          style={{padding:"12px 22px",background: phase==="idle"?"rgba(255,255,255,0.08)":"rgba(255,255,255,0.03)",
-            color: phase==="idle"?"#fff":"rgba(255,255,255,0.2)",
-            border:`1px solid ${phase==="idle"?"rgba(255,255,255,0.15)":"rgba(255,255,255,0.05)"}`,
-            borderRadius:4,cursor: phase==="idle"?"pointer":"not-allowed",fontFamily:"monospace",fontSize:12,letterSpacing:1}}>
-          {S.hedgeBtn1}
-        </button>
-        <button
-          onClick={initiateSweep}
-          disabled={phase !== "need_sweep"}
-          style={{padding:"12px 22px",
-            background: phase==="need_sweep"?C.red:"rgba(255,255,255,0.03)",
-            color: phase==="need_sweep"?"#fff":"rgba(255,255,255,0.2)",
-            border:"none",borderRadius:4,
-            cursor: phase==="need_sweep"?"pointer":"not-allowed",
-            fontFamily:"monospace",fontSize:12,letterSpacing:1,fontWeight:700}}>
-          {S.hedgeBtn2}
-        </button>
-        {phase === "done" && (
-          <button onClick={reset} style={{padding:"12px 22px",background:C.greenD,color:"#fff",border:"none",borderRadius:4,cursor:"pointer",fontFamily:"monospace",fontSize:12,letterSpacing:1,fontWeight:700}}>
-            {S.hedgeBtnRepeat}
-          </button>
+        {!filled ? (
+          <button onClick={fill500} style={{display:"block",margin:"0 auto",padding:"14px 32px",background:C.gold,color:"#18181a",border:"none",borderRadius:4,cursor:"pointer",fontFamily:"monospace",fontSize:13,letterSpacing:1.5,fontWeight:700}}>{bo.bridgeBtn}</button>
+        ) : (
+          <div style={{textAlign:"center"}}>
+            <div style={{display:"flex",justifyContent:"center",gap:28,flexWrap:"wrap",marginBottom:14,fontFamily:"monospace",fontSize:13}}>
+              <span>{bo.topOfBook}: <b>{filled.topOfBook.toFixed(2)}</b></span>
+              <span>{bo.avgFill}: <b style={{color:C.gold}}>{filled.avg.toFixed(2)}</b></span>
+              <span>{bo.slippage}: <b style={{color:C.red}}>+{filled.slippage.toFixed(2)}</b></span>
+            </div>
+            <p style={{fontSize:13,color:C.gold,fontStyle:"italic",margin:0}}>{bo.bridgeResultLabel}</p>
+          </div>
         )}
       </div>
+    </div>
+  );
+}
 
-      {phase === "done" && (
-        <div style={{marginTop:20,background:"rgba(8,153,129,0.1)",border:`1px solid ${C.green}44`,borderRadius:4,padding:"16px 20px"}}>
-          <div style={{fontWeight:700,color:C.green,fontSize:14,marginBottom:8}}>{S.hedgeResultTitle}</div>
-          <p style={{fontSize:13,color:"rgba(255,255,255,0.6)",lineHeight:1.65}}>
-            {S.hedgeResultBody}
-          </p>
+// ─── Как исполняют на самом деле ───────────────────────────────────────────────
+function ExecutionCards() {
+  const T7 = window.Ch7Content[INITIAL_LANG] || window.Ch7Content.ru;
+  const ex = T7.execution;
+  return (
+    <div style={{marginBottom:48}}>
+      <p style={{fontSize:14,color:C.inkMid,lineHeight:1.75,marginBottom:24,maxWidth:820}}>{ex.preamble}</p>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}} className="g2">
+        {[[ex.c1Title,ex.c1Text],[ex.c2Title,ex.c2Text],[ex.c3Title,ex.c3Text],[ex.c4Title,ex.c4Text]].map(([t,x],i) => (
+          <div key={i} style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:6,padding:"20px 22px"}}>
+            <div style={{fontSize:15,fontWeight:600,color:C.black,marginBottom:10}}>{t}</div>
+            <p style={{fontSize:12.5,color:C.inkMid,lineHeight:1.65,margin:0}}>{x}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── Где след действительно виден ──────────────────────────────────────────────
+function FootprintPlaces() {
+  const T7 = window.Ch7Content[INITIAL_LANG] || window.Ch7Content.ru;
+  const fp = T7.footprintPlaces;
+  return (
+    <div style={{marginBottom:48}}>
+      <p style={{fontSize:14,color:C.inkMid,lineHeight:1.75,marginBottom:24,maxWidth:820}}>{fp.preamble}</p>
+      <div style={{overflowX:"auto",marginBottom:24}}>
+        <table style={{borderCollapse:"collapse",width:"100%",minWidth:560}}>
+          <thead>
+            <tr>
+              {[fp.colWhere,fp.colWhat,fp.colAccess].map(h => <th key={h} style={{textAlign:"left",padding:"8px 10px",fontSize:10.5,fontFamily:"monospace",color:C.inkFaint,textTransform:"uppercase",borderBottom:`1px solid ${C.border}`}}>{h}</th>)}
+            </tr>
+          </thead>
+          <tbody>
+            {fp.rows.map((r,i) => (
+              <tr key={i}>
+                <td style={{padding:"10px 10px",fontSize:12.5,color:C.black,fontWeight:600,borderBottom:`1px solid ${C.border}`,verticalAlign:"top"}}>{r.where}</td>
+                <td style={{padding:"10px 10px",fontSize:12,color:C.inkMid,borderBottom:`1px solid ${C.border}`,verticalAlign:"top"}}>{r.what}</td>
+                <td style={{padding:"10px 10px",fontSize:11.5,color:C.gold,fontFamily:"monospace",borderBottom:`1px solid ${C.border}`,verticalAlign:"top"}}>{r.access}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div style={{background:C.goldPale,border:`1px solid ${C.borderGold}`,borderRadius:6,padding:"18px 22px",marginBottom:16}}>
+        <div style={{fontWeight:600,fontSize:13,color:C.black,marginBottom:8}}>{fp.cotTitle}</div>
+        <p style={{fontSize:12.5,color:C.inkMid,lineHeight:1.7,margin:0}}>{fp.cotBody}</p>
+      </div>
+      <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:6,padding:"18px 22px"}}>
+        <div style={{fontWeight:600,fontSize:13,color:C.black,marginBottom:8}}>{fp.spotCaveatTitle}</div>
+        <p style={{fontSize:12.5,color:C.inkMid,lineHeight:1.7,margin:0}}>{fp.spotCaveatBody}</p>
+      </div>
+    </div>
+  );
+}
+
+// ─── Таблица паттернов (§3.5) ──────────────────────────────────────────────────
+function PatternRealityTable({ patterns }) {
+  const T7 = window.Ch7Content[INITIAL_LANG] || window.Ch7Content.ru;
+  const cm = T7.coreMeasure;
+  const { useState, useMemo } = React;
+  const [instrument, setInstrument] = useState("GOLD");
+  const cells = (patterns && patterns.cells) || [];
+  const symbols = useMemo(() => Array.from(new Set(cells.map(c=>c.symbol))).sort(), [cells]);
+  const rows = useMemo(() => cells.filter(c => c.symbol === instrument).sort((a,b) => b.n - a.n), [cells, instrument]);
+  const nameKey = "display_name_" + INITIAL_LANG;
+  const naData = INITIAL_LANG==="ru"?"мало данных":INITIAL_LANG==="ro"?"date insuficiente":"not enough data";
+
+  return (
+    <div>
+      <div style={{display:"flex",gap:6,marginBottom:14,flexWrap:"wrap"}}>
+        {symbols.map(s => (
+          <button key={s} onClick={()=>setInstrument(s)} style={{fontFamily:"monospace",fontSize:10.5,padding:"5px 10px",cursor:"pointer",background:s===instrument?C.gold:"#fff",color:s===instrument?"#18181a":C.inkMid,border:`1px solid ${s===instrument?C.gold:C.border}`,borderRadius:3}}>{s}</button>
+        ))}
+      </div>
+      <div style={{overflowX:"auto",marginBottom:8}}>
+        <table style={{borderCollapse:"collapse",width:"100%",minWidth:560}}>
+          <thead>
+            <tr>
+              <th style={{textAlign:"left",padding:"8px 10px",fontSize:10.5,fontFamily:"monospace",color:C.inkFaint,textTransform:"uppercase",borderBottom:`1px solid ${C.border}`}}>{cm.patternLabel}</th>
+              <th style={{textAlign:"center",padding:"8px 10px",fontSize:10.5,fontFamily:"monospace",color:C.inkFaint,borderBottom:`1px solid ${C.border}`}}>TF</th>
+              <th style={{textAlign:"center",padding:"8px 10px",fontSize:10.5,fontFamily:"monospace",color:C.inkFaint,borderBottom:`1px solid ${C.border}`}}>agree_5</th>
+              <th style={{textAlign:"center",padding:"8px 10px",fontSize:10.5,fontFamily:"monospace",color:C.inkFaint,borderBottom:`1px solid ${C.border}`}}>CI95</th>
+              <th style={{textAlign:"center",padding:"8px 10px",fontSize:10.5,fontFamily:"monospace",color:C.inkFaint,borderBottom:`1px solid ${C.border}`}}>n</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colSpan="5" style={{padding:"6px 10px",fontSize:10.5,fontFamily:"monospace",color:C.inkFaint,fontStyle:"italic",borderBottom:`1px solid ${C.border}`}}>{INITIAL_LANG==="ru"?"опорная линия случайности":INITIAL_LANG==="ro"?"linia de referință a întâmplării":"random baseline"}: 50%</td></tr>
+            {rows.map((c,i) => (
+              <tr key={i}>
+                <td style={{padding:"7px 10px",fontSize:12,color:C.black,fontWeight:600,borderBottom:`1px solid ${C.border}`}}>{c[nameKey] || c.pattern_key}</td>
+                <td style={{padding:"7px 10px",textAlign:"center",fontSize:11,fontFamily:"monospace",color:C.inkSoft,borderBottom:`1px solid ${C.border}`}}>{c.tf}</td>
+                <td style={{padding:"7px 10px",textAlign:"center",fontSize:12,fontFamily:"monospace",fontWeight:600,color: c.shown ? (Math.abs(c.agree_5*100-50)>10?C.gold:C.black) : C.inkFaint,borderBottom:`1px solid ${C.border}`}}>{c.shown ? (c.agree_5*100).toFixed(1)+"%" : naData}</td>
+                <td style={{padding:"7px 10px",textAlign:"center",fontSize:11,fontFamily:"monospace",color:C.inkFaint,borderBottom:`1px solid ${C.border}`}}>{c.shown && c.ci95[0]!=null ? `${c.ci95[0]}–${c.ci95[1]}` : "—"}</td>
+                <td style={{padding:"7px 10px",textAlign:"center",fontSize:11,fontFamily:"monospace",color:C.inkSoft,borderBottom:`1px solid ${C.border}`}}>{c.n}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+// ─── "Наши измерения" (§3.5) ───────────────────────────────────────────────────
+function CoreMeasureBlock({ patterns, vars }) {
+  const T7 = window.Ch7Content[INITIAL_LANG] || window.Ch7Content.ru;
+  const cm = T7.coreMeasure;
+  return (
+    <div style={{marginBottom:56}}>
+      <p style={{fontSize:14,color:C.inkMid,lineHeight:1.75,marginBottom:20,maxWidth:820}}>{cm.preamble}</p>
+      <p style={{fontSize:13,color:C.inkMid,lineHeight:1.7,marginBottom:24,maxWidth:820}}>{cm.whatCounted}</p>
+
+      <div style={{background:C.redPale,border:"1px solid rgba(192,57,43,.25)",borderRadius:6,padding:"18px 22px",marginBottom:28}}>
+        <div style={{fontWeight:600,fontSize:12.5,color:"#7a2418",marginBottom:8}}>{cm.lookaheadTitle}</div>
+        <p style={{fontSize:12,color:C.inkMid,lineHeight:1.7,margin:0}}>{cm.lookaheadBody}</p>
+      </div>
+
+      <div style={{display:"flex",flexDirection:"column",gap:14,marginBottom:28}}>
+        {[cm.finding1, cm.finding2, cm.finding3].map((f,i) => (
+          <div key={i} style={{display:"flex",gap:12,alignItems:"flex-start"}}>
+            <span style={{color:C.gold,fontFamily:"monospace",fontSize:11,marginTop:2}}>0{i+1}</span>
+            <span style={{fontSize:13,color:C.inkMid,lineHeight:1.65}}>{vars ? fillTemplate(f, vars) : "—"}</span>
+          </div>
+        ))}
+      </div>
+
+      <PatternRealityTable patterns={patterns}/>
+
+      <div style={{background:C.goldPale,border:`1px solid ${C.borderGold}`,borderRadius:6,padding:"18px 22px",marginTop:16,marginBottom:16}}>
+        <div style={{fontWeight:600,fontSize:12.5,color:C.black,marginBottom:6}}>{cm.honestTitle}</div>
+        <p style={{fontSize:12,color:C.inkMid,lineHeight:1.65,margin:0}}>{cm.honestBody}</p>
+      </div>
+
+      <a href="/data/edu_stats/pattern_reality.csv" download style={{fontFamily:"monospace",fontSize:12,color:C.gold,textDecoration:"none",border:`1px solid ${C.gold}`,padding:"9px 16px",borderRadius:4,display:"inline-block"}}>{cm.downloadCsv}</a>
+    </div>
+  );
+}
+
+// ─── Подтверждено / нарратив (два столбца, как AMD в главе 5) ─────────────────
+function NarrativeVsMeasured() {
+  const T7 = window.Ch7Content[INITIAL_LANG] || window.Ch7Content.ru;
+  const nv = T7.narrativeVsMeasured;
+  return (
+    <div style={{marginBottom:48}}>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,marginBottom:24}} className="g2">
+        <div style={{background:C.greenPale,border:"1px solid rgba(45,122,79,.25)",borderRadius:8,padding:"20px 24px"}}>
+          <Mono size={11} color={C.green} spacing={2} style={{display:"block",marginBottom:12}}>✓ {nv.confirmedTitle}</Mono>
+          {nv.confirmed.map((t,i) => <p key={i} style={{fontSize:12.5,color:C.inkMid,lineHeight:1.65,marginBottom:10}}>{t}</p>)}
+        </div>
+        <div style={{background:C.redPale,border:"1px solid rgba(242,54,69,.25)",borderRadius:8,padding:"20px 24px"}}>
+          <Mono size={11} color="#c0392b" spacing={2} style={{display:"block",marginBottom:12}}>✗ {nv.narrativeTitle}</Mono>
+          {nv.narrative.map((t,i) => <p key={i} style={{fontSize:12.5,color:C.inkMid,lineHeight:1.65,marginBottom:10}}>{t}</p>)}
+        </div>
+      </div>
+      <div style={{textAlign:"center",fontFamily:"'DM Serif Display',serif",fontStyle:"italic",fontSize:16,color:C.black,padding:"20px 0",borderTop:`1px solid ${C.border}`}}>{nv.finalPlate}</div>
+    </div>
+  );
+}
+
+// ─── "Рентген", перевёрнутый (3 шага) ──────────────────────────────────────────
+function XrayReversed({ xray }) {
+  const { useState } = React;
+  const T7 = window.Ch7Content[INITIAL_LANG] || window.Ch7Content.ru;
+  const xr = T7.xray;
+  const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
+  const [step, setStep] = useState(1);
+  const [dayIdx, setDayIdx] = useState(0);
+
+  const days = (xray && xray.days) || [];
+  const day = days[dayIdx];
+
+  const zoneLabel = (kind) => kind === "round_number" ? xr.zoneRound : kind === "prev_session_high" ? xr.zonePrevHigh : xr.zonePrevLow;
+  const outcomeLabel = (o) => o === "reversed" ? xr.outcomeReversed : o === "broke_through" ? xr.outcomeBroke : xr.outcomeInconclusive;
+
+  if (!day) return <p style={{color:C.inkFaint}}>—</p>;
+
+  const candles = day.candles || [];
+  const lo = Math.min(...candles.map(c=>c.low)), hi = Math.max(...candles.map(c=>c.high));
+  const maxVol = Math.max(...candles.map(c => c.volume || 0), 1);
+  const CW = 680, CH = 180;
+
+  return (
+    <div>
+      {step === 1 && (
+        <div style={{background:C.goldPale,border:`1px solid ${C.borderGold}`,borderRadius:8,padding:"22px 26px",marginBottom:20}}>
+          <StepTag n="1" label={S.stepExplain}/>
+          <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,marginBottom:16}}>{xr.step1Legend}</p>
+          <button onClick={()=>setStep(2)} style={{padding:"12px 26px",background:C.black,color:"#fff",border:"none",borderRadius:4,cursor:"pointer",fontFamily:"monospace",fontSize:12,letterSpacing:1}}>→</button>
+        </div>
+      )}
+
+      {step >= 2 && (
+        <div style={{background:C.black,borderRadius:8,padding:"24px 28px",color:"#fff",marginBottom:20}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+            <StepTag n="2-3" label={S.stepShow+" → "+S.stepDo}/>
+            <Mono size={11} color="rgba(255,255,255,0.5)" spacing={1}>{day.date} · {dayIdx+1}/{days.length}</Mono>
+          </div>
+          <p style={{fontSize:12.5,color:"rgba(255,255,255,0.6)",marginBottom:14}}>{xr.step2Legend}</p>
+
+          {/* SPEC_ch7_debug.md §1: раньше здесь был ряд столбиков высотой
+              high-low -- ни тела свечи, ни цены открытия/закрытия, ни шкалы.
+              Теперь -- настоящие свечи (SVG, тело+фитиль) на той же ценовой
+              оси, что и линии зон, плюс подписи хай/лоу дня как минимальная
+              шкала. */}
+          <div style={{position:"relative",height:CH,marginBottom:6}}>
+            {day.zones.filter(z => z.price >= lo-5 && z.price <= hi+5).map((z,i) => {
+              const y = CH - ((z.price - lo) / (hi - lo || 1)) * CH;
+              return <div key={i} title={`${zoneLabel(z.kind)} · ${z.price.toFixed(0)}`} style={{position:"absolute",left:0,right:0,top:y,height:1,background: z.kind==="round_number" ? "rgba(201,151,58,0.35)" : "rgba(139,92,246,0.5)",borderTop: z.kind!=="round_number" ? "1px dashed rgba(139,92,246,0.6)" : "none"}}/>;
+            })}
+            <svg viewBox={`0 0 ${CW} ${CH}`} preserveAspectRatio="none" style={{width:"100%",height:CH,display:"block"}}>
+              {candles.map((c,i) => {
+                const step = CW / candles.length;
+                const x = i * step;
+                const bw = Math.max(2, step - 2);
+                const toY = p => CH - ((p - lo) / (hi - lo || 1)) * CH;
+                const isTouch = day.touch && c.time === day.touch.touch_time;
+                const up = c.close >= c.open;
+                const color = isTouch ? C.gold : (up ? "rgba(46,204,113,0.6)" : "rgba(231,76,60,0.6)");
+                const bodyTop = toY(Math.max(c.open, c.close)), bodyBot = toY(Math.min(c.open, c.close));
+                return (
+                  <g key={i} title={`${c.open}/${c.high}/${c.low}/${c.close}`}>
+                    <line x1={x+step/2} x2={x+step/2} y1={toY(c.high)} y2={toY(c.low)} stroke={color} strokeWidth="1"/>
+                    <rect x={x+(step-bw)/2} width={bw} y={bodyTop} height={Math.max(1,bodyBot-bodyTop)} fill={color}/>
+                  </g>
+                );
+              })}
+            </svg>
+            <div style={{position:"absolute",left:4,top:2,fontSize:9,fontFamily:"monospace",color:"rgba(255,255,255,0.35)"}}>{hi.toFixed(0)}</div>
+            <div style={{position:"absolute",left:4,bottom:2,fontSize:9,fontFamily:"monospace",color:"rgba(255,255,255,0.35)"}}>{lo.toFixed(0)}</div>
+          </div>
+
+          {/* §2: тиковый объём лежит в ohlc_*.json рядом со свечами и нигде
+              в курсе не использовался -- ближайшая наблюдаемая мера
+              активности для главы про институциональный след. */}
+          <div style={{display:"flex",alignItems:"flex-end",gap:1,height:30,marginBottom:4}}>
+            {candles.map((c,i) => {
+              const isTouch = day.touch && c.time === day.touch.touch_time;
+              const vh = Math.max(1, ((c.volume||0)/maxVol)*30);
+              return <div key={i} title={`${c.volume ?? "—"}`} style={{flex:1,height:vh,background:isTouch?"rgba(201,151,58,0.55)":"rgba(255,255,255,0.16)"}}/>;
+            })}
+          </div>
+          <p style={{fontSize:9.5,color:"rgba(255,255,255,0.32)",fontFamily:"monospace",lineHeight:1.5,marginBottom:10}}>{xr.volumeCaption}</p>
+
+          {step === 2 && (
+            <div style={{textAlign:"center"}}>
+              <button onClick={()=>setStep(3)} style={{padding:"12px 26px",background:C.gold,color:"#18181a",border:"none",borderRadius:4,cursor:"pointer",fontFamily:"monospace",fontSize:12,letterSpacing:1,fontWeight:700}}>{xr.moreDaysBtn}</button>
+            </div>
+          )}
+          {step === 3 && dayIdx < days.length - 1 && (
+            <div style={{textAlign:"center"}}>
+              <button onClick={()=>setDayIdx(i=>i+1)} style={{padding:"10px 22px",background:"rgba(255,255,255,0.08)",color:"#fff",border:"1px solid rgba(255,255,255,0.2)",borderRadius:4,cursor:"pointer",fontFamily:"monospace",fontSize:11,letterSpacing:1}}>{xr.moreDaysBtn} →</button>
+            </div>
+          )}
+          {step === 3 && dayIdx >= days.length - 1 && (
+            <p style={{textAlign:"center",fontSize:11,color:"rgba(255,255,255,0.4)",fontFamily:"monospace"}}>{day.touch ? outcomeLabel(day.touch.outcome) : "—"}</p>
+          )}
+        </div>
+      )}
+
+      {step === 3 && dayIdx >= days.length - 1 && (
+        <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"24px 28px"}}>
+          <div style={{fontWeight:600,fontSize:14.5,color:C.black,marginBottom:10}}>{xr.revealTitle}</div>
+          {xr.revealBody.split("\n\n").map((p,i) => (
+            <p key={i} style={{fontSize:13,color:C.inkMid,lineHeight:1.7,marginBottom:10}}>{fillTemplate(p, {n_days: days.length, xray_hit: xray.meta.xray_hit})}</p>
+          ))}
+          <p style={{fontSize:11,color:C.inkFaint,fontStyle:"italic",marginTop:10,marginBottom:0}}>{xr.xpNote}</p>
         </div>
       )}
     </div>
   );
 }
 
-// ─── Interactive 2: X-Ray Chart Trainer ──────────────────────────────────────
-function XRayChart() {
-  const { useState, useRef } = React;
-  const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
-
-  const W = 680, H = 300;
-  const PRICE_MIN = 2488, PRICE_MAX = 2535;
-  const toY = p => H - ((p - PRICE_MIN) / (PRICE_MAX - PRICE_MIN)) * H;
-
-  // Pre-built scenario: visible support levels + hidden stop clusters + FVG
-  const candles = [
-    // initial downtrend
-    {o:2530,c:2525,h:2532,l:2523,x:28},
-    {o:2525,c:2519,h:2527,l:2517,x:54},
-    {o:2519,c:2522,h:2524,l:2516,x:80},
-    {o:2522,c:2515,h:2524,l:2513,x:106},
-    {o:2515,c:2518,h:2520,l:2512,x:132},
-    // consolidation near support
-    {o:2518,c:2516,h:2521,l:2514,x:158},
-    {o:2516,c:2517,h:2519,l:2513,x:184},
-    {o:2517,c:2515,h:2519,l:2512,x:210},
-    {o:2515,c:2516,h:2518,l:2511,x:236},
-    {o:2516,c:2514,h:2517,l:2510,x:262},
-    // sweep below support (long wick)
-    {o:2514,c:2512,h:2516,l:2503,x:288}, // KEY: long wick sweep
-    // FVG impulse up
-    {o:2512,c:2522,h:2524,l:2511,x:314}, // impulse 1
-    {o:2522,c:2530,h:2532,l:2521,x:340}, // impulse 2 — FVG between 2522-2530
-    // continuation
-    {o:2530,c:2527,h:2533,l:2525,x:366},
-    {o:2527,c:2531,h:2534,l:2526,x:392},
-    // current candle (unknown)
-    {o:2531,c:2531,h:2531,l:2531,x:418}, // placeholder for prediction
-  ];
-
-  // Visible support levels (what retail sees)
-  const supports = [
-    {p:2514, label:S.xraySupport1, color:"rgba(8,153,129,0.5)"},
-    {p:2510, label:S.xraySupport2, color:"rgba(8,153,129,0.35)"},
-  ];
-
-  // Hidden X-Ray data
-  const stopClusters = [
-    {y1:toY(2509), y2:toY(2503), label:S.xrayStopLong, color:"rgba(242,54,69,0.25)", strokeColor:C.red},
-    {y1:toY(2532), y2:toY(2528), label:S.xrayStopShort, color:"rgba(8,153,129,0.15)", strokeColor:C.green},
-  ];
-
-  const fvg = {p1:2522, p2:2530, label:"Fair Value Gap"}; // gap left after impulse
-
-  const [xray, setXray] = useState(false);
-  const [guess, setGuess] = useState(null); // "up"|"down"|"sideways"
-  const [phase, setPhase] = useState("explore"); // explore | guess | result
-  const [hovering, setHovering] = useState(false);
-
-  const submitGuess = (dir) => {
-    setGuess(dir);
-    setPhase("result");
-  };
-
-  const reset = () => { setGuess(null); setPhase("explore"); setXray(false); };
-
-  const candleW = 18;
-  const lastC = candles[candles.length-2]; // last real candle
-
+// ─── Ступень 2: предел макета (ladder pending) ─────────────────────────────────
+function LadderLimitBlock() {
+  const T7 = window.Ch7Content[INITIAL_LANG] || window.Ch7Content.ru;
+  const ll = T7.ladderLimit;
   return (
-    <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"36px 40px"}}>
-      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:20,flexWrap:"wrap",gap:12}}>
-        <div style={{display:"flex",alignItems:"center",gap:12}}>
-          <span style={{fontSize:28}}>🩻</span>
-          <div>
-            <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.black}}>{S.xrayTitle}</div>
-            <Mono size={11} color={C.inkSoft} spacing={2}>{S.xraySubtitle}</Mono>
-          </div>
-        </div>
-        {phase !== "explore" && (
-          <button onClick={reset} style={{padding:"9px 18px",background:C.black,color:"#fff",border:"none",borderRadius:4,cursor:"pointer",fontFamily:"monospace",fontSize:11,letterSpacing:1}}>
-            {S.xrayReset}
-          </button>
-        )}
+    <div style={{marginBottom:48}}>
+      {ll.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:14,color:C.inkMid,lineHeight:1.75,marginBottom:14,maxWidth:800}}>{p}</p>)}
+      <div style={{border:`1px dashed ${C.borderGold}`,borderRadius:8,padding:"18px 22px",background:C.surface}}>
+        <p style={{fontSize:12,color:C.inkFaint,fontStyle:"italic",margin:0}}>{ll.pendingNote}</p>
       </div>
+    </div>
+  );
+}
 
-      {/* Instruction */}
-      {phase === "explore" && (
-        <div style={{background:C.goldPale,border:`1px solid ${C.borderGold}`,borderRadius:4,padding:"12px 18px",marginBottom:16,display:"flex",gap:14,alignItems:"center",flexWrap:"wrap"}}>
-          <span style={{fontSize:18}}><img class='mi-icon' style={{verticalAlign:'middle'}} src='/assets/icons/icon-idea.png' alt='' width='20' height='20' /></span>
-          <div>
-            <Mono size={12} color={C.gold} spacing={1}>{S.xrayInstructExplore}</Mono>
-          </div>
-        </div>
-      )}
-      {phase === "guess" && (
-        <div style={{background:C.greenPale,border:`1px solid ${C.green}`,borderRadius:4,padding:"12px 18px",marginBottom:16,display:"flex",gap:12,alignItems:"center",flexWrap:"wrap"}}>
-          <Mono size={12} color={C.greenD} spacing={1} style={{flex:1}}>{S.xrayInstructGuess}</Mono>
-          <div style={{display:"flex",gap:8}}>
-            <button onClick={() => submitGuess("up")} style={{padding:"9px 18px",background:C.green,color:"#fff",border:"none",borderRadius:3,cursor:"pointer",fontFamily:"monospace",fontSize:12,fontWeight:700}}>{S.xrayBtnUp}</button>
-            <button onClick={() => submitGuess("down")} style={{padding:"9px 18px",background:C.red,color:"#fff",border:"none",borderRadius:3,cursor:"pointer",fontFamily:"monospace",fontSize:12,fontWeight:700}}>{S.xrayBtnDown}</button>
-            <button onClick={() => submitGuess("sideways")} style={{padding:"9px 18px",background:C.inkMid,color:"#fff",border:"none",borderRadius:3,cursor:"pointer",fontFamily:"monospace",fontSize:12,fontWeight:700}}>{S.xrayBtnSideways}</button>
-          </div>
-        </div>
-      )}
-      {phase === "result" && (
-        <div style={{background: guess==="up" ? C.greenPale : C.redPale,
-          border:`1px solid ${guess==="up" ? C.green : C.red}`,borderRadius:4,padding:"14px 20px",marginBottom:16}}>
-          <div style={{fontWeight:700,fontSize:14,color: guess==="up" ? C.greenD : C.redD,marginBottom:6}}>
-            {guess === "up" ? S.xrayResultCorrect : S.xrayResultWrong}
-          </div>
-          <p style={{fontSize:13,color:C.inkMid,lineHeight:1.65}}>
-            {S.xrayResultBody}
-          </p>
-        </div>
-      )}
-
-      {/* Chart */}
-      <div style={{position:"relative",borderRadius:4,overflow:"hidden",border:`1px solid ${C.border}`,marginBottom:16,userSelect:"none"}}>
-        <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",display:"block",background:C.chart,transition:"filter .3s",filter: xray ? "brightness(0.7)" : "none"}}>
-
-          {/* Support levels */}
-          {supports.map((s,i) => (
-            <g key={i}>
-              <line x1="0" y1={toY(s.p)} x2={W} y2={toY(s.p)} stroke={s.color} strokeWidth="1.5" strokeDasharray="8 4"/>
-              {!xray && <text x="6" y={toY(s.p)-4} fontSize="9" fill="rgba(8,153,129,0.6)" fontFamily="monospace">{s.label}</text>}
-            </g>
-          ))}
-
-          {/* Price grid */}
-          {[2490,2500,2510,2520,2530].map(p => (
-            <g key={p}>
-              <line x1="0" y1={toY(p)} x2={W} y2={toY(p)} stroke="rgba(255,255,255,0.04)" strokeWidth="1"/>
-              <text x="4" y={toY(p)-3} fontSize="9" fill="rgba(255,255,255,0.2)" fontFamily="monospace">{p}</text>
-            </g>
-          ))}
-
-          {/* X-RAY layers */}
-          {xray && stopClusters.map((cl,i) => (
-            <g key={i}>
-              <rect x="0" y={cl.y1} width={W} height={cl.y2-cl.y1} fill={cl.color}/>
-              <line x1="0" y1={cl.y1} x2={W} y2={cl.y1} stroke={cl.strokeColor} strokeWidth="1" strokeDasharray="4 3" opacity="0.7"/>
-              <line x1="0" y1={cl.y2} x2={W} y2={cl.y2} stroke={cl.strokeColor} strokeWidth="1" strokeDasharray="4 3" opacity="0.7"/>
-              <text x={W-8} y={(cl.y1+cl.y2)/2+3} fontSize="9" fill={cl.strokeColor} textAnchor="end" fontFamily="monospace" fontWeight="700">{cl.label}</text>
-            </g>
-          ))}
-
-          {/* FVG zone */}
-          {xray && (
-            <g>
-              <rect x={314} y={toY(fvg.p2)} width={W-314} height={toY(fvg.p1)-toY(fvg.p2)}
-                fill="rgba(201,151,58,0.12)" stroke={C.gold} strokeWidth="1" strokeDasharray="5 3" opacity="0.8"/>
-              <text x={320} y={toY(fvg.p2)+14} fontSize="9" fill={C.gold} fontFamily="monospace">FVG · Fair Value Gap</text>
-            </g>
-          )}
-
-          {/* Candles */}
-          {candles.slice(0,-1).map((c,i) => {
-            const bull = c.c >= c.o;
-            const col = c.x === 288 ? C.red : (bull ? C.green : C.red); // sweep candle highlighted
-            const bodyT = toY(Math.max(c.o,c.c));
-            const bodyB = toY(Math.min(c.o,c.c));
-            return (
-              <g key={i}>
-                <line x1={c.x} y1={toY(c.h)} x2={c.x} y2={toY(c.l)} stroke={col} strokeWidth="1.5"/>
-                <rect x={c.x-candleW/2} y={bodyT} width={candleW} height={Math.max(bodyB-bodyT,1.5)} fill={col} rx="1"/>
-              </g>
-            );
-          })}
-
-          {/* Sweep annotation */}
-          {xray && (
-            <g>
-              <line x1={288} y1={toY(2503)} x2={310} y2={toY(2500)} stroke={C.red} strokeWidth="1"/>
-              <text x={314} y={toY(2500)+4} fontSize="9" fill={C.red} fontFamily="monospace">SWEEP ↓</text>
-            </g>
-          )}
-
-          {/* Question mark candle */}
-          {phase !== "result" && (
-            <g>
-              <rect x={418-candleW/2} y={toY(2535)} width={candleW} height={H-toY(2535)} fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.15)" strokeWidth="1" strokeDasharray="3 2" rx="2"/>
-              <text x={418} y={H/2} fontSize="20" textAnchor="middle" fill="rgba(255,255,255,0.3)">?</text>
-            </g>
-          )}
-
-          {/* Result candle */}
-          {phase === "result" && (
-            <g>
-              <line x1={418} y1={toY(2533)} x2={418} y2={toY(2530)} stroke={C.green} strokeWidth="1.5"/>
-              <rect x={418-candleW/2} y={toY(2533)} width={candleW} height={toY(2531)-toY(2533)} fill={C.green} rx="1"/>
-            </g>
-          )}
-        </svg>
-
-        {/* X-Ray overlay label */}
-        {xray && (
-          <div style={{position:"absolute",top:8,left:"50%",transform:"translateX(-50%)",background:"rgba(242,54,69,0.9)",padding:"4px 14px",borderRadius:3,pointerEvents:"none"}}>
-            <Mono size={10} color="#fff" spacing={2}>{S.xrayModeActive}</Mono>
-          </div>
-        )}
+// ─── Предикт недели ─────────────────────────────────────────────────────────
+function PredictTf({ vars }) {
+  const { useState } = React;
+  const T7 = window.Ch7Content[INITIAL_LANG] || window.Ch7Content.ru;
+  const p = T7.predict;
+  const [picked, setPicked] = useState(null);
+  return (
+    <div style={{border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px",marginTop:8,marginBottom:24}}>
+      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{p.tag}</Mono>
+      <p style={{fontSize:14.5,color:C.black,lineHeight:1.65,marginBottom:14}}>{p.question}</p>
+      <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:14}}>
+        {p.options.map((o,i) => (
+          <button key={i} onClick={()=>setPicked(i)} style={{fontFamily:"monospace",fontSize:12,padding:"9px 20px",cursor:"pointer",background:picked===i?C.gold:"#fff",color:picked===i?"#18181a":C.inkMid,border:`1px solid ${picked===i?C.gold:C.border}`,borderRadius:4}}>{o}</button>
+        ))}
       </div>
-
-      {/* Legend */}
-      {xray && (
-        <div style={{display:"flex",gap:20,marginBottom:16,flexWrap:"wrap"}}>
-          <div style={{display:"flex",alignItems:"center",gap:6}}><div style={{width:12,height:12,background:"rgba(242,54,69,0.3)",border:`1px solid ${C.red}`,borderRadius:2}}/><span style={{fontSize:11,fontFamily:"monospace",color:C.inkMid}}>{S.xrayLegendStops}</span></div>
-          <div style={{display:"flex",alignItems:"center",gap:6}}><div style={{width:12,height:12,background:"rgba(201,151,58,0.2)",border:`1px solid ${C.gold}`,borderRadius:2}}/><span style={{fontSize:11,fontFamily:"monospace",color:C.inkMid}}>Fair Value Gap</span></div>
-        </div>
-      )}
-
-      {/* Controls */}
-      <div style={{display:"flex",gap:12,flexWrap:"wrap"}}>
-        <button
-          onMouseDown={() => setXray(true)}
-          onMouseUp={() => { setXray(false); if(phase==="explore") setPhase("guess"); }}
-          onMouseLeave={() => { setXray(false); }}
-          onTouchStart={() => setXray(true)}
-          onTouchEnd={() => { setXray(false); if(phase==="explore") setPhase("guess"); }}
-          style={{padding:"12px 28px",background:xray?"rgba(242,54,69,0.9)":C.black,color:"#fff",border:"none",borderRadius:4,cursor:"pointer",fontFamily:"monospace",fontSize:13,letterSpacing:1,fontWeight:700,transition:"background .15s",userSelect:"none"}}>
-          {xray ? S.xrayBtnActive : S.xrayBtnHold}
-        </button>
-        <div style={{fontSize:12,color:C.inkMid,display:"flex",alignItems:"center",fontFamily:"monospace"}}>
-          {phase === "explore" && S.xrayHintExplore}
-          {phase === "guess" && S.xrayHintGuess}
-          {phase === "result" && S.xrayHintResult}
-        </div>
-      </div>
+      {picked !== null && vars && <p style={{fontSize:12.5,color:C.inkMid,lineHeight:1.7,marginBottom:10,background:C.goldPale,padding:"12px 16px",borderRadius:4}}>{fillTemplate(p.afterPick, vars)}</p>}
+      <p style={{fontSize:11,color:C.inkFaint}}>{p.xpNote}</p>
     </div>
   );
 }
 
 // ─── Main Chapter 7 ────────────────────────────────────────────────────────────
 function Chapter7() {
-  const { useState } = React;
   const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
-  const [askOpen, setAskOpen] = useState(false);
-  const [checked, setChecked] = useState({});
-
-  const toggleCheck = (i) => setChecked(p => ({...p,[i]:!p[i]}));
-  const checkedCount = Object.values(checked).filter(Boolean).length;
-
-  const smcConcepts = [
-    {icon:"🏦", title:S.smc1Title,
-     text:S.smc1Text,
-     accent:C.gold},
-    {icon:"🎣", title:S.smc2Title,
-     text:S.smc2Text,
-     accent:C.red},
-    {icon:"📊", title:S.smc3Title,
-     text:S.smc3Text,
-     accent:C.blue},
-    {icon:"⚖️", title:S.smc4Title,
-     text:S.smc4Text,
-     accent:C.green},
-  ];
-
-  const checklistItems = [
-    S.checklist1,
-    S.checklist2,
-    S.checklist3,
-    S.checklist4,
-    S.checklist5,
-    S.checklist6,
-  ];
-
-  const conclusions = [
-    S.conclusion1,
-    S.conclusion2,
-    S.conclusion3,
-    S.conclusion4,
-    S.conclusion5,
-    S.conclusion6,
-  ];
+  const lang = INITIAL_LANG;
+  const T7 = window.Ch7Content[lang] || window.Ch7Content.ru;
+  const { loading, error, patterns, xray } = useCh7Data();
+  const vars = React.useMemo(() => buildVars(patterns, xray, lang), [patterns, xray, lang]);
 
   return (
     <div style={{minHeight:"100vh",background:C.white,color:C.ink,fontFamily:"'DM Sans',sans-serif"}}>
 
-      {/* Sticky header */}
       <div style={{position:"sticky",top:106,background:"rgba(255,255,255,0.96)",backdropFilter:"blur(10px)",borderBottom:`1px solid ${C.border}`,padding:"15px 5vw",display:"flex",alignItems:"center",justifyContent:"space-between",zIndex:50}}>
         <div style={{display:"flex",alignItems:"center",gap:20}}>
-          <span onClick={() => window.location.href = getChUrl(6)} style={{color:C.gold,cursor:"pointer",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</span>
-          <Chip>{S.chipLevel}</Chip>
-          <Mono size={14} color={C.inkSoft} spacing={0} className="hide-mobile">{S.headerChapterName}</Mono>
+          <span onClick={() => window.location.href = getChUrl(6, lang)} style={{color:C.gold,cursor:"pointer",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</span>
+          <Chip>{S.levelChip}</Chip>
+          <Mono size={14} color={C.inkSoft} spacing={0} className="hide-mobile">{S.chapterNameShort}</Mono>
         </div>
-        <div style={{display:"flex",gap:8,alignItems:"center"}}>
-          {checkedCount > 0 && <Chip color={C.green}>{checkedCount}/{checklistItems.length} ✓</Chip>}
-          <Chip color={C.inkFaint}>{S.chipFA}</Chip>
-          <Chip color={C.inkFaint}>{S.chipTA}</Chip>
+        <div style={{display:"flex",gap:8}}>
+          <Chip color={C.inkFaint}>{S.faTag}</Chip>
+          <Chip color={C.inkFaint}>{S.taTag}</Chip>
         </div>
       </div>
 
-      {/* HERO */}
       <div style={{background:C.black,padding:"80px 5vw 70px",textAlign:"center",position:"relative",overflow:"hidden"}}>
-        <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 100%, rgba(242,54,69,0.07) 0%, transparent 60%)"}}/>
+        <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 100%, rgba(201,151,58,0.1) 0%, transparent 60%)"}}/>
         <div style={{position:"relative"}}>
-          <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:20}}>{S.heroTag}</Mono>
+          <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:20}}>{S.heroEyebrow}</Mono>
           <h1 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(36px,6vw,66px)",fontWeight:400,color:C.white,lineHeight:1.05,marginBottom:20}}>
-            {S.heroTitle1}<br/>{S.heroTitle2} <span style={{color:C.gold}}>Smart Money</span>
+            {S.heroTitleLine1}<br/><span style={{color:C.gold}}>{S.heroTitleLine2}</span>
           </h1>
-          <p style={{fontSize:"clamp(16px,2vw,20px)",color:"rgba(255,255,255,0.55)",maxWidth:640,margin:"0 auto 32px",lineHeight:1.65}}>
-            {S.heroSub}
-          </p>
+          <p style={{fontSize:"clamp(16px,2vw,20px)",color:"rgba(255,255,255,0.55)",maxWidth:640,margin:"0 auto 32px",lineHeight:1.65}}>{S.heroSubtitle}</p>
           <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
-            <Chip color={C.gold}>{S.chipFundamental}</Chip>
-            <Chip color="rgba(255,255,255,0.3)">{S.chipTechnical}</Chip>
-            <Chip color="rgba(255,255,255,0.3)">{S.chipInteractive}</Chip>
+            <Chip color={C.gold}>{S.fundamentalChip}</Chip>
+            <Chip color="rgba(255,255,255,0.3)">{S.technicalChip}</Chip>
+            <Chip color="rgba(255,255,255,0.3)">{S.interactiveChip}</Chip>
           </div>
         </div>
       </div>
 
-      <div style={{maxWidth:1060,margin:"0 auto",padding:"72px 5vw 120px"}}>
+      {loading && <div style={{textAlign:"center",padding:"60px 0",fontFamily:"monospace",fontSize:13,color:C.inkFaint}}>{S.loadingLabel}</div>}
+      {error && <div style={{textAlign:"center",padding:"40px 0",fontFamily:"monospace",fontSize:13,color:"#c0392b",background:C.redPale}}>{S.loadErrorLabel}</div>}
 
-        {/* ── ANTI-MYTH ── */}
-        <div style={{background:C.black,borderRadius:6,padding:"36px 40px",marginBottom:56,position:"relative",overflow:"hidden"}}>
-          <div style={{position:"absolute",top:0,left:0,bottom:0,width:4,background:C.red}}/>
-          <Mono size={11} color={C.red} spacing={3} style={{display:"block",marginBottom:16}}>{S.mythTag}</Mono>
-          <h3 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(20px,3vw,28px)",color:C.white,fontWeight:400,marginBottom:16,lineHeight:1.3}}>
-            {S.mythTitle}
-          </h3>
-          <p style={{fontSize:14,color:"rgba(255,255,255,0.55)",lineHeight:1.75,maxWidth:700}}>
-            {S.mythBody}
-          </p>
-        </div>
+      {!loading && (
+      <div style={{maxWidth:1060,margin:"0 auto",padding:"0 0 120px"}}>
 
-        {/* ── SBF VOICE ── */}
-        <div style={{background:C.goldPale,border:`1px solid ${C.borderGold}`,borderRadius:6,padding:"32px 40px",marginBottom:56}}>
-          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:14}}>{S.voiceTag}</Mono>
-          <blockquote style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(18px,2.5vw,24px)",color:C.black,fontWeight:400,lineHeight:1.5,marginBottom:16,fontStyle:"italic"}}>
-            {S.voiceQuote}
-          </blockquote>
-          <p style={{fontSize:13,color:C.inkMid,lineHeight:1.65}}>
-            {S.voiceBody}
-          </p>
-        </div>
+        <div style={{margin:"0 -5vw 56px"}}><ColdOpen7/></div>
 
-        {/* ── PRICE OF IGNORANCE ── */}
-        <div style={{background:C.redPale,border:`1px solid rgba(242,54,69,0.25)`,borderRadius:6,padding:"28px 36px",marginBottom:64,display:"flex",gap:24,alignItems:"flex-start",flexWrap:"wrap"}}>
-          <div style={{fontSize:40,flexShrink:0}}>💸</div>
-          <div>
-            <div style={{fontWeight:700,fontSize:14,color:C.redD,letterSpacing:0.5,textTransform:"uppercase",marginBottom:10}}>{S.ignoranceTag}</div>
-            <p style={{fontSize:14,color:C.redD,lineHeight:1.75}}>
-              {S.ignoranceBodyA}<strong>Liquidity Sweep</strong>{S.ignoranceBodyB}
-            </p>
-          </div>
-        </div>
+        <div style={{padding:"0 5vw"}}>
 
-        {/* ── THEORY 1: FA ── */}
-        <SectionTitle sub={S.fa1Sub}>
-          {S.fa1Title}
-        </SectionTitle>
+        <IntroBlock/>
 
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,marginBottom:48}} className="g2">
-          {smcConcepts.map((c,i) => <InfoCard key={i} {...c}/>)}
-        </div>
+        <SectionTitle id="secBigOrder" sub={S.bigOrderSub}>{T7.bigOrderTask.tag}</SectionTitle>
+        <BigOrderBridge/>
 
-        {/* Liquidity diagram */}
-        <div style={{background:C.black,borderRadius:6,padding:"28px 32px",marginBottom:56}}>
-          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:20}}>{S.diagTitle}</Mono>
-          <svg viewBox="0 0 680 180" style={{width:"100%",display:"block"}}>
-            <rect width="680" height="180" fill="#18181a"/>
-            {/* Timeline */}
-            <line x1="40" y1="90" x2="640" y2="90" stroke="rgba(255,255,255,0.1)" strokeWidth="1"/>
+        <SectionTitle sub={S.executionSub}>{T7.execution.tag}</SectionTitle>
+        <ExecutionCards/>
 
-            {/* Step 1: Accumulation */}
-            <rect x="40" y="60" width="120" height="60" fill="rgba(139,92,246,0.12)" stroke="#8b5cf6" strokeWidth="1" rx="3"/>
-            <text x="100" y="82" fontSize="9" fill="#8b5cf6" textAnchor="middle" fontFamily="monospace" fontWeight="700">{S.diagAccumTitle}</text>
-            <text x="100" y="96" fontSize="8" fill="rgba(139,92,246,0.6)" textAnchor="middle" fontFamily="monospace">{S.diagAccumSub1}</text>
-            <text x="100" y="110" fontSize="8" fill="rgba(139,92,246,0.6)" textAnchor="middle" fontFamily="monospace">{S.diagAccumSub2}</text>
+        <SectionTitle sub={S.placesSub}>{T7.footprintPlaces.tag}</SectionTitle>
+        <FootprintPlaces/>
 
-            <text x="180" y="93" fontSize="16" fill="rgba(255,255,255,0.2)" textAnchor="middle">→</text>
+        <SectionTitle id="secCoreMeasure" sub={S.coreMeasureSub}>{T7.coreMeasure.tag}</SectionTitle>
+        <CoreMeasureBlock patterns={patterns} vars={vars}/>
 
-            {/* Step 2: Sweep */}
-            <rect x="200" y="55" width="130" height="70" fill="rgba(242,54,69,0.12)" stroke={C.red} strokeWidth="1" rx="3"/>
-            <text x="265" y="78" fontSize="9" fill={C.red} textAnchor="middle" fontFamily="monospace" fontWeight="700">{S.diagSweepTitle}</text>
-            <text x="265" y="92" fontSize="8" fill="rgba(242,54,69,0.6)" textAnchor="middle" fontFamily="monospace">{S.diagSweepSub1}</text>
-            <text x="265" y="106" fontSize="8" fill="rgba(242,54,69,0.6)" textAnchor="middle" fontFamily="monospace">{S.diagSweepSub2}</text>
-            <text x="265" y="118" fontSize="8" fill={C.red} textAnchor="middle" fontFamily="monospace">{S.diagSweepNote}</text>
+        <SectionTitle sub={S.narrativeSub}>{T7.narrativeVsMeasured.tag}</SectionTitle>
+        <NarrativeVsMeasured/>
 
-            <text x="350" y="93" fontSize="16" fill="rgba(255,255,255,0.2)" textAnchor="middle">→</text>
-
-            {/* Step 3: Reversal + Buy */}
-            <rect x="370" y="60" width="130" height="60" fill="rgba(8,153,129,0.12)" stroke={C.green} strokeWidth="1" rx="3"/>
-            <text x="435" y="82" fontSize="9" fill={C.green} textAnchor="middle" fontFamily="monospace" fontWeight="700">{S.diagReversalTitle}</text>
-            <text x="435" y="96" fontSize="8" fill="rgba(8,153,129,0.6)" textAnchor="middle" fontFamily="monospace">{S.diagReversalSub1}</text>
-            <text x="435" y="110" fontSize="8" fill="rgba(8,153,129,0.6)" textAnchor="middle" fontFamily="monospace">{S.diagReversalSub2}</text>
-
-            <text x="520" y="93" fontSize="16" fill="rgba(255,255,255,0.2)" textAnchor="middle">→</text>
-
-            {/* Step 4: Distribution / Run */}
-            <rect x="540" y="55" width="100" height="70" fill="rgba(201,151,58,0.12)" stroke={C.gold} strokeWidth="1" rx="3"/>
-            <text x="590" y="78" fontSize="9" fill={C.gold} textAnchor="middle" fontFamily="monospace" fontWeight="700">{S.diagTrendTitle}</text>
-            <text x="590" y="92" fontSize="8" fill="rgba(201,151,58,0.6)" textAnchor="middle" fontFamily="monospace">{S.diagTrendSub1}</text>
-            <text x="590" y="106" fontSize="8" fill="rgba(201,151,58,0.6)" textAnchor="middle" fontFamily="monospace">{S.diagTrendSub2}</text>
-
-            {/* Arrow above */}
-            <path d="M100,55 Q100,30 265,30 Q370,30 435,55" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="1" strokeDasharray="4 3"/>
-            <text x="280" y="24" fontSize="8" fill="rgba(255,255,255,0.2)" fontFamily="monospace" textAnchor="middle">{S.diagPlanNote}</text>
-          </svg>
-        </div>
-
-        {/* ── INTERACTIVE 1 ── */}
-        <div style={{marginBottom:64}}>
-          <HedgeFundSim/>
-        </div>
+        <SectionTitle id="secXray" sub={S.xraySub}>{T7.xray.tag}</SectionTitle>
+        <div style={{marginBottom:56}}><XrayReversed xray={xray}/></div>
 
         <Rule/>
 
-        {/* ── THEORY 2: TA ── */}
-        <SectionTitle sub={S.ta2Sub}>
-          {S.ta2Title}
-        </SectionTitle>
+        <LadderLimitBlock/>
 
-        {/* Sweep anatomy */}
-        <div style={{background:C.black,borderRadius:6,padding:"28px 32px",marginBottom:32}}>
-          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:20}}>{S.sweepAnatomyTitle}</Mono>
-          <svg viewBox="0 0 680 200" style={{width:"100%",display:"block"}}>
-            <rect width="680" height="200" fill="#18181a"/>
-            {/* Support level */}
-            <line x1="0" y1="100" x2="680" y2="100" stroke="rgba(8,153,129,0.5)" strokeWidth="1.5" strokeDasharray="8 4"/>
-            <text x="8" y="94" fontSize="9" fill="rgba(8,153,129,0.7)" fontFamily="monospace">{S.sweepSupportLabel}</text>
+        <QuizBlock questions={T7.quiz} levelId="level_7" lang={lang} copy={{
+          kicker: S.quizKicker, title: S.quizTitle, next: S.quizNext,
+          stuckAll: S.quizStuckAll, stuckSome: S.quizStuckSome, backToSection: S.quizBackToSection,
+        }} />
 
-            {/* Stop cluster below */}
-            <rect x="0" y="105" width="680" height="35" fill="rgba(242,54,69,0.06)"/>
-            <text x="8" y="120" fontSize="9" fill="rgba(242,54,69,0.5)" fontFamily="monospace">{S.sweepZoneLabel}</text>
+        <PredictTf vars={vars}/>
 
-            {/* Candles before sweep */}
-            {[
-              {x:60, o:130,c:125,h:132,l:122},{x:90, o:125,c:128,h:130,l:121},
-              {x:120,o:128,c:124,h:130,l:120},{x:150,o:124,c:126,h:128,l:119},
-              {x:180,o:126,c:123,h:127,l:118},
-            ].map((c,i) => {
-              const toYl = p => 200 - p;
-              const bull = c.c>=c.o;
-              const col = bull ? C.green : C.red;
-              return (
-                <g key={i}>
-                  <line x1={c.x} y1={toYl(c.h)} x2={c.x} y2={toYl(c.l)} stroke={col} strokeWidth="1.5"/>
-                  <rect x={c.x-6} y={toYl(Math.max(c.o,c.c))} width={12} height={Math.max(toYl(Math.min(c.o,c.c))-toYl(Math.max(c.o,c.c)),1.5)} fill={col} rx="1"/>
-                </g>
-              );
-            })}
-
-            {/* SWEEP candle — long wick down */}
-            <line x1="220" y1="55" x2="220" y2="158" stroke={C.red} strokeWidth="2"/>
-            <rect x="214" y="100" width="12" height="20" fill={C.red} rx="1"/>
-            <text x="220" y="170" fontSize="9" fill={C.red} textAnchor="middle" fontFamily="monospace" fontWeight="700">SWEEP</text>
-            <line x1="220" y1="158" x2="245" y2="158" stroke={C.red} strokeWidth="1" opacity="0.5"/>
-            <text x="248" y="162" fontSize="8" fill={C.red} fontFamily="monospace">{S.sweepActivatedLabel}</text>
-
-            {/* Arrow label for wick */}
-            <line x1="232" y1="130" x2="270" y2="140" stroke={C.red} strokeWidth="1" opacity="0.5"/>
-            <text x="272" y="143" fontSize="8" fill={C.red} fontFamily="monospace">{S.sweepWickNote}</text>
-
-            {/* Reversal candles */}
-            {[
-              {x:260,o:118,c:126,h:128,l:116},
-              {x:290,o:126,c:135,h:137,l:124},
-              {x:320,o:135,c:142,h:144,l:133},
-              {x:350,o:142,c:148,h:150,l:140},
-              {x:380,o:148,c:155,h:157,l:146},
-            ].map((c,i) => {
-              const toYl = p => 200 - p;
-              return (
-                <g key={i}>
-                  <line x1={c.x} y1={toYl(c.h)} x2={c.x} y2={toYl(c.l)} stroke={C.green} strokeWidth="1.5"/>
-                  <rect x={c.x-6} y={toYl(Math.max(c.o,c.c))} width={12} height={Math.max(toYl(Math.min(c.o,c.c))-toYl(Math.max(c.o,c.c)),1.5)} fill={C.green} rx="1"/>
-                </g>
-              );
-            })}
-            <text x="320" y="36" fontSize="9" fill={C.green} textAnchor="middle" fontFamily="monospace" fontWeight="700">{S.sweepTrueMoveLabel}</text>
-
-            {/* Smart Money entry label */}
-            <rect x="246" y="65" width="100" height="22" fill="rgba(201,151,58,0.15)" stroke={C.gold} strokeWidth="1" rx="2"/>
-            <text x="296" y="79" fontSize="9" fill={C.gold} textAnchor="middle" fontFamily="monospace">{S.sweepEntryLabel}</text>
-          </svg>
+        <div style={{border:`1px dashed ${C.borderGold}`,borderRadius:8,padding:"20px 24px",marginBottom:32,background:C.surface}}>
+          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T7.cliffhanger.tag}</Mono>
+          {T7.cliffhanger.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:14,color:C.inkMid,lineHeight:1.7,marginBottom:10}}>{p}</p>)}
         </div>
 
-        {/* FVG anatomy */}
-        <div style={{background:C.black,borderRadius:6,padding:"28px 32px",marginBottom:56}}>
-          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:20}}>{S.fvgAnatomyTitle}</Mono>
-          <svg viewBox="0 0 680 200" style={{width:"100%",display:"block"}}>
-            <rect width="680" height="200" fill="#18181a"/>
-
-            {/* Candles */}
-            {/* Pre-impulse */}
-            {[{x:60,o:130,c:128,h:133,l:126},{x:90,o:128,c:130,h:132,l:125},{x:120,o:130,c:127,h:133,l:124}].map((c,i)=>{
-              const toYl=p=>200-p; const col=c.c>=c.o?C.green:C.red;
-              return <g key={i}><line x1={c.x} y1={toYl(c.h)} x2={c.x} y2={toYl(c.l)} stroke={col} strokeWidth="1.5"/><rect x={c.x-7} y={toYl(Math.max(c.o,c.c))} width={14} height={Math.max(toYl(Math.min(c.o,c.c))-toYl(Math.max(c.o,c.c)),1.5)} fill={col} rx="1"/></g>;
-            })}
-
-            {/* 3 FVG candles: c1, IMPULSE (middle), c3 */}
-            {/* C1 */}
-            <line x1="160" y1="65" x2="160" y2="90" stroke={C.green} strokeWidth="1.5"/>
-            <rect x="153" y="65" width="14" height="25" fill={C.green} rx="1"/>
-            {/* IMPULSE (middle) */}
-            <line x1="200" y1="30" x2="200" y2="90" stroke={C.green} strokeWidth="2"/>
-            <rect x="193" y="30" width="14" height="60" fill={C.green} rx="1"/>
-            {/* C3 */}
-            <line x1="240" y1="22" x2="240" y2="48" stroke={C.green} strokeWidth="1.5"/>
-            <rect x="233" y="22" width="14" height="26" fill={C.green} rx="1"/>
-
-            {/* FVG zone: between top of C1 body and bottom of C3 body */}
-            <rect x="153" y="48" width="101" height="17" fill="rgba(201,151,58,0.2)" stroke={C.gold} strokeWidth="1" strokeDasharray="5 3"/>
-            <text x="204" y="60" fontSize="9" fill={C.gold} textAnchor="middle" fontFamily="monospace" fontWeight="700">FVG</text>
-            <line x1="110" y1="48" x2="153" y2="48" stroke={C.gold} strokeWidth="0.8" strokeDasharray="3 2" opacity="0.5"/>
-            <line x1="110" y1="65" x2="153" y2="65" stroke={C.gold} strokeWidth="0.8" strokeDasharray="3 2" opacity="0.5"/>
-
-            {/* Continuation then pullback to FVG */}
-            {[{x:280,o:20,c:22,h:24,l:18},{x:310,o:22,c:24,h:26,l:20},{x:340,o:24,c:30,h:32,l:22}].map((c,i)=>{
-              const toYl=p=>200-p;
-              return <g key={i}><line x1={c.x} y1={toYl(c.h)} x2={c.x} y2={toYl(c.l)} stroke={C.green} strokeWidth="1.5"/><rect x={c.x-6} y={toYl(Math.max(c.o,c.c))} width={12} height={Math.max(toYl(Math.min(c.o,c.c))-toYl(Math.max(c.o,c.c)),1.5)} fill={C.green} rx="1"/></g>;
-            })}
-
-            {/* Pullback arrow to FVG */}
-            <path d="M380,170 Q420,120 390,65" fill="none" stroke="rgba(201,151,58,0.5)" strokeWidth="1.5" strokeDasharray="5 3"/>
-            <text x="430" y="125" fontSize="9" fill={C.gold} fontFamily="monospace">{S.fvgReturnLabel1}</text>
-            <text x="430" y="138" fontSize="9" fill={C.gold} fontFamily="monospace">{S.fvgReturnLabel2}</text>
-            {[{x:410,o:40,c:58,h:38,l:62},{x:440,o:58,c:52,h:56,l:64},{x:470,o:52,c:60,h:50,l:65}].map((c,i)=>{
-              const toYl=p=>200-p; const col=c.c>=c.o?C.green:C.red;
-              return <g key={i}><line x1={c.x} y1={toYl(c.h)} x2={c.x} y2={toYl(c.l)} stroke={col} strokeWidth="1.5"/><rect x={c.x-6} y={toYl(Math.max(c.o,c.c))} width={12} height={Math.max(toYl(Math.min(c.o,c.c))-toYl(Math.max(c.o,c.c)),1.5)} fill={col} rx="1"/></g>;
-            })}
-          </svg>
-          <div style={{marginTop:16,fontSize:13,color:C.inkMid,lineHeight:1.7}}>
-            <strong style={{color:C.black}}>{S.fvgUsageStrong}</strong> {S.fvgUsageBody}
-          </div>
+        <div style={{marginBottom:32}}>
+          <Mono size={10} color={C.inkFaint} spacing={2} style={{display:"block",marginBottom:10,textTransform:"uppercase"}}>{T7.sources.tag}</Mono>
+          <ol style={{fontSize:11.5,color:C.inkFaint,lineHeight:1.8,paddingLeft:18,marginBottom:8}}>
+            {T7.sources.list.map((s,i) => <li key={i}>{s}</li>)}
+          </ol>
+          <p style={{fontSize:11,color:C.inkFaint,fontStyle:"italic"}}>{T7.sources.checked}</p>
         </div>
 
-        {/* ── INTERACTIVE 2 ── */}
-        <div style={{marginBottom:64}}>
-          <XRayChart/>
-        </div>
+        <ComplianceFootnote lang={lang} />
 
-        <Rule/>
-
-        {/* ── CHECKLIST ── */}
-        <div style={{marginBottom:64}}>
-          <SectionTitle sub={S.checklistSub} align="center">
-            {S.checklistTitle}
-          </SectionTitle>
-          <div style={{display:"grid",gap:10}}>
-            {checklistItems.map((item,i) => (
-              <div
-                key={i}
-                onClick={() => toggleCheck(i)}
-                style={{
-                  display:"flex",gap:14,alignItems:"center",
-                  padding:"16px 20px",borderRadius:4,cursor:"pointer",
-                  border:`1px solid ${checked[i] ? C.green : C.border}`,
-                  background: checked[i] ? C.greenPale : C.surface,
-                  transition:"all .2s"
-                }}>
-                <div style={{
-                  width:22,height:22,borderRadius:3,flexShrink:0,
-                  border:`2px solid ${checked[i] ? C.green : C.border}`,
-                  background: checked[i] ? C.green : "transparent",
-                  display:"flex",alignItems:"center",justifyContent:"center",
-                  color:"#fff",fontSize:13,transition:"all .2s"
-                }}>{checked[i] ? "✓" : ""}</div>
-                <span style={{fontSize:14,color:checked[i] ? C.greenD : C.inkMid,lineHeight:1.5}}>{item}</span>
-              </div>
-            ))}
-          </div>
-          {checkedCount === checklistItems.length && (
-            <div style={{marginTop:20,background:C.greenPale,border:`1px solid ${C.green}`,borderRadius:4,padding:"18px 24px",textAlign:"center"}}>
-              <div style={{fontWeight:700,color:C.greenD,fontSize:15,marginBottom:4}}>{S.checklistDoneTitle}</div>
-              <div style={{fontSize:13,color:C.greenD}}>{S.checklistDoneBody}</div>
-            </div>
-          )}
-        </div>
-
-        {/* ── CONCLUSIONS ── */}
-        <div style={{background:C.black,borderRadius:8,padding:"44px 48px"}}>
-          <div style={{textAlign:"center",marginBottom:32}}>
-            <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:12}}>{S.conclusionsTitle}</Mono>
-            <h3 style={{fontFamily:"'DM Serif Display',serif",fontSize:28,color:C.white,fontWeight:400}}>{S.conclusionsSub}</h3>
-          </div>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
-            {conclusions.map((c,i) => (
-              <div key={i} style={{display:"flex",gap:14,alignItems:"flex-start",padding:"14px 16px",background:"rgba(255,255,255,0.04)",borderRadius:4,border:"1px solid rgba(255,255,255,0.06)"}}>
-                <span style={{color:C.gold,fontFamily:"monospace",fontSize:11,marginTop:2,flexShrink:0}}>0{i+1}</span>
-                <span style={{fontSize:13,color:"rgba(255,255,255,0.7)",lineHeight:1.65}}>{c}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Footer navigation */}
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",paddingTop:48,marginTop:48,borderTop:`1px solid ${C.border}`}}>
-          <span onClick={() => setAskOpen(true)} style={{fontSize:14,color:C.inkSoft,fontFamily:"monospace",borderBottom:`1px solid ${C.border}`,cursor:"pointer"}}>
-            {S.askQuestionFooter}
-          </span>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:20,paddingTop:48,marginTop:16,borderTop:`1px solid ${C.border}`}}>
+          <AskAnalystBtn tr={{askAnalyst:S.askQuestionLabel}} chapterNum={7} lang={lang} />
           <button
-            onClick={() => window.location.href = getChUrl(8)}
+            onClick={() => window.location.href = getChUrl(8, lang)}
             style={{background:C.black,color:C.white,border:"none",padding:"18px 35px",cursor:"pointer",fontFamily:"monospace",fontSize:14,letterSpacing:2,fontWeight:700,transition:"background .2s"}}
             onMouseEnter={e=>e.target.style.background=C.gold}
             onMouseLeave={e=>e.target.style.background=C.black}>
@@ -1496,9 +702,9 @@ function Chapter7() {
           </button>
         </div>
 
+        </div>
       </div>
-
-      {askOpen && <AskAnalystPopup onClose={() => setAskOpen(false)}/>}
+      )}
     </div>
   );
 }

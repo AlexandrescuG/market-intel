@@ -1,0 +1,85 @@
+{
+  "_meta": {
+    "built": "2026-07-28",
+    "symbol": "GOLD",
+    "granularity": "H1",
+    "round_step": 50,
+    "zone_tolerance": 4.0,
+    "reversal_horizon_bars": 6,
+    "reversal_threshold": 8.0,
+    "selection": "last_6_consecutive_trading_days",
+    "n_days": 6,
+    "n_scored": 5,
+    "n_hit": 1,
+    "xray_hit": 1,
+    "note_ru": "Зоны — фиксированные круглые уровни ($50 шаг) и границы диапазона предыдущей сессии, а не реальные заявки. Дни отобраны как последние 6 подряд с полными данными, исход — фактический на реальных H1-свечах."
+  },
+  "days": [
+    {
+      "date": "2026-07-20",
+      "touch": {
+        "touch_time": 1784505600,
+        "zone_price": 4000.0,
+        "approached_from_below": true,
+        "outcome": "broke_through",
+        "hit": false
+      },
+      "n_zones": 5
+    },
+    {
+      "date": "2026-07-21",
+      "touch": {
+        "touch_time": 1784592000,
+        "zone_price": 4018.8999,
+        "approached_from_below": true,
+        "outcome": "broke_through",
+        "hit": false
+      },
+      "n_zones": 7
+    },
+    {
+      "date": "2026-07-22",
+      "touch": {
+        "touch_time": 1784678400,
+        "zone_price": 4100.0,
+        "approached_from_below": true,
+        "outcome": "broke_through",
+        "hit": false
+      },
+      "n_zones": 8
+    },
+    {
+      "date": "2026-07-23",
+      "touch": {
+        "touch_time": 1784790000,
+        "zone_price": 4100.0,
+        "approached_from_below": false,
+        "outcome": "broke_through",
+        "hit": false
+      },
+      "n_zones": 8
+    },
+    {
+      "date": "2026-07-24",
+      "touch": {
+        "touch_time": 1784851200,
+        "zone_price": 4050.0,
+        "approached_from_below": true,
+        "outcome": "reversed",
+        "hit": true
+      },
+      "n_zones": 7
+    },
+    {
+      "date": "2026-07-27",
+      "touch": {
+        "touch_time": 1785110400,
+        "zone_price": 4100.0,
+        "approached_from_below": true,
+        "outcome": "inconclusive",
+        "hit": false
+      },
+      "n_zones": 5
+    }
+  ]
+}
