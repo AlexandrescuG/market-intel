@@ -116,6 +116,14 @@ window.Ch5Content = {
       ratioLine: "Отношение: в {{peak_ratio}} раза. Закономерность держится {{years_consistent}} из {{years_total}} периодов наблюдения.",
       switchInstrument: "Инструмент", switchSubset: "Разрез",
       subsetAll: "Все дни", subsetFriday: "Пятница", subsetNfp: "День NFP (проксируем 1-й пятницей месяца)", subsetRegular: "Обычный день",
+      // §3.1: заголовки не должны утверждать больше, чем показывает выборка —
+      // считаются из periods_total/vs_regular (hourly_profile.json), не текст.
+      conclusionFewPeriods: "Пока держится на всей доступной выборке ({{n}} периода)",
+      conclusionSubsetSignificant: "{{label}} отличается: {{delta}}, n = {{n}}",
+      conclusionSubsetNotSignificant: "{{label}}: значимой разницы не видно, n = {{n}}",
+      conclusionInsufficient: "{{label}}: данных пока мало, n = {{n}}",
+      fridayLabel: "Пятница",
+      nfpLabel: "День NFP",
       conclusions: [
         { title: "Форма кривой воспроизводится", body: "Не «так было в прошлом месяце», а закономерность, держащаяся {{years_consistent}} из {{years_total}} измеренных периодов. Совпадение с академическими измерениями 1998 года на других инструментах — дополнительный аргумент: закономерность старше нас." },
         { title: "У каждого инструмента своя кривая", body: "Переключи на BTC — увидишь то, чего нет у остальных: у криптовалюты нет ни фиксингов, ни бирж с расписанием, и её суточный профиль заметно ровнее. Где нет институционального расписания, там нет и горбов на кривой." },
@@ -392,6 +400,12 @@ window.Ch5Content = {
       ratioLine: "Raportul: de {{peak_ratio}} ori. Tiparul se menține {{years_consistent}} din {{years_total}} perioade observate.",
       switchInstrument: "Instrument", switchSubset: "Segment",
       subsetAll: "Toate zilele", subsetFriday: "Vineri", subsetNfp: "Ziua NFP (proxy: prima vineri a lunii)", subsetRegular: "Zi obișnuită",
+      conclusionFewPeriods: "Deocamdată se confirmă pe tot eșantionul disponibil ({{n}} perioade)",
+      conclusionSubsetSignificant: "{{label}} diferă: {{delta}}, n = {{n}}",
+      conclusionSubsetNotSignificant: "{{label}}: nu se vede o diferență semnificativă, n = {{n}}",
+      conclusionInsufficient: "{{label}}: date insuficiente încă, n = {{n}}",
+      fridayLabel: "Vineri",
+      nfpLabel: "Ziua NFP",
       conclusions: [
         { title: "Forma curbei se reproduce", body: "Nu „așa a fost luna trecută”, ci un tipar care se menține {{years_consistent}} din {{years_total}} perioade măsurate. Coincidența cu măsurătorile academice din 1998 pe alte instrumente e un argument suplimentar: tiparul e mai vechi decât noi." },
         { title: "Fiecare instrument are propria curbă", body: "Comută pe BTC — vei vedea ce nu au ceilalți: criptomoneda nu are nici fixing-uri, nici burse cu program, iar profilul ei zilnic e vizibil mai plat. Unde nu există program instituțional, nu există nici cocoașe pe curbă." },
@@ -668,6 +682,12 @@ window.Ch5Content = {
       ratioLine: "Ratio: {{peak_ratio}}×. The pattern holds {{years_consistent}} of {{years_total}} observed periods.",
       switchInstrument: "Instrument", switchSubset: "Slice",
       subsetAll: "All days", subsetFriday: "Friday", subsetNfp: "NFP day (proxied by month's first Friday)", subsetRegular: "Regular day",
+      conclusionFewPeriods: "Still holding across the full available sample ({{n}} periods)",
+      conclusionSubsetSignificant: "{{label}} differs: {{delta}}, n = {{n}}",
+      conclusionSubsetNotSignificant: "{{label}}: no significant difference visible, n = {{n}}",
+      conclusionInsufficient: "{{label}}: not enough data yet, n = {{n}}",
+      fridayLabel: "Friday",
+      nfpLabel: "NFP day",
       conclusions: [
         { title: "The curve's shape reproduces", body: "Not \"that's how it was last month,\" but a pattern that holds {{years_consistent}} of {{years_total}} measured periods. Matching the 1998 academic measurements on different instruments is a further argument: the pattern is older than us." },
         { title: "Every instrument has its own curve", body: "Switch to BTC — you'll see what the others don't have: crypto has no fixings, no exchanges with a schedule, and its daily profile is noticeably flatter. Where there's no institutional schedule, there are no humps in the curve." },

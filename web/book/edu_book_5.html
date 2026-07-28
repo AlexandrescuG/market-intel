@@ -186,6 +186,15 @@ function fillTemplate(str, vars) {
   });
 }
 
+// ── formatDelta: доля (0.0719) → подписанная строка в п.п. ("+7.2 п.п.").
+// Используется только для честных заголовков блока §3.1 (разрез значим/незначим).
+const DELTA_UNIT = { ru: "п.п.", ro: "p.p.", en: "pp" };
+function formatDelta(delta, lang) {
+  if (delta === null || delta === undefined) return "—";
+  const sign = delta > 0 ? "+" : delta < 0 ? "−" : "±";
+  return sign + Math.abs(delta * 100).toFixed(1) + " " + (DELTA_UNIT[lang] || DELTA_UNIT.ru);
+}
+
 // ── <Stat/>: примитив главы 5 (SPEC §3.4/§8) -- отображает уже вычисленное
 // число или честно "—" + console.error, если данных нет. Числа сюда всегда
 // приходят из hourly_profile.json/asia_sweep.json через компонент выше по
@@ -368,6 +377,27 @@ function HourStatsBlock({ hp, vars }) {
     }
   }
 
+  // §3.1: заголовки блока выводов не должны утверждать больше, чем показывает
+  // текущая выборка. periods_total/vs_regular приходят из hourly_profile.json
+  // (hourly_profile.py), пересчитываются при смене инструмента через data.
+  function subsetConclusionTitle(v, label) {
+    if (!v || v.delta === null || v.n_a < 2) {
+      return fillTemplate(hs.conclusionInsufficient, { label, n: v ? v.n_a : 0 });
+    }
+    return v.significant
+      ? fillTemplate(hs.conclusionSubsetSignificant, { label, delta: formatDelta(v.delta, INITIAL_LANG), n: v.n_a })
+      : fillTemplate(hs.conclusionSubsetNotSignificant, { label, n: v.n_a });
+  }
+  const curveTitle = data && data.periods_total < 3
+    ? fillTemplate(hs.conclusionFewPeriods, { n: data.periods_total })
+    : hs.conclusions[0].title;
+  const conclusionTitles = data ? [
+    curveTitle,
+    hs.conclusions[1].title,
+    subsetConclusionTitle(data.subsets && data.subsets.friday && data.subsets.friday.vs_regular, hs.fridayLabel),
+    subsetConclusionTitle(data.subsets && data.subsets.nfp_day && data.subsets.nfp_day.vs_regular, hs.nfpLabel),
+  ] : hs.conclusions.map(c => c.title);
+
   const warnings = data ? (data.warnings || []) : [];
   const warnText = { short_history: hs.coverageWarningShort, few_periods: hs.coverageWarningFew, under_one_year: hs.coverageWarningYear };
 
@@ -434,7 +464,7 @@ function HourStatsBlock({ hp, vars }) {
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginBottom:28}} className="g2">
           {hs.conclusions.map((c,i) => (
             <div key={i} style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:6,padding:"16px 20px"}}>
-              <div style={{fontWeight:600,fontSize:12.5,color:C.black,marginBottom:6}}>{c.title}</div>
+              <div style={{fontWeight:600,fontSize:12.5,color:C.black,marginBottom:6}}>{conclusionTitles[i]}</div>
               <p style={{fontSize:12,color:C.inkMid,lineHeight:1.6,margin:0}}>{fillTemplate(c.body, vars)}</p>
             </div>
           ))}
