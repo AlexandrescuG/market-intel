@@ -129,6 +129,18 @@ window.Ch6Content = {
       nextBtn: "Следующий релиз →",
       kindLabels: { big_positive: "Большой положительный сюрприз", big_negative: "Большой отрицательный сюрприз", zero: "Сюрприз около нуля", dir_mismatch: "Направление против наивного ожидания" },
     },
+    ladderStage1: {
+      tag: "СТУПЕНЬ 1 — ЖИВОЙ КАЛЕНДАРЬ, БЕЗ РЕГИСТРАЦИИ",
+      title: "То, что ты сейчас нажал, — это запись.",
+      body: [
+        "Мы честно скажем: наш симулятор релиза NFP — это заранее записанные данные. Мы поставили его, чтобы ты понял механику: ожидание, факт, реакция. Понимать механику по записи можно. Научиться реагировать — нельзя.",
+        "Настоящий NFP выходит в первую пятницу месяца. Ближайший — {{next_nfp_date}}. За две минуты до него график золота выглядит как остановившееся сердце, а через восемь секунд после — так, как ты не увидишь больше ни в один день месяца.",
+        "Посмотреть это можно бесплатно и без регистрации. Календарь релизов, где видно прогноз, факт и предыдущее значение, открыт у всех крупных площадок. Вот тот, которым пользуемся мы: он показывает время в твоём часовом поясе и подсвечивает события по силе влияния.",
+        "Ничего не открывай и никуда не вводи данные. Просто посмотри несколько минут вокруг {{next_nfp_date}}. Этого достаточно, чтобы глава 6 перестала быть текстом.",
+      ],
+      cta: "Открыть живой календарь →",
+      loadingDate: "уточняем дату…",
+    },
     squeeze: {
       tag: "BOLLINGER BANDS И СЖАТИЕ ПЕРЕД РЕЛИЗОМ",
       header: "Охота на Squeeze (Сжатие)", badge: "ИНТЕРАКТИВ — ТЕХНИКА (BOLLINGER BANDS)",
@@ -309,6 +321,18 @@ window.Ch6Content = {
       nextBtn: "Următoarea publicație →",
       kindLabels: { big_positive: "Surpriză pozitivă mare", big_negative: "Surpriză negativă mare", zero: "Surpriză aproape de zero", dir_mismatch: "Direcție contrară așteptării naive" },
     },
+    ladderStage1: {
+      tag: "TREAPTA 1 — CALENDAR LIVE, FĂRĂ ÎNREGISTRARE",
+      title: "Ce ai apăsat acum e o înregistrare.",
+      body: [
+        "Spunem cinstit: simulatorul nostru de publicare NFP e date înregistrate dinainte. L-am pus ca să înțelegi mecanica: așteptare, fapt, reacție. Mecanica se poate înțelege dintr-o înregistrare. A învăța să reacționezi — nu.",
+        "NFP-ul real iese în prima vineri a lunii. Cel mai apropiat — {{next_nfp_date}}. Cu două minute înainte, graficul aurului arată ca o inimă oprită, iar la opt secunde după — așa cum nu-l vei mai vedea în nicio altă zi a lunii.",
+        "Poți urmări asta gratuit și fără înregistrare. Calendarul publicărilor, unde se văd prognoza, faptul și valoarea anterioară, e deschis la toate platformele mari. Iată-l pe cel pe care îl folosim noi: arată ora în fusul tău orar și evidențiază evenimentele după forța impactului.",
+        "Nu deschide nimic și nu introdu nicăieri date. Doar privește câteva minute în jurul {{next_nfp_date}}. Atât e suficient ca acest capitol să nu mai fie doar text.",
+      ],
+      cta: "Deschide calendarul live →",
+      loadingDate: "verificăm data…",
+    },
     squeeze: {
       tag: "BOLLINGER BANDS ȘI COMPRESIA ÎNAINTE DE PUBLICARE",
       header: "Vânătoare de Squeeze (Comprimare)", badge: "INTERACTIV — TEHNICĂ (BOLLINGER BANDS)",
@@ -488,6 +512,18 @@ window.Ch6Content = {
       sigmaTooltip: "σ (sigma) — how many standard deviations the surprise is from what's typical for this indicator. More on this further down the page.",
       nextBtn: "Next release →",
       kindLabels: { big_positive: "Large positive surprise", big_negative: "Large negative surprise", zero: "Near-zero surprise", dir_mismatch: "Direction against the naive expectation" },
+    },
+    ladderStage1: {
+      tag: "STEP 1 — LIVE CALENDAR, NO SIGN-UP",
+      title: "What you just clicked is a recording.",
+      body: [
+        "We'll say it plainly: our NFP release simulator is pre-recorded data. We built it so you'd understand the mechanics — expectation, fact, reaction. You can understand mechanics from a recording. You can't learn to react from one.",
+        "The real NFP comes out the first Friday of the month. The next one is {{next_nfp_date}}. Two minutes before it, gold's chart looks like a stopped heart, and eight seconds after, it looks like nothing else you'll see any other day of the month.",
+        "You can watch it for free, no sign-up. The release calendar, showing forecast, actual, and previous, is open on every major platform. Here's the one we use: it shows times in your own timezone and highlights events by how much they typically move markets.",
+        "Don't open anything, don't enter any data anywhere. Just watch for a few minutes around {{next_nfp_date}}. That's enough for this chapter to stop being just text.",
+      ],
+      cta: "Open the live calendar →",
+      loadingDate: "checking the date…",
     },
     squeeze: {
       tag: "BOLLINGER BANDS AND THE COMPRESSION BEFORE A RELEASE",

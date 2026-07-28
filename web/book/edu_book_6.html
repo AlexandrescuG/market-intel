@@ -600,6 +600,47 @@ function ReleaseSimulatorV2({ stats }) {
   );
 }
 
+// ─── Ступень 1 лестницы — живой календарь, без регистрации ─────────────────
+function useNextNfp() {
+  const [state, setState] = React.useState({ loading: true, date: null });
+  React.useEffect(() => {
+    let cancelled = false;
+    const from = new Date().toISOString().slice(0, 10);
+    const to = new Date(Date.now() + 60 * 86400000).toISOString().slice(0, 10);
+    fetch(`/api/calendar/events?from=${from}&to=${to}`).then(r => r.json()).then(events => {
+      if (cancelled) return;
+      const now = Date.now();
+      const nfp = (Array.isArray(events) ? events : [])
+        .filter(e => e.country === "US" && e.impact === "high" && /non ?farm payrolls/i.test(e.title || "") && new Date(e.ts_utc).getTime() > now)
+        .sort((a, b) => new Date(a.ts_utc) - new Date(b.ts_utc));
+      setState({ loading: false, date: nfp[0] ? nfp[0].ts_utc : null });
+    }).catch(() => { if (!cancelled) setState({ loading: false, date: null }); });
+    return () => { cancelled = true; };
+  }, []);
+  return state;
+}
+
+function LiveCalendarStage() {
+  const T6 = window.Ch6Content[INITIAL_LANG] || window.Ch6Content.ru;
+  const ls = T6.ladderStage1;
+  const { loading, date } = useNextNfp();
+  const localeTag = INITIAL_LANG === "ru" ? "ru-RU" : INITIAL_LANG === "ro" ? "ro-RO" : "en-US";
+  const dateLabel = !loading && date
+    ? new Date(date).toLocaleString(localeTag, { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit", timeZoneName: "short" })
+    : ls.loadingDate;
+
+  return (
+    <div style={{border:`1px solid ${C.borderGold}`,borderRadius:8,padding:"26px 30px",marginBottom:56,background:C.goldPale}}>
+      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:14}}>{ls.tag}</Mono>
+      <p style={{fontWeight:600,fontSize:15,color:C.black,marginBottom:14}}>{ls.title}</p>
+      {ls.body.map((p,i) => (
+        <p key={i} style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,marginBottom:12}}>{fillTemplate(p, {next_nfp_date: dateLabel})}</p>
+      ))}
+      <a href="/calendar" target="_blank" rel="noopener" style={{display:"inline-block",marginTop:8,padding:"12px 24px",background:C.gold,color:"#18181a",textDecoration:"none",borderRadius:4,fontFamily:"monospace",fontSize:12,letterSpacing:0.5,fontWeight:700}}>{ls.cta}</a>
+    </div>
+  );
+}
+
 // ─── Squeeze trainer (Bollinger Bands) — сохранён почти без изменений,
 // добавлена честная связка с календарём и смягчение claim про 95%.
 function SqueezeTrainer() {
@@ -788,6 +829,8 @@ function Chapter6() {
 
         <SectionTitle id="secSimulator" sub={S.simulatorSub}>{T6.simulator.tag}</SectionTitle>
         <div style={{marginBottom:56}}><ReleaseSimulatorV2 stats={stats}/></div>
+
+        <LiveCalendarStage/>
 
         <SectionTitle sub={S.squeezeSub}>{T6.squeeze.tag}</SectionTitle>
         <div style={{marginBottom:56}}><SqueezeTrainer/></div>
