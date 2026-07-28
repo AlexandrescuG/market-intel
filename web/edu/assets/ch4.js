@@ -69,6 +69,11 @@ window.Ch4Content = {
       ],
       finalRule: "Правило SBF: рыночный ордер — инструмент ликвидного часа. В остальное время очередь должна работать на тебя, а не наоборот.",
     },
+    pendingScheme: {
+      hint: "Потяни линию выше или ниже текущей цены — подпись обновится сама.",
+      aboveExplain: "Ты поставил ордер выше цены. Купить выше рынка можно только на пробое — значит, это BUY STOP. Продать выше рынка можно только лимитом — значит, SELL LIMIT.",
+      belowExplain: "Ты поставил ордер ниже цены. Купить ниже рынка можно только лимитом — значит, это BUY LIMIT. Продать ниже рынка можно только на пробое — значит, SELL STOP.",
+    },
     ordersTrainer: {
       legend: "Цена ползёт по графику. Твоя задача — исполнить шесть типов ордеров правильно: поставь линию туда, где этот тип имеет смысл (BUY LIMIT — ниже цены, BUY STOP — выше, и наоборот для SELL; STOP LIMIT и TRAILING STOP — по своей логике). Поставишь не туда — тренажёр объяснит, почему ордер не сработает или сработает не так, как ты думал.",
       finalNote: "6/6 — очередь работает на тебя.",
@@ -200,6 +205,11 @@ window.Ch4Content = {
       ],
       finalRule: "SBF's rule: a market order is a tool for the liquid hour. The rest of the time, the queue should work for you, not the other way around.",
     },
+    pendingScheme: {
+      hint: "Drag the line above or below the current price — the label updates itself.",
+      aboveExplain: "You placed the order above price. You can only buy above the market on a breakout — so that's BUY STOP. You can only sell above the market at a limit — so that's SELL LIMIT.",
+      belowExplain: "You placed the order below price. You can only buy below the market at a limit — so that's BUY LIMIT. You can only sell below the market on a breakout — so that's SELL STOP.",
+    },
     ordersTrainer: {
       legend: "The price crawls across the chart. Your job is to execute six order types correctly: place the line where that type actually makes sense (BUY LIMIT — below price, BUY STOP — above, and the reverse for SELL; STOP LIMIT and TRAILING STOP follow their own logic). Place it wrong, and the trainer will explain why the order won't fire, or will fire differently than you expected.",
       finalNote: "6/6 — the queue is working for you.",
@@ -330,6 +340,11 @@ window.Ch4Content = {
         { situation: "Cripto noaptea, carnetul e subțire", action: "Doar ordine limit, și nu mă mir de execuții parțiale." },
       ],
       finalRule: "Regula SBF: ordinul de piață e un instrument al orei lichide. În rest, coada trebuie să lucreze pentru tine, nu invers.",
+    },
+    pendingScheme: {
+      hint: "Trage linia deasupra sau sub prețul curent — eticheta se actualizează singură.",
+      aboveExplain: "Ai plasat ordinul deasupra prețului. Poți cumpăra deasupra pieței doar la breakout — deci e BUY STOP. Poți vinde deasupra pieței doar la limită — deci e SELL LIMIT.",
+      belowExplain: "Ai plasat ordinul sub preț. Poți cumpăra sub piață doar la limită — deci e BUY LIMIT. Poți vinde sub piață doar la breakout — deci e SELL STOP.",
     },
     ordersTrainer: {
       legend: "Prețul se târăște pe grafic. Sarcina ta este să execuți corect șase tipuri de ordine: pune linia acolo unde acel tip are sens (BUY LIMIT — sub preț, BUY STOP — deasupra, și invers pentru SELL; STOP LIMIT și TRAILING STOP au propria logică). Dacă o pui greșit, antrenorul îți explică de ce ordinul nu se declanșează, sau se declanșează altfel decât te așteptai.",

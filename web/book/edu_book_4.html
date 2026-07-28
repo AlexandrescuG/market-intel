@@ -26,6 +26,13 @@
       .ch4-flow-badge{margin:0;flex-shrink:0}
       .ch4-flow-num{display:inline}
     }
+    .ch4-pending-tag{position:absolute;transform:translateY(-50%);font-family:monospace;font-size:10.5px;font-weight:700;letter-spacing:.03em;padding:4px 8px;border-radius:3px;white-space:nowrap;pointer-events:none}
+    .ch4-pending-price{left:6px;background:rgba(255,255,255,0.15);color:rgba(255,255,255,0.85)}
+    .ch4-pending-level{right:6px;color:#0a0a0a}
+    @media(max-width:768px){
+      .ch4-pending-tag{font-size:12px;padding:5px 10px}
+      .ch4-pending-level{left:50%;right:auto;transform:translate(-50%,16px)}
+    }
   </style>
 </head>
 <body>
@@ -152,8 +159,6 @@ const STRINGS = {
     ],
     pendingDiagramLabel:"ГДЕ СТАВИТЬ ОТЛОЖЕННЫЕ ОРДЕРА",
     currentPriceLabel:"ЦЕНА 2505",
-    aboveMarketLabel:"Выше рынка → SELL LIMIT / BUY STOP",
-    belowMarketLabel:"Ниже рынка → BUY LIMIT / SELL STOP",
 
     // Conclusions
     conclusionsTag:"ИТОГИ ГЛАВЫ 4",
@@ -283,8 +288,6 @@ const STRINGS = {
     ],
     pendingDiagramLabel:"WHERE TO PLACE PENDING ORDERS",
     currentPriceLabel:"PRICE 2505",
-    aboveMarketLabel:"Above the market → SELL LIMIT / BUY STOP",
-    belowMarketLabel:"Below the market → BUY LIMIT / SELL STOP",
 
     // Conclusions
     conclusionsTag:"CHAPTER 4 TAKEAWAYS",
@@ -414,8 +417,6 @@ const STRINGS = {
     ],
     pendingDiagramLabel:"UNDE SE PLASEAZĂ ORDINELE PENDING",
     currentPriceLabel:"PREȚ 2505",
-    aboveMarketLabel:"Peste prețul pieței → SELL LIMIT / BUY STOP",
-    belowMarketLabel:"Sub prețul pieței → BUY LIMIT / SELL STOP",
 
     // Conclusions
     conclusionsTag:"CONCLUZIILE CAPITOLULUI 4",
@@ -723,6 +724,124 @@ function MarketDepthSimulator() {
         <p style={{fontSize:12,color:"rgba(255,255,255,0.35)",marginTop:20,fontStyle:"italic"}}>{ds.calibrationNote}</p>
       </div>
       <p style={{fontSize:12.5,color:C.inkSoft,marginTop:14,maxWidth:780}}>{ds.afterNote}</p>
+    </div>
+  );
+}
+
+// ─── "Где ставить отложенные ордера" -- SPEC_ch4_debug.md §4.2. Было: статичная
+// схема с четырьмя зонами на абстрактной линии. Теперь: одна перетаскиваемая
+// (мышью и пальцем) линия на РЕАЛЬНЫХ M30-свечах GOLD; тип ордера -- не
+// зазубренная из четырёх комбинаций, а прямое следствие того, где линия стоит
+// относительно текущей цены. Подписи -- HTML поверх SVG (position:absolute,
+// %-based top), а не текст внутри viewBox: при масштабировании 680-юнитного
+// viewBox до 390px текст внутри SVG уезжал бы к нечитаемым ~6px, HTML-оверлей
+// от этого не зависит и получает свой обычный responsive font-size из CSS.
+function PendingOrderScheme() {
+  const { useState, useEffect, useRef } = React;
+  const T4 = window.Ch4Content[INITIAL_LANG] || window.Ch4Content.ru;
+  const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
+  const P = T4.pendingScheme;
+  const priceWord = (S.currentPriceLabel || "").replace(/[\d.,\s]+$/, "").trim();
+
+  const [candles, setCandles] = useState(null);
+  const [levelPrice, setLevelPrice] = useState(null);
+  const svgRef = useRef(null);
+  const draggingRef = useRef(false);
+
+  useEffect(() => {
+    fetch("/data/ohlc_GOLD_M30.json").then(r => r.json()).then(d => {
+      const all = d && d.candles;
+      if (!Array.isArray(all) || !all.length) return;
+      const recent = all.slice(-32);
+      const highs = recent.map(c => c.high), lows = recent.map(c => c.low);
+      const span = Math.max(...highs) - Math.min(...lows);
+      setCandles(recent);
+      setLevelPrice(recent[recent.length - 1].close + span * 0.22);
+    }).catch(() => {});
+  }, []);
+
+  if (!candles || levelPrice == null) {
+    return <div style={{background:C.black,borderRadius:6,minHeight:220,marginBottom:56}}/>;
+  }
+
+  const currentPrice = candles[candles.length - 1].close;
+  const W = 680, H = 220, padY = 18;
+  const highs = candles.map(c => c.high), lows = candles.map(c => c.low);
+  // Диапазон фиксирован от РЕАЛЬНЫХ данных свечей и центрирован на текущей
+  // цене -- не растягивается вслед за перетаскиваемым уровнем (раньше
+  // levelPrice сам входил в min/max: потянешь линию в одну сторону, диапазон
+  // растягивался вслед за ней, линия цены уезжала к краю, а противоположная
+  // зона становилась слишком узкой для перетаскивания -- живой баг, найден
+  // Playwright-драгом: клик на 90% высоты давал то же "BUY STOP", потому что
+  // цена сама стояла на 85%). И не берётся голым min/max свечей: у реальных
+  // 32 M30-баров цена сама по себе может стоять у самого края 16-часового
+  // окна (здесь честно и было — 85% вниз) — тогда просто одна зона всё равно
+  // останется узкой. Вместо этого — симметричный полу-диапазон от БОЛЬШЕГО
+  // из двух естественных расстояний (до максимума и до минимума), центр
+  // всегда на цене: обе зоны всегда ровно по 50%, ни один фитиль не обрезан.
+  const distUp = Math.max(...highs) - currentPrice;
+  const distDown = currentPrice - Math.min(...lows);
+  const halfSpan = Math.max(distUp, distDown, (Math.max(...highs) - Math.min(...lows)) * 0.5) * 1.25;
+  const min = currentPrice - halfSpan;
+  const max = currentPrice + halfSpan;
+  const range = (max - min) || 1;
+  const toY = p => padY + (1 - (p - min) / range) * (H - padY * 2);
+  const toP = yFrac => min + (1 - yFrac) * range;
+  const step = (W - 40) / candles.length;
+  const candleW = Math.max(3, step - 3);
+
+  const posFromEvent = (e) => {
+    const rect = svgRef.current.getBoundingClientRect();
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return Math.max(0, Math.min(1, (clientY - rect.top) / rect.height));
+  };
+  const setFromEvent = (e) => {
+    const p = toP(posFromEvent(e));
+    setLevelPrice(Math.max(min, Math.min(max, p)));
+  };
+  const startDrag = (e) => { draggingRef.current = true; setFromEvent(e); };
+  const moveDrag = (e) => { if (draggingRef.current) setFromEvent(e); };
+  const endDrag = () => { draggingRef.current = false; };
+
+  const eps = range * 0.006;
+  const above = levelPrice > currentPrice + eps;
+  const below = levelPrice < currentPrice - eps;
+  const levelColor = above ? "#0ea5e9" : below ? C.chartGreen : "rgba(255,255,255,0.35)";
+  const levelLabel = above ? "BUY STOP · SELL LIMIT" : below ? "BUY LIMIT · SELL STOP" : "···";
+
+  return (
+    <div style={{background:C.black,borderRadius:6,padding:"28px 32px",marginBottom:56,overflow:"hidden"}}>
+      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:16}}>{S.pendingDiagramLabel}</Mono>
+      <p style={{fontSize:12,color:"rgba(255,255,255,0.45)",marginBottom:14}}>{P.hint}</p>
+      <div style={{position:"relative"}}>
+        <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`}
+          style={{width:"100%",display:"block",cursor:"ns-resize",touchAction:"none",userSelect:"none"}}
+          onMouseDown={startDrag} onMouseMove={moveDrag} onMouseUp={endDrag} onMouseLeave={endDrag}
+          onTouchStart={startDrag} onTouchMove={moveDrag} onTouchEnd={endDrag}>
+          {candles.map((c, i) => {
+            const x = 20 + i * step;
+            const up = c.close >= c.open;
+            const color = up ? C.chartGreen : C.chartRed;
+            const bodyTop = toY(Math.max(c.open, c.close)), bodyBot = toY(Math.min(c.open, c.close));
+            return (
+              <g key={i}>
+                <line x1={x + candleW / 2} y1={toY(c.high)} x2={x + candleW / 2} y2={toY(c.low)} stroke={color} strokeWidth="1"/>
+                <rect x={x} y={bodyTop} width={candleW} height={Math.max(1, bodyBot - bodyTop)} fill={color}/>
+              </g>
+            );
+          })}
+          <line x1="0" y1={toY(currentPrice)} x2={W} y2={toY(currentPrice)} stroke="rgba(255,255,255,0.35)" strokeWidth="1.5"/>
+          <line x1="0" y1={toY(levelPrice)} x2={W} y2={toY(levelPrice)} stroke={levelColor} strokeWidth="2" strokeDasharray="7 4"/>
+          <circle cx={W - 24} cy={toY(levelPrice)} r="9" fill={levelColor}/>
+        </svg>
+        <div className="ch4-pending-tag ch4-pending-price" style={{top:`${(toY(currentPrice) / H) * 100}%`}}>{priceWord} {currentPrice.toFixed(1)}</div>
+        <div className="ch4-pending-tag ch4-pending-level" style={{top:`${(toY(levelPrice) / H) * 100}%`, background:levelColor}}>{levelLabel}</div>
+      </div>
+      {(above || below) && (
+        <p style={{fontSize:12.5,color:"rgba(255,255,255,0.75)",lineHeight:1.7,marginTop:18,marginBottom:0,maxWidth:620}}>
+          {above ? P.aboveExplain : P.belowExplain}
+        </p>
+      )}
     </div>
   );
 }
@@ -1272,41 +1391,7 @@ function Chapter4() {
         </div>
 
         {/* Pending orders placement guide */}
-        <div style={{background:C.black,borderRadius:6,padding:"28px 32px",marginBottom:56,overflow:"hidden"}}>
-          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:20}}>{S.pendingDiagramLabel}</Mono>
-          <svg viewBox="0 0 680 200" style={{width:"100%",display:"block"}}>
-            {/* Background */}
-            <rect width="680" height="200" fill="#18181a"/>
-            {/* Current price line */}
-            <line x1="0" y1="100" x2="680" y2="100" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5"/>
-            <rect x="0" y="92" width="80" height="16" fill="rgba(255,255,255,0.15)" rx="2"/>
-            <text x="8" y="104" fontSize="10" fill="rgba(255,255,255,0.7)" fontFamily="monospace">{S.currentPriceLabel}</text>
-
-            {/* SELL LIMIT zone (above) */}
-            <rect x="0" y="0" width="680" height="95" fill="rgba(242,54,69,0.04)"/>
-            <line x1="0" y1="55" x2="680" y2="55" stroke={C.chartRed} strokeWidth="1" strokeDasharray="6 3"/>
-            <rect x="580" y="43" width="95" height="16" fill={C.chartRed} opacity="0.9" rx="2"/>
-            <text x="628" y="55" fontSize="9" fill="#fff" textAnchor="middle" fontFamily="monospace">SELL LIMIT</text>
-            <text x="10" y="48" fontSize="10" fill="rgba(242,54,69,0.7)" fontFamily="monospace">{S.aboveMarketLabel}</text>
-
-            {/* BUY STOP zone (above) */}
-            <line x1="0" y1="30" x2="680" y2="30" stroke="#0ea5e9" strokeWidth="1" strokeDasharray="6 3"/>
-            <rect x="580" y="18" width="95" height="16" fill="#0ea5e9" opacity="0.9" rx="2"/>
-            <text x="628" y="30" fontSize="9" fill="#fff" textAnchor="middle" fontFamily="monospace">BUY STOP</text>
-
-            {/* BUY LIMIT zone (below) */}
-            <rect x="0" y="105" width="680" height="95" fill="rgba(8,153,129,0.04)"/>
-            <line x1="0" y1="145" x2="680" y2="145" stroke={C.chartGreen} strokeWidth="1" strokeDasharray="6 3"/>
-            <rect x="580" y="133" width="95" height="16" fill={C.chartGreen} opacity="0.9" rx="2"/>
-            <text x="628" y="145" fontSize="9" fill="#fff" textAnchor="middle" fontFamily="monospace">BUY LIMIT</text>
-            <text x="10" y="165" fontSize="10" fill="rgba(8,153,129,0.7)" fontFamily="monospace">{S.belowMarketLabel}</text>
-
-            {/* SELL STOP zone (below) */}
-            <line x1="0" y1="170" x2="680" y2="170" stroke="#f59e0b" strokeWidth="1" strokeDasharray="6 3"/>
-            <rect x="580" y="158" width="95" height="16" fill="#f59e0b" opacity="0.9" rx="2"/>
-            <text x="628" y="170" fontSize="9" fill="#fff" textAnchor="middle" fontFamily="monospace">SELL STOP</text>
-          </svg>
-        </div>
+        <PendingOrderScheme/>
 
         {/* Scenario cards */}
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:16}} className="g2">
