@@ -316,7 +316,8 @@ window.Ch5Content = {
       tag: "ПРЕДИКТ НЕДЕЛИ",
       question: "В какой час завтра золото пройдёт наибольший диапазон? Выбери час из сетки ниже.",
       utcNote: "Часы — в UTC.",
-      afterPick: "Записано. По нашим измерениям исторический пик — {{peak_hour}}:00 UTC ({{peak_share}}% диапазона), минимум — {{trough_hour}}:00 UTC ({{trough_share}}%). Сравни свой выбор с картой в блоке «Наши сутки» выше и загляни завтра — сработает ли закономерность и на этой неделе.",
+      afterPick: "Записано. По нашим измерениям исторический пик — {{peak_hour}}:00 UTC ({{peak_share}}% диапазона), минимум — {{trough_hour}}:00 UTC ({{trough_share}}%). Загляни завтра — сработает ли закономерность и на этой неделе.",
+      jumpToMapLink: "↑ Смотреть на карте",
       xpNote: "+15 XP за участие. Это не про направление цены — предикт полностью укладывается в правила комплаенса.",
     },
     cliffhanger: {
@@ -607,7 +608,8 @@ window.Ch5Content = {
       tag: "PREDICȚIA SĂPTĂMÂNII",
       question: "În ce oră mâine aurul va parcurge cel mai mare interval? Alege o oră din grila de mai jos.",
       utcNote: "Orele sunt în UTC.",
-      afterPick: "Înregistrat. Conform măsurătorilor noastre, vârful istoric e la ora {{peak_hour}}:00 UTC ({{peak_share}}% din interval), minimul — {{trough_hour}}:00 UTC ({{trough_share}}%). Compară alegerea ta cu harta din blocul „Ziua noastră” de mai sus și revino mâine — se confirmă tiparul și în această săptămână?",
+      afterPick: "Înregistrat. Conform măsurătorilor noastre, vârful istoric e la ora {{peak_hour}}:00 UTC ({{peak_share}}% din interval), minimul — {{trough_hour}}:00 UTC ({{trough_share}}%). Revino mâine — se confirmă tiparul și în această săptămână?",
+      jumpToMapLink: "↑ Vezi pe hartă",
       xpNote: "+15 XP pentru participare. Nu e despre direcția prețului — predicția respectă integral regulile de conformitate.",
     },
     cliffhanger: {
@@ -898,7 +900,8 @@ window.Ch5Content = {
       tag: "PREDICTION OF THE WEEK",
       question: "Which hour will gold post its largest range tomorrow? Pick an hour from the grid below.",
       utcNote: "Hours are in UTC.",
-      afterPick: "Logged. By our measurements, the historical peak is {{peak_hour}}:00 UTC ({{peak_share}}% of range), the minimum is {{trough_hour}}:00 UTC ({{trough_share}}%). Compare your pick against the map in the \"Our day\" block above, and come back tomorrow to see whether the pattern held this week too.",
+      afterPick: "Logged. By our measurements, the historical peak is {{peak_hour}}:00 UTC ({{peak_share}}% of range), the minimum is {{trough_hour}}:00 UTC ({{trough_share}}%). Come back tomorrow to see whether the pattern held this week too.",
+      jumpToMapLink: "↑ See it on the map",
       xpNote: "+15 XP for participating. This isn't about price direction — the prediction fits fully within compliance rules.",
     },
     cliffhanger: {
