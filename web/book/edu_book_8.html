@@ -706,8 +706,20 @@ function Chapter8() {
 
         <div style={{marginBottom:32}}>
           <Mono size={10} color={C.inkFaint} spacing={2} style={{display:"block",marginBottom:10,textTransform:"uppercase"}}>{T8.sources.tag}</Mono>
-          <ol style={{fontSize:11.5,color:C.inkFaint,lineHeight:1.8,paddingLeft:18,marginBottom:8}}>
+          <ol style={{fontSize:11.5,color:C.inkMid,lineHeight:1.8,paddingLeft:18,marginBottom:8}}>
             {T8.sources.list.map((s,i) => <li key={i}>{s}</li>)}
+            {ema_ && ema_._meta && (() => {
+              const m = ema_._meta;
+              const text = T8.sources.ownTemplate
+                .replace("{{grid_size}}", m.grid_size).replace("{{n_cells}}", m.n_cells)
+                .replace("{{cost}}", m.cost_per_trade_atr).replace("{{built}}", "27.07.2026");
+              return (
+                <li>
+                  {text}{" "}
+                  <a href="/data/edu_stats/ema_reality.csv" download style={{color:C.gold}}>{T8.sources.csvLabel}</a>
+                </li>
+              );
+            })()}
           </ol>
           <p style={{fontSize:11,color:C.inkFaint,fontStyle:"italic"}}>{T8.sources.checked}</p>
         </div>
