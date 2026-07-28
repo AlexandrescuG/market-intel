@@ -248,6 +248,18 @@ function declineTradingDays(n, lang) {
   if (lang === "en") return AS.declineEn(n, "trading day", "trading days");
   return AS.declineRu(n, ["торговый день", "торговых дня", "торговых дней"]);
 }
+// P2.3: контекст локали выбирается по часовому поясу браузера
+// (SBFSessionTable.guessZone), а не хардкодится по языку страницы --
+// раньше ЛЮБОЙ русскоязычный читатель видел "Казахстан/СНГ", хотя
+// компания молдавская. astana/moscow -- свой вариант, всё остальное
+// (включая несматченный браузер, guessZone возвращает "UTC") -- молдавский
+// по умолчанию, это и есть реальный домашний рынок компании.
+function localeZoneGroup(zoneId) {
+  if (zoneId === "astana") return "kazakhstan";
+  if (zoneId === "moscow") return "russia";
+  return "moldova";
+}
+
 function declinePeriods(n, lang) {
   if (n == null) return null;
   const AS = window.AcademyShared;
@@ -1185,7 +1197,11 @@ function Chapter5() {
         {/* ── Контекст локали ── */}
         <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px",marginBottom:48}}>
           <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T5.localeContext.tag}</Mono>
-          <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,margin:0,maxWidth:780}}>{vars ? fillTemplate(T5.localeContext.body, vars) : T5.localeContext.body}</p>
+          <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,margin:0,maxWidth:780}}>{(() => {
+            const zoneGroup = cfg && window.SBFSessionTable ? localeZoneGroup(window.SBFSessionTable.guessZone(cfg)) : "moldova";
+            const body = T5.localeContext.byZone[zoneGroup] || T5.localeContext.byZone.moldova;
+            return vars ? fillTemplate(body, vars) : body;
+          })()}</p>
         </div>
 
         <Rule/>

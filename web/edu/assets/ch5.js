@@ -259,8 +259,20 @@ window.Ch5Content = {
       savedNote: "Сохранено. Утренний бриф теперь придёт за 30 минут до начала твоего окна.",
     },
     localeContext: {
-      tag: "КОНТЕКСТ ЛОКАЛИ · КАЗАХСТАН / СНГ",
-      body: "Казахстан с 1 марта 2024 года живёт в едином часовом поясе UTC+5. Для Астаны это означает, что перекрытие Лондона и Нью-Йорка приходится на {{overlap_kz}} — то есть на поздний вечер. Практический вывод: самое ликвидное окно суток совпадает с вечером, и это, пожалуй, удачнее, чем у большинства. Для России: Москва не переводит часы с 2014 года, поэтому вся американская программа съезжает на час дважды в год — держи это в голове или, лучше, не держи, а смотри в календарь.",
+      // [ИСПРАВЛЕНО P2.3] Раньше было безусловно "Казахстан/СНГ" для ЛЮБОГО
+      // русскоязычного читателя, хотя компания молдавская, и re-версия этого
+      // же блока (byZone.moldova ниже) писала совсем другой, корректный текст
+      // про Кишинёв. Выбор варианта теперь идёт по зоне из
+      // SBFSessionTable.guessZone() (см. localeContextZone в edu_book_5.html),
+      // а не по языку страницы — казахстанский читатель СНГ-раздела на
+      // русском видит казахстанский вариант, все остальные (включая тех, у
+      // кого браузер не сматчился ни с одной зоной) — молдавский по умолчанию.
+      tag: "КОНТЕКСТ ЛОКАЛИ",
+      byZone: {
+        moldova: "Молдова переходит на летнее время вместе с ЕС — как и США, с разницей всего в три недели в год. Поэтому, в отличие от Москвы, американские события держатся в одном и том же местном времени круглый год: перекрытие Лондон–Нью-Йорк — {{overlap_md}}, а макроданные США выходят в {{us_data_md}}. Летом Кишинёв совпадает с московским временем; зимой отстаёт на час. Три недели расхождения в 2026-м: 8–29 марта и 25 октября — 1 ноября — в эти дни сверяй часы по календарю, а не по памяти.",
+        kazakhstan: "Казахстан с 1 марта 2024 года живёт в едином часовом поясе UTC+5. Для Астаны это означает, что перекрытие Лондона и Нью-Йорка приходится на {{overlap_kz}} — то есть на поздний вечер. Практический вывод: самое ликвидное окно суток совпадает с вечером, и это, пожалуй, удачнее, чем у большинства.",
+        russia: "Москва не переводит часы с 2014 года, поэтому вся американская программа съезжает на час дважды в год — держи это в голове или, лучше, не держи, а смотри в календарь.",
+      },
     },
     quiz: [
       { id: "q1", section: "secClocks", prompt: "Почему золото часто резко двигается в 12:30 UTC?",
@@ -541,8 +553,12 @@ window.Ch5Content = {
       savedNote: "Salvat. Briefing-ul de dimineață va veni acum cu 30 de minute înainte de începutul ferestrei tale.",
     },
     localeContext: {
-      tag: "CONTEXT LOCAL · MOLDOVA",
-      body: "Moldova trece la ora de vară odată cu UE, la fel ca Statele Unite — cu doar trei săptămâni de decalaj pe an. De aceea, spre deosebire de Moscova, evenimentele americane rămân la aceeași oră locală tot anul: suprapunerea Londra–New York e {{overlap_md}}, iar datele macro din SUA apar la {{us_data_md}}. Vara, Chișinăul coincide cu ora Moscovei; iarna rămâne cu o oră în urmă. Cele trei săptămâni de decalaj în 2026: 8–29 martie și 25 octombrie – 1 noiembrie — în aceste zile verifică orele în calendar, nu din memorie.",
+      tag: "CONTEXT LOCAL",
+      byZone: {
+        moldova: "Moldova trece la ora de vară odată cu UE, la fel ca Statele Unite — cu doar trei săptămâni de decalaj pe an. De aceea, spre deosebire de Moscova, evenimentele americane rămân la aceeași oră locală tot anul: suprapunerea Londra–New York e {{overlap_md}}, iar datele macro din SUA apar la {{us_data_md}}. Vara, Chișinăul coincide cu ora Moscovei; iarna rămâne cu o oră în urmă. Cele trei săptămâni de decalaj în 2026: 8–29 martie și 25 octombrie – 1 noiembrie — în aceste zile verifică orele în calendar, nu din memorie.",
+        kazakhstan: "Kazahstanul trăiește din 1 martie 2024 într-un singur fus orar, UTC+5. Pentru Astana, asta înseamnă că suprapunerea Londra–New York cade la {{overlap_kz}} — adică spre seară târziu. Concluzia practică: fereastra cea mai lichidă a zilei coincide cu seara, ceea ce e, probabil, mai avantajos decât pentru majoritatea.",
+        russia: "Moscova nu mai schimbă ora din 2014, așa că întregul program american se mută cu o oră de două ori pe an — ține minte asta sau, mai bine, nu ține minte, ci verifică în calendar.",
+      },
     },
     quiz: [
       { id: "q1", section: "secClocks", prompt: "De ce aurul se mișcă adesea brusc la 12:30 UTC?",
@@ -824,7 +840,11 @@ window.Ch5Content = {
     },
     localeContext: {
       tag: "LOCALE CONTEXT",
-      body: "One rule beats every timetable: store event times in UTC and let your calendar render them in your locale. Sessions are labels; releases, fixes and overlaps are the real clock. If you take a single number from this chapter, take the peak-to-trough ratio we measured on our own data — {{peak_ratio}}× between the busiest and quietest hour — and then check what your own window looks like against it.",
+      byZone: {
+        moldova: "Moldova switches to daylight saving with the EU — same as the US, with only a three-week gap each year. So, unlike Moscow, US events stay at the same local time year-round: the London–New York overlap is {{overlap_md}}, and US macro data lands at {{us_data_md}}. In summer, Chisinau matches Moscow time; in winter it falls an hour behind. The three mismatched weeks in 2026: March 8–29 and October 25–November 1 — check the calendar on those days, not your memory.",
+        kazakhstan: "Kazakhstan has lived in a single UTC+5 time zone since March 1, 2024. For Astana, that means the London–New York overlap falls at {{overlap_kz}} — late evening. The practical takeaway: the day's most liquid window lands in the evening, which is arguably more convenient than for most.",
+        russia: "Moscow hasn't changed its clocks since 2014, so the entire US schedule slides by an hour twice a year — keep that in mind, or better, don't try to remember it and just check the calendar.",
+      },
     },
     quiz: [
       { id: "q1", section: "secClocks", prompt: "Why does gold often move sharply at 12:30 UTC?",
