@@ -149,6 +149,17 @@
     'transition:background .12s;padding:0;flex-shrink:0;outline:none;}',
     '.sbf-pp-x:hover{background:rgba(43,43,51,.12);}',
 
+    // Гостевая плашка (видна только анониму — профиль без входа хранится
+    // только в этом браузере, без явной подсказки это выглядит как "я вошёл")
+    '.sbf-pp-guest-banner{display:flex;align-items:center;gap:10px;flex-wrap:wrap;',
+    'padding:9px 20px;background:rgba(43,43,51,.05);',
+    'border-bottom:1px solid var(--line,#E7DFCF);font-size:11.5px;line-height:1.5;',
+    'color:var(--muted,#8A8275);flex-shrink:0;}',
+    '.sbf-pp-gb-actions{white-space:nowrap;flex-shrink:0;}',
+    '.sbf-pp-gb-link{color:var(--gold,#C9A227);font-weight:700;text-decoration:none;}',
+    '.sbf-pp-gb-link:hover{text-decoration:underline;}',
+    '.sbf-pp-gb-sep{margin:0 4px;opacity:.5;}',
+
     // Тело панели
     '.sbf-pp-body{flex:1;overflow-y:auto;padding:22px 20px 28px;',
     '-webkit-overflow-scrolling:touch;}',
@@ -403,6 +414,17 @@
       '<div class="sbf-pp-hd">',
       '  <h3 data-i18n="profile.panel_title">' + t('profile.panel_title', 'Профиль') + '</h3>',
       '  <button class="sbf-pp-x" id="sbfPpX" data-i18n-aria="profile.aria_close" aria-label="' + t('profile.aria_close', 'Закрыть') + '">✕</button>',
+      '</div>',
+
+      // Guest banner (гость: прогресс локальный, входа не было) — скрыта по умолчанию,
+      // видимость выставляется в openPanel() по тому же признаку, что и вся авторизация
+      '<div class="sbf-pp-guest-banner" id="sbfGuestBanner" style="display:none">',
+      '  <span data-i18n="profile.guest_banner_text">' + t('profile.guest_banner_text', 'Это гостевой профиль — прогресс хранится только в этом браузере и пропадёт при очистке.') + '</span>',
+      '  <span class="sbf-pp-gb-actions">',
+      '    <a href="/login.html" class="sbf-pp-gb-link" data-i18n="profile.guest_login_button">' + t('profile.guest_login_button', 'Войти') + '</a>',
+      '    <span class="sbf-pp-gb-sep">·</span>',
+      '    <a href="/register.html" class="sbf-pp-gb-link" data-i18n="profile.guest_register_button">' + t('profile.guest_register_button', 'Создать аккаунт') + '</a>',
+      '  </span>',
       '</div>',
 
       // Avatar strip (compact, outside scroll)
@@ -908,6 +930,8 @@
     fillPanel(load());
     fillWatchlist();
     _loadPanelStats();
+    var gb = document.getElementById('sbfGuestBanner');
+    if (gb) gb.style.display = (window.sbfAuth && window.sbfAuth.isLoggedIn()) ? 'none' : '';
     overlay.classList.add('open');
     panel.classList.add('open');
     document.body.style.overflow = 'hidden';
@@ -1040,9 +1064,10 @@
       if (bnav.querySelector('.sbf-bn-prof')) return;
       var item;
       if (!isLoggedIn) {
-        // Анонимный: показываем ссылку «Войти»
+        // Анонимный: показываем ссылку «Войти» (была ошибочно /survey — единственный
+        // путь входа с телефона вёл в опрос вместо формы логина, см. координацию 28.07)
         item = document.createElement('a');
-        item.href = '/survey';
+        item.href = '/login.html';
         item.className = 'sbf-bn-prof g-bn-item';
         item.setAttribute('data-i18n-aria', 'profile.login_label');
         item.setAttribute('aria-label', t('profile.login_label', 'Войти'));
