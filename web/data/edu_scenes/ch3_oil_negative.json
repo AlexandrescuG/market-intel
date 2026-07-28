@@ -1,0 +1,92 @@
+{
+  "meta": {
+    "symbol": "WTI",
+    "granularity": "D1",
+    "granularity_note": "Spec asked for M30; no free intraday source exists this far back for the May-2020 WTI contract (see script docstring). Using real daily OHLC instead -- still 100% real, not reconstructed, just coarser resolution.",
+    "markers": [
+      {
+        "date": "2020-04-20",
+        "label": "May WTI contract settles at $-37.63, intraday low $-40.32"
+      }
+    ],
+    "range": [
+      "2020-04-13",
+      "2020-04-24"
+    ],
+    "source": "Yahoo Finance chart API, CL=F, interval=1d. Real fetched daily OHLC.",
+    "reconstruction": false,
+    "note": "Real values: 2020-04-20 open $17.73, low $-40.32, close $-37.63 (public record: settled at -$37.63; matches). Next session (2020-04-21) opened at $-14.00 as trading rolled to the June contract, back in positive territory."
+  },
+  "candles": [
+    {
+      "time": "2020-04-13",
+      "open": 24.6,
+      "high": 24.74,
+      "low": 22.03,
+      "close": 22.41
+    },
+    {
+      "time": "2020-04-14",
+      "open": 22.36,
+      "high": 23.08,
+      "low": 19.95,
+      "close": 20.11
+    },
+    {
+      "time": "2020-04-15",
+      "open": 20.72,
+      "high": 20.89,
+      "low": 19.2,
+      "close": 19.87
+    },
+    {
+      "time": "2020-04-16",
+      "open": 20.15,
+      "high": 20.53,
+      "low": 19.42,
+      "close": 19.87
+    },
+    {
+      "time": "2020-04-17",
+      "open": 20.0,
+      "high": 20.22,
+      "low": 17.31,
+      "close": 18.27
+    },
+    {
+      "time": "2020-04-20",
+      "open": 17.73,
+      "high": 17.85,
+      "low": -40.32,
+      "close": -37.63
+    },
+    {
+      "time": "2020-04-21",
+      "open": -14.0,
+      "high": 13.86,
+      "low": -16.74,
+      "close": 10.01
+    },
+    {
+      "time": "2020-04-22",
+      "open": 13.12,
+      "high": 16.18,
+      "low": 10.26,
+      "close": 13.78
+    },
+    {
+      "time": "2020-04-23",
+      "open": 14.2,
+      "high": 18.26,
+      "low": 13.35,
+      "close": 16.5
+    },
+    {
+      "time": "2020-04-24",
+      "open": 16.78,
+      "high": 17.97,
+      "low": 15.64,
+      "close": 16.94
+    }
+  ]
+}
