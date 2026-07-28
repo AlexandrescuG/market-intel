@@ -166,9 +166,9 @@ function _patchI18n(root) {
 // tier: "free"|"pro" — флаг для будущего гейтинга, сейчас всё открыто
 const CHAPTERS = [
   {n:1,  tier:"free", ico:'<img class="mi-icon" src="/assets/icons/icon-books.png" alt="" width="20" height="20">', title:"Биржевая торговля",         sub:"Введение, ориентация, путь инвестора/трейдера"},
-  {n:2,  tier:"free", ico:'<img class="mi-icon" src="/assets/icons/icon-globe.svg" alt="" width="20" height="20">', title:"Глобальные Кукловоды",       sub:"Биржи мира, капитализации, ключевые игроки"},
+  {n:2,  tier:"free", ico:'<img class="mi-icon" src="/assets/icons/icon-globe.svg" alt="" width="20" height="20">', title:"Крупнейшие Организации",     sub:"Центральные банки, нефтяные картели, международные фонды"},
   {n:3,  tier:"free", ico:'<img class="mi-icon" src="/assets/icons/icon-shield.png" alt="" width="20" height="20">', title:"Арсенал и Защита",           sub:"Risk/Reward, Stop-Loss, расчёт позиции"},
-  {n:4,  tier:"free", ico:'<img class="mi-icon" src="/assets/icons/icon-settings.svg" alt="" width="20" height="20">', title:"Ликвидность и Ордера",       sub:"Стакан, маркет-мейкеры, типы ордеров, проскальзывание"},
+  {n:4,  tier:"free", ico:'<img class="mi-icon" src="/assets/icons/icon-settings.svg" alt="" width="20" height="20">', title:"Ликвидность и Механика Ордеров", sub:"Стакан, маркет-мейкеры, типы ордеров, проскальзывание"},
   {n:5,  tier:"free", ico:'<img class="mi-icon" src="/assets/icons/icon-globe.svg" alt="" width="20" height="20">', title:"Глобальные Часы",             sub:"Торговые сессии, AMD-цикл, перекрытие Лондон+NY"},
   {n:6,  tier:"pro",  ico:'<img class="mi-icon" src="/assets/icons/icon-newspaper.svg" alt="" width="20" height="20">', title:"Пульс Новостей",              sub:"NFP, CPI, ФРС. Как фундаментал создаёт тренды"},
   {n:7,  tier:"pro",  ico:'<img class="mi-icon" src="/assets/icons/icon-footprints.svg" alt="" width="20" height="20">', title:"Институциональный след",      sub:"Smart Money, Liquidity Sweep, Fair Value Gap"},
@@ -176,10 +176,10 @@ const CHAPTERS = [
   {n:9,  tier:"pro",  ico:'<img class="mi-icon" src="/assets/icons/icon-bar-chart.png" alt="" width="20" height="20">', title:"Отчётности и Осцилляторы",   sub:"RSI, MACD, дивергенция, поиск разворотов"},
   {n:10, tier:"pro",  ico:'<img class="mi-icon" src="/assets/icons/icon-mindset.png" alt="" width="20" height="20">', title:"Психология и Паттерны",       sub:"Флаг, клин, двойная вершина, поведение толпы"},
   {n:11, tier:"pro",  ico:'<img class="mi-icon" src="/assets/icons/icon-microscope.svg" alt="" width="20" height="20">', title:"Тёмные пулы и HFT",           sub:"Скрытая ликвидность, алготрейдинг, VWAP"},
-  {n:12, tier:"pro",  ico:'<img class="mi-icon" src="/assets/icons/icon-cloud.svg" alt="" width="20" height="20">', title:"Японская философия",           sub:"Ишимоку: Облако, Tenkan, Kijun, Chikou"},
-  {n:13, tier:"pro",  ico:'<img class="mi-icon" src="/assets/icons/icon-target.png" alt="" width="20" height="20">', title:"Анатомия Свинга",              sub:"Свинг-трейдинг: стратегии от входа до выхода"},
+  {n:12, tier:"pro",  ico:'<img class="mi-icon" src="/assets/icons/icon-cloud.svg" alt="" width="20" height="20">', title:"Японская философия",           sub:"Ишимоку, статистика и размер выборки"},
+  {n:13, tier:"pro",  ico:'<img class="mi-icon" src="/assets/icons/icon-target.png" alt="" width="20" height="20">', title:"Анатомия Свинга и Пирамидинг", sub:"Разбор сделки и арифметика добора"},
   {n:14, tier:"pro",  ico:'<img class="mi-icon" src="/assets/icons/icon-lightning.png" alt="" width="20" height="20">', title:"Анатомия Скальпинга",          sub:"Скальпинг: сессии, тайминг, управление рисками"},
-  {n:15, tier:"pro",  ico:'<img class="mi-icon" src="/assets/icons/icon-trophy.png" alt="" width="20" height="20">', title:"Проп-Трейдинг и Финал",       sub:"Профессиональная торговля, финальный экзамен"},
+  {n:15, tier:"pro",  ico:'<img class="mi-icon" src="/assets/icons/icon-trophy.png" alt="" width="20" height="20">', title:"От Теории к Практике",        sub:"Три пути, проп-трейдинг без иллюзий"},
 ];
 
 const DONE_KEY = 'sbf_edu_done';
