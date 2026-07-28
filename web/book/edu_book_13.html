@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>SBF | {% if lang == 'ru' %}Глава 13. Анатомия Свинга{% elif lang == 'ro' %}Capitolul 13. Anatomia Swing-ului{% else %}Chapter 13. Swing Anatomy{% endif %}</title>
+  <title>SBF | {% if lang == 'ru' %}Глава 13. Анатомия Свинга и Пирамидинг{% elif lang == 'ro' %}Capitolul 13. Anatomia Swing-ului și Piramidare{% else %}Chapter 13. Swing Anatomy and Pyramiding{% endif %}</title>
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
   <style>
@@ -11,8 +11,7 @@
     html,body{max-width:100vw;overflow-x:hidden;scroll-behavior:smooth}
     body{background:#ffffff;font-family:'DM Sans',system-ui,sans-serif;color:#18181a}
     #sbf-book-root{min-height:100vh}
-    .messenger-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:30px}
-    @media(max-width:768px){.messenger-grid{grid-template-columns:1fr}.hide-mobile{display:none!important}.g2{grid-template-columns:1fr!important}.g3{grid-template-columns:1fr!important}}
+    @media(max-width:768px){.hide-mobile{display:none!important}.g2{grid-template-columns:1fr!important}.g3{grid-template-columns:1fr!important}}
   </style>
 </head>
 <body>
@@ -22,7 +21,8 @@
 
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"></script>
+<script src="/edu/assets/ch13.js"></script>
 
 <script type="text/babel" data-presets="react">
 const INITIAL_LANG = "{{ lang }}";
@@ -30,1627 +30,679 @@ const INITIAL_LANG = "{{ lang }}";
 {% raw %}
 const STRINGS = {
   ru: {
-    // Ask-analyst contact popup
-    askTag: "— НАПИСАТЬ НАМ",
-    askTitle: "Предпочитаете мессенджер?",
-    askBody: "Напишите в Telegram или WhatsApp — сообщение уже готово.",
-    askTgSub: "Telegram · онлайн",
-    askTgBtn: "ОТКРЫТЬ TELEGRAM",
-    askWaSub: "WhatsApp · онлайн",
-    askWaBtn: "ОТКРЫТЬ WHATSAPP",
-
-    // Interactive 1: News Calendar
-    calTitle: "Оценка новостного фона",
-    calSubtitle: "ИНТЕРАКТИВ — ФУНДАМЕНТАЛ · АНАЛИЗ НЕДЕЛИ",
-    calOpenPosLabel: "ОТКРЫТАЯ ПОЗИЦИЯ",
-    calEntry: "Вход",
-    calCurrent: "Текущая",
-    calFloatPnl: "Плавающий PnL",
-    calTakeProfit: "Take Profit",
-    calStopLoss: "Stop Loss",
-    calToTarget: "ДО ЦЕЛИ",
-    calPt: "пт",
-    calInstruction: "Изучите экономический календарь на неделю вперёд. Нажмите на каждое событие, чтобы увидеть консенсус-прогноз и его влияние на золото. Затем примите решение.",
-    calDayMon: "Пн", calDayTue: "Вт", calDayWed: "Ср", calDayThu: "Чт", calDayFri: "Пт",
-    calDateMon: "16 июня", calDateTue: "17 июня", calDateWed: "18 июня", calDateThu: "19 июня", calDateFri: "20 июня",
-    calEv1Name: "Розничные продажи США",
-    calEv1Hint: "Умеренные данные. Не ожидается резкой реакции по золоту.",
-    calEv2Name: "Индекс цен производителей (PPI)",
-    calEv2Hint: "PPI ниже ожиданий → дефляционное давление → ФРС мягче → золото растёт.",
-    calEv3Name: "Выступление члена ФРС Боумана",
-    calEv3Hint: "Риторика осторожная. Вряд ли сдвинет рынок.",
-    calEv4Name: "CPI (Инфляция США)",
-    calEv4Hint: "CPI ниже прогноза → инфляция снижается → ФРС приближается к снижению ставок → XAUUSD +$15–30.",
-    calEv5Name: "Пресс-конференция Пауэлла (ФРС)",
-    calEv5Consensus: "Без изм.",
-    calEv5Hint: "Пауэлл намекает на снижение ставки в сентябре. Мягкая риторика = сильный импульс для золота.",
-    calEv6Name: "Заявки на пособие по безработице",
-    calEv6Hint: "Рынок труда стабилен. Не влияет на позицию по золоту.",
-    calEv7Name: "Индекс потребдоверия Мичиган",
-    calEv7Hint: "Небольшое улучшение. Нейтрально для золота.",
-    calImpCritical: "КРИТИЧНО", calImpHigh: "ВАЖНО", calImpMedium: "СРЕДНЕ", calImpLow: "НИЗКОЕ",
-    calImpactBullish: "📈 Бычий для золота", calImpactBearish: "📉 Медвежий", calImpactNeutral: "➡️ Нейтральный",
-    calForecastLabel: "Прогноз:", calPrevLabel: "Пред.:",
-    calStudiedLabel: "Изучено", calEventsWord: "событий",
-    calHoldBtn: "📈 ДЕРЖАТЬ ПОЗИЦИЮ", calCloseBtn: "🔒 ЗАКРЫТЬ СЕЙЧАС",
-    calResultCorrect: "✅ Правильно! Держать позицию — верное решение.",
-    calResultWrong: "❌ Поторопились. Фундаментал указывал на удержание.",
-    calResultParaA: "На этой неделе ожидаются ",
-    calResultParaBold: "бычьих события",
-    calResultParaB: " для золота: PPI ниже ожиданий (вт), CPI ниже прогноза (ср) и мягкая риторика Пауэлла (чт). Все три катализатора толкают XAUUSD вверх — к Take Profit $",
-    calScenarioCpi: "Сценарий после CPI",
-    calScenarioPowell: "После Пауэлла",
-    calScenarioPowellPrefix: "Ещё",
-    calScenarioWeek: "Итог недели",
-    calPrinciple: "💡 Принцип Daoti: «Не закрывай прибыльную позицию перед бычьим фундаменталом. Дай ей дышать.»",
-
-    // Interactive 2: Pyramiding Simulator
-    simTitle: "Симулятор Пирамидинга",
-    simSubtitle: "ИНТЕРАКТИВ — ТЕХНИКА · EMA 20/50 + ПИРАМИДИНГ",
-    simResetBtn: "↺ СБРОС",
-    simPauseBtn: "⏸ ПАУЗА",
-    simContinueBtn: "▶ ПРОДОЛЖИТЬ",
-    simStartBtn: "▶ СТАРТ",
-    simStatPositions: "Позиций",
-    simStatTotalLots: "Итого лотов",
-    simStatAvgEntry: "Средний вход",
-    simStatFloatPnl: "Float PnL",
-    simStatStopLoss: "Стоп-лосс",
-    simDefaultMsg: "Нажми СТАРТ, затем добавляй лоты при откатах к EMA 20.",
-    simWarnFar: "⚠️ Цена далеко от EMA 20. Ждите отката для добавления лота.",
-    simLotAt: "лот по",
-    simTotalPositionsLabel: "Всего позиций",
-    simSlUpdated: "SL обновлён.",
-    simBreakeven: "🔒 Стоп переведён в безубыток! Позиция защищена.",
-    simSlTriggered: "сработал.",
-    simResultLabel: "Итог",
-    simPointsOnWord: "пунктов на",
-    simLotsWord: "лот(а)",
-    simComplete: "🏁 Симуляция завершена! Итоговый PnL показан ниже.",
-    simAddBtnActive: "🎯 ДОБАВИТЬ ЛОТ — ЦЕНА У EMA 20!",
-    simAddBtnWaitPrefix: "+ ДОБАВИТЬ ЛОТ (ждите отката к EMA 20 · сейчас:",
-    simAddBtnWaitMid: ", EMA20:",
-    simLegendEma20: "EMA 20 (быстрая)",
-    simLegendEma50: "EMA 50 (медленная)",
-    simLegendEntries: "Уровни входа",
-    simLegendTp: "Take Profit +150пт",
-    simLegendSl: "Stop Loss (тяни мышью)",
-    simDoneGood: "✅ Отличный пирамидинг!",
-    simDoneNeutral: "📊 Итог симуляции",
-    simDoneAdded: "Добавлено позиций",
-    simDoneFinalPnl: "Итоговый PnL",
-    simDoneExplain: "Пирамидинг усиливает прибыль при тренде, но требует дисциплины: добавлять только у EMA 20, каждый раз поднимать SL, никогда не добавлять в убыточную позицию.",
-
-    // Swing facts (info cards)
-    fact1Title: "Свинг vs. Скальпинг",
-    fact1Text: "Свинг-трейдер держит позицию 1–7 дней, захватывая движения 80–300+ пунктов. Нет нужды сидеть у экрана весь день. Психологически легче переносить внутридневной шум.",
-    fact2Title: "Металлы — инструмент выбора",
-    fact2Text: "XAUUSD и XAGUSD реагируют на макро-тренды (инфляция, ставки ФРС, геополитика) предсказуемо и с большой амплитудой. Стратегия Daoti специализируется именно на золоте.",
-    fact3Title: "Игнорировать внутридневной шум",
-    fact3Text: "На H1 каждый час выходят новости, которые ненадолго двигают цену. Свинг-трейдер смотрит на H4 и Daily — где видна настоящая структура. Мелкие движения не меняют картину.",
-    fact4Title: "Реальный стейтмент Daoti",
-    fact4Text: "Стратегия показывает стабильный профит за счёт удержания: большинство прибыльных сделок закрывались не в первый день, а на 3–5й, когда новостной фон полностью раскрывался.",
-
-    // Pyramid rules
-    rule1Title: "Первый лот — на сигнале EMA",
-    rule1Text: "Открываем базовую позицию при пересечении EMA 20 и EMA 50 или при касании EMA 20 в тренде. Объём — 1 лот.",
-    rule2Title: "Добавление — только на откате к EMA 20",
-    rule2Text: "Каждый следующий лот добавляем строго при касании цены EMA 20 (не «примерно», а при подтверждённом касании на закрытии свечи).",
-    rule3Title: "SL двигается после каждой доливки",
-    rule3Text: "После добавления лота стоп переносится выше предыдущего минимума. Цель — не дать убытку вырасти с увеличением позиции.",
-    rule4Title: "Безубыток при +15 пунктов",
-    rule4Text: "Как только цена ушла от первого входа на +15 пунктов, стоп первого лота переводится в точку входа. Риск = 0.",
-    rule5Title: "Take Profit — 150 пунктов от первого входа",
-    rule5Text: "Фиксированный TP на уровне Entry + 150. Соотношение риск/прибыль: SL 80 пт / TP 150 пт = 1:1.875. При пирамидинге итоговый RR растёт.",
-
-    // Checklist
-    checklistSub: "Отметьте каждый пункт, который поняли и готовы применять.",
-    checklistTitle: "Чек-лист главы 13",
-    checklist1: "Свинг: удержание 1–7 дней, цель 80–300+ пунктов по XAUUSD",
-    checklist2: "Перед удержанием — анализировать экономический календарь на неделю",
-    checklist3: "EMA 20 — линия динамической поддержки для доливки позиции",
-    checklist4: "EMA 50 — направление тренда: выше = бычий, ниже = медвежий",
-    checklist5: "Пирамидинг: добавлять лоты только на откатах к EMA 20",
-    checklist6: "После каждой доливки — поднимать стоп-лосс",
-    checklist7: "При +15 пунктов от входа — перевести стоп в безубыток",
-    checklist8: "TP фиксированный: +150 пт. SL: -80 пт. RR = 1:1.875",
-    checklistDoneTitle: "✅ Глава 13 освоена!",
-    checklistDoneBody: "Вы понимаете механику профессионального свинга. Терпение — это ваша позиция.",
-
-    // Conclusions
-    conclusionsTitle: "ИТОГИ ГЛАВЫ 13",
-    conclusionsSub: "Что вы теперь знаете",
-    conclusion1: "Свинг-трейдинг — это терпение: не закрывать прибыль раньше времени",
-    conclusion2: "Экономический календарь — обязательный инструмент перед удержанием",
-    conclusion3: "EMA 20 — якорь для пирамидинга, не для угадывания входа",
-    conclusion4: "Каждая доливка должна сопровождаться подъёмом стопа",
-    conclusion5: "Пирамидинг без контроля стопа — это рецепт катастрофы",
-    conclusion6: "Стратегия Daoti: качество сделок важнее их количества",
-
-    // Sticky header
-    headerLevelChip: "УРОВЕНЬ 13",
-    headerSubtitle: "Анатомия Свинга · Daoti",
-    headerFaChip: "ФА 35%",
-    headerTaChip: "ТА 65%",
-
-    // Hero
+    levelChip: "УРОВЕНЬ 13", chapterNameShort: "Свинг и Пирамидинг", faTag: "ФА 30%", taTag: "ТА 70%",
+    stepExplain: "ОБЪЯСНИ", stepShow: "ПОКАЖИ", stepDo: "ДАЙ СДЕЛАТЬ",
     heroEyebrow: "SBF COMPANY — ГЛАВА 13",
-    heroBadge: "СТРАТЕГИЯ АНАЛИТИКА SBF — DAOTI",
-    heroTitleLine1: "Анатомия Свинга",
-    heroTitleAnd: "и",
-    heroTitleLine2: "Пирамидинг",
-    heroSub: "Как профессиональный аналитик строит позицию по золоту на несколько дней. Реальная механика. Живые числа.",
-    heroChip1: "Фундаментал 35%",
-    heroChip2: "Техника 65%",
-    heroChip3: "2 Интерактива",
-
-    // Anti-myth
-    mythTag: "РАСПРОСТРАНЁННОЕ ЗАБЛУЖДЕНИЕ",
-    mythQuote: "«Чем чаще торгуешь — тем больше зарабатываешь. Нужно ловить каждое движение.»",
-    mythBody: "Большинство трейдеров переторговывают. Каждая лишняя сделка — это комиссия, стресс и решение, принятое не по стратегии. Профессиональный свинг-трейдер делает 2–5 сделок в неделю. Зато каждая — по плану, с полным анализом фундаментала и чёткими уровнями.",
-
-    // SBF voice
-    voiceTag: "— АНАЛИТИК SBF · DAOTI",
-    voiceQuote: "«Моя лучшая сделка в месяце часто та, которую я почти закрыл на второй день. Рынку нужно время, чтобы сделать то, что он должен сделать. Терпение — это позиция.»",
-    voiceBody: "Daoti — реальный стейтмент SBF Company. Стратегия основана на макро-тренде металлов, EMA-динамике и строгом контроле позиции через пирамидинг.",
-
-    // Price of ignorance
-    ignoranceTag: "Цена незнания",
-    ignoranceBody: "Трейдер открывает позицию по золоту. Через 12 часов она в +45 пунктах. Он фиксирует прибыль — «пока не забрали». На следующий день вышел CPI ниже прогноза, Пауэлл намекнул на смягчение: XAUUSD +180 пунктов. Он посмотрел на закрытую сделку. ",
-    ignoranceBold: "Незнание фундаментального контекста стоило ему 135 пунктов прибыли.",
-
-    // Theory 1
-    theory1Sub: "Свинг-трейдинг — это стиль торговли, при котором позиция удерживается несколько дней для захвата среднесрочного движения.",
-    theory1Title: "Что такое свинг-трейдинг на металлах",
-
-    // Trades table
-    tradesHeader: "ПРИМЕРЫ СДЕЛОК — СТРАТЕГИЯ DAOTI (XAUUSD)",
-    thDate: "Дата", thInstrument: "Инструмент", thDirection: "Направление",
-    thEntry: "Вход", thExit: "Выход", thHold: "Удержание", thPnl: "PnL (пт)", thCatalyst: "Катализатор",
-    trade1Date: "12 мар", trade1Hold: "4 дня", trade1Cat: "CPI -0.2% + Пауэлл",
-    trade2Date: "28 мар", trade2Hold: "5 дней", trade2Cat: "NFP слабый",
-    trade3Date: "9 апр", trade3Hold: "3 дня", trade3Cat: "Геополитика + инфляция",
-    trade4Date: "22 апр", trade4Hold: "2 дня", trade4Cat: "Коррекция после ATH",
-    trade5Date: "5 мая", trade5Hold: "1 день", trade5Cat: "SL сработал (NFP выше)",
-
-    // Theory 2
-    theory2Sub: "EMA 20 и EMA 50 на H1 — динамические уровни поддержки для построения позиции через пирамидинг.",
-    theory2Title: "EMA-стратегия и механика пирамидинга",
-
-    // EMA diagram
-    emaDiagramHeader: "КАК РАБОТАЕТ EMA 20 / EMA 50 ПРИ СВИНГЕ",
-    emaDiagramTp: "TP +150пт",
-
-    // Risk math example
-    riskMathHeader: "МАТЕМАТИКА ПИРАМИДИНГА — ПРИМЕР",
-    riskStep1: "Вход #1", riskStep2: "Доливка #2", riskStep3: "Доливка #3",
-    riskNote1: "Риск: 80пт × 1л = 80пт",
-    riskNote2: "Стоп #1 → безубыток",
-    riskNote3: "Средний вход ~2499",
-    riskPriceLabel: "Цена:", riskLotsLabel: "Лотов:",
-    riskSummaryLabel: "Итог при достижении TP (+150пт от #1): ",
-    riskSummaryFormula: "(150пт×1л) + (135пт×1л) + (123пт×1л) = ",
-    riskSummaryBold: "408 пунктов",
-    riskSummaryTail: " против риска ~80пт",
-
-    // Footer
-    footerAsk: "Остался вопрос? Напиши аналитику",
-    footerNext: "Уровень 14: Анатомия Скальпинга →",
-  },
-  en: {
-    // Ask-analyst contact popup
-    askTag: "— CONTACT US",
-    askTitle: "Prefer a messenger?",
-    askBody: "Message us on Telegram or WhatsApp — the message is already prepared.",
-    askTgSub: "Telegram · online",
-    askTgBtn: "OPEN TELEGRAM",
-    askWaSub: "WhatsApp · online",
-    askWaBtn: "OPEN WHATSAPP",
-
-    // Interactive 1: News Calendar
-    calTitle: "Assessing the News Backdrop",
-    calSubtitle: "INTERACTIVE — FUNDAMENTALS · WEEKLY ANALYSIS",
-    calOpenPosLabel: "OPEN POSITION",
-    calEntry: "Entry",
-    calCurrent: "Current",
-    calFloatPnl: "Floating PnL",
-    calTakeProfit: "Take Profit",
-    calStopLoss: "Stop Loss",
-    calToTarget: "TO TARGET",
-    calPt: "pts",
-    calInstruction: "Study the economic calendar for the week ahead. Click each event to see the consensus forecast and its impact on gold. Then make your decision.",
-    calDayMon: "Mon", calDayTue: "Tue", calDayWed: "Wed", calDayThu: "Thu", calDayFri: "Fri",
-    calDateMon: "16 June", calDateTue: "17 June", calDateWed: "18 June", calDateThu: "19 June", calDateFri: "20 June",
-    calEv1Name: "US Retail Sales",
-    calEv1Hint: "Moderate data. No sharp reaction expected in gold.",
-    calEv2Name: "Producer Price Index (PPI)",
-    calEv2Hint: "PPI below expectations → disinflationary pressure → Fed turns more dovish → gold rises.",
-    calEv3Name: "Fed Governor Bowman speech",
-    calEv3Hint: "Cautious rhetoric. Unlikely to move the market.",
-    calEv4Name: "CPI (US Inflation)",
-    calEv4Hint: "CPI below forecast → inflation is cooling → Fed moves closer to cutting rates → XAUUSD +$15–30.",
-    calEv5Name: "Powell Press Conference (Fed)",
-    calEv5Consensus: "No change",
-    calEv5Hint: "Powell hints at a September rate cut. Dovish rhetoric = strong momentum for gold.",
-    calEv6Name: "Unemployment Claims",
-    calEv6Hint: "Labor market is stable. No impact on the gold position.",
-    calEv7Name: "Michigan Consumer Sentiment Index",
-    calEv7Hint: "Slight improvement. Neutral for gold.",
-    calImpCritical: "CRITICAL", calImpHigh: "HIGH", calImpMedium: "MEDIUM", calImpLow: "LOW",
-    calImpactBullish: "📈 Bullish for gold", calImpactBearish: "📉 Bearish", calImpactNeutral: "➡️ Neutral",
-    calForecastLabel: "Forecast:", calPrevLabel: "Prev.:",
-    calStudiedLabel: "Studied", calEventsWord: "events",
-    calHoldBtn: "📈 HOLD POSITION", calCloseBtn: "🔒 CLOSE NOW",
-    calResultCorrect: "✅ Correct! Holding the position is the right call.",
-    calResultWrong: "❌ Too hasty. The fundamentals pointed to holding.",
-    calResultParaA: "This week, ",
-    calResultParaBold: "bullish events",
-    calResultParaB: " are expected for gold: PPI below expectations (Tue), CPI below forecast (Wed) and Powell's dovish rhetoric (Thu). All three catalysts are pushing XAUUSD higher — toward Take Profit $",
-    calScenarioCpi: "Scenario after CPI",
-    calScenarioPowell: "After Powell",
-    calScenarioPowellPrefix: "Further",
-    calScenarioWeek: "Week total",
-    calPrinciple: "💡 Daoti principle: 'Don't close a profitable position ahead of a bullish fundamental. Let it breathe.'",
-
-    // Interactive 2: Pyramiding Simulator
-    simTitle: "Pyramiding Simulator",
-    simSubtitle: "INTERACTIVE — TECHNIQUE · EMA 20/50 + PYRAMIDING",
-    simResetBtn: "↺ RESET",
-    simPauseBtn: "⏸ PAUSE",
-    simContinueBtn: "▶ CONTINUE",
-    simStartBtn: "▶ START",
-    simStatPositions: "Positions",
-    simStatTotalLots: "Total lots",
-    simStatAvgEntry: "Average entry",
-    simStatFloatPnl: "Float PnL",
-    simStatStopLoss: "Stop-loss",
-    simDefaultMsg: "Press START, then add lots on pullbacks to EMA 20.",
-    simWarnFar: "⚠️ Price is far from EMA 20. Wait for a pullback before adding a lot.",
-    simLotAt: "lot at",
-    simTotalPositionsLabel: "Total positions",
-    simSlUpdated: "SL updated.",
-    simBreakeven: "🔒 Stop moved to breakeven! Position is protected.",
-    simSlTriggered: "triggered.",
-    simResultLabel: "Result",
-    simPointsOnWord: "points on",
-    simLotsWord: "lot(s)",
-    simComplete: "🏁 Simulation complete! Final PnL is shown below.",
-    simAddBtnActive: "🎯 ADD LOT — PRICE AT EMA 20!",
-    simAddBtnWaitPrefix: "+ ADD LOT (wait for a pullback to EMA 20 · now:",
-    simAddBtnWaitMid: ", EMA20:",
-    simLegendEma20: "EMA 20 (fast)",
-    simLegendEma50: "EMA 50 (slow)",
-    simLegendEntries: "Entry levels",
-    simLegendTp: "Take Profit +150pts",
-    simLegendSl: "Stop Loss (drag with mouse)",
-    simDoneGood: "✅ Excellent pyramiding!",
-    simDoneNeutral: "📊 Simulation Result",
-    simDoneAdded: "Positions added",
-    simDoneFinalPnl: "Final PnL",
-    simDoneExplain: "Pyramiding amplifies profit in a trend, but requires discipline: add only at EMA 20, raise the SL after every add-on, never add to a losing position.",
-
-    // Swing facts (info cards)
-    fact1Title: "Swing vs. Scalping",
-    fact1Text: "A swing trader holds a position for 1–7 days, capturing moves of 80–300+ points. No need to sit in front of the screen all day. Intraday noise is psychologically easier to endure.",
-    fact2Title: "Metals — the instrument of choice",
-    fact2Text: "XAUUSD and XAGUSD react to macro trends (inflation, Fed rates, geopolitics) predictably and with large amplitude. The Daoti strategy specializes specifically in gold.",
-    fact3Title: "Ignore intraday noise",
-    fact3Text: "On H1, news comes out every hour that briefly moves the price. A swing trader looks at H4 and Daily — where the real structure is visible. Small moves don't change the overall picture.",
-    fact4Title: "Daoti's real track record",
-    fact4Text: "The strategy shows stable profit through holding: most profitable trades closed not on the first day, but on the 3rd–5th, once the news backdrop had fully played out.",
-
-    // Pyramid rules
-    rule1Title: "First lot — on the EMA signal",
-    rule1Text: "We open the base position on the EMA 20 / EMA 50 crossover or when price touches EMA 20 within a trend. Volume — 1 lot.",
-    rule2Title: "Adding — only on a pullback to EMA 20",
-    rule2Text: "Each subsequent lot is added strictly when price touches EMA 20 (not 'approximately' — a confirmed touch at candle close).",
-    rule3Title: "SL moves after every add-on",
-    rule3Text: "After adding a lot, the stop is moved above the previous low. The goal is to keep the loss from growing as the position gets bigger.",
-    rule4Title: "Breakeven at +15 points",
-    rule4Text: "As soon as price has moved +15 points from the first entry, the stop on the first lot is moved to the entry point. Risk = 0.",
-    rule5Title: "Take Profit — 150 points from the first entry",
-    rule5Text: "Fixed TP at Entry + 150. Risk/reward: SL 80 pts / TP 150 pts = 1:1.875. With pyramiding, the final RR grows.",
-
-    // Checklist
-    checklistSub: "Check off each point you understand and are ready to apply.",
-    checklistTitle: "Chapter 13 Checklist",
-    checklist1: "Swing: 1–7 day hold, target 80–300+ points on XAUUSD",
-    checklist2: "Before holding — analyze the economic calendar for the week ahead",
-    checklist3: "EMA 20 — dynamic support line for adding to the position",
-    checklist4: "EMA 50 — trend direction: above = bullish, below = bearish",
-    checklist5: "Pyramiding: add lots only on pullbacks to EMA 20",
-    checklist6: "After every add-on — raise the stop-loss",
-    checklist7: "At +15 points from entry — move the stop to breakeven",
-    checklist8: "TP fixed: +150 pts. SL: -80 pts. RR = 1:1.875",
-    checklistDoneTitle: "✅ Chapter 13 mastered!",
-    checklistDoneBody: "You understand the mechanics of professional swing trading. Patience is your position.",
-
-    // Conclusions
-    conclusionsTitle: "CHAPTER 13 CONCLUSIONS",
-    conclusionsSub: "What you now know",
-    conclusion1: "Swing trading is patience: don't close profit ahead of time",
-    conclusion2: "The economic calendar is a mandatory tool before holding a position",
-    conclusion3: "EMA 20 is an anchor for pyramiding, not for guessing entries",
-    conclusion4: "Every add-on must be followed by raising the stop",
-    conclusion5: "Pyramiding without stop control is a recipe for disaster",
-    conclusion6: "Daoti strategy: trade quality matters more than trade count",
-
-    // Sticky header
-    headerLevelChip: "LEVEL 13",
-    headerSubtitle: "Swing Anatomy · Daoti",
-    headerFaChip: "FA 35%",
-    headerTaChip: "TA 65%",
-
-    // Hero
-    heroEyebrow: "SBF COMPANY — CHAPTER 13",
-    heroBadge: "SBF ANALYST STRATEGY — DAOTI",
-    heroTitleLine1: "Swing Anatomy",
-    heroTitleAnd: "and",
-    heroTitleLine2: "Pyramiding",
-    heroSub: "How a professional analyst builds a gold position over several days. Real mechanics. Live numbers.",
-    heroChip1: "Fundamentals 35%",
-    heroChip2: "Technicals 65%",
-    heroChip3: "2 Interactives",
-
-    // Anti-myth
-    mythTag: "COMMON MISCONCEPTION",
-    mythQuote: "'The more you trade, the more you earn. You need to catch every move.'",
-    mythBody: "Most traders overtrade. Every extra trade means commission, stress, and a decision made outside the strategy. A professional swing trader makes 2–5 trades a week. But each one follows the plan, with full fundamental analysis and clear levels.",
-
-    // SBF voice
-    voiceTag: "— SBF ANALYST · DAOTI",
-    voiceQuote: "'My best trade of the month is often the one I almost closed on day two. The market needs time to do what it has to do. Patience is a position.'",
-    voiceBody: "Daoti is a real SBF Company track record. The strategy is built on the macro trend in metals, EMA dynamics, and strict position control through pyramiding.",
-
-    // Price of ignorance
-    ignoranceTag: "The price of ignorance",
-    ignoranceBody: "A trader opens a gold position. 12 hours later it's at +45 points. He locks in the profit — 'before it gets taken away.' The next day CPI came in below forecast, and Powell hinted at easing: XAUUSD +180 points. He looked at the closed trade. ",
-    ignoranceBold: "Not knowing the fundamental context cost him 135 points of profit.",
-
-    // Theory 1
-    theory1Sub: "Swing trading is a trading style in which a position is held for several days to capture a medium-term move.",
-    theory1Title: "What swing trading on metals is",
-
-    // Trades table
-    tradesHeader: "TRADE EXAMPLES — DAOTI STRATEGY (XAUUSD)",
-    thDate: "Date", thInstrument: "Instrument", thDirection: "Direction",
-    thEntry: "Entry", thExit: "Exit", thHold: "Hold", thPnl: "PnL (pts)", thCatalyst: "Catalyst",
-    trade1Date: "12 Mar", trade1Hold: "4 days", trade1Cat: "CPI -0.2% + Powell",
-    trade2Date: "28 Mar", trade2Hold: "5 days", trade2Cat: "Weak NFP",
-    trade3Date: "9 Apr", trade3Hold: "3 days", trade3Cat: "Geopolitics + inflation",
-    trade4Date: "22 Apr", trade4Hold: "2 days", trade4Cat: "Correction after ATH",
-    trade5Date: "5 May", trade5Hold: "1 day", trade5Cat: "SL triggered (NFP above forecast)",
-
-    // Theory 2
-    theory2Sub: "EMA 20 and EMA 50 on H1 are dynamic support levels for building a position through pyramiding.",
-    theory2Title: "EMA strategy and the mechanics of pyramiding",
-
-    // EMA diagram
-    emaDiagramHeader: "HOW EMA 20 / EMA 50 WORK IN A SWING",
-    emaDiagramTp: "TP +150pts",
-
-    // Risk math example
-    riskMathHeader: "PYRAMIDING MATH — EXAMPLE",
-    riskStep1: "Entry #1", riskStep2: "Add-on #2", riskStep3: "Add-on #3",
-    riskNote1: "Risk: 80pts × 1L = 80pts",
-    riskNote2: "Stop #1 → breakeven",
-    riskNote3: "Average entry ~2499",
-    riskPriceLabel: "Price:", riskLotsLabel: "Lots:",
-    riskSummaryLabel: "Result at TP (+150pts from #1): ",
-    riskSummaryFormula: "(150pts×1L) + (135pts×1L) + (123pts×1L) = ",
-    riskSummaryBold: "408 points",
-    riskSummaryTail: " against risk of ~80pts",
-
-    // Footer
-    footerAsk: "Still have a question? Message an analyst",
-    footerNext: "Level 14: Scalping Anatomy →",
+    heroTitleLine1: "Анатомия свинга и", heroTitleLine2: "арифметика добора",
+    heroSubtitle: "Добор к прибыльной позиции — единственное решение в трейдинге, принимаемое в момент выигрыша. Именно поэтому оно опаснее всех остальных.",
+    fundamentalChip: "Анатомия сделки 30%", technicalChip: "Арифметика 70%", interactiveChip: "Калькулятор пирамидинга",
+    whySwingSub: "Продолжение главы 11.",
+    anatomySub: "Разбор одной реальной сделки, без публикации системы.",
+    pyramidSub: "Ядро главы.",
+    breakevenSub: "Наше измерение — не мнение.",
+    tradePlanSub: "Что записывается до открытия позиции.",
+    quizKicker: "ПРОВЕРЬ СЕБЯ", quizTitle: "Что ты узнал в этой главе", quizNext: "Дальше →",
+    quizStuckAll: "Всё закрепилось.", quizStuckSome: "Почти всё закрепилось.",
+    quizBackToSection: "← Вернуться к разделу",
+    askQuestionLabel: "Остался вопрос? Напиши аналитику",
+    nextChapterBtn: "Уровень 14: Скальпинг и издержки →",
+    loadingLabel: "Загружаю главу…",
+    loadErrorLabel: "Не удалось загрузить часть данных главы.",
+    seriesCounterNotYet: "Серия: не начата",
+    seriesCounterBlocked: "Серия: бумажная версия",
+    seriesCounterDone: "Серия: 50/50 ✓",
+    seriesCounterGoto: "К главе 12 →",
   },
   ro: {
-    // Ask-analyst contact popup
-    askTag: "— CONTACTAȚI-NE",
-    askTitle: "Preferați un messenger?",
-    askBody: "Scrieți pe Telegram sau WhatsApp — mesajul este deja pregătit.",
-    askTgSub: "Telegram · online",
-    askTgBtn: "DESCHIDE TELEGRAM",
-    askWaSub: "WhatsApp · online",
-    askWaBtn: "DESCHIDE WHATSAPP",
-
-    // Interactive 1: News Calendar
-    calTitle: "Evaluarea contextului fundamental",
-    calSubtitle: "INTERACTIV — FUNDAMENTAL · ANALIZA SĂPTĂMÂNII",
-    calOpenPosLabel: "POZIȚIE DESCHISĂ",
-    calEntry: "Intrare",
-    calCurrent: "Curentă",
-    calFloatPnl: "PnL flotant",
-    calTakeProfit: "Take Profit",
-    calStopLoss: "Stop Loss",
-    calToTarget: "PÂNĂ LA ȚINTĂ",
-    calPt: "pct",
-    calInstruction: "Studiați calendarul economic pentru săptămâna următoare. Apăsați pe fiecare eveniment pentru a vedea prognoza de consens și impactul asupra aurului. Apoi luați o decizie.",
-    calDayMon: "Lu", calDayTue: "Ma", calDayWed: "Mi", calDayThu: "Jo", calDayFri: "Vi",
-    calDateMon: "16 iunie", calDateTue: "17 iunie", calDateWed: "18 iunie", calDateThu: "19 iunie", calDateFri: "20 iunie",
-    calEv1Name: "Vânzări cu amănuntul SUA",
-    calEv1Hint: "Date moderate. Nu se așteaptă o reacție puternică pe aur.",
-    calEv2Name: "Indicele prețurilor de producție (PPI)",
-    calEv2Hint: "PPI sub așteptări → presiune dezinflaționistă → Fed mai porumbel → aurul crește.",
-    calEv3Name: "Discursul membrului Fed, Bowman",
-    calEv3Hint: "Retorică prudentă. Puțin probabil să miște piața.",
-    calEv4Name: "CPI (Inflația SUA)",
-    calEv4Hint: "CPI sub prognoză → inflația scade → Fed se apropie de reducerea ratelor → XAUUSD +$15–30.",
-    calEv5Name: "Conferința de presă Powell (Fed)",
-    calEv5Consensus: "Fără modif.",
-    calEv5Hint: "Powell sugerează o reducere de rată în septembrie. Retorică porumbel = impuls puternic pentru aur.",
-    calEv6Name: "Cererile de ajutor de șomaj",
-    calEv6Hint: "Piața muncii este stabilă. Nu afectează poziția pe aur.",
-    calEv7Name: "Indicele încrederii consumatorilor Michigan",
-    calEv7Hint: "Ușoară îmbunătățire. Neutru pentru aur.",
-    calImpCritical: "CRITIC", calImpHigh: "IMPORTANT", calImpMedium: "MEDIU", calImpLow: "SCĂZUT",
-    calImpactBullish: "📈 Bullish pentru aur", calImpactBearish: "📉 Bearish", calImpactNeutral: "➡️ Neutru",
-    calForecastLabel: "Prognoză:", calPrevLabel: "Anterior:",
-    calStudiedLabel: "Studiat", calEventsWord: "evenimente",
-    calHoldBtn: "📈 MENȚINE POZIȚIA", calCloseBtn: "🔒 ÎNCHIDE ACUM",
-    calResultCorrect: "✅ Corect! Menținerea poziției este decizia corectă.",
-    calResultWrong: "❌ V-ați grăbit. Fundamentalul indica menținerea poziției.",
-    calResultParaA: "În această săptămână sunt așteptate ",
-    calResultParaBold: "evenimente bullish",
-    calResultParaB: " pentru aur: PPI sub așteptări (marți), CPI sub prognoză (miercuri) și retorica porumbel a lui Powell (joi). Toți cei trei catalizatori împing XAUUSD în sus — spre Take Profit $",
-    calScenarioCpi: "Scenariul după CPI",
-    calScenarioPowell: "După Powell",
-    calScenarioPowellPrefix: "Încă",
-    calScenarioWeek: "Rezultatul săptămânii",
-    calPrinciple: "💡 Principiul Daoti: «Nu închide o poziție profitabilă înainte de un fundamental bullish. Las-o să respire.»",
-
-    // Interactive 2: Pyramiding Simulator
-    simTitle: "Simulator de Piramidare",
-    simSubtitle: "INTERACTIV — TEHNICĂ · EMA 20/50 + PIRAMIDARE",
-    simResetBtn: "↺ RESETARE",
-    simPauseBtn: "⏸ PAUZĂ",
-    simContinueBtn: "▶ CONTINUĂ",
-    simStartBtn: "▶ START",
-    simStatPositions: "Poziții",
-    simStatTotalLots: "Total loturi",
-    simStatAvgEntry: "Intrare medie",
-    simStatFloatPnl: "Float PnL",
-    simStatStopLoss: "Stop-loss",
-    simDefaultMsg: "Apasă START, apoi adaugă loturi la retragerile către EMA 20.",
-    simWarnFar: "⚠️ Prețul este departe de EMA 20. Așteaptă o retragere pentru a adăuga un lot.",
-    simLotAt: "lot la",
-    simTotalPositionsLabel: "Total poziții",
-    simSlUpdated: "SL actualizat.",
-    simBreakeven: "🔒 Stopul a fost mutat pe breakeven! Poziția este protejată.",
-    simSlTriggered: "declanșat.",
-    simResultLabel: "Rezultat",
-    simPointsOnWord: "puncte pe",
-    simLotsWord: "lot(uri)",
-    simComplete: "🏁 Simularea s-a încheiat! PnL-ul final este afișat mai jos.",
-    simAddBtnActive: "🎯 ADAUGĂ LOT — PREȚUL E LA EMA 20!",
-    simAddBtnWaitPrefix: "+ ADAUGĂ LOT (așteaptă retragerea la EMA 20 · acum:",
-    simAddBtnWaitMid: ", EMA20:",
-    simLegendEma20: "EMA 20 (rapidă)",
-    simLegendEma50: "EMA 50 (lentă)",
-    simLegendEntries: "Niveluri de intrare",
-    simLegendTp: "Take Profit +150 pct",
-    simLegendSl: "Stop Loss (trage cu mouse-ul)",
-    simDoneGood: "✅ Piramidare excelentă!",
-    simDoneNeutral: "📊 Rezultatul simulării",
-    simDoneAdded: "Poziții adăugate",
-    simDoneFinalPnl: "PnL final",
-    simDoneExplain: "Piramidarea amplifică profitul într-un trend, dar cere disciplină: adaugă loturi doar la EMA 20, ridică SL după fiecare adăugare, nu adăuga niciodată la o poziție pe pierdere.",
-
-    // Swing facts (info cards)
-    fact1Title: "Swing vs. Scalping",
-    fact1Text: "Un swing trader menține poziția 1–7 zile, captând mișcări de 80–300+ puncte. Nu e nevoie să stai în fața ecranului toată ziua. Psihologic este mai ușor de suportat zgomotul intraday.",
-    fact2Title: "Metalele — instrumentul preferat",
-    fact2Text: "XAUUSD și XAGUSD reacționează la macro-trenduri (inflație, ratele Fed, geopolitică) previzibil și cu amplitudine mare. Strategia Daoti se specializează exact pe aur.",
-    fact3Title: "Ignoră zgomotul intraday",
-    fact3Text: "Pe H1, în fiecare oră apar știri care mișcă prețul pentru scurt timp. Un swing trader se uită la H4 și Daily — unde se vede structura reală. Mișcările mici nu schimbă tabloul de ansamblu.",
-    fact4Title: "Statement-ul real al Daoti",
-    fact4Text: "Strategia arată un profit stabil datorită menținerii pozițiilor: majoritatea tranzacțiilor profitabile s-au închis nu în prima zi, ci în a 3-a–5-a, când contextul de știri s-a manifestat complet.",
-
-    // Pyramid rules
-    rule1Title: "Primul lot — la semnalul EMA",
-    rule1Text: "Deschidem poziția de bază la intersecția EMA 20 și EMA 50 sau la atingerea EMA 20 în trend. Volum — 1 lot.",
-    rule2Title: "Adăugare — doar la retragerea către EMA 20",
-    rule2Text: "Fiecare lot următor se adaugă strict la atingerea prețului de EMA 20 (nu «aproximativ», ci la o atingere confirmată la închiderea lumânării).",
-    rule3Title: "SL se mută după fiecare adăugare",
-    rule3Text: "După adăugarea unui lot, stopul este mutat deasupra minimului anterior. Scopul — să nu lăsăm pierderea să crească odată cu poziția.",
-    rule4Title: "Breakeven la +15 puncte",
-    rule4Text: "De îndată ce prețul se îndepărtează cu +15 puncte de la prima intrare, stopul primului lot este mutat la punctul de intrare. Risc = 0.",
-    rule5Title: "Take Profit — 150 puncte de la prima intrare",
-    rule5Text: "TP fix la nivelul Entry + 150. Raportul risc/profit: SL 80 pct / TP 150 pct = 1:1.875. Prin piramidare, RR-ul final crește.",
-
-    // Checklist
-    checklistSub: "Bifează fiecare punct pe care l-ai înțeles și ești gata să-l aplici.",
-    checklistTitle: "Checklist-ul capitolului 13",
-    checklist1: "Swing: menținere 1–7 zile, țintă 80–300+ puncte la XAUUSD",
-    checklist2: "Înainte de menținere — analizează calendarul economic pentru săptămâna respectivă",
-    checklist3: "EMA 20 — linie de suport dinamic pentru adăugarea la poziție",
-    checklist4: "EMA 50 — direcția trendului: deasupra = bullish, dedesubt = bearish",
-    checklist5: "Piramidare: adaugă loturi doar la retragerile către EMA 20",
-    checklist6: "După fiecare adăugare — ridică stop-loss-ul",
-    checklist7: "La +15 puncte de la intrare — mută stopul pe breakeven",
-    checklist8: "TP fix: +150 pct. SL: -80 pct. RR = 1:1.875",
-    checklistDoneTitle: "✅ Capitolul 13 asimilat!",
-    checklistDoneBody: "Înțelegi mecanica swing-ului profesionist. Răbdarea este poziția ta.",
-
-    // Conclusions
-    conclusionsTitle: "CONCLUZIILE CAPITOLULUI 13",
-    conclusionsSub: "Ce știi acum",
-    conclusion1: "Swing trading înseamnă răbdare: nu închide profitul înainte de timp",
-    conclusion2: "Calendarul economic — instrument obligatoriu înainte de a menține o poziție",
-    conclusion3: "EMA 20 — ancoră pentru piramidare, nu pentru ghicitul intrării",
-    conclusion4: "Fiecare adăugare trebuie însoțită de ridicarea stopului",
-    conclusion5: "Piramidarea fără controlul stopului este o rețetă pentru dezastru",
-    conclusion6: "Strategia Daoti: calitatea tranzacțiilor contează mai mult decât numărul lor",
-
-    // Sticky header
-    headerLevelChip: "NIVELUL 13",
-    headerSubtitle: "Anatomia Swing-ului · Daoti",
-    headerFaChip: "AF 35%",
-    headerTaChip: "AT 65%",
-
-    // Hero
+    levelChip: "NIVEL 13", chapterNameShort: "Swing și Piramidare", faTag: "AF 30%", taTag: "AT 70%",
+    stepExplain: "EXPLICĂ", stepShow: "ARATĂ", stepDo: "LASĂ SĂ ÎNCERCE",
     heroEyebrow: "SBF COMPANY — CAPITOLUL 13",
-    heroBadge: "STRATEGIA ANALISTULUI SBF — DAOTI",
-    heroTitleLine1: "Anatomia Swing-ului",
-    heroTitleAnd: "și",
-    heroTitleLine2: "Piramidarea",
-    heroSub: "Cum construiește un analist profesionist o poziție pe aur pentru câteva zile. Mecanică reală. Cifre reale.",
-    heroChip1: "Fundamental 35%",
-    heroChip2: "Tehnică 65%",
-    heroChip3: "2 Interactive",
-
-    // Anti-myth
-    mythTag: "CONCEPȚIE GREȘITĂ FRECVENTĂ",
-    mythQuote: "«Cu cât tranzacționezi mai des, cu atât câștigi mai mult. Trebuie să prinzi fiecare mișcare.»",
-    mythBody: "Majoritatea traderilor supratranzacționează. Fiecare tranzacție în plus înseamnă comision, stres și o decizie luată în afara strategiei. Un swing trader profesionist face 2–5 tranzacții pe săptămână. În schimb, fiecare este conform planului, cu o analiză completă a fundamentalului și niveluri clare.",
-
-    // SBF voice
-    voiceTag: "— ANALIST SBF · DAOTI",
-    voiceQuote: "«Cea mai bună tranzacție a mea din lună este adesea cea pe care aproape am închis-o în a doua zi. Piața are nevoie de timp ca să facă ceea ce trebuie să facă. Răbdarea este o poziție.»",
-    voiceBody: "Daoti — statement real al SBF Company. Strategia se bazează pe macro-trendul metalelor, dinamica EMA și un control strict al poziției prin piramidare.",
-
-    // Price of ignorance
-    ignoranceTag: "Prețul ignoranței",
-    ignoranceBody: "Un trader deschide o poziție pe aur. După 12 ore, ea este la +45 puncte. El încasează profitul — «cât mai e timp». A doua zi a apărut un CPI sub prognoză, Powell a sugerat o relaxare: XAUUSD +180 puncte. S-a uitat la tranzacția închisă. ",
-    ignoranceBold: "Necunoașterea contextului fundamental l-a costat 135 de puncte de profit.",
-
-    // Theory 1
-    theory1Sub: "Swing trading-ul este un stil de tranzacționare în care poziția este menținută câteva zile pentru a capta o mișcare pe termen mediu.",
-    theory1Title: "Ce este swing trading-ul pe metale",
-
-    // Trades table
-    tradesHeader: "EXEMPLE DE TRANZACȚII — STRATEGIA DAOTI (XAUUSD)",
-    thDate: "Data", thInstrument: "Instrument", thDirection: "Direcție",
-    thEntry: "Intrare", thExit: "Ieșire", thHold: "Durată", thPnl: "PnL (pct)", thCatalyst: "Catalizator",
-    trade1Date: "12 mar", trade1Hold: "4 zile", trade1Cat: "CPI -0.2% + Powell",
-    trade2Date: "28 mar", trade2Hold: "5 zile", trade2Cat: "NFP slab",
-    trade3Date: "9 apr", trade3Hold: "3 zile", trade3Cat: "Geopolitică + inflație",
-    trade4Date: "22 apr", trade4Hold: "2 zile", trade4Cat: "Corecție după ATH",
-    trade5Date: "5 mai", trade5Hold: "1 zi", trade5Cat: "SL declanșat (NFP peste așteptări)",
-
-    // Theory 2
-    theory2Sub: "EMA 20 și EMA 50 pe H1 — niveluri de suport dinamice pentru construirea poziției prin piramidare.",
-    theory2Title: "Strategia EMA și mecanica piramidării",
-
-    // EMA diagram
-    emaDiagramHeader: "CUM FUNCȚIONEAZĂ EMA 20 / EMA 50 ÎN SWING",
-    emaDiagramTp: "TP +150 pct",
-
-    // Risk math example
-    riskMathHeader: "MATEMATICA PIRAMIDĂRII — EXEMPLU",
-    riskStep1: "Intrare #1", riskStep2: "Adăugare #2", riskStep3: "Adăugare #3",
-    riskNote1: "Risc: 80 pct × 1L = 80 pct",
-    riskNote2: "Stop #1 → breakeven",
-    riskNote3: "Intrare medie ~2499",
-    riskPriceLabel: "Preț:", riskLotsLabel: "Loturi:",
-    riskSummaryLabel: "Rezultat la atingerea TP (+150 pct de la #1): ",
-    riskSummaryFormula: "(150 pct×1L) + (135 pct×1L) + (123 pct×1L) = ",
-    riskSummaryBold: "408 puncte",
-    riskSummaryTail: " față de riscul ~80 pct",
-
-    // Footer
-    footerAsk: "Mai ai o întrebare? Scrie analistului",
-    footerNext: "Nivelul 14: Anatomia Scalping-ului →",
+    heroTitleLine1: "Anatomia swing-ului și", heroTitleLine2: "aritmetica adăugării",
+    heroSubtitle: "A adăuga la o poziție profitabilă e singura decizie din trading luată exact în momentul câștigului. Tocmai de aceea e mai periculoasă decât oricare alta.",
+    fundamentalChip: "Anatomia tranzacției 30%", technicalChip: "Aritmetică 70%", interactiveChip: "Calculator piramidare",
+    whySwingSub: "Continuarea capitolului 11.",
+    anatomySub: "Analiza unei tranzacții reale, fără publicarea unui sistem.",
+    pyramidSub: "Nucleul capitolului.",
+    breakevenSub: "Măsurătoarea noastră — nu o părere.",
+    tradePlanSub: "Ce se scrie înainte de deschiderea poziției.",
+    quizKicker: "TESTEAZĂ-TE", quizTitle: "Ce ai învățat în acest capitol", quizNext: "Continuă →",
+    quizStuckAll: "Totul s-a fixat.", quizStuckSome: "Aproape totul s-a fixat.",
+    quizBackToSection: "← Înapoi la secțiune",
+    askQuestionLabel: "Mai aveți o întrebare? Scrieți analistului",
+    nextChapterBtn: "Nivelul 14: Scalping și costuri →",
+    loadingLabel: "Se încarcă capitolul…",
+    loadErrorLabel: "Nu s-a putut încărca o parte din datele capitolului.",
+    seriesCounterNotYet: "Serie: neîncepută",
+    seriesCounterBlocked: "Serie: versiune pe hârtie",
+    seriesCounterDone: "Serie: 50/50 ✓",
+    seriesCounterGoto: "La capitolul 12 →",
+  },
+  en: {
+    levelChip: "LEVEL 13", chapterNameShort: "Swing and Pyramiding", faTag: "FA 30%", taTag: "TA 70%",
+    stepExplain: "EXPLAIN", stepShow: "SHOW", stepDo: "LET YOU TRY",
+    heroEyebrow: "SBF COMPANY — CHAPTER 13",
+    heroTitleLine1: "Swing anatomy and", heroTitleLine2: "the arithmetic of adding",
+    heroSubtitle: "Adding to a winning position is the only decision in trading made exactly when you're winning. That's exactly why it's more dangerous than any other.",
+    fundamentalChip: "Trade anatomy 30%", technicalChip: "Arithmetic 70%", interactiveChip: "Pyramiding calculator",
+    whySwingSub: "A continuation of chapter 11.",
+    anatomySub: "A real trade broken down, without publishing a system.",
+    pyramidSub: "The chapter's core.",
+    breakevenSub: "Our measurement — not an opinion.",
+    tradePlanSub: "What gets written down before opening a position.",
+    quizKicker: "TEST YOURSELF", quizTitle: "What you learned in this chapter", quizNext: "Next →",
+    quizStuckAll: "Everything stuck.", quizStuckSome: "Almost everything stuck.",
+    quizBackToSection: "← Back to the section",
+    askQuestionLabel: "Have a question? Write to an analyst",
+    nextChapterBtn: "Level 14: Scalping and Costs →",
+    loadingLabel: "Loading the chapter…",
+    loadErrorLabel: "Some chapter data failed to load.",
+    seriesCounterNotYet: "Series: not started",
+    seriesCounterBlocked: "Series: paper version",
+    seriesCounterDone: "Series: 50/50 ✓",
+    seriesCounterGoto: "To chapter 12 →",
   },
 };
 
-const C = {
-  gold:"#c9973a", goldLight:"#f4d49f", goldPale:"#f7f0e3",
-  black:"#18181a", ink:"#18181a", inkMid:"#555555",
-  inkSoft:"rgba(24,24,26,0.58)", inkFaint:"rgba(24,24,26,0.28)",
-  white:"#ffffff", surface:"#faf8f5", surfaceMid:"#f0ebe0",
-  border:"rgba(24,24,26,0.1)", borderGold:"rgba(201,151,58,0.25)",
-  green:"#089981", greenD:"#2d7a4f", greenPale:"#eaf5ee",
-  red:"#f23645", redD:"#c0392b", redPale:"#fdecea",
-  blue:"#2563eb", chart:"#131722"
-};
+const {C, Mono, Chip, Rule, AskAnalystBtn, getChUrl, QuizBlock, ComplianceFootnote} = window.AcademyShared;
 
-const Mono = ({children,size=13,color=C.inkSoft,spacing=3,style={},className=""}) =>
-  <span className={className} style={{fontFamily:"'Courier New',monospace",fontSize:size,letterSpacing:spacing,color,...style}}>{children}</span>;
-const Chip = ({children,color=C.gold}) =>
-  <span style={{fontFamily:"'Courier New',monospace",fontSize:11,letterSpacing:3,color,border:`1px solid ${color}`,padding:"4px 11px",display:"inline-block",textTransform:"uppercase"}}>{children}</span>;
-const Rule = ({w="50%",my=32}) =>
-  <div style={{height:1,background:`linear-gradient(90deg,transparent,${C.gold},transparent)`,width:w,margin:`${my}px auto`,opacity:0.4}}/>;
-const SectionTitle = ({children,sub,align="left"}) => (
-  <div style={{textAlign:align,marginBottom:36}}>
+const SectionTitle = ({children,sub,align="left",id}) => (
+  <div id={id} style={{textAlign:align,marginBottom:36,scrollMarginTop:130}}>
     <h2 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(24px,3.2vw,36px)",fontWeight:400,color:C.black,lineHeight:1.15,marginBottom:sub?10:0}}>{children}</h2>
     {sub && <p style={{fontSize:15,color:C.inkSoft,lineHeight:1.65,maxWidth:680,margin:align==="center"?"0 auto":0}}>{sub}</p>}
   </div>
 );
-const InfoCard = ({icon,title,text,accent=C.gold}) => (
-  <div style={{background:C.surface,border:`1px solid ${C.border}`,padding:"22px 26px",borderRadius:4,borderLeft:`3px solid ${accent}`}}>
-    <div style={{fontSize:20,marginBottom:8}}>{icon}</div>
-    <div style={{fontWeight:600,fontSize:13,color:C.black,letterSpacing:0.5,marginBottom:7,textTransform:"uppercase"}}>{title}</div>
-    <div style={{fontSize:13,color:C.inkMid,lineHeight:1.65}}>{text}</div>
-  </div>
+const StepTag = ({n,label}) => (
+  <Mono size={9.5} color={C.inkFaint} spacing={2} style={{display:"block",marginBottom:8,textTransform:"uppercase"}}>{n} · {label}</Mono>
 );
-const getChUrl = (ch) => {
-  const p = new URLSearchParams(window.location.search).get('path')||'explorer';
-  let base = INITIAL_LANG==='ru'?'/edu/b':`/edu/${INITIAL_LANG}/b`;
-  return `${base}/${ch}?path=${p}`;
-};
 
-// ─── AskAnalystPopup ──────────────────────────────────────────────────────────
-function AskAnalystPopup({onClose}) {
-  const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
-  const prefill = INITIAL_LANG==='ru' ? "Здравствуйте, есть вопрос по главе 13"
-    : INITIAL_LANG==='en' ? "Hello, question on chapter 13" : "Bună ziua, întrebare cap 13";
-  const tgLink = `https://t.me/SBF_Support?text=${encodeURIComponent(prefill)}`;
-  const waLink = `https://api.whatsapp.com/send/?phone=37369005200&text=${encodeURIComponent(prefill)}&type=phone_number&app_absent=0`;
+// ─── Загрузка breakeven_cost.json ────────────────────────────────────────────
+function useCh13Data() {
+  const [state, setState] = React.useState({ loading: true, error: null, be: null });
+  React.useEffect(() => {
+    let cancelled = false;
+    fetch("/data/edu_stats/breakeven_cost.json")
+      .then(r => { if (!r.ok) throw new Error("breakeven_cost.json HTTP " + r.status); return r.json(); })
+      .then(be => { if (!cancelled) setState({ loading: false, error: null, be }); })
+      .catch(err => {
+        console.error("[ch13] load failed:", err);
+        if (!cancelled) setState({ loading: false, error: err, be: null });
+      });
+    return () => { cancelled = true; };
+  }, []);
+  return state;
+}
+
+// ─── Хук: серия ступени 7 (глава 12) — только для счётчика в шапке ─────────
+function useSeriesProgress() {
+  const [data, setData] = React.useState(null);
+  const [loading, setLoading] = React.useState(true);
+  React.useEffect(() => {
+    let alive = true;
+    fetch("/api/journal/series-progress")
+      .then(r => r.ok ? r.json() : null)
+      .catch(() => null)
+      .then(d => { if (alive) { setData(d); setLoading(false); } });
+    return () => { alive = false; };
+  }, []);
+  return { data, loading };
+}
+
+function SeriesCounter({ progress, loading, lang }) {
+  const S = STRINGS[lang] || STRINGS.ru;
+  if (loading || !progress) return null;
+  const goBack = () => { window.location.href = getChUrl(12, lang); };
+  let label;
+  if (progress.status === "done") label = S.seriesCounterDone;
+  else if (progress.status === "in_progress") label = `${progress.trade_count} / ${progress.target}`;
+  else if (progress.status === "blocked") label = S.seriesCounterBlocked;
+  else label = S.seriesCounterNotYet;
   return (
-    <div style={{position:"fixed",inset:0,zIndex:1000,display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={onClose}>
-      <div style={{position:"fixed",inset:0,background:"rgba(250,248,245,0.98)"}}/>
-      <div onClick={e=>e.stopPropagation()} style={{position:"relative",width:"100%",maxWidth:900,zIndex:1,margin:"auto",padding:"40px 0"}}>
-        <button onClick={onClose} style={{position:"absolute",top:0,right:10,background:"none",border:"none",fontSize:35,cursor:"pointer",color:C.inkFaint,lineHeight:1}}>×</button>
-        <div style={{marginBottom:40}}>
-          <Mono size={13} color={C.gold} spacing={3} style={{display:"block",marginBottom:15}}>{S.askTag}</Mono>
-          <h2 style={{fontSize:"clamp(30px,5vw,42px)",fontWeight:700,color:C.black,marginBottom:15,fontFamily:"'DM Serif Display',serif"}}>{S.askTitle}</h2>
-          <p style={{fontSize:18,color:C.inkMid}}>{S.askBody}</p>
-        </div>
-        <div className="messenger-grid">
-          {[{href:tgLink,bg:"#0088cc",icon:"🚀",name:"SBF Support",sub:S.askTgSub,btn:S.askTgBtn},
-            {href:waLink,bg:"#25d366",icon:"💬",name:"SBF Company",sub:S.askWaSub,btn:S.askWaBtn}
-          ].map((m,i) => (
-            <div key={i} style={{background:"#fff",border:"1px solid #e0e0e0",borderRadius:12,padding:"30px 25px",display:"flex",flexDirection:"column"}}>
-              <div style={{display:"flex",alignItems:"center",gap:15,marginBottom:30}}>
-                <div style={{width:50,height:50,borderRadius:"50%",background:i===0?"#e1f3fb":"#e8f5ed",display:"flex",alignItems:"center",justifyContent:"center"}}>{m.icon}</div>
-                <div><div style={{fontSize:18,fontWeight:700}}>{m.name}</div><div style={{fontSize:14,color:C.inkFaint}}>{m.sub}</div></div>
-              </div>
-              <div style={{background:m.bg,padding:"15px 20px",borderRadius:"12px 12px 0 12px",marginBottom:30,alignSelf:"flex-end",maxWidth:"90%"}}>
-                <div style={{fontSize:14,color:"#fff"}}>{prefill}</div>
-              </div>
-              <a href={m.href} target="_blank" style={{marginTop:"auto",display:"block",background:m.bg,color:"#fff",textAlign:"center",padding:"18px",borderRadius:8,textDecoration:"none",fontWeight:700}}>{m.btn}</a>
-            </div>
-          ))}
-        </div>
+    <div onClick={goBack} title={S.seriesCounterGoto} style={{cursor:"pointer",fontFamily:"monospace",fontSize:11.5,color:C.gold,border:`1px solid ${C.borderGold}`,borderRadius:20,padding:"5px 14px",letterSpacing:0.5,whiteSpace:"nowrap"}}>
+    {label}
+    </div>
+  );
+}
+
+// ─── Cold open ──────────────────────────────────────────────────────────────
+function ColdOpen13() {
+  const T = window.Ch13Content[INITIAL_LANG] || window.Ch13Content.ru;
+  const co = T.coldOpen;
+  return (
+    <div style={{background:C.black,padding:"70px 5vw 56px",color:"#fff"}}>
+      <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:24,textAlign:"center"}}>{co.tag}</Mono>
+      <div style={{maxWidth:840,margin:"0 auto 12px"}}>
+        {co.lines.map((line,i) => (
+          <p key={i} style={{fontSize: i===co.lines.length-1 ? 17 : 15.5, color: i>=4?"#fff":"rgba(255,255,255,0.72)", fontWeight: i>=4?600:400, lineHeight:1.75, marginBottom:14, fontFamily: i===co.lines.length-1 ? "'DM Serif Display',serif" : "inherit"}}>{line}</p>
+        ))}
+      </div>
+      <p style={{textAlign:"center",fontFamily:"monospace",fontSize:12,color:C.gold}}>{co.cta}</p>
+    </div>
+  );
+}
+
+// ─── Анти-миф → Голос SBF ────────────────────────────────────────────────────
+function IntroBlock() {
+  const T = window.Ch13Content[INITIAL_LANG] || window.Ch13Content.ru;
+  return (
+    <div id="secAntiMyth" style={{marginBottom:48,scrollMarginTop:130}}>
+      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T.antiMyth.tag}</Mono>
+      <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px",marginBottom:28}}>
+        <p style={{fontWeight:600,fontSize:14.5,color:C.black,marginBottom:10}}>{T.antiMyth.title}</p>
+        <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,marginBottom:12}}>{T.antiMyth.body1}</p>
+        <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,marginBottom:12}}>{T.antiMyth.body2}</p>
+        <p style={{fontSize:13.5,color:C.black,lineHeight:1.7,margin:0,fontWeight:600}}>{T.antiMyth.body3}</p>
+      </div>
+
+      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T.voiceSbf.tag}</Mono>
+      <div style={{borderLeft:`4px solid ${C.gold}`,paddingLeft:24}}>
+        {T.voiceSbf.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:16,fontStyle:"italic",color:C.inkMid,lineHeight:1.7,fontFamily:"'DM Serif Display',serif",marginBottom:12}}>{p}</p>)}
       </div>
     </div>
   );
 }
 
-// ─── Interactive 1: News Calendar — Hold or Close Decision ───────────────────
-function NewsCalendar() {
-  const { useState } = React;
+// ─── Цена незнания ───────────────────────────────────────────────────────────
+function PriceOfNotKnowing13() {
+  const T = window.Ch13Content[INITIAL_LANG] || window.Ch13Content.ru;
+  const p = T.priceOfNotKnowing;
+  return (
+    <div id="secPriceOfNotKnowing" style={{marginBottom:48,scrollMarginTop:130}}>
+      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{p.tag}</Mono>
+      <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.black,marginBottom:14}}>{p.title}</div>
+      <p style={{fontSize:14,color:C.inkMid,lineHeight:1.75,marginBottom:12,maxWidth:800}}>{p.intro}</p>
+      <p style={{fontSize:14,color:C.inkMid,lineHeight:1.75,marginBottom:20,maxWidth:800}}>{p.body2}</p>
+      <div style={{background:C.black,borderRadius:8,padding:"22px 28px",color:"#fff",marginBottom:16}}>
+        <Mono size={10} color={C.gold} spacing={1} style={{display:"block",marginBottom:8,textTransform:"uppercase"}}>{p.keyLabel}</Mono>
+        <p style={{fontSize:14,color:"rgba(255,255,255,0.85)",lineHeight:1.7,margin:0}}>{p.keyBody}</p>
+      </div>
+      <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.75,marginBottom:14,maxWidth:800}}>{p.body3}</p>
+      <p style={{fontSize:13.5,color:C.inkSoft,lineHeight:1.75,fontStyle:"italic",maxWidth:800}}>{p.body4}</p>
+    </div>
+  );
+}
+
+// ─── Почему свинг ─────────────────────────────────────────────────────────────
+function WhySwing() {
+  const T = window.Ch13Content[INITIAL_LANG] || window.Ch13Content.ru;
+  const w = T.whySwing;
+  const scalp = (1/15*100).toFixed(1);
+  const swing = (1/150*100).toFixed(1);
+  return (
+    <div style={{marginBottom:48}}>
+      <p style={{fontSize:14,color:C.inkMid,lineHeight:1.78,marginBottom:14,maxWidth:820}}>{w.body1}</p>
+      <p style={{fontSize:14,color:C.black,fontWeight:600,lineHeight:1.78,marginBottom:14,maxWidth:820}}>{w.body2(scalp, swing)}</p>
+      <p style={{fontSize:14,color:C.inkMid,lineHeight:1.78,marginBottom:14,maxWidth:820}}>{w.body3}</p>
+      <p style={{fontSize:13.5,color:C.inkSoft,lineHeight:1.78,fontStyle:"italic",maxWidth:820,marginBottom:14}}>{w.body4}</p>
+      <a href="/chart.html?s=GOLD" target="_blank" rel="noopener" style={{fontFamily:"monospace",fontSize:12,color:C.gold,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>{w.openOnChart}</a>
+    </div>
+  );
+}
+
+// ─── Анатомия одной сделки ───────────────────────────────────────────────────
+function TradeAnatomy() {
+  const T = window.Ch13Content[INITIAL_LANG] || window.Ch13Content.ru;
+  const a = T.tradeAnatomy;
+  return (
+    <div style={{marginBottom:48}}>
+      <div style={{background:C.goldPale,border:`1px solid ${C.borderGold}`,borderRadius:8,padding:"16px 22px",marginBottom:26}}>
+        <p style={{fontSize:12.5,color:C.black,lineHeight:1.65,margin:0,fontStyle:"italic"}}>{a.disclaimer}</p>
+      </div>
+
+      <div style={{marginBottom:22}}>
+        <Mono size={10} color={C.inkFaint} spacing={1} style={{display:"block",marginBottom:8,textTransform:"uppercase"}}>{a.contextLabel}</Mono>
+        <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,margin:0}}>{a.contextText}</p>
+      </div>
+
+      <div style={{marginBottom:22}}>
+        <Mono size={10} color={C.inkFaint} spacing={1} style={{display:"block",marginBottom:10,textTransform:"uppercase"}}>{a.questionsLabel}</Mono>
+        {a.questions.map((q,i) => (
+          <div key={i} style={{display:"flex",gap:10,marginBottom:10,alignItems:"flex-start"}}>
+            <Mono size={11} color={C.gold} spacing={0}>{i+1}</Mono>
+            <p style={{fontSize:13,color:C.inkMid,lineHeight:1.65,margin:0}}>{q}</p>
+          </div>
+        ))}
+      </div>
+
+      <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"18px 22px",marginBottom:22}}>
+        <Mono size={10} color={C.inkFaint} spacing={1} style={{display:"block",marginBottom:8,textTransform:"uppercase"}}>{a.stopLabel}</Mono>
+        <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,margin:0}}>{a.stopText}</p>
+      </div>
+
+      <div style={{marginBottom:22}}>
+        <Mono size={10} color={C.inkFaint} spacing={1} style={{display:"block",marginBottom:10,textTransform:"uppercase"}}>{a.timelineLabel}</Mono>
+        {a.timeline.map((t,i) => (
+          <div key={i} style={{borderLeft:`3px solid ${C.borderGold}`,paddingLeft:16,marginBottom:12}}>
+            <p style={{fontSize:13,color:C.inkMid,lineHeight:1.65,margin:0}}>{t}</p>
+          </div>
+        ))}
+      </div>
+
+      <div style={{background:"rgba(242,54,69,0.06)",border:"1px solid rgba(242,54,69,0.25)",borderRadius:8,padding:"18px 22px",marginBottom:16}}>
+        <Mono size={10} color="#c0392b" spacing={1} style={{display:"block",marginBottom:8,textTransform:"uppercase"}}>{a.mistakeLabel}</Mono>
+        <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,margin:0}}>{a.mistakeText}</p>
+      </div>
+
+      <div style={{background:C.black,borderRadius:8,padding:"18px 22px"}}>
+        <Mono size={10} color={C.gold} spacing={1} style={{display:"block",marginBottom:8,textTransform:"uppercase"}}>{a.lessonLabel}</Mono>
+        <p style={{fontSize:13.5,color:"rgba(255,255,255,0.85)",lineHeight:1.7,margin:0}}>{a.lessonText}</p>
+      </div>
+    </div>
+  );
+}
+
+// ─── Арифметика пирамидинга ── математика ──────────────────────────────────
+function pyramidCompute(firstSize, stepPts, addSize, nAdds, mode) {
+  const entries = [{ price: 0, size: firstSize }];
+  for (let k = 1; k <= nAdds; k++) {
+    const size = mode === "decreasing" ? addSize / Math.pow(2, k - 1) : addSize;
+    entries.push({ price: k * stepPts, size });
+  }
+  const totalSize = entries.reduce((s, e) => s + e.size, 0);
+  const avgPrice = entries.reduce((s, e) => s + e.price * e.size, 0) / totalSize;
+  const peak = nAdds * stepPts;
+  const pnrPts = Math.max(0, peak - avgPrice);
+  const pnrPct = peak > 0 ? (pnrPts / peak * 100) : 0;
+  const riskRatio = totalSize / firstSize;
+  return { avgPrice, pnrPts, pnrPct, riskRatio, totalSize };
+}
+
+function PyramidCalculator() {
   const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
+  const T = window.Ch13Content[INITIAL_LANG] || window.Ch13Content.ru;
+  const py = T.pyramid;
+  const [step, setStep] = React.useState(1);
+  const [firstSize, setFirstSize] = React.useState(1);
+  const [stepPts, setStepPts] = React.useState(40);
+  const [addSize, setAddSize] = React.useState(1);
+  const [nAdds, setNAdds] = React.useState(3);
+  const [mode, setMode] = React.useState("equal");
 
-  // Open position context
-  const entry = 2485.50;
-  const currentPrice = 2501.20;
-  const floatingPnl = ((currentPrice - entry) * 100).toFixed(0); // ~1570 pts
-  const tp = entry + 150;
-  const sl = entry - 80;
+  const example = React.useMemo(() => ({
+    after1: pyramidCompute(1, 40, 1, 1, "equal"),
+    after3: pyramidCompute(1, 40, 1, 3, "equal"),
+  }), []);
 
-  const days = [
-    {
-      day:S.calDayMon, date:S.calDateMon,
-      events:[
-        {time:"16:30",name:S.calEv1Name,importance:"medium",consensus:"0.3%",prev:"0.5%",
-         impact:"neutral",hint:S.calEv1Hint},
-      ]
-    },
-    {
-      day:S.calDayTue, date:S.calDateTue,
-      events:[
-        {time:"15:30",name:S.calEv2Name,importance:"high",consensus:"-0.1%",prev:"0.2%",
-         impact:"bullish",hint:S.calEv2Hint},
-        {time:"21:00",name:S.calEv3Name,importance:"medium",consensus:"—",prev:"—",
-         impact:"neutral",hint:S.calEv3Hint},
-      ]
-    },
-    {
-      day:S.calDayWed, date:S.calDateWed,
-      events:[
-        {time:"15:30",name:S.calEv4Name,importance:"critical",consensus:"3.1%",prev:"3.4%",
-         impact:"bullish",hint:S.calEv4Hint},
-      ]
-    },
-    {
-      day:S.calDayThu, date:S.calDateThu,
-      events:[
-        {time:"21:30",name:S.calEv5Name,importance:"critical",consensus:S.calEv5Consensus,prev:"—",
-         impact:"bullish",hint:S.calEv5Hint},
-        {time:"15:30",name:S.calEv6Name,importance:"low",consensus:"225K",prev:"222K",
-         impact:"neutral",hint:S.calEv6Hint},
-      ]
-    },
-    {
-      day:S.calDayFri, date:S.calDateFri,
-      events:[
-        {time:"15:30",name:S.calEv7Name,importance:"medium",consensus:"69.5",prev:"69.1",
-         impact:"neutral",hint:S.calEv7Hint},
-      ]
-    },
-  ];
-
-  const [revealed, setRevealed] = useState({}); // {dayIdx_evIdx: true}
-  const [decision, setDecision] = useState(null); // "hold"|"close"
-  const [phase, setPhase] = useState("analyze"); // analyze | decide | result
-
-  const revealCount = Object.values(revealed).filter(Boolean).length;
-  const totalEvents = days.reduce((a,d)=>a+d.events.length,0);
-
-  const toggleReveal = (key) => setRevealed(p => ({...p,[key]:!p[key]}));
-
-  const importanceColor = (imp) =>
-    imp==="critical"?C.red : imp==="high"?"#f59e0b" : imp==="medium"?C.gold : C.inkFaint;
-  const importanceLabel = (imp) =>
-    imp==="critical"?S.calImpCritical : imp==="high"?S.calImpHigh : imp==="medium"?S.calImpMedium : S.calImpLow;
-  const impactIcon = (imp) =>
-    imp==="bullish"?S.calImpactBullish : imp==="bearish"?S.calImpactBearish : S.calImpactNeutral;
-
-  // Determine if user's analysis matches correct answer (hold = correct)
-  const correctDecision = "hold";
-  const bullishCount = days.flatMap(d=>d.events).filter(e=>e.impact==="bullish").length;
+  const custom = React.useMemo(() =>
+    pyramidCompute(Math.max(0.01, firstSize), Math.max(1, stepPts), Math.max(0.01, addSize), Math.max(1, Math.min(10, nAdds)), mode),
+    [firstSize, stepPts, addSize, nAdds, mode]
+  );
 
   return (
-    <div style={{background:C.black,borderRadius:8,padding:"36px 40px",color:C.white}}>
-      <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:28}}>
-        <span style={{fontSize:28}}><img class='mi-icon' style={{verticalAlign:'middle'}} src='/assets/icons/icon-calendar.png' alt='' width='20' height='20' /></span>
-        <div>
-          <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.gold}}>{S.calTitle}</div>
-          <Mono size={11} color="rgba(255,255,255,0.4)" spacing={2}>{S.calSubtitle}</Mono>
-        </div>
-      </div>
-
-      {/* Open position banner */}
-      <div style={{background:"rgba(8,153,129,0.1)",border:`1px solid ${C.green}44`,borderRadius:6,padding:"18px 24px",marginBottom:28,display:"flex",gap:24,flexWrap:"wrap",alignItems:"center"}}>
-        <div>
-          <Mono size={9} color="rgba(255,255,255,0.35)" spacing={1} style={{display:"block",marginBottom:4}}>{S.calOpenPosLabel}</Mono>
-          <div style={{fontFamily:"'DM Serif Display',serif",fontSize:20,color:C.gold}}>XAUUSD · BUY</div>
-        </div>
-        {[
-          {label:S.calEntry,value:`$${entry}`,color:"rgba(255,255,255,0.7)"},
-          {label:S.calCurrent,value:`$${currentPrice}`,color:C.green},
-          {label:S.calFloatPnl,value:`+${floatingPnl} ${S.calPt}`,color:C.green},
-          {label:S.calTakeProfit,value:`$${tp.toFixed(2)}`,color:C.gold},
-          {label:S.calStopLoss,value:`$${sl.toFixed(2)}`,color:C.red},
-        ].map((item,i) => (
-          <div key={i} style={{textAlign:"center"}}>
-            <div style={{fontSize:9,fontFamily:"monospace",color:"rgba(255,255,255,0.35)",letterSpacing:1,marginBottom:2}}>{item.label}</div>
-            <div style={{fontFamily:"monospace",fontSize:14,fontWeight:700,color:item.color}}>{item.value}</div>
-          </div>
-        ))}
-        <div style={{marginLeft:"auto",padding:"8px 16px",background:"rgba(8,153,129,0.15)",border:`1px solid ${C.green}55`,borderRadius:4,textAlign:"center"}}>
-          <div style={{fontSize:9,fontFamily:"monospace",color:"rgba(255,255,255,0.35)",letterSpacing:1,marginBottom:2}}>{S.calToTarget}</div>
-          <div style={{fontFamily:"monospace",fontSize:14,fontWeight:700,color:C.gold}}>+{(tp - currentPrice).toFixed(1)} {S.calPt}</div>
-        </div>
-      </div>
-
-      {/* Instruction */}
-      {phase === "analyze" && (
-        <div style={{background:"rgba(201,151,58,0.08)",border:"1px solid rgba(201,151,58,0.25)",borderRadius:4,padding:"12px 18px",marginBottom:20,display:"flex",gap:10,alignItems:"center"}}>
-          <span style={{fontSize:16}}><img class='mi-icon' style={{verticalAlign:'middle'}} src='/assets/icons/icon-idea.png' alt='' width='20' height='20' /></span>
-          <Mono size={12} color={C.gold} spacing={1}>
-            {S.calInstruction}
-          </Mono>
+    <div style={{marginBottom:16}}>
+      {step === 1 && (
+        <div style={{background:C.goldPale,border:`1px solid ${C.borderGold}`,borderRadius:8,padding:"26px 30px",marginBottom:20}}>
+          <StepTag n="1" label={py.step1Label}/>
+          <p style={{fontSize:14,color:C.inkMid,lineHeight:1.75,marginBottom:20}}>{py.step1Body}</p>
+          <button onClick={()=>setStep(2)} style={{padding:"12px 28px",background:C.black,color:"#fff",border:"none",borderRadius:4,cursor:"pointer",fontFamily:"monospace",fontSize:12,letterSpacing:1}}>→</button>
         </div>
       )}
 
-      {/* Calendar */}
-      <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:10,marginBottom:24}} className="g3">
-        {days.map((day,di) => (
-          <div key={di} style={{background:"rgba(255,255,255,0.04)",borderRadius:6,overflow:"hidden",border:"1px solid rgba(255,255,255,0.07)"}}>
-            {/* Day header */}
-            <div style={{padding:"10px 12px",background:"rgba(255,255,255,0.06)",borderBottom:"1px solid rgba(255,255,255,0.06)"}}>
-              <div style={{fontWeight:700,fontSize:13,color:C.white}}>{day.day}</div>
-              <div style={{fontSize:10,fontFamily:"monospace",color:"rgba(255,255,255,0.35)"}}>{day.date}</div>
+      {step >= 2 && (
+        <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"24px 28px",marginBottom:20}}>
+          <StepTag n="2" label={py.step2Label}/>
+          <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,marginBottom:16}}>{py.step2Intro}</p>
+          <div style={{display:"flex",gap:24,flexWrap:"wrap",justifyContent:"center",background:C.black,borderRadius:6,padding:"20px 24px",marginBottom:14}}>
+            <div style={{textAlign:"center"}}>
+              <div style={{fontFamily:"'DM Serif Display',serif",fontSize:24,color:C.gold}}>+{example.after3.avgPrice.toFixed(0)}</div>
+              <Mono size={9} color="rgba(255,255,255,0.5)" spacing={0.5}>{py.avgLabel}</Mono>
             </div>
-            {/* Events */}
-            <div style={{padding:"10px 8px",display:"flex",flexDirection:"column",gap:8}}>
-              {day.events.map((ev,ei) => {
-                const key = `${di}_${ei}`;
-                const open = revealed[key];
-                return (
-                  <div key={ei}
-                    onClick={() => toggleReveal(key)}
-                    style={{
-                      background: open ? "rgba(255,255,255,0.07)" : "rgba(255,255,255,0.03)",
-                      border:`1px solid ${open ? importanceColor(ev.importance)+"44" : "rgba(255,255,255,0.06)"}`,
-                      borderRadius:4,padding:"10px 10px",cursor:"pointer",
-                      borderLeft:`3px solid ${importanceColor(ev.importance)}`,
-                      transition:"all .2s"
-                    }}>
-                    <div style={{display:"flex",alignItems:"center",gap:5,marginBottom:5}}>
-                      <Mono size={9} color={importanceColor(ev.importance)} spacing={0}>{ev.time}</Mono>
-                      <span style={{fontSize:8,fontFamily:"monospace",color:importanceColor(ev.importance),background:`${importanceColor(ev.importance)}18`,padding:"1px 5px",borderRadius:2}}>{importanceLabel(ev.importance)}</span>
-                    </div>
-                    <div style={{fontSize:11,color:"rgba(255,255,255,0.7)",lineHeight:1.4,marginBottom:open?8:0}}>{ev.name}</div>
-                    {open && (
-                      <div style={{fontSize:10,fontFamily:"monospace",color:"rgba(255,255,255,0.4)",lineHeight:1.5,borderTop:"1px solid rgba(255,255,255,0.06)",paddingTop:6,marginTop:4}}>
-                        <div>{S.calForecastLabel} <span style={{color:"rgba(255,255,255,0.7)"}}>{ev.consensus}</span></div>
-                        <div>{S.calPrevLabel} <span style={{color:"rgba(255,255,255,0.5)"}}>{ev.prev}</span></div>
-                        <div style={{marginTop:4,color:ev.impact==="bullish"?C.green:ev.impact==="bearish"?C.red:"rgba(255,255,255,0.4)"}}>{impactIcon(ev.impact)}</div>
-                        <div style={{marginTop:6,fontSize:9,color:"rgba(255,255,255,0.35)",lineHeight:1.5}}>{ev.hint}</div>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+            <div style={{textAlign:"center"}}>
+              <div style={{fontFamily:"'DM Serif Display',serif",fontSize:24,color:"#fff"}}>{example.after3.pnrPts.toFixed(0)}</div>
+              <Mono size={9} color="rgba(255,255,255,0.5)" spacing={0.5}>{py.pnrLabel}</Mono>
             </div>
           </div>
-        ))}
-      </div>
-
-      {/* Progress */}
-      <div style={{display:"flex",gap:16,alignItems:"center",marginBottom:20,flexWrap:"wrap"}}>
-        <div style={{flex:1,background:"rgba(255,255,255,0.06)",borderRadius:3,height:4,overflow:"hidden"}}>
-          <div style={{height:"100%",background:C.gold,width:`${(revealCount/totalEvents)*100}%`,transition:"width .3s",borderRadius:3}}/>
-        </div>
-        <Mono size={11} color="rgba(255,255,255,0.4)" spacing={1}>{S.calStudiedLabel}: {revealCount}/{totalEvents} {S.calEventsWord}</Mono>
-      </div>
-
-      {/* Decision */}
-      {phase !== "result" && (
-        <div style={{display:"flex",gap:12,flexWrap:"wrap"}}>
-          <button
-            onClick={() => { setDecision("hold"); setPhase("result"); }}
-            style={{flex:1,minWidth:180,padding:"16px 24px",background:"rgba(8,153,129,0.12)",
-              border:`2px solid ${C.green}`,color:C.green,borderRadius:6,cursor:"pointer",
-              fontFamily:"monospace",fontSize:13,fontWeight:700,letterSpacing:1}}>
-            {S.calHoldBtn}
-          </button>
-          <button
-            onClick={() => { setDecision("close"); setPhase("result"); }}
-            style={{flex:1,minWidth:180,padding:"16px 24px",background:"rgba(242,54,69,0.1)",
-              border:`2px solid ${C.red}`,color:C.red,borderRadius:6,cursor:"pointer",
-              fontFamily:"monospace",fontSize:13,fontWeight:700,letterSpacing:1}}>
-            {S.calCloseBtn}
-          </button>
+          <p style={{fontSize:13,color:C.black,fontWeight:600,lineHeight:1.7,margin:0}}>{py.step2Note}</p>
+          {step === 2 && (
+            <div style={{textAlign:"center",marginTop:18}}>
+              <button onClick={()=>setStep(3)} style={{padding:"11px 24px",background:C.gold,color:"#18181a",border:"none",borderRadius:4,cursor:"pointer",fontFamily:"monospace",fontSize:11.5,letterSpacing:1,fontWeight:700}}>{S.stepDo} →</button>
+            </div>
+          )}
         </div>
       )}
 
-      {/* Result */}
-      {phase === "result" && (
-        <div style={{
-          background: decision===correctDecision ? "rgba(8,153,129,0.12)" : "rgba(242,54,69,0.08)",
-          border:`1px solid ${decision===correctDecision ? C.green : C.red}44`,
-          borderRadius:6,padding:"24px 28px"
-        }}>
-          <div style={{fontWeight:700,fontSize:16,color: decision===correctDecision ? C.green : C.red,marginBottom:12}}>
-            {decision==="hold"
-              ? S.calResultCorrect
-              : S.calResultWrong}
+      {step >= 3 && (
+        <div style={{background:C.black,borderRadius:8,padding:"28px 5vw 32px",color:"#fff",marginBottom:20}}>
+          <StepTag n="3" label={py.step3Label}/>
+          <p style={{fontSize:13.5,color:"rgba(255,255,255,0.75)",lineHeight:1.7,marginBottom:20}}>{py.step3Intro}</p>
+
+          <div style={{display:"flex",gap:8,marginBottom:20}}>
+            <button onClick={()=>setMode("equal")} style={{flex:1,padding:"9px 0",fontFamily:"monospace",fontSize:11,cursor:"pointer",background:mode==="equal"?C.gold:"transparent",color:mode==="equal"?"#18181a":"rgba(255,255,255,0.6)",border:`1px solid ${mode==="equal"?C.gold:"rgba(255,255,255,0.2)"}`,borderRadius:4}}>{py.modeEqual}</button>
+            <button onClick={()=>setMode("decreasing")} style={{flex:1,padding:"9px 0",fontFamily:"monospace",fontSize:11,cursor:"pointer",background:mode==="decreasing"?C.gold:"transparent",color:mode==="decreasing"?"#18181a":"rgba(255,255,255,0.6)",border:`1px solid ${mode==="decreasing"?C.gold:"rgba(255,255,255,0.2)"}`,borderRadius:4}}>{py.modeDecreasing}</button>
           </div>
-          <p style={{fontSize:13,color:"rgba(255,255,255,0.65)",lineHeight:1.75,marginBottom:16}}>
-            {S.calResultParaA}<strong style={{color:C.gold}}>{bullishCount} {S.calResultParaBold}</strong>{S.calResultParaB}{tp.toFixed(2)}.
-          </p>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10}}>
-            {[
-              {label:S.calScenarioCpi,value:"XAUUSD +$18–25",color:C.green},
-              {label:S.calScenarioPowell,value:`${S.calScenarioPowellPrefix} +$12–20`,color:C.green},
-              {label:S.calScenarioWeek,value:`$${(currentPrice+35).toFixed(0)} (~TP)`,color:C.gold},
-            ].map((s,i) => (
-              <div key={i} style={{background:"rgba(255,255,255,0.05)",borderRadius:4,padding:"12px 14px",textAlign:"center"}}>
-                <div style={{fontSize:9,fontFamily:"monospace",color:"rgba(255,255,255,0.35)",letterSpacing:1,marginBottom:4}}>{s.label}</div>
-                <div style={{fontFamily:"monospace",fontSize:13,fontWeight:700,color:s.color}}>{s.value}</div>
-              </div>
+
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,marginBottom:22}} className="g2">
+            <div>
+              <Mono size={10} color="rgba(255,255,255,0.5)" spacing={0.5} style={{display:"block",marginBottom:6}}>{py.firstSizeLabel}</Mono>
+              <input type="number" step={0.1} min={0.01} value={firstSize} onChange={e=>setFirstSize(+e.target.value)} style={{width:"100%",padding:"9px 12px",background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.2)",borderRadius:4,color:"#fff",fontFamily:"monospace",fontSize:14}}/>
+            </div>
+            <div>
+              <Mono size={10} color="rgba(255,255,255,0.5)" spacing={0.5} style={{display:"block",marginBottom:6}}>{py.stepPtsLabel}</Mono>
+              <input type="number" min={1} value={stepPts} onChange={e=>setStepPts(+e.target.value)} style={{width:"100%",padding:"9px 12px",background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.2)",borderRadius:4,color:"#fff",fontFamily:"monospace",fontSize:14}}/>
+            </div>
+            <div>
+              <Mono size={10} color="rgba(255,255,255,0.5)" spacing={0.5} style={{display:"block",marginBottom:6}}>{py.addSizeLabel}</Mono>
+              <input type="number" step={0.1} min={0.01} value={addSize} onChange={e=>setAddSize(+e.target.value)} style={{width:"100%",padding:"9px 12px",background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.2)",borderRadius:4,color:"#fff",fontFamily:"monospace",fontSize:14}}/>
+            </div>
+            <div>
+              <Mono size={10} color="rgba(255,255,255,0.5)" spacing={0.5} style={{display:"block",marginBottom:6}}>{py.nAddsLabel}</Mono>
+              <input type="number" min={1} max={10} value={nAdds} onChange={e=>setNAdds(+e.target.value)} style={{width:"100%",padding:"9px 12px",background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.2)",borderRadius:4,color:"#fff",fontFamily:"monospace",fontSize:14}}/>
+            </div>
+          </div>
+
+          <div style={{display:"flex",gap:20,flexWrap:"wrap",justifyContent:"center"}}>
+            <div style={{textAlign:"center",minWidth:130}}>
+              <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.gold}}>+{custom.avgPrice.toFixed(1)}</div>
+              <Mono size={9} color="rgba(255,255,255,0.5)" spacing={0.5}>{py.resultAvgLabel}</Mono>
+            </div>
+            <div style={{textAlign:"center",minWidth:130}}>
+              <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:"#fff"}}>{custom.pnrPts.toFixed(1)}</div>
+              <Mono size={9} color="rgba(255,255,255,0.5)" spacing={0.5}>{py.resultPnrPtsLabel}</Mono>
+            </div>
+            <div style={{textAlign:"center",minWidth:130}}>
+              <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:"#fff"}}>{custom.pnrPct.toFixed(0)}%</div>
+              <Mono size={9} color="rgba(255,255,255,0.5)" spacing={0.5}>{py.resultPnrPctLabel}</Mono>
+            </div>
+            <div style={{textAlign:"center",minWidth:130}}>
+              <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:"#fff"}}>×{custom.riskRatio.toFixed(2)}</div>
+              <Mono size={9} color="rgba(255,255,255,0.5)" spacing={0.5}>{py.resultRiskLabel}</Mono>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {step >= 3 && (
+        <div style={{border:`1px solid ${C.border}`,borderRadius:8,padding:"24px 28px",marginBottom:16}}>
+          <div style={{fontFamily:"'DM Serif Display',serif",fontSize:19,color:C.black,marginBottom:14}}>{py.reveal.title}</div>
+          <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.75,marginBottom:12}}>{py.reveal.p1}</p>
+          <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.75,marginBottom:12}}>{py.reveal.p2}</p>
+          <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.75,marginBottom:14}}>{py.reveal.p3}</p>
+          <p style={{fontSize:14,color:C.black,fontWeight:600,lineHeight:1.75,margin:0}}>{py.reveal.conclusion}</p>
+        </div>
+      )}
+
+      {step >= 2 && (
+        <p style={{fontSize:11.5,color:C.inkFaint,fontStyle:"italic",marginBottom:8}}>{py.compliance}</p>
+      )}
+      {step >= 3 && (
+        <a href="/chart.html?s=GOLD" target="_blank" rel="noopener" style={{fontFamily:"monospace",fontSize:12,color:C.gold,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>{py.openOnChart}</a>
+      )}
+    </div>
+  );
+}
+
+// ─── Таблица безубытка ────────────────────────────────────────────────────
+function BreakevenCostTable({ be, loading, error }) {
+  const T = window.Ch13Content[INITIAL_LANG] || window.Ch13Content.ru;
+  const b = T.breakeven;
+
+  if (loading) return <p style={{fontSize:12.5,color:C.inkFaint}}>…</p>;
+  if (error || !be) return <p style={{fontSize:12.5,color:C.inkFaint}}>—</p>;
+
+  const highlight = be.highlight;
+  const xLabel = INITIAL_LANG === "ru" ? "половины" : INITIAL_LANG === "ro" ? "jumătate" : "half";
+
+  return (
+    <div style={{marginBottom:48}}>
+      <p style={{fontSize:14,color:C.inkMid,lineHeight:1.75,marginBottom:16,maxWidth:820}}>{b.preamble}</p>
+
+      <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"18px 22px",marginBottom:16}}>
+        <Mono size={10} color={C.inkFaint} spacing={1} style={{display:"block",marginBottom:8,textTransform:"uppercase"}}>{b.firstLabel}</Mono>
+        <p style={{fontSize:13,color:C.inkMid,lineHeight:1.65,margin:0}}>{b.firstText}</p>
+      </div>
+
+      <div style={{marginBottom:16}}>
+        <Mono size={10} color={C.gold} spacing={1} style={{display:"block",marginBottom:8,textTransform:"uppercase"}}>{b.secondLabel}</Mono>
+        <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,marginBottom:16}}>{b.secondText}</p>
+      </div>
+
+      {highlight && (
+        <div style={{background:C.black,borderRadius:8,padding:"24px 28px",color:"#fff",marginBottom:16,textAlign:"center"}}>
+          <div style={{fontFamily:"'DM Serif Display',serif",fontSize:40,color:C.gold,marginBottom:10}}>{highlight.zero_pct}%</div>
+          <p style={{fontSize:13,color:"rgba(255,255,255,0.8)",lineHeight:1.65,maxWidth:600,margin:"0 auto"}}>{b.verdictLabel(xLabel, highlight.zero_pct, highlight.n)}</p>
+        </div>
+      )}
+
+      <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,marginBottom:12}}>{b.point2}</p>
+      <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,marginBottom:20}}>{b.point3}</p>
+
+      <div style={{overflowX:"auto",marginBottom:16}}>
+        <table style={{width:"100%",borderCollapse:"collapse",fontSize:12.5}}>
+          <thead>
+            <tr style={{borderBottom:`2px solid ${C.border}`}}>
+              <th style={{textAlign:"left",padding:"8px 10px",color:C.inkFaint,fontWeight:600}}>{b.tableXLabel}</th>
+              <th style={{textAlign:"left",padding:"8px 10px",color:C.inkFaint,fontWeight:600}}>{b.tableYLabel}</th>
+              <th style={{textAlign:"right",padding:"8px 10px",color:C.inkFaint,fontWeight:600}}>{b.tableZeroLabel}</th>
+              <th style={{textAlign:"right",padding:"8px 10px",color:C.inkFaint,fontWeight:600}}>{b.tableNLabel}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {(be.pooled || []).map((r,i) => (
+              <tr key={i} style={{borderBottom:`1px solid ${C.border}`, background: (r.x===0.5 && r.y===2.0) ? C.goldPale : "transparent"}}>
+                <td style={{padding:"7px 10px",color:C.inkMid}}>{r.x}</td>
+                <td style={{padding:"7px 10px",color:C.inkMid}}>{r.y}</td>
+                <td style={{padding:"7px 10px",color:C.black,fontWeight:600,textAlign:"right"}}>{r.zero_pct}%</td>
+                <td style={{padding:"7px 10px",color:C.inkFaint,textAlign:"right"}}>{r.n.toLocaleString()}</td>
+              </tr>
             ))}
-          </div>
-          <div style={{marginTop:16,padding:"12px 16px",background:"rgba(201,151,58,0.08)",borderRadius:4,border:`1px solid ${C.gold}33`}}>
-            <Mono size={11} color={C.gold} spacing={1}>{S.calPrinciple}</Mono>
-          </div>
-        </div>
-      )}
+          </tbody>
+        </table>
+      </div>
+
+      <div style={{background:C.goldPale,border:`1px solid ${C.borderGold}`,borderRadius:6,padding:"14px 18px",marginBottom:16}}>
+        <p style={{fontSize:12,color:C.black,lineHeight:1.6,margin:0}}>{b.honestPlate}</p>
+      </div>
+
+      <a href="/data/edu_stats/breakeven_cost.csv" download style={{fontFamily:"monospace",fontSize:12,color:C.gold,textDecoration:"none",border:`1px solid ${C.gold}`,padding:"9px 16px",borderRadius:4,display:"inline-block",marginRight:14}}>{b.csvBtn}</a>
+      <a href="/chart.html?s=GOLD" target="_blank" rel="noopener" style={{fontFamily:"monospace",fontSize:12,color:C.gold,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>{b.openOnChart}</a>
     </div>
   );
 }
 
-// ─── Interactive 2: Pyramiding Simulator ─────────────────────────────────────
-function PyramidingSim() {
-  const { useState, useEffect, useRef, useCallback } = React;
-  const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
+// ─── План сделки ──────────────────────────────────────────────────────────
+function TradePlan() {
+  const T = window.Ch13Content[INITIAL_LANG] || window.Ch13Content.ru;
+  const tp = T.tradePlan;
+  const [entry, setEntry] = React.useState("");
+  const [stop, setStop] = React.useState("");
+  const [exit, setExit] = React.useState("");
+  const [add, setAdd] = React.useState("");
+  const [cal, setCal] = React.useState("");
+  const [saved, setSaved] = React.useState(false);
+  const [busy, setBusy] = React.useState(false);
 
-  const W = 680, H = 300;
-  const BASE_PRICE = 2490;
-  const PRICE_RANGE = 60; // 2490–2550
-  const toY = p => H - ((p - BASE_PRICE) / PRICE_RANGE) * H;
-  const toP = y => BASE_PRICE + ((H - y) / H) * PRICE_RANGE;
-
-  // EMA calculation
-  const calcEMA = (prices, period) => {
-    const k = 2 / (period + 1);
-    let ema = prices[0];
-    return prices.map(p => { ema = p * k + ema * (1 - k); return +ema.toFixed(2); });
+  const save = () => {
+    setBusy(true);
+    const plan_text = `${tp.entryLabel}: ${entry}\n${tp.stopLabel}: ${stop}\n${tp.exitLabel}: ${exit}\n${tp.addLabel}: ${add}\n${tp.calendarLabel}: ${cal}`;
+    fetch("/api/journal/tradeplan", {
+      method: "POST", headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({ plan_text }),
+    }).then(r => r.json()).then(res => { setBusy(false); if (res.ok) setSaved(true); }).catch(() => setBusy(false));
   };
 
-  // Generate trending-up candle data
-  const generateCandles = () => {
-    let price = 2500;
-    const candles = [];
-    for (let i = 0; i < 40; i++) {
-      // Bias upward with occasional pullback to EMA
-      const pullback = (i % 7 === 6) ? -4 : 0; // pullback every 7 candles
-      const drift = 0.8 + Math.random() * 0.6;
-      const change = drift + pullback + (Math.random() - 0.4) * 3;
-      const open = price;
-      const close = Math.max(BASE_PRICE + 2, Math.min(BASE_PRICE + PRICE_RANGE - 2, open + change));
-      const high = Math.max(open, close) + Math.random() * 2;
-      const low  = Math.min(open, close) - Math.random() * 2;
-      price = close;
-      candles.push({ open: +open.toFixed(2), close: +close.toFixed(2), high: +high.toFixed(2), low: +low.toFixed(2) });
-    }
-    return candles;
-  };
-
-  const [allCandles] = useState(generateCandles);
-  const [visibleCount, setVisibleCount] = useState(18);
-  const [running, setRunning] = useState(false);
-  const [positions, setPositions] = useState([]); // [{entry, lots, idx}]
-  const [sl, setSl] = useState(null); // user SL price
-  const [draggingSl, setDraggingSl] = useState(false);
-  const [message, setMessage] = useState(S.simDefaultMsg);
-  const [msgType, setMsgType] = useState("neutral"); // neutral|good|bad
-  const [done, setDone] = useState(false);
-  const [missed, setMissed] = useState(0);
-  const svgRef = useRef(null);
-  const timerRef = useRef(null);
-
-  const visibleCandles = allCandles.slice(0, visibleCount).map((c,i) => ({
-    ...c, x: 20 + i * ((W - 40) / 39)
-  }));
-
-  const closes = visibleCandles.map(c => c.close);
-  const ema20 = calcEMA(closes, 20);
-  const ema50 = calcEMA(closes, 50);
-
-  const currentPrice = visibleCandles[visibleCandles.length - 1]?.close ?? BASE_PRICE;
-  const currentEma20 = ema20[ema20.length - 1] ?? currentPrice;
-
-  // Detect pullback: current price within 3 pts of EMA20 AND trending
-  const nearEma20 = Math.abs(currentPrice - currentEma20) < 3.5;
-  const canAdd = running && !done && nearEma20 && positions.length < 5;
-
-  // Floating PnL
-  const totalLots = positions.reduce((a,p) => a+p.lots, 0);
-  const avgEntry = totalLots > 0 ? positions.reduce((a,p) => a+p.entry*p.lots, 0) / totalLots : 0;
-  const floatPnl = totalLots > 0 ? ((currentPrice - avgEntry) * totalLots * 100).toFixed(0) : 0;
-  const floatPnlNum = Number(floatPnl);
-
-  const addPosition = useCallback(() => {
-    if (!canAdd) {
-      if (!nearEma20 && running) {
-        setMessage(S.simWarnFar);
-        setMsgType("bad");
-      }
-      return;
-    }
-    const lots = 1;
-    setPositions(p => [...p, { entry: currentPrice, lots, idx: visibleCount }]);
-    if (sl === null) setSl(+(currentPrice - 25).toFixed(2));
-    else setSl(s => +(Math.max(s, currentPrice - 25)).toFixed(2)); // trail SL up
-    setMessage(`✅ +${lots} ${S.simLotAt} ${currentPrice.toFixed(2)}. ${S.simTotalPositionsLabel}: ${positions.length+1}. ${S.simSlUpdated}`);
-    setMsgType("good");
-  }, [canAdd, currentPrice, visibleCount, sl, nearEma20, running, positions.length]);
-
-  // Trail stop: when price moves +15 from entry, trail SL to breakeven
-  useEffect(() => {
-    if (positions.length > 0 && sl !== null) {
-      const firstEntry = positions[0].entry;
-      if (currentPrice - firstEntry >= 15 && sl < firstEntry) {
-        setSl(firstEntry);
-        setMessage(S.simBreakeven);
-        setMsgType("good");
-      }
-    }
-  }, [currentPrice, positions, sl]);
-
-  // Check SL hit
-  useEffect(() => {
-    if (sl !== null && currentPrice <= sl && positions.length > 0 && running) {
-      setRunning(false);
-      setDone(true);
-      const pnl = ((sl - avgEntry) * totalLots * 100).toFixed(0);
-      const sign = Number(pnl) >= 0 ? "+" : "";
-      setMessage(`📊 ${S.simStatStopLoss} ${sl} ${S.simSlTriggered} ${S.simResultLabel}: ${sign}${pnl} ${S.simPointsOnWord} ${totalLots} ${S.simLotsWord}.`);
-      setMsgType(Number(pnl) >= 0 ? "good" : "bad");
-    }
-  }, [currentPrice, sl, positions, running]);
-
-  // Auto advance candles
-  useEffect(() => {
-    if (running && !done) {
-      timerRef.current = setInterval(() => {
-        setVisibleCount(v => {
-          if (v >= allCandles.length) {
-            setRunning(false);
-            setDone(true);
-            setMessage(S.simComplete);
-            setMsgType("good");
-            return v;
-          }
-          return v + 1;
-        });
-      }, 900);
-    } else {
-      clearInterval(timerRef.current);
-    }
-    return () => clearInterval(timerRef.current);
-  }, [running, done, allCandles.length]);
-
-  const reset = () => {
-    setVisibleCount(18); setRunning(false); setPositions([]); setSl(null);
-    setDone(false); setMissed(0);
-    setMessage(S.simDefaultMsg);
-    setMsgType("neutral");
-    clearInterval(timerRef.current);
-  };
-
-  // SL drag
-  const getSVGY = (e) => {
-    if (!svgRef.current) return 0;
-    const rect = svgRef.current.getBoundingClientRect();
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    return Math.max(0, Math.min(H, (clientY - rect.top) * (H / rect.height)));
-  };
-  const onSlMouseDown = (e) => { e.stopPropagation(); setDraggingSl(true); };
-  const onMouseMove = (e) => { if (draggingSl && sl !== null) setSl(+(toP(getSVGY(e))).toFixed(2)); };
-  const onMouseUp = () => setDraggingSl(false);
-
-  const candleW = 11;
-  const msgBg = msgType==="good" ? "rgba(8,153,129,0.12)" : msgType==="bad" ? "rgba(242,54,69,0.1)" : "rgba(255,255,255,0.04)";
-  const msgColor = msgType==="good" ? C.green : msgType==="bad" ? C.red : "rgba(255,255,255,0.6)";
-
-  // TP line at +150 from first entry
-  const tpPrice = positions.length > 0 ? +(positions[0].entry + 150).toFixed(2) : null;
+  const fields = [[tp.entryLabel,entry,setEntry],[tp.stopLabel,stop,setStop],[tp.exitLabel,exit,setExit],[tp.addLabel,add,setAdd],[tp.calendarLabel,cal,setCal]];
+  const ready = entry.trim() && stop.trim() && exit.trim();
 
   return (
-    <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"36px 40px"}}>
-      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:20,flexWrap:"wrap",gap:12}}>
-        <div style={{display:"flex",alignItems:"center",gap:12}}>
-          <span style={{fontSize:28}}>🧱</span>
-          <div>
-            <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.black}}>{S.simTitle}</div>
-            <Mono size={11} color={C.inkSoft} spacing={2}>{S.simSubtitle}</Mono>
-          </div>
-        </div>
-        <div style={{display:"flex",gap:10,alignItems:"center"}}>
-          {done && <button onClick={reset} style={{padding:"8px 16px",background:C.black,color:"#fff",border:"none",borderRadius:4,cursor:"pointer",fontFamily:"monospace",fontSize:11,letterSpacing:1}}>{S.simResetBtn}</button>}
-          {!done && (
-            <button
-              onClick={() => { if(!running && visibleCount===18) setRunning(true); else setRunning(r=>!r); }}
-              style={{padding:"10px 20px",background:running?C.black:C.greenD,color:"#fff",border:"none",borderRadius:4,cursor:"pointer",fontFamily:"monospace",fontSize:12,letterSpacing:1,fontWeight:700}}>
-              {running ? S.simPauseBtn : visibleCount>18 ? S.simContinueBtn : S.simStartBtn}
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Stats bar */}
-      <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:8,marginBottom:16}}>
-        {[
-          {label:S.simStatPositions,value:`${positions.length}/5`,color:C.black},
-          {label:S.simStatTotalLots,value:totalLots,color:C.black},
-          {label:S.simStatAvgEntry,value: totalLots>0 ? avgEntry.toFixed(1) : "—",color:C.black},
-          {label:S.simStatFloatPnl,value: totalLots>0 ? `${floatPnlNum>=0?"+":""}${floatPnl} ${S.calPt}`:  "—",color: floatPnlNum>=0?C.greenD:C.redD},
-          {label:S.simStatStopLoss,value: sl ? sl.toFixed(1) : "—",color:C.red},
-        ].map((s,i) => (
-          <div key={i} style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:4,padding:"10px 12px",textAlign:"center"}}>
-            <div style={{fontSize:9,fontFamily:"monospace",color:C.inkFaint,letterSpacing:1,marginBottom:4}}>{s.label}</div>
-            <div style={{fontFamily:"monospace",fontSize:13,fontWeight:700,color:s.color}}>{s.value}</div>
+    <div style={{marginBottom:48}}>
+      <p style={{fontSize:14,color:C.inkMid,lineHeight:1.78,marginBottom:22,maxWidth:800}}>{tp.intro}</p>
+      <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"24px 28px"}}>
+        {fields.map(([label,val,setter],i) => (
+          <div key={i} style={{marginBottom:14}}>
+            <Mono size={10} color={C.inkFaint} spacing={0.5} style={{display:"block",marginBottom:6}}>{label}</Mono>
+            <input value={val} onChange={e=>{setter(e.target.value); setSaved(false);}} style={{width:"100%",padding:"9px 12px",border:`1px solid ${C.border}`,borderRadius:4,fontFamily:"'DM Sans',sans-serif",fontSize:13}}/>
           </div>
         ))}
+        <button onClick={save} disabled={!ready || busy} style={{padding:"11px 24px",background: ready ? C.black : C.inkFaint,color:"#fff",border:"none",borderRadius:4,cursor: ready ? "pointer" : "not-allowed",fontFamily:"monospace",fontSize:12,letterSpacing:0.5}}>{tp.saveBtn}</button>
+        {saved && <p style={{fontSize:12,color:C.gold,marginTop:10}}>{tp.savedNote}</p>}
       </div>
-
-      {/* Add lot button */}
-      <div style={{marginBottom:12}}>
-        <button
-          onClick={addPosition}
-          disabled={!canAdd}
-          style={{
-            width:"100%",padding:"13px",
-            background: canAdd ? `rgba(8,153,129,0.12)` : "rgba(0,0,0,0.04)",
-            border:`2px solid ${canAdd ? C.green : C.border}`,
-            color: canAdd ? C.greenD : C.inkFaint,
-            borderRadius:6,cursor: canAdd?"pointer":"not-allowed",
-            fontFamily:"monospace",fontSize:13,fontWeight:700,letterSpacing:1,
-            transition:"all .2s",
-            animation: canAdd ? "pulse 1.2s infinite" : "none",
-          }}>
-          {canAdd ? S.simAddBtnActive : `${S.simAddBtnWaitPrefix} ${currentPrice.toFixed(1)}${S.simAddBtnWaitMid} ${currentEma20.toFixed(1)})`}
-        </button>
-        <style>{`@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(8,153,129,0.4)}50%{box-shadow:0 0 0 6px rgba(8,153,129,0)}}`}</style>
-      </div>
-
-      {/* Message */}
-      <div style={{background:msgBg,borderRadius:4,padding:"10px 14px",marginBottom:14,minHeight:38,transition:"background .3s"}}>
-        <p style={{fontSize:12,fontFamily:"monospace",color:msgColor,lineHeight:1.5}}>{message}</p>
-      </div>
-
-      {/* Chart */}
-      <div style={{borderRadius:4,overflow:"hidden",border:`1px solid ${C.border}`,userSelect:"none"}}>
-        <svg
-          ref={svgRef}
-          viewBox={`0 0 ${W} ${H}`}
-          style={{width:"100%",display:"block",background:C.chart,cursor:draggingSl?"ns-resize":"default",touchAction:"none"}}
-          onMouseMove={onMouseMove}
-          onMouseUp={onMouseUp}
-          onMouseLeave={onMouseUp}
-        >
-          {/* Grid */}
-          {[2495,2505,2515,2525,2535,2545].map(p => (
-            <g key={p}>
-              <line x1="0" y1={toY(p)} x2={W} y2={toY(p)} stroke="rgba(255,255,255,0.04)" strokeWidth="1"/>
-              <text x="4" y={toY(p)-3} fontSize="9" fill="rgba(255,255,255,0.18)" fontFamily="monospace">{p}</text>
-            </g>
-          ))}
-
-          {/* EMA 50 */}
-          {ema50.length > 1 && (
-            <polyline
-              points={visibleCandles.map((c,i) => `${c.x},${toY(ema50[i])}`).join(" ")}
-              fill="none" stroke="rgba(37,99,235,0.6)" strokeWidth="1.5"/>
-          )}
-
-          {/* EMA 20 */}
-          {ema20.length > 1 && (
-            <polyline
-              points={visibleCandles.map((c,i) => `${c.x},${toY(ema20[i])}`).join(" ")}
-              fill="none" stroke="rgba(201,151,58,0.8)" strokeWidth="1.5"/>
-          )}
-
-          {/* Candles */}
-          {visibleCandles.map((c,i) => {
-            const bull = c.close >= c.open;
-            const col = bull ? C.green : C.red;
-            const bodyT = toY(Math.max(c.open,c.close));
-            const bodyB = toY(Math.min(c.open,c.close));
-            return (
-              <g key={i}>
-                <line x1={c.x} y1={toY(c.high)} x2={c.x} y2={toY(c.low)} stroke={col} strokeWidth="1.5"/>
-                <rect x={c.x-candleW/2} y={bodyT} width={candleW} height={Math.max(bodyB-bodyT,1.5)} fill={col} rx="1"/>
-              </g>
-            );
-          })}
-
-          {/* Entry markers */}
-          {positions.map((pos,i) => {
-            const cx = visibleCandles[Math.min(pos.idx, visibleCandles.length-1)]?.x ?? 0;
-            return (
-              <g key={i}>
-                <line x1={cx} y1={toY(pos.entry)} x2={W} y2={toY(pos.entry)}
-                  stroke={C.gold} strokeWidth="1" strokeDasharray="4 3" opacity="0.6"/>
-                <rect x={cx-2} y={toY(pos.entry)-8} width={50} height={14} fill="rgba(201,151,58,0.2)" rx="2"/>
-                <text x={cx+2} y={toY(pos.entry)+3} fontSize="8" fill={C.gold} fontFamily="monospace">+{pos.lots}L @{pos.entry}</text>
-              </g>
-            );
-          })}
-
-          {/* TP line */}
-          {tpPrice && toY(tpPrice) > 0 && toY(tpPrice) < H && (
-            <g>
-              <line x1="0" y1={toY(tpPrice)} x2={W} y2={toY(tpPrice)} stroke={C.green} strokeWidth="1.5" strokeDasharray="6 3" opacity="0.7"/>
-              <rect x={W-90} y={toY(tpPrice)-10} width={88} height={18} fill="rgba(8,153,129,0.2)" rx="2"/>
-              <text x={W-86} y={toY(tpPrice)+3} fontSize="9" fill={C.green} fontFamily="monospace">TP {tpPrice}</text>
-            </g>
-          )}
-
-          {/* SL line — draggable */}
-          {sl !== null && (
-            <g>
-              <line x1="0" y1={toY(sl)} x2={W} y2={toY(sl)} stroke={C.red} strokeWidth="1.5" strokeDasharray="6 3"/>
-              <rect x="0" y={toY(sl)-10} width={88} height={18} fill="rgba(242,54,69,0.2)" rx="2"
-                style={{cursor:"ns-resize"}} onMouseDown={onSlMouseDown}/>
-              <text x="4" y={toY(sl)+3} fontSize="9" fill={C.red} fontFamily="monospace">SL {sl} ↕</text>
-            </g>
-          )}
-
-          {/* EMA 20 zone highlight when price is near */}
-          {canAdd && (
-            <rect x="0" y={toY(currentEma20+3)} width={W} height={toY(currentEma20-3)-toY(currentEma20+3)}
-              fill="rgba(201,151,58,0.05)" stroke="rgba(201,151,58,0.2)" strokeWidth="1" strokeDasharray="3 2"/>
-          )}
-        </svg>
-      </div>
-
-      {/* Legend */}
-      <div style={{marginTop:12,display:"flex",gap:20,flexWrap:"wrap"}}>
-        {[{color:C.gold,label:S.simLegendEma20},
-          {color:C.blue,label:S.simLegendEma50},
-          {color:C.gold,label:S.simLegendEntries,dashed:true},
-          {color:C.green,label:S.simLegendTp,dashed:true},
-          {color:C.red,label:S.simLegendSl,dashed:true},
-        ].map((l,i) => (
-          <div key={i} style={{display:"flex",alignItems:"center",gap:6}}>
-            <div style={{width:16,height:2,background:l.color,opacity:l.dashed?0.6:1,borderRadius:1}}/>
-            <span style={{fontSize:11,fontFamily:"monospace",color:C.inkMid}}>{l.label}</span>
-          </div>
-        ))}
-      </div>
-
-      {/* Done summary */}
-      {done && positions.length > 0 && (
-        <div style={{marginTop:20,background:floatPnlNum>=0?C.greenPale:C.redPale,
-          border:`1px solid ${floatPnlNum>=0?C.green:C.red}`,borderRadius:6,padding:"20px 24px"}}>
-          <div style={{fontWeight:700,fontSize:15,color:floatPnlNum>=0?C.greenD:C.redD,marginBottom:10}}>
-            {floatPnlNum>=0 ? S.simDoneGood : S.simDoneNeutral}
-          </div>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10}}>
-            {[
-              {label:S.simDoneAdded,value:positions.length},
-              {label:S.simStatTotalLots,value:totalLots},
-              {label:S.simDoneFinalPnl,value:`${floatPnlNum>=0?"+":""}${floatPnl} ${S.calPt}`,special:true},
-            ].map((s,i) => (
-              <div key={i} style={{textAlign:"center",background:"rgba(0,0,0,0.06)",borderRadius:4,padding:"10px"}}>
-                <div style={{fontSize:9,fontFamily:"monospace",color:C.inkMid,letterSpacing:1,marginBottom:4}}>{s.label}</div>
-                <div style={{fontFamily:"monospace",fontSize:14,fontWeight:700,color:s.special?(floatPnlNum>=0?C.greenD:C.redD):C.black}}>{s.value}</div>
-              </div>
-            ))}
-          </div>
-          <p style={{fontSize:12,color:C.inkMid,lineHeight:1.65,marginTop:12}}>
-            {S.simDoneExplain}
-          </p>
-        </div>
-      )}
     </div>
   );
 }
 
-// ─── Main Chapter 13 ──────────────────────────────────────────────────────────
+// ─── Ступень 8 — pending заглушка ────────────────────────────────────────
+function LadderStep8() {
+  const T = window.Ch13Content[INITIAL_LANG] || window.Ch13Content.ru;
+  const l8 = T.ladderStep8;
+  return (
+    <div id="secLadderStep8" style={{marginBottom:48,scrollMarginTop:130}}>
+      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:14}}>{l8.tag}</Mono>
+      <p style={{fontSize:14,color:C.inkMid,lineHeight:1.78,marginBottom:12,maxWidth:800}}>{l8.limitParagraph1}</p>
+      <p style={{fontSize:14,color:C.inkMid,lineHeight:1.78,marginBottom:24,maxWidth:800}}>{l8.limitParagraph2}</p>
+
+      <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px",marginBottom:16}}>
+        <div style={{fontWeight:600,fontSize:13,color:C.black,marginBottom:8}}>{l8.factualityTitle}</div>
+        <p style={{fontSize:13,color:C.inkMid,lineHeight:1.65,margin:0}}>{l8.factualityBody}</p>
+      </div>
+
+      <div style={{background:C.goldPale,border:`1px solid ${C.borderGold}`,borderRadius:6,padding:"14px 18px",marginBottom:16}}>
+        <p style={{fontSize:12,color:C.black,lineHeight:1.6,margin:0}}>{l8.disclosureLine}</p>
+      </div>
+
+      <div style={{border:`1px dashed ${C.borderGold}`,borderRadius:8,padding:"18px 22px",background:C.surface}}>
+        <p style={{fontSize:12,color:C.inkFaint,fontStyle:"italic",margin:0}}>{l8.pendingNote}</p>
+      </div>
+    </div>
+  );
+}
+
+// ─── Предикт недели ─────────────────────────────────────────────────────────
+function PredictBreakeven({ be }) {
+  const T = window.Ch13Content[INITIAL_LANG] || window.Ch13Content.ru;
+  const p = T.predict;
+  const [picked, setPicked] = React.useState(null);
+  const highlight = be && be.highlight;
+  return (
+    <div style={{border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px",marginTop:8,marginBottom:24}}>
+      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{p.tag}</Mono>
+      <p style={{fontSize:14.5,color:C.black,lineHeight:1.65,marginBottom:14}}>{p.question}</p>
+      <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:14}}>
+        {p.options.map((o,i) => (
+          <button key={i} onClick={()=>setPicked(i)} style={{fontFamily:"monospace",fontSize:12,padding:"9px 20px",cursor:"pointer",background:picked===i?C.gold:"#fff",color:picked===i?"#18181a":C.inkMid,border:`1px solid ${picked===i?C.gold:C.border}`,borderRadius:4}}>{o}</button>
+        ))}
+      </div>
+      {picked !== null && highlight && <p style={{fontSize:12.5,color:C.inkMid,lineHeight:1.7,marginBottom:10,background:C.goldPale,padding:"12px 16px",borderRadius:4}}>{p.answerNote(highlight.zero_pct)}</p>}
+      <p style={{fontSize:11,color:C.inkFaint}}>{p.xpNote}</p>
+    </div>
+  );
+}
+
+// ─── Main Chapter 13 ────────────────────────────────────────────────────────
 function Chapter13() {
-  const { useState } = React;
   const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
-  const [askOpen, setAskOpen] = useState(false);
-  const [checked, setChecked] = useState({});
-
-  const toggleCheck = (i) => setChecked(p => ({...p,[i]:!p[i]}));
-  const checkedCount = Object.values(checked).filter(Boolean).length;
-
-  const swingFacts = [
-    {icon:"⏱️", title:S.fact1Title,
-     text:S.fact1Text,
-     accent:C.gold},
-    {icon:"🏅", title:S.fact2Title,
-     text:S.fact2Text,
-     accent:C.gold},
-    {icon:"🌊", title:S.fact3Title,
-     text:S.fact3Text,
-     accent:C.blue},
-    {icon:"📋", title:S.fact4Title,
-     text:S.fact4Text,
-     accent:C.green},
-  ];
-
-  const pyramidRules = [
-    {num:"01", title:S.rule1Title,
-     desc:S.rule1Text},
-    {num:"02", title:S.rule2Title,
-     desc:S.rule2Text},
-    {num:"03", title:S.rule3Title,
-     desc:S.rule3Text},
-    {num:"04", title:S.rule4Title,
-     desc:S.rule4Text},
-    {num:"05", title:S.rule5Title,
-     desc:S.rule5Text},
-  ];
-
-  const checklistItems = [
-    S.checklist1,
-    S.checklist2,
-    S.checklist3,
-    S.checklist4,
-    S.checklist5,
-    S.checklist6,
-    S.checklist7,
-    S.checklist8,
-  ];
-
-  const conclusions = [
-    S.conclusion1,
-    S.conclusion2,
-    S.conclusion3,
-    S.conclusion4,
-    S.conclusion5,
-    S.conclusion6,
-  ];
+  const lang = INITIAL_LANG;
+  const T = window.Ch13Content[lang] || window.Ch13Content.ru;
+  const { loading, error, be } = useCh13Data();
+  const { data: progress, loading: progressLoading } = useSeriesProgress();
 
   return (
     <div style={{minHeight:"100vh",background:C.white,color:C.ink,fontFamily:"'DM Sans',sans-serif"}}>
 
-      {/* Sticky header */}
-      <div style={{position:"sticky",top:106,background:"rgba(255,255,255,0.96)",backdropFilter:"blur(10px)",borderBottom:`1px solid ${C.border}`,padding:"15px 5vw",display:"flex",alignItems:"center",justifyContent:"space-between",zIndex:50}}>
+      <div style={{position:"sticky",top:106,background:"rgba(255,255,255,0.96)",backdropFilter:"blur(10px)",borderBottom:`1px solid ${C.border}`,padding:"15px 5vw",display:"flex",alignItems:"center",justifyContent:"space-between",zIndex:50,gap:12,flexWrap:"wrap"}}>
         <div style={{display:"flex",alignItems:"center",gap:20}}>
-          <span onClick={() => window.location.href = getChUrl(12)} style={{color:C.gold,cursor:"pointer",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</span>
-          <Chip>{S.headerLevelChip}</Chip>
-          <Mono size={14} color={C.inkSoft} spacing={0} className="hide-mobile">{S.headerSubtitle}</Mono>
+          <span onClick={() => window.location.href = getChUrl(12, lang)} style={{color:C.gold,cursor:"pointer",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</span>
+          <Chip>{S.levelChip}</Chip>
+          <Mono size={14} color={C.inkSoft} spacing={0} className="hide-mobile">{S.chapterNameShort}</Mono>
         </div>
         <div style={{display:"flex",gap:8,alignItems:"center"}}>
-          {checkedCount > 0 && <Chip color={C.green}>{checkedCount}/{checklistItems.length} ✓</Chip>}
-          <Chip color={C.inkFaint}>{S.headerFaChip}</Chip>
-          <Chip color={C.inkFaint}>{S.headerTaChip}</Chip>
+          <SeriesCounter progress={progress} loading={progressLoading} lang={lang}/>
+          <Chip color={C.inkFaint}>{S.faTag}</Chip>
+          <Chip color={C.inkFaint}>{S.taTag}</Chip>
         </div>
       </div>
 
-      {/* HERO */}
       <div style={{background:C.black,padding:"80px 5vw 70px",textAlign:"center",position:"relative",overflow:"hidden"}}>
-        <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 100%, rgba(201,151,58,0.12) 0%, transparent 60%)"}}/>
+        <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 100%, rgba(201,151,58,0.1) 0%, transparent 60%)"}}/>
         <div style={{position:"relative"}}>
-          <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:12}}>{S.heroEyebrow}</Mono>
-          <div style={{display:"inline-block",marginBottom:20,padding:"5px 18px",background:"rgba(201,151,58,0.12)",border:"1px solid rgba(201,151,58,0.3)",borderRadius:3}}>
-            <Mono size={11} color={C.gold} spacing={2}>{S.heroBadge}</Mono>
-          </div>
-          <h1 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(36px,6vw,66px)",fontWeight:400,color:C.white,lineHeight:1.05,marginBottom:20}}>
-            {S.heroTitleLine1}<br/>{S.heroTitleAnd} <span style={{color:C.gold}}>{S.heroTitleLine2}</span>
+          <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:20}}>{S.heroEyebrow}</Mono>
+          <h1 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(32px,5.4vw,60px)",fontWeight:400,color:C.white,lineHeight:1.1,marginBottom:20}}>
+            {S.heroTitleLine1}<br/><span style={{color:C.gold}}>{S.heroTitleLine2}</span>
           </h1>
-          <p style={{fontSize:"clamp(16px,2vw,20px)",color:"rgba(255,255,255,0.55)",maxWidth:640,margin:"0 auto 32px",lineHeight:1.65}}>
-            {S.heroSub}
-          </p>
+          <p style={{fontSize:"clamp(16px,2vw,20px)",color:"rgba(255,255,255,0.55)",maxWidth:640,margin:"0 auto 32px",lineHeight:1.65}}>{S.heroSubtitle}</p>
           <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
-            <Chip color={C.gold}>{S.heroChip1}</Chip>
-            <Chip color="rgba(255,255,255,0.3)">{S.heroChip2}</Chip>
-            <Chip color="rgba(255,255,255,0.3)">{S.heroChip3}</Chip>
+            <Chip color={C.gold}>{S.fundamentalChip}</Chip>
+            <Chip color="rgba(255,255,255,0.3)">{S.technicalChip}</Chip>
+            <Chip color="rgba(255,255,255,0.3)">{S.interactiveChip}</Chip>
           </div>
         </div>
       </div>
 
-      <div style={{maxWidth:1060,margin:"0 auto",padding:"72px 5vw 120px"}}>
+      <div style={{maxWidth:1060,margin:"0 auto",padding:"0 0 120px"}}>
 
-        {/* ── ANTI-MYTH ── */}
-        <div style={{background:C.black,borderRadius:6,padding:"36px 40px",marginBottom:56,position:"relative",overflow:"hidden"}}>
-          <div style={{position:"absolute",top:0,left:0,bottom:0,width:4,background:C.red}}/>
-          <Mono size={11} color={C.red} spacing={3} style={{display:"block",marginBottom:16}}>{S.mythTag}</Mono>
-          <h3 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(20px,3vw,28px)",color:C.white,fontWeight:400,marginBottom:16,lineHeight:1.3}}>
-            {S.mythQuote}
-          </h3>
-          <p style={{fontSize:14,color:"rgba(255,255,255,0.55)",lineHeight:1.75,maxWidth:700}}>
-            {S.mythBody}
-          </p>
-        </div>
+        <div style={{margin:"0 -5vw 56px"}}><ColdOpen13/></div>
 
-        {/* ── SBF VOICE ── */}
-        <div style={{background:C.goldPale,border:`1px solid ${C.borderGold}`,borderRadius:6,padding:"32px 40px",marginBottom:56}}>
-          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:14}}>{S.voiceTag}</Mono>
-          <blockquote style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(18px,2.5vw,24px)",color:C.black,fontWeight:400,lineHeight:1.5,marginBottom:16,fontStyle:"italic"}}>
-            {S.voiceQuote}
-          </blockquote>
-          <p style={{fontSize:13,color:C.inkMid,lineHeight:1.65}}>
-            {S.voiceBody}
-          </p>
-        </div>
+        <div style={{padding:"0 5vw"}}>
 
-        {/* ── PRICE OF IGNORANCE ── */}
-        <div style={{background:C.redPale,border:`1px solid rgba(242,54,69,0.25)`,borderRadius:6,padding:"28px 36px",marginBottom:64,display:"flex",gap:24,alignItems:"flex-start",flexWrap:"wrap"}}>
-          <div style={{fontSize:40,flexShrink:0}}>💸</div>
-          <div>
-            <div style={{fontWeight:700,fontSize:14,color:C.redD,letterSpacing:0.5,textTransform:"uppercase",marginBottom:10}}>{S.ignoranceTag}</div>
-            <p style={{fontSize:14,color:C.redD,lineHeight:1.75}}>
-              {S.ignoranceBody}<strong>{S.ignoranceBold}</strong>
-            </p>
-          </div>
-        </div>
+        <IntroBlock/>
 
-        {/* ── THEORY 1: FA ── */}
-        <SectionTitle sub={S.theory1Sub}>
-          {S.theory1Title}
-        </SectionTitle>
+        <PriceOfNotKnowing13/>
 
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,marginBottom:48}} className="g2">
-          {swingFacts.map((c,i) => <InfoCard key={i} {...c}/>)}
-        </div>
+        <SectionTitle id="secWhySwing" sub={S.whySwingSub}>{T.whySwing.tag}</SectionTitle>
+        <WhySwing/>
 
-        {/* Real trades table */}
-        <div style={{background:C.black,borderRadius:6,padding:"28px 32px",marginBottom:56}}>
-          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:20}}>{S.tradesHeader}</Mono>
-          <div style={{overflowX:"auto"}}>
-            <table style={{width:"100%",borderCollapse:"collapse",fontSize:12}}>
-              <thead>
-                <tr>
-                  {[S.thDate,S.thInstrument,S.thDirection,S.thEntry,S.thExit,S.thHold,S.thPnl,S.thCatalyst].map(h => (
-                    <th key={h} style={{textAlign:"left",padding:"8px 12px",fontSize:10,color:"rgba(255,255,255,0.35)",letterSpacing:1,borderBottom:"1px solid rgba(255,255,255,0.07)",textTransform:"uppercase",whiteSpace:"nowrap"}}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {[
-                  {date:S.trade1Date,inst:"XAUUSD",dir:"BUY",entry:"2183.40",exit:"2318.90",hold:S.trade1Hold,pnl:"+135",pnlC:C.green,cat:S.trade1Cat},
-                  {date:S.trade2Date,inst:"XAUUSD",dir:"BUY",entry:"2155.00",exit:"2236.50",hold:S.trade2Hold,pnl:"+82",pnlC:C.green,cat:S.trade2Cat},
-                  {date:S.trade3Date,inst:"XAGUSD",dir:"BUY",entry:"27.80",exit:"29.10",hold:S.trade3Hold,pnl:"+130",pnlC:C.green,cat:S.trade3Cat},
-                  {date:S.trade4Date,inst:"XAUUSD",dir:"SELL",entry:"2395.00",exit:"2348.20",hold:S.trade4Hold,pnl:"+47",pnlC:C.green,cat:S.trade4Cat},
-                  {date:S.trade5Date,inst:"XAUUSD",dir:"BUY",entry:"2300.10",exit:"2280.00",hold:S.trade5Hold,pnl:"-80",pnlC:C.red,cat:S.trade5Cat},
-                ].map((row,i) => (
-                  <tr key={i} style={{borderBottom:"1px solid rgba(255,255,255,0.05)"}}>
-                    <td style={{padding:"10px 12px",color:"rgba(255,255,255,0.4)",fontFamily:"monospace",fontSize:11}}>{row.date}</td>
-                    <td style={{padding:"10px 12px",color:C.gold,fontFamily:"monospace",fontSize:11,fontWeight:700}}>{row.inst}</td>
-                    <td style={{padding:"10px 12px"}}>
-                      <span style={{fontSize:10,fontFamily:"monospace",color:row.dir==="BUY"?C.green:C.red,background:row.dir==="BUY"?"rgba(8,153,129,0.12)":"rgba(242,54,69,0.1)",padding:"2px 8px",borderRadius:2}}>{row.dir}</span>
-                    </td>
-                    <td style={{padding:"10px 12px",fontFamily:"monospace",fontSize:11,color:"rgba(255,255,255,0.6)"}}>{row.entry}</td>
-                    <td style={{padding:"10px 12px",fontFamily:"monospace",fontSize:11,color:"rgba(255,255,255,0.6)"}}>{row.exit}</td>
-                    <td style={{padding:"10px 12px",fontFamily:"monospace",fontSize:11,color:"rgba(255,255,255,0.4)"}}>{row.hold}</td>
-                    <td style={{padding:"10px 12px",fontFamily:"monospace",fontSize:13,fontWeight:700,color:row.pnlC}}>{row.pnl}</td>
-                    <td style={{padding:"10px 12px",fontSize:11,color:"rgba(255,255,255,0.4)"}}>{row.cat}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* ── INTERACTIVE 1 ── */}
-        <div style={{marginBottom:64}}>
-          <NewsCalendar/>
-        </div>
+        <SectionTitle id="secTradeAnatomy" sub={S.anatomySub}>{T.tradeAnatomy.tag}</SectionTitle>
+        <TradeAnatomy/>
 
         <Rule/>
 
-        {/* ── THEORY 2: TA ── */}
-        <SectionTitle sub={S.theory2Sub}>
-          {S.theory2Title}
-        </SectionTitle>
+        <SectionTitle id="secPyramid" sub={S.pyramidSub}>{T.pyramid.tag}</SectionTitle>
+        <PyramidCalculator/>
 
-        {/* EMA diagram */}
-        <div style={{background:C.black,borderRadius:6,padding:"28px 32px",marginBottom:40}}>
-          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:20}}>{S.emaDiagramHeader}</Mono>
-          <svg viewBox="0 0 680 200" style={{width:"100%",display:"block"}}>
-            <rect width="680" height="200" fill="#18181a"/>
-            {/* EMA 50 */}
-            <path d="M20,160 Q200,140 350,115 Q500,90 660,75" fill="none" stroke="rgba(37,99,235,0.6)" strokeWidth="2"/>
-            <text x="645" y="70" fontSize="8" fill="#2563eb" fontFamily="monospace" textAnchor="end">EMA 50</text>
-            {/* EMA 20 */}
-            <path d="M20,155 Q150,130 260,105 Q380,82 480,68 Q560,58 660,52" fill="none" stroke="rgba(201,151,58,0.8)" strokeWidth="2"/>
-            <text x="645" y="46" fontSize="8" fill={C.gold} fontFamily="monospace" textAnchor="end">EMA 20</text>
+        <SectionTitle id="secBreakeven" sub={S.breakevenSub}>{T.breakeven.tag}</SectionTitle>
+        <BreakevenCostTable be={be} loading={loading} error={error}/>
 
-            {/* Price path with pullbacks */}
-            <path d="M20,145 L80,120 L110,130 L160,105 L190,115 L250,88 L280,96 L330,72 L360,80 L410,58 L450,66 L500,44 L540,52 L590,35 L640,28"
-              fill="none" stroke={C.green} strokeWidth="2"/>
+        <SectionTitle id="secTradePlan" sub={S.tradePlanSub}>{T.tradePlan.tag}</SectionTitle>
+        <TradePlan/>
 
-            {/* Entry markers at EMA20 touches */}
-            {[[110,130],[190,115],[280,96],[360,80],[450,66]].map(([x,y],i) => (
-              <g key={i}>
-                <circle cx={x} cy={y} r={6} fill="none" stroke={C.gold} strokeWidth="1.5"/>
-                <circle cx={x} cy={y} r={2.5} fill={C.gold}/>
-                <text x={x} y={y-10} fontSize="8" fill={C.gold} textAnchor="middle" fontFamily="monospace">+{i+1}L</text>
-              </g>
-            ))}
+        <LadderStep8/>
 
-            {/* SL line (trailing) */}
-            <path d="M20,175 L80,165 L160,145 L250,130 L330,115 L410,95 L500,78 L590,62 L640,56"
-              fill="none" stroke={C.red} strokeWidth="1.5" strokeDasharray="5 3"/>
-            <text x="650" y="54" fontSize="8" fill={C.red} fontFamily="monospace">SL↑</text>
+        <QuizBlock questions={T.quiz} levelId="level_13" lang={lang} copy={{
+          kicker: S.quizKicker, title: S.quizTitle, next: S.quizNext,
+          stuckAll: S.quizStuckAll, stuckSome: S.quizStuckSome, backToSection: S.quizBackToSection,
+        }} />
 
-            {/* TP line */}
-            <line x1="0" y1="20" x2="680" y2="20" stroke={C.green} strokeWidth="1" strokeDasharray="6 3" opacity="0.5"/>
-            <text x="8" y="16" fontSize="8" fill={C.green} fontFamily="monospace">{S.emaDiagramTp}</text>
-          </svg>
+        <PredictBreakeven be={be}/>
+
+        <div style={{border:`1px dashed ${C.borderGold}`,borderRadius:8,padding:"20px 24px",marginBottom:32,background:C.surface}}>
+          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T.cliffhanger.tag}</Mono>
+          {T.cliffhanger.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:14,color:C.inkMid,lineHeight:1.7,marginBottom:10}}>{p}</p>)}
         </div>
 
-        {/* Pyramid rules */}
-        <div style={{display:"grid",gap:12,marginBottom:56}}>
-          {pyramidRules.map((r,i) => (
-            <div key={i} style={{display:"flex",gap:16,alignItems:"flex-start",background:C.surface,border:`1px solid ${C.border}`,borderRadius:4,padding:"18px 22px"}}>
-              <div style={{width:36,height:36,background:C.black,borderRadius:3,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-                <Mono size={11} color={C.gold} spacing={0}>{r.num}</Mono>
-              </div>
-              <div>
-                <div style={{fontWeight:600,fontSize:14,color:C.black,marginBottom:5}}>{r.title}</div>
-                <p style={{fontSize:13,color:C.inkMid,lineHeight:1.65}}>{r.desc}</p>
-              </div>
-            </div>
-          ))}
+        <div style={{marginBottom:32}}>
+          <Mono size={10} color={C.inkFaint} spacing={2} style={{display:"block",marginBottom:10,textTransform:"uppercase"}}>{T.sources.tag}</Mono>
+          <ol style={{fontSize:11.5,color:C.inkFaint,lineHeight:1.8,paddingLeft:18,marginBottom:8}}>
+            {T.sources.list.map((s,i) => <li key={i}>{s}</li>)}
+            {be && be._meta && (() => {
+              const m = be._meta;
+              const text = T.sources.ownTemplate
+                .replace("{{x_n}}", m.x_grid_atr.length).replace("{{y_n}}", m.y_grid_atr.length)
+                .replace("{{atr_period}}", m.atr_period).replace("{{lookahead}}", m.lookahead_bars)
+                .replace("{{built}}", "27.07.2026");
+              return (
+                <li>
+                  {text}{" "}
+                  <a href="/data/edu_stats/breakeven_cost.csv" download style={{color:C.gold}}>{T.sources.csvLabel}</a>
+                </li>
+              );
+            })()}
+          </ol>
+          <p style={{fontSize:11,color:C.inkFaint,fontStyle:"italic"}}>{T.sources.checked}</p>
         </div>
 
-        {/* Risk math */}
-        <div style={{background:C.goldPale,border:`1px solid ${C.borderGold}`,borderRadius:6,padding:"28px 36px",marginBottom:56}}>
-          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:16}}>{S.riskMathHeader}</Mono>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:16}} className="g3">
-            {[
-              {step:S.riskStep1,price:"2485.50",lots:1,sl:"2405.50",note:S.riskNote1},
-              {step:S.riskStep2,price:"2500.00",lots:2,sl:"2420.00",note:S.riskNote2},
-              {step:S.riskStep3,price:"2512.00",lots:3,sl:"2440.00",note:S.riskNote3},
-            ].map((s,i) => (
-              <div key={i} style={{background:"rgba(201,151,58,0.06)",borderRadius:4,padding:"16px"}}>
-                <div style={{fontFamily:"monospace",fontSize:10,color:C.gold,letterSpacing:1,marginBottom:10}}>{s.step}</div>
-                <div style={{fontSize:12,color:C.black,marginBottom:4}}>{S.riskPriceLabel} <strong>{s.price}</strong></div>
-                <div style={{fontSize:12,color:C.black,marginBottom:4}}>{S.riskLotsLabel} <strong>{s.lots}</strong></div>
-                <div style={{fontSize:12,color:C.redD,marginBottom:8}}>SL: {s.sl}</div>
-                <div style={{fontSize:11,color:C.inkMid,fontFamily:"monospace"}}>{s.note}</div>
-              </div>
-            ))}
-          </div>
-          <div style={{marginTop:16,padding:"12px 16px",background:"rgba(8,153,129,0.08)",borderRadius:4,border:`1px solid ${C.green}33`}}>
-            <span style={{fontSize:13,color:C.greenD,fontWeight:600}}>{S.riskSummaryLabel}</span>
-            <span style={{fontFamily:"monospace",fontSize:13,color:C.greenD}}>
-              {S.riskSummaryFormula}<strong>{S.riskSummaryBold}</strong>{S.riskSummaryTail}
-            </span>
-          </div>
-        </div>
+        <ComplianceFootnote lang={lang} />
 
-        {/* ── INTERACTIVE 2 ── */}
-        <div style={{marginBottom:64}}>
-          <PyramidingSim/>
-        </div>
-
-        <Rule/>
-
-        {/* ── CHECKLIST ── */}
-        <div style={{marginBottom:64}}>
-          <SectionTitle sub={S.checklistSub} align="center">
-            {S.checklistTitle}
-          </SectionTitle>
-          <div style={{display:"grid",gap:10}}>
-            {checklistItems.map((item,i) => (
-              <div
-                key={i}
-                onClick={() => toggleCheck(i)}
-                style={{
-                  display:"flex",gap:14,alignItems:"center",
-                  padding:"16px 20px",borderRadius:4,cursor:"pointer",
-                  border:`1px solid ${checked[i] ? C.green : C.border}`,
-                  background: checked[i] ? C.greenPale : C.surface,
-                  transition:"all .2s"
-                }}>
-                <div style={{
-                  width:22,height:22,borderRadius:3,flexShrink:0,
-                  border:`2px solid ${checked[i] ? C.green : C.border}`,
-                  background: checked[i] ? C.green : "transparent",
-                  display:"flex",alignItems:"center",justifyContent:"center",
-                  color:"#fff",fontSize:13,transition:"all .2s"
-                }}>{checked[i] ? "✓" : ""}</div>
-                <span style={{fontSize:14,color:checked[i] ? C.greenD : C.inkMid,lineHeight:1.5}}>{item}</span>
-              </div>
-            ))}
-          </div>
-          {checkedCount === checklistItems.length && (
-            <div style={{marginTop:20,background:C.greenPale,border:`1px solid ${C.green}`,borderRadius:4,padding:"18px 24px",textAlign:"center"}}>
-              <div style={{fontWeight:700,color:C.greenD,fontSize:15,marginBottom:4}}>{S.checklistDoneTitle}</div>
-              <div style={{fontSize:13,color:C.greenD}}>{S.checklistDoneBody}</div>
-            </div>
-          )}
-        </div>
-
-        {/* ── CONCLUSIONS ── */}
-        <div style={{background:C.black,borderRadius:8,padding:"44px 48px"}}>
-          <div style={{textAlign:"center",marginBottom:32}}>
-            <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:12}}>{S.conclusionsTitle}</Mono>
-            <h3 style={{fontFamily:"'DM Serif Display',serif",fontSize:28,color:C.white,fontWeight:400}}>{S.conclusionsSub}</h3>
-          </div>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
-            {conclusions.map((c,i) => (
-              <div key={i} style={{display:"flex",gap:14,alignItems:"flex-start",padding:"14px 16px",background:"rgba(255,255,255,0.04)",borderRadius:4,border:"1px solid rgba(255,255,255,0.06)"}}>
-                <span style={{color:C.gold,fontFamily:"monospace",fontSize:11,marginTop:2,flexShrink:0}}>{String(i+1).padStart(2,"0")}</span>
-                <span style={{fontSize:13,color:"rgba(255,255,255,0.7)",lineHeight:1.65}}>{c}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Footer navigation */}
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",paddingTop:48,marginTop:48,borderTop:`1px solid ${C.border}`}}>
-          <span onClick={() => setAskOpen(true)} style={{fontSize:14,color:C.inkSoft,fontFamily:"monospace",borderBottom:`1px solid ${C.border}`,cursor:"pointer"}}>
-            {S.footerAsk}
-          </span>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:20,paddingTop:48,marginTop:16,borderTop:`1px solid ${C.border}`}}>
+          <AskAnalystBtn tr={{askAnalyst:S.askQuestionLabel}} chapterNum={13} lang={lang} />
           <button
-            onClick={() => window.location.href = getChUrl(14)}
+            onClick={() => window.location.href = getChUrl(14, lang)}
             style={{background:C.black,color:C.white,border:"none",padding:"18px 35px",cursor:"pointer",fontFamily:"monospace",fontSize:14,letterSpacing:2,fontWeight:700,transition:"background .2s"}}
             onMouseEnter={e=>e.target.style.background=C.gold}
             onMouseLeave={e=>e.target.style.background=C.black}>
-            {S.footerNext}
+            {S.nextChapterBtn}
           </button>
         </div>
 
+        </div>
       </div>
-
-      {askOpen && <AskAnalystPopup onClose={() => setAskOpen(false)}/>}
     </div>
   );
 }
