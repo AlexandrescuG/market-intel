@@ -1,0 +1,11 @@
+{
+  "require_cashtag": true,
+  "caps_ratio_downrank": 0.5,
+  "caps_min_letters": 12,
+  "breaking_keywords": ["BREAKING", "СРОЧНО", "URGENT", "ALERT", "ВНИМАНИЕ"],
+  "political_keywords": [
+    "президент", "president", "выборы", "election", "elections",
+    "война", "war", "санкции", "sanctions",
+    "госдума", "конгресс", "congress", "senate", "parliament", "impeachment"
+  ]
+}

@@ -216,6 +216,11 @@ a:hover{text-decoration:underline;color:var(--glow)}
 .sig .t{font-size:13px;line-height:1.5}
 .sig .t a{color:var(--ink)}
 .sig .t a:hover{color:var(--gold);text-decoration:underline}
+.sig .conf{padding:1px 6px;border-radius:8px;letter-spacing:.2px}
+.sig .conf-media{color:var(--up);background:rgba(30,142,90,.08)}
+.sig .conf-social_unverified{color:var(--muted);background:rgba(138,130,117,.1)}
+.sig .rn{margin-top:5px;font-size:11px;line-height:1.5;color:var(--down);
+  background:rgba(192,57,43,.06);border-left:2px solid var(--down);padding:4px 8px}
 
 /* pulse (Фаза 4 — заменяет старое облако-«buzz») */
 .pulse-list{display:flex;flex-direction:column;gap:1px;padding:4px 0}
@@ -1103,20 +1108,27 @@ document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeChart(); });
 
 const I18N_SIG = {
   noSignals: {{ t('home.no_signals', lang) | tojson }},
-  noSignalsWindow: {{ t('home.no_signals_window', lang) | tojson }}
+  noSignalsWindow: {{ t('home.no_signals_window', lang) | tojson }},
+  confMedia: {{ t('home.brief_conf_media', lang) | tojson }},
+  confSocial: {{ t('home.brief_conf_social', lang) | tojson }},
+  reportFlag: {{ t('home.feed_report_flag_prefix', lang) | tojson }}
 };
 let SIG=null;
 function renderSignals(dim){
   const el=document.getElementById('signals'); if(!SIG||!SIG[dim]){el.innerHTML='<div class="empty">'+I18N_SIG.noSignals+'</div>';return;}
   const rows=SIG[dim]; if(!rows.length){el.innerHTML='<div class="empty">'+I18N_SIG.noSignalsWindow+'</div>';return;}
+  const confLabel={media:I18N_SIG.confMedia, social_unverified:I18N_SIG.confSocial};
   el.innerHTML=rows.map(s=>{
     const ct=(s.cashtags||[]).map(t=>'$'+t).join(' ');
+    const conf=confLabel[s.confidence]||'';
     return `<div class="sig">
-      <div class="m"><span class="src">${s.source}</span>
+      <div class="m"><span class="src">${escapeHtmlIdx(s.source)}</span>
         <span class="imp">imp ${s.importance}</span>
         ${s.engagement?`<span>👁 ${fmt(s.engagement)}</span>`:''}
-        ${ct?`<span class="ct">${ct}</span>`:''}</div>
-      <div class="t">${s.url?`<a href="${s.url}" target="_blank" rel="noopener">${s.text}</a>`:s.text}</div>
+        ${ct?`<span class="ct">${escapeHtmlIdx(ct)}</span>`:''}
+        ${conf?`<span class="conf conf-${s.confidence}">${escapeHtmlIdx(conf)}</span>`:''}</div>
+      <div class="t">${s.url?`<a href="${s.url}" target="_blank" rel="noopener">${escapeHtmlIdx(s.text)}</a>`:escapeHtmlIdx(s.text)}</div>
+      ${s.report_note?`<div class="rn">⚠ ${escapeHtmlIdx(I18N_SIG.reportFlag)}: ${briefBold(s.report_note)}</div>`:''}
     </div>`;
   }).join('');
 }

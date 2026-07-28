@@ -87,10 +87,22 @@ def publish_technical() -> None:
 
 
 def publish_signals() -> None:
+    # P0-2 §2.2 шаги 2-4: маркер достоверности + фильтр (без тикера — не
+    # показывать, капс/BREAKING — понизить, политическое — отсечь) + связка
+    # с брифом. Правила берут кандидатов с запасом (лимит ×4 к отображаемому),
+    # т.к. часть будет отфильтрована — иначе после фильтра карточек может
+    # остаться меньше 12 даже когда сырых сигналов достаточно.
+    from core.feed_filter import apply_feed_rules
+    DISPLAY_LIMIT = 12
     out = {}
     for dim in ("economy", "geopolitics"):
-        out[dim] = [_sig(s) for s in db.top_by_dimension(24, dim, 12)]
-    out["crowd"] = [_sig(s) for s in db.top_by_crowd(24, 12)]
+        candidates = [_sig(s) for s in db.top_by_dimension(24, dim, DISPLAY_LIMIT * 4)]
+        # geopolitics по данным структурно без тикеров (см. feed_filter.py) --
+        # там штамп "нет тикера" убил бы вкладку целиком, требование ослаблено
+        # сознательно, политический фильтр остаётся в силе.
+        out[dim] = apply_feed_rules(candidates, DISPLAY_LIMIT, require_cashtag=(dim != "geopolitics"))
+    crowd_candidates = [_sig(s) for s in db.top_by_crowd(24, DISPLAY_LIMIT * 4)]
+    out["crowd"] = apply_feed_rules(crowd_candidates, DISPLAY_LIMIT)
     _write("signals.json", {"updated": _now(), **out})
 
 
