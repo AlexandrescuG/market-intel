@@ -610,8 +610,8 @@ function buildStrip(items) {
     const name = NAMES[i.ticker] || i.name || i.ticker;
     _live[i.ticker] = i.price;
     return `<div class="tick"><div class="k">${name}</div>
-      <div class="v" id="sp_${safeId(i.ticker)}">${fmt(i.price)}</div>
-      <div class="c ${cls}" id="sc_${safeId(i.ticker)}">${chg!=null?sign+chg.toFixed(2)+'%':'—'}</div></div>`;
+      <div class="v" data-sym="${safeId(i.ticker)}">${fmt(i.price)}</div>
+      <div class="c ${cls}" data-sym="${safeId(i.ticker)}">${chg!=null?sign+chg.toFixed(2)+'%':'—'}</div></div>`;
   }).join('');
   if (_fng) {
     const v = _fng.value;
@@ -619,9 +619,14 @@ function buildStrip(items) {
       <div class="v">${v} · ${_fng.label}</div>
       <div class="bar"></div><div class="mark" style="margin-left:${v}%"></div></div>`;
   }
-  // Клон для бесшовного цикла (IDs: sp2_X, sc2_X)
-  const clone = first.replace(/id="sp_/g,'id="sp2_').replace(/id="sc_/g,'id="sc2_');
-  inner.innerHTML = first + clone;
+  // Клон-разметка только для бесшовной прокрутки (P1-2: та же схема
+  // data-sym/querySelectorAll, что и sbf-header.js -- один идентификатор
+  // ленты в проекте, а не id="sp_"/"sp2_" здесь и id="sp_" там). Раньше
+  // клон получал СВОИ id (sp2_/sc2_) и синк на них не приходил при живом
+  // обновлении -- та же природа бага, что и в sbf-header.js, здесь просто
+  // уже был обойдён вручную двойным списком префиксов ниже; data-sym проще
+  // и не требует помнить оба префикса на каждый апдейт.
+  inner.innerHTML = first + first;
   _tickerHalfW = 0; // пересчитать ширину после следующего кадра
 }
 
@@ -629,9 +634,7 @@ function updateStripPrice(sym, price) {
   const id = safeId(sym);
   const prev = _live[sym];
   _live[sym] = price;
-  ['sp_', 'sp2_'].forEach(pfx => {
-    const el = document.getElementById(pfx + id);
-    if (!el) return;
+  document.querySelectorAll('.v[data-sym="' + id + '"]').forEach(el => {
     el.textContent = fmt(price);
     if (prev != null && price !== prev) {
       const cls = price > prev ? 'fl-up' : 'fl-dn';
@@ -655,9 +658,8 @@ async function pollLiveStrip() {
         const chg = data.change_pct;
         const txt = (chg > 0 ? '+' : '') + chg.toFixed(2) + '%';
         const cls = 'c ' + (chg > 0 ? 'up' : chg < 0 ? 'down' : '');
-        ['sc_', 'sc2_'].forEach(pfx => {
-          const el = document.getElementById(pfx + safeId(sym));
-          if (el) { el.textContent = txt; el.className = cls; }
+        document.querySelectorAll('.c[data-sym="' + safeId(sym) + '"]').forEach(el => {
+          el.textContent = txt; el.className = cls;
         });
       }
     }

@@ -321,9 +321,15 @@
       var sign = chg > 0 ? '+' : '';
       var name = tickerName(i.ticker) || i.name || i.ticker;
       _live[i.ticker] = i.price;
+      // data-sym, не id: buildStrip дублирует html+html для бесшовной прокрутки
+      // (см. ниже), а id обязан быть уникален на странице -- getElementById
+      // из updateStripPrice/pollQuotes видел бы только первую копию, и вторая
+      // навсегда застревала бы на цене первого рендера (P1-2, живой баг,
+      // подтверждено Playwright: VIX/SILVER расходились между двумя копиями
+      // на /edu/b/5). querySelectorAll по data-sym обновляет обе разом.
       return '<div class="tick"><div class="k">' + name + '</div>' +
-        '<div class="v" id="sp_' + safeId(i.ticker) + '">' + fmt(i.price) + '</div>' +
-        '<div class="c ' + cls + '" id="sc_' + safeId(i.ticker) + '">' +
+        '<div class="v" data-sym="' + safeId(i.ticker) + '">' + fmt(i.price) + '</div>' +
+        '<div class="c ' + cls + '" data-sym="' + safeId(i.ticker) + '">' +
         (chg != null ? sign + chg.toFixed(2) + '%' : '—') + '</div></div>';
     }).join('');
     if (_fng) {
@@ -359,17 +365,19 @@
   }());
 
   function updateStripPrice(sym, price) {
-    var el = document.getElementById('sp_' + safeId(sym));
-    if (!el) return;
+    var els = document.querySelectorAll('.v[data-sym="' + safeId(sym) + '"]');
+    if (!els.length) return;
     var prev = _live[sym];
     _live[sym] = price;
-    el.textContent = fmt(price);
-    if (prev != null && price !== prev) {
-      var cls = price > prev ? 'fl-up' : 'fl-dn';
-      el.classList.remove('fl-up', 'fl-dn');
-      void el.offsetWidth;
-      el.classList.add(cls);
-    }
+    els.forEach(function (el) {
+      el.textContent = fmt(price);
+      if (prev != null && price !== prev) {
+        var cls = price > prev ? 'fl-up' : 'fl-dn';
+        el.classList.remove('fl-up', 'fl-dn');
+        void el.offsetWidth;
+        el.classList.add(cls);
+      }
+    });
   }
 
   // ── Часы и окно ──────────────────────────────────────────────────────────
@@ -416,12 +424,11 @@
         var d = q.quotes[sym];
         if (d.price != null) updateStripPrice(sym, d.price);
         if (d.change_pct != null) {
-          var ce = document.getElementById('sc_' + safeId(sym));
-          if (ce) {
-            var chg = d.change_pct;
+          var chg = d.change_pct;
+          document.querySelectorAll('.c[data-sym="' + safeId(sym) + '"]').forEach(function (ce) {
             ce.textContent = (chg > 0 ? '+' : '') + chg.toFixed(2) + '%';
             ce.className = 'c ' + (chg > 0 ? 'up' : chg < 0 ? 'down' : '');
-          }
+          });
         }
       }
       setLive(true);
