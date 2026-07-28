@@ -1005,56 +1005,186 @@ function AsymmetryArc() {
 // the asymmetry widget above just taught as "practically unrecoverable".
 const SURVIVE_SEQUENCE = ["L","L","L","L","L","L","L","W","L","W","W","L","W","W","L","W","W","L","W","W"];
 const SURVIVE_BUST_DD = 0.50;
+const SURVIVE_RR = 2;
+
+function surviveStepSide(side, riskPct, outcome, stepNo) {
+  if (side.busted) return { ...side, path: [...side.path, side.path[side.path.length-1]] };
+  const r = side.eq * riskPct / 100;
+  const eq = outcome === "W" ? side.eq + r*SURVIVE_RR : side.eq - r;
+  const peak = Math.max(side.peak, eq);
+  const dd = (peak - eq) / peak;
+  return { eq, peak, busted: dd >= SURVIVE_BUST_DD, path: [...side.path, {time: stepNo, value: eq/10000}] };
+}
+
+function surviveMakeInitial() {
+  return {
+    step: 0, lossStreak: 0, frozen: false,
+    user: { eq:10000, peak:10000, busted:false, path:[{time:0,value:1}] },
+    disc: { eq:10000, peak:10000, busted:false, path:[{time:0,value:1}] },
+  };
+}
+
+// Дисциплинированная линия vs линия пользователя на одном графике -- обычный
+// EquitySpark рисует одну кривую (используется краш-лабораторией), здесь
+// нужны две поверх друг друга для прямого сравнения (SPEC_ch3_debug.md §2).
+function SurviveTwoLineChart({ user, disc, height }) {
+  const W = 560, H = height || 160;
+  const allVals = [...user.map(p=>p.value), ...disc.map(p=>p.value)];
+  const min = Math.min(...allVals), max = Math.max(...allVals);
+  const pad = (max-min)*0.08 || 0.02;
+  const toY = v => H-16 - ((v-(min-pad))/((max+pad)-(min-pad)))*(H-32);
+  const toX = (i,len) => (i/Math.max(len-1,1))*(W-20)+10;
+  const line = (arr,color,width) => (
+    <polyline points={arr.map((p,i) => `${toX(i,arr.length)},${toY(p.value)}`).join(" ")} fill="none" stroke={color} strokeWidth={width}/>
+  );
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",display:"block"}}>
+      <line x1="10" y1={toY(1)} x2={W-10} y2={toY(1)} stroke="rgba(255,255,255,0.15)" strokeDasharray="4 4"/>
+      {line(disc, "#8A8275", "2")}
+      {line(user, C.gold, "2.5")}
+    </svg>
+  );
+}
 
 function SurviveStreak() {
   const { useState } = React;
   const T = window.Ch3Content[INITIAL_LANG] || window.Ch3Content.ru;
   const s = T.survival.surviveGame;
-  const initState = () => ({ low:{step:0,eq:10000,peak:10000,busted:false}, high:{step:0,eq:10000,peak:10000,busted:false} });
-  const [state, setState] = useState(initState);
-  const done = state.low.step >= SURVIVE_SEQUENCE.length;
 
-  const step = () => {
-    setState(prev => {
-      const next = { low:{...prev.low}, high:{...prev.high} };
-      [["low",0.01],["high",0.10]].forEach(([side,risk]) => {
-        const st = next[side];
-        if (st.busted || st.step >= SURVIVE_SEQUENCE.length) return;
-        const outcome = SURVIVE_SEQUENCE[st.step];
-        const r = st.eq * risk;
-        st.eq = outcome === "W" ? st.eq + r*2 : st.eq - r;
-        st.peak = Math.max(st.peak, st.eq);
-        const dd = (st.peak - st.eq) / st.peak;
-        if (dd >= SURVIVE_BUST_DD) st.busted = true;
-        st.step++;
-      });
+  const [setupRisk, setSetupRisk] = useState(2);
+  const [phase, setPhase] = useState("setup"); // setup | playing | paused | done
+  const [baseRisk, setBaseRisk] = useState(2);
+  const [userRisk, setUserRisk] = useState(2);
+  const [game, setGame] = useState(surviveMakeInitial);
+
+  const ddPct = (riskPct, n) => (1 - Math.pow(1 - riskPct/100, n)) * 100;
+  const recPct = (riskPct, n) => (1 / Math.pow(1 - riskPct/100, n) - 1) * 100;
+  const previewDd = ddPct(setupRisk, 5);
+  const previewRec = recPct(setupRisk, 5);
+
+  const start = () => {
+    setBaseRisk(setupRisk);
+    setUserRisk(setupRisk);
+    setGame(surviveMakeInitial());
+    setPhase("playing");
+  };
+  const reset = () => setPhase("setup");
+
+  const advance = () => {
+    setGame(prev => {
+      if (prev.step >= SURVIVE_SEQUENCE.length) return prev;
+      const outcome = SURVIVE_SEQUENCE[prev.step];
+      const stepNo = prev.step + 1;
+      const disc = surviveStepSide(prev.disc, baseRisk, outcome, stepNo);
+      const user = prev.frozen
+        ? { ...prev.user, path:[...prev.user.path, {time:stepNo, value:prev.user.path[prev.user.path.length-1].value}] }
+        : surviveStepSide(prev.user, userRisk, outcome, stepNo);
+      const lossStreak = outcome === "L" ? prev.lossStreak + 1 : 0;
+      const next = { step: stepNo, lossStreak, frozen: prev.frozen, user, disc };
+
+      if (stepNo >= SURVIVE_SEQUENCE.length) setPhase("done");
+      else if (!prev.frozen && lossStreak > 0 && lossStreak % 3 === 0) setPhase("paused");
       return next;
     });
   };
-  const reset = () => setState(initState());
+
+  const choose = (action) => {
+    if (action === "stopToday") {
+      setGame(prev => {
+        let cur = { ...prev, frozen: true };
+        while (cur.step < SURVIVE_SEQUENCE.length) {
+          const outcome = SURVIVE_SEQUENCE[cur.step];
+          const stepNo = cur.step + 1;
+          const disc = surviveStepSide(cur.disc, baseRisk, outcome, stepNo);
+          const lastVal = cur.user.path[cur.user.path.length-1].value;
+          const user = { ...cur.user, path:[...cur.user.path, {time:stepNo, value:lastVal}] };
+          cur = { step: stepNo, lossStreak: 0, frozen: true, user, disc };
+        }
+        return cur;
+      });
+      setPhase("done");
+      return;
+    }
+    setUserRisk(r => action === "increase" ? r*2 : action === "decrease" ? r*0.5 : r);
+    setPhase("playing");
+  };
+
+  const done = phase === "done";
+  const fmt = (side) => `$${Math.round(side.eq).toLocaleString()}${side.busted ? " ⛔" : ""}`;
 
   return (
     <div style={{marginBottom:32}}>
       <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:8}}>{s.tag}</Mono>
       <div style={{fontFamily:"'DM Serif Display',serif",fontSize:20,color:C.black,marginBottom:8}}>{s.title}</div>
       <p style={{fontSize:13,color:C.inkMid,lineHeight:1.65,marginBottom:18,maxWidth:700}}>{s.legend}</p>
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,marginBottom:16}} className="grid-2">
-        {[["low",s.riskLowLabel],["high",s.riskHighLabel]].map(([side,label]) => (
-          <div key={side} style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:6,padding:18}}>
-            <Mono size={10} color={C.inkFaint} spacing={1}>{label}</Mono>
-            <div style={{fontFamily:"monospace",fontSize:22,marginTop:6,color:state[side].busted?C.red:C.black}}>
-              ${Math.round(state[side].eq).toLocaleString()}{state[side].busted?" ⛔":""}
+
+      {phase === "setup" ? (
+        <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:6,padding:20,maxWidth:520}}>
+          <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
+            <span style={{fontSize:12,color:C.inkMid,fontWeight:500}}>{s.riskSliderLabel}</span>
+            <span style={{fontSize:13,fontWeight:700,color:C.inkMid,fontFamily:"monospace"}}>{setupRisk}%</span>
+          </div>
+          <input type="range" min={0.5} max={10} step={0.5} value={setupRisk}
+            onChange={e => setSetupRisk(+e.target.value)}
+            style={{width:"100%",accentColor:C.inkMid,cursor:"pointer",marginBottom:14}}/>
+          <p style={{fontSize:12.5,color:C.inkSoft,lineHeight:1.6,marginBottom:16}}>
+            {s.drawdownPreview.replace("{{dd}}", previewDd.toFixed(1)).replace("{{rec}}", previewRec.toFixed(1))}
+          </p>
+          <button onClick={start}
+            style={{padding:"10px 18px",background:C.black,color:"#fff",border:"none",borderRadius:4,cursor:"pointer",fontFamily:"monospace",fontSize:12.5,fontWeight:700}}>{s.startBtn}</button>
+        </div>
+      ) : (
+        <React.Fragment>
+          <div style={{background:C.black,borderRadius:6,padding:14,marginBottom:14}}>
+            <SurviveTwoLineChart user={game.user.path} disc={game.disc.path} height={160}/>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,marginBottom:16}} className="grid-2">
+            <div style={{background:C.surface,border:`1px solid ${C.borderGold}`,borderRadius:6,padding:18}}>
+              <Mono size={10} color={C.gold} spacing={1}>{s.yourLineLabel} · {userRisk}%</Mono>
+              <div style={{fontFamily:"monospace",fontSize:22,marginTop:6,color:game.user.busted?C.red:C.black}}>{fmt(game.user)}</div>
+            </div>
+            <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:6,padding:18}}>
+              <Mono size={10} color={C.inkFaint} spacing={1}>{s.disciplinedLineLabel} · {baseRisk}%</Mono>
+              <div style={{fontFamily:"monospace",fontSize:22,marginTop:6,color:game.disc.busted?C.red:C.black}}>{fmt(game.disc)}</div>
             </div>
           </div>
-        ))}
-      </div>
-      <div style={{display:"flex",gap:10,marginBottom:14}}>
-        <button onClick={step} disabled={done}
-          style={{padding:"10px 18px",background:done?C.border:C.black,color:done?C.inkFaint:"#fff",border:"none",borderRadius:4,cursor:done?"default":"pointer",fontFamily:"monospace",fontSize:12.5,fontWeight:700}}>{s.nextTradeLabel}</button>
-        <button onClick={reset}
-          style={{padding:"10px 18px",background:"transparent",border:`1px solid ${C.border}`,borderRadius:4,cursor:"pointer",fontFamily:"monospace",fontSize:12.5,color:C.inkMid}}>↺ {s.resetLabel}</button>
-      </div>
-      {done && <p style={{fontSize:13.5,fontStyle:"italic",color:C.black,marginBottom:8,maxWidth:700}}>{s.final}</p>}
+
+          {phase === "paused" && (
+            <div style={{background:C.goldPale,border:`1px solid ${C.borderGold}`,borderRadius:6,padding:18,marginBottom:16}}>
+              <p style={{fontSize:13.5,fontWeight:600,color:C.black,marginBottom:12}}>{s.interventionQuestion}</p>
+              <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+                {[["increase",s.choiceIncrease],["keep",s.choiceKeep],["decrease",s.choiceDecrease],["stopToday",s.choiceStopToday]].map(([action,label]) => (
+                  <button key={action} onClick={() => choose(action)}
+                    style={{padding:"9px 14px",background:"#fff",border:`1px solid ${C.borderGold}`,borderRadius:4,cursor:"pointer",fontSize:12,color:C.black,fontFamily:"'DM Sans',sans-serif"}}>{label}</button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {phase === "playing" && (
+            <div style={{display:"flex",gap:10,marginBottom:14}}>
+              <button onClick={advance}
+                style={{padding:"10px 18px",background:C.black,color:"#fff",border:"none",borderRadius:4,cursor:"pointer",fontFamily:"monospace",fontSize:12.5,fontWeight:700}}>{s.nextTradeLabel}</button>
+            </div>
+          )}
+
+          {game.frozen && (
+            <p style={{fontSize:12,color:C.inkSoft,fontStyle:"italic",marginBottom:14}}>{s.frozenNote}</p>
+          )}
+
+          {done && (
+            <p style={{fontSize:13.5,fontStyle:"italic",color:C.black,marginBottom:8,maxWidth:700}}>
+              {s.finalTemplate.replace("{{base}}", fmt(game.disc)).replace("{{user}}", fmt(game.user))}
+            </p>
+          )}
+
+          <div style={{marginBottom:14}}>
+            <button onClick={reset}
+              style={{padding:"10px 18px",background:"transparent",border:`1px solid ${C.border}`,borderRadius:4,cursor:"pointer",fontFamily:"monospace",fontSize:12.5,color:C.inkMid}}>↺ {s.resetLabel}</button>
+          </div>
+        </React.Fragment>
+      )}
+
       <p style={{fontSize:11,color:C.inkFaint}}>{s.modelNote}</p>
     </div>
   );
