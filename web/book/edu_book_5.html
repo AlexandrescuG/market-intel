@@ -3,9 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>SBF | {% if lang == 'ru' %}Глава 5. Глобальные Часы{% elif lang == 'ro' %}Capitolul 5. Ceasul Global{% else %}Chapter 5. Global Clock{% endif %}</title>
+  <title>SBF | {% if lang == 'ru' %}Глава 5. Глобальные Часы{% elif lang == 'ro' %}Capitolul 5. Ceasurile Globale{% else %}Chapter 5. Global Clocks{% endif %}</title>
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/edu/assets/history.css">
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     html,body{max-width:100vw;overflow-x:hidden;scroll-behavior:smooth}
@@ -22,7 +23,10 @@
 
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"></script>
+<script src="/edu/assets/scene-engine.js"></script>
+<script src="/edu/assets/session-table.js"></script>
+<script src="/edu/assets/ch5.js"></script>
 
 <script type="text/babel" data-presets="react">
 const INITIAL_LANG = "{{ lang }}";
@@ -30,972 +34,980 @@ const INITIAL_LANG = "{{ lang }}";
 {% raw %}
 const STRINGS = {
   ru: {
-    mskAbbrev: "МСК",
-    // AskAnalystPopup
-    askTag: "— НАПИСАТЬ НАМ",
-    askTitle: "Предпочитаете мессенджер?",
-    askBody: "Напишите в Telegram или WhatsApp — сообщение уже готово.",
-    askTelegramSub: "Telegram · онлайн",
-    askWhatsappSub: "WhatsApp · онлайн",
-    askTelegramBtn: "ОТКРЫТЬ TELEGRAM",
-    askWhatsappBtn: "ОТКРЫТЬ WHATSAPP",
-    // LiquidityGlobe
-    glTitle: "Глобус Ликвидности",
-    glSubtitle: "ИНТЕРАКТИВ — ФУНДАМЕНТАЛ · ДВИГАЙТЕ ПОЛЗУНОК",
-    glOverlapBanner: "⚡ ПЕРЕКРЫТИЕ ЛОНДОН + НЬЮ-ЙОРК — ПИКОВАЯ ЛИКВИДНОСТЬ",
-    glSessionTokyoName: "Токио / Азия",
-    glSessionTokyoDesc: "Накопление. Институты готовят позиции. Диапазон узкий, движения медленные.",
-    glSessionLondonName: "Лондон / Европа",
-    glSessionLondonDesc: "Манипуляция + пробой диапазона Азии. Институты охотятся за стопами.",
-    glSessionNyName: "Нью-Йорк / США",
-    glSessionNyDesc: "Дистрибуция. Формируется основной тренд дня. NFP, CPI выходят здесь.",
-    glActiveBadge: "АКТИВНА",
-    glVolumeLabel: "ЛИКВИДНОСТЬ РЫНКА (% ОТ ПИКА)",
-    glStopBtn: "⏹ СТОП",
-    glAutoBtn: "▶ АВТО",
-    glOverlapLegend: "Overlap (пик)",
-    // AsiaBoxTrainer
-    abTitle: "Распознавание Коробки Азии",
-    abSubtitle: "ИНТЕРАКТИВ — ТЕХНИКА",
-    abResetBtn: "↺ СНАЧАЛА",
-    abStep1: "ШАГ 1: Выделите мышкой диапазон азиатской сессии на графике (первые 14 свечей)",
-    abStep2: "ШАГ 2: В какую сторону был ИСТИННЫЙ пробой? (не ловушка)",
-    abUpBtn: "↑ ВВЕРХ",
-    abDownBtn: "↓ ВНИЗ",
-    abResultPerfectTitle: "✅ Отлично! Идеально распознали Коробку Азии и истинный пробой!",
-    abResultDirOkTitle: "👍 Направление правильное! Но точнее выделяйте диапазон Азии.",
-    abResultWrongTitle: "❌ Направление неверно. Это был ложный пробой вниз (Stop Hunt) — ловушка институтов.",
-    abResultPerfectBody: "Лондон сделал ложное движение вниз — выбил стопы тех, кто поставил под диапазон Азии. Затем истинный пробой — вверх.",
-    abResultDirOkBody: "Азиатский диапазон — это 2508–2520. Именно этот диапазон нужно выделить, чтобы понять точки ликвидности.",
-    abResultWrongBody: "Лондон сначала пробил низ Азии, забрал стопы и развернулся вверх. Это классический AMD: Accumulation → Manipulation → Distribution.",
-    abAsiaLabel: "АЗИЯ 00:00–07:00",
-    abLondonLabel: "ЛОНДОН 07:00+",
-    abTrueBreakoutLabel: "↑ ИСТИННЫЙ ПРОБОЙ",
-    abLegendAsia: "Азия (накопление)",
-    abLegendManip: "Манипуляция (ловушка)",
-    abLegendTrue: "Истинный пробой",
-    // Chapter5 — sticky header
-    chipLevel5: "УРОВЕНЬ 5",
-    chipHeaderSubtitle: "Глобальные Часы",
-    chipFA: "ФА 50%",
-    chipTA: "ТА 50%",
-    // Hero
+    levelChip: "УРОВЕНЬ 5",
+    stepExplain: "ОБЪЯСНИ", stepShow: "ПОКАЖИ", stepDo: "ДАЙ СДЕЛАТЬ",
+    faTag: "ФА 60%", taTag: "ТА 40%",
+    chapterNameShort: "Глобальные Часы",
     heroEyebrow: "SBF COMPANY — ГЛАВА 5",
-    heroTitleTop: "Глобальные Часы",
-    heroTitleAnd: "и",
-    heroTitleBottom: "Синхронизация Сессий",
-    heroLead: "Почему золото взрывается ровно в 15:30? Кто двигает рынок ночью? Как читать торговый день как единый сценарий?",
-    heroChipFA: "Фундаментал 50%",
-    heroChipTA: "Техника 50%",
-    heroChipInteractive: "2 Интерактива",
-    // Anti-myth
-    mythLabel: "РАСПРОСТРАНЁННОЕ ЗАБЛУЖДЕНИЕ",
-    mythQuote: "«Рынок случаен. Нет никаких закономерностей — просто хаос цены.»",
-    mythBody: "Это неверно. Рынок — это расписание. Каждый день торговая ликвидность перемещается с востока на запад: Токио → Лондон → Нью-Йорк. В каждой сессии своя роль. Азия накапливает, Лондон манипулирует, Нью-Йорк распределяет. Это не теория — это институциональная механика, повторяющаяся каждый торговый день.",
-    // SBF voice
-    voiceAttribution: "— АНАЛИТИК SBF · ОЛЕГ",
-    voiceQuote: "«Когда новичок видит пробой вниз на открытии Лондона — он продаёт. Когда опытный трейдер видит то же самое — он ждёт. Потому что знает: это, скорее всего, Stop Hunt перед разворотом вверх.»",
-    voiceBody: "Понимание сессий — это не просто знание часовых поясов. Это умение читать намерения крупных игроков по времени суток.",
-    // Price of ignorance
-    ignoranceLabel: "Цена незнания",
-    ignoranceIntro: "Трейдер видит пробой уровня в ",
-    ignoranceTimeLabel: "03:00 МСК",
-    ignoranceMiddle: " и открывает позицию. Он не знает, что торгует в мёртвую зону азиатской сессии — минимальная ликвидность, широкий спред, высокое проскальзывание. Потеря на входе + потеря на выходе + ложный пробой. ",
-    ignoranceBold: "85% убыточных сделок новичков совершаются вне оптимального торгового окна.",
-    // Theory 1 (FA)
-    theory1Sub: "Forex и рынок золота работают 24/5 — но не с одинаковой интенсивностью. Ликвидность перемещается по глобусу по расписанию.",
-    theory1Title: "Анатомия торгового дня: три акта",
-    tableHeaders: ["Сессия","GMT","МСК","Инструменты","Ликвидность"],
-    sessTableOverlap: "Перекрытие",
-    sessTablePairsOverlap: "Все мажоры + XAU/USD",
-    liqLow: "Низкая",
-    liqHigh: "Высокая",
-    liqMax: "Максимум",
-    // InfoCards
-    infoCard1Title: "Почему JPY активна ночью?",
-    infoCard1Body: "Токийская сессия — рабочий день в Японии. Банк Японии, экспортёры, хедж-фонды региона открывают позиции. USD/JPY, AUD/USD — их парки. Остальные инструменты в этот момент «спят'.",
-    infoCard2Title: "Почему золото взрывается в 15:30–<span class='local-time' data-utc='2026-03-09T13:00:00Z'>16:00 МСК</span>?",
-    infoCard2Body: "<span class='local-time' data-utc='2026-03-09T12:00:00Z'>15:30 МСК</span> — открытие Нью-Йоркской фондовой биржи. COMEX (биржа металлов) активирует фьючерсы XAU/USD. Одновременно выходят американские данные (NFP, CPI) — максимальный всплеск объёмов.",
-    infoCard3Title: "Что делают институты ночью?",
-    infoCard3Body: "Используют низкую ликвидность для незаметного набора позиции. Цена ходит боком — это не скука, это накопление. Крупный ордер в ликвидном рынке сдвинет цену против себя — поэтому они покупают тихо.",
-    infoCard4Title: "Зачем нужен ложный пробой Лондона?",
-    infoCard4Body: "Перед истинным движением институтам нужна ликвидность. Розничные трейдеры ставят стопы под минимумы азиатского диапазона. Лондон «пробивает' эти уровни, забирает стопы (= ликвидность) и разворачивается.",
-    // Theory 2 (TA)
-    theory2Sub: "Азиатский диапазон — ключевой технический уровень. Он определяет точки ликвидности для лондонской манипуляции.",
-    theory2Title: "Asia Range и концепция AMD",
-    // AMD steps
-    amdAccWord: "Накопление",
-    amdAccDesc: "Азиатская сессия. Крупные игроки незаметно набирают позиции. Цена ходит узким диапазоном, создавая иллюзию «скучного рынка».",
-    amdManipWord: "Манипуляция",
-    amdManipDesc: "Лондонское открытие. Институты пробивают границы азиатского диапазона в ложном направлении. Выбивают стопы розничных трейдеров.",
-    amdDistWord: "Дистрибуция",
-    amdDistDesc: "Истинное движение. Имея позицию и чужую ликвидность, институты запускают тренд в нужном им направлении.",
-    // AMD diagram
-    amdDiagramLabel: "СТРУКТУРА ТОРГОВОГО ДНЯ — СХЕМА AMD",
-    amdDiagAsia: "АЗИЯ · 00:00–09:00",
-    amdDiagLondon: "ЛОНДОН · 07:00–16:00",
-    amdDiagNy: "НЬЮ-ЙОРК · 13:00+",
-    amdDiagTrend: "↑ ТРЕНД",
-    // Overlap detail
-    overlapDetailPrefix: "Перекрытие сессий: 16:00–",
-    overlapDetailMskLabel: "19:00 МСК",
-    overlapDetailSuffix: " — горячее окно",
-    overlapDetailBody: "В этот период одновременно активны Лондон и Нью-Йорк. Объёмы удваиваются. Большинство крупных движений дня завершаются именно здесь. Для трейдера это оптимальное окно: узкий спред, предсказуемые движения, высокий объём исполнения ордеров.",
-    // Checklist
-    checklistSub: "Отметьте каждый пункт, который вы поняли и готовы применять.",
-    checklistTitle: "Чек-лист главы 5",
-    checklistItem1: "Торговый день делится на три сессии: Азия, Лондон, Нью-Йорк",
-    checklistItem2: "Азиатская сессия — накопление: узкий диапазон, низкая ликвидность",
-    checklistItem3: "Лондон открывается с манипуляции — ложный пробой диапазона Азии",
-    checklistItem4: "Истинный тренд формируется после Stop Hunt, а не до него",
-    checklistItem5: "Перекрытие Лондон + Нью-Йорк (16:00–<span class='local-time' data-utc='2026-03-09T16:00:00Z'>19:00 МСК</span>) — пик объёмов",
-    checklistItem6: "AMD: Накопление → Манипуляция → Дистрибуция — цикл в каждом дне",
-    checklistItem7: "Золото взрывается в 15:30–<span class='local-time' data-utc='2026-03-09T13:00:00Z'>16:00 МСК</span>: открытие Нью-Йорка + COMEX",
-    checklistDoneTitle: "✅ Глава 5 освоена!",
-    checklistDoneBody: "Вы готовы читать рынок как расписание, а не как хаос.",
-    // Conclusions
-    conclusionsLabel: "ИТОГИ ГЛАВЫ 5",
-    conclusionsTitle: "Что вы теперь знаете",
-    conclusion1: "Азия не «скучная» — она накапливает позиции для Лондона",
-    conclusion2: "Лондонский пробой Азии — чаще всего ловушка. Ждите разворота",
-    conclusion3: "Перекрытие Лондон + Нью-Йорк = пиковые объёмы = лучшее время",
-    conclusion4: "AMD объясняет каждый торговый день на любом инструменте",
-    conclusion5: "JPY активна ночью, XAU/USD взрывается на открытии Нью-Йорка",
-    conclusion6: "Торговать против сессионного контекста — торговать вслепую",
-    // Footer
-    footerAskLink: "Остался вопрос? Напиши аналитику",
-    footerNextBtn: "Уровень 6: Пульс Новостей →",
-  },
-  en: {
-    mskAbbrev: "MSK",
-    // AskAnalystPopup
-    askTag: "— CONTACT US",
-    askTitle: "Prefer a messenger?",
-    askBody: "Write to us on Telegram or WhatsApp — your message is ready.",
-    askTelegramSub: "Telegram · online",
-    askWhatsappSub: "WhatsApp · online",
-    askTelegramBtn: "OPEN TELEGRAM",
-    askWhatsappBtn: "OPEN WHATSAPP",
-    // LiquidityGlobe
-    glTitle: "Liquidity Globe",
-    glSubtitle: "INTERACTIVE — FUNDAMENTALS · DRAG THE SLIDER",
-    glOverlapBanner: "⚡ LONDON + NEW YORK OVERLAP — PEAK LIQUIDITY",
-    glSessionTokyoName: "Tokyo / Asia",
-    glSessionTokyoDesc: "Accumulation. Institutions build their positions. The range is narrow, moves are slow.",
-    glSessionLondonName: "London / Europe",
-    glSessionLondonDesc: "Manipulation + breakout of the Asia range. Institutions hunt for stops.",
-    glSessionNyName: "New York / USA",
-    glSessionNyDesc: "Distribution. The main trend of the day forms here. NFP and CPI are released here.",
-    glActiveBadge: "ACTIVE",
-    glVolumeLabel: "MARKET LIQUIDITY (% OF PEAK)",
-    glStopBtn: "⏹ STOP",
-    glAutoBtn: "▶ AUTO",
-    glOverlapLegend: "Overlap (peak)",
-    // AsiaBoxTrainer
-    abTitle: "Recognizing the Asia Box",
-    abSubtitle: "INTERACTIVE — TECHNICAL",
-    abResetBtn: "↺ RESTART",
-    abStep1: "STEP 1: Use your mouse to select the Asian session range on the chart (the first 14 candles)",
-    abStep2: "STEP 2: Which direction was the TRUE breakout? (not the trap)",
-    abUpBtn: "↑ UP",
-    abDownBtn: "↓ DOWN",
-    abResultPerfectTitle: "✅ Excellent! You perfectly identified the Asia Box and the true breakout!",
-    abResultDirOkTitle: "👍 The direction is correct! But select the Asia range more precisely.",
-    abResultWrongTitle: "❌ Wrong direction. That was a false breakout downward (Stop Hunt) — an institutional trap.",
-    abResultPerfectBody: "London made a false move down — it triggered the stops of those who placed them below the Asia range. Then came the true breakout — upward.",
-    abResultDirOkBody: "The Asia range is 2508–2520. This is exactly the range you need to select to identify the liquidity points.",
-    abResultWrongBody: "London first broke below the Asia low, collected the stops, and reversed upward. This is a classic AMD: Accumulation → Manipulation → Distribution.",
-    abAsiaLabel: "ASIA 00:00–07:00",
-    abLondonLabel: "LONDON 07:00+",
-    abTrueBreakoutLabel: "↑ TRUE BREAKOUT",
-    abLegendAsia: "Asia (accumulation)",
-    abLegendManip: "Manipulation (trap)",
-    abLegendTrue: "True breakout",
-    // Chapter5 — sticky header
-    chipLevel5: "LEVEL 5",
-    chipHeaderSubtitle: "Global Clock",
-    chipFA: "FA 50%",
-    chipTA: "TA 50%",
-    // Hero
-    heroEyebrow: "SBF COMPANY — CHAPTER 5",
-    heroTitleTop: "Global Clock",
-    heroTitleAnd: "and",
-    heroTitleBottom: "Session Synchronization",
-    heroLead: "Why does gold explode at exactly 15:30? Who moves the market at night? How do you read the trading day as a single scenario?",
-    heroChipFA: "Fundamentals 50%",
-    heroChipTA: "Technical 50%",
-    heroChipInteractive: "2 Interactives",
-    // Anti-myth
-    mythLabel: "COMMON MISCONCEPTION",
-    mythQuote: "“The market is random. There are no patterns — just price chaos.”",
-    mythBody: "This is wrong. The market is a schedule. Every day, trading liquidity moves from east to west: Tokyo → London → New York. Each session has its own role. Asia accumulates, London manipulates, New York distributes. This isn't theory — it's institutional mechanics repeating every trading day.",
-    // SBF voice
-    voiceAttribution: "— SBF ANALYST · OLEG",
-    voiceQuote: "“When a beginner sees a breakdown at the London open — he sells. When an experienced trader sees the same thing — he waits. Because he knows: this is most likely a Stop Hunt before a reversal upward.”",
-    voiceBody: "Understanding sessions isn't just knowing time zones. It's the ability to read the intentions of major players by time of day.",
-    // Price of ignorance
-    ignoranceLabel: "The Price of Ignorance",
-    ignoranceIntro: "A trader sees a level break at ",
-    ignoranceTimeLabel: "03:00 MSK",
-    ignoranceMiddle: " and opens a position. He doesn't know he's trading in the dead zone of the Asian session — minimal liquidity, wide spread, high slippage. Loss on entry + loss on exit + false breakout. ",
-    ignoranceBold: "85% of beginners' losing trades happen outside the optimal trading window.",
-    // Theory 1 (FA)
-    theory1Sub: "Forex and the gold market operate 24/5 — but not with the same intensity. Liquidity moves around the globe on a schedule.",
-    theory1Title: "Anatomy of the Trading Day: Three Acts",
-    tableHeaders: ["Session","GMT","MSK","Instruments","Liquidity"],
-    sessTableOverlap: "Overlap",
-    sessTablePairsOverlap: "All majors + XAU/USD",
-    liqLow: "Low",
-    liqHigh: "High",
-    liqMax: "Maximum",
-    // InfoCards
-    infoCard1Title: "Why is JPY active at night?",
-    infoCard1Body: "The Tokyo session is the business day in Japan. The Bank of Japan, exporters, and regional hedge funds open their positions. USD/JPY and AUD/USD are their playground. Other instruments are “asleep” at this time.",
-    infoCard2Title: "Why does gold explode at 15:30–<span class='local-time' data-utc='2026-03-09T13:00:00Z'>16:00 MSK</span>?",
-    infoCard2Body: "<span class='local-time' data-utc='2026-03-09T12:00:00Z'>15:30 MSK</span> — the New York Stock Exchange opens. COMEX (the metals exchange) activates XAU/USD futures. At the same time, US data is released (NFP, CPI) — the maximum surge in volume.",
-    infoCard3Title: "What do institutions do at night?",
-    infoCard3Body: "They use low liquidity to build a position unnoticed. The price moves sideways — that's not boredom, that's accumulation. A large order in a liquid market would move the price against itself — so they buy quietly.",
-    infoCard4Title: "Why does London need a false breakout?",
-    infoCard4Body: "Before the true move, institutions need liquidity. Retail traders place their stops below the lows of the Asia range. London “breaks” these levels, collects the stops (= liquidity), and reverses.",
-    // Theory 2 (TA)
-    theory2Sub: "The Asia range is a key technical level. It defines the liquidity points for the London manipulation.",
-    theory2Title: "Asia Range and the AMD Concept",
-    // AMD steps
-    amdAccWord: "Accumulation",
-    amdAccDesc: "The Asian session. Major players quietly build their positions. The price moves in a narrow range, creating the illusion of a “boring market”.",
-    amdManipWord: "Manipulation",
-    amdManipDesc: "The London open. Institutions break the boundaries of the Asia range in a false direction. They trigger retail traders' stops.",
-    amdDistWord: "Distribution",
-    amdDistDesc: "The true move. With a position and someone else's liquidity, institutions launch the trend in the direction they need.",
-    // AMD diagram
-    amdDiagramLabel: "STRUCTURE OF THE TRADING DAY — AMD DIAGRAM",
-    amdDiagAsia: "ASIA · 00:00–09:00",
-    amdDiagLondon: "LONDON · 07:00–16:00",
-    amdDiagNy: "NEW YORK · 13:00+",
-    amdDiagTrend: "↑ TREND",
-    // Overlap detail
-    overlapDetailPrefix: "Session overlap: 16:00–",
-    overlapDetailMskLabel: "19:00 MSK",
-    overlapDetailSuffix: " — the hot window",
-    overlapDetailBody: "During this period, London and New York are active simultaneously. Volumes double. Most of the day's major moves conclude right here. For a trader, this is the optimal window: tight spreads, predictable moves, high order execution volume.",
-    // Checklist
-    checklistSub: "Check off each item you understand and are ready to apply.",
-    checklistTitle: "Chapter 5 Checklist",
-    checklistItem1: "The trading day is divided into three sessions: Asia, London, New York",
-    checklistItem2: "The Asian session is accumulation: narrow range, low liquidity",
-    checklistItem3: "London opens with manipulation — a false breakout of the Asia range",
-    checklistItem4: "The true trend forms after the Stop Hunt, not before it",
-    checklistItem5: "London + New York overlap (16:00–<span class='local-time' data-utc='2026-03-09T16:00:00Z'>19:00 MSK</span>) — peak volume",
-    checklistItem6: "AMD: Accumulation → Manipulation → Distribution — a cycle every day",
-    checklistItem7: "Gold explodes at 15:30–<span class='local-time' data-utc='2026-03-09T13:00:00Z'>16:00 MSK</span>: the New York open + COMEX",
-    checklistDoneTitle: "✅ Chapter 5 mastered!",
-    checklistDoneBody: "You're ready to read the market as a schedule, not as chaos.",
-    // Conclusions
-    conclusionsLabel: "CHAPTER 5 TAKEAWAYS",
-    conclusionsTitle: "What you now know",
-    conclusion1: "Asia isn't “boring” — it's accumulating positions for London",
-    conclusion2: "London's breakout of Asia is most often a trap. Wait for the reversal",
-    conclusion3: "London + New York overlap = peak volume = the best time",
-    conclusion4: "AMD explains every trading day on any instrument",
-    conclusion5: "JPY is active at night, XAU/USD explodes at the New York open",
-    conclusion6: "Trading against the session context is trading blind",
-    // Footer
-    footerAskLink: "Still have a question? Write to an analyst",
-    footerNextBtn: "Level 6: News Pulse →",
+    heroTitleLine1: "Глобальные",
+    heroAnd: "и",
+    heroTitleLine2: "Часы",
+    heroSubtitle: "Почему золото взрывается в 12:30 UTC? Кто двигает рынок ночью? Расписание есть у ликвидности — не у направления. Мы его измерили.",
+    fundamentalChip: "Фундаментал 60%",
+    technicalChip: "Техника 40%",
+    interactiveChip: "3 Интерактива",
+    clocksSub: "Биржа — это площадка с расписанием. Сессия — это условное имя для часов, когда в регионе рабочий день. Дальше — только события, у каждого свой владелец и точное время.",
+    globeSub: "Не выдуманная кривая «активности» — измеренный нами средний размер получасового бара по часам.",
+    hourStatsSub: "Наш собственный эксклюзив: почасовая карта диапазона, построенная на реальном бэкфилле MT5.",
+    enginesSub: "Карта показала горбы. Вот кто их делает.",
+    stopsSub: "Самая мифологизированная тема курса — на данных, а не на ощущениях.",
+    amdSub: "Разбираем модель по частям: что измерено, а что — удобная история.",
+    sweepSub: "Один реальный день. Реальный прокол. Твоё решение — до раскрытия.",
+    trainerSub: "Реальные дни из бэкфилла, честная ротация, проверка в цене.",
+    dstSub: "Три недели в году расписание разъезжается. Вот когда именно.",
+    windowSub: "Всё предыдущее было про рынок вообще. Здесь — про тебя.",
+    quizKicker: "ПРОВЕРЬ СЕБЯ", quizTitle: "Что ты узнал в этой главе", quizNext: "Дальше →",
+    quizStuckAll: "Всё закрепилось.", quizStuckSome: "Почти всё закрепилось.",
+    quizBackToSection: "← Вернуться к разделу",
+    askQuestionLabel: "Остался вопрос? Напиши аналитику",
+    nextChapterBtn: "Уровень 6: Пульс Новостей →",
+    loadingLabel: "Загружаю наши измерения…",
+    loadErrorLabel: "Не удалось загрузить данные главы — часть блоков не отрисована. Это блокирующая ошибка, а не предупреждение.",
   },
   ro: {
-    mskAbbrev: "MSK",
-    // AskAnalystPopup
-    askTag: "— SCRIE-NE",
-    askTitle: "Preferați un messenger?",
-    askBody: "Scrieți-ne pe Telegram sau WhatsApp — mesajul este deja pregătit.",
-    askTelegramSub: "Telegram · online",
-    askWhatsappSub: "WhatsApp · online",
-    askTelegramBtn: "DESCHIDE TELEGRAM",
-    askWhatsappBtn: "DESCHIDE WHATSAPP",
-    // LiquidityGlobe
-    glTitle: "Globul Lichidității",
-    glSubtitle: "INTERACTIV — FUNDAMENTAL · MIȘCĂ CURSORUL",
-    glOverlapBanner: "⚡ SUPRAPUNERE LONDRA + NEW YORK — LICHIDITATE MAXIMĂ",
-    glSessionTokyoName: "Tokyo / Asia",
-    glSessionTokyoDesc: "Acumulare. Instituțiile își pregătesc pozițiile. Interval îngust, mișcări lente.",
-    glSessionLondonName: "Londra / Europa",
-    glSessionLondonDesc: "Manipulare + spargerea intervalului Asiei. Instituțiile vânează stop-loss-urile.",
-    glSessionNyName: "New York / SUA",
-    glSessionNyDesc: "Distribuție. Se formează trendul principal al zilei. Aici sunt publicate NFP, CPI.",
-    glActiveBadge: "ACTIVĂ",
-    glVolumeLabel: "LICHIDITATEA PIEȚEI (% DIN VÂRF)",
-    glStopBtn: "⏹ STOP",
-    glAutoBtn: "▶ AUTO",
-    glOverlapLegend: "Overlap (vârf)",
-    // AsiaBoxTrainer
-    abTitle: "Recunoașterea Casetei Asiei",
-    abSubtitle: "INTERACTIV — TEHNIC",
-    abResetBtn: "↺ DE LA ÎNCEPUT",
-    abStep1: "PASUL 1: Selectați cu mouse-ul intervalul sesiunii asiatice pe grafic (primele 14 lumânări)",
-    abStep2: "PASUL 2: În ce direcție a fost spargerea REALĂ? (nu capcana)",
-    abUpBtn: "↑ SUS",
-    abDownBtn: "↓ JOS",
-    abResultPerfectTitle: "✅ Excelent! Ați recunoscut perfect Caseta Asiei și spargerea reală!",
-    abResultDirOkTitle: "👍 Direcția este corectă! Dar selectați mai precis intervalul Asiei.",
-    abResultWrongTitle: "❌ Direcție greșită. A fost o spargere falsă în jos (Stop Hunt) — capcana instituțiilor.",
-    abResultPerfectBody: "Londra a făcut o mișcare falsă în jos — a declanșat stop-loss-urile celor care le-au plasat sub intervalul Asiei. Apoi a urmat spargerea reală — în sus.",
-    abResultDirOkBody: "Intervalul asiatic este 2508–2520. Exact acest interval trebuie selectat pentru a înțelege punctele de lichiditate.",
-    abResultWrongBody: "Londra a spart mai întâi minimul Asiei, a colectat stop-loss-urile și s-a întors în sus. Acesta este un AMD clasic: Accumulation → Manipulation → Distribution.",
-    abAsiaLabel: "ASIA 00:00–07:00",
-    abLondonLabel: "LONDRA 07:00+",
-    abTrueBreakoutLabel: "↑ SPARGERE REALĂ",
-    abLegendAsia: "Asia (acumulare)",
-    abLegendManip: "Manipulare (capcană)",
-    abLegendTrue: "Spargere reală",
-    // Chapter5 — sticky header
-    chipLevel5: "NIVELUL 5",
-    chipHeaderSubtitle: "Ceasul Global",
-    chipFA: "AF 50%",
-    chipTA: "AT 50%",
-    // Hero
+    levelChip: "NIVEL 5",
+    stepExplain: "EXPLICĂ", stepShow: "ARATĂ", stepDo: "LASĂ SĂ ÎNCERCE",
+    faTag: "AF 60%", taTag: "AT 40%",
+    chapterNameShort: "Ceasurile Globale",
     heroEyebrow: "SBF COMPANY — CAPITOLUL 5",
-    heroTitleTop: "Ceasul Global",
-    heroTitleAnd: "și",
-    heroTitleBottom: "Sincronizarea Sesiunilor",
-    heroLead: "De ce explodează aurul exact la 15:30? Cine mișcă piața noaptea? Cum să citești ziua de tranzacționare ca pe un singur scenariu?",
-    heroChipFA: "Fundamental 50%",
-    heroChipTA: "Tehnic 50%",
-    heroChipInteractive: "2 Interactive",
-    // Anti-myth
-    mythLabel: "CONCEPȚIE GREȘITĂ FRECVENTĂ",
-    mythQuote: "«Piața este aleatorie. Nu există niciun tipar — doar haosul prețului.»",
-    mythBody: "Este greșit. Piața este un program. În fiecare zi, lichiditatea de tranzacționare se deplasează de la est la vest: Tokyo → Londra → New York. Fiecare sesiune are propriul rol. Asia acumulează, Londra manipulează, New York distribuie. Nu este o teorie — este mecanica instituțională care se repetă în fiecare zi de tranzacționare.",
-    // SBF voice
-    voiceAttribution: "— ANALIST SBF · OLEG",
-    voiceQuote: "«Când un începător vede o spargere în jos la deschiderea Londrei — vinde. Când un trader experimentat vede același lucru — așteaptă. Pentru că știe: este, cel mai probabil, un Stop Hunt înainte de o revenire în sus.»",
-    voiceBody: "Înțelegerea sesiunilor nu înseamnă doar cunoașterea fusurilor orare. Înseamnă capacitatea de a citi intențiile marilor jucători în funcție de ora din zi.",
-    // Price of ignorance
-    ignoranceLabel: "Prețul necunoașterii",
-    ignoranceIntro: "Un trader vede o spargere de nivel la ",
-    ignoranceTimeLabel: "03:00 MSK",
-    ignoranceMiddle: " și deschide o poziție. Nu știe că tranzacționează în zona moartă a sesiunii asiatice — lichiditate minimă, spread larg, alunecare (slippage) ridicată. Pierdere la intrare + pierdere la ieșire + spargere falsă. ",
-    ignoranceBold: "85% dintre tranzacțiile pierzătoare ale începătorilor au loc în afara ferestrei optime de tranzacționare.",
-    // Theory 1 (FA)
-    theory1Sub: "Forex și piața aurului funcționează 24/5 — dar nu cu aceeași intensitate. Lichiditatea se deplasează pe glob după un program.",
-    theory1Title: "Anatomia zilei de tranzacționare: trei acte",
-    tableHeaders: ["Sesiune","GMT","MSK","Instrumente","Lichiditate"],
-    sessTableOverlap: "Suprapunere",
-    sessTablePairsOverlap: "Toate perechile majore + XAU/USD",
-    liqLow: "Scăzută",
-    liqHigh: "Ridicată",
-    liqMax: "Maximă",
-    // InfoCards
-    infoCard1Title: "De ce este JPY activ noaptea?",
-    infoCard1Body: "Sesiunea din Tokyo este ziua de lucru în Japonia. Banca Japoniei, exportatorii, fondurile speculative din regiune își deschid pozițiile. USD/JPY, AUD/USD — sunt terenul lor de joc. Restul instrumentelor «dorm» în acest moment.",
-    infoCard2Title: "De ce explodează aurul la 15:30–<span class='local-time' data-utc='2026-03-09T13:00:00Z'>16:00 MSK</span>?",
-    infoCard2Body: "<span class='local-time' data-utc='2026-03-09T12:00:00Z'>15:30 MSK</span> — deschiderea Bursei de Valori din New York. COMEX (bursa de metale) activează contractele futures XAU/USD. Simultan sunt publicate datele americane (NFP, CPI) — vârful maxim de volum.",
-    infoCard3Title: "Ce fac instituțiile noaptea?",
-    infoCard3Body: "Folosesc lichiditatea scăzută pentru a-și construi pozițiile discret. Prețul se mișcă lateral — nu este plictiseală, este acumulare. Un ordin mare într-o piață lichidă ar mișca prețul împotriva lor — de aceea cumpără în liniște.",
-    infoCard4Title: "De ce este necesară spargerea falsă a Londrei?",
-    infoCard4Body: "Înainte de mișcarea reală, instituțiile au nevoie de lichiditate. Traderii de retail își plasează stop-loss-urile sub minimele intervalului asiatic. Londra «sparge» aceste niveluri, colectează stop-loss-urile (= lichiditate) și se întoarce.",
-    // Theory 2 (TA)
-    theory2Sub: "Intervalul asiatic este un nivel tehnic esențial. El definește punctele de lichiditate pentru manipularea londoneză.",
-    theory2Title: "Asia Range și conceptul AMD",
-    // AMD steps
-    amdAccWord: "Acumulare",
-    amdAccDesc: "Sesiunea asiatică. Jucătorii mari își construiesc pozițiile discret. Prețul se mișcă într-un interval îngust, creând iluzia unei «piețe plictisitoare».",
-    amdManipWord: "Manipulare",
-    amdManipDesc: "Deschiderea Londrei. Instituțiile sparg granițele intervalului asiatic într-o direcție falsă. Declanșează stop-loss-urile traderilor de retail.",
-    amdDistWord: "Distribuție",
-    amdDistDesc: "Mișcarea reală. Având poziția și lichiditatea altora, instituțiile lansează trendul în direcția dorită.",
-    // AMD diagram
-    amdDiagramLabel: "STRUCTURA ZILEI DE TRANZACȚIONARE — SCHEMA AMD",
-    amdDiagAsia: "ASIA · 00:00–09:00",
-    amdDiagLondon: "LONDRA · 07:00–16:00",
-    amdDiagNy: "NEW YORK · 13:00+",
-    amdDiagTrend: "↑ TREND",
-    // Overlap detail
-    overlapDetailPrefix: "Suprapunerea sesiunilor: 16:00–",
-    overlapDetailMskLabel: "19:00 MSK",
-    overlapDetailSuffix: " — fereastra fierbinte",
-    overlapDetailBody: "În această perioadă, Londra și New York sunt active simultan. Volumele se dublează. Majoritatea mișcărilor mari ale zilei se încheie chiar aici. Pentru trader, aceasta este fereastra optimă: spread îngust, mișcări predictibile, volum ridicat de execuție a ordinelor.",
-    // Checklist
-    checklistSub: "Bifați fiecare punct pe care l-ați înțeles și sunteți gata să îl aplicați.",
-    checklistTitle: "Lista de verificare — Capitolul 5",
-    checklistItem1: "Ziua de tranzacționare se împarte în trei sesiuni: Asia, Londra, New York",
-    checklistItem2: "Sesiunea asiatică — acumulare: interval îngust, lichiditate scăzută",
-    checklistItem3: "Londra deschide cu manipulare — o spargere falsă a intervalului Asiei",
-    checklistItem4: "Trendul real se formează după Stop Hunt, nu înainte de el",
-    checklistItem5: "Suprapunerea Londra + New York (16:00–<span class='local-time' data-utc='2026-03-09T16:00:00Z'>19:00 MSK</span>) — vârful volumelor",
-    checklistItem6: "AMD: Acumulare → Manipulare → Distribuție — un ciclu în fiecare zi",
-    checklistItem7: "Aurul explodează la 15:30–<span class='local-time' data-utc='2026-03-09T13:00:00Z'>16:00 MSK</span>: deschiderea New York-ului + COMEX",
-    checklistDoneTitle: "✅ Capitolul 5 asimilat!",
-    checklistDoneBody: "Sunteți gata să citiți piața ca pe un program, nu ca pe un haos.",
-    // Conclusions
-    conclusionsLabel: "CONCLUZIILE CAPITOLULUI 5",
-    conclusionsTitle: "Ce știți acum",
-    conclusion1: "Asia nu este «plictisitoare» — acumulează poziții pentru Londra",
-    conclusion2: "Spargerea Asiei de către Londra este, cel mai adesea, o capcană. Așteptați revenirea",
-    conclusion3: "Suprapunerea Londra + New York = volume maxime = cel mai bun moment",
-    conclusion4: "AMD explică fiecare zi de tranzacționare, pe orice instrument",
-    conclusion5: "JPY este activ noaptea, XAU/USD explodează la deschiderea New York-ului",
-    conclusion6: "A tranzacționa împotriva contextului sesiunii înseamnă a tranzacționa orbește",
-    // Footer
-    footerAskLink: "Mai aveți o întrebare? Scrieți analistului",
-    footerNextBtn: "Nivelul 6: Pulsul Știrilor →",
+    heroTitleLine1: "Ceasurile",
+    heroAnd: "și",
+    heroTitleLine2: "Globale",
+    heroSubtitle: "De ce explodează aurul la 12:30 UTC? Cine mișcă piața noaptea? Lichiditatea are un orar — direcția, nu. L-am măsurat.",
+    fundamentalChip: "Fundamental 60%",
+    technicalChip: "Tehnic 40%",
+    interactiveChip: "3 Module Interactive",
+    clocksSub: "Bursa e o platformă cu program. Sesiunea e un nume convențional pentru orele de lucru ale unei regiuni. Mai departe — doar evenimente, fiecare cu proprietar și oră exactă.",
+    globeSub: "Nu o curbă „de activitate” inventată — dimensiunea medie măsurată de noi a barei de 30 de minute, oră de oră.",
+    hourStatsSub: "Exclusivitatea noastră: harta pe ore a intervalului, construită pe bekfill-ul real MT5.",
+    enginesSub: "Harta a arătat cocoașele. Iată cine le face.",
+    stopsSub: "Cel mai mitologizat subiect al cursului — pe date, nu pe senzații.",
+    amdSub: "Analizăm modelul pe bucăți: ce e măsurat și ce e o poveste convenabilă.",
+    sweepSub: "O zi reală. O spargere reală. Decizia ta — înainte de dezvăluire.",
+    trainerSub: "Zile reale din bekfill, rotație cinstită, verificare în preț.",
+    dstSub: "Trei săptămâni pe an programul se dă peste cap. Iată exact când.",
+    windowSub: "Tot ce a fost înainte era despre piață în general. Aici — despre tine.",
+    quizKicker: "TESTEAZĂ-TE", quizTitle: "Ce ai învățat în acest capitol", quizNext: "Continuă →",
+    quizStuckAll: "Totul s-a fixat.", quizStuckSome: "Aproape totul s-a fixat.",
+    quizBackToSection: "← Înapoi la secțiune",
+    askQuestionLabel: "Mai aveți o întrebare? Scrieți analistului",
+    nextChapterBtn: "Nivel 6: Pulsul Știrilor →",
+    loadingLabel: "Se încarcă măsurătorile noastre…",
+    loadErrorLabel: "Datele capitolului nu s-au încărcat — unele blocuri nu sunt afișate. Aceasta e o eroare blocantă, nu un avertisment.",
+  },
+  en: {
+    levelChip: "LEVEL 5",
+    stepExplain: "EXPLAIN", stepShow: "SHOW", stepDo: "LET YOU TRY",
+    faTag: "FA 60%", taTag: "TA 40%",
+    chapterNameShort: "Global Clocks",
+    heroEyebrow: "SBF COMPANY — CHAPTER 5",
+    heroTitleLine1: "Global",
+    heroAnd: "and",
+    heroTitleLine2: "Clocks",
+    heroSubtitle: "Why does gold explode at 12:30 UTC? Who moves the market at night? Liquidity has a schedule — direction doesn't. We measured it.",
+    fundamentalChip: "Fundamental 60%",
+    technicalChip: "Technical 40%",
+    interactiveChip: "3 Interactives",
+    clocksSub: "An exchange is a venue with a schedule. A session is shorthand for a region's working hours. What follows is events — each with an owner and an exact time.",
+    globeSub: "Not a made-up \"activity\" curve — our own measured median 30-minute bar size, hour by hour.",
+    hourStatsSub: "Our own exclusive: an hourly range map built on the real MT5 backfill.",
+    enginesSub: "The map showed the humps. Here's who makes them.",
+    stopsSub: "The most mythologised topic in the course — on data, not on feeling.",
+    amdSub: "Breaking the model down piece by piece: what's measured, what's a convenient story.",
+    sweepSub: "One real day. A real sweep. Your call — before the reveal.",
+    trainerSub: "Real days from the backfill, an honest rotation, price-based checking.",
+    dstSub: "Three weeks a year the schedule shifts out of sync. Here's exactly when.",
+    windowSub: "Everything before this was about the market in general. This is about you.",
+    quizKicker: "TEST YOURSELF", quizTitle: "What you learned in this chapter", quizNext: "Next →",
+    quizStuckAll: "Everything stuck.", quizStuckSome: "Almost everything stuck.",
+    quizBackToSection: "← Back to the section",
+    askQuestionLabel: "Have a question? Write to an analyst",
+    nextChapterBtn: "Level 6: News Pulse →",
+    loadingLabel: "Loading our measurements…",
+    loadErrorLabel: "Chapter data failed to load — some blocks aren't rendered. This is a blocking error, not a warning.",
   },
 };
 
-const C = {
-  gold:"#c9973a", goldLight:"#f4d49f", goldPale:"#f7f0e3",
-  black:"#18181a", ink:"#18181a", inkMid:"#555555",
-  inkSoft:"rgba(24,24,26,0.58)", inkFaint:"rgba(24,24,26,0.28)",
-  white:"#ffffff", surface:"#faf8f5", surfaceMid:"#f0ebe0",
-  border:"rgba(24,24,26,0.1)", borderGold:"rgba(201,151,58,0.25)",
-  green:"#089981", greenD:"#2d7a4f", greenPale:"#eaf5ee",
-  red:"#f23645", redD:"#c0392b", redPale:"#fdecea",
-  blue:"#2563eb", chart:"#131722"
-};
+const {C, Mono, Chip, Rule, GlossWord, withGlossTerms, AskAnalystBtn, getChUrl, QuizBlock, ComplianceFootnote} = window.AcademyShared;
 
-const Mono = ({children,size=13,color=C.inkSoft,spacing=3,style={},className=""}) =>
-  <span className={className} style={{fontFamily:"'Courier New',monospace",fontSize:size,letterSpacing:spacing,color,...style}}>{children}</span>;
-const Chip = ({children,color=C.gold}) =>
-  <span style={{fontFamily:"'Courier New',monospace",fontSize:11,letterSpacing:3,color,border:`1px solid ${color}`,padding:"4px 11px",display:"inline-block",textTransform:"uppercase"}}>{children}</span>;
-const Rule = ({w="50%",my=32}) =>
-  <div style={{height:1,background:`linear-gradient(90deg,transparent,${C.gold},transparent)`,width:w,margin:`${my}px auto`,opacity:0.4}}/>;
-const SectionTitle = ({children,sub,align="left"}) => (
-  <div style={{textAlign:align,marginBottom:36}}>
+const SectionTitle = ({children,sub,align="left",id}) => (
+  <div id={id} style={{textAlign:align,marginBottom:36,scrollMarginTop:130}}>
     <h2 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(24px,3.2vw,36px)",fontWeight:400,color:C.black,lineHeight:1.15,marginBottom:sub?10:0}}>{children}</h2>
     {sub && <p style={{fontSize:15,color:C.inkSoft,lineHeight:1.65,maxWidth:680,margin:align==="center"?"0 auto":0}}>{sub}</p>}
   </div>
 );
-const InfoCard = ({icon,title,text,accent=C.gold}) => (
-  <div style={{background:C.surface,border:`1px solid ${C.border}`,padding:"22px 26px",borderRadius:4,borderLeft:`3px solid ${accent}`}}>
-    <div style={{fontSize:20,marginBottom:8}}>{icon}</div>
-    <div style={{fontWeight:600,fontSize:13,color:C.black,letterSpacing:0.5,marginBottom:7,textTransform:"uppercase"}}>{title}</div>
-    <div style={{fontSize:13,color:C.inkMid,lineHeight:1.65}}>{text}</div>
-  </div>
+const StepTag = ({n,label}) => (
+  <Mono size={9.5} color={C.inkFaint} spacing={2} style={{display:"block",marginBottom:8,textTransform:"uppercase"}}>{n} · {label}</Mono>
 );
-const getChUrl = (ch) => {
-  const p = new URLSearchParams(window.location.search).get('path')||'explorer';
-  let base = INITIAL_LANG==='ru'?'/edu/b':`/edu/${INITIAL_LANG}/b`;
-  return `${base}/${ch}?path=${p}`;
-};
 
-// ─── AskAnalystPopup ──────────────────────────────────────────────────────────
-function AskAnalystPopup({onClose}) {
-  const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
-  const prefill = INITIAL_LANG==='ru' ? "Здравствуйте, есть вопрос по главе 5"
-    : INITIAL_LANG==='en' ? "Hello, question on chapter 5" : "Bună ziua, întrebare cap 5";
-  const tgLink = `https://t.me/SBF_Support?text=${encodeURIComponent(prefill)}`;
-  const waLink = `https://api.whatsapp.com/send/?phone=37369005200&text=${encodeURIComponent(prefill)}&type=phone_number&app_absent=0`;
-  return (
-    <div style={{position:"fixed",inset:0,zIndex:1000,display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={onClose}>
-      <div style={{position:"fixed",inset:0,background:"rgba(250,248,245,0.98)"}}/>
-      <div onClick={e=>e.stopPropagation()} style={{position:"relative",width:"100%",maxWidth:900,zIndex:1,margin:"auto",padding:"40px 0"}}>
-        <button onClick={onClose} style={{position:"absolute",top:0,right:10,background:"none",border:"none",fontSize:35,cursor:"pointer",color:C.inkFaint,lineHeight:1}}>×</button>
-        <div style={{marginBottom:40}}>
-          <Mono size={13} color={C.gold} spacing={3} style={{display:"block",marginBottom:15}}>{S.askTag}</Mono>
-          <h2 style={{fontSize:"clamp(30px,5vw,42px)",fontWeight:700,color:C.black,marginBottom:15,fontFamily:"'DM Serif Display',serif"}}>{S.askTitle}</h2>
-          <p style={{fontSize:18,color:C.inkMid}}>{S.askBody}</p>
-        </div>
-        <div className="messenger-grid">
-          {[{href:tgLink,bg:"#0088cc",icon:"🚀",name:"SBF Support",sub:S.askTelegramSub,btn:S.askTelegramBtn},
-            {href:waLink,bg:"#25d366",icon:"💬",name:"SBF Company",sub:S.askWhatsappSub,btn:S.askWhatsappBtn}
-          ].map((m,i) => (
-            <div key={i} style={{background:"#fff",border:"1px solid #e0e0e0",borderRadius:12,padding:"30px 25px",display:"flex",flexDirection:"column"}}>
-              <div style={{display:"flex",alignItems:"center",gap:15,marginBottom:30}}>
-                <div style={{width:50,height:50,borderRadius:"50%",background:i===0?"#e1f3fb":"#e8f5ed",display:"flex",alignItems:"center",justifyContent:"center"}}>{m.icon}</div>
-                <div><div style={{fontSize:18,fontWeight:700}}>{m.name}</div><div style={{fontSize:14,color:C.inkFaint}}>{m.sub}</div></div>
-              </div>
-              <div style={{background:m.bg,padding:"15px 20px",borderRadius:"12px 12px 0 12px",marginBottom:30,alignSelf:"flex-end",maxWidth:"90%"}}>
-                <div style={{fontSize:14,color:"#fff"}}>{prefill}</div>
-              </div>
-              <a href={m.href} target="_blank" style={{marginTop:"auto",display:"block",background:m.bg,color:"#fff",textAlign:"center",padding:"18px",borderRadius:8,textDecoration:"none",fontWeight:700}}>{m.btn}</a>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
+// SceneEngine mounting helper -- same convention as chapters 2-4: each JSX
+// page redefines its own copy since there's no shared module system between
+// Jinja pages.
+function SceneMount({ url, mode, symbol, copy }) {
+  const { useRef, useEffect } = React;
+  const ref = useRef(null);
+  useEffect(() => {
+    let cancelled = false;
+    fetch(url).then(r => r.json()).then(data => {
+      if (!cancelled && ref.current) window.SceneEngine.mount(ref.current, { mode, data, symbol, copy });
+    }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [url]);
+  return <div ref={ref}/>;
 }
 
-// ─── Interactive 1: Liquidity Globe — Session Timeline ────────────────────────
-function LiquidityGlobe() {
-  const { useState, useEffect, useRef } = React;
-  const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
-  const [hour, setHour] = useState(9);
-  const [playing, setPlaying] = useState(false);
-  const timerRef = useRef(null);
-
-  const sessions = [
-    {
-      name:S.glSessionTokyoName, nameEn:"Tokyo", emoji:"🇯🇵",
-      color:"#8b5cf6", colorLight:"rgba(139,92,246,0.15)",
-      start:0, end:9,
-      pairs:["USD/JPY","AUD/USD","NZD/USD"],
-      desc:S.glSessionTokyoDesc,
-      mskOffset:`+5 ${S.mskAbbrev}`
-    },
-    {
-      name:S.glSessionLondonName, nameEn:"London", emoji:"🇬🇧",
-      color:C.gold, colorLight:"rgba(201,151,58,0.15)",
-      start:7, end:16,
-      pairs:["EUR/USD","GBP/USD","XAU/USD"],
-      desc:S.glSessionLondonDesc,
-      mskOffset:`+2 ${S.mskAbbrev}`
-    },
-    {
-      name:S.glSessionNyName, nameEn:"New York", emoji:"🇺🇸",
-      color:C.green, colorLight:"rgba(8,153,129,0.15)",
-      start:13, end:22,
-      pairs:["EUR/USD","USD/CAD","DJI"],
-      desc:S.glSessionNyDesc,
-      mskOffset:`-5 ${S.mskAbbrev}`
-    },
-  ];
-
-  const overlap = hour >= 13 && hour < 16;
-
-  // Volume curve: peaks at overlap 13-16 GMT
-  const getVolume = (h) => {
-    if (h >= 13 && h < 16) return 100;
-    if (h >= 7 && h < 13) return 55 + (h - 7) * 7;
-    if (h >= 16 && h < 18) return 85 - (h - 16) * 15;
-    if (h >= 18 && h < 22) return 55 - (h - 18) * 8;
-    if (h >= 0 && h < 7) return 20 + h * 3;
-    return 15;
-  };
-
-  const activeSessions = sessions.filter(s => hour >= s.start && hour < s.end);
-
+// SBFSessionTable mounting helper -- same ref-callback pattern as SceneMount.
+function SessionTableMount({ lang, zone, mode }) {
+  const { useRef, useEffect } = React;
+  const ref = useRef(null);
   useEffect(() => {
-    if (playing) {
-      timerRef.current = setInterval(() => {
-        setHour(h => h >= 23 ? 0 : h + 1);
-      }, 700);
-    } else {
-      clearInterval(timerRef.current);
+    let cancelled = false;
+    if (ref.current && window.SBFSessionTable) {
+      window.SBFSessionTable.mount(ref.current, { lang, zone, mode }).catch(() => {});
     }
-    return () => clearInterval(timerRef.current);
-  }, [playing]);
+    return () => { cancelled = true; };
+  }, [lang, zone, mode]);
+  return <div ref={ref} style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 24px"}}/>;
+}
 
-  const W = 680, H = 80;
-  const barW = W / 24;
+// ── fillTemplate: единственное место, где числа главы попадают в текст.
+// Плейсхолдер без значения в vars -- честный "—" + console.error, а не
+// тихая подстановка выдуманного числа (§8 критериев приёмки: "ни одного
+// числа, написанного руками", незаполненный плейсхолдер -- блокирующий баг).
+function fillTemplate(str, vars) {
+  if (!str) return str;
+  return str.replace(/\{\{(\w+)\}\}/g, (m, key) => {
+    const v = vars ? vars[key] : undefined;
+    if (v === undefined || v === null || (typeof v === "number" && isNaN(v))) {
+      console.error("[ch5] отсутствует значение для {{" + key + "}}");
+      return "—";
+    }
+    return String(v);
+  });
+}
 
-  // Build volume bars for chart
-  const bars = Array.from({length:24}, (_,i) => ({h:i, vol: getVolume(i)}));
+// ── <Stat/>: примитив главы 5 (SPEC §3.4/§8) -- отображает уже вычисленное
+// число или честно "—" + console.error, если данных нет. Числа сюда всегда
+// приходят из hourly_profile.json/asia_sweep.json через компонент выше по
+// дереву -- ни одного литерала в JSX-разметке.
+function Stat({v, suffix="", prefix="", round}) {
+  const ok = v !== undefined && v !== null && !(typeof v === "number" && isNaN(v));
+  if (!ok) {
+    console.error("[ch5] Stat: нет значения");
+    return <span style={{color:C.red}}>—</span>;
+  }
+  const val = (round != null && typeof v === "number") ? v.toFixed(round) : v;
+  return <span>{prefix}{val}{suffix}</span>;
+}
 
-  const fmtHour = h => `${String(h).padStart(2,'0')}:00`;
-  const mskHour = h => `${String((h+3)%24).padStart(2,'0')}:00 ${S.mskAbbrev}`;
+// ── Загрузка всех данных главы: hourly_profile.json, asia_sweep.json,
+// market_hours.json (через SBFSessionTable.load()), ch5_coldopen_day.json.
+function useCh5Data() {
+  const { useState, useEffect } = React;
+  const [state, setState] = useState({ loading: true, error: null, hp: null, as: null, cfg: null, coldOpen: null });
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all([
+      fetch("/data/edu_stats/hourly_profile.json").then(r => { if (!r.ok) throw new Error("hourly_profile.json HTTP " + r.status); return r.json(); }),
+      fetch("/data/edu_stats/asia_sweep.json").then(r => { if (!r.ok) throw new Error("asia_sweep.json HTTP " + r.status); return r.json(); }),
+      window.SBFSessionTable.load(),
+      fetch("/data/edu_scenes/ch5_coldopen_day.json").then(r => { if (!r.ok) throw new Error("ch5_coldopen_day.json HTTP " + r.status); return r.json(); }),
+    ]).then(([hp, as, cfg, coldOpen]) => {
+      if (!cancelled) setState({ loading: false, error: null, hp, as, cfg, coldOpen });
+    }).catch(err => {
+      console.error("[ch5] load failed:", err);
+      if (!cancelled) setState({ loading: false, error: err, hp: null, as: null, cfg: null, coldOpen: null });
+    });
+    return () => { cancelled = true; };
+  }, []);
+  return state;
+}
 
+// ── vars: единственный источник чисел для текстовых {{плейсхолдеров}}
+// (остальные компоненты читают hp/as напрямую в своём собственном состоянии).
+function buildVars(hp, as, cfg, lang) {
+  if (!hp || !as || !cfg) return null;
+  const g = hp.GOLD;
+  if (!g) return null;
+  const avg = g.avg_share || {};
+  const ASIA_HOURS = [0,1,2,3,4,5,6];
+  const nightVals = ASIA_HOURS.map(h => avg[h]).filter(v => v != null);
+  const nightShare = nightVals.length ? Math.round((nightVals.reduce((a,b)=>a+b,0)/nightVals.length)*1000)/10 : null;
+
+  const anchor = cfg.anchors.summer;
+  const tstr = window.SBFSessionTable.timeString;
+  const findEv = id => cfg.events.find(e => e.id === id);
+  const evOverlap = findEv("overlap"), evLseClose = findEv("lse_close"), evUsMacro = findEv("us_macro"), evLseOpen = findEv("lse_open");
+
+  const midHour = evLseOpen ? parseInt(evLseOpen.utc_dst.split(":")[0], 10) : null;
+  const midShare = (midHour != null && avg[midHour] != null) ? Math.round(avg[midHour]*1000)/10 : null;
+
+  return {
+    n_days: g.coverage ? g.coverage.n_days : null,
+    total_bars: g.total_bars,
+    peak_hour: g.peak_hour, peak_share: g.peak_share,
+    trough_hour: g.trough_hour, trough_share: g.trough_share,
+    peak_ratio: g.peak_ratio,
+    years_consistent: g.years_consistent, years_total: g.years_total,
+    coverage_first: g.coverage ? g.coverage.first : null,
+    coverage_last: g.coverage ? g.coverage.last : null,
+    night_share: nightShare,
+    midHour, midShare,
+    sweep_total_days: as.total_days, sweep_days: as.sweep_days, sweep_pct: as.sweep_pct,
+    reversal_pct: as.reversal_pct, continuation_pct: as.continuation_pct, neutral_pct: as.neutral_pct,
+    overlap_local: evOverlap ? tstr(evOverlap, anchor, "Europe/Chisinau", lang) : null,
+    overlap_md: evOverlap ? tstr(evOverlap, anchor, "Europe/Chisinau", lang) : null,
+    overlap_kz: evOverlap ? tstr(evOverlap, anchor, "Asia/Almaty", lang) : null,
+    us_data_md: evUsMacro ? tstr(evUsMacro, anchor, "Europe/Chisinau", lang) : null,
+    lon_close_local: evLseClose ? tstr(evLseClose, anchor, "Europe/Chisinau", lang) : null,
+  };
+}
+
+const ASSET_LABELS = { GOLD:"GOLD (XAU/USD)", EURUSD:"EUR/USD", USDJPY:"USD/JPY", BTC:"BTC/USD", SPX:"S&P 500", WTI:"WTI" };
+const ASSET_ORDER = ["GOLD","EURUSD","USDJPY","BTC","SPX","WTI"];
+
+// ─── Cold open: "У прилива есть таблица" ─────────────────────────────────────
+function ColdOpen5({ coldOpen }) {
+  const T5 = window.Ch5Content[INITIAL_LANG] || window.Ch5Content.ru;
+  const co = T5.coldOpen;
+  if (!coldOpen) {
+    return (
+      <div style={{background:C.black,padding:"60px 5vw",textAlign:"center"}}>
+        <Mono size={11} color={C.gold} spacing={4}>{co.tag}</Mono>
+      </div>
+    );
+  }
+  const meta = coldOpen.meta, candles = coldOpen.candles || [];
+  const maxRange = Math.max(...candles.map(c => c.high - c.low));
+  const peakTime = meta.peak_bar_time;
+  // Строка после первого бара зависит от того, как крупнейший бар суток
+  // соотносится с первой третью (meta.coldopen_key, см. build_ch5_coldopen_day.py) —
+  // день выбирается как медианный, а не рекордный, и на тихий день утверждение
+  // "бар больше первой трети" было бы неправдой рядом со своими же числами.
+  const climax = (co.climaxByKey && co.climaxByKey[meta.coldopen_key]) || co.lines[3];
+  const lines = co.lines.map((line, i) => i === 3 ? fillTemplate(climax, {day_range: meta.day_range}) : line);
   return (
-    <div style={{background:C.black,borderRadius:8,padding:"36px 40px",color:C.white}}>
-      <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:28}}>
-        <span style={{fontSize:28}}><img class='mi-icon' style={{verticalAlign:'middle'}} src='/assets/icons/icon-globe.png' alt='' width='20' height='20' /></span>
-        <div>
-          <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.gold}}>{S.glTitle}</div>
-          <Mono size={11} color="rgba(255,255,255,0.4)" spacing={2}>{S.glSubtitle}</Mono>
-        </div>
+    <div style={{background:C.black,padding:"70px 5vw 56px",color:"#fff"}}>
+      <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:24,textAlign:"center"}}>{co.tag}</Mono>
+      <div style={{maxWidth:840,margin:"0 auto 28px"}}>
+        {lines.map((line,i) => (
+          <p key={i} style={{fontSize: i<2 ? 15 : i===co.lines.length-1 ? 17 : 15.5, color: i>=4?"#fff":"rgba(255,255,255,0.72)", fontWeight: i>=4?600:400, lineHeight:1.75, marginBottom:14, fontFamily: i===co.lines.length-1 ? "'DM Serif Display',serif" : "inherit"}}>{line}</p>
+        ))}
       </div>
-
-      {/* Time display */}
-      <div style={{textAlign:"center",marginBottom:28}}>
-        <div style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(36px,6vw,56px)",color:C.gold,letterSpacing:2}}>
-          {fmtHour(hour)} <span style={{fontSize:"clamp(16px,2vw,22px)",color:"rgba(255,255,255,0.4)",letterSpacing:1}}>GMT</span>
-        </div>
-        <div style={{fontSize:14,color:"rgba(255,255,255,0.35)",marginTop:4,fontFamily:"monospace"}}>{mskHour(hour)}</div>
-        {overlap && (
-          <div style={{display:"inline-block",marginTop:10,background:"rgba(201,151,58,0.15)",border:"1px solid rgba(201,151,58,0.4)",padding:"5px 18px",borderRadius:3}}>
-            <Mono size={11} color={C.gold} spacing={2}>{S.glOverlapBanner}</Mono>
-          </div>
-        )}
-      </div>
-
-      {/* Session cards */}
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:14,marginBottom:28}} className="g3">
-        {sessions.map((s,i) => {
-          const active = hour >= s.start && hour < s.end;
+      <div style={{display:"flex",alignItems:"flex-end",gap:2,height:140,maxWidth:900,margin:"0 auto 14px",padding:"0 4px"}}>
+        {candles.map((c,i) => {
+          const r = c.high - c.low;
+          const h = Math.max(2, (r / maxRange) * 140);
+          const isPeak = c.time === peakTime;
+          const isQuiet = new Date(c.time).getUTCHours() < 8;
           return (
-            <div key={i} style={{
-              borderRadius:6,padding:"18px 20px",
-              background: active ? s.colorLight : "rgba(255,255,255,0.03)",
-              border: `1px solid ${active ? s.color : "rgba(255,255,255,0.07)"}`,
-              transition:"all .4s",opacity: active ? 1 : 0.4
-            }}>
-              <div style={{display:"flex",gap:8,alignItems:"center",marginBottom:10}}>
-                <span style={{fontSize:18}}>{s.emoji}</span>
-                <div style={{fontWeight:700,fontSize:13,color: active ? s.color : "rgba(255,255,255,0.5)"}}>{s.name}</div>
-                {active && <span style={{marginLeft:"auto",fontSize:9,fontFamily:"monospace",color:s.color,letterSpacing:1,background:`rgba(${s.color==='#8b5cf6'?'139,92,246':s.color===C.gold?'201,151,58':'8,153,129'},0.15)`,padding:"2px 7px",borderRadius:2}}>{S.glActiveBadge}</span>}
-              </div>
-              <div style={{fontSize:11,fontFamily:"monospace",color:"rgba(255,255,255,0.35)",marginBottom:8}}>
-                {fmtHour(s.start)}–{fmtHour(s.end)} GMT · {s.mskOffset}
-              </div>
-              {active && <p style={{fontSize:12,color:"rgba(255,255,255,0.6)",lineHeight:1.6,marginBottom:10}}>{s.desc}</p>}
-              {active && (
-                <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
-                  {s.pairs.map(p => <span key={p} style={{fontSize:10,fontFamily:"monospace",color:s.color,background:`rgba(${s.color==='#8b5cf6'?'139,92,246':s.color===C.gold?'201,151,58':'8,153,129'},0.1)`,padding:"2px 8px",borderRadius:2}}>{p}</span>)}
-                </div>
-              )}
-            </div>
+            <div key={i} title={c.time} style={{flex:1,height:h,background:isPeak?C.gold:isQuiet?"rgba(255,255,255,0.15)":"rgba(201,151,58,0.45)",borderRadius:1}}/>
           );
         })}
       </div>
+      <div style={{display:"flex",justifyContent:"space-between",maxWidth:900,margin:"0 auto 30px",fontSize:10,fontFamily:"monospace",color:"rgba(255,255,255,0.35)",padding:"0 4px"}}>
+        <span>00:00 UTC</span><span>12:00 UTC</span><span>23:30 UTC</span>
+      </div>
+      <div style={{display:"flex",gap:24,justifyContent:"center",flexWrap:"wrap",maxWidth:900,margin:"0 auto 22px",fontFamily:"monospace",fontSize:11,color:"rgba(255,255,255,0.55)"}}>
+        <span>{co.dayRangeLabel}: <b style={{color:"#fff"}}>{meta.day_range}</b></span>
+        <span>{co.quietLabel}: <b style={{color:"#fff"}}>{meta.quiet_third_range}</b></span>
+        <span>{co.peakLabel}: <b style={{color:C.gold}}>{meta.peak_bar_range}</b></span>
+        <span>{co.ratioLabel}: <b style={{color:C.gold}}>×{meta.peak_vs_quiet}</b></span>
+      </div>
+      <p style={{textAlign:"center",fontSize:11,color:"rgba(255,255,255,0.4)",fontStyle:"italic",marginBottom:20}}>
+        {meta["selection_note_" + INITIAL_LANG] || meta.selection_note_ru} · {meta.date} · {meta.days_considered && (INITIAL_LANG==="ru"?"из "+meta.days_considered+" полных суток":INITIAL_LANG==="ro"?"din "+meta.days_considered+" zile complete":"of "+meta.days_considered+" full days")}
+      </p>
+      <p style={{textAlign:"center",fontFamily:"monospace",fontSize:12,color:C.gold}}>{co.cta}</p>
+    </div>
+  );
+}
 
-      {/* Volume chart */}
-      <div style={{marginBottom:20}}>
-        <Mono size={9} color="rgba(255,255,255,0.3)" spacing={1} style={{display:"block",marginBottom:10}}>{S.glVolumeLabel}</Mono>
-        <svg viewBox={`0 0 ${W} ${H+20}`} style={{width:"100%",display:"block"}}>
-          {bars.map(({h,vol}) => {
-            const s = sessions.find(s => h >= s.start && h < s.end);
-            const color = s ? s.color : "rgba(255,255,255,0.15)";
-            const isOverlap = h >= 13 && h < 16;
-            const barH = (vol / 100) * H;
-            const active = h === hour;
+// ─── Why sessions exist (4 cards) ─────────────────────────────────────────────
+function WhySessionsCards() {
+  const T5 = window.Ch5Content[INITIAL_LANG] || window.Ch5Content.ru;
+  return (
+    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,marginBottom:32}} className="g2">
+      {T5.whySessions.cards.map((c,i) => (
+        <div key={i} style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:6,padding:"20px 22px",borderLeft:`3px solid ${C.gold}`}}>
+          <div style={{fontSize:22,marginBottom:8}}>{c.emoji}</div>
+          <div style={{fontWeight:600,fontSize:13.5,color:C.black,marginBottom:8}}>{c.title}</div>
+          <p style={{fontSize:12.5,color:C.inkMid,lineHeight:1.65,margin:0}}>{c.body}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ─── Hour stats block: heatmap 24×N — ядро главы ──────────────────────────────
+function HourStatsBlock({ hp, vars }) {
+  const { useState } = React;
+  const T5 = window.Ch5Content[INITIAL_LANG] || window.Ch5Content.ru;
+  const hs = T5.hourStats;
+  const [asset, setAsset] = useState("GOLD");
+  const [subset, setSubset] = useState("all");
+  const data = hp && hp[asset];
+  const hours = Array.from({length:24}, (_,i) => i);
+
+  const periods = data ? Object.keys(data.by_period).sort() : [];
+  const cellVal = (period, h) => {
+    if (subset === "all") {
+      const c = data.by_period[period][h];
+      return c ? c.share_of_day : null;
+    }
+    const key = subset === "friday" ? "friday" : subset === "nfp" ? "nfp_day" : "regular_day";
+    const sub = data.subsets && data.subsets[key];
+    return sub && sub.profile ? sub.profile[h] : null;
+  };
+
+  let maxVal = 0.0001;
+  if (data) {
+    if (subset === "all") {
+      periods.forEach(p => hours.forEach(h => { const v = cellVal(p,h); if (v!=null && v>maxVal) maxVal = v; }));
+    } else {
+      hours.forEach(h => { const v = cellVal(null,h); if (v!=null && v>maxVal) maxVal = v; });
+    }
+  }
+
+  const warnings = data ? (data.warnings || []) : [];
+  const warnText = { short_history: hs.coverageWarningShort, few_periods: hs.coverageWarningFew, under_one_year: hs.coverageWarningYear };
+
+  return (
+    <div>
+      <p style={{fontSize:14,color:C.inkMid,lineHeight:1.75,marginBottom:24,maxWidth:820}}>{data ? fillTemplate(hs.preamble, {total_bars:data.total_bars, n_days:data.coverage?data.coverage.n_days:null, coverage_first:data.coverage?data.coverage.first:null, coverage_last:data.coverage?data.coverage.last:null}) : "—"}</p>
+
+      <div style={{display:"flex",gap:20,flexWrap:"wrap",marginBottom:18,alignItems:"center"}}>
+        <div>
+          <Mono size={10} color={C.inkFaint} spacing={1} style={{display:"block",marginBottom:6,textTransform:"uppercase"}}>{hs.switchInstrument}</Mono>
+          <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
+            {ASSET_ORDER.filter(a => hp && hp[a]).map(a => (
+              <button key={a} onClick={() => setAsset(a)} style={{fontFamily:"monospace",fontSize:10.5,padding:"5px 10px",cursor:"pointer",background:a===asset?C.gold:"#fff",color:a===asset?"#18181a":C.inkMid,border:`1px solid ${a===asset?C.gold:C.border}`,borderRadius:3}}>{a}</button>
+            ))}
+          </div>
+        </div>
+        <div>
+          <Mono size={10} color={C.inkFaint} spacing={1} style={{display:"block",marginBottom:6,textTransform:"uppercase"}}>{hs.switchSubset}</Mono>
+          <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
+            {[["all",hs.subsetAll],["friday",hs.subsetFriday],["nfp",hs.subsetNfp],["regular",hs.subsetRegular]].map(([k,label]) => (
+              <button key={k} onClick={() => setSubset(k)} style={{fontFamily:"monospace",fontSize:10.5,padding:"5px 10px",cursor:"pointer",background:k===subset?C.black:"#fff",color:k===subset?"#fff":C.inkMid,border:`1px solid ${k===subset?C.black:C.border}`,borderRadius:3}}>{label}</button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {!data ? <p style={{fontSize:13,color:C.inkFaint}}>—</p> : (
+      <>
+        {subset === "all" ? (
+          <div style={{overflowX:"auto",marginBottom:8}}>
+            <div style={{display:"inline-block",minWidth:640}}>
+              <div style={{display:"flex",marginBottom:2}}>
+                <div style={{width:70,flexShrink:0}}/>
+                {hours.map(h => <div key={h} style={{flex:1,minWidth:22,textAlign:"center",fontSize:8,fontFamily:"monospace",color:C.inkFaint}}>{h}</div>)}
+              </div>
+              {periods.map(p => (
+                <div key={p} style={{display:"flex",marginBottom:2}}>
+                  <div style={{width:70,flexShrink:0,fontSize:10,fontFamily:"monospace",color:C.inkSoft,display:"flex",alignItems:"center"}}>{p}</div>
+                  {hours.map(h => {
+                    const v = cellVal(p, h);
+                    const alpha = v != null ? Math.max(0.08, v / maxVal) : 0;
+                    return <div key={h} title={v!=null ? (v*100).toFixed(1)+"%" : "—"} style={{flex:1,minWidth:22,height:22,background: v!=null ? `rgba(201,151,58,${alpha})` : "repeating-linear-gradient(45deg,#f0ebe0,#f0ebe0 3px,#fff 3px,#fff 6px)",border:`1px solid ${C.border}`}}/>;
+                  })}
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div style={{display:"flex",alignItems:"flex-end",gap:2,height:90,marginBottom:8}}>
+            {hours.map(h => {
+              const v = cellVal(null, h);
+              const barH = v != null ? Math.max(3, (v/maxVal)*90) : 2;
+              return <div key={h} title={h+":00 · "+(v!=null?(v*100).toFixed(1)+"%":"—")} style={{flex:1,height:barH,background: v!=null ? C.gold : C.border,borderRadius:1}}/>;
+            })}
+          </div>
+        )}
+
+        <div style={{display:"flex",gap:24,flexWrap:"wrap",marginBottom:28,fontFamily:"monospace",fontSize:12,color:C.inkMid}}>
+          <span>{fillTemplate(hs.peakLine, {peak_hour:data.peak_hour, peak_share:data.peak_share})}</span>
+          <span>{fillTemplate(hs.troughLine, {trough_hour:data.trough_hour, trough_share:data.trough_share})}</span>
+          <span>{fillTemplate(hs.ratioLine, {peak_ratio:data.peak_ratio, years_consistent:data.years_consistent, years_total:data.years_total})}</span>
+        </div>
+
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginBottom:28}} className="g2">
+          {hs.conclusions.map((c,i) => (
+            <div key={i} style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:6,padding:"16px 20px"}}>
+              <div style={{fontWeight:600,fontSize:12.5,color:C.black,marginBottom:6}}>{c.title}</div>
+              <p style={{fontSize:12,color:C.inkMid,lineHeight:1.6,margin:0}}>{fillTemplate(c.body, vars)}</p>
+            </div>
+          ))}
+        </div>
+
+        <div style={{background:C.goldPale,border:`1px solid ${C.borderGold}`,borderRadius:6,padding:"16px 20px",marginBottom:12}}>
+          <div style={{fontWeight:600,fontSize:12.5,color:C.black,marginBottom:6}}>{hs.honestTitle}</div>
+          <p style={{fontSize:12,color:C.inkMid,lineHeight:1.65,margin:0}}>{hs.honestBody}</p>
+        </div>
+
+        {warnings.length > 0 && (
+          <div style={{background:C.redPale,border:"1px solid rgba(242,54,69,.25)",borderRadius:6,padding:"14px 18px",marginBottom:16}}>
+            <div style={{fontWeight:600,fontSize:11.5,color:"#c0392b",marginBottom:6}}>{hs.coverageLabel}: {data.coverage ? `${data.coverage.first} → ${data.coverage.last} (${data.coverage.n_days}d, ${data.coverage.n_periods}p)` : "—"}</div>
+            {warnings.map(w => <p key={w} style={{fontSize:11.5,color:"#c0392b",lineHeight:1.6,margin:"4px 0 0"}}>· {warnText[w] || w}</p>)}
+          </div>
+        )}
+
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:10}}>
+          <a href="/data/edu_stats/hourly_profile.csv" download style={{fontFamily:"monospace",fontSize:12,color:C.gold,textDecoration:"none",border:`1px solid ${C.gold}`,padding:"9px 16px",borderRadius:4}}>{hs.downloadCsv}</a>
+          <span style={{fontSize:10.5,color:C.inkFaint,fontFamily:"monospace"}}>{hs.buildNote}</span>
+        </div>
+      </>
+      )}
+    </div>
+  );
+}
+
+// ─── Clocks master table (§3.2) ───────────────────────────────────────────────
+function ClocksBlock() {
+  const T5 = window.Ch5Content[INITIAL_LANG] || window.Ch5Content.ru;
+  const cl = T5.clocks;
+  return (
+    <div style={{marginBottom:36}}>
+      <p style={{fontSize:14,color:C.inkMid,lineHeight:1.75,marginBottom:20,maxWidth:820}}>{cl.preamble}</p>
+      <SessionTableMount lang={INITIAL_LANG} mode="summer"/>
+      <p style={{fontSize:11,color:C.inkFaint,fontStyle:"italic",marginTop:10,maxWidth:820}}>{cl.tableCaption}</p>
+    </div>
+  );
+}
+
+// ─── Liquidity Globe (глобус ликвидности, 3 шага, реальные данные) ───────────
+function LiquidityGlobe({ hp }) {
+  const { useState, useEffect, useRef } = React;
+  const T5 = window.Ch5Content[INITIAL_LANG] || window.Ch5Content.ru;
+  const gl = T5.globe;
+  const [asset, setAsset] = useState("GOLD");
+  const [hour, setHour] = useState(13);
+  const [touring, setTouring] = useState(false);
+  const timerRef = useRef(null);
+
+  const data = hp && hp[asset];
+  const avg = data ? data.avg_share : null;
+  const hours = Array.from({length:24}, (_,i) => i);
+  const maxShare = avg ? Math.max(...hours.map(h => avg[h] || 0)) : 1;
+
+  const midHourLocal = data ? Math.round(((data.trough_hour + data.peak_hour + (data.peak_hour < data.trough_hour ? 24 : 0)) / 2) % 24) : null;
+  const midShareLocal = (data && avg && midHourLocal != null && avg[midHourLocal] != null) ? Math.round(avg[midHourLocal]*1000)/10 : null;
+
+  useEffect(() => {
+    if (!touring || !data) return;
+    const stops = [data.trough_hour, midHourLocal, data.peak_hour].filter(v => v != null);
+    let i = 0;
+    setHour(stops[0]);
+    timerRef.current = setInterval(() => {
+      i++;
+      if (i >= stops.length) { setTouring(false); clearInterval(timerRef.current); return; }
+      setHour(stops[i]);
+    }, 2200);
+    return () => clearInterval(timerRef.current);
+  }, [touring, asset]);
+
+  const sessionBand = (h) => {
+    // приблизительные календарные окна (см. таблицу §3.2), не измерение --
+    // используются только как фоновая подсказка "кто примерно за столом".
+    const inAsia = h < 7 || h >= 21;
+    const inLondon = h >= 7 && h < 16;
+    const inNy = h >= 13 && h < 22;
+    if (inLondon && inNy) return "overlap";
+    if (inLondon) return "london";
+    if (inNy) return "ny";
+    if (inAsia) return "asia";
+    return "";
+  };
+  const bandColor = { asia:"rgba(139,92,246,0.16)", london:"rgba(201,151,58,0.16)", ny:"rgba(45,122,79,0.16)", overlap:"rgba(240,54,69,0.14)", "":"transparent" };
+
+  return (
+    <div style={{background:C.black,borderRadius:8,padding:"32px 5vw",color:"#fff"}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:10,marginBottom:20}}>
+        <Mono size={11} color={C.gold} spacing={3}>{gl.tag}</Mono>
+        <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+          {ASSET_ORDER.filter(a => hp && hp[a]).map(a => (
+            <button key={a} onClick={() => { setAsset(a); setTouring(false); }} style={{
+              fontFamily:"monospace",fontSize:10.5,padding:"5px 10px",cursor:"pointer",
+              background: a===asset ? C.gold : "transparent", color: a===asset ? "#18181a" : "rgba(255,255,255,0.55)",
+              border:`1px solid ${a===asset?C.gold:"rgba(255,255,255,0.2)"}`,borderRadius:3
+            }}>{a}</button>
+          ))}
+        </div>
+      </div>
+
+      {!data ? <p style={{color:"rgba(255,255,255,0.5)",fontSize:13}}>—</p> : (
+      <>
+        <p style={{fontSize:13.5,color:"rgba(255,255,255,0.7)",lineHeight:1.7,marginBottom:22,maxWidth:820}}>{fillTemplate(gl.step1Legend, {n_days: data.coverage ? data.coverage.n_days : null})}</p>
+
+        {/* 24h band */}
+        <div style={{display:"flex",borderRadius:4,overflow:"hidden",marginBottom:6,height:22}}>
+          {hours.map(h => (
+            <div key={h} style={{flex:1,background:bandColor[sessionBand(h)],borderRight: h===hour ? "none" : "1px solid rgba(255,255,255,0.04)",position:"relative"}}/>
+          ))}
+        </div>
+        <div style={{display:"flex",justifyContent:"space-between",fontSize:9,fontFamily:"monospace",color:"rgba(255,255,255,0.3)",marginBottom:14}}>
+          <span>00</span><span>06</span><span>12</span><span>18</span><span>23</span>
+        </div>
+
+        {/* bars */}
+        <div style={{display:"flex",alignItems:"flex-end",gap:2,height:100,marginBottom:10}}>
+          {hours.map(h => {
+            const share = avg[h];
+            const barH = share != null ? Math.max(3, (share/maxShare)*100) : 2;
             return (
-              <g key={h}>
-                <rect
-                  x={h * barW + 1}
-                  y={H - barH}
-                  width={barW - 2}
-                  height={barH}
-                  fill={isOverlap ? C.gold : color}
-                  opacity={active ? 1 : 0.4}
-                  rx="1"
-                />
-                {active && (
-                  <rect x={h * barW + 1} y={0} width={barW - 2} height={H + 20}
-                    fill="rgba(255,255,255,0.06)" rx="1"/>
-                )}
-                {h % 3 === 0 && (
-                  <text x={h * barW + barW/2} y={H + 15} fontSize="8" fill="rgba(255,255,255,0.25)"
-                    textAnchor="middle" fontFamily="monospace">{String(h).padStart(2,'0')}</text>
-                )}
-              </g>
+              <div key={h} onClick={() => { setHour(h); setTouring(false); }} style={{flex:1,height:barH,background: h===hour ? C.gold : share!=null ? "rgba(201,151,58,0.4)" : "rgba(255,255,255,0.08)",cursor:"pointer",borderRadius:1}} title={h+":00 UTC"}/>
             );
           })}
-          {/* Current time line */}
-          <line x1={hour * barW + barW/2} y1={0} x2={hour * barW + barW/2} y2={H}
-            stroke={C.gold} strokeWidth="1.5" strokeDasharray="3 2"/>
-        </svg>
-      </div>
+        </div>
+        <input type="range" min="0" max="23" value={hour} onChange={e => { setHour(+e.target.value); setTouring(false); }} style={{width:"100%",marginBottom:16}}/>
 
-      {/* Slider + controls */}
-      <div style={{display:"flex",alignItems:"center",gap:16,flexWrap:"wrap"}}>
-        <input
-          type="range" min={0} max={23} value={hour}
-          onChange={e => setHour(Number(e.target.value))}
-          style={{flex:1,minWidth:200,accentColor:C.gold,cursor:"pointer"}}
-        />
-        <button
-          onClick={() => setPlaying(p => !p)}
-          style={{padding:"10px 20px",background:playing?C.black:C.gold,color:playing?"#fff":C.black,
-            border:playing?"1px solid rgba(255,255,255,0.2)":"none",
-            borderRadius:4,cursor:"pointer",fontFamily:"monospace",fontSize:12,letterSpacing:1,fontWeight:700}}>
-          {playing ? S.glStopBtn : S.glAutoBtn}
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:12,background:"rgba(255,255,255,0.05)",borderRadius:6,padding:"14px 18px",marginBottom:20}}>
+          <div>
+            <Mono size={20} color={C.gold} spacing={0}>{String(hour).padStart(2,"0")}:00 UTC</Mono>
+            <div style={{fontSize:12,color:"rgba(255,255,255,0.55)",marginTop:4}}>
+              {[sessionBand(hour)==="asia"||sessionBand(hour)==="" ? null : null].filter(Boolean)}
+              {gl.sessionAsia}{(hour<7||hour>=21) ? " ●" : " ○"} · {gl.sessionLondon}{(hour>=7&&hour<16) ? " ●" : " ○"} · {gl.sessionNy}{(hour>=13&&hour<22) ? " ●" : " ○"}
+              {(hour>=13&&hour<16) && <span style={{color:C.red,marginLeft:8}}>⚡ {gl.overlapBadge}</span>}
+            </div>
+          </div>
+          <div style={{textAlign:"right"}}>
+            <Mono size={20} color="#fff" spacing={0}>{avg[hour]!=null ? (avg[hour]*100).toFixed(1) : "—"}%</Mono>
+            <div style={{fontSize:10,color:"rgba(255,255,255,0.4)",fontFamily:"monospace"}}>{gl.barLabel}</div>
+          </div>
+        </div>
+
+        <button onClick={() => setTouring(t => !t)} style={{fontFamily:"monospace",fontSize:11,letterSpacing:1,padding:"9px 18px",background: touring?C.gold:"transparent",color: touring?"#18181a":C.gold,border:`1px solid ${C.gold}`,borderRadius:4,cursor:"pointer",marginBottom:20}}>
+          {touring ? gl.stopBtn : gl.autoBtn}
         </button>
-      </div>
-      <div style={{marginTop:12,display:"flex",gap:20,flexWrap:"wrap"}}>
-        {sessions.map((s,i) => (
-          <div key={i} style={{display:"flex",alignItems:"center",gap:6}}>
-            <div style={{width:10,height:10,borderRadius:2,background:s.color}}/>
-            <span style={{fontSize:11,fontFamily:"monospace",color:"rgba(255,255,255,0.35)"}}>{s.nameEn}</span>
+
+        <div style={{background:"rgba(255,255,255,0.04)",borderRadius:6,padding:"16px 20px",marginBottom:6}}>
+          <Mono size={10} color="rgba(255,255,255,0.4)" spacing={1} style={{display:"block",marginBottom:8,textTransform:"uppercase"}}>{gl.step2Intro}</Mono>
+          <p style={{fontSize:12.5,color:"rgba(255,255,255,0.65)",lineHeight:1.7,marginBottom:6}}>{fillTemplate(gl.step2Trough, {trough_hour:data.trough_hour, trough_share:data.trough_share})}</p>
+          <p style={{fontSize:12.5,color:"rgba(255,255,255,0.65)",lineHeight:1.7,marginBottom:6}}>{fillTemplate(gl.step2Mid, {midHour: midHourLocal, midShare: midShareLocal})}</p>
+          <p style={{fontSize:12.5,color:"rgba(255,255,255,0.65)",lineHeight:1.7}}>{fillTemplate(gl.step2Peak, {peak_hour:data.peak_hour, peak_share:data.peak_share, peak_ratio:data.peak_ratio})}</p>
+        </div>
+
+        <p style={{fontSize:12.5,color:"rgba(255,255,255,0.6)",lineHeight:1.7,marginTop:16,marginBottom:6}}>{gl.step3Task}</p>
+        <p style={{fontSize:12.5,color:C.gold,lineHeight:1.7,marginBottom:16,fontStyle:"italic"}}>{gl.step3Reveal}</p>
+        <div style={{textAlign:"center",fontFamily:"'DM Serif Display',serif",fontStyle:"italic",fontSize:16,color:"#fff",paddingTop:16,borderTop:"1px solid rgba(255,255,255,0.1)"}}>{gl.finalPlate}</div>
+      </>
+      )}
+    </div>
+  );
+}
+
+// ─── Three engines of the day (§3.5) ──────────────────────────────────────────
+function ThreeEngines({ vars }) {
+  const T5 = window.Ch5Content[INITIAL_LANG] || window.Ch5Content.ru;
+  const te = T5.threeEngines;
+  return (
+    <div style={{marginBottom:48}}>
+      <p style={{fontSize:14,color:C.inkMid,lineHeight:1.75,marginBottom:24,maxWidth:820}}>{te.preamble}</p>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:14,marginBottom:24}} className="g3">
+        {[te.engine1, te.engine2].map((e,i) => (
+          <div key={i} style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:6,padding:"18px 20px",borderTop:`3px solid ${C.gold}`}}>
+            <div style={{fontWeight:600,fontSize:13,color:C.black,marginBottom:8}}>{e.title}</div>
+            <p style={{fontSize:12,color:C.inkMid,lineHeight:1.65,margin:0}}>{fillTemplate(e.body, vars)}</p>
           </div>
         ))}
-        <div style={{display:"flex",alignItems:"center",gap:6}}>
-          <div style={{width:10,height:10,borderRadius:2,background:C.gold}}/>
-          <span style={{fontSize:11,fontFamily:"monospace",color:"rgba(255,255,255,0.35)"}}>{S.glOverlapLegend}</span>
+        <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:6,padding:"18px 20px",borderTop:`3px solid ${C.gold}`}}>
+          <div style={{fontWeight:600,fontSize:13,color:C.black,marginBottom:8}}>{te.engine3.title}</div>
+          <p style={{fontSize:12,color:C.inkMid,lineHeight:1.65,margin:0}}>{te.engine3.intro}</p>
         </div>
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:24}} className="g2">
+        {[te.engine3.tokyo, te.engine3.gotobi, te.engine3.lbma, te.engine3.wmr].map((t,i) => (
+          <div key={i} style={{background:"#fff",border:`1px solid ${C.border}`,borderRadius:6,padding:"14px 18px"}}>
+            <p style={{fontSize:12,color:C.inkMid,lineHeight:1.65,margin:0}}>{t}</p>
+          </div>
+        ))}
+      </div>
+      <div style={{background:C.black,borderRadius:8,padding:"28px 32px",color:"#fff"}}>
+        <Mono size={11} color={C.gold} spacing={2} style={{display:"block",marginBottom:12}}>{te.manipulation.tag}</Mono>
+        {te.manipulation.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:13,lineHeight:1.75,color:"rgba(255,255,255,0.75)",marginBottom:12}}>{p}</p>)}
       </div>
     </div>
   );
 }
 
-// ─── Interactive 2: Asia Box Trainer ─────────────────────────────────────────
-function AsiaBoxTrainer() {
+// ─── Stops mechanics (§3.6) ────────────────────────────────────────────────────
+function StopsSection() {
+  const T5 = window.Ch5Content[INITIAL_LANG] || window.Ch5Content.ru;
+  const st = T5.stops;
+  return (
+    <div style={{marginBottom:48}}>
+      <p style={{fontSize:14,color:C.inkMid,lineHeight:1.75,marginBottom:14,maxWidth:820}}>{st.preamble}</p>
+      <p style={{fontSize:13,color:C.inkSoft,lineHeight:1.75,marginBottom:24,maxWidth:820,fontStyle:"italic"}}>{st.oslerIntro}</p>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:14,marginBottom:24}} className="g3">
+        {[st.finding1, st.finding2, st.finding3].map((f,i) => (
+          <div key={i} style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:6,padding:"18px 20px"}}>
+            <div style={{fontWeight:600,fontSize:12.5,color:C.black,marginBottom:8}}>{f.title}</div>
+            <p style={{fontSize:12,color:C.inkMid,lineHeight:1.65,margin:0}}>{f.body}</p>
+          </div>
+        ))}
+      </div>
+      <div style={{display:"flex",flexDirection:"column",gap:8,marginBottom:20}}>
+        {st.conclusions.map((c,i) => (
+          <div key={i} style={{display:"flex",gap:12,alignItems:"flex-start"}}>
+            <span style={{color:C.gold,fontFamily:"monospace",fontSize:11,marginTop:2}}>0{i+1}</span>
+            <span style={{fontSize:13,color:C.inkMid,lineHeight:1.65}}>{c}</span>
+          </div>
+        ))}
+      </div>
+      <div style={{background:C.goldPale,border:`1px solid ${C.borderGold}`,borderRadius:6,padding:"18px 22px"}}>
+        <p style={{fontSize:13,color:C.inkMid,lineHeight:1.7,margin:0,fontStyle:"italic"}}>{st.bridgePlate}</p>
+      </div>
+    </div>
+  );
+}
+
+// ─── AMD honest block (§3.7): 2 columns + "check on our data" ────────────────
+function AmdHonestBlock({ as, vars }) {
+  const { useState } = React;
+  const T5 = window.Ch5Content[INITIAL_LANG] || window.Ch5Content.ru;
+  const amd = T5.amd;
+  const [checked, setChecked] = useState(false);
+
+  const verdictTpl = as ? amd.verdictTemplates[as.verdict_key] : null;
+  const verdictText = verdictTpl ? fillTemplate(verdictTpl, vars) : "—";
+
+  return (
+    <div style={{marginBottom:48}}>
+      <p style={{fontSize:14,color:C.inkMid,lineHeight:1.75,marginBottom:24,maxWidth:820}}>{amd.preamble}</p>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,marginBottom:24}} className="g2">
+        <div style={{background:C.greenPale,border:"1px solid rgba(45,122,79,.25)",borderRadius:8,padding:"20px 24px"}}>
+          <Mono size={11} color={C.green} spacing={2} style={{display:"block",marginBottom:12}}>✓ {amd.confirmedTitle}</Mono>
+          {amd.confirmed.map((t,i) => <p key={i} style={{fontSize:12.5,color:C.inkMid,lineHeight:1.65,marginBottom:10}}>{fillTemplate(t, vars)}</p>)}
+        </div>
+        <div style={{background:C.redPale,border:"1px solid rgba(242,54,69,.25)",borderRadius:8,padding:"20px 24px"}}>
+          <Mono size={11} color="#c0392b" spacing={2} style={{display:"block",marginBottom:12}}>✗ {amd.narrativeTitle}</Mono>
+          {amd.narrative.map((t,i) => <p key={i} style={{fontSize:12.5,color:C.inkMid,lineHeight:1.65,marginBottom:10}}>{t}</p>)}
+        </div>
+      </div>
+
+      {!checked ? (
+        <button onClick={() => setChecked(true)} style={{display:"block",margin:"0 auto 24px",padding:"14px 32px",background:C.black,color:"#fff",border:"none",borderRadius:4,cursor:"pointer",fontFamily:"monospace",fontSize:13,letterSpacing:1.5}}>
+          {amd.checkButton}
+        </button>
+      ) : (
+        <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"24px 28px",marginBottom:24}}>
+          <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.75,marginBottom:10}}>{as ? fillTemplate(amd.checkResultIntro, vars) : "—"}</p>
+          <p style={{fontSize:13.5,color:C.black,lineHeight:1.75,marginBottom:14,fontWeight:600}}>{as ? fillTemplate(amd.checkResultStats, vars) : "—"}</p>
+          <div style={{background:"#fff",border:`1px solid ${C.borderGold}`,borderRadius:6,padding:"14px 18px",marginBottom:14}}>
+            <p style={{fontSize:13,color:C.gold,lineHeight:1.7,margin:0,fontWeight:600}}>{verdictText}</p>
+          </div>
+          <p style={{fontSize:12.5,color:C.inkSoft,lineHeight:1.7,margin:0}}>{amd.checkResultOutro}</p>
+        </div>
+      )}
+
+      <div style={{textAlign:"center",fontFamily:"'DM Serif Display',serif",fontStyle:"italic",fontSize:17,color:C.black,padding:"20px 0",borderTop:`1px solid ${C.border}`}}>{amd.finalPlate}</div>
+    </div>
+  );
+}
+
+// ─── Scene: real London sweep (§3.8, EVENT mode — decision before reveal) ────
+function SweepScene({ vars }) {
+  const T5 = window.Ch5Content[INITIAL_LANG] || window.Ch5Content.ru;
+  const sc = T5.sweepScene;
+  const revealText = vars ? fillTemplate(sc.revealTemplate, vars) : "—";
+  return (
+    <div style={{marginBottom:56}}>
+      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{sc.tag}</Mono>
+      <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,marginBottom:14,maxWidth:760}}>{sc.legend}</p>
+      <SceneMount url="/data/edu_scenes/ch5_london_sweep.json" mode="event" symbol="GOLD" copy={{
+        question: sc.question, options: sc.options, revealText, nextMarker: null,
+      }}/>
+      <p style={{fontSize:12,color:C.inkFaint,fontStyle:"italic",marginTop:10,maxWidth:760}}>{sc.xpNote}</p>
+    </div>
+  );
+}
+
+// ─── Asia Box trainer v2 (§3.9): real days, price-based check, 4-option question ──
+function AsiaBoxTrainer({ as }) {
   const { useState, useRef, useEffect } = React;
   const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
+  const T5 = window.Ch5Content[INITIAL_LANG] || window.Ch5Content.ru;
+  const tr = T5.trainer;
+  const days = (as && as.sample_days) || [];
 
-  const W = 680, H = 320;
-  const PRICE_MIN = 2490, PRICE_MAX = 2540;
-  const toY = p => H - ((p - PRICE_MIN) / (PRICE_MAX - PRICE_MIN)) * H;
-  const toP = y => PRICE_MIN + ((H - y) / H) * (PRICE_MAX - PRICE_MIN);
-
-  // Scenario: Asia range 2510–2520, London fake break DOWN then true break UP
-  const asiaBoxTrue = { lo: 2508, hi: 2520 };
-
-  // Pre-built candle data: Asia consolidation then London manipulation then breakout
-  const buildCandles = () => {
-    const candles = [];
-    // Asia 00:00–07:00 (14 candles): tight range
-    let price = 2514;
-    for (let i = 0; i < 14; i++) {
-      const open = price;
-      const move = (Math.random() - 0.5) * 3;
-      const close = Math.max(2509, Math.min(2519, open + move));
-      const high = Math.max(open,close) + Math.random() * 1.5;
-      const low  = Math.min(open,close) - Math.random() * 1.5;
-      price = close;
-      candles.push({open,close,high,low,session:"asia"});
-    }
-    // London manipulation 07:00–09:00 (4 candles): false break DOWN (stop hunt)
-    const manip = [
-      {open:price,close:price-4,high:price+0.5,low:price-7,session:"london_manip"},
-      {open:price-4,close:price-6,high:price-2,low:price-8.5,session:"london_manip"},
-      {open:price-6,close:price-2,high:price-1,low:price-7,session:"london_manip"},
-      {open:price-2,close:price+1,high:price+2,low:price-3,session:"london_manip"},
-    ];
-    price = price+1;
-    candles.push(...manip);
-    // London true breakout 09:00–13:00 (8 candles): strong move UP
-    for (let i = 0; i < 8; i++) {
-      const open = price;
-      const close = open + 2.5 + Math.random() * 2;
-      const high = close + Math.random() * 2;
-      const low = open - Math.random() * 1.5;
-      price = close;
-      candles.push({open,close,high,low,session:"london_true"});
-    }
-    return candles.map((c,i) => ({...c, x: 20 + i * ((W-40)/25)}));
-  };
-
-  const [candles] = useState(buildCandles);
+  const W = 680, H = 300;
+  const [idx, setIdx] = useState(0);
   const [phase, setPhase] = useState("draw"); // draw | guess | result
   const [drawing, setDrawing] = useState(false);
-  const [box, setBox] = useState(null); // {y1,y2} in SVG coords
+  const [box, setBox] = useState(null);
   const [startY, setStartY] = useState(null);
-  const [guess, setGuess] = useState(null); // "up"|"down"
+  const [answer, setAnswer] = useState(null);
   const [result, setResult] = useState(null);
+  const [scores, setScores] = useState([]);
   const svgRef = useRef(null);
+
+  const day = days[idx];
+  const candles = day ? day.candles.map((c,i) => ({...c})) : [];
+  const allPrices = candles.length ? candles.flatMap(c => [c.high, c.low]) : [0,1];
+  const PMIN = Math.min(...allPrices), PMAX = Math.max(...allPrices);
+  const pad = (PMAX - PMIN) * 0.1 || 1;
+  const toY = p => H - ((p - (PMIN-pad)) / ((PMAX+pad) - (PMIN-pad))) * H;
+  const toP = y => (PMIN-pad) + ((H - y) / H) * ((PMAX+pad) - (PMIN-pad));
+  const step = candles.length ? (W-40) / candles.length : 1;
+
+  const asiaCount = candles.filter(c => new Date(c.time).getUTCHours() < 7).length;
 
   const getSVGY = (e) => {
     const rect = svgRef.current.getBoundingClientRect();
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
     return (clientY - rect.top) * (H / rect.height);
   };
+  const handleMouseDown = (e) => { if (phase !== "draw") return; const y = getSVGY(e); setStartY(y); setDrawing(true); setBox({y1:y,y2:y}); };
+  const handleMouseMove = (e) => { if (!drawing) return; setBox({y1:startY, y2:getSVGY(e)}); };
+  const handleMouseUp = () => { if (!drawing) return; setDrawing(false); if (box && Math.abs(box.y2-box.y1) > 6) setPhase("guess"); };
 
-  const handleMouseDown = (e) => {
-    if (phase !== "draw") return;
-    const y = getSVGY(e);
-    setStartY(y);
-    setDrawing(true);
-    setBox({y1:y,y2:y});
-  };
-  const handleMouseMove = (e) => {
-    if (!drawing) return;
-    setBox({y1:startY, y2:getSVGY(e)});
-  };
-  const handleMouseUp = () => {
-    if (!drawing) return;
-    setDrawing(false);
-    if (box && Math.abs(box.y2 - box.y1) > 10) setPhase("guess");
-  };
-
-  const submitGuess = (dir) => {
-    setGuess(dir);
-    // True breakout was UP
-    const boxOk = box && Math.min(box.y1,box.y2) <= toY(asiaBoxTrue.hi)+10
-                      && Math.max(box.y1,box.y2) >= toY(asiaBoxTrue.lo)-10;
-    const dirOk = dir === "up";
-    setResult({boxOk, dirOk, perfect: boxOk && dirOk});
+  const submitAnswer = (opt) => {
+    setAnswer(opt);
+    const trueHi = day.asia_high, trueLo = day.asia_low;
+    const trueRange = trueHi - trueLo;
+    const userHi = toP(Math.min(box.y1,box.y2)), userLo = toP(Math.max(box.y1,box.y2));
+    const boxOk = Math.abs(userHi - trueHi) <= trueRange*0.15 && Math.abs(userLo - trueLo) <= trueRange*0.15;
+    const outcomeIdx = { reversal:0, continuation:1, no_sweep:2, neutral:3 }[day.outcome];
+    const answerOk = opt === outcomeIdx;
+    setResult({ boxOk, answerOk });
+    setScores(s => [...s, answerOk]);
     setPhase("result");
   };
 
-  const reset = () => { setPhase("draw"); setBox(null); setGuess(null); setResult(null); setStartY(null); setDrawing(false); };
+  const next = () => {
+    if (idx + 1 >= days.length) { setPhase("done"); return; }
+    setIdx(i => i+1); setPhase("draw"); setBox(null); setAnswer(null); setResult(null); setStartY(null); setDrawing(false);
+  };
+  const restart = () => { setIdx(0); setPhase("draw"); setBox(null); setAnswer(null); setResult(null); setScores([]); };
 
-  const candleW = 10;
-  const sessionLabels = [
-    {x:20, label:"АЗИЯ 00:00–07:00 GMT", color:"#8b5cf6"},
-    {x:20 + 14 * ((W-40)/25), label:"ЛОНДОН", color:C.gold},
-  ];
+  if (!days.length) return <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"30px",textAlign:"center",color:C.inkFaint}}>—</div>;
+
+  const scoreCount = scores.filter(Boolean).length;
 
   return (
-    <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"36px 40px"}}>
-      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:20,flexWrap:"wrap",gap:12}}>
-        <div style={{display:"flex",alignItems:"center",gap:12}}>
-          <span style={{fontSize:28}}><img class='mi-icon' style={{verticalAlign:'middle'}} src='/assets/icons/icon-target.png' alt='' width='20' height='20' /></span>
-          <div>
-            <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.black}}>{S.abTitle}</div>
-            <Mono size={11} color={C.inkSoft} spacing={2}>{S.abSubtitle}</Mono>
-          </div>
+    <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"32px 36px"}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16,flexWrap:"wrap",gap:10}}>
+        <div>
+          <Mono size={11} color={C.gold} spacing={2}>{tr.tag}</Mono>
+          <div style={{fontFamily:"monospace",fontSize:12,color:C.inkSoft,marginTop:4}}>{fillTemplate(tr.dayCounter, {cur:idx+1, total:days.length})} · {tr.dateLabel}: {day.date}</div>
         </div>
-        {phase !== "draw" && (
-          <button onClick={reset} style={{padding:"9px 18px",background:C.black,color:"#fff",border:"none",borderRadius:4,cursor:"pointer",fontFamily:"monospace",fontSize:11,letterSpacing:1}}>
-            {S.abResetBtn}
-          </button>
+        {phase !== "done" && <button onClick={restart} style={{padding:"8px 16px",background:C.black,color:"#fff",border:"none",borderRadius:4,cursor:"pointer",fontFamily:"monospace",fontSize:11}}>{tr.resetBtn}</button>}
+      </div>
+
+      {phase === "done" ? (
+        <div style={{textAlign:"center",padding:"30px 0"}}>
+          <div style={{fontSize:28,fontFamily:"'DM Serif Display',serif",marginBottom:12}}>{fillTemplate(tr.resultTemplate, {score:scoreCount, total:days.length})}</div>
+          <p style={{fontSize:12.5,color:C.inkFaint,marginBottom:16}}>{fillTemplate(tr.honestCount, {total:days.length})}</p>
+          <button onClick={restart} style={{padding:"10px 24px",background:C.gold,color:"#18181a",border:"none",borderRadius:4,cursor:"pointer",fontFamily:"monospace",fontSize:12,fontWeight:700}}>{tr.resetBtn}</button>
+        </div>
+      ) : (
+      <>
+        {phase === "draw" && idx === 0 && (
+          <div style={{background:"rgba(201,151,58,0.08)",border:"1px solid rgba(201,151,58,0.25)",borderRadius:4,padding:"12px 16px",marginBottom:14}}>
+            <StepTag n="1" label={S.stepExplain}/>
+            <p style={{fontSize:12.5,color:C.inkMid,lineHeight:1.6,margin:0}}>{tr.step1}</p>
+            <StepTag n="2" label={S.stepShow}/>
+            <p style={{fontSize:12.5,color:C.inkMid,lineHeight:1.6,margin:0}}>{tr.step2}</p>
+          </div>
+        )}
+        {phase === "draw" && <div style={{fontSize:12,color:C.inkFaint,marginBottom:10}}>{tr.boxToleranceNote}</div>}
+        {phase === "guess" && (
+          <div style={{background:C.greenPale,border:`1px solid ${C.green}`,borderRadius:4,padding:"14px 18px",marginBottom:14}}>
+            {idx === 0 && <StepTag n="3" label={S.stepDo}/>}
+            <p style={{fontSize:12.5,color:C.inkMid,marginBottom:10}}>{tr.step3Intro}</p>
+            <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+              {tr.options.map((o,i) => (
+                <button key={i} onClick={() => submitAnswer(i)} style={{padding:"9px 16px",background:"#fff",color:C.black,border:`1px solid ${C.border}`,borderRadius:4,cursor:"pointer",fontFamily:"monospace",fontSize:11.5}}>{o}</button>
+              ))}
+            </div>
+          </div>
+        )}
+        {phase === "result" && result && (
+          <div style={{background: result.answerOk ? C.greenPale : C.redPale, border:`1px solid ${result.answerOk?C.green:C.red}`,borderRadius:4,padding:"14px 18px",marginBottom:14}}>
+            <div style={{fontWeight:700,fontSize:13,marginBottom:6,color: result.answerOk?"#1f6b46":"#c0392b"}}>
+              {tr.options[{ reversal:0, continuation:1, no_sweep:2, neutral:3 }[day.outcome]]} {result.boxOk ? "· ✓ box" : ""}
+            </div>
+            <p style={{fontSize:12,color:C.inkMid,lineHeight:1.6,margin:0}}>{day.date} · {day.outcome}{day.sweep_dir ? " ("+day.sweep_dir+")" : ""}</p>
+            <button onClick={next} style={{marginTop:12,padding:"9px 18px",background:C.black,color:"#fff",border:"none",borderRadius:4,cursor:"pointer",fontFamily:"monospace",fontSize:11.5}}>{tr.nextBtn}</button>
+          </div>
+        )}
+
+        <div style={{borderRadius:4,overflow:"hidden",border:`1px solid ${C.border}`,position:"relative",userSelect:"none"}}>
+          <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} style={{width:"100%",display:"block",background:"#131722",cursor:phase==="draw"?"crosshair":"default",touchAction:"none"}}
+            onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}>
+            <line x1={20+asiaCount*step} y1={0} x2={20+asiaCount*step} y2={H} stroke="rgba(201,151,58,0.3)" strokeWidth="1" strokeDasharray="4 3"/>
+            {candles.map((c,i) => {
+              const bull = c.close >= c.open;
+              const col = i < asiaCount ? "#8b5cf6" : bull ? "#2E7D5B" : "#B14848";
+              const x = 20 + i*step;
+              const bodyT = toY(Math.max(c.open,c.close)), bodyB = toY(Math.min(c.open,c.close));
+              return (
+                <g key={i}>
+                  <line x1={x} y1={toY(c.high)} x2={x} y2={toY(c.low)} stroke={col} strokeWidth="1.3"/>
+                  <rect x={x-Math.max(2,step*0.35)} y={bodyT} width={Math.max(4,step*0.7)} height={Math.max(bodyB-bodyT,1)} fill={col}/>
+                </g>
+              );
+            })}
+            {phase === "result" && (
+              <rect x={20} y={toY(day.asia_high)} width={asiaCount*step} height={toY(day.asia_low)-toY(day.asia_high)} fill="rgba(139,92,246,0.08)" stroke="#8b5cf6" strokeWidth="1.3" strokeDasharray="5 3"/>
+            )}
+            {(idx===0 && phase==="draw") && (
+              <rect x={20} y={toY(day.asia_high)} width={asiaCount*step} height={toY(day.asia_low)-toY(day.asia_high)} fill="rgba(201,151,58,0.1)" stroke={C.gold} strokeWidth="1.3" strokeDasharray="5 3"/>
+            )}
+            {box && phase !== "result" && (
+              <rect x={20} y={Math.min(box.y1,box.y2)} width={asiaCount*step} height={Math.abs(box.y2-box.y1)} fill="rgba(201,151,58,0.08)" stroke={C.gold} strokeWidth="1.5" strokeDasharray="5 3"/>
+            )}
+            <rect x={18} y={4} width={110} height={16} fill="rgba(139,92,246,0.25)" rx="2"/>
+            <text x={24} y={15} fontSize="9" fill="#c4b5fd" fontFamily="monospace" fontWeight="700">ASIA 00-07</text>
+          </svg>
+        </div>
+        <p style={{fontSize:11,color:C.inkFaint,marginTop:10}}>{tr.xpNote}</p>
+      </>
+      )}
+    </div>
+  );
+}
+
+// ─── DST trap (§3.10): prose + SessionTable defaulted to the desync case ─────
+function DstTrapBlock({ vars }) {
+  const T5 = window.Ch5Content[INITIAL_LANG] || window.Ch5Content.ru;
+  const d = T5.dstTrap;
+  return (
+    <div style={{marginBottom:48}}>
+      <p style={{fontSize:14,color:C.inkMid,lineHeight:1.75,marginBottom:16,maxWidth:820}}>{d.body}</p>
+      <div style={{display:"flex",flexDirection:"column",gap:12,marginBottom:20}}>
+        <p style={{fontSize:13,color:C.inkMid,lineHeight:1.7,margin:0}}>{d.point1}</p>
+        <p style={{fontSize:13,color:C.inkMid,lineHeight:1.7,margin:0}}>{vars ? fillTemplate(d.point2, vars) : d.point2}</p>
+        <p style={{fontSize:13,color:C.inkMid,lineHeight:1.7,margin:0}}>{d.point3}</p>
+      </div>
+      <p style={{fontSize:14,color:C.black,fontWeight:600,lineHeight:1.7,marginBottom:20,maxWidth:820}}>{d.conclusion}</p>
+      <SessionTableMount lang={INITIAL_LANG} mode="desync"/>
+      <p style={{fontSize:11,color:C.inkFaint,fontStyle:"italic",marginTop:10,maxWidth:820}}>{d.calendarFootnote}</p>
+    </div>
+  );
+}
+
+// ─── My Window (§3.11): personal block ────────────────────────────────────────
+function MyWindowBlock({ cfg, hp, vars }) {
+  const { useState, useEffect } = React;
+  const T5 = window.Ch5Content[INITIAL_LANG] || window.Ch5Content.ru;
+  const mw = T5.myWindow;
+  const [archetype, setArchetype] = useState(null);
+  const [saved, setSaved] = useState(false);
+
+  const windowRanges = {
+    morning: { startH:5, endH:9, label:{ru:"05:00–09:00",ro:"05:00–09:00",en:"05:00–09:00"} },
+    evening: { startH:16, endH:20, label:{ru:"16:00–20:00",ro:"16:00–20:00",en:"16:00–20:00"} },
+    night:   { startH:0, endH:4, label:{ru:"00:00–04:00",ro:"00:00–04:00",en:"00:00–04:00"} },
+  };
+
+  const g = hp && hp.GOLD;
+  const range = archetype ? windowRanges[archetype] : null;
+  let userShare = null;
+  if (g && range) {
+    const hours = [];
+    for (let h = range.startH; h < range.endH; h++) hours.push(h);
+    const vals = hours.map(h => g.avg_share[h]).filter(v => v != null);
+    userShare = vals.length ? Math.round((vals.reduce((a,b)=>a+b,0)/vals.length)*1000)/10 : null;
+  }
+
+  let eventsIn = [], eventsMissed = [];
+  if (cfg && range) {
+    cfg.events.forEach(ev => {
+      const h = parseInt(ev.utc_dst.split(":")[0], 10);
+      const label = ev["label_" + INITIAL_LANG] || ev.label_en;
+      if (h >= range.startH && h < range.endH) eventsIn.push(label); else eventsMissed.push(label);
+    });
+  }
+
+  return (
+    <div style={{marginBottom:48}}>
+      <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"28px 32px"}}>
+        <Mono size={11} color={C.gold} spacing={2} style={{display:"block",marginBottom:14}}>{mw.askQuestion}</Mono>
+        <div style={{display:"flex",gap:10,flexWrap:"wrap",marginBottom:24}}>
+          {[["morning",mw.morningBtn],["evening",mw.eveningBtn],["night",mw.nightBtn]].map(([k,label]) => (
+            <button key={k} onClick={() => { setArchetype(k); setSaved(false); }} style={{padding:"12px 20px",background:archetype===k?C.gold:"#fff",color:archetype===k?"#18181a":C.black,border:`1px solid ${archetype===k?C.gold:C.border}`,borderRadius:6,cursor:"pointer",fontSize:13,fontWeight:600}}>{label}</button>
+          ))}
+        </div>
+
+        {archetype && (
+          <div style={{background:"#fff",border:`1px solid ${C.borderGold}`,borderRadius:8,padding:"24px 28px"}}>
+            <div style={{fontFamily:"'DM Serif Display',serif",fontSize:20,color:C.black,marginBottom:6}}>{mw.cardTitle}: {range.label[INITIAL_LANG] || range.label.en}</div>
+            <p style={{fontSize:13,color:C.inkMid,lineHeight:1.7,marginBottom:14}}>{fillTemplate(mw.shareLine, {...vars, user_window_share: userShare})}</p>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginBottom:16}} className="g2">
+              <div>
+                <Mono size={10} color={C.inkFaint} spacing={1} style={{display:"block",marginBottom:6,textTransform:"uppercase"}}>{mw.eventsInLabel}</Mono>
+                <p style={{fontSize:12,color:C.inkMid,lineHeight:1.6,margin:0}}>{eventsIn.length ? eventsIn.join(" · ") : "—"}</p>
+              </div>
+              <div>
+                <Mono size={10} color={C.inkFaint} spacing={1} style={{display:"block",marginBottom:6,textTransform:"uppercase"}}>{mw.eventsMissedLabel}</Mono>
+                <p style={{fontSize:12,color:C.inkFaint,lineHeight:1.6,margin:0}}>{eventsMissed.length ? eventsMissed.join(" · ") : "—"}</p>
+              </div>
+            </div>
+            <p style={{fontSize:13,color:C.inkMid,lineHeight:1.75,marginBottom:18}}>{fillTemplate(mw.archetypes[archetype], vars)}</p>
+
+            <div style={{background:C.goldPale,border:`1px solid ${C.borderGold}`,borderRadius:6,padding:"16px 20px",marginBottom:16}}>
+              <p style={{fontSize:12.5,color:C.inkMid,lineHeight:1.7,margin:0}}>{mw.journalBridge}</p>
+            </div>
+
+            <div style={{display:"flex",gap:10,flexWrap:"wrap",alignItems:"center"}}>
+              <button onClick={() => {
+                setSaved(true);
+                // SPEC_morning_brief_v2.md блок 6 -- раньше это было только
+                // setSaved(true) локально, ничего не уходило на бэкенд.
+                // Тот же паттерн, что saveSetup()/ритуал в главе 3: optimistic
+                // UI + fire-and-forget PUT, анонимному пользователю бэкенд
+                // молча вернёт 401 (см. _lp_require_auth), это ожидаемо.
+                const doFetch = (window.sbfAuth && window.sbfAuth.isLoggedIn && window.sbfAuth.isLoggedIn()) ? window.sbfAuth.fetch : fetch;
+                doFetch('/api/user/trading-window', {
+                  method:'PUT', headers:{'Content-Type':'application/json'},
+                  body: JSON.stringify({start_h: range.startH, end_h: range.endH, archetype}),
+                }).catch(() => {});
+              }} style={{padding:"11px 22px",background:saved?C.green:C.black,color:"#fff",border:"none",borderRadius:4,cursor:"pointer",fontFamily:"monospace",fontSize:12,fontWeight:700}}>
+                {saved ? "✓" : ""} {mw.saveBtn}
+              </button>
+              <a href="/journal" style={{padding:"11px 22px",border:`1px solid ${C.border}`,borderRadius:4,color:C.black,textDecoration:"none",fontFamily:"monospace",fontSize:12}}>{mw.openJournalBtn}</a>
+              {saved && <span style={{fontSize:11.5,color:C.green}}>{mw.savedNote}</span>}
+            </div>
+          </div>
         )}
       </div>
+    </div>
+  );
+}
 
-      {/* Instructions */}
-      {phase === "draw" && (
-        <div style={{background:"rgba(201,151,58,0.08)",border:"1px solid rgba(201,151,58,0.25)",borderRadius:4,padding:"14px 18px",marginBottom:16}}>
-          <Mono size={12} color={C.gold} spacing={1}>{S.abStep1}</Mono>
-        </div>
-      )}
-      {phase === "guess" && (
-        <div style={{background:C.greenPale,border:`1px solid ${C.green}`,borderRadius:4,padding:"14px 18px",marginBottom:16,display:"flex",gap:16,alignItems:"center",flexWrap:"wrap"}}>
-          <Mono size={12} color={C.greenD} spacing={1}>{S.abStep2}</Mono>
-          <div style={{display:"flex",gap:10,marginLeft:"auto"}}>
-            <button onClick={() => submitGuess("up")} style={{padding:"10px 22px",background:C.green,color:"#fff",border:"none",borderRadius:4,cursor:"pointer",fontFamily:"monospace",fontSize:13,fontWeight:700}}>{S.abUpBtn}</button>
-            <button onClick={() => submitGuess("down")} style={{padding:"10px 22px",background:C.red,color:"#fff",border:"none",borderRadius:4,cursor:"pointer",fontFamily:"monospace",fontSize:13,fontWeight:700}}>{S.abDownBtn}</button>
-          </div>
-        </div>
-      )}
-      {phase === "result" && result && (
-        <div style={{background: result.perfect ? C.greenPale : result.dirOk ? "rgba(201,151,58,0.08)" : C.redPale,
-          border: `1px solid ${result.perfect ? C.green : result.dirOk ? C.gold : C.red}`,
-          borderRadius:4,padding:"16px 20px",marginBottom:16}}>
-          <div style={{fontWeight:700,fontSize:15,color: result.perfect ? C.greenD : result.dirOk ? C.gold : C.redD,marginBottom:8}}>
-            {result.perfect ? S.abResultPerfectTitle :
-             result.dirOk ? S.abResultDirOkTitle :
-             S.abResultWrongTitle}
-          </div>
-          <p style={{fontSize:13,color:C.inkMid,lineHeight:1.65}}>
-            {result.perfect
-              ? S.abResultPerfectBody
-              : result.dirOk
-              ? S.abResultDirOkBody
-              : S.abResultWrongBody}
-          </p>
-        </div>
-      )}
-
-      {/* Chart */}
-      <div style={{borderRadius:4,overflow:"hidden",border:`1px solid ${C.border}`,position:"relative",userSelect:"none"}}>
-        <svg
-          ref={svgRef}
-          viewBox={`0 0 ${W} ${H}`}
-          style={{width:"100%",display:"block",background:C.chart,cursor: phase==="draw" ? "crosshair" : "default",touchAction:"none"}}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseUp}
-        >
-          {/* Grid */}
-          {[2495,2500,2505,2510,2515,2520,2525,2530,2535].map(p => (
-            <g key={p}>
-              <line x1="0" y1={toY(p)} x2={W} y2={toY(p)} stroke="rgba(255,255,255,0.04)" strokeWidth="1"/>
-              <text x="4" y={toY(p)-3} fontSize="9" fill="rgba(255,255,255,0.2)" fontFamily="monospace">{p}</text>
-            </g>
-          ))}
-
-          {/* Session divider */}
-          <line x1={20 + 14 * ((W-40)/25)} y1={0} x2={20 + 14 * ((W-40)/25)} y2={H}
-            stroke="rgba(201,151,58,0.25)" strokeWidth="1" strokeDasharray="4 3"/>
-
-          {/* Candles */}
-          {candles.map((c,i) => {
-            const bull = c.close >= c.open;
-            const col = c.session === "asia" ? "#8b5cf6"
-              : c.session === "london_manip" ? C.red
-              : C.green;
-            const bodyT = toY(Math.max(c.open,c.close));
-            const bodyB = toY(Math.min(c.open,c.close));
-            return (
-              <g key={i}>
-                <line x1={c.x} y1={toY(c.high)} x2={c.x} y2={toY(c.low)} stroke={col} strokeWidth="1.5"/>
-                <rect x={c.x-candleW/2} y={bodyT} width={candleW} height={Math.max(bodyB-bodyT,1)} fill={col} rx="1"/>
-              </g>
-            );
-          })}
-
-          {/* True Asia box overlay (show in result) */}
-          {phase === "result" && (
-            <rect x={20} y={toY(asiaBoxTrue.hi)} width={14*((W-40)/25)}
-              height={toY(asiaBoxTrue.lo)-toY(asiaBoxTrue.hi)}
-              fill="rgba(139,92,246,0.1)" stroke="#8b5cf6" strokeWidth="1.5" strokeDasharray="5 3"/>
-          )}
-
-          {/* User's drawn box */}
-          {box && (
-            <rect
-              x={20}
-              y={Math.min(box.y1,box.y2)}
-              width={14*((W-40)/25)}
-              height={Math.abs(box.y2-box.y1)}
-              fill="rgba(201,151,58,0.08)"
-              stroke={C.gold}
-              strokeWidth="1.5"
-              strokeDasharray="5 3"
-            />
-          )}
-
-          {/* Labels */}
-          <rect x={18} y={4} width={140} height={16} fill="rgba(139,92,246,0.2)" rx="2"/>
-          <text x={24} y={15} fontSize="9" fill="#8b5cf6" fontFamily="monospace" fontWeight="700">{S.abAsiaLabel}</text>
-          <rect x={20 + 14*((W-40)/25)+4} y={4} width={120} height={16} fill="rgba(201,151,58,0.2)" rx="2"/>
-          <text x={20 + 14*((W-40)/25)+10} y={15} fontSize="9" fill={C.gold} fontFamily="monospace" fontWeight="700">{S.abLondonLabel}</text>
-
-          {/* Stop hunt annotation in result */}
-          {phase === "result" && (
-            <g>
-              <line x1={20+14*((W-40)/25)+4} y1={toY(2506)} x2={20+16*((W-40)/25)} y2={toY(2506)}
-                stroke={C.red} strokeWidth="1" strokeDasharray="3 2"/>
-              <text x={20+16*((W-40)/25)+4} y={toY(2505)} fontSize="9" fill={C.red} fontFamily="monospace">STOP HUNT ↓</text>
-              <text x={20+20*((W-40)/25)+4} y={toY(2523)} fontSize="9" fill={C.green} fontFamily="monospace">{S.abTrueBreakoutLabel}</text>
-            </g>
-          )}
-        </svg>
-      </div>
-
-      <div style={{marginTop:12,display:"flex",gap:20,flexWrap:"wrap"}}>
-        {[{color:"#8b5cf6",label:S.abLegendAsia},
-          {color:C.red,label:S.abLegendManip},
-          {color:C.green,label:S.abLegendTrue}
-        ].map((l,i) => (
-          <div key={i} style={{display:"flex",alignItems:"center",gap:6}}>
-            <div style={{width:10,height:10,borderRadius:2,background:l.color}}/>
-            <span style={{fontSize:11,fontFamily:"monospace",color:C.inkMid}}>{l.label}</span>
-          </div>
+// ─── Predict of the week (§5): hour grid, no direction question ──────────────
+function PredictHour({ vars }) {
+  const { useState } = React;
+  const T5 = window.Ch5Content[INITIAL_LANG] || window.Ch5Content.ru;
+  const p = T5.predict;
+  const [picked, setPicked] = useState(null);
+  const hours = Array.from({length:24}, (_,i) => i);
+  return (
+    <div style={{border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px",marginTop:32,marginBottom:24}}>
+      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{p.tag}</Mono>
+      <p style={{fontSize:14.5,color:C.black,lineHeight:1.65,marginBottom:4}}>{p.question}</p>
+      <p style={{fontSize:11,color:C.inkFaint,marginBottom:14}}>{p.utcNote}</p>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(12,1fr)",gap:5,marginBottom:14,maxWidth:520}}>
+        {hours.map(h => (
+          <button key={h} onClick={() => setPicked(h)} style={{padding:"8px 0",fontFamily:"monospace",fontSize:11,cursor:"pointer",
+            background: picked===h ? C.gold : "#fff", color: picked===h ? "#18181a" : C.inkMid,
+            border:`1px solid ${picked===h?C.gold:C.border}`,borderRadius:3}}>{String(h).padStart(2,"0")}</button>
         ))}
       </div>
+      {picked !== null && vars && <p style={{fontSize:12.5,color:C.inkMid,lineHeight:1.7,marginBottom:10,background:C.goldPale,padding:"12px 16px",borderRadius:4}}>{fillTemplate(p.afterPick, vars)}</p>}
+      <p style={{fontSize:11,color:C.inkFaint}}>{p.xpNote}</p>
     </div>
   );
 }
 
 // ─── Main Chapter 5 ────────────────────────────────────────────────────────────
 function Chapter5() {
-  const { useState } = React;
   const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
-  const [askOpen, setAskOpen] = useState(false);
-  const [checked, setChecked] = useState({});
-
-  const toggleCheck = (i) => setChecked(p => ({...p,[i]:!p[i]}));
-  const checkedCount = Object.values(checked).filter(Boolean).length;
-
-  const sessionTable = [
-    {session:S.glSessionTokyoName,  gmt:"00:00–09:00",  msk:"03:00–12:00", pairs:"USD/JPY, AUD/USD, NZD/USD", liq:S.liqLow,   color:"#8b5cf6"},
-    {session:S.glSessionLondonName, gmt:"07:00–16:00",  msk:"10:00–19:00", pairs:"EUR/USD, GBP/USD, XAU/USD", liq:S.liqHigh,  color:C.gold},
-    {session:S.glSessionNyName,     gmt:"13:00–22:00",  msk:"16:00–01:00", pairs:"EUR/USD, USD/CAD, DJI",     liq:S.liqHigh,  color:C.green},
-    {session:S.sessTableOverlap,    gmt:"13:00–16:00",  msk:"16:00–19:00", pairs:S.sessTablePairsOverlap,      liq:S.liqMax,   color:C.red},
-  ];
-
-  const amdSteps = [
-    {letter:"A",word:S.amdAccWord,eng:"Accumulation",icon:"📦",
-     color:"#8b5cf6",colorL:"rgba(139,92,246,0.08)",
-     desc:S.amdAccDesc},
-    {letter:"M",word:S.amdManipWord,eng:"Manipulation",icon:"🎭",
-     color:C.red,colorL:C.redPale,
-     desc:S.amdManipDesc},
-    {letter:"D",word:S.amdDistWord,eng:"Distribution",icon:"📈",
-     color:C.green,colorL:C.greenPale,
-     desc:S.amdDistDesc},
-  ];
-
-  const checklistItems = [
-    S.checklistItem1,
-    S.checklistItem2,
-    S.checklistItem3,
-    S.checklistItem4,
-    S.checklistItem5,
-    S.checklistItem6,
-    S.checklistItem7,
-  ];
-
-  const conclusions = [
-    S.conclusion1,
-    S.conclusion2,
-    S.conclusion3,
-    S.conclusion4,
-    S.conclusion5,
-    S.conclusion6,
-  ];
+  const lang = INITIAL_LANG;
+  const T5 = window.Ch5Content[lang] || window.Ch5Content.ru;
+  const { loading, error, hp, as, cfg, coldOpen } = useCh5Data();
+  const vars = React.useMemo(() => buildVars(hp, as, cfg, lang), [hp, as, cfg, lang]);
 
   return (
     <div style={{minHeight:"100vh",background:C.white,color:C.ink,fontFamily:"'DM Sans',sans-serif"}}>
@@ -1003,281 +1015,156 @@ function Chapter5() {
       {/* Sticky header */}
       <div style={{position:"sticky",top:106,background:"rgba(255,255,255,0.96)",backdropFilter:"blur(10px)",borderBottom:`1px solid ${C.border}`,padding:"15px 5vw",display:"flex",alignItems:"center",justifyContent:"space-between",zIndex:50}}>
         <div style={{display:"flex",alignItems:"center",gap:20}}>
-          <span onClick={() => window.location.href = getChUrl(4)} style={{color:C.gold,cursor:"pointer",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</span>
-          <Chip>{S.chipLevel5}</Chip>
-          <Mono size={14} color={C.inkSoft} spacing={0} className="hide-mobile">{S.chipHeaderSubtitle}</Mono>
+          <span onClick={() => window.location.href = getChUrl(4, lang)} style={{color:C.gold,cursor:"pointer",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</span>
+          <Chip>{S.levelChip}</Chip>
+          <Mono size={14} color={C.inkSoft} spacing={0} className="hide-mobile">{S.chapterNameShort}</Mono>
         </div>
-        <div style={{display:"flex",gap:8,alignItems:"center"}}>
-          {checkedCount > 0 && <Chip color={C.green}>{checkedCount}/{checklistItems.length} ✓</Chip>}
-          <Chip color={C.inkFaint}>{S.chipFA}</Chip>
-          <Chip color={C.inkFaint}>{S.chipTA}</Chip>
+        <div style={{display:"flex",gap:8}}>
+          <Chip color={C.inkFaint}>{S.faTag}</Chip>
+          <Chip color={C.inkFaint}>{S.taTag}</Chip>
         </div>
       </div>
 
       {/* HERO */}
       <div style={{background:C.black,padding:"80px 5vw 70px",textAlign:"center",position:"relative",overflow:"hidden"}}>
-        <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 100%, rgba(201,151,58,0.10) 0%, transparent 60%)"}}/>
+        <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 100%, rgba(201,151,58,0.1) 0%, transparent 60%)"}}/>
         <div style={{position:"relative"}}>
           <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:20}}>{S.heroEyebrow}</Mono>
           <h1 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(36px,6vw,66px)",fontWeight:400,color:C.white,lineHeight:1.05,marginBottom:20}}>
-            {S.heroTitleTop}<br/>{S.heroTitleAnd} <span style={{color:C.gold}}>{S.heroTitleBottom}</span>
+            {S.heroTitleLine1}<br/><span style={{color:C.gold}}>{S.heroTitleLine2}</span>
           </h1>
-          <p style={{fontSize:"clamp(16px,2vw,20px)",color:"rgba(255,255,255,0.55)",maxWidth:620,margin:"0 auto 32px",lineHeight:1.65}}>
-            {S.heroLead}
+          <p style={{fontSize:"clamp(16px,2vw,20px)",color:"rgba(255,255,255,0.55)",maxWidth:640,margin:"0 auto 32px",lineHeight:1.65}}>
+            {S.heroSubtitle}
           </p>
           <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
-            <Chip color={C.gold}>{S.heroChipFA}</Chip>
-            <Chip color="rgba(255,255,255,0.3)">{S.heroChipTA}</Chip>
-            <Chip color="rgba(255,255,255,0.3)">{S.heroChipInteractive}</Chip>
+            <Chip color={C.gold}>{S.fundamentalChip}</Chip>
+            <Chip color="rgba(255,255,255,0.3)">{S.technicalChip}</Chip>
+            <Chip color="rgba(255,255,255,0.3)">{S.interactiveChip}</Chip>
           </div>
         </div>
       </div>
 
-      <div style={{maxWidth:1060,margin:"0 auto",padding:"72px 5vw 120px"}}>
+      {loading && <div style={{textAlign:"center",padding:"60px 0",fontFamily:"monospace",fontSize:13,color:C.inkFaint}}>{S.loadingLabel}</div>}
+      {error && <div style={{textAlign:"center",padding:"40px 0",fontFamily:"monospace",fontSize:13,color:"#c0392b",background:C.redPale}}>{S.loadErrorLabel}</div>}
 
-        {/* ── ANTI-MYTH ── */}
-        <div style={{background:C.black,borderRadius:6,padding:"36px 40px",marginBottom:56,position:"relative",overflow:"hidden"}}>
-          <div style={{position:"absolute",top:0,left:0,bottom:0,width:4,background:C.red}}/>
-          <Mono size={11} color={C.red} spacing={3} style={{display:"block",marginBottom:16}}>{S.mythLabel}</Mono>
-          <h3 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(20px,3vw,28px)",color:C.white,fontWeight:400,marginBottom:16,lineHeight:1.3}}>
-            {S.mythQuote}
-          </h3>
-          <p style={{fontSize:14,color:"rgba(255,255,255,0.55)",lineHeight:1.75,maxWidth:700}}>
-            {S.mythBody}
-          </p>
-        </div>
+      {!loading && (
+      <div style={{maxWidth:1060,margin:"0 auto",padding:"0 0 120px"}}>
 
-        {/* ── SBF VOICE ── */}
-        <div style={{background:C.goldPale,border:`1px solid ${C.borderGold}`,borderRadius:6,padding:"32px 40px",marginBottom:56}}>
-          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:14}}>{S.voiceAttribution}</Mono>
-          <blockquote style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(18px,2.5vw,24px)",color:C.black,fontWeight:400,lineHeight:1.5,marginBottom:16,fontStyle:"italic"}}>
-            {S.voiceQuote}
-          </blockquote>
-          <p style={{fontSize:13,color:C.inkMid,lineHeight:1.65}}>
-            {S.voiceBody}
-          </p>
-        </div>
+        <div style={{margin:"0 -5vw 56px"}}><ColdOpen5 coldOpen={coldOpen}/></div>
 
-        {/* ── PRICE OF IGNORANCE ── */}
-        <div style={{background:C.redPale,border:`1px solid rgba(242,54,69,0.25)`,borderRadius:6,padding:"28px 36px",marginBottom:64,display:"flex",gap:24,alignItems:"flex-start",flexWrap:"wrap"}}>
-          <div style={{fontSize:40,flexShrink:0}}>💸</div>
-          <div>
-            <div style={{fontWeight:700,fontSize:14,color:C.redD,letterSpacing:0.5,textTransform:"uppercase",marginBottom:10}}>{S.ignoranceLabel}</div>
-            <p style={{fontSize:14,color:C.redD,lineHeight:1.75}}>
-              {S.ignoranceIntro}<span class='local-time' data-utc='2026-03-09T00:00:00Z'>{S.ignoranceTimeLabel}</span>{S.ignoranceMiddle}<strong>{S.ignoranceBold}</strong>
-            </p>
+        <div style={{padding:"0 5vw"}}>
+
+        {/* ── АНТИ-МИФ → ГОЛОС SBF → ЦЕНА НЕЗНАНИЯ ── */}
+        <div style={{marginBottom:48}}>
+          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T5.antiMyth.tag}</Mono>
+          <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px",marginBottom:28}}>
+            <p style={{fontWeight:600,fontSize:14.5,color:C.black,marginBottom:10}}>{T5.antiMyth.title}</p>
+            <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,marginBottom:12}}>{T5.antiMyth.body1}</p>
+            <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,margin:0}}>{T5.antiMyth.body2}</p>
+          </div>
+
+          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T5.voiceSbf.tag}</Mono>
+          <div style={{borderLeft:`4px solid ${C.gold}`,paddingLeft:24,marginBottom:28}}>
+            {T5.voiceSbf.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:16,fontStyle:"italic",color:C.inkMid,lineHeight:1.7,fontFamily:"'DM Serif Display',serif",marginBottom:12}}>{p}</p>)}
+          </div>
+
+          <div style={{background:C.black,borderRadius:8,padding:"26px 30px",color:C.white}}>
+            <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T5.priceOfNotKnowing.tag}</Mono>
+            <div style={{fontFamily:"'DM Serif Display',serif",fontSize:20,color:C.white,marginBottom:12}}>{T5.priceOfNotKnowing.title}</div>
+            {T5.priceOfNotKnowing.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:13.5,lineHeight:1.75,color:"rgba(255,255,255,0.7)",marginBottom:10}}>{vars ? fillTemplate(p, vars) : p}</p>)}
           </div>
         </div>
 
-        {/* ── THEORY 1: FA ── */}
-        <SectionTitle sub={S.theory1Sub}>
-          {S.theory1Title}
-        </SectionTitle>
+        {/* ── Часы планеты ── */}
+        <SectionTitle id="secClocks">{T5.clocks.title}</SectionTitle>
+        <ClocksBlock/>
 
-        {/* Session table */}
-        <div style={{overflowX:"auto",marginBottom:48}}>
-          <table style={{width:"100%",borderCollapse:"collapse",fontSize:13}}>
-            <thead>
-              <tr>
-                {S.tableHeaders.map(h => (
-                  <th key={h} style={{textAlign:"left",padding:"10px 14px",fontSize:11,color:C.inkSoft,letterSpacing:1,borderBottom:`2px solid ${C.border}`,textTransform:"uppercase",whiteSpace:"nowrap"}}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {sessionTable.map((row,i) => (
-                <tr key={i} style={{borderBottom:`1px solid ${C.border}`}}>
-                  <td style={{padding:"14px",fontWeight:600,fontSize:13,color:row.color,display:"flex",alignItems:"center",gap:8,whiteSpace:"nowrap"}}>
-                    <div style={{width:6,height:6,borderRadius:"50%",background:row.color,flexShrink:0}}/>
-                    {row.session}
-                  </td>
-                  <td style={{padding:"14px",fontFamily:"monospace",fontSize:13}}>{row.gmt}</td>
-                  <td style={{padding:"14px",fontFamily:"monospace",fontSize:13}}>{row.msk}</td>
-                  <td style={{padding:"14px",color:C.inkMid,fontSize:13}}>{row.pairs}</td>
-                  <td style={{padding:"14px"}}>
-                    <span style={{
-                      fontSize:11,fontFamily:"monospace",letterSpacing:0.5,
-                      padding:"3px 10px",borderRadius:3,
-                      color: row.liq===S.liqMax?C.red:row.liq===S.liqHigh?C.greenD:row.liq===S.liqLow?"#8b5cf6":C.inkSoft,
-                      background: row.liq===S.liqMax?C.redPale:row.liq===S.liqHigh?C.greenPale:row.liq===S.liqLow?"rgba(139,92,246,0.08)":C.surface,
-                    }}>{row.liq}</span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        {/* ── Глобус ликвидности ── */}
+        <SectionTitle sub={S.globeSub}>{T5.globe.title}</SectionTitle>
+        <div style={{marginBottom:24}}><StepTag n="1-3" label={S.stepExplain+" → "+S.stepShow+" → "+S.stepDo}/></div>
+        <div style={{marginBottom:56}}><LiquidityGlobe hp={hp}/></div>
 
-        {/* Key facts */}
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,marginBottom:56}} className="g2">
-          <InfoCard icon="🌙" title={S.infoCard1Title}
-            text={S.infoCard1Body}
-            accent="#8b5cf6"/>
-          <InfoCard icon="⚡" title={S.infoCard2Title}
-            text={S.infoCard2Body}
-            accent={C.gold}/>
-          <InfoCard icon="🏦" title={S.infoCard3Title}
-            text={S.infoCard3Body}
-            accent={C.blue}/>
-          <InfoCard icon="🎭" title={S.infoCard4Title}
-            text={S.infoCard4Body}
-            accent={C.red}/>
-        </div>
+        {/* ── Почему сессии существуют ── */}
+        <SectionTitle id="secWhySessions">{T5.whySessions.tag}</SectionTitle>
+        <WhySessionsCards/>
 
-        {/* ── INTERACTIVE 1 ── */}
-        <div style={{marginBottom:64}}>
-          <LiquidityGlobe/>
+        {/* ── Наши сутки — почасовая карта ── */}
+        <SectionTitle>{T5.hourStats.title}</SectionTitle>
+        <div style={{marginBottom:56}}><HourStatsBlock hp={hp} vars={vars}/></div>
+
+        {/* ── Три мотора суток ── */}
+        <SectionTitle>{T5.threeEngines.tag}</SectionTitle>
+        <ThreeEngines vars={vars}/>
+
+        {/* ── Где живут стопы ── */}
+        <SectionTitle id="secStops">{T5.stops.title}</SectionTitle>
+        <StopsSection/>
+
+        {/* ── AMD как карта ── */}
+        <SectionTitle>{T5.amd.title}</SectionTitle>
+        <AmdHonestBlock as={as} vars={vars}/>
+
+        {/* ── Сцена: реальный прокол ── */}
+        <SectionTitle sub={S.sweepSub}>{T5.sweepScene.tag}</SectionTitle>
+        <SweepScene vars={vars}/>
+
+        {/* ── Тренажёр «Коробка Азии» v2 ── */}
+        <SectionTitle sub={S.trainerSub}>{T5.trainer.tag}</SectionTitle>
+        <div style={{marginBottom:56}}><AsiaBoxTrainer as={as}/></div>
+
+        {/* ── Ловушка перевода часов ── */}
+        <SectionTitle id="secDstTrap" sub={S.dstSub}>{T5.dstTrap.title}</SectionTitle>
+        <DstTrapBlock vars={vars}/>
+
+        {/* ── Твоё окно ── */}
+        <SectionTitle sub={S.windowSub}>{T5.myWindow.title}</SectionTitle>
+        <MyWindowBlock cfg={cfg} hp={hp} vars={vars}/>
+
+        {/* ── Контекст локали ── */}
+        <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px",marginBottom:48}}>
+          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T5.localeContext.tag}</Mono>
+          <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,margin:0,maxWidth:780}}>{vars ? fillTemplate(T5.localeContext.body, vars) : T5.localeContext.body}</p>
         </div>
 
         <Rule/>
 
-        {/* ── THEORY 2: TA ── */}
-        <SectionTitle sub={S.theory2Sub}>
-          {S.theory2Title}
-        </SectionTitle>
+        <QuizBlock questions={T5.quiz} levelId="level_5" lang={lang} copy={{
+          kicker: S.quizKicker, title: S.quizTitle, next: S.quizNext,
+          stuckAll: S.quizStuckAll, stuckSome: S.quizStuckSome, backToSection: S.quizBackToSection,
+        }} />
 
-        {/* AMD steps */}
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:16,marginBottom:48}} className="g3">
-          {amdSteps.map((s,i) => (
-            <div key={i} style={{background:s.colorL,border:`1px solid ${s.color}22`,borderRadius:6,padding:"28px 24px",borderTop:`3px solid ${s.color}`}}>
-              <div style={{display:"flex",gap:10,alignItems:"center",marginBottom:12}}>
-                <div style={{width:36,height:36,borderRadius:"50%",background:s.color,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontFamily:"monospace",fontWeight:700,fontSize:16,flexShrink:0}}>{s.letter}</div>
-                <div>
-                  <div style={{fontWeight:700,fontSize:14,color:C.black}}>{s.word}</div>
-                  <div style={{fontSize:11,color:C.inkFaint,fontFamily:"monospace"}}>{s.eng}</div>
-                </div>
-                <span style={{marginLeft:"auto",fontSize:22}}>{s.icon}</span>
-              </div>
-              <p style={{fontSize:13,color:C.inkMid,lineHeight:1.65}}>{s.desc}</p>
-            </div>
-          ))}
+        <PredictHour vars={vars}/>
+
+        <div style={{border:`1px dashed ${C.borderGold}`,borderRadius:8,padding:"20px 24px",marginBottom:32,background:C.surface}}>
+          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T5.cliffhanger.tag}</Mono>
+          {T5.cliffhanger.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:14,color:C.inkMid,lineHeight:1.7,marginBottom:10}}>{p}</p>)}
         </div>
 
-        {/* AMD chart diagram */}
-        <div style={{background:C.black,borderRadius:6,padding:"28px 32px",marginBottom:56}}>
-          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:20}}>{S.amdDiagramLabel}</Mono>
-          <svg viewBox="0 0 680 220" style={{width:"100%",display:"block"}}>
-            <rect width="680" height="220" fill="#18181a"/>
-            {/* Session zones */}
-            <rect x="0"   y="0" width="200" height="220" fill="rgba(139,92,246,0.06)"/>
-            <rect x="200" y="0" width="200" height="220" fill="rgba(242,54,69,0.06)"/>
-            <rect x="400" y="0" width="280" height="220" fill="rgba(8,153,129,0.06)"/>
-            {/* Labels */}
-            <text x="12" y="18" fontSize="9" fill="#8b5cf6" fontFamily="monospace" fontWeight="700">{S.amdDiagAsia}</text>
-            <text x="212" y="18" fontSize="9" fill="#f23645" fontFamily="monospace" fontWeight="700">{S.amdDiagLondon}</text>
-            <text x="412" y="18" fontSize="9" fill="#089981" fontFamily="monospace" fontWeight="700">{S.amdDiagNy}</text>
-            {/* Asia range box */}
-            <rect x="20" y="70" width="160" height="80" fill="rgba(139,92,246,0.12)" stroke="#8b5cf6" strokeWidth="1" strokeDasharray="5 3"/>
-            <text x="25" y="88" fontSize="8" fill="#8b5cf6" fontFamily="monospace">Asia Hi</text>
-            <text x="25" y="155" fontSize="8" fill="#8b5cf6" fontFamily="monospace">Asia Lo</text>
-            {/* Manipulation line: fake break down */}
-            <polyline points="180,110 220,110 260,175 300,140 340,100" fill="none" stroke="#f23645" strokeWidth="2"/>
-            {/* Stop hunt marker */}
-            <circle cx="260" cy="175" r="5" fill="none" stroke="#f23645" strokeWidth="1.5"/>
-            <text x="240" y="195" fontSize="8" fill="#f23645" fontFamily="monospace">STOP HUNT</text>
-            {/* True breakout */}
-            <polyline points="340,100 380,80 420,55 460,42 520,30 580,22" fill="none" stroke="#089981" strokeWidth="2.5"/>
-            <text x="500" y="18" fontSize="8" fill="#089981" fontFamily="monospace">{S.amdDiagTrend}</text>
-            {/* Overlap zone */}
-            <rect x="400" y="0" width="80" height="220" fill="rgba(201,151,58,0.08)"/>
-            <text x="405" y="210" fontSize="8" fill={C.gold} fontFamily="monospace">OVERLAP</text>
-          </svg>
+        <div style={{marginBottom:32}}>
+          <Mono size={10} color={C.inkFaint} spacing={2} style={{display:"block",marginBottom:10,textTransform:"uppercase"}}>{T5.sources.tag}</Mono>
+          <ol style={{fontSize:11.5,color:C.inkFaint,lineHeight:1.8,paddingLeft:18,marginBottom:8}}>
+            {T5.sources.list.map((s,i) => <li key={i}>{s}</li>)}
+          </ol>
+          <p style={{fontSize:11,color:C.inkFaint,fontStyle:"italic"}}>{T5.sources.checked}</p>
         </div>
 
-        {/* Session overlap detail */}
-        <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:6,padding:"28px 36px",marginBottom:56}}>
-          <div style={{display:"flex",gap:16,alignItems:"flex-start"}}>
-            <div style={{width:52,height:52,borderRadius:4,background:`rgba(201,151,58,0.12)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:26,flexShrink:0}}><img class='mi-icon' style={{verticalAlign:'middle'}} src='/assets/icons/icon-lightning.png' alt='' width='20' height='20' /></div>
-            <div>
-              <div style={{fontWeight:700,fontSize:15,color:C.black,marginBottom:8}}>{S.overlapDetailPrefix}<span class='local-time' data-utc='2026-03-09T16:00:00Z'>{S.overlapDetailMskLabel}</span>{S.overlapDetailSuffix}</div>
-              <p style={{fontSize:14,color:C.inkMid,lineHeight:1.75}}>
-                {S.overlapDetailBody}
-              </p>
-              <div style={{marginTop:12,display:"flex",gap:10,flexWrap:"wrap"}}>
-                {["EUR/USD","GBP/USD","XAU/USD","USD/JPY"].map(p => (
-                  <span key={p} style={{fontSize:11,fontFamily:"monospace",color:C.gold,background:C.goldPale,padding:"3px 10px",borderRadius:2}}>{p}</span>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* ── INTERACTIVE 2 ── */}
-        <div style={{marginBottom:64}}>
-          <AsiaBoxTrainer/>
-        </div>
-
-        <Rule/>
-
-        {/* ── CHECKLIST ── */}
-        <div style={{marginBottom:64}}>
-          <SectionTitle sub={S.checklistSub} align="center">
-            {S.checklistTitle}
-          </SectionTitle>
-          <div style={{display:"grid",gap:10}}>
-            {checklistItems.map((item,i) => (
-              <div
-                key={i}
-                onClick={() => toggleCheck(i)}
-                style={{
-                  display:"flex",gap:14,alignItems:"center",
-                  padding:"16px 20px",borderRadius:4,cursor:"pointer",
-                  border:`1px solid ${checked[i] ? C.green : C.border}`,
-                  background: checked[i] ? C.greenPale : C.surface,
-                  transition:"all .2s"
-                }}>
-                <div style={{
-                  width:22,height:22,borderRadius:3,flexShrink:0,
-                  border:`2px solid ${checked[i] ? C.green : C.border}`,
-                  background: checked[i] ? C.green : "transparent",
-                  display:"flex",alignItems:"center",justifyContent:"center",
-                  color:"#fff",fontSize:13,transition:"all .2s"
-                }}>{checked[i] ? "✓" : ""}</div>
-                <span style={{fontSize:14,color:checked[i] ? C.greenD : C.inkMid,lineHeight:1.5}}>{item}</span>
-              </div>
-            ))}
-          </div>
-          {checkedCount === checklistItems.length && (
-            <div style={{marginTop:20,background:C.greenPale,border:`1px solid ${C.green}`,borderRadius:4,padding:"18px 24px",textAlign:"center"}}>
-              <div style={{fontWeight:700,color:C.greenD,fontSize:15,marginBottom:4}}>{S.checklistDoneTitle}</div>
-              <div style={{fontSize:13,color:C.greenD}}>{S.checklistDoneBody}</div>
-            </div>
-          )}
-        </div>
-
-        {/* ── CONCLUSIONS ── */}
-        <div style={{background:C.black,borderRadius:8,padding:"44px 48px"}}>
-          <div style={{textAlign:"center",marginBottom:32}}>
-            <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:12}}>{S.conclusionsLabel}</Mono>
-            <h3 style={{fontFamily:"'DM Serif Display',serif",fontSize:28,color:C.white,fontWeight:400}}>{S.conclusionsTitle}</h3>
-          </div>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
-            {conclusions.map((c,i) => (
-              <div key={i} style={{display:"flex",gap:14,alignItems:"flex-start",padding:"14px 16px",background:"rgba(255,255,255,0.04)",borderRadius:4,border:"1px solid rgba(255,255,255,0.06)"}}>
-                <span style={{color:C.gold,fontFamily:"monospace",fontSize:11,marginTop:2,flexShrink:0}}>0{i+1}</span>
-                <span style={{fontSize:13,color:"rgba(255,255,255,0.7)",lineHeight:1.65}}>{c}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+        <ComplianceFootnote lang={lang} />
 
         {/* Footer navigation */}
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",paddingTop:48,marginTop:48,borderTop:`1px solid ${C.border}`}}>
-          <span onClick={() => setAskOpen(true)} style={{fontSize:14,color:C.inkSoft,fontFamily:"monospace",borderBottom:`1px solid ${C.border}`,cursor:"pointer"}}>
-            {S.footerAskLink}
-          </span>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:20,paddingTop:48,marginTop:16,borderTop:`1px solid ${C.border}`}}>
+          <AskAnalystBtn tr={{askAnalyst:S.askQuestionLabel}} chapterNum={5} lang={lang} />
           <button
-            onClick={() => window.location.href = getChUrl(6)}
+            onClick={() => window.location.href = getChUrl(6, lang)}
             style={{background:C.black,color:C.white,border:"none",padding:"18px 35px",cursor:"pointer",fontFamily:"monospace",fontSize:14,letterSpacing:2,fontWeight:700,transition:"background .2s"}}
             onMouseEnter={e=>e.target.style.background=C.gold}
             onMouseLeave={e=>e.target.style.background=C.black}>
-            {S.footerNextBtn}
+            {S.nextChapterBtn}
           </button>
         </div>
 
+        </div>
       </div>
-
-      {askOpen && <AskAnalystPopup onClose={() => setAskOpen(false)}/>}
+      )}
     </div>
   );
 }
@@ -1287,34 +1174,5 @@ ReactDOM.createRoot(document.getElementById('sbf-book-root')).render(<Chapter5 /
 </script>
 </body>
 </html>
-<script>
-// Скрипт для конвертации UTC времени в локальное время пользователя
-document.addEventListener('DOMContentLoaded', function() {
-    var _pageLang = "{{ lang }}";
-    var _intlLocale = _pageLang === 'ro' ? 'ro-RO' : _pageLang === 'en' ? 'en-US' : 'ru-RU';
-    const utcTimes = document.querySelectorAll('.local-time[data-utc]');
 
-    utcTimes.forEach(function(element) {
-        // Получаем UTC время из data-utc атрибута
-        var utcString = element.getAttribute('data-utc');
-        
-        try {
-            // Парсим UTC дату и время
-            var utcDate = new Date(utcString);
-            
-            // Конвертируем в локальное время пользователя
-            var localDate = new Date(utcDate.getTime() + utcDate.getTimezoneOffset() * 60000);
-            
-            // Форматируем для отображения (например, "19:00 МСК")
-            var hours = String(localDate.getHours()).padStart(2, '0');
-            var minutes = String(localDate.getMinutes()).padStart(2, '0');
-            var timeZoneName = Intl.DateTimeFormat(_intlLocale, { timeZoneName: 'long' }).format(localDate);
-            
-            // Обновляем текст элемента с локальным временем
-            element.innerHTML = '<span class="local-time-display">' + hours + ':' + minutes + ' ' + timeZoneName.replace(/\s/g, '') + '</span>';
-        } catch (e) {
-            console.error('Ошибка конвертации времени:', e);
-        }
-    });
-});
-</script>
+
