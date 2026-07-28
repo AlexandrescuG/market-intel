@@ -11,20 +11,12 @@
     html,body{max-width:100vw;overflow-x:hidden;scroll-behavior:smooth}
     body{background:#ffffff;font-family:'DM Sans',system-ui,sans-serif;color:#18181a}
     #sbf-book-root{min-height:100vh}
-    .messenger-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:30px}
     @media(max-width:768px){
-      .messenger-grid{grid-template-columns:1fr}
       .hide-mobile{display:none!important}
       .g2{grid-template-columns:1fr!important}
       .g3{grid-template-columns:1fr!important}
       .g4{grid-template-columns:1fr 1fr!important}
     }
-    @keyframes pulseFlash {
-      0% { background-color: rgba(242,54,69,0.1); }
-      50% { background-color: rgba(242,54,69,0.4); }
-      100% { background-color: rgba(242,54,69,0.1); }
-    }
-    .flash-news { animation: pulseFlash 1.5s infinite; }
   </style>
 </head>
 <body>
@@ -34,7 +26,8 @@
 
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"></script>
+<script src="/edu/assets/ch6.js"></script>
 
 <script type="text/babel" data-presets="react">
 const INITIAL_LANG = "{{ lang }}";
@@ -42,445 +35,603 @@ const INITIAL_LANG = "{{ lang }}";
 {% raw %}
 const STRINGS = {
   ru: {
-    stickyLevel:"УРОВЕНЬ 6", stickyTitle:"Пульс Новостей", stickyFA:"ФА 50%", stickyTA:"ТА 50%",
-    heroLabel:"SBF COMPANY — ГЛАВА 6", heroTitleA:"Пульс", heroTitleB:"Новостей",
-    heroSub:"Как фундаментальный анализ предсказывает экономический взрыв, а технический индикатор визуализирует сжатие пружины перед пробоем.",
-    heroChip1:"Макроэкономика", heroChip3:"2 Тренажера",
-
-    sec1Title:"Макроэкономика: Три кита волатильности",
-    sec1Sub:"Рынок движут не линии на графике, а капитал. Капитал перетекает из актива в актив только под давлением глобальных экономических данных. Новость — это триггер ликвидности.",
-
-    fundFomcTitle:"FOMC (Ставка ФРС)", fundGdpTitle:"GDP (ВВП США)",
-    fundNfpText:"Количество новых рабочих мест в США. Выходит в первую пятницу месяца. Один из самых волатильных дней в трейдинге. Если мест больше прогноза — экономика сильна, доллар растёт.",
-    fundCpiText:"Индекс потребительских цен (Инфляция). Главный страх рынков. Если инфляция выше ожиданий, инвесторы паникуют, акции падают, а ФРС готовится ужесточать политику.",
-    fundFomcText:"Решение Центрального Банка США по процентной ставке. Деньги дорожают = акции и крипта дешевеют. И наоборот. Это 'рубильник' мировой ликвидности.",
-    fundGdpText:"Базовый индикатор здоровья экономики. Отклонения от прогноза вызывают переоценку всех активов институциональными инвесторами.",
-
-    matrixLabel:"МАТРИЦА ВЛИЯНИЯ НОВОСТЕЙ (ПРИ ЗНАЧЕНИЯХ ВЫШЕ ПРОГНОЗА)",
-    matrixColEvent:"Событие", matrixColDollar:"Доллар (DXY)", matrixColGold:"Золото (XAU)", matrixColSP:"S&P 500", matrixColCrypto:"Крипта (BTC)",
-    matrixRowNFP:"NFP (Рабочие места) ↑", matrixRowCPI:"CPI (Инфляция) ↑", matrixRowFOMC:"FOMC (Ставка ФРС) ↑",
-    matrixStrongUp:"🟢 Сильный рост", matrixUp:"🟢 Рост", matrixDown:"🔴 Падение", matrixMixed:"🟡 Смешанно", matrixStrongDown:"🔴 Сильное падение",
-
-    cycleLabel:"ЖИЗНЕННЫЙ ЦИКЛ НОВОСТИ",
-    phase1Label:"ФАЗА 1: ОЖИДАНИЕ", phase1Sub:"«Слухи»",
-    phase1Text:"Аналитики прогнозируют хорошие данные. Толпа начинает заранее скупать актив. Цена стабильно растет без видимых причин.",
-    phase2Label:"ФАЗА 2: РЕЛИЗ", phase2Sub:"«Факт»",
-    phase2Text:"Выходит позитивная новость. В рынок залетают опоздавшие (FOMO). Происходит резкий всплеск волатильности и ликвидности.",
-    phase3Label:"ФАЗА 3: ФИКСАЦИЯ", phase3Sub:"«Обвал»",
-    phase3Text:"Крупные игроки (Умные деньги), купившие на 'Фазе 1', продают свои огромные объемы об радостную толпу. Цена стремительно падает.",
-
-    nfpHeader:"Bloomberg Терминал: Релиз NFP", nfpBadge:"ИНТЕРАКТИВ — ФУНДАМЕНТАЛ",
-    nfpEventLabel:"Событие", nfpEventDesc:"Изменение числа занятых в несельскохозяйственном секторе",
-    nfpForecastLabel:"Прогноз аналитиकों:",
-    nfpSimulateBtn:"СИМУЛИРОВАТЬ РЕЛИЗ", nfpLocalTimeFallback:"15:30 МСК",
-    nfpFactLabel:"ФАКТ (Actual):",
-    nfpShockPart1:"🔥 ШОКОВЫЕ ДАННЫЕ!", nfpShockPart2:"Значение колоссально превышает прогноз.",
-    nfpInstrumentTitle:"Инструмент: XAU/USD (Золото)",
-    nfpStage0Text:"Изучите макро-ожидания слева. Как только выйдут данные, у вас будут доли секунды, чтобы принять верное решение. Приготовьтесь.",
-    nfpStage1Text:"🚨 ДАННЫЕ ВЫШЛИ! Рабочих мест создано в 2 раза больше прогноза. Экономика перегрета. Что делаем с золотом?",
-    nfpStage2Text:"Сделка зафиксирована.",
-    nfpBuyBtn:"BUY (Купить)", nfpSellBtn:"SELL (Продать)",
-    nfpCorrectTitle:"✅ Блестяще! Вы забрали профит.", nfpWrongTitle:"❌ Ошибка. Вас выбило по стопу.",
-    nfpCorrectExplain:"Логика: NFP вышел лучше прогноза (285K > 150K). Экономика США сильна. Инвесторы начинают верить, что ФРС повысит ставки. Капитал перетекает в Доллар (USD). Так как золото котируется в долларах (XAU/USD), сильный доллар мгновенно обрушает цену золота.",
-    nfpWrongExplain:"Логика: Вы купили золото, но NFP вышел феноменально сильным (285K > 150K). Это позитив для экономики США и Доллара. Инвесторы скупают доллар, что математически давит пару XAU/USD вниз. Покупка золота при сильном долларе — это игра против локомотива.",
-    nfpResetBtn:"↺ ПОВТОРИТЬ СИМУЛЯЦИЮ",
-
-    sqzHeader:"Охота на Squeeze (Сжатие)", sqzBadge:"ИНТЕРАКТИВ — ТЕХНИКА (BOLLINGER BANDS)",
-    sqzInitialMsg:"Найдите на графике зону 'Squeeze' (максимального сужения линий) и кликните в этот блок.",
-    sqzCorrectMsg:"🎯 Идеально! Вы нашли Squeeze. Волатильность упала до нуля, пружина сжалась. Именно здесь крупные игроки накопили позицию перед мощным прострелом вверх.",
-    sqzWrongMsg:"❌ Нет, здесь полосы всё ещё широкие. Ищите 'узкое горлышко', где цена зажата в тиски.",
-    sqzBreakoutLabel:"ВЗРЫВ (BREAKOUT) <img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-rocket.png' alt='' width='20' height='20' />", sqzFutureHidden:"БУДУЩЕЕ СКРЫТО", sqzHideBtn:"↻ СКРЫТЬ ГРАФИК",
-
-    bbSmaTitle:"Справедливая цена (SMA)",
-    bbSmaText:"Средняя линия индикатора — это 20-периодная скользящая средняя. Она показывает, где находится баланс сил между покупателями и продавцами прямо сейчас.",
-    bbExtremeTitle:"Зоны экстремума (±2 SD)",
-    bbExtremeText:"Верхняя и нижняя границы построены на отклонениях математической дисперсии. 95% времени цена находится внутри этого тоннеля. Выход за границы — это аномалия.",
-    bbExpansionTitle:"Пузырь (Expansion)",
-    bbExpansionText:"Когда на рынке мощный тренд или паника, полосы резко расходятся в стороны. Запрыгивать в сделку в этот момент — самая частая ошибка новичков.",
-    bbSqueezeTitle:"Сжатие (Squeeze)",
-    bbSqueezeText:"Полосы сужаются в узкий коридор. Волатильность падает. Рынок замер и копит энергию. Именно в этой зоне профессионалы расставляют ловушки на пробой.",
-
-    sec2Title:"Bollinger Bands: Индикатор дыхания рынка",
-    sec2Sub:"Новость — это спичка. Но чтобы произошел мощный взрыв, нужен плотно спрессованный порох. Индикатор Bollinger Bands визуально показывает периоды, когда рынок зажат в тиски и копит энергию.",
-
-    concl1:"Фундаментал (Макро-новости) создает причину для движения капитала. Техника (Индикаторы) визуализирует это на графике.",
-    concl2:"Правило №1 при NFP: Сильная экономика = Сильный доллар (DXY) = Золото и Евро падают.",
-    concl3:"Рынок живет ожиданиями. Принцип 'Покупай на слухах, продавай на фактах' объясняет, почему актив может рухнуть даже при хороших новостях.",
-    concl4:"Индикатор Bollinger Bands — это детектор волатильности. Он не предсказывает направление, он предсказывает силу будущего движения.",
-    concl5:"Не торгуйте внутри 'Сжатия' (Squeeze). Дождитесь пробоя границы и подтверждения объемами.",
-
-    conclLabel:"ИТОГИ ГЛАВЫ 6", conclTitle:"Чек-лист: Пульс Новостей",
-
-    footerAsk:"Остался вопрос? Напиши аналитику", footerNextBtn:"Уровень 7: Следы Институционалов →",
-  },
-  en: {
-    stickyLevel:"LEVEL 6", stickyTitle:"News Pulse", stickyFA:"FA 50%", stickyTA:"TA 50%",
-    heroLabel:"SBF COMPANY — CHAPTER 6", heroTitleA:"News", heroTitleB:"Pulse",
-    heroSub:"How fundamental analysis predicts an economic explosion, while a technical indicator visualizes a spring compressing before it breaks out.",
-    heroChip1:"Macroeconomics", heroChip3:"2 Simulators",
-
-    sec1Title:"Macroeconomics: The Three Whales of Volatility",
-    sec1Sub:"The market isn't driven by lines on a chart, but by capital. Capital flows from one asset to another only under the pressure of global economic data. News is a liquidity trigger.",
-
-    fundFomcTitle:"FOMC (Fed Rate)", fundGdpTitle:"GDP (US GDP)",
-    fundNfpText:"The number of new jobs created in the US. Released on the first Friday of the month. One of the most volatile days in trading. If jobs beat the forecast — the economy is strong, the dollar rises.",
-    fundCpiText:"Consumer Price Index (Inflation). The markets' main fear. If inflation comes in above expectations, investors panic, stocks fall, and the Fed prepares to tighten policy.",
-    fundFomcText:"The US central bank's decision on the interest rate. Money gets more expensive = stocks and crypto get cheaper. And vice versa. This is the «switch» for the world's liquidity.",
-    fundGdpText:"The core indicator of economic health. Deviations from forecast trigger a repricing of all assets by institutional investors.",
-
-    matrixLabel:"NEWS IMPACT MATRIX (WHEN VALUES BEAT FORECAST)",
-    matrixColEvent:"Event", matrixColDollar:"Dollar (DXY)", matrixColGold:"Gold (XAU)", matrixColSP:"S&P 500", matrixColCrypto:"Crypto (BTC)",
-    matrixRowNFP:"NFP (Jobs) ↑", matrixRowCPI:"CPI (Inflation) ↑", matrixRowFOMC:"FOMC (Fed Rate) ↑",
-    matrixStrongUp:"🟢 Strong rise", matrixUp:"🟢 Rise", matrixDown:"🔴 Fall", matrixMixed:"🟡 Mixed", matrixStrongDown:"🔴 Strong fall",
-
-    cycleLabel:"THE LIFE CYCLE OF A NEWS EVENT",
-    phase1Label:"PHASE 1: ANTICIPATION", phase1Sub:"«Rumors»",
-    phase1Text:"Analysts forecast good data. The crowd starts buying the asset ahead of time. The price rises steadily for no visible reason.",
-    phase2Label:"PHASE 2: RELEASE", phase2Sub:"«Fact»",
-    phase2Text:"Positive news comes out. Latecomers pile into the market (FOMO). Volatility and liquidity spike sharply.",
-    phase3Label:"PHASE 3: PROFIT-TAKING", phase3Sub:"«Collapse»",
-    phase3Text:"Big players (Smart Money), who bought during 'Phase 1', sell their huge volumes into the euphoric crowd. The price plunges rapidly.",
-
-    nfpHeader:"Bloomberg Terminal: NFP Release", nfpBadge:"INTERACTIVE — FUNDAMENTAL",
-    nfpEventLabel:"Event", nfpEventDesc:"Change in the number of people employed in the non-farm sector",
-    nfpForecastLabel:"Analysts' forecast:",
-    nfpSimulateBtn:"SIMULATE RELEASE", nfpLocalTimeFallback:"15:30 MSK",
-    nfpFactLabel:"ACTUAL:",
-    nfpShockPart1:"🔥 SHOCK DATA!", nfpShockPart2:"The value colossally exceeds the forecast.",
-    nfpInstrumentTitle:"Instrument: XAU/USD (Gold)",
-    nfpStage0Text:"Study the macro expectations on the left. As soon as the data comes out, you'll have a split second to make the right call. Get ready.",
-    nfpStage1Text:"🚨 THE DATA IS OUT! Twice as many jobs were created as forecast. The economy is overheating. What do we do with gold?",
-    nfpStage2Text:"Trade closed.",
-    nfpBuyBtn:"BUY", nfpSellBtn:"SELL",
-    nfpCorrectTitle:"✅ Brilliant! You locked in the profit.", nfpWrongTitle:"❌ Mistake. You got stopped out.",
-    nfpCorrectExplain:"Logic: NFP came in better than forecast (285K > 150K). The US economy is strong. Investors start to believe the Fed will raise rates. Capital flows into the Dollar (USD). Since gold is quoted in dollars (XAU/USD), a strong dollar instantly crushes the price of gold.",
-    nfpWrongExplain:"Logic: You bought gold, but NFP came in phenomenally strong (285K > 150K). That's bullish for the US economy and the Dollar. Investors buy up dollars, which mathematically pushes the XAU/USD pair down. Buying gold while the dollar is strong means playing against the locomotive.",
-    nfpResetBtn:"↺ REPEAT SIMULATION",
-
-    sqzHeader:"Hunting for the Squeeze", sqzBadge:"INTERACTIVE — TECHNICAL (BOLLINGER BANDS)",
-    sqzInitialMsg:"Find the 'Squeeze' zone on the chart (where the lines narrow the most) and click on that block.",
-    sqzCorrectMsg:"🎯 Perfect! You found the Squeeze. Volatility dropped to zero, the spring compressed. This is exactly where big players accumulated their position before a powerful move up.",
-    sqzWrongMsg:"❌ No, the bands are still wide here. Look for the 'narrow neck' where price is squeezed in a vice.",
-    sqzBreakoutLabel:"BREAKOUT <img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-rocket.png' alt='' width='20' height='20' />", sqzFutureHidden:"THE FUTURE IS HIDDEN", sqzHideBtn:"↻ HIDE CHART",
-
-    bbSmaTitle:"Fair Price (SMA)",
-    bbSmaText:"The indicator's middle line is a 20-period moving average. It shows where the balance of power between buyers and sellers stands right now.",
-    bbExtremeTitle:"Extreme Zones (±2 SD)",
-    bbExtremeText:"The upper and lower bands are built on deviations of mathematical variance. 95% of the time, price stays inside this tunnel. Breaking outside the bands is an anomaly.",
-    bbExpansionTitle:"Expansion",
-    bbExpansionText:"When the market has a powerful trend or panic, the bands spread sharply apart. Jumping into a trade at that exact moment is the most common beginner mistake.",
-    bbSqueezeTitle:"Squeeze",
-    bbSqueezeText:"The bands narrow into a tight corridor. Volatility drops. The market has frozen and is storing up energy. This is exactly the zone where professionals set traps for the breakout.",
-
-    sec2Title:"Bollinger Bands: The Market's Breathing Indicator",
-    sec2Sub:"News is the match. But for a powerful explosion, you need tightly packed gunpowder. The Bollinger Bands indicator visually shows the periods when the market is squeezed in a vice and storing up energy.",
-
-    concl1:"Fundamentals (macro news) create the reason for capital to move. Technicals (indicators) visualize this on the chart.",
-    concl2:"Rule #1 for NFP: Strong economy = Strong dollar (DXY) = Gold and the Euro fall.",
-    concl3:"The market lives on expectations. The 'buy the rumor, sell the fact' principle explains why an asset can crash even on good news.",
-    concl4:"The Bollinger Bands indicator is a volatility detector. It doesn't predict direction, it predicts the strength of the coming move.",
-    concl5:"Don't trade inside a 'Squeeze'. Wait for the band breakout and volume confirmation.",
-
-    conclLabel:"CHAPTER 6 TAKEAWAYS", conclTitle:"Checklist: News Pulse",
-
-    footerAsk:"Have a question? Write to an analyst", footerNextBtn:"Level 7: Institutional Footprint →",
+    levelChip: "УРОВЕНЬ 6", chapterNameShort: "Пульс Новостей", faTag: "ФА 55%", taTag: "ТА 45%",
+    stepExplain: "ОБЪЯСНИ", stepShow: "ПОКАЖИ", stepDo: "ДАЙ СДЕЛАТЬ",
+    heroEyebrow: "SBF COMPANY — ГЛАВА 6",
+    heroTitleLine1: "Пульс", heroTitleLine2: "Новостей",
+    heroSubtitle: "Календарь не говорит, куда пойдёт цена. Он говорит, когда она гарантированно шевельнётся. Мы измерили разницу между этими двумя вещами.",
+    fundamentalChip: "Фундаментал 55%", technicalChip: "Техника 45%", interactiveChip: "3 Интерактива",
+    calendarSub: "Расписание публикаций, а не журналистские новости.",
+    surpriseCalcSub: "Число без прогноза не значит ничего. Вот как это считается на практике.",
+    coreMeasureSub: "Ядро главы: что мы реально измерили на своих данных, включая честную неожиданность.",
+    whyFallsSub: "Самый частый вопрос новичка про золото и доллар — без мистики.",
+    zeroSurpriseSub: "Закрывает клиффхэнгер главы 5 полностью.",
+    threeTypesSub: "Не все релизы одинаковы — и не для всех эта глава работает.",
+    simulatorSub: "Реальные релизы из нашей базы. Вопрос про масштаб, не про направление.",
+    squeezeSub: "Индикатор дыхания рынка — связан с тем же календарём, а не сам по себе.",
+    quizKicker: "ПРОВЕРЬ СЕБЯ", quizTitle: "Что ты узнал в этой главе", quizNext: "Дальше →",
+    quizStuckAll: "Всё закрепилось.", quizStuckSome: "Почти всё закрепилось.",
+    quizBackToSection: "← Вернуться к разделу",
+    askQuestionLabel: "Остался вопрос? Напиши аналитику",
+    nextChapterBtn: "Уровень 7: Следы Институционалов →",
+    loadingLabel: "Загружаю наши измерения…",
+    loadErrorLabel: "Не удалось загрузить данные главы — часть блоков не отрисована. Это блокирующая ошибка, а не предупреждение.",
   },
   ro: {
-    stickyLevel:"NIVELUL 6", stickyTitle:"Pulsul Știrilor", stickyFA:"AF 50%", stickyTA:"AT 50%",
-    heroLabel:"SBF COMPANY — CAPITOLUL 6", heroTitleA:"Pulsul", heroTitleB:"Știrilor",
-    heroSub:"Cum analiza fundamentală anticipează o explozie economică, iar un indicator tehnic vizualizează comprimarea arcului înainte de spargere (breakout).",
-    heroChip1:"Macroeconomie", heroChip3:"2 Simulatoare",
-
-    sec1Title:"Macroeconomie: Cei trei piloni ai volatilității",
-    sec1Sub:"Piața nu este mișcată de liniile de pe grafic, ci de capital. Capitalul se deplasează dintr-un activ în altul doar sub presiunea datelor economice globale. Știrea este declanșatorul lichidității.",
-
-    fundFomcTitle:"FOMC (Rata Fed)", fundGdpTitle:"GDP (PIB-ul SUA)",
-    fundNfpText:"Numărul de locuri de muncă noi create în SUA. Se publică în prima vineri a lunii. Una dintre cele mai volatile zile din trading. Dacă numărul de locuri de muncă depășește prognoza — economia este puternică, dolarul crește.",
-    fundCpiText:"Indicele prețurilor de consum (Inflația). Principala teamă a piețelor. Dacă inflația depășește așteptările, investitorii intră în panică, acțiunile scad, iar Fed se pregătește să înăsprească politica monetară.",
-    fundFomcText:"Decizia Băncii Centrale a SUA privind rata dobânzii. Banii devin mai scumpi = acțiunile și cripto se ieftinesc. Și invers. Acesta este „întrerupătorul” lichidității mondiale.",
-    fundGdpText:"Indicatorul de bază al sănătății economiei. Abaterile de la prognoză determină reevaluarea tuturor activelor de către investitorii instituționali.",
-
-    matrixLabel:"MATRICEA IMPACTULUI ȘTIRILOR (LA VALORI PESTE PROGNOZĂ)",
-    matrixColEvent:"Eveniment", matrixColDollar:"Dolar (DXY)", matrixColGold:"Aur (XAU)", matrixColSP:"S&P 500", matrixColCrypto:"Cripto (BTC)",
-    matrixRowNFP:"NFP (Locuri de muncă) ↑", matrixRowCPI:"CPI (Inflație) ↑", matrixRowFOMC:"FOMC (Rata Fed) ↑",
-    matrixStrongUp:"🟢 Creștere puternică", matrixUp:"🟢 Creștere", matrixDown:"🔴 Scădere", matrixMixed:"🟡 Mixt", matrixStrongDown:"🔴 Scădere puternică",
-
-    cycleLabel:"CICLUL DE VIAȚĂ AL ȘTIRII",
-    phase1Label:"FAZA 1: AȘTEPTARE", phase1Sub:"«Zvonuri»",
-    phase1Text:"Analiștii prognozează date bune. Mulțimea începe să cumpere activul din timp. Prețul crește constant fără motive vizibile.",
-    phase2Label:"FAZA 2: PUBLICARE", phase2Sub:"«Fapt»",
-    phase2Text:"Apare o știre pozitivă. Pe piață intră întârziații (FOMO). Are loc un salt brusc al volatilității și lichidității.",
-    phase3Label:"FAZA 3: ÎNCASAREA PROFITULUI", phase3Sub:"«Prăbușire»",
-    phase3Text:"Marii jucători (Smart Money), care au cumpărat în 'Faza 1', își vând acum volumele uriașe către mulțimea euforică. Prețul se prăbușește rapid.",
-
-    nfpHeader:"Terminal Bloomberg: Publicarea NFP", nfpBadge:"INTERACTIV — FUNDAMENTAL",
-    nfpEventLabel:"Eveniment", nfpEventDesc:"Variația numărului de angajați în sectorul non-agricol",
-    nfpForecastLabel:"Prognoza analiștilor:",
-    nfpSimulateBtn:"SIMULEAZĂ PUBLICAREA", nfpLocalTimeFallback:"15:30 MSK",
-    nfpFactLabel:"FAPT (Actual):",
-    nfpShockPart1:"🔥 DATE ȘOCANTE!", nfpShockPart2:"Valoarea depășește colosal prognoza.",
-    nfpInstrumentTitle:"Instrument: XAU/USD (Aur)",
-    nfpStage0Text:"Studiază așteptările macro din stânga. De îndată ce apar datele, vei avea o fracțiune de secundă pentru a lua decizia corectă. Pregătește-te.",
-    nfpStage1Text:"🚨 DATELE AU APĂRUT! S-au creat de 2 ori mai multe locuri de muncă decât prognoza. Economia este supraîncălzită. Ce facem cu aurul?",
-    nfpStage2Text:"Tranzacția este finalizată.",
-    nfpBuyBtn:"BUY (Cumpără)", nfpSellBtn:"SELL (Vinde)",
-    nfpCorrectTitle:"✅ Excelent! Ai luat profitul.", nfpWrongTitle:"❌ Greșeală. Ai fost scos pe stop.",
-    nfpCorrectExplain:"Logica: NFP a ieșit mai bun decât prognoza (285K > 150K). Economia SUA este puternică. Investitorii încep să creadă că Fed va majora rata dobânzii. Capitalul se mută spre Dolar (USD). Deoarece aurul este cotat în dolari (XAU/USD), un dolar puternic prăbușește instantaneu prețul aurului.",
-    nfpWrongExplain:"Logica: Ai cumpărat aur, dar NFP a ieșit fenomenal de puternic (285K > 150K). Acesta este un semnal pozitiv pentru economia SUA și pentru dolar. Investitorii cumpără masiv dolari, ceea ce împinge matematic perechea XAU/USD în jos. Cumpărarea aurului atunci când dolarul este puternic înseamnă să joci împotriva locomotivei.",
-    nfpResetBtn:"↺ REPETĂ SIMULAREA",
-
-    sqzHeader:"Vânătoare de Squeeze (Comprimare)", sqzBadge:"INTERACTIV — TEHNICĂ (BOLLINGER BANDS)",
-    sqzInitialMsg:"Găsește pe grafic zona de 'Squeeze' (comprimarea maximă a liniilor) și dă clic în acest bloc.",
-    sqzCorrectMsg:"🎯 Perfect! Ai găsit Squeeze-ul. Volatilitatea a scăzut la zero, arcul s-a comprimat. Exact aici jucătorii mari și-au acumulat poziția înainte de o mișcare puternică în sus.",
-    sqzWrongMsg:"❌ Nu, aici benzile sunt încă largi. Caută 'gâtul de sticlă' unde prețul este strâns ca într-o menghină.",
-    sqzBreakoutLabel:"EXPLOZIE (BREAKOUT) <img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-rocket.png' alt='' width='20' height='20' />", sqzFutureHidden:"VIITORUL ESTE ASCUNS", sqzHideBtn:"↻ ASCUNDE GRAFICUL",
-
-    bbSmaTitle:"Prețul corect (SMA)",
-    bbSmaText:"Linia mediană a indicatorului este o medie mobilă pe 20 de perioade. Ea arată unde se află echilibrul de forțe dintre cumpărători și vânzători chiar acum.",
-    bbExtremeTitle:"Zonele extreme (±2 SD)",
-    bbExtremeText:"Marginile superioară și inferioară sunt construite pe baza abaterilor dispersiei matematice. 95% din timp, prețul se află în interiorul acestui tunel. Ieșirea în afara marginilor este o anomalie.",
-    bbExpansionTitle:"Balonul (Expansion)",
-    bbExpansionText:"Când pe piață este un trend puternic sau panică, benzile se depărtează brusc una de alta. Să sari într-o tranzacție chiar în acest moment este cea mai frecventă greșeală a începătorilor.",
-    bbSqueezeTitle:"Comprimare (Squeeze)",
-    bbSqueezeText:"Benzile se îngustează într-un coridor strâmt. Volatilitatea scade. Piața a înghețat și acumulează energie. Exact în această zonă profesioniștii pregătesc capcane pentru breakout.",
-
-    sec2Title:"Bollinger Bands: Indicatorul respirației pieței",
-    sec2Sub:"Știrea este un chibrit. Dar pentru o explozie puternică e nevoie de praf de pușcă bine comprimat. Indicatorul Bollinger Bands arată vizual perioadele în care piața este strânsă ca într-o menghină și acumulează energie.",
-
-    concl1:"Fundamentalul (știrile macro) creează motivul mișcării capitalului. Tehnica (indicatorii) vizualizează acest lucru pe grafic.",
-    concl2:"Regula nr. 1 la NFP: Economie puternică = Dolar puternic (DXY) = Aurul și Euro scad.",
-    concl3:"Piața trăiește din așteptări. Principiul 'Cumpără pe zvonuri, vinde pe fapte' explică de ce un activ poate să se prăbușească chiar și la vești bune.",
-    concl4:"Indicatorul Bollinger Bands este un detector de volatilitate. El nu prezice direcția, ci prezice forța mișcării viitoare.",
-    concl5:"Nu tranzacționa în interiorul 'Comprimării' (Squeeze). Așteaptă spargerea marginii și confirmarea prin volum.",
-
-    conclLabel:"CONCLUZIILE CAPITOLULUI 6", conclTitle:"Checklist: Pulsul Știrilor",
-
-    footerAsk:"Mai ai o întrebare? Scrie analistului", footerNextBtn:"Nivelul 7: Urmele Instituționalilor →",
-  }
+    levelChip: "NIVEL 6", chapterNameShort: "Pulsul Știrilor", faTag: "AF 55%", taTag: "AT 45%",
+    stepExplain: "EXPLICĂ", stepShow: "ARATĂ", stepDo: "LASĂ SĂ ÎNCERCE",
+    heroEyebrow: "SBF COMPANY — CAPITOLUL 6",
+    heroTitleLine1: "Pulsul", heroTitleLine2: "Știrilor",
+    heroSubtitle: "Calendarul nu spune încotro merge prețul. Spune când se va mișca sigur. Am măsurat diferența dintre aceste două lucruri.",
+    fundamentalChip: "Fundamental 55%", technicalChip: "Tehnic 45%", interactiveChip: "3 Module Interactive",
+    calendarSub: "Un program de publicații, nu știri jurnalistice.",
+    surpriseCalcSub: "O cifră fără prognoză nu înseamnă nimic. Iată cum se calculează în practică.",
+    coreMeasureSub: "Nucleul capitolului: ce am măsurat de fapt pe datele noastre, inclusiv o surpriză sinceră.",
+    whyFallsSub: "Cea mai frecventă întrebare a unui începător despre aur și dolar — fără mistică.",
+    zeroSurpriseSub: "Închide complet cliffhanger-ul capitolului 5.",
+    threeTypesSub: "Nu toate publicațiile sunt la fel — și nu pentru toate funcționează acest capitol.",
+    simulatorSub: "Publicații reale din baza noastră. Întrebarea e despre amploare, nu direcție.",
+    squeezeSub: "Indicatorul respirației pieței — legat de același calendar, nu de sine stătător.",
+    quizKicker: "TESTEAZĂ-TE", quizTitle: "Ce ai învățat în acest capitol", quizNext: "Continuă →",
+    quizStuckAll: "Totul s-a fixat.", quizStuckSome: "Aproape totul s-a fixat.",
+    quizBackToSection: "← Înapoi la secțiune",
+    askQuestionLabel: "Mai aveți o întrebare? Scrieți analistului",
+    nextChapterBtn: "Nivelul 7: Urmele Instituționalilor →",
+    loadingLabel: "Se încarcă măsurătorile noastre…",
+    loadErrorLabel: "Datele capitolului nu s-au încărcat — unele blocuri nu sunt afișate. Aceasta e o eroare blocantă, nu un avertisment.",
+  },
+  en: {
+    levelChip: "LEVEL 6", chapterNameShort: "News Pulse", faTag: "FA 55%", taTag: "TA 45%",
+    stepExplain: "EXPLAIN", stepShow: "SHOW", stepDo: "LET YOU TRY",
+    heroEyebrow: "SBF COMPANY — CHAPTER 6",
+    heroTitleLine1: "News", heroTitleLine2: "Pulse",
+    heroSubtitle: "The calendar doesn't say where price is going. It says when it's guaranteed to move. We measured the gap between those two things.",
+    fundamentalChip: "Fundamental 55%", technicalChip: "Technical 45%", interactiveChip: "3 Interactives",
+    calendarSub: "A publication schedule, not journalistic news.",
+    surpriseCalcSub: "A number without a forecast means nothing. Here's how it's actually computed.",
+    coreMeasureSub: "The chapter's core: what we actually measured in our own data, including an honest surprise.",
+    whyFallsSub: "The most common beginner question about gold and the dollar — with the mysticism stripped out.",
+    zeroSurpriseSub: "Fully closes chapter 5's cliffhanger.",
+    threeTypesSub: "Not all releases are the same — and this chapter doesn't apply to all of them.",
+    simulatorSub: "Real releases from our database. The question is about scale, not direction.",
+    squeezeSub: "The market's breathing indicator — tied to the same calendar, not standalone.",
+    quizKicker: "TEST YOURSELF", quizTitle: "What you learned in this chapter", quizNext: "Next →",
+    quizStuckAll: "Everything stuck.", quizStuckSome: "Almost everything stuck.",
+    quizBackToSection: "← Back to the section",
+    askQuestionLabel: "Have a question? Write to an analyst",
+    nextChapterBtn: "Level 7: Institutional Footprint →",
+    loadingLabel: "Loading our measurements…",
+    loadErrorLabel: "Chapter data failed to load — some blocks aren't rendered. This is a blocking error, not a warning.",
+  },
 };
 
-const C = {
-  gold:"#c9973a", goldLight:"#f4d49f", goldPale:"#f7f0e3",
-  black:"#18181a", ink:"#18181a", inkMid:"#555555",
-  inkSoft:"rgba(24,24,26,0.58)", inkFaint:"rgba(24,24,26,0.28)",
-  white:"#ffffff", surface:"#faf8f5", surfaceMid:"#f0ebe0",
-  border:"rgba(24,24,26,0.1)", borderGold:"rgba(201,151,58,0.25)",
-  green:"#089981", greenD:"#2d7a4f", greenPale:"#eaf5ee",
-  red:"#f23645", redD:"#c0392b", redPale:"#fdecea",
-  blue:"#2563eb", chart:"#131722", bluePale:"#eff6ff"
-};
+const {C, Mono, Chip, Rule, AskAnalystBtn, getChUrl, QuizBlock, ImpactMatrix, ComplianceFootnote} = window.AcademyShared;
 
-const MSG_TR = {
-  ru:{ tag:"НАПИСАТЬ НАМ", title:"Предпочитаете мессенджер?", sub:"Напишите в Telegram или WhatsApp — сообщение уже готово.", btnTg:"ОТКРЫТЬ TELEGRAM", btnWa:"ОТКРЫТЬ WHATSAPP", online:"онлайн" },
-  en:{ tag:"CONTACT US", title:"Prefer a messenger?", sub:"Write us on Telegram or WhatsApp.", btnTg:"OPEN TELEGRAM", btnWa:"OPEN WHATSAPP", online:"online" },
-  ro:{ tag:"CONTACTAȚI-NE", title:"Preferați un messenger?", sub:"Scrieți pe Telegram sau WhatsApp.", btnTg:"DESCHIDE TELEGRAM", btnWa:"DESCHIDE WHATSAPP", online:"online" }
-};
-
-const Mono = ({children,size=13,color=C.inkSoft,spacing=3,style={},className=""}) =>
-  <span className={className} style={{fontFamily:"'Courier New',monospace",fontSize:size,letterSpacing:spacing,color,...style}}>{children}</span>;
-const Chip = ({children,color=C.gold,bg="transparent"}) =>
-  <span style={{fontFamily:"'Courier New',monospace",fontSize:11,letterSpacing:3,color,border:`1px solid ${color}`,background:bg,padding:"4px 11px",display:"inline-block",textTransform:"uppercase"}}>{children}</span>;
-const Rule = ({w="50%",my=32}) =>
-  <div style={{height:1,background:`linear-gradient(90deg,transparent,${C.gold},transparent)`,width:w,margin:`${my}px auto`,opacity:0.4}}/>;
-const SectionTitle = ({children,sub,align="left"}) => (
-  <div style={{textAlign:align,marginBottom:40}}>
-    <h2 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(24px,3.2vw,36px)",fontWeight:400,color:C.black,lineHeight:1.15,marginBottom:sub?12:0}}>{children}</h2>
-    {sub && <p style={{fontSize:15,color:C.inkSoft,lineHeight:1.65,maxWidth:720,margin:align==="center"?"0 auto":0}}>{sub}</p>}
+const SectionTitle = ({children,sub,align="left",id}) => (
+  <div id={id} style={{textAlign:align,marginBottom:36,scrollMarginTop:130}}>
+    <h2 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(24px,3.2vw,36px)",fontWeight:400,color:C.black,lineHeight:1.15,marginBottom:sub?10:0}}>{children}</h2>
+    {sub && <p style={{fontSize:15,color:C.inkSoft,lineHeight:1.65,maxWidth:680,margin:align==="center"?"0 auto":0}}>{sub}</p>}
   </div>
+);
+const StepTag = ({n,label}) => (
+  <Mono size={9.5} color={C.inkFaint} spacing={2} style={{display:"block",marginBottom:8,textTransform:"uppercase"}}>{n} · {label}</Mono>
 );
 const InfoCard = ({icon,title,text,accent=C.gold}) => (
-  <div style={{background:C.surface,border:`1px solid ${C.border}`,padding:"24px 28px",borderRadius:6,borderLeft:`3px solid ${accent}`}}>
-    <div style={{fontSize:24,marginBottom:12}}>{icon}</div>
-    <div style={{fontWeight:700,fontSize:14,color:C.black,letterSpacing:0.5,marginBottom:8,textTransform:"uppercase"}}>{title}</div>
-    <div style={{fontSize:14,color:C.inkMid,lineHeight:1.65}}>{text}</div>
+  <div style={{background:C.surface,border:`1px solid ${C.border}`,padding:"20px 24px",borderRadius:6,borderLeft:`3px solid ${accent}`}}>
+    {icon && <div style={{fontSize:22,marginBottom:10}}>{icon}</div>}
+    <div style={{fontWeight:600,fontSize:13.5,color:C.black,marginBottom:8}}>{title}</div>
+    <div style={{fontSize:12.5,color:C.inkMid,lineHeight:1.65}}>{text}</div>
   </div>
 );
 
-const getChUrl = (ch) => {
-  let base = INITIAL_LANG==='ru'?'/edu/b':`/edu/${INITIAL_LANG}/b`;
-  return `${base}/${ch}`;
-};
+// fillTemplate/Stat -- та же дисциплина, что в главе 5: незаполненный
+// плейсхолдер -- честный "—" + console.error, а не тихая подстановка.
+function fillTemplate(str, vars) {
+  if (!str) return str;
+  return str.replace(/\{\{(\w+)\}\}/g, (m, key) => {
+    const v = vars ? vars[key] : undefined;
+    if (v === undefined || v === null || (typeof v === "number" && isNaN(v))) {
+      console.error("[ch6] отсутствует значение для {{" + key + "}}");
+      return "—";
+    }
+    return String(v);
+  });
+}
 
-// ─── AskAnalystPopup ──────────────────────────────────────────────────────────
-function AskAnalystPopup({chapterNum, lang, onClose}) {
-  const tr = MSG_TR[lang]||MSG_TR.ru;
-  const prefill = lang==='ru'?`Здравствуйте, есть вопрос по главе ${chapterNum}`:(lang==='en'?`Hello, question on ch ${chapterNum}`:`Bună ziua, întrebare cap ${chapterNum}`);
-  const tgLink = `https://t.me/SBF_Support?text=${encodeURIComponent(prefill)}`;
-  const waLink = `https://api.whatsapp.com/send/?phone=37369005200&text=${encodeURIComponent(prefill)}&type=phone_number&app_absent=0`;
+// ── Загрузка данных главы: surprise_reaction.json (ядро) + ch6_release_day.json (cold open).
+function useCh6Data() {
+  const { useState, useEffect } = React;
+  const [state, setState] = useState({ loading: true, error: null, stats: null, scene: null });
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all([
+      fetch("/data/edu_stats/surprise_reaction.json").then(r => { if (!r.ok) throw new Error("surprise_reaction.json HTTP " + r.status); return r.json(); }),
+      fetch("/data/edu_scenes/ch6_release_day.json").then(r => { if (!r.ok) throw new Error("ch6_release_day.json HTTP " + r.status); return r.json(); }),
+    ]).then(([stats, scene]) => {
+      if (!cancelled) setState({ loading: false, error: null, stats, scene });
+    }).catch(err => {
+      console.error("[ch6] load failed:", err);
+      if (!cancelled) setState({ loading: false, error: err, stats: null, scene: null });
+    });
+    return () => { cancelled = true; };
+  }, []);
+  return state;
+}
+
+// ── vars: единственный источник чисел для текстовых {{плейсхолдеров}}.
+function buildVars(stats, scene, lang) {
+  if (!stats || !scene) return null;
+  const T6 = window.Ch6Content[lang] || window.Ch6Content.ru;
+  const bi = stats.by_impact || {};
+  const dir = stats.direction || {};
+  const msl = stats.move_small_large || {};
+  const meta = stats._meta || {};
+  const ex = (stats.sim_releases || []).find(s => s.kind === "big_positive");
+  const verdictText = dir.verdict_key === "coin_flip" ? T6.coreMeasure.verdictCoinFlip
+    : dir.verdict_key === "weak_tilt" ? T6.coreMeasure.verdictWeakTilt
+    : dir.verdict_key === "strong_tilt" ? T6.coreMeasure.verdictStrongTilt : null;
+
+  return {
+    release_bar_range: scene.meta.release_bar_range,
+    peak_vs_quiet: scene.meta.peak_vs_quiet,
+    impact_high: bi.high ? bi.high.median_move : null,
+    impact_medium: bi.medium ? bi.medium.median_move : null,
+    impact_low: bi.low ? bi.low.median_move : null,
+    impact_high_iqr: bi.high ? `${bi.high.iqr[0]}–${bi.high.iqr[1]}` : null,
+    n_impact_high: bi.high ? bi.high.n : null,
+    n_impact_low: bi.low ? bi.low.n : null,
+    impact_high_vs_low: (bi.high && bi.low && bi.low.median_move) ? Math.round((bi.high.median_move / bi.low.median_move) * 100) / 100 : null,
+    dir_hit_rate: dir.hit_rate, n_releases_dir: dir.n,
+    dir_ci: dir.ci95 ? `${dir.ci95[0]}–${dir.ci95[1]}%` : null,
+    dir_verdict: verdictText,
+    release_median_move: bi.high ? bi.high.median_move : null,
+    n_releases: meta.n_releases, coverage_days: meta.coverage_days,
+    move_small: msl.move_small, move_large: msl.move_large, move_ratio: msl.move_ratio,
+    n_small: msl.n_small, n_large: msl.n_large,
+    parse_failed_pct: meta.parse_failed_share != null ? Math.round(meta.parse_failed_share * 10000) / 100 : null,
+    ex_forecast: ex ? ex.forecast : null, ex_actual: ex ? ex.actual : null,
+    ex_surprise: ex ? Math.round((ex.actual - ex.forecast) * 100) / 100 : null,
+    ex_std: ex ? Math.round((ex.actual - ex.forecast) / ex.surprise_sigma * 100) / 100 : null,
+    ex_sigma: ex ? ex.surprise_sigma : null,
+  };
+}
+
+// ─── Cold open: "Все знали дату. Никто не знал числа." ────────────────────────
+function ColdOpen6({ scene }) {
+  const T6 = window.Ch6Content[INITIAL_LANG] || window.Ch6Content.ru;
+  const co = T6.coldOpen;
+  if (!scene) {
+    return (
+      <div style={{background:C.black,padding:"60px 5vw",textAlign:"center"}}>
+        <Mono size={11} color={C.gold} spacing={4}>{co.tag}</Mono>
+      </div>
+    );
+  }
+  const meta = scene.meta, candles = scene.candles || [];
+  const maxRange = Math.max(...candles.map(c => c.high - c.low));
+  const markerTime = meta.marker_time;
+  const vars = { release_bar_range: meta.release_bar_range, peak_vs_quiet: meta.peak_vs_quiet };
   return (
-    <div style={{position:"fixed",inset:0,zIndex:1000,display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={onClose}>
-      <div style={{position:"fixed",inset:0,background:"rgba(250,248,245,0.98)"}}/>
-      <div onClick={e=>e.stopPropagation()} style={{position:"relative",width:"100%",maxWidth:900,zIndex:1,margin:"auto",padding:"40px 0"}}>
-        <button onClick={onClose} style={{position:"absolute",top:0,right:10,background:"none",border:"none",fontSize:35,cursor:"pointer",color:C.inkFaint,lineHeight:1}}>×</button>
-        <div style={{marginBottom:40}}>
-          <Mono size={13} color={C.gold} spacing={3} style={{display:"block",marginBottom:15}}>— {tr.tag}</Mono>
-          <h2 style={{fontSize:"clamp(30px,5vw,42px)",fontWeight:700,color:C.black,marginBottom:15,fontFamily:"'DM Serif Display',serif"}}>{tr.title}</h2>
-          <p style={{fontSize:18,color:C.inkMid}}>{tr.sub}</p>
+    <div style={{background:C.black,padding:"70px 5vw 56px",color:"#fff"}}>
+      <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:24,textAlign:"center"}}>{co.tag}</Mono>
+      <div style={{maxWidth:840,margin:"0 auto 28px"}}>
+        {co.lines.map((line,i) => (
+          <p key={i} style={{fontSize: i<2 ? 15 : i===co.lines.length-1 ? 17 : 15.5, color: i>=4?"#fff":"rgba(255,255,255,0.72)", fontWeight: i>=4?600:400, lineHeight:1.75, marginBottom:14, fontFamily: i===co.lines.length-1 ? "'DM Serif Display',serif" : "inherit"}}>{fillTemplate(line, vars)}</p>
+        ))}
+      </div>
+      <div style={{display:"flex",alignItems:"flex-end",gap:2,height:140,maxWidth:900,margin:"0 auto 14px",padding:"0 4px"}}>
+        {candles.map((c,i) => {
+          const r = c.high - c.low;
+          const h = Math.max(2, (r / maxRange) * 140);
+          const isMarker = c.time === markerTime;
+          const hour = new Date(c.time).getUTCHours();
+          const isQuiet = hour < 8;
+          return (
+            <div key={i} title={c.time} style={{flex:1,height:h,background:isMarker?C.gold:isQuiet?"rgba(255,255,255,0.15)":"rgba(201,151,58,0.45)",borderRadius:1}}/>
+          );
+        })}
+      </div>
+      <div style={{display:"flex",justifyContent:"space-between",maxWidth:900,margin:"0 auto 30px",fontSize:10,fontFamily:"monospace",color:"rgba(255,255,255,0.35)",padding:"0 4px"}}>
+        <span>00:00 UTC</span><span>12:00 UTC</span><span>23:30 UTC</span>
+      </div>
+      <div style={{display:"flex",gap:24,justifyContent:"center",flexWrap:"wrap",maxWidth:900,margin:"0 auto 22px",fontFamily:"monospace",fontSize:11,color:"rgba(255,255,255,0.55)"}}>
+        <span>{meta.release_bar_range} pt</span>
+        <span>×{meta.peak_vs_quiet} · <Mono size={11} color="rgba(255,255,255,.55)" spacing={0}>{meta.marker_label}</Mono></span>
+      </div>
+      <p style={{textAlign:"center",fontSize:11,color:"rgba(255,255,255,0.4)",fontStyle:"italic",marginBottom:20}}>
+        {meta["selection_note_" + INITIAL_LANG] || meta.selection_note_ru} · {meta.date}
+      </p>
+      <p style={{textAlign:"center",fontFamily:"monospace",fontSize:12,color:C.gold}}>{co.cta}</p>
+    </div>
+  );
+}
+
+// ─── Анти-миф → Голос SBF → Цена незнания ──────────────────────────────────────
+function IntroBlock({ vars }) {
+  const T6 = window.Ch6Content[INITIAL_LANG] || window.Ch6Content.ru;
+  return (
+    <div style={{marginBottom:48}}>
+      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T6.antiMyth.tag}</Mono>
+      <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px",marginBottom:28}}>
+        <p style={{fontWeight:600,fontSize:14.5,color:C.black,marginBottom:10}}>{T6.antiMyth.title}</p>
+        <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,marginBottom:12}}>{vars ? fillTemplate(T6.antiMyth.body1, vars) : "—"}</p>
+        <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,marginBottom:12}}>{vars ? fillTemplate(T6.antiMyth.body2, vars) : "—"}</p>
+        <p style={{fontSize:13.5,color:C.black,lineHeight:1.7,margin:0,fontWeight:600}}>{T6.antiMyth.body3}</p>
+      </div>
+
+      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T6.voiceSbf.tag}</Mono>
+      <div style={{borderLeft:`4px solid ${C.gold}`,paddingLeft:24,marginBottom:28}}>
+        {T6.voiceSbf.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:16,fontStyle:"italic",color:C.inkMid,lineHeight:1.7,fontFamily:"'DM Serif Display',serif",marginBottom:12}}>{p}</p>)}
+      </div>
+
+      <div style={{background:C.black,borderRadius:8,padding:"26px 30px",color:C.white}}>
+        <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T6.priceOfNotKnowing.tag}</Mono>
+        <div style={{fontFamily:"'DM Serif Display',serif",fontSize:20,color:C.white,marginBottom:12}}>{T6.priceOfNotKnowing.title}</div>
+        {T6.priceOfNotKnowing.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:13.5,lineHeight:1.75,color:"rgba(255,255,255,0.7)",marginBottom:10}}>{vars ? fillTemplate(p, vars) : p}</p>)}
+      </div>
+    </div>
+  );
+}
+
+// ─── Что такое календарь на самом деле ─────────────────────────────────────────
+function CalendarExplainer() {
+  const T6 = window.Ch6Content[INITIAL_LANG] || window.Ch6Content.ru;
+  const cal = T6.calendar;
+  return (
+    <div style={{marginBottom:48}}>
+      <p style={{fontSize:14,color:C.inkMid,lineHeight:1.75,marginBottom:24,maxWidth:820}}>{cal.preamble}</p>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:14,marginBottom:20}} className="g3">
+        <InfoCard title={cal.colPrev} text={cal.colPrevDesc} accent={C.inkFaint}/>
+        <InfoCard title={cal.colForecast} text={cal.colForecastDesc}/>
+        <InfoCard title={cal.colActual} text={cal.colActualDesc} accent={C.green}/>
+      </div>
+      <div style={{background:C.goldPale,border:`1px solid ${C.borderGold}`,borderRadius:6,padding:"18px 22px",marginBottom:20,textAlign:"center"}}>
+        <p style={{fontSize:14,color:C.black,lineHeight:1.65,margin:0,fontWeight:600}}>{cal.surprisePlate}</p>
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}} className="g2">
+        <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:6,padding:"18px 22px"}}>
+          <div style={{fontWeight:600,fontSize:13,color:C.black,marginBottom:8}}>{cal.importanceTitle}</div>
+          <p style={{fontSize:12.5,color:C.inkMid,lineHeight:1.65,margin:0}}>{cal.importanceText}</p>
         </div>
-        <div className="messenger-grid">
-          {[{href:tgLink,bg:"#0088cc",icon:"🚀",name:"SBF Support",sub:`Telegram · ${tr.online}`,btn:tr.btnTg},
-            {href:waLink,bg:"#25d366",icon:"💬",name:"SBF Company",sub:`WhatsApp · ${tr.online}`,btn:tr.btnWa}
-          ].map((m,i) => (
-            <div key={i} style={{background:"#fff",border:"1px solid #e0e0e0",borderRadius:12,padding:"30px 25px",display:"flex",flexDirection:"column"}}>
-              <div style={{display:"flex",alignItems:"center",gap:15,marginBottom:30}}>
-                <div style={{width:50,height:50,borderRadius:"50%",background:i===0?"#e1f3fb":"#e8f5ed",display:"flex",alignItems:"center",justifyContent:"center"}}>{m.icon}</div>
-                <div><div style={{fontSize:18,fontWeight:700}}>{m.name}</div><div style={{fontSize:14,color:C.inkFaint}}>{m.sub}</div></div>
-              </div>
-              <div style={{background:m.bg,padding:"15px 20px",borderRadius:"12px 12px 0 12px",marginBottom:30,alignSelf:"flex-end",maxWidth:"90%"}}>
-                <div style={{fontSize:14,color:"#fff"}}>{prefill}</div>
-              </div>
-              <a href={m.href} target="_blank" style={{marginTop:"auto",display:"block",background:m.bg,color:"#fff",textAlign:"center",padding:"18px",borderRadius:8,textDecoration:"none",fontWeight:700}}>{m.btn}</a>
-            </div>
-          ))}
+        <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:6,padding:"18px 22px"}}>
+          <div style={{fontWeight:600,fontSize:13,color:C.black,marginBottom:8}}>{cal.revisionsTitle}</div>
+          <p style={{fontSize:12.5,color:C.inkMid,lineHeight:1.65,margin:0}}>{cal.revisionsText}</p>
         </div>
       </div>
     </div>
   );
 }
 
-// ─── Interactive 1: NFP Terminal Simulator ───────────────────────────────────
-function NFPNewsSimulator() {
+// ─── Сюрприз, а не число: калькулятор в 3 шага ────────────────────────────────
+function SurpriseCalc({ stats, vars }) {
   const { useState } = React;
-  const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
-  const [stage, setStage] = useState(0);
-  const [choice, setChoice] = useState(null);
-
-  const handleRelease = () => setStage(1);
-  const handleChoice = (c) => { if (stage === 1) { setChoice(c); setStage(2); } };
-  const reset = () => { setStage(0); setChoice(null); };
-
-  const isCorrect = choice === 'sell';
+  const T6 = window.Ch6Content[INITIAL_LANG] || window.Ch6Content.ru;
+  const sc = T6.surpriseCalc;
+  const bins = (stats && stats.bins) || [];
+  const [binIdx, setBinIdx] = useState(0);
+  const b = bins[binIdx];
 
   return (
-    <div style={{background:C.black, borderRadius:8, padding:"40px 48px", color:C.white, position:"relative", overflow:"hidden"}}>
-      <div style={{position:"absolute", top:0, right:0, width:300, height:300, background:"radial-gradient(circle at top right, rgba(201,151,58,0.1), transparent)", pointerEvents:"none"}}/>
-      
-      <div style={{display:"flex",alignItems:"center",gap:14,marginBottom:32, position:"relative"}}>
-        <span style={{fontSize:32}}>📺</span>
-        <div>
-          <div style={{fontFamily:"'DM Serif Display',serif",fontSize:24,color:C.gold}}>{S.nfpHeader}</div>
-          <Mono size={11} color="rgba(255,255,255,0.4)" spacing={2}>{S.nfpBadge}</Mono>
-        </div>
+    <div style={{marginBottom:56}}>
+      <p style={{fontSize:14,color:C.inkMid,lineHeight:1.75,marginBottom:24,maxWidth:820}}>{sc.intro}</p>
+
+      <div style={{marginBottom:16}}><StepTag n="1" label={STRINGS[INITIAL_LANG].stepExplain}/></div>
+      <div style={{background:C.black,borderRadius:8,padding:"22px 26px",color:"#fff",marginBottom:28}}>
+        <p style={{fontSize:13.5,lineHeight:1.75,color:"rgba(255,255,255,0.8)",margin:0}}>{vars ? fillTemplate(sc.step1Legend, vars) : "—"}</p>
       </div>
 
-      <div style={{display:"grid", gridTemplateColumns:"1fr 1.2fr", gap:40, alignItems:"stretch"}} className="g2">
-        {/* Terminal Screen */}
-        <div style={{background:"#0a0a0c", border:`1px solid #333`, borderRadius:6, padding:24, display:"flex", flexDirection:"column", justifyContent:"space-between"}}>
-          <div>
-            <Mono size={11} color={C.gold} spacing={2} style={{display:"block", marginBottom:20}}>ECONOMIC CALENDAR (USA)</Mono>
-            
-            <div style={{borderBottom:"1px dashed #333", paddingBottom:15, marginBottom:20}}>
-              <div style={{color:"#888", fontSize:12, marginBottom:6, textTransform:"uppercase"}}>{S.nfpEventLabel}</div>
-              <div style={{fontSize:16, fontWeight:600, color:"#eee"}}>🇺🇸 Non-Farm Payrolls (NFP)</div>
-              <div style={{fontSize:12, color:"#666", marginTop:4}}>{S.nfpEventDesc}</div>
-            </div>
+      <div style={{marginBottom:16}}><StepTag n="2" label={STRINGS[INITIAL_LANG].stepShow}/></div>
+      <p style={{fontSize:13,color:C.inkMid,lineHeight:1.7,marginBottom:24,maxWidth:780}}>{sc.step2Legend}</p>
 
-            <div style={{display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:20, padding:"12px 16px", background:"rgba(255,255,255,0.03)", borderRadius:4}}>
-              <span style={{fontSize:14, color:"#aaa"}}>{S.nfpForecastLabel}</span>
-              <span style={{fontFamily:"monospace", fontSize:18, fontWeight:700, color:"#ccc"}}>150,000</span>
+      <div style={{marginBottom:16}}><StepTag n="3" label={STRINGS[INITIAL_LANG].stepDo}/></div>
+      <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px"}}>
+        <p style={{fontSize:13,color:C.inkMid,marginBottom:14}}>{sc.step3Task}</p>
+        {bins.length > 0 ? (
+          <>
+            <input type="range" min="0" max={bins.length-1} value={binIdx} onChange={e=>setBinIdx(+e.target.value)} style={{width:"100%",marginBottom:14}}/>
+            <div style={{display:"flex",justifyContent:"space-between",fontSize:10,fontFamily:"monospace",color:C.inkFaint,marginBottom:18}}>
+              {bins.map((bb,i) => <span key={i}>{bb.from}σ{bb.to?`–${bb.to}σ`:"+"}</span>)}
             </div>
-          </div>
-
-          <div style={{minHeight: 100, display:"flex", flexDirection:"column", justifyContent:"center"}}>
-            {stage === 0 && (
-              <button onClick={handleRelease} style={{background:C.gold, color:C.black, border:"none", padding:"16px", fontWeight:700, fontFamily:"monospace", cursor:"pointer", borderRadius:4, letterSpacing:1, width:"100%", transition:"transform 0.1s"}} onMouseDown={e=>e.target.style.transform="scale(0.98)"} onMouseUp={e=>e.target.style.transform="scale(1)"}>
-                {S.nfpSimulateBtn} <span class='local-time' data-utc='2026-03-09T12:00:00Z'>{S.nfpLocalTimeFallback}</span>
-              </button>
-            )}
-
-            {stage >= 1 && (
-              <div className={stage === 1 ? "flash-news" : ""} style={{padding: "20px", borderRadius:4, background: stage === 1 ? "rgba(242,54,69,0.15)" : "rgba(255,255,255,0.05)", border: stage === 1 ? `1px solid ${C.redB}` : `1px solid #333`, transition:"background 0.3s"}}>
-                <div style={{display:"flex", justifyContent:"space-between", alignItems:"center"}}>
-                  <span style={{fontSize:14, fontWeight:700, color:stage===1?C.white:"#888"}}>{S.nfpFactLabel}</span>
-                  <span style={{fontFamily:"monospace", fontSize:28, fontWeight:700, color:C.greenB}}>285,000</span>
-                </div>
-                <div style={{fontSize:12, color:C.greenB, marginTop:10, opacity:0.9, lineHeight:1.4}}>
-                  {S.nfpShockPart1}<br/>{S.nfpShockPart2}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Action Screen */}
-        <div style={{display:"flex", flexDirection:"column", justifyContent:"center"}}>
-          <div style={{marginBottom:24}}>
-            <h3 style={{fontSize:20, fontWeight:600, marginBottom:12, color:C.white}}>{S.nfpInstrumentTitle}</h3>
-            <div style={{fontSize:15, color:"#aaa", lineHeight:1.7, background:"rgba(255,255,255,0.03)", padding:"16px", borderRadius:4, borderLeft:`3px solid ${C.gold}`}}>
-              {stage === 0 ? S.nfpStage0Text
-               : stage === 1 ? S.nfpStage1Text
-               : S.nfpStage2Text}
+            <div style={{display:"flex",justifyContent:"center",alignItems:"baseline",gap:14,marginBottom:10}}>
+              <Mono size={13} color={C.inkSoft} spacing={1}>{sc.sliderLabel}: {b.from}σ{b.to?`–${b.to}σ`:"+"}</Mono>
+              <span style={{fontFamily:"'DM Serif Display',serif",fontSize:34,color:C.gold}}>{b.median_move != null ? b.median_move : "—"}</span>
+              <Mono size={11} color={C.inkFaint} spacing={0}>n={b.n}</Mono>
             </div>
-          </div>
-
-          {stage <= 1 ? (
-            <div style={{display:"grid", gridTemplateColumns:"1fr 1fr", gap:15}}>
-              <button onClick={() => handleChoice('buy')} disabled={stage===0} style={{padding:"20px", background:stage===0?"#1a1a1a":"rgba(8,153,129,0.1)", border:stage===0?"1px solid #333":`1px solid ${C.greenB}`, color:stage===0?"#444":C.greenB, borderRadius:6, cursor:stage===0?"not-allowed":"pointer", fontWeight:700, fontSize:16, transition:"all .2s"}}>
-                <span style={{fontSize:24, display:"block", marginBottom:8}}><img class='mi-icon' style={{verticalAlign:'middle'}} src='/assets/icons/icon-trend-up.png' alt='' width='20' height='20' /></span>
-                {S.nfpBuyBtn}
-              </button>
-              <button onClick={() => handleChoice('sell')} disabled={stage===0} style={{padding:"20px", background:stage===0?"#1a1a1a":"rgba(242,54,69,0.1)", border:stage===0?"1px solid #333":`1px solid ${C.redB}`, color:stage===0?"#444":C.redB, borderRadius:6, cursor:stage===0?"not-allowed":"pointer", fontWeight:700, fontSize:16, transition:"all .2s"}}>
-                <span style={{fontSize:24, display:"block", marginBottom:8}}><img class='mi-icon' style={{verticalAlign:'middle'}} src='/assets/icons/icon-trend-down.png' alt='' width='20' height='20' /></span>
-                {S.nfpSellBtn}
-              </button>
-            </div>
-          ) : (
-            <div style={{padding:"24px", borderRadius:6, background: isCorrect ? "rgba(8,153,129,0.1)" : "rgba(242,54,69,0.1)", border: isCorrect ? `1px solid rgba(8,153,129,0.3)` : `1px solid rgba(242,54,69,0.3)`}}>
-              <h4 style={{fontSize:20, color: isCorrect ? C.greenB : C.redB, marginBottom:12, fontFamily:"'DM Serif Display',serif"}}>
-                {isCorrect ? S.nfpCorrectTitle : S.nfpWrongTitle}
-              </h4>
-              <p style={{fontSize:14, color:"#ccc", lineHeight:1.7, marginBottom:20}}>
-                {isCorrect
-                  ? S.nfpCorrectExplain
-                  : S.nfpWrongExplain}
-              </p>
-              <button onClick={reset} style={{background:"transparent", border:`1px solid ${C.gold}`, color:C.gold, padding:"10px 20px", borderRadius:4, cursor:"pointer", fontSize:13, fontWeight:700, fontFamily:"monospace"}}>{S.nfpResetBtn}</button>
-            </div>
-          )}
-        </div>
+            <p style={{fontSize:11.5,color:C.inkFaint,textAlign:"center",fontStyle:"italic",margin:0}}>{sc.step3Note}</p>
+          </>
+        ) : <p style={{color:C.inkFaint}}>—</p>}
       </div>
     </div>
   );
 }
 
-// ─── Interactive 2: Bollinger Squeeze Hunter ─────────────────────────────────
-function BollingerSqueeze() {
+// ─── Диаграмма рассеяния: сюрприз (σ) × реакция (доля дневного диапазона) ─────
+function SurpriseScatter({ stats }) {
+  const { useState, useMemo } = React;
+  const [instrument, setInstrument] = useState("GOLD");
+  const scatter = (stats && stats.scatter) || [];
+  const symbols = useMemo(() => Array.from(new Set(scatter.map(p => p.symbol))).sort(), [scatter]);
+  const points = useMemo(() => scatter.filter(p => p.symbol === instrument && p.move_30m_norm != null), [scatter, instrument]);
+
+  const W = 720, H = 260, PAD = 30;
+  const X_MAX = 4.5, Y_MAX = 1.4;
+  const toX = s => PAD + ((Math.max(-X_MAX, Math.min(X_MAX, s)) + X_MAX) / (2*X_MAX)) * (W - 2*PAD);
+  const toY = m => H - PAD - (Math.min(Y_MAX, m) / Y_MAX) * (H - 2*PAD);
+
+  const bins = (stats && stats.bins) || [];
+
+  return (
+    <div>
+      <div style={{display:"flex",gap:6,marginBottom:14,flexWrap:"wrap"}}>
+        {symbols.map(s => (
+          <button key={s} onClick={()=>setInstrument(s)} style={{fontFamily:"monospace",fontSize:10.5,padding:"5px 10px",cursor:"pointer",background:s===instrument?C.gold:"#fff",color:s===instrument?"#18181a":C.inkMid,border:`1px solid ${s===instrument?C.gold:C.border}`,borderRadius:3}}>{s}</button>
+        ))}
+      </div>
+      <div style={{overflowX:"auto"}}>
+        <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",minWidth:520,background:C.surface,border:`1px solid ${C.border}`,borderRadius:6}}>
+          <line x1={toX(0)} y1={PAD} x2={toX(0)} y2={H-PAD} stroke={C.border} strokeWidth="1"/>
+          <line x1={PAD} y1={H-PAD} x2={W-PAD} y2={H-PAD} stroke={C.border} strokeWidth="1"/>
+          {bins.map((b,i) => {
+            if (b.median_move == null) return null;
+            const x1 = toX(b.from), x2 = toX(b.to != null ? b.to : X_MAX);
+            const y = toY(b.median_move);
+            return <line key={i} x1={x1} y1={y} x2={x2} y2={y} stroke={C.red} strokeWidth="2" opacity="0.55"/>;
+          })}
+          {points.map((p,i) => (
+            <circle key={i} cx={toX(p.surprise_sigma)} cy={toY(p.move_30m_norm)} r="2.4" fill={C.gold} opacity="0.35">
+              <title>{p.event_type} · {p.date} · {p.surprise_sigma}σ · {p.move_30m_norm}</title>
+            </circle>
+          ))}
+          <text x={W/2} y={H-8} textAnchor="middle" fontSize="9" fontFamily="monospace" fill={C.inkFaint}>surprise, σ</text>
+        </svg>
+      </div>
+      <p style={{fontSize:11,color:C.inkFaint,marginTop:8,fontStyle:"italic"}}>{instrument} · {points.length} {INITIAL_LANG==="ru"?"точек":INITIAL_LANG==="ro"?"puncte":"points"} · {INITIAL_LANG==="ru"?"красная линия — медиана по бину":INITIAL_LANG==="ro"?"linia roșie — mediana pe bin":"red line — bin median"}</p>
+    </div>
+  );
+}
+
+// ─── Матрица силы: event_type × instrument, честные "мало данных" ────────────
+const CORE_EVENT_TYPES = ["nfp","cpi","rate","pmi","gdp","unemployment"];
+const EVENT_TYPE_LABELS = {
+  ru: {nfp:"NFP",cpi:"CPI",rate:"Ставка ЦБ",pmi:"PMI",gdp:"ВВП",unemployment:"Безработица"},
+  ro: {nfp:"NFP",cpi:"CPI",rate:"Rata băncii centrale",pmi:"PMI",gdp:"PIB",unemployment:"Șomaj"},
+  en: {nfp:"NFP",cpi:"CPI",rate:"Central bank rate",pmi:"PMI",gdp:"GDP",unemployment:"Unemployment"},
+};
+const MATRIX_SYMBOLS = ["GOLD","EURUSD","USDJPY"];
+
+function StrengthMatrix({ stats }) {
+  const T6 = window.Ch6Content[INITIAL_LANG] || window.Ch6Content.ru;
+  const cm = T6.coreMeasure;
+  const labels = EVENT_TYPE_LABELS[INITIAL_LANG] || EVENT_TYPE_LABELS.ru;
+  const idx = {};
+  (stats && stats.strength_matrix || []).forEach(c => { idx[c.event_type + "|" + c.symbol] = c; });
+  // SPEC_ch2_debug_and_chart_engine.md §2.2 -- общий ImpactMatrix с главой 2:
+  // тот же приём (приглушение+штриховка малой выборки вместо полного скрытия
+  // клетки), median_move уже нормирован на дневной диапазон в surprise_reaction.py.
+  const columns = MATRIX_SYMBOLS.map(s => ({ key: s, label: s }));
+  const rows = CORE_EVENT_TYPES.map(et => ({
+    key: et,
+    label: labels[et] || et,
+    cells: Object.fromEntries(MATRIX_SYMBOLS.map(sym => {
+      const c = idx[et + "|" + sym];
+      if (!c) return [sym, null];
+      return [sym, { norm: c.median_move, n: c.n }];
+    })),
+  }));
+  const minCases = (stats && stats._meta && stats._meta.min_cell_n) || 4;
+  return (
+    <ImpactMatrix rows={rows} columns={columns} minCases={minCases} copy={{
+      rowHead: cm.eventTypeLabel, naLabel: cm.matrixNaLabel, lowSampleLegend: cm.matrixLowSampleLegend,
+    }}/>
+  );
+}
+
+// ─── "Наши измерения" — ядро главы ─────────────────────────────────────────────
+function CoreMeasureBlock({ stats, vars }) {
+  const T6 = window.Ch6Content[INITIAL_LANG] || window.Ch6Content.ru;
+  const cm = T6.coreMeasure;
+  return (
+    <div style={{marginBottom:56}}>
+      <p style={{fontSize:14,color:C.inkMid,lineHeight:1.75,marginBottom:28,maxWidth:820}}>{vars ? fillTemplate(cm.preamble, vars) : "—"}</p>
+
+      <div style={{marginBottom:32}}>
+        <div style={{fontWeight:600,fontSize:14.5,color:C.black,marginBottom:8}}>{cm.finding1Title}</div>
+        <p style={{fontSize:13,color:C.inkMid,lineHeight:1.7,marginBottom:18,maxWidth:800}}>{vars ? fillTemplate(cm.finding1Text, vars) : "—"}</p>
+        <SurpriseScatter stats={stats}/>
+      </div>
+
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:20,marginBottom:32}} className="g2">
+        <div>
+          <div style={{fontWeight:600,fontSize:14.5,color:C.black,marginBottom:8}}>{cm.finding2Title}</div>
+          <p style={{fontSize:13,color:C.inkMid,lineHeight:1.7,margin:0}}>{vars ? fillTemplate(cm.finding2Text, vars) : "—"}</p>
+        </div>
+        <div>
+          <div style={{fontWeight:600,fontSize:14.5,color:C.black,marginBottom:8}}>{cm.finding3Title}</div>
+          <p style={{fontSize:13,color:C.inkMid,lineHeight:1.7,margin:0}}>{vars ? fillTemplate(cm.finding3Text, vars) : "—"}</p>
+        </div>
+      </div>
+
+      <div style={{marginBottom:8}}>
+        <div style={{fontWeight:600,fontSize:14,color:C.black,marginBottom:6}}>{cm.strengthMatrixTitle}</div>
+        <p style={{fontSize:12.5,color:C.inkMid,lineHeight:1.65,marginBottom:16,maxWidth:780}}>{cm.strengthMatrixText}</p>
+      </div>
+      <StrengthMatrix stats={stats}/>
+
+      <div style={{background:C.goldPale,border:`1px solid ${C.borderGold}`,borderRadius:6,padding:"18px 22px",marginBottom:16}}>
+        <div style={{fontWeight:600,fontSize:12.5,color:C.black,marginBottom:6}}>{cm.honestTitle}</div>
+        <p style={{fontSize:12,color:C.inkMid,lineHeight:1.65,margin:0}}>{vars ? fillTemplate(cm.honestBody, vars) : "—"}</p>
+      </div>
+
+      <a href="/data/edu_stats/surprise_reaction.json" download style={{fontFamily:"monospace",fontSize:12,color:C.gold,textDecoration:"none",border:`1px solid ${C.gold}`,padding:"9px 16px",borderRadius:4,display:"inline-block"}}>{cm.downloadCsv}</a>
+    </div>
+  );
+}
+
+// ─── Почему рынок падает на хороших новостях ───────────────────────────────────
+function WhyFallsOnGoodNews() {
+  const T6 = window.Ch6Content[INITIAL_LANG] || window.Ch6Content.ru;
+  const w = T6.whyFallsOnGoodNews;
+  return (
+    <div style={{marginBottom:48}}>
+      <p style={{fontSize:14,color:C.inkMid,lineHeight:1.75,marginBottom:24,maxWidth:820}}>{w.preamble}</p>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:14,marginBottom:24}} className="g3">
+        {[[w.m1Title,w.m1Text],[w.m2Title,w.m2Text],[w.m3Title,w.m3Text]].map(([t,x],i) => (
+          <div key={i} style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:6,padding:"18px 20px",borderTop:`3px solid ${C.gold}`}}>
+            <div style={{fontWeight:600,fontSize:13,color:C.black,marginBottom:8}}>{t}</div>
+            <p style={{fontSize:12,color:C.inkMid,lineHeight:1.65,margin:0}}>{x}</p>
+          </div>
+        ))}
+      </div>
+      <div style={{background:C.redPale,border:"1px solid rgba(192,57,43,.25)",borderRadius:6,padding:"16px 20px"}}>
+        <p style={{fontSize:12.5,color:"#7a2418",lineHeight:1.65,margin:0}}>{w.notSaying}</p>
+      </div>
+    </div>
+  );
+}
+
+// ─── Почему релиз точно по прогнозу тоже двигает рынок ─────────────────────────
+function ZeroSurpriseBlock() {
+  const T6 = window.Ch6Content[INITIAL_LANG] || window.Ch6Content.ru;
+  const z = T6.zeroSurprise;
+  return (
+    <div style={{marginBottom:48}}>
+      <p style={{fontSize:14,color:C.inkMid,lineHeight:1.75,marginBottom:20,maxWidth:820}}>{z.intro}</p>
+      <div style={{display:"flex",flexDirection:"column",gap:10,marginBottom:20}}>
+        {[z.r1,z.r2,z.r3].map((r,i) => (
+          <div key={i} style={{display:"flex",gap:12,alignItems:"flex-start"}}>
+            <span style={{color:C.gold,fontFamily:"monospace",fontSize:11,marginTop:2}}>0{i+1}</span>
+            <span style={{fontSize:13,color:C.inkMid,lineHeight:1.65}}>{r}</span>
+          </div>
+        ))}
+      </div>
+      <div style={{background:C.goldPale,border:`1px solid ${C.borderGold}`,borderRadius:6,padding:"18px 22px"}}>
+        <p style={{fontSize:13,color:C.inkMid,lineHeight:1.7,margin:0,fontStyle:"italic"}}>{z.conclusion}</p>
+      </div>
+    </div>
+  );
+}
+
+// ─── Три типа релизов ──────────────────────────────────────────────────────────
+function ThreeTypesBlock() {
+  const T6 = window.Ch6Content[INITIAL_LANG] || window.Ch6Content.ru;
+  const t = T6.threeTypes;
+  return (
+    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:16,marginBottom:48}} className="g3">
+      {[[t.t1Title,t.t1Text],[t.t2Title,t.t2Text],[t.t3Title,t.t3Text]].map(([ti,tx],i) => (
+        <div key={i} style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:6,padding:"20px 22px"}}>
+          <div style={{fontSize:15,fontWeight:600,color:C.black,marginBottom:10}}>{ti}</div>
+          <p style={{fontSize:12.5,color:C.inkMid,lineHeight:1.65,margin:0}}>{tx}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ─── Симулятор релиза v2: масштаб + действие, честный reveal ──────────────────
+function ReleaseSimulatorV2({ stats }) {
+  const { useState } = React;
+  const T6 = window.Ch6Content[INITIAL_LANG] || window.Ch6Content.ru;
+  const sim = T6.simulator;
+  const releases = (stats && stats.sim_releases) || [];
+  const [idx, setIdx] = useState(0);
+  const [sizeAns, setSizeAns] = useState(null);
+  const [actionAns, setActionAns] = useState(null);
+  const [revealed, setRevealed] = useState(false);
+
+  const r = releases[idx];
+  if (!r) return <p style={{color:C.inkFaint}}>—</p>;
+
+  const candles = r.candles || [];
+  const maxRange = candles.length ? Math.max(...candles.map(c => c.high - c.low)) : 1;
+
+  const next = () => {
+    setIdx(i => (i+1) % releases.length);
+    setSizeAns(null); setActionAns(null); setRevealed(false);
+  };
+
+  return (
+    <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"28px 30px"}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14,flexWrap:"wrap",gap:8}}>
+        <Chip>{sim.kindLabels[r.kind] || r.kind}</Chip>
+        <Mono size={11} color={C.inkFaint} spacing={1}>{fillTemplate(sim.dayCounter, {cur: idx+1, total: releases.length})}</Mono>
+      </div>
+      <p style={{fontSize:12.5,color:C.inkSoft,marginBottom:16}}>{sim.legend}</p>
+
+      <div style={{display:"flex",alignItems:"flex-end",gap:2,height:70,marginBottom:16}}>
+        {candles.map((c,i) => {
+          const h = Math.max(2, ((c.high-c.low)/maxRange)*70);
+          return <div key={i} style={{flex:1,height:h,background:C.borderGold,borderRadius:1}}/>;
+        })}
+      </div>
+
+      <div style={{background:"#fff",border:`1px solid ${C.border}`,borderRadius:6,padding:"14px 18px",marginBottom:20,display:"flex",gap:24,flexWrap:"wrap",fontFamily:"monospace",fontSize:12.5}}>
+        <span>forecast: <b>{r.forecast}</b></span>
+        <span>actual: <b>{r.actual}</b></span>
+        <span title={sim.sigmaTooltip}>σ: <b style={{color:C.gold}}>{r.surprise_sigma}</b></span>
+      </div>
+
+      {!revealed ? (
+        <>
+          <p style={{fontSize:13.5,color:C.black,fontWeight:600,marginBottom:10}}>{sim.questionSize}</p>
+          <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:20}}>
+            {sim.sizeOptions.map((o,i) => (
+              <button key={i} onClick={()=>setSizeAns(i)} style={{fontFamily:"monospace",fontSize:11,padding:"8px 14px",cursor:"pointer",background:sizeAns===i?C.gold:"#fff",color:sizeAns===i?"#18181a":C.inkMid,border:`1px solid ${sizeAns===i?C.gold:C.border}`,borderRadius:4}}>{o}</button>
+            ))}
+          </div>
+          <p style={{fontSize:13.5,color:C.black,fontWeight:600,marginBottom:10}}>{sim.questionAction}</p>
+          <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:20}}>
+            {sim.actionOptions.map((o,i) => (
+              <button key={i} onClick={()=>setActionAns(i)} style={{fontFamily:"monospace",fontSize:11,padding:"8px 14px",cursor:"pointer",background:actionAns===i?C.black:"#fff",color:actionAns===i?"#fff":C.inkMid,border:`1px solid ${actionAns===i?C.black:C.border}`,borderRadius:4}}>{o}</button>
+            ))}
+          </div>
+          <button disabled={sizeAns===null || actionAns===null} onClick={()=>setRevealed(true)} style={{padding:"12px 26px",background:(sizeAns===null||actionAns===null)?C.border:C.black,color:"#fff",border:"none",borderRadius:4,cursor:(sizeAns===null||actionAns===null)?"default":"pointer",fontFamily:"monospace",fontSize:12,letterSpacing:1}}>→</button>
+        </>
+      ) : (
+        <>
+          <div style={{background:C.goldPale,border:`1px solid ${C.borderGold}`,borderRadius:6,padding:"16px 20px",marginBottom:14}}>
+            <Mono size={20} color={C.gold} spacing={0}>{r.actual_move_30m}</Mono>
+            <p style={{fontSize:12,color:C.inkMid,marginTop:8,marginBottom:0}}>{sim.revealPrefix}</p>
+          </div>
+          <button onClick={next} style={{padding:"12px 26px",background:C.black,color:"#fff",border:"none",borderRadius:4,cursor:"pointer",fontFamily:"monospace",fontSize:12,letterSpacing:1}}>{sim.nextBtn}</button>
+        </>
+      )}
+      <p style={{fontSize:11,color:C.inkFaint,marginTop:16,marginBottom:0,fontStyle:"italic"}}>{sim.xpNote}</p>
+    </div>
+  );
+}
+
+// ─── Squeeze trainer (Bollinger Bands) — сохранён почти без изменений,
+// добавлена честная связка с календарём и смягчение claim про 95%.
+function SqueezeTrainer() {
   const { useState, useRef } = React;
-  const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
+  const T6 = window.Ch6Content[INITIAL_LANG] || window.Ch6Content.ru;
+  const sq = T6.squeeze;
 
   const W = 700, H = 280;
   const dataLen = 70;
   const points = [];
   let currentPrice = 120;
-
   for (let i = 0; i <= dataLen; i++) {
     let vol = 0;
-    if (i < 25) vol = 8; // Expansion
-    else if (i >= 25 && i <= 45) vol = 1.5; // THE SQUEEZE
-    else if (i > 45) vol = 12; // Breakout
-    
+    if (i < 25) vol = 8;
+    else if (i >= 25 && i <= 45) vol = 1.5;
+    else if (i > 45) vol = 12;
     let trend = 0;
-    if (i > 45) trend = (i - 45) * 3; // Pump
-    else trend = Math.sin(i / 4) * 3; // Walk
-
+    if (i > 45) trend = (i - 45) * 3;
+    else trend = Math.sin(i / 4) * 3;
     currentPrice = 120 + trend;
-    let upBand = currentPrice + (vol * 2.5);
-    let lowBand = currentPrice - (vol * 2.5);
-    
-    points.push({ x: i * (W / dataLen), c: currentPrice, u: upBand, l: lowBand });
+    points.push({ x: i * (W / dataLen), c: currentPrice, u: currentPrice + vol*2.5, l: currentPrice - vol*2.5 });
   }
-
   const minP = Math.min(...points.map(p => p.l)) - 10;
   const maxP = Math.max(...points.map(p => p.u)) + 10;
   const toY = p => H - ((p - minP) / (maxP - minP)) * H;
-
-  const pLine = points.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x},${toY(p.c)}`).join(' ');
-  const uLine = points.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x},${toY(p.u)}`).join(' ');
-  const lLine = points.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x},${toY(p.l)}`).join(' ');
+  const pLine = points.map((p,i) => `${i===0?'M':'L'}${p.x},${toY(p.c)}`).join(' ');
+  const uLine = points.map((p,i) => `${i===0?'M':'L'}${p.x},${toY(p.u)}`).join(' ');
+  const lLine = points.map((p,i) => `${i===0?'M':'L'}${p.x},${toY(p.l)}`).join(' ');
   const areaPath = uLine + ' ' + points.slice().reverse().map(p => `L${p.x},${toY(p.l)}`).join(' ') + ' Z';
 
   const [revealed, setRevealed] = useState(false);
-  const [msg, setMsg] = useState(S.sqzInitialMsg);
+  const [msg, setMsg] = useState(sq.initialMsg);
   const [errFlash, setErrFlash] = useState(false);
   const svgRef = useRef(null);
 
@@ -489,284 +640,229 @@ function BollingerSqueeze() {
     const rect = svgRef.current.getBoundingClientRect();
     const xClick = e.clientX - rect.left;
     const clickIndex = Math.round(xClick / (W / dataLen));
-
-    if (clickIndex >= 25 && clickIndex <= 45) {
-      setRevealed(true);
-      setMsg(S.sqzCorrectMsg);
-    } else {
-      setMsg(S.sqzWrongMsg);
-      setErrFlash(true);
-      setTimeout(() => setErrFlash(false), 500);
-    }
+    if (clickIndex >= 25 && clickIndex <= 45) { setRevealed(true); setMsg(sq.correctMsg); }
+    else { setMsg(sq.wrongMsg); setErrFlash(true); setTimeout(()=>setErrFlash(false),500); }
   };
-
-  const reset = () => {
-    setRevealed(false);
-    setMsg(S.sqzInitialMsg);
-  };
-
-  const visibleWidth = revealed ? W : (45 * (W / dataLen));
+  const reset = () => { setRevealed(false); setMsg(sq.initialMsg); };
+  const visibleWidth = revealed ? W : (45 * (W/dataLen));
 
   return (
-    <div style={{background:C.surface, border:`1px solid ${errFlash ? C.redB : C.border}`, borderRadius:8, padding:"40px", transition: "border 0.3s"}}>
-      <div style={{display:"flex",alignItems:"center",gap:14,marginBottom:32}}>
-        <span style={{fontSize:32}}>🗜️</span>
-        <div>
-          <div style={{fontFamily:"'DM Serif Display',serif",fontSize:24,color:C.black}}>{S.sqzHeader}</div>
-          <Mono size={11} color={C.inkSoft} spacing={2}>{S.sqzBadge}</Mono>
+    <div>
+      <div style={{background:C.surface, border:`1px solid ${errFlash ? C.red : C.border}`, borderRadius:8, padding:"40px", transition:"border 0.3s"}}>
+        <div style={{display:"flex",alignItems:"center",gap:14,marginBottom:32}}>
+          <span style={{fontSize:32}}>🗜️</span>
+          <div>
+            <div style={{fontFamily:"'DM Serif Display',serif",fontSize:24,color:C.black}}>{sq.header}</div>
+            <Mono size={11} color={C.inkSoft} spacing={2}>{sq.badge}</Mono>
+          </div>
         </div>
-      </div>
 
-      <div style={{marginBottom: 24, padding: "16px 20px", background: revealed ? "rgba(8,153,129,0.08)" : C.surfaceMid, borderRadius: 6, color: revealed ? C.greenD : C.inkMid, fontWeight: revealed ? 600 : 400, fontSize: 15, borderLeft: revealed ? `4px solid ${C.greenB}` : `4px solid transparent`, transition:"all .3s"}}>
-        {msg}
-      </div>
+        <div style={{marginBottom:24,padding:"16px 20px",background:revealed?"rgba(45,122,79,0.08)":C.surfaceMid,borderRadius:6,color:revealed?C.green:C.inkMid,fontWeight:revealed?600:400,fontSize:14,borderLeft:revealed?`4px solid ${C.green}`:"4px solid transparent",transition:"all .3s"}}>
+          {msg}
+        </div>
 
-      <div style={{position:"relative", background:C.chart, borderRadius:6, overflow:"hidden", cursor: revealed ? "default" : "crosshair", boxShadow:"inset 0 0 20px rgba(0,0,0,0.5)"}} onClick={handleClick} ref={svgRef}>
-        <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%", display:"block"}}>
-          
-          <clipPath id="chartMask">
-            <rect x="0" y="0" width={visibleWidth} height={H} style={{transition: "width 1.5s cubic-bezier(0.4, 0, 0.2, 1)"}} />
-          </clipPath>
-
-          <g clipPath="url(#chartMask)">
-            {[0.2, 0.4, 0.6, 0.8].map(v => (
-              <line key={v} x1="0" y1={H*v} x2={W} y2={H*v} stroke="rgba(255,255,255,0.05)" strokeWidth="1" strokeDasharray="4 4" />
-            ))}
-
-            {/* Area */}
-            <path d={areaPath} fill="rgba(37,99,235,0.08)" />
-            
-            {/* Bands */}
-            <path d={uLine} fill="none" stroke={C.blue} strokeWidth="1.5" opacity="0.6" />
-            <path d={lLine} fill="none" stroke={C.blue} strokeWidth="1.5" opacity="0.6" />
-            
-            {/* SMA */}
-            <path d={points.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x},${toY((p.u+p.l)/2)}`).join(' ')} fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1" strokeDasharray="5 5" />
-
-            {/* Price */}
-            <path d={pLine} fill="none" stroke={C.gold} strokeWidth="2.5" />
-          </g>
-
-          {/* Highlights */}
-          {revealed && (
-            <g style={{animation: "fadeIn 1s forwards"}}>
-              <rect x={25 * (W/dataLen)} y="0" width={20 * (W/dataLen)} height={H} fill="rgba(201,151,58,0.15)" />
-              <line x1={25 * (W/dataLen)} y1="0" x2={25 * (W/dataLen)} y2={H} stroke={C.gold} strokeWidth="1" strokeDasharray="4 4" opacity="0.5"/>
-              <line x1={45 * (W/dataLen)} y1="0" x2={45 * (W/dataLen)} y2={H} stroke={C.gold} strokeWidth="1" strokeDasharray="4 4" opacity="0.5"/>
-              
-              <rect x={29 * (W/dataLen)} y="15" width={80} height={24} fill={C.gold} rx="4" />
-              <text x={34 * (W/dataLen)} y="31" fill={C.black} fontSize="11" fontFamily="monospace" fontWeight="bold" textAnchor="middle">SQUEEZE</text>
-              
-              <text x={58 * (W/dataLen)} y="50" fill={C.greenB} fontSize="16" fontWeight="bold" textAnchor="middle">{S.sqzBreakoutLabel}</text>
+        <div style={{position:"relative",background:C.chartBg,borderRadius:6,overflow:"hidden",cursor:revealed?"default":"crosshair",boxShadow:"inset 0 0 20px rgba(0,0,0,0.5)"}} onClick={handleClick} ref={svgRef}>
+          <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",display:"block"}}>
+            <clipPath id="ch6ChartMask"><rect x="0" y="0" width={visibleWidth} height={H} style={{transition:"width 1.5s cubic-bezier(0.4,0,0.2,1)"}}/></clipPath>
+            <g clipPath="url(#ch6ChartMask)">
+              {[0.2,0.4,0.6,0.8].map(v => <line key={v} x1="0" y1={H*v} x2={W} y2={H*v} stroke="rgba(255,255,255,0.05)" strokeWidth="1" strokeDasharray="4 4"/>)}
+              <path d={areaPath} fill="rgba(37,99,235,0.08)"/>
+              <path d={uLine} fill="none" stroke={C.blue} strokeWidth="1.5" opacity="0.6"/>
+              <path d={lLine} fill="none" stroke={C.blue} strokeWidth="1.5" opacity="0.6"/>
+              <path d={points.map((p,i)=>`${i===0?'M':'L'}${p.x},${toY((p.u+p.l)/2)}`).join(' ')} fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1" strokeDasharray="5 5"/>
+              <path d={pLine} fill="none" stroke={C.gold} strokeWidth="2.5"/>
             </g>
-          )}
-
-          {/* Fog line */}
+            {revealed && (
+              <g>
+                <rect x={25*(W/dataLen)} y="0" width={20*(W/dataLen)} height={H} fill="rgba(201,151,58,0.15)"/>
+                <line x1={25*(W/dataLen)} y1="0" x2={25*(W/dataLen)} y2={H} stroke={C.gold} strokeWidth="1" strokeDasharray="4 4" opacity="0.5"/>
+                <line x1={45*(W/dataLen)} y1="0" x2={45*(W/dataLen)} y2={H} stroke={C.gold} strokeWidth="1" strokeDasharray="4 4" opacity="0.5"/>
+                <rect x={29*(W/dataLen)} y="15" width={100} height={24} fill={C.gold} rx="4"/>
+                <text x={79*(W/dataLen)} y="31" fill={C.black} fontSize="11" fontFamily="monospace" fontWeight="bold" textAnchor="middle">SQUEEZE</text>
+                <text x={58*(W/dataLen)} y="50" fill={C.green} fontSize="16" fontWeight="bold" textAnchor="middle">{sq.breakoutLabel}</text>
+              </g>
+            )}
+            {!revealed && <line x1={visibleWidth} y1="0" x2={visibleWidth} y2={H} stroke="rgba(255,255,255,0.5)" strokeWidth="2" strokeDasharray="4 4"/>}
+          </svg>
           {!revealed && (
-             <line x1={visibleWidth} y1="0" x2={visibleWidth} y2={H} stroke="rgba(255,255,255,0.5)" strokeWidth="2" strokeDasharray="4 4" />
+            <div style={{position:"absolute",top:0,right:0,bottom:0,left:`${(45/dataLen)*100}%`,background:"rgba(19,23,34,0.92)",display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(2px)"}}>
+              <span style={{color:"rgba(255,255,255,0.4)",fontSize:13,fontFamily:"monospace",letterSpacing:2}}>{sq.futureHidden}</span>
+            </div>
           )}
-        </svg>
+        </div>
 
-        {/* Fog overlay */}
-        {!revealed && (
-          <div style={{position:"absolute", top:0, right:0, bottom:0, left: `${(45/dataLen)*100}%`, background:"rgba(19,23,34,0.92)", display:"flex", alignItems:"center", justifyContent:"center", backdropFilter:"blur(2px)"}}>
-            <span style={{color:"rgba(255,255,255,0.4)", fontSize:13, fontFamily:"monospace", letterSpacing:2}}>{S.sqzFutureHidden}</span>
+        {revealed && (
+          <div style={{marginTop:24,textAlign:"center"}}>
+            <button onClick={reset} style={{background:"transparent",border:`1px solid ${C.inkMid}`,color:C.inkMid,padding:"10px 20px",borderRadius:4,cursor:"pointer",fontSize:12,fontFamily:"monospace",fontWeight:700,letterSpacing:1}}>{sq.hideBtn}</button>
           </div>
         )}
       </div>
+      <p style={{fontSize:12,color:C.inkSoft,lineHeight:1.65,marginTop:14,fontStyle:"italic",maxWidth:780}}>{sq.calendarLink}</p>
 
-      {revealed && (
-        <div style={{marginTop: 24, textAlign:"center"}}>
-           <button onClick={reset} style={{background:"transparent", border:`1px solid ${C.inkMid}`, color:C.inkMid, padding:"10px 20px", borderRadius:4, cursor:"pointer", fontSize:12, fontFamily:"monospace", fontWeight:700, letterSpacing:1}}>
-             {S.sqzHideBtn}
-           </button>
-        </div>
-      )}
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginTop:28}} className="g2">
+        <InfoCard title={sq.smaTitle} text={sq.smaText}/>
+        <InfoCard title={sq.extremeTitle} text={sq.extremeText}/>
+        <InfoCard title={sq.expansionTitle} text={sq.expansionText}/>
+        <InfoCard title={sq.squeezeTitle} text={sq.squeezeText}/>
+      </div>
     </div>
   );
 }
 
 // ─── Main Chapter 6 ────────────────────────────────────────────────────────────
 function Chapter6() {
-  const { useState } = React;
   const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
-  const [askOpen, setAskOpen] = useState(false);
-
-  const fundamentals = [
-    {icon:"💼", title:"NFP (Non-Farm Payrolls)", accent:C.blue, text:S.fundNfpText},
-    {icon:"🛒", title:"CPI (Consumer Price Index)", accent:C.red, text:S.fundCpiText},
-    {icon:"🏦", title:S.fundFomcTitle, accent:C.gold, text:S.fundFomcText},
-    {icon:"🗣️", title:S.fundGdpTitle, accent:C.green, text:S.fundGdpText},
-  ];
-
-  const bollingerCards = [
-    {icon:"📏", title:S.bbSmaTitle, text:S.bbSmaText},
-    {icon:"🌋", title:S.bbExtremeTitle, text:S.bbExtremeText},
-    {icon:"🎈", title:S.bbExpansionTitle, text:S.bbExpansionText},
-    {icon:"🗜️", title:S.bbSqueezeTitle, text:S.bbSqueezeText},
-  ];
-
-  const conclusions = [S.concl1, S.concl2, S.concl3, S.concl4, S.concl5];
+  const lang = INITIAL_LANG;
+  const T6 = window.Ch6Content[lang] || window.Ch6Content.ru;
+  const { loading, error, stats, scene } = useCh6Data();
+  const vars = React.useMemo(() => buildVars(stats, scene, lang), [stats, scene, lang]);
 
   return (
     <div style={{minHeight:"100vh",background:C.white,color:C.ink,fontFamily:"'DM Sans',sans-serif"}}>
 
-      {/* Sticky header */}
       <div style={{position:"sticky",top:106,background:"rgba(255,255,255,0.96)",backdropFilter:"blur(10px)",borderBottom:`1px solid ${C.border}`,padding:"15px 5vw",display:"flex",alignItems:"center",justifyContent:"space-between",zIndex:50}}>
         <div style={{display:"flex",alignItems:"center",gap:20}}>
-          <span onClick={() => window.location.href = getChUrl(5)} style={{color:C.gold,cursor:"pointer",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</span>
-          <Chip>{S.stickyLevel}</Chip>
-          <Mono size={14} color={C.inkSoft} spacing={0} className="hide-mobile">{S.stickyTitle}</Mono>
+          <span onClick={() => window.location.href = getChUrl(5, lang)} style={{color:C.gold,cursor:"pointer",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</span>
+          <Chip>{S.levelChip}</Chip>
+          <Mono size={14} color={C.inkSoft} spacing={0} className="hide-mobile">{S.chapterNameShort}</Mono>
         </div>
         <div style={{display:"flex",gap:8}}>
-          <Chip color={C.inkFaint}>{S.stickyFA}</Chip>
-          <Chip color={C.inkFaint}>{S.stickyTA}</Chip>
+          <Chip color={C.inkFaint}>{S.faTag}</Chip>
+          <Chip color={C.inkFaint}>{S.taTag}</Chip>
         </div>
       </div>
 
-      {/* HERO */}
-      <div style={{background:C.black,padding:"90px 5vw 80px",textAlign:"center",position:"relative",overflow:"hidden"}}>
-        <div style={{position:"absolute",inset:0,background:"radial-gradient(circle at 50% 120%, rgba(201,151,58,0.15) 0%, transparent 60%)"}}/>
+      <div style={{background:C.black,padding:"80px 5vw 70px",textAlign:"center",position:"relative",overflow:"hidden"}}>
+        <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 100%, rgba(201,151,58,0.1) 0%, transparent 60%)"}}/>
         <div style={{position:"relative"}}>
-          <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:24}}>{S.heroLabel}</Mono>
-          <h1 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(40px,7vw,72px)",fontWeight:400,color:C.white,lineHeight:1.05,marginBottom:24}}>
-            {S.heroTitleA} <span style={{color:C.gold}}>{S.heroTitleB}</span>
+          <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:20}}>{S.heroEyebrow}</Mono>
+          <h1 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(36px,6vw,66px)",fontWeight:400,color:C.white,lineHeight:1.05,marginBottom:20}}>
+            {S.heroTitleLine1}<br/><span style={{color:C.gold}}>{S.heroTitleLine2}</span>
           </h1>
-          <p style={{fontSize:"clamp(16px,2vw,20px)",color:"rgba(255,255,255,0.6)",maxWidth:680,margin:"0 auto 36px",lineHeight:1.6}}>
-            {S.heroSub}
-          </p>
+          <p style={{fontSize:"clamp(16px,2vw,20px)",color:"rgba(255,255,255,0.55)",maxWidth:640,margin:"0 auto 32px",lineHeight:1.65}}>{S.heroSubtitle}</p>
           <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
-            <Chip color={C.gold}>{S.heroChip1}</Chip>
-            <Chip color="rgba(255,255,255,0.3)">Bollinger Bands</Chip>
-            <Chip color="rgba(255,255,255,0.3)">{S.heroChip3}</Chip>
+            <Chip color={C.gold}>{S.fundamentalChip}</Chip>
+            <Chip color="rgba(255,255,255,0.3)">{S.technicalChip}</Chip>
+            <Chip color="rgba(255,255,255,0.3)">{S.interactiveChip}</Chip>
           </div>
         </div>
       </div>
 
-      <div style={{maxWidth:1060,margin:"0 auto",padding:"72px 5vw 120px"}}>
+      {loading && <div style={{textAlign:"center",padding:"60px 0",fontFamily:"monospace",fontSize:13,color:C.inkFaint}}>{S.loadingLabel}</div>}
+      {error && <div style={{textAlign:"center",padding:"40px 0",fontFamily:"monospace",fontSize:13,color:"#c0392b",background:C.redPale}}>{S.loadErrorLabel}</div>}
 
-        {/* ── BLOCK 1: Fundamental News ── */}
-        <SectionTitle sub={S.sec1Sub}>
-          {S.sec1Title}
-        </SectionTitle>
+      {!loading && (
+      <div style={{maxWidth:1060,margin:"0 auto",padding:"0 0 120px"}}>
 
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:20,marginBottom:48}} className="g2">
-          {fundamentals.map((f,i) => <InfoCard key={i} {...f} />)}
-        </div>
+        {/* SPEC_ch6_debug.md §1 (сквозное, здесь -- только для главы 6):
+            margin:"0 -5vw" внутри maxWidth:1060 колонки не даёт настоящий
+            full-bleed -- -5vw считается от вьюпорта, а доступная ширина уже
+            обрезана родителем до 1060px, поэтому по краям оставались белые
+            полосы (тёмный блок "уже по ширине", встык с полноширинным hero).
+            width:100vw + margin-left:50% + translateX(-50%) не зависит от
+            ширины родителя вообще -- секция, а не карточка, как и требует
+            правило §1 (cold open продолжает hero по смыслу). */}
+        <div style={{width:"100vw",marginLeft:"50%",transform:"translateX(-50%)",marginBottom:56}}><ColdOpen6 scene={scene}/></div>
 
-        {/* Volatility Matrix */}
-        <div style={{background:C.surfaceMid, borderRadius:8, padding:"32px 40px", marginBottom:56, border:`1px solid ${C.border}`}}>
-          <Mono size={11} color={C.black} spacing={2} style={{display:"block",marginBottom:20, fontWeight:700}}>{S.matrixLabel}</Mono>
-          <div style={{overflowX:"auto"}}>
-            <table style={{width:"100%",borderCollapse:"collapse",fontSize:14, fontFamily:"'DM Sans', sans-serif"}}>
-              <thead>
-                <tr>
-                  {[S.matrixColEvent, S.matrixColDollar, S.matrixColGold, S.matrixColSP, S.matrixColCrypto].map(h => (
-                    <th key={h} style={{textAlign:"left",padding:"12px 16px",color:C.inkMid,borderBottom:`2px solid ${C.border}`,fontWeight:600}}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {[
-                  [S.matrixRowNFP, S.matrixStrongUp, S.matrixDown, S.matrixMixed, S.matrixDown],
-                  [S.matrixRowCPI, S.matrixUp, S.matrixDown, S.matrixStrongDown, S.matrixStrongDown],
-                  [S.matrixRowFOMC, S.matrixStrongUp, S.matrixStrongDown, S.matrixStrongDown, S.matrixStrongDown],
-                ].map((row,i) => (
-                  <tr key={i} style={{borderBottom:`1px solid ${C.border}`}}>
-                    {row.map((cell,j) => (
-                      <td key={j} style={{padding:"14px 16px", color:j===0?C.black:C.inkMid, fontWeight:j===0?600:400}}>
-                        {cell}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <div style={{padding:"0 5vw"}}>
 
-        {/* "Buy the rumor" Diagram */}
-        <div style={{background:C.black, borderRadius:8, padding:"40px", color:C.white, marginBottom:64}}>
-          <Mono size={11} color={C.gold} spacing={2} style={{display:"block",marginBottom:24}}>{S.cycleLabel}</Mono>
-          <h3 style={{fontFamily:"'DM Serif Display',serif",fontSize:26,marginBottom:32}}>Buy the Rumor, Sell the News</h3>
+        <IntroBlock vars={vars}/>
 
-          <div style={{display:"grid", gridTemplateColumns:"repeat(3, 1fr)", gap:20}} className="g3">
-            <div style={{background:"rgba(255,255,255,0.05)", padding:"24px", borderRadius:6, borderTop:`3px solid ${C.blue}`}}>
-              <div style={{fontSize:12, color:"#888", marginBottom:8, fontFamily:"monospace"}}>{S.phase1Label}</div>
-              <div style={{fontSize:18, fontWeight:700, marginBottom:12}}>{S.phase1Sub}</div>
-              <p style={{fontSize:13, color:"#bbb", lineHeight:1.6}}>{S.phase1Text}</p>
-            </div>
+        <SectionTitle id="secCalendar" sub={S.calendarSub}>{T6.calendar.tag}</SectionTitle>
+        <CalendarExplainer/>
 
-            <div style={{background:"rgba(255,255,255,0.05)", padding:"24px", borderRadius:6, borderTop:`3px solid ${C.gold}`}}>
-              <div style={{fontSize:12, color:"#888", marginBottom:8, fontFamily:"monospace"}}>{S.phase2Label}</div>
-              <div style={{fontSize:18, fontWeight:700, marginBottom:12}}>{S.phase2Sub}</div>
-              <p style={{fontSize:13, color:"#bbb", lineHeight:1.6}}>{S.phase2Text}</p>
-            </div>
+        <SectionTitle sub={S.surpriseCalcSub}>{T6.surpriseCalc.title}</SectionTitle>
+        <SurpriseCalc stats={stats} vars={vars}/>
 
-            <div style={{background:"rgba(255,255,255,0.05)", padding:"24px", borderRadius:6, borderTop:`3px solid ${C.redB}`}}>
-              <div style={{fontSize:12, color:"#888", marginBottom:8, fontFamily:"monospace"}}>{S.phase3Label}</div>
-              <div style={{fontSize:18, fontWeight:700, marginBottom:12}}>{S.phase3Sub}</div>
-              <p style={{fontSize:13, color:"#bbb", lineHeight:1.6}}>{S.phase3Text}</p>
-            </div>
-          </div>
-        </div>
+        <SectionTitle id="secCoreMeasure" sub={S.coreMeasureSub}>{T6.coreMeasure.title}</SectionTitle>
+        <CoreMeasureBlock stats={stats} vars={vars}/>
 
-        {/* ── INTERACTIVE 1: NFP Quiz ── */}
-        <div style={{marginBottom:72}}>
-          <NFPNewsSimulator/>
-        </div>
+        <SectionTitle sub={S.whyFallsSub}>{T6.whyFallsOnGoodNews.tag}</SectionTitle>
+        <WhyFallsOnGoodNews/>
+
+        <SectionTitle id="secZeroSurprise" sub={S.zeroSurpriseSub}>{T6.zeroSurprise.tag}</SectionTitle>
+        <ZeroSurpriseBlock/>
+
+        <SectionTitle sub={S.threeTypesSub}>{T6.threeTypes.tag}</SectionTitle>
+        <ThreeTypesBlock/>
+
+        <SectionTitle id="secSimulator" sub={S.simulatorSub}>{T6.simulator.tag}</SectionTitle>
+        <div style={{marginBottom:56}}><ReleaseSimulatorV2 stats={stats}/></div>
+
+        <SectionTitle sub={S.squeezeSub}>{T6.squeeze.tag}</SectionTitle>
+        <div style={{marginBottom:56}}><SqueezeTrainer/></div>
 
         <Rule/>
 
-        {/* ── BLOCK 2: Technical Analysis (Bollinger) ── */}
-        <SectionTitle sub={S.sec2Sub}>
-          {S.sec2Title}
-        </SectionTitle>
-
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:20,marginBottom:56}} className="g2">
-          {bollingerCards.map((f,i) => <InfoCard key={i} {...f} accent={i===3 ? C.gold : C.inkMid} />)}
-        </div>
-
-        {/* ── INTERACTIVE 2: Squeeze Hunter ── */}
-        <div style={{marginBottom:64}}>
-          <BollingerSqueeze/>
-        </div>
-
-        <Rule/>
-
-        {/* ── CONCLUSIONS ── */}
-        <div style={{background:C.black,borderRadius:8,padding:"48px 56px"}}>
-          <div style={{textAlign:"center",marginBottom:36}}>
-            <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:12}}>{S.conclLabel}</Mono>
-            <h3 style={{fontFamily:"'DM Serif Display',serif",fontSize:32,color:C.white,fontWeight:400}}>{S.conclTitle}</h3>
-          </div>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}} className="g2">
-            {conclusions.map((c,i) => (
-              <div key={i} style={{display:"flex",gap:16,alignItems:"flex-start",padding:"16px 20px",background:"rgba(255,255,255,0.04)",borderRadius:6,border:"1px solid rgba(255,255,255,0.06)"}}>
-                <span style={{color:C.gold,fontFamily:"monospace",fontSize:12,marginTop:2,flexShrink:0}}>0{i+1}</span>
-                <span style={{fontSize:14,color:"rgba(255,255,255,0.75)",lineHeight:1.6}}>{c}</span>
+        <div style={{marginBottom:40}}>
+          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:16,textAlign:"center"}}>{T6.takeaways.tag}</Mono>
+          <h3 style={{fontFamily:"'DM Serif Display',serif",fontSize:22,fontWeight:400,color:C.black,textAlign:"center",marginBottom:24}}>{T6.takeaways.title}</h3>
+          <div style={{display:"flex",flexDirection:"column",gap:10,maxWidth:820,margin:"0 auto"}}>
+            {T6.takeaways.items.map((it,i) => (
+              <div key={i} style={{display:"flex",gap:12,alignItems:"flex-start",background:C.surface,border:`1px solid ${C.border}`,borderRadius:6,padding:"12px 16px"}}>
+                <span style={{color:C.gold,fontFamily:"monospace",fontSize:11,marginTop:2}}>0{i+1}</span>
+                <span style={{fontSize:13,color:C.inkMid,lineHeight:1.6}}>{it}</span>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Footer navigation */}
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",paddingTop:48,marginTop:48,borderTop:`1px solid ${C.border}`}}>
-          <span onClick={() => setAskOpen(true)} style={{fontSize:14,color:C.inkSoft,fontFamily:"monospace",borderBottom:`1px solid ${C.border}`,cursor:"pointer"}}>
-            {S.footerAsk}
-          </span>
+        <QuizBlock questions={T6.quiz} levelId="level_6" lang={lang} copy={{
+          kicker: S.quizKicker, title: S.quizTitle, next: S.quizNext,
+          stuckAll: S.quizStuckAll, stuckSome: S.quizStuckSome, backToSection: S.quizBackToSection,
+        }} />
+
+        <PredictMagnitude/>
+
+        <div style={{border:`1px dashed ${C.borderGold}`,borderRadius:8,padding:"20px 24px",marginBottom:32,background:C.surface}}>
+          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T6.cliffhanger.tag}</Mono>
+          {T6.cliffhanger.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:14,color:C.inkMid,lineHeight:1.7,marginBottom:10}}>{p}</p>)}
+        </div>
+
+        <div style={{marginBottom:32}}>
+          <Mono size={10} color={C.inkFaint} spacing={2} style={{display:"block",marginBottom:10,textTransform:"uppercase"}}>{T6.sources.tag}</Mono>
+          <ol style={{fontSize:11.5,color:C.inkFaint,lineHeight:1.8,paddingLeft:18,marginBottom:8}}>
+            {T6.sources.list.map((s,i) => <li key={i}>{s}</li>)}
+          </ol>
+          <p style={{fontSize:11,color:C.inkFaint,fontStyle:"italic"}}>{T6.sources.checked}</p>
+        </div>
+
+        <ComplianceFootnote lang={lang} />
+
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:20,paddingTop:48,marginTop:16,borderTop:`1px solid ${C.border}`}}>
+          <AskAnalystBtn tr={{askAnalyst:S.askQuestionLabel}} chapterNum={6} lang={lang} />
           <button
-            onClick={() => window.location.href = getChUrl(7)}
+            onClick={() => window.location.href = getChUrl(7, lang)}
             style={{background:C.black,color:C.white,border:"none",padding:"18px 35px",cursor:"pointer",fontFamily:"monospace",fontSize:14,letterSpacing:2,fontWeight:700,transition:"background .2s"}}
             onMouseEnter={e=>e.target.style.background=C.gold}
             onMouseLeave={e=>e.target.style.background=C.black}>
-            {S.footerNextBtn}
+            {S.nextChapterBtn}
           </button>
         </div>
 
+        </div>
       </div>
+      )}
+    </div>
+  );
+}
 
-      {askOpen && <AskAnalystPopup chapterNum={6} lang={INITIAL_LANG} onClose={() => setAskOpen(false)}/>}
+// ─── Предикт недели: масштаб, не направление ───────────────────────────────────
+function PredictMagnitude() {
+  const { useState } = React;
+  const T6 = window.Ch6Content[INITIAL_LANG] || window.Ch6Content.ru;
+  const p = T6.predict;
+  const [picked, setPicked] = useState(null);
+  return (
+    <div style={{border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px",marginTop:8,marginBottom:24}}>
+      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{p.tag}</Mono>
+      <p style={{fontSize:14.5,color:C.black,lineHeight:1.65,marginBottom:14}}>{p.question}</p>
+      <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:14}}>
+        {p.options.map((o,i) => (
+          <button key={i} onClick={()=>setPicked(i)} style={{fontFamily:"monospace",fontSize:11.5,padding:"9px 16px",cursor:"pointer",background:picked===i?C.gold:"#fff",color:picked===i?"#18181a":C.inkMid,border:`1px solid ${picked===i?C.gold:C.border}`,borderRadius:4}}>{o}</button>
+        ))}
+      </div>
+      <p style={{fontSize:11,color:C.inkFaint}}>{p.xpNote}</p>
     </div>
   );
 }
@@ -776,34 +872,3 @@ ReactDOM.createRoot(document.getElementById('sbf-book-root')).render(<Chapter6 /
 </script>
 </body>
 </html>
-<script>
-// Скрипт для конвертации UTC времени в локальное время пользователя
-document.addEventListener('DOMContentLoaded', function() {
-    var _pageLang = "{{ lang }}";
-    var _intlLocale = _pageLang === 'ro' ? 'ro-RO' : _pageLang === 'en' ? 'en-US' : 'ru-RU';
-    const utcTimes = document.querySelectorAll('.local-time[data-utc]');
-
-    utcTimes.forEach(function(element) {
-        // Получаем UTC время из data-utc атрибута
-        var utcString = element.getAttribute('data-utc');
-
-        try {
-            // Парсим UTC дату и время
-            var utcDate = new Date(utcString);
-
-            // Конвертируем в локальное время пользователя
-            var localDate = new Date(utcDate.getTime() + utcDate.getTimezoneOffset() * 60000);
-
-            // Форматируем для отображения (например, "19:00 МСК")
-            var hours = String(localDate.getHours()).padStart(2, '0');
-            var minutes = String(localDate.getMinutes()).padStart(2, '0');
-            var timeZoneName = Intl.DateTimeFormat(_intlLocale, { timeZoneName: 'long' }).format(localDate);
-            
-            // Обновляем текст элемента с локальным временем
-            element.innerHTML = '<span class="local-time-display">' + hours + ':' + minutes + ' ' + timeZoneName.replace(/\s/g, '') + '</span>';
-        } catch (e) {
-            console.error('Ошибка конвертации времени:', e);
-        }
-    });
-});
-</script>
