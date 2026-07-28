@@ -821,8 +821,27 @@ function Chapter6() {
 
         <div style={{marginBottom:32}}>
           <Mono size={10} color={C.inkFaint} spacing={2} style={{display:"block",marginBottom:10,textTransform:"uppercase"}}>{T6.sources.tag}</Mono>
-          <ol style={{fontSize:11.5,color:C.inkFaint,lineHeight:1.8,paddingLeft:18,marginBottom:8}}>
+          {/* SPEC_ch6_debug.md §6 (сквозное, здесь -- только для главы 6):
+              был путь к таблицам БД и скрипту вместо реквизитов источника.
+              Числа -- из stats._meta (surprise_reaction.json), не руками;
+              inkMid вместо inkFaint -- тот же контраст-фикс, что в главе 5. */}
+          <ol style={{fontSize:11.5,color:C.inkMid,lineHeight:1.8,paddingLeft:18,marginBottom:8}}>
             {T6.sources.list.map((s,i) => <li key={i}>{s}</li>)}
+            {stats && stats._meta && (() => {
+              const m = stats._meta;
+              const ddmmyyyy = iso => { const [y,mo,d] = iso.split("-"); return `${d}.${mo}.${y}`; };
+              const nAssets = new Set((stats.strength_matrix||[]).map(r=>r.symbol)).size;
+              const text = T6.sources.ownTemplate
+                .replace("{{first}}", ddmmyyyy(m.coverage_first)).replace("{{last}}", ddmmyyyy(m.coverage_last))
+                .replace("{{n}}", m.n_releases.toLocaleString()).replace("{{assets}}", nAssets)
+                .replace("{{built}}", ddmmyyyy(m.built));
+              return (
+                <li>
+                  {text}{" "}
+                  <a href="/data/edu_stats/surprise_reaction.csv" download style={{color:C.gold}}>{T6.sources.csvLabel}</a>
+                </li>
+              );
+            })()}
           </ol>
           <p style={{fontSize:11,color:C.inkFaint,fontStyle:"italic"}}>{T6.sources.checked}</p>
         </div>

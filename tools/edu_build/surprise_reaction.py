@@ -42,6 +42,7 @@ calendar_matrix.py и hourly_profile.py — сверяем реальные да
 
 Запуск: python3 tools/edu_build/surprise_reaction.py
 """
+import csv
 import datetime
 import json
 import pathlib
@@ -52,6 +53,7 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 WEB = ROOT / "web"
 OUT = WEB / "data" / "edu_stats" / "surprise_reaction.json"
+OUT_CSV = WEB / "data" / "edu_stats" / "surprise_reaction.csv"
 BOT_DB = pathlib.Path("/mnt/sbfdata/sbf-platform/SBFAcademy_bot/bot.db")
 
 sys.path.insert(0, str(ROOT))
@@ -375,6 +377,15 @@ def main():
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(payload, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+
+    # SPEC_ch6_debug.md §6: источник в главе должен вести на скачиваемый CSV,
+    # не на путь к этому скрипту. scatter -- сырой, событие-за-событием набор,
+    # самый полезный для читателя, который хочет проверить цифры сам.
+    with OUT_CSV.open("w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f)
+        w.writerow(["date", "event_type", "title", "symbol", "surprise_sigma", "move_30m_norm", "dir_match"])
+        for p in scatter:
+            w.writerow([p["date"], p["event_type"], p["title"], p["symbol"], p["surprise_sigma"], p["move_30m_norm"], p["dir_match"]])
 
     print(f"направление: hit_rate={hit_rate}% n={n_dir} CI95={ci} verdict={verdict}")
     print(f"матрица силы: {len(strength_matrix)} клеток, показано {sum(1 for x in strength_matrix if x['shown'])}")
