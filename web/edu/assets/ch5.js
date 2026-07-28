@@ -84,7 +84,7 @@ window.Ch5Content = {
     globe: {
       tag: "ГЛОБУС ЛИКВИДНОСТИ",
       title: "Сколько рынок реально проходит по часам",
-      step1Legend: "Это карта суток. Верхняя полоса — двадцать четыре часа по UTC. Три цветные ленты — часы, в которые за столом сидят Азия, Европа и Америка. Столбики внизу — НЕ выдуманная кривая «активности», а измеренный нами средний размер получасового бара в этот час: сколько рынок реально проходит. Данные — наш бэкфилл MT5, {{n_days}} дней по золоту. Двигай ползунок — увидишь, кто за столом и сколько в этот час стоит движение.",
+      step1Legend: "Это карта суток. Верхняя полоса — двадцать четыре часа по UTC. Три цветные ленты — часы, в которые за столом сидят Азия, Европа и Америка. Столбики внизу — НЕ выдуманная кривая «активности», а измеренный нами средний размер получасового бара в этот час: сколько рынок реально проходит. Данные — наш бэкфилл MT5, {{n_days_label}} по золоту. Двигай ползунок — увидишь, кто за столом и сколько в этот час стоит движение.",
       step2Intro: "Автотур по трём точкам:",
       step2Trough: "{{trough_hour}}:00 UTC — минимум суток: {{trough_share}}% от дневного диапазона. Тише часа в сутках нет.",
       step2Mid: "{{midHour}}:00 UTC — Лондон уже за столом: {{midShare}}%. Заметно оживает, но это ещё не пик.",
@@ -110,7 +110,7 @@ window.Ch5Content = {
     hourStats: {
       tag: "«НАШИ СУТКИ» — ПОЧАСОВАЯ КАРТА",
       title: "Ядро главы: наш собственный эксклюзив",
-      preamble: "Всё, что ты прочитал выше, — общеизвестно и есть в любом учебнике. Дальше начинается то, чего в учебнике нет: мы посчитали это на своих данных. {{total_bars}} получасовых баров золота, {{n_days}} торговых дней ({{coverage_first}} → {{coverage_last}}). Ты можешь переключать инструмент и смотреть, держится ли закономерность.",
+      preamble: "Всё, что ты прочитал выше, — общеизвестно и есть в любом учебнике. Дальше начинается то, чего в учебнике нет: мы посчитали это на своих данных. {{total_bars}} получасовых баров золота, {{n_trading_days_label}} ({{coverage_first}} → {{coverage_last}}). Ты можешь переключать инструмент и смотреть, держится ли закономерность.",
       peakLine: "Самый активный час: {{peak_hour}} UTC — {{peak_share}}% суточного диапазона в среднем.",
       troughLine: "Самый тихий час: {{trough_hour}} UTC — {{trough_share}}%.",
       ratioLine: "Отношение: в {{peak_ratio}} раза. Закономерность держится {{years_consistent}} из {{years_total}} периодов наблюдения.",
@@ -118,7 +118,7 @@ window.Ch5Content = {
       subsetAll: "Все дни", subsetFriday: "Пятница", subsetNfp: "День NFP (проксируем 1-й пятницей месяца)", subsetRegular: "Обычный день",
       // §3.1: заголовки не должны утверждать больше, чем показывает выборка —
       // считаются из periods_total/vs_regular (hourly_profile.json), не текст.
-      conclusionFewPeriods: "Пока держится на всей доступной выборке ({{n}} периода)",
+      conclusionFewPeriods: "Пока держится на всей доступной выборке ({{n_label}})",
       conclusionSubsetSignificant: "{{label}} отличается: {{delta}}, n = {{n}}",
       conclusionSubsetNotSignificant: "{{label}}: значимой разницы не видно, n = {{n}}",
       conclusionInsufficient: "{{label}}: данных пока мало, n = {{n}}",
@@ -368,7 +368,7 @@ window.Ch5Content = {
     globe: {
       tag: "GLOBUL LICHIDITĂȚII",
       title: "Cât parcurge piața cu adevărat, oră de oră",
-      step1Legend: "Aceasta e harta zilei. Banda de sus — douăzeci și patru de ore UTC. Trei benzi colorate — orele în care Asia, Europa și America sunt la masă. Barele de jos NU sunt o curbă „de activitate” inventată, ci dimensiunea medie măsurată de noi a barei de 30 de minute în ora respectivă. Date — bekfill-ul nostru MT5, {{n_days}} zile pe aur. Mișcă cursorul — vezi cine e la masă și cât valorează mișcarea în ora respectivă.",
+      step1Legend: "Aceasta e harta zilei. Banda de sus — douăzeci și patru de ore UTC. Trei benzi colorate — orele în care Asia, Europa și America sunt la masă. Barele de jos NU sunt o curbă „de activitate” inventată, ci dimensiunea medie măsurată de noi a barei de 30 de minute în ora respectivă. Date — bekfill-ul nostru MT5, {{n_days_label}} pe aur. Mișcă cursorul — vezi cine e la masă și cât valorează mișcarea în ora respectivă.",
       step2Intro: "Tur automat prin trei puncte:",
       step2Trough: "Ora {{trough_hour}}:00 UTC — minimul zilei: {{trough_share}}% din intervalul zilnic. Nicio oră mai liniștită.",
       step2Mid: "Ora {{midHour}}:00 UTC — Londra e deja la masă: {{midShare}}%. Se trezește vizibil, dar încă nu e vârful.",
@@ -394,13 +394,13 @@ window.Ch5Content = {
     hourStats: {
       tag: "„ZIUA NOASTRĂ” — HARTA PE ORE",
       title: "Nucleul capitolului: exclusivitatea noastră",
-      preamble: "Tot ce ai citit mai sus e cunoscut și se găsește în orice manual. De aici începe ce nu găsești în manual: am calculat pe datele noastre. {{total_bars}} bare de 30 de minute pe aur, {{n_days}} zile de tranzacționare ({{coverage_first}} → {{coverage_last}}). Poți comuta instrumentul și verifica dacă tiparul se menține.",
+      preamble: "Tot ce ai citit mai sus e cunoscut și se găsește în orice manual. De aici începe ce nu găsești în manual: am calculat pe datele noastre. {{total_bars}} bare de 30 de minute pe aur, {{n_trading_days_label}} ({{coverage_first}} → {{coverage_last}}). Poți comuta instrumentul și verifica dacă tiparul se menține.",
       peakLine: "Ora cea mai activă: {{peak_hour}} UTC — {{peak_share}}% din intervalul zilnic în medie.",
       troughLine: "Ora cea mai liniștită: {{trough_hour}} UTC — {{trough_share}}%.",
       ratioLine: "Raportul: de {{peak_ratio}} ori. Tiparul se menține {{years_consistent}} din {{years_total}} perioade observate.",
       switchInstrument: "Instrument", switchSubset: "Segment",
       subsetAll: "Toate zilele", subsetFriday: "Vineri", subsetNfp: "Ziua NFP (proxy: prima vineri a lunii)", subsetRegular: "Zi obișnuită",
-      conclusionFewPeriods: "Deocamdată se confirmă pe tot eșantionul disponibil ({{n}} perioade)",
+      conclusionFewPeriods: "Deocamdată se confirmă pe tot eșantionul disponibil ({{n_label}})",
       conclusionSubsetSignificant: "{{label}} diferă: {{delta}}, n = {{n}}",
       conclusionSubsetNotSignificant: "{{label}}: nu se vede o diferență semnificativă, n = {{n}}",
       conclusionInsufficient: "{{label}}: date insuficiente încă, n = {{n}}",
@@ -650,7 +650,7 @@ window.Ch5Content = {
     globe: {
       tag: "LIQUIDITY GLOBE",
       title: "How far the market actually moves, hour by hour",
-      step1Legend: "This is a map of the day. The top bar is 24 hours in UTC. The three coloured bands mark the hours Asia, Europe and America are at the table. The bars below are NOT a made-up \"activity\" curve — they're our own measured median 30-minute bar size for that hour: how far the market actually moves. Data — our MT5 backfill, {{n_days}} days of gold. Drag the slider — see who's at the table and how much movement that hour is worth.",
+      step1Legend: "This is a map of the day. The top bar is 24 hours in UTC. The three coloured bands mark the hours Asia, Europe and America are at the table. The bars below are NOT a made-up \"activity\" curve — they're our own measured median 30-minute bar size for that hour: how far the market actually moves. Data — our MT5 backfill, {{n_days_label}} of gold. Drag the slider — see who's at the table and how much movement that hour is worth.",
       step2Intro: "Auto-tour through three stops:",
       step2Trough: "{{trough_hour}}:00 UTC — the daily minimum: {{trough_share}}% of the daily range. No quieter hour exists.",
       step2Mid: "{{midHour}}:00 UTC — London is already at the table: {{midShare}}%. Visibly waking up, but not the peak yet.",
@@ -676,13 +676,13 @@ window.Ch5Content = {
     hourStats: {
       tag: "\"OUR DAY\" — THE HOURLY MAP",
       title: "The chapter's core: our own exclusive",
-      preamble: "Everything you've read above is common knowledge, in any textbook. What follows isn't: we calculated it on our own data. {{total_bars}} 30-minute gold bars, {{n_days}} trading days ({{coverage_first}} → {{coverage_last}}). You can switch instruments and check whether the pattern holds.",
+      preamble: "Everything you've read above is common knowledge, in any textbook. What follows isn't: we calculated it on our own data. {{total_bars}} 30-minute gold bars, {{n_trading_days_label}} ({{coverage_first}} → {{coverage_last}}). You can switch instruments and check whether the pattern holds.",
       peakLine: "Most active hour: {{peak_hour}} UTC — {{peak_share}}% of the daily range on average.",
       troughLine: "Quietest hour: {{trough_hour}} UTC — {{trough_share}}%.",
       ratioLine: "Ratio: {{peak_ratio}}×. The pattern holds {{years_consistent}} of {{years_total}} observed periods.",
       switchInstrument: "Instrument", switchSubset: "Slice",
       subsetAll: "All days", subsetFriday: "Friday", subsetNfp: "NFP day (proxied by month's first Friday)", subsetRegular: "Regular day",
-      conclusionFewPeriods: "Still holding across the full available sample ({{n}} periods)",
+      conclusionFewPeriods: "Still holding across the full available sample ({{n_label}})",
       conclusionSubsetSignificant: "{{label}} differs: {{delta}}, n = {{n}}",
       conclusionSubsetNotSignificant: "{{label}}: no significant difference visible, n = {{n}}",
       conclusionInsufficient: "{{label}}: not enough data yet, n = {{n}}",

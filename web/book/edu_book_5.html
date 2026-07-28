@@ -232,6 +232,30 @@ function useCh5Data() {
   return state;
 }
 
+// Склонение "N дней/N zile/N days" по языку (P2.1: AcademyShared.declineRu/
+// declineRo/declineEn — общая функция, не разовая правка одной строки).
+function declineDays(n, lang) {
+  if (n == null) return null;
+  const AS = window.AcademyShared;
+  if (lang === "ro") return AS.declineRo(n, "zi", "zile");
+  if (lang === "en") return AS.declineEn(n, "day", "days");
+  return AS.declineRu(n, ["день", "дня", "дней"]);
+}
+function declineTradingDays(n, lang) {
+  if (n == null) return null;
+  const AS = window.AcademyShared;
+  if (lang === "ro") return AS.declineRo(n, "zi de tranzacționare", "zile de tranzacționare");
+  if (lang === "en") return AS.declineEn(n, "trading day", "trading days");
+  return AS.declineRu(n, ["торговый день", "торговых дня", "торговых дней"]);
+}
+function declinePeriods(n, lang) {
+  if (n == null) return null;
+  const AS = window.AcademyShared;
+  if (lang === "ro") return AS.declineRo(n, "perioadă", "perioade");
+  if (lang === "en") return AS.declineEn(n, "period", "periods");
+  return AS.declineRu(n, ["период", "периода", "периодов"]);
+}
+
 // ── vars: единственный источник чисел для текстовых {{плейсхолдеров}}
 // (остальные компоненты читают hp/as напрямую в своём собственном состоянии).
 function buildVars(hp, as, cfg, lang) {
@@ -253,6 +277,8 @@ function buildVars(hp, as, cfg, lang) {
 
   return {
     n_days: g.coverage ? g.coverage.n_days : null,
+    n_days_label: g.coverage ? declineDays(g.coverage.n_days, lang) : null,
+    n_trading_days_label: g.coverage ? declineTradingDays(g.coverage.n_days, lang) : null,
     total_bars: g.total_bars,
     peak_hour: g.peak_hour, peak_share: g.peak_share,
     trough_hour: g.trough_hour, trough_share: g.trough_share,
@@ -389,7 +415,7 @@ function HourStatsBlock({ hp, vars }) {
       : fillTemplate(hs.conclusionSubsetNotSignificant, { label, n: v.n_a });
   }
   const curveTitle = data && data.periods_total < 3
-    ? fillTemplate(hs.conclusionFewPeriods, { n: data.periods_total })
+    ? fillTemplate(hs.conclusionFewPeriods, { n_label: declinePeriods(data.periods_total, INITIAL_LANG) })
     : hs.conclusions[0].title;
   const conclusionTitles = data ? [
     curveTitle,
