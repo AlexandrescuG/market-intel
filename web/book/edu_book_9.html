@@ -3,1384 +3,712 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>SBF | {% if lang == 'ru' %}Глава 9. Отчётности и Осцилляторы{% elif lang == 'ro' %}Capitolul 9. Rapoarte și Oscilatori{% else %}Chapter 9. Earnings and Oscillators{% endif %}</title>
+  <title>SBF | {% if lang == 'ru' %}Глава 9. Отчётности и Осцилляторы{% elif lang == 'ro' %}Capitolul 9. Raportări și Oscilatoare{% else %}Chapter 9. Earnings and Oscillators{% endif %}</title>
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     html,body{max-width:100vw;overflow-x:hidden;scroll-behavior:smooth}
-    body{background:#fff;font-family:'DM Sans',system-ui,sans-serif;color:#18181a}
+    body{background:#ffffff;font-family:'DM Sans',system-ui,sans-serif;color:#18181a}
     #sbf-book-root{min-height:100vh}
-    .messenger-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:30px}
-    @media(max-width:768px){.messenger-grid{grid-template-columns:1fr}.hide-mobile{display:none!important}}
+    @media(max-width:768px){.hide-mobile{display:none!important}.g2{grid-template-columns:1fr!important}.g3{grid-template-columns:1fr!important}}
   </style>
 </head>
 <body>
+
+
 <div id="sbf-book-root"></div>
+
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
-<script src="/edu/edu-chart.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"></script>
+<script src="/edu/assets/ch9.js"></script>
+
 <script type="text/babel" data-presets="react">
 const INITIAL_LANG = "{{ lang }}";
+
 {% raw %}
-const C = {
-  gold:"#c9973a",goldLight:"#f4d49f",goldPale:"#f7f0e3",black:"#18181a",
-  ink:"#18181a",inkMid:"#555555",inkSoft:"rgba(24,24,26,0.58)",inkFaint:"rgba(24,24,26,0.28)",
-  white:"#ffffff",surface:"#faf8f5",surfaceMid:"#f0ebe0",border:"rgba(24,24,26,0.1)",
-  borderGold:"rgba(201,151,58,0.25)",dark:"#18181a",
-  bull:"#22c55e",bear:"#ef4444",blue:"#3b82f6",purple:"#8b5cf6"
-};
-
-// ─────────────────────────────────────────────
-// TRANSLATIONS
-// ─────────────────────────────────────────────
-const TR = {
-  ru: {
-    chNum:"УРОВЕНЬ 9", chName:"Отчётности и Осцилляторы",
-    chTitle:"Когда фундаментальный позитив уже заложен в цену",
-    prevCh:"← Уровень 8", nextCh:"Уровень 10: Психология толпы →",
-    askLink:"Остался вопрос? Напиши аналитику",
-
-    // ANTI-MYTH
-    mythTag:"ПАРАДОКС РЫНКА",
-    mythTitle:"Компания отчиталась рекордно — акция упала на 15%. Почему?",
-    mythBody:"Потому что рынок не торгует реальностью. Он торгует разрывом между ожиданиями и реальностью. Если все ожидали +30% роста прибыли, а пришло +28% — это провал. Акция уже содержала в себе ожидание идеального квартала. Когда идеал не случается — позиции закрываются. Это и есть «Buy the rumor, sell the fact» — один из важнейших законов рынка.",
-
-    // SECTION FA
-    faTag:"9.1 — ФУНДАМЕНТАЛЬНЫЙ АНАЛИЗ",
-    faTitle:"Читаем корпоративный отчёт как аналитик",
-    faSub:"Каждые 3 месяца публичные компании публикуют отчёт. Для инвестора это главный первоисточник.",
-
-    metricsTitle:"Ключевые метрики отчёта",
-    metrics:[
-      {key:"EPS",name:"Earnings Per Share",ru:"Прибыль на акцию",
-       formula:"Чистая прибыль / Кол-во акций",
-       beg:"Сколько долларов прибыли компания заработала на каждую вашу акцию. Если EPS = $5 и у вас 100 акций — компания «принесла» вам $500.",
-       pro:"Разделяйте GAAP EPS (по стандарту учёта) и Non-GAAP (скорректированный). Компании манипулируют Non-GAAP, исключая stock-based compensation и амортизацию. Смотрите оба показателя.",
-       beat:"beat",miss:"miss"},
-      {key:"REV",name:"Revenue",ru:"Выручка",
-       formula:"Сумма всех продаж за период",
-       beg:"Сколько денег компания получила от клиентов. Не прибыль — а именно поступления. Amazon может иметь выручку $500 млрд при прибыли $30 млрд.",
-       pro:"Смотрите YoY-рост (год к году) и сегментацию. AWS даёт Amazon ~17% выручки, но 60%+ операционной прибыли. Важен не размер — важна структура.",
-       beat:"beat",miss:"miss"},
-      {key:"GUID",name:"Guidance",ru:"Прогноз компании",
-       formula:"Ожидаемые EPS и Revenue на след. квартал",
-       beg:"Прогноз — важнее самого отчёта. Если компания снижает прогноз на следующий квартал, акция падает, даже если текущий отчёт был отличным. Рынок смотрит вперёд.",
-       pro:"Guidance revision — опережающий индикатор. Мета-анализ: если >3 аналитиков из 5 снижают прогнозы после отчёта — высокая вероятность продолжения снижения акции в течение 30 дней.",
-       beat:"raise",miss:"lower"},
-      {key:"MARG",name:"Operating Margin",ru:"Операционная маржа",
-       formula:"Операционная прибыль / Выручка × 100%",
-       beg:"Сколько процентов от выручки остаётся после всех операционных расходов. Маржа 30% = из каждых $100 выручки $30 — реальная прибыль бизнеса.",
-       pro:"Следите за маржинальностью в динамике: расширяется или сжимается? SaaS-компании с >25% operating margin считаются высокоэффективными. Tesla улучшила маржу с 5% до 17% за 3 года — именно это разогнало акцию.",
-       beat:"expand",miss:"compress"},
-    ],
-
-    // EARNINGS SIMULATOR
-    simTag:"СИМУЛЯТОР ОТЧЁТА",
-    simTitle:"Earnings Call: Угадай реакцию рынка",
-    simSub:"Изучи данные отчёта и предскажи — как отреагирует акция",
-    cases:[
-      {
-        company:"NVIDIA (NVDA)",ticker:"NVDA",sector:"AI / Semiconductors",
-        price:875,
-        items:[
-          {label:"Выручка (факт)",val:"$22.1 млрд",exp:"$21.9 млрд",beat:true},
-          {label:"EPS (факт)",val:"$5.16",exp:"$5.10",beat:true},
-          {label:"Операционная маржа",val:"54.1%",exp:"52.8%",beat:true},
-          {label:"Guidance (след. квартал)",val:"$24.0 млрд",exp:"$26.5 млрд",beat:false},
-        ],
-        verdict:"down",
-        verdictPct:"-8.5%",
-        explanation:"NVIDIA побила по выручке и EPS — но guidance оказался ниже ожиданий на $2.5 млрд. Рынок немедленно продал. Правило: guidance важнее текущего отчёта. Аналитики заложили $26.5 млрд, компания дала $24.0. Это сигнал замедления.",
-        explanationEn:"NVIDIA beat revenue and EPS — but guidance missed by $2.5B. The market sold immediately. Rule: guidance matters more than current results.",
-        explanationRo:"NVIDIA a depășit veniturile și EPS — dar ghidajul a ratat cu $2,5 miliarde. Piața a vândut imediat.",
-      },
-      {
-        company:"META Platforms",ticker:"META",sector:"Social Media / AI",
-        price:550,
-        items:[
-          {label:"Выручка (факт)",val:"$40.6 млрд",exp:"$38.3 млрд",beat:true},
-          {label:"EPS (факт)",val:"$8.02",exp:"$6.70",beat:true},
-          {label:"DAU (активных пользователей)",val:"3.29 млрд",exp:"3.25 млрд",beat:true},
-          {label:"Capex (инвестиции в AI)",val:"$60-65 млрд/год",exp:"$50 млрд",beat:false},
-        ],
-        verdict:"up",
-        verdictPct:"+12.3%",
-        explanation:"Мета превзошла всё. Главный триггер: пользователи продолжают расти, а рекламная выручка бьёт рекорды. Capex выше ожиданий — но рынок воспринял это как бычий сигнал: компания агрессивно инвестирует в AI. Контекст важен.",
-        explanationEn:"Meta beat everything. Key trigger: users keep growing, ad revenue hits records. Higher Capex seen as bullish — aggressive AI investment.",
-        explanationRo:"Meta a depășit totul. Utilizatorii continuă să crească, veniturile din publicitate bat recorduri.",
-      },
-      {
-        company:"Apple (AAPL)",ticker:"AAPL",sector:"Consumer Tech",
-        price:220,
-        items:[
-          {label:"Выручка iPhone",val:"$51.1 млрд",exp:"$54.0 млрд",beat:false},
-          {label:"Выручка Services",val:"$24.2 млрд",exp:"$24.0 млрд",beat:true},
-          {label:"EPS",val:"$1.64",exp:"$1.62",beat:true},
-          {label:"Guidance",val:"Рост в рамках консенсуса",exp:"Ускорение роста",beat:false},
-        ],
-        verdict:"down",
-        verdictPct:"-5.2%",
-        explanation:"iPhone — главный продукт. Провал iPhone-сегмента ($51 vs $54 млрд) перекрыл всё остальное. Services растут — но рынок ждал ускорения в ключевом hardware. Guidance не ободрил. Продажи пошли.",
-        explanationEn:"iPhone is the key product. Miss in iPhone segment ($51B vs $54B expected) overshadowed everything. Services growing — but market expected hardware acceleration.",
-        explanationRo:"iPhone este produsul cheie. Ratarea segmentului iPhone ($51B vs $54B așteptat) a eclipsat totul.",
-      },
-    ],
-    simChoiceUp:"📈 Акция вырастет",
-    simChoiceDown:"📉 Акция упадёт",
-    simCorrect:"✓ Верно!",
-    simWrong:"✗ Неверно",
-    simNext:"Следующий кейс →",
-    simFinish:"Все кейсы разобраны",
-    simScore:"Счёт",
-    simExplain:"Объяснение:",
-    simOf:"из",
-
-    // SECTION TA
-    taTag:"9.2 — ТЕХНИЧЕСКИЙ АНАЛИЗ",
-    taTitle:"Осцилляторы: RSI и MACD",
-    taSub:"Когда трендовые индикаторы говорят одно, а осцилляторы — другое: кому верить?",
-
-    rsiTitle:"RSI — Индекс Относительной Силы",
-    rsiBeg:"RSI измеряет «усталость» рынка. Представьте бегуна: если он бежит слишком долго без остановки — он замедлится. RSI показывает, сколько сил осталось у тренда. >70 = рынок разогрелся, возможен откат. <30 = рынок «выдохся», возможен отскок.",
-    rsiPro:"RSI = 100 − 100/(1 + RS), где RS = средний прирост за N дней / среднее падение за N дней. Стандартный период: 14. Важно: RSI может держаться в зоне перекупленности (>70) неделями при сильном тренде. Дивергенция надёжнее, чем абсолютные значения.",
-    rsiFormula:"RSI = 100 − [100 / (1 + RS)]",
-    rsiFormulaDetail:"RS = Avg Gain(14) / Avg Loss(14)",
-
-    macdTitle:"MACD — схождение/расхождение скользящих средних",
-    macdBeg:"MACD показывает разницу между двумя скользящими средними цены. Когда быстрая линия пересекает медленную снизу вверх — бычий сигнал. Сверху вниз — медвежий. Гистограмма показывает силу импульса.",
-    macdPro:"MACD = EMA(12) − EMA(26). Signal Line = EMA(9) от MACD. Гистограмма = MACD − Signal. Лучший сигнал: расхождение гистограммы с ценой (дивергенция). Слабость MACD: запаздывающий индикатор, генерирует ложные сигналы в боковике.",
-    macdFormula:"MACD = EMA(12) − EMA(26)",
-    macdFormulaDetail:"Signal = EMA(9) of MACD · Histogram = MACD − Signal",
-
-    divTitle:"Дивергенция — самый сильный сигнал",
-    divBeg:"Дивергенция — когда цена и индикатор движутся в противоположные стороны. Это как машина, у которой заканчивается бензин: она ещё едет, но скоро остановится.",
-    divPro:"Медвежья дивергенция: цена делает новый максимум, RSI — нет. Топливо кончилось, разворот вероятен. Бычья: цена на новом минимуме, RSI растёт. Продавцы выдыхаются. Скрытая дивергенция — для подтверждения тренда, не разворота.",
-    divTypes:[
-      {type:"Медвежья дивергенция",icon:"🔻",color:C.bear||"#ef4444",
-       desc:"Цена — новый максимум. RSI — более низкий максимум. Топливо кончается. Вероятен разворот вниз."},
-      {type:"Бычья дивергенция",icon:"🔺",color:C.bull||"#22c55e",
-       desc:"Цена — новый минимум. RSI — более высокий минимум. Продавцы выдыхаются. Вероятен разворот вверх."},
-    ],
-
-    // DIVERGENCE HUNT
-    huntTag:"ОХОТА НА ДИВЕРГЕНЦИЮ",
-    huntTitle:"Найди скрытый сигнал на графике",
-    huntSub:"На верхнем графике — цена. На нижнем — RSI. Кликните на два пика цены и два соответствующих пика RSI, чтобы найти медвежью дивергенцию.",
-    huntStep1:"Шаг 1: Нажмите на первый пик цены (левее)",
-    huntStep2:"Шаг 2: Нажмите на второй пик цены (правее, выше)",
-    huntStep3:"Шаг 3: Нажмите на первый пик RSI",
-    huntStep4:"Шаг 4: Нажмите на второй пик RSI (должен быть ниже)",
-    huntCorrect:"🎯 Дивергенция найдена! Цена шла вверх, RSI — вниз. Топливо кончилось. Через 3 свечи акция упала на 12%.",
-    huntWrong:"Не совсем. Попробуй выбрать оба ценовых пика (оба выше), и оба пика RSI (второй должен быть ниже первого).",
-    huntReset:"Начать заново",
-    huntReveal:"Показать решение",
-
-    // COMBINED SIGNAL
-    comboTag:"КОМБО-СИГНАЛ",
-    comboTitle:"RSI + MACD вместе: когда совпадают — сигнал усиливается",
-    comboBeg:"Ни один индикатор не работает идеально в одиночку. Профессионалы используют подтверждение: если RSI < 30 (перепродан) И MACD пересекает сигнальную линию снизу вверх — это двойной бычий сигнал. Значительно надёжнее.",
-    comboPro:"Профессиональный фильтр: (1) RSI < 35 + бычья дивергенция + MACD crossover = high-conviction entry. (2) Добавь объём: если объём при отскоке выше 20-дневного среднего — сигнал сильнее. (3) Временные фреймы: подтверди сигнал на старшем ТФ перед входом на младшем.",
-
-    // CHECKLIST
-    checkTag:"ПРОГРЕСС УРОВНЯ",
-    checkTitle:"Проверь себя",
-    checks:[
-      "Я понимаю, почему хороший отчёт может привести к падению акции",
-      "Я умею читать EPS, Revenue и Guidance из отчёта",
-      "Я понимаю принцип «Buy the rumor, sell the fact»",
-      "Я знаю, как рассчитывается RSI и что означают зоны 30/70",
-      "Я умею находить медвежью дивергенцию на графике",
-      "Я понимаю сигнал MACD crossover",
-    ],
-
-    // QUIZ
-    quizTag:"ТЕСТ УРОВНЯ",
-    quizStartBtn:"Пройти тест →",
-    qof:(i,n)=>`ВОПРОС ${i} из ${n}`,
-    qcor:(n)=>`Правильных: ${n}`,
-    passmsg:"Отличный результат! Уровень 9 пройден.",
-    failmsg:"Перечитайте раздел и попробуйте снова.",
-    medalTitle:"🏅 СТРАТЕГ",
-    medalDesc:"Уровень 9 пройден · +240 XP",
-    quiz:[
-      {q:"NVIDIA: EPS и выручка побиты. Guidance снижен на $2.5 млрд. Что произойдёт с акцией?",
-       o:["Вырастет на 10%","Упадёт, так как guidance важнее текущего отчёта","Останется на месте","Рост — хороший квартал перевешивает"],c:1},
-      {q:"RSI = 78. Что это означает?",
-       o:["Актив перепродан, возможен рост","Актив перекуплен, возможен откат","Нейтральная зона","Сильный бычий сигнал"],c:1},
-      {q:"Цена обновила максимум, но RSI сделал более низкий максимум. Это:",
-       o:["Бычья дивергенция","Медвежья дивергенция","MACD crossover","Уровень поддержки"],c:1},
-      {q:"MACD crossover — быстрая линия пересекает медленную СНИЗУ ВВЕРХ. Это сигнал:",
-       o:["Продажи","Покупки","Нейтральный","Стоп-лосс"],c:1},
-      {q:"Что такое Non-GAAP EPS?",
-       o:["Стандартный показатель прибыли","Прибыль с исключением неденежных расходов (SBC, амортизация)","Прибыль до налогов","Выручка на акцию"],c:1},
-      {q:"Почему принцип «buy the rumor, sell the fact» работает?",
-       o:["Потому что рынок неэффективен","Потому что ожидания уже заложены в цену до события","Потому что инсайдеры торгуют первыми","Потому что отчёты всегда лучше ожиданий"],c:1},
-    ],
-
-    // ANALYST POPUP
-    online:"онлайн",justNow:"только что",
-    tgMsg:"Привет 👋 Чем можем помочь? Оставьте заявку и мы пришлём материалы.",
-    waMsg:"Добрый день! Напишите что вас интересует <img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-bar-chart.png' alt='' width='20' height='20' />",
-    apTitle:"Предпочитаете мессенджер?",
-    apSub:"Напишите в Telegram или WhatsApp — сообщение уже готово.",
-    tgBtn:"ОТКРЫТЬ TELEGRAM", waBtn:"ОТКРЫТЬ WHATSAPP",
-    chMsg:(n)=>`Здравствуйте, есть вопрос по главе ${n}`,
-  },
-
-  en: {
-    chNum:"LEVEL 9", chName:"Earnings & Oscillators",
-    chTitle:"When the fundamental positive is already priced in",
-    prevCh:"← Level 8", nextCh:"Level 10: Crowd Psychology →",
-    askLink:"Have a question? Write to an analyst",
-    mythTag:"MARKET PARADOX",
-    mythTitle:"Company posts record earnings — stock falls 15%. Why?",
-    mythBody:"Because the market doesn't trade reality. It trades the gap between expectations and reality. If everyone expected +30% profit growth and got +28% — that's a miss. The stock already priced in a perfect quarter. When perfection doesn't happen, positions close. This is 'Buy the rumor, sell the fact' — one of the most important laws of markets.",
-    faTag:"9.1 — FUNDAMENTAL ANALYSIS", faTitle:"Reading an earnings report like an analyst",
-    faSub:"Every 3 months public companies publish a report. For investors, this is the primary source.",
-    metricsTitle:"Key Report Metrics",
-    metrics:[
-      {key:"EPS",name:"Earnings Per Share",ru:"Earnings Per Share",
-       formula:"Net Income / Share Count",
-       beg:"How many dollars of profit the company earned per share. If EPS = $5 and you own 100 shares — the company 'earned' you $500.",
-       pro:"Separate GAAP EPS (accounting standard) from Non-GAAP (adjusted). Companies manipulate Non-GAAP by excluding stock-based compensation and depreciation. Always check both.",
-       beat:"beat",miss:"miss"},
-      {key:"REV",name:"Revenue",ru:"Revenue",
-       formula:"Total sales for the period",
-       beg:"How much money the company received from customers. Not profit — just receipts. Amazon can have $500B revenue with $30B profit.",
-       pro:"Look at YoY growth and segmentation. AWS gives Amazon ~17% of revenue but 60%+ of operating profit. Size doesn't matter — structure does.",
-       beat:"beat",miss:"miss"},
-      {key:"GUID",name:"Guidance",ru:"Company Forecast",
-       formula:"Expected EPS and Revenue next quarter",
-       beg:"Guidance matters more than the report itself. If the company lowers its next-quarter outlook, the stock falls — even if the current report was great. The market looks forward.",
-       pro:"Guidance revision is a leading indicator. Meta-analysis: if >3 of 5 analysts lower estimates after the report — high probability of continued stock decline within 30 days.",
-       beat:"raise",miss:"lower"},
-      {key:"MARG",name:"Operating Margin",ru:"Operating Margin",
-       formula:"Operating Profit / Revenue × 100%",
-       beg:"What percentage of revenue remains after all operating expenses. A 30% margin = for every $100 of revenue, $30 is real business profit.",
-       pro:"Track margin trajectory: expanding or contracting? SaaS companies with >25% operating margin are considered highly efficient. Tesla improved margin from 5% to 17% in 3 years — that's what drove the stock.",
-       beat:"expand",miss:"compress"},
-    ],
-    simTag:"EARNINGS SIMULATOR", simTitle:"Earnings Call: Predict the Market Reaction",
-    simSub:"Study the report data and predict — how will the stock react?",
-    cases:[
-      {company:"NVIDIA (NVDA)",ticker:"NVDA",sector:"AI / Semiconductors",price:875,
-       items:[{label:"Revenue (actual)",val:"$22.1B",exp:"$21.9B",beat:true},{label:"EPS (actual)",val:"$5.16",exp:"$5.10",beat:true},{label:"Operating Margin",val:"54.1%",exp:"52.8%",beat:true},{label:"Guidance (next Q)",val:"$24.0B",exp:"$26.5B",beat:false}],
-       verdict:"down",verdictPct:"-8.5%",
-       explanation:"NVIDIA beat revenue and EPS — but guidance missed by $2.5B. The market sold immediately. Rule: guidance matters more than current results. Analysts priced in $26.5B, company gave $24.0B. That's a deceleration signal.",
-       explanationEn:"NVIDIA beat revenue and EPS — but guidance missed by $2.5B. Guidance matters more than current results.",
-       explanationRo:"NVIDIA a depășit veniturile și EPS — dar ghidajul a ratat cu $2,5B."},
-      {company:"META Platforms",ticker:"META",sector:"Social Media / AI",price:550,
-       items:[{label:"Revenue (actual)",val:"$40.6B",exp:"$38.3B",beat:true},{label:"EPS (actual)",val:"$8.02",exp:"$6.70",beat:true},{label:"DAU",val:"3.29B",exp:"3.25B",beat:true},{label:"Capex (AI)",val:"$60-65B/yr",exp:"$50B",beat:false}],
-       verdict:"up",verdictPct:"+12.3%",
-       explanation:"Meta beat everything. Key trigger: users keep growing, ad revenue hits records. Higher Capex seen as bullish — aggressive AI investment. Context matters.",
-       explanationEn:"Meta beat everything. Users growing, ad revenue hits records. Higher Capex = bullish AI signal.",
-       explanationRo:"Meta a depășit totul. Utilizatorii cresc, veniturile din publicitate bat recorduri."},
-      {company:"Apple (AAPL)",ticker:"AAPL",sector:"Consumer Tech",price:220,
-       items:[{label:"iPhone Revenue",val:"$51.1B",exp:"$54.0B",beat:false},{label:"Services Revenue",val:"$24.2B",exp:"$24.0B",beat:true},{label:"EPS",val:"$1.64",exp:"$1.62",beat:true},{label:"Guidance",val:"In-line with consensus",exp:"Acceleration",beat:false}],
-       verdict:"down",verdictPct:"-5.2%",
-       explanation:"iPhone is the key product. Missing iPhone revenue ($51B vs $54B expected) overshadowed everything. Services growing — but market expected hardware acceleration. Guidance didn't excite.",
-       explanationEn:"iPhone miss ($51B vs $54B) overshadowed everything despite EPS beat.",
-       explanationRo:"Ratarea iPhone ($51B vs $54B) a eclipsat totul, în ciuda EPS beat."},
-    ],
-    simChoiceUp:"📈 Stock will rise", simChoiceDown:"📉 Stock will fall",
-    simCorrect:"✓ Correct!", simWrong:"✗ Wrong",
-    simNext:"Next case →", simFinish:"All cases reviewed", simScore:"Score", simExplain:"Explanation:", simOf:"of",
-    taTag:"9.2 — TECHNICAL ANALYSIS", taTitle:"Oscillators: RSI and MACD",
-    taSub:"When trend indicators say one thing and oscillators say another: which to trust?",
-    rsiTitle:"RSI — Relative Strength Index",
-    rsiBeg:"RSI measures market 'fatigue'. Imagine a runner: if they sprint too long without stopping — they'll slow down. RSI shows how much fuel the trend has left. >70 = market is overheated, pullback possible. <30 = market is 'exhausted', bounce possible.",
-    rsiPro:"RSI = 100 − 100/(1 + RS), where RS = avg gain over N days / avg loss over N days. Standard period: 14. Important: RSI can stay in overbought territory (>70) for weeks in a strong trend. Divergence is more reliable than absolute values.",
-    rsiFormula:"RSI = 100 − [100 / (1 + RS)]",rsiFormulaDetail:"RS = Avg Gain(14) / Avg Loss(14)",
-    macdTitle:"MACD — Moving Average Convergence Divergence",
-    macdBeg:"MACD shows the difference between two moving averages of price. When the fast line crosses the slow line from below — bullish signal. From above — bearish. The histogram shows momentum strength.",
-    macdPro:"MACD = EMA(12) − EMA(26). Signal Line = EMA(9) of MACD. Histogram = MACD − Signal. Best signal: histogram divergence from price. Weakness: lagging indicator, generates false signals in ranging markets.",
-    macdFormula:"MACD = EMA(12) − EMA(26)",macdFormulaDetail:"Signal = EMA(9) of MACD · Histogram = MACD − Signal",
-    divTitle:"Divergence — The Strongest Signal",
-    divBeg:"Divergence — when price and indicator move in opposite directions. Like a car running out of gas: it's still moving, but will stop soon.",
-    divPro:"Bearish divergence: price makes new high, RSI does not. Fuel is running out, reversal likely. Bullish: price at new low, RSI rising. Sellers are exhausted. Hidden divergence — for trend confirmation, not reversal.",
-    divTypes:[{type:"Bearish Divergence",icon:"🔻",color:"#ef4444",desc:"Price — new high. RSI — lower high. Fuel running out. Downward reversal likely."},{type:"Bullish Divergence",icon:"🔺",color:"#22c55e",desc:"Price — new low. RSI — higher low. Sellers exhausted. Upward reversal likely."}],
-    huntTag:"DIVERGENCE HUNT", huntTitle:"Find the hidden signal on the chart",
-    huntSub:"Top chart: Price. Bottom: RSI. Click two price peaks and two corresponding RSI peaks to find the bearish divergence.",
-    huntStep1:"Step 1: Click the first price peak (left)",
-    huntStep2:"Step 2: Click the second price peak (right, higher)",
-    huntStep3:"Step 3: Click the first RSI peak",
-    huntStep4:"Step 4: Click the second RSI peak (should be lower)",
-    huntCorrect:"🎯 Divergence found! Price went up, RSI went down. Fuel ran out. 3 candles later the stock fell 12%.",
-    huntWrong:"Not quite. Try selecting both price peaks (both higher), and both RSI peaks (second lower than first).",
-    huntReset:"Reset",huntReveal:"Show solution",
-    comboTag:"COMBO SIGNAL", comboTitle:"RSI + MACD together: when they agree — signal strengthens",
-    comboBeg:"No single indicator works perfectly alone. Professionals use confirmation: if RSI < 30 (oversold) AND MACD crosses signal line from below — that's a double bullish signal. Significantly more reliable.",
-    comboPro:"Professional filter: (1) RSI < 35 + bullish divergence + MACD crossover = high-conviction entry. (2) Add volume: if volume on bounce is above 20-day average — signal stronger. (3) Timeframes: confirm signal on higher TF before entering on lower TF.",
-    checkTag:"LEVEL PROGRESS",checkTitle:"Check Yourself",
-    checks:["I understand why a good earnings report can cause a stock to fall","I can read EPS, Revenue, and Guidance from a report","I understand the 'Buy the rumor, sell the fact' principle","I know how RSI is calculated and what the 30/70 zones mean","I can find bearish divergence on a chart","I understand the MACD crossover signal"],
-    quizTag:"LEVEL TEST",quizStartBtn:"Take the test →",
-    qof:(i,n)=>`QUESTION ${i} of ${n}`,qcor:(n)=>`Correct: ${n}`,
-    passmsg:"Excellent! Level 9 complete.",failmsg:"Re-read the section and try again.",
-    medalTitle:"🏅 STRATEGIST",medalDesc:"Level 9 Complete · +240 XP",
-    quiz:[
-      {q:"NVIDIA: EPS and revenue beat. Guidance cut by $2.5B. What happens to the stock?",o:["Rises 10%","Falls, because guidance matters more than current results","Stays flat","Rises — good quarter outweighs"],c:1},
-      {q:"RSI = 78. What does this mean?",o:["Asset oversold, bounce likely","Asset overbought, pullback possible","Neutral zone","Strong bullish signal"],c:1},
-      {q:"Price makes a new high, but RSI makes a lower high. This is:",o:["Bullish divergence","Bearish divergence","MACD crossover","Support level"],c:1},
-      {q:"MACD crossover — fast line crosses slow line FROM BELOW. This is a signal to:",o:["Sell","Buy","Neutral","Set stop-loss"],c:1},
-      {q:"What is Non-GAAP EPS?",o:["Standard profit metric","Profit excluding non-cash expenses (SBC, depreciation)","Pre-tax profit","Revenue per share"],c:1},
-      {q:"Why does 'buy the rumor, sell the fact' work?",o:["Because markets are inefficient","Because expectations are already priced in before the event","Because insiders trade first","Because reports always beat estimates"],c:1},
-    ],
-    online:"online",justNow:"just now",
-    tgMsg:"Hi 👋 How can we help? Leave a request and we'll send materials.",
-    waMsg:"Hello! Tell us what you're interested in <img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-bar-chart.png' alt='' width='20' height='20' />",
-    apTitle:"Prefer a messenger?",apSub:"Write on Telegram or WhatsApp — message already ready.",
-    tgBtn:"OPEN TELEGRAM",waBtn:"OPEN WHATSAPP",
-    chMsg:(n)=>`Hello, question on chapter ${n}`,
-  },
-
-  ro: {
-    chNum:"NIVEL 9", chName:"Rapoarte și Oscilatori",
-    chTitle:"Când pozitivul fundamental este deja inclus în preț",
-    prevCh:"← Nivel 8", nextCh:"Nivel 10: Psihologia mulțimii →",
-    askLink:"Aveți o întrebare? Scrieți unui analist",
-    mythTag:"PARADOXUL PIEȚEI",
-    mythTitle:"Compania a raportat record — acțiunea a scăzut 15%. De ce?",
-    mythBody:"Pentru că piața nu tranzacționează realitatea. Tranzacționează decalajul dintre așteptări și realitate. Dacă toți așteptau +30% creștere a profitului și a venit +28% — este o ratare. Acțiunea deja includea în ea așteptarea unui trimestru perfect. Când perfecțiunea nu se întâmplă — pozițiile se închid. Acesta este 'Buy the rumor, sell the fact'.",
-    faTag:"9.1 — ANALIZĂ FUNDAMENTALĂ", faTitle:"Citim un raport corporativ ca un analist",
-    faSub:"La fiecare 3 luni companiile publice publică un raport. Pentru investitor, aceasta este sursa principală.",
-    metricsTitle:"Metrici Cheie ale Raportului",
-    metrics:[
-      {key:"EPS",name:"Earnings Per Share",ru:"Profit pe acțiune",formula:"Profit net / Nr. acțiuni",
-       beg:"Câți dolari de profit a câștigat compania per acțiune a ta. Dacă EPS = $5 și ai 100 acțiuni — compania ți-a 'adus' $500.",
-       pro:"Separați GAAP EPS (standard contabil) de Non-GAAP (ajustat). Companiile manipulează Non-GAAP excluzând compensațiile bazate pe acțiuni și amortizarea.",beat:"beat",miss:"miss"},
-      {key:"REV",name:"Revenue",ru:"Venituri",formula:"Total vânzări pentru perioadă",
-       beg:"Câți bani a primit compania de la clienți. Nu profit — ci încasări. Amazon poate avea venituri de $500 miliarde cu profit de $30 miliarde.",
-       pro:"Urmăriți creșterea YoY și segmentarea. AWS oferă Amazon ~17% din venituri dar 60%+ din profitul operațional. Nu dimensiunea contează — ci structura.",beat:"beat",miss:"miss"},
-      {key:"GUID",name:"Guidance",ru:"Prognoză companie",formula:"EPS și Venituri așteptate trimestrul următor",
-       beg:"Ghidajul contează mai mult decât raportul în sine. Dacă compania scade prognoza pentru trimestrul următor, acțiunea cade — chiar dacă trimestrul curent a fost excelent.",
-       pro:"Revizuirea ghidajului este un indicator anticipativ. Dacă >3 din 5 analiști scad estimările după raport — probabilitate ridicată de scădere continuă a acțiunii în 30 de zile.",beat:"raise",miss:"lower"},
-      {key:"MARG",name:"Operating Margin",ru:"Marjă operațională",formula:"Profit operațional / Venituri × 100%",
-       beg:"Ce procent din venituri rămâne după toate cheltuielile operaționale. O marjă de 30% = din fiecare $100 venituri, $30 este profit real.",
-       pro:"Urmăriți traiectoria marjei: se extinde sau se contractă? Companiile SaaS cu >25% marjă operațională sunt considerate înalt eficiente.",beat:"expand",miss:"compress"},
-    ],
-    simTag:"SIMULATOR RAPORT", simTitle:"Earnings Call: Ghicește reacția pieței",
-    simSub:"Studiați datele raportului și preziceți — cum va reacționa acțiunea?",
-    cases:[
-      {company:"NVIDIA (NVDA)",ticker:"NVDA",sector:"AI / Semiconductors",price:875,
-       items:[{label:"Venituri (real)",val:"$22,1 mld",exp:"$21,9 mld",beat:true},{label:"EPS (real)",val:"$5,16",exp:"$5,10",beat:true},{label:"Marjă operațională",val:"54,1%",exp:"52,8%",beat:true},{label:"Ghidaj (trim. urm.)",val:"$24,0 mld",exp:"$26,5 mld",beat:false}],
-       verdict:"down",verdictPct:"-8,5%",
-       explanation:"NVIDIA a depășit veniturile și EPS — dar ghidajul a ratat cu $2,5 miliarde. Piața a vândut imediat. Regula: ghidajul contează mai mult decât rezultatele curente. Analiștii au estimat $26,5 mld, compania a dat $24,0 mld. Semnal de decelerare.",
-       explanationEn:"NVIDIA beat revenue and EPS — but guidance missed by $2.5B.",
-       explanationRo:"NVIDIA a depășit veniturile și EPS — dar ghidajul a ratat cu $2,5 mld. Piața a vândut imediat."},
-      {company:"META Platforms",ticker:"META",sector:"Social Media / AI",price:550,
-       items:[{label:"Venituri (real)",val:"$40,6 mld",exp:"$38,3 mld",beat:true},{label:"EPS (real)",val:"$8,02",exp:"$6,70",beat:true},{label:"DAU",val:"3,29 mld",exp:"3,25 mld",beat:true},{label:"Capex (AI)",val:"$60-65 mld/an",exp:"$50 mld",beat:false}],
-       verdict:"up",verdictPct:"+12,3%",
-       explanation:"Meta a depășit totul. Utilizatorii continuă să crească, veniturile din publicitate bat recorduri. Capex mai mare văzut ca bullish — investiție agresivă în AI. Contextul contează.",
-       explanationEn:"Meta beat everything.",
-       explanationRo:"Meta a depășit totul. Utilizatorii cresc, veniturile din publicitate bat recorduri."},
-      {company:"Apple (AAPL)",ticker:"AAPL",sector:"Consumer Tech",price:220,
-       items:[{label:"Venituri iPhone",val:"$51,1 mld",exp:"$54,0 mld",beat:false},{label:"Venituri Services",val:"$24,2 mld",exp:"$24,0 mld",beat:true},{label:"EPS",val:"$1,64",exp:"$1,62",beat:true},{label:"Ghidaj",val:"În linie cu consensul",exp:"Accelerare",beat:false}],
-       verdict:"down",verdictPct:"-5,2%",
-       explanation:"iPhone este produsul cheie. Ratarea segmentului iPhone ($51 vs $54 mld așteptat) a eclipsat totul. Services în creștere — dar piața aștepta accelerarea hardware-ului.",
-       explanationEn:"iPhone miss overshadowed everything.",
-       explanationRo:"Ratarea iPhone ($51 vs $54 mld) a eclipsat totul."},
-    ],
-    simChoiceUp:"📈 Acțiunea va crește",simChoiceDown:"📉 Acțiunea va scădea",
-    simCorrect:"✓ Corect!",simWrong:"✗ Greșit",
-    simNext:"Următorul caz →",simFinish:"Toate cazurile analizate",simScore:"Scor",simExplain:"Explicație:",simOf:"din",
-    taTag:"9.2 — ANALIZĂ TEHNICĂ",taTitle:"Oscilatori: RSI și MACD",
-    taSub:"Când indicatorii de trend spun un lucru, iar oscilatorii altul: cui să crezi?",
-    rsiTitle:"RSI — Indicele Puterii Relative",
-    rsiBeg:"RSI măsoară 'oboseala' pieței. Imaginați-vă un alergător: dacă aleargă prea mult fără oprire — va încetini. RSI arată câtă energie mai are trendul. >70 = piața s-a supraîncălzit, corecție posibilă. <30 = piața a 'obosit', revenire posibilă.",
-    rsiPro:"RSI = 100 − 100/(1 + RS), unde RS = câștig mediu pe N zile / pierdere medie pe N zile. Perioadă standard: 14. Important: RSI poate rămâne în zona supracumpărată (>70) săptămâni întregi în trend puternic. Divergența este mai fiabilă decât valorile absolute.",
-    rsiFormula:"RSI = 100 − [100 / (1 + RS)]",rsiFormulaDetail:"RS = Avg Gain(14) / Avg Loss(14)",
-    macdTitle:"MACD — Convergența/Divergența Mediilor Mobile",
-    macdBeg:"MACD arată diferența dintre două medii mobile ale prețului. Când linia rapidă traversează linia lentă de jos în sus — semnal bullish. De sus în jos — bearish. Histograma arată puterea impulsului.",
-    macdPro:"MACD = EMA(12) − EMA(26). Linia Semnal = EMA(9) din MACD. Histogramă = MACD − Semnal. Cel mai bun semnal: divergența histogramei față de preț.",
-    macdFormula:"MACD = EMA(12) − EMA(26)",macdFormulaDetail:"Signal = EMA(9) of MACD · Histogram = MACD − Signal",
-    divTitle:"Divergența — Cel Mai Puternic Semnal",
-    divBeg:"Divergența — când prețul și indicatorul se mișcă în direcții opuse. Ca o mașină care rămâne fără benzin: încă se mișcă, dar se va opri curând.",
-    divPro:"Divergență bearish: prețul face un nou maxim, RSI nu. Combustibilul s-a terminat, reversarea este probabilă. Bullish: prețul la minim nou, RSI crește. Vânzătorii sunt epuizați.",
-    divTypes:[{type:"Divergență Bearish",icon:"🔻",color:"#ef4444",desc:"Preț — maxim nou. RSI — maxim mai mic. Combustibil terminat. Reversare descendentă probabilă."},{type:"Divergență Bullish",icon:"🔺",color:"#22c55e",desc:"Preț — minim nou. RSI — minim mai mare. Vânzători epuizați. Reversare ascendentă probabilă."}],
-    huntTag:"VÂNĂTOAREA DE DIVERGENȚĂ",huntTitle:"Găsește semnalul ascuns pe grafic",
-    huntSub:"Grafic sus: Preț. Jos: RSI. Faceți clic pe două vârfuri de preț și două vârfuri RSI corespunzătoare pentru a găsi divergența bearish.",
-    huntStep1:"Pasul 1: Faceți clic pe primul vârf de preț (stânga)",
-    huntStep2:"Pasul 2: Faceți clic pe al doilea vârf de preț (dreapta, mai sus)",
-    huntStep3:"Pasul 3: Faceți clic pe primul vârf RSI",
-    huntStep4:"Pasul 4: Faceți clic pe al doilea vârf RSI (trebuie să fie mai jos)",
-    huntCorrect:"🎯 Divergență găsită! Prețul a urcat, RSI a coborât. Combustibil epuizat. Peste 3 lumânări, acțiunea a scăzut 12%.",
-    huntWrong:"Nu chiar. Încercați să selectați ambele vârfuri de preț (ambele mai sus) și ambele vârfuri RSI (al doilea mai jos decât primul).",
-    huntReset:"Resetare",huntReveal:"Arată soluția",
-    comboTag:"SEMNAL COMBINAT",comboTitle:"RSI + MACD împreună: când coincid — semnalul se amplifică",
-    comboBeg:"Niciun indicator nu funcționează perfect singur. Profesioniștii folosesc confirmarea: dacă RSI < 30 (supravândut) ȘI MACD traversează linia semnal de jos în sus — acesta este un semnal bullish dublu. Semnificativ mai fiabil.",
-    comboPro:"Filtru profesional: (1) RSI < 35 + divergență bullish + MACD crossover = intrare high-conviction. (2) Adaugă volum: dacă volumul la revenire este peste media 20 de zile — semnal mai puternic. (3) Intervale de timp: confirmați semnalul pe TF superior înainte de intrare pe TF inferior.",
-    checkTag:"PROGRES NIVEL",checkTitle:"Verificați-vă",
-    checks:["Înțeleg de ce un raport bun poate duce la scăderea acțiunii","Pot citi EPS, Revenue și Guidance dintr-un raport","Înțeleg principiul 'Buy the rumor, sell the fact'","Știu cum se calculează RSI și ce înseamnă zonele 30/70","Pot găsi divergența bearish pe un grafic","Înțeleg semnalul MACD crossover"],
-    quizTag:"TEST NIVEL",quizStartBtn:"Susține testul →",
-    qof:(i,n)=>`ÎNTREBARE ${i} din ${n}`,qcor:(n)=>`Corecte: ${n}`,
-    passmsg:"Excelent! Nivelul 9 finalizat.",failmsg:"Recitiți secțiunea și încercați din nou.",
-    medalTitle:"🏅 STRATEG",medalDesc:"Nivelul 9 Finalizat · +240 XP",
-    quiz:[
-      {q:"NVIDIA: EPS și venituri depășite. Ghidaj tăiat cu $2,5 mld. Ce se întâmplă cu acțiunea?",o:["Crește 10%","Scade, deoarece ghidajul contează mai mult decât rezultatele curente","Rămâne plată","Crește — trimestrul bun depășește"],c:1},
-      {q:"RSI = 78. Ce înseamnă?",o:["Activ supravândut, revenire probabilă","Activ supracumpărat, corecție posibilă","Zonă neutră","Semnal bullish puternic"],c:1},
-      {q:"Prețul face un nou maxim, dar RSI face un maxim mai mic. Aceasta este:",o:["Divergență bullish","Divergență bearish","MACD crossover","Nivel de suport"],c:1},
-      {q:"MACD crossover — linia rapidă traversează linia lentă DE JOS ÎN SUS. Acesta este semnal de:",o:["Vânzare","Cumpărare","Neutru","Stop-loss"],c:1},
-      {q:"Ce este Non-GAAP EPS?",o:["Metrică standard de profit","Profit excluzând cheltuieli non-monetare (SBC, amortizare)","Profit înainte de impozite","Venituri per acțiune"],c:1},
-      {q:"De ce funcționează 'buy the rumor, sell the fact'?",o:["Pentru că piețele sunt ineficiente","Pentru că așteptările sunt deja incluse în preț înainte de eveniment","Pentru că insiderii tranzacționează primii","Pentru că rapoartele depășesc întotdeauna estimările"],c:1},
-    ],
-    online:"online",justNow:"acum",
-    tgMsg:"Salut 👋 Cu ce vă putem ajuta? Lăsați o cerere.",
-    waMsg:"Bună ziua! Scrieți ce vă interesează <img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-bar-chart.png' alt='' width='20' height='20' />",
-    apTitle:"Preferați un messenger?",apSub:"Scrieți pe Telegram sau WhatsApp — mesajul este gata.",
-    tgBtn:"DESCHIDE TELEGRAM",waBtn:"DESCHIDE WHATSAPP",
-    chMsg:(n)=>`Bună ziua, întrebare capitol ${n}`,
-  },
-};
-
-// ─────────────────────────────────────────────
-// STRINGS — hardcoded strings outside TR (chart labels, mode toggle, etc.)
-// ─────────────────────────────────────────────
 const STRINGS = {
   ru: {
-    metricsHeaders:["МЕТРИКА","ФАКТ","ОЖИДАЛОСЬ",""],
-    rsiFigCaption:"RSI(14) · как считается и зоны 30/70",
-    rsiFigLink:"📈 Открыть RSI в полном Графике",
-    macdFigCaption:"MACD(12,26,9) · линия, сигнал, гистограмма",
-    macdFigLink:"📈 Открыть MACD в полном Графике",
-    rsiChartLabel:"GOLD · МЕДВЕЖЬЯ ДИВЕРГЕНЦИЯ RSI · Авг–Ноя 2024",
-    macdChartLabel:"S&P 500 · MACD(12,26,9) · Янв–Авг 2024",
-    realData:"РЕАЛЬНЫЕ ДАННЫЕ",
-    modeBeg:"метафоры и примеры",
-    modePro:"профессиональная глубина",
-  },
-  en: {
-    metricsHeaders:["METRIC","ACTUAL","EXPECTED",""],
-    rsiFigCaption:"RSI(14) · how it's calculated and the 30/70 zones",
-    rsiFigLink:"📈 Open RSI in the Full Chart",
-    macdFigCaption:"MACD(12,26,9) · line, signal, histogram",
-    macdFigLink:"📈 Open MACD in the Full Chart",
-    rsiChartLabel:"GOLD · BEARISH RSI DIVERGENCE · Aug–Nov 2024",
-    macdChartLabel:"S&P 500 · MACD(12,26,9) · Jan–Aug 2024",
-    realData:"REAL DATA",
-    modeBeg:"metaphors and examples",
-    modePro:"professional depth",
+    levelChip: "УРОВЕНЬ 9", chapterNameShort: "Отчётности и Осцилляторы", faTag: "ФА 50%", taTag: "ТА 50%",
+    stepExplain: "ОБЪЯСНИ", stepShow: "ПОКАЖИ", stepDo: "ДАЙ СДЕЛАТЬ",
+    heroEyebrow: "SBF COMPANY — ГЛАВА 9",
+    heroTitleLine1: "Отчётности", heroTitleLine2: "и Осцилляторы",
+    heroSubtitle: "Задним числом всё очевидно. Это не потому, что ты умный, а потому что память переписывает ожидание под уже известный результат. Мы это продемонстрируем на тебе.",
+    fundamentalChip: "Фундаментал 50%", technicalChip: "Техника 50%", interactiveChip: "2 Интерактива",
+    anatomySub: "Выручка, EPS, маржа, сегменты, guidance.",
+    whyFallsSub: "Три механизма, без «умных денег» и без «правил».",
+    hindsightSub: "Ключевой экран главы. Упражнение на самом себе.",
+    oscillatorSub: "RSI и MACD — без обещания точки входа.",
+    coreMeasureSub: "Что происходит после RSI>70 и после дивергенции — с базовой линией, а не с 50%.",
+    threeCasesSub: "Три истории, три разных механизма.",
+    quizKicker: "ПРОВЕРЬ СЕБЯ", quizTitle: "Что ты узнал в этой главе", quizNext: "Дальше →",
+    quizStuckAll: "Всё закрепилось.", quizStuckSome: "Почти всё закрепилось.",
+    quizBackToSection: "← Вернуться к разделу",
+    askQuestionLabel: "Остался вопрос? Напиши аналитику",
+    nextChapterBtn: "Уровень 10: Психология и Паттерны →",
+    loadingLabel: "Загружаю наши измерения…",
+    loadErrorLabel: "Не удалось загрузить данные главы — часть блоков не отрисована. Это блокирующая ошибка, а не предупреждение.",
   },
   ro: {
-    metricsHeaders:["METRICĂ","REAL","AȘTEPTAT",""],
-    rsiFigCaption:"RSI(14) · cum se calculează și zonele 30/70",
-    rsiFigLink:"📈 Deschide RSI în Graficul complet",
-    macdFigCaption:"MACD(12,26,9) · linie, semnal, histogramă",
-    macdFigLink:"📈 Deschide MACD în Graficul complet",
-    rsiChartLabel:"GOLD · DIVERGENȚĂ BEARISH RSI · Aug–Noi 2024",
-    macdChartLabel:"S&P 500 · MACD(12,26,9) · Ian–Aug 2024",
-    realData:"DATE REALE",
-    modeBeg:"metafore și exemple",
-    modePro:"profunzime profesională",
+    levelChip: "NIVEL 9", chapterNameShort: "Raportări și Oscilatoare", faTag: "AF 50%", taTag: "AT 50%",
+    stepExplain: "EXPLICĂ", stepShow: "ARATĂ", stepDo: "LASĂ SĂ ÎNCERCE",
+    heroEyebrow: "SBF COMPANY — CAPITOLUL 9",
+    heroTitleLine1: "Raportări", heroTitleLine2: "și Oscilatoare",
+    heroSubtitle: "Retroactiv, totul e evident. Nu pentru că ești deștept, ci pentru că memoria rescrie așteptarea după rezultatul deja cunoscut. O demonstrăm chiar pe tine.",
+    fundamentalChip: "Fundamental 50%", technicalChip: "Tehnic 50%", interactiveChip: "2 Module Interactive",
+    anatomySub: "Venituri, EPS, marjă, segmente, guidance.",
+    whyFallsSub: "Trei mecanisme, fără «bani deștepți» și fără «reguli».",
+    hindsightSub: "Ecranul cheie al capitolului. Un exercițiu pe tine însuți.",
+    oscillatorSub: "RSI și MACD — fără o promisiune de punct de intrare.",
+    coreMeasureSub: "Ce se întâmplă după RSI>70 și după divergență — cu o linie de bază, nu cu 50%.",
+    threeCasesSub: "Trei povești, trei mecanisme diferite.",
+    quizKicker: "TESTEAZĂ-TE", quizTitle: "Ce ai învățat în acest capitol", quizNext: "Continuă →",
+    quizStuckAll: "Totul s-a fixat.", quizStuckSome: "Aproape totul s-a fixat.",
+    quizBackToSection: "← Înapoi la secțiune",
+    askQuestionLabel: "Mai aveți o întrebare? Scrieți analistului",
+    nextChapterBtn: "Nivelul 10: Psihologie și Paternuri →",
+    loadingLabel: "Se încarcă măsurătorile noastre…",
+    loadErrorLabel: "Datele capitolului nu s-au încărcat — unele blocuri nu sunt afișate. Aceasta e o eroare blocantă, nu un avertisment.",
+  },
+  en: {
+    levelChip: "LEVEL 9", chapterNameShort: "Earnings and Oscillators", faTag: "FA 50%", taTag: "TA 50%",
+    stepExplain: "EXPLAIN", stepShow: "SHOW", stepDo: "LET YOU TRY",
+    heroEyebrow: "SBF COMPANY — CHAPTER 9",
+    heroTitleLine1: "Earnings", heroTitleLine2: "and Oscillators",
+    heroSubtitle: "In hindsight, everything is obvious. Not because you're smart — because memory rewrites your expectation to match the outcome it already knows. We're about to demonstrate that on you.",
+    fundamentalChip: "Fundamental 50%", technicalChip: "Technical 50%", interactiveChip: "2 Interactives",
+    anatomySub: "Revenue, EPS, margin, segments, guidance.",
+    whyFallsSub: "Three mechanisms, no «smart money», no «rules».",
+    hindsightSub: "The chapter's key screen. An exercise on yourself.",
+    oscillatorSub: "RSI and MACD — without a promised entry point.",
+    coreMeasureSub: "What happens after RSI>70 and after a divergence — against a baseline, not against 50%.",
+    threeCasesSub: "Three stories, three different mechanisms.",
+    quizKicker: "TEST YOURSELF", quizTitle: "What you learned in this chapter", quizNext: "Next →",
+    quizStuckAll: "Everything stuck.", quizStuckSome: "Almost everything stuck.",
+    quizBackToSection: "← Back to the section",
+    askQuestionLabel: "Have a question? Write to an analyst",
+    nextChapterBtn: "Level 10: Psychology and Patterns →",
+    loadingLabel: "Loading our measurements…",
+    loadErrorLabel: "Chapter data failed to load — some blocks aren't rendered. This is a blocking error, not a warning.",
   },
 };
 
-// ─────────────────────────────────────────────
-// MICRO COMPONENTS
-// ─────────────────────────────────────────────
-const {useState, useEffect, useRef, useCallback} = React;
-const Mono = ({children,size=13,color=C.inkSoft,spacing=3,style={}}) =>
-  <span style={{fontFamily:"'Courier New',monospace",fontSize:size,letterSpacing:spacing,color,...style}}>{children}</span>;
-const Chip = ({children,color=C.gold}) =>
-  <span style={{fontFamily:"'Courier New',monospace",fontSize:11,letterSpacing:3,color,border:`1px solid ${color}`,padding:"4px 11px",display:"inline-block",textTransform:"uppercase"}}>{children}</span>;
-const Rule = ({w="50%",my=32}) =>
-  <div style={{height:1,background:`linear-gradient(90deg,transparent,${C.gold},transparent)`,width:w,margin:`${my}px auto`,opacity:0.4}}></div>;
+const {C, Mono, Chip, Rule, AskAnalystBtn, getChUrl, QuizBlock, ComplianceFootnote} = window.AcademyShared;
 
-const getChUrl = (ch) => {
-  const p = new URLSearchParams(window.location.search).get('path') || 'explorer';
-  let base = INITIAL_LANG === 'ru' ? '/edu/b' : `/edu/${INITIAL_LANG}/b`;
-  return ch === 'start' ? `${base}?path=${p}` : `${base}/${ch}?path=${p}`;
-};
+const SectionTitle = ({children,sub,align="left",id}) => (
+  <div id={id} style={{textAlign:align,marginBottom:36,scrollMarginTop:130}}>
+    <h2 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(24px,3.2vw,36px)",fontWeight:400,color:C.black,lineHeight:1.15,marginBottom:sub?10:0}}>{children}</h2>
+    {sub && <p style={{fontSize:15,color:C.inkSoft,lineHeight:1.65,maxWidth:680,margin:align==="center"?"0 auto":0}}>{sub}</p>}
+  </div>
+);
+const StepTag = ({n,label}) => (
+  <Mono size={9.5} color={C.inkFaint} spacing={2} style={{display:"block",marginBottom:8,textTransform:"uppercase"}}>{n} · {label}</Mono>
+);
 
-// ─────────────────────────────────────────────
-// ANALYST POPUP
-// ─────────────────────────────────────────────
-function AskAnalystPopup({chapterNum, lang, onClose}) {
-  const t = TR[lang] || TR.ru;
-  const prefill = t.chMsg(chapterNum);
-  const tgLink = `https://t.me/SBF_Support?text=${encodeURIComponent(prefill)}`;
-  const waLink = `https://api.whatsapp.com/send/?phone=37369005200&text=${encodeURIComponent(prefill)}&type=phone_number&app_absent=0`;
+function fillTemplate(str, vars) {
+  if (!str) return str;
+  return str.replace(/\{\{(\w+)\}\}/g, (m, key) => {
+    const v = vars ? vars[key] : undefined;
+    if (v === undefined || v === null || (typeof v === "number" && isNaN(v))) {
+      console.error("[ch9] отсутствует значение для {{" + key + "}}");
+      return "—";
+    }
+    return String(v);
+  });
+}
+
+function shuffled(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ── Загрузка данных главы: oscillator_reality.json + earnings_cases.json.
+function useCh9Data() {
+  const { useState, useEffect } = React;
+  const [state, setState] = useState({ loading: true, error: null, osc: null, cases: null });
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all([
+      fetch("/data/edu_stats/oscillator_reality.json").then(r => { if (!r.ok) throw new Error("oscillator_reality.json HTTP " + r.status); return r.json(); }),
+      fetch("/data/edu_stats/earnings_cases.json").then(r => { if (!r.ok) throw new Error("earnings_cases.json HTTP " + r.status); return r.json(); }),
+    ]).then(([osc, cases]) => {
+      if (!cancelled) setState({ loading: false, error: null, osc, cases: cases.cases });
+    }).catch(err => {
+      console.error("[ch9] load failed:", err);
+      if (!cancelled) setState({ loading: false, error: err, osc: null, cases: null });
+    });
+    return () => { cancelled = true; };
+  }, []);
+  return state;
+}
+
+function buildVars(osc, lang) {
+  if (!osc) return null;
+  const T9 = window.Ch9Content[lang] || window.Ch9Content.ru;
+  const sum = osc.summary || {};
+  const rsi = sum.rsi_high_k10_pooled || {};
+  const div = sum.divergence_k10_pooled || {};
+  const verdictText = (key) => key === "no_edge" ? T9.coreMeasure.verdictNoEdge : key === "weak_edge" ? T9.coreMeasure.verdictWeakEdge : T9.coreMeasure.verdictEdge;
+  return {
+    rsi_share: rsi.share_reversal, rsi_base: rsi.base_share, rsi_n: rsi.n, rsi_edge: rsi.edge_pp,
+    rsi_verdict: verdictText(rsi.verdict_key),
+    div_share: div.share_reversal, div_base: div.base_share, div_n: div.n, div_edge: div.edge_pp,
+    div_verdict: verdictText(div.verdict_key),
+    rsi_duration: sum.rsi_high_duration_median_bars,
+  };
+}
+
+// ─── Cold open ──────────────────────────────────────────────────────────────
+function ColdOpen9() {
+  const T9 = window.Ch9Content[INITIAL_LANG] || window.Ch9Content.ru;
+  const co = T9.coldOpen;
   return (
-    <div style={{position:"fixed",inset:0,zIndex:500,display:"flex",alignItems:"center",justifyContent:"center",padding:20,overflowY:"auto"}} onClick={onClose}>
-      <div style={{position:"fixed",inset:0,background:"rgba(250,248,245,0.98)"}}></div>
-      <div onClick={e=>e.stopPropagation()} style={{position:"relative",width:"100%",maxWidth:900,zIndex:1,margin:"auto",padding:"40px 0"}}>
-        <button onClick={onClose} style={{position:"absolute",top:0,right:10,background:"none",border:"none",fontSize:35,cursor:"pointer",color:C.inkFaint,lineHeight:1}}>×</button>
-        <div style={{marginBottom:40,padding:"0 10px"}}>
-          <Mono size={13} color={C.gold} spacing={3} style={{display:"block",marginBottom:15}}>— {t.chNum}</Mono>
-          <h2 style={{fontSize:"clamp(30px,5vw,42px)",fontWeight:700,color:C.black,marginBottom:15,fontFamily:"'DM Serif Display',serif"}}>{t.apTitle}</h2>
-          <p style={{fontSize:18,color:C.inkMid}}>{t.apSub}</p>
-        </div>
-        <div className="messenger-grid">
-          {[{name:"SBF Support",plat:"Telegram",bg:"#0088cc",icon:"🚀",link:tgLink,btn:t.tgBtn,msgBg:"#e1f3fb"},
-            {name:"SBF Company",plat:"WhatsApp",bg:"#25d366",icon:"💬",link:waLink,btn:t.waBtn,msgBg:"#e8f5ed"}].map((m,i)=>
-            <div key={i} style={{background:"#fff",border:"1px solid #e0e0e0",borderRadius:12,padding:"30px 25px",display:"flex",flexDirection:"column"}}>
-              <div style={{display:"flex",alignItems:"center",gap:15,marginBottom:30}}>
-                <div style={{width:50,height:50,borderRadius:"50%",background:m.msgBg,display:"flex",alignItems:"center",justifyContent:"center"}}>{m.icon}</div>
-                <div><div style={{fontSize:18,fontWeight:700}}>{m.name}</div><div style={{fontSize:14,color:C.inkFaint}}>{m.plat} · {t.online}</div></div>
-              </div>
-              <div style={{background:m.bg,padding:"15px 20px",borderRadius:"12px 12px 0 12px",marginBottom:30,alignSelf:"flex-end",maxWidth:"90%"}}>
-                <div style={{fontSize:16,color:"#fff"}}>{prefill}</div>
-              </div>
-              <a href={m.link} target="_blank" style={{marginTop:"auto",display:"block",background:m.bg,color:"#fff",textAlign:"center",padding:"18px",borderRadius:8,textDecoration:"none",fontWeight:700}}>{m.btn}</a>
-            </div>
-          )}
-        </div>
+    <div style={{background:C.black,padding:"70px 5vw 56px",color:"#fff"}}>
+      <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:24,textAlign:"center"}}>{co.tag}</Mono>
+      <div style={{maxWidth:840,margin:"0 auto 20px"}}>
+        {co.lines.map((line,i) => (
+          <p key={i} style={{fontSize: i<2 ? 17 : i===co.lines.length-1 ? 17 : 15.5, color: i>=2?"rgba(255,255,255,0.72)":"#fff", fontWeight: i<2?600:400, lineHeight:1.75, marginBottom:14, fontFamily: i===co.lines.length-1 ? "'DM Serif Display',serif" : "inherit"}}>{line}</p>
+        ))}
+      </div>
+      <p style={{textAlign:"center",fontFamily:"monospace",fontSize:12,color:C.gold}}>{co.cta}</p>
+    </div>
+  );
+}
+
+// ─── Анти-миф → Голос SBF → Цена незнания ──────────────────────────────────────
+function IntroBlock() {
+  const T9 = window.Ch9Content[INITIAL_LANG] || window.Ch9Content.ru;
+  return (
+    <div id="secAntiMyth" style={{marginBottom:48,scrollMarginTop:130}}>
+      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T9.antiMyth.tag}</Mono>
+      <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px",marginBottom:28}}>
+        <p style={{fontWeight:600,fontSize:14.5,color:C.black,marginBottom:10}}>{T9.antiMyth.title}</p>
+        <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,marginBottom:12}}>{T9.antiMyth.body1}</p>
+        <p style={{fontSize:13.5,color:C.black,lineHeight:1.7,margin:0,fontWeight:600}}>{T9.antiMyth.body2}</p>
+      </div>
+
+      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T9.voiceSbf.tag}</Mono>
+      <div style={{borderLeft:`4px solid ${C.gold}`,paddingLeft:24,marginBottom:28}}>
+        {T9.voiceSbf.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:16,fontStyle:"italic",color:C.inkMid,lineHeight:1.7,fontFamily:"'DM Serif Display',serif",marginBottom:12}}>{p}</p>)}
+      </div>
+
+      <div style={{background:C.black,borderRadius:8,padding:"26px 30px",color:C.white}}>
+        <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T9.priceOfNotKnowing.tag}</Mono>
+        <div style={{fontFamily:"'DM Serif Display',serif",fontSize:20,color:C.white,marginBottom:12}}>{T9.priceOfNotKnowing.title}</div>
+        {T9.priceOfNotKnowing.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:13.5,lineHeight:1.75,color:"rgba(255,255,255,0.7)",marginBottom:10}}>{p}</p>)}
       </div>
     </div>
   );
 }
 
-// ─────────────────────────────────────────────
-// EARNINGS SIMULATOR
-// ─────────────────────────────────────────────
-function EarningsSimulator({t}) {
-  const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
-  const [idx, setIdx] = useState(0);
-  const [chosen, setChosen] = useState(null);
-  const [score, setScore] = useState(0);
-  const [done, setDone] = useState(false);
-
-  const cases = t.cases;
-  const c = cases[idx];
-
-  const choose = (dir) => {
-    if (chosen) return;
-    const correct = dir === c.verdict;
-    if (correct) setScore(s => s+1);
-    setChosen(dir);
-  };
-
-  const next = () => {
-    if (idx + 1 >= cases.length) { setDone(true); return; }
-    setIdx(i => i+1);
-    setChosen(null);
-  };
-
-  const getLang = () => INITIAL_LANG;
-  const getExpl = () => {
-    if (getLang() === 'en') return c.explanationEn || c.explanation;
-    if (getLang() === 'ro') return c.explanationRo || c.explanation;
-    return c.explanation;
-  };
-
-  if (done) return (
-    <div style={{background:C.surface,border:`1px solid ${C.border}`,padding:"36px 32px",textAlign:"center"}}>
-      <div style={{fontSize:48,marginBottom:12}}><img class='mi-icon' style={{verticalAlign:'middle'}} src='/assets/icons/icon-trophy.png' alt='' width='20' height='20' /></div>
-      <div style={{fontFamily:"monospace",fontSize:28,color:C.gold,fontWeight:700,marginBottom:8}}>{score} / {cases.length}</div>
-      <div style={{fontSize:14,color:C.inkSoft,marginBottom:24}}>{t.simFinish}</div>
-      {score >= 2 && <div style={{background:"#fff",border:`1px solid ${C.borderGold}`,display:"inline-block",padding:"14px 28px"}}>
-        <span style={{fontFamily:"monospace",fontSize:11,color:C.gold,letterSpacing:3,display:"block",marginBottom:4}}><img class='mi-icon' style={{verticalAlign:'middle'}} src='/assets/icons/icon-target.png' alt='' width='20' height='20' /> EARNINGS READER</span>
-        <span style={{fontFamily:"monospace",fontSize:12,color:C.inkSoft}}>{score === 3 ? "+60 BONUS XP" : "+30 XP"}</span>
-      </div>}
-    </div>
-  );
-
-  const correct = chosen === c.verdict;
-
+// ─── Как читать отчётность ──────────────────────────────────────────────────
+function EarningsAnatomy() {
+  const T9 = window.Ch9Content[INITIAL_LANG] || window.Ch9Content.ru;
+  const ea = T9.earningsAnatomy;
   return (
-    <div style={{background:C.surface,border:`1px solid ${C.border}`,padding:"28px 28px 24px"}}>
-      {/* Score + progress */}
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
-        <div style={{display:"flex",alignItems:"center",gap:10}}>
-          <Chip>{t.simTag}</Chip>
-          <Mono size={12} color={C.inkFaint} spacing={0}>{idx+1} {t.simOf} {cases.length}</Mono>
-        </div>
-        <Mono size={12} color={C.inkSoft} spacing={1}>{t.simScore}: {score}</Mono>
-      </div>
-
-      {/* Company header */}
-      <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:16,marginBottom:20,flexWrap:"wrap"}}>
-        <div>
-          <div style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(20px,3vw,28px)",fontWeight:700,color:C.black,marginBottom:4}}>{c.company}</div>
-          <Mono size={11} color={C.inkFaint} spacing={1}>{c.sector}</Mono>
-        </div>
-        <div style={{textAlign:"right"}}>
-          <div style={{fontFamily:"monospace",fontSize:14,color:C.inkSoft}}>Last close</div>
-          <div style={{fontFamily:"monospace",fontSize:22,fontWeight:700,color:C.black}}>${c.price}</div>
-        </div>
-      </div>
-
-      {/* Metrics table */}
-      <div style={{marginBottom:24,border:`1px solid ${C.border}`,background:"#fff",overflow:"hidden"}}>
-        {/* header */}
-        <div style={{display:"grid",gridTemplateColumns:"2fr 1.2fr 1.2fr 80px",background:C.dark,padding:"10px 16px",gap:8}}>
-          {S.metricsHeaders.map((h,i)=>
-            <Mono key={i} size={10} color={i===0?C.gold:"rgba(255,255,255,.45)"} spacing={2} style={{fontWeight:700}}>{h}</Mono>
-          )}
-        </div>
-        {c.items.map((item, i) => (
-          <div key={i} style={{display:"grid",gridTemplateColumns:"2fr 1.2fr 1.2fr 80px",padding:"11px 16px",gap:8,borderTop:i>0?`1px solid ${C.border}`:"none",alignItems:"center"}}>
-            <div style={{fontSize:13,color:C.inkMid,fontWeight:500}}>{item.label}</div>
-            <div style={{fontFamily:"monospace",fontSize:13,color:C.black,fontWeight:700}}>{item.val}</div>
-            <div style={{fontFamily:"monospace",fontSize:13,color:C.inkSoft}}>{item.exp}</div>
-            <div style={{
-              fontFamily:"monospace",fontSize:10,letterSpacing:1,fontWeight:700,
-              color:item.beat?"#fff":"#fff",
-              background:item.beat?C.bull:C.bear,
-              padding:"3px 7px",textAlign:"center",borderRadius:2
-            }}>{item.beat?"▲ BEAT":"▼ MISS"}</div>
+    <div style={{marginBottom:48}}>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:14,marginBottom:20}} className="g3">
+        {[[ea.c1Title,ea.c1Text],[ea.c2Title,ea.c2Text],[ea.c3Title,ea.c3Text],[ea.c4Title,ea.c4Text],[ea.c5Title,ea.c5Text]].map(([t,x],i) => (
+          <div key={i} style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:6,padding:"18px 20px",borderTop:`3px solid ${C.gold}`}}>
+            <div style={{fontWeight:600,fontSize:13,color:C.black,marginBottom:8}}>{t}</div>
+            <p style={{fontSize:12,color:C.inkMid,lineHeight:1.65,margin:0}}>{x}</p>
           </div>
         ))}
       </div>
-
-      {/* Choice buttons */}
-      {!chosen && (
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:0}}>
-          <button onClick={()=>choose("up")}
-            style={{padding:"16px 12px",fontSize:15,fontWeight:700,cursor:"pointer",border:`2px solid ${C.bull}`,background:"rgba(34,197,94,.07)",color:C.bull,fontFamily:"'DM Sans',sans-serif",transition:"all .2s"}}
-            onMouseEnter={e=>{e.currentTarget.style.background="rgba(34,197,94,.18)"}}
-            onMouseLeave={e=>{e.currentTarget.style.background="rgba(34,197,94,.07)"}}
-          >{t.simChoiceUp}</button>
-          <button onClick={()=>choose("down")}
-            style={{padding:"16px 12px",fontSize:15,fontWeight:700,cursor:"pointer",border:`2px solid ${C.bear}`,background:"rgba(239,68,68,.07)",color:C.bear,fontFamily:"'DM Sans',sans-serif",transition:"all .2s"}}
-            onMouseEnter={e=>{e.currentTarget.style.background="rgba(239,68,68,.18)"}}
-            onMouseLeave={e=>{e.currentTarget.style.background="rgba(239,68,68,.07)"}}
-          >{t.simChoiceDown}</button>
-        </div>
-      )}
-
-      {/* Result */}
-      {chosen && (
-        <div>
-          <div style={{padding:"16px 20px",background:correct?"rgba(34,197,94,.08)":"rgba(239,68,68,.08)",border:`1px solid ${correct?C.bull:C.bear}`,marginBottom:14}}>
-            <div style={{fontSize:16,fontWeight:700,color:correct?C.bull:C.bear,marginBottom:6}}>
-              {correct ? t.simCorrect : t.simWrong}
-              {" "}
-              <span style={{fontFamily:"monospace",fontSize:13,fontWeight:700,color:correct?C.bull:C.bear}}>
-                {c.verdict==="up"?"📈":"📉"} {c.verdictPct}
-              </span>
-            </div>
-            <div style={{fontSize:13,color:C.inkMid,lineHeight:1.7}}>
-              <strong style={{color:C.black}}>{t.simExplain}</strong> {getExpl()}
-            </div>
-          </div>
-          <button onClick={next}
-            style={{background:C.black,color:C.white,border:"none",padding:"12px 28px",cursor:"pointer",fontFamily:"monospace",fontSize:12,letterSpacing:2,fontWeight:700,float:"right",transition:"background .2s"}}
-            onMouseEnter={e=>e.currentTarget.style.background=C.gold}
-            onMouseLeave={e=>e.currentTarget.style.background=C.black}
-          >{idx+1<cases.length ? t.simNext : t.simFinish}</button>
-          <div style={{clear:"both"}}></div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ─────────────────────────────────────────────
-// RSI / MACD — концептуальные примеры (grafik-engine.js)
-// ─────────────────────────────────────────────
-function RSIFigure() {
-  const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
-  return (
-    <div style={{marginBottom:16}}>
-      <div className="sbf-fig" data-cat="ind" data-key="rsi"
-        data-caption={S.rsiFigCaption} />
-      <span className="sbf-figlink"
-        onClick={() => window.sbfOpenGrafik && window.sbfOpenGrafik('ind','rsi')}>
-        {S.rsiFigLink}
-      </span>
-    </div>
-  );
-}
-function MACDFigure() {
-  const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
-  return (
-    <div style={{marginBottom:16}}>
-      <div className="sbf-fig" data-cat="ind" data-key="macd"
-        data-caption={S.macdFigCaption} />
-      <span className="sbf-figlink"
-        onClick={() => window.sbfOpenGrafik && window.sbfOpenGrafik('ind','macd')}>
-        {S.macdFigLink}
-      </span>
-    </div>
-  );
-}
-
-// ─────────────────────────────────────────────
-// RSI CHART — реальные данные через EduChart + Lightweight Charts
-// ─────────────────────────────────────────────
-function RSIChart({mode}) {
-  const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
-  const chartRef = useRef(null);
-  useEffect(()=>{
-    const el = chartRef.current;
-    if(!el || typeof EduChart === 'undefined') return;
-    el.innerHTML = '';
-    EduChart.create(el, {
-      fixture: 'rsi_divergence',
-      panes: ['price','rsi'],
-      height: 220,
-      interactive: true,
-    });
-  },[mode]);
-  return (
-    <div>
-      <div style={{marginBottom:6,display:'flex',gap:10,alignItems:'center',flexWrap:'wrap'}}>
-        <Mono size={10} color={C.inkFaint} spacing={1}>{S.rsiChartLabel}</Mono>
-        <span style={{fontFamily:'JetBrains Mono, monospace',fontSize:9,color:'#1e8e5a',background:'rgba(30,142,90,.08)',padding:'2px 7px',borderRadius:3}}>{S.realData}</span>
+      <div style={{background:C.goldPale,border:`1px solid ${C.borderGold}`,borderRadius:6,padding:"18px 22px"}}>
+        <div style={{fontWeight:600,fontSize:13,color:C.black,marginBottom:8}}>{ea.knownTitle}</div>
+        <p style={{fontSize:12.5,color:C.inkMid,lineHeight:1.7,margin:0}}>{ea.knownBody}</p>
       </div>
-      <div ref={chartRef} style={{background:'#fff',border:'1px solid #E7DFCF',minHeight:340}}/>
     </div>
   );
 }
 
-// ─────────────────────────────────────────────
-// MACD CHART — реальные данные через EduChart + Lightweight Charts
-// ─────────────────────────────────────────────
-function MACDChart() {
-  const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
-  const chartRef = useRef(null);
-  useEffect(()=>{
-    const el = chartRef.current;
-    if(!el || typeof EduChart === 'undefined') return;
-    el.innerHTML = '';
-    EduChart.create(el, {
-      fixture: 'macd_signal',
-      panes: ['price','macd'],
-      height: 200,
-      interactive: true,
-    });
-  },[]);
+// ─── Почему падают на хорошем отчёте ────────────────────────────────────────
+function WhyFalls() {
+  const T9 = window.Ch9Content[INITIAL_LANG] || window.Ch9Content.ru;
+  const w = T9.whyFalls;
   return (
-    <div>
-      <div style={{marginBottom:6,display:'flex',gap:10,alignItems:'center',flexWrap:'wrap'}}>
-        <Mono size={10} color={C.inkFaint} spacing={1}>{S.macdChartLabel}</Mono>
-        <span style={{fontFamily:'JetBrains Mono, monospace',fontSize:9,color:'#1e8e5a',background:'rgba(30,142,90,.08)',padding:'2px 7px',borderRadius:3}}>{S.realData}</span>
-      </div>
-      <div ref={chartRef} style={{background:'#fff',border:'1px solid #E7DFCF',minHeight:320}}/>
-    </div>
-  );
-}
-
-// ─────────────────────────────────────────────
-// DIVERGENCE HUNT INTERACTIVE
-// ─────────────────────────────────────────────
-function DivergenceHunt({t}) {
-  const pRef = useRef(null);
-  const rRef = useRef(null);
-  const [step, setStep] = useState(0); // 0..4
-  const [sel, setSel] = useState([]); // selected points: {chart:'p'|'r', idx:number}
-  const [result, setResult] = useState(null); // 'correct'|'wrong'
-  const [showSolution, setShowSolution] = useState(false);
-
-  // Реальные данные: Gold (авг–ноя 2024). Пики: сен-26 (idx 5) и окт-30 (idx 29).
-  // Цена: 2669.9 → 2788.5 (выше). RSI: 78.3 → 74.9 (ниже) = медвежья дивергенция.
-  const pPrices = [2588.0,2619.9,2626.5,2651.2,2659.2,2669.9,2644.3,2636.1,2667.3,2647.1,2657.1,2645.8,2644.8,2615.0,2606.0,2620.6,2657.6,2647.8,2661.4,2674.0,2691.0,2713.7,2723.1,2744.2,2714.4,2734.9,2740.9,2742.9,2768.4,2788.5,2738.3,2738.6,2736.1,2740.3,2667.6,2698.4,2687.5];
-  const rsiData  = [68.4,72.7,73.5,76.3,77.1,78.3,69.5,66.9,71.3,65.3,66.8,63.5,63.2,54.9,52.6,55.8,62.6,60.0,62.3,64.4,67.1,70.3,71.5,74.2,65.1,68.0,68.8,69.1,72.5,74.9,60.8,60.9,60.2,61.0,45.0,50.9,48.9];
-
-  // Правильные пики — реальные данные
-  const CORRECT_P = [5, 29];
-  const CORRECT_R = [5, 29];
-
-  const pPeaks = [5, 29];
-  const rPeaks = [5, 29];
-
-  const instructions = [t.huntStep1, t.huntStep2, t.huntStep3, t.huntStep4];
-  const stepLabels = ["P1","P2","R1","R2"];
-
-  const handleClick = (chart, idx) => {
-    if(result) return;
-    const newSel = [...sel, {chart, idx}];
-    setSel(newSel);
-    const nextStep = step + 1;
-    setStep(nextStep);
-    if(nextStep === 4) {
-      // Validate
-      const pSels = newSel.filter(s=>s.chart==='p').map(s=>s.idx).sort((a,b)=>a-b);
-      const rSels = newSel.filter(s=>s.chart==='r').map(s=>s.idx).sort((a,b)=>a-b);
-      const pOk = pSels.length===2 && pSels[0]<pSels[1];
-      const rOk = rSels.length===2 && rSels[0]<rSels[1];
-      // bearish: price second > first, rsi second < first
-      const pBearish = pOk && pPrices[pSels[1]] > pPrices[pSels[0]];
-      const rBearish = rOk && rsiData[rSels[1]] < rsiData[rSels[0]];
-      setResult(pBearish && rBearish ? 'correct' : 'wrong');
-    }
-  };
-
-  const reset = () => { setSel([]); setStep(0); setResult(null); setShowSolution(false); };
-
-  const drawCharts = useCallback(()=>{
-    const drawLine = (ref, data, label, color, peakIdxs, selPoints, h, showDiv) => {
-      const canvas = ref.current;
-      if(!canvas) return;
-      const W=canvas.width, H=h;
-      canvas.height=H;
-      const ctx=canvas.getContext('2d');
-      ctx.clearRect(0,0,W,H);
-      const pad={l:36,r:16,t:12,b:20};
-      const cW=W-pad.l-pad.r, cH=H-pad.t-pad.b;
-      const mn=Math.min(...data)-3, mx=Math.max(...data)+3, rng=mx-mn;
-      const px=i=>pad.l+i/(data.length-1)*cW;
-      const py=v=>pad.t+cH-(v-mn)/rng*cH;
-
-      // Zones for RSI
-      if(label==="RSI"){
-        ctx.fillStyle="rgba(239,68,68,.06)";ctx.fillRect(pad.l,pad.t,cW,py(70)-pad.t);
-        ctx.fillStyle="rgba(34,197,94,.06)";ctx.fillRect(pad.l,py(30),cW,H-pad.b-py(30));
-        ctx.strokeStyle="rgba(239,68,68,.3)";ctx.lineWidth=1;ctx.setLineDash([3,3]);
-        ctx.beginPath();ctx.moveTo(pad.l,py(70));ctx.lineTo(W-pad.r,py(70));ctx.stroke();
-        ctx.fillStyle="rgba(239,68,68,.5)";ctx.font="8px monospace";ctx.textAlign="left";ctx.fillText("70",W-pad.r+2,py(70)+3);
-        ctx.strokeStyle="rgba(34,197,94,.3)";ctx.beginPath();ctx.moveTo(pad.l,py(30));ctx.lineTo(W-pad.r,py(30));ctx.stroke();
-        ctx.fillStyle="rgba(34,197,94,.5)";ctx.fillText("30",W-pad.r+2,py(30)+3);
-        ctx.setLineDash([]);
-      }
-      // Grid
-      ctx.strokeStyle="rgba(24,24,26,.04)";ctx.lineWidth=1;ctx.setLineDash([]);
-      for(let i=0;i<=3;i++){const y=pad.t+i/3*cH;ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(W-pad.r,y);ctx.stroke();}
-      // Area
-      const grad=ctx.createLinearGradient(0,pad.t,0,H-pad.b);
-      grad.addColorStop(0,`${color}20`);grad.addColorStop(1,`${color}03`);
-      ctx.fillStyle=grad;
-      ctx.beginPath();ctx.moveTo(px(0),py(data[0]));
-      data.forEach((_,i)=>ctx.lineTo(px(i),py(data[i])));
-      ctx.lineTo(px(data.length-1),H-pad.b);ctx.lineTo(px(0),H-pad.b);ctx.closePath();ctx.fill();
-      // Main line
-      ctx.strokeStyle=color;ctx.lineWidth=2;
-      ctx.beginPath();data.forEach((v,i)=>i===0?ctx.moveTo(px(i),py(v)):ctx.lineTo(px(i),py(v)));ctx.stroke();
-
-      // Draw divergence line if solution shown or correct
-      if((showDiv||showSolution) && peakIdxs.length===2){
-        ctx.strokeStyle=C.bear;ctx.lineWidth=1.5;ctx.setLineDash([4,3]);
-        ctx.beginPath();ctx.moveTo(px(peakIdxs[0]),py(data[peakIdxs[0]]));ctx.lineTo(px(peakIdxs[1]),py(data[peakIdxs[1]]));ctx.stroke();ctx.setLineDash([]);
-      }
-
-      // Peak circles (clickable)
-      peakIdxs.forEach((i,pi)=>{
-        const isSelected = selPoints.some(s=>s.idx===i);
-        const cx=px(i), cy=py(data[i]);
-        // Glow
-        if(isSelected){ctx.fillStyle=C.bear+"40";ctx.beginPath();ctx.arc(cx,cy,10,0,Math.PI*2);ctx.fill();}
-        ctx.fillStyle=isSelected?C.bear:"#fff";
-        ctx.strokeStyle=C.bear;ctx.lineWidth=2;
-        ctx.beginPath();ctx.arc(cx,cy,6,0,Math.PI*2);ctx.fill();ctx.stroke();
-        // Label
-        ctx.fillStyle=C.bear;ctx.font="bold 9px monospace";ctx.textAlign="center";
-        ctx.fillText(pi===0?"P1":"P2",cx,cy-10);
-      });
-
-      // Y labels
-      ctx.fillStyle=C.inkSoft;ctx.font="9px monospace";ctx.textAlign="right";
-      [mn,mn+rng/2,mx].forEach(v=>ctx.fillText(Math.round(v),pad.l-4,py(v)+3));
-      // Label
-      ctx.fillStyle=C.inkFaint;ctx.font="bold 10px monospace";ctx.textAlign="left";ctx.fillText(label,pad.l+4,pad.t+12);
-    };
-
-    const W = pRef.current?.parentElement?.clientWidth || 600;
-    if(pRef.current){pRef.current.width=W;}
-    if(rRef.current){rRef.current.width=W;}
-
-    const pSel = sel.filter(s=>s.chart==='p');
-    const rSel = sel.filter(s=>s.chart==='r');
-    const showDiv = result==='correct';
-    drawLine(pRef, pPrices, "PRICE", C.gold, pPeaks, pSel, 160, showDiv);
-    drawLine(rRef, rsiData, "RSI(14)", "#3b82f6", rPeaks, rSel, 120, showDiv);
-  },[sel, result, showSolution]);
-
-  useEffect(()=>{
-    drawCharts();
-    window.addEventListener('resize',drawCharts);
-    return ()=>window.removeEventListener('resize',drawCharts);
-  },[drawCharts]);
-
-  const getPeakPos = (ref, data, idx) => {
-    if(!ref.current) return null;
-    const canvas=ref.current;
-    const W=canvas.width, H=canvas.height;
-    const pad={l:36,r:16,t:12,b:20};
-    const cW=W-pad.l-pad.r, cH=H-pad.t-pad.b;
-    const mn=Math.min(...data)-3, mx=Math.max(...data)+3, rng=mx-mn;
-    return {x:pad.l+idx/(data.length-1)*cW, y:pad.t+cH-(data[idx]-mn)/rng*cH};
-  };
-
-  const handleCanvasClick = (e, chart) => {
-    if(result) return;
-    const canvas = chart==='p'?pRef.current:rRef.current;
-    if(!canvas) return;
-    const rect=canvas.getBoundingClientRect();
-    const x=(e.clientX-rect.left)*(canvas.width/rect.width);
-    const y=(e.clientY-rect.top)*(canvas.height/rect.height);
-    const peaks = chart==='p'?pPeaks:rPeaks;
-    const data  = chart==='p'?pPrices:rsiData;
-    // Check if click is near a peak
-    const W=canvas.width, H=canvas.height;
-    const pad={l:36,r:16,t:12,b:20};
-    const cW=W-pad.l-pad.r, cH=H-pad.t-pad.b;
-    const mn=Math.min(...data)-3, mx=Math.max(...data)+3, rng=mx-mn;
-    const px=i=>pad.l+i/(data.length-1)*cW;
-    const py=v=>pad.t+cH-(v-mn)/rng*cH;
-    for(const idx of peaks){
-      const dx=x-px(idx), dy=y-py(data[idx]);
-      if(Math.sqrt(dx*dx+dy*dy)<18){
-        // Check it's the right step
-        const needP=(step===0||step===1), needR=(step===2||step===3);
-        if((chart==='p'&&needP)||(chart==='r'&&needR)){
-          // Don't allow same index twice
-          if(!sel.some(s=>s.chart===chart&&s.idx===idx)){
-            handleClick(chart,idx);
-          }
-        }
-        return;
-      }
-    }
-  };
-
-  return (
-    <div style={{background:C.surface,border:`1px solid ${C.border}`,padding:"24px 24px 20px"}}>
-      {/* Progress */}
-      <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:16,flexWrap:"wrap"}}>
-        <Chip>{t.huntTag}</Chip>
-        {[0,1,2,3].map(i=>(
-          <div key={i} style={{display:"flex",alignItems:"center",gap:6}}>
-            <div style={{width:22,height:22,borderRadius:"50%",background:i<step?C.gold:i===step?C.black:"transparent",border:`2px solid ${i<step?C.gold:i===step?C.black:C.border}`,display:"flex",alignItems:"center",justifyContent:"center"}}>
-              <Mono size={9} color={i<step||i===step?"#fff":C.inkFaint} spacing={0}>{i<step?"✓":i+1}</Mono>
-            </div>
-            {i<3&&<div style={{width:20,height:1,background:i<step?C.gold:C.border}}></div>}
+    <div style={{marginBottom:48}}>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:14,marginBottom:20}} className="g3">
+        {[[w.m1Title,w.m1Text],[w.m2Title,w.m2Text],[w.m3Title,w.m3Text]].map(([t,x],i) => (
+          <div key={i} style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:6,padding:"18px 20px"}}>
+            <div style={{fontWeight:600,fontSize:13,color:C.black,marginBottom:8}}>{t}</div>
+            <p style={{fontSize:12,color:C.inkMid,lineHeight:1.65,margin:0}}>{x}</p>
           </div>
         ))}
       </div>
-      {/* Instruction */}
-      {!result && step<4 && (
-        <div style={{background:"rgba(201,151,58,.08)",border:`1px solid ${C.borderGold}`,padding:"10px 14px",marginBottom:14,fontSize:13,color:C.inkMid}}>
-          <strong style={{color:C.gold}}>→</strong> {instructions[step]}
-        </div>
-      )}
-      {/* Charts */}
-      <div style={{cursor:step<2?"crosshair":"default",marginBottom:2}}>
-        <canvas ref={pRef} onClick={e=>handleCanvasClick(e,'p')} style={{display:"block",width:"100%"}}/>
-      </div>
-      <div style={{cursor:step>=2&&step<4?"crosshair":"default"}}>
-        <canvas ref={rRef} onClick={e=>handleCanvasClick(e,'r')} style={{display:"block",width:"100%"}}/>
-      </div>
-      {/* Result */}
-      {result && (
-        <div style={{marginTop:14,padding:"14px 18px",background:result==='correct'?"rgba(34,197,94,.08)":"rgba(239,68,68,.08)",border:`1px solid ${result==='correct'?C.bull:C.bear}`}}>
-          <div style={{fontSize:15,fontWeight:700,color:result==='correct'?C.bull:C.bear,marginBottom:6}}>
-            {result==='correct' ? t.huntCorrect : t.huntWrong}
-          </div>
-        </div>
-      )}
-      {/* Controls */}
-      <div style={{display:"flex",gap:10,marginTop:14,flexWrap:"wrap"}}>
-        <button onClick={reset} style={{background:"transparent",border:`1px solid ${C.border}`,color:C.inkSoft,padding:"8px 18px",cursor:"pointer",fontFamily:"monospace",fontSize:11,letterSpacing:2,transition:"all .2s"}}>{t.huntReset}</button>
-        <button onClick={()=>{setShowSolution(true);drawCharts();}} style={{background:"transparent",border:`1px solid ${C.gold}`,color:C.gold,padding:"8px 18px",cursor:"pointer",fontFamily:"monospace",fontSize:11,letterSpacing:2,transition:"all .2s"}}>{t.huntReveal}</button>
+      <div style={{background:C.redPale,border:"1px solid rgba(192,57,43,.25)",borderRadius:6,padding:"16px 20px"}}>
+        <p style={{fontSize:12.5,color:"#7a2418",lineHeight:1.65,margin:0}}>{w.notClaim}</p>
       </div>
     </div>
   );
 }
 
-// ─────────────────────────────────────────────
-// COMBO SIGNAL VISUAL
-// ─────────────────────────────────────────────
-function ComboSignalChart() {
-  const ref = useRef(null);
-  const prices=[120,118,116,114,112,110,108,107,106,105,104,103,105,108,112,116,120,124,128,132,136,140,144,148,152];
-  const rsiVals=[68,64,60,55,50,44,38,33,29,28,27,26,30,35,42,50,58,64,68,71,73,74,75,76,77];
-  const macdH=[0.5,0.3,0.1,-0.2,-0.5,-0.8,-1.1,-1.3,-1.4,-1.2,-0.9,-0.6,-0.2,0.3,0.8,1.2,1.6,1.9,2.1,2.2,2.1,1.9,1.7,1.5,1.3];
-  const crossoverIdx=12; // index where MACD crosses up + RSI in oversold
+// ─── Ретроспективное искажение — ключевой интерактив ───────────────────────
+function HindsightTest({ cases }) {
+  const { useState, useMemo } = React;
+  const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
+  const T9 = window.Ch9Content[INITIAL_LANG] || window.Ch9Content.ru;
+  const h = T9.hindsight;
+  const nameKey = "company_" + INITIAL_LANG;
 
-  useEffect(()=>{
-    const draw = () => {
-      const canvas=ref.current;
-      if(!canvas) return;
-      const W=canvas.width=canvas.parentElement.clientWidth||600;
-      const H=canvas.height=220;
-      const ctx=canvas.getContext('2d');
-      ctx.clearRect(0,0,W,H);
-      const pH=120, rH=50, mH=40;
-      const pad={l:40,r:16,t:10,b:10};
-      const cW=W-pad.l-pad.r;
-      const N=prices.length;
-      const px=i=>pad.l+i/(N-1)*cW;
+  const [pool] = useState(() => cases ? shuffled(cases).slice(0, 4) : []);
+  const [step, setStep] = useState(0); // 0=intro, 1-3=hidden cases, 4=revealed case, 5=result
+  const [answers, setAnswers] = useState([]); // {dir, confidence}
+  const [dirPick, setDirPick] = useState(null);
+  const [confidence, setConfidence] = useState(50);
+  const [hindsightConfidence, setHindsightConfidence] = useState(50);
 
-      // PRICE
-      const pmn=Math.min(...prices)-3,pmx=Math.max(...prices)+3,prng=pmx-pmn;
-      const ppy=v=>pad.t+pH-(v-pmn)/prng*pH;
-      const grad=ctx.createLinearGradient(0,pad.t,0,pad.t+pH);
-      grad.addColorStop(0,"rgba(201,151,58,.12)");grad.addColorStop(1,"rgba(201,151,58,.01)");
-      ctx.fillStyle=grad;ctx.beginPath();ctx.moveTo(px(0),ppy(prices[0]));
-      prices.forEach((_,i)=>ctx.lineTo(px(i),ppy(prices[i])));
-      ctx.lineTo(px(N-1),pad.t+pH);ctx.lineTo(px(0),pad.t+pH);ctx.closePath();ctx.fill();
-      ctx.strokeStyle=C.gold;ctx.lineWidth=2;ctx.setLineDash([]);
-      ctx.beginPath();prices.forEach((v,i)=>i===0?ctx.moveTo(px(i),ppy(v)):ctx.lineTo(px(i),ppy(v)));ctx.stroke();
+  if (!cases || pool.length < 4) return <p style={{color:C.inkFaint}}>—</p>;
 
-      // RSI zone
-      const rBase=pad.t+pH+6;
-      const rpy=v=>rBase+rH-(v/100)*rH;
-      ctx.fillStyle="rgba(34,197,94,.07)";ctx.fillRect(pad.l,rpy(35),cW,rH-rpy(35)+rBase);
-      ctx.strokeStyle="rgba(34,197,94,.3)";ctx.lineWidth=1;ctx.setLineDash([3,3]);
-      ctx.beginPath();ctx.moveTo(pad.l,rpy(30));ctx.lineTo(W-pad.r,rpy(30));ctx.stroke();ctx.setLineDash([]);
-      ctx.strokeStyle="#3b82f6";ctx.lineWidth=1.5;
-      ctx.beginPath();rsiVals.forEach((v,i)=>i===0?ctx.moveTo(px(i),rpy(v)):ctx.lineTo(px(i),rpy(v)));ctx.stroke();
-      ctx.fillStyle=C.inkFaint;ctx.font="8px monospace";ctx.textAlign="right";ctx.fillText("RSI",pad.l-4,rBase+8);
+  const hiddenCases = pool.slice(0, 3);
+  const revealedCase = pool[3];
 
-      // MACD zone
-      const mBase=rBase+rH+6;
-      const mmn=Math.min(...macdH)-0.2,mmx=Math.max(...macdH)+0.2,mrng=mmx-mmn;
-      const mpy=v=>mBase+mH-(v-mmn)/mrng*mH;
-      const mzero=mpy(0);
-      macdH.forEach((v,i)=>{
-        const bh=Math.abs(mzero-mpy(v));
-        ctx.fillStyle=v>=0?"rgba(34,197,94,.6)":"rgba(239,68,68,.6)";
-        ctx.fillRect(px(i)-2,Math.min(mzero,mpy(v)),4,bh||1);
-      });
-      ctx.fillStyle=C.inkFaint;ctx.font="8px monospace";ctx.textAlign="right";ctx.fillText("MACD",pad.l-4,mBase+8);
-
-      // CROSSOVER SIGNAL at crossoverIdx
-      const cx=px(crossoverIdx);
-      // Vertical line
-      ctx.strokeStyle="rgba(34,197,94,.4)";ctx.lineWidth=1;ctx.setLineDash([4,4]);
-      ctx.beginPath();ctx.moveTo(cx,pad.t);ctx.lineTo(cx,H-pad.b);ctx.stroke();ctx.setLineDash([]);
-      // Arrow on price
-      ctx.fillStyle=C.bull;ctx.font="bold 16px sans-serif";ctx.textAlign="center";
-      ctx.fillText("▲",cx,ppy(prices[crossoverIdx])-8);
-      // BUY label
-      ctx.fillStyle=C.bull;ctx.font="bold 9px monospace";ctx.textAlign="center";
-      ctx.fillRect(cx-16,pad.t+pH+1,32,14);
-      ctx.fillStyle="#fff";ctx.fillText("BUY",cx,pad.t+pH+11);
-    };
-    draw();window.addEventListener('resize',draw);return()=>window.removeEventListener('resize',draw);
-  },[]);
-
-  return <div style={{background:"#fff",border:`1px solid ${C.border}`,overflow:"hidden"}}><canvas ref={ref} style={{display:"block",width:"100%"}}/></div>;
-}
-
-// ─────────────────────────────────────────────
-// MODE TOGGLE
-// ─────────────────────────────────────────────
-function ModeToggle({mode, setMode, t}) {
-  return (
-    <div style={{display:"inline-flex",border:`1px solid ${C.border}`}}>
-      {["beg","pro"].map(m=>(
-        <button key={m} onClick={()=>setMode(m)} style={{
-          background:mode===m?C.black:"transparent",
-          color:mode===m?"#fff":C.inkSoft,
-          border:"none",padding:"6px 18px",cursor:"pointer",
-          fontFamily:"monospace",fontSize:9,letterSpacing:3,fontWeight:700,transition:"all .2s"
-        }}>{m==="beg"?t.beg:t.pro}</button>
-      ))}
-    </div>
-  );
-}
-
-// ─────────────────────────────────────────────
-// CHECKLIST
-// ─────────────────────────────────────────────
-function Checklist({t}) {
-  const [checks, setChecks] = useState(new Array(t.checks.length).fill(false));
-  const done = checks.filter(Boolean).length;
-  const pct = Math.round(done/checks.length*100);
-  return (
-    <div>
-      <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16}}>
-        <div style={{flex:1,height:3,background:C.surfaceMid,borderRadius:2,overflow:"hidden"}}>
-          <div style={{width:pct+"%",height:"100%",background:C.gold,transition:"width .4s"}}/>
-        </div>
-        <Mono size={11} color={C.inkFaint} spacing={1}>{pct}%</Mono>
-      </div>
-      {t.checks.map((text,i)=>(
-        <div key={i} onClick={()=>setChecks(c=>{const n=[...c];n[i]=!n[i];return n;})}
-          style={{display:"flex",alignItems:"center",gap:14,padding:"13px 18px",marginBottom:8,cursor:"pointer",
-            border:`1px solid ${checks[i]?C.gold:C.border}`,background:checks[i]?"rgba(201,151,58,.06)":"#fff",transition:"all .25s"}}>
-          <div style={{width:18,height:18,border:`1px solid ${checks[i]?C.gold:C.inkFaint}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,background:checks[i]?C.gold:"transparent",transition:"all .25s"}}>
-            {checks[i]&&<span style={{color:"#fff",fontSize:11}}>✓</span>}
-          </div>
-          <span style={{fontSize:14,color:checks[i]?C.black:C.inkMid}}>{text}</span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-// ─────────────────────────────────────────────
-// QUIZ
-// ─────────────────────────────────────────────
-function Quiz({t}) {
-  const [started, setStarted] = useState(false);
-  const [qidx, setQidx] = useState(0);
-  const [score, setScore] = useState(0);
-  const [sel, setSel] = useState(null);
-  const [done, setDone] = useState(false);
-  const qq = t.quiz;
-
-  const choose = (i) => {
-    if(sel!==null) return;
-    setSel(i);
-    if(i===qq[qidx].c) setScore(s=>s+1);
-    setTimeout(()=>{
-      setSel(null);
-      if(qidx+1>=qq.length) setDone(true);
-      else setQidx(x=>x+1);
-    }, 900);
+  const submitHidden = () => {
+    setAnswers(a => [...a, { dir: dirPick, confidence }]);
+    setDirPick(null); setConfidence(50);
+    setStep(s => s + 1);
   };
 
-  if(!started) return (
-    <div style={{textAlign:"center"}}>
-      <button onClick={()=>setStarted(true)}
-        style={{background:"transparent",border:`1px solid ${C.black}`,color:C.black,padding:"13px 36px",cursor:"pointer",fontFamily:"monospace",fontSize:11,letterSpacing:3,transition:"all .2s"}}
-        onMouseEnter={e=>{e.currentTarget.style.background=C.black;e.currentTarget.style.color="#fff";}}
-        onMouseLeave={e=>{e.currentTarget.style.background="transparent";e.currentTarget.style.color=C.black;}}
-      >{t.quizStartBtn}</button>
-    </div>
-  );
+  const finish = () => setStep(5);
 
-  if(done) return (
-    <div style={{background:C.surface,border:`1px solid ${C.border}`,padding:"36px 28px",textAlign:"center"}}>
-      <div style={{fontSize:48,marginBottom:14}}>🏅</div>
-      <div style={{fontFamily:"monospace",fontSize:28,color:C.gold,fontWeight:700,marginBottom:8}}>{score} / {qq.length}</div>
-      <p style={{fontSize:14,color:C.inkSoft,marginBottom:24}}>{score>=4?t.passmsg:t.failmsg}</p>
-      {score>=4&&<div style={{background:"#fff",border:`1px solid rgba(201,151,58,.25)`,display:"inline-block",padding:"14px 28px"}}>
-        <span style={{fontFamily:"monospace",fontSize:11,letterSpacing:3,color:C.gold,display:"block",marginBottom:4}}>{t.medalTitle}</span>
-        <span style={{fontFamily:"monospace",fontSize:12,color:C.inkSoft}}>{t.medalDesc}</span>
-      </div>}
-    </div>
-  );
+  const accuracy = useMemo(() => {
+    if (answers.length < 3) return null;
+    let hits = 0;
+    hiddenCases.forEach((c, i) => {
+      const guessed = answers[i].dir; // "up" | "down" | "flat"
+      if (guessed === c.direction_outcome) hits++;
+    });
+    return Math.round(100 * hits / 3);
+  }, [answers]);
 
-  const q=qq[qidx];
+  const avgConfidence = useMemo(() => {
+    if (answers.length < 3) return null;
+    return Math.round(answers.reduce((s, a) => s + a.confidence, 0) / 3);
+  }, [answers]);
+
   return (
-    <div style={{background:C.surface,border:`1px solid ${C.border}`,padding:"26px 28px"}}>
-      <div style={{display:"flex",justifyContent:"space-between",marginBottom:18,alignItems:"center"}}>
-        <Chip>{t.qof(qidx+1,qq.length)}</Chip>
-        <Mono size={12} color={C.inkSoft} spacing={1}>{t.qcor(score)}</Mono>
+    <div>
+      {step === 0 && (
+        <div style={{background:C.goldPale,border:`1px solid ${C.borderGold}`,borderRadius:8,padding:"26px 30px"}}>
+          <StepTag n="1" label={S.stepExplain}/>
+          <p style={{fontSize:14,color:C.inkMid,lineHeight:1.75,marginBottom:20}}>{h.step1Legend}</p>
+          <button onClick={()=>setStep(1)} style={{padding:"12px 28px",background:C.black,color:"#fff",border:"none",borderRadius:4,cursor:"pointer",fontFamily:"monospace",fontSize:12,letterSpacing:1}}>{h.startBtn}</button>
+        </div>
+      )}
+
+      {step >= 1 && step <= 3 && (() => {
+        const c = hiddenCases[step - 1];
+        return (
+          <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"26px 30px"}}>
+            <Mono size={10.5} color={C.inkFaint} spacing={1} style={{display:"block",marginBottom:16}}>{fillTemplate(h.caseLabel, {cur: step})}</Mono>
+            <div style={{background:"#fff",border:`1px solid ${C.border}`,borderRadius:6,padding:"18px 22px",marginBottom:20}}>
+              <Chip color={C.inkFaint}>{h.hiddenTicker}</Chip>
+              <div style={{display:"flex",gap:24,flexWrap:"wrap",marginTop:14}}>
+                <div><Mono size={10} color={C.inkFaint} spacing={0.5}>{h.consensusLabel}</Mono><p style={{fontSize:12.5,color:C.inkMid,marginTop:4,maxWidth:340}}>{c.consensus_note_ru}</p></div>
+                <div><Mono size={10} color={C.inkFaint} spacing={0.5}>{h.actualLabel}</Mono><p style={{fontSize:12.5,color:C.inkMid,marginTop:4,maxWidth:340}}>{c.actual_ru}</p></div>
+              </div>
+            </div>
+            <p style={{fontSize:14,color:C.black,fontWeight:600,marginBottom:12}}>{h.questionDirection}</p>
+            <div style={{display:"flex",gap:8,marginBottom:22}}>
+              {[["up",h.dirUp],["down",h.dirDown],["flat",h.dirFlat]].map(([k,label]) => (
+                <button key={k} onClick={()=>setDirPick(k)} style={{flex:1,padding:"12px 0",fontFamily:"monospace",fontSize:12,cursor:"pointer",background:dirPick===k?C.gold:"#fff",color:dirPick===k?"#18181a":C.inkMid,border:`1px solid ${dirPick===k?C.gold:C.border}`,borderRadius:4}}>{label}</button>
+              ))}
+            </div>
+            <Mono size={10.5} color={C.inkFaint} spacing={0.5} style={{display:"block",marginBottom:8}}>{h.confidenceLabel}: {confidence}%</Mono>
+            <input type="range" min="0" max="100" value={confidence} onChange={e=>setConfidence(+e.target.value)} style={{width:"100%",marginBottom:20}}/>
+            <button onClick={submitHidden} disabled={!dirPick} style={{padding:"11px 26px",background:dirPick?C.black:C.border,color:"#fff",border:"none",borderRadius:4,cursor:dirPick?"pointer":"default",fontFamily:"monospace",fontSize:11.5,letterSpacing:1}}>{h.nextBtn}</button>
+          </div>
+        );
+      })()}
+
+      {step === 4 && (
+        <div style={{background:C.black,borderRadius:8,padding:"28px 32px",color:"#fff"}}>
+          <p style={{fontSize:12.5,color:"rgba(255,255,255,0.6)",marginBottom:16}}>{h.step3Intro}</p>
+          <div style={{background:"rgba(255,255,255,0.05)",borderRadius:6,padding:"18px 22px",marginBottom:20}}>
+            <Chip color={C.gold}>{revealedCase[nameKey]} · {revealedCase.report_date}</Chip>
+            <p style={{fontSize:12.5,color:"rgba(255,255,255,0.75)",marginTop:12,marginBottom:8}}>{revealedCase.actual_ru}</p>
+            <p style={{fontSize:12.5,color:"rgba(255,255,255,0.75)",marginBottom:8}}>{revealedCase.guidance_ru}</p>
+            <Mono size={20} color={revealedCase.reaction_1d_pct>=0?"#6ec99a":C.red} spacing={0}>{revealedCase.reaction_1d_pct>0?"+":""}{revealedCase.reaction_1d_pct}%</Mono>
+          </div>
+          <p style={{fontSize:14,color:"#fff",fontWeight:600,marginBottom:16}}>{h.step3Question}</p>
+          <div style={{display:"flex",justifyContent:"space-between",fontSize:10.5,color:"rgba(255,255,255,0.4)",fontFamily:"monospace",marginBottom:6}}>
+            <span>{h.certaintyNo}</span><span>{h.certaintyYes}</span>
+          </div>
+          <input type="range" min="0" max="100" value={hindsightConfidence} onChange={e=>setHindsightConfidence(+e.target.value)} style={{width:"100%",marginBottom:22}}/>
+          <button onClick={finish} style={{padding:"12px 28px",background:C.gold,color:"#18181a",border:"none",borderRadius:4,cursor:"pointer",fontFamily:"monospace",fontSize:12,letterSpacing:1,fontWeight:700}}>{h.revealBtn}</button>
+        </div>
+      )}
+
+      {step === 5 && (
+        <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"26px 30px"}}>
+          <div style={{fontWeight:600,fontSize:15,color:C.black,marginBottom:14}}>{h.revealTitle}</div>
+          {fillTemplate(h.revealBody, { user_accuracy: accuracy, user_confidence: avgConfidence, user_hindsight: hindsightConfidence }).split("\n\n").map((p,i) => (
+            <p key={i} style={{fontSize:13,color:C.inkMid,lineHeight:1.7,marginBottom:10}}>{p}</p>
+          ))}
+          <p style={{fontSize:11.5,color:C.inkFaint,fontStyle:"italic",marginBottom:18}}>{h.privacyNote}</p>
+
+          <div style={{fontWeight:600,fontSize:12.5,color:C.black,marginBottom:10}}>{h.revealedCasesTitle}</div>
+          <div style={{display:"flex",flexDirection:"column",gap:8}}>
+            {pool.map((c,i) => (
+              <div key={i} style={{display:"flex",justifyContent:"space-between",fontSize:11.5,fontFamily:"monospace",padding:"6px 0",borderBottom:`1px solid ${C.border}`}}>
+                <span>{c[nameKey]} · {c.report_date}</span>
+                <span style={{color: c.reaction_1d_pct>=0?"#2d7a4f":C.red}}>{c.reaction_1d_pct>0?"+":""}{c.reaction_1d_pct}%</span>
+              </div>
+            ))}
+          </div>
+          <p style={{fontSize:11,color:C.inkFaint,marginTop:14}}>{h.xpNote}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Осцилляторы: что они измеряют ──────────────────────────────────────────
+function OscillatorMath() {
+  const T9 = window.Ch9Content[INITIAL_LANG] || window.Ch9Content.ru;
+  const om = T9.oscillatorMath;
+  return (
+    <div style={{marginBottom:48}}>
+      <div style={{display:"flex",flexDirection:"column",gap:20}}>
+        {[[om.rsiTitle,om.rsiBody],[om.macdTitle,om.macdBody],[om.divTitle,om.divBody]].map(([t,x],i) => (
+          <div key={i} style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px"}}>
+            <div style={{fontWeight:600,fontSize:15,color:C.black,marginBottom:10}}>{t}</div>
+            {x.split("\n\n").map((p,j) => <p key={j} style={{fontSize:13,color:C.inkMid,lineHeight:1.7,marginBottom:10}}>{p}</p>)}
+          </div>
+        ))}
       </div>
-      <p style={{fontSize:16,color:C.black,marginBottom:18,lineHeight:1.55,fontWeight:500}}>{q.q}</p>
-      <div style={{display:"grid",gap:10}}>
-        {q.o.map((opt,i)=>{
-          let bg="#fff", bc=C.border;
-          if(sel!==null){if(i===q.c){bg="rgba(34,197,94,.08)";bc="#86efac";}else if(i===sel){bg="rgba(239,68,68,.08)";bc="#fca5a5";}}
+    </div>
+  );
+}
+
+// ─── Таблица §3.6 — инструмент × ТФ × условие, с базовой линией и сортировкой ──
+const CHART_SYMBOLS = new Set(["GOLD","SILVER","BTC","ETH","SOL","SPX","NASDAQ","DJI","VIX","WTI","NG","EURUSD","GBPUSD","USDJPY","DXY"]);
+
+function OscillatorRealityTable({ cells }) {
+  const { useState, useMemo } = React;
+  const T9 = window.Ch9Content[INITIAL_LANG] || window.Ch9Content.ru;
+  const ot = T9.oscTable;
+  if (!cells || !cells.length) return null;
+
+  const [condition, setCondition] = useState("rsi_high");
+  const [checkpoint, setCheckpoint] = useState("k10");
+  const [sortKey, setSortKey] = useState("symbol");
+  const [sortDir, setSortDir] = useState(1);
+
+  const verdictShort = (key) => key === "no_edge" ? ot.verdictNoEdgeShort : key === "weak_edge" ? ot.verdictWeakEdgeShort : ot.verdictEdgeShort;
+
+  const cols = [
+    { key: "symbol", label: ot.colSymbol, align: "left" },
+    { key: "tf", label: ot.colTf, align: "center" },
+    { key: "n", label: ot.colN, align: "center" },
+    { key: "share_reversal", label: ot.colShare, align: "center" },
+    { key: "base_share", label: ot.colBase, align: "center" },
+    { key: "edge_pp", label: ot.colEdge, align: "center" },
+    { key: "verdict_key", label: ot.colVerdict, align: "center" },
+  ];
+
+  const rows = useMemo(() => {
+    const out = [];
+    cells.forEach(cell => {
+      const v = cell.conditions && cell.conditions[condition] && cell.conditions[condition][checkpoint];
+      if (v && v.shown) out.push({ symbol: cell.symbol, tf: cell.tf, ...v });
+    });
+    const isNum = typeof out[0]?.[sortKey] === "number";
+    out.sort((a,b) => {
+      const d = isNum ? (a[sortKey]-b[sortKey]) : String(a[sortKey]).localeCompare(String(b[sortKey]));
+      return d*sortDir || a.symbol.localeCompare(b.symbol);
+    });
+    return out;
+  }, [cells, condition, checkpoint, sortKey, sortDir]);
+
+  const onSort = (key) => {
+    if (key === sortKey) setSortDir(d => -d);
+    else { setSortKey(key); setSortDir(1); }
+  };
+
+  return (
+    <div style={{marginBottom:24}}>
+      <div style={{display:"flex",gap:6,marginBottom:10,flexWrap:"wrap",alignItems:"center"}}>
+        {[["rsi_high",ot.tabConditionRsi],["divergence",ot.tabConditionDiv]].map(([k,label]) => (
+          <button key={k} onClick={()=>setCondition(k)} style={{fontFamily:"monospace",fontSize:11,padding:"6px 14px",cursor:"pointer",background:k===condition?C.gold:"#fff",color:k===condition?"#18181a":C.inkMid,border:`1px solid ${k===condition?C.gold:C.border}`,borderRadius:3,fontWeight:600}}>{label}</button>
+        ))}
+        <span style={{width:1,height:18,background:C.border,margin:"0 4px"}}/>
+        {["k5","k10","k20"].map(k => (
+          <button key={k} onClick={()=>setCheckpoint(k)} style={{fontFamily:"monospace",fontSize:11,padding:"6px 12px",cursor:"pointer",background:k===checkpoint?C.black:"#fff",color:k===checkpoint?"#fff":C.inkMid,border:`1px solid ${k===checkpoint?C.black:C.border}`,borderRadius:3}}>{ot.checkpointPrefix} {k.slice(1)} {ot.checkpointSuffix}</button>
+        ))}
+      </div>
+      <div style={{overflowX:"auto"}}>
+        <table style={{borderCollapse:"collapse",width:"100%",minWidth:620}}>
+          <thead>
+            <tr>
+              {cols.map(col => (
+                <th key={col.key} onClick={()=>onSort(col.key)} style={{textAlign:col.align,padding:"7px 9px",fontSize:10,fontFamily:"monospace",color:sortKey===col.key?C.gold:C.inkFaint,textTransform:"uppercase",borderBottom:`1px solid ${C.border}`,cursor:"pointer",userSelect:"none",whiteSpace:"nowrap"}}>
+                  {col.label}{sortKey===col.key ? (sortDir>0?" ▾":" ▴") : ""}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r,i) => (
+              <tr key={i}>
+                <td style={{padding:"6px 9px",fontSize:11.5,color:C.black,fontWeight:600,borderBottom:`1px solid ${C.border}`}}>
+                  {CHART_SYMBOLS.has(r.symbol)
+                    ? <a href={"/chart.html?s="+r.symbol} target="_blank" rel="noopener" style={{color:C.black,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>{r.symbol}</a>
+                    : r.symbol}
+                </td>
+                <td style={{padding:"6px 9px",textAlign:"center",fontSize:10.5,fontFamily:"monospace",color:C.inkSoft,borderBottom:`1px solid ${C.border}`}}>{r.tf}</td>
+                <td style={{padding:"6px 9px",textAlign:"center",fontSize:10.5,fontFamily:"monospace",color:C.inkSoft,borderBottom:`1px solid ${C.border}`}}>{r.n}</td>
+                <td style={{padding:"6px 9px",textAlign:"center",fontSize:11,fontFamily:"monospace",color:C.inkMid,borderBottom:`1px solid ${C.border}`}}>{r.share_reversal}%</td>
+                <td style={{padding:"6px 9px",textAlign:"center",fontSize:11,fontFamily:"monospace",color:C.inkSoft,borderBottom:`1px solid ${C.border}`}}>{r.base_share}%</td>
+                <td style={{padding:"6px 9px",textAlign:"center",fontSize:11,fontFamily:"monospace",fontWeight:600,color:C.inkMid,borderBottom:`1px solid ${C.border}`}}>{r.edge_pp>0?"+":""}{r.edge_pp}</td>
+                <td style={{padding:"6px 9px",textAlign:"center",fontSize:10,fontFamily:"monospace",color:C.inkSoft,borderBottom:`1px solid ${C.border}`}}>{verdictShort(r.verdict_key)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+// ─── "Наши измерения" ───────────────────────────────────────────────────────
+function CoreMeasureBlock({ vars, cells }) {
+  const T9 = window.Ch9Content[INITIAL_LANG] || window.Ch9Content.ru;
+  const cm = T9.coreMeasure;
+  return (
+    <div style={{marginBottom:56}}>
+      <p style={{fontSize:14,color:C.inkMid,lineHeight:1.75,marginBottom:20,maxWidth:820}}>{cm.preamble}</p>
+      <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:6,padding:"16px 20px",marginBottom:28}}>
+        <div style={{fontWeight:600,fontSize:12.5,color:C.black,marginBottom:6}}>{cm.methodTitle}</div>
+        <p style={{fontSize:12,color:C.inkMid,lineHeight:1.65,margin:0}}>{cm.methodBody}</p>
+      </div>
+      <OscillatorRealityTable cells={cells}/>
+      <div style={{display:"flex",flexDirection:"column",gap:20,marginBottom:20}}>
+        {[[cm.finding1Title,cm.finding1Text],[cm.finding2Title,cm.finding2Text],[cm.finding3Title,cm.finding3Text]].map(([t,x],i) => (
+          <div key={i}>
+            <div style={{fontWeight:600,fontSize:14,color:C.black,marginBottom:6}}>{t}</div>
+            <p style={{fontSize:13,color:C.inkMid,lineHeight:1.7,margin:0}}>{vars ? fillTemplate(x, vars) : "—"}</p>
+          </div>
+        ))}
+      </div>
+      <div style={{background:C.goldPale,border:`1px solid ${C.borderGold}`,borderRadius:6,padding:"18px 22px",marginBottom:16}}>
+        <div style={{fontWeight:600,fontSize:12.5,color:C.black,marginBottom:6}}>{cm.honestTitle}</div>
+        <p style={{fontSize:12,color:C.inkMid,lineHeight:1.65,margin:0}}>{cm.honestBody}</p>
+      </div>
+      <a href="/data/edu_stats/oscillator_reality.csv" download style={{fontFamily:"monospace",fontSize:12,color:C.gold,textDecoration:"none",border:`1px solid ${C.gold}`,padding:"9px 16px",borderRadius:4,display:"inline-block"}}>{cm.downloadCsv}</a>
+    </div>
+  );
+}
+
+// ─── Три кейса — три механизма ──────────────────────────────────────────────
+function ThreeCases({ cases }) {
+  const { useState } = React;
+  const T9 = window.Ch9Content[INITIAL_LANG] || window.Ch9Content.ru;
+  const tc = T9.threeCases;
+  const nameKey = "company_" + INITIAL_LANG;
+  const byId = {};
+  (cases || []).forEach(c => { byId[c.id] = c; });
+  const [active, setActive] = useState(0);
+  const tcase = tc.cases[active];
+  const real = byId[tcase.id];
+  return (
+    <div style={{marginBottom:48}}>
+      <div style={{display:"flex",gap:8,marginBottom:20,flexWrap:"wrap"}}>
+        {tc.cases.map((c,i) => {
+          const r = byId[c.id];
           return (
-            <button key={i} onClick={()=>choose(i)}
-              style={{background:bg,border:`1px solid ${bc}`,color:C.ink,padding:"11px 15px",cursor:"pointer",textAlign:"left",fontFamily:"'DM Sans',sans-serif",fontSize:14,transition:"all .2s"}}
-            >{opt}</button>
+            <button key={i} onClick={()=>setActive(i)} style={{fontFamily:"monospace",fontSize:12,padding:"9px 18px",cursor:"pointer",background:i===active?C.gold:"#fff",color:i===active?"#18181a":C.inkMid,border:`1px solid ${i===active?C.gold:C.border}`,borderRadius:4,fontWeight:600}}>
+              {r ? r[nameKey] : c.id}
+            </button>
           );
         })}
       </div>
+      <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px",borderLeft:`3px solid ${C.gold}`,marginBottom:20}}>
+        <Mono size={10.5} color={C.gold} spacing={1} style={{display:"block",marginBottom:6}}>{tcase.mechanism}</Mono>
+        <div style={{fontWeight:600,fontSize:15,color:C.black,marginBottom:10}}>{real ? real[nameKey] : tcase.id} {real && <span style={{color:C.inkFaint,fontWeight:400,fontSize:12}}>· {real.report_date}</span>}</div>
+        <p style={{fontSize:13,color:C.inkMid,lineHeight:1.7,marginBottom:real?10:0}}>{tcase.text}</p>
+        {real && <Mono size={10} color={C.inkFaint} spacing={0.5}>{tc.readMore}: {real.source}</Mono>}
+      </div>
+      <p style={{fontSize:13,color:C.inkMid,lineHeight:1.7,fontStyle:"italic",background:C.goldPale,padding:"16px 20px",borderRadius:6,margin:0}}>{tc.closingLine}</p>
     </div>
   );
 }
 
-// ─────────────────────────────────────────────
-// METRICS EXPLAINER
-// ─────────────────────────────────────────────
-function MetricsExplainer({t, mode}) {
-  const [open, setOpen] = useState(null);
+// ─── Ступень 4: домашнее задание + точка возврата, без CTA лестницы ────────
+function LadderLimitBlock() {
+  const T9 = window.Ch9Content[INITIAL_LANG] || window.Ch9Content.ru;
+  const ll = T9.ladderLimit;
   return (
-    <div style={{marginBottom:40}}>
-      <div style={{fontFamily:"'DM Serif Display',serif",fontSize:20,fontWeight:700,color:C.black,marginBottom:16}}>{t.metricsTitle}</div>
-      {t.metrics.map((m,i)=>(
-        <div key={i} onClick={()=>setOpen(open===i?null:i)}
-          style={{border:`1px solid ${open===i?C.gold:C.border}`,marginBottom:-1,cursor:"pointer",background:open===i?"rgba(201,151,58,.03)":"#fff",transition:"all .2s"}}>
-          <div style={{display:"flex",alignItems:"center",gap:14,padding:"14px 18px"}}>
-            <div style={{fontFamily:"monospace",fontSize:20,fontWeight:900,color:C.gold,minWidth:52}}>{m.key}</div>
-            <div style={{flex:1}}>
-              <div style={{fontSize:14,fontWeight:600,color:C.black}}>{m.name}</div>
-              <div style={{fontFamily:"monospace",fontSize:10,color:C.inkFaint,letterSpacing:1}}>{m.formula}</div>
-            </div>
-            <div style={{display:"flex",gap:6}}>
-              <span style={{background:"rgba(34,197,94,.12)",color:C.bull,fontFamily:"monospace",fontSize:9,padding:"3px 8px",letterSpacing:1}}>▲ {m.beat?.toUpperCase()}</span>
-              <span style={{background:"rgba(239,68,68,.12)",color:C.bear,fontFamily:"monospace",fontSize:9,padding:"3px 8px",letterSpacing:1}}>▼ {m.miss?.toUpperCase()}</span>
-            </div>
-            <div style={{fontSize:13,color:C.inkFaint,transition:"transform .25s",transform:open===i?"rotate(90deg)":"none"}}>›</div>
-          </div>
-          {open===i&&(
-            <div style={{padding:"0 18px 16px 84px",borderTop:`1px solid ${C.border}`}}>
-              <p style={{fontSize:14,color:C.inkMid,lineHeight:1.75,marginTop:12}}>
-                {mode==="pro"?m.pro:m.beg}
-              </p>
-            </div>
-          )}
-        </div>
-      ))}
+    <div style={{marginBottom:48}}>
+      {ll.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:14,color:C.inkMid,lineHeight:1.75,marginBottom:14,maxWidth:800}}>{p}</p>)}
+      <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px",marginBottom:16}}>
+        <div style={{fontWeight:600,fontSize:13,color:C.black,marginBottom:10}}>{ll.taskTitle}</div>
+        {ll.taskBody.split("\n\n").map((p,i) => <p key={i} style={{fontSize:13,color:C.inkMid,lineHeight:1.7,marginBottom:10}}>{p}</p>)}
+      </div>
+      <div style={{background:C.goldPale,border:`1px solid ${C.borderGold}`,borderRadius:8,padding:"22px 26px",marginBottom:16}}>
+        <div style={{fontWeight:600,fontSize:13,color:C.black,marginBottom:10}}>{ll.returnTitle}</div>
+        {ll.returnBody.split("\n\n").map((p,i) => <p key={i} style={{fontSize:13,color:C.inkMid,lineHeight:1.7,marginBottom:10}}>{p}</p>)}
+      </div>
+      <div style={{border:`1px dashed ${C.borderGold}`,borderRadius:8,padding:"18px 22px",background:C.surface}}>
+        <p style={{fontSize:12,color:C.inkFaint,fontStyle:"italic",margin:0}}>{ll.pendingNote}</p>
+      </div>
     </div>
   );
 }
 
-// ─────────────────────────────────────────────
-// MAIN CHAPTER 9
-// ─────────────────────────────────────────────
+// ─── Предикт недели ─────────────────────────────────────────────────────────
+function PredictDiv({ vars }) {
+  const { useState } = React;
+  const T9 = window.Ch9Content[INITIAL_LANG] || window.Ch9Content.ru;
+  const p = T9.predict;
+  const [picked, setPicked] = useState(null);
+  return (
+    <div style={{border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px",marginTop:8,marginBottom:24}}>
+      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{p.tag}</Mono>
+      <p style={{fontSize:14.5,color:C.black,lineHeight:1.65,marginBottom:14}}>{p.question}</p>
+      <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:14}}>
+        {p.options.map((o,i) => (
+          <button key={i} onClick={()=>setPicked(i)} style={{fontFamily:"monospace",fontSize:12,padding:"9px 20px",cursor:"pointer",background:picked===i?C.gold:"#fff",color:picked===i?"#18181a":C.inkMid,border:`1px solid ${picked===i?C.gold:C.border}`,borderRadius:4}}>{o}</button>
+        ))}
+      </div>
+      {picked !== null && vars && <p style={{fontSize:12.5,color:C.inkMid,lineHeight:1.7,marginBottom:10,background:C.goldPale,padding:"12px 16px",borderRadius:4}}>{fillTemplate(p.afterPick, vars)}</p>}
+      <p style={{fontSize:11,color:C.inkFaint}}>{p.xpNote}</p>
+    </div>
+  );
+}
+
+// ─── Main Chapter 9 ────────────────────────────────────────────────────────────
 function Chapter9() {
-  const [askOpen, setAskOpen] = useState(false);
-  const [mode, setMode]     = useState("beg");
-  const t = TR[INITIAL_LANG] || TR.ru;
   const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
+  const lang = INITIAL_LANG;
+  const T9 = window.Ch9Content[lang] || window.Ch9Content.ru;
+  const { loading, error, osc, cases } = useCh9Data();
+  const vars = React.useMemo(() => buildVars(osc, lang), [osc, lang]);
 
   return (
     <div style={{minHeight:"100vh",background:C.white,color:C.ink,fontFamily:"'DM Sans',sans-serif"}}>
 
-      {/* ── STICKY NAV ── */}
-      <div style={{position:"sticky",top:106,background:"rgba(255,255,255,0.96)",backdropFilter:"blur(10px)",borderBottom:`1px solid ${C.border}`,padding:"12px 5vw",display:"flex",alignItems:"center",justifyContent:"space-between",zIndex:50,flexWrap:"wrap",gap:10}}>
-        <div style={{display:"flex",alignItems:"center",gap:16}}>
-          <span onClick={()=>window.location.href=getChUrl(8)} style={{color:C.gold,cursor:"pointer",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</span>
-          <Chip>{t.chNum}</Chip>
-          <Mono size={14} color={C.inkSoft} spacing={0} style={{display:"none",["@media(minWidth:600px)"]:{display:"block"}}}>{t.chName}</Mono>
+      <div style={{position:"sticky",top:106,background:"rgba(255,255,255,0.96)",backdropFilter:"blur(10px)",borderBottom:`1px solid ${C.border}`,padding:"15px 5vw",display:"flex",alignItems:"center",justifyContent:"space-between",zIndex:50}}>
+        <div style={{display:"flex",alignItems:"center",gap:20}}>
+          <span onClick={() => window.location.href = getChUrl(8, lang)} style={{color:C.gold,cursor:"pointer",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</span>
+          <Chip>{S.levelChip}</Chip>
+          <Mono size={14} color={C.inkSoft} spacing={0} className="hide-mobile">{S.chapterNameShort}</Mono>
         </div>
-        <ModeToggle mode={mode} setMode={setMode} t={t}/>
+        <div style={{display:"flex",gap:8}}>
+          <Chip color={C.inkFaint}>{S.faTag}</Chip>
+          <Chip color={C.inkFaint}>{S.taTag}</Chip>
+        </div>
       </div>
 
-      <div style={{maxWidth:920,margin:"0 auto",padding:"52px 5vw 120px"}}>
-
-        {/* ── TITLE ── */}
-        <div style={{textAlign:"center",marginBottom:56}}>
-          <Mono size={12} color={C.gold} spacing={4} style={{display:"block",marginBottom:14}}>SBF COMPANY · {t.chNum}</Mono>
-          <h1 style={{fontSize:"clamp(32px,5vw,52px)",fontWeight:700,color:C.black,fontFamily:"'DM Serif Display',serif",marginBottom:16,lineHeight:1.1}}>
-            {t.chName}
+      <div style={{background:C.black,padding:"80px 5vw 70px",textAlign:"center",position:"relative",overflow:"hidden"}}>
+        <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 100%, rgba(201,151,58,0.1) 0%, transparent 60%)"}}/>
+        <div style={{position:"relative"}}>
+          <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:20}}>{S.heroEyebrow}</Mono>
+          <h1 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(36px,6vw,66px)",fontWeight:400,color:C.white,lineHeight:1.05,marginBottom:20}}>
+            {S.heroTitleLine1}<br/><span style={{color:C.gold}}>{S.heroTitleLine2}</span>
           </h1>
-          <p style={{fontSize:18,color:C.inkMid,maxWidth:620,margin:"0 auto",lineHeight:1.6}}>{t.chTitle}</p>
-        </div>
-
-        {/* ── MYTH BLOCK ── */}
-        <div style={{background:C.dark,color:"#fff",padding:"32px 36px",marginBottom:52,position:"relative",overflow:"hidden"}}>
-          <div style={{position:"absolute",top:-10,right:20,fontSize:90,opacity:.04,fontFamily:"monospace",pointerEvents:"none"}}><img class='mi-icon' style={{verticalAlign:'middle'}} src='/assets/icons/icon-bar-chart.png' alt='' width='20' height='20' /></div>
-          <Chip color={C.gold}>{t.mythTag}</Chip>
-          <h2 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(18px,2.5vw,26px)",fontWeight:700,margin:"14px 0 12px",color:"#fff",lineHeight:1.25}}>{t.mythTitle}</h2>
-          <p style={{fontSize:15,color:"#ccc",lineHeight:1.85}}>{t.mythBody}</p>
-        </div>
-
-        {/* ═══════════════════════════════════════
-            9.1 FUNDAMENTAL ANALYSIS
-        ═══════════════════════════════════════ */}
-        <div style={{marginBottom:28}}>
-          <div style={{fontFamily:"monospace",fontSize:11,letterSpacing:3,color:C.gold,border:`1px solid ${C.gold}`,padding:"3px 9px",display:"inline-block",marginBottom:10}}>{t.faTag}</div>
-          <div style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(22px,3vw,32px)",fontWeight:700,color:C.black,letterSpacing:-.5,marginBottom:6,lineHeight:1.2}}>{t.faTitle}</div>
-          <div style={{fontSize:13,color:C.inkSoft,marginBottom:20}}>{t.faSub}</div>
-        </div>
-        <div style={{marginBottom:16,display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
-          <ModeToggle mode={mode} setMode={setMode} t={t}/>
-          <Mono size={11} color={C.inkFaint} spacing={1}>{mode==="beg"?S.modeBeg:S.modePro}</Mono>
-        </div>
-
-        {/* Metrics explainer accordion */}
-        <MetricsExplainer t={t} mode={mode}/>
-
-        {/* Earnings Simulator */}
-        <div style={{marginBottom:12}}>
-          <div style={{fontFamily:"'DM Serif Display',serif",fontSize:20,fontWeight:700,color:C.black,marginBottom:6}}>{t.simTitle}</div>
-          <div style={{fontSize:13,color:C.inkSoft,marginBottom:16}}>{t.simSub}</div>
-        </div>
-        <EarningsSimulator t={t}/>
-
-        <Rule/>
-
-        {/* ═══════════════════════════════════════
-            9.2 TECHNICAL ANALYSIS
-        ═══════════════════════════════════════ */}
-        <div style={{marginBottom:28}}>
-          <div style={{fontFamily:"monospace",fontSize:11,letterSpacing:3,color:C.gold,border:`1px solid ${C.gold}`,padding:"3px 9px",display:"inline-block",marginBottom:10}}>{t.taTag}</div>
-          <div style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(22px,3vw,32px)",fontWeight:700,color:C.black,letterSpacing:-.5,marginBottom:6,lineHeight:1.2}}>{t.taTitle}</div>
-          <div style={{fontSize:13,color:C.inkSoft,marginBottom:20}}>{t.taSub}</div>
-        </div>
-
-        {/* RSI */}
-        <div style={{background:C.surface,border:`1px solid ${C.border}`,padding:"24px 24px 20px",marginBottom:20}}>
-          <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:16,marginBottom:16,flexWrap:"wrap"}}>
-            <div>
-              <div style={{fontFamily:"'DM Serif Display',serif",fontSize:20,fontWeight:700,color:C.black,marginBottom:4}}>{t.rsiTitle}</div>
-              <p style={{fontSize:14,color:C.inkMid,lineHeight:1.75,maxWidth:580}}>{mode==="beg"?t.rsiBeg:t.rsiPro}</p>
-            </div>
-          </div>
-          {/* Formula box */}
-          <div style={{background:"rgba(201,151,58,.06)",border:`1px solid ${C.borderGold}`,padding:"12px 16px",marginBottom:16,display:"inline-block"}}>
-            <div style={{fontFamily:"monospace",fontSize:14,color:C.gold,fontWeight:700,marginBottom:4}}>{t.rsiFormula}</div>
-            <div style={{fontFamily:"monospace",fontSize:11,color:C.inkSoft}}>{t.rsiFormulaDetail}</div>
-          </div>
-          <RSIFigure/>
-          <RSIChart mode={mode}/>
-        </div>
-
-        {/* MACD */}
-        <div style={{background:C.surface,border:`1px solid ${C.border}`,padding:"24px 24px 20px",marginBottom:20}}>
-          <div style={{fontFamily:"'DM Serif Display',serif",fontSize:20,fontWeight:700,color:C.black,marginBottom:8}}>{t.macdTitle}</div>
-          <p style={{fontSize:14,color:C.inkMid,lineHeight:1.75,maxWidth:580,marginBottom:14}}>{mode==="beg"?t.macdBeg:t.macdPro}</p>
-          <div style={{background:"rgba(201,151,58,.06)",border:`1px solid ${C.borderGold}`,padding:"12px 16px",marginBottom:16,display:"inline-block"}}>
-            <div style={{fontFamily:"monospace",fontSize:14,color:C.gold,fontWeight:700,marginBottom:4}}>{t.macdFormula}</div>
-            <div style={{fontFamily:"monospace",fontSize:11,color:C.inkSoft}}>{t.macdFormulaDetail}</div>
-          </div>
-          <MACDFigure/>
-          <MACDChart/>
-        </div>
-
-        {/* DIVERGENCE theory cards */}
-        <div style={{marginBottom:24}}>
-          <div style={{fontFamily:"'DM Serif Display',serif",fontSize:20,fontWeight:700,color:C.black,marginBottom:8}}>{t.divTitle}</div>
-          <p style={{fontSize:14,color:C.inkMid,lineHeight:1.75,marginBottom:16}}>{mode==="beg"?t.divBeg:t.divPro}</p>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(260px,1fr))",gap:12}}>
-            {t.divTypes.map((d,i)=>(
-              <div key={i} style={{border:`1px solid ${d.color}20`,background:`${d.color}08`,padding:"18px 20px"}}>
-                <div style={{fontSize:28,marginBottom:8}}>{d.icon}</div>
-                <div style={{fontSize:15,fontWeight:700,color:d.color,marginBottom:6,fontFamily:"'DM Serif Display',serif"}}>{d.type}</div>
-                <div style={{fontSize:13,color:C.inkMid,lineHeight:1.7}}>{d.desc}</div>
-              </div>
-            ))}
+          <p style={{fontSize:"clamp(16px,2vw,20px)",color:"rgba(255,255,255,0.55)",maxWidth:640,margin:"0 auto 32px",lineHeight:1.65}}>{S.heroSubtitle}</p>
+          <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
+            <Chip color={C.gold}>{S.fundamentalChip}</Chip>
+            <Chip color="rgba(255,255,255,0.3)">{S.technicalChip}</Chip>
+            <Chip color="rgba(255,255,255,0.3)">{S.interactiveChip}</Chip>
           </div>
         </div>
-
-        {/* DIVERGENCE HUNT */}
-        <div style={{marginBottom:28}}>
-          <div style={{fontFamily:"'DM Serif Display',serif",fontSize:20,fontWeight:700,color:C.black,marginBottom:6}}>{t.huntTitle}</div>
-          <div style={{fontSize:13,color:C.inkSoft,marginBottom:16}}>{t.huntSub}</div>
-          <DivergenceHunt t={t}/>
-        </div>
-
-        <Rule/>
-
-        {/* COMBO SIGNAL */}
-        <div style={{background:C.surface,border:`1px solid ${C.border}`,padding:"24px 24px 20px",marginBottom:48}}>
-          <Chip>{t.comboTag}</Chip>
-          <div style={{fontFamily:"'DM Serif Display',serif",fontSize:20,fontWeight:700,color:C.black,margin:"12px 0 10px"}}>{t.comboTitle}</div>
-          <p style={{fontSize:14,color:C.inkMid,lineHeight:1.75,marginBottom:18}}>{mode==="beg"?t.comboBeg:t.comboPro}</p>
-          <ComboSignalChart/>
-          <div style={{marginTop:14,background:"rgba(34,197,94,.06)",border:`1px solid rgba(34,197,94,.25)`,padding:"12px 16px"}}>
-            <Mono size={12} color={C.bull} spacing={1} style={{display:"block",marginBottom:4}}>✓ DOUBLE CONFIRMATION SIGNAL</Mono>
-            <div style={{fontSize:13,color:C.inkMid,lineHeight:1.6}}>
-              {INITIAL_LANG==="ru"?"RSI в зоне перепроданности (<30) + MACD crossover вверх. Стрелка ▲ показывает точку входа. Цена выросла на +27% после сигнала.":
-               INITIAL_LANG==="ro"?"RSI în zona supravândut (<30) + MACD crossover în sus. Săgeata ▲ indică punctul de intrare. Prețul a crescut cu +27% după semnal.":
-               "RSI in oversold zone (<30) + MACD crossover up. Arrow ▲ shows entry point. Price rose +27% after the signal."}
-            </div>
-          </div>
-        </div>
-
-        {/* ── CHECKLIST ── */}
-        <div style={{marginBottom:12}}>
-          <div style={{fontFamily:"monospace",fontSize:11,letterSpacing:3,color:C.gold,border:`1px solid ${C.gold}`,padding:"3px 9px",display:"inline-block",marginBottom:10}}>{t.checkTag}</div>
-          <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,fontWeight:700,color:C.black,marginBottom:16}}>{t.checkTitle}</div>
-        </div>
-        <Checklist t={t}/>
-
-        <div style={{marginBottom:40}}/>
-
-        {/* ── QUIZ ── */}
-        <div style={{marginBottom:12}}>
-          <Chip>{t.quizTag}</Chip>
-          <div style={{height:16}}/>
-        </div>
-        <Quiz t={t}/>
-
-        <div style={{height:40}}/>
-
-        {/* ── FOOTER ── */}
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",paddingTop:32,borderTop:`1px solid ${C.border}`,flexWrap:"wrap",gap:12}}>
-          <button onClick={()=>window.location.href=getChUrl(8)}
-            style={{background:"transparent",border:`1px solid ${C.border}`,color:C.inkSoft,padding:"11px 20px",cursor:"pointer",fontFamily:"monospace",fontSize:11,letterSpacing:2,textDecoration:"none",transition:"all .2s"}}
-            onMouseEnter={e=>{e.currentTarget.style.borderColor=C.gold;e.currentTarget.style.color=C.gold;}}
-            onMouseLeave={e=>{e.currentTarget.style.borderColor=C.border;e.currentTarget.style.color=C.inkSoft;}}
-          >{t.prevCh}</button>
-          <span onClick={()=>setAskOpen(true)} style={{fontSize:14,color:C.inkSoft,fontFamily:"monospace",borderBottom:`1px solid ${C.border}`,cursor:"pointer",letterSpacing:1}}>{t.askLink}</span>
-          <button onClick={()=>window.location.href=getChUrl(10)}
-            style={{background:C.black,color:C.white,border:"none",padding:"16px 28px",cursor:"pointer",fontFamily:"monospace",fontSize:13,letterSpacing:2,fontWeight:700,transition:"background .2s"}}
-            onMouseEnter={e=>e.currentTarget.style.background=C.gold}
-            onMouseLeave={e=>e.currentTarget.style.background=C.black}
-          >{t.nextCh}</button>
-        </div>
-
       </div>
 
-      {askOpen && <AskAnalystPopup chapterNum={9} lang={INITIAL_LANG} onClose={()=>setAskOpen(false)}/>}
+      {loading && <div style={{textAlign:"center",padding:"60px 0",fontFamily:"monospace",fontSize:13,color:C.inkFaint}}>{S.loadingLabel}</div>}
+      {error && <div style={{textAlign:"center",padding:"40px 0",fontFamily:"monospace",fontSize:13,color:"#c0392b",background:C.redPale}}>{S.loadErrorLabel}</div>}
+
+      {!loading && (
+      <div style={{maxWidth:1060,margin:"0 auto",padding:"0 0 120px"}}>
+
+        <div style={{margin:"0 -5vw 56px"}}><ColdOpen9/></div>
+
+        <div style={{padding:"0 5vw"}}>
+
+        <IntroBlock/>
+
+        <SectionTitle sub={S.anatomySub}>{T9.earningsAnatomy.tag}</SectionTitle>
+        <EarningsAnatomy/>
+
+        <SectionTitle id="secWhyFalls" sub={S.whyFallsSub}>{T9.whyFalls.tag}</SectionTitle>
+        <WhyFalls/>
+
+        <SectionTitle sub={S.hindsightSub}>{T9.hindsight.tag}</SectionTitle>
+        <div style={{marginBottom:56}}><HindsightTest cases={cases}/></div>
+
+        <SectionTitle id="secOscillatorMath" sub={S.oscillatorSub}>{T9.oscillatorMath.tag}</SectionTitle>
+        <OscillatorMath/>
+
+        <SectionTitle id="secCoreMeasure" sub={S.coreMeasureSub}>{T9.coreMeasure.tag}</SectionTitle>
+        <CoreMeasureBlock vars={vars} cells={osc && osc.cells}/>
+
+        <SectionTitle sub={S.threeCasesSub}>{T9.threeCases.tag}</SectionTitle>
+        <ThreeCases cases={cases}/>
+
+        <Rule/>
+
+        <LadderLimitBlock/>
+
+        <QuizBlock questions={T9.quiz} levelId="level_9" lang={lang} copy={{
+          kicker: S.quizKicker, title: S.quizTitle, next: S.quizNext,
+          stuckAll: S.quizStuckAll, stuckSome: S.quizStuckSome, backToSection: S.quizBackToSection,
+        }} />
+
+        <PredictDiv vars={vars}/>
+
+        <div style={{border:`1px dashed ${C.borderGold}`,borderRadius:8,padding:"20px 24px",marginBottom:32,background:C.surface}}>
+          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T9.cliffhanger.tag}</Mono>
+          {T9.cliffhanger.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:14,color:C.inkMid,lineHeight:1.7,marginBottom:10}}>{p}</p>)}
+        </div>
+
+        <div style={{marginBottom:32}}>
+          <Mono size={10} color={C.inkFaint} spacing={2} style={{display:"block",marginBottom:10,textTransform:"uppercase"}}>{T9.sources.tag}</Mono>
+          <ol style={{fontSize:11.5,color:C.inkFaint,lineHeight:1.8,paddingLeft:18,marginBottom:8}}>
+            {T9.sources.list.map((s,i) => <li key={i}>{s}</li>)}
+            {osc && osc._meta && (() => {
+              const m = osc._meta;
+              const text = T9.sources.ownTemplate
+                .replace("{{n_cells}}", m.n_cells).replace("{{rsi_period}}", m.rsi_period)
+                .replace("{{div_window}}", m.div_window).replace("{{built}}", "27.07.2026");
+              return (
+                <li>
+                  {text}{" "}
+                  <a href="/data/edu_stats/oscillator_reality.csv" download style={{color:C.gold}}>{T9.sources.csvLabel}</a>
+                </li>
+              );
+            })()}
+          </ol>
+          <p style={{fontSize:11,color:C.inkFaint,fontStyle:"italic"}}>{T9.sources.checked}</p>
+        </div>
+
+        <ComplianceFootnote lang={lang} />
+
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:20,paddingTop:48,marginTop:16,borderTop:`1px solid ${C.border}`}}>
+          <AskAnalystBtn tr={{askAnalyst:S.askQuestionLabel}} chapterNum={9} lang={lang} />
+          <button
+            onClick={() => window.location.href = getChUrl(10, lang)}
+            style={{background:C.black,color:C.white,border:"none",padding:"18px 35px",cursor:"pointer",fontFamily:"monospace",fontSize:14,letterSpacing:2,fontWeight:700,transition:"background .2s"}}
+            onMouseEnter={e=>e.target.style.background=C.gold}
+            onMouseLeave={e=>e.target.style.background=C.black}>
+            {S.nextChapterBtn}
+          </button>
+        </div>
+
+        </div>
+      </div>
+      )}
     </div>
   );
 }
 
-ReactDOM.createRoot(document.getElementById('sbf-book-root')).render(<Chapter9/>);
+ReactDOM.createRoot(document.getElementById('sbf-book-root')).render(<Chapter9 />);
 {% endraw %}
 </script>
 </body>
