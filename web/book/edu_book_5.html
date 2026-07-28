@@ -846,6 +846,12 @@ function AsiaBoxTrainer({ as }) {
         <div>
           <Mono size={11} color={C.gold} spacing={2}>{tr.tag}</Mono>
           <div style={{fontFamily:"monospace",fontSize:12,color:C.inkSoft,marginTop:4}}>{fillTemplate(tr.dayCounter, {cur:idx+1, total:days.length})} · {tr.dateLabel}: {day.date}</div>
+          {/* P2.2: "День 1 из 5" видно с первого экрана тренажёра, а честное
+              объяснение "почему 5, а не 6 из спеки" раньше показывалось
+              только на финальном экране (phase==="done") -- часть читателей
+              так до него и не доходит. Та же строка honestCount, просто
+              видна сразу, а не только в конце. */}
+          <div style={{fontSize:10.5,color:C.inkFaint,marginTop:2,maxWidth:420,lineHeight:1.4}}>{fillTemplate(tr.honestCount, {total:days.length})}</div>
         </div>
         {phase !== "done" && <button onClick={restart} style={{padding:"8px 16px",background:C.black,color:"#fff",border:"none",borderRadius:4,cursor:"pointer",fontFamily:"monospace",fontSize:11}}>{tr.resetBtn}</button>}
       </div>
