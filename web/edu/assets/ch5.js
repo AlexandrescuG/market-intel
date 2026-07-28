@@ -138,6 +138,9 @@ window.Ch5Content = {
       coverageWarningYear: "Меньше года данных — сезонные эффекты (декабрь, лето) ещё не проверены.",
       downloadCsv: "⬇ Скачать наши числа (CSV)",
       buildNote: "Построено скриптом hourly_profile.py по web/data/ohlc_{ASSET}_M30.json.",
+      noDataTooltip: "Мало данных на этот час в выбранном разрезе",
+      noDataCaption: "Заштрихованные столбики — на этот час в выбранном разрезе недостаточно данных, не ноль.",
+      nowMarker: "сейчас",
     },
     threeEngines: {
       tag: "ТРИ МОТОРА СУТОК",
@@ -434,6 +437,9 @@ window.Ch5Content = {
       coverageWarningYear: "Mai puțin de un an de date — efectele sezoniere (decembrie, vara) încă nu sunt verificate.",
       downloadCsv: "⬇ Descarcă cifrele noastre (CSV)",
       buildNote: "Construit de scriptul hourly_profile.py din web/data/ohlc_{ASSET}_M30.json.",
+      noDataTooltip: "Date insuficiente pentru această oră în segmentul ales",
+      noDataCaption: "Coloanele hașurate — date insuficiente pentru acea oră în segmentul ales, nu zero.",
+      nowMarker: "acum",
     },
     threeEngines: {
       tag: "TREI MOTOARE ALE ZILEI",
@@ -722,6 +728,9 @@ window.Ch5Content = {
       coverageWarningYear: "Less than a year of data — seasonal effects (December, summer) haven't been checked yet.",
       downloadCsv: "⬇ Download our numbers (CSV)",
       buildNote: "Built by hourly_profile.py from web/data/ohlc_{ASSET}_M30.json.",
+      noDataTooltip: "Not enough data for this hour in the selected slice",
+      noDataCaption: "Hatched columns — not enough data for that hour in the selected slice, not zero.",
+      nowMarker: "now",
     },
     threeEngines: {
       tag: "THREE ENGINES OF THE DAY",

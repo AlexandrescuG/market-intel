@@ -394,6 +394,7 @@ function HourStatsBlock({ hp, vars }) {
   const [subset, setSubset] = useState("all");
   const data = hp && hp[asset];
   const hours = Array.from({length:24}, (_,i) => i);
+  const nowUtcHour = new Date().getUTCHours();
 
   const periods = data ? Object.keys(data.by_period).sort() : [];
   const cellVal = (period, h) => {
@@ -484,12 +485,41 @@ function HourStatsBlock({ hp, vars }) {
             </div>
           </div>
         ) : (
-          <div style={{display:"flex",alignItems:"flex-end",gap:2,height:90,marginBottom:8}}>
-            {hours.map(h => {
-              const v = cellVal(null, h);
-              const barH = v != null ? Math.max(3, (v/maxVal)*90) : 2;
-              return <div key={h} title={h+":00 · "+(v!=null?(v*100).toFixed(1)+"%":"—")} style={{flex:1,height:barH,background: v!=null ? C.gold : C.border,borderRadius:1}}/>;
-            })}
+          // SPEC_ch5_debug.md §4.1/§4.2: раньше -- ряд столбиков без осей и
+          // подписей часов, а часы без данных просто не рисовались (дыра без
+          // объяснения). Теперь: ось X каждые 3 часа, вертикальная линия
+          // текущего часа UTC, шкала Y (пик подписан), а часы без данных --
+          // заштрихованный столбик фиксированной высоты (тот же паттерн
+          // hatch, что у пустых клеток ImpactMatrix в academy-shared.js),
+          // а не пустое место.
+          <div style={{marginBottom:8}}>
+            {/* cellVal(null,h) для разрезов (не "все дни") приходит из
+                subsets[...].profile -- эти числа уже в процентах (29.5, а не
+                0.295, как share_of_day в ветке "все дни"), поэтому здесь без
+                повторного ×100 -- иначе на экране была бы "2955%" (живой баг,
+                пойман на SPX/"Обычный день"). */}
+            <div style={{display:"flex",justifyContent:"flex-end",fontSize:9,color:C.inkFaint,fontFamily:"monospace",marginBottom:2}}>{maxVal.toFixed(1)}%</div>
+            <div style={{position:"relative",display:"flex",alignItems:"flex-end",gap:2,height:90,borderBottom:`1px solid ${C.border}`}}>
+              {hours.map(h => {
+                const v = cellVal(null, h);
+                const hasData = v != null;
+                const barH = hasData ? Math.max(3, (v/maxVal)*90) : 7;
+                return <div key={h}
+                  title={hasData ? (h+":00 UTC · "+v.toFixed(1)+"%") : hs.noDataTooltip}
+                  style={{flex:1,height:barH,borderRadius:1,
+                    background: hasData ? C.gold : "repeating-linear-gradient(45deg, rgba(24,24,26,0.14), rgba(24,24,26,0.14) 3px, transparent 3px, transparent 7px)",
+                    border: hasData ? "none" : `1px solid ${C.border}`}}/>;
+              })}
+              <div style={{position:"absolute",left:`${((nowUtcHour+0.5)/24)*100}%`,top:0,bottom:0,width:0,borderLeft:`1px dashed ${C.black}`,opacity:0.4,pointerEvents:"none"}}/>
+            </div>
+            <div style={{display:"flex",marginTop:3}}>
+              {hours.map(h => (
+                <div key={h} style={{flex:1,textAlign:"center",fontSize:8,fontFamily:"monospace",color:h===nowUtcHour?C.black:C.inkFaint,fontWeight:h===nowUtcHour?700:400}}>{h%3===0 || h===nowUtcHour ? h : ""}</div>
+              ))}
+            </div>
+            {hours.some(h => cellVal(null,h)==null) && (
+              <p style={{fontSize:10.5,color:C.inkFaint,fontStyle:"italic",marginTop:6,marginBottom:0}}>{hs.noDataCaption}</p>
+            )}
           </div>
         )}
 
