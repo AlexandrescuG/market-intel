@@ -441,7 +441,7 @@ function HourStatsBlock({ hp, vars }) {
 
   return (
     <div>
-      <p style={{fontSize:14,color:C.inkMid,lineHeight:1.75,marginBottom:24,maxWidth:820}}>{data ? fillTemplate(hs.preamble, {total_bars:data.total_bars, n_days:data.coverage?data.coverage.n_days:null, coverage_first:data.coverage?data.coverage.first:null, coverage_last:data.coverage?data.coverage.last:null}) : "—"}</p>
+      <p style={{fontSize:14,color:C.inkMid,lineHeight:1.75,marginBottom:24,maxWidth:820}}>{data ? fillTemplate(hs.preamble, {total_bars:data.total_bars, n_trading_days_label: data.coverage ? declineTradingDays(data.coverage.n_days, INITIAL_LANG) : null, coverage_first:data.coverage?data.coverage.first:null, coverage_last:data.coverage?data.coverage.last:null}) : "—"}</p>
 
       <div style={{display:"flex",gap:20,flexWrap:"wrap",marginBottom:18,alignItems:"center"}}>
         <div>
@@ -605,7 +605,7 @@ function LiquidityGlobe({ hp }) {
 
       {!data ? <p style={{color:"rgba(255,255,255,0.5)",fontSize:13}}>—</p> : (
       <>
-        <p style={{fontSize:13.5,color:"rgba(255,255,255,0.7)",lineHeight:1.7,marginBottom:22,maxWidth:820}}>{fillTemplate(gl.step1Legend, {n_days: data.coverage ? data.coverage.n_days : null})}</p>
+        <p style={{fontSize:13.5,color:"rgba(255,255,255,0.7)",lineHeight:1.7,marginBottom:22,maxWidth:820}}>{fillTemplate(gl.step1Legend, {n_days_label: data.coverage ? declineDays(data.coverage.n_days, INITIAL_LANG) : null})}</p>
 
         {/* 24h band */}
         <div style={{display:"flex",borderRadius:4,overflow:"hidden",marginBottom:6,height:22}}>
