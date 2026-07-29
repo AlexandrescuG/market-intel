@@ -218,6 +218,7 @@ a:hover{text-decoration:underline;color:var(--glow)}
 .sig .m{display:flex;gap:8px;font-size:10px;color:var(--muted);
   font-family:'JetBrains Mono';margin-bottom:4px;flex-wrap:wrap;letter-spacing:.3px}
 .sig .src{color:var(--signal);text-transform:uppercase;font-weight:700}
+.sig .outlet-domain{color:var(--muted)}
 .sig .imp{color:var(--up)}
 .sig .ct{color:var(--gold);font-weight:700}
 .sig .t{font-size:13px;line-height:1.5}
@@ -1146,8 +1147,22 @@ function renderSignals(dim){
   el.innerHTML=rows.map(s=>{
     const ct=(s.cashtags||[]).map(t=>'$'+t).join(' ');
     const conf=confLabel[s.confidence]||'';
+    // SPEC_site_fixes_2026-07-29 §6 п.4: различить твит и новость по виду
+    // сейчас нельзя -- для RSS показываем реальное издание (outlet) вместо
+    // литерального "rss" плюс домен первоисточника; ссылка уже открывалась
+    // в новой вкладке (target=_blank), тут не менялось.
+    const isPress = s.source === 'rss';
+    const srcLabel = (isPress && s.outlet) ? s.outlet : s.source;
+    // s.domain -- резолвлен на бэкенде из entry.source.href (rss.py), нужен
+    // для Google News: s.url там ведёт через редирект news.google.com, а не
+    // на первоисточник. Для прямых лент (без domain) домен берём из URL.
+    let domain = (isPress && s.domain) ? s.domain : '';
+    if (isPress && !domain && s.url) {
+      try { domain = new URL(s.url).hostname.replace(/^www\./, ''); } catch(e) {}
+    }
     return `<div class="sig">
-      <div class="m"><span class="src">${escapeHtmlIdx(s.source)}</span>
+      <div class="m"><span class="src">${escapeHtmlIdx(srcLabel)}</span>
+        ${domain?`<span class="outlet-domain">${escapeHtmlIdx(domain)}</span>`:''}
         <span class="imp">imp ${s.importance}</span>
         ${s.engagement?`<span>👁 ${fmt(s.engagement)}</span>`:''}
         ${ct?`<span class="ct">${escapeHtmlIdx(ct)}</span>`:''}

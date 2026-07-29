@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import math
 import re
+import time
 
 # ─── Лексиконы: (измерение → категория → [(термин, вес)]) ───────────────────────
 # Термины ищутся как подстроки в lower-case тексте. Веса 1–3 по «силе» сигнала.
@@ -231,6 +232,40 @@ def importance(
         "dim_scores": scores,
         "econ_relevance": er,
         "crowd_intensity": ci,
+        "cashtags": cashtags(text),
+        "importance": round(imp, 4),
+    }
+
+
+def rss_importance(
+    text: str,
+    author: str,
+    published_ts: float | None,
+    cross_coverage: int,
+) -> dict:
+    """SPEC_site_fixes_2026-07-29 §6 п.3: RSS не имеет вовлечённости (лайков/RT)
+    -- считать по ней значит гарантированно проигрывать твитам (engagement=0
+    всегда). Вместо неё: эшелон источника (is_tier1_source), свежесть публикации
+    и число ДРУГИХ изданий, уже написавших о том же (cross_coverage, считается
+    вызывающим кодом -- db.upsert() знает соседние RSS-сигналы, scoring не
+    обязан знать про БД)."""
+    from core.credibility import is_tier1_source  # локальный импорт -- см. db.py, тот же паттерн
+
+    dim, scores = classify(text)
+    er = econ_relevance(text, scores)
+    tier = 1.0 if is_tier1_source(author) else 0.0
+    if published_ts:
+        age_hours = max(0.0, (time.time() - published_ts) / 3600)
+        freshness = max(0.0, 1 - age_hours / 24)
+    else:
+        freshness = 0.5  # неизвестно -- нейтрально, не штрафуем и не поощряем
+    coverage = math.tanh(cross_coverage / 3.0)  # 3+ независимых издания -- почти максимум
+    imp = 0.5 * er + 0.2 * tier + 0.2 * freshness + 0.1 * coverage
+    return {
+        "dimension": dim,
+        "dim_scores": scores,
+        "econ_relevance": er,
+        "crowd_intensity": 0.0,  # у заголовка СМИ нет "психологии толпы" -- это не твит
         "cashtags": cashtags(text),
         "importance": round(imp, 4),
     }

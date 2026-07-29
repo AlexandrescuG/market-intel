@@ -94,21 +94,37 @@ def publish_signals() -> None:
     # остаться меньше 12 даже когда сырых сигналов достаточно.
     from core.feed_filter import apply_feed_rules
     DISPLAY_LIMIT = 12
+    # SPEC_site_fixes_2026-07-29 §6 п.1: квота, не ранжирование -- пока
+    # importance для RSS ниже вовлечённости твитов, ранжирование одно эту
+    # задачу не решает. Не применяется к "Соцсети" (crowd) -- та вкладка
+    # сознательно осталась чисто социальной (см. §7).
+    PRESS_QUOTA = 4
     out = {}
     for dim in ("economy", "geopolitics"):
         candidates = [_sig(s) for s in db.top_by_dimension(24, dim, DISPLAY_LIMIT * 4)]
         # geopolitics по данным структурно без тикеров (см. feed_filter.py) --
         # там штамп "нет тикера" убил бы вкладку целиком, требование ослаблено
         # сознательно, политический фильтр остаётся в силе.
-        out[dim] = apply_feed_rules(candidates, DISPLAY_LIMIT, require_cashtag=(dim != "geopolitics"))
+        out[dim] = apply_feed_rules(candidates, DISPLAY_LIMIT, require_cashtag=(dim != "geopolitics"),
+                                     press_quota=PRESS_QUOTA)
     crowd_candidates = [_sig(s) for s in db.top_by_crowd(24, DISPLAY_LIMIT * 4)]
     out["crowd"] = apply_feed_rules(crowd_candidates, DISPLAY_LIMIT)
     _write("signals.json", {"updated": _now(), **out})
 
 
 def _sig(s: dict) -> dict:
+    # SPEC_site_fixes_2026-07-29 §6 п.4: для Google-News-статей s["url"] -- это
+    # редирект через news.google.com, не первоисточник, поэтому домен из URL
+    # был бы неверным ("news.google.com"). rss.py уже резолвит настоящий домен
+    # издания (entry.source.href) и кладёт в raw -- используем его, если есть.
+    try:
+        raw = json.loads(s.get("raw") or "{}")
+    except (json.JSONDecodeError, TypeError):
+        raw = {}
     return {
         "source": s["source"], "author": s["author"],
+        "outlet": s.get("topic_hint") or "",
+        "domain": raw.get("domain") or "",
         "text": (s["title"] or s["text"])[:280], "url": s["url"],
         "importance": s["importance"], "econ": s["econ_relevance"],
         "crowd": s["crowd_intensity"], "engagement": s["engagement"],

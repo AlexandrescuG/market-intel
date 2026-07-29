@@ -52,6 +52,32 @@ def init_db() -> None:
         db.commit()
 
 
+def _rss_cross_coverage(db: sqlite3.Connection, ctags: list[str], author: str, hours: int = 6) -> int:
+    """Число ДРУГИХ RSS-изданий (author != этот), у которых за последние `hours`
+    есть сигнал хотя бы с одним общим кэштегом -- прокси "сколько изданий уже
+    написали о том же" (SPEC_site_fixes_2026-07-29 §6 п.3). Без кэштегов
+    сравнивать не с чем -- 0, не гадаем по тексту."""
+    if not ctags:
+        return 0
+    cutoff = (datetime.now(timezone.utc) - timedelta(hours=hours)).isoformat()
+    rows = db.execute(
+        "SELECT author, cashtags FROM signals WHERE source='rss' AND last_seen >= ?",
+        (cutoff,),
+    ).fetchall()
+    tagset = set(ctags)
+    authors = set()
+    for a, cj in rows:
+        if a == author:
+            continue
+        try:
+            other_tags = set(json.loads(cj or "[]"))
+        except (json.JSONDecodeError, TypeError):
+            continue
+        if tagset & other_tags:
+            authors.add(a)
+    return len(authors)
+
+
 def upsert(
     *,
     source: str,
@@ -83,9 +109,20 @@ def upsert(
         prev_alerted = 0 if is_new else row[1]
         growth = engagement - prev_alerted
 
-        sc = scoring.importance(
-            blob, engagement=engagement, replies=replies, virality=max(growth, 0)
-        )
+        # SPEC_site_fixes_2026-07-29 §6 п.3: RSS всегда приходит с engagement=0
+        # (нет лайков/RT у заголовка СМИ) -- считать importance общей формулой
+        # значит гарантированно проигрывать твитам. cross_coverage считаем тут
+        # (не в scoring.py -- та не обязана знать про БД): сколько ДРУГИХ
+        # изданий уже писали с тем же кэштегом за последние часы.
+        if source == "rss":
+            ctags = scoring.cashtags(blob)
+            published_ts = (raw or {}).get("published")
+            cross_coverage = _rss_cross_coverage(db, ctags, author)
+            sc = scoring.rss_importance(blob, author, published_ts, cross_coverage)
+        else:
+            sc = scoring.importance(
+                blob, engagement=engagement, replies=replies, virality=max(growth, 0)
+            )
 
         if is_new:
             db.execute(
@@ -100,13 +137,21 @@ def upsert(
                  json.dumps(raw or {}), now, now),
             )
         else:
+            # SPEC_site_fixes_2026-07-29 §6 п.4: раньше raw не обновлялся на
+            # повторном upsert того же uid -- значит новое поле raw.domain
+            # (резолвится в rss.py из entry.source.href) никогда не доходило
+            # до уже виденных статей, только до по-настоящему новых uid.
+            # RSS-агрегаторы (Google News) отдают одни и те же топ-статьи по
+            # несколько циклов сбора подряд -- без этого фикса домен молчал
+            # бы неделями. topic_hint/title/url не трогаем -- у них риск
+            # перезаписать не изменившееся значение выше цены починки.
             db.execute(
                 """UPDATE signals SET engagement=?, replies=?, dimension=?,
                    econ_relevance=?, crowd_intensity=?, importance=?, cashtags=?,
-                   last_seen=? WHERE uid=?""",
+                   raw=?, last_seen=? WHERE uid=?""",
                 (engagement, replies, sc["dimension"], sc["econ_relevance"],
                  sc["crowd_intensity"], sc["importance"], json.dumps(sc["cashtags"]),
-                 now, uid),
+                 json.dumps(raw or {}), now, uid),
             )
         db.commit()
 

@@ -71,6 +71,14 @@ def confidence_for(source: str, author: str) -> str:
     return "social_unverified"
 
 
+def _is_press_or_tier1(it: dict) -> bool:
+    """SPEC_site_fixes_2026-07-29 §6 п.2: правило require_cashtag писалось
+    против анонимных твиттер-аккаунтов -- к Reuters/BBC оно неприменимо.
+    Тот же критерий, что уже использует confidence_for() (rss ИЛИ tier1-твиттер),
+    переиспользуется тут и как критерий квоты изданий (п.1)."""
+    return it.get("source") == "rss" or is_tier1_source(it.get("author"))
+
+
 def _caps_ratio(text: str) -> float:
     letters = [c for c in text if c.isalpha()]
     if len(letters) < 1:
@@ -117,7 +125,8 @@ def _report_flag_for(cashtags: list[str], unverified_texts: list[str]) -> str | 
     return None
 
 
-def apply_feed_rules(items: list[dict], limit: int, require_cashtag: bool | None = None) -> list[dict]:
+def apply_feed_rules(items: list[dict], limit: int, require_cashtag: bool | None = None,
+                      press_quota: int = 0) -> list[dict]:
     """items -- вывод _sig() из publish.py (source, author, text, cashtags, ...).
     Возвращает отфильтрованный, помеченный и переупорядоченный список, уже
     обрезанный до `limit`.
@@ -131,7 +140,14 @@ def apply_feed_rules(items: list[dict], limit: int, require_cashtag: bool | None
     Применить требование тут буквально значило бы полностью обнулить вкладку
     геополитики, а не убрать мусор -- это регрессия рабочей фичи, не фикс.
     Политический фильтр и понижение капса/BREAKING применяются везде, включая
-    geopolitics -- это и есть настоящая цель находки (см. пример спеки)."""
+    geopolitics -- это и есть настоящая цель находки (см. пример спеки).
+
+    press_quota (SPEC_site_fixes_2026-07-29 §6 п.1): минимум столько позиций
+    от прессы/tier1 в результате, даже если ранжирование по importance их
+    вытеснило -- ранжированием эту задачу не решить, пока RSS структурно не
+    имеет вовлечённости. 0 (по умолчанию) -- поведение не меняется, для
+    измерений, где пресса не ожидается (напр. "Соцсети" -- см. §7: вкладка
+    сознательно осталась чисто социальной, квота была бы противоречием)."""
     cfg = load_config()
     need_cashtag = cfg["require_cashtag"] if require_cashtag is None else require_cashtag
     unverified_texts = _load_unverified_report_terms()
@@ -139,7 +155,8 @@ def apply_feed_rules(items: list[dict], limit: int, require_cashtag: bool | None
     kept, shouty = [], []
     for it in items:
         cashtags = it.get("cashtags") or []
-        if need_cashtag and not cashtags:
+        press = _is_press_or_tier1(it)
+        if need_cashtag and not cashtags and not press:
             continue
         text = it.get("text") or ""
         if _is_political(text, cfg):
@@ -153,4 +170,18 @@ def apply_feed_rules(items: list[dict], limit: int, require_cashtag: bool | None
 
         (shouty if _is_shouty(text, cfg) else kept).append(it)
 
-    return (kept + shouty)[:limit]
+    ordered = kept + shouty
+    result = ordered[:limit]
+
+    if press_quota:
+        press_in_result = sum(1 for it in result if _is_press_or_tier1(it))
+        if press_in_result < press_quota:
+            need = press_quota - press_in_result
+            extra_press = [it for it in ordered[limit:] if _is_press_or_tier1(it)][:need]
+            if extra_press:
+                non_press_idx = [i for i, it in enumerate(result) if not _is_press_or_tier1(it)]
+                drop_n = min(len(extra_press), len(non_press_idx))
+                drop_idx = set(non_press_idx[-drop_n:]) if drop_n else set()
+                result = [it for i, it in enumerate(result) if i not in drop_idx] + extra_press
+
+    return result

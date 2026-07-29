@@ -110,6 +110,14 @@ GOOGLE_NEWS_TOPICS = {
     "Google News: Bitcoin": "Bitcoin",
     "Google News: Fed":     "Federal Reserve",
     "Google News: ECB":     "ECB interest rate",
+    # SPEC_site_fixes_2026-07-29 §6: Bloomberg/Reuters закрыли публичные RSS --
+    # site:-запрос к Google News даёт заголовок+ссылку (не полный текст, но
+    # для панели этого достаточно), entry.source.title в rss.py резолвит
+    # реального публикатора вместо "Google News: ...".
+    "Google News: Reuters":   "site:reuters.com",
+    "Google News: Bloomberg": "site:bloomberg.com",
+    "Google News: AP":        "site:apnews.com",
+    "Google News: WSJ":       "site:wsj.com",
 }
 RSS_FEEDS.update({name: _google_news(q) for name, q in GOOGLE_NEWS_TOPICS.items()})
 RSS_TREND_WINDOW_HOURS = int(os.getenv("RSS_TREND_WINDOW_HOURS", "24"))
