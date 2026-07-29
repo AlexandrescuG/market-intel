@@ -27,6 +27,7 @@
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
 <script src="/edu/assets/ch6.js"></script>
 
 <script type="text/babel" data-presets="react">
@@ -644,10 +645,18 @@ function LiveCalendarStage() {
 // ─── Squeeze trainer (Bollinger Bands) — реальные бары GOLD M30, ротация из
 // трёх реальных дней (пробой вверх / вниз / без пробоя). Полосы считаются
 // (SMA20 ± 2·SD20) из настоящих закрытий, не рисуются формулой по индексу.
+// Keys are neutral day IDs, not outcome claims: the real breakout direction
+// is computed live from current data (see scenarioDirs in SqueezeTrainer),
+// not hardcoded here. Found live 29.07: ohlc_GOLD_M30.json is append-only
+// (never rolls), but 2 of these 3 squeeze points now compute a DIFFERENT
+// direction than whatever they showed when first verified (day1 -> "none"
+// today, not "up"; day3 -> "down", not "none") -- real feeds get corrected/
+// revised after the fact, so a hardcoded direction label WILL eventually
+// drift from what the formula actually says and contradict it on screen.
 const SQUEEZE_SCENARIOS = [
-  { key: "up", squeezeIdx: 2135 },
-  { key: "down", squeezeIdx: 703 },
-  { key: "none", squeezeIdx: 962 },
+  { key: "day1", squeezeIdx: 2135 },
+  { key: "day2", squeezeIdx: 703 },
+  { key: "day3", squeezeIdx: 962 },
 ];
 const SQUEEZE_HALF_WINDOW = 35;
 const SQUEEZE_BB_PERIOD = 20;
@@ -675,69 +684,116 @@ function bollinger(closes, i, period) {
 }
 
 function SqueezeTrainer() {
-  const { useState, useRef, useMemo } = React;
+  const { useState, useRef, useMemo, useEffect } = React;
   const T6 = window.Ch6Content[INITIAL_LANG] || window.Ch6Content.ru;
   const sq = T6.squeeze;
   const candles = useGoldM30();
-  const [scenario, setScenario] = useState("up");
+  const [scenario, setScenario] = useState("day1");
 
   const closes = useMemo(() => candles ? candles.map(c => +c.close) : [], [candles]);
   const bands = useMemo(() => closes.length ? closes.map((_,i) => bollinger(closes, i, SQUEEZE_BB_PERIOD)) : [], [closes]);
+  // Real breakout direction per scenario, computed fresh every render from
+  // whatever the data says right now -- see the SQUEEZE_SCENARIOS comment.
+  const scenarioDirs = useMemo(() => {
+    const out = {};
+    if (!bands.length) return out;
+    SQUEEZE_SCENARIOS.forEach(s => {
+      const b = bands[s.squeezeIdx];
+      const cc = closes[s.squeezeIdx + SQUEEZE_CHECK_OFFSET];
+      out[s.key] = (b && cc != null) ? (cc > b.upper ? "up" : cc < b.lower ? "down" : "none") : null;
+    });
+    return out;
+  }, [bands, closes]);
 
   const [revealed, setRevealed] = useState(false);
   const [msg, setMsg] = useState(sq.initialMsg);
   const [errFlash, setErrFlash] = useState(false);
-  const svgRef = useRef(null);
+  const containerRef = useRef(null);
+  const chartRef = useRef(null);
+  const seriesRef = useRef({});
+  const clickHandlerRef = useRef(null);
 
-  React.useEffect(() => { setRevealed(false); setMsg(sq.initialMsg); }, [scenario]);
-
-  if (!candles || !bands.length) {
-    return <div style={{background:C.surface,borderRadius:8,minHeight:340}}/>;
-  }
+  useEffect(() => { setRevealed(false); setMsg(sq.initialMsg); }, [scenario]);
 
   const scenarioIdx = SQUEEZE_SCENARIOS.findIndex(s => s.key === scenario);
   const { squeezeIdx } = SQUEEZE_SCENARIOS[scenarioIdx];
   const start = squeezeIdx - SQUEEZE_HALF_WINDOW, end = squeezeIdx + SQUEEZE_HALF_WINDOW;
-  const dataLen = end - start;
   const zoneLocalStart = SQUEEZE_HALF_WINDOW - 7, zoneLocalEnd = SQUEEZE_HALF_WINDOW + 7;
 
-  const W = 700, H = 280;
-  const points = [];
-  for (let i = start; i <= end; i++) {
-    const b = bands[i];
-    if (!b) continue;
-    points.push({ x: (i - start) * (W / dataLen), c: closes[i], u: b.upper, l: b.lower });
-  }
-  const minP = Math.min(...points.map(p => p.l)) - 3;
-  const maxP = Math.max(...points.map(p => p.u)) + 3;
-  const toY = p => H - ((p - minP) / (maxP - minP)) * H;
-  const pLine = points.map((p,i) => `${i===0?'M':'L'}${p.x},${toY(p.c)}`).join(' ');
-  const uLine = points.map((p,i) => `${i===0?'M':'L'}${p.x},${toY(p.u)}`).join(' ');
-  const lLine = points.map((p,i) => `${i===0?'M':'L'}${p.x},${toY(p.l)}`).join(' ');
-  const areaPath = uLine + ' ' + points.slice().reverse().map(p => `L${p.x},${toY(p.l)}`).join(' ') + ' Z';
+  // SPEC_charts_and_interactivity_standard.md: this used to be a hand-rolled
+  // <svg><path d=...> spline (real Bollinger math, fake render -- the spec's
+  // own named worst-case example). Rebuilt on real LightweightCharts candles
+  // + real band lines, real price/time axes, data-source attribute below.
+  const windowCandles = useMemo(() => (candles ? candles.slice(start, end + 1) : []), [candles, start, end]);
+  const windowBands = useMemo(() => (bands.length ? bands.slice(start, end + 1) : []), [bands, start, end]);
 
-  const checkClose = closes[squeezeIdx + SQUEEZE_CHECK_OFFSET];
-  const breakoutDir = checkClose > bands[squeezeIdx].upper ? "up" : checkClose < bands[squeezeIdx].lower ? "down" : "none";
+  const breakoutDir = scenarioDirs[scenario] ?? null;
   const breakoutText = breakoutDir === "up" ? sq.breakoutLabel : breakoutDir === "down" ? sq.breakoutLabelDown : sq.noBreakoutLabel;
-  const squeezeDate = candles[squeezeIdx] ? new Date(candles[squeezeIdx].time * 1000).toLocaleDateString(INITIAL_LANG === "ru" ? "ru-RU" : INITIAL_LANG === "ro" ? "ro-RO" : "en-US", {day:"numeric", month:"long", year:"numeric"}) : "";
+  const dayWord = INITIAL_LANG==="ru"?"День":INITIAL_LANG==="ro"?"Ziua":"Day";
+  const squeezeDate = candles && candles[squeezeIdx] ? new Date(candles[squeezeIdx].time * 1000).toLocaleDateString(INITIAL_LANG === "ru" ? "ru-RU" : INITIAL_LANG === "ro" ? "ro-RO" : "en-US", {day:"numeric", month:"long", year:"numeric"}) : "";
 
-  const handleClick = (e) => {
-    if (revealed) return;
-    const rect = svgRef.current.getBoundingClientRect();
-    const xClick = e.clientX - rect.left;
-    const clickIndex = Math.round((xClick / rect.width) * dataLen);
-    if (clickIndex >= zoneLocalStart && clickIndex <= zoneLocalEnd) { setRevealed(true); setMsg(sq.correctMsg); }
+  const reset = () => { setRevealed(false); setMsg(sq.initialMsg); };
+
+  clickHandlerRef.current = (time) => {
+    if (revealed || !candles) return;
+    const zoneStartTime = candles[squeezeIdx - 7].time, zoneEndTime = candles[squeezeIdx + 7].time;
+    if (time >= zoneStartTime && time <= zoneEndTime) { setRevealed(true); setMsg(sq.correctMsg); }
     else { setMsg(sq.wrongMsg); setErrFlash(true); setTimeout(()=>setErrFlash(false),500); }
   };
-  const reset = () => { setRevealed(false); setMsg(sq.initialMsg); };
-  const visibleWidth = revealed ? W : (zoneLocalEnd * (W/dataLen));
+
+  // Create the chart once.
+  useEffect(() => {
+    if (!containerRef.current || chartRef.current || typeof LightweightCharts === "undefined") return;
+    const chart = LightweightCharts.createChart(containerRef.current, {
+      width: containerRef.current.clientWidth, height: 320,
+      layout: { background: { color: C.chartBg }, textColor: "rgba(255,255,255,0.55)" },
+      grid: { vertLines: { color: "rgba(255,255,255,0.05)" }, horzLines: { color: "rgba(255,255,255,0.05)" } },
+      rightPriceScale: { borderColor: "rgba(255,255,255,0.15)" },
+      timeScale: { borderColor: "rgba(255,255,255,0.15)", timeVisible: true, secondsVisible: false },
+      crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
+    });
+    const candleSeries = chart.addCandlestickSeries({
+      upColor: C.chartGreen, downColor: C.chartRed, borderUpColor: C.chartGreen, borderDownColor: C.chartRed,
+      wickUpColor: C.chartGreen, wickDownColor: C.chartRed,
+    });
+    const upperSeries = chart.addLineSeries({ color: C.blue, lineWidth: 1, lineStyle: 2, priceLineVisible: false, lastValueVisible: false });
+    const lowerSeries = chart.addLineSeries({ color: C.blue, lineWidth: 1, lineStyle: 2, priceLineVisible: false, lastValueVisible: false });
+    chartRef.current = chart;
+    seriesRef.current = { candleSeries, upperSeries, lowerSeries };
+    chart.subscribeClick(param => { if (param.time != null && clickHandlerRef.current) clickHandlerRef.current(param.time); });
+    const ro = new ResizeObserver(entries => { if (entries[0]) chart.applyOptions({ width: entries[0].contentRect.width }); });
+    ro.observe(containerRef.current);
+    return () => { ro.disconnect(); chart.remove(); chartRef.current = null; };
+  }, []);
+
+  // Push real data whenever the scenario/reveal state changes.
+  useEffect(() => {
+    const { candleSeries, upperSeries, lowerSeries } = seriesRef.current;
+    if (!candleSeries || !windowCandles.length) return;
+    const visibleCount = revealed ? windowCandles.length : Math.min(zoneLocalEnd + 1, windowCandles.length);
+    const visible = windowCandles.slice(0, visibleCount);
+    candleSeries.setData(visible.map(c => ({ time: c.time, open: +c.open, high: +c.high, low: +c.low, close: +c.close })));
+    const bandSlice = windowBands.slice(0, visibleCount);
+    upperSeries.setData(bandSlice.map((b,i) => b ? { time: visible[i].time, value: b.upper } : null).filter(Boolean));
+    lowerSeries.setData(bandSlice.map((b,i) => b ? { time: visible[i].time, value: b.lower } : null).filter(Boolean));
+    if (revealed && candles) {
+      candleSeries.setMarkers([{ time: candles[squeezeIdx - 7].time, position: "aboveBar", color: C.gold, shape: "arrowDown", text: "SQUEEZE" }]);
+    } else {
+      candleSeries.setMarkers([]);
+    }
+    chartRef.current.timeScale().fitContent();
+  }, [windowCandles, windowBands, revealed, zoneLocalEnd]);
 
   return (
     <div>
       <div style={{display:"flex",gap:6,marginBottom:16,flexWrap:"wrap"}}>
-        {SQUEEZE_SCENARIOS.map(s => (
-          <button key={s.key} onClick={()=>setScenario(s.key)} style={{fontFamily:"monospace",fontSize:11,padding:"7px 14px",cursor:"pointer",background:s.key===scenario?C.gold:"#fff",color:s.key===scenario?"#18181a":C.inkMid,border:`1px solid ${s.key===scenario?C.gold:C.border}`,borderRadius:4,fontWeight:600}}>{sq.scenarioLabels[s.key]}</button>
-        ))}
+        {SQUEEZE_SCENARIOS.map((s,i) => {
+          const dir = scenarioDirs[s.key];
+          const dirText = dir === "up" ? sq.breakoutLabel : dir === "down" ? sq.breakoutLabelDown : dir === "none" ? sq.noBreakoutLabel : "…";
+          return (
+            <button key={s.key} onClick={()=>setScenario(s.key)} style={{fontFamily:"monospace",fontSize:11,padding:"7px 14px",cursor:"pointer",background:s.key===scenario?C.gold:"#fff",color:s.key===scenario?"#18181a":C.inkMid,border:`1px solid ${s.key===scenario?C.gold:C.border}`,borderRadius:4,fontWeight:600}}>{dayWord} {i+1} · {dirText.toLowerCase()}</button>
+          );
+        })}
       </div>
       <div style={{background:C.surface, border:`1px solid ${errFlash ? C.red : C.border}`, borderRadius:8, padding:"40px", transition:"border 0.3s"}}>
         <div style={{display:"flex",alignItems:"center",gap:14,marginBottom:32}}>
@@ -752,43 +808,26 @@ function SqueezeTrainer() {
           {msg}
         </div>
 
-        <div style={{position:"relative",background:C.chartBg,borderRadius:6,overflow:"hidden",cursor:revealed?"default":"crosshair",boxShadow:"inset 0 0 20px rgba(0,0,0,0.5)"}} onClick={handleClick} ref={svgRef}>
-          <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",display:"block"}}>
-            <clipPath id="ch6ChartMask"><rect x="0" y="0" width={visibleWidth} height={H} style={{transition:"width 1.5s cubic-bezier(0.4,0,0.2,1)"}}/></clipPath>
-            <g clipPath="url(#ch6ChartMask)">
-              {[0.2,0.4,0.6,0.8].map(v => <line key={v} x1="0" y1={H*v} x2={W} y2={H*v} stroke="rgba(255,255,255,0.05)" strokeWidth="1" strokeDasharray="4 4"/>)}
-              <path d={areaPath} fill="rgba(37,99,235,0.08)"/>
-              <path d={uLine} fill="none" stroke={C.blue} strokeWidth="1.5" opacity="0.6"/>
-              <path d={lLine} fill="none" stroke={C.blue} strokeWidth="1.5" opacity="0.6"/>
-              <path d={points.map((p,i)=>`${i===0?'M':'L'}${p.x},${toY((p.u+p.l)/2)}`).join(' ')} fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1" strokeDasharray="5 5"/>
-              <path d={pLine} fill="none" stroke={C.gold} strokeWidth="2.5"/>
-            </g>
-            {revealed && (
-              <g>
-                <rect x={zoneLocalStart*(W/dataLen)} y="0" width={(zoneLocalEnd-zoneLocalStart)*(W/dataLen)} height={H} fill="rgba(201,151,58,0.15)"/>
-                <line x1={zoneLocalStart*(W/dataLen)} y1="0" x2={zoneLocalStart*(W/dataLen)} y2={H} stroke={C.gold} strokeWidth="1" strokeDasharray="4 4" opacity="0.5"/>
-                <line x1={zoneLocalEnd*(W/dataLen)} y1="0" x2={zoneLocalEnd*(W/dataLen)} y2={H} stroke={C.gold} strokeWidth="1" strokeDasharray="4 4" opacity="0.5"/>
-                <rect x={(zoneLocalStart+2)*(W/dataLen)} y="15" width={100} height={24} fill={C.gold} rx="4"/>
-                <text x={(zoneLocalStart+2)*(W/dataLen)+50} y="31" fill={C.black} fontSize="11" fontFamily="monospace" fontWeight="bold" textAnchor="middle">SQUEEZE</text>
-                <text x={(zoneLocalStart+21)*(W/dataLen)} y="50" fill={breakoutDir==="none"?"#fff":C.green} fontSize="16" fontWeight="bold" textAnchor="middle">{breakoutText}</text>
-              </g>
-            )}
-            {!revealed && <line x1={visibleWidth} y1="0" x2={visibleWidth} y2={H} stroke="rgba(255,255,255,0.5)" strokeWidth="2" strokeDasharray="4 4"/>}
-          </svg>
+        <div style={{position:"relative",borderRadius:6,overflow:"hidden",cursor:revealed?"default":"crosshair"}}>
+          <div ref={containerRef} data-source="/data/ohlc_GOLD_M30.json"/>
           {!revealed && (
-            <div style={{position:"absolute",top:0,right:0,bottom:0,left:`${(zoneLocalEnd/dataLen)*100}%`,background:"rgba(19,23,34,0.92)",display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(2px)"}}>
-              <span style={{color:"rgba(255,255,255,0.4)",fontSize:13,fontFamily:"monospace",letterSpacing:2}}>{sq.futureHidden}</span>
+            <div style={{position:"absolute",top:0,right:0,bottom:0,width:"22%",background:"rgba(19,23,34,0.92)",display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(2px)",pointerEvents:"none"}}>
+              <span style={{color:"rgba(255,255,255,0.4)",fontSize:12,fontFamily:"monospace",letterSpacing:1.5,textAlign:"center",padding:"0 8px"}}>{sq.futureHidden}</span>
             </div>
           )}
         </div>
 
         {revealed && (
-          <div style={{marginTop:24,textAlign:"center"}}>
+          <div style={{marginTop:20,textAlign:"center"}}>
+            <div style={{fontSize:16,fontWeight:700,color:breakoutDir==="none"?C.inkMid:C.green,marginBottom:16}}>{breakoutText}</div>
             <button onClick={reset} style={{background:"transparent",border:`1px solid ${C.inkMid}`,color:C.inkMid,padding:"10px 20px",borderRadius:4,cursor:"pointer",fontSize:12,fontFamily:"monospace",fontWeight:700,letterSpacing:1}}>{sq.hideBtn}</button>
           </div>
         )}
       </div>
       <p style={{fontSize:12,color:C.inkSoft,lineHeight:1.65,marginTop:14,fontStyle:"italic",maxWidth:780}}>{sq.calendarLink}</p>
+      <a href="/chart.html?s=GOLD" target="_blank" rel="noopener" style={{fontFamily:"monospace",fontSize:12,color:C.gold,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>
+        {INITIAL_LANG==="ru"?"Открыть GOLD на графике →":INITIAL_LANG==="ro"?"Deschide GOLD pe grafic →":"Open GOLD on the chart →"}
+      </a>
 
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginTop:28}} className="g2">
         <InfoCard title={sq.smaTitle} text={sq.smaText}/>
