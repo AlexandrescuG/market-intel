@@ -551,7 +551,12 @@ function SceneMount({ url, mode, symbol, copy }) {
     }).catch(() => {});
     return () => { cancelled = true; };
   }, [url]);
-  return <div ref={ref}/>;
+  // SPEC_charts_and_interactivity_standard.md §2: technical acceptance
+  // marker for "this is a real chart" -- the scene JSON's own basename
+  // (e.g. "ch3_2022_multi"), set on the mount root without touching
+  // scene-engine.js itself (locked by the chapter-2 agent).
+  const sceneName = (url.split("/").pop() || "").replace(/\.json$/, "");
+  return <div ref={ref} data-scene={sceneName}/>;
 }
 
 function StepTag({ n, label }) {
