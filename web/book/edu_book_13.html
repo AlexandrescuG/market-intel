@@ -432,14 +432,28 @@ function PyramidCalculator() {
 
 // ─── Таблица безубытка ────────────────────────────────────────────────────
 function BreakevenCostTable({ be, loading, error }) {
+  const { useState, useMemo } = React;
   const T = window.Ch13Content[INITIAL_LANG] || window.Ch13Content.ru;
   const b = T.breakeven;
+
+  // SPEC_charts_and_interactivity_standard.md: `cells` (per symbol x tf x x x y)
+  // was already loaded but never read -- only the pooled-across-everything
+  // rows were shown, so there was no interactive that recomputed a number.
+  // A real symbol/timeframe filter over already-fetched data is a free
+  // class A: the table's own numbers change, not just which text is shown.
+  const symbols = useMemo(() => be ? Array.from(new Set((be.cells||[]).map(c=>c.symbol))).sort() : [], [be]);
+  const [symbol, setSymbol] = useState("ALL");
+  const [tf, setTf] = useState("ALL");
 
   if (loading) return <p style={{fontSize:12.5,color:C.inkFaint}}>…</p>;
   if (error || !be) return <p style={{fontSize:12.5,color:C.inkFaint}}>—</p>;
 
   const highlight = be.highlight;
   const xLabel = INITIAL_LANG === "ru" ? "половины" : INITIAL_LANG === "ro" ? "jumătate" : "half";
+
+  const filtered = symbol === "ALL" && tf === "ALL" ? be.pooled
+    : (be.cells || []).filter(c => (symbol === "ALL" || c.symbol === symbol) && (tf === "ALL" || c.tf === tf) && c.shown !== false);
+  const rows = symbol === "ALL" && tf === "ALL" ? (be.pooled || []) : filtered;
 
   return (
     <div style={{marginBottom:48}}>
@@ -465,6 +479,21 @@ function BreakevenCostTable({ be, loading, error }) {
       <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,marginBottom:12}}>{b.point2}</p>
       <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,marginBottom:20}}>{b.point3}</p>
 
+      <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:8}}>
+        {["ALL", ...symbols].map(s => (
+          <button key={s} onClick={()=>setSymbol(s)} style={{fontFamily:"monospace",fontSize:10.5,padding:"5px 10px",cursor:"pointer",background:s===symbol?C.gold:"#fff",color:s===symbol?"#18181a":C.inkMid,border:`1px solid ${s===symbol?C.gold:C.border}`,borderRadius:3}}>
+            {s === "ALL" ? (INITIAL_LANG==="ru"?"Все":INITIAL_LANG==="ro"?"Toate":"All") : s}
+          </button>
+        ))}
+      </div>
+      <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:16}}>
+        {["ALL","H4","D1"].map(v => (
+          <button key={v} onClick={()=>setTf(v)} style={{fontFamily:"monospace",fontSize:10.5,padding:"5px 10px",cursor:"pointer",background:v===tf?C.gold:"#fff",color:v===tf?"#18181a":C.inkMid,border:`1px solid ${v===tf?C.gold:C.border}`,borderRadius:3}}>
+            {v === "ALL" ? (INITIAL_LANG==="ru"?"Все ТФ":INITIAL_LANG==="ro"?"Toate TF":"All TF") : v}
+          </button>
+        ))}
+      </div>
+
       <div style={{overflowX:"auto",marginBottom:16}}>
         <table style={{width:"100%",borderCollapse:"collapse",fontSize:12.5}}>
           <thead>
@@ -476,7 +505,12 @@ function BreakevenCostTable({ be, loading, error }) {
             </tr>
           </thead>
           <tbody>
-            {(be.pooled || []).map((r,i) => (
+            {rows.length === 0 && (
+              <tr><td colSpan={4} style={{padding:"14px 10px",color:C.inkFaint,fontStyle:"italic"}}>
+                {INITIAL_LANG==="ru"?"Недостаточно наблюдений для этого сочетания.":INITIAL_LANG==="ro"?"Date insuficiente pentru această combinație.":"Not enough observations for this combination."}
+              </td></tr>
+            )}
+            {rows.map((r,i) => (
               <tr key={i} style={{borderBottom:`1px solid ${C.border}`, background: (r.x===0.5 && r.y===2.0) ? C.goldPale : "transparent"}}>
                 <td style={{padding:"7px 10px",color:C.inkMid}}>{r.x}</td>
                 <td style={{padding:"7px 10px",color:C.inkMid}}>{r.y}</td>
