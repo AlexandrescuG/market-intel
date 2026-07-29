@@ -377,9 +377,19 @@ function BookModels() {
 
 // ─── Что измерить самому — домашнее задание ────────────────────────────────
 function MeasureYourBroker() {
+  const { useState, useMemo } = React;
   const T11 = window.Ch11Content[INITIAL_LANG] || window.Ch11Content.ru;
   const m = T11.measureYourBroker;
   const items = [[m.m1Title,m.m1Text],[m.m2Title,m.m2Text],[m.m3Title,m.m3Text],[m.m4Title,m.m4Text]];
+  // SPEC_charts_and_interactivity_standard.md: cards 1/2 ("your hours" spread
+  // vs "on release" spread) were pure static text -- both are the same unit
+  // (pips the reader measures themselves), so a live ratio between them is a
+  // genuine class A without inventing a monthly-cost model that would
+  // duplicate ch14's own CostArithmetic (this chapter's own outro text
+  // explicitly defers full cost math to ch14, using the reader's numbers).
+  const [normalSpread, setNormalSpread] = useState(2.0);
+  const [releaseSpread, setReleaseSpread] = useState(8.0);
+  const multiplier = useMemo(() => normalSpread > 0 ? releaseSpread / normalSpread : null, [normalSpread, releaseSpread]);
   return (
     <div style={{marginBottom:48}}>
       <p style={{fontSize:14,color:C.inkMid,lineHeight:1.75,marginBottom:20,maxWidth:820}}>{m.intro}</p>
@@ -391,6 +401,23 @@ function MeasureYourBroker() {
             {i<2 && <a href="/chart.html?s=GOLD" target="_blank" rel="noopener" style={{fontFamily:"monospace",fontSize:10.5,color:C.gold,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>{m.openOnChart}</a>}
           </div>
         ))}
+      </div>
+      <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"20px 24px",marginBottom:16}}>
+        <Mono size={10} color={C.gold} spacing={1} style={{display:"block",marginBottom:14,textTransform:"uppercase"}}>{m.multiplierLabel}</Mono>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,marginBottom:16}} className="g2">
+          <div>
+            <Mono size={10} color={C.inkFaint} spacing={0.5} style={{display:"block",marginBottom:6}}>{m.m1Title}</Mono>
+            <input type="number" value={normalSpread} step={0.1} min={0} onChange={e=>setNormalSpread(+e.target.value)} style={{width:"100%",padding:"9px 12px",border:`1px solid ${C.border}`,borderRadius:4,fontFamily:"monospace",fontSize:14}}/>
+          </div>
+          <div>
+            <Mono size={10} color={C.inkFaint} spacing={0.5} style={{display:"block",marginBottom:6}}>{m.m2Title}</Mono>
+            <input type="number" value={releaseSpread} step={0.1} min={0} onChange={e=>setReleaseSpread(+e.target.value)} style={{width:"100%",padding:"9px 12px",border:`1px solid ${C.border}`,borderRadius:4,fontFamily:"monospace",fontSize:14}}/>
+          </div>
+        </div>
+        <div style={{textAlign:"center",background:C.black,borderRadius:6,padding:"18px 24px"}}>
+          <div style={{fontFamily:"'DM Serif Display',serif",fontSize:28,color:C.gold}}>{multiplier!=null?multiplier.toFixed(1)+"×":"—"}</div>
+          <Mono size={9.5} color="rgba(255,255,255,0.5)" spacing={0.5}>{m.multiplierResultLabel}</Mono>
+        </div>
       </div>
       <p style={{fontSize:13,color:C.inkSoft,lineHeight:1.7,fontStyle:"italic",margin:0}}>{m.outro}</p>
     </div>

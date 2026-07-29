@@ -261,6 +261,8 @@ window.Ch11Content = {
       m4Title: "4 · Swap", m4Text: "Cât costă transferul unei poziții peste noapte și peste miercuri. Adesea se dovedește costul principal la cei care țin pozițiile mult timp.",
       outro: "Notează în jurnal. În capitolul 14 vom calcula cât costă asta pe o serie de tranzacții, și acolo va fi nevoie de cifrele tale, nu de ale noastre.",
       openOnChart: "Deschide GOLD pe grafic →",
+      multiplierLabel: "De câte ori e mai larg spread-ul la publicare",
+      multiplierResultLabel: "ori mai larg decât normal",
     },
     ladderLimit: {
       body: "Tocmai ai văzut că adevărata ta contraparte nu e o piață abstractă, ci o companie concretă cu un model de venit concret. Următoarea întrebare logică e: care anume, și prin ce diferă între ele.\n\nÎn acest capitol nu arătăm o comparație a platformelor cu cifra procentului de clienți care pierd afișată mare — nu pentru că nu vrem, ci pentru că o pregătim cinstit: cu date reale pentru fiecare partener, dată de preluare și link către sursă, fără nicio cifră fixată în cod. O strângem separat, împreună cu restul infrastructurii de parteneriat.",
@@ -401,6 +403,8 @@ window.Ch11Content = {
       m4Title: "4 · Swap", m4Text: "What it costs to carry a position overnight, and over a Wednesday rollover. Often turns out to be the main cost for anyone holding positions for a while.",
       outro: "Write it in your journal. In chapter 14 we'll work out what this costs across a series of trades, and we'll need your numbers there, not ours.",
       openOnChart: "Open GOLD on the chart →",
+      multiplierLabel: "How many times wider the spread gets on release",
+      multiplierResultLabel: "x wider than normal",
     },
     ladderLimit: {
       body: "You just saw that your real counterparty isn't an abstract market — it's a specific company with a specific revenue model. The logical next question is: which one, exactly, and how do they differ from each other.\n\nThis chapter doesn't show a platform comparison with a big, prominent losing-client percentage — not because we don't want to, but because we're preparing it honestly: with real data per partner, a capture date, and a source link, without a single hardcoded number. We're building that separately, alongside the rest of the ladder infrastructure.",
