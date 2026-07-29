@@ -102,12 +102,28 @@
     '.sbf-right{margin-left:auto;display:flex;align-items:center;gap:18px;',
     'font-size:12px;font-family:"JetBrains Mono",monospace;}',
 
-    '.sbf-lang-sw{display:flex;gap:2px;align-items:center;margin-left:8px;}',
-    '.sbf-lang-sw a{font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:700;',
-    'letter-spacing:1.5px;text-decoration:none;color:var(--muted);padding:4px 7px;',
-    'border-radius:5px;transition:color .15s,background .15s;}',
-    '.sbf-lang-sw a.active{color:var(--gold);}',
-    '.sbf-lang-sw a:hover{color:var(--ink);background:rgba(201,162,39,.08);text-decoration:none;}',
+    // SPEC_site_fixes_2026-07-29 §1: шторка вместо ряда ссылок -- кнопка с
+    // текущим языком + выпадающий listbox, aria-разметка ниже в JS (mountLangSwitch).
+    '.sbf-lang-sw{position:relative;margin-left:8px;}',
+    '.sbf-lang-btn{display:flex;align-items:center;gap:4px;font-family:"JetBrains Mono",monospace;',
+    'font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--muted);background:none;',
+    'border:none;cursor:pointer;padding:4px 7px;border-radius:5px;transition:color .15s,background .15s;}',
+    '.sbf-lang-btn:hover,.sbf-lang-btn[aria-expanded="true"]{color:var(--ink);background:rgba(201,162,39,.08);}',
+    '.sbf-lang-chev{font-size:9px;transition:transform .15s;}',
+    '.sbf-lang-btn[aria-expanded="true"] .sbf-lang-chev{transform:rotate(180deg);}',
+    '.sbf-lang-list{list-style:none;margin:4px 0 0;padding:4px;position:absolute;top:100%;right:0;',
+    'min-width:64px;background:var(--paper);border:1px solid var(--line);border-radius:8px;',
+    'box-shadow:0 6px 20px rgba(43,43,51,.12);z-index:60;}',
+    '.sbf-lang-list[hidden]{display:none;}',
+    '.sbf-lang-list.sbf-lang-up{top:auto;bottom:100%;margin-top:0;margin-bottom:4px;}',
+    '.sbf-lang-list li{margin:0;}',
+    '.sbf-lang-list a{display:flex;align-items:center;justify-content:space-between;gap:6px;',
+    'font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:700;letter-spacing:1px;',
+    'text-decoration:none;color:var(--muted);padding:6px 9px;border-radius:5px;}',
+    '.sbf-lang-list a:hover,.sbf-lang-list a:focus{color:var(--ink);background:rgba(201,162,39,.08);',
+    'outline:none;text-decoration:none;}',
+    '.sbf-lang-list a[aria-selected="true"]{color:var(--gold);}',
+    '.sbf-lang-check{color:var(--gold);font-size:10px;}',
     '.sbf-win{display:flex;align-items:center;gap:6px;color:var(--muted);}',
     '.dot{width:7px;height:7px;border-radius:50%;background:var(--faint);}',
     '.dot.on{background:var(--up);box-shadow:0 0 7px var(--up);}',
@@ -198,6 +214,100 @@
     return '/' + lang + (rest === '/' ? '' : rest);
   }
 
+  // SPEC_site_fixes_2026-07-29 §1: единственная реализация переключателя
+  // языков -- шторка (кнопка + listbox), а не два независимых экземпляра
+  // (index.html держал свою копию, потому что inject() ниже пропускает полную
+  // шапку на страницах со своим #strip -- см. isMain). mount() строит hrefs
+  // сама (bookNum/otherLangHref уже посчитаны один раз для всей страницы) и
+  // берёт любой пустой контейнер -- используется и отсюда (для всех обычных
+  // страниц), и из index.html явно через window.SbfLangSwitch.mount().
+  var LANG_LABELS = { ru: 'RU', ro: 'RO', en: 'EN' };
+  var LANG_ORDER = ['ru', 'ro', 'en'];
+
+  function mountLangSwitch(container) {
+    if (!container || container.dataset.sbfMounted) return;
+    container.dataset.sbfMounted = '1';
+
+    var hrefs = bookNum
+      ? { ru: '/edu/b/' + bookNum, ro: '/edu/ro/b/' + bookNum, en: '/edu/en/b/' + bookNum }
+      : { ru: otherLangHref('ru'), ro: otherLangHref('ro'), en: otherLangHref('en') };
+    var active = bookNum ? bookLang : _i18n.lang;
+
+    container.className = 'sbf-lang-sw';
+    container.innerHTML =
+      '<button type="button" class="sbf-lang-btn" aria-haspopup="listbox" aria-expanded="false">' +
+      '<span class="sbf-lang-cur">' + LANG_LABELS[active] + '</span><span class="sbf-lang-chev" aria-hidden="true">▾</span>' +
+      '</button>' +
+      '<ul class="sbf-lang-list" role="listbox" hidden>' +
+      LANG_ORDER.map(function (code) {
+        var sel = code === active;
+        return '<li role="presentation"><a role="option" aria-selected="' + sel + '" tabindex="-1" ' +
+          'href="' + hrefs[code] + '" data-lang="' + code + '">' + LANG_LABELS[code] +
+          (sel ? ' <span class="sbf-lang-check" aria-hidden="true">✓</span>' : '') + '</a></li>';
+      }).join('') +
+      '</ul>';
+
+    var btn = container.querySelector('.sbf-lang-btn');
+    var list = container.querySelector('.sbf-lang-list');
+    var opts = Array.prototype.slice.call(container.querySelectorAll('[role="option"]'));
+
+    function isOpen() { return !list.hidden; }
+    function openList() {
+      list.hidden = false;
+      btn.setAttribute('aria-expanded', 'true');
+      list.classList.remove('sbf-lang-up');
+      // На мобильном раскрывается вверх, если снизу не хватает места.
+      if (list.getBoundingClientRect().bottom > window.innerHeight) {
+        list.classList.add('sbf-lang-up');
+      }
+      var cur = opts.filter(function (o) { return o.dataset.lang === active; })[0] || opts[0];
+      cur.focus();
+    }
+    function closeList(refocusBtn) {
+      list.hidden = true;
+      btn.setAttribute('aria-expanded', 'false');
+      if (refocusBtn) btn.focus();
+    }
+
+    btn.addEventListener('click', function () {
+      if (isOpen()) { closeList(true); } else { openList(); }
+    });
+    btn.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && isOpen()) { e.preventDefault(); closeList(true); }
+      else if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && !isOpen()) { e.preventDefault(); openList(); }
+    });
+    opts.forEach(function (opt, idx) {
+      opt.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') { e.preventDefault(); closeList(true); }
+        else if (e.key === 'ArrowDown') { e.preventDefault(); opts[(idx + 1) % opts.length].focus(); }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); opts[(idx - 1 + opts.length) % opts.length].focus(); }
+        else if (e.key === 'Home') { e.preventDefault(); opts[0].focus(); }
+        else if (e.key === 'End') { e.preventDefault(); opts[opts.length - 1].focus(); }
+        else if (e.key === ' ') { e.preventDefault(); opt.click(); }
+      });
+    });
+    document.addEventListener('click', function (e) {
+      if (isOpen() && !container.contains(e.target)) closeList(false);
+    });
+  }
+  window.SbfLangSwitch = { mount: mountLangSwitch };
+
+  // SPEC_site_fixes_2026-07-29 §1 п.4: минимальные страницы (вход/регистрация/
+  // опрос) не должны получать полную шапку с навигацией и тикером котировок --
+  // им нужен только переключатель языков. window.SBF_LANG_SWITCH_ONLY=true
+  // (ставится инлайн-скриптом ДО подключения этого файла) монтирует уже
+  // присутствующие на странице .sbf-lang-sw и не идёт дальше -- CSS выше уже
+  // применён, остального (тикер/нав/часы) эти страницы не просят.
+  if (window.SBF_LANG_SWITCH_ONLY) {
+    var mountAllLangSwitches = function () {
+      var els = document.querySelectorAll('.sbf-lang-sw');
+      for (var i = 0; i < els.length; i++) mountLangSwitch(els[i]);
+    };
+    if (document.body) { mountAllLangSwitches(); }
+    else { document.addEventListener('DOMContentLoaded', mountAllLangSwitches); }
+    return;
+  }
+
   // Ссылки в шапке/нижнем баре (Сегодня/Обучение/Календарь) раньше были
   // жёстко "/", "/edu/", "/calendar" — переход с любой /ro/- или /en/-страницы
   // (или с книжной главы /edu/ro/b/N, /edu/en/b/N) сбрасывал язык на русский,
@@ -229,23 +339,14 @@
     '    <div class="sbf-win"><span class="dot" id="liveDot"></span><span id="liveTxt">Live</span></div>',
     '    <div class="sbf-win"><span class="dot" id="winDot"></span><span id="winTxt">—</span></div>',
     '    <div id="clock">—</div>',
-    bookNum
-      ? '    <div class="sbf-lang-sw">' +
-        '<a href="/edu/b/' + bookNum + '"' + (bookLang === 'ru' ? ' class="active"' : '') + '>RU</a>' +
-        '<a href="/edu/ro/b/' + bookNum + '"' + (bookLang === 'ro' ? ' class="active"' : '') + '>RO</a>' +
-        '<a href="/edu/en/b/' + bookNum + '"' + (bookLang === 'en' ? ' class="active"' : '') + '>EN</a>' +
-        '</div>'
-      : '    <div class="sbf-lang-sw">' +
-        '<a href="' + otherLangHref('ru') + '"' + (_i18n.lang === 'ru' ? ' class="active"' : '') + '>RU</a>' +
-        '<a href="' + otherLangHref('ro') + '"' + (_i18n.lang === 'ro' ? ' class="active"' : '') + '>RO</a>' +
-        '<a href="' + otherLangHref('en') + '"' + (_i18n.lang === 'en' ? ' class="active"' : '') + '>EN</a>' +
-        '</div>',
+    '    <div class="sbf-lang-sw" id="sbfLangSw"></div>',
     '  </div>',
     '</header>',
     '<div class="sbf-mob-bar" id="sbfMobBar">',
     '  <img src="/assets/logo.png" alt="SBF">',
     '  <span class="mob-brand">SBF INTELLIGENCE</span>',
     '  <div class="mob-time"><span class="mob-dot" id="mobLiveDot"></span><span id="mobClock">—</span></div>',
+    '  <div class="sbf-lang-sw" id="sbfLangSwMob"></div>',
     '</div>',
     '<div class="strip" id="strip"><div class="strip-i" id="stripI"></div></div>'
   ].join('\n');
@@ -265,6 +366,8 @@
       var hd = document.createElement('div');
       hd.innerHTML = _hdHtml;
       document.body.insertAdjacentElement('afterbegin', hd);
+      mountLangSwitch(document.getElementById('sbfLangSw'));
+      mountLangSwitch(document.getElementById('sbfLangSwMob'));
     }
     // Always inject bottom nav (single source of truth for all pages)
     if (!document.querySelector('.g-bottom-nav')) {
@@ -308,6 +411,29 @@
     if (ticker === 'CL=F') return t('ticker.wti', 'Нефть WTI');
     if (ticker === 'NG=F') return t('ticker.gas', 'Природный газ');
     return NAMES[ticker];
+  }
+  // Yahoo-тикер → символ графика (chart.html's `YF`, зеркалировано — общего
+  // модуля между этим файлом и инлайн-скриптом chart.html нет). Нужен для
+  // сопоставления ватчлиста (хранит символы графика: GOLD/BTC/...) с
+  // элементами тикер-ленты (ключи — Yahoo-тикеры).
+  var TICKER_TO_CHART_SYMBOL = {
+    'GC=F':'GOLD', 'SI=F':'SILVER', 'CL=F':'WTI', 'NG=F':'NG',
+    'BTC-USD':'BTC', 'ETH-USD':'ETH', 'SOL-USD':'SOL',
+    'EURUSD=X':'EURUSD', 'GBPUSD=X':'GBPUSD',
+    '^GSPC':'SPX', '^IXIC':'NASDAQ', '^DJI':'DJI', '^VIX':'VIX', 'DX-Y.NYB':'DXY',
+  };
+  // SBF_Charts_Layer4_Spec, Фаза 1.2.1: инструменты ватчлиста первыми (в
+  // порядке ватчлиста), затем остальные в исходном порядке.
+  function reorderByWatchlist(items) {
+    var wl = (window.SBF && window.SBF.user && window.SBF.user.watchlist) || [];
+    if (!wl.length) return items;
+    var rank = {};
+    wl.forEach(function (sym, i) { rank[sym] = i; });
+    return items.map(function (it, idx) {
+      var chartSym = TICKER_TO_CHART_SYMBOL[it.ticker];
+      var r = (chartSym && (chartSym in rank)) ? rank[chartSym] : 1000 + idx;
+      return {it: it, r: r};
+    }).sort(function (a, b) { return a.r - b.r; }).map(function (x) { return x.it; });
   }
   var BYBIT_MAP = { 'BTCUSDT':'BTC-USD','ETHUSDT':'ETH-USD','SOLUSDT':'SOL-USD' };
   var _fng = null;
@@ -439,15 +565,25 @@
     } catch (e) { setLive(false); }
   }
 
+  var _lastMarketItems = null;
   async function loadMarket() {
     try {
       var r = await fetch('/data/market.json?t=' + Date.now());
       var m = r.ok ? await r.json() : null;
       if (!m) return;
       if (m.fear_greed) _fng = m.fear_greed;
-      if (m.items) buildStrip(m.items);
+      if (m.items) {
+        _lastMarketItems = m.items;
+        buildStrip(reorderByWatchlist(m.items));
+      }
     } catch (e) {}
   }
+  // Контекст пользователя (и с ним ватчлист) обычно приходит чуть позже
+  // первого loadMarket() — перерисовываем ленту без нового фетча, когда он
+  // готов, вместо того чтобы ждать следующий 5-минутный цикл loadMarket().
+  document.addEventListener('sbf:user-ready', function () {
+    if (_lastMarketItems) buildStrip(reorderByWatchlist(_lastMarketItems));
+  });
 
   var _ws = null;
   function startBybitWS() {
@@ -513,8 +649,55 @@
   var s = document.createElement('script');
   s.src = '/assets/sbf-auth.js?v=1';
   s.async = false;
+  s.onload = _sbfLoadUserContext;
   document.head.appendChild(s);
 })();
+
+// ── Единый пользовательский контекст (SBF_Charts_Layer4_Spec, Фаза 1.1) ─────
+// Один запрос /api/auth/me на загрузку любой страницы, результат — в
+// window.SBF.user (первично) и localStorage (офлайн-фоллбек для следующей
+// загрузки ДО того, как сетевой запрос успеет отработать — избегает
+// "мигания" анонимного состояния на страницах, которые решают, что рисовать,
+// синхронно). Другие модули графика/календаря/пульса читают window.SBF.user,
+// не делают собственных auth-запросов — событие 'sbf:user-ready' сообщает,
+// когда контекст точно готов (страницы, которым он критичен на первом
+// рендере — напр. дефолтный инструмент графика — ждут это событие или уже
+// подгруженный localStorage-кэш).
+window.SBF = window.SBF || {};
+window.SBF.user = null;
+try {
+  var _cached = localStorage.getItem('sbf_user_cache');
+  if (_cached) window.SBF.user = JSON.parse(_cached);
+} catch (e) { /* ignore */ }
+
+function _sbfLoadUserContext() {
+  if (!window.sbfAuth || !window.sbfAuth.isLoggedIn()) {
+    // 401/нет токена — чистим кэш, анонимный режим не должен показывать
+    // устаревшие персональные данные с предыдущей сессии на этом устройстве.
+    window.SBF.user = null;
+    try { localStorage.removeItem('sbf_user_cache'); } catch (e) {}
+    document.dispatchEvent(new CustomEvent('sbf:user-ready', {detail: null}));
+    return;
+  }
+  window.sbfAuth.fetch('/api/auth/me')
+    .then(function (r) {
+      if (r.status === 401) {
+        window.sbfAuth.clear();
+        window.SBF.user = null;
+        try { localStorage.removeItem('sbf_user_cache'); } catch (e) {}
+        document.dispatchEvent(new CustomEvent('sbf:user-ready', {detail: null}));
+        return null;
+      }
+      return r.json();
+    })
+    .then(function (data) {
+      if (!data || data.error) return;
+      window.SBF.user = data;
+      try { localStorage.setItem('sbf_user_cache', JSON.stringify(data)); } catch (e) {}
+      document.dispatchEvent(new CustomEvent('sbf:user-ready', {detail: data}));
+    })
+    .catch(function () { /* сеть недоступна — остаёмся на localStorage-кэше, не ломаем страницу */ });
+}
 
 // Автозагрузка модуля профиля
 (function () {
