@@ -138,6 +138,11 @@ a:hover{text-decoration:underline;color:var(--glow)}
 .panel-h h2{font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--ink)}
 .panel-h .fresh{margin-left:auto;font-size:11px;color:var(--muted);font-family:'JetBrains Mono'}
 .panel-sub{font-size:11.5px;color:var(--muted);line-height:1.5;margin:-8px 0 14px}
+/* SPEC_site_fixes_2026-07-29 §8: ежечасная сводка новостного фона, шапка панели */
+.news-digest{font-size:12.5px;line-height:1.5;color:var(--ink);background:var(--surface);
+  border-radius:8px;padding:9px 12px;margin:-2px 0 14px}
+.news-digest-meta{display:block;margin-top:3px;font-size:10.5px;color:var(--muted);
+  font-family:'JetBrains Mono'}
 
 /* report */
 .report{font-family:Montserrat}
@@ -437,6 +442,10 @@ a:hover{text-decoration:underline;color:var(--glow)}
           <span class="fresh" id="sigFresh"></span>
         </div>
         <p class="panel-sub">{{ t('home.feed_subtitle', lang) }}</p>
+        <div class="news-digest" id="newsDigest" style="display:none">
+          <span id="newsDigestText"></span>
+          <span class="news-digest-meta" id="newsDigestMeta"></span>
+        </div>
         <div class="tabs" id="tabs">
           <button class="tab chip active" data-d="economy">{{ t('home.tab_economy', lang) }}</button>
           <button class="tab chip" data-d="geopolitics">{{ t('home.tab_geopolitics', lang) }}</button>
@@ -1181,6 +1190,10 @@ const I18N_PULSE = {
   zeroCollapsed: {{ t('home.pulse_zero_collapsed', lang) | tojson }},
 };
 
+const I18N_DIGEST = {
+  stale: {{ t('home.news_digest_stale', lang) | tojson }},
+};
+
 function escapeHtmlIdx(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
 // SPEC_site_fixes_2026-07-29 §5: спарклайн нормализуется по ОБЩЕЙ шкале (lo/hi
@@ -1294,15 +1307,35 @@ document.getElementById('pulseTabs').addEventListener('click', e=>{
 
 async function load(){
   clockWindow();
-  const [m,t,s,r,meta]=await Promise.all(
-    ['market','technical','signals','report','meta'].map(get));
+  const [m,t,s,r,meta,digest]=await Promise.all(
+    ['market','technical','signals','report','meta','news_digest'].map(get));
   renderMarket(m); renderFng(m||{}); renderReport(r);
   try { renderTech(t); } catch(e) { /* tcards may not exist in current layout */ }
   loadPulse(_pulseCat);
   SIG=s; renderSignals('economy');
+  renderNewsDigest(digest);
   const techFreshEl=document.getElementById('techFresh');
   if(t&&techFreshEl)techFreshEl.textContent=ago(t.updated);
   if(s)document.getElementById('sigFresh').textContent=ago(s.updated);
+}
+
+// SPEC_site_fixes_2026-07-29 §8: ежечасная сводка -- text уже прошла
+// валидатор на бэкенде (news_digest_job.py), тут только рендер. stale=true
+// означает "модель упала/провалила проверку в этот час, ниже -- прошлая
+// сводка" -- показываем это явно, не выдаём её молча за свежую. Сводка пока
+// только на русском (спека §8: RO/EN — вторым заходом, отдельными запросами,
+// не машинным переводом) -- на /ro/ и /en/ показывать русский текст было бы
+// той же ошибкой "не тот язык", что уже ловили в этом заходе в других местах,
+// поэтому виджет пока скрыт там целиком, а не наполовину переведён.
+function renderNewsDigest(d){
+  const el = document.getElementById('newsDigest');
+  if(!el) return;
+  if(!d || !d.text || _PAGE_LANG !== 'ru'){ el.style.display='none'; return; }
+  document.getElementById('newsDigestText').textContent = d.text;
+  const metaEl = document.getElementById('newsDigestMeta');
+  const staleNote = d.stale ? (' · ' + I18N_DIGEST.stale) : '';
+  metaEl.textContent = (d.updated ? ago(d.updated) : '') + staleNote;
+  el.style.display = 'block';
 }
 
 document.getElementById('tabs').addEventListener('click',e=>{
