@@ -203,8 +203,16 @@ function IntroBlock() {
 
 // ─── Цена незнания ───────────────────────────────────────────────────────────
 function PriceOfNotKnowing13() {
+  const { useState, useMemo } = React;
   const T = window.Ch13Content[INITIAL_LANG] || window.Ch13Content.ru;
   const p = T.priceOfNotKnowing;
+  // SPEC_charts_and_interactivity_standard.md: body4 already promised "именно
+  // это считает калькулятор ниже" but no calculator followed it -- the actual
+  // PyramidCalculator lives much further down the page. This live slider
+  // computes the exact illustrative example from intro/body2 (1 lot, 3 adds)
+  // for whatever step size the reader drags, reusing pyramidCompute() as-is.
+  const [stepPts, setStepPts] = useState(40);
+  const live = useMemo(() => pyramidCompute(1, stepPts, 1, 3, "equal"), [stepPts]);
   return (
     <div id="secPriceOfNotKnowing" style={{marginBottom:48,scrollMarginTop:130}}>
       <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{p.tag}</Mono>
@@ -214,6 +222,23 @@ function PriceOfNotKnowing13() {
       <div style={{background:C.black,borderRadius:8,padding:"22px 28px",color:"#fff",marginBottom:16}}>
         <Mono size={10} color={C.gold} spacing={1} style={{display:"block",marginBottom:8,textTransform:"uppercase"}}>{p.keyLabel}</Mono>
         <p style={{fontSize:14,color:"rgba(255,255,255,0.85)",lineHeight:1.7,margin:0}}>{p.keyBody}</p>
+      </div>
+      <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"20px 24px",marginBottom:16}}>
+        <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
+          <span style={{fontSize:12,color:C.inkMid,fontWeight:500}}>{INITIAL_LANG==="ru"?"Шаг добора":INITIAL_LANG==="ro"?"Pasul de adăugare":"Add-on step"}</span>
+          <span style={{fontSize:13,fontWeight:700,color:C.inkMid,fontFamily:"monospace"}}>{stepPts} {INITIAL_LANG==="ru"?"пт":INITIAL_LANG==="ro"?"pct":"pt"}</span>
+        </div>
+        <input type="range" min={20} max={80} step={5} value={stepPts} onChange={e=>setStepPts(+e.target.value)} style={{width:"100%",accentColor:C.gold,cursor:"pointer",marginBottom:14}}/>
+        <div style={{display:"flex",gap:24,flexWrap:"wrap"}}>
+          <div>
+            <Mono size={9} color={C.inkFaint} spacing={0.5}>{INITIAL_LANG==="ru"?"СРЕДНЯЯ ЦЕНА ВЫШЕ ПЕРВОГО ВХОДА":INITIAL_LANG==="ro"?"PREȚ MEDIU PESTE PRIMA INTRARE":"AVG PRICE ABOVE FIRST ENTRY"}</Mono>
+            <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.black}}>{live.avgPrice.toFixed(0)} {INITIAL_LANG==="ru"?"пт":INITIAL_LANG==="ro"?"pct":"pt"}</div>
+          </div>
+          <div>
+            <Mono size={9} color={C.inkFaint} spacing={0.5}>{INITIAL_LANG==="ru"?"ОТКАТ ДО УБЫТКА":INITIAL_LANG==="ro"?"RETRAGERE PÂNĂ LA PIERDERE":"PULLBACK TO LOSS"}</Mono>
+            <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.gold}}>{live.pnrPts.toFixed(0)} {INITIAL_LANG==="ru"?"пт":INITIAL_LANG==="ro"?"pct":"pt"}</div>
+          </div>
+        </div>
       </div>
       <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.75,marginBottom:14,maxWidth:800}}>{p.body3}</p>
       <p style={{fontSize:13.5,color:C.inkSoft,lineHeight:1.75,fontStyle:"italic",maxWidth:800}}>{p.body4}</p>
