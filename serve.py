@@ -138,6 +138,31 @@ def _url_for(endpoint, **values):
         return "/assets/" + values.get("filename", "")
     return "/"
 
+# SPEC_site_fixes_2026-07-29 §4: единая иконка сайта. Раньше пять разных
+# состояний по файлам -- index.html относительный ./assets/favicon.svg
+# (ломался на /ro/, /en/: разрешался в /ro/assets/favicon.svg, которого нет),
+# 16 глав книги через url_for('static', filename='favicon.png') (после
+# рендера -- /assets/favicon.png, другой формат), пара страниц вовсе без
+# иконки. Нормализуем ЗДЕСЬ, один раз, по факту отрисованного HTML -- иначе
+# следующая новая страница снова разъедется (спека прямо предлагает вынести
+# в общий фрагмент). rel="apple-touch-icon" убирается перед вставкой блока,
+# если уже стоял отдельно (journal.html) -- иначе дубль.
+_FAVICON_BLOCK = (
+    '<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">\n'
+    '<link rel="alternate icon" type="image/png" href="/assets/favicon.png">\n'
+    '<link rel="apple-touch-icon" href="/assets/icons/icon-192.png">'
+)
+_FAVICON_ICON_RE = re.compile(r'<link[^>]*\brel="icon"[^>]*>')
+_FAVICON_APPLE_RE = re.compile(r'\s*<link[^>]*\brel="apple-touch-icon"[^>]*>')
+
+
+def _normalize_favicon(html: str) -> str:
+    if not _FAVICON_ICON_RE.search(html):
+        return html  # страницы вовсе без <link rel="icon"> чинятся отдельно, не здесь
+    html = _FAVICON_APPLE_RE.sub("", html, count=1)
+    html = _FAVICON_ICON_RE.sub(_FAVICON_BLOCK, html, count=1)
+    return html
+
 _jinja = Environment(loader=FileSystemLoader(str(BOOK_DIR)), autoescape=False)
 _jinja.globals["url_for"] = _url_for
 
@@ -507,7 +532,7 @@ function sbfNavigate(tool) {{
 
 def _build_edu_page(ch: int, lang: str) -> bytes:
     """Рендерим шаблон + вставляем скомпилированный JS + edu-nav инжекции."""
-    html = _jinja.get_template(f"edu_book_{ch}.html").render(lang=lang)
+    html = _normalize_favicon(_jinja.get_template(f"edu_book_{ch}.html").render(lang=lang))
 
     if ch in _COMPILED:
         # Убираем CDN-скрипты и babel-блок
@@ -1011,6 +1036,12 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         elif re.match(r"^/assets/icons/icon-\d+\.png$", path_clean):
             fname = path_clean.split("/")[-1]
             self._serve_static(WEB_DIR / "assets" / "icons" / fname, content_type="image/png")
+        elif path_clean == "/favicon.ico":
+            # §4: маршрута не было вовсе -- core/journal_alerts.py:663 ставит этот
+            # путь иконкой пуш-уведомлений по умолчанию, запрос был битым (404).
+            # Расширение в URL для Notification API не имеет значения, важен
+            # Content-Type -- отдаём тот же PNG, что и alternate icon на страницах.
+            self._serve_static(WEB_DIR / "assets" / "favicon.png", content_type="image/png")
         # ── Auth / Onboarding ──
         elif path_clean == "/api/auth/me":
             self._handle_auth_me()
@@ -1218,7 +1249,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         шаблоны используют `{{ t('key', lang) }}`."""
         try:
             tpl = _site_jinja.get_template(template_name)
-            html = tpl.render(lang=lang)
+            html = _normalize_favicon(tpl.render(lang=lang))
         except Exception as e:
             self.send_response(500)
             self.send_header("Content-Type", "text/plain; charset=utf-8")

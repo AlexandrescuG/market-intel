@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SBF · Превью — Глава 1 «История: 400 лет рынка»</title>
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="alternate icon" type="image/png" href="/assets/favicon.png">
+<link rel="apple-touch-icon" href="/assets/icons/icon-192.png">
+<link rel="stylesheet" href="/edu/assets/history.css">
+<style>
+  :root{--cream:#FBF6EF;--paper:#fff;--line:#E7DFCF;--line-gold:#D9C48A;--ink:#2B2B33;--ink-soft:#55524B;
+    --ink-faint:#8A8275;--gold:#C9A227;--gold-pale:#F3E8C8;--dark:#141416;
+    --serif:'DM Serif Display',Georgia,serif;--mono:'JetBrains Mono',ui-monospace,monospace;--sans:'DM Sans',system-ui,sans-serif}
+  *{box-sizing:border-box}
+  body{background:var(--cream);color:var(--ink);font-family:var(--sans);margin:0;padding:0 0 80px}
+  .wrap{max-width:760px;margin:0 auto;padding:0 20px}
+  .previewbar{background:var(--dark);color:var(--gold-pale);font-family:var(--mono);font-size:11.5px;
+    letter-spacing:.04em;padding:9px 20px;text-align:center;position:sticky;top:0;z-index:50}
+  .previewbar b{color:var(--gold)}
+  .langbar{display:flex;justify-content:flex-end;gap:6px;padding:14px 0 0}
+  .lang-btn{font-family:var(--mono);font-size:11px;padding:5px 11px;border-radius:14px;border:1px solid var(--line);
+    background:var(--paper);color:var(--ink-soft);cursor:pointer}
+  .lang-btn.active{background:var(--dark);color:var(--gold-pale);border-color:var(--dark)}
+
+  section{margin-top:56px}
+  .kicker{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--gold);margin-bottom:10px}
+  h1.hero{font-family:var(--serif);font-weight:400;font-size:32px;line-height:1.2;margin:0 0 14px}
+  h2.sec-title{font-family:var(--serif);font-weight:400;font-size:24px;margin:0 0 6px}
+  .sec-sub{color:var(--ink-faint);font-size:13.5px;margin-bottom:18px}
+  p.lead{font-size:16px;line-height:1.65;color:var(--ink-soft);max-width:60ch}
+  .cta{display:inline-block;margin-top:18px;font-family:var(--mono);font-size:13px;color:var(--dark);
+    border-bottom:1px solid var(--gold);padding-bottom:2px;cursor:pointer}
+
+  .mythcard{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:20px 22px}
+  .mythcard .no{font-family:var(--mono);font-size:11px;color:#B14848;letter-spacing:.08em}
+  .mythcard .yes{font-family:var(--mono);font-size:11px;color:#2E7D5B;letter-spacing:.08em;margin-top:8px}
+  .mythcard p{margin:4px 0 0;font-size:14.5px;color:var(--ink-soft)}
+
+  .statblock{background:var(--dark);color:var(--gold-pale);border-radius:12px;padding:26px 24px}
+  .statblock .num{font-family:var(--serif);font-size:44px;color:var(--gold)}
+  .statblock p{font-size:14px;line-height:1.6;color:#D8D2C4;max-width:52ch;margin-top:8px}
+
+  .era-tabs .h-era-tab{margin-bottom:0}
+  .era-note{margin-top:12px;font-size:13px;color:var(--ink-faint)}
+  #lwc-b, #lwc-replay{width:100%;height:220px}
+
+  .calc-row{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
+  .calc-row select,.calc-row input{font-family:var(--mono);font-size:13px;padding:8px 10px;border-radius:8px;
+    border:1px solid var(--line);background:var(--paper);color:var(--ink)}
+  .calc-result{margin-top:16px;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:16px 18px}
+  .calc-result .big{font-family:var(--serif);font-size:26px}
+  .calc-result .draw{margin-top:8px;font-size:13px;color:#B14848}
+  .calc-loading{font-size:12.5px;color:var(--ink-faint);font-family:var(--mono)}
+
+  .localebox{border:1px solid var(--line-gold);background:var(--gold-pale);border-radius:10px;padding:16px 18px;font-size:14px;color:var(--ink-soft)}
+
+  .quiz-q{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin-bottom:12px}
+  .quiz-q .prompt{font-size:14.5px;margin-bottom:10px}
+  .quiz-opt{display:block;width:100%;text-align:left;font-family:var(--sans);font-size:13.5px;padding:9px 12px;
+    margin-bottom:6px;border-radius:8px;border:1px solid var(--line);background:var(--cream);cursor:pointer;color:var(--ink)}
+  .quiz-opt.correct{border-color:#2E7D5B;background:#E7F3EC}
+  .quiz-opt.wrong{border-color:#B14848;background:#FBEAEA}
+  .quiz-fb{font-size:12.5px;margin-top:6px;color:var(--ink-faint)}
+
+  .cliff{background:var(--paper);border:1px dashed var(--line-gold);border-radius:10px;padding:18px 20px;font-size:14px;
+    color:var(--ink-soft);line-height:1.6}
+
+  footer.footbar{margin-top:70px;border-top:1px solid var(--line);padding-top:18px;font-size:11.5px;color:var(--ink-faint);
+    display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+</style>
+</head>
+<body>
+
+<div class="previewbar">ПРЕВЬЮ · <b>SPEC_edu_level1_history.md</b> · плейсхолдер-иллюстрации до утверждения манифеста §8.2 · вне продакшен-роутинга</div>
+
+<div style="display:none" aria-hidden="true">
+  <svg><defs>
+    <pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="6" height="6" fill="#efe6d6"/><line x1="0" y1="0" x2="0" y2="6" stroke="#c9bda5" stroke-width="1.1"/>
+    </pattern>
+    <pattern id="hatch2" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(-30)">
+      <rect width="5" height="5" fill="#e6dcc8"/><line x1="0" y1="0" x2="0" y2="5" stroke="#b6a98d" stroke-width="1"/>
+    </pattern>
+  </defs></svg>
+</div>
+
+<div class="wrap">
+
+  <div class="langbar" id="langbar"></div>
+
+  <!-- 1. COLD OPEN -->
+  <section id="sec-cold">
+    <div class="h-passepartout">
+      <div class="h-artwork" id="art-cold"></div>
+      <div class="h-caption"><span id="cold-cap-title">1653 · «Двор Амстердамской биржи» · Эмануэль де Витте</span>
+        <span class="h-src">WIKIMEDIA COMMONS · PUBLIC DOMAIN</span></div>
+    </div>
+    <h1 class="hero" style="margin-top:22px" id="cold-headline">Всё, что ты увидишь в терминале — уже случалось</h1>
+    <p class="lead" id="cold-body">Свечи, шорты, сквизы, паника — первый раз это случилось 400 лет назад. Мы прокрутим всё за 12 минут.</p>
+    <div class="cta" id="cold-cta" onclick="document.getElementById('sec-a').scrollIntoView({behavior:'smooth'})">Запустить хронику ↓</div>
+  </section>
+
+  <!-- 2. АНТИ-МИФ -->
+  <section id="sec-myth">
+    <div class="kicker" id="myth-kicker">АНТИ-МИФ</div>
+    <div class="mythcard">
+      <div class="no" id="myth-no">✗ «Биржа — изобретение Уолл-стрит»</div>
+      <div class="yes" id="myth-yes">✓ Амстердам, 1602: финансирование флота Голландской Ост-Индской компании</div>
+      <p id="myth-body">Уолл-стрит появится только через 190 лет после первой в мире акции.</p>
+    </div>
+  </section>
+
+  <!-- 3. ЦЕНА НЕЗНАНИЯ -->
+  <section id="sec-cost">
+    <div class="statblock">
+      <div class="num">34 <span id="cost-years" style="font-size:20px;color:#D8D2C4">года</span></div>
+      <p id="cost-body">Инвестор, купивший Nikkei 225 на пике 29 декабря 1989-го, ждал возврата цены до 22 февраля 2024-го. История — не украшение курса. Это статистика выживания.</p>
+    </div>
+  </section>
+
+  <!-- 4. ИНТЕРАКТИВ A — ХРОНО-МАШИНА -->
+  <section id="sec-a">
+    <div class="kicker" id="a-kicker">ИНТЕРАКТИВ · ХРОНО-МАШИНА</div>
+    <h2 class="sec-title" id="a-title">15 станций, 400 лет</h2>
+    <p class="sec-sub" id="a-sub">Технологии менялись — жадность и страх нет.</p>
+
+    <div class="h-chrono" id="chrono-nodes"></div>
+    <p class="h-progress" id="chrono-progress">ХРОНИКА: <b>1/15</b> · +5 XP за станцию · все 15 → бейдж «Хронист»</p>
+
+    <div class="h-station" id="station-panel"></div>
+  </section>
+
+  <!-- 5. ИНТЕРАКТИВ B — 5 ЭПОХ -->
+  <section id="sec-b">
+    <div class="kicker" id="b-kicker">ИНТЕРАКТИВ · ОДНА ЦЕНА, ПЯТЬ ЭПОХ</div>
+    <h2 class="sec-title" id="b-title">Как рисовали графики</h2>
+    <p class="sec-sub" id="b-sub">Один и тот же ряд GOLD (реальные данные) — пятью разными способами.</p>
+    <div class="h-era-tabs era-tabs" id="era-tabs"></div>
+    <div class="h-era-frame">
+      <div class="h-era-label" id="era-label">1900 · ГАЗЕТНАЯ ТАБЛИЦА</div>
+      <div id="era-body"></div>
+    </div>
+    <p class="era-note" id="era-task">Задача: найди день разворота глазами.</p>
+    <div class="h-note" id="b-lesson">Каждая эпоха придумывала способ видеть больше, быстрее, раньше остальных. Свеча победила, потому что несёт 4 цены + психологию бара в одном знаке.</div>
+  </section>
+
+  <!-- 6. ИНТЕРАКТИВ C — МАШИНА ВРЕМЕНИ ИНВЕСТОРА -->
+  <section id="sec-c">
+    <div class="kicker" id="c-kicker">ИНТЕРАКТИВ · МАШИНА ВРЕМЕНИ ИНВЕСТОРА</div>
+    <h2 class="sec-title" id="c-title">Что было бы, если...</h2>
+    <p class="sec-sub" id="c-sub">Реальные ряды: GOLD (MT5, с 2021) · век DJIA · Nikkei-1989 (жёсткий режим)</p>
+    <div class="calc-row">
+      <select id="c-asset"></select>
+      <select id="c-start"></select>
+      <input id="c-amount" type="number" value="1000" min="10" step="10" style="width:110px">
+    </div>
+    <div class="calc-result" id="c-result">
+      <div class="calc-loading" id="c-loading">Загружаю ряды…</div>
+    </div>
+  </section>
+
+  <!-- 7. КОНТЕКСТ ЛОКАЛИ -->
+  <section id="sec-locale">
+    <div class="kicker" id="locale-kicker">ПРИ ЧЁМ ТУТ Я</div>
+    <div class="localebox" id="locale-body">Как биржа влияет на тенге — курс национальной валюты завязан на те же потоки капитала, что двигают Уолл-стрит.</div>
+  </section>
+
+  <!-- 8. КВИЗ + ПРЕДИКТ + КЛИФФХЭНГЕР -->
+  <section id="sec-quiz">
+    <div class="kicker" id="quiz-kicker">ЗАКРЕПИМ</div>
+    <div id="quiz-list"></div>
+  </section>
+
+  <section id="sec-predict">
+    <div class="kicker" id="predict-kicker">ПРЕДИКТ НЕДЕЛИ</div>
+    <div class="mythcard" id="predict-body">
+      <p style="margin-top:0" id="predict-q">DJIA существует 130 лет. Закроет ли он эту неделю ростом?</p>
+      <div style="display:flex;gap:10px;margin-top:10px">
+        <button class="h-btn" id="predict-yes">Да</button>
+        <button class="h-btn ghost" id="predict-no">Нет</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="sec-cliff">
+    <div class="kicker" id="cliff-kicker">ДАЛЬШЕ</div>
+    <div class="cliff" id="cliff-body">В панику 1907 года рынок спас один человек — Дж. П. Морган запер банкиров в кабинете, пока те не скинулись. Сегодня эту роль играет институт, одно слово которого двигает всё на планете. Его разберём в следующем эпизоде.</div>
+    <div class="cta" id="cliff-cta">Открыть терминал →</div>
+  </section>
+
+  <footer class="footbar">
+    <span id="foot-compliance">Учебный материал. Не индивидуальная инвестиционная рекомендация.</span>
+    <span id="foot-credits">Иллюстрации: плейсхолдер · финал — Wikimedia Commons / LOC, public domain</span>
+  </footer>
+
+</div>
+
+<script src="/edu/assets/chrono.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
+<script>
+(function(){
+"use strict";
+
+/* ---------------------------------------------------------------- UI copy */
+var UI = {
+  ru: {
+    lang:"RU", coldHeadline:"Всё, что ты увидишь в терминале — уже случалось",
+    coldBody:"Свечи, шорты, сквизы, паника — первый раз это случилось 400 лет назад. Мы прокрутим всё за 12 минут.",
+    coldCta:"Запустить хронику ↓", coldCap:"1653 · «Двор Амстердамской биржи» · Эмануэль де Витте",
+    mythKicker:"АНТИ-МИФ", mythNo:"✗ «Биржа — изобретение Уолл-стрит»",
+    mythYes:"✓ Амстердам, 1602: финансирование флота Голландской Ост-Индской компании",
+    mythBody:"Уолл-стрит появится только через 190 лет после первой в мире акции.",
+    costBody:"Инвестор, купивший Nikkei 225 на пике 29 декабря 1989-го, ждал возврата цены до 22 февраля 2024-го. История — не украшение курса. Это статистика выживания.", costYears:"года",
+    aKicker:"ИНТЕРАКТИВ · ХРОНО-МАШИНА", aTitle:"15 станций, 400 лет", aSub:"Технологии менялись — жадность и страх нет.",
+    chronicle:"ХРОНИКА", xpNote:"+5 XP за станцию · все 15 → бейдж «Хронист»",
+    bKicker:"ИНТЕРАКТИВ · ОДНА ЦЕНА, ПЯТЬ ЭПОХ", bTitle:"Как рисовали графики",
+    bSub:"Один и тот же ряд GOLD (реальные данные) — пятью разными способами.",
+    bLesson:"Каждая эпоха придумывала способ видеть больше, быстрее, раньше остальных. Свеча победила, потому что несёт 4 цены + психологию бара в одном знаке.",
+    eraTask:"Задача: найди день разворота глазами.",
+    cKicker:"ИНТЕРАКТИВ · МАШИНА ВРЕМЕНИ ИНВЕСТОРА", cTitle:"Что было бы, если...",
+    cSub:"Реальные ряды: GOLD (MT5, с 2021) · век DJIA · Nikkei-1989 (жёсткий режим)",
+    cLoading:"Загружаю ряды…", cAmountLabel:"сумма",
+    localeKicker:"ПРИ ЧЁМ ТУТ Я",
+    localeBody:"Как биржа влияет на тенге — курс национальной валюты завязан на те же потоки капитала, что двигают Уолл-стрит.",
+    quizKicker:"ЗАКРЕПИМ", predictKicker:"ПРЕДИКТ НЕДЕЛИ",
+    predictQ:"DJIA существует 130 лет. Закроет ли он эту неделю ростом?", predictYes:"Да", predictNo:"Нет",
+    cliffKicker:"ДАЛЬШЕ",
+    cliffBody:"В панику 1907 года рынок спас один человек — Дж. П. Морган запер банкиров в кабинете, пока те не скинулись. Сегодня эту роль играет институт, одно слово которого двигает всё на планете. Его разберём в следующем эпизоде.",
+    cliffCta:"Открыть терминал →",
+    compliance:"Учебный материал. Не индивидуальная инвестиционная рекомендация.",
+    credits:"Иллюстрации: плейсхолдер · финал — Wikimedia Commons / LOC, public domain",
+    stationBtn:"Дальше →", eras:["1900 · ГАЗЕТНАЯ ТАБЛИЦА","1930 · РУЧНОЙ ГРАФИК","1900-е · POINT & FIGURE","XIX в. → 1991 · ЯПОНСКИЕ СВЕЧИ","СЕГОДНЯ · ТЕРМИНАЛ SBF"],
+    tableCols:["Дата","High","Low","Close"],
+    live:"→ в живой график", reversalNote:"Разворот здесь: ", today:"СЕГОДНЯ"
+  },
+  ro: {
+    lang:"RO", coldHeadline:"Tot ce vezi în terminal — s-a mai întâmplat",
+    coldBody:"Lumânări, short-uri, squeeze-uri, panică — prima dată acum 400 de ani. Derulăm totul în 12 minute.",
+    coldCta:"Pornește cronica ↓", coldCap:"1653 · „Curtea Bursei din Amsterdam” · Emanuel de Witte",
+    mythKicker:"ANTI-MIT", mythNo:"✗ „Bursa este o invenție de pe Wall Street”",
+    mythYes:"✓ Amsterdam, 1602: finanțarea flotei Companiei Olandeze a Indiilor de Est",
+    mythBody:"Wall Street va apărea abia peste 190 de ani după prima acțiune din lume.",
+    costBody:"Un investitor care a cumpărat Nikkei 225 la vârful din 29 decembrie 1989 a așteptat revenirea prețului până pe 22 februarie 2024. Istoria nu e un decor al cursului. E o statistică a supraviețuirii.", costYears:"de ani",
+    aKicker:"INTERACTIV · MAȘINA CRONO", aTitle:"15 stații, 400 de ani", aSub:"Tehnologiile s-au schimbat — lăcomia și frica, niciodată.",
+    chronicle:"CRONICĂ", xpNote:"+5 XP per stație · toate 15 → insigna „Cronicar”",
+    bKicker:"INTERACTIV · UN PREȚ, CINCI EPOCI", bTitle:"Cum se desenau graficele",
+    bSub:"Aceeași serie GOLD (date reale) — în cinci moduri diferite.",
+    bLesson:"Fiecare epocă a inventat un mod de a vedea mai mult, mai rapid, înaintea celorlalți. Lumânarea a câștigat pentru că duce 4 prețuri + psihologia barei într-un singur semn.",
+    eraTask:"Sarcină: găsește ziua de întoarcere din ochi.",
+    cKicker:"INTERACTIV · MAȘINA TIMPULUI A INVESTITORULUI", cTitle:"Ce-ar fi fost dacă...",
+    cSub:"Serii reale: GOLD (MT5, din 2021) · un secol DJIA · Nikkei-1989 (mod dificil)",
+    cLoading:"Se încarcă seriile…", cAmountLabel:"suma",
+    localeKicker:"CE ARE ASTA CU MINE",
+    localeBody:"Cum influențează bursa leul moldovenesc — cursul monedei naționale e legat de aceleași fluxuri de capital care mișcă Wall Street-ul.",
+    quizKicker:"SĂ FIXĂM", predictKicker:"PREDICȚIA SĂPTĂMÂNII",
+    predictQ:"DJIA există de 130 de ani. Va închide săptămâna aceasta în creștere?", predictYes:"Da", predictNo:"Nu",
+    cliffKicker:"URMEAZĂ",
+    cliffBody:"În panica din 1907, piața a fost salvată de un singur om — J.P. Morgan i-a încuiat pe bancheri într-un birou până au strâns banii. Astăzi acest rol îl joacă o instituție al cărei singur cuvânt mișcă totul pe planetă. O analizăm în episodul următor.",
+    cliffCta:"Deschide terminalul →",
+    compliance:"Material educațional. Nu este o recomandare individuală de investiții.",
+    credits:"Ilustrații: temporare · varianta finală — Wikimedia Commons / LOC, domeniu public",
+    stationBtn:"Mai departe →", eras:["1900 · TABEL DE ZIAR","1930 · GRAFIC DE MÂNĂ","Anii 1900 · POINT & FIGURE","Sec. XIX → 1991 · LUMÂNĂRI JAPONEZE","AZI · TERMINALUL SBF"],
+    tableCols:["Data","High","Low","Close"],
+    live:"→ la graficul live", reversalNote:"Întoarcerea aici: ", today:"AZI"
+  },
+  en: {
+    lang:"EN", coldHeadline:"Everything you'll see in the terminal has happened before",
+    coldBody:"Candles, shorts, squeezes, panic — the first time was 400 years ago. We'll replay it all in 12 minutes.",
+    coldCta:"Start the chronicle ↓", coldCap:"1653 · \"The Courtyard of the Amsterdam Exchange\" · Emanuel de Witte",
+    mythKicker:"ANTI-MYTH", mythNo:"✗ \"The stock exchange was invented on Wall Street\"",
+    mythYes:"✓ Amsterdam, 1602: financing the Dutch East India Company's fleet",
+    mythBody:"Wall Street won't exist for another 190 years after the world's first share.",
+    costBody:"An investor who bought Nikkei 225 at its peak on December 29, 1989 waited for the price to recover until February 22, 2024. History isn't decoration for the course. It's survivorship statistics.", costYears:"years",
+    aKicker:"INTERACTIVE · THE CHRONO MACHINE", aTitle:"15 stations, 400 years", aSub:"The technology changed — greed and fear never did.",
+    chronicle:"CHRONICLE", xpNote:"+5 XP per station · all 15 → the \"Chronicler\" badge",
+    bKicker:"INTERACTIVE · ONE PRICE, FIVE ERAS", bTitle:"How charts used to be drawn",
+    bSub:"The same GOLD series (real data) — shown five different ways.",
+    bLesson:"Every era invented a way to see more, faster, before everyone else. The candlestick won because it packs 4 prices plus the psychology of the bar into a single mark.",
+    eraTask:"Task: spot the reversal day by eye.",
+    cKicker:"INTERACTIVE · THE INVESTOR'S TIME MACHINE", cTitle:"What if you had...",
+    cSub:"Real series: GOLD (MT5, since 2021) · a century of DJIA · Nikkei-1989 (hard mode)",
+    cLoading:"Loading series…", cAmountLabel:"amount",
+    localeKicker:"WHY THIS MATTERS TO YOU",
+    localeBody:"The dollar index (DXY) tracks the same capital flows that move every market you'll trade — a stronger dollar means tighter conditions everywhere else.",
+    quizKicker:"LOCK IT IN", predictKicker:"PREDICTION OF THE WEEK",
+    predictQ:"The DJIA has existed for 130 years. Will it close this week higher?", predictYes:"Yes", predictNo:"No",
+    cliffKicker:"NEXT",
+    cliffBody:"In the panic of 1907, one man saved the market — J.P. Morgan locked the bankers in his study until they pooled the money. Today that role belongs to an institution whose single word moves everything on the planet. We cover it in the next episode.",
+    cliffCta:"Open the terminal →",
+    compliance:"Educational material. Not individual investment advice.",
+    credits:"Illustrations: placeholder · final versions — Wikimedia Commons / LOC, public domain",
+    stationBtn:"Next →", eras:["1900 · NEWSPAPER TABLE","1930 · HAND-DRAWN CHART","1900s · POINT & FIGURE","19th c. → 1991 · JAPANESE CANDLES","TODAY · SBF TERMINAL"],
+    tableCols:["Date","High","Low","Close"],
+    live:"→ open live chart", reversalNote:"Reversal here: ", today:"TODAY"
+  }
+};
+
+var QUIZ = {
+  ru: [
+    {prompt:"Первый запрет шорт-продаж появился…", opts:[{t:"1610, Амстердам",c:true},{t:"2008, США",c:false},{t:"1929, Нью-Йорк",c:false}], fb:"Спор старше США на полтора века."},
+    {prompt:"Свечной график в современном виде…", opts:[{t:"Изобрёл Хомма в 1750-м",c:false},{t:"Оформился в Японии к концу XIX века",c:true},{t:"Придумали в Чикаго в 1900-м",c:false}], fb:"Запад узнал о нём только в 1991-м от Стива Нисона."},
+    {prompt:"В крах 1929-го тикерная лента…", opts:[{t:"Работала в реальном времени",c:false},{t:"Отставала на часы",c:true},{t:"Была отключена властями",c:false}], fb:"Сегодня та же гонка идёт на микросекундах (HFT, глава 11)."}
+  ],
+  ro: [
+    {prompt:"Prima interdicție a vânzărilor short a apărut…", opts:[{t:"1610, Amsterdam",c:true},{t:"2008, SUA",c:false},{t:"1929, New York",c:false}], fb:"Disputa e mai veche decât SUA cu un secol și jumătate."},
+    {prompt:"Graficul cu lumânări în forma modernă…", opts:[{t:"A fost inventat de Homma în 1750",c:false},{t:"S-a conturat în Japonia spre finalul secolului XIX",c:true},{t:"A fost inventat la Chicago în 1900",c:false}], fb:"Occidentul l-a aflat abia în 1991, de la Steve Nison."},
+    {prompt:"În prăbușirea din 1929, banda tickerului…", opts:[{t:"Funcționa în timp real",c:false},{t:"Rămânea în urmă cu ore",c:true},{t:"A fost oprită de autorități",c:false}], fb:"Azi aceeași cursă se dă la nivel de microsecunde (HFT, capitolul 11)."}
+  ],
+  en: [
+    {prompt:"The first short-selling ban appeared…", opts:[{t:"1610, Amsterdam",c:true},{t:"2008, USA",c:false},{t:"1929, New York",c:false}], fb:"The dispute predates the US by a century and a half."},
+    {prompt:"The modern candlestick chart…", opts:[{t:"Was invented by Homma in 1750",c:false},{t:"Took shape in Japan by the late 19th century",c:true},{t:"Was invented in Chicago in 1900",c:false}], fb:"The West only learned of it in 1991, from Steve Nison."},
+    {prompt:"During the 1929 crash, the ticker tape…", opts:[{t:"Ran in real time",c:false},{t:"Ran hours behind",c:true},{t:"Was shut off by regulators",c:false}], fb:"Today the same race happens in microseconds (HFT, chapter 11)."}
+  ]
+};
+
+var LOCALE_BLOCKS = { ru: UI.ru.localeBody, ro: UI.ro.localeBody, en: UI.en.localeBody };
+
+/* ---------------------------------------------------------------- state */
+var lang = "ru";
+var stationIdx = 0;
+var stationsDone = window.ChronoStations.ru.map(function(_, i){ return i === 0; });
+var eraIdx = 0;
+var goldFull = null; // full ohlc_GOLD_D1.json (for interactive C)
+var gold30 = null;   // 30-bar slice (for interactive B)
+
+/* Иллюстрации станций и печать SBF — вынесены в assets/chrono.js (window.ChronoStationArt/window.ChronoArchiveStamp),
+   переиспользуются живой главой edu_book_1.html. */
+var STATION_ART = window.ChronoStationArt;
+var STAMP = window.ChronoArchiveStamp;
+
+/* ---------------------------------------------------------------- render: static copy */
+function applyUI(){
+  var u = UI[lang];
+  document.documentElement.lang = lang;
+  document.getElementById("cold-headline").textContent = u.coldHeadline;
+  document.getElementById("cold-body").textContent = u.coldBody;
+  document.getElementById("cold-cta").textContent = u.coldCta;
+  document.getElementById("cold-cap-title").textContent = u.coldCap;
+  document.getElementById("myth-kicker").textContent = u.mythKicker;
+  document.getElementById("myth-no").textContent = u.mythNo;
+  document.getElementById("myth-yes").textContent = u.mythYes;
+  document.getElementById("myth-body").textContent = u.mythBody;
+  document.getElementById("cost-body").textContent = u.costBody;
+  document.getElementById("cost-years").textContent = u.costYears;
+  document.getElementById("a-kicker").textContent = u.aKicker;
+  document.getElementById("a-title").textContent = u.aTitle;
+  document.getElementById("a-sub").textContent = u.aSub;
+  document.getElementById("b-kicker").textContent = u.bKicker;
+  document.getElementById("b-title").textContent = u.bTitle;
+  document.getElementById("b-sub").textContent = u.bSub;
+  document.getElementById("b-lesson").textContent = u.bLesson;
+  document.getElementById("era-task").textContent = u.eraTask;
+  document.getElementById("c-kicker").textContent = u.cKicker;
+  document.getElementById("c-title").textContent = u.cTitle;
+  document.getElementById("c-sub").textContent = u.cSub;
+  document.getElementById("locale-kicker").textContent = u.localeKicker;
+  document.getElementById("locale-body").textContent = LOCALE_BLOCKS[lang];
+  document.getElementById("quiz-kicker").textContent = u.quizKicker;
+  document.getElementById("predict-kicker").textContent = u.predictKicker;
+  document.getElementById("predict-q").textContent = u.predictQ;
+  document.getElementById("predict-yes").textContent = u.predictYes;
+  document.getElementById("predict-no").textContent = u.predictNo;
+  document.getElementById("cliff-kicker").textContent = u.cliffKicker;
+  document.getElementById("cliff-body").textContent = u.cliffBody;
+  document.getElementById("cliff-cta").textContent = u.cliffCta;
+  document.getElementById("foot-compliance").textContent = u.compliance;
+  document.getElementById("foot-credits").textContent = u.credits;
+
+  document.getElementById("art-cold").innerHTML = (window.ChronoStationArtHTML ? window.ChronoStationArtHTML("1602_beurs") : STATION_ART["1602_beurs"]()) + STAMP;
+
+  renderLangbar();
+  renderChrono();
+  renderStation();
+  renderEraTabs();
+  renderEra();
+  renderCalc();
+  renderQuiz();
+}
+
+function renderLangbar(){
+  var bar = document.getElementById("langbar");
+  bar.innerHTML = "";
+  ["ru","ro","en"].forEach(function(l){
+    var b = document.createElement("button");
+    b.className = "lang-btn" + (l === lang ? " active" : "");
+    b.textContent = UI[l].lang;
+    b.onclick = function(){ lang = l; applyUI(); };
+    bar.appendChild(b);
+  });
+}
+
+/* ---------------------------------------------------------------- interactive A: chrono */
+function renderChrono(){
+  var st = window.ChronoStations[lang];
+  var wrap = document.getElementById("chrono-nodes");
+  wrap.innerHTML = "";
+  st.forEach(function(s, i){
+    if (i > 0){
+      var sep = document.createElement("span");
+      sep.className = "h-sep"; sep.textContent = "—";
+      wrap.appendChild(sep);
+    }
+    var btn = document.createElement("button");
+    btn.className = "h-node" + (i === stationIdx ? " active" : (stationsDone[i] ? " done" : ""));
+    btn.textContent = s.id === "today" ? UI[lang].today : s.id;
+    btn.onclick = function(){ stationIdx = i; stationsDone[i] = true; renderChrono(); renderStation(); };
+    wrap.appendChild(btn);
+  });
+  var done = stationsDone.filter(Boolean).length;
+  document.getElementById("chrono-progress").innerHTML =
+    UI[lang].chronicle + ": <b>" + done + "/" + st.length + "</b> · " + UI[lang].xpNote;
+}
+
+function renderStation(){
+  var s = window.ChronoStations[lang][stationIdx];
+  var panel = document.getElementById("station-panel");
+  var html = '';
+  html += '<div class="h-passepartout"><div class="h-artwork">' + (window.ChronoStationArtHTML ? window.ChronoStationArtHTML(s.illustration) : STATION_ART[s.illustration]()) + STAMP + '</div>'
+    + '<div class="h-caption"><span>' + s.year + ' · ' + s.place + '</span><span class="h-src">' + s.source + '</span></div></div>';
+  html += '<div><div class="h-station-head"><span class="h-station-year">' + s.year + '</span><span class="h-station-place">' + s.place + '</span></div>';
+  html += '<h3 class="h-station-title">' + s.title + '</h3>';
+  html += '<p class="h-station-body">' + s.body + '</p>';
+  html += '<div class="h-callout h-callout-fact">' + s.fact + '</div>';
+  if (s.legend){ html += '<div class="h-callout h-callout-legend">' + s.legend + '</div>'; }
+  html += '<div class="h-callout h-callout-hook">' + s.hook + '</div>';
+  if (stationIdx < window.ChronoStations[lang].length - 1){
+    html += '<div style="margin-top:14px"><button class="h-btn" id="station-next">' + UI[lang].stationBtn + '</button></div>';
+  }
+  html += '</div>';
+  panel.innerHTML = html;
+  var nextBtn = document.getElementById("station-next");
+  if (nextBtn){
+    nextBtn.onclick = function(){
+      stationIdx = Math.min(stationIdx + 1, window.ChronoStations[lang].length - 1);
+      stationsDone[stationIdx] = true;
+      renderChrono(); renderStation();
+    };
+  }
+}
+
+/* ---------------------------------------------------------------- interactive B: 5 eras */
+function renderEraTabs(){
+  var wrap = document.getElementById("era-tabs");
+  wrap.innerHTML = "";
+  UI[lang].eras.forEach(function(label, i){
+    var b = document.createElement("button");
+    b.className = "h-era-tab" + (i === eraIdx ? " active" : "");
+    b.textContent = (i+1) + "";
+    b.title = label;
+    b.onclick = function(){ eraIdx = i; renderEraTabs(); renderEra(); };
+    wrap.appendChild(b);
+  });
+}
+
+function renderEra(){
+  document.getElementById("era-label").textContent = UI[lang].eras[eraIdx];
+  var body = document.getElementById("era-body");
+  if (!gold30){ body.innerHTML = '<div class="calc-loading">' + UI[lang].cLoading + '</div>'; return; }
+  var candles = gold30.candles;
+  if (eraIdx === 0) return renderEraTable(body, candles);
+  if (eraIdx === 1) return renderEraHandline(body, candles);
+  if (eraIdx === 2) return renderEraPnF(body, candles);
+  if (eraIdx === 3) return renderEraCandles(body, candles, false);
+  if (eraIdx === 4) return renderEraCandles(body, candles, true);
+}
+
+function renderEraTable(body, candles){
+  var cols = UI[lang].tableCols;
+  var html = '<div style="overflow-x:auto"><table class="h-table"><thead><tr><th>' + cols.join('</th><th>') + '</th></tr></thead><tbody>';
+  candles.forEach(function(c){
+    html += '<tr><td>' + c.time.slice(5) + '</td><td>' + c.high.toFixed(1) + '</td><td>' + c.low.toFixed(1) + '</td><td>' + c.close.toFixed(1) + '</td></tr>';
+  });
+  html += '</tbody></table></div>';
+  body.innerHTML = html;
+}
+
+function renderEraHandline(body, candles){
+  var w = 680, h = 220, pad = 16;
+  var closes = candles.map(function(c){ return c.close; });
+  var mn = Math.min.apply(null, closes), mx = Math.max.apply(null, closes);
+  var pts = closes.map(function(v, i){
+    var x = pad + (i / (closes.length - 1)) * (w - 2*pad);
+    var y = h - pad - ((v - mn) / (mx - mn)) * (h - 2*pad);
+    var jitter = (Math.sin(i * 12.9) * 1.6);
+    return (x).toFixed(1) + ',' + (y + jitter).toFixed(1);
+  }).join(' ');
+  var grid = '';
+  for (var gx = pad; gx < w; gx += 24){ grid += '<line x1="'+gx+'" y1="0" x2="'+gx+'" y2="'+h+'" stroke="#d8cdb2" stroke-width="0.5"/>'; }
+  for (var gy = 0; gy < h; gy += 22){ grid += '<line x1="0" y1="'+gy+'" x2="'+w+'" y2="'+gy+'" stroke="#d8cdb2" stroke-width="0.5"/>'; }
+  body.innerHTML = '<svg viewBox="0 0 '+w+' '+h+'" style="width:100%;height:auto;background:#fbf8f0;border:1px solid #E7DFCF">' + grid
+    + '<polyline points="'+pts+'" fill="none" stroke="#3a3630" stroke-width="1.6" stroke-linejoin="round"/></svg>';
+}
+
+function renderEraPnF(body, candles){
+  var box = (Math.max.apply(null, candles.map(function(c){return c.close;})) - Math.min.apply(null, candles.map(function(c){return c.close;}))) / 16;
+  var reversal = 3;
+  var cols = [];
+  var cur = null;
+  candles.forEach(function(c){
+    var level = Math.round(c.close / box);
+    if (!cur){ cur = { dir: 1, boxes: [level] }; return; }
+    var last = cur.boxes[cur.boxes.length - 1];
+    if (cur.dir === 1){
+      if (level > last){ for (var i=last+1;i<=level;i++) cur.boxes.push(i); }
+      else if (level <= last - reversal){ cols.push(cur); cur = { dir: -1, boxes: [] }; for (var j=last-1;j>=level;j--) cur.boxes.push(j); }
+    } else {
+      if (level < last){ for (var k=last-1;k>=level;k--) cur.boxes.push(k); }
+      else if (level >= last + reversal){ cols.push(cur); cur = { dir: 1, boxes: [] }; for (var m=last+1;m<=level;m++) cur.boxes.push(m); }
+    }
+  });
+  if (cur) cols.push(cur);
+  var allLevels = [].concat.apply([], cols.map(function(c){return c.boxes;}));
+  var top = Math.max.apply(null, allLevels), bot = Math.min.apply(null, allLevels);
+  var lines = [];
+  for (var lvl = top; lvl >= bot; lvl--){
+    var row = cols.map(function(c){
+      return c.boxes.indexOf(lvl) >= 0 ? (c.dir === 1 ? '<span class="x">X</span>' : '<span class="o">O</span>') : ' ';
+    }).join(' ');
+    lines.push(row);
+  }
+  body.innerHTML = '<div class="h-pnf">' + lines.join('\n') + '</div>';
+}
+
+var lwcChartB = null, lwcSeriesB = null;
+function renderEraCandles(body, candles, withLayers){
+  body.innerHTML = '<div id="lwc-b"></div>' + (withLayers ? '<div class="era-note">' + UI[lang].reversalNote + gold30.meta.reversal_day + ' &nbsp;·&nbsp; <span class="cta" onclick="window.open(\'/chart.html\',\'_blank\')">' + UI[lang].live + '</span></div>' : '');
+  if (typeof LightweightCharts === "undefined") return;
+  var el = document.getElementById("lwc-b");
+  var chart = LightweightCharts.createChart(el, {
+    width: el.clientWidth, height: 220,
+    layout: { background: { color: "transparent" }, textColor: "#55524B" },
+    grid: { vertLines: { color: "#E7DFCF" }, horzLines: { color: "#E7DFCF" } },
+    rightPriceScale: { borderColor: "#E7DFCF" }, timeScale: { borderColor: "#E7DFCF" }
+  });
+  var series = chart.addCandlestickSeries({ upColor:"#2E7D5B", downColor:"#B14848", borderVisible:false, wickUpColor:"#2E7D5B", wickDownColor:"#B14848" });
+  series.setData(candles.map(function(c){ return { time: c.time, open:c.open, high:c.high, low:c.low, close:c.close }; }));
+  if (withLayers){
+    var reversal = gold30.meta.reversal_day;
+    series.setMarkers([{ time: reversal, position: "belowBar", color: "#C9A227", shape: "arrowUp", text: UI[lang].reversalNote.replace(":","") }]);
+  }
+  chart.timeScale().fitContent();
+}
+
+/* ---------------------------------------------------------------- interactive C: calculator */
+var djiaCentury = null, nikkei = null;
+var ASSETS = [];
+
+function initCalcAssets(){
+  ASSETS = [
+    { id:"gold", label:"GOLD (MT5, 2021→)", series:null, kind:"daily" },
+    { id:"djia", label:"DJIA — 100 лет", series:null, kind:"annual" },
+    { id:"nikkei", label:"Nikkei-1989 (жёсткий режим)", series:null, kind:"monthly" }
+  ];
+  var sel = document.getElementById("c-asset");
+  sel.innerHTML = "";
+  ASSETS.forEach(function(a){
+    var o = document.createElement("option"); o.value = a.id; o.textContent = a.label; sel.appendChild(o);
+  });
+  sel.onchange = function(){ populateStarts(); renderCalc(); };
+  document.getElementById("c-start").onchange = renderCalc;
+  document.getElementById("c-amount").oninput = renderCalc;
+}
+
+function populateStarts(){
+  var assetId = document.getElementById("c-asset").value;
+  var startSel = document.getElementById("c-start");
+  startSel.innerHTML = "";
+  var opts = [];
+  if (assetId === "gold" && goldFull){
+    var years = {};
+    goldFull.candles.forEach(function(c){ var y = c.time.slice(0,4); if (!years[y]) years[y] = c.time; });
+    opts = Object.keys(years).sort().map(function(y){ return { v: years[y], l: y }; });
+  } else if (assetId === "djia" && djiaCentury){
+    opts = djiaCentury.years.map(function(y){ return { v: String(y.year), l: String(y.year) }; });
+  } else if (assetId === "nikkei" && nikkei){
+    opts = nikkei.months.filter(function(m,i){ return i % 12 === 0; }).map(function(m){ return { v: m.time, l: m.time }; });
+  }
+  opts.forEach(function(o){ var el = document.createElement("option"); el.value = o.v; el.textContent = o.l; startSel.appendChild(el); });
+}
+
+function calcSeries(assetId){
+  if (assetId === "gold" && goldFull) return { points: goldFull.candles.map(function(c){ return { key: c.time, v: c.close }; }) };
+  if (assetId === "djia" && djiaCentury) return { points: djiaCentury.years.map(function(y){ return { key: String(y.year), v: y.close }; }) };
+  if (assetId === "nikkei" && nikkei) return { points: nikkei.months.map(function(m){ return { key: m.time, v: m.close }; }) };
+  return null;
+}
+
+function renderCalc(){
+  var out = document.getElementById("c-result");
+  var assetId = document.getElementById("c-asset").value;
+  var s = calcSeries(assetId);
+  if (!s){ out.innerHTML = '<div class="calc-loading">' + UI[lang].cLoading + ' (капсула ' + assetId + ' ещё не готова — дособерётся фоновым агентом)</div>'; return; }
+  var startKey = document.getElementById("c-start").value;
+  var amount = parseFloat(document.getElementById("c-amount").value) || 1000;
+  var startIdx = s.points.findIndex(function(p){ return p.key === startKey; });
+  if (startIdx < 0) startIdx = 0;
+  var path = s.points.slice(startIdx);
+  if (path.length < 2){ out.innerHTML = '<div class="calc-loading">—</div>'; return; }
+  var base = path[0].v;
+  var finalV = path[path.length - 1].v;
+  var mult = finalV / base;
+  var worst = path.reduce(function(acc, p){ return p.v < acc.v ? p : acc; }, path[0]);
+  var worstMult = worst.v / base;
+  out.innerHTML =
+    '<div class="big">$' + amount.toFixed(0) + ' → $' + (amount*mult).toFixed(0) + '</div>'
+    + '<div style="font-size:12.5px;color:var(--ink-faint);margin-top:4px">' + path[0].key + ' → ' + path[path.length-1].key + ' · x' + mult.toFixed(2) + '</div>'
+    + '<div class="draw">' + (worstMult < 1 ? 'Худшая просадка на пути: ' : 'Минимум на пути: ') + '$' + (amount*worstMult).toFixed(0) + ' (' + worst.key + '). Выдержал бы?' + '</div>';
+}
+
+/* ---------------------------------------------------------------- quiz */
+function renderQuiz(){
+  var wrap = document.getElementById("quiz-list");
+  wrap.innerHTML = "";
+  QUIZ[lang].forEach(function(q, qi){
+    var card = document.createElement("div");
+    card.className = "quiz-q";
+    var prompt = document.createElement("div");
+    prompt.className = "prompt"; prompt.textContent = (qi+1) + ". " + q.prompt;
+    card.appendChild(prompt);
+    var fb = document.createElement("div");
+    fb.className = "quiz-fb";
+    q.opts.forEach(function(o){
+      var b = document.createElement("button");
+      b.className = "quiz-opt"; b.textContent = o.t;
+      b.onclick = function(){
+        Array.prototype.forEach.call(card.querySelectorAll(".quiz-opt"), function(el){ el.disabled = true; });
+        b.className = "quiz-opt " + (o.c ? "correct" : "wrong");
+        fb.textContent = q.fb;
+      };
+      card.appendChild(b);
+    });
+    card.appendChild(fb);
+    wrap.appendChild(card);
+  });
+}
+
+/* ---------------------------------------------------------------- predict (visual only) */
+document.addEventListener("DOMContentLoaded", function(){
+  document.getElementById("predict-yes").onclick = function(){ this.style.opacity=.5; document.getElementById("predict-no").style.opacity=.5; this.textContent += " ✓"; };
+  document.getElementById("predict-no").onclick = function(){ this.style.opacity=.5; document.getElementById("predict-yes").style.opacity=.5; this.textContent += " ✓"; };
+});
+
+/* ---------------------------------------------------------------- boot */
+function loadJSON(url){ return fetch(url).then(function(r){ if (!r.ok) throw new Error(url); return r.json(); }); }
+
+Promise.all([
+  loadJSON("/data/edu_scenes/gold_30d.json").then(function(d){ gold30 = d; }),
+  loadJSON("/data/ohlc_GOLD_D1.json").then(function(d){ goldFull = d; }),
+  loadJSON("/data/edu_capsules/djia_century.json").then(function(d){ djiaCentury = d; }).catch(function(){ djiaCentury = null; }),
+  loadJSON("/data/edu_capsules/nikkei_bubble.json").then(function(d){ nikkei = d; }).catch(function(){ nikkei = null; })
+]).finally(function(){
+  initCalcAssets();
+  populateStarts();
+  applyUI();
+});
+
+})();
+</script>
+</body>
+</html>
