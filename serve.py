@@ -373,9 +373,16 @@ def _edu_inject(ch: int, lang: str = i18n.DEFAULT_LANG) -> str:
         ),
     }
     if ch in _FIG_MAP:
+        # SPEC_charts_and_interactivity_standard.md §2.1 (29.07 re-audit):
+        # data-schema-label computed server-side, same as data-caption --
+        # edu-embed.js's client-side t() dict loads async and is empty at
+        # DOMContentLoaded (window.sbfI18n.ready hasn't resolved yet), so a
+        # client-only translation would render the RU fallback on RO/EN
+        # pages. Passing it pre-translated sidesteps that race entirely.
+        _schema_label = i18n.t("eduindex.embed.schema_label", lang)
         _figs_inner = "".join(
             f'<div class="sbf-fig" data-cat="{cat}" data-key="{key}"'
-            f' data-caption="{cap}"></div>\n'
+            f' data-caption="{cap}" data-schema-label="{_schema_label}"></div>\n'
             for cat, key, cap in _FIG_MAP[ch]
         )
         _tcard_js = _TCARD_MAP.get(ch, "")

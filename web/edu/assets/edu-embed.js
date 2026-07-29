@@ -20,6 +20,7 @@
   var CSS = `
   :root{--sbf-up:#2E8B6F;--sbf-down:#C0504D;--sbf-gold:#C9A227;--sbf-line:#E7DFCF;--sbf-ink:#2B2B33;--sbf-muted:#7C7563;--sbf-paper:#FFFFFF;--sbf-cream:#FBF6EF;}
   .sbf-fig{background:var(--sbf-paper);border:1px solid var(--sbf-line);border-radius:12px;padding:10px;margin:20px 0;cursor:pointer}
+  .sbf-fig .sbf-fig-schema-tag{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--sbf-gold);border:1px solid var(--sbf-gold);border-radius:3px;display:inline-block;padding:2px 6px;margin:2px 4px 8px}
   .sbf-fig .sbf-cap{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--sbf-muted);margin:8px 4px 2px}
   .sbf-fig svg{display:block;width:100%;height:auto}
   .sbf-figlink{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--sbf-gold);cursor:pointer;display:inline-block;margin-top:6px}
@@ -45,6 +46,17 @@
   var st = document.createElement('style'); st.textContent = CSS; document.head.appendChild(st);
 
   // ---- 2. монтирование фигур из движка ----
+  // SPEC_charts_and_interactivity_standard.md §2.1 (29.07 re-audit): these
+  // figures are seeded, deterministic, illustrative shapes -- "what a hammer
+  // looks like", not a real historical event -- and were never labeled as
+  // such, so a reader has no way to tell them apart from a real chart. Per
+  // §2.1 a diagram used to explain mechanics (not show data) is legitimate,
+  // but must say so explicitly. Scoped to THIS file deliberately: it's the
+  // only thing that mounts .sbf-fig blocks (course chapters + calendar.html);
+  // grafik-engine.js's own render core is untouched here, since chart.html
+  // and index.html's own "Технический" pattern-school section calls the
+  // exact same ITEMS/renderItem/build() directly for a separate, real
+  // feature that would need its own dedicated verification pass.
   function mountFigures(root) {
     (root || document).querySelectorAll('.sbf-fig[data-cat][data-key]').forEach(function (el) {
       if (el._sbf) return;
@@ -52,7 +64,15 @@
       var it = G && G.findItem(el.dataset.cat, el.dataset.key);
       if (!it) { el.innerHTML = '<div style="font:12px monospace;color:#a99">' + t('eduindex.embed.figure_not_found', 'фигура не найдена: ') + el.dataset.cat + '/' + el.dataset.key + '</div>'; return; }
       var cap = el.dataset.caption || (it.n + ' · ' + t('eduindex.embed.how_it_forms', 'как формируется'));
-      el.innerHTML = '<div class="sbf-fig-chart"></div><div class="sbf-cap">' + cap + '</div>';
+      // Prefer the server-rendered label (data-schema-label, set by serve.py
+      // for course chapters) over the client-side t() fallback -- the
+      // client i18n dict loads async and is typically still empty at this
+      // point (see comment above), so on pages without the server attribute
+      // (e.g. calendar.html, which mounts .sbf-fig without serve.py's
+      // _FIG_MAP wiring) this will render in Russian until sbfI18n.ready
+      // resolves and the figure is re-mounted.
+      var schemaLabel = el.dataset.schemaLabel || t('eduindex.embed.schema_label', 'СХЕМА · ИЛЛЮСТРАЦИЯ, НЕ РЕАЛЬНЫЕ ДАННЫЕ');
+      el.innerHTML = '<div class="sbf-fig-schema-tag">' + schemaLabel + '</div><div class="sbf-fig-chart"></div><div class="sbf-cap">' + cap + '</div>';
       function render() { el.querySelector('.sbf-fig-chart').innerHTML = it.build(); }
       render(); el._sbf = true;
       el.title = t('eduindex.embed.click_to_replay', 'нажми, чтобы проиграть заново');
