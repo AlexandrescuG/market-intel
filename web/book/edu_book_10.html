@@ -307,10 +307,13 @@ const TF_LABEL = "H1"; // таймфрейм tools/edu_build/pattern_examples.py
 // always required a real chart with the marked pattern per screen; it was
 // never built (text cards only) despite being marked ✅ in the debug queue.
 function PatternMiniChart({ example, patternKey }) {
-  const { useEffect, useRef } = React;
+  const { useEffect, useRef, useState, useMemo } = React;
+  const T10 = window.Ch10Content[INITIAL_LANG] || window.Ch10Content.ru;
+  const ps = T10.patternScreens;
   const containerRef = useRef(null);
   const chartRef = useRef(null);
   const seriesRef = useRef({});
+  const [holdN, setHoldN] = useState(5);
 
   useEffect(() => {
     if (!containerRef.current || chartRef.current || typeof LightweightCharts === "undefined") return;
@@ -341,7 +344,36 @@ function PatternMiniChart({ example, patternKey }) {
     chartRef.current.timeScale().fitContent();
   }, [example]);
 
-  return <div ref={containerRef} data-scene={"ch10_patterns:" + patternKey} style={{background:"rgba(255,255,255,0.03)",borderRadius:6,overflow:"hidden",marginBottom:8,minHeight:180}}/>;
+  // SPEC_charts_and_interactivity_standard.md (29.07): real class-A element --
+  // example.candles already carries 16 real H1 candles after marker_time
+  // (pattern_examples.py's AFTER window), unused until now. The slider
+  // recomputes a real forward return from the real marker close to the
+  // real close N hours later, on the actual detected occurrence.
+  const maxHold = useMemo(() => {
+    if (!example) return 0;
+    const idx = example.candles.findIndex(c => c.time === example.marker_time);
+    return idx >= 0 ? example.candles.length - 1 - idx : 0;
+  }, [example]);
+  const holdPct = useMemo(() => {
+    if (!example || maxHold === 0) return null;
+    const idx = example.candles.findIndex(c => c.time === example.marker_time);
+    const n = Math.min(holdN, maxHold);
+    const base = example.candles[idx].close, after = example.candles[idx + n].close;
+    return (after - base) / base * 100;
+  }, [example, holdN, maxHold]);
+
+  return (
+    <div style={{marginBottom:8}}>
+      <div ref={containerRef} data-scene={"ch10_patterns:" + patternKey} style={{background:"rgba(255,255,255,0.03)",borderRadius:6,overflow:"hidden",marginBottom:8,minHeight:180}}/>
+      {maxHold > 0 && (
+        <div style={{display:"flex",alignItems:"center",gap:12,flexWrap:"wrap",padding:"0 2px"}}>
+          <Mono size={9.5} color={C.inkFaint} spacing={0.5}>{ps.holdLabel}</Mono>
+          <input type="range" min={1} max={maxHold} value={Math.min(holdN,maxHold)} onChange={e=>setHoldN(+e.target.value)} style={{flex:1,minWidth:100}}/>
+          {holdPct !== null && <Mono size={11} color={holdPct >= 0 ? "#1c8a4a" : "#c0392b"} spacing={0}>{ps.holdResult(Math.min(holdN,maxHold), holdPct)}</Mono>}
+        </div>
+      )}
+    </div>
+  );
 }
 
 function PatternBehaviorScreens({ patterns, examples }) {

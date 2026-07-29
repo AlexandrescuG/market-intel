@@ -108,6 +108,7 @@ window.Ch10Content = {
       mechanicNote: "Это не психология, а механика — глава 5, скученность заявок Ослер.",
       statLabel: "согласованность", nLabel: "n", baselineNote: "опорная линия — 50%",
       openOnChart: "Открыть USDJPY на графике →",
+      holdLabel: "Часов удержания после сигнала", holdResult: (n, pct) => `${n}ч удержания: ${pct >= 0 ? "+" : ""}${pct.toFixed(2)}%`,
     },
     coreMeasure: {
       tag: "РАЗБИВКА ПО ИНСТРУМЕНТАМ",
@@ -258,6 +259,7 @@ window.Ch10Content = {
       mechanicNote: "Asta nu e psihologie, e mecanică — capitolul 5, aglomerarea ordinelor, Osler.",
       statLabel: "concordanță", nLabel: "n", baselineNote: "linia de bază — 50%",
       openOnChart: "Deschide USDJPY pe grafic →",
+      holdLabel: "Ore de deținere după semnal", holdResult: (n, pct) => `${n}h deținere: ${pct >= 0 ? "+" : ""}${pct.toFixed(2)}%`,
     },
     coreMeasure: {
       tag: "DEFALCARE PE INSTRUMENTE",
@@ -408,6 +410,7 @@ window.Ch10Content = {
       mechanicNote: "This isn't psychology, it's mechanics — chapter 5, order clustering, Osler.",
       statLabel: "agreement", nLabel: "n", baselineNote: "baseline — 50%",
       openOnChart: "Open USDJPY on the chart →",
+      holdLabel: "Hours held after the signal", holdResult: (n, pct) => `${n}h held: ${pct >= 0 ? "+" : ""}${pct.toFixed(2)}%`,
     },
     coreMeasure: {
       tag: "BREAKDOWN BY INSTRUMENT",
