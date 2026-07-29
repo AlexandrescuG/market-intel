@@ -266,13 +266,19 @@ function ThreePaths({ lang }) {
         <div style={cardStyle}>
           <div style={{fontWeight:600,fontSize:14,color:C.black,marginBottom:10}}>{tp.path2.title}</div>
           <p style={{fontSize:12.5,color:C.inkMid,lineHeight:1.6,marginBottom:12,flex:1}}>{tp.path2.text}</p>
-          {!gateLoading && gate && !gate.all_ok && (
+          {/* SPEC_charts_and_interactivity_standard.md (29.07 re-audit): this
+              real gate-status fetch used to render unconditionally, visible
+              before any click -- clicking "live" only added a thank-you note,
+              not a real consequence (class C dressed as B). Now it's gated
+              behind the actual choice: the reader commits to path 2 first,
+              THEN sees the real result. */}
+          {selected === "live" && !gateLoading && gate && !gate.all_ok && (
             <div style={{background:"#fff",border:`1px solid ${C.border}`,borderRadius:6,padding:"10px 12px",marginBottom:12}}>
               <p style={{fontSize:11.5,color:C.inkMid,margin:"0 0 6px 0"}}>{tp.path2.blockedNote}</p>
               <span onClick={()=>window.location.href=getChUrl(14,lang)} style={{fontSize:11,color:C.gold,cursor:"pointer",fontFamily:"monospace"}}>{tp.path2.gotoGate}</span>
             </div>
           )}
-          {!gateLoading && gate && gate.all_ok && (
+          {selected === "live" && !gateLoading && gate && gate.all_ok && (
             <div style={{background:"#fff",border:`1px dashed ${C.borderGold}`,borderRadius:6,padding:"10px 12px",marginBottom:12}}>
               <p style={{fontSize:11.5,color:C.inkFaint,fontStyle:"italic",margin:0}}>{tp.path2.pendingNote}</p>
             </div>
