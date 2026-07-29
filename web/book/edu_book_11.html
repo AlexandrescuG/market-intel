@@ -417,6 +417,13 @@ function PredictLossPct() {
   const T11 = window.Ch11Content[INITIAL_LANG] || window.Ch11Content.ru;
   const p = T11.predict;
   const [picked, setPicked] = useState(null);
+  // options[2] ("Больше десяти" / more than ten pp) is the one ESMA's own
+  // methodology confirms -- the reveal below now depends on which of the
+  // 3 options was actually picked, not a fixed sentence for any click.
+  const correct = picked === 2;
+  const correctPrefix = INITIAL_LANG==="ru" ? "Верно. " : INITIAL_LANG==="ro" ? "Corect. " : "Correct. ";
+  const wrongPrefix = INITIAL_LANG==="ru" ? "На деле разрыв больше, чем ты предположил. " : INITIAL_LANG==="ro" ? "De fapt diferența e mai mare decât ai presupus. " : "The gap is actually bigger than you guessed. ";
+  const esmaFact = INITIAL_LANG==="ru"?"По методике ESMA разброс между площадками действительно бывает больше десяти процентных пунктов — точную таблицу по нашим партнёрам опубликуем вместе с инструментом сравнения.":INITIAL_LANG==="ro"?"După metodologia ESMA, diferența dintre platforme poate fi într-adevăr mai mare de zece puncte procentuale — tabelul exact pentru partenerii noștri va fi publicat odată cu instrumentul de comparare.":"Per ESMA's methodology, the gap between platforms genuinely can exceed ten percentage points — we'll publish the exact table for our partners alongside the comparison tool.";
   return (
     <div style={{border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px",marginTop:8,marginBottom:24}}>
       <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{p.tag}</Mono>
@@ -426,7 +433,7 @@ function PredictLossPct() {
           <button key={i} onClick={()=>setPicked(i)} style={{fontFamily:"monospace",fontSize:12,padding:"9px 20px",cursor:"pointer",background:picked===i?C.gold:"#fff",color:picked===i?"#18181a":C.inkMid,border:`1px solid ${picked===i?C.gold:C.border}`,borderRadius:4}}>{o}</button>
         ))}
       </div>
-      {picked !== null && <p style={{fontSize:12.5,color:C.inkMid,lineHeight:1.7,marginBottom:10,background:C.goldPale,padding:"12px 16px",borderRadius:4}}>{INITIAL_LANG==="ru"?"По методике ESMA разброс между площадками действительно бывает больше десяти процентных пунктов — точную таблицу по нашим партнёрам опубликуем вместе с инструментом сравнения.":INITIAL_LANG==="ro"?"După metodologia ESMA, diferența dintre platforme poate fi într-adevăr mai mare de zece puncte procentuale — tabelul exact pentru partenerii noștri va fi publicat odată cu instrumentul de comparare.":"Per ESMA's methodology, the gap between platforms genuinely can exceed ten percentage points — we'll publish the exact table for our partners alongside the comparison tool."}</p>}
+      {picked !== null && <p style={{fontSize:12.5,color:C.inkMid,lineHeight:1.7,marginBottom:10,background:C.goldPale,padding:"12px 16px",borderRadius:4}}>{(correct ? correctPrefix : wrongPrefix) + esmaFact}</p>}
       <p style={{fontSize:11,color:C.inkFaint}}>{p.xpNote}</p>
     </div>
   );
