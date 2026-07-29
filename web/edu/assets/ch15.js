@@ -136,6 +136,12 @@ window.Ch15Content = {
         cta: "Проверить условия",
         blockedNote: "Сначала — то, чего не хватает по воротам главы 14.",
         gotoGate: "К воротам главы 14 →",
+        condTrades: "Сделок в серии", condWeeks: "Недель активности", condSystem: "Правила серии записаны", condMath: "Калькулятор издержек пройден",
+        projLabel: "Сделок в неделю (твой темп)", projResult: (weeks) => {
+          const mod10 = weeks % 10, mod100 = weeks % 100;
+          const word = (mod10 === 1 && mod100 !== 11) ? "неделя" : (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) ? "недели" : "недель";
+          return `ещё ${weeks} ${word} до 50 сделок`;
+        }, projDone: "условие по сделкам уже выполнено",
         pendingNote: "Список площадок с проверенными данными по юрлицам и лицензиям готовится отдельно и пока не показан здесь — по той же причине, по которой мы не публикуем непроверенные цифры нигде в курсе.",
       },
       path3: {
@@ -277,6 +283,8 @@ window.Ch15Content = {
         cta: "Check the conditions",
         blockedNote: "First, what's missing at chapter 14's gate.",
         gotoGate: "To chapter 14's gate →",
+        condTrades: "Trades logged", condWeeks: "Active weeks", condSystem: "Rules written down", condMath: "Cost calculator done",
+        projLabel: "Trades per week (your pace)", projResult: (weeks) => weeks === 1 ? "1 more week to 50 trades" : `${weeks} more weeks to 50 trades`, projDone: "the trades condition is already met",
         pendingNote: "The list of platforms with verified legal-entity and license data is being prepared separately and isn't shown here yet — for the same reason we don't publish unverified numbers anywhere in the course.",
       },
       path3: {
@@ -418,6 +426,8 @@ window.Ch15Content = {
         cta: "Verific condițiile",
         blockedNote: "Mai întâi, ce lipsește la poarta capitolului 14.",
         gotoGate: "La poarta capitolului 14 →",
+        condTrades: "Tranzacții înregistrate", condWeeks: "Săptămâni active", condSystem: "Reguli scrise", condMath: "Calculator de costuri făcut",
+        projLabel: "Tranzacții pe săptămână (ritmul tău)", projResult: (weeks) => weeks === 1 ? "încă 1 săptămână până la 50" : `încă ${weeks} săptămâni până la 50`, projDone: "condiția de tranzacții e deja îndeplinită",
         pendingNote: "Lista platformelor cu date verificate despre entități juridice și licențe e în pregătire separată și nu e încă arătată aici — din același motiv pentru care nu publicăm cifre neverificate nicăieri în curs.",
       },
       path3: {
