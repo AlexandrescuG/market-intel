@@ -134,6 +134,10 @@ window.Ch7Content = {
       xpNote: "XP начисляется за прохождение независимо от совпадений.",
       zoneRound: "круглый уровень", zonePrevHigh: "хай предыдущей сессии", zonePrevLow: "лоу предыдущей сессии",
       outcomeReversed: "модель совпала — цена развернулась", outcomeBroke: "модель не совпала — цена прошла зону", outcomeInconclusive: "неопределённо",
+      predictDayQuestion: "Прежде чем смотреть свечи: как думаешь, цена развернётся от зоны или пройдёт сквозь неё?",
+      predictReversedBtn: "Развернётся", predictBrokeBtn: "Пройдёт сквозь",
+      predictCorrect: "Угадал.", predictWrong: "Не угадал.",
+      predictInconclusive: "По факту — неопределённо: ни явного разворота, ни явного пробоя.",
     },
     ladderLimit: {
       body: "Всё, что ты прочитал в этой главе, ты пока принял на слово — кроме одного блока, где мы выложили свои измерения и CSV.\n\nИ это неправильно. Шесть глав мы учили тебя проверять за нами. А эту главу проверить не на чем, и дело не в нашей лени: поведение книги заявок не рисуется на макете. Плотность, которая восстанавливается за две секунды после того, как её съели; заявки, исчезающие за минуту до релиза; серия сделок одинакового размера, идущая двадцать минут подряд — всё это существует только в моменте. Запись показывает результат, а результат мы тебе уже показали — это свеча, и по ней ничего не видно.\n\nЗначит, нужен терминал. Не счёт с деньгами — терминал.",
@@ -297,6 +301,10 @@ window.Ch7Content = {
       xpNote: "XP se acordă pentru parcurgere, indiferent de potriviri.",
       zoneRound: "nivel rotund", zonePrevHigh: "maximul sesiunii precedente", zonePrevLow: "minimul sesiunii precedente",
       outcomeReversed: "modelul s-a potrivit — prețul a întors", outcomeBroke: "modelul nu s-a potrivit — prețul a trecut zona", outcomeInconclusive: "neconcludent",
+      predictDayQuestion: "Înainte să vezi lumânările: crezi că prețul va întoarce de la zonă sau va trece prin ea?",
+      predictReversedBtn: "Va întoarce", predictBrokeBtn: "Va trece prin",
+      predictCorrect: "Ai ghicit.", predictWrong: "N-ai ghicit.",
+      predictInconclusive: "De fapt — neconcludent: nici întoarcere clară, nici trecere clară.",
     },
     ladderLimit: {
       body: "Tot ce ai citit în acest capitol, l-ai acceptat deocamdată pe cuvânt — cu excepția unui bloc unde am publicat propriile măsurători și CSV-ul.\n\nȘi asta nu e corect. Șase capitole te-am învățat să ne verifici. Iar acest capitol n-are pe ce fi verificat, și nu din lene: comportamentul cărții de ordine nu se desenează într-un mockup. Densitatea care se reface în două secunde după ce a fost consumată; ordinele care dispar cu un minut înainte de publicație; o serie de tranzacții de mărime egală, care ține douăzeci de minute la rând — toate acestea există doar în moment. O înregistrare arată rezultatul, iar rezultatul ți l-am arătat deja — e o lumânare, și din ea nu se vede nimic.\n\nDeci ai nevoie de un terminal. Nu de un cont cu bani — de un terminal.",
@@ -460,6 +468,10 @@ window.Ch7Content = {
       xpNote: "XP is awarded for completing this regardless of how many matched.",
       zoneRound: "round level", zonePrevHigh: "previous session's high", zonePrevLow: "previous session's low",
       outcomeReversed: "the model matched — price reversed", outcomeBroke: "the model missed — price broke through the zone", outcomeInconclusive: "inconclusive",
+      predictDayQuestion: "Before you see the candles: do you think price will reverse off the zone or break through it?",
+      predictReversedBtn: "Reverse", predictBrokeBtn: "Break through",
+      predictCorrect: "Right.", predictWrong: "Not this time.",
+      predictInconclusive: "Actually inconclusive — no clean reversal, no clean break.",
     },
     ladderLimit: {
       body: "Everything you read in this chapter, you took on trust — except for one block where we published our own measurements and the CSV.\n\nAnd that's not right. For six chapters we taught you to check our work. This chapter has nothing to check it against, and that's not laziness on our part: order-book behavior doesn't draw onto a mockup. Density recovering in two seconds after being eaten; orders vanishing a minute before a release; a series of matching-size trades running for twenty minutes straight — all of that only exists in the moment. A recording shows the outcome, and we've already shown you the outcome — it's a candle, and nothing shows through it.\n\nSo you need a terminal. Not a funded account — a terminal.",

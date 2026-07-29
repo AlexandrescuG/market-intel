@@ -489,6 +489,7 @@ function XrayReversed({ xray }) {
   const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
   const [step, setStep] = useState(1);
   const [dayIdx, setDayIdx] = useState(0);
+  const [dayGuesses, setDayGuesses] = useState({});
   const containerRef = useRef(null);
   const chartRef = useRef(null);
   const seriesRef = useRef({});
@@ -572,7 +573,32 @@ function XrayReversed({ xray }) {
               data, still not a compliant chart (no axes, no engine, no
               marker). Now real lightweight-charts candles + a real volume
               pane, real price+time axes, zones as real price lines. */}
-          <div ref={containerRef} data-scene="ch7_xray" style={{marginBottom:6}}/>
+          <div style={{position:"relative",marginBottom:6}}>
+            <div ref={containerRef} data-scene="ch7_xray"/>
+            {/* SPEC_charts_and_interactivity_standard.md (29.07): real
+                class-B element -- the day's real outcome (day.touch.outcome)
+                used to be visible together with the candles (chart shows
+                whether price reversed or broke through at a glance). Now
+                the chart is covered until the reader commits a prediction
+                for THIS day, so seeing the candles is a real consequence
+                of a real choice, not simultaneous with it. The chart
+                underneath still renders/updates normally -- only the
+                overlay is new. */}
+            {day.touch && dayGuesses[dayIdx] === undefined && (
+              <div style={{position:"absolute",inset:0,zIndex:5,background:"rgba(10,10,12,0.96)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:14,padding:"0 24px",textAlign:"center"}}>
+                <p style={{fontSize:13,color:"rgba(255,255,255,0.75)",lineHeight:1.6,maxWidth:400,margin:0}}>{xr.predictDayQuestion}</p>
+                <div style={{display:"flex",gap:10}}>
+                  <button onClick={()=>setDayGuesses(g=>({...g,[dayIdx]:"reversed"}))} style={{padding:"10px 20px",background:"transparent",color:"#fff",border:"1px solid rgba(255,255,255,0.3)",borderRadius:4,cursor:"pointer",fontFamily:"monospace",fontSize:12}}>{xr.predictReversedBtn}</button>
+                  <button onClick={()=>setDayGuesses(g=>({...g,[dayIdx]:"broke_through"}))} style={{padding:"10px 20px",background:"transparent",color:"#fff",border:"1px solid rgba(255,255,255,0.3)",borderRadius:4,cursor:"pointer",fontFamily:"monospace",fontSize:12}}>{xr.predictBrokeBtn}</button>
+                </div>
+              </div>
+            )}
+          </div>
+          {day.touch && dayGuesses[dayIdx] !== undefined && (
+            <p style={{fontSize:11.5,color:C.gold,fontFamily:"monospace",marginBottom:10}}>
+              {day.touch.outcome === "inconclusive" ? xr.predictInconclusive : (dayGuesses[dayIdx] === day.touch.outcome ? xr.predictCorrect : xr.predictWrong)}{" "}{outcomeLabel(day.touch.outcome)}
+            </p>
+          )}
           <p style={{fontSize:9.5,color:"rgba(255,255,255,0.32)",fontFamily:"monospace",lineHeight:1.5,marginBottom:10}}>{xr.volumeCaption}</p>
 
           {step === 2 && (
@@ -580,18 +606,15 @@ function XrayReversed({ xray }) {
               <button onClick={()=>setStep(3)} style={{padding:"12px 26px",background:C.gold,color:"#18181a",border:"none",borderRadius:4,cursor:"pointer",fontFamily:"monospace",fontSize:12,letterSpacing:1,fontWeight:700}}>{xr.moreDaysBtn}</button>
             </div>
           )}
-          {step === 3 && dayIdx < days.length - 1 && (
+          {step === 3 && dayIdx < days.length - 1 && (!day.touch || dayGuesses[dayIdx] !== undefined) && (
             <div style={{textAlign:"center"}}>
               <button onClick={()=>setDayIdx(i=>i+1)} style={{padding:"10px 22px",background:"rgba(255,255,255,0.08)",color:"#fff",border:"1px solid rgba(255,255,255,0.2)",borderRadius:4,cursor:"pointer",fontFamily:"monospace",fontSize:11,letterSpacing:1}}>{xr.moreDaysBtn} →</button>
             </div>
           )}
-          {step === 3 && dayIdx >= days.length - 1 && (
-            <p style={{textAlign:"center",fontSize:11,color:"rgba(255,255,255,0.4)",fontFamily:"monospace"}}>{day.touch ? outcomeLabel(day.touch.outcome) : "—"}</p>
-          )}
         </div>
       )}
 
-      {step === 3 && dayIdx >= days.length - 1 && (
+      {step === 3 && dayIdx >= days.length - 1 && (!day.touch || dayGuesses[dayIdx] !== undefined) && (
         <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"24px 28px"}}>
           <div style={{fontWeight:600,fontSize:14.5,color:C.black,marginBottom:10}}>{xr.revealTitle}</div>
           {xr.revealBody.split("\n\n").map((p,i) => (
