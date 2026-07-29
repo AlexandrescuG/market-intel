@@ -22,6 +22,7 @@
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
 <script src="/edu/assets/ch10.js"></script>
 
 <script type="text/babel" data-presets="react">
@@ -115,17 +116,20 @@ function fillTemplate(str, vars) {
   });
 }
 
-// ── Загрузка данных главы: pattern_reality.json (переиспользуется из главы 7).
+// ── Загрузка данных главы: pattern_reality.json (переиспользуется из главы 7)
+// + ch10_patterns.json (по одному реальному примеру на паттерн, tools/edu_build/pattern_examples.py).
 function useCh10Data() {
   const { useState, useEffect } = React;
-  const [state, setState] = useState({ loading: true, error: null, patterns: null });
+  const [state, setState] = useState({ loading: true, error: null, patterns: null, examples: null });
   useEffect(() => {
     let cancelled = false;
-    fetch("/data/edu_stats/pattern_reality.json").then(r => { if (!r.ok) throw new Error("pattern_reality.json HTTP " + r.status); return r.json(); })
-      .then(patterns => { if (!cancelled) setState({ loading: false, error: null, patterns }); })
+    Promise.all([
+      fetch("/data/edu_stats/pattern_reality.json").then(r => { if (!r.ok) throw new Error("pattern_reality.json HTTP " + r.status); return r.json(); }),
+      fetch("/data/edu_scenes/ch10_patterns.json").then(r => { if (!r.ok) throw new Error("ch10_patterns.json HTTP " + r.status); return r.json(); }),
+    ]).then(([patterns, examples]) => { if (!cancelled) setState({ loading: false, error: null, patterns, examples }); })
       .catch(err => {
         console.error("[ch10] load failed:", err);
-        if (!cancelled) setState({ loading: false, error: err, patterns: null });
+        if (!cancelled) setState({ loading: false, error: err, patterns: null, examples: null });
       });
     return () => { cancelled = true; };
   }, []);
@@ -294,12 +298,58 @@ function PatternsAsCrowd() {
 const CORE_PATTERN_TYPES = ["double_top","double_bottom","bearish_engulfing","bullish_engulfing","pin_bar_top","pin_bar_bottom","break_retest"];
 const MATRIX_SYMBOLS_10 = ["GOLD","EURUSD","USDJPY","BTC"];
 const PATTERN_CHART_SYMBOL = "USDJPY"; // инструмент с наибольшим n по всем четырём парам
+const TF_LABEL = "H1"; // таймфрейм tools/edu_build/pattern_examples.py
 
-function PatternBehaviorScreens({ patterns }) {
+// One real occurrence per pattern key (tools/edu_build/pattern_examples.py,
+// via core.patterns.detect() -- the platform's own detector, not a new one)
+// rendered on lightweight-charts. SPEC_charts_and_interactivity_standard.md
+// 29.07 re-audit: this chapter's own debug spec (SPEC_ch10_debug.md §2/§6)
+// always required a real chart with the marked pattern per screen; it was
+// never built (text cards only) despite being marked ✅ in the debug queue.
+function PatternMiniChart({ example, patternKey }) {
+  const { useEffect, useRef } = React;
+  const containerRef = useRef(null);
+  const chartRef = useRef(null);
+  const seriesRef = useRef({});
+
+  useEffect(() => {
+    if (!containerRef.current || chartRef.current || typeof LightweightCharts === "undefined") return;
+    const chart = LightweightCharts.createChart(containerRef.current, {
+      width: containerRef.current.clientWidth, height: 180,
+      layout: { background: { color: C.black }, textColor: "rgba(255,255,255,0.5)" },
+      grid: { vertLines: { color: "rgba(255,255,255,0.05)" }, horzLines: { color: "rgba(255,255,255,0.05)" } },
+      rightPriceScale: { borderColor: "rgba(255,255,255,0.15)" },
+      timeScale: { borderColor: "rgba(255,255,255,0.15)", timeVisible: true, secondsVisible: false },
+    });
+    const candleSeries = chart.addCandlestickSeries({
+      upColor: "rgba(46,204,113,0.8)", downColor: "rgba(231,76,60,0.8)",
+      borderUpColor: "rgba(46,204,113,0.8)", borderDownColor: "rgba(231,76,60,0.8)",
+      wickUpColor: "rgba(46,204,113,0.8)", wickDownColor: "rgba(231,76,60,0.8)",
+    });
+    chartRef.current = chart;
+    seriesRef.current = { candleSeries };
+    const ro = new ResizeObserver(entries => { if (entries[0]) chart.applyOptions({ width: entries[0].contentRect.width }); });
+    ro.observe(containerRef.current);
+    return () => { ro.disconnect(); chart.remove(); chartRef.current = null; };
+  }, []);
+
+  useEffect(() => {
+    const s = seriesRef.current;
+    if (!s.candleSeries || !example) return;
+    s.candleSeries.setData(example.candles.map(c => ({ time: c.time, open: +c.open, high: +c.high, low: +c.low, close: +c.close })));
+    s.candleSeries.setMarkers([{ time: example.marker_time, position: example.direction === "bearish" ? "aboveBar" : "belowBar", color: C.gold, shape: example.direction === "bearish" ? "arrowDown" : "arrowUp" }]);
+    chartRef.current.timeScale().fitContent();
+  }, [example]);
+
+  return <div ref={containerRef} data-scene={"ch10_patterns:" + patternKey} style={{background:"rgba(255,255,255,0.03)",borderRadius:6,overflow:"hidden",marginBottom:8,minHeight:180}}/>;
+}
+
+function PatternBehaviorScreens({ patterns, examples }) {
   const T10 = window.Ch10Content[INITIAL_LANG] || window.Ch10Content.ru;
   const ps = T10.patternScreens;
   const cm = T10.coreMeasure;
   const pooled = (patterns && patterns.pattern_pooled) || {};
+  const exPatterns = (examples && examples.patterns) || {};
 
   return (
     <div style={{marginBottom:48}}>
@@ -307,9 +357,12 @@ function PatternBehaviorScreens({ patterns }) {
       <div style={{display:"flex",flexDirection:"column",gap:14,marginBottom:20}}>
         {ps.items.map((it,i) => {
           const stats = it.keys.map(k => pooled[k]).filter(Boolean);
+          const example = exPatterns[it.keys[0]];
           return (
             <div key={i} style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"20px 24px",borderLeft:`3px solid ${it.mechanic?"#c0392b":C.gold}`}}>
               <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,marginBottom:12}}>{it.behavior}</p>
+              <PatternMiniChart example={example} patternKey={it.keys[0]}/>
+              {example && <Mono size={9} color={C.inkFaint} spacing={0.5} style={{display:"block",marginBottom:12}}>{PATTERN_CHART_SYMBOL} · {TF_LABEL} · {example.date} UTC</Mono>}
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:10,marginBottom:it.mechanic?10:0}}>
                 <div style={{fontWeight:600,fontSize:14.5,color:C.black}}>{it.label}</div>
                 <div style={{display:"flex",gap:14,flexWrap:"wrap"}}>
@@ -444,7 +497,7 @@ function Chapter10() {
   const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
   const lang = INITIAL_LANG;
   const T10 = window.Ch10Content[lang] || window.Ch10Content.ru;
-  const { loading, error, patterns } = useCh10Data();
+  const { loading, error, patterns, examples } = useCh10Data();
 
   return (
     <div style={{minHeight:"100vh",background:C.white,color:C.ink,fontFamily:"'DM Sans',sans-serif"}}>
@@ -501,7 +554,7 @@ function Chapter10() {
         <SectionTitle id="secPatternsAsCrowd" sub={S.patternsSub}>{T10.patternsAsCrowd.tag}</SectionTitle>
         <PatternsAsCrowd/>
 
-        <PatternBehaviorScreens patterns={patterns}/>
+        <PatternBehaviorScreens patterns={patterns} examples={examples}/>
 
         <CoreMeasureBlock patterns={patterns}/>
 
