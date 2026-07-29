@@ -44,6 +44,7 @@
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
 <script src="/edu/assets/scene-engine.js"></script>
 <script src="/assets/sbf-icons.js"></script>
 <script src="/edu/assets/ch4.js"></script>
@@ -744,12 +745,14 @@ function PendingOrderScheme() {
   const T4 = window.Ch4Content[INITIAL_LANG] || window.Ch4Content.ru;
   const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
   const P = T4.pendingScheme;
-  const priceWord = (S.currentPriceLabel || "").replace(/[\d.,\s]+$/, "").trim();
 
   const [candles, setCandles] = useState(null);
   const [levelPrice, setLevelPrice] = useState(null);
-  const svgRef = useRef(null);
+  const containerRef = useRef(null);
+  const chartRef = useRef(null);
+  const seriesRef = useRef({});
   const draggingRef = useRef(false);
+  const priceLineRef = useRef(null);
 
   useEffect(() => {
     fetch("/data/ohlc_GOLD_M30.json").then(r => r.json()).then(d => {
@@ -763,83 +766,89 @@ function PendingOrderScheme() {
     }).catch(() => {});
   }, []);
 
-  if (!candles || levelPrice == null) {
-    return <div style={{background:C.black,borderRadius:6,minHeight:220,marginBottom:56}}/>;
-  }
-
-  const currentPrice = candles[candles.length - 1].close;
-  const W = 680, H = 220, padY = 18;
-  const highs = candles.map(c => c.high), lows = candles.map(c => c.low);
-  // Диапазон фиксирован от РЕАЛЬНЫХ данных свечей и центрирован на текущей
-  // цене -- не растягивается вслед за перетаскиваемым уровнем (раньше
-  // levelPrice сам входил в min/max: потянешь линию в одну сторону, диапазон
-  // растягивался вслед за ней, линия цены уезжала к краю, а противоположная
-  // зона становилась слишком узкой для перетаскивания -- живой баг, найден
-  // Playwright-драгом: клик на 90% высоты давал то же "BUY STOP", потому что
-  // цена сама стояла на 85%). И не берётся голым min/max свечей: у реальных
-  // 32 M30-баров цена сама по себе может стоять у самого края 16-часового
-  // окна (здесь честно и было — 85% вниз) — тогда просто одна зона всё равно
-  // останется узкой. Вместо этого — симметричный полу-диапазон от БОЛЬШЕГО
-  // из двух естественных расстояний (до максимума и до минимума), центр
-  // всегда на цене: обе зоны всегда ровно по 50%, ни один фитиль не обрезан.
-  const distUp = Math.max(...highs) - currentPrice;
-  const distDown = currentPrice - Math.min(...lows);
-  const halfSpan = Math.max(distUp, distDown, (Math.max(...highs) - Math.min(...lows)) * 0.5) * 1.25;
-  const min = currentPrice - halfSpan;
-  const max = currentPrice + halfSpan;
-  const range = (max - min) || 1;
-  const toY = p => padY + (1 - (p - min) / range) * (H - padY * 2);
-  const toP = yFrac => min + (1 - yFrac) * range;
-  const step = (W - 40) / candles.length;
-  const candleW = Math.max(3, step - 3);
-
-  const posFromEvent = (e) => {
-    const rect = svgRef.current.getBoundingClientRect();
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    return Math.max(0, Math.min(1, (clientY - rect.top) / rect.height));
-  };
-  const setFromEvent = (e) => {
-    const p = toP(posFromEvent(e));
-    setLevelPrice(Math.max(min, Math.min(max, p)));
-  };
-  const startDrag = (e) => { draggingRef.current = true; setFromEvent(e); };
-  const moveDrag = (e) => { if (draggingRef.current) setFromEvent(e); };
-  const endDrag = () => { draggingRef.current = false; };
-
-  const eps = range * 0.006;
-  const above = levelPrice > currentPrice + eps;
-  const below = levelPrice < currentPrice - eps;
+  const currentPrice = candles ? candles[candles.length - 1].close : null;
+  const eps = candles ? (Math.max(...candles.map(c=>c.high)) - Math.min(...candles.map(c=>c.low))) * 0.006 : 0;
+  const above = levelPrice != null && currentPrice != null && levelPrice > currentPrice + eps;
+  const below = levelPrice != null && currentPrice != null && levelPrice < currentPrice - eps;
   const levelColor = above ? "#0ea5e9" : below ? C.chartGreen : "rgba(255,255,255,0.35)";
   const levelLabel = above ? "BUY STOP · SELL LIMIT" : below ? "BUY LIMIT · SELL STOP" : "···";
+
+  // SPEC_charts_and_interactivity_standard.md §2 (29.07 re-audit): this
+  // already drew real OHLC candlesticks (not a spline) but with a
+  // hand-rolled <svg>, no axes, no data-source. Real lightweight-charts
+  // candles + real axes now; the draggable level stays a real
+  // createPriceLine(), dragged via coordinateToPrice() on pointer events.
+  useEffect(() => {
+    if (!containerRef.current || chartRef.current || typeof LightweightCharts === "undefined") return;
+    const chart = LightweightCharts.createChart(containerRef.current, {
+      width: containerRef.current.clientWidth, height: 240,
+      layout: { background: { color: C.black }, textColor: "rgba(255,255,255,0.5)" },
+      grid: { vertLines: { color: "rgba(255,255,255,0.05)" }, horzLines: { color: "rgba(255,255,255,0.05)" } },
+      rightPriceScale: { borderColor: "rgba(255,255,255,0.15)" },
+      timeScale: { borderColor: "rgba(255,255,255,0.15)", timeVisible: true, secondsVisible: false },
+      handleScroll: false, handleScale: false,
+    });
+    const candleSeries = chart.addCandlestickSeries({
+      upColor: C.chartGreen, downColor: C.chartRed, borderUpColor: C.chartGreen, borderDownColor: C.chartRed,
+      wickUpColor: C.chartGreen, wickDownColor: C.chartRed,
+    });
+    chartRef.current = chart;
+    seriesRef.current = { candleSeries };
+    const ro = new ResizeObserver(entries => { if (entries[0]) chart.applyOptions({ width: entries[0].contentRect.width }); });
+    ro.observe(containerRef.current);
+
+    var setFromClientY = function (clientY) {
+      var rect = containerRef.current.getBoundingClientRect();
+      var y = Math.max(0, Math.min(rect.height, clientY - rect.top));
+      var p = candleSeries.coordinateToPrice(y);
+      if (p != null) setLevelPrice(p);
+    };
+    var onMove = function (e) { if (draggingRef.current) { e.preventDefault(); setFromClientY(e.touches ? e.touches[0].clientY : e.clientY); } };
+    var onUp = function () { draggingRef.current = false; };
+    var onDown = function (e) { draggingRef.current = true; setFromClientY(e.touches ? e.touches[0].clientY : e.clientY); };
+    var el = containerRef.current;
+    el.style.cursor = "ns-resize"; el.style.touchAction = "none";
+    el.addEventListener("mousedown", onDown);
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+    el.addEventListener("touchstart", onDown, { passive: true });
+    window.addEventListener("touchmove", onMove, { passive: false });
+    window.addEventListener("touchend", onUp);
+
+    return () => {
+      ro.disconnect();
+      el.removeEventListener("mousedown", onDown);
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+      el.removeEventListener("touchstart", onDown);
+      window.removeEventListener("touchmove", onMove);
+      window.removeEventListener("touchend", onUp);
+      chart.remove(); chartRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    const s = seriesRef.current;
+    if (!s.candleSeries || !candles) return;
+    s.candleSeries.setData(candles.map(c => ({ time: c.time, open: +c.open, high: +c.high, low: +c.low, close: +c.close })));
+    chartRef.current.timeScale().fitContent();
+  }, [candles]);
+
+  useEffect(() => {
+    const s = seriesRef.current;
+    if (!s.candleSeries || levelPrice == null) return;
+    if (priceLineRef.current) s.candleSeries.removePriceLine(priceLineRef.current);
+    priceLineRef.current = s.candleSeries.createPriceLine({
+      price: levelPrice, color: levelColor, lineWidth: 2, lineStyle: LightweightCharts.LineStyle.Dashed,
+      axisLabelVisible: true, title: levelLabel,
+    });
+  }, [levelPrice, levelColor, levelLabel]);
 
   return (
     <div style={{background:C.black,borderRadius:6,padding:"28px 32px",marginBottom:56,overflow:"hidden"}}>
       <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:16}}>{S.pendingDiagramLabel}</Mono>
       <p style={{fontSize:12,color:"rgba(255,255,255,0.45)",marginBottom:14}}>{P.hint}</p>
-      <div style={{position:"relative"}}>
-        <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`}
-          style={{width:"100%",display:"block",cursor:"ns-resize",touchAction:"none",userSelect:"none"}}
-          onMouseDown={startDrag} onMouseMove={moveDrag} onMouseUp={endDrag} onMouseLeave={endDrag}
-          onTouchStart={startDrag} onTouchMove={moveDrag} onTouchEnd={endDrag}>
-          {candles.map((c, i) => {
-            const x = 20 + i * step;
-            const up = c.close >= c.open;
-            const color = up ? C.chartGreen : C.chartRed;
-            const bodyTop = toY(Math.max(c.open, c.close)), bodyBot = toY(Math.min(c.open, c.close));
-            return (
-              <g key={i}>
-                <line x1={x + candleW / 2} y1={toY(c.high)} x2={x + candleW / 2} y2={toY(c.low)} stroke={color} strokeWidth="1"/>
-                <rect x={x} y={bodyTop} width={candleW} height={Math.max(1, bodyBot - bodyTop)} fill={color}/>
-              </g>
-            );
-          })}
-          <line x1="0" y1={toY(currentPrice)} x2={W} y2={toY(currentPrice)} stroke="rgba(255,255,255,0.35)" strokeWidth="1.5"/>
-          <line x1="0" y1={toY(levelPrice)} x2={W} y2={toY(levelPrice)} stroke={levelColor} strokeWidth="2" strokeDasharray="7 4"/>
-          <circle cx={W - 24} cy={toY(levelPrice)} r="9" fill={levelColor}/>
-        </svg>
-        <div className="ch4-pending-tag ch4-pending-price" style={{top:`${(toY(currentPrice) / H) * 100}%`}}>{priceWord} {currentPrice.toFixed(1)}</div>
-        <div className="ch4-pending-tag ch4-pending-level" style={{top:`${(toY(levelPrice) / H) * 100}%`, background:levelColor}}>{levelLabel}</div>
-      </div>
+      <div ref={containerRef} data-source="/data/ohlc_GOLD_M30.json" style={{minHeight:240}}/>
       {(above || below) && (
         <p style={{fontSize:12.5,color:"rgba(255,255,255,0.75)",lineHeight:1.7,marginTop:18,marginBottom:0,maxWidth:620}}>
           {above ? P.aboveExplain : P.belowExplain}
