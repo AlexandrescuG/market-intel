@@ -383,6 +383,8 @@ function TargetFeasibility() {
   // При 10pt эффект настоящий (12/23), при 12-15pt — узкое окно вокруг
   // перекрытия Лондон-NY (часы 12,13,14 UTC), как и утверждает текст.
   const [target, setTarget] = React.useState(10);
+  const [guess, setGuess] = React.useState(12);
+  const [revealed, setRevealed] = React.useState(false);
 
   const cells = React.useMemo(() => {
     if (!hours) return [];
@@ -410,19 +412,38 @@ function TargetFeasibility() {
             <input type="range" min={1} max={20} step={0.5} value={target} onChange={e=>setTarget(+e.target.value)} style={{flex:1,minWidth:140}}/>
             <Mono size={13} color={C.gold} spacing={0}>{target}</Mono>
           </div>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(24,1fr)",gap:3,marginBottom:12}}>
-            {cells.map(c => (
-              <div key={c.h} title={`${c.h}:00 UTC${c.median!=null?` — ${c.median.toFixed(1)}pt`:""}`} style={{height:36,borderRadius:3,background: c.state==="ok" ? C.gold : c.state==="notok" ? "rgba(0,0,0,0.12)" : "rgba(0,0,0,0.04)",display:"flex",alignItems:"flex-end",justifyContent:"center",paddingBottom:2}}>
-                <Mono size={7} color={c.state==="ok" ? "#18181a" : C.inkFaint} spacing={0}>{c.h}</Mono>
+
+          {/* SPEC_charts_and_interactivity_standard.md (29.07): real class-B
+              element -- reader commits a guess about the real dataset BEFORE
+              seeing the grid, then sees the real outcome and how far off they
+              were. The grid itself stays live afterward (class A unchanged). */}
+          {!revealed ? (
+            <div style={{background:"#fff",border:`1px solid ${C.border}`,borderRadius:6,padding:"16px 18px"}}>
+              <p style={{fontSize:12.5,color:C.inkMid,lineHeight:1.6,marginBottom:12}}>{tf.predictQuestion(target)}</p>
+              <div style={{display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
+                <Mono size={10} color={C.inkFaint} spacing={0.5}>{tf.predictInputLabel}</Mono>
+                <input type="number" min={0} max={23} value={guess} onChange={e=>setGuess(Math.max(0,Math.min(23,+e.target.value)))} style={{width:60,padding:"6px 8px",border:`1px solid ${C.border}`,borderRadius:4,fontFamily:"monospace",fontSize:13}}/>
+                <button onClick={()=>setRevealed(true)} style={{padding:"9px 18px",background:C.black,color:"#fff",border:"none",borderRadius:4,cursor:"pointer",fontFamily:"monospace",fontSize:11.5,letterSpacing:0.5,fontWeight:600}}>{tf.predictCta}</button>
               </div>
-            ))}
-          </div>
-          <div style={{display:"flex",gap:16,flexWrap:"wrap",marginBottom:10}}>
-            <div style={{display:"flex",alignItems:"center",gap:6}}><span style={{width:10,height:10,borderRadius:2,background:C.gold,display:"inline-block"}}/><Mono size={9.5} color={C.inkFaint} spacing={0}>{tf.okLegend}</Mono></div>
-            <div style={{display:"flex",alignItems:"center",gap:6}}><span style={{width:10,height:10,borderRadius:2,background:"rgba(0,0,0,0.12)",display:"inline-block"}}/><Mono size={9.5} color={C.inkFaint} spacing={0}>{tf.notOkLegend}</Mono></div>
-            <div style={{display:"flex",alignItems:"center",gap:6}}><span style={{width:10,height:10,borderRadius:2,background:"rgba(0,0,0,0.04)",display:"inline-block"}}/><Mono size={9.5} color={C.inkFaint} spacing={0}>{tf.noDataLegend}</Mono></div>
-          </div>
-          <p style={{fontSize:13.5,color:C.black,fontWeight:600,margin:0}}>{tf.hoursOkLabel(hoursOk, measured)}</p>
+            </div>
+          ) : (
+            <React.Fragment>
+              <p style={{fontSize:12.5,color:C.gold,fontFamily:"monospace",marginBottom:14}}>{tf.predictResult(guess, hoursOk)}</p>
+              <div style={{display:"grid",gridTemplateColumns:"repeat(24,1fr)",gap:3,marginBottom:12}}>
+                {cells.map(c => (
+                  <div key={c.h} title={`${c.h}:00 UTC${c.median!=null?` — ${c.median.toFixed(1)}pt`:""}`} style={{height:36,borderRadius:3,background: c.state==="ok" ? C.gold : c.state==="notok" ? "rgba(0,0,0,0.12)" : "rgba(0,0,0,0.04)",display:"flex",alignItems:"flex-end",justifyContent:"center",paddingBottom:2}}>
+                    <Mono size={7} color={c.state==="ok" ? "#18181a" : C.inkFaint} spacing={0}>{c.h}</Mono>
+                  </div>
+                ))}
+              </div>
+              <div style={{display:"flex",gap:16,flexWrap:"wrap",marginBottom:10}}>
+                <div style={{display:"flex",alignItems:"center",gap:6}}><span style={{width:10,height:10,borderRadius:2,background:C.gold,display:"inline-block"}}/><Mono size={9.5} color={C.inkFaint} spacing={0}>{tf.okLegend}</Mono></div>
+                <div style={{display:"flex",alignItems:"center",gap:6}}><span style={{width:10,height:10,borderRadius:2,background:"rgba(0,0,0,0.12)",display:"inline-block"}}/><Mono size={9.5} color={C.inkFaint} spacing={0}>{tf.notOkLegend}</Mono></div>
+                <div style={{display:"flex",alignItems:"center",gap:6}}><span style={{width:10,height:10,borderRadius:2,background:"rgba(0,0,0,0.04)",display:"inline-block"}}/><Mono size={9.5} color={C.inkFaint} spacing={0}>{tf.noDataLegend}</Mono></div>
+              </div>
+              <p style={{fontSize:13.5,color:C.black,fontWeight:600,margin:0}}>{tf.hoursOkLabel(hoursOk, measured)}</p>
+            </React.Fragment>
+          )}
         </div>
       )}
 
