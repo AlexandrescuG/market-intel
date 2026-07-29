@@ -531,7 +531,15 @@ function ThreeCases({ cases }) {
       </div>
       <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px",borderLeft:`3px solid ${C.gold}`,marginBottom:20}}>
         <Mono size={10.5} color={C.gold} spacing={1} style={{display:"block",marginBottom:6}}>{tcase.mechanism}</Mono>
-        <div style={{fontWeight:600,fontSize:15,color:C.black,marginBottom:10}}>{real ? real[nameKey] : tcase.id} {real && <span style={{color:C.inkFaint,fontWeight:400,fontSize:12}}>· {real.report_date}</span>}</div>
+        <div style={{fontWeight:600,fontSize:15,color:C.black,marginBottom:10,display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
+          <span>{real ? real[nameKey] : tcase.id}</span>
+          {real && <span style={{color:C.inkFaint,fontWeight:400,fontSize:12}}>· {real.report_date}</span>}
+          {real && real.reaction_1d_pct != null && (
+            <span style={{fontFamily:"monospace",fontSize:13,fontWeight:700,color:real.reaction_1d_pct>=0?"#2d7a4f":C.red}}>
+              {real.reaction_1d_pct>0?"+":""}{real.reaction_1d_pct}% · {tc.reactionLabel}
+            </span>
+          )}
+        </div>
         <p style={{fontSize:13,color:C.inkMid,lineHeight:1.7,marginBottom:real?10:0}}>{tcase.text}</p>
         {real && <Mono size={10} color={C.inkFaint} spacing={0.5}>{tc.readMore}: {real.source}</Mono>}
       </div>

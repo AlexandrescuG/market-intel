@@ -131,6 +131,7 @@ window.Ch9Content = {
       tag: "ТРИ КЕЙСА — ТРИ МЕХАНИЗМА",
       closingLine: "Три случая — это три случая. Мы показали их, чтобы ты увидел, что механизмов несколько и они разные. Насколько часто побеждает каждый — мы не считали и потому не утверждаем. Если начнём считать — опубликуем, как всё остальное в этом курсе.",
       readMore: "Источник",
+      reactionLabel: "реакция за 1 день",
       cases: [
         {
           id: "meta_2022q4", mechanism: "Когда решает guidance и опережающая метрика",
@@ -308,6 +309,7 @@ window.Ch9Content = {
       tag: "TREI CAZURI — TREI MECANISME",
       closingLine: "Trei cazuri sunt trei cazuri. Le-am arătat ca să vezi că există mai multe mecanisme și sunt diferite. Cât de des câștigă fiecare — n-am calculat și de aceea nu afirmăm. Dacă vom începe să calculăm — publicăm, ca tot restul din acest curs.",
       readMore: "Sursă",
+      reactionLabel: "reacție în 1 zi",
       cases: [
         { id: "meta_2022q4", mechanism: "Când decide guidance-ul și o metrică anticipativă",
           text: "Februarie 2022. Meta a raportat în linia așteptărilor, dar a arătat prima scădere trimestrială din istoria companiei a audienței zilnice — și a dat o prognoză pentru trimestrul următor sub cea anticipată de piață. Reacție: −26.4% într-o singură sesiune, cea mai mare pierdere de capitalizare într-o zi din istoria pieței americane la acel moment. Niciun fapt izolat n-a fost o catastrofă — coincidența dintre guidance și metrica anticipativă a contat mai mult decât oricare separat." },
@@ -479,6 +481,7 @@ window.Ch9Content = {
       tag: "THREE CASES — THREE MECHANISMS",
       closingLine: "Three cases are three cases. We showed them so you'd see there are several mechanisms and they're different. How often each one wins — we haven't counted, and so we don't claim. If we start counting, we'll publish it, like everything else in this course.",
       readMore: "Source",
+      reactionLabel: "1-day reaction",
       cases: [
         { id: "meta_2022q4", mechanism: "When guidance and a leading metric decide it",
           text: "February 2022. Meta reported roughly in line with expectations but showed the first-ever quarterly decline in daily active users in the company's history — and gave next-quarter guidance below what the market was pricing in. Reaction: −26.4% in a single session, the largest one-day market-cap loss in US market history at the time. No single fact on its own was a catastrophe — the coincidence of weak guidance and a weak leading metric mattered more than either one alone." },
