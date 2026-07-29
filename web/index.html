@@ -68,7 +68,7 @@ if (new URLSearchParams(location.search).get("embed") === "1") {
 <link rel="stylesheet" href="/assets/tokens.css?v=1">
 <script src="/assets/i18n.js?v=2" defer></script>
 <script src="/edu/assets/calendar-terms.js?v=1" defer></script>
-<script src="/assets/sbf-header.js?v=15" defer></script>
+<script src="/assets/sbf-header.js?v=16" defer></script>
 <script src="/assets/sbf-auth.js?v=1" defer></script>
 <script src="/assets/sbf-profile.js?v=2" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.0/marked.min.js"></script>
@@ -385,11 +385,7 @@ a:hover{text-decoration:underline;color:var(--glow)}
     <div class="win"><span class="dot" id="liveDot"></span><span id="liveTxt">—</span></div>
     <div class="win"><span class="dot" id="winDot"></span><span id="winTxt">—</span></div>
     <div id="clock">—</div>
-    <div class="sbf-lang-sw">
-      <a href="/"{{ (' class="active"'|safe) if lang == 'ru' else '' }}>RU</a>
-      <a href="/ro/"{{ (' class="active"'|safe) if lang == 'ro' else '' }}>RO</a>
-      <a href="/en/"{{ (' class="active"'|safe) if lang == 'en' else '' }}>EN</a>
-    </div>
+    <div class="sbf-lang-sw" id="sbfLangSw"></div>
   </div>
 </header>
 
@@ -397,6 +393,7 @@ a:hover{text-decoration:underline;color:var(--glow)}
   <img src="./assets/logo.png" alt="SBF">
   <span class="mob-brand">SBF INTELLIGENCE</span>
   <div class="mob-time"><span class="mob-dot" id="mobLiveDot"></span><span id="mobClock">—</span></div>
+  <div class="sbf-lang-sw" id="sbfLangSwMob"></div>
 </div>
 
 <div class="strip" id="strip"><div class="strip-inner" id="stripInner"></div></div>
@@ -1288,6 +1285,16 @@ load();
 startBybitStrip();
 pollLiveStrip();
 setInterval(clockWindow, 60000);
+
+// SPEC_site_fixes_2026-07-29 §1: единственная реализация переключателя языков
+// живёт в sbf-header.js (defer) -- этот инлайн-скрипт синхронный и выполняется
+// РАНЬШЕ него при парсинге, поэтому вызов отложен до DOMContentLoaded (к этому
+// моменту все defer-скрипты уже гарантированно выполнены).
+document.addEventListener('DOMContentLoaded', function(){
+  if (!window.SbfLangSwitch) return;
+  window.SbfLangSwitch.mount(document.getElementById('sbfLangSw'));
+  window.SbfLangSwitch.mount(document.getElementById('sbfLangSwMob'));
+});
 setInterval(pollLiveStrip, 10000);
 setInterval(load, 300000);
 
