@@ -22,6 +22,7 @@
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
 <script src="/edu/assets/ch12.js"></script>
 
 <script type="text/babel" data-presets="react">
@@ -299,12 +300,31 @@ function computeIchimoku(candles) {
   return { tenkan, kijun, spanA, spanB };
 }
 
+// Real calendar date N weekdays after a 'YYYY-MM-DD' string -- used only to
+// place the forward-shifted cloud (spanA/spanB) past the last real candle,
+// which is inherent to how Ichimoku is defined (the cloud is drawn ahead of
+// price), not a data fabrication: the VALUES are 100% computed from real
+// historical highs/lows, only their future calendar slot is projected.
+function addWeekdays(dateStr, n) {
+  const d = new Date(dateStr + "T00:00:00Z");
+  let added = 0;
+  while (added < n) {
+    d.setUTCDate(d.getUTCDate() + 1);
+    const day = d.getUTCDay();
+    if (day !== 0 && day !== 6) added++;
+  }
+  return d.toISOString().slice(0, 10);
+}
+
 function IchimokuLiveChart() {
-  const { useState, useEffect, useMemo } = React;
+  const { useState, useEffect, useMemo, useRef } = React;
   const T = window.Ch12Content[INITIAL_LANG] || window.Ch12Content.ru;
   const lc = T.liveChart;
   const [symbol, setSymbol] = useState("GOLD");
   const [full, setFull] = useState(null);
+  const containerRef = useRef(null);
+  const chartRef = useRef(null);
+  const seriesRef = useRef({});
 
   useEffect(() => {
     let cancelled = false;
@@ -317,59 +337,78 @@ function IchimokuLiveChart() {
 
   const ind = useMemo(() => full ? computeIchimoku(full) : null, [full]);
 
-  if (!full || !ind) {
-    return <div style={{background:C.black,borderRadius:6,minHeight:280,marginBottom:32,display:"flex",alignItems:"center",justifyContent:"center"}}>
-      <Mono size={11} color="rgba(255,255,255,0.4)" spacing={1}>{lc.loadingLabel}</Mono>
-    </div>;
-  }
+  // Create the chart once.
+  useEffect(() => {
+    if (!containerRef.current || chartRef.current || typeof LightweightCharts === "undefined") return;
+    const chart = LightweightCharts.createChart(containerRef.current, {
+      width: containerRef.current.clientWidth, height: 320,
+      layout: { background: { color: C.black }, textColor: "rgba(255,255,255,0.55)" },
+      grid: { vertLines: { color: "rgba(255,255,255,0.05)" }, horzLines: { color: "rgba(255,255,255,0.05)" } },
+      rightPriceScale: { borderColor: "rgba(255,255,255,0.15)" },
+      timeScale: { borderColor: "rgba(255,255,255,0.15)" },
+      crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
+    });
+    const candleSeries = chart.addCandlestickSeries({
+      upColor: C.chartGreen, downColor: C.chartRed, borderUpColor: C.chartGreen, borderDownColor: C.chartRed,
+      wickUpColor: C.chartGreen, wickDownColor: C.chartRed,
+    });
+    const tenkanSeries = chart.addLineSeries({ color: "#e53e3e", lineWidth: 2, priceLineVisible: false, lastValueVisible: false });
+    const kijunSeries = chart.addLineSeries({ color: "#3182ce", lineWidth: 2, priceLineVisible: false, lastValueVisible: false });
+    const chikouSeries = chart.addLineSeries({ color: "#805ad5", lineWidth: 1, lineStyle: 2, priceLineVisible: false, lastValueVisible: false });
+    const spanASeries = chart.addLineSeries({ color: "#38a169", lineWidth: 1, priceLineVisible: false, lastValueVisible: false });
+    const spanBSeries = chart.addAreaSeries({ topColor: "rgba(56,161,105,0.18)", bottomColor: "rgba(56,161,105,0.18)", lineColor: "#c53030", lineWidth: 1, priceLineVisible: false, lastValueVisible: false });
+    chartRef.current = chart;
+    seriesRef.current = { candleSeries, tenkanSeries, kijunSeries, chikouSeries, spanASeries, spanBSeries };
+    const ro = new ResizeObserver(entries => { if (entries[0]) chart.applyOptions({ width: entries[0].contentRect.width }); });
+    ro.observe(containerRef.current);
+    return () => { ro.disconnect(); chart.remove(); chartRef.current = null; };
+  }, []);
 
-  const n = full.length;
-  const startIdx = Math.max(0, n - ICHIMOKU_DISPLAY_N);
-  const realCount = n - startIdx;
-  const totalSlots = realCount + ICHIMOKU_SHIFT;
+  // Push real data whenever symbol/candles change.
+  useEffect(() => {
+    const s = seriesRef.current;
+    if (!s.candleSeries || !full || !ind) return;
+    const n = full.length;
+    const startIdx = Math.max(0, n - ICHIMOKU_DISPLAY_N);
+    const window_ = full.slice(startIdx);
 
-  const W = 760, H = 300, padY = 20;
-  let lo = Infinity, hi = -Infinity;
-  for (let i = startIdx; i < n; i++) {
-    lo = Math.min(lo, full[i].low); hi = Math.max(hi, full[i].high);
-    const cloudPos = i - startIdx + ICHIMOKU_SHIFT;
-    if (cloudPos < totalSlots) { lo = Math.min(lo, ind.spanA[i], ind.spanB[i]); hi = Math.max(hi, ind.spanA[i], ind.spanB[i]); }
-  }
-  const range = (hi - lo) || 1;
-  const toY = p => padY + (1 - (p - lo) / range) * (H - padY * 2);
-  const step = W / totalSlots;
-  const candleW = Math.max(2, step - 2);
-  const slotX = pos => pos * step;
+    s.candleSeries.setData(window_.map(c => ({ time: c.time, open: +c.open, high: +c.high, low: +c.low, close: +c.close })));
 
-  const linePath = (arr, mapPos) => {
-    let d = "";
-    for (let i = startIdx; i < n; i++) {
-      const pos = mapPos(i);
-      if (pos < 0 || pos >= totalSlots || arr[i] == null) continue;
-      const x = slotX(pos) + candleW / 2, y = toY(arr[i]);
-      d += (d ? "L" : "M") + x + " " + y + " ";
-    }
-    return d;
-  };
-  const tenkanPath = linePath(ind.tenkan, i => i - startIdx);
-  const kijunPath = linePath(ind.kijun, i => i - startIdx);
-  const spanAPath = linePath(ind.spanA, i => i - startIdx + ICHIMOKU_SHIFT);
-  const spanBPath = linePath(ind.spanB, i => i - startIdx + ICHIMOKU_SHIFT);
-  const chikouPath = linePath(full.map(c => c.close), i => i - startIdx - ICHIMOKU_SHIFT);
+    const toSeries = (arr, offsetIdx) => {
+      const out = [];
+      for (let i = startIdx; i < n; i++) {
+        const v = arr[i];
+        if (v == null) continue;
+        const j = i + offsetIdx;
+        if (j >= 0 && j < n) out.push({ time: full[j].time, value: v });
+      }
+      return out;
+    };
+    s.tenkanSeries.setData(toSeries(ind.tenkan, 0));
+    s.kijunSeries.setData(toSeries(ind.kijun, 0));
+    // Chikou: today's close plotted ICHIMOKU_SHIFT days back -- always a real
+    // past date already in the data.
+    s.chikouSeries.setData(toSeries(full.map(c => c.close), -ICHIMOKU_SHIFT));
 
-  let cloudFill = "";
-  for (let i = startIdx; i < n; i++) {
-    const pos = i - startIdx + ICHIMOKU_SHIFT;
-    if (pos >= totalSlots) continue;
-    const x = slotX(pos) + candleW / 2;
-    cloudFill += (cloudFill ? "L" : "M") + x + " " + toY(ind.spanA[i]) + " ";
-  }
-  for (let i = n - 1; i >= startIdx; i--) {
-    const pos = i - startIdx + ICHIMOKU_SHIFT;
-    if (pos >= totalSlots) continue;
-    const x = slotX(pos) + candleW / 2;
-    cloudFill += "L" + x + " " + toY(ind.spanB[i]) + " ";
-  }
+    // Cloud (spanA/spanB): plotted ICHIMOKU_SHIFT days ahead. Where that
+    // lands past the last real candle, generate the real future weekday.
+    const lastDate = full[n - 1].time;
+    const cloud = (arr) => {
+      const out = [];
+      for (let i = startIdx; i < n; i++) {
+        const v = arr[i];
+        if (v == null) continue;
+        const j = i + ICHIMOKU_SHIFT;
+        const time = j < n ? full[j].time : addWeekdays(lastDate, j - (n - 1));
+        out.push({ time, value: v });
+      }
+      return out;
+    };
+    s.spanASeries.setData(cloud(ind.spanA));
+    s.spanBSeries.setData(cloud(ind.spanB));
+
+    chartRef.current.timeScale().fitContent();
+  }, [full, ind]);
 
   return (
     <div style={{background:C.black,borderRadius:6,padding:"24px 5vw 28px",marginBottom:32,overflow:"hidden"}}>
@@ -381,28 +420,14 @@ function IchimokuLiveChart() {
           ))}
         </div>
       </div>
-      <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",display:"block"}}>
-        <path d={cloudFill + "Z"} fill="rgba(56,161,105,0.18)" stroke="none"/>
-        {full.slice(startIdx).map((c,k) => {
-          const i = startIdx + k;
-          const pos = i - startIdx;
-          const x = slotX(pos);
-          const up = c.close >= c.open;
-          const color = up ? C.chartGreen : C.chartRed;
-          const bodyTop = toY(Math.max(c.open, c.close)), bodyBot = toY(Math.min(c.open, c.close));
-          return (
-            <g key={i}>
-              <line x1={x + candleW / 2} y1={toY(c.high)} x2={x + candleW / 2} y2={toY(c.low)} stroke={color} strokeWidth="1"/>
-              <rect x={x} y={bodyTop} width={candleW} height={Math.max(1, bodyBot - bodyTop)} fill={color}/>
-            </g>
-          );
-        })}
-        <path d={spanAPath} fill="none" stroke="#38a169" strokeWidth="1.25" opacity="0.85"/>
-        <path d={spanBPath} fill="none" stroke="#c53030" strokeWidth="1.25" opacity="0.85"/>
-        <path d={tenkanPath} fill="none" stroke="#e53e3e" strokeWidth="1.5"/>
-        <path d={kijunPath} fill="none" stroke="#3182ce" strokeWidth="1.5"/>
-        <path d={chikouPath} fill="none" stroke="#805ad5" strokeWidth="1.25" strokeDasharray="4 3"/>
-      </svg>
+      <div style={{position:"relative",minHeight:280}}>
+        <div ref={containerRef} data-source={"/data/ohlc_" + symbol + "_D1.json"}/>
+        {!full && (
+          <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",pointerEvents:"none"}}>
+            <Mono size={11} color="rgba(255,255,255,0.4)" spacing={1}>{lc.loadingLabel}</Mono>
+          </div>
+        )}
+      </div>
       <div style={{display:"flex",gap:16,flexWrap:"wrap",marginTop:14,marginBottom:14}}>
         {[["#e53e3e",lc.tenkanLabel],["#3182ce",lc.kijunLabel],["rgba(56,161,105,0.7)",lc.cloudLabel],["#805ad5",lc.chikouLabel]].map(([col,label],i) => (
           <div key={i} style={{display:"flex",alignItems:"center",gap:6}}>
@@ -412,6 +437,9 @@ function IchimokuLiveChart() {
         ))}
       </div>
       <p style={{fontSize:12,color:"rgba(255,255,255,0.5)",lineHeight:1.65,margin:0,maxWidth:680}}>{lc.caption}</p>
+      <a href={"/chart.html?s=" + symbol} target="_blank" rel="noopener" style={{fontFamily:"monospace",fontSize:11.5,color:C.gold,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`,marginTop:10,display:"inline-block"}}>
+        {INITIAL_LANG==="ru"?`Открыть ${symbol} на графике →`:INITIAL_LANG==="ro"?`Deschide ${symbol} pe grafic →`:`Open ${symbol} on the chart →`}
+      </a>
     </div>
   );
 }
