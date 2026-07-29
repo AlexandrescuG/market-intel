@@ -1133,11 +1133,22 @@ function PredictHour({ vars }) {
             border:`1px solid ${picked===h?C.gold:C.border}`,borderRadius:3}}>{String(h).padStart(2,"0")}</button>
         ))}
       </div>
-      {picked !== null && vars && (
-        <p style={{fontSize:12.5,color:C.inkMid,lineHeight:1.7,marginBottom:10,background:C.goldPale,padding:"12px 16px",borderRadius:4}}>
-          {fillTemplate(p.afterPick, vars)} <a href="#secHourStats" onClick={jumpToMap} style={{color:C.gold,fontWeight:700,whiteSpace:"nowrap"}}>{p.jumpToMapLink}</a>
-        </p>
-      )}
+      {picked !== null && vars && (() => {
+        // Circular distance in hours between the picked hour and the real
+        // measured peak -- makes the reveal genuinely depend on which of
+        // the 24 buttons was clicked, not just show the same peak/trough
+        // sentence for any pick (SPEC_charts_and_interactivity_standard.md:
+        // a reveal that doesn't vary by choice is class C, not class B).
+        const raw = Math.abs(picked - vars.peak_hour);
+        const dist = Math.min(raw, 24 - raw);
+        const close = dist <= 1;
+        const template = close ? p.afterPickClose : p.afterPickFar;
+        return (
+          <p style={{fontSize:12.5,color:C.inkMid,lineHeight:1.7,marginBottom:10,background:C.goldPale,padding:"12px 16px",borderRadius:4}}>
+            {fillTemplate(template, {...vars, picked_hour: String(picked).padStart(2,"0"), hour_diff: dist})} <a href="#secHourStats" onClick={jumpToMap} style={{color:C.gold,fontWeight:700,whiteSpace:"nowrap"}}>{p.jumpToMapLink}</a>
+          </p>
+        );
+      })()}
       <p style={{fontSize:11,color:C.inkFaint}}>{p.xpNote}</p>
     </div>
   );
