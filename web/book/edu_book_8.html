@@ -151,6 +151,12 @@ function useCh8Data() {
   return state;
 }
 
+function medianOf(nums) {
+  const s = nums.slice().sort((a,b)=>a-b);
+  const mid = Math.floor(s.length / 2);
+  return s.length % 2 ? s[mid] : (s[mid-1] + s[mid]) / 2;
+}
+
 function buildVars(ema_, lang) {
   if (!ema_) return null;
   const T8 = window.Ch8Content[lang] || window.Ch8Content.ru;
@@ -159,6 +165,20 @@ function buildVars(ema_, lang) {
     : sum.verdict_key === "weak_persistence" ? T8.coreMeasure.verdictWeakPersistence : T8.coreMeasure.verdictSomePersistence;
   const spread = sum.oos_percentile_spread || {};
   const lvs = sum.long_vs_short || {};
+
+  // Per-timeframe median OOS rank, real numbers from the same cells the
+  // overall summary is built from -- used by PredictTf so its reveal can
+  // genuinely depend on which timeframe the reader picked (SPEC_charts_
+  // and_interactivity_standard.md: a reveal that doesn't vary by choice is
+  // class C dressed as class B, not a real "choice with consequence").
+  const cells = ema_.cells || [];
+  const byTf = {};
+  cells.forEach(c => { if (c.tf && c.oos) (byTf[c.tf] = byTf[c.tf] || []).push(c.oos.rank); });
+  const tfRank = {};
+  Object.keys(byTf).forEach(tf => { tfRank[tf] = Math.round(medianOf(byTf[tf])); });
+  const tfOf = cells[0] && cells[0].oos ? cells[0].oos.of : sum.of;
+  const worstTf = Object.keys(tfRank).reduce((a,b) => tfRank[b] > tfRank[a] ? b : a, Object.keys(tfRank)[0]);
+
   return {
     grid_size: ema_._meta.grid_size, n_cells: ema_._meta.n_cells, cost_per_trade_atr: ema_._meta.cost_per_trade_atr,
     median_oos_rank: sum.median_oos_rank, median_percentile: spread.median,
@@ -168,6 +188,7 @@ function buildVars(ema_, lang) {
     net_positive_short: lvs.net_positive_share_short != null ? Math.round(lvs.net_positive_share_short * 1000) / 10 : null,
     rank_long: lvs.median_rank_slow_ge_100, rank_short: lvs.median_rank_slow_lt_100,
     cost_per_trade: 0.29, crosses_per_month: 30, monthly_cost: 8.7,
+    tf_rank_h1: tfRank.H1, tf_rank_h4: tfRank.H4, tf_rank_d1: tfRank.D1, tf_of: tfOf, tf_worst: worstTf,
   };
 }
 
@@ -685,6 +706,13 @@ function PredictTf({ vars }) {
   const T8 = window.Ch8Content[INITIAL_LANG] || window.Ch8Content.ru;
   const p = T8.predict;
   const [picked, setPicked] = useState(null);
+  // options are ["H1","H4","D1"] in that fixed order (content file) -- map
+  // the picked index to the real per-timeframe rank so the reveal actually
+  // depends on the choice, not just on whether *a* choice was made.
+  const TF_BY_INDEX = ["H1", "H4", "D1"];
+  const pickedTf = picked !== null ? TF_BY_INDEX[picked] : null;
+  const pickedRank = pickedTf && vars ? vars["tf_rank_" + pickedTf.toLowerCase()] : null;
+  const correct = pickedTf && vars && pickedTf === vars.tf_worst;
   return (
     <div style={{border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px",marginTop:8,marginBottom:24}}>
       <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{p.tag}</Mono>
@@ -694,7 +722,13 @@ function PredictTf({ vars }) {
           <button key={i} onClick={()=>setPicked(i)} style={{fontFamily:"monospace",fontSize:12,padding:"9px 20px",cursor:"pointer",background:picked===i?C.gold:"#fff",color:picked===i?"#18181a":C.inkMid,border:`1px solid ${picked===i?C.gold:C.border}`,borderRadius:4}}>{o}</button>
         ))}
       </div>
-      {picked !== null && vars && <p style={{fontSize:12.5,color:C.inkMid,lineHeight:1.7,marginBottom:10,background:C.goldPale,padding:"12px 16px",borderRadius:4}}>{fillTemplate(p.afterPick, vars)}</p>}
+      {picked !== null && vars && (
+        <p style={{fontSize:12.5,color:C.inkMid,lineHeight:1.7,marginBottom:10,background:C.goldPale,padding:"12px 16px",borderRadius:4}}>
+          {fillTemplate(correct ? p.afterPickCorrect : p.afterPickWrong, {
+            ...vars, picked_tf: pickedTf, picked_rank: pickedRank, worst_tf: vars.tf_worst, worst_rank: vars["tf_rank_" + String(vars.tf_worst).toLowerCase()],
+          })}
+        </p>
+      )}
       <p style={{fontSize:11,color:C.inkFaint}}>{p.xpNote}</p>
     </div>
   );

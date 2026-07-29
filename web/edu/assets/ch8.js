@@ -145,7 +145,8 @@ window.Ch8Content = {
       tag: "ПРЕДИКТ НЕДЕЛИ",
       question: "На каком таймфрейме, по-твоему, подобранные на истории параметры хуже всего переносятся на будущее?",
       options: ["H1", "H4", "D1"],
-      afterPick: "По нашим данным медианное место в рейтинге почти не зависит от таймфрейма — устойчивость низкая на всех трёх ({{median_oos_rank}} из {{grid_size}} в среднем). Если ты выбрал конкретный таймфрейм как «явно хуже» — на наших данных настолько чёткой разницы нет.",
+      afterPickCorrect: "Верно — на наших данных {{picked_tf}} хуже всего держит место в рейтинге: медиана {{picked_rank}} из {{tf_of}} (для сравнения, у остальных двух таймфреймов ранг лучше). Разница не огромная — устойчивость низкая на всех таймфреймах, — но именно {{picked_tf}} измеримо хуже.",
+      afterPickWrong: "На наших данных хуже всего переносится не {{picked_tf}} (медиана {{picked_rank}} из {{tf_of}}), а {{worst_tf}} — медиана {{worst_rank}} из {{tf_of}}. Разница между таймфреймами не огромная — устойчивость низкая на всех, — но по нашим измерениям именно {{worst_tf}} измеримо хуже остальных.",
       xpNote: "+15 XP за участие. Про измеримую величину, не про цену.",
     },
     cliffhanger: {
@@ -287,7 +288,8 @@ window.Ch8Content = {
       tag: "PREDICȚIA SĂPTĂMÂNII",
       question: "Pe ce timeframe crezi că parametrii aleși pe istoric se transferă cel mai prost în viitor?",
       options: ["H1", "H4", "D1"],
-      afterPick: "După datele noastre, locul median în clasament aproape nu depinde de timeframe — stabilitatea e scăzută pe toate trei ({{median_oos_rank}} din {{grid_size}} în medie). Dacă ai ales un anumit timeframe ca fiind „evident mai rău” — pe datele noastre o diferență atât de clară nu există.",
+      afterPickCorrect: "Corect — pe datele noastre {{picked_tf}} ține cel mai prost locul în clasament: mediana {{picked_rank}} din {{tf_of}} (comparativ, celelalte două timeframe-uri au un rang mai bun). Diferența nu e uriașă — stabilitatea e scăzută pe toate timeframe-urile —, dar exact {{picked_tf}} e măsurabil mai slab.",
+      afterPickWrong: "Pe datele noastre, cel mai prost se transferă nu {{picked_tf}} (mediana {{picked_rank}} din {{tf_of}}), ci {{worst_tf}} — mediana {{worst_rank}} din {{tf_of}}. Diferența dintre timeframe-uri nu e uriașă — stabilitatea e scăzută pe toate —, dar după măsurătorile noastre exact {{worst_tf}} e măsurabil mai slab decât celelalte.",
       xpNote: "+15 XP pentru participare. Despre o mărime măsurabilă, nu despre preț.",
     },
     cliffhanger: {
@@ -429,7 +431,8 @@ window.Ch8Content = {
       tag: "PREDICTION OF THE WEEK",
       question: "On which timeframe do you think parameters picked off history transfer worst to the future?",
       options: ["H1", "H4", "D1"],
-      afterPick: "Per our data, the median rank barely depends on timeframe — persistence is low across all three ({{median_oos_rank}} out of {{grid_size}} on average). If you picked a specific timeframe as «clearly worse» — our data shows no difference that clean.",
+      afterPickCorrect: "Correct — in our data {{picked_tf}} holds the worst rank: median {{picked_rank}} out of {{tf_of}} (the other two timeframes rank better by comparison). The gap isn't huge — persistence is low across the board — but {{picked_tf}} is measurably worse.",
+      afterPickWrong: "In our data, the worst-transferring timeframe isn't {{picked_tf}} (median {{picked_rank}} out of {{tf_of}}) — it's {{worst_tf}}, median {{worst_rank}} out of {{tf_of}}. The gap between timeframes isn't huge — persistence is low across the board — but by our measurements {{worst_tf}} is measurably worse than the rest.",
       xpNote: "+15 XP for participating. About a measurable quantity, not price.",
     },
     cliffhanger: {
