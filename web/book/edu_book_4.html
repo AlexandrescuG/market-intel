@@ -74,6 +74,7 @@ const STRINGS = {
     // LimitCatcher
     gameTitle:"Тренажёр Исполнения Ордеров",
     gameTag:"ИНТЕРАКТИВ — ТЕХНИКА",
+    gameSyntheticNote:"СИНТЕТИЧЕСКИЕ ЦЕНЫ, НЕ РЕАЛЬНЫЙ РЫНОК — тренажёр учит механике типов ордеров, не поведению рынка. Реальные свечи GOLD — выше, в разделе про отложенные ордера.",
     executedLabel:"ИСПОЛНЕНО",
     executedInlineLabel:"Исполнено",
     startBtn:"▶ СТАРТ",
@@ -203,6 +204,7 @@ const STRINGS = {
     // LimitCatcher
     gameTitle:"Order Execution Trainer",
     gameTag:"INTERACTIVE — TECHNICAL",
+    gameSyntheticNote:"SYNTHETIC PRICES, NOT A REAL MARKET — this trainer teaches order-type mechanics, not market behavior. Real GOLD candles are above, in the pending-orders section.",
     executedLabel:"EXECUTED",
     executedInlineLabel:"Executed",
     startBtn:"▶ START",
@@ -332,6 +334,7 @@ const STRINGS = {
     // LimitCatcher
     gameTitle:"Simulator de Execuție a Ordinelor",
     gameTag:"INTERACTIV — TEHNIC",
+    gameSyntheticNote:"PREȚURI SINTETICE, NU O PIAȚĂ REALĂ — acest simulator învață mecanica tipurilor de ordine, nu comportamentul pieței. Lumânările reale GOLD sunt mai sus, în secțiunea despre ordinele pending.",
     executedLabel:"EXECUTATE",
     executedInlineLabel:"Executate",
     startBtn:"▶ START",
@@ -1024,6 +1027,20 @@ function LimitCatcher() {
           </button>
         </div>
       </div>
+
+      {/* SPEC_charts_and_interactivity_standard.md §2.1 (29.07 re-audit): this
+          runs on Math.random() price action, not a data file -- rewiring the
+          live-ticking game onto real historical bars would need a dynamic
+          price axis + recalibrated stop/trail distances (the current 1.5/6pt
+          constants are tuned to this synthetic range, not real GOLD M30
+          volatility), a materially bigger change than the render-engine
+          swaps done elsewhere this session. Honest labeling instead, per
+          the standard's own schema allowance: this teaches order-type
+          mechanics (a decision tree), not market behavior -- the real GOLD
+          candles for that claim are in PendingOrderScheme, right above. */}
+      {/* README.md "Постоянные проверки": disclaimers that confirm data
+          honesty must not be inkFaint (contrast <4.5:1) -- inkMid instead. */}
+      <p style={{fontSize:10.5,color:C.inkMid,fontFamily:"monospace",letterSpacing:0.3,marginBottom:16,lineHeight:1.5}}>{S.gameSyntheticNote}</p>
 
       {/* Order type selector */}
       <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8,marginBottom:20}} className="g3">
