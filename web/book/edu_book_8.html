@@ -22,6 +22,7 @@
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
 <script src="/edu/assets/ch8.js"></script>
 
 <script type="text/babel" data-presets="react">
@@ -210,33 +211,52 @@ function ColdOpen8({ candles }) {
     return <div style={{background:C.black,padding:"60px 5vw",textAlign:"center"}}><Mono size={11} color={C.gold} spacing={4}>{co.tag}</Mono></div>;
   }
   const closes = candles.map(c => +c.close);
-  const W = 420, H = 160;
-  const lo = Math.min(...closes.slice(-200)), hi = Math.max(...closes.slice(-200));
-  const toY = p => H - ((p - lo) / (hi - lo || 1)) * H;
-  const toX = i => (i / 199) * W;
-  const pathFor = (series) => {
-    let started = false;
-    return series.slice(-200).map((v, i) => {
-      if (v == null) return null;
-      const cmd = started ? 'L' : 'M';
-      started = true;
-      return `${cmd}${toX(i)},${toY(v)}`;
-    }).filter(Boolean).join(' ');
-  };
 
-  const MiniChart = ({ period, setPeriod, min, max, color, label, sliderLabel }) => (
-    <div style={{flex:1,minWidth:280}}>
-      <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",background:"rgba(255,255,255,0.03)",borderRadius:6}}>
-        <path d={pathFor(closes.map((c,i)=>i>=closes.length-200?c:null))} fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth="1.5"/>
-        <path d={pathFor(ema(closes, period))} fill="none" stroke={color} strokeWidth="2"/>
-      </svg>
-      <Mono size={11} color="rgba(255,255,255,0.5)" spacing={1} style={{display:"block",textAlign:"center",marginTop:8,marginBottom:10}}>{fillTemplate(label, {p: period})}</Mono>
-      <input type="range" min={min} max={max} step="1" value={period}
-        onChange={e => setPeriod(+e.target.value)}
-        style={{width:"100%",accentColor:color,cursor:"pointer"}}
-        aria-label={sliderLabel}/>
-    </div>
-  );
+  const MiniChart = ({ period, setPeriod, min, max, color, label, sliderLabel }) => {
+    const { useEffect, useRef } = React;
+    const containerRef = useRef(null);
+    const chartRef = useRef(null);
+    const seriesRef = useRef({});
+
+    useEffect(() => {
+      if (!containerRef.current || chartRef.current || typeof LightweightCharts === "undefined") return;
+      const chart = LightweightCharts.createChart(containerRef.current, {
+        width: containerRef.current.clientWidth, height: 160,
+        layout: { background: { color: "rgba(255,255,255,0.03)" }, textColor: "rgba(255,255,255,0.45)" },
+        grid: { vertLines: { visible: false }, horzLines: { color: "rgba(255,255,255,0.06)" } },
+        rightPriceScale: { borderColor: "rgba(255,255,255,0.12)" },
+        timeScale: { borderColor: "rgba(255,255,255,0.12)" },
+      });
+      const closeSeries = chart.addLineSeries({ color: "rgba(255,255,255,0.35)", lineWidth: 1, priceLineVisible: false, lastValueVisible: false });
+      const emaSeries = chart.addLineSeries({ color, lineWidth: 2, priceLineVisible: false, lastValueVisible: false });
+      chartRef.current = chart;
+      seriesRef.current = { closeSeries, emaSeries };
+      const ro = new ResizeObserver(entries => { if (entries[0]) chart.applyOptions({ width: entries[0].contentRect.width }); });
+      ro.observe(containerRef.current);
+      return () => { ro.disconnect(); chart.remove(); chartRef.current = null; };
+    }, []);
+
+    useEffect(() => {
+      const s = seriesRef.current;
+      if (!s.closeSeries) return;
+      const start = Math.max(0, candles.length - 200);
+      const emaFull = ema(closes, period);
+      s.closeSeries.setData(closes.slice(start).map((v,i) => ({ time: candles[start+i].time, value: v })));
+      s.emaSeries.setData(emaFull.slice(start).map((v,i) => v != null ? { time: candles[start+i].time, value: v } : null).filter(Boolean));
+      chartRef.current.timeScale().fitContent();
+    }, [period]);
+
+    return (
+      <div style={{flex:1,minWidth:280}}>
+        <div ref={containerRef} data-source="/data/ohlc_GOLD_D1.json" style={{borderRadius:6,overflow:"hidden"}}/>
+        <Mono size={11} color="rgba(255,255,255,0.5)" spacing={1} style={{display:"block",textAlign:"center",marginTop:8,marginBottom:10}}>{fillTemplate(label, {p: period})}</Mono>
+        <input type="range" min={min} max={max} step="1" value={period}
+          onChange={e => setPeriod(+e.target.value)}
+          style={{width:"100%",accentColor:color,cursor:"pointer"}}
+          aria-label={sliderLabel}/>
+      </div>
+    );
+  };
 
   return (
     <div style={{background:C.black,padding:"70px 5vw 56px",color:"#fff"}}>
@@ -584,36 +604,18 @@ function CoreMeasureBlock({ ema_, vars }) {
 
 // ─── Для чего EMA годится — один график, три режима ────────────────────────
 function EmaUsageModes({ candles }) {
-  const { useState, useMemo } = React;
+  const { useState, useMemo, useEffect, useRef } = React;
   const T8 = window.Ch8Content[INITIAL_LANG] || window.Ch8Content.ru;
   const w = T8.whatMaIsFor;
   const [mode, setMode] = useState("definition");
+  const containerRef = useRef(null);
+  const chartRef = useRef(null);
+  const seriesRef = useRef({});
 
   const closes = useMemo(() => candles ? candles.map(c => +c.close) : [], [candles]);
   const e20 = useMemo(() => closes.length ? ema(closes, 20) : [], [closes]);
   const e50 = useMemo(() => closes.length ? ema(closes, 50) : [], [closes]);
   const e200 = useMemo(() => closes.length ? ema(closes, 200) : [], [closes]);
-
-  if (closes.length < 210) {
-    return <div style={{background:C.surface,borderRadius:6,minHeight:260,marginBottom:48}}/>;
-  }
-
-  const W = 680, H = 220;
-  const visible = mode === "language" ? closes.slice(-260) : closes.slice(-200);
-  const n = visible.length;
-  const seriesForRange = (full) => full.slice(full.length - n);
-  const lo = Math.min(...visible), hi = Math.max(...visible);
-  const toY = p => H - ((p - lo) / (hi - lo || 1)) * H;
-  const toX = i => (i / (n - 1)) * W;
-  const pathFor = (series) => {
-    let started = false;
-    return series.map((v, i) => {
-      if (v == null) return null;
-      const cmd = started ? 'L' : 'M';
-      started = true;
-      return `${cmd}${toX(i)},${toY(v)}`;
-    }).filter(Boolean).join(' ');
-  };
 
   const lastClose = closes[closes.length - 1];
   const lastE20 = e20[e20.length - 1];
@@ -624,6 +626,54 @@ function EmaUsageModes({ candles }) {
 
   const modes = [["definition", w.modeDefinition], ["regime", w.modeRegime], ["language", w.modeLanguage]];
 
+  // Create the chart once.
+  useEffect(() => {
+    if (!containerRef.current || chartRef.current || typeof LightweightCharts === "undefined") return;
+    const chart = LightweightCharts.createChart(containerRef.current, {
+      width: containerRef.current.clientWidth, height: 260,
+      layout: { background: { color: C.black }, textColor: "rgba(255,255,255,0.55)" },
+      grid: { vertLines: { color: "rgba(255,255,255,0.05)" }, horzLines: { color: "rgba(255,255,255,0.05)" } },
+      rightPriceScale: { borderColor: "rgba(255,255,255,0.15)" },
+      timeScale: { borderColor: "rgba(255,255,255,0.15)" },
+      crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
+    });
+    const closeSeries = chart.addLineSeries({ color: "rgba(255,255,255,0.4)", lineWidth: 1, priceLineVisible: false, lastValueVisible: false });
+    const emaASeries = chart.addLineSeries({ color: C.gold, lineWidth: 2, priceLineVisible: false, lastValueVisible: false, title: "EMA" });
+    const emaBSeries = chart.addLineSeries({ color: "#6ea8fe", lineWidth: 2, priceLineVisible: false, lastValueVisible: false, title: "EMA" });
+    chartRef.current = chart;
+    seriesRef.current = { closeSeries, emaASeries, emaBSeries };
+    const ro = new ResizeObserver(entries => { if (entries[0]) chart.applyOptions({ width: entries[0].contentRect.width }); });
+    ro.observe(containerRef.current);
+    return () => { ro.disconnect(); chart.remove(); chartRef.current = null; };
+  }, []);
+
+  // Push real data whenever mode/candles change.
+  useEffect(() => {
+    const s = seriesRef.current;
+    if (!s.closeSeries || !candles || closes.length < 210) return;
+    const n = mode === "language" ? 260 : 200;
+    const start = Math.max(0, candles.length - n);
+    const toSeries = (arr) => arr.slice(start).map((v,i) => v != null ? { time: candles[start+i].time, value: v } : null).filter(Boolean);
+    s.closeSeries.setData(toSeries(closes));
+    if (mode !== "language") {
+      s.emaASeries.setData(toSeries(e20));
+      s.emaBSeries.setData([]);
+    } else {
+      s.emaASeries.setData(toSeries(e50));
+      s.emaBSeries.setData(toSeries(e200));
+    }
+    if (mode === "definition") {
+      chartRef.current.applyOptions({ layout: { background: { color: above ? "#0a1f16" : "#210b0b" } } });
+    } else {
+      chartRef.current.applyOptions({ layout: { background: { color: C.black } } });
+    }
+    chartRef.current.timeScale().fitContent();
+  }, [mode, candles, closes, e20, e50, e200, above]);
+
+  if (closes.length < 210) {
+    return <div style={{background:C.surface,borderRadius:6,minHeight:260,marginBottom:48}}/>;
+  }
+
   return (
     <div style={{marginBottom:48}}>
       <div style={{display:"flex",gap:6,marginBottom:16,flexWrap:"wrap"}}>
@@ -633,17 +683,7 @@ function EmaUsageModes({ candles }) {
       </div>
 
       <div style={{background:C.black,borderRadius:8,padding:"22px 5vw 26px",marginBottom:16}}>
-        <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",display:"block"}}>
-          {mode === "definition" && (
-            <rect x="0" y="0" width={W} height={H} fill={above ? "rgba(8,153,129,0.08)" : "rgba(242,54,69,0.08)"}/>
-          )}
-          <path d={pathFor(seriesForRange(closes))} fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5"/>
-          {mode !== "language" && <path d={pathFor(seriesForRange(e20))} fill="none" stroke={C.gold} strokeWidth="2"/>}
-          {mode === "language" && <>
-            <path d={pathFor(seriesForRange(e50))} fill="none" stroke={C.gold} strokeWidth="2"/>
-            <path d={pathFor(seriesForRange(e200))} fill="none" stroke="#6ea8fe" strokeWidth="2"/>
-          </>}
-        </svg>
+        <div ref={containerRef} data-source="/data/ohlc_GOLD_D1.json"/>
 
         {mode === "definition" && (
           <p style={{fontSize:13,color:above?"#4ade80":"#f87171",fontFamily:"monospace",textAlign:"center",marginTop:14,marginBottom:0}}>
