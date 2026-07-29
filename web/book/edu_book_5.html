@@ -153,7 +153,10 @@ function SceneMount({ url, mode, symbol, copy }) {
     }).catch(() => {});
     return () => { cancelled = true; };
   }, [url]);
-  return <div ref={ref}/>;
+  // SPEC_charts_and_interactivity_standard.md §2 technical marker -- set on
+  // the mount root (this component, not scene-engine.js, which is locked).
+  const sceneName = (url.split("/").pop() || "").replace(/\.json$/, "");
+  return <div ref={ref} data-scene={sceneName}/>;
 }
 
 // SBFSessionTable mounting helper -- same ref-callback pattern as SceneMount.
