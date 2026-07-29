@@ -59,7 +59,8 @@
   var isMain     = _bare === '/' || _bare === '/index.html';
   var isCalendar = _bare === '/calendar' || _bare.startsWith('/edu/calendar');
   var isJournal  = _bare === '/journal.html' || _bare === '/journal';
-  var isEdu      = !isMain && !isCalendar && !isJournal;
+  var isBrokers  = _bare === '/brokers' || _bare === '/brokers.html';
+  var isEdu      = !isMain && !isCalendar && !isJournal && !isBrokers;
 
   // Detect edu book pages for RU/RO/EN switcher: /edu/b/n, /edu/ro/b/n, /edu/en/b/n
   var _bookM = path.match(/\/edu\/(ro\/|en\/)?b\/(\d+)/);
@@ -71,6 +72,7 @@
     if (page === 'calendar' && isCalendar) return 'active';
     if (page === 'journal'  && isJournal)  return 'active';
     if (page === 'edu'      && isEdu)      return 'active';
+    if (page === 'brokers'  && isBrokers)  return 'active';
     return '';
   }
 
@@ -221,6 +223,7 @@
     '    <a href="' + navHref('/') + '"           class="g-nav-item ' + navCls('today')    + '" data-i18n="nav.today">' + t('nav.today', 'Сегодня') + '</a>',
     '    <a href="' + navHref('/edu/') + '"       class="g-nav-item ' + navCls('edu')       + '" data-i18n="nav.edu">' + t('nav.edu', 'Обучение') + '</a>',
     '    <a href="' + navHref('/calendar') + '"   class="g-nav-item ' + navCls('calendar')  + '" data-i18n="nav.calendar">' + t('nav.calendar', 'Календарь') + '</a>',
+    '    <a href="' + navHref('/brokers') + '"     class="g-nav-item ' + navCls('brokers')   + '" data-i18n="nav.brokers">' + t('nav.brokers', 'Брокеры') + '</a>',
     '  </nav>',
     '  <div class="sbf-right">',
     '    <div class="sbf-win"><span class="dot" id="liveDot"></span><span id="liveTxt">Live</span></div>',
@@ -252,7 +255,8 @@
     '<a href="' + navHref('/') + '"           class="g-bn-item ' + navCls('today')    + '"><span class="g-bn-ico"><img class="mi-icon" src="/assets/icons/icon-sun.svg" alt="" width="20" height="20"></span><span class="g-bn-lbl" data-i18n="nav.today">' + t('nav.today', 'Сегодня') + '</span></a>',
     // Profile injected here as 2nd by sbf-profile.js
     '<a href="' + navHref('/edu/') + '"     class="g-bn-item ' + navCls('edu')       + '"><span class="g-bn-ico"><img class="mi-icon" src="/assets/icons/icon-books.png" alt="" width="20" height="20"></span><span class="g-bn-lbl" data-i18n="nav.edu">' + t('nav.edu', 'Обучение') + '</span></a>',
-    '<a href="' + navHref('/calendar') + '" class="g-bn-item ' + navCls('calendar')  + '"><span class="g-bn-ico"><img class="mi-icon" src="/assets/icons/icon-calendar.png" alt="" width="20" height="20"></span><span class="g-bn-lbl" data-i18n="nav.calendar">' + t('nav.calendar', 'Календарь') + '</span></a>'
+    '<a href="' + navHref('/calendar') + '" class="g-bn-item ' + navCls('calendar')  + '"><span class="g-bn-ico"><img class="mi-icon" src="/assets/icons/icon-calendar.png" alt="" width="20" height="20"></span><span class="g-bn-lbl" data-i18n="nav.calendar">' + t('nav.calendar', 'Календарь') + '</span></a>',
+    '<a href="' + navHref('/brokers') + '"   class="g-bn-item ' + navCls('brokers')   + '"><span class="g-bn-ico"><img class="mi-icon" src="/assets/icons/icon-briefcase.png" alt="" width="20" height="20"></span><span class="g-bn-lbl" data-i18n="nav.brokers">' + t('nav.brokers', 'Брокеры') + '</span></a>'
   ].join('\n');
 
   function inject() {

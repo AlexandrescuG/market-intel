@@ -1,0 +1,322 @@
+{
+  "_meta": {
+    "schema_version": 1,
+    "checked": null,
+    "remuneration_model": "revshare",
+    "note": "Реестр партнёров. ЕДИНСТВЕННЫЙ источник истины для страницы сравнения /brokers, BrokerPicker главы 11, ступеней 2/9/10 лестницы. Ни одно число из этого файла не дублируется руками в HTML.",
+    "rules": [
+      "Партнёр без актуального loss_pct НЕ ОТОБРАЖАЕТСЯ нигде. Это не предупреждение, это условие рендера.",
+      "loss_pct, плечо, защита от отрицательного баланса и компенсационный фонд хранятся НА УРОВНЕ ЮРЛИЦА, а не бренда. У одного бренда бывает 1:30 и фонд на 20000 EUR в одном юрлице и 1:1000 без фонда в другом. Брать цифру одного юрлица и показывать её пользователю другого — подлог, даже если формально 'взято с сайта партнёра'.",
+      "У каждого числа обязательны *_checked (дата снятия) и *_source (ссылка на страницу, где взято).",
+      "Данные старше 90 дней помечаются как устаревшие автоматически; loss_pct пересчитывается площадками ежеквартально.",
+      "Сортировка по умолчанию везде — loss_pct по возрастанию. НЕ по нашему вознаграждению.",
+      "Колонки 'наша рекомендация', звёзд и рейтингов не существует."
+    ],
+    "todo": "Заполнить поля со значением null. Всё, что помечено VERIFY, снимается с сайта партнёра со скриншотом и датой."
+  },
+
+  "groups": [
+    {
+      "id": "naga_capex",
+      "members": ["naga", "capex"],
+      "label_ru": "Одна группа компаний",
+      "label_ro": "Același grup de companii",
+      "label_en": "Same corporate group",
+      "note_ru": "Сравнивать их между собой как независимые варианты бессмысленно.",
+      "verify": "Связь зафиксирована в SPEC_partner_ladder_ch6_15.md §0.5/§2.4 (проверено 27.07.2026): NAGA Markets Europe Ltd (CySEC 204/13) и KW Investments Ltd (Capex, Seychelles FSA SD020) — в одном футере. Собственным просмотром 29.07.2026 не переподтверждено (naga.com/capex.com отдают HTTP 403 автоматическим инструментам) — источник добросовестный (та же спека, что и остальные проверенные числа этого файла), но повторная ручная сверка перед публикацией всё равно стоит одной минуты."
+    }
+  ],
+
+  "partners": [
+    {
+      "id": "xm",
+      "name": "XM",
+      "enabled": true,
+      "links": {
+        "affiliate": "https://clicks.pipaffiliates.com/c?c=1258918&l=ru&p=1",
+        "demo": null,
+        "live": null,
+        "tracking_ok": null,
+        "tracking_note": "VERIFY, НЕ ЗАВЕРШЕНО 2026-07-29: автоматическая попытка (WebFetch на clicks.pipaffiliates.com) дважды упала по таймауту 60с — многошаговый редирект не удалось пройти инструментом. pipaffiliates — официальная, давно работающая партнёрская платформа XM (не самописный трекер), и cookie/redirect-атрибуция — её основная функция, так что технически рабочий вариант вероятен, но это предположение, а не подтверждение. Нужен один ручной переход по ссылке в браузере (лучше в приватном режиме) до формы регистрации XM и проверка кабинета партнёрки на следующий день — появился ли клик/лид."
+      },
+      "entity_resolution": {
+        "md": "xm_global",
+        "md_confirmed": false,
+        "md_note": "ВЫВОД, А НЕ ОПУБЛИКОВАННЫЙ ФАКТ. Кипрское юрлицо в собственном футере ограничено резидентами ЕЭЗ, Молдова — вне ЕЭЗ; глобальный сайт ведёт XM Global, и Молдовы в его списке запрещённых стран нет. Ни одна страница XM Молдову не называет. Форма регистрации — JS-приложение, юрлицо назначается только после выбора страны. Честное значение ячейки: «XM Global Limited (Белиз), не подтверждено — определяется при регистрации».",
+        "eea": "trading_point_cy"
+      },
+      "entities": [
+        {
+          "id": "xm_global",
+          "legal_name": "XM Global Limited",
+          "jurisdiction": "BZ",
+          "regulator": "Financial Services Commission (Belize), Securities Industry Act 2021",
+          "licence_no": "8557558",
+          "address": "Suite 101, 63 Eve Street, Belize City, Belize",
+          "serves": "global",
+          "excludes": ["US", "CA", "IL", "IR"],
+          "show_in_eu_locales": false,
+          "checked": "2026-07-29",
+          "source": "https://www.xm.com/regulation",
+          "source_note": "Номер лицензии взят с сайта XM. Публичный реестр FSC Белиза машинно не читается — перекрёстной проверки нет.",
+          "leverage_retail": "1:1000",
+          "leverage_source": "https://www.xm.com/stable-leverage",
+          "loss_pct": null,
+          "loss_pct_confirmed_not_published": true,
+          "loss_pct_note": "НЕ ПУБЛИКУЕТСЯ. В футере только общее предупреждение о риске, процента нет. Отсутствие подтверждено 2026-07-29.",
+          "negative_balance_protection": true,
+          "nbp_source": "https://cloud.xm-cdn.com/static/pdf/System-PDFs/XMGlobal-Risk-Disclosures-for-Financial-Instruments.pdf",
+          "stop_out": "Принудительное закрытие от ~50% уровня маржи, автоматическое при ≤20%.",
+          "compensation_scheme": null,
+          "compensation_note": "Компенсационной схемы нет. В раскрытии рисков сказано только о сегрегации средств клиентов и что она «может не обеспечивать полной защиты»."
+        },
+        {
+          "id": "trading_point_cy",
+          "legal_name": "Trading Point of Financial Instruments Limited",
+          "reg_no": "HE251334",
+          "jurisdiction": "CY",
+          "regulator": "CySEC",
+          "licence_no": "120/10",
+          "licenced_since": "2010-08-05",
+          "serves": "EEA",
+          "show_in_eu_locales": true,
+          "checked": "2026-07-29",
+          "source": "https://www.cysec.gov.cy/en-GB/entities/investment-firms/cypriot/37582/",
+          "source_note": "Подтверждено по реестру регулятора, не по сайту брокера.",
+          "leverage_retail": "1:30",
+          "leverage_source": "https://www.xm.com/margin-and-leverage",
+          "leverage_note": "Потолки ESMA: 30:1 основные валютные пары, 20:1 золото и индексы.",
+          "loss_pct": 74.3,
+          "loss_pct_checked": "2026-07-29",
+          "loss_pct_source": "https://www.xm.com/legal-documents",
+          "negative_balance_protection": true,
+          "nbp_note": "Обязательна по правилам ESMA/CySEC. Отдельной цитаты со страницы XM EU в этой проверке не снято.",
+          "compensation_scheme": { "name": "CySEC Investor Compensation Fund", "amount": 20000, "currency": "EUR",
+            "source": "https://www.cysec.gov.cy/en-GB/investor-protection/tae/information/" }
+        },
+        {
+          "id": "trading_point_mena",
+          "legal_name": "Trading Point MENA Limited",
+          "jurisdiction": "AE-DIFC",
+          "regulator": "DFSA",
+          "licence_no": "F003484",
+          "licenced_since": "2019-09-10",
+          "serves": "MENA",
+          "show_in_eu_locales": false,
+          "checked": "2026-07-29",
+          "source": "https://www.dfsa.ae/public-register/firms/trading-point-mena-limited",
+          "loss_pct": 73.04,
+          "loss_pct_checked": "2026-07-29",
+          "loss_pct_source": "https://www.xm.com/mena",
+          "leverage_retail": null,
+          "note_ru": "Только Matched Principal, с разрешением на розничных клиентов."
+        }
+      ],
+      "entities_stale": [
+        { "note": "Австралийское подразделение ушло из бренда XM: теперь Trading.com Markets PTY Ltd, AFSL 443670. Любой источник, называющий XM «регулируемым ASIC», устарел." },
+        { "note": "Британское юрлицо (FRN 705428) переименовано в Trading.com Markets UK Limited. Статус по реестру FCA не прочитан — страницы реестра только на JS." }
+      ],
+      "loss_pct": null,
+      "loss_pct_checked": null,
+      "loss_pct_source": null,
+      "loss_pct_blocker": "РЕШЕНО 2026-07-29 (вариант 2 из §5.2 SPEC_brokers_comparison_page.md, рекомендованный самой спекой): показывать XM с явным пропуском в колонке процента у юрлица, к которому реально попадает молдавский пользователь (xm_global, entities[].loss_pct_confirmed_not_published=true) + раскрытием цифры соседнего юрлица (trading_point_cy, 74.3%) с оговоркой про другое плечо (1:30 vs 1:1000) и другой фонд (€20 000 vs нет). Строка не участвует в сортировке по умолчанию (нет собственного числа) и рендерится ниже партнёров с реальным loss_pct, но не скрывается — таблица сама объясняет разницу бренда и юрлица. НЕ подставлять 74.3% как loss_pct самой XM — это по-прежнему цифра другой компании.",
+      "min_deposit": { "value": 5, "currency": "USD", "account_types": "Standard, Ultra Low; Shares — 10000",
+        "entity": "xm_global", "checked": "2026-07-29", "source": "https://www.xm.com/account-types",
+        "note": "Снято с белизской сборки сайта. Для кипрского юрлица не проверено — сборка ЕС в этой сессии не отдавалась." },
+      "spreads": [
+        { "symbol": "XAUUSD", "typical": null, "account_type": null, "checked": null, "source": null },
+        { "symbol": "EURUSD", "typical": null, "account_type": null, "checked": null, "source": null }
+      ],
+      "spreads_note": "🔴 НЕ СНЯТЫ. Таблицы спредов на /forex-trading и /precious-metals рендерятся на клиенте, статического эквивалента нет. Читается только маркетинговое «спреды от 0.8 пункта» — без инструмента, без типа счёта, без периода усреднения; в таблицу такое не ставится. Снимать вручную из терминала или со скриншота.",
+      "commission": { "model": "per_side", "value": 3.5, "currency": "USD", "per_volume": 100000,
+        "round_turn": 7, "account_type": "XM Zero", "entity": "trading_point_cy",
+        "checked": "2026-07-29", "source": "https://www.xm.com/assets/pdf/new/docs/XM-costs-and-charges.pdf",
+        "note": "Счёт XM Zero есть в документе издержек ЕС, но отсутствует в белизской сборке. Комиссию для юрлица, доступного молдавскому клиенту, проверять отдельно." },
+      "dormant_fee": { "value": 5, "currency": "USD", "period": "month", "after_days": 90,
+        "source": "https://www.xm.com/assets/pdf/new/docs/XM-costs-and-charges.pdf" },
+      "swap_note": null,
+      "platforms": ["MT4", "MT5", "MT5 WebTrader", "XM App"],
+      "platforms_checked": "2026-07-29",
+      "platforms_source": "https://www.xm.com/mt5",
+      "platforms_note": "MT4 и MT5 на глобальной и европейской сборках. На ближневосточной MT4 нет. Разбивка MT4/MT5 по типам счетов не снята — скрыта за JS-переключателем.",
+      "demo_requires_verification": null,
+      "demo_note": "Не проверено. Справочный центр XM — JS-приложение, текст FAQ из первоисточника не читается. Публичные страницы описывают демо как «виртуальные средства» с одной кнопкой и без загрузки документов, но это вывод, а не подтверждённое утверждение.",
+      "funding_methods": [],
+      "notes_ru": null
+    },
+
+    {
+      "id": "avatrade",
+      "name": "AvaTrade",
+      "enabled": false,
+      "links": {
+        "affiliate": "https://www.avatrade.com/?tag=184200",
+        "demo": null,
+        "live": null,
+        "tracking_ok": true,
+        "tracking_note": "Параметр tag присутствует."
+      },
+      "entities": [
+        {
+          "legal_name": null, "jurisdiction": null, "regulator": null, "licence_no": null,
+          "serves": null, "excludes": null, "show_in_eu_locales": null, "source": null,
+          "verify": "Глобальный домен, юрлицо определяется гео. Пройти регистрацию с молдавским адресом до экрана договора и зафиксировать, какое юрлицо реально его подписывает."
+        }
+      ],
+      "leverage_retail": { "value": null, "checked": null, "source": null },
+      "loss_pct": null, "loss_pct_checked": null, "loss_pct_source": null,
+      "min_deposit": { "value": null, "currency": null, "checked": null, "source": null },
+      "spreads": [
+        { "symbol": "XAUUSD", "typical": null, "account_type": null, "checked": null, "source": null },
+        { "symbol": "EURUSD", "typical": null, "account_type": null, "checked": null, "source": null }
+      ],
+      "commission": { "model": null, "value": null, "checked": null, "source": null },
+      "swap_note": null,
+      "negative_balance_protection": null,
+      "compensation_scheme": { "name": null, "amount": null, "currency": null, "source": null },
+      "platforms": [],
+      "demo_requires_verification": null,
+      "funding_methods": [],
+      "notes_ru": null
+    },
+
+    {
+      "id": "fxpro",
+      "name": "FxPro",
+      "enabled": false,
+      "links": {
+        "affiliate": "https://www.fxpro-direct.org/en/register/md/cri/32TQQFd7H",
+        "demo": null,
+        "live": null,
+        "tracking_ok": true,
+        "tracking_note": "Ссылка на регистрацию с гео-маршрутом на Молдову. ВНИМАНИЕ: страница закрыта robots.txt — данные по юрлицу, регулятору, лицензии и проценту убыточных счетов собирать руками."
+      },
+      "entities": [
+        {
+          "legal_name": null, "jurisdiction": null, "regulator": null, "licence_no": null,
+          "serves": null, "excludes": null, "show_in_eu_locales": null, "source": null,
+          "verify": "Собрать вручную — страница закрыта от индексации."
+        }
+      ],
+      "leverage_retail": { "value": null, "checked": null, "source": null },
+      "loss_pct": null, "loss_pct_checked": null, "loss_pct_source": null,
+      "min_deposit": { "value": null, "currency": null, "checked": null, "source": null },
+      "spreads": [
+        { "symbol": "XAUUSD", "typical": null, "account_type": null, "checked": null, "source": null },
+        { "symbol": "EURUSD", "typical": null, "account_type": null, "checked": null, "source": null }
+      ],
+      "commission": { "model": null, "value": null, "checked": null, "source": null },
+      "swap_note": null,
+      "negative_balance_protection": null,
+      "compensation_scheme": { "name": null, "amount": null, "currency": null, "source": null },
+      "platforms": [],
+      "demo_requires_verification": null,
+      "funding_methods": [],
+      "notes_ru": null,
+      "remuneration_note": "VERIFY У ЮРИСТА: по этому партнёру вознаграждение привязано к результату клиента. Формулировка про это НЕ ПУБЛИКУЕТСЯ до заключения — при неаккуратной подаче читается как обещание прибыли."
+    },
+
+    {
+      "id": "naga",
+      "name": "NAGA",
+      "enabled": false,
+      "group": "naga_capex",
+      "links": {
+        "affiliate": "https://go.joinnaga.com/29LSS44/23JF6C/",
+        "demo": null, "live": null,
+        "tracking_ok": true,
+        "tracking_note": "Корректная партнёрская ссылка."
+      },
+      "entities": [
+        { "legal_name": "NAGA Markets Europe Ltd", "jurisdiction": "CY", "regulator": "CySEC", "licence_no": "204/13",
+          "licenced_since": "2013-06-20", "reg_no": "251168", "serves": "EEA", "excludes": null, "show_in_eu_locales": true,
+          "checked": "2026-07-29", "source": "https://www.cysec.gov.cy/en-GB/entities/investment-firms/cypriot/",
+          "source_note": "Подтверждено по публичному реестру регулятора (не по сайту брокера) — активна, без ограничений на 2026-07-29." }
+      ],
+      "leverage_retail": { "value": null, "checked": null, "source": null,
+        "verify": "Не снято. Юрлицо CY подпадает под потолки ESMA (30:1 основные пары), но точное значение для розницы не подтверждено напрямую." },
+      "loss_pct": null, "loss_pct_checked": null, "loss_pct_source": null,
+      "loss_pct_note": "НЕ ОТОБРАЖАЕТСЯ ПОКА НЕ ПОДТВЕРЖДЕНО ПРЯМЫМ ПРОСМОТРОМ. WebSearch (29.07.2026, независимо двумя запросами) устойчиво даёт 77.41% для NAGA Markets Europe Ltd, вероятный первоисточник — https://naga.com/eu/documents/risk_disclosure_and_warning_notice (стандартное MiFID-раскрытие). Прямой просмотр этой и ещё двух страниц naga.com дал HTTP 403 (анти-бот) — число НЕ подтверждено собственным просмотром страницы, только поисковым индексом. Правило проекта («ни одного числа не написано руками») требует первичного источника, а не пересказа поисковика — до ручной проверки (один заход на страницу глазами) loss_pct остаётся null, партнёр не показывается.",
+      "min_deposit": { "value": null, "currency": null, "checked": null, "source": null },
+      "spreads": [
+        { "symbol": "XAUUSD", "typical": null, "account_type": null, "checked": null, "source": null },
+        { "symbol": "EURUSD", "typical": null, "account_type": null, "checked": null, "source": null }
+      ],
+      "commission": { "model": null, "value": null, "checked": null, "source": null },
+      "swap_note": null,
+      "negative_balance_protection": null,
+      "compensation_scheme": { "name": "CySEC Investor Compensation Fund", "amount": 20000, "currency": "EUR",
+        "checked": "2026-07-29", "source": "https://www.cysec.gov.cy/en-GB/investor-protection/tae/information/",
+        "note": "Общая для всех CySEC-лицензиатов схема (та же, что у XM Кипр) — сумма не проверена специально для NAGA, взята с той же страницы регулятора по праву юрисдикции." },
+      "platforms": [],
+      "demo_requires_verification": null,
+      "funding_methods": [],
+      "notes_ru": null
+    },
+
+    {
+      "id": "capex",
+      "name": "Capex.com",
+      "enabled": false,
+      "group": "naga_capex",
+      "links": {
+        "affiliate": "https://account.capex.com/en/register?sidc=88EA29D5-46D9-472E-AEB2-C6E5C30E822A",
+        "demo": null, "live": null,
+        "tracking_ok": true,
+        "tracking_note": "ИСПРАВЛЕНО 2026-07-29: путь login→register, параметр sidc сохранён без изменений. account.capex.com/en/register подтверждён как реальный публичный путь регистрации (WebSearch, независимо от прежней спеки). Оговорка: сам конечный редирект/сохранение sidc через него не протестирован живым переходом (WebFetch на account.capex.com получил 403 от анти-бот защиты) — стоит подтвердить одним ручным переходом до экрана оплаты/договора перед первым реальным трафиком."
+      },
+      "entities": [
+        { "legal_name": "KW Investments Ltd", "jurisdiction": "SC", "regulator": "Seychelles FSA", "licence_no": "SD020",
+          "serves": null, "excludes": null, "show_in_eu_locales": false, "checked": null, "source": null,
+          "verify": "Не переподтверждено собственным просмотром 29.07.2026 (capex.com отдаёт HTTP 403 автоматическим инструментам). Взято из SPEC_partner_ladder_ch6_15.md §2.3 (проверено 27.07.2026). Юрлицо сейшельское — по правилу §2.2(2) в RO/EN-локалях карточка Capex не рендерится вообще, показ имеет смысл только для аудитории, которой офшорное юрлицо честно раскрыто." }
+      ],
+      "leverage_retail": { "value": null, "checked": null, "source": null },
+      "loss_pct": null, "loss_pct_checked": null, "loss_pct_source": null,
+      "loss_pct_note": "По SPEC_partner_ladder_ch6_15.md §2.3 — офшорное юрлицо процент не публикует вовсе (аналог ситуации XM/Белиз, но здесь нет юрлица группы с ЕС-регистрацией и собственным процентом для раскрытия по образцу XM). Партнёр не отображается, пока это не изменится.",
+      "min_deposit": { "value": null, "currency": null, "checked": null, "source": null },
+      "spreads": [
+        { "symbol": "XAUUSD", "typical": null, "account_type": null, "checked": null, "source": null },
+        { "symbol": "EURUSD", "typical": null, "account_type": null, "checked": null, "source": null }
+      ],
+      "commission": { "model": null, "value": null, "checked": null, "source": null },
+      "swap_note": null,
+      "negative_balance_protection": null,
+      "compensation_scheme": { "name": null, "amount": null, "currency": null, "source": null },
+      "platforms": [],
+      "demo_requires_verification": null,
+      "funding_methods": [],
+      "notes_ru": null
+    },
+
+    {
+      "id": "instaforex",
+      "name": "InstaForex",
+      "enabled": false,
+      "links": {
+        "affiliate": "https://www.instaforex.com/en/fast_open_live_account?x=TTVDG",
+        "demo": null, "live": null,
+        "tracking_ok": true,
+        "tracking_note": "ИСПРАВЛЕНО 2026-07-29. Параметр ?x=TTVDG найден не выдумкой, а сверкой с реальным работающим партнёрским линком в /mnt/sbfdata/sbf-platform/SBFAcademy_bot/sbfacademy/content/brokers.json (тот же проект SBF, другой бот) — тот файл уже использует этот код в продакшене, а его данные по AvaTrade (tag=184200) и Capex (sidc=88EA29D5-...) байт-в-байт совпадают с уже проверенными записями этого же partners.json, что и даёт уверенность в актуальности кода. Формат ?x=КОД подтверждён и в SPEC_partner_ladder_ch6_15.md §2.4 (документация партнёрки InstaForex). Отдельно, тем же заходом не закрыто: домен instaforex.com — глобальный, а CySEC-юрлицо (Instant Trading EU Ltd, лиц. 266/15), которое, если фигурирует в карточке, живёт на instaforex.eu — если карточка для ЕС-локали обещает кипрское юрлицо и компенсационный фонд, а ссылка ведёт на глобальный домен, пользователь подписывает договор не с тем, что описано (для RU/MD-локали это не проблема, т.к. используется глобальное юрлицо). Источник по этой части: SPEC_partner_ladder_ch6_15.md §2.4 (проверено 27.07.2026)."
+      },
+      "entities": [
+        { "legal_name": null, "jurisdiction": null, "regulator": null, "licence_no": null,
+          "serves": null, "excludes": null, "show_in_eu_locales": null, "source": null }
+      ],
+      "leverage_retail": { "value": null, "checked": null, "source": null },
+      "loss_pct": null, "loss_pct_checked": null, "loss_pct_source": null,
+      "min_deposit": { "value": null, "currency": null, "checked": null, "source": null },
+      "spreads": [
+        { "symbol": "XAUUSD", "typical": null, "account_type": null, "checked": null, "source": null },
+        { "symbol": "EURUSD", "typical": null, "account_type": null, "checked": null, "source": null }
+      ],
+      "commission": { "model": null, "value": null, "checked": null, "source": null },
+      "swap_note": null,
+      "negative_balance_protection": null,
+      "compensation_scheme": { "name": null, "amount": null, "currency": null, "source": null },
+      "platforms": [],
+      "demo_requires_verification": null,
+      "funding_methods": [],
+      "notes_ru": null
+    }
+  ]
+}

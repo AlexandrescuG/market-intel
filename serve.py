@@ -1039,6 +1039,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self._render_site_page("login.html", req_lang)
         elif path_clean in ("/survey", "/survey.html"):
             self._render_site_page("survey.html", req_lang)
+        elif path_clean in ("/brokers", "/brokers.html"):
+            self._render_site_page("brokers.html", req_lang)
         elif path_clean == "/journal":
             self._serve_static(WEB_DIR / "journal.html")
         # ── Legacy /m/* routes → redirect to unified index ──

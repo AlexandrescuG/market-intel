@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ t('brokers.page_title', lang) }}</title>
+<meta name="description" content="{{ t('brokers.page_description', lang) }}">
+<meta name="robots" content="index, follow">
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="stylesheet" href="/assets/design.css">
+<link rel="stylesheet" href="/assets/tokens.css?v=1">
+<script src="/assets/i18n.js?v=2" defer></script>
+<script src="/assets/sbf-auth.js?v=1" defer></script>
+<script src="/assets/sbf-header.js?v=15" defer></script>
+<style>
+.wrap{max-width:1180px;margin:0 auto;padding:24px 20px 60px}
+.brokers-h1{font-size:26px;font-weight:800;letter-spacing:-.01em;color:var(--ink);margin-bottom:6px}
+.brokers-sub{font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:20px;max-width:760px}
+
+/* Раскрытие вознаграждения — вверху, не в подвале (§2 п.4 спеки) */
+.disclosure{margin:0 0 20px;padding:12px 16px;background:var(--cream,#faf8f3);
+  border-left:3px solid var(--gold);font-size:13px;line-height:1.6;color:var(--ink)}
+.disclosure b{color:var(--ink)}
+.disclosure a{color:var(--ink);border-bottom:1px solid var(--gold);text-decoration:none}
+
+/* Тулбар: страна + пометка сортировки */
+.brokers-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin-bottom:16px}
+.country-picker{font-size:13px;color:var(--muted)}
+.country-picker select{margin-left:6px;padding:5px 8px;font-size:13px;border:1px solid var(--line);border-radius:6px;background:var(--paper)}
+.sort-note{font-size:12px;color:var(--down);display:flex;align-items:center;gap:8px}
+.sort-note button{font-size:11px;padding:3px 8px;border:1px solid var(--line);border-radius:5px;background:var(--paper);cursor:pointer}
+
+/* Таблица (desktop) */
+.brokers-table-wrap{overflow-x:auto}
+.brokers-table{width:100%;border-collapse:collapse;font-size:12.5px}
+.brokers-table th{text-align:left;padding:9px 10px;background:var(--cream,#faf8f3);
+  border-bottom:2px solid var(--line);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);white-space:nowrap}
+.brokers-table th.sortable{cursor:pointer;user-select:none}
+.brokers-table th.sortable:hover{color:var(--ink)}
+.brokers-table th.active{color:var(--gold)}
+.brokers-table td{padding:10px;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.5}
+.brokers-table .col-name a{color:var(--ink);font-weight:700;text-decoration:none}
+.brokers-table .col-name a:hover{color:var(--gold)}
+.entity-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.loss-val{color:var(--down);font-size:14px}
+.loss-np{color:var(--muted);font-style:italic}
+.loss-disclose{font-size:11px;color:var(--muted);margin-top:4px;max-width:220px;line-height:1.5}
+.group-badge{font-size:10px;color:var(--gold);margin-top:4px;font-weight:600}
+.date-badge{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.date-badge.stale{color:var(--down)}
+.src-link{font-size:10px;color:var(--muted);text-decoration:underline;margin-left:4px}
+.no-data{color:var(--faint,#c5baa8);font-style:italic}
+.empty-row{text-align:center;padding:30px;color:var(--muted);font-size:13px}
+
+/* Карточки (mobile) — по умолчанию скрыты, таблица скрыта на узких экранах */
+.brokers-cards{display:none}
+@media (max-width:760px){
+  .brokers-table-wrap{display:none}
+  .brokers-cards{display:block}
+  .broker-card{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:12px}
+  .bc-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+  .bc-head a{font-weight:700;font-size:15px;color:var(--ink);text-decoration:none}
+  .bc-row{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;padding:4px 0;border-top:1px solid var(--line)}
+  .bc-row span:first-child{color:var(--muted)}
+}
+
+/* Калькулятор */
+.calc-section, .quiz-section{margin-top:36px;padding:20px 22px;background:var(--paper);border:1px solid var(--line);border-radius:10px}
+.section-title{font-size:16px;font-weight:800;margin-bottom:12px;color:var(--ink)}
+.calc-inputs{display:flex;flex-wrap:wrap;gap:16px;margin-bottom:16px}
+.calc-inputs label{font-size:12px;color:var(--muted);display:flex;flex-direction:column;gap:4px}
+.calc-inputs input, .calc-inputs select{padding:7px 9px;border:1px solid var(--line);border-radius:6px;font-size:13px}
+.calc-table{width:100%;border-collapse:collapse;font-size:13px}
+.calc-table th, .calc-table td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left}
+.calc-note{font-size:11.5px;color:var(--muted);margin-top:10px;line-height:1.5}
+
+/* Опросник */
+.quiz-q p{font-size:14px;margin-bottom:12px;color:var(--ink)}
+.quiz-opt{display:block;width:100%;text-align:left;padding:10px 14px;margin-bottom:8px;
+  border:1px solid var(--line);border-radius:8px;background:var(--paper);cursor:pointer;font-size:13px}
+.quiz-opt:hover{border-color:var(--gold)}
+.quiz-result p{font-size:13.5px;line-height:1.6;color:var(--ink);margin-bottom:12px}
+.quiz-restart{font-size:12px;padding:6px 12px;border:1px solid var(--line);border-radius:6px;background:var(--paper);cursor:pointer}
+
+/* Риск-предупреждение — полная форма, тёплая подложка, не мелкий серый текст в подвале */
+.rwarn{margin-top:28px;padding:14px 18px;background:#FFF9F0;border:1px solid rgba(201,162,39,.35);border-radius:6px}
+.rwarn p{margin:0;font-size:13px;line-height:1.6;color:var(--ink)}
+.rwarn strong{color:var(--down)}
+
+.brokers-error{padding:30px;text-align:center;color:var(--down)}
+</style>
+</head>
+<body>
+
+<div class="wrap" id="brokersPageRoot">
+  <h1 class="brokers-h1">{{ t('brokers.h1', lang) }}</h1>
+  <p class="brokers-sub">{{ t('brokers.subtitle', lang) }}</p>
+
+  <div class="disclosure">
+    <b>{{ t('brokers.disclosure_mark', lang) }}</b>
+    {{ t('brokers.disclosure_revshare', lang) }}
+  </div>
+
+  <div id="brokersTableRoot"></div>
+
+  <div class="calc-section">
+    <div class="section-title">{{ t('brokers.calc_title', lang) }}</div>
+    <div id="brokersCalcRoot"></div>
+  </div>
+
+  <div class="quiz-section">
+    <div class="section-title">{{ t('brokers.quiz_title', lang) }}</div>
+    <div id="brokersQuizRoot"></div>
+  </div>
+
+  <aside class="rwarn" role="note">
+    <p>{{ t('brokers.risk_warning_full', lang) }}</p>
+  </aside>
+</div>
+
+<script src="/assets/brokers.js?v=1" defer></script>
+</body>
+</html>
