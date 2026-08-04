@@ -56,17 +56,12 @@
  */
 window.Ch13Content = {
   ru: {
-    coldOpen: {
-      tag: "ГЛАВА 13 — ПЛЮС СТО СОРОК, ЗАКРЫЛАСЬ В МИНУС",
-      lines: [
-        "Позиция была в плюсе на сто сорок пунктов.",
-        "Трейдер добрал трижды: на сорока, на восьмидесяти и на ста двадцати. Каждый добор был обоснован — тренд шёл, всё подтверждалось, позиция работала.",
-        "Цена развернулась и прошла назад семьдесят пунктов. Половину от того, что уже было пройдено.",
-        "Сделка закрылась в убыток.",
-        "Останови взгляд на этой строчке. Рынок вернулся не к точке входа, а лишь наполовину. Убыток сделал не разворот. Убыток сделали три решения, принятых в тот момент, когда всё шло хорошо.",
-        "Следующие четырнадцать минут — про арифметику этих решений. Она считается точно, до пункта, и объясняет, почему выигранные сделки теряют чаще, чем проигранные.",
-      ],
-      cta: "Посчитать ↓",
+    coldStart: {
+      tag: "ОТЫГРАТЬ",
+      ask: "Задай величину просадки. Сколько нужно заработать, чтобы вернуться к исходной сумме?",
+      drawdownLabel: "Просадка",
+      revealTemplate: "−{{dd}}% → нужно +{{need}}%, чтобы вернуться к исходной сумме. Асимметрия растёт быстрее, чем кажется: не линейно, а по формуле dd/(1−dd).",
+      bridge: "Отсюда и весь смысл этой главы: не в том, как далеко зайти в прибыли, а в том, чего стоит вернуться из убытка.",
     },
     antiMyth: {
       tag: "АНТИ-МИФ",
@@ -212,7 +207,7 @@ window.Ch13Content = {
       tag: "ПРЕДИКТ НЕДЕЛИ",
       question: "Как думаешь, при переводе стопа в безубыток после прохождения половины пути к цели — какая доля сделок закроется в ноль вместо достижения цели?",
       options: ["Меньше 30%", "30–60%", "60–85%", "Больше 85%"],
-      answerNote: (cost) => `По нашим измерениям (H4/D1, все инструменты): ${cost}%.`,
+      answerNote: (cost, correct) => `${correct ? "Точно." : "Мимо."} По нашим измерениям (H4/D1, все инструменты): ${cost}%.`,
       xpNote: "Про измеримую величину — правильного варианта в моральном смысле нет, есть посчитанный.",
     },
     cliffhanger: {
@@ -234,17 +229,12 @@ window.Ch13Content = {
   },
 
   en: {
-    coldOpen: {
-      tag: "CHAPTER 13 — UP A HUNDRED FORTY, CLOSED IN THE RED",
-      lines: [
-        "The position was up a hundred and forty points.",
-        "The trader added three times: at forty, at eighty, at a hundred twenty. Each add was justified — the trend was running, everything confirmed it, the position was working.",
-        "Price reversed and gave back seventy points. Half of what had already been covered.",
-        "The trade closed at a loss.",
-        "Stop on that line. The market didn't return to entry — only halfway. The reversal didn't make the loss. Three decisions made exactly when everything was going well made the loss.",
-        "The next fourteen minutes are about the arithmetic of those decisions. It computes exactly, to the point, and explains why winning trades turn into losses more often than losing ones stay losses.",
-      ],
-      cta: "Compute it ↓",
+    coldStart: {
+      tag: "CLAW BACK",
+      ask: "Set the size of a drawdown. How much do you need to earn back to return to the starting amount?",
+      drawdownLabel: "Drawdown",
+      revealTemplate: "−{{dd}}% → you need +{{need}}% to get back to even. The asymmetry grows faster than it looks: not linearly, but by dd/(1−dd).",
+      bridge: "That asymmetry is what this whole chapter is about: not how far you ride a gain, but what it costs to come back from a loss.",
     },
     antiMyth: {
       tag: "ANTI-MYTH",
@@ -390,7 +380,7 @@ window.Ch13Content = {
       tag: "PREDICTION OF THE WEEK",
       question: "What share of trades do you think close at zero instead of reaching target, when the stop moves to breakeven after covering half the distance to target?",
       options: ["Under 30%", "30–60%", "60–85%", "Over 85%"],
-      answerNote: (cost) => `By our measurements (H4/D1, all instruments): ${cost}%.`,
+      answerNote: (cost, correct) => `${correct ? "Correct." : "Missed."} By our measurements (H4/D1, all instruments): ${cost}%.`,
       xpNote: "About a measurable quantity — there's no morally correct answer, only a computed one.",
     },
     cliffhanger: {
@@ -412,17 +402,12 @@ window.Ch13Content = {
   },
 
   ro: {
-    coldOpen: {
-      tag: "CAPITOLUL 13 — PLUS O SUTĂ PATRUZECI, ÎNCHISĂ PE MINUS",
-      lines: [
-        "Poziția era pe plus o sută patruzeci de puncte.",
-        "Traderul a adăugat de trei ori: la patruzeci, la optzeci, la o sută douăzeci. Fiecare adăugare era justificată — trendul mergea, totul confirma, poziția funcționa.",
-        "Prețul s-a întors și a parcurs înapoi șaptezeci de puncte. Jumătate din ce fusese deja parcurs.",
-        "Tranzacția s-a închis pe pierdere.",
-        "Oprește-te asupra acestei linii. Piața nu s-a întors la punctul de intrare, ci doar la jumătate. Pierderea n-a fost făcută de reversare. Pierderea a fost făcută de trei decizii luate exact atunci când totul mergea bine.",
-        "Următoarele paisprezece minute sunt despre aritmetica acestor decizii. Se calculează exact, până la punct, și explică de ce tranzacțiile câștigate se pierd mai des decât rămân pierdute cele deja pierdute.",
-      ],
-      cta: "Calculează ↓",
+    coldStart: {
+      tag: "SĂ RECUPEREZI",
+      ask: "Alege mărimea unei pierderi. Cât trebuie să câștigi ca să revii la suma inițială?",
+      drawdownLabel: "Pierdere",
+      revealTemplate: "−{{dd}}% → ai nevoie de +{{need}}% ca să revii la zero. Asimetria crește mai repede decât pare: nu liniar, ci după formula dd/(1−dd).",
+      bridge: "În asta stă tot sensul acestui capitol: nu cât de departe mergi pe profit, ci cât costă să revii dintr-o pierdere.",
     },
     antiMyth: {
       tag: "ANTI-MIT",
@@ -568,7 +553,7 @@ window.Ch13Content = {
       tag: "PROGNOZA SĂPTĂMÂNII",
       question: "Ce pondere din tranzacții crezi că se închid la zero în loc să atingă ținta, când stopul e mutat la breakeven după jumătatea drumului spre țintă?",
       options: ["Sub 30%", "30–60%", "60–85%", "Peste 85%"],
-      answerNote: (cost) => `După măsurătorile noastre (H4/D1, toate instrumentele): ${cost}%.`,
+      answerNote: (cost, correct) => `${correct ? "Corect." : "Ratat."} După măsurătorile noastre (H4/D1, toate instrumentele): ${cost}%.`,
       xpNote: "Despre o mărime măsurabilă — nu există răspuns corect moral, există unul calculat.",
     },
     cliffhanger: {

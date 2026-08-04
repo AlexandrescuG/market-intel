@@ -22,15 +22,13 @@
  */
 window.Ch9Content = {
   ru: {
-    coldOpen: {
-      tag: "ГЛАВА 9 — РЕКОРДНЫЙ ОТЧЁТ, МИНУС ВОСЕМЬ ПРОЦЕНТОВ",
-      lines: [
-        "Компания отчиталась лучше прогноза по выручке. Лучше по прибыли на акцию. Лучше по марже.",
-        "Акция открылась на восемь процентов ниже.",
-        "Если ты сейчас подумал «наверное, там было что-то в прогнозе на следующий квартал» — остановись на секунду. Ты прав. Но обрати внимание на то, как легко тебе далась эта мысль после того, как ты увидел результат.",
-        "Следующие четырнадцать минут — про это. Про то, как читается отчётность, почему рынок торгует не её, а разницу с ожиданием, и про одно свойство памяти, из-за которого учиться на графиках прошлого почти бесполезно. Мы это свойство сейчас продемонстрируем на тебе — и это будет самый неприятный экран курса.",
-      ],
-      cta: "Разобрать отчёт ↓",
+    coldStart: {
+      tag: "ПЕРЕКУПЛЕН — ЗНАЧИТ УПАДЁТ?",
+      ask: "RSI выше 70. Правая часть графика скрыта. Что дальше?",
+      optDown: "Упадёт", optUp: "Вырастет", optDontKnow: "Не знаю",
+      dirUpPast: "выросла", dirDownPast: "упала",
+      revealTemplate: "В этом случае (GOLD, {{caseDate}}, RSI {{caseRsi}}): через 10 баров цена {{caseDirWord}}, с {{caseFrom}} до {{caseTo}}. По всем {{n}} случаям RSI>70: разворот случается в {{share}}% (база без условия — {{base}}%) — эджа нет.",
+      bridge: "Дальше — почему условие «перекуплено» может держаться неделями, и что тогда с ним делать.",
     },
     antiMyth: {
       tag: "АНТИ-МИФ",
@@ -132,18 +130,23 @@ window.Ch9Content = {
       closingLine: "Три случая — это три случая. Мы показали их, чтобы ты увидел, что механизмов несколько и они разные. Насколько часто побеждает каждый — мы не считали и потому не утверждаем. Если начнём считать — опубликуем, как всё остальное в этом курсе.",
       readMore: "Источник",
       reactionLabel: "реакция за 1 день",
+      guessAsk: "Как думаешь, куда пошла акция после этого отчёта?",
+      guessUp: "Выросла", guessDown: "Упала",
       cases: [
         {
           id: "meta_2022q4", mechanism: "Когда решает guidance и опережающая метрика",
-          text: "Февраль 2022. Meta отчиталась в рамках ожиданий, но показала первое в истории компании квартальное снижение суточной аудитории — и дала прогноз на следующий квартал ниже, чем закладывал рынок. Реакция: −26.4% за одну сессию, крупнейшее на тот момент однодневное падение капитализации в истории американского рынка. Ни один отдельный факт не был катастрофой — совпадение guidance и опережающей метрики оказалось важнее любого из них по отдельности.",
+          setup: "Февраль 2022. Meta отчиталась в рамках ожиданий, но показала первое в истории компании квартальное снижение суточной аудитории — и дала прогноз на следующий квартал ниже, чем закладывал рынок.",
+          outcome: "Реакция: −26.4% за одну сессию, крупнейшее на тот момент однодневное падение капитализации в истории американского рынка. Ни один отдельный факт не был катастрофой — совпадение guidance и опережающей метрики оказалось важнее любого из них по отдельности.",
         },
         {
           id: "tsla_2024q1", mechanism: "Когда решает не факт и не guidance, а комментарий менеджмента",
-          text: "Апрель 2024. Tesla не дотянула и по прибыли на акцию, и по выручке — падение выручки год к году оказалось крупнейшим с 2012 года. По логике первых двух механизмов акция должна была упасть. Она выросла: на звонке с инвесторами Маск анонсировал более ранний, чем ожидалось, запуск доступных моделей. Ни факт, ни формальный guidance не изменились — решило устное заявление.",
+          setup: "Апрель 2024. Tesla не дотянула и по прибыли на акцию, и по выручке — падение выручки год к году оказалось крупнейшим с 2012 года. По логике первых двух механизмов акция должна была упасть.",
+          outcome: "Она выросла: на звонке с инвесторами Маск анонсировал более ранний, чем ожидалось, запуск доступных моделей. Ни факт, ни формальный guidance не изменились — решило устное заявление.",
         },
         {
           id: "msft_2026q2fy26", mechanism: "Когда решает темп роста ключевой метрики, а не сам факт",
-          text: "Январь 2026. Microsoft превысила консенсус и по прибыли, и по выручке. Акция упала на 7%. Причина — рост облачного направления Azure чуть замедлился по сравнению с предыдущим кварталом на фоне резко растущих капитальных расходов на инфраструктуру ИИ. Компания не промахнулась ни по одной опубликованной цифре — рынок отреагировал на замедление темпа роста и на то, что означает для маржи будущих кварталов рост расходов.",
+          setup: "Январь 2026. Microsoft превысила консенсус и по прибыли, и по выручке.",
+          outcome: "Акция упала на 7%. Причина — рост облачного направления Azure чуть замедлился по сравнению с предыдущим кварталом на фоне резко растущих капитальных расходов на инфраструктуру ИИ. Компания не промахнулась ни по одной опубликованной цифре — рынок отреагировал на замедление темпа роста и на то, что означает для маржи будущих кварталов рост расходов.",
         },
       ],
     },
@@ -200,15 +203,13 @@ window.Ch9Content = {
     },
   },
   ro: {
-    coldOpen: {
-      tag: "CAPITOLUL 9 — RAPORT RECORD, MINUS OPT LA SUTĂ",
-      lines: [
-        "Compania a raportat mai bine decât prognoza la venituri. Mai bine la profit pe acțiune. Mai bine la marjă.",
-        "Acțiunea a deschis cu opt procente mai jos.",
-        "Dacă acum te-ai gândit «probabil era ceva în prognoza pentru trimestrul următor» — oprește-te o secundă. Ai dreptate. Dar observă cât de ușor ți-a venit acest gând după ce ai văzut rezultatul.",
-        "Următoarele paisprezece minute — despre asta. Despre cum se citește o raportare, de ce piața nu tranzacționează raportarea în sine, ci diferența față de așteptare, și despre o proprietate a memoriei din cauza căreia a învăța din graficele trecutului e aproape inutil. Această proprietate ți-o vom demonstra chiar ție — și va fi cel mai neplăcut ecran al cursului.",
-      ],
-      cta: "Analizează raportul ↓",
+    coldStart: {
+      tag: "SUPRACUMPĂRAT — ÎNSEAMNĂ CĂ VA SCĂDEA?",
+      ask: "RSI peste 70. Partea dreaptă a graficului e ascunsă. Ce urmează?",
+      optDown: "Va scădea", optUp: "Va crește", optDontKnow: "Nu știu",
+      dirUpPast: "a crescut", dirDownPast: "a scăzut",
+      revealTemplate: "În acest caz (GOLD, {{caseDate}}, RSI {{caseRsi}}): după 10 bare prețul {{caseDirWord}}, de la {{caseFrom}} la {{caseTo}}. Pe toate cele {{n}} cazuri cu RSI>70: reversarea are loc în {{share}}% (baza fără condiție — {{base}}%) — nu există avantaj.",
+      bridge: "În continuare — de ce condiția «supracumpărat» poate ține săptămâni întregi, și ce e de făcut atunci.",
     },
     antiMyth: {
       tag: "ANTI-MIT",
@@ -310,13 +311,18 @@ window.Ch9Content = {
       closingLine: "Trei cazuri sunt trei cazuri. Le-am arătat ca să vezi că există mai multe mecanisme și sunt diferite. Cât de des câștigă fiecare — n-am calculat și de aceea nu afirmăm. Dacă vom începe să calculăm — publicăm, ca tot restul din acest curs.",
       readMore: "Sursă",
       reactionLabel: "reacție în 1 zi",
+      guessAsk: "Încotro crezi că a mers acțiunea după acest raport?",
+      guessUp: "A crescut", guessDown: "A scăzut",
       cases: [
         { id: "meta_2022q4", mechanism: "Când decide guidance-ul și o metrică anticipativă",
-          text: "Februarie 2022. Meta a raportat în linia așteptărilor, dar a arătat prima scădere trimestrială din istoria companiei a audienței zilnice — și a dat o prognoză pentru trimestrul următor sub cea anticipată de piață. Reacție: −26.4% într-o singură sesiune, cea mai mare pierdere de capitalizare într-o zi din istoria pieței americane la acel moment. Niciun fapt izolat n-a fost o catastrofă — coincidența dintre guidance și metrica anticipativă a contat mai mult decât oricare separat." },
+          setup: "Februarie 2022. Meta a raportat în linia așteptărilor, dar a arătat prima scădere trimestrială din istoria companiei a audienței zilnice — și a dat o prognoză pentru trimestrul următor sub cea anticipată de piață.",
+          outcome: "Reacție: −26.4% într-o singură sesiune, cea mai mare pierdere de capitalizare într-o zi din istoria pieței americane la acel moment. Niciun fapt izolat n-a fost o catastrofă — coincidența dintre guidance și metrica anticipativă a contat mai mult decât oricare separat." },
         { id: "tsla_2024q1", mechanism: "Când decide nu faptul, nici guidance-ul, ci comentariul managementului",
-          text: "Aprilie 2024. Tesla n-a atins nici profitul pe acțiune, nici veniturile — scăderea veniturilor an la an a fost cea mai mare din 2012. După logica primelor două mecanisme, acțiunea ar fi trebuit să scadă. A crescut: la conferința cu investitorii, Musk a anunțat lansarea, mai devreme decât se aștepta, a modelelor accesibile. Nici faptul, nici guidance-ul formal nu s-au schimbat — a decis o declarație verbală." },
+          setup: "Aprilie 2024. Tesla n-a atins nici profitul pe acțiune, nici veniturile — scăderea veniturilor an la an a fost cea mai mare din 2012. După logica primelor două mecanisme, acțiunea ar fi trebuit să scadă.",
+          outcome: "A crescut: la conferința cu investitorii, Musk a anunțat lansarea, mai devreme decât se aștepta, a modelelor accesibile. Nici faptul, nici guidance-ul formal nu s-au schimbat — a decis o declarație verbală." },
         { id: "msft_2026q2fy26", mechanism: "Când decide ritmul de creștere al unei metrici-cheie, nu faptul în sine",
-          text: "Ianuarie 2026. Microsoft a depășit consensul atât la profit, cât și la venituri. Acțiunea a scăzut cu 7%. Motivul — creșterea segmentului cloud Azure a încetinit ușor față de trimestrul anterior, pe fondul unor cheltuieli de capital în creștere accentuată pentru infrastructura de AI. Compania n-a ratat nicio cifră publicată — piața a reacționat la încetinirea ritmului de creștere și la ce înseamnă pentru marjele trimestrelor viitoare creșterea cheltuielilor." },
+          setup: "Ianuarie 2026. Microsoft a depășit consensul atât la profit, cât și la venituri.",
+          outcome: "Acțiunea a scăzut cu 7%. Motivul — creșterea segmentului cloud Azure a încetinit ușor față de trimestrul anterior, pe fondul unor cheltuieli de capital în creștere accentuată pentru infrastructura de AI. Compania n-a ratat nicio cifră publicată — piața a reacționat la încetinirea ritmului de creștere și la ce înseamnă pentru marjele trimestrelor viitoare creșterea cheltuielilor." },
       ],
     },
     ladderLimit: {
@@ -372,15 +378,13 @@ window.Ch9Content = {
     },
   },
   en: {
-    coldOpen: {
-      tag: "CHAPTER 9 — A RECORD REPORT, MINUS EIGHT PERCENT",
-      lines: [
-        "The company beat forecast on revenue. Beat on earnings per share. Beat on margin.",
-        "The stock opened eight percent lower.",
-        "If your first thought was «there was probably something in next quarter's forecast» — pause for a second. You're right. But notice how easily that thought came to you after you'd already seen the outcome.",
-        "The next fourteen minutes are about that. About how to read an earnings report, why the market trades the gap to expectation rather than the report itself, and about one property of memory that makes learning from past charts almost useless. We're about to demonstrate that property on you — and it'll be the most uncomfortable screen in the course.",
-      ],
-      cta: "Break down the report ↓",
+    coldStart: {
+      tag: "OVERBOUGHT — MEANS IT'LL FALL?",
+      ask: "RSI above 70. The right side of the chart is hidden. What happens next?",
+      optDown: "It'll fall", optUp: "It'll rise", optDontKnow: "Don't know",
+      dirUpPast: "rose", dirDownPast: "fell",
+      revealTemplate: "In this case (GOLD, {{caseDate}}, RSI {{caseRsi}}): 10 bars later price {{caseDirWord}}, from {{caseFrom}} to {{caseTo}}. Across all {{n}} RSI>70 cases: a reversal happens {{share}}% of the time (base rate without the condition — {{base}}%) — no edge.",
+      bridge: "Next: why «overbought» can hold for weeks, and what to do about it when it does.",
     },
     antiMyth: {
       tag: "ANTI-MYTH",
@@ -482,13 +486,18 @@ window.Ch9Content = {
       closingLine: "Three cases are three cases. We showed them so you'd see there are several mechanisms and they're different. How often each one wins — we haven't counted, and so we don't claim. If we start counting, we'll publish it, like everything else in this course.",
       readMore: "Source",
       reactionLabel: "1-day reaction",
+      guessAsk: "Which way do you think the stock moved after this report?",
+      guessUp: "It rose", guessDown: "It fell",
       cases: [
         { id: "meta_2022q4", mechanism: "When guidance and a leading metric decide it",
-          text: "February 2022. Meta reported roughly in line with expectations but showed the first-ever quarterly decline in daily active users in the company's history — and gave next-quarter guidance below what the market was pricing in. Reaction: −26.4% in a single session, the largest one-day market-cap loss in US market history at the time. No single fact on its own was a catastrophe — the coincidence of weak guidance and a weak leading metric mattered more than either one alone." },
+          setup: "February 2022. Meta reported roughly in line with expectations but showed the first-ever quarterly decline in daily active users in the company's history — and gave next-quarter guidance below what the market was pricing in.",
+          outcome: "Reaction: −26.4% in a single session, the largest one-day market-cap loss in US market history at the time. No single fact on its own was a catastrophe — the coincidence of weak guidance and a weak leading metric mattered more than either one alone." },
         { id: "tsla_2024q1", mechanism: "When neither the fact nor guidance decides it — management's commentary does",
-          text: "April 2024. Tesla missed on both earnings per share and revenue — the year-over-year revenue decline was the largest since 2012. By the logic of the first two mechanisms, the stock should have fallen. It rose: on the investor call, Musk announced an earlier-than-expected launch of affordable models. Neither the fact nor formal guidance changed — a verbal statement decided it." },
+          setup: "April 2024. Tesla missed on both earnings per share and revenue — the year-over-year revenue decline was the largest since 2012. By the logic of the first two mechanisms, the stock should have fallen.",
+          outcome: "It rose: on the investor call, Musk announced an earlier-than-expected launch of affordable models. Neither the fact nor formal guidance changed — a verbal statement decided it." },
         { id: "msft_2026q2fy26", mechanism: "When the growth rate of a key metric decides it, not the fact itself",
-          text: "January 2026. Microsoft beat consensus on both earnings and revenue. The stock fell 7%. The reason: growth in the Azure cloud business slowed slightly from the prior quarter against a backdrop of sharply rising AI infrastructure capital spending. The company didn't miss a single published number — the market reacted to the deceleration in growth rate and to what rising spending means for future quarters' margins." },
+          setup: "January 2026. Microsoft beat consensus on both earnings and revenue.",
+          outcome: "The stock fell 7%. The reason: growth in the Azure cloud business slowed slightly from the prior quarter against a backdrop of sharply rising AI infrastructure capital spending. The company didn't miss a single published number — the market reacted to the deceleration in growth rate and to what rising spending means for future quarters' margins." },
       ],
     },
     ladderLimit: {

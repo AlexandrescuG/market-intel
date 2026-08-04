@@ -19,9 +19,8 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-from core import focus_db, journal_brief
+from core import focus_db
 from core.focus import DEFAULT_UNIVERSE, NO_LIVE_FEED, select_focus
-from core.journal_symbols import to_chart_symbol
 
 _WEB_DATA = Path(__file__).parent / "web" / "data"
 
@@ -76,28 +75,6 @@ def _update_instrument_live(quotes: dict, now_ts: int, now_dt: datetime, today: 
                   + (" (новый день)" if is_new_day else ""))
 
 
-def _active_user_scopes() -> list[str]:
-    """Пользователи (не 'default' -- тот уже покрыт scope_key='default'/
-    DEFAULT_UNIVERSE) с непустым ватчлистом и БЕЗ пина (запиненным
-    select_focus() не нужен -- пин читается напрямую в API)."""
-    return [uid for uid in journal_brief.list_watchlist_user_ids(exclude_default=True)
-            if not journal_brief.get_pinned(uid)]
-
-
-def _scope_symbols(user_id: str | None) -> list[str]:
-    if user_id is None:
-        return DEFAULT_UNIVERSE
-    raw = journal_brief.get_watchlist(user_id)
-    if not raw:
-        return DEFAULT_UNIVERSE
-    mapped = []
-    for s in raw:
-        chart_sym = to_chart_symbol(s) or (s if s in DEFAULT_UNIVERSE else None)
-        if chart_sym:
-            mapped.append(chart_sym)
-    return mapped or DEFAULT_UNIVERSE
-
-
 def _reassign_scope(scope_key: str, symbols: list[str], today: str, now_ts: int, verbose: bool) -> None:
     candidates = focus_db.build_candidates(symbols, today)
     current = focus_db.load_focus_state(scope_key)
@@ -117,8 +94,8 @@ def tick(verbose: bool = False) -> None:
     _update_instrument_live(quotes, now_ts, now_dt, today, verbose)
 
     _reassign_scope("default", DEFAULT_UNIVERSE, today, now_ts, verbose)
-    for user_id in _active_user_scopes():
-        _reassign_scope(f"user:{user_id}", _scope_symbols(user_id), today, now_ts, verbose)
+    for user_id in focus_db.active_user_scopes():
+        _reassign_scope(f"user:{user_id}", focus_db.scope_symbols(user_id), today, now_ts, verbose)
 
 
 if __name__ == "__main__":

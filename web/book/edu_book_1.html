@@ -6,6 +6,7 @@
   <title>SBF | {% if lang == 'ru' %}Биржевая торговля — Руководство{% elif lang == 'ro' %}Trading la Bursă — Ghid{% else %}Exchange Trading — Guide{% endif %}</title>
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/edu/assets/history.css">
 
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -47,104 +48,59 @@
 
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
+<script src="/edu/assets/chrono.js"></script>
 
 <script type="text/babel" data-presets="react">
 const INITIAL_LANG = "{{ lang }}";
 
 {% raw %}
-const C = {
-  gold:       "#c9973a",
-  goldDark:   "#b8832a",
-  goldLight:  "#f4d49f",
-  goldPale:   "#f7f0e3",
-  black:      "#18181a",
-  ink:        "#18181a",
-  inkMid:     "#555555",
-  inkSoft:    "rgba(24,24,26,0.58)",
-  inkFaint:   "rgba(24,24,26,0.28)",
-  white:      "#ffffff",
-  surface:    "#faf8f5",
-  surfaceMid: "#f0ebe0",
-  border:     "rgba(24,24,26,0.1)",
-  borderGold: "rgba(201,151,58,0.25)",
-  dark:       "#18181a",
-};
-
-// Тексты для мессенджера
-const MSG_TR = {
-  ru: {
-    tag: "НАПИСАТЬ НАМ",
-    title: "Предпочитаете мессенджер?",
-    sub: "Напишите в Telegram или WhatsApp — сообщение уже готово, просто нажмите Отправить.",
-    tgInc: "Привет 👋 Чем можем помочь? Оставьте заявку и мы пришлём материалы.",
-    waInc: "Добрый день! Напишите что вас интересует <img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-bar-chart.png' alt='' width='20' height='20' />",
-    btnTg: "ОТКРЫТЬ TELEGRAM",
-    btnWa: "ОТКРЫТЬ WHATSAPP",
-    you: "Вы",
-    online: "онлайн",
-    justNow: "только что"
-  },
-  en: {
-    tag: "CONTACT US",
-    title: "Prefer a messenger?",
-    sub: "Write us on Telegram or WhatsApp — the message is pre-filled, just click Send.",
-    tgInc: "Hi 👋 How can we help? Leave a request and we'll send the materials.",
-    waInc: "Good day! Tell us what you're interested in <img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-bar-chart.png' alt='' width='20' height='20' />",
-    btnTg: "OPEN TELEGRAM",
-    btnWa: "OPEN WHATSAPP",
-    you: "You",
-    online: "online",
-    justNow: "just now"
-  },
-  ro: {
-    tag: "CONTACTAȚI-NE",
-    title: "Preferați un messenger?",
-    sub: "Scrieți pe Telegram sau WhatsApp — mesajul este pregătit, doar apăsați Trimite.",
-    tgInc: "Bună 👋 Cu ce vă putem ajuta? Lăsați o cerere și vă trimitem materialele.",
-    waInc: "Bună ziua! Spuneți ce vă interesează <img class='mi-icon' style='vertical-align:middle' src='/assets/icons/icon-bar-chart.png' alt='' width='20' height='20' />",
-    btnTg: "DESCHIDE TELEGRAM",
-    btnWa: "DESCHIDE WHATSAPP",
-    you: "Tu",
-    online: "online",
-    justNow: "acum"
-  }
-};
+// Общий хром (C/Mono/Chip/Rule/MSG_TR/AskAnalystPopup/AskAnalystBtn/
+// GlossWord/QuizBlock/ComplianceFootnote) -- SPEC_academy_chapter3_
+// integration.md §5/§7, вынесено в /assets/academy-shared.js (инжектится
+// в <head> serve.py._build_edu_page(), см. план). Раньше здесь были
+// локальные копии, разошедшиеся с Главой 3.
+const {C, Mono, Chip, Rule, GlossWord, AskAnalystBtn, getChUrl, QuizBlock, ComplianceFootnote} = window.AcademyShared;
 
 const TR = {
   ru: {
     bookTitle:"Биржевая торговля",bookSubtitle:"ПОЛНОЕ РУКОВОДСТВО",
     pathLabel:"ВЫБЕРИТЕ ПУТЬ",pathHint:"Это настроит акценты в контенте",
     paths:[
-      {id:"investor",icon:"◈",title:"Инвестор",desc:"Долгосрочный рост. Buy&Hold, дивиденды, портфели."},
-      {id:"trader",icon:"◎",title:"Трейдер",desc:"Активная торговля. Теханализ, паттерны, риск."},
       {id:"explorer",icon:"◇",title:"Исследователь",desc:"Хочу разобраться в рынках. Начну с основ."},
+      {id:"trader",icon:"◎",title:"Трейдер",desc:"Активная торговля. Теханализ, паттерны, риск."},
+      {id:"investor",icon:"◈",title:"Инвестор",desc:"Долгосрочный рост. Buy&Hold, дивиденды, портфели."},
     ],
     startBtn:"Начать путь",live:"LIVE",
     antiMythTag:"АНТИ-МИФ",voiceTag:"ГОЛОС SBF",priceTag:"ЦЕНА НЕЗНАНИЯ",
     levelTag:"УРОВЕНЬ 1",beginner:"НОВИЧОК",pro:"ПРОФИ",
     factTag:"НЕОЧЕВИДНЫЙ ФАКТ",moldovaTag:"КОНТЕКСТ: КАЗАХСТАН",progressTag:"ПРОГРЕСС УРОВНЯ",
-    antiMythTitle: "Биржа — это Инфраструктура Капитала",
-    antiMythBody: "Многие путают биржу с игрой, но это критическая ошибка. Биржа — это гигантский механизм перераспределения ресурсов. Когда вы покупаете актив, вы не делаете ставку, вы участвуете в финансировании экономики. S&P 500 — это 500 крупнейших корпораций, которые строят города, лечат болезни и создают технологии. За 100 лет индекс вырос более чем на 30 000%. Это не везение, это физический рост человеческой цивилизации, выраженный в цифрах.",
-    voiceText:"«Коллега, большинство учебников объясняют биржу через скучные определения. Мы пойдём иначе: через логику, через деньги, через реальные события. Если после этого уровня ты поймёшь, зачем Баффет держит $150 млрд в кэше — значит, мы всё сделали правильно.»",
-    priceBody:"Человек, который держит $10 000 на депозите под 8% вместо диверсифицированного портфеля акций, упустил бы в среднем +$1 200 дополнительной доходности за последние 10 лет.",
-    priceSub:"* Сравнение с доходностью S&P 500 за 2015–2025",
-    sec11Tag:"1.1 — ЧТО ТАКОЕ БИРЖА",sec11Title:"Механизм, который создаёт цены",
-    sec12Tag:"1.2 — ИСТОРИЯ",sec12Title:"От Амстердама до алгоритмов",sec12Sub:"Нажмите на событие, чтобы раскрыть подробности",
-    sec13Tag:"1.3 — БИРЖИ МИРА",sec13Title:"Где торгуется капитал планеты",
-    sec14Tag:"1.4 — МАШИНА ВРЕМЕНИ",sec14Title:"Машина времени инвестора",sec14Sub:"Введи сумму, год и актив — посмотри, что было бы сейчас",
+    antiMythTitle: "Биржа — изобретение Уолл-стрит?",
+    antiMythBody: "Нет. Амстердам, 1602 год: Голландской Ост-Индской компании нужны деньги на флот, и она впервые в истории продаёт доли всем желающим. Уолл-стрит появится только 190 лет спустя, в 1792-м. Всё, что ты увидишь в терминале — свечи, шорты, сквизы, паника — уже случалось. Первый раз это случилось 400 лет назад. Мы прокрутим всё за 12 минут.",
+    voiceText:"«Коллега, большинство учебников объясняют биржу через скучные определения. Мы пойдём иначе: через историю, через деньги, через реальные события. Если после этого уровня ты поймёшь, что технологии меняются, а жадность и страх — нет, значит, мы всё сделали правильно.»",
+    priceBody:"Инвестор, купивший индекс Nikkei 225 на пике 29 декабря 1989-го, ждал возврата цены 34 года — до 22 февраля 2024-го. История — не украшение курса. Это статистика выживания.",
+    priceSub:"* Источник: закрытия Nikkei 225, публичные данные",
+    chronoTag:"ИНТЕРАКТИВ · ХРОНО-МАШИНА", chronoTitle:"15 станций, 400 лет", chronoSub:"Технологии менялись — жадность и страх нет.",
+    chronoChronicle:"ХРОНИКА", chronoXpNote:"+5 XP за станцию · все 15 → бейдж «Хронист»", chronoNext:"Дальше →", chronoToday:"СЕГОДНЯ",
+    erasTag:"ИНТЕРАКТИВ · ОДНА ЦЕНА, ПЯТЬ ЭПОХ", erasTitle:"Как рисовали графики",
+    erasSub:"Один и тот же ряд GOLD (реальные данные) — пятью разными способами.",
+    erasLesson:"Каждая эпоха придумывала способ видеть больше, быстрее, раньше остальных. Свеча победила, потому что несёт 4 цены + психологию бара в одном знаке.",
+    erasTask:"Задача: найди день разворота глазами.",
+    erasList:["1900 · ГАЗЕТНАЯ ТАБЛИЦА","1930 · РУЧНОЙ ГРАФИК","1900-е · POINT & FIGURE","XIX в. → 1991 · ЯПОНСКИЕ СВЕЧИ","СЕГОДНЯ · ТЕРМИНАЛ SBF"],
+    erasReversalNote:"Разворот здесь: ", erasLive:"→ в живой график",
+    sec14Tag:"МАШИНА ВРЕМЕНИ ИНВЕСТОРА",sec14Title:"Что было бы, если...",sec14Sub:"Реальные ряды: GOLD (MT5, с 2021) · век DJIA · Nikkei-1989 (жёсткий режим)",
     calcBtn:"Рассчитать →",amountLabel:"Сумма ($)",yearLabel:"Год начала",assetLabel:"Актив",
+    calcLoading:"Загружаю ряды…", calcWorst:"Худшая просадка на пути: ", calcWorstQ:". Выдержал бы?",
+    calcIntro:"Идея простая: выбери актив и год — и увидишь, во что превратилась бы вложенная сумма сегодня. Но итог — только половина картины: ниже показана ещё и худшая просадка на пути, то, через что реально пришлось бы пройти. Попробуй сам, потом читай цифры.",
+    calcRangeNote:"GOLD — реальные брокерские котировки (MT5), они у нас есть только с 2021 года. DJIA и Nikkei — публичные исторические ряды за десятилетия, поэтому там доступны любые старые годы.",
+    djiaLabel:"DJIA (индекс Доу-Джонса)",
     finalLabel:"Итог",profitLabel:"Прибыль",growthLabel:"Рост",multLabel:"Умножитель",
-    factTitle:"NYSE основана уличными торговцами, а не банкирами",
-    factBody:"17 мая 1792 года 24 маклера подписали Buttonwood Agreement под платаном на Уолл-стрит. Маклер (нем. Makler) — посредник в торговых сделках. Платан (buttonwood tree) — вид американского дерева, под которым буквально собирались торговцы. Никакого регулятора, никакого правительства — только джентльменское соглашение: торговать друг с другом и брать комиссию 0.25%. Из этого соглашения выросла биржа стоимостью $31.7 трлн.",
     moldovaTitle:"Как биржа влияет на тенге прямо сейчас",
     moldovaBody:"Курс казахстанского тенге к доллару напрямую зависит от американского рынка. Когда S&P 500 падает — глобальные инвесторы уходят в доллар, USD укрепляется, а KZT слабеет. Нацбанк Казахстана держит резервы частично в инструментах, связанных с американским рынком. Каждое решение ФРС меняет стоимость денег для казахстанских компаний. Вот почему Уолл-стрит — это ваше дело тоже.",
-    checks:["Я понимаю, что такое фондовая биржа","Я знаю разницу между NYSE и NASDAQ","Я понимаю, зачем нужны биржевые индексы","Я знаю, как биржа связана с реальной экономикой"],
     nextLevel:"Уровень 2: Финансовые институты →",askAnalyst:"Остался вопрос? Напиши аналитику",companies:"компаний",top5:"Топ-5 компаний в индексе",
-    sec15Tag: "1.5 — МЕХАНИКА РЫНКА",
-    sec15Title: "Теханализ: Чтение графиков",
-    taBeginner: "Представьте резиновый мячик, прыгающий в комнате. Пол — это 'Поддержка' (Support), цена, при которой покупатели считают актив дешевым и начинают массово покупать, не давая ему упасть. Потолок — 'Сопротивление' (Resistance), зона, где продавцы фиксируют прибыль. Когда мячик пробивает потолок — он выходит на новый этаж. Это называется 'пробой уровня'.",
-    taPro: "Рынок движется от одной зоны ликвидности к другой. Поддержка и сопротивление — это не просто линии, это зоны скопления лимитных ордеров и стоп-лоссов. В институциональном трейдинге для вычисления этих зон часто используют математические формулы, такие как Точки разворота (Pivot Points), базирующиеся на данных предыдущего дня.",
+    predictTag:"ПРЕДИКТ НЕДЕЛИ", predictQ:"Закроет ли золото эту неделю выше открытия понедельника?", predictYes:"Да", predictNo:"Нет",
+    cliffTag:"ДАЛЬШЕ", cliffBody:"В панику 1907 года рынок спас один человек — Дж. П. Морган запер крупнейших банкиров Нью-Йорка в своей библиотеке и не выпускал, пока те не скинулись деньгами на спасение системы. Сегодня эту роль играет институт, одно слово которого двигает всё на планете. Его разберём в следующем эпизоде.",
     soonTitle: "Глава 2 в разработке...",
     soonDesc: "Вы успешно усвоили фундамент. Следующий уровень, где мы разберем работу хедж-фондов и темные пулы (Dark Pools), сейчас готовится аналитиками SBF.",
     treeBtn: "Открыть Древо Навыков ➔",
@@ -156,35 +112,39 @@ const TR = {
     bookTitle:"Exchange Trading",bookSubtitle:"COMPLETE GUIDE",
     pathLabel:"CHOOSE YOUR PATH",pathHint:"This adjusts the content focus for you",
     paths:[
-      {id:"investor",icon:"◈",title:"Investor",desc:"Long-term growth. Buy&Hold, dividends, portfolios."},
-      {id:"trader",icon:"◎",title:"Trader",desc:"Active trading. Technical analysis, patterns, risk."},
       {id:"explorer",icon:"◇",title:"Explorer",desc:"I want to understand markets. Starting from basics."},
+      {id:"trader",icon:"◎",title:"Trader",desc:"Active trading. Technical analysis, patterns, risk."},
+      {id:"investor",icon:"◈",title:"Investor",desc:"Long-term growth. Buy&Hold, dividends, portfolios."},
     ],
     startBtn:"Begin",live:"LIVE",
     antiMythTag:"ANTI-MYTH",voiceTag:"SBF VOICE",priceTag:"COST OF NOT KNOWING",
     levelTag:"LEVEL 1",beginner:"BEGINNER",pro:"PRO",
     factTag:"NON-OBVIOUS FACT",moldovaTag:"GLOBAL CONTEXT",progressTag:"LEVEL PROGRESS",
-    antiMythTitle:"The Stock Exchange is NOT a Casino",
-    antiMythBody:"A casino is mathematically designed against you — the house always wins. Exchanges are the opposite: you buy ownership in real businesses. S&P 500 returned 31,600% from 1928 to 2025. Behind that number: real factories, real technology, real profits. The difference is fundamental: probability vs. ownership.",
-    voiceText:"\"Colleague, most textbooks explain exchanges through boring definitions. We'll go differently: through logic, through money, through real events. If after this level you understand why Buffett holds $150B in cash — then we've done this right.\"",
-    priceBody:"A person holding $10,000 in a bank deposit at 4% instead of a diversified stock portfolio missed an average of +$1,200 in additional returns over the last 10 years.",
-    priceSub:"* Comparison with S&P 500 returns 2015–2025",
-    sec11Tag:"1.1 — WHAT IS AN EXCHANGE",sec11Title:"The Mechanism That Creates Prices",
-    sec12Tag:"1.2 — HISTORY",sec12Title:"From Amsterdam to Algorithms",sec12Sub:"Click an event to expand details",
-    sec13Tag:"1.3 — WORLD EXCHANGES",sec13Title:"Where the Planet's Capital Trades",
-    sec14Tag:"1.4 — TIME MACHINE",sec14Title:"Investor Time Machine",sec14Sub:"Enter amount, year and asset — see what it would be today",
+    antiMythTitle:"The stock exchange — a Wall Street invention?",
+    antiMythBody:"No. Amsterdam, 1602: the Dutch East India Company needs money for its fleet, and for the first time in history sells stakes to anyone willing to buy. Wall Street won't exist for another 190 years, until 1792. Everything you'll see in the terminal — candles, shorts, squeezes, panic — has happened before. The first time was 400 years ago. We'll replay it all in 12 minutes.",
+    voiceText:"\"Colleague, most textbooks explain exchanges through boring definitions. We'll go differently: through history, through money, through real events. If after this level you understand that the technology changed but greed and fear never did — then we've done this right.\"",
+    priceBody:"An investor who bought Nikkei 225 at its peak on December 29, 1989 waited for the price to recover until February 22, 2024 — 34 years. History isn't decoration for the course. It's survivorship statistics.",
+    priceSub:"* Source: Nikkei 225 closes, public data",
+    chronoTag:"INTERACTIVE · THE CHRONO MACHINE", chronoTitle:"15 stations, 400 years", chronoSub:"The technology changed — greed and fear never did.",
+    chronoChronicle:"CHRONICLE", chronoXpNote:"+5 XP per station · all 15 → the \"Chronicler\" badge", chronoNext:"Next →", chronoToday:"TODAY",
+    erasTag:"INTERACTIVE · ONE PRICE, FIVE ERAS", erasTitle:"How charts used to be drawn",
+    erasSub:"The same GOLD series (real data) — shown five different ways.",
+    erasLesson:"Every era invented a way to see more, faster, before everyone else. The candlestick won because it packs 4 prices plus the psychology of the bar into a single mark.",
+    erasTask:"Task: spot the reversal day by eye.",
+    erasList:["1900 · NEWSPAPER TABLE","1930 · HAND-DRAWN CHART","1900s · POINT & FIGURE","19th c. → 1991 · JAPANESE CANDLES","TODAY · SBF TERMINAL"],
+    erasReversalNote:"Reversal here: ", erasLive:"→ open live chart",
+    sec14Tag:"THE INVESTOR'S TIME MACHINE",sec14Title:"What if you had...",sec14Sub:"Real series: GOLD (MT5, since 2021) · a century of DJIA · Nikkei-1989 (hard mode)",
     calcBtn:"Calculate →",amountLabel:"Amount ($)",yearLabel:"Start Year",assetLabel:"Asset",
+    calcLoading:"Loading series…", calcWorst:"Worst drawdown on the way: ", calcWorstQ:". Would you have held on?",
+    calcIntro:"The idea is simple: pick an asset and a year, and see what your money would be worth today. But the final number is only half the picture — below it you'll also see the worst drawdown along the way, what you'd actually have had to live through. Try it yourself, then read the numbers.",
+    calcRangeNote:"GOLD uses real broker quotes (MT5), which we only have from 2021 onward. DJIA and Nikkei are public historical series spanning decades, so any older year is available there.",
+    djiaLabel:"DJIA (the Dow Jones Industrial Average)",
     finalLabel:"Final",profitLabel:"Profit",growthLabel:"Growth",multLabel:"Multiplier",
-    factTitle:"NYSE was founded by street traders, not bankers",
-    factBody:"On May 17, 1792, 24 brokers signed the Buttonwood Agreement under a tree on Wall Street. No regulator, no government — just an agreement to trade only with each other and charge 0.25% commission. From this gentleman's agreement grew an exchange worth $31.7T.",
     moldovaTitle:"How markets move your money globally",
     moldovaBody:"When the Fed raises rates, the US Dollar strengthens globally. International investors pull capital back to American assets. The Dollar Index (DXY) moves on every Fed meeting. S&P 500 and USD are deeply linked: when US stocks soar, foreign capital floods in, strengthening USD further. Understanding this dynamic lets you anticipate currency moves before they happen.",
-    checks:["I understand what a stock exchange is","I know the difference between NYSE and NASDAQ","I understand why market indices exist","I know how the exchange connects to the real economy"],
     nextLevel:"Level 2: Financial Institutions →",askAnalyst:"Have a question? Write to an analyst",companies:"companies",top5:"Top-5 companies in index",
-    sec15Tag: "1.5 — MARKET MECHANICS",
-    sec15Title: "Technical Analysis: Reading Charts",
-    taBeginner: "Imagine a rubber ball bouncing in a room. The floor is 'Support', a price where buyers consider the asset cheap and start buying massively, preventing it from falling. The ceiling is 'Resistance', an area where sellers take profits. When the ball breaks the ceiling, it enters a new floor. This is called a 'breakout'.",
-    taPro: "The market moves from one liquidity zone to another. Support and resistance are not just lines; they are clusters of limit orders and stop-losses. In institutional trading, mathematical formulas like Pivot Points, based on previous day's data, are often used to calculate these zones.",
+    predictTag:"PREDICTION OF THE WEEK", predictQ:"Will gold close this week above Monday's open?", predictYes:"Yes", predictNo:"No",
+    cliffTag:"NEXT", cliffBody:"In the panic of 1907, one man saved the market — J.P. Morgan locked the bankers in his study until they pooled the money. Today that role belongs to an institution whose single word moves everything on the planet. We cover it in the next episode.",
     soonTitle: "Chapter 2 is in development...",
     soonDesc: "You have successfully mastered the foundation. The next level, where we cover hedge funds and Dark Pools, is currently being prepared by SBF analysts.",
     treeBtn: "Open Skill Tree ➔",
@@ -196,35 +156,39 @@ const TR = {
     bookTitle:"Trading la Bursă",bookSubtitle:"GHID COMPLET",
     pathLabel:"ALEGEȚI CALEA",pathHint:"Aceasta personalizează conținutul pentru tine",
     paths:[
-      {id:"investor",icon:"◈",title:"Investitor",desc:"Creștere pe termen lung. Buy&Hold, dividende, portofolii."},
-      {id:"trader",icon:"◎",title:"Trader",desc:"Tranzacționare activă. Analiză tehnică, tipare, risc."},
       {id:"explorer",icon:"◇",title:"Explorator",desc:"Vreau să înțeleg piețele. Pornind de la baze."},
+      {id:"trader",icon:"◎",title:"Trader",desc:"Tranzacționare activă. Analiză tehnică, tipare, risc."},
+      {id:"investor",icon:"◈",title:"Investitor",desc:"Creștere pe termen lung. Buy&Hold, dividende, portofolii."},
     ],
     startBtn:"Începe",live:"LIVE",
     antiMythTag:"ANTI-MIT",voiceTag:"VOCEA SBF",priceTag:"COSTUL NEȘTIINȚEI",
     levelTag:"NIVEL 1",beginner:"ÎNCEPĂTOR",pro:"PRO",
     factTag:"FAPT NEAȘTEPTAT",moldovaTag:"CONTEXT: MOLDOVA",progressTag:"PROGRES NIVEL",
-    antiMythTitle:"Bursa NU este un Cazino",
-    antiMythBody:"Un cazinou este conceput matematic împotriva ta. Bursele sunt opusul: cumperi proprietate în afaceri reale. S&P 500 a crescut cu 31.600% din 1928 până în 2025 — în spatele acestui număr stau fabrici reale, tehnologie reală, profit real.",
-    voiceText:"„Coleg, majoritatea manualelor explică bursa prin definiții plictisitoare. Vom merge altfel: prin logică, prin bani, prin evenimente reale. Dacă după acest nivel înțelegi de ce Buffett ține $150 miliarde în numerar — atunci am făcut totul corect.”",
-    priceBody:"O persoană care ține $10.000 într-un depozit bancar la 8% în loc de un portofoliu diversificat a pierdut în medie +$1.200 în randamente suplimentare în ultimii 10 ani.",
-    priceSub:"* Comparație cu randamentele S&P 500 2015–2025",
-    sec11Tag:"1.1 — CE ESTE O BURSĂ",sec11Title:"Mecanismul Care Creează Prețuri",
-    sec12Tag:"1.2 — ISTORIE",sec12Title:"De la Amsterdam la Algoritmi",sec12Sub:"Apăsați pe un eveniment pentru detalii",
-    sec13Tag:"1.3 — BURSE MONDIALE",sec13Title:"Unde se Tranzacționează Capitalul Planetei",
-    sec14Tag:"1.4 — MAȘINA TIMPULUI",sec14Title:"Mașina Timpului Investitorului",sec14Sub:"Introduceți suma, anul și activul — vedeți ce ar fi acum",
+    antiMythTitle:"Bursa — o invenție de pe Wall Street?",
+    antiMythBody:"Nu. Amsterdam, 1602: Compania Olandeză a Indiilor de Est are nevoie de bani pentru flotă și vinde pentru prima dată în istorie participații oricui dorește. Wall Street va apărea abia peste 190 de ani, în 1792. Tot ce vezi în terminal — lumânări, short-uri, squeeze-uri, panică — s-a mai întâmplat. Prima dată acum 400 de ani. Derulăm totul în 12 minute.",
+    voiceText:"„Coleg, majoritatea manualelor explică bursa prin definiții plictisitoare. Vom merge altfel: prin istorie, prin bani, prin evenimente reale. Dacă după acest nivel înțelegi că tehnologiile s-au schimbat, dar lăcomia și frica niciodată — atunci am făcut totul corect.”",
+    priceBody:"Un investitor care a cumpărat Nikkei 225 la vârful din 29 decembrie 1989 a așteptat revenirea prețului până pe 22 februarie 2024 — 34 de ani. Istoria nu e un decor al cursului. E o statistică a supraviețuirii.",
+    priceSub:"* Sursă: închiderile Nikkei 225, date publice",
+    chronoTag:"INTERACTIV · MAȘINA CRONO", chronoTitle:"15 stații, 400 de ani", chronoSub:"Tehnologiile s-au schimbat — lăcomia și frica, niciodată.",
+    chronoChronicle:"CRONICĂ", chronoXpNote:"+5 XP per stație · toate 15 → insigna „Cronicar”", chronoNext:"Mai departe →", chronoToday:"AZI",
+    erasTag:"INTERACTIV · UN PREȚ, CINCI EPOCI", erasTitle:"Cum se desenau graficele",
+    erasSub:"Aceeași serie GOLD (date reale) — în cinci moduri diferite.",
+    erasLesson:"Fiecare epocă a inventat un mod de a vedea mai mult, mai rapid, înaintea celorlalți. Lumânarea a câștigat pentru că duce 4 prețuri + psihologia barei într-un singur semn.",
+    erasTask:"Sarcină: găsește ziua de întoarcere din ochi.",
+    erasList:["1900 · TABEL DE ZIAR","1930 · GRAFIC DE MÂNĂ","Anii 1900 · POINT & FIGURE","Sec. XIX → 1991 · LUMÂNĂRI JAPONEZE","AZI · TERMINALUL SBF"],
+    erasReversalNote:"Întoarcerea aici: ", erasLive:"→ la graficul live",
+    sec14Tag:"MAȘINA TIMPULUI INVESTITORULUI",sec14Title:"Ce-ar fi fost dacă...",sec14Sub:"Serii reale: GOLD (MT5, din 2021) · un secol DJIA · Nikkei-1989 (mod dificil)",
     calcBtn:"Calculează →",amountLabel:"Suma ($)",yearLabel:"Anul de start",assetLabel:"Activ",
+    calcLoading:"Se încarcă seriile…", calcWorst:"Cea mai mare pierdere pe parcurs: ", calcWorstQ:". Ai fi rezistat?",
+    calcIntro:"Ideea e simplă: alege un activ și un an — și vezi în ce s-ar fi transformat suma investită până azi. Dar rezultatul e doar jumătate din poveste: mai jos vezi și cea mai mare pierdere de pe parcurs, prin ce ai fi trecut cu adevărat. Încearcă singur, apoi citește cifrele.",
+    calcRangeNote:"GOLD folosește cotații reale de broker (MT5), pe care le avem doar din 2021. DJIA și Nikkei sunt serii istorice publice de zeci de ani, de aceea acolo sunt disponibili și ani mai vechi.",
+    djiaLabel:"DJIA (indicele Dow Jones)",
     finalLabel:"Final",profitLabel:"Profit",growthLabel:"Creștere",multLabel:"Multiplicator",
-    factTitle:"NYSE a fost fondată de comercianți stradali, nu de bancheri",
-    factBody:"Pe 17 mai 1792, 24 de brokeri au semnat Acordul Buttonwood sub un copac pe Wall Street. Niciun regulator, niciun guvern — doar un acord de a tranzacționa cu comision de 0,25%. Din acest acord de gentlemen a crescut o bursă de $31,7T.",
     moldovaTitle:"Cum influențează bursa MDL-ul tău chiar acum",
     moldovaBody:"Cursul leului față de dolar depinde de NYSE și NASDAQ indirect, dar real. Când indicii americani scad, investitorii se refugiază în dolar, USD se întărește, iar MDL slăbește. Banca Națională a Moldovei deține rezerve parțial în instrumente legate de piața americană.",
-    checks:["Înțeleg ce este o bursă de valori","Știu diferența dintre NYSE și NASDAQ","Înțeleg de ce există indicii bursieri","Știu cum bursa se conectează la economia reală"],
     nextLevel:"Nivelul 2: Instituții Financiare →",askAnalyst:"Aveți o întrebare? Scrieți unui analist",companies:"companii",top5:"Top-5 companii din indice",
-    sec15Tag: "1.5 — MECANICA PIEȚEI",
-    sec15Title: "Analiza Tehnică: Citirea Graficelor",
-    taBeginner: "Imaginați-vă o minge de cauciuc sărind într-o cameră. Podeaua este 'Suportul' (Support), un preț la care cumpărătorii consideră activul ieftin și încep să cumpere masiv. Tavanul este 'Rezistența' (Resistance), zona în care vânzătorii își marchează profitul. Când mingea sparge tavanul, trece la un etaj nou. Acesta se numește 'breakout'.",
-    taPro: "Piața se mișcă de la o zonă de lichiditate la alta. Suportul și rezistența nu sunt doar linii, sunt zone de concentrare a ordinelor limită și stop-loss. În tranzacționarea instituțională, se folosesc adesea formule matematice, cum ar fi Punctele Pivot (Pivot Points), bazate pe datele zilei anterioare, pentru a calcula aceste zone.",
+    predictTag:"PREDICȚIA SĂPTĂMÂNII", predictQ:"Va închide aurul săptămâna aceasta peste deschiderea de luni?", predictYes:"Da", predictNo:"Nu",
+    cliffTag:"URMEAZĂ", cliffBody:"În panica din 1907, piața a fost salvată de un singur om — J.P. Morgan i-a încuiat pe bancheri într-un birou până au strâns banii. Astăzi acest rol îl joacă o instituție al cărei singur cuvânt mișcă totul pe planetă. O analizăm în episodul următor.",
     soonTitle: "Capitolul 2 este în dezvoltare...",
     soonDesc: "Ați asimilat cu succes fundația. Următorul nivel, unde vom analiza fondurile de acoperire (hedge funds) și Dark Pools, este în curs de pregătire de către analiștii SBF.",
     treeBtn: "Deschide Arborele de Abilități ➔",
@@ -237,13 +201,6 @@ const TR = {
 // Строки без TR-покрытия (графики, скилл-три и т.д.)
 const STRINGS = {
   ru: {
-    chartResistancePivot: "Сопротивление | Точка разворота",
-    chartLastSignal: "Последний сигнал",
-    chartSupport: "Поддержка",
-    pivotBase: "1. Базовая точка (P) =",
-    pivotResistance: "2. Сопротивление (R1) =",
-    pivotSupport: "3. Поддержка (S1) =",
-    pivotNote: "* Где High, Low, Close — максимумы, минимумы и цена закрытия предыдущего дня.",
     comingSoonBack: "← Вернуться к Главе 1",
     treeBack: "← НАЗАД",
     treeLevelDone: "УРОВЕНЬ 1 ЗАВЕРШЕН",
@@ -256,13 +213,6 @@ const STRINGS = {
     treeLocked: "Закрыто (Ур. 2)",
   },
   en: {
-    chartResistancePivot: "Resistance | Pivot Point",
-    chartLastSignal: "Last Signal",
-    chartSupport: "Support",
-    pivotBase: "1. Base Point (P) =",
-    pivotResistance: "2. Resistance (R1) =",
-    pivotSupport: "3. Support (S1) =",
-    pivotNote: "* Where High, Low, Close are the previous day's high, low, and closing price.",
     comingSoonBack: "← Back to Chapter 1",
     treeBack: "← BACK",
     treeLevelDone: "LEVEL 1 COMPLETE",
@@ -275,13 +225,6 @@ const STRINGS = {
     treeLocked: "Locked (Lvl. 2)",
   },
   ro: {
-    chartResistancePivot: "Rezistență | Punct de pivot",
-    chartLastSignal: "Ultimul semnal",
-    chartSupport: "Suport",
-    pivotBase: "1. Punctul de bază (P) =",
-    pivotResistance: "2. Rezistență (R1) =",
-    pivotSupport: "3. Suport (S1) =",
-    pivotNote: "* Unde High, Low, Close — maximul, minimul și prețul de închidere din ziua precedentă.",
     comingSoonBack: "← Înapoi la Capitolul 1",
     treeBack: "← ÎNAPOI",
     treeLevelDone: "NIVELUL 1 FINALIZAT",
@@ -295,68 +238,97 @@ const STRINGS = {
   },
 };
 
+// Тест на воспроизведение вместо чек-листа самоотчёта (SPEC_academy_level1_
+// interactivity.md §1). Формулировки — черновик, утверждён пользователем перед
+// реализацией. Один вопрос — один пройденный подпункт урока (id секции для
+// ссылки "вернуться к разделу" при промахе).
+const QUIZ = {
+  ru: [
+    {id:"q1", section:"chrono", prompt:"Первый запрет шорт-продаж появился…",
+     options:[
+       {text:"1610, Амстердам", correct:true},
+       {text:"2008, США", correct:false},
+       {text:"1929, Нью-Йорк", correct:false},
+     ],
+     feedbackCorrect:"Верно. Спор «запрещать ли шорты» старше США на полтора века.",
+     feedbackWrong:"Неверно. Первый в истории запрет шорт-продаж — Амстердам, 1610-й, после шорт-атаки Исаака Ле Мэра."},
+    {id:"q2", section:"eras", prompt:"Свечной график в современном виде…",
+     options:[
+       {text:"Изобрёл Хомма в 1750-м", correct:false},
+       {text:"Оформился в Японии к концу XIX века", correct:true},
+       {text:"Придумали в Чикаго в 1900-м", correct:false},
+     ],
+     feedbackCorrect:"Верно. Запад узнал о нём только в 1991-м от Стива Нисона.",
+     feedbackWrong:"Не совсем. Легенда про Хомму красивая, но свечи в современном виде оформились в Японии лишь к концу XIX века."},
+    {id:"q3", section:"chrono", prompt:"В крах 1929-го тикерная лента…",
+     options:[
+       {text:"Работала в реальном времени", correct:false},
+       {text:"Отставала на часы", correct:true},
+       {text:"Была отключена властями", correct:false},
+     ],
+     feedbackCorrect:"Верно. Сегодня та же гонка идёт на микросекундах (HFT, глава 11).",
+     feedbackWrong:"Неверно. Объём паники был так велик, что лента отставала на часы — люди продавали, не зная текущих цен."},
+  ],
+  en: [
+    {id:"q1", section:"chrono", prompt:"The first short-selling ban appeared…",
+     options:[
+       {text:"1610, Amsterdam", correct:true},
+       {text:"2008, USA", correct:false},
+       {text:"1929, New York", correct:false},
+     ],
+     feedbackCorrect:"Correct. The dispute predates the US by a century and a half.",
+     feedbackWrong:"Incorrect. The first ever short-selling ban was Amsterdam, 1610, after Isaac Le Maire's short attack."},
+    {id:"q2", section:"eras", prompt:"The modern candlestick chart…",
+     options:[
+       {text:"Was invented by Homma in 1750", correct:false},
+       {text:"Took shape in Japan by the late 19th century", correct:true},
+       {text:"Was invented in Chicago in 1900", correct:false},
+     ],
+     feedbackCorrect:"Correct. The West only learned of it in 1991, from Steve Nison.",
+     feedbackWrong:"Not quite. The Homma legend is a good story, but candlesticks took their modern form in Japan only by the late 19th century."},
+    {id:"q3", section:"chrono", prompt:"During the 1929 crash, the ticker tape…",
+     options:[
+       {text:"Ran in real time", correct:false},
+       {text:"Ran hours behind", correct:true},
+       {text:"Was shut off by regulators", correct:false},
+     ],
+     feedbackCorrect:"Correct. Today the same race happens in microseconds (HFT, chapter 11).",
+     feedbackWrong:"Incorrect. Panic volume was so heavy the tape ran hours behind — people sold without knowing current prices."},
+  ],
+  ro: [
+    {id:"q1", section:"chrono", prompt:"Prima interdicție a vânzărilor short a apărut…",
+     options:[
+       {text:"1610, Amsterdam", correct:true},
+       {text:"2008, SUA", correct:false},
+       {text:"1929, New York", correct:false},
+     ],
+     feedbackCorrect:"Corect. Disputa e mai veche decât SUA cu un secol și jumătate.",
+     feedbackWrong:"Incorect. Prima interdicție din istorie a vânzărilor short a fost Amsterdam, 1610, după atacul short al lui Isaac Le Maire."},
+    {id:"q2", section:"eras", prompt:"Graficul cu lumânări în forma modernă…",
+     options:[
+       {text:"A fost inventat de Homma în 1750", correct:false},
+       {text:"S-a conturat în Japonia spre finalul secolului XIX", correct:true},
+       {text:"A fost inventat la Chicago în 1900", correct:false},
+     ],
+     feedbackCorrect:"Corect. Occidentul l-a aflat abia în 1991, de la Steve Nison.",
+     feedbackWrong:"Nu chiar. Legenda lui Homma e frumoasă, dar lumânările au luat forma modernă în Japonia abia spre finalul secolului XIX."},
+    {id:"q3", section:"chrono", prompt:"În prăbușirea din 1929, banda tickerului…",
+     options:[
+       {text:"Funcționa în timp real", correct:false},
+       {text:"Rămânea în urmă cu ore", correct:true},
+       {text:"A fost oprită de autorități", correct:false},
+     ],
+     feedbackCorrect:"Corect. Azi aceeași cursă se dă la nivel de microsecunde (HFT, capitolul 11).",
+     feedbackWrong:"Incorect. Volumul panicii a fost atât de mare încât banda rămânea în urmă cu ore — oamenii vindeau fără să cunoască prețurile curente."},
+  ],
+};
+
 const MARKET=[
   {s:"S&P 500",v:"5,842",c:"+0.43%",up:true},{s:"GOLD",v:"$3,124",c:"+0.71%",up:true},
   {s:"OIL",v:"$68.42",c:"−0.28%",up:false},{s:"EUR/USD",v:"1.0832",c:"+0.15%",up:true},
   {s:"USD/MDL",v:"17.84",c:"−0.12%",up:false},{s:"BTC",v:"$83,421",c:"+1.24%",up:true},
   {s:"NASDAQ",v:"18,261",c:"+0.52%",up:true},
 ];
-const TIMELINE=[
-  {y:1602,ru:"Амстердам. VOC (Vereenigde Oost-Indische Compagnie) выпускает первые акции в истории.",en:"Amsterdam. VOC (Dutch East India Company) issues the world's first shares.",ro:"Amsterdam. VOC emite primele acțiuni din istoria lumii.",
-   detail:{ru:"VOC — Vereenigde Oost-Indische Compagnie, Объединённая Ост-Индская компания. Основана в 1602 году для торговли с Азией. Чтобы финансировать опасные и дорогостоящие морские экспедиции, она разделила собственность на акции и продала их публике. Первая в истории акционерная компания с ограниченной ответственностью. На пике капитализация VOC составляла ~$8 триллионов в современных деньгах — больше, чем Apple и Microsoft вместе. Именно здесь родился современный капитализм.",en:"VOC stands for Vereenigde Oost-Indische Compagnie — Dutch East India Company. Founded in 1602 to trade with Asia. To finance dangerous and expensive maritime expeditions, it divided ownership into shares and sold them to the public. The world's first joint-stock company with limited liability. At peak, VOC's market cap was ~$8 trillion in today's money — more than Apple and Microsoft combined. This is where modern capitalism was born.",ro:"VOC — Compania Olandezo-Indiei de Est, fondată în 1602 pentru comerț cu Asia. Pentru a finanța expediții maritime costisitoare, a împărțit proprietatea în acțiuni vândute publicului. Prima companie pe acțiuni cu răspundere limitată din lume. La apogeu, capitalizarea VOC era ~$8 trilioane în banii de astăzi."},
-   impact:{ru:"Рождение капитализма",en:"Birth of capitalism",ro:"Nașterea capitalismului"}},
-  {y:1792,ru:"NYSE основана 24 маклерами под платаном на Уолл-стрит.",en:"NYSE founded by 24 brokers under a buttonwood tree on Wall Street.",ro:"NYSE fondată de 24 brokeri sub un copac pe Wall Street.",
-   detail:{ru:"24 брокера подписали Buttonwood Agreement 17 мая 1792 года под платаном (buttonwood tree) на Уолл-стрит. Маклер (Makler, нем.) — посредник в торговых сделках. Платан здесь — буквально дерево (американский платан, buttonwood), под которым собирались торговцы. Договорились: торговать только друг с другом, комиссия 0.25%. Никакого государства, никакого регулятора. Чистый рынок. Сейчас NYSE — крупнейшая биржа мира: $31.7 трлн капитализации.",en:"24 brokers signed the Buttonwood Agreement on May 17, 1792 under a buttonwood (sycamore) tree on Wall Street. 'Buttonwood' is a species of American sycamore — the actual tree they met under. They agreed: trade only with each other, 0.25% commission. No government, no regulator. Pure market. Today NYSE is the world's largest exchange at $31.7T market cap.",ro:"24 de brokeri au semnat Acordul Buttonwood pe 17 mai 1792 sub un copac platanus pe Wall Street. S-au angajat să tranzacționeze cu comision de 0,25%, fără regulator sau guvern. Astăzi NYSE este cea mai mare bursă din lume."},
-   impact:{ru:"Крупнейшая биржа мира",en:"World's largest exchange",ro:"Cea mai mare bursă"}},
-  {y:1929,ru:"Крах 1929 — S&P потерял 89% за 3 года. Начало Великой Депрессии.",en:"Crash of 1929 — S&P lost 89% in 3 years. Great Depression begins.",ro:"Crahul din 1929 — S&P a pierdut 89% în 3 ani.",
-   detail:{ru:"24 октября 1929 — «Чёрный четверг». S&P 500 потерял 89% за следующие 3 года. Главная причина: кредитное плечо 10:1 (купить акции с 10% своих денег). Когда рынок упал — брокеры требовали погашения кредитов, что вызывало каскадные принудительные продажи. Рынок восстановился до уровней 1929 года только в 1954 году — через 25 лет. Урок: кредитное плечо умножает как прибыли, так и потери.",en:"October 24, 1929 — 'Black Thursday'. S&P 500 lost 89% over 3 years. Main cause: leverage 10:1 (buy stocks with only 10% of your money). When the market fell, brokers demanded loan repayment, causing cascade forced selling. The market didn't recover to 1929 levels until 1954 — 25 years later. Lesson: leverage multiplies both gains and losses.",ro:"24 octombrie 1929 — 'Joia Neagră'. S&P 500 a pierdut 89% în 3 ani. Cauza principală: efect de levier 10:1. Piața a revenit la nivelurile din 1929 abia în 1954 — după 25 de ani."},
-   impact:{ru:"Урок: плечо убивает",en:"Lesson: leverage kills",ro:"Lecție: levierul ucide"}},
-  {y:1971,ru:"NASDAQ — первая в мире электронная биржа без торгового зала.",en:"NASDAQ — world's first fully electronic exchange, no trading floor.",ro:"NASDAQ — prima bursă electronică din lume.",
-   detail:{ru:"NASDAQ (National Association of Securities Dealers Automated Quotations) открылась 8 февраля 1971 года. Первая биржа полностью без торгового зала. Революция: впервые цены формировались не криком брокеров в яме, а компьютерными алгоритмами. Именно здесь разместились Apple, Microsoft, Intel, Amazon — компании, изменившие мир. NASDAQ сегодня — второй по величине рынок акций в мире с капитализацией $29.9 трлн.",en:"NASDAQ (National Association of Securities Dealers Automated Quotations) opened February 8, 1971. The first exchange completely without a trading floor. Revolution: for the first time, prices were formed not by broker shouting in a pit, but by computer algorithms. This is where Apple, Microsoft, Intel, and Amazon listed. NASDAQ today is the world's second-largest stock market at $29.9T.",ro:"NASDAQ a deschis pe 8 februarie 1971 — prima bursă fără sală de tranzacționare. Revoluție: prețurile formate de algoritmi, nu de strigătele brokerilor. Astăzi NASDAQ este a doua piață ca mărime din lume, $29,9T."},
-   impact:{ru:"Революция технологий",en:"Tech revolution",ro:"Revoluția tehnologică"}},
-  {y:2000,ru:"Пузырь доткомов. NASDAQ −78%. Тысячи компаний обанкротились.",en:"Dot-com bubble. NASDAQ −78%. Thousands bankrupt.",ro:"Bula dot-com. NASDAQ −78%. Mii de companii falimentate.",
-   detail:{ru:"1995–2000: всё с «.com» в названии росло без оглядки на прибыль. Pets.com потратила $300 млн за 9 месяцев и закрылась. Amazon упал с $107 до $7. P/E у многих компаний был бесконечным — прибыли не было вообще. Урок: реальная стоимость бизнеса важна. Amazon выжил, потому что строил настоящий бизнес. Остальные — нет.",en:"1995–2000: everything with '.com' rose without profit. Pets.com spent $300M in 9 months then closed. Amazon fell from $107 to $7. P/E for many companies was infinite — no earnings at all. Lesson: real business value matters. Amazon survived because it was building a real business. The rest were not.",ro:"1995–2000: totul cu '.com' creștea fără profit real. Amazon a scăzut de la $107 la $7. P/E infinit — fără câștiguri. Amazon a supraviețuit pentru că construia o afacere reală."},
-   impact:{ru:"Урок: оценка важна",en:"Lesson: valuation matters",ro:"Evaluarea contează"}},
-  {y:2008,ru:"Финансовый кризис. S&P −57%. Lehman Brothers банкрот. Диверсификация не спасла.",en:"Financial crisis. S&P −57%. Lehman bankrupt. Diversification failed.",ro:"Criză financiară. S&P −57%. Lehman faliment.",
-   detail:{ru:"15 сентября 2008 — Lehman Brothers объявляет банкротство. S&P 500 потерял 57% от пика. Причина: производные инструменты (CDO, MBS) от ипотечных кредитов низкого качества. Когда рухнул рынок недвижимости — обвалилось всё. Важный урок: в кризис корреляция между активами стремится к 1. Диверсификация не помогла никому — золото, акции, облигации — всё падало. Настоящая защита — понимание рисков, не просто набор разных бумаг.",en:"September 15, 2008 — Lehman Brothers declares bankruptcy. S&P 500 lost 57% from peak. Cause: CDO and MBS derivatives backed by subprime mortgages. When real estate collapsed — everything collapsed. Key lesson: in crisis, correlation between assets approaches 1. Diversification didn't help — gold, stocks, bonds all fell. Real protection is understanding risks, not just owning different assets.",ro:"15 septembrie 2008 — Lehman Brothers declară faliment. S&P 500 pierde 57%. Cauza: instrumente derivate din credite subprime. În criză, corelația dintre active se apropie de 1 — diversificarea nu a ajutat."},
-   impact:{ru:"Диверсификация не спасла",en:"Diversification failed",ro:"Diversificarea n-a salvat"}},
-  {y:2020,ru:"COVID-крах. S&P −34% за 33 дня — самое быстрое в истории. Потом +100% за 18 мес.",en:"COVID crash. S&P −34% in 33 days — fastest ever. Then +100% in 18 months.",ro:"Crahul COVID. S&P −34% în 33 zile. Apoi +100% în 18 luni.",
-   detail:{ru:"19 февраля 2020 — начало. 23 марта 2020 — дно. 33 дня — самый быстрый обвал в истории. ФРС вкачала $3 трлн, процентные ставки до нуля, стимулы населению. Рынок не только восстановился — он вырос в 2 раза к 2021 году. Урок: паника — худший советник. Те, кто продал в марте 2020, потеряли весь следующий рост +100%.",en:"February 19, 2020 — start. March 23, 2020 — bottom. 33 days — fastest crash in history. Fed injected $3 trillion, zero rates, stimulus checks. The market not only recovered but doubled by 2021. Lesson: panic is the worst advisor. Those who sold in March 2020 missed the entire +100% gain that followed.",ro:"19 feb 2020 — start. 23 mart 2020 — fund. 33 de zile — cel mai rapid crah din istorie. Fed a injectat $3 trilioane. Piața s-a dublat până în 2021. Lecție: panica este cel mai rău sfătuitor."},
-   impact:{ru:"+100% за 18 месяцев",en:"+100% in 18 months",ro:"+100% în 18 luni"}},
-];
-const EXCHANGES=[
-  {name:"NYSE",flag:"🇺🇸",cap:"$31.7T",cos:"2,126",yr:1792,bar:100,accent:true,top5:["Apple (AAPL) — $3.5T","Berkshire Hathaway (BRK) — $1.0T","JPMorgan Chase (JPM) — $0.68T","Visa (V) — $0.55T","Johnson & Johnson (JNJ) — $0.38T"]},
-  {name:"NASDAQ",flag:"🇺🇸",cap:"$29.9T",cos:"3,200+",yr:1971,bar:94,top5:["Microsoft (MSFT) — $3.1T","NVIDIA (NVDA) — $2.9T","Alphabet (GOOGL) — $2.1T","Amazon (AMZN) — $2.2T","Meta Platforms (META) — $1.4T"]},
-  {name:"JPX",flag:"🇯🇵",cap:"$6.9T",cos:"3,958",yr:1949,bar:22,top5:["Toyota Motor (7203) — $0.28T","Sony Group (6758) — $0.12T","Keyence (6861) — $0.11T","Mitsubishi UFJ (8306) — $0.16T","Fast Retailing (9983) — $0.08T"]},
-  {name:"Shanghai",flag:"🇨🇳",cap:"$7.3T",cos:"2,284",yr:1990,bar:23,top5:["ICBC (601398) — $0.29T","PetroChina (601857) — $0.22T","China Construction Bank — $0.21T","Bank of China — $0.15T","Agricultural Bank — $0.14T"]},
-  {name:"Euronext",flag:"🇪🇺",cap:"$6.0T",cos:"1,808",yr:2000,bar:19,top5:["LVMH (MC) — $0.32T","Hermès (RMS) — $0.22T","L'Oréal (OR) — $0.19T","TotalEnergies (TTE) — $0.15T","Airbus (AIR) — $0.12T"]},
-  {name:"LSE",flag:"🇬🇧",cap:"$5.9T",cos:"1,025",yr:1801,bar:18,top5:["AstraZeneca (AZN) — $0.28T","Shell (SHEL) — $0.22T","HSBC (HSBA) — $0.18T","Unilever (ULVR) — $0.12T","GSK (GSK) — $0.08T"]},
-];
-const TM={
-  "S&P 500":   {2005:1249,2010:1136,2012:1426,2015:2043,2018:2746,2020:3756,2022:4770,now:5842,note:{ru:"+408% за 15 лет",en:"+408% in 15 years",ro:"+408% în 15 ani"}},
-  "Apple":     {2005:6,  2010:29,  2012:76,  2015:108, 2018:157, 2020:131, 2022:150, now:227,  note:{ru:"+3,683% с 2005",en:"+3,683% since 2005",ro:"+3.683% din 2005"}},
-  "Gold":      {2005:513,2010:1115,2012:1675,2015:1062,2018:1282,2020:1900,2022:1826,now:3124, note:{ru:"+313% за 15 лет (реал.)",en:"+313% in 15 years (real)",ro:"+313% în 15 ani (real)"}},
-  "Bitcoin":   {                  2015:320, 2018:13800,2020:29000,2022:47000,          now:83421,note:{ru:"+26,069% за 10 лет",en:"+26,069% in 10 years",ro:"+26.069% în 10 ani"}},
-  "NVIDIA":    {        2010:4,  2012:13,  2015:23,  2018:33,  2020:131, 2022:140,    now:875,  note:{ru:"+21,775% за 15 лет",en:"+21,775% in 15 years",ro:"+21.775% în 15 ani"}},
-  "Amazon":    {2005:47, 2010:185,2012:227,2015:694,2018:1501,2020:3256,2022:94,      now:226,  note:{ru:"+381% за 10 лет",en:"+381% in 10 years",ro:"+381% în 10 ani"}},
-  "Microsoft": {2005:26, 2010:31, 2012:28, 2015:55, 2018:102, 2020:214, 2022:290,    now:420,  note:{ru:"+1,515% за 20 лет",en:"+1,515% in 20 years",ro:"+1.515% în 20 ani"}},
-  "Tesla":     {                 2015:50, 2018:65,  2020:705, 2022:123,               now:338,  note:{ru:"+576% за 10 лет",en:"+576% in 10 years",ro:"+576% în 10 ani"}},
-  "Ethereum":  {                          2018:350, 2020:730, 2022:3740,              now:2100, note:{ru:"+500% за 7 лет",en:"+500% in 7 years",ro:"+500% în 7 ani"}},
-  "Oil (WTI)": {2005:60, 2010:79, 2012:91, 2015:50, 2018:61,  2020:47,  2022:78,    now:68,   note:{ru:"+13% за 20 лет",en:"+13% in 20 years",ro:"+13% în 20 ani"}},
-};
-const CANDLES = [
-  {o:5180, h:5195, l:5175, c:5190}, {o:5190, h:5195, l:5170, c:5175}, {o:5175, h:5185, l:5165, c:5180},
-  {o:5180, h:5190, l:5160, c:5165}, {o:5165, h:5180, l:5155, c:5175}, {o:5175, h:5195, l:5170, c:5190},
-  {o:5190, h:5200, l:5185, c:5195}, {o:5195, h:5210, l:5190, c:5205}, {o:5205, h:5215, l:5195, c:5195},
-  {o:5195, h:5205, l:5180, c:5185}, {o:5185, h:5190, l:5170, c:5175}, {o:5175, h:5180, l:5150, c:5155},
-  {o:5155, h:5170, l:5145, c:5165}, {o:5165, h:5175, l:5150, c:5150}, {o:5150, h:5160, l:5130, c:5135},
-  {o:5135, h:5145, l:5120, c:5125}, {o:5125, h:5130, l:5110, c:5115}, {o:5115, h:5140, l:5110, c:5135},
-  {o:5135, h:5155, l:5125, c:5150}, {o:5150, h:5165, l:5140, c:5160}, {o:5160, h:5170, l:5155, c:5165},
-  {o:5165, h:5180, l:5160, c:5175}, {o:5175, h:5185, l:5165, c:5170}, {o:5170, h:5180, l:5155, c:5178}
-];
-const getCY = (price) => 260 - ((price - 5080) / 170) * 230;
-const TM_EMOJIS = {"S&P 500":"📈","Apple":"🍎","Gold":"🥇","Bitcoin":"₿","NVIDIA":"🎮","Amazon":"📦","Microsoft":"💻","Tesla":"⚡","Ethereum":"🔷","Oil (WTI)":"🛢️"};
-
 const GLOSSARY={
   ru:{
     "биржа":{s:"Место встречи покупателей и продавцов ценных бумаг",a:"Организованный рынок стандартизированных финансовых инструментов",e:"NYSE — $31.7T капитализации"},
@@ -388,160 +360,9 @@ const GLOSSARY={
 // ═══════════════════════════════════════════════
 // MICRO COMPONENTS
 // ═══════════════════════════════════════════════
-const {useState,useEffect} = React;
+const {useState,useEffect,useRef} = React;
 
-const Mono = ({children,size=13,color=C.inkSoft,spacing=3,style={}}) =>
-  React.createElement('span',{style:{fontFamily:"'Courier New',monospace",fontSize:size,letterSpacing:spacing,color,...style}},children);
-
-const Chip = ({children,color=C.gold}) =>
-  React.createElement('span',{style:{fontFamily:"'Courier New',monospace",fontSize:11,letterSpacing:3,color,border:`1px solid ${color}`,padding:"4px 11px",display:"inline-block"}},children);
-
-const Rule = ({w="50%",my=32}) =>
-  React.createElement('div',{style:{height:1,background:`linear-gradient(90deg,transparent,${C.gold},transparent)`,width:w,margin:`${my}px auto`,opacity:0.4}});
-
-function GlossWord({word,lang,children}) {
-  const [open,setOpen] = useState(false);
-  const d = GLOSSARY[lang]?.[word];
-  if(!d) return React.createElement('span',{style:{color:C.gold,fontWeight:600,borderBottom:`1px dashed ${C.gold}`,cursor:"pointer"}},children);
-  return React.createElement('span',{style:{position:"relative",display:"inline"}},
-    React.createElement('span',{
-      onClick:(e)=>{e.stopPropagation();setOpen(o=>!o)},
-      style:{color:C.gold,borderBottom:`1px dashed ${C.gold}`,cursor:"pointer",fontWeight:600}
-    },children),
-    open && React.createElement(React.Fragment,{},
-      React.createElement('div',{
-        onClick:(e)=>{e.stopPropagation();setOpen(false)},
-        style:{position:"fixed",inset:0,zIndex:199}
-      }),
-      React.createElement('span',{
-        onClick:(e)=>e.stopPropagation(),
-        style:{
-          position:"absolute",bottom:"130%",left:"50%",transform:"translateX(-50%)",
-          width:360,background:C.white,border:`1px solid ${C.border}`,
-          boxShadow:"0 10px 40px rgba(0,0,0,0.15)",padding:"20px 23px",zIndex:200,display:"block",
-        }
-      },
-        React.createElement(Mono,{size:13,color:C.gold,spacing:2,style:{display:"block",marginBottom:8}},word.toUpperCase()),
-        React.createElement('span',{style:{display:"block",fontSize:16,color:C.ink,marginBottom:10,lineHeight:1.6,fontWeight:600}},d.s),
-        React.createElement('span',{style:{display:"block",fontSize:15,color:C.inkSoft,marginBottom:10,lineHeight:1.5,fontStyle:"italic"}},d.a),
-        React.createElement('span',{style:{display:"block",fontSize:15,color:C.gold,lineHeight:1.5}},"→ ",d.e),
-        React.createElement('span',{
-          onClick:(e)=>{e.stopPropagation();setOpen(false)},
-          style:{position:"absolute",top:10,right:12,cursor:"pointer",color:C.inkFaint,fontSize:20,lineHeight:1}
-        },"×")
-      )
-    )
-  );
-}
-
-// ═══════════════════════════════════════════════
-// MESSENGER POPUP (НОВЫЙ ДИЗАЙН)
-// ═══════════════════════════════════════════════
-function AskAnalystPopup({chapterNum, lang, onClose}) {
-  const tr = MSG_TR[lang] || MSG_TR.ru;
-  
-  // Динамический текст для предзаполнения
-  const prefillRu = `Здравствуйте, есть вопрос по главе ${chapterNum}`;
-  const prefillEn = `Hello, I have a question about chapter ${chapterNum}`;
-  const prefillRo = `Bună ziua, am o întrebare despre capitolul ${chapterNum}`;
-  const msgText = lang === 'ru' ? prefillRu : lang === 'en' ? prefillEn : prefillRo;
-  
-  const tgLink = `https://t.me/SBF_Support?text=${encodeURIComponent(msgText)}`;
-  const waLink = `https://api.whatsapp.com/send/?phone=37369005200&text=${encodeURIComponent(msgText)}&type=phone_number&app_absent=0`;
-
-  return (
-    <div style={{position:"fixed", inset:0, zIndex:500, display:"flex", alignItems:"center", justifyContent:"center", padding:20, overflowY: "auto"}} onClick={onClose}>
-      <div style={{position:"fixed", inset:0, background:"rgba(250,248,245,0.98)"}}></div>
-      
-      <div onClick={(e)=>e.stopPropagation()} style={{position:"relative", width:"100%", maxWidth:900, zIndex:1, margin: "auto", padding: "40px 0"}}>
-        <button onClick={onClose} style={{position:"absolute", top:0, right:10, background:"none", border:"none", fontSize:35, cursor:"pointer", color:C.inkFaint, lineHeight:1}}>×</button>
-        
-        <div style={{marginBottom: 40, padding: "0 10px"}}>
-          <Mono size={13} color={C.gold} spacing={3} style={{display:"block", marginBottom:15}}>— {tr.tag}</Mono>
-          <h2 style={{fontSize: "clamp(30px, 5vw, 42px)", fontWeight:700, color:C.black, marginBottom:15, fontFamily:"'DM Serif Display',serif"}}>{tr.title}</h2>
-          <p style={{fontSize: 18, color:C.inkMid, lineHeight: 1.6}}>{tr.sub}</p>
-        </div>
-
-        <div className="messenger-grid">
-          
-          {/* TELEGRAM CARD */}
-          <div style={{background: "#ffffff", border: "1px solid #e0e0e0", borderRadius: 12, padding: "30px 25px", display: "flex", flexDirection: "column", boxShadow: "0 10px 30px rgba(0,0,0,0.03)"}}>
-            <div style={{display: "flex", alignItems: "center", gap: 15, marginBottom: 30}}>
-              <div style={{width: 50, height: 50, borderRadius: "50%", background: "#e1f3fb", display: "flex", alignItems: "center", justifyContent: "center"}}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M20.665 3.717l-17.73 6.837c-1.21.486-1.203 1.161-.222 1.462l4.552 1.42 10.532-6.645c.498-.303.953-.14.579.192l-8.533 7.701h-.002l.002.002-.314 4.692c.46 0 .663-.211.921-.46l2.211-2.15 4.599 3.397c.848.467 1.457.227 1.668-.785l3.019-14.228c.309-1.239-.473-1.8-1.282-1.435z" fill="#0088cc"/>
-                </svg>
-              </div>
-              <div>
-                <div style={{fontSize: 18, fontWeight: 700, color: C.black}}>SBF Support</div>
-                <div style={{fontSize: 14, color: C.inkFaint}}>Telegram · {tr.online}</div>
-              </div>
-            </div>
-
-            <div style={{background: "#f7f7f7", padding: "15px 20px", borderRadius: "12px 12px 12px 0", marginBottom: 20, alignSelf: "flex-start", maxWidth: "90%"}}>
-              <div style={{fontSize: 16, color: C.black, lineHeight: 1.5, marginBottom: 8}}>{tr.tgInc}</div>
-              <div style={{fontSize: 11, color: C.inkFaint}}>SBF Support · {tr.justNow}</div>
-            </div>
-
-            <div style={{background: "#0088cc", padding: "15px 20px", borderRadius: "12px 12px 0 12px", marginBottom: 30, alignSelf: "flex-end", maxWidth: "90%"}}>
-              <div style={{fontSize: 16, color: "#ffffff", lineHeight: 1.5, marginBottom: 8}}>{msgText}</div>
-              <div style={{fontSize: 11, color: "rgba(255,255,255,0.7)", textAlign: "right"}}>{tr.you} · ✓✓</div>
-            </div>
-
-            <a href={tgLink} target="_blank" rel="noreferrer" style={{marginTop: "auto", display: "block", background: "#0088cc", color: "#fff", textAlign: "center", padding: "18px 20px", borderRadius: 8, fontSize: 15, letterSpacing: 1.5, fontFamily: "monospace", fontWeight: 700, textDecoration: "none", transition: "opacity 0.2s"}} onMouseEnter={e=>e.currentTarget.style.opacity=0.85} onMouseLeave={e=>e.currentTarget.style.opacity=1}>
-              <span style={{display: "inline-block", width: 12, height: 12, borderRadius: "50%", background: "#fff", marginRight: 10, verticalAlign: "middle"}}></span>
-              {tr.btnTg}
-            </a>
-          </div>
-
-          {/* WHATSAPP CARD */}
-          <div style={{background: "#ffffff", border: "1px solid #e0e0e0", borderRadius: 12, padding: "30px 25px", display: "flex", flexDirection: "column", boxShadow: "0 10px 30px rgba(0,0,0,0.03)"}}>
-            <div style={{display: "flex", alignItems: "center", gap: 15, marginBottom: 30}}>
-              <div style={{width: 50, height: 50, borderRadius: "50%", background: "#e8f5ed", display: "flex", alignItems: "center", justifyContent: "center"}}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M20.52 3.449C18.24 1.245 15.24 0 12.042 0 5.463 0 .104 5.334.101 11.893c-.001 2.093.546 4.14 1.587 5.945L.041 24l6.335-1.652c1.745.943 3.71 1.444 5.71 1.445h.005c6.577 0 11.938-5.336 11.94-11.897.002-3.174-1.229-6.158-3.511-8.447zm-8.473 17.51h-.004c-1.774-.001-3.513-.475-5.038-1.373l-.361-.213-3.744.977.994-3.633-.235-.373c-1.01-1.603-1.543-3.453-1.542-5.36.002-5.541 4.536-10.057 10.106-10.057 2.697.001 5.234 1.048 7.137 2.943 1.905 1.897 2.955 4.418 2.954 7.108-.002 5.542-4.538 10.058-10.108 10.058zm5.552-7.532c-.304-.152-1.799-.884-2.078-.985-.279-.101-.482-.152-.685.152-.203.303-.787.985-.964 1.187-.178.203-.356.228-.66.076-1.554-.775-2.73-1.564-3.76-3.32-.102-.178-.011-.274.141-.426.136-.136.304-.354.456-.532.152-.177.203-.303.304-.506.102-.203.051-.38-.025-.532-.076-.152-.685-1.643-.938-2.251-.247-.591-.497-.512-.685-.521-.177-.008-.38-.01-.582-.01-.203 0-.532.076-.811.38-.279.304-1.065 1.036-1.065 2.527s1.09 2.932 1.242 3.134c.152.202 2.146 3.262 5.197 4.577.726.313 1.292.5 1.734.64.729.231 1.393.198 1.916.12.585-.088 1.799-.733 2.053-1.442.253-.708.253-1.314.177-1.442-.076-.126-.279-.202-.583-.354z" fill="#25d366"/>
-                </svg>
-              </div>
-              <div>
-                <div style={{fontSize: 18, fontWeight: 700, color: C.black}}>SBF Company</div>
-                <div style={{fontSize: 14, color: C.inkFaint}}>WhatsApp · {tr.online}</div>
-              </div>
-            </div>
-
-            <div style={{background: "#f7f7f7", padding: "15px 20px", borderRadius: "12px 12px 12px 0", marginBottom: 20, alignSelf: "flex-start", maxWidth: "90%"}}>
-              <div style={{fontSize: 16, color: C.black, lineHeight: 1.5, marginBottom: 8}}>{tr.waInc}</div>
-              <div style={{fontSize: 11, color: C.inkFaint}}>SBF · {tr.justNow}</div>
-            </div>
-
-            <div style={{background: "#25d366", padding: "15px 20px", borderRadius: "12px 12px 0 12px", marginBottom: 30, alignSelf: "flex-end", maxWidth: "90%"}}>
-              <div style={{fontSize: 16, color: "#ffffff", lineHeight: 1.5, marginBottom: 8}}>{msgText}</div>
-              <div style={{fontSize: 11, color: "rgba(255,255,255,0.8)", textAlign: "right"}}>{tr.you} · ✓✓</div>
-            </div>
-
-            <a href={waLink} target="_blank" rel="noreferrer" style={{marginTop: "auto", display: "block", background: "#25d366", color: "#fff", textAlign: "center", padding: "18px 20px", borderRadius: 8, fontSize: 15, letterSpacing: 1.5, fontFamily: "monospace", fontWeight: 700, textDecoration: "none", transition: "opacity 0.2s"}} onMouseEnter={e=>e.currentTarget.style.opacity=0.85} onMouseLeave={e=>e.currentTarget.style.opacity=1}>
-              <span style={{display: "inline-block", marginRight: 10, verticalAlign: "middle"}}><img class='mi-icon' style={{verticalAlign:'middle'}} src='/assets/icons/icon-quote.png' alt='' width='20' height='20' /></span>
-              {tr.btnWa}
-            </a>
-          </div>
-
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function AskAnalystBtn({tr, chapterNum}) {
-  const [open,setOpen] = useState(false);
-  const lang = INITIAL_LANG;
-  return (
-    <span>
-      <span onClick={()=>setOpen(true)} style={{fontSize:15, color:C.inkSoft, fontFamily:"monospace", letterSpacing:1, borderBottom:`1px solid ${C.border}`, paddingBottom:2, cursor:"pointer", display:"inline-block"}}>
-        {tr.askAnalyst}
-      </span>
-      {open && <AskAnalystPopup chapterNum={chapterNum} lang={lang} onClose={()=>setOpen(false)} />}
-    </span>
-  );
-}
+// Mono/Chip/Rule/GlossWord/AskAnalystPopup/AskAnalystBtn -- см. window.AcademyShared выше.
 
 // ═══════════════════════════════════════════════
 // START SCREEN
@@ -596,28 +417,99 @@ function Level1({onBack, onNext, path}) {
   const tr = TR[lang] || TR.ru;
   const S = STRINGS[lang] || STRINGS.ru;
   const [mode,setMode] = useState("beginner");
-  const [tlOpen,setTlOpen] = useState(null);
-  const [exOpen, setExOpen] = useState(null);
-  const [tmAmt,setTmAmt] = useState("1000");
-  const [tmYr,setTmYr] = useState("2015");
-  const [tmAsset,setTmAsset] = useState("S&P 500");
-  const [tmRes,setTmRes] = useState(null);
-  const [checks,setChecks] = useState([false,false,false,false]);
-  
-  const prog = checks.filter(Boolean).length/checks.length*100;
+  const [predictAnswered,setPredictAnswered] = useState(null); // null|'yes'|'no'
+  const quiz = QUIZ[lang] || QUIZ.ru;
+  const [quizProg,setQuizProg] = useState(0); // 0..100, репортится QuizBlock'ом (см. onProgress)
 
-  const calcTM = () => {
-    const d = TM[tmAsset];
-    const sp = d?.[parseInt(tmYr)];
-    if(!sp){setTmRes(null);return;}
-    const mult = d.now/sp;
-    const fin = Math.round(parseFloat(tmAmt)*mult);
-    const years = 2025 - parseInt(tmYr);
-    const depFin = Math.round(parseFloat(tmAmt) * Math.pow(1.05, years));
-    setTmRes({fin,gain:fin-parseFloat(tmAmt),pct:Math.round((mult-1)*100),mult:mult.toFixed(1),depFin,note:(d.note&&(d.note[lang]||d.note.ru))||""});
+  const prog = quizProg;
+
+  // ── Хроно-машина (интерактив A, SPEC_edu_level1_history.md §4) ──
+  const chronoStations = (window.ChronoStations && window.ChronoStations[lang]) || [];
+  // Якорь из адресной строки (SPEC_ch2_debug_and_chart_engine.md §5.2) --
+  // открытие /edu/b/1#2008_lehman сразу ставит нужную станцию, а не станцию 0.
+  const chronoInitialIdx = () => {
+    const h = (typeof location !== "undefined" ? location.hash : "").replace("#", "");
+    const i = h ? chronoStations.findIndex(s => s.id === h) : -1;
+    return i >= 0 ? i : 0;
   };
+  const [chronoIdx, setChronoIdx] = useState(chronoInitialIdx);
+  const [chronoDone, setChronoDone] = useState(() => chronoStations.map((_, i) => i === chronoInitialIdx()));
+  const chronoStation = chronoStations[chronoIdx];
+  const chronoArt = (key) => (window.ChronoStationArtHTML ? window.ChronoStationArtHTML(key) : '') + (window.ChronoArchiveStamp || '');
+  const chronoGo = (i) => {
+    setChronoIdx(i); setChronoDone(d => d.map((v, j) => v || j === i));
+    if (window.SbfAnchorReturn && chronoStations[i]) window.SbfAnchorReturn.setStationAnchor(chronoStations[i].id);
+  };
+  const chronoDoneCount = chronoDone.filter(Boolean).length;
 
-  const SH=({tag,title,sub})=>React.createElement('div',{style:{marginBottom:35}},
+  // ── 5 эпох отображения графика (интерактив B, §5). Правило трёх шагов
+  // (FIX_chart_eras_explained.md): каждая эпоха проходит легенда → экскурсия → задача,
+  // прежде чем показать сырой артефакт. eraPhase/eraRevealed — per-era state, ключ = индекс эпохи.
+  const [eraIdx, setEraIdx] = useState(0);
+  const [gold30, setGold30] = useState(null);
+  const [eraPhase, setEraPhase] = useState({});   // {0:'legend'|'guided'|'task', ...}
+  const [eraRevealed, setEraRevealed] = useState({}); // {0:bool, ...} — «Показать ответ» нажат
+  const eraLegends = (window.ChronoEraLegends && window.ChronoEraLegends[lang]) || [];
+  const phaseOf = (i) => eraPhase[i] || 'legend';
+  const advancePhase = (i, next) => setEraPhase(p => ({...p, [i]: next}));
+  // Эры 0-2 (таблица/линия/P&F) — задача «найди разворот сам», маркер прячется до «Показать ответ».
+  // Эры 3-4 (свечи) показывают куда больше баров — прятать один день там уже не задача, а лотерея,
+  // маркер просто виден с шага «экскурсия» и дальше.
+  const showMarker = eraIdx >= 3
+    ? phaseOf(eraIdx) !== 'legend'
+    : phaseOf(eraIdx) === 'guided' || (phaseOf(eraIdx) === 'task' && eraRevealed[eraIdx]);
+
+  // ── Машина времени инвестора (интерактив C, §6) — реальные ряды ──
+  const [goldFull, setGoldFull] = useState(null);
+  const [djiaCentury, setDjiaCentury] = useState(null);
+  const [nikkei, setNikkei] = useState(null);
+  const [calcAsset, setCalcAsset] = useState("gold");
+  const [calcStart, setCalcStart] = useState("");
+  const [calcAmount, setCalcAmount] = useState("1000");
+
+  useEffect(() => {
+    fetch("/data/edu_scenes/gold_30d.json").then(r => r.json()).then(setGold30).catch(() => {});
+    fetch("/data/ohlc_GOLD_D1.json").then(r => r.json()).then(setGoldFull).catch(() => {});
+    fetch("/data/edu_capsules/djia_century.json").then(r => r.json()).then(setDjiaCentury).catch(() => {});
+    fetch("/data/edu_capsules/nikkei_bubble.json").then(r => r.json()).then(setNikkei).catch(() => {});
+  }, []);
+
+  const calcSeriesFor = (assetId) => {
+    if (assetId === "gold" && goldFull) {
+      const years = {};
+      goldFull.candles.forEach(c => { const y = c.time.slice(0,4); if (!years[y]) years[y] = c.time; });
+      return { points: goldFull.candles.map(c => ({ key: c.time, v: c.close })), starts: Object.keys(years).sort().map(y => ({ v: years[y], l: y })) };
+    }
+    if (assetId === "djia" && djiaCentury) {
+      return { points: djiaCentury.years.map(y => ({ key: String(y.year), v: y.close })), starts: djiaCentury.years.map(y => ({ v: String(y.year), l: String(y.year) })) };
+    }
+    if (assetId === "nikkei" && nikkei) {
+      return { points: nikkei.months.map(m => ({ key: m.time, v: m.close })), starts: nikkei.months.filter((m,i)=>i%12===0).map(m => ({ v: m.time, l: m.time })) };
+    }
+    return null;
+  };
+  const calcSeries = calcSeriesFor(calcAsset);
+  useEffect(() => {
+    if (calcSeries && calcSeries.starts.length && !calcSeries.starts.find(s => s.v === calcStart)) {
+      setCalcStart(calcSeries.starts[0].v);
+    }
+  }, [calcAsset, goldFull, djiaCentury, nikkei]);
+
+  let calcResult = null;
+  if (calcSeries) {
+    const startIdx = Math.max(0, calcSeries.points.findIndex(p => p.key === calcStart));
+    const path = calcSeries.points.slice(startIdx);
+    if (path.length > 1) {
+      const amount = parseFloat(calcAmount) || 1000;
+      const base = path[0].v;
+      const finalV = path[path.length - 1].v;
+      const mult = finalV / base;
+      const worst = path.reduce((acc, p) => p.v < acc.v ? p : acc, path[0]);
+      calcResult = { amount, mult, final: amount * mult, worst, worstMult: worst.v / base, from: path[0].key, to: path[path.length - 1].key };
+    }
+  }
+
+  const SH=({tag,title,sub,id})=>React.createElement('div',{id,style:{marginBottom:35,scrollMarginTop:130}},
     React.createElement(Chip,{},tag),
     React.createElement('h2',{style:{fontSize:"clamp(28px,4vw,40px)",fontWeight:700,margin:"12px 0 8px",color:C.black,letterSpacing:-0.5,fontFamily:"'DM Serif Display',serif"}},title),
     sub&&React.createElement('p',{style:{fontSize:16,color:C.inkSoft,margin:0,lineHeight:1.6}},sub)
@@ -685,184 +577,267 @@ function Level1({onBack, onNext, path}) {
         )
       ),
 
-      React.createElement(SH,{tag:tr.sec11Tag,title:tr.sec11Title}),
-      React.createElement(Toggle,{}),
-      mode==="beginner"
-        ? React.createElement('div',{style:{fontSize:19,lineHeight:1.9,color:C.inkMid,marginBottom:60}},
-            React.createElement('p',{style:{marginBottom:20}},
-              lang==="ru"?React.createElement(React.Fragment,{},
-                "Представь: ты хочешь продать машину. Выставляешь объявление, находишь покупателя, договариваетесь о цене. ",
-                React.createElement(GlossWord,{word:"биржа",lang},"Биржа"),
-                " — то же самое, только вместо машин — акции компаний, а вместо двух людей — тысячи участников. И всё за миллисекунды."
-              ):lang==="en"?React.createElement(React.Fragment,{},
-                "Imagine you want to sell a car. You post an ad, find a buyer, agree on a price. An ",
-                React.createElement(GlossWord,{word:"exchange",lang},"exchange"),
-                " works the same way — but instead of cars, it's company shares, and instead of two people, thousands of participants."
-              ):React.createElement(React.Fragment,{},
-                "Imaginează-ți că vrei să vinzi o mașină. Postezi un anunț, găsești un cumpărător, vă înțelegeți asupra prețului. O ",
-                React.createElement(GlossWord,{word:"bursă",lang},"bursă"),
-                " funcționează la fel — doar că în loc de mașini sunt acțiuni ale companiilor, iar în loc de două persoane, mii de participanți. Și totul în câteva milisecunde."
-              )
-            ),
-            React.createElement('p',{},
-              lang==="ru"?"Когда компания хочет привлечь деньги на развитие — она выходит на биржу через IPO и продаёт часть себя инвесторам. Инвесторы становятся совладельцами и зарабатывают, когда бизнес растёт."
-              :lang==="en"?"When a company wants to raise money for growth, it goes public through an IPO and sells part of itself to investors. Investors become co-owners and profit when the business grows."
-              :"Când o companie dorește să strângă bani pentru dezvoltare, se listează la bursă prin IPO și vinde o parte din ea investitorilor. Investitorii devin coproprietari și câștigă atunci când afacerea crește."
-            )
-          )
-        : React.createElement('div',{style:{fontSize:19,lineHeight:1.9,color:C.inkMid,marginBottom:60}},
-            React.createElement('p',{style:{marginBottom:20}},
-              lang==="ru"?React.createElement(React.Fragment,{},
-                "Биржа — двусторонний аукционный рынок с ",
-                React.createElement(GlossWord,{word:"ликвидность",lang},"ликвидностью"),
-                ", обеспечиваемой маркет-мейкерами. Цена формируется через книгу ордеров: лучший bid встречается с лучшим ask. Спред — доход маркет-мейкера."
-              ):lang==="en"?React.createElement(React.Fragment,{},
-                "An exchange is a two-sided auction market with ",
-                React.createElement(GlossWord,{word:"liquidity",lang},"liquidity"),
-                " provided by market makers. Price is formed through an order book: best bid meets best ask."
-              ):React.createElement(React.Fragment,{},
-                "O bursă este o piață de licitație bilaterală cu ",
-                React.createElement(GlossWord,{word:"lichiditate",lang},"lichiditate"),
-                " asigurată de formatorii de piață. Prețul se formează prin cartea de ordine: cel mai bun bid întâlnește cel mai bun ask. Spread-ul reprezintă venitul formatorului de piață."
-              )
-            ),
-            React.createElement('p',{},
-              lang==="ru"?"NYSE использует модель специалистов — один участник отвечает за конкретную бумагу. NASDAQ — децентрализованная система. Разница влияет на волатильность и стоимость исполнения."
-              :lang==="en"?"NYSE uses a specialist model — one participant per security. NASDAQ uses multiple market makers. The difference affects volatility and execution cost."
-              :"NYSE folosește un model de specialist — un singur participant răspunde de un titlu anume. NASDAQ este un sistem descentralizat cu mai mulți formatori de piață. Diferența influențează volatilitatea și costul de execuție."
-            )
-          ),
+      <div className="history-ep">
+        <SH id="chrono" tag={tr.chronoTag} title={tr.chronoTitle} sub={tr.chronoSub} />
+        <div className="h-chrono">
+          {chronoStations.map((s,i) => (
+            <React.Fragment key={s.id}>
+              {i > 0 && <span className="h-sep">—</span>}
+              <button className={"h-node" + (i===chronoIdx?" active":chronoDone[i]?" done":"")} onClick={() => chronoGo(i)}>
+                {s.id === "today" ? tr.chronoToday : s.id}
+              </button>
+            </React.Fragment>
+          ))}
+        </div>
+        <p className="h-progress" style={{marginBottom:30}}>{tr.chronoChronicle}: <b>{chronoDoneCount}/{chronoStations.length}</b> · {tr.chronoXpNote}</p>
+
+        {chronoStation && (
+          <div className="h-station" style={{marginBottom:60}}>
+            <div className="h-passepartout">
+              <div className="h-artwork" dangerouslySetInnerHTML={{__html: chronoArt(chronoStation.illustration)}} />
+              <div className="h-caption"><span>{chronoStation.year} · {chronoStation.place}</span><span className="h-src">{chronoStation.source}</span></div>
+            </div>
+            <div>
+              <div className="h-station-head"><span className="h-station-year">{chronoStation.year}</span><span className="h-station-place">{chronoStation.place}</span></div>
+              <h3 className="h-station-title">{chronoStation.title}</h3>
+              <p className="h-station-body">{chronoStation.body}</p>
+              <div className="h-callout h-callout-fact">{chronoStation.fact}</div>
+              {chronoStation.legend && <div className="h-callout h-callout-legend">{chronoStation.legend}</div>}
+              <div className="h-callout h-callout-hook">{chronoStation.hook}</div>
+              {chronoIdx < chronoStations.length - 1 && (
+                <div style={{marginTop:14}}><button className="h-btn" onClick={() => chronoGo(chronoIdx+1)}>{tr.chronoNext}</button></div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>,
 
       React.createElement(Rule,{}),
-      React.createElement('div',{style:{display:"flex",justifyContent:"flex-end",marginBottom:20}},React.createElement(Toggle,{})),
 
-      React.createElement(SH,{tag:tr.sec12Tag,title:tr.sec12Title,sub:tr.sec12Sub}),
-      React.createElement('div',{style:{position:"relative",paddingLeft:20,marginBottom:60}},
-        React.createElement('div',{style:{position:"absolute",left:0,top:10,bottom:10,width:1,background:`linear-gradient(180deg,${C.gold},transparent)`,opacity:0.5}}),
-        TIMELINE.map((ev,i)=>React.createElement('div',{key:i,onClick:()=>setTlOpen(tlOpen===i?null:i),style:{marginBottom:25,paddingLeft:35,cursor:"pointer",position:"relative"}},
-          React.createElement('div',{style:{position:"absolute",left:-6,top:9,width:13,height:13,background:tlOpen===i?C.gold:C.white,border:`1px solid ${C.gold}`,borderRadius:"50%",transition:"background 0.25s"}}),
-          React.createElement('div',{style:{display:"flex",gap:20,alignItems:"baseline", flexWrap:"wrap"}},
-            React.createElement(Mono,{size:16,color:C.gold,spacing:0,style:{fontWeight:700,minWidth:48}},ev.y),
-            React.createElement('span',{style:{fontSize:18,color:tlOpen===i?C.black:C.inkMid,lineHeight:1.6,transition:"color 0.25s"}},ev[lang]||ev.ru)
-          ),
-          tlOpen===i&&React.createElement('div',{
-            style:{marginTop:15,marginLeft:"auto",padding:"20px 5vw",background:C.goldPale,border:`1px solid ${C.borderGold}`},
-            onClick:(e)=>e.stopPropagation(),
-          },
-            React.createElement(Mono,{size:14,color:C.gold,spacing:2,style:{display:"block",marginBottom:12}},"→ ",(ev.impact[lang]||ev.impact.ru)),
-            React.createElement('p',{style:{fontSize:16,color:C.inkMid,lineHeight:1.8,margin:0}},ev.detail?.[lang]||ev.detail?.ru)
-          )
-        ))
-      ),
+      <div className="history-ep" id="eras">
+        <SH tag={tr.erasTag} title={tr.erasTitle} sub={tr.erasSub} />
+        <div className="h-era-tabs">
+          {eraLegends.map((lg,i) => (
+            <button key={i} className={"h-era-tab" + (i===eraIdx?" active":"")} onClick={() => setEraIdx(i)}>{lg.tab}</button>
+          ))}
+        </div>
+        <div className="h-era-frame" style={{position:"relative"}}>
+          <div className="h-era-label">{eraLegends[eraIdx] ? eraLegends[eraIdx].tab : tr.erasList[eraIdx]}</div>
+          {!gold30 ? <div style={{fontSize:12.5,color:"var(--h-ink-faint)",fontFamily:"monospace"}}>{tr.calcLoading}</div> : (function(){
+            const candles = gold30.candles;
+            const reversalIdx = candles.findIndex(c => c.time === gold30.meta.reversal_day);
+            const phase = phaseOf(eraIdx);
+            const lg = eraLegends[eraIdx] || {};
 
-      React.createElement(Rule,{}),
-      React.createElement('div',{style:{display:"flex",justifyContent:"flex-end",marginBottom:20}},React.createElement(Toggle,{})),
-
-      React.createElement(SH,{tag:tr.sec13Tag,title:tr.sec13Title}),
-      React.createElement('div',{style:{display:"flex",flexDirection:"column",gap:13,marginBottom:60}},
-        EXCHANGES.map((ex,i)=>React.createElement(React.Fragment,{key:i},
-          React.createElement('div',{
-            onClick:()=>setExOpen(exOpen===i?null:i),
-            style:{display:"flex",alignItems:"center",gap:20,padding:"20px 5vw",cursor:"pointer", flexWrap:"wrap",
-              background:ex.accent?C.dark:C.surface,border:`1px solid ${ex.accent?"transparent":exOpen===i?C.gold:C.border}`,
-              transition:"border-color .2s"
+            let artifact;
+            if (eraIdx === 0) {
+              artifact = (
+                <div style={{overflowX:"auto"}}>
+                  <table className="h-table"><thead><tr>
+                    <th>{lang==="ru"?"Дата":lang==="ro"?"Data":"Date"}</th><th>High</th><th>Low</th><th>Close</th>
+                  </tr></thead><tbody>
+                    {candles.map((c,i) => (
+                      <tr key={i} style={showMarker && i===reversalIdx ? {background:"var(--h-gold-pale)",fontWeight:700} : null}>
+                        <td>{showMarker && i===reversalIdx ? "◆ " : ""}{c.time.slice(5)}</td><td>{c.high.toFixed(1)}</td><td>{c.low.toFixed(1)}</td><td>{c.close.toFixed(1)}</td>
+                      </tr>
+                    ))}
+                  </tbody></table>
+                </div>
+              );
+            } else if (eraIdx === 1) {
+              const w=680,h=220,pad=16;
+              const closes = candles.map(c=>c.close);
+              const mn=Math.min(...closes), mx=Math.max(...closes);
+              const xy = closes.map((v,i)=>{
+                const x = pad + (i/(closes.length-1))*(w-2*pad);
+                const y = h-pad-((v-mn)/(mx-mn))*(h-2*pad) + Math.sin(i*12.9)*1.6;
+                return [x,y];
+              });
+              const pts = xy.map(p=>p[0].toFixed(1)+","+p[1].toFixed(1)).join(' ');
+              const grid = [];
+              for (let gx=pad; gx<w; gx+=24) grid.push(<line key={"gx"+gx} x1={gx} y1={0} x2={gx} y2={h} stroke="#d8cdb2" strokeWidth="0.5"/>);
+              for (let gy=0; gy<h; gy+=22) grid.push(<line key={"gy"+gy} x1={0} y1={gy} x2={w} y2={gy} stroke="#d8cdb2" strokeWidth="0.5"/>);
+              const rp = xy[reversalIdx];
+              artifact = (
+                <svg viewBox={`0 0 ${w} ${h}`} style={{width:"100%",height:"auto",background:"#fbf8f0",border:"1px solid #E7DFCF"}}>
+                  {grid}
+                  <polyline points={pts} fill="none" stroke="#3a3630" strokeWidth="1.6" strokeLinejoin="round"/>
+                  {showMarker && rp && (
+                    <g>
+                      <circle cx={rp[0]} cy={rp[1]} r="6" fill="#C9A227" stroke="#141416" strokeWidth="1.2"/>
+                      <text x={rp[0]} y={rp[1]-12} textAnchor="middle" fontFamily="monospace" fontSize="11" fill="#141416">◆</text>
+                    </g>
+                  )}
+                </svg>
+              );
+            } else if (eraIdx === 2) {
+              const closes = candles.map(c=>c.close);
+              const box = (Math.max(...closes)-Math.min(...closes))/11;
+              const reversal = 3;
+              const cols = [];
+              const dayCell = [];
+              let cur = null;
+              closes.forEach((v) => {
+                const level = Math.round(v/box);
+                if (!cur){ cur = {dir:1, boxes:[level]}; dayCell.push({col:0, level}); return; }
+                const last = cur.boxes[cur.boxes.length-1];
+                if (cur.dir===1){
+                  if (level>last){ for(let i=last+1;i<=level;i++) cur.boxes.push(i); dayCell.push({col:cols.length, level}); }
+                  else if (level<=last-reversal){ cols.push(cur); cur={dir:-1,boxes:[]}; for(let j=last-1;j>=level;j--) cur.boxes.push(j); dayCell.push({col:cols.length, level}); }
+                  else dayCell.push({col:cols.length, level:last});
+                } else {
+                  if (level<last){ for(let k=last-1;k>=level;k--) cur.boxes.push(k); dayCell.push({col:cols.length, level}); }
+                  else if (level>=last+reversal){ cols.push(cur); cur={dir:1,boxes:[]}; for(let m=last+1;m<=level;m++) cur.boxes.push(m); dayCell.push({col:cols.length, level}); }
+                  else dayCell.push({col:cols.length, level:last});
+                }
+              });
+              if (cur) cols.push(cur);
+              const allLevels = [].concat(...cols.map(c=>c.boxes));
+              const top = Math.max(...allLevels), bot = Math.min(...allLevels);
+              const mark = dayCell[reversalIdx];
+              const rows = [];
+              for (let lvl=top; lvl>=bot; lvl--){
+                rows.push(cols.map((c,ci) => {
+                  const has = c.boxes.indexOf(lvl)>=0;
+                  const isMark = showMarker && mark && mark.col===ci && mark.level===lvl;
+                  return <span key={ci} className={(has ? (c.dir===1?"x":"o") : "") + (isMark ? " h-pnf-mark" : "")}>{has ? (c.dir===1?"X":"O") : "·"} </span>;
+                }));
+              }
+              artifact = <div className="h-pnf">{rows.map((r,i) => <div key={i}>{r}</div>)}</div>;
+            } else {
+              // Эры 3 (свечи) и 4 (терминал) — больше баров, чем table/line/P&F: свеча
+              // масштабируется лучше, это и есть часть урока. Эра 4 берёт хвост до сегодняшнего
+              // дня включительно (goldFull.candles заканчивается текущей датой) — "живой" срез.
+              const withLayers = eraIdx === 4;
+              const chartCandles = goldFull ? goldFull.candles.slice(-150) : candles;
+              artifact = (
+                <div>
+                  <div key={"lwc-"+eraIdx+"-"+showMarker} style={{height:260}} ref={el => {
+                    if (!el || typeof LightweightCharts === "undefined") return;
+                    el.innerHTML = "";
+                    const chart = LightweightCharts.createChart(el, {
+                      width: el.clientWidth, height: 260,
+                      layout: { background: { color: "transparent" }, textColor: "#55524B" },
+                      grid: { vertLines: { color: "#E7DFCF" }, horzLines: { color: "#E7DFCF" } },
+                      rightPriceScale: { borderColor: "#E7DFCF" }, timeScale: { borderColor: "#E7DFCF" }
+                    });
+                    const series = chart.addCandlestickSeries({ upColor:"#2E7D5B", downColor:"#B14848", borderVisible:false, wickUpColor:"#2E7D5B", wickDownColor:"#B14848" });
+                    series.setData(chartCandles.map(c => ({ time:c.time, open:c.open, high:c.high, low:c.low, close:c.close })));
+                    if (showMarker) {
+                      series.setMarkers([{ time: gold30.meta.reversal_day, position:"belowBar", color:"#C9A227", shape:"arrowUp", text:"◆" }]);
+                    }
+                    chart.timeScale().fitContent();
+                  }} />
+                  {withLayers && (
+                    <div style={{marginTop:8,fontSize:13}}>
+                      <span style={{cursor:"pointer",borderBottom:"1px solid var(--h-gold)"}} onClick={() => window.open('/chart.html','_blank')}>{tr.erasLive}</span>
+                    </div>
+                  )}
+                </div>
+              );
             }
-          },
-          React.createElement('span',{style:{fontSize:25}},ex.flag),
-          React.createElement('div',{style:{width:115}},
-            React.createElement('div',{style:{fontSize:18,fontWeight:700,fontFamily:"monospace",color:ex.accent?C.gold:C.black}},ex.name),
-            React.createElement(Mono,{size:13,color:ex.accent?"#666":C.inkFaint,spacing:0},ex.yr)
-          ),
-          React.createElement('div',{style:{flex:1, minWidth:100}},
-            React.createElement('div',{style:{height:4,background:ex.accent?"#333":C.surfaceMid,borderRadius:2,overflow:"hidden"}},
-              React.createElement('div',{style:{width:`${ex.bar}%`,height:"100%",background:`linear-gradient(90deg,${C.gold},${C.goldLight})`}})
-            )
-          ),
-          React.createElement('div',{style:{textAlign:"right",minWidth:140}},
-            React.createElement('div',{style:{fontSize:18,color:C.gold,fontFamily:"monospace",fontWeight:700}},ex.cap),
-            React.createElement(Mono,{size:13,color:ex.accent?"#666":C.inkFaint,spacing:0},ex.cos," ",tr.companies)
-          ),
-          React.createElement('span',{style:{color:ex.accent?C.gold:C.inkFaint,fontSize:18,marginLeft:5}},exOpen===i?"▾":"›")
-          ),
-          exOpen===i && React.createElement('div',{
-            onClick:(e)=>e.stopPropagation(),
-            style:{background:C.white,border:`1px solid ${C.borderGold}`,padding:"20px 5vw",marginLeft:20}
-          },
-            React.createElement(Mono,{size:13,color:C.gold,spacing:2,style:{display:"block",marginBottom:12}},tr.top5||"Top-5"),
-            (ex.top5||[]).map((c,ci)=>React.createElement('div',{key:ci,style:{
-              fontSize:16,color:C.inkMid,padding:"7px 0",
-              borderBottom:ci<(ex.top5.length-1)?`1px solid ${C.border}`:"none",fontFamily:"monospace"
-            }},React.createElement('span',{style:{color:C.inkFaint,marginRight:10}},`${ci+1}.`),c))
-          )
-        ))
-      ),
 
-      React.createElement('div',{style:{border:`1px solid ${C.border}`,padding:"35px 5vw",marginBottom:60,background:C.surface,position:"relative"}},
-        React.createElement('div',{style:{marginBottom:15}},React.createElement(Chip,{},tr.factTag)),
-        React.createElement('p',{style:{fontSize:20,fontWeight:700,margin:"0 0 12px",color:C.black,fontFamily:"'DM Serif Display',serif"}},tr.factTitle),
-        React.createElement('p',{style:{fontSize:18,color:C.inkMid,lineHeight:1.8,margin:0}},tr.factBody)
-      ),
+            return (
+              <div>
+                <div style={phase==="legend" ? {filter:"blur(6px)",pointerEvents:"none",userSelect:"none"} : null}>{artifact}</div>
+
+                {phase==="legend" && (
+                  <div style={{position:"absolute",inset:0,background:"rgba(251,246,239,.94)",border:"1px solid var(--h-line-gold)",borderRadius:8,padding:"20px 22px",display:"flex",flexDirection:"column",justifyContent:"center",gap:8,overflowY:"auto"}}>
+                    <div style={{fontFamily:"monospace",fontSize:10.5,letterSpacing:".08em",color:"var(--h-gold)"}}>
+                      {lang==="ru"?"ЧТО ЭТО":lang==="ro"?"CE ESTE":"WHAT IS THIS"}
+                    </div>
+                    <p style={{fontSize:14,lineHeight:1.55,margin:0,color:"var(--h-ink)"}}>{lg.what}</p>
+                    <div style={{fontFamily:"monospace",fontSize:10.5,letterSpacing:".08em",color:"var(--h-gold)",marginTop:6}}>
+                      {lang==="ru"?"КАК ЧИТАТЬ":lang==="ro"?"CUM SE CITEȘTE":"HOW TO READ IT"}
+                    </div>
+                    <p style={{fontSize:14,lineHeight:1.55,margin:0,color:"var(--h-ink)"}}>{lg.how}</p>
+                    {lg.why && <React.Fragment>
+                      <div style={{fontFamily:"monospace",fontSize:10.5,letterSpacing:".08em",color:"var(--h-gold)",marginTop:6}}>
+                        {lang==="ru"?"ЗАЧЕМ ПРИДУМАЛИ":lang==="ro"?"DE CE A APĂRUT":"WHY IT WAS INVENTED"}
+                      </div>
+                      <p style={{fontSize:14,lineHeight:1.55,margin:0,color:"var(--h-ink)"}}>{lg.why}</p>
+                    </React.Fragment>}
+                    <button className="h-btn" style={{marginTop:10,alignSelf:"flex-start"}} onClick={() => advancePhase(eraIdx,"guided")}>
+                      {lang==="ru"?"Понятно, показать →":lang==="ro"?"Am înțeles, arată →":"Got it, show me →"}
+                    </button>
+                  </div>
+                )}
+
+                {phase==="guided" && eraIdx < 3 && (
+                  <div style={{marginTop:12,background:"var(--h-gold-pale)",border:"1px solid var(--h-line-gold)",borderRadius:8,padding:"12px 16px"}}>
+                    <p style={{fontSize:13.5,lineHeight:1.5,margin:0,color:"var(--h-ink-soft)"}}>{lg.notice}</p>
+                    <button className="h-btn" style={{marginTop:10}} onClick={() => advancePhase(eraIdx,"task")}>
+                      {lang==="ru"?"Дальше: задача →":lang==="ro"?"Mai departe: sarcina →":"Next: the task →"}
+                    </button>
+                  </div>
+                )}
+
+                {phase!=="legend" && eraIdx >= 3 && (
+                  <div style={{marginTop:12,background:"var(--h-gold-pale)",border:"1px solid var(--h-line-gold)",borderRadius:8,padding:"12px 16px"}}>
+                    <p style={{fontSize:13.5,lineHeight:1.5,margin:0,color:"var(--h-ink-soft)"}}>{lg.notice}</p>
+                    <p style={{fontFamily:"monospace",fontSize:12.5,color:"var(--h-gold)",margin:"8px 0 0"}}>{tr.erasReversalNote}{gold30.meta.reversal_day}</p>
+                  </div>
+                )}
+
+                {phase==="task" && eraIdx < 3 && (
+                  <div style={{marginTop:12,display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:10}}>
+                    <span style={{fontSize:13.5,color:"var(--h-ink-soft)"}}>{tr.erasTask}</span>
+                    {!eraRevealed[eraIdx]
+                      ? <button className="h-btn ghost" onClick={() => setEraRevealed(r => ({...r,[eraIdx]:true}))}>
+                          {lang==="ru"?"Показать ответ":lang==="ro"?"Arată răspunsul":"Show the answer"}
+                        </button>
+                      : <span style={{fontFamily:"monospace",fontSize:12.5,color:"var(--h-gold)"}}>◆ {gold30.meta.reversal_day}</span>
+                    }
+                  </div>
+                )}
+              </div>
+            );
+          })()}
+        </div>
+        <div className="h-note" style={{marginBottom:60}}>{(window.ChronoEraFinalNote && window.ChronoEraFinalNote[lang]) || tr.erasLesson}</div>
+      </div>,
 
       React.createElement(Rule,{}),
 
       React.createElement(SH,{tag:tr.sec14Tag,title:tr.sec14Title,sub:tr.sec14Sub}),
       React.createElement('div',{style:{background:C.surface,border:`1px solid ${C.border}`,padding:"35px 5vw",marginBottom:60}},
-        React.createElement('div',{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:20,marginBottom:25}},
+        React.createElement('p',{style:{fontSize:16,lineHeight:1.7,color:C.inkMid,marginBottom:25,maxWidth:"62ch"}},tr.calcIntro),
+        React.createElement('div',{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:20,marginBottom:10}},
           React.createElement('div',{},
-            React.createElement(Mono,{size:13,color:C.inkSoft,spacing:2,style:{display:"block",marginBottom:8}},tr.amountLabel),
-            React.createElement('input',{type:"number",value:tmAmt,onChange:e=>setTmAmt(e.target.value),style:{width:"100%",background:C.white,border:`1px solid ${C.border}`,color:C.ink,padding:"12px 15px",fontFamily:"monospace",fontSize:18,outline:"none",boxSizing:"border-box"}})
+            React.createElement(Mono,{size:13,color:C.inkSoft,spacing:2,style:{display:"block",marginBottom:8}},tr.assetLabel),
+            React.createElement('select',{value:calcAsset,onChange:e=>setCalcAsset(e.target.value),style:{width:"100%",background:C.white,border:`1px solid ${C.border}`,color:C.ink,padding:"12px 15px",fontFamily:"monospace",fontSize:16,outline:"none"}},
+              React.createElement('option',{value:"gold"},"GOLD (MT5, 2021→)"),
+              React.createElement('option',{value:"djia"},tr.djiaLabel+" — "+(lang==="ru"?"100 лет":lang==="ro"?"100 de ani":"100 years")),
+              React.createElement('option',{value:"nikkei"},"Nikkei-1989 ("+(lang==="ru"?"жёсткий режим":lang==="ro"?"mod dificil":"hard mode")+")")
+            )
           ),
           React.createElement('div',{},
             React.createElement(Mono,{size:13,color:C.inkSoft,spacing:2,style:{display:"block",marginBottom:8}},tr.yearLabel),
-            React.createElement('select',{value:tmYr,onChange:e=>setTmYr(e.target.value),style:{width:"100%",background:C.white,border:`1px solid ${C.border}`,color:C.ink,padding:"12px 15px",fontFamily:"monospace",fontSize:18,outline:"none"}},
-              ["2005","2010","2012","2015","2018","2020","2022"].map(y=>React.createElement('option',{key:y},y))
+            React.createElement('select',{value:calcStart,onChange:e=>setCalcStart(e.target.value),style:{width:"100%",background:C.white,border:`1px solid ${C.border}`,color:C.ink,padding:"12px 15px",fontFamily:"monospace",fontSize:16,outline:"none"}},
+              (calcSeries?calcSeries.starts:[]).map(s=>React.createElement('option',{key:s.v,value:s.v},s.l))
             )
           ),
           React.createElement('div',{},
-            React.createElement(Mono,{size:13,color:C.inkSoft,spacing:2,style:{display:"block",marginBottom:8}},tr.assetLabel),
-            React.createElement('select',{value:tmAsset,onChange:e=>setTmAsset(e.target.value),style:{width:"100%",background:C.white,border:`1px solid ${C.border}`,color:C.ink,padding:"12px 15px",fontFamily:"monospace",fontSize:18,outline:"none"}},
-              Object.keys(TM).filter(k=>TM[k][parseInt(tmYr)]).map(a=>React.createElement('option',{key:a,value:a},(TM_EMOJIS?.[a]||"")+" "+a))
-            )
+            React.createElement(Mono,{size:13,color:C.inkSoft,spacing:2,style:{display:"block",marginBottom:8}},tr.amountLabel),
+            React.createElement('input',{type:"number",value:calcAmount,onChange:e=>setCalcAmount(e.target.value),style:{width:"100%",background:C.white,border:`1px solid ${C.border}`,color:C.ink,padding:"12px 15px",fontFamily:"monospace",fontSize:18,outline:"none",boxSizing:"border-box"}})
           )
         ),
-        React.createElement('button',{onClick:calcTM,style:{background:C.black,color:C.white,border:"none",padding:"15px 40px",fontFamily:"monospace",fontSize:14,letterSpacing:3,cursor:"pointer"},
-          onMouseEnter:e=>e.target.style.background=C.gold,
-          onMouseLeave:e=>e.target.style.background=C.black,
-        },tr.calcBtn),
-        tmRes&&React.createElement('div',{style:{marginTop:30}},
-          React.createElement('div',{style:{padding:"25px 5vw",background:C.white,border:`1px solid ${C.borderGold}`,marginBottom:15}},
-            React.createElement('div',{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(140px,1fr))",gap:20}},
-              [{l:tr.finalLabel,v:`$${tmRes.fin.toLocaleString()}`,big:true,col:C.gold},
-               {l:tr.profitLabel,v:`+$${tmRes.gain.toLocaleString()}`,col:"#22c55e"},
-               {l:tr.growthLabel,v:`+${tmRes.pct}%`,col:"#22c55e"},
-               {l:tr.multLabel,v:`×${tmRes.mult}`,col:C.black}
-              ].map((s,i)=>React.createElement('div',{key:i,style:{textAlign:"center"}},
-                React.createElement(Mono,{size:11,color:C.inkSoft,spacing:2,style:{display:"block",marginBottom:5}},s.l),
-                React.createElement('div',{style:{fontSize:s.big?33:23,color:s.col,fontFamily:"monospace",fontWeight:700}},s.v)
-              ))
+        React.createElement('p',{style:{fontSize:12,color:C.inkFaint,marginBottom:25,fontStyle:"italic"}},tr.calcRangeNote),
+        !calcSeries
+          ? React.createElement('div',{style:{fontSize:12.5,color:C.inkFaint,fontFamily:"monospace",marginTop:20}},tr.calcLoading)
+          : calcResult && React.createElement('div',{style:{marginTop:30}},
+              React.createElement('div',{style:{padding:"25px 5vw",background:C.white,border:`1px solid ${C.borderGold}`,marginBottom:15}},
+                React.createElement('div',{style:{fontSize:33,fontFamily:"monospace",fontWeight:700,color:C.gold}},
+                  "$"+Math.round(calcResult.amount).toLocaleString()+" → $"+Math.round(calcResult.final).toLocaleString()
+                ),
+                React.createElement('div',{style:{fontSize:13,color:C.inkFaint,marginTop:6,fontFamily:"monospace"}},
+                  calcResult.from+" → "+calcResult.to+" · x"+calcResult.mult.toFixed(2)
+                )
+              ),
+              React.createElement('div',{style:{background:C.surface,border:`1px solid ${C.border}`,padding:"18px 5vw",fontSize:14,color:"#b14848"}},
+                tr.calcWorst+"$"+Math.round(calcResult.amount*calcResult.worstMult).toLocaleString()+" ("+calcResult.worst.key+")"+tr.calcWorstQ
+              )
             )
-          ),
-          React.createElement('div',{style:{background:C.surface,border:`1px solid ${C.border}`,padding:"18px 5vw"}},
-            React.createElement(Mono,{size:11,color:C.inkSoft,spacing:2,style:{display:"block",marginBottom:12}},
-              lang==="ru"?"ДЕПОЗИТ VS РЫНОК":lang==="en"?"DEPOSIT VS MARKET":"DEPOZIT VS PIAȚĂ"
-            ),
-            React.createElement('div',{style:{display:"flex",alignItems:"center",gap:12,marginBottom:10, flexWrap:"wrap"}},
-              React.createElement('span',{style:{fontSize:14,fontFamily:"monospace",color:C.inkSoft,width:140,flexShrink:0}},"🏦 "+( lang==="ru"?"Депозит 5%":lang==="en"?"Deposit 5%":"Depozit 5%")),
-              React.createElement('div',{style:{flex:1,height:9,background:"#e8e4dc",borderRadius:4,overflow:"hidden", minWidth: 100}},
-                React.createElement('div',{style:{width:`${Math.min(tmRes.depFin/tmRes.fin*100,100).toFixed(0)}%`,height:"100%",background:"#f97316",borderRadius:4,transition:"width .8s"}})
-              ),
-              React.createElement('span',{style:{fontSize:15,fontFamily:"monospace",fontWeight:700,color:C.inkMid,minWidth:96,textAlign:"right"}},"$"+tmRes.depFin.toLocaleString())
-            ),
-            React.createElement('div',{style:{display:"flex",alignItems:"center",gap:12, flexWrap:"wrap"}},
-              React.createElement('span',{style:{fontSize:14,fontFamily:"monospace",color:C.inkSoft,width:140,flexShrink:0}},(TM_EMOJIS[tmAsset]||"📈")+" "+tmAsset.substring(0,10)),
-              React.createElement('div',{style:{flex:1,height:9,background:"#e8e4dc",borderRadius:4,overflow:"hidden", minWidth: 100}},
-                React.createElement('div',{style:{width:"100%",height:"100%",background:C.gold,borderRadius:4}})
-              ),
-              React.createElement('span',{style:{fontSize:15,fontFamily:"monospace",fontWeight:700,color:C.gold,minWidth:96,textAlign:"right"}},"$"+tmRes.fin.toLocaleString())
-            ),
-            tmRes.note && React.createElement(Mono,{size:11,color:C.inkFaint,spacing:1,style:{display:"block",marginTop:10}},tmRes.note)
-          )
-        )
       ),
 
       (lang==="ru"||lang==="ro")&&React.createElement('div',{style:{border:`1px solid ${C.border}`,padding:"35px 5vw",marginBottom:60,background:C.surface}},
@@ -873,111 +848,35 @@ function Level1({onBack, onNext, path}) {
 
       React.createElement(Rule,{}),
 
-      // 1.5 ТЕХАНАЛИЗ И ГРАФИК
-      <SH tag={tr.sec15Tag} title={tr.sec15Title} />,
-      
-      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 20 }}>
-        <Toggle />
-      </div>,
-      
-      <div style={{ background: C.surface, border: `1px solid ${C.border}`, padding: "35px 5vw", marginBottom: 60 }}>
-        <p style={{ fontSize: 19, lineHeight: 1.8, color: C.inkMid, marginBottom: 30 }}>
-          {mode === "beginner" ? tr.taBeginner : tr.taPro}
-        </p>
-
-        {/* СВЕЧНОЙ ГРАФИК (Trading Central Style) */}
-        <div style={{ background: "#131722", borderRadius: 8, position: "relative", height: 430, marginBottom: 30, overflow: "hidden", fontFamily: "'DM Sans', sans-serif" }}>
-          <div style={{ padding: "18px 23px", borderBottom: "1px solid #2a2e39", display: "flex", justifyContent: "space-between", color: "#d1d4dc", fontSize: 16 }}>
-            <div><span style={{ color: "#f23645", fontWeight: 700 }}>Sell</span> <span style={{ marginLeft: 20 }}>GOLD — Gold</span></div>
-            <div style={{ color: "#787b86" }}>Daily</div>
-          </div>
-
-          <svg viewBox="0 0 600 280" style={{ width: "100%", height: "calc(100% - 60px)", display: "block" }}>
-            <line x1="0" y1="50" x2="520" y2="50" stroke="#2a2e39" strokeWidth="1" />
-            <line x1="0" y1="120" x2="520" y2="120" stroke="#2a2e39" strokeWidth="1" />
-            <line x1="0" y1="190" x2="520" y2="190" stroke="#2a2e39" strokeWidth="1" />
-            <line x1="0" y1="260" x2="520" y2="260" stroke="#2a2e39" strokeWidth="1" />
-
-            <line x1="0" y1={getCY(5235)} x2="520" y2={getCY(5235)} stroke="#089981" strokeWidth="1" />
-            <line x1="0" y1={getCY(5215)} x2="520" y2={getCY(5215)} stroke="#089981" strokeWidth="1" />
-            
-            <line x1="0" y1={getCY(5195)} x2="520" y2={getCY(5195)} stroke="#ff9800" strokeWidth="1" />
-            <text x="10" y={getCY(5195) - 6} fill="#089981" fontSize="12">{S.chartResistancePivot}</text>
-
-            <line x1="0" y1={getCY(5178)} x2="520" y2={getCY(5178)} stroke="#2962ff" strokeWidth="1" strokeDasharray="3,3" />
-            <text x="10" y={getCY(5178) - 6} fill="#787b86" fontSize="12">{S.chartLastSignal}</text>
-
-            <line x1="0" y1={getCY(5135)} x2="520" y2={getCY(5135)} stroke="#f23645" strokeWidth="1" />
-            <text x="10" y={getCY(5135) - 6} fill="#f23645" fontSize="12">{S.chartSupport}</text>
-            <line x1="0" y1={getCY(5115)} x2="520" y2={getCY(5115)} stroke="#f23645" strokeWidth="1" />
-
-            {CANDLES.map((c, i) => {
-              const x = 20 + i * 20;
-              const isUp = c.c >= c.o;
-              const color = isUp ? "#089981" : "#f23645";
-              const yTop = getCY(Math.max(c.o, c.c));
-              const yBot = getCY(Math.min(c.o, c.c));
-              const bodyH = Math.max(1.5, yBot - yTop);
-              return (
-                <g key={i}>
-                  <line x1={x} y1={getCY(c.h)} x2={x} y2={getCY(c.l)} stroke={color} strokeWidth="1.5" />
-                  <rect x={x - 4} y={yTop} width="8" height={bodyH} fill={color} />
-                </g>
-              );
-            })}
-
-            <g transform="translate(520, 0)">
-              <rect x="0" y="0" width="80" height="280" fill="#1e222d" />
-              
-              <rect x="5" y={getCY(5235)-9} width="65" height="20" fill="#089981" rx="2" />
-              <text x="10" y={getCY(5235)+5} fill="#fff" fontSize="12" fontFamily="monospace">5235.00</text>
-
-              <rect x="5" y={getCY(5215)-9} width="65" height="20" fill="#089981" rx="2" />
-              <text x="10" y={getCY(5215)+5} fill="#fff" fontSize="12" fontFamily="monospace">5215.00</text>
-
-              <rect x="5" y={getCY(5195)-9} width="65" height="20" fill="#ff9800" rx="2" />
-              <text x="10" y={getCY(5195)+5} fill="#fff" fontSize="12" fontFamily="monospace">5195.00</text>
-
-              <rect x="5" y={getCY(5178)-9} width="65" height="20" fill="#2962ff" rx="2" />
-              <text x="10" y={getCY(5178)+5} fill="#fff" fontSize="12" fontFamily="monospace">5178.00</text>
-
-              <rect x="5" y={getCY(5135)-9} width="65" height="20" fill="#f23645" rx="2" />
-              <text x="10" y={getCY(5135)+5} fill="#fff" fontSize="12" fontFamily="monospace">5135.00</text>
-
-              <rect x="5" y={getCY(5115)-9} width="65" height="20" fill="#f23645" rx="2" />
-              <text x="10" y={getCY(5115)+5} fill="#fff" fontSize="12" fontFamily="monospace">5115.00</text>
-            </g>
-          </svg>
+      <div style={{border:`1px solid ${C.border}`,padding:"30px 5vw",marginBottom:40,background:C.surface}}>
+        <Chip>{tr.predictTag}</Chip>
+        <p style={{fontSize:19,color:C.ink,margin:"14px 0 18px"}}>{tr.predictQ}</p>
+        <div style={{display:"flex",gap:12}}>
+          <button className="h-btn" disabled={!!predictAnswered} style={{opacity:predictAnswered&&predictAnswered!=='yes'?0.5:1}} onClick={()=>setPredictAnswered('yes')}>{tr.predictYes}{predictAnswered==='yes'?' ✓':''}</button>
+          <button className="h-btn ghost" disabled={!!predictAnswered} style={{opacity:predictAnswered&&predictAnswered!=='no'?0.5:1}} onClick={()=>setPredictAnswered('no')}>{tr.predictNo}{predictAnswered==='no'?' ✓':''}</button>
         </div>
+      </div>,
 
-        {mode === "pro" && (
-          <div style={{ background: C.dark, color: C.white, padding: "25px", fontFamily: "monospace", fontSize: 16, lineHeight: 1.6 }}>
-            <div style={{ color: C.gold, marginBottom: 12, fontSize: 14, letterSpacing: 2 }}>PIVOT POINTS FORMULAS:</div>
-            <div><span style={{color: "#888"}}>{S.pivotBase}</span> (High + Low + Close) / 3</div>
-            <div><span style={{color: "#888"}}>{S.pivotResistance}</span> (P × 2) - Low</div>
-            <div><span style={{color: "#888"}}>{S.pivotSupport}</span> (P × 2) - High</div>
-            <div style={{ marginTop: 15, fontSize: 14, color: "#aaa", fontStyle: "italic" }}>{S.pivotNote}</div>
-          </div>
-        )}
+      <div style={{border:`1px dashed ${C.borderGold}`,padding:"25px 5vw",marginBottom:40,background:C.white}}>
+        <Chip>{tr.cliffTag}</Chip>
+        <p style={{fontSize:16,color:C.inkMid,lineHeight:1.7,margin:"14px 0 0"}}>{tr.cliffBody}</p>
       </div>,
 
       <Rule />,
 
-      React.createElement(SH,{tag:tr.progressTag,title:lang==="ru"?"Что ты узнал на этом уровне":lang==="en"?"What You Learned This Level":"Ce ai Învățat la Acest Nivel"}),
-      React.createElement('div',{style:{marginBottom:60}},
-        tr.checks.map((text,i)=>React.createElement('div',{key:i,
-          onClick:()=>setChecks(c=>{const n=[...c];n[i]=!n[i];return n;}),
-          style:{display:"flex",alignItems:"center",gap:20,padding:"18px 25px",marginBottom:10,cursor:"pointer",border:`1px solid ${checks[i]?C.gold:C.border}`,background:checks[i]?C.goldPale:C.white,transition:"all 0.25s"}
-        },
-          React.createElement('div',{style:{width:23,height:23,border:`1px solid ${checks[i]?C.gold:C.inkFaint}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,background:checks[i]?C.gold:"transparent",transition:"all 0.25s"}},
-            checks[i]&&React.createElement('span',{style:{color:C.white,fontSize:14}},"✓")
-          ),
-          React.createElement('span',{style:{fontSize:18,color:checks[i]?C.black:C.inkMid}},text)
-        ))
-      ),
+      <QuizBlock questions={quiz} levelId="level_1" lang={lang} onProgress={(a,t)=>setQuizProg(a/t*100)} copy={{
+        kicker: tr.progressTag,
+        title: lang==="ru"?"Что ты узнал на этом уровне":lang==="en"?"What You Learned This Level":"Ce ai Învățat la Acest Nivel",
+        next: lang==="ru"?"Дальше →":lang==="en"?"Next →":"Continuă →",
+        stuckAll: lang==="ru"?"Всё закрепилось.":lang==="en"?"Everything stuck.":"Totul s-a fixat.",
+        stuckSome: lang==="ru"?"Почти всё закрепилось.":lang==="en"?"Almost everything stuck.":"Aproape totul s-a fixat.",
+        backToSection: lang==="ru"?"← Вернуться к разделу":lang==="en"?"← Back to the section":"← Înapoi la secțiune",
+      }} />,
+
+      <ComplianceFootnote lang={lang} />,
 
       React.createElement('div',{style:{display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:20,paddingTop:40,borderTop:`1px solid ${C.border}`}},
-        React.createElement(AskAnalystBtn,{tr, chapterNum: 1}),
+        React.createElement(AskAnalystBtn,{tr, chapterNum: 1, lang}),
         React.createElement('button',{onClick: onNext, style:{background:C.black,color:C.white,border:"none",padding:"18px 35px",cursor:"pointer",fontFamily:"monospace",fontSize:14,letterSpacing:2,fontWeight:700},
           onMouseEnter:e=>e.target.style.background=C.gold,
           onMouseLeave:e=>e.target.style.background=C.black,

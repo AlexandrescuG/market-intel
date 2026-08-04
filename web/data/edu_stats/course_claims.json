@@ -1,0 +1,98 @@
+{
+  "_meta": {
+    "note_ru": "Машинно-читаемый список измеримых утверждений курса market_intel (главы 5-14). Собран вручную из реальных скриптов и их выгрузок в tools/edu_build/ и web/data/edu_stats/ — не сгенерирован автоматически, но каждая ссылка на файл проверена на существование на диске.",
+    "built": "2026-07-27"
+  },
+  "claims": [
+    {
+      "claim_ru": "Почасовой профиль медианного диапазона бара M30 по инструментам — какие часы вообще способны пройти заданную цель в пунктах.",
+      "claim_en": "Hourly median M30 bar-range profile per instrument — which hours can actually cover a given point target.",
+      "claim_ro": "Profilul orar median al intervalului barei M30 pe instrumente — ce ore pot acoperi efectiv o țintă dată în puncte.",
+      "chapter": 5,
+      "type": "measured",
+      "script": "tools/edu_build/hourly_profile.py",
+      "json": "/data/edu_stats/hourly_profile.json",
+      "csv": "/data/edu_stats/hourly_profile.csv",
+      "checked_at": "2026-07-27"
+    },
+    {
+      "claim_ru": "Знак сюрприза макро-релиза не предсказывает знак движения цены через 30 минут — результат неотличим от подбрасывания монеты.",
+      "claim_en": "The sign of a macro release's surprise does not predict the sign of the 30-minute price move — indistinguishable from a coin flip.",
+      "claim_ro": "Semnul surprizei unei publicații macro nu prezice semnul mișcării de preț după 30 de minute — indistinguibil de aruncarea unei monede.",
+      "chapter": 6,
+      "type": "measured",
+      "script": "tools/edu_build/surprise_reaction.py",
+      "json": "/data/edu_stats/surprise_reaction.json",
+      "csv": null,
+      "checked_at": "2026-07-27"
+    },
+    {
+      "claim_ru": "Согласованность классических свечных/графических паттернов с направлением следующих 5 баров — 46.8-51.3% по инструментам, статистически неотличимо от 50%.",
+      "claim_en": "Agreement of classic candlestick/chart patterns with the next 5 bars' direction — 46.8-51.3% across instruments, statistically indistinguishable from 50%.",
+      "claim_ro": "Concordanța pattern-urilor clasice cu direcția următoarelor 5 bare — 46.8-51.3% pe instrumente, indistinguibilă statistic de 50%.",
+      "chapter": "7, 10",
+      "type": "measured",
+      "script": "tools/edu_build/pattern_reality.py",
+      "json": "/data/edu_stats/pattern_reality.json",
+      "csv": "/data/edu_stats/pattern_reality.csv",
+      "checked_at": "2026-07-27"
+    },
+    {
+      "claim_ru": "Пара периодов EMA, лучшая на первой половине истории, не сохраняет ранг на второй половине — медианное место 31 из 61 возможных пар.",
+      "claim_en": "The best EMA-period pair on the first half of history doesn't keep its rank on the second half — median place 31 of 61 possible pairs.",
+      "claim_ro": "Perechea de perioade EMA cea mai bună pe prima jumătate a istoricului nu-și păstrează rangul pe a doua jumătate — locul median 31 din 61 de perechi posibile.",
+      "chapter": 8,
+      "type": "measured",
+      "script": "tools/edu_build/ema_reality.py",
+      "json": "/data/edu_stats/ema_reality.json",
+      "csv": "/data/edu_stats/ema_reality.csv",
+      "checked_at": "2026-07-27"
+    },
+    {
+      "claim_ru": "RSI>70 и медвежья дивергенция не дают статистического преимущества относительно безусловной базовой линии разворота (edge около 0 п.п.).",
+      "claim_en": "RSI>70 and bearish divergence give no statistical edge over the unconditional reversal baseline (edge near 0 percentage points).",
+      "claim_ro": "RSI>70 și divergența bearish nu oferă niciun avantaj statistic față de linia de bază necondiționată a reversării (edge aproape de 0 puncte procentuale).",
+      "chapter": 9,
+      "type": "measured",
+      "script": "tools/edu_build/oscillator_reality.py",
+      "json": "/data/edu_stats/oscillator_reality.json",
+      "csv": "/data/edu_stats/oscillator_reality.csv",
+      "checked_at": "2026-07-27"
+    },
+    {
+      "claim_ru": "Перевод стопа в безубыток после прохождения половины пути к цели закрывает 91.0% сделок в ноль вместо цели (n=117 541, Wilson CI [90.9, 91.2]).",
+      "claim_en": "Moving the stop to breakeven after covering half the distance to target closes 91.0% of trades at zero instead of target (n=117,541, Wilson CI [90.9, 91.2]).",
+      "claim_ro": "Mutarea stopului la breakeven după jumătatea drumului spre țintă închide 91.0% din tranzacții la zero în loc de țintă (n=117.541, Wilson CI [90.9, 91.2]).",
+      "chapter": 13,
+      "type": "measured",
+      "script": "tools/edu_build/breakeven_cost.py",
+      "json": "/data/edu_stats/breakeven_cost.json",
+      "csv": "/data/edu_stats/breakeven_cost.csv",
+      "checked_at": "2026-07-27"
+    },
+    {
+      "claim_ru": "Чтобы отличить систему с преимуществом от системы без него с уверенностью 95%, при типичных параметрах нужны сотни сделок, не десятки.",
+      "claim_en": "Distinguishing a system with an edge from one without, at 95% confidence, typically takes hundreds of trades, not dozens, under realistic parameters.",
+      "claim_ro": "Pentru a deosebi un sistem cu avantaj de unul fără, la 95% încredere, sunt necesare de regulă sute de tranzacții, nu zeci, la parametri realiști.",
+      "chapter": 12,
+      "type": "arithmetic",
+      "script": null,
+      "formula": "one-proportion z-test: n = [z(1-a/2)*sqrt(p0(1-p0)) + z(1-b)*sqrt(p1(1-p1))]^2 / (p1-p0)^2, a=0.05, power=80%",
+      "json": null,
+      "csv": null,
+      "checked_at": "2026-07-27"
+    },
+    {
+      "claim_ru": "При цели 5 пунктов и стопе 15 порог безубыточности превышает 75% ещё до издержек; с реальным спредом порог выше.",
+      "claim_en": "At a 5-point target and 15-point stop, the breakeven threshold exceeds 75% before costs even apply; with a real spread the threshold is higher.",
+      "claim_ro": "La o țintă de 5 puncte și un stop de 15, pragul de rentabilitate depășește 75% chiar înainte de costuri; cu un spread real pragul e mai mare.",
+      "chapter": 14,
+      "type": "arithmetic",
+      "script": null,
+      "formula": "wr_be = (stop + cost) / (target + stop)",
+      "json": null,
+      "csv": null,
+      "checked_at": "2026-07-27"
+    }
+  ]
+}

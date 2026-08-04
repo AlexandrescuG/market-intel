@@ -1,0 +1,159 @@
+/* «Архив SBF» — визуальный язык главы 1 «История: 400 лет рынка» (SPEC_edu_level1_history.md §8.3)
+   Паспарту + дуотон + печать SBF + хроно-степпер + карточки станций + era-слайдер (интерактив B). */
+
+.history-ep{--h-cream:#FBF6EF;--h-paper:#fff;--h-line:#E7DFCF;--h-line-gold:#D9C48A;
+  --h-ink:#2B2B33;--h-ink-soft:#55524B;--h-ink-faint:#8A8275;--h-gold:#C9A227;
+  --h-gold-pale:#F3E8C8;--h-dark:#141416;
+  --h-serif:'DM Serif Display',Georgia,serif;--h-mono:'JetBrains Mono',ui-monospace,monospace;
+  color:var(--h-ink);font-family:inherit}
+
+/* ---- Паспарту «Архив SBF» ---- */
+.h-passepartout{background:var(--h-paper);border:1px solid var(--h-line-gold);border-radius:6px;
+  padding:14px;box-shadow:0 8px 30px rgba(24,24,26,.08)}
+.h-artwork{position:relative;overflow:hidden;border:1px solid var(--h-line);border-radius:2px}
+.h-artwork img,.h-artwork svg.h-art{display:block;width:100%;height:auto;
+  filter:sepia(.55) saturate(.65) contrast(1.05) brightness(1.02)}
+.h-artwork::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(160deg,rgba(201,162,39,.10),rgba(20,20,22,.14));mix-blend-mode:multiply}
+.h-stamp{position:absolute;right:10px;bottom:10px;width:72px;height:72px;opacity:.20;
+  transform:rotate(-12deg);pointer-events:none;z-index:2}
+.h-caption{display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap;
+  font-family:var(--h-serif);font-style:italic;font-size:13.5px;color:var(--h-ink-soft);padding:10px 4px 0}
+.h-caption .h-src{font-family:var(--h-mono);font-style:normal;font-size:10px;letter-spacing:.08em;color:var(--h-ink-faint);white-space:nowrap}
+
+/* ---- Хроно-степпер ---- */
+.h-chrono{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:6px}
+.h-node{font-family:var(--h-mono);font-size:12px;letter-spacing:.06em;padding:9px 14px;border-radius:22px;
+  border:1px solid var(--h-line);background:var(--h-paper);color:var(--h-ink-soft);cursor:pointer;
+  transition:background .15s,border-color .15s,color .15s}
+.h-node:hover{border-color:var(--h-gold)}
+.h-node.done{border-color:var(--h-line-gold);background:var(--h-gold-pale);color:var(--h-ink)}
+.h-node.active{background:var(--h-dark);color:var(--h-gold-pale);border-color:var(--h-dark)}
+.h-sep{color:var(--h-line-gold)}
+.h-progress{margin-top:6px;font-family:var(--h-mono);font-size:11px;color:var(--h-ink-faint)}
+.h-progress b{color:var(--h-gold)}
+
+/* ---- Карточка станции ---- */
+.h-station{display:grid;gap:18px;margin-top:18px}
+.h-station-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.h-station-year{font-family:var(--h-mono);font-size:13px;letter-spacing:.08em;color:var(--h-gold);
+  background:var(--h-gold-pale);border:1px solid var(--h-line-gold);border-radius:20px;padding:3px 12px}
+.h-station-place{font-family:var(--h-mono);font-size:11px;color:var(--h-ink-faint);letter-spacing:.06em}
+.h-station-title{font-family:var(--h-serif);font-weight:400;font-size:24px;line-height:1.25;margin:6px 0 2px}
+.h-station-body{font-size:15px;line-height:1.6;color:var(--h-ink-soft);max-width:62ch}
+
+.h-callout{border-radius:10px;padding:12px 16px;font-size:13.5px;line-height:1.55;margin-top:4px;border:1px solid}
+.h-callout-fact{background:var(--h-gold-pale);border-color:var(--h-line-gold);color:var(--h-ink-soft)}
+.h-callout-fact::before{content:"НЕОЧЕВИДНЫЙ ФАКТ";display:block;font-family:var(--h-mono);font-size:9.5px;
+  letter-spacing:.12em;color:var(--h-gold);margin-bottom:4px}
+.h-callout-hook{background:var(--h-cream);border-color:var(--h-line);color:var(--h-ink-soft);font-style:italic}
+.h-callout-legend{background:#FBEAEA;border-color:#E3B9B9;color:#7A3B3B;font-size:12.5px}
+.h-callout-legend::before{content:"⚠ ЛЕГЕНДА, НЕ ФАКТ";display:block;font-family:var(--h-mono);font-size:9.5px;
+  letter-spacing:.1em;margin-bottom:4px}
+
+.h-station-source{font-family:var(--h-mono);font-size:10px;letter-spacing:.06em;color:var(--h-ink-faint);margin-top:2px}
+
+/* ---- Era-слайдер (интерактив B) ---- */
+.h-eras{margin-top:8px}
+.h-era-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.h-era-tab{font-family:var(--h-mono);font-size:11px;padding:7px 12px;border-radius:16px;
+  border:1px solid var(--h-line);background:var(--h-paper);color:var(--h-ink-soft);cursor:pointer}
+.h-era-tab.active{background:var(--h-dark);color:var(--h-gold-pale);border-color:var(--h-dark)}
+.h-era-frame{border:1px solid var(--h-line);border-radius:8px;background:var(--h-paper);padding:16px;min-height:260px}
+.h-era-label{font-family:var(--h-mono);font-size:10.5px;letter-spacing:.08em;color:var(--h-ink-faint);margin-bottom:10px}
+
+/* -- 1900 таблица -- */
+.h-table{width:100%;border-collapse:collapse;font-family:var(--h-mono);font-size:12px}
+.h-table th{text-align:right;font-weight:400;color:var(--h-ink-faint);border-bottom:1px solid var(--h-line);padding:4px 8px}
+.h-table td{text-align:right;padding:2px 8px;color:var(--h-ink-soft);border-bottom:1px dotted var(--h-line)}
+.h-table td:first-child,.h-table th:first-child{text-align:left}
+
+/* -- P&F клетки -- */
+.h-pnf{font-family:var(--h-mono);white-space:pre;font-size:16px;line-height:1.4;color:var(--h-ink-soft);
+  max-width:100%;overflow-x:auto;letter-spacing:.02em}
+.h-pnf .x{color:#2E7D5B;font-weight:700}.h-pnf .o{color:#B14848;font-weight:700}
+.h-pnf-mark{background:var(--h-gold-pale);outline:2px solid var(--h-gold);border-radius:3px}
+
+/* ---- Общее ---- */
+.h-note{margin-top:20px;background:var(--h-gold-pale);border:1px solid var(--h-line-gold);border-radius:10px;
+  padding:12px 16px;font-size:13.5px;color:var(--h-ink-soft)}
+.h-btn{font-family:var(--h-mono);font-size:12.5px;letter-spacing:.04em;padding:10px 18px;border-radius:22px;
+  border:1px solid var(--h-dark);background:var(--h-dark);color:var(--h-gold-pale);cursor:pointer}
+.h-btn:hover{opacity:.88}
+.h-btn.ghost{background:transparent;color:var(--h-ink);border-color:var(--h-line)}
+
+@media (max-width:640px){
+  .h-station-title{font-size:20px}
+  .h-chrono{gap:4px}
+  .h-node{padding:7px 10px;font-size:11px}
+}
+
+/* ---- Сцены машины времени (SceneEngine: EVENT/REPLAY/STORY, гл.2) ---- */
+.scn-wrap{border:1px solid var(--h-line,#E7DFCF);border-radius:8px;background:var(--h-paper,#fff);padding:14px}
+.scn-chart{width:100%}
+.scn-panel{margin-top:12px}
+.scn-marker-label{font-family:var(--h-mono,monospace);font-size:11.5px;letter-spacing:.04em;color:var(--h-gold,#C9A227);
+  background:var(--h-gold-pale,#F3E8C8);border:1px solid var(--h-line-gold,#D9C48A);border-radius:16px;
+  padding:5px 12px;display:inline-block;margin-bottom:10px}
+.scn-question{font-size:14.5px;color:var(--h-ink,#2B2B33);margin:0 0 10px}
+.scn-reveal{font-size:13.5px;line-height:1.55;color:var(--h-ink-soft,#55524B);margin:0 0 10px}
+.scn-story-text{font-size:14px;line-height:1.6;color:var(--h-ink-soft,#55524B);margin:0 0 12px}
+.scn-btnrow{display:flex;gap:10px;flex-wrap:wrap}
+/* Сетка вариантов решения (не навигация) -- SPEC_ch2_debug_and_chart_engine.md §1.5.
+   2 колонки одинаковой высоты, текст по левому краю -- полноценные кнопки выбора,
+   а не список ссылок в строку. */
+.scn-choicegrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:640px){.scn-choicegrid{grid-template-columns:1fr}}
+.scn-choice{font-family:var(--h-mono);font-size:13px;line-height:1.4;text-align:left;
+  padding:14px 16px;border-radius:6px;border:1px solid var(--h-line,#E7DFCF);
+  background:var(--h-paper,#fff);color:var(--h-ink,#2B2B33);cursor:pointer;
+  transition:border-color .15s,background .15s}
+.scn-choice:hover{border-color:var(--h-gold,#C9A227);background:var(--h-gold-pale,#F3E8C8)}
+.scn-dots{display:flex;gap:6px;margin-bottom:10px}
+.scn-dot{width:8px;height:8px;border-radius:50%;background:var(--h-line,#E7DFCF);display:inline-block}
+.scn-dot.active{background:var(--h-gold,#C9A227)}
+.scn-dot.done{background:var(--h-line-gold,#D9C48A)}
+
+/* ---- REPLAY mode -- движок графика (SPEC_ch2_debug_and_chart_engine.md §4) ---- */
+.scn-replay-head{margin-bottom:10px}
+.scn-replay-title{font-size:14px;font-weight:600;color:var(--h-ink,#2B2B33);margin-bottom:2px}
+.scn-replay-period{font-family:var(--h-mono,monospace);font-size:11px;color:var(--h-ink-faint,#8A8275)}
+.scn-timeline{display:flex;gap:4px;margin:10px 0;flex-wrap:wrap}
+.scn-timeline-dot{width:10px;height:10px;border-radius:50%;background:var(--h-line,#E7DFCF);
+  border:none;padding:0;cursor:pointer;transition:background .15s,transform .15s}
+.scn-timeline-dot:hover{transform:scale(1.25)}
+.scn-timeline-dot.active{background:var(--h-gold,#C9A227);transform:scale(1.3)}
+.scn-timeline-dot.done{background:var(--h-line-gold,#D9C48A)}
+.scn-symbol-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.scn-symbol-pill{font-family:var(--h-mono,monospace);font-size:11.5px;letter-spacing:.03em;
+  padding:6px 13px;border-radius:16px;border:1px solid var(--h-line,#E7DFCF);
+  background:var(--h-paper,#fff);color:var(--h-ink-soft,#55524B);cursor:pointer;
+  transition:all .15s}
+.scn-symbol-pill:hover{border-color:var(--h-gold,#C9A227)}
+.scn-symbol-pill.active{background:var(--h-dark,#141416);color:var(--h-gold-pale,#F3E8C8);border-color:var(--h-dark,#141416)}
+.scn-symbol-pill.compare-on{border-color:var(--h-gold,#C9A227);background:var(--h-gold-pale,#F3E8C8);color:var(--h-ink,#2B2B33)}
+.scn-toolrow{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-top:8px}
+.scn-tool-btn{font-family:var(--h-mono,monospace);font-size:11px;letter-spacing:.03em;
+  padding:5px 12px;border-radius:14px;border:1px solid var(--h-line,#E7DFCF);
+  background:transparent;color:var(--h-ink-soft,#55524B);cursor:pointer}
+.scn-tool-btn:hover{border-color:var(--h-gold,#C9A227);color:var(--h-ink,#2B2B33)}
+.scn-tool-btn.active{background:var(--h-gold,#C9A227);border-color:var(--h-gold,#C9A227);color:var(--h-dark,#141416)}
+.scn-back-to-event{position:absolute;top:10px;right:10px;z-index:5;font-family:var(--h-mono,monospace);
+  font-size:11px;padding:6px 12px;border-radius:14px;border:1px solid var(--h-gold,#C9A227);
+  background:var(--h-paper,#fff);color:var(--h-gold,#C9A227);cursor:pointer;
+  box-shadow:0 4px 12px rgba(24,24,26,.1)}
+.scn-compare-note{font-size:10.5px;color:var(--h-ink-faint,#8A8275);font-style:italic;margin-top:6px}
+.scn-chart-wrap{position:relative}
+
+/* ---- MULTI mode (гл.3 cold open) ---- */
+.scn-multi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:640px){.scn-multi-grid{grid-template-columns:1fr}}
+.scn-multi-pane{border:2px solid var(--h-line,#E7DFCF);border-radius:6px;padding:8px;cursor:pointer;
+  transition:border-color .15s,background .15s}
+.scn-multi-pane:hover{border-color:var(--h-gold,#C9A227)}
+.scn-multi-pane.picked{border-color:var(--h-gold,#C9A227);background:var(--h-gold-pale,#F3E8C8)}
+.scn-multi-pane.correct{border-color:#2E7D5B;background:rgba(46,125,91,.08)}
+.scn-multi-pane.wrong{border-color:#B14848;background:rgba(177,72,72,.08)}
+.scn-multi-pane.neutral{opacity:.55}
+.scn-multi-label{font-family:var(--h-mono,monospace);font-size:11px;letter-spacing:.06em;color:var(--h-ink-soft,#55524B);margin-bottom:4px}
+.scn-multi-chart{width:100%}

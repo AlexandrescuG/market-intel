@@ -14,8 +14,7 @@ import asyncio
 import concurrent.futures
 import logging
 import re
-import time
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from urllib.parse import quote_plus
 
 import cloakbrowser
@@ -74,20 +73,34 @@ async def _btn_count(article, testid: str) -> int:
     return 0
 
 
+_MAX_AGE_HOURS = 36  # принимаем твиты не старше 36 часов
+
+
 async def _extract(page) -> list[dict]:
+    cutoff = datetime.now(timezone.utc) - timedelta(hours=_MAX_AGE_HOURS)
     out = []
     for article in await page.query_selector_all('article[data-testid="tweet"]'):
         try:
-            tid = turl = None
+            tid = turl = pub_dt = None
             for link in await article.query_selector_all('a[href*="/status/"]'):
                 href = await link.get_attribute("href") or ""
                 m = re.search(r"/status/(\d+)", href)
                 if m:
                     tid = m.group(1)
                     turl = f"https://x.com{href}" if href.startswith("/") else href
-                    if await link.query_selector("time"):
+                    time_el = await link.query_selector("time")
+                    if time_el:
+                        dt_attr = await time_el.get_attribute("datetime") or ""
+                        try:
+                            pub_dt = datetime.fromisoformat(dt_attr.replace("Z", "+00:00"))
+                        except ValueError:
+                            pass
                         break
             if not tid:
+                continue
+            # Отбрасываем старые твиты
+            if pub_dt and pub_dt < cutoff:
+                log.debug("skip old tweet %s published %s", tid, pub_dt.date())
                 continue
             author = ""
             ub = await article.query_selector('[data-testid="User-Name"]')
@@ -97,31 +110,16 @@ async def _extract(page) -> list[dict]:
                     if h and "/" not in h:
                         author = h
                         break
-            # время твита из <time datetime="2026-06-16T14:23:00.000Z">
-            tweet_ts = 0.0
-            time_el = await article.query_selector("time")
-            if time_el:
-                dt_str = await time_el.get_attribute("datetime") or ""
-                try:
-                    tweet_ts = datetime.fromisoformat(
-                        dt_str.replace("Z", "+00:00")).timestamp()
-                except Exception:
-                    pass
-
-            # пропускаем твиты старше 24 часов
-            if tweet_ts and tweet_ts < time.time() - 86400:
-                continue
-
             text = ""
             te = await article.query_selector('[data-testid="tweetText"]')
             if te:
                 text = (await te.inner_text()).strip()
             out.append({
                 "tweet_id": tid, "author": author, "text": text, "url": turl,
+                "pub_date": pub_dt.isoformat() if pub_dt else None,
                 "likes": await _btn_count(article, "like"),
                 "retweets": await _btn_count(article, "retweet"),
                 "replies": await _btn_count(article, "reply"),
-                "tweet_ts": tweet_ts,
             })
         except Exception as e:
             log.debug("skip article: %s", e)
@@ -188,7 +186,11 @@ async def _caption(tw: dict, dim: str) -> str:
 
 
 async def _scan_query(page, dimension: str, query: str) -> list[dict]:
-    url = f"https://x.com/search?q={quote_plus(query)}&src=typed_query&f=top"
+    # since: вчера — не брать твиты старше вчерашнего дня
+    since = (datetime.now(timezone.utc) - timedelta(days=1)).strftime("%Y-%m-%d")
+    dated_query = f"{query} since:{since}"
+    # f=live — вкладка "Latest", не "Top" (Top показывает хиты за всё время)
+    url = f"https://x.com/search?q={quote_plus(dated_query)}&src=typed_query&f=live"
     try:
         await page.goto(url, wait_until="domcontentloaded", timeout=40_000)
     except Exception as e:

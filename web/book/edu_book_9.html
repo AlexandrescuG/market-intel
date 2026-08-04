@@ -94,7 +94,7 @@ const STRINGS = {
   },
 };
 
-const {C, Mono, Chip, Rule, AskAnalystBtn, getChUrl, QuizBlock, ComplianceFootnote} = window.AcademyShared;
+const {C, Mono, Chip, Rule, AskAnalystBtn, getChUrl, QuizBlock, ComplianceFootnote, ColdStart} = window.AcademyShared;
 
 const SectionTitle = ({children,sub,align="left",id}) => (
   <div id={id} style={{textAlign:align,marginBottom:36,scrollMarginTop:130}}>
@@ -130,17 +130,18 @@ function shuffled(arr) {
 // ── Загрузка данных главы: oscillator_reality.json + earnings_cases.json.
 function useCh9Data() {
   const { useState, useEffect } = React;
-  const [state, setState] = useState({ loading: true, error: null, osc: null, cases: null });
+  const [state, setState] = useState({ loading: true, error: null, osc: null, cases: null, scene: null });
   useEffect(() => {
     let cancelled = false;
     Promise.all([
       fetch("/data/edu_stats/oscillator_reality.json").then(r => { if (!r.ok) throw new Error("oscillator_reality.json HTTP " + r.status); return r.json(); }),
       fetch("/data/edu_stats/earnings_cases.json").then(r => { if (!r.ok) throw new Error("earnings_cases.json HTTP " + r.status); return r.json(); }),
-    ]).then(([osc, cases]) => {
-      if (!cancelled) setState({ loading: false, error: null, osc, cases: cases.cases });
+      fetch("/data/edu/rsi_divergence.json").then(r => { if (!r.ok) throw new Error("rsi_divergence.json HTTP " + r.status); return r.json(); }),
+    ]).then(([osc, cases, scene]) => {
+      if (!cancelled) setState({ loading: false, error: null, osc, cases: cases.cases, scene });
     }).catch(err => {
       console.error("[ch9] load failed:", err);
-      if (!cancelled) setState({ loading: false, error: err, osc: null, cases: null });
+      if (!cancelled) setState({ loading: false, error: err, osc: null, cases: null, scene: null });
     });
     return () => { cancelled = true; };
   }, []);
@@ -163,20 +164,88 @@ function buildVars(osc, lang) {
   };
 }
 
-// ─── Cold open ──────────────────────────────────────────────────────────────
-function ColdOpen9() {
+// ─── Cold start: "Перекуплен — значит упадёт?" (SPEC_coldstart_interactives_
+// ch6_15.md §5). Заменяет ColdOpen9. Первый настоящий график во всей главе:
+// реальные дневные свечи GOLD + RSI (rsi_divergence.json), правая часть
+// скрыта до первого пересечения RSI>70 (idx=35), три кнопки, раскрытие --
+// и конкретный случай, и агрегат по всем случаям (oscillator_reality.json,
+// уже посчитан в vars через buildVars).
+function ColdStart9Entry({ scene, vars }) {
+  const { useRef, useEffect } = React;
   const T9 = window.Ch9Content[INITIAL_LANG] || window.Ch9Content.ru;
-  const co = T9.coldOpen;
+  const cs = T9.coldStart;
+  const containerRef = useRef(null);
+  const chartRef = useRef(null);
+  const s = React.useState(false), committed = s[0], setCommitted = s[1];
+
+  if (!scene || !vars) return <div style={{background:C.black,padding:"60px 5vw",textAlign:"center"}}><Mono size={11} color={C.gold} spacing={4}>{cs.tag}</Mono></div>;
+
+  const HIDE_FROM = 36; // idx 35 -- первое RSI>70 пересечение, оно же последний видимый бар
+  const candles = scene.ohlc.map((c, i) => ({ time: Math.floor(Date.parse(c.time) / 1000), open: +c.open, high: +c.high, low: +c.low, close: +c.close, rsi: scene.rsi[i] }));
+  const caseIdx = HIDE_FROM - 1, targetIdx = Math.min(caseIdx + 10, candles.length - 1);
+  const dirUp = candles[targetIdx].close > candles[caseIdx].close;
+
+  useEffect(() => {
+    if (!containerRef.current || chartRef.current || typeof LightweightCharts === "undefined") return undefined;
+    const chart = LightweightCharts.createChart(containerRef.current, {
+      width: containerRef.current.clientWidth, height: 340,
+      layout: { background: { color: C.chartBg }, textColor: "rgba(255,255,255,0.55)" },
+      grid: { vertLines: { color: "rgba(255,255,255,0.05)" }, horzLines: { color: "rgba(255,255,255,0.05)" } },
+      rightPriceScale: { borderColor: "rgba(255,255,255,0.15)" },
+      timeScale: { borderColor: "rgba(255,255,255,0.15)", timeVisible: false },
+    });
+    const candleSeries = chart.addCandlestickSeries({
+      upColor: C.chartGreen, downColor: C.chartRed, borderUpColor: C.chartGreen, borderDownColor: C.chartRed,
+      wickUpColor: C.chartGreen, wickDownColor: C.chartRed,
+    });
+    const rsiSeries = chart.addLineSeries({ color: "#6ea8fe", lineWidth: 2, priceScaleId: "rsi", priceLineVisible: false, lastValueVisible: false });
+    rsiSeries.priceScale().applyOptions({ scaleMargins: { top: 0.78, bottom: 0 } });
+    rsiSeries.createPriceLine({ price: 70, color: "rgba(255,255,255,0.3)", lineWidth: 1, lineStyle: 2, axisLabelVisible: false });
+    chartRef.current = { chart, candleSeries, rsiSeries };
+    const ro = new ResizeObserver(entries => { if (entries[0]) chart.applyOptions({ width: entries[0].contentRect.width }); });
+    ro.observe(containerRef.current);
+    return () => { ro.disconnect(); chart.remove(); chartRef.current = null; };
+  }, []);
+
+  useEffect(() => {
+    if (!chartRef.current) return;
+    const n = committed ? candles.length : HIDE_FROM;
+    const visible = candles.slice(0, n);
+    chartRef.current.candleSeries.setData(visible.map(c => ({ time: c.time, open: c.open, high: c.high, low: c.low, close: c.close })));
+    chartRef.current.rsiSeries.setData(visible.map(c => c.rsi != null ? { time: c.time, value: c.rsi } : null).filter(Boolean));
+    chartRef.current.chart.timeScale().fitContent();
+  }, [committed]);
+
+  const commit = () => setCommitted(true);
+
   return (
-    <div style={{background:C.black,padding:"70px 5vw 56px",color:"#fff"}}>
-      <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:24,textAlign:"center"}}>{co.tag}</Mono>
-      <div style={{maxWidth:840,margin:"0 auto 20px"}}>
-        {co.lines.map((line,i) => (
-          <p key={i} style={{fontSize: i<2 ? 17 : i===co.lines.length-1 ? 17 : 15.5, color: i>=2?"rgba(255,255,255,0.72)":"#fff", fontWeight: i<2?600:400, lineHeight:1.75, marginBottom:14, fontFamily: i===co.lines.length-1 ? "'DM Serif Display',serif" : "inherit"}}>{line}</p>
-        ))}
-      </div>
-      <p style={{textAlign:"center",fontFamily:"monospace",fontSize:12,color:C.gold}}>{co.cta}</p>
-    </div>
+    <ColdStart
+      tag={cs.tag}
+      ask={cs.ask}
+      action={{ type: "custom", render: (csCommit) => (
+        <div>
+          <div style={{position:"relative", borderRadius:6, overflow:"hidden"}}>
+            <div ref={containerRef} data-source="/data/edu/rsi_divergence.json"/>
+          </div>
+          <div style={{display:"flex", gap:10, justifyContent:"center", flexWrap:"wrap", marginTop:16}}>
+            {[["down",cs.optDown],["up",cs.optUp],["dontknow",cs.optDontKnow]].map(([val,label]) => (
+              <button key={val} disabled={committed} onClick={() => { commit(); csCommit(val); }} style={{
+                fontFamily:"monospace", fontSize:14, fontWeight:700, padding:"14px 22px", borderRadius:4,
+                cursor: committed ? "default" : "pointer", background:"rgba(255,255,255,0.06)", color:"#fff",
+                border:"1px solid rgba(255,255,255,0.22)", opacity: committed ? 0.6 : 1,
+              }}>{label}</button>
+            ))}
+          </div>
+        </div>
+      )}}
+      reveal={() => fillTemplate(cs.revealTemplate, {
+        caseDate: scene.ohlc[caseIdx].time, caseRsi: scene.rsi[caseIdx],
+        caseDirWord: dirUp ? cs.dirUpPast : cs.dirDownPast,
+        caseFrom: candles[caseIdx].close, caseTo: candles[targetIdx].close,
+        n: vars.rsi_n, share: vars.rsi_share, base: vars.rsi_base,
+      })}
+      bridge={cs.bridge}
+    />
   );
 }
 
@@ -508,13 +577,15 @@ function CoreMeasureBlock({ vars, cells }) {
 
 // ─── Три кейса — три механизма ──────────────────────────────────────────────
 function ThreeCases({ cases }) {
-  const { useState } = React;
+  const { useState, useEffect } = React;
   const T9 = window.Ch9Content[INITIAL_LANG] || window.Ch9Content.ru;
   const tc = T9.threeCases;
   const nameKey = "company_" + INITIAL_LANG;
   const byId = {};
   (cases || []).forEach(c => { byId[c.id] = c; });
   const [active, setActive] = useState(0);
+  const [guess, setGuess] = useState(null);
+  useEffect(() => { setGuess(null); }, [active]);
   const tcase = tc.cases[active];
   const real = byId[tcase.id];
   return (
@@ -534,14 +605,23 @@ function ThreeCases({ cases }) {
         <div style={{fontWeight:600,fontSize:15,color:C.black,marginBottom:10,display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
           <span>{real ? real[nameKey] : tcase.id}</span>
           {real && <span style={{color:C.inkFaint,fontWeight:400,fontSize:12}}>· {real.report_date}</span>}
-          {real && real.reaction_1d_pct != null && (
+          {guess != null && real && real.reaction_1d_pct != null && (
             <span style={{fontFamily:"monospace",fontSize:13,fontWeight:700,color:real.reaction_1d_pct>=0?"#2d7a4f":C.red}}>
               {real.reaction_1d_pct>0?"+":""}{real.reaction_1d_pct}% · {tc.reactionLabel}
             </span>
           )}
         </div>
-        <p style={{fontSize:13,color:C.inkMid,lineHeight:1.7,marginBottom:real?10:0}}>{tcase.text}</p>
-        {real && <Mono size={10} color={C.inkFaint} spacing={0.5}>{tc.readMore}: {real.source}</Mono>}
+        <p style={{fontSize:13,color:C.inkMid,lineHeight:1.7,marginBottom:14}}>{tcase.setup}</p>
+        {guess == null ? (
+          <div style={{display:"flex",gap:10,marginBottom:real?10:0}}>
+            <p style={{fontSize:13,color:C.black,fontWeight:600,margin:"0 14px 0 0",alignSelf:"center"}}>{tc.guessAsk}</p>
+            <button onClick={()=>setGuess("up")} style={{fontFamily:"monospace",fontSize:12,padding:"8px 16px",cursor:"pointer",background:"#fff",color:C.inkMid,border:`1px solid ${C.border}`,borderRadius:4,fontWeight:600}}>{tc.guessUp}</button>
+            <button onClick={()=>setGuess("down")} style={{fontFamily:"monospace",fontSize:12,padding:"8px 16px",cursor:"pointer",background:"#fff",color:C.inkMid,border:`1px solid ${C.border}`,borderRadius:4,fontWeight:600}}>{tc.guessDown}</button>
+          </div>
+        ) : (
+          <p style={{fontSize:13,color:C.inkMid,lineHeight:1.7,marginBottom:real?10:0}}>{tcase.outcome}</p>
+        )}
+        {guess != null && real && <Mono size={10} color={C.inkFaint} spacing={0.5}>{tc.readMore}: {real.source}</Mono>}
       </div>
       <p style={{fontSize:13,color:C.inkMid,lineHeight:1.7,fontStyle:"italic",background:C.goldPale,padding:"16px 20px",borderRadius:6,margin:0}}>{tc.closingLine}</p>
     </div>
@@ -596,7 +676,7 @@ function Chapter9() {
   const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
   const lang = INITIAL_LANG;
   const T9 = window.Ch9Content[lang] || window.Ch9Content.ru;
-  const { loading, error, osc, cases } = useCh9Data();
+  const { loading, error, osc, cases, scene } = useCh9Data();
   const vars = React.useMemo(() => buildVars(osc, lang), [osc, lang]);
 
   return (
@@ -636,7 +716,7 @@ function Chapter9() {
       {!loading && (
       <div style={{maxWidth:1060,margin:"0 auto",padding:"0 0 120px"}}>
 
-        <div style={{margin:"0 -5vw 56px"}}><ColdOpen9/></div>
+        <div style={{margin:"0 -5vw 56px"}}><ColdStart9Entry scene={scene} vars={vars}/></div>
 
         <div style={{padding:"0 5vw"}}>
 

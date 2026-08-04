@@ -24,17 +24,12 @@
  */
 window.Ch8Content = {
   ru: {
-    coldOpen: {
-      tag: "ГЛАВА 8 — ДВА ТРЕЙДЕРА, ОДИН ИНСТРУМЕНТ, РАЗНЫЕ НАСТРОЙКИ. ОБА ПРАВЫ.",
-      lines: [
-        "Слева трейдер, который держит позицию несколько часов. Справа — который держит несколько недель.",
-        "Один инструмент. Одни и те же цены. Разные настройки одного и того же индикатора.",
-        "Левый скажет, что тренд развернулся вчера. Правый — что тренд не менялся третий месяц. Оба смотрят на арифметику по одним и тем же числам, и оба правы, потому что отвечают на разные вопросы.",
-        "Теперь главное. Если ты спросишь любого из них, какой период правильный, он назовёт свой. Если спросишь в интернете — получишь двадцать разных чисел, каждое с уверенным обоснованием.",
-        "Следующие тринадцать минут — про то, откуда берётся эта уверенность, почему у вопроса нет ответа, и что происходит с «идеальными настройками», когда их проверяют на данных, которых они не видели. Проверять будем на твоих настройках: подбирать их будешь ты.",
-      ],
-      cta: "Собрать свой индикатор ↓",
-      fastLabel: "EMA {{p}} · короткая", slowLabel: "EMA {{p}} · длинная",
+    coldStart: {
+      tag: "КАКАЯ СКОЛЬЗЯЩАЯ ЛУЧШЕ",
+      ask: "Три периода скользящей средней. Выбери, какой, по-твоему, чаще даёт прибыль вне выборки — до того, как увидишь график.",
+      opt20: "20", opt50: "50", opt200: "200",
+      revealTemplate: "Вне выборки, по {{n_total}} комбинациям на 15 инструментах: период 20 — прибыльно в {{p20}}% случаев (n={{n20}}), 50 — в {{p50}}% (n={{n50}}), 200 — в {{p200}}% (n={{n200}}). Разброс между «правильными» периодами меньше, чем кажется.",
+      bridge: "Дальше — откуда берётся уверенность в «идеальном» периоде, и что с ней происходит на данных, которых индикатор не видел.",
     },
     antiMyth: {
       tag: "АНТИ-МИФ",
@@ -167,17 +162,12 @@ window.Ch8Content = {
     },
   },
   ro: {
-    coldOpen: {
-      tag: "CAPITOLUL 8 — DOI TRADERI, UN INSTRUMENT, SETĂRI DIFERITE. AMÂNDOI AU DREPTATE.",
-      lines: [
-        "În stânga, un trader care ține o poziție câteva ore. În dreapta — cineva care ține câteva săptămâni.",
-        "Un singur instrument. Aceleași prețuri. Setări diferite ale aceluiași indicator.",
-        "Cel din stânga va spune că trendul s-a întors ieri. Cel din dreapta — că trendul nu s-a schimbat de trei luni. Amândoi se uită la aceeași aritmetică pe aceleași cifre, și amândoi au dreptate, pentru că răspund la întrebări diferite.",
-        "Acum, esențialul. Dacă îl întrebi pe oricare dintre ei care e perioada corectă, îți va spune pe a lui. Dacă cauți pe internet — vei primi douăzeci de cifre diferite, fiecare cu o argumentație sigură de sine.",
-        "Următoarele treisprezece minute — despre de unde vine această siguranță, de ce întrebarea nu are răspuns, și ce se întâmplă cu „setările ideale” când sunt verificate pe date pe care nu le-au văzut. Vom verifica pe setările tale: tu le vei alege.",
-      ],
-      cta: "Configurează-ți propriul indicator ↓",
-      fastLabel: "EMA {{p}} · scurtă", slowLabel: "EMA {{p}} · lungă",
+    coldStart: {
+      tag: "CARE MEDIE MOBILĂ E MAI BUNĂ",
+      ask: "Trei perioade de medie mobilă. Alege care, după tine, e mai des profitabilă în afara eșantionului — înainte să vezi vreun grafic.",
+      opt20: "20", opt50: "50", opt200: "200",
+      revealTemplate: "În afara eșantionului, pe {{n_total}} combinații la 15 instrumente: perioada 20 — profitabilă în {{p20}}% din cazuri (n={{n20}}), 50 — în {{p50}}% (n={{n50}}), 200 — în {{p200}}% (n={{n200}}). Diferența dintre perioadele „corecte” e mai mică decât pare.",
+      bridge: "În continuare — de unde vine siguranța privind perioada „ideală”, și ce se întâmplă cu ea pe date pe care indicatorul nu le-a văzut.",
     },
     antiMyth: {
       tag: "ANTI-MIT",
@@ -310,17 +300,12 @@ window.Ch8Content = {
     },
   },
   en: {
-    coldOpen: {
-      tag: "CHAPTER 8 — TWO TRADERS, ONE INSTRUMENT, DIFFERENT SETTINGS. BOTH ARE RIGHT.",
-      lines: [
-        "On the left, a trader who holds a position for a few hours. On the right, one who holds for a few weeks.",
-        "One instrument. The same prices. Different settings on the same indicator.",
-        "The one on the left will say the trend reversed yesterday. The one on the right — that the trend hasn't changed in three months. Both are looking at the same arithmetic on the same numbers, and both are right, because they're answering different questions.",
-        "Now the main point. Ask either of them which period is correct, and they'll name their own. Ask the internet, and you'll get twenty different numbers, each with a confident justification.",
-        "The next thirteen minutes are about where that confidence comes from, why the question has no answer, and what happens to «ideal settings» when they're checked against data they've never seen. We'll check yours: you'll be the one picking them.",
-      ],
-      cta: "Build your own indicator ↓",
-      fastLabel: "EMA {{p}} · short", slowLabel: "EMA {{p}} · long",
+    coldStart: {
+      tag: "WHICH MOVING AVERAGE IS BETTER",
+      ask: "Three moving-average periods. Pick which one you think is profitable more often out of sample — before you see any chart.",
+      opt20: "20", opt50: "50", opt200: "200",
+      revealTemplate: "Out of sample, across {{n_total}} combinations on 15 instruments: period 20 — profitable in {{p20}}% of cases (n={{n20}}), 50 — {{p50}}% (n={{n50}}), 200 — {{p200}}% (n={{n200}}). The spread between «correct» periods is smaller than it looks.",
+      bridge: "Next: where that confidence in the «ideal» period comes from, and what happens to it on data the indicator has never seen.",
     },
     antiMyth: {
       tag: "ANTI-MYTH",

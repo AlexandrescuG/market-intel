@@ -1,0 +1,5 @@
+{
+  "_schema_note": "SPEC_morning_brief_v2.md блок 2, вариант A. Ручное обновление ~раз в квартал. Поля на запись: ticker (str, uppercase), name (str), report_date (YYYY-MM-DD), session ('pre'|'post'), eps_forecast (float|null), rev_forecast (float, в валюте компании|null), source (str, откуда взята дата), checked_at (ISO ts, когда проверяли), market_cap_rank (int, меньше=крупнее, для сортировки при пустом пересечении с cashtag_heatmap; необязательно). Не выдумывать числа -- пустой earnings: [] лучше, чем неверная дата отчёта.",
+  "updated": null,
+  "earnings": []
+}

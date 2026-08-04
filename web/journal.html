@@ -14,6 +14,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/design.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="/assets/sbf-thermo-widget.js"></script>
 <script src="/assets/i18n.js?v=2" defer></script>
 <script src="/assets/sbf-header.js?v=16" defer></script>
 
@@ -66,6 +67,8 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
 .j-up{color:var(--up)}
 .j-dn{color:var(--dn)}
 .j-empty{color:var(--muted);text-align:center;padding:32px;font-size:13px}
+.j-trade-highlight{animation:jTradeFlash 2.6s ease-out}
+@keyframes jTradeFlash{0%,20%{background:rgba(201,162,39,.22)}100%{background:transparent}}
 .j-del-btn{background:none;border:none;cursor:pointer;color:var(--muted);font-size:12px;
   padding:3px 7px;border-radius:4px}
 .j-del-btn:hover{background:#fde8e8;color:var(--dn)}
@@ -467,6 +470,19 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
 .j-retro{margin-bottom:18px}
 .j-retro-title{font-size:11px;color:var(--muted);text-transform:uppercase;
   letter-spacing:.5px;margin-bottom:8px;font-weight:600}
+/* Термометр «Твоего дня» (Layer4 Ф4) — те же классы, что chart.html/
+   sbf-thermo-widget.js генерирует, адаптированы под переменные этой
+   страницы (--grid здесь нет, ближайший аналог --soft; --down здесь --dn). */
+.thermo-chips{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.thermo-chip{background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:8px 10px;min-width:0}
+.thermo-chip .tc-label{font-size:9.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:'JetBrains Mono',monospace;letter-spacing:.2px}
+.thermo-chip .tc-value{font-size:12.5px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:'JetBrains Mono',monospace;margin-top:1px}
+.thermo-chip .tc-value.tc-hot{color:var(--up)}
+.thermo-chip .tc-value.tc-warm{color:var(--gold)}
+.thermo-chip .tc-value.tc-cold{color:var(--muted)}
+.thermo-chip .tc-bar{height:3px;border-radius:2px;background:var(--line);margin-top:5px;overflow:hidden}
+.thermo-chip .tc-bar i{display:block;height:100%;background:var(--gold)}
+.j-open-item{font-size:12px;color:var(--ink);background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:6px 10px}
 .j-retro-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px}
 .j-retro-card{background:var(--soft);border:1px solid var(--line);
   border-radius:8px;padding:10px 12px;cursor:pointer;text-decoration:none;
@@ -920,14 +936,33 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
 
     <!-- Вчерашняя ретроспектива -->
     <div class="j-retro" id="jRetroSection" style="display:none">
-      <div class="j-retro-title" data-i18n="journal.retro_title">📊 Что вчера двигало ваши инструменты</div>
+      <div class="j-retro-title"><img class="mi-icon" style="vertical-align:middle" src="/assets/icons/icon-bar-chart.png" alt="" width="18" height="18"> <span data-i18n="journal.retro_title">Что вчера двигало ваши инструменты</span></div>
       <div class="j-retro-grid" id="jRetroGrid"></div>
     </div>
 
-    <!-- Макрокалендарь сегодня -->
+    <!-- Макрокалендарь сегодня (блок 1 спеки Layer4 Ф4 — уже существовал до этой спеки) -->
     <div id="jMacroSection" style="display:none">
-      <div class="j-retro-title" style="margin-bottom:8px" data-i18n="journal.macro_title">📅 Экономический календарь на сегодня</div>
+      <div class="j-retro-title" style="margin-bottom:8px"><img class="mi-icon" style="vertical-align:middle" src="/assets/icons/icon-calendar.png" alt="" width="18" height="18"> <span data-i18n="journal.macro_title">Экономический календарь на сегодня</span></div>
       <div class="j-macro-list" id="jMacroList"></div>
+    </div>
+
+    <!-- Термометр первого инструмента ватчлиста (SBF_Charts_Layer4_Spec Ф4,
+         блок 2 — тот же компонент, что chart.html, см. sbf-thermo-widget.js) -->
+    <div id="jThermoSection" style="display:none">
+      <div class="j-retro-title" style="margin-bottom:8px">🌡 <span id="jThermoSymLabel"></span></div>
+      <div class="thermo-chips" id="jThermoChips"></div>
+    </div>
+
+    <!-- «Вчерашний ты» (Ф4, блок 3) -->
+    <div id="jYesterdaySection" style="display:none">
+      <div class="j-retro-title" style="margin-bottom:6px" data-i18n="journal.yesterday_you_title">💭 Вчерашний ты</div>
+      <div id="jYesterdayText" style="font-size:13px;line-height:1.6;color:var(--ink);font-style:italic"></div>
+    </div>
+
+    <!-- Незакрытые пункты (Ф4, блок 4 — условные, ни один не рендерит пустой дыры) -->
+    <div id="jOpenItemsSection" style="display:none">
+      <div class="j-retro-title" style="margin-bottom:6px" data-i18n="journal.open_items_title">📌 Незакрытые пункты</div>
+      <div class="j-wl-add" id="jOpenItemsList" style="display:flex;flex-direction:column;gap:6px;align-items:flex-start"></div>
     </div>
 
     <div id="jBriefEmpty" style="display:none;font-size:13px;color:var(--muted);
@@ -973,7 +1008,7 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
 
     <!-- Прогресс курса -->
     <div id="jCourseBlock">
-      <div class="j-course-title" data-i18n="journal.course_progress">📚 Курс — прогресс по главам</div>
+      <div class="j-course-title"><img class="mi-icon" style="vertical-align:middle" src="/assets/icons/icon-books.png" alt="" width="18" height="18"> <span data-i18n="journal.course_progress">Курс — прогресс по главам</span></div>
       <div class="j-course-grid" id="jCourseGrid"></div>
     </div>
   </div>
@@ -1023,7 +1058,7 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
 
     <!-- Revenge cluster warning -->
     <div id="jRevengeWarn" class="j-revenge-warn" style="display:none">
-      <span style="font-size:18px">⚠️</span>
+      <span style="font-size:18px"><img class="mi-icon" src="/assets/icons/icon-warning.png" alt="" width="18" height="18"></span>
       <span id="jRevengeWarnText"></span>
     </div>
 
@@ -1057,7 +1092,7 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
 
     <!-- Tilt Heatmap -->
     <div class="j-heatmap" id="jTiltHeatmapWrap" style="display:none">
-      <div class="j-heatmap-title" data-i18n="journal.tilt_heatmap_title">🧠 Тильт по дням и сессиям</div>
+      <div class="j-heatmap-title"><img class="mi-icon" style="vertical-align:middle" src="/assets/icons/icon-mindset.png" alt="" width="18" height="18"> <span data-i18n="journal.tilt_heatmap_title">Тильт по дням и сессиям</span></div>
       <div id="jTiltHeatmapTable"></div>
     </div>
   </div>
@@ -1066,7 +1101,7 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
   <div class="j-disc" id="jDiscSection" style="display:none">
     <a id="discipline" style="display:block;visibility:hidden;height:0;margin:0"></a>
     <div class="j-disc-hd">
-      <div class="j-disc-title"><span>🎯</span> <span data-i18n="journal.discipline_score">Оценка дисциплины</span></div>
+      <div class="j-disc-title"><span><img class="mi-icon" style="vertical-align:middle" src="/assets/icons/icon-target.png" alt="" width="18" height="18"></span> <span data-i18n="journal.discipline_score">Оценка дисциплины</span></div>
       <button class="j-btn j-btn-sec" style="padding:5px 12px;font-size:12px"
               onclick="SBFJournal.openDiscConfig()" data-i18n="journal.configure_rules">⚙ Настроить правила</button>
     </div>
@@ -1097,7 +1132,7 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
   <!-- ── Тильт-детектор ── -->
   <div class="j-tilt-banner" id="jTiltBanner" style="display:none">
     <div class="j-tilt-hd">
-      <span class="j-tilt-ico">🧠</span>
+      <span class="j-tilt-ico"><img class="mi-icon" style="vertical-align:middle" src="/assets/icons/icon-mindset.png" alt="" width="18" height="18"></span>
       <span class="j-tilt-title" data-i18n="journal.psych_indicators">Психологические индикаторы</span>
     </div>
     <div class="j-tilt-reasons" id="jTiltReasons"></div>
@@ -1159,7 +1194,7 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
       <div class="j-setups-empty" data-i18n="journal.loading">Загрузка…</div>
     </div>
     <div class="j-playbook-stats" id="jPlaybookStats" style="display:none">
-      <div class="j-playbook-title" data-i18n="journal.playbook_effectiveness">📊 Эффективность паттернов (плейбук)</div>
+      <div class="j-playbook-title"><img class="mi-icon" style="vertical-align:middle" src="/assets/icons/icon-bar-chart.png" alt="" width="18" height="18"> <span data-i18n="journal.playbook_effectiveness">Эффективность паттернов (плейбук)</span></div>
       <div style="overflow-x:auto">
         <table class="j-pb-table">
           <thead><tr>
@@ -1209,7 +1244,7 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
   <!-- ── Tilt debrief card ── -->
   <div id="jDebriefCardWrap" style="display:none">
     <div class="j-debrief-card">
-      <div class="j-debrief-card-hd" data-i18n="journal.debrief_title">🧠 Разбор эпизода (+30 XP)</div>
+      <div class="j-debrief-card-hd"><img class="mi-icon" style="vertical-align:middle" src="/assets/icons/icon-mindset.png" alt="" width="18" height="18"> <span data-i18n="journal.debrief_title">Разбор эпизода (+30 XP)</span></div>
       <div class="j-debrief-field">
         <label data-i18n="journal.deb_q1">Что произошло?</label>
         <textarea id="jDebQ1" rows="2" data-i18n-placeholder="journal.deb_q1_ph" placeholder="Опиши ситуацию, мин. 10 символов…"></textarea>
@@ -1232,7 +1267,7 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
   <!-- ── Аналитика ── -->
   <div class="j-analytics" id="jAnalyticsSection" style="display:none">
     <div class="j-analytics-hd">
-      <span class="j-analytics-title" data-i18n="journal.analytics_title">📊 Аналитика</span>
+      <span class="j-analytics-title"><img class="mi-icon" style="vertical-align:middle" src="/assets/icons/icon-bar-chart.png" alt="" width="18" height="18"> <span data-i18n="journal.analytics_title">Аналитика</span></span>
       <div class="j-period-tabs">
         <button class="j-period-tab active" data-period="30d" data-i18n="journal.period_30d">30д</button>
         <button class="j-period-tab" data-period="90d" data-i18n="journal.period_90d">90д</button>
@@ -1321,9 +1356,7 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
         Доступно при уровне ≥ 8. Сбрасывает XP и уровень до 1, но сохраняет достижения и присваивает Prestige-метку.
       </div>
       <button class="j-btn j-btn-sec" id="jPrestigeBtn"
-        style="border-color:var(--accent);color:var(--accent)" data-i18n="journal.activate_prestige">
-        ⭐ Активировать престиж
-      </button>
+        style="border-color:var(--accent);color:var(--accent)"><img class="mi-icon" style="vertical-align:middle" src="/assets/icons/icon-star.png" alt="" width="18" height="18"> <span data-i18n="journal.activate_prestige">Активировать престиж</span></button>
     </div>
   </div>
 
@@ -1331,7 +1364,7 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
   <a id="goals" style="display:block;visibility:hidden;height:0;margin:0"></a>
   <div class="j-goals" id="jGoalsSection">
     <div class="j-goals-hd">
-      <div class="j-goals-title"><span>🎯</span> <span data-i18n="journal.goals_seasons">Цели и сезоны</span></div>
+      <div class="j-goals-title"><span><img class="mi-icon" style="vertical-align:middle" src="/assets/icons/icon-target.png" alt="" width="18" height="18"></span> <span data-i18n="journal.goals_seasons">Цели и сезоны</span></div>
       <button class="j-btn j-btn-sec" id="jGoalFormToggle" style="padding:6px 14px;font-size:12px" data-i18n="journal.own_goal">+ Своя цель</button>
     </div>
 
@@ -1342,17 +1375,17 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
     <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--muted);letter-spacing:.05em;margin-bottom:8px" data-i18n="journal.quick_start">Быстрый старт</div>
     <div class="j-presets">
       <button class="j-preset-card" onclick="SBFJournal.applyPreset('iron_shield')">
-        <div class="j-preset-card-icon">🛡️</div>
+        <div class="j-preset-card-icon"><img class="mi-icon" style="vertical-align:middle" src="/assets/icons/icon-shield.png" alt="" width="18" height="18"></div>
         <div class="j-preset-card-name" data-i18n="journal.preset_iron_shield">Железный щит</div>
         <div class="j-preset-card-desc" data-i18n="journal.preset_iron_shield_desc">Риск не более 1R на сделку, 30 торговых дней</div>
       </button>
       <button class="j-preset-card" onclick="SBFJournal.applyPreset('mindfulness_marathon')">
-        <div class="j-preset-card-icon">🧘</div>
+        <div class="j-preset-card-icon"><img class="mi-icon" style="vertical-align:middle" src="/assets/icons/icon-mindfulness.png" alt="" width="18" height="18"></div>
         <div class="j-preset-card-name" data-i18n="journal.preset_mindfulness">Осознанность</div>
         <div class="j-preset-card-desc" data-i18n="journal.preset_mindfulness_desc">Дисциплина &gt;80%, журнал 14 дней подряд</div>
       </button>
       <button class="j-preset-card" onclick="SBFJournal.applyPreset('academic_standard')">
-        <div class="j-preset-card-icon">📚</div>
+        <div class="j-preset-card-icon"><img class="mi-icon" style="vertical-align:middle" src="/assets/icons/icon-books.png" alt="" width="18" height="18"></div>
         <div class="j-preset-card-name" data-i18n="journal.preset_academic">Академический</div>
         <div class="j-preset-card-desc" data-i18n="journal.preset_academic_desc">Пройти 5 обучающих модулей за сезон</div>
       </button>
@@ -1380,7 +1413,7 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
   <div class="j-checklist" id="jChecklistSection">
     <div class="j-checklist-hd">
       <div class="j-checklist-title">
-        <span>✅</span> <span data-i18n="journal.pretrade_ritual">Пре-трейд ритуал</span>
+        <span><img class="mi-icon" style="vertical-align:middle" src="/assets/icons/icon-check.png" alt="" width="18" height="18"></span> <span data-i18n="journal.pretrade_ritual">Пре-трейд ритуал</span>
         <span id="jClProgress" style="font-size:12px;font-weight:400;color:var(--muted)"></span>
       </div>
       <button class="j-btn" id="jRunChecklistBtn" style="padding:6px 16px;font-size:12px" data-i18n="journal.run_checklist">Пройти чек-лист</button>
@@ -1643,7 +1676,7 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
         <li><span class="step-n">4</span><span data-i18n="journal.inv_avatrade_step4">Установите или скопируйте пароль инвестора</span></li>
         <li><span class="step-n">5</span><span data-i18n-html="journal.inv_avatrade_step5">Сервер MT5 обычно: <b>AvaTrade-Live</b> или <b>AvaTrade-Live02</b></span></li>
       </ul>
-      <div class="j-inv-warn" data-i18n="journal.inv_encryption_note">🔒 Пароль шифруется AES-256-GCM локально и нигде не логируется.</div>
+      <div class="j-inv-warn"><img class="mi-icon" style="vertical-align:middle" src="/assets/icons/icon-lock.png" alt="" width="18" height="18"> <span data-i18n="journal.inv_encryption_note">Пароль шифруется AES-256-GCM локально и нигде не логируется.</span></div>
     </div>
 
     <div id="jInvPanel_naga" style="display:none">
@@ -1657,7 +1690,7 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
         <li><span class="step-n">4</span><span data-i18n-html="journal.inv_naga_step4">Сервер: <b>NAGA-Server</b> (указан на той же странице)</span></li>
         <li><span class="step-n">5</span><span data-i18n="journal.inv_naga_step5">Скопируйте пароль и номер счёта, вставьте в форму</span></li>
       </ul>
-      <div class="j-inv-warn" data-i18n="journal.inv_encryption_note">🔒 Пароль шифруется AES-256-GCM локально и нигде не логируется.</div>
+      <div class="j-inv-warn"><img class="mi-icon" style="vertical-align:middle" src="/assets/icons/icon-lock.png" alt="" width="18" height="18"> <span data-i18n="journal.inv_encryption_note">Пароль шифруется AES-256-GCM локально и нигде не логируется.</span></div>
     </div>
   </div>
 </div>
@@ -1667,21 +1700,21 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
 <div class="j-modal-bg" id="jDiscConfigModal">
   <div class="j-modal" style="max-width:560px">
     <div class="j-modal-hd">
-      <h3 data-i18n="journal.discipline_rules_title">🎯 Правила дисциплины</h3>
+      <h3><img class="mi-icon" style="vertical-align:middle" src="/assets/icons/icon-target.png" alt="" width="18" height="18"> <span data-i18n="journal.discipline_rules_title">Правила дисциплины</span></h3>
       <button class="j-close" id="jDiscConfigClose">✕</button>
     </div>
 
     <!-- Пресеты -->
     <div style="font-size:12px;color:var(--muted);margin-bottom:8px;font-weight:600" data-i18n="journal.trading_style_preset">Пресет стиля торговли</div>
     <div class="j-disc-presets">
-      <button class="j-preset-btn" data-preset="conservative" data-i18n="journal.preset_conservative">🛡️ Консервативный</button>
-      <button class="j-preset-btn" data-preset="scalper" data-i18n="journal.preset_scalper">⚡ Скальпер</button>
-      <button class="j-preset-btn" data-preset="investor" data-i18n="journal.preset_investor">📈 Инвестор</button>
+      <button class="j-preset-btn" data-preset="conservative"><img class="mi-icon" style="vertical-align:middle" src="/assets/icons/icon-shield.png" alt="" width="18" height="18"> <span data-i18n="journal.preset_conservative">Консервативный</span></button>
+      <button class="j-preset-btn" data-preset="scalper"><img class="mi-icon" style="vertical-align:middle" src="/assets/icons/icon-lightning.png" alt="" width="18" height="18"> <span data-i18n="journal.preset_scalper">Скальпер</span></button>
+      <button class="j-preset-btn" data-preset="investor"><img class="mi-icon" style="vertical-align:middle" src="/assets/icons/icon-trend-up.png" alt="" width="18" height="18"> <span data-i18n="journal.preset_investor">Инвестор</span></button>
     </div>
 
     <!-- Wellbeing -->
     <div class="j-wellbeing" id="jDiscWellbeing" style="display:none">
-      ⚠️ <span id="jDiscWellbeingText"></span>
+      <img class="mi-icon" style="vertical-align:middle" src="/assets/icons/icon-warning.png" alt="" width="16" height="16"> <span id="jDiscWellbeingText"></span>
     </div>
 
     <!-- Таблица критериев -->
@@ -1750,8 +1783,7 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
 
       <!-- Дисциплина (загружается динамически) -->
       <div class="j-disc-criteria" id="jMetaDiscSection" style="display:none">
-        <div style="font-size:12px;color:var(--muted);font-weight:600;margin-bottom:10px" data-i18n="journal.discipline_score_for_trade">
-          🎯 Оценка дисциплины по этой сделке
+        <div style="font-size:12px;color:var(--muted);font-weight:600;margin-bottom:10px"><img class="mi-icon" style="vertical-align:middle" src="/assets/icons/icon-target.png" alt="" width="18" height="18"> <span data-i18n="journal.discipline_score_for_trade">Оценка дисциплины по этой сделке</span>
         </div>
         <div id="jMetaDiscRows"></div>
       </div>
@@ -1946,8 +1978,7 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
     <p id="jSetupStatusDesc" style="font-size:13px;color:var(--muted);margin:0 0 16px"></p>
     <div style="display:flex;flex-direction:column;gap:8px">
       <button class="j-btn j-btn-sec" data-new-status="executed"
-        style="text-align:left;justify-content:flex-start" data-i18n="journal.status_executed_desc">
-        ✅ Исполнен — паттерн отработал, привязать к сделке
+        style="text-align:left;justify-content:flex-start"><img class="mi-icon" style="vertical-align:middle" src="/assets/icons/icon-check.png" alt="" width="18" height="18"> <span data-i18n="journal.status_executed_desc">Исполнен — паттерн отработал, привязать к сделке</span>
       </button>
       <button class="j-btn j-btn-sec" data-new-status="invalidated"
         style="text-align:left;justify-content:flex-start" data-i18n="journal.status_invalidated_desc">
@@ -1973,7 +2004,7 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
       <button class="j-close" id="jFcClose">✕</button>
     </div>
     <div id="jFcDone" class="j-fc-done" style="display:none">
-      <span data-i18n="journal.all_cards_done">✅ Все карточки пройдены!</span> <br>
+      <span><img class="mi-icon" style="vertical-align:middle" src="/assets/icons/icon-check.png" alt="" width="18" height="18"> <span data-i18n="journal.all_cards_done">Все карточки пройдены!</span></span> <br>
       <span id="jFcSessionXp" style="font-size:13px;color:var(--gold);font-weight:600"></span>
     </div>
     <div id="jFcContent">

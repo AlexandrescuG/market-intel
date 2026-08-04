@@ -43,17 +43,12 @@
  */
 window.Ch14Content = {
   ru: {
-    coldOpen: {
-      tag: "ГЛАВА 14 — ДЕСЯТЬ ПО ПЯТЬ",
-      lines: [
-        "В этой главе до сегодняшнего дня было написано: десять сделок по пять пунктов лучше, чем одна по пятьдесят.",
-        "Считаем вместе, и считаем до конца.",
-        "Десять сделок по пять пунктов — это пятьдесят пунктов прибыли и десять оплаченных издержек за круг. Одна сделка на пятьдесят пунктов — это те же пятьдесят и одна оплаченная издержка.",
-        "Подставь свой спред — тот, который ты сам замерил в главе 11. Калькулятор ниже сделает это за тебя на твоих числах, но арифметика уже понятна: издержка, умноженная на десять, вычитается из пятидесяти куда заметнее, чем та же издержка, умноженная на один.",
-        "Мы убрали эту строку из главы. Не потому, что скальпинг плох, а потому что сравнение было сделано без единственного числа, которое в скальпинге и решает.",
-        "Следующие четырнадцать минут — про это число. И в конце главы будет разговор про реальный счёт, к которому мы шли восемь глав.",
-      ],
-      cta: "Посчитать своё ↓",
+    coldStart: {
+      tag: "СКОЛЬКО ТЫ ПЛАТИШЬ",
+      ask: "Сколько сделок в день ты делаешь (или планируешь)?",
+      placeholder: "10", unit: "сделок/день",
+      revealTemplate: "При реальном спреде 0.3 пункта и {{n}} сделках в день: {{annual}} пункта издержек в год. При цели 5 пунктов на сделку это {{equivWins}} полностью съеденных прибыльных сделок в год — только на спреде.",
+      bridge: "Издержки — не мелочь на полях. Дальше — сколько нужно накопить прибыли, чтобы их вообще увидеть.",
     },
     antiMyth: {
       tag: "АНТИ-МИФ",
@@ -215,17 +210,12 @@ window.Ch14Content = {
   },
 
   en: {
-    coldOpen: {
-      tag: "CHAPTER 14 — TEN AT FIVE",
-      lines: [
-        "Until today, this chapter said: ten trades at five points beats one trade at fifty.",
-        "Let's compute it together, and compute it all the way through.",
-        "Ten trades at five points is fifty points of profit and ten paid round-trip costs. One trade at fifty points is the same fifty and one paid cost.",
-        "Plug in your own spread — the one you measured yourself in chapter 11. The calculator below will do it on your numbers, but the arithmetic is already clear: a cost multiplied by ten eats into fifty far more visibly than the same cost multiplied by one.",
-        "We removed that line from the chapter. Not because scalping is bad, but because the comparison was made without the one number that actually decides scalping.",
-        "The next fourteen minutes are about that number. And at the end of the chapter, there's a conversation about a real account — the one we've been building toward for eight chapters.",
-      ],
-      cta: "Compute your own ↓",
+    coldStart: {
+      tag: "HOW MUCH YOU PAY",
+      ask: "How many trades a day do you make (or plan to)?",
+      placeholder: "10", unit: "trades/day",
+      revealTemplate: "At a real 0.3-point spread and {{n}} trades a day: {{annual}} points of cost a year. At a 5-point target per trade, that's {{equivWins}} fully-eaten winning trades a year — on spread alone.",
+      bridge: "Costs aren't a rounding error. Next: how much profit you need to bank before you even see them.",
     },
     antiMyth: {
       tag: "ANTI-MYTH",
@@ -387,17 +377,12 @@ window.Ch14Content = {
   },
 
   ro: {
-    coldOpen: {
-      tag: "CAPITOLUL 14 — ZECE LA CINCI",
-      lines: [
-        "Până azi, acest capitol spunea: zece tranzacții a câte cinci puncte sunt mai bune decât una de cincizeci.",
-        "Calculăm împreună, și calculăm până la capăt.",
-        "Zece tranzacții a câte cinci puncte înseamnă cincizeci de puncte profit și zece costuri de rundă plătite. O tranzacție de cincizeci de puncte înseamnă aceleași cincizeci și un singur cost plătit.",
-        "Introdu propriul spread — cel pe care l-ai măsurat chiar tu în capitolul 11. Calculatorul de mai jos o va face pe numerele tale, dar aritmetica e deja clară: un cost înmulțit cu zece mănâncă din cincizeci mult mai vizibil decât același cost înmulțit cu unu.",
-        "Am eliminat acest rând din capitol. Nu pentru că scalping-ul e rău, ci pentru că această comparație a fost făcută fără singurul număr care chiar decide în scalping.",
-        "Următoarele paisprezece minute sunt despre acest număr. Iar la finalul capitolului urmează o discuție despre un cont real — cea spre care ne-am îndreptat de opt capitole.",
-      ],
-      cta: "Calculează-l pe al tău ↓",
+    coldStart: {
+      tag: "CÂT PLĂTEȘTI",
+      ask: "Câte tranzacții pe zi faci (sau plănuiești)?",
+      placeholder: "10", unit: "tranzacții/zi",
+      revealTemplate: "La un spread real de 0.3 puncte și {{n}} tranzacții pe zi: {{annual}} puncte de cost pe an. La o țintă de 5 puncte per tranzacție, asta înseamnă {{equivWins}} tranzacții câștigătoare mâncate complet pe an — doar din spread.",
+      bridge: "Costurile nu sunt un detaliu neglijabil. În continuare — cât profit trebuie să aduni înainte să le vezi măcar.",
     },
     antiMyth: {
       tag: "ANTI-MIT",

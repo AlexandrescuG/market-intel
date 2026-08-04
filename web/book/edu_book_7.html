@@ -95,7 +95,7 @@ const STRINGS = {
   },
 };
 
-const {C, Mono, Chip, Rule, AskAnalystBtn, getChUrl, QuizBlock, ComplianceFootnote} = window.AcademyShared;
+const {C, Mono, Chip, Rule, AskAnalystBtn, getChUrl, QuizBlock, ComplianceFootnote, ColdStart} = window.AcademyShared;
 
 const SectionTitle = ({children,sub,align="left",id}) => (
   <div id={id} style={{textAlign:align,marginBottom:36,scrollMarginTop:130}}>
@@ -155,20 +155,147 @@ function buildVars(patterns, xray, lang) {
   };
 }
 
-// ─── Cold open ──────────────────────────────────────────────────────────────
-function ColdOpen7() {
+// ─── Cold start: "Цена спешки" (SPEC_coldstart_interactives_ch6_15.md §3) ──────
+// Заменяет прежний ColdOpen7. BIG_ORDER_BOOK -- тот же стакан, что чуть ниже
+// использует BigOrderBridge (реальный "мост со стаканом главы 4"), просто
+// читается раньше по счёту функций -- порядок объявлений не важен, это
+// module-level const, вычисляется один раз при загрузке скрипта.
+function ColdStart7Entry() {
   const T7 = window.Ch7Content[INITIAL_LANG] || window.Ch7Content.ru;
-  const co = T7.coldOpen;
+  const cs = T7.coldStart;
+  const SIZE = 500;
+  const { asks } = BIG_ORDER_BOOK;
+  const walk = (size) => {
+    let remaining = size, cost = 0, filledQty = 0;
+    for (const a of asks) {
+      const take = Math.min(remaining, a.v);
+      cost += take * a.p; filledQty += take; remaining -= take;
+      if (remaining <= 0) break;
+    }
+    return filledQty ? cost / filledQty : asks[0].p;
+  };
+  const avgNow = walk(SIZE);
+  const avgSlow = asks[0].p; // патиентное исполнение -- без давления на стакан, лучшая котировка
   return (
-    <div style={{background:C.black,padding:"70px 5vw 56px",color:"#fff"}}>
-      <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:24,textAlign:"center"}}>{co.tag}</Mono>
-      <div style={{maxWidth:840,margin:"0 auto 20px"}}>
-        {co.lines.map((line,i) => (
-          <p key={i} style={{fontSize: i<2 ? 15 : i===co.lines.length-1 ? 17 : 15.5, color: i>=3?"#fff":"rgba(255,255,255,0.72)", fontWeight: i>=3?600:400, lineHeight:1.75, marginBottom:14, fontFamily: i===co.lines.length-1 ? "'DM Serif Display',serif" : "inherit"}}>{line}</p>
-        ))}
-      </div>
-      <p style={{textAlign:"center",fontFamily:"monospace",fontSize:12,color:C.gold}}>{co.cta}</p>
-    </div>
+    <ColdStart
+      tag={cs.tag}
+      ask={cs.ask}
+      action={{ type: "choice", options: [
+        { label: cs.optNow, value: "now" }, { label: cs.optSlow, value: "slow" },
+      ]}}
+      reveal={() => fillTemplate(cs.revealTemplate, {
+        avgNow: avgNow.toFixed(2), slipNow: (avgNow - asks[0].p).toFixed(2),
+        avgSlow: avgSlow.toFixed(2), diffPts: (avgNow - avgSlow).toFixed(2), size: SIZE,
+      })}
+      bridge={cs.bridge}
+    />
+  );
+}
+
+// ─── Cold start, середина: "Где была активность" (§3 середина) ────────────────
+// Реальный последний полный торговый день из /data/ohlc_GOLD_M30.json (тот же
+// файл, что использует остальной сайт) -- volume уже лежит в каждом ohlc_*.json
+// параллельным массивом и раньше нигде в курсе не показывался.
+function ColdStart7Middle() {
+  const { useState, useEffect, useMemo, useRef } = React;
+  const T7 = window.Ch7Content[INITIAL_LANG] || window.Ch7Content.ru;
+  const cm = T7.coldStartMiddle;
+  const [day, setDay] = useState(null);
+  const [picked, setPicked] = useState(null);
+  const containerRef = useRef(null);
+  const chartRef = useRef(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/data/ohlc_GOLD_M30.json").then(r => r.json()).then(d => {
+      if (cancelled) return;
+      const byDay = {};
+      d.candles.forEach((c, i) => {
+        const key = new Date(c.time * 1000).toISOString().slice(0, 10);
+        (byDay[key] = byDay[key] || []).push({ ...c, vol: d.volume[i] });
+      });
+      const fullDays = Object.keys(byDay).filter(k => byDay[k].length >= 45).sort();
+      const lastDay = byDay[fullDays[fullDays.length - 1]];
+      setDay(lastDay);
+    }).catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
+
+  const zones = useMemo(() => {
+    if (!day) return null;
+    const third = Math.floor(day.length / 3);
+    const segs = [day.slice(0, third), day.slice(third, 2 * third), day.slice(2 * third)];
+    const hm = (t) => new Date(t * 1000).toISOString().slice(11, 16);
+    return segs.map((seg, i) => ({
+      idx: i, from: hm(seg[0].time), to: hm(seg[seg.length - 1].time),
+      vol: seg.reduce((s, c) => s + c.vol.value, 0),
+    }));
+  }, [day]);
+
+  useEffect(() => {
+    if (!containerRef.current || chartRef.current || typeof LightweightCharts === "undefined" || !day) return undefined;
+    const chart = LightweightCharts.createChart(containerRef.current, {
+      width: containerRef.current.clientWidth, height: 300,
+      layout: { background: { color: C.chartBg }, textColor: "rgba(255,255,255,0.55)" },
+      grid: { vertLines: { color: "rgba(255,255,255,0.05)" }, horzLines: { color: "rgba(255,255,255,0.05)" } },
+      rightPriceScale: { borderColor: "rgba(255,255,255,0.15)" },
+      timeScale: { borderColor: "rgba(255,255,255,0.15)", timeVisible: true, secondsVisible: false },
+    });
+    const candleSeries = chart.addCandlestickSeries({
+      upColor: C.chartGreen, downColor: C.chartRed, borderUpColor: C.chartGreen, borderDownColor: C.chartRed,
+      wickUpColor: C.chartGreen, wickDownColor: C.chartRed,
+    });
+    const volumeSeries = chart.addHistogramSeries({ priceFormat: { type: "volume" }, priceScaleId: "vol" });
+    volumeSeries.priceScale().applyOptions({ scaleMargins: { top: 0.82, bottom: 0 } });
+    candleSeries.setData(day.map(c => ({ time: c.time, open: +c.open, high: +c.high, low: +c.low, close: +c.close })));
+    chart.timeScale().fitContent();
+    chartRef.current = { chart, candleSeries, volumeSeries };
+    const ro = new ResizeObserver(entries => { if (entries[0]) chart.applyOptions({ width: entries[0].contentRect.width }); });
+    ro.observe(containerRef.current);
+    return () => { ro.disconnect(); chart.remove(); chartRef.current = null; };
+  }, [day]);
+
+  useEffect(() => {
+    if (!chartRef.current) return;
+    chartRef.current.volumeSeries.setData(picked == null ? [] : day.map(c => ({ time: c.time, value: c.vol.value, color: c.vol.color })));
+  }, [picked, day]);
+
+  if (!day || !zones) return <div style={{background:C.black,padding:"60px 5vw",textAlign:"center"}}><Mono size={11} color={C.gold} spacing={4}>{cm.tag}</Mono></div>;
+
+  const topZone = zones.reduce((a, b) => (b.vol > a.vol ? b : a));
+
+  return (
+    <ColdStart
+      tag={cm.tag}
+      ask={cm.ask}
+      action={{ type: "custom", render: (csCommit) => (
+        <div>
+          <div style={{position:"relative", borderRadius:6, overflow:"hidden"}}>
+            <div ref={containerRef} data-source="/data/ohlc_GOLD_M30.json"/>
+          </div>
+          <div style={{display:"flex", gap:10, justifyContent:"center", flexWrap:"wrap", marginTop:16}}>
+            {zones.map(z => {
+              const isPicked = picked === z.idx;
+              return (
+                <button key={z.idx} disabled={picked != null} onClick={() => { setPicked(z.idx); csCommit(z.idx); }} style={{
+                  fontFamily:"monospace", fontSize:13, fontWeight:700, padding:"12px 18px", borderRadius:4,
+                  cursor: picked != null ? "default" : "pointer",
+                  background: isPicked ? C.gold : "rgba(255,255,255,0.06)", color: isPicked ? C.black : "#fff",
+                  border:`1px solid ${isPicked ? C.gold : "rgba(255,255,255,0.22)"}`,
+                  opacity: picked != null && !isPicked ? 0.45 : 1,
+                }}>{z.from}–{z.to}</button>
+              );
+            })}
+          </div>
+          {picked != null && <p style={{textAlign:"center", fontSize:11, color:"rgba(255,255,255,0.4)", fontStyle:"italic", marginTop:14}}>{cm.noteTicks}</p>}
+        </div>
+      )}}
+      reveal={() => picked == null ? null : fillTemplate(cm.revealTemplate, {
+        topLabel: `${topZone.from}–${topZone.to}`, topVol: topZone.vol.toLocaleString(),
+        matchText: picked === topZone.idx ? cm.matchYes : cm.matchNo,
+      })}
+      bridge={cm.bridge}
+    />
   );
 }
 
@@ -707,7 +834,7 @@ function Chapter7() {
       {!loading && (
       <div style={{maxWidth:1060,margin:"0 auto",padding:"0 0 120px"}}>
 
-        <div style={{margin:"0 -5vw 56px"}}><ColdOpen7/></div>
+        <div style={{margin:"0 -5vw 56px"}}><ColdStart7Entry/></div>
 
         <div style={{padding:"0 5vw"}}>
 
@@ -721,6 +848,8 @@ function Chapter7() {
 
         <SectionTitle sub={S.placesSub}>{T7.footprintPlaces.tag}</SectionTitle>
         <FootprintPlaces/>
+
+        <div style={{margin:"0 -5vw 56px"}}><ColdStart7Middle/></div>
 
         <SectionTitle id="secCoreMeasure" sub={S.coreMeasureSub}>{T7.coreMeasure.tag}</SectionTitle>
         <CoreMeasureBlock patterns={patterns} vars={vars}/>

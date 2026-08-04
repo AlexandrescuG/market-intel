@@ -98,8 +98,24 @@
   }
 
   // ── API ───────────────────────────────────────────────────────────────────
+  // НАЙДЕНО при работе над SBF_Charts_Layer4_Spec Фаза 4: apiFetch() делал
+  // голый fetch() БЕЗ auth-заголовков вообще — ни X-Auth-Token, ни
+  // Authorization. Комментарий в serve.py:_auth_token() уже давно ссылается
+  // на несуществующую journal_html's _authHdr() ("отправляет именно Bearer")
+  // — судя по всему, это либо устарело, либо никогда не было реализовано в
+  // текущем виде файла. Следствие: ВЕСЬ journal.html (сделки/статистика/
+  // «Твой день»/алерты/дисциплина/геймификация — все apiFetch-вызовы) все
+  // это время читал и писал в общий "default" user_id (см. serve.py
+  // _current_user_id() — permissive-фоллбек для анонима), независимо от
+  // того, залогинен ли реальный посетитель. Не поймано раньше — до
+  // добавления настоящей кнопки "Войти" (см. соседний фикс той же сессии)
+  // залогиниться на сайте было физически нельзя, так что расхождение
+  // никогда не проявлялось на практике. Исправлено на sbfAuth.fetch() — тот
+  // же клиент, что уже используют chart.html/calendar.html, добавляет оба
+  // заголовка и сам обновляет токен по истечении.
   function apiFetch(path, opts) {
-    return fetch(path, opts).then(function (r) {
+    var doFetch = (window.sbfAuth && window.sbfAuth.fetch) ? window.sbfAuth.fetch : fetch;
+    return doFetch(path, opts).then(function (r) {
       if (!r.ok) return r.json().then(function (e) { throw new Error(e.error || r.status); });
       return r.json();
     });
@@ -118,7 +134,23 @@
         _trades = d.trades || [];
         renderTable(_trades);
         renderPager(d.total, page);
+        _highlightDeepLinkedTrade();
       }).catch(function (e) { showError(t('journal.error_loading_prefix', 'Ошибка загрузки: ') + e.message); });
+  }
+
+  // SBF_Charts_Layer4_Spec, Фаза 2: «Открыть в журнале» с графика — ?trade=ID
+  // в URL. Упрощение (задокументировано): подсвечивает, только если сделка
+  // оказалась на ТЕКУЩЕЙ (обычно первой — самые новые сверху) странице
+  // пагинации; для более старых сделок ссылка просто откроет журнал без
+  // авто-скролла — не гоняемся за поиском нужной страницы ради этого.
+  function _highlightDeepLinkedTrade() {
+    var id = new URLSearchParams(location.search).get('trade');
+    if (!id) return;
+    var row = document.querySelector('tr[data-trade-id="' + id + '"]');
+    if (!row) return;
+    row.scrollIntoView({behavior: 'smooth', block: 'center'});
+    row.classList.add('j-trade-highlight');
+    setTimeout(function () { row.classList.remove('j-trade-highlight'); }, 2600);
   }
 
   function loadStats() {
@@ -370,7 +402,7 @@
       var journalBtn = hasMeta
         ? '<button class="j-journal-btn j-journaled" data-id="' + t.id + '" title="' + editAnalysisTip + '">✏️</button>'
         : '<button class="j-journal-btn j-unjournaled" data-id="' + t.id + '" title="' + addAnalysisTip + '">📝</button>';
-      return '<tr>'
+      return '<tr data-trade-id="' + t.id + '">'
         + '<td><span class="j-sym">' + escHtml(t.symbol) + '</span></td>'
         + '<td><span class="' + dirCl + '">' + dirIc + ' ' + t.dir.toUpperCase() + '</span></td>'
         + '<td class="j-mono">' + fmt(t.size, 2) + '</td>'
@@ -1075,6 +1107,72 @@
         }).join('');
       }
     }
+
+    // ── SBF_Charts_Layer4_Spec, Фаза 4 (сборка «Твой день») ──────────────
+    // Блок 2: термометр первого инструмента ватчлиста — отдельный live-фетч
+    // (не из кэша brief), чтобы данные были свежими и это был РЕАЛЬНО тот же
+    // компонент, что chart.html (акцептанс спеки), а не снапшот на момент
+    // генерации брифа.
+    loadDayThermoForBrief(wl[0]);
+
+    // Блок 3: «Вчерашний ты»
+    var ySec = el('jYesterdaySection');
+    if (brief.yesterday_you && brief.yesterday_you.text) {
+      if (ySec) ySec.style.display = 'block';
+      var yEl = el('jYesterdayText');
+      if (yEl) yEl.textContent = '«' + brief.yesterday_you.text + '»';
+    } else if (ySec) {
+      ySec.style.display = 'none';
+    }
+
+    // Блок 4: незакрытые пункты — условные, каждый рендерится только если есть
+    var oi = brief.open_items || {};
+    var oiParts = [];
+    if (oi.cooldown) {
+      oiParts.push('<div class="j-open-item">⏸ ' + t('journal.open_item_cooldown', 'Активен cooldown после нарушения плана') + '</div>');
+    }
+    if (oi.weekly_review_available) {
+      oiParts.push('<a class="j-open-item" href="#review" style="text-decoration:none;display:block">📋 ' + t('journal.open_item_review', 'Доступен еженедельный обзор — заполните его') + '</a>');
+    }
+    var oiSec = el('jOpenItemsSection');
+    if (oiParts.length) {
+      if (oiSec) oiSec.style.display = 'block';
+      var oiList = el('jOpenItemsList');
+      if (oiList) oiList.innerHTML = oiParts.join('');
+    } else if (oiSec) {
+      oiSec.style.display = 'none';
+    }
+  }
+
+  // SBF_Charts_Layer4_Spec, Фаза 4: HTML чипов строит window.SBFThermoWidget
+  // (общий web/assets/sbf-thermo-widget.js) — акцептанс спеки требует "один
+  // компонент, изменение в одном месте меняет оба" (термометр на графике и
+  // здесь). Без инструментальных тапов/попапов (гистограмма, лента) — тут
+  // read-only витрина, не интерактивный график.
+  // Виджету нужна ФУНКЦИЯ ПОДСТАНОВКИ ШАБЛОНА ("{p}-й перцентиль" + {p:83} →
+  // "83-й перцентиль") — в этом файле fmt(n,d) означает другое (форматирует
+  // число с decimals), поэтому локальный тонкий враппер, не переиспользуем
+  // имя во избежание путаницы с сигнатурой.
+  function _fmtTpl(tpl, vars) {
+    return tpl.replace(/\{(\w+)\}/g, function (_, k) { return vars[k] != null ? vars[k] : ''; });
+  }
+
+  function loadDayThermoForBrief(symbol) {
+    var sec = el('jThermoSection');
+    if (!symbol || !window.SBFThermoWidget) { if (sec) sec.style.display = 'none'; return; }
+    fetch('/api/chart/thermo?symbol=' + encodeURIComponent(symbol))
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (data) {
+        if (!data || !sec) { if (sec) sec.style.display = 'none'; return; }
+        var lbl = el('jThermoSymLabel');
+        if (lbl) lbl.textContent = symbol;
+        var chips = el('jThermoChips');
+        if (chips) {
+          chips.innerHTML = window.SBFThermoWidget.buildChipsHtml(data, symbol, {t: t, fmt: _fmtTpl, esc: escHtml});
+        }
+        sec.style.display = 'block';
+      })
+      .catch(function () { if (sec) sec.style.display = 'none'; });
   }
 
   function _fmtEventTime(scheduledTs, tsUtc) {
@@ -2719,10 +2817,23 @@
     }
   }
 
+  // sbf-auth.js грузится sbf-header.js асинхронно (динамический <script>,
+  // добавленный уже ПОСЛЕ парсинга документа) — DOMContentLoaded не ждёт
+  // такие скрипты вообще, поэтому init()→loadAll()→apiFetch() мог выстрелить
+  // раньше, чем window.sbfAuth появится, и ПЕРВЫЙ (решающий для рендера)
+  // набор запросов уходил без токена — молча резолвился на общий "default"
+  // user_id на сервере (см. комментарий у apiFetch). Короткий поллинг с
+  // разумным потолком — не блокирует загрузку насовсем, если что-то пошло
+  // не так со скриптом.
+  function _startWhenAuthReady(attempt) {
+    attempt = attempt || 0;
+    if (window.sbfAuth || attempt > 40) { init(); return; }
+    setTimeout(function () { _startWhenAuthReady(attempt + 1); }, 25);
+  }
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener('DOMContentLoaded', function () { _startWhenAuthReady(0); });
   } else {
-    init();
+    _startWhenAuthReady(0);
   }
 
   window.SBFJournal = {

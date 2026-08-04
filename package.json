@@ -1,0 +1,26 @@
+{
+  "name": "market_intel",
+  "version": "1.0.0",
+  "description": "Мультиисточниковый сбор сигналов (X / Reddit / RSS) → единая БД → два потребителя: real-time алерты в Telegram (для контента) и дневной дайджест через Claude Code (анализ по геополитике / экономике / психологии толпы для трейдеров).",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlexandrescuG/market-intel.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AlexandrescuG/market-intel/issues"
+  },
+  "homepage": "https://github.com/AlexandrescuG/market-intel#readme",
+  "dependencies": {
+    "@babel/standalone": "^8.0.3"
+  }
+}

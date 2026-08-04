@@ -178,6 +178,13 @@ window.Ch15Content = {
       typeLabels: { measured: "измерено", external: "внешний факт", arithmetic: "арифметика" },
       chapterLabel: "гл.",
     },
+    coldStart: {
+      tag: "ПРОВЕРЬ НАС",
+      ask: "Пятнадцать глав утверждений. Выбери любое — увидишь, чем именно оно проверено.",
+      methodScript: "Метод: скрипт {{script}}", methodArithmetic: "Метод: прямой расчёт, без данных",
+      dateLabel: "Проверено {{date}}", downloadLabel: "Скачать проверку",
+      bridge: "Остальные семь утверждений и полный список источников — в course_claims.json, открыт для скачивания.",
+    },
     finalParagraph: {
       body1: "Пятнадцать глав назад мы начали с того, что цена — это след чужих решений, а не линия на экране. Всё остальное было способами читать этот след.",
       body2: "Мы старались не соврать тебе ни разу. Где могли — выкладывали данные, чтобы ты пересчитал сам. Где зарабатываем — писали, сколько и на чём. Где не знаем — говорили, что не знаем. Это единственное, чем обучающий курс о рынке может отличаться от рекламы, и это же единственное, что мы просим сохранить в собственной торговле: считать самому и проверять, кому что выгодно.",
@@ -321,6 +328,13 @@ window.Ch15Content = {
       typeLabels: { measured: "measured", external: "external fact", arithmetic: "arithmetic" },
       chapterLabel: "ch.",
     },
+    coldStart: {
+      tag: "CHECK US",
+      ask: "Fifteen chapters of claims. Pick any one — see exactly how it was checked.",
+      methodScript: "Method: script {{script}}", methodArithmetic: "Method: direct calculation, no data",
+      dateLabel: "Checked {{date}}", downloadLabel: "Download the check",
+      bridge: "The other seven claims and the full source list — in course_claims.json, open for download.",
+    },
     finalParagraph: {
       body1: "Fifteen chapters ago we started with the idea that price is a trace of other people's decisions, not a line on a screen. Everything else was ways of reading that trace.",
       body2: "We tried never to lie to you. Where we could, we published the data so you could recompute it yourself. Where we earn, we wrote how much and from what. Where we don't know, we said so. That's the only thing that can separate a course about markets from an advertisement, and it's the only thing we ask you to carry into your own trading: compute it yourself, and check who benefits from what.",
@@ -463,6 +477,13 @@ window.Ch15Content = {
       downloadAll: "Descarcă toate măsurătorile noastre (CSV)",
       typeLabels: { measured: "măsurat", external: "fapt extern", arithmetic: "aritmetică" },
       chapterLabel: "cap.",
+    },
+    coldStart: {
+      tag: "VERIFICĂ-NE",
+      ask: "Cincisprezece capitole de afirmații. Alege una — vezi exact cum a fost verificată.",
+      methodScript: "Metodă: script {{script}}", methodArithmetic: "Metodă: calcul direct, fără date",
+      dateLabel: "Verificat {{date}}", downloadLabel: "Descarcă verificarea",
+      bridge: "Celelalte șapte afirmații și lista completă a surselor — în course_claims.json, deschis pentru descărcare.",
     },
     finalParagraph: {
       body1: "Acum cincisprezece capitole am pornit de la ideea că prețul e urma unor decizii ale altora, nu o linie pe ecran. Tot restul au fost moduri de a citi acea urmă.",

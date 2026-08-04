@@ -117,6 +117,23 @@ def run(verbose: bool = False) -> int:
     if verbose:
         print(f"Обработано инструментов: {processed}/{len(DEFAULT_UNIVERSE)}")
         print(f"Фокус дня (default): {state.symbol} anomaly={state.anomaly} source={state.source}")
+
+    # Персональные scope (пользователь с собственным watchlist/пином) тоже
+    # получают "batch"-пик раз в день, не только 'default' -- иначе
+    # залогиненный пользователь никогда не видит LLM-разбор, только шаблон
+    # (см. build_brief.py's дедуп по символу и prompt.md -- разбор потом
+    # пишется один раз на СИМВОЛ, не на scope, даже если несколько
+    # пользователей сошлись на одном и том же инструменте).
+    for user_id in focus_db.active_user_scopes():
+        scope_key = f"user:{user_id}"
+        symbols = focus_db.scope_symbols(user_id)
+        u_candidates = focus_db.build_candidates(symbols, today)
+        u_current = focus_db.load_focus_state(scope_key)
+        u_state = select_focus(scope_key, u_candidates, None, u_current, now_ts, new_source="batch")
+        focus_db.save_focus_state(u_state)
+        if verbose:
+            print(f"Фокус дня ({scope_key}): {u_state.symbol} anomaly={u_state.anomaly} source={u_state.source}")
+
     return processed
 
 

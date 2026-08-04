@@ -73,6 +73,32 @@ def anomaly(running_tr_value: float | None, atr: float | None) -> float | None:
     return running_tr_value / atr
 
 
+def yesterday_deviation(candles: list[dict], today: str, n: int = 14) -> dict | None:
+    """SPEC_morning_brief_v2.md блок 3: отклонение ПОСЛЕДНЕГО ЗАКРЫТОГО дня от
+    его же нормы -- не сегодняшний частичный день (это already-existing
+    anomaly()/running_tr(), для live-карточки), а ретроспективный "вчера".
+
+    candles -- как в wilder_atr: по возрастанию 'date', каждый {'date','o','h','l','c'}.
+    ATR(n) считается по n дням ДО измеряемого (тот же принцип, что as_of_date
+    в wilder_atr исключает ещё не закрытую свечу) -- иначе сам вчерашний день
+    просачивался бы в свой же знаменатель.
+    """
+    closed = [c for c in candles if c["date"] < today]
+    if len(closed) < n + 2:
+        return None
+    yday, prior_close = closed[-1], closed[-2]["c"]
+    atr = wilder_atr(closed[:-1], n=n)
+    tr = true_range(yday["h"], yday["l"], prior_close)
+    if not prior_close:
+        return None
+    return {
+        "bar_date": yday["date"],
+        "close": yday["c"],
+        "chg_pct": round((yday["c"] - prior_close) / prior_close * 100, 2),
+        "ratio": anomaly(tr, atr),
+    }
+
+
 @dataclass
 class FocusState:
     scope_key: str

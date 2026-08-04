@@ -95,7 +95,7 @@ const STRINGS = {
   },
 };
 
-const {C, Mono, Chip, Rule, AskAnalystBtn, getChUrl, QuizBlock, ComplianceFootnote} = window.AcademyShared;
+const {C, Mono, Chip, Rule, AskAnalystBtn, getChUrl, QuizBlock, ComplianceFootnote, ColdStart} = window.AcademyShared;
 
 const SectionTitle = ({children,sub,align="left",id}) => (
   <div id={id} style={{textAlign:align,marginBottom:36,scrollMarginTop:130}}>
@@ -137,18 +137,139 @@ function useCh10Data() {
 }
 
 // ─── Cold open ──────────────────────────────────────────────────────────────
-function ColdOpen10() {
+// ─── Cold start: "Что будет дальше" (SPEC_coldstart_interactives_ch6_15.md
+// §6). Заменяет ColdOpen10. Один реальный случай double_top из ch10_patterns.
+// json (тот же файл, что питает PatternBehaviorScreens ниже), правая часть
+// скрыта до выбора направления.
+function ColdStart10Entry({ patterns, examples }) {
+  const { useRef, useEffect, useState } = React;
   const T10 = window.Ch10Content[INITIAL_LANG] || window.Ch10Content.ru;
-  const co = T10.coldOpen;
+  const cs = T10.coldStart;
+  const containerRef = useRef(null);
+  const chartRef = useRef(null);
+  const [committed, setCommitted] = useState(false);
+
+  const ex = examples && examples.patterns && examples.patterns.double_top;
+  const pooled = patterns && patterns.pattern_pooled && patterns.pattern_pooled.double_top;
+  if (!ex || !pooled) return <div style={{background:C.black,padding:"60px 5vw",textAlign:"center"}}><Mono size={11} color={C.gold} spacing={4}>{cs.tag}</Mono></div>;
+
+  const markerIdx = ex.candles.findIndex(c => c.time === ex.marker_time);
+  const HIDE_FROM = markerIdx + 1;
+  const targetIdx = Math.min(markerIdx + 5, ex.candles.length - 1);
+  const dirDown = ex.candles[targetIdx].close < ex.candles[markerIdx].close;
+
+  useEffect(() => {
+    if (!containerRef.current || chartRef.current || typeof LightweightCharts === "undefined") return undefined;
+    const chart = LightweightCharts.createChart(containerRef.current, {
+      width: containerRef.current.clientWidth, height: 320,
+      layout: { background: { color: C.chartBg }, textColor: "rgba(255,255,255,0.55)" },
+      grid: { vertLines: { color: "rgba(255,255,255,0.05)" }, horzLines: { color: "rgba(255,255,255,0.05)" } },
+      rightPriceScale: { borderColor: "rgba(255,255,255,0.15)" },
+      timeScale: { borderColor: "rgba(255,255,255,0.15)", timeVisible: true, secondsVisible: false },
+    });
+    const candleSeries = chart.addCandlestickSeries({
+      upColor: C.chartGreen, downColor: C.chartRed, borderUpColor: C.chartGreen, borderDownColor: C.chartRed,
+      wickUpColor: C.chartGreen, wickDownColor: C.chartRed,
+    });
+    chartRef.current = { chart, candleSeries };
+    const ro = new ResizeObserver(entries => { if (entries[0]) chart.applyOptions({ width: entries[0].contentRect.width }); });
+    ro.observe(containerRef.current);
+    return () => { ro.disconnect(); chart.remove(); chartRef.current = null; };
+  }, []);
+
+  useEffect(() => {
+    if (!chartRef.current) return;
+    const n = committed ? ex.candles.length : HIDE_FROM;
+    chartRef.current.candleSeries.setData(ex.candles.slice(0, n).map(c => ({ time: c.time, open: +c.open, high: +c.high, low: +c.low, close: +c.close })));
+    if (committed) chartRef.current.candleSeries.setMarkers([{ time: ex.marker_time, position: "aboveBar", color: C.gold, shape: "arrowDown" }]);
+    chartRef.current.chart.timeScale().fitContent();
+  }, [committed]);
+
   return (
-    <div style={{background:C.black,padding:"70px 5vw 56px",color:"#fff"}}>
-      <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:24,textAlign:"center"}}>{co.tag}</Mono>
-      <div style={{maxWidth:840,margin:"0 auto 20px"}}>
-        {co.lines.map((line,i) => (
-          <p key={i} style={{fontSize: i===co.lines.length-1 ? 17 : 15.5, color: i>=3?"#fff":"rgba(255,255,255,0.72)", fontWeight: i>=3?600:400, lineHeight:1.75, marginBottom:14, fontFamily: i===co.lines.length-1 ? "'DM Serif Display',serif" : "inherit"}}>{line}</p>
-        ))}
+    <ColdStart
+      tag={cs.tag}
+      ask={cs.ask}
+      action={{ type: "custom", render: (csCommit) => (
+        <div>
+          <div style={{borderRadius:6, overflow:"hidden"}}><div ref={containerRef} data-scene="ch10_patterns:double_top"/></div>
+          <div style={{display:"flex", gap:10, justifyContent:"center", flexWrap:"wrap", marginTop:16}}>
+            {[["down",cs.optDown],["up",cs.optUp],["dontknow",cs.optDontKnow]].map(([val,label]) => (
+              <button key={val} disabled={committed} onClick={() => { setCommitted(true); csCommit(val); }} style={{
+                fontFamily:"monospace", fontSize:14, fontWeight:700, padding:"14px 22px", borderRadius:4,
+                cursor: committed ? "default" : "pointer", background:"rgba(255,255,255,0.06)", color:"#fff",
+                border:"1px solid rgba(255,255,255,0.22)", opacity: committed ? 0.6 : 1,
+              }}>{label}</button>
+            ))}
+          </div>
+        </div>
+      )}}
+      reveal={() => fillTemplate(cs.revealTemplate, {
+        dirWord: dirDown ? cs.dirDownPast : cs.dirUpPast,
+        from: ex.candles[markerIdx].close, to: ex.candles[targetIdx].close,
+        n: pooled.n, pct: Math.round(pooled.agree_5 * 1000) / 10,
+      })}
+      bridge={cs.bridge}
+    />
+  );
+}
+
+// ─── Середина: "Твоя серия" (§6 середина, чистый расчёт) ──────────────────────
+// Не через ColdStart-шелл -- это, как MeasureYourBroker/SampleSizeCalculator
+// в других главах, live-калькулятор с повторным пересчётом, а не одноразовое
+// раскрытие. Монте-Карло по 1000 прогонам монетных серий с заданной
+// вероятностью убытка -- медиана самой длинной серии. Данные не нужны: это
+// арифметика вероятности, не рыночная статистика.
+function ColdStart10Middle() {
+  const [winRate, setWinRate] = React.useState(50);
+  const [nTrades, setNTrades] = React.useState(100);
+  const [streak, setStreak] = React.useState(null);
+
+  function simulate() {
+    const q = 1 - winRate / 100;
+    const runs = [];
+    for (let t = 0; t < 1000; t++) {
+      let cur = 0, longest = 0;
+      for (let i = 0; i < nTrades; i++) {
+        if (Math.random() < q) { cur++; longest = Math.max(longest, cur); } else { cur = 0; }
+      }
+      runs.push(longest);
+    }
+    runs.sort((a,b) => a-b);
+    setStreak(runs[Math.floor(runs.length / 2)]);
+  }
+
+  const T10 = window.Ch10Content[INITIAL_LANG] || window.Ch10Content.ru;
+  const cm = T10.coldStartMiddle;
+
+  return (
+    <div style={{background:C.black, padding:"64px 5vw 52px", color:"#fff"}}>
+      <Mono size={11} color={C.gold} spacing={4} style={{display:"block", marginBottom:22, textAlign:"center"}}>{cm.tag}</Mono>
+      <p style={{fontFamily:"'DM Serif Display',serif", fontSize:"clamp(21px,3.2vw,28px)", color:"#fff", textAlign:"center", maxWidth:680, margin:"0 auto 30px", lineHeight:1.42}}>{cm.ask}</p>
+      <div style={{maxWidth:420, margin:"0 auto"}}>
+        <div style={{marginBottom:20}}>
+          <div style={{display:"flex", justifyContent:"space-between", marginBottom:6}}>
+            <span style={{fontSize:11.5, color:"rgba(255,255,255,0.55)", fontFamily:"monospace"}}>{cm.winRateLabel}</span>
+            <span style={{fontSize:13, fontWeight:700, color:C.gold, fontFamily:"monospace"}}>{winRate}%</span>
+          </div>
+          <input type="range" min="20" max="80" value={winRate} onChange={e=>{ setWinRate(+e.target.value); setStreak(null); }} style={{width:"100%", accentColor:C.gold}}/>
+        </div>
+        <div style={{marginBottom:20}}>
+          <div style={{display:"flex", justifyContent:"space-between", marginBottom:6}}>
+            <span style={{fontSize:11.5, color:"rgba(255,255,255,0.55)", fontFamily:"monospace"}}>{cm.tradesLabel}</span>
+            <span style={{fontSize:13, fontWeight:700, color:C.gold, fontFamily:"monospace"}}>{nTrades}</span>
+          </div>
+          <input type="range" min="20" max="500" step="10" value={nTrades} onChange={e=>{ setNTrades(+e.target.value); setStreak(null); }} style={{width:"100%", accentColor:C.gold}}/>
+        </div>
+        <div style={{textAlign:"center"}}>
+          <button onClick={simulate} style={{fontFamily:"monospace", fontSize:14, fontWeight:700, padding:"12px 28px", borderRadius:4, cursor:"pointer", background:C.gold, color:C.black, border:"none"}}>{cm.runBtn}</button>
+        </div>
       </div>
-      <p style={{textAlign:"center",fontFamily:"monospace",fontSize:12,color:C.gold}}>{co.cta}</p>
+      {streak != null && (
+        <div style={{maxWidth:640, margin:"26px auto 0", padding:"20px 24px", background:"rgba(201,151,58,0.1)", border:"1px solid rgba(201,151,58,0.3)", borderRadius:6}}>
+          <div style={{fontSize:16, lineHeight:1.62, color:"#fff"}}>{fillTemplate(cm.revealTemplate, { winRate, n: nTrades, streak })}</div>
+        </div>
+      )}
+      {streak != null && <p style={{textAlign:"center", fontFamily:"monospace", fontSize:12, color:C.gold, letterSpacing:0.5, marginTop:22, marginBottom:0}}>{cm.bridge}</p>}
     </div>
   );
 }
@@ -568,7 +689,7 @@ function Chapter10() {
       {!loading && (
       <div style={{maxWidth:1060,margin:"0 auto",padding:"0 0 120px"}}>
 
-        <div style={{margin:"0 -5vw 56px"}}><ColdOpen10/></div>
+        <div style={{margin:"0 -5vw 56px"}}><ColdStart10Entry patterns={patterns} examples={examples}/></div>
 
         <div style={{padding:"0 5vw"}}>
 
@@ -582,6 +703,8 @@ function Chapter10() {
 
         <SectionTitle id="secFourMistakes" sub={S.fourMistakesSub}>{T10.fourMistakes.tag}</SectionTitle>
         <FourMistakes/>
+
+        <div style={{margin:"0 -5vw 56px"}}><ColdStart10Middle/></div>
 
         <SectionTitle id="secPatternsAsCrowd" sub={S.patternsSub}>{T10.patternsAsCrowd.tag}</SectionTitle>
         <PatternsAsCrowd/>

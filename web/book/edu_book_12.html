@@ -104,7 +104,19 @@ const STRINGS = {
   },
 };
 
-const {C, Mono, Chip, Rule, AskAnalystBtn, getChUrl, QuizBlock, ComplianceFootnote} = window.AcademyShared;
+const {C, Mono, Chip, Rule, AskAnalystBtn, getChUrl, QuizBlock, ComplianceFootnote, ColdStart} = window.AcademyShared;
+
+function fillTemplate(str, vars) {
+  if (!str) return str;
+  return str.replace(/\{\{(\w+)\}\}/g, (m, key) => {
+    const v = vars ? vars[key] : undefined;
+    if (v === undefined || v === null || (typeof v === "number" && isNaN(v))) {
+      console.error("[ch12] отсутствует значение для {{" + key + "}}");
+      return "—";
+    }
+    return String(v);
+  });
+}
 
 const SectionTitle = ({children,sub,align="left",id}) => (
   <div id={id} style={{textAlign:align,marginBottom:36,scrollMarginTop:130}}>
@@ -176,19 +188,26 @@ function useSeriesProgress(refreshKey) {
 }
 
 // ─── Cold open ──────────────────────────────────────────────────────────────
-function ColdOpen12() {
+// ─── Cold start: "Сколько сделок достаточно" (SPEC_coldstart_interactives_
+// ch6_15.md §8). Заменяет ColdOpen12. Данные не нужны -- переиспользует уже
+// существующую binomAtLeast() (та же арифметика, что ниже в SampleSizeCalculator).
+function ColdStart12Entry() {
   const T = window.Ch12Content[INITIAL_LANG] || window.Ch12Content.ru;
-  const co = T.coldOpen;
+  const cs = T.coldStart;
   return (
-    <div style={{background:C.black,padding:"70px 5vw 56px",color:"#fff"}}>
-      <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:24,textAlign:"center"}}>{co.tag}</Mono>
-      <div style={{maxWidth:840,margin:"0 auto 12px"}}>
-        {co.lines.map((line,i) => (
-          <p key={i} style={{fontSize: i===co.lines.length-1 ? 17 : 15.5, color: i>=3?"#fff":"rgba(255,255,255,0.72)", fontWeight: i>=3?600:400, lineHeight:1.75, marginBottom:14, fontFamily: i===co.lines.length-1 ? "'DM Serif Display',serif" : "inherit"}}>{line}</p>
-        ))}
-      </div>
-      <p style={{textAlign:"center",fontFamily:"monospace",fontSize:12,color:C.gold}}>{co.cta}</p>
-    </div>
+    <ColdStart
+      tag={cs.tag}
+      ask={cs.ask}
+      action={{ type: "choice", options: [
+        { label: cs.opt10, value: 10 }, { label: cs.opt50, value: 50 }, { label: cs.opt200, value: 200 },
+      ]}}
+      reveal={(n) => {
+        const pct = binomAtLeast(n, Math.ceil(n * 0.6), 0.5);
+        const pct200 = binomAtLeast(200, Math.ceil(200 * 0.6), 0.5);
+        return fillTemplate(cs.revealTemplate, { n, pct: Math.round(pct * 10) / 10, pct200: Math.round(pct200 * 100) / 100 });
+      }}
+      bridge={cs.bridge}
+    />
   );
 }
 
@@ -863,7 +882,7 @@ function Chapter12() {
 
       <div style={{maxWidth:1060,margin:"0 auto",padding:"0 0 120px"}}>
 
-        <div style={{margin:"0 -5vw 56px"}}><ColdOpen12/></div>
+        <div style={{margin:"0 -5vw 56px"}}><ColdStart12Entry/></div>
 
         <div style={{padding:"0 5vw"}}>
 
@@ -881,6 +900,9 @@ function Chapter12() {
         <SectionTitle id="secCloudShift" sub={S.cloudShiftSub}>{T.cloudShift.tag}</SectionTitle>
         <CloudShiftExplainer/>
 
+        <SectionTitle id="secSampleSize" sub={S.sampleSizeSub}>{T.sampleSize.tag}</SectionTitle>
+        <SampleSizeCalculator/>
+
         <SectionTitle id="secChikou" sub={S.chikouSub}>{T.chikouTautology.tag}</SectionTitle>
         <ChikouTautology/>
 
@@ -888,9 +910,6 @@ function Chapter12() {
         <WhatValuable12/>
 
         <Rule/>
-
-        <SectionTitle id="secSampleSize" sub={S.sampleSizeSub}>{T.sampleSize.tag}</SectionTitle>
-        <SampleSizeCalculator/>
 
         <SectionTitle id="secFifty" sub={S.fiftySub}>{T.whatFiftyShows.tag}</SectionTitle>
         <WhatFiftyShows progress={progress} loading={loading}/>

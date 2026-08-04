@@ -23,16 +23,21 @@
  */
 window.Ch10Content = {
   ru: {
-    coldOpen: {
-      tag: "ГЛАВА 10 — ДВЕ ОДИНАКОВЫЕ СДЕЛКИ",
-      lines: [
-        "Слева и справа — одна и та же сделка. Один инструмент, вход в пределах нескольких пунктов, оба раза стоп сработал.",
-        "Разница одна, и она не на графике. Левая была первой сделкой дня. Правая — третьей подряд после двух убытков, и объём в ней был вдвое больше.",
-        "Первая — рабочий момент. Вторая — начало серии, которая заканчивается одинаково у всех и называется по-разному: тильт, отыгрыш, «сегодня я всё верну».",
-        "Про это невозможно рассказать так, чтобы человек узнал себя: все читают такие абзацы про кого-то другого. Поэтому дальше будет не рассказ, а твои собственные цифры — если ты привязал журнал в главе 8. И четыре конкретных признака, каждый из которых виден в записях и ни один не виден в ощущениях.",
-        "И отдельно: в этой главе мы ничего не предлагаем и никуда не ведём. Ни одной ссылки. Причину скажем в конце.",
-      ],
-      cta: "Показать цифры ↓",
+    coldStart: {
+      tag: "ЧТО БУДЕТ ДАЛЬШЕ",
+      ask: "Реальные свечи USDJPY H1 до момента, где сложился паттерн «двойная вершина». Правая часть скрыта. Куда пойдёт цена?",
+      optDown: "Упадёт", optUp: "Вырастет", optDontKnow: "Не знаю",
+      dirUpPast: "выросла", dirDownPast: "упала",
+      revealTemplate: "Здесь цена {{dirWord}}, с {{from}} до {{to}} за 5 баров. Но по {{n}} реальным случаям «двойной вершины»: движение совпало с ожидаемым направлением лишь в {{pct}}% — паттерн не пророчество.",
+      bridge: "Дальше — что паттерн показывает на самом деле, если не будущее.",
+    },
+    coldStartMiddle: {
+      tag: "ТВОЯ СЕРИЯ",
+      ask: "Задай долю прибыльных сделок и их количество. Симуляция покажет самую длинную серию подряд идущих убытков, которую ты почти наверняка встретишь.",
+      winRateLabel: "Доля прибыльных", tradesLabel: "Количество сделок",
+      runBtn: "Проверить",
+      revealTemplate: "При {{winRate}}% прибыльных на {{n}} сделках медианная самая длинная серия убытков — {{streak}} подряд. Это норма при таких числах, а не сигнал, что стратегия сломалась.",
+      bridge: "Это то, ради чего написана эта глава: психология путается не в фактах, а в арифметике серий.",
     },
     antiMyth: {
       tag: "АНТИ-МИФ",
@@ -174,16 +179,21 @@ window.Ch10Content = {
     },
   },
   ro: {
-    coldOpen: {
-      tag: "CAPITOLUL 10 — DOUĂ TRANZACȚII IDENTICE",
-      lines: [
-        "În stânga și în dreapta — aceeași tranzacție. Un singur instrument, intrare în limita câtorva puncte, de ambele ori stopul s-a declanșat.",
-        "Există o singură diferență, și nu e pe grafic. Cea din stânga a fost prima tranzacție a zilei. Cea din dreapta — a treia la rând după două pierderi, iar volumul ei a fost dublu.",
-        "Prima e un moment normal de lucru. A doua e începutul unei serii care se termină la fel pentru toată lumea și se numește diferit: tilt, recuperare disperată, „azi recuperez tot”.",
-        "Despre asta e imposibil să povestești în așa fel încât cineva să se recunoască: toată lumea citește astfel de paragrafe despre altcineva. De aceea, ce urmează nu va fi o poveste, ci propriile tale cifre — dacă ai legat jurnalul în capitolul 8. Și patru semne concrete, fiecare vizibil în înregistrări și niciunul vizibil în senzații.",
-        "Și separat: în acest capitol nu propunem nimic și nu te ducem nicăieri. Niciun link. Motivul îl spunem la final.",
-      ],
-      cta: "Arată cifrele ↓",
+    coldStart: {
+      tag: "CE URMEAZĂ",
+      ask: "Lumânări reale USDJPY H1 până la momentul unde s-a format un „double top”. Partea dreaptă e ascunsă. Încotro merge prețul?",
+      optDown: "Va scădea", optUp: "Va crește", optDontKnow: "Nu știu",
+      dirUpPast: "a crescut", dirDownPast: "a scăzut",
+      revealTemplate: "Aici prețul {{dirWord}}, de la {{from}} la {{to}} în 5 bare. Dar la {{n}} cazuri reale de „double top”: mișcarea a coincis cu direcția așteptată doar în {{pct}}% — modelul nu e o profeție.",
+      bridge: "În continuare — ce arată de fapt un model, dacă nu viitorul.",
+    },
+    coldStartMiddle: {
+      tag: "SERIA TA",
+      ask: "Alege ponderea tranzacțiilor profitabile și numărul lor. Simularea arată cea mai lungă serie de pierderi consecutive pe care aproape sigur o vei întâlni.",
+      winRateLabel: "Pondere profitabile", tradesLabel: "Număr de tranzacții",
+      runBtn: "Verifică",
+      revealTemplate: "La {{winRate}}% profitabile din {{n}} tranzacții, cea mai lungă serie mediană de pierderi — {{streak}} la rând. E normal la aceste cifre, nu un semn că strategia s-a stricat.",
+      bridge: "Pentru asta e scris acest capitol: psihologia se încurcă nu în fapte, ci în aritmetica seriilor.",
     },
     antiMyth: {
       tag: "ANTI-MIT",
@@ -325,16 +335,21 @@ window.Ch10Content = {
     },
   },
   en: {
-    coldOpen: {
-      tag: "CHAPTER 10 — TWO IDENTICAL TRADES",
-      lines: [
-        "On the left and the right — the same trade. One instrument, entry within a few points of each other, the stop hit both times.",
-        "There's exactly one difference, and it isn't on the chart. The left one was the first trade of the day. The right one was the third in a row after two losses, and its size was double.",
-        "The first is a normal working moment. The second is the start of a streak that ends the same way for everyone and gets called different things: tilt, chasing losses, «today I'm getting it all back».",
-        "It's impossible to tell this story in a way that makes someone recognize themselves in it: everyone reads paragraphs like this as being about someone else. So what follows isn't a story — it's your own numbers, if you linked your journal back in chapter 8. And four concrete tells, each visible in the records and none visible in how it feels.",
-        "And separately: in this chapter we offer nothing and lead you nowhere. Not a single link. We'll explain why at the end.",
-      ],
-      cta: "Show the numbers ↓",
+    coldStart: {
+      tag: "WHAT HAPPENS NEXT",
+      ask: "Real USDJPY H1 candles up to the point where a «double top» formed. The right side is hidden. Which way does price go?",
+      optDown: "It'll fall", optUp: "It'll rise", optDontKnow: "Don't know",
+      dirUpPast: "rose", dirDownPast: "fell",
+      revealTemplate: "Here price {{dirWord}}, from {{from}} to {{to}} over 5 bars. But across {{n}} real «double top» cases: the move matched the expected direction only {{pct}}% of the time — the pattern isn't a prophecy.",
+      bridge: "Next: what a pattern actually shows, if not the future.",
+    },
+    coldStartMiddle: {
+      tag: "YOUR STREAK",
+      ask: "Set your win rate and number of trades. The simulation shows the longest losing streak you'll almost certainly hit.",
+      winRateLabel: "Win rate", tradesLabel: "Number of trades",
+      runBtn: "Check",
+      revealTemplate: "At {{winRate}}% wins over {{n}} trades, the median longest losing streak is {{streak}} in a row. That's normal at these numbers, not a sign the strategy broke.",
+      bridge: "This is what this chapter is really about: psychology gets confused not by facts, but by the arithmetic of streaks.",
     },
     antiMyth: {
       tag: "ANTI-MYTH",

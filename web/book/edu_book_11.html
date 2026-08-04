@@ -91,7 +91,19 @@ const STRINGS = {
   },
 };
 
-const {C, Mono, Chip, Rule, AskAnalystBtn, getChUrl, QuizBlock, ComplianceFootnote} = window.AcademyShared;
+const {C, Mono, Chip, Rule, AskAnalystBtn, getChUrl, QuizBlock, ComplianceFootnote, ColdStart} = window.AcademyShared;
+
+function fillTemplate(str, vars) {
+  if (!str) return str;
+  return str.replace(/\{\{(\w+)\}\}/g, (m, key) => {
+    const v = vars ? vars[key] : undefined;
+    if (v === undefined || v === null || (typeof v === "number" && isNaN(v))) {
+      console.error("[ch11] отсутствует значение для {{" + key + "}}");
+      return "—";
+    }
+    return String(v);
+  });
+}
 
 const SectionTitle = ({children,sub,align="left",id}) => (
   <div id={id} style={{textAlign:align,marginBottom:36,scrollMarginTop:130}}>
@@ -103,21 +115,56 @@ const StepTag = ({n,label}) => (
   <Mono size={9.5} color={C.inkFaint} spacing={2} style={{display:"block",marginBottom:8,textTransform:"uppercase"}}>{n} · {label}</Mono>
 );
 
-// ─── Cold open ──────────────────────────────────────────────────────────────
-function ColdOpen11() {
+// ─── Cold start: "Гонка" (SPEC_coldstart_interactives_ch6_15.md §7). Заменяет
+// ColdOpen11. Данные не нужны -- реакция читателя измеряется вживую через
+// performance.now(), сравнивается с известной величиной задержки колокации.
+function ColdStart11Entry() {
   const T11 = window.Ch11Content[INITIAL_LANG] || window.Ch11Content.ru;
-  const co = T11.coldOpen;
+  const cs = T11.coldStart;
+  const [phase, setPhase] = React.useState("idle"); // idle -> waiting -> live -> early -> done
+  const [ms, setMs] = React.useState(null);
+  const timeoutRef = React.useRef(null);
+  const t0Ref = React.useRef(null);
+
+  function start() {
+    setPhase("waiting");
+    const delay = 1200 + Math.random() * 2200;
+    timeoutRef.current = setTimeout(() => { t0Ref.current = performance.now(); setPhase("live"); }, delay);
+  }
+  function onClick() {
+    if (phase === "waiting") { clearTimeout(timeoutRef.current); setPhase("early"); return; }
+    if (phase === "live") { setMs(Math.round(performance.now() - t0Ref.current)); setPhase("done"); }
+  }
+  React.useEffect(() => () => clearTimeout(timeoutRef.current), []);
+
+  const ratio = ms ? Math.round(ms / 0.2) : null;
+
   return (
-    <div style={{background:C.black,padding:"70px 5vw 56px",color:"#fff"}}>
-      <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:24,textAlign:"center"}}>{co.tag}</Mono>
-      <div style={{maxWidth:840,margin:"0 auto 12px"}}>
-        {co.lines.map((line,i) => (
-          <p key={i} style={{fontSize: i===co.lines.length-1 ? 17 : 15.5, color: i>=3?"#fff":"rgba(255,255,255,0.72)", fontWeight: i>=3?600:400, lineHeight:1.75, marginBottom:14, fontFamily: i===co.lines.length-1 ? "'DM Serif Display',serif" : "inherit"}}>{line}</p>
-        ))}
-      </div>
-      <p style={{textAlign:"center",fontSize:10.5,color:"rgba(255,255,255,0.35)",fontStyle:"italic",marginBottom:20}}>{co.source}</p>
-      <p style={{textAlign:"center",fontFamily:"monospace",fontSize:12,color:C.gold}}>{co.cta}</p>
-    </div>
+    <ColdStart
+      tag={cs.tag}
+      ask={cs.ask}
+      action={{ type: "custom", render: (csCommit) => (
+        <div style={{textAlign:"center"}}>
+          {phase === "idle" && (
+            <button onClick={start} style={{fontFamily:"monospace", fontSize:14, fontWeight:700, padding:"16px 32px", borderRadius:4, cursor:"pointer", background:C.gold, color:C.black, border:"none"}}>{cs.readyBtn}</button>
+          )}
+          {phase === "waiting" && (
+            <div onClick={onClick} style={{cursor:"pointer", padding:"40px 0", fontFamily:"monospace", fontSize:20, color:"rgba(255,255,255,0.4)"}}>{cs.waitLabel}</div>
+          )}
+          {phase === "early" && (
+            <div>
+              <p style={{fontFamily:"monospace", fontSize:14, color:C.red, marginBottom:16}}>{cs.tooEarly}</p>
+              <button onClick={start} style={{fontFamily:"monospace", fontSize:14, fontWeight:700, padding:"14px 26px", borderRadius:4, cursor:"pointer", background:"rgba(255,255,255,0.06)", color:"#fff", border:"1px solid rgba(255,255,255,0.22)"}}>{cs.readyBtn}</button>
+            </div>
+          )}
+          {phase === "live" && (
+            <div onClick={() => { onClick(); csCommit(true); }} style={{cursor:"pointer", padding:"40px 0", fontFamily:"monospace", fontSize:32, fontWeight:700, color:C.gold}}>{cs.jumpLabel}</div>
+          )}
+        </div>
+      )}}
+      reveal={() => ms == null ? null : fillTemplate(cs.revealTemplate, { ms, ratio })}
+      bridge={cs.bridge}
+    />
   );
 }
 
@@ -505,7 +552,7 @@ function Chapter11() {
 
       <div style={{maxWidth:1060,margin:"0 auto",padding:"0 0 120px"}}>
 
-        <div style={{margin:"0 -5vw 56px"}}><ColdOpen11/></div>
+        <div style={{margin:"0 -5vw 56px"}}><ColdStart11Entry/></div>
 
         <div style={{padding:"0 5vw"}}>
 
@@ -515,6 +562,9 @@ function Chapter11() {
 
         <SectionTitle id="secWhyOffExchange" sub={S.whyOffExchangeSub}>{T11.whyOffExchange.tag}</SectionTitle>
         <WhyOffExchange/>
+
+        <SectionTitle sub={S.measureSub}>{T11.measureYourBroker.tag}</SectionTitle>
+        <MeasureYourBroker/>
 
         <SectionTitle id="secHftThreeThings" sub={S.hftSub}>{T11.hftThreeThings.tag}</SectionTitle>
         <HftThreeThings/>
@@ -527,9 +577,6 @@ function Chapter11() {
 
         <SectionTitle sub={S.bookModelsSub}>{T11.bookModels.tag}</SectionTitle>
         <BookModels/>
-
-        <SectionTitle sub={S.measureSub}>{T11.measureYourBroker.tag}</SectionTitle>
-        <MeasureYourBroker/>
 
         <Rule/>
 

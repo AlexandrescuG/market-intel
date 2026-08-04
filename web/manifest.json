@@ -1,0 +1,39 @@
+{
+  "name": "SBF Journal",
+  "short_name": "SBF",
+  "description": "Торговый дневник и трекер дисциплины",
+  "start_url": "/journal.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#FBF6EF",
+  "background_color": "#FBF6EF",
+  "lang": "ru",
+  "icons": [
+    {
+      "src": "/assets/icons/icon-72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Добавить сделку",
+      "url": "/journal.html#add",
+      "icons": [{ "src": "/assets/icons/icon-72.png", "sizes": "72x72" }]
+    }
+  ],
+  "categories": ["finance", "productivity"]
+}

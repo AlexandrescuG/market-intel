@@ -1,0 +1,203 @@
+{
+  "_meta": {
+    "purpose": "Таблица-мастер главы 5 «Глобальные Часы» (§3.2) в машинном виде. Из неё рендерятся: таблица сессий, переключатель локали, переключатель DST (лето/зима/неделя рассинхрона) и подписи блока «Твоё окно». Захардкоженных времён и data-utc в HTML главы быть не должно.",
+    "checked": "2026-07-27",
+    "principle": "Время события хранится в ЛОКАЛЬНОМ времени его владельца (local_time + tz). UTC вычисляется на клиенте через Intl для конкретной даты — поэтому недели рассинхрона переводов часов считаются сами, а не подгоняются руками. Поля utc_dst/utc_std оставлены только как контрольные значения для приёмки.",
+    "version": 1
+  },
+
+  "anchors": {
+    "summer": "2026-07-15",
+    "winter": "2026-01-15",
+    "desync": "2026-03-15"
+  },
+
+  "desync_windows_2026": [
+    { "from": "2026-03-08", "to": "2026-03-29", "note_ru": "США уже на летнем времени, Европа ещё нет", "note_ro": "SUA au trecut deja la ora de vară, Europa încă nu", "note_en": "US already on DST, Europe not yet" },
+    { "from": "2026-10-25", "to": "2026-11-01", "note_ru": "Европа уже вернулась на зимнее, США ещё нет", "note_ro": "Europa a revenit deja la ora de iarnă, SUA încă nu", "note_en": "Europe back on standard time, US not yet" }
+  ],
+
+  "dst_rules": {
+    "US": { "start": "2nd Sun Mar", "end": "1st Sun Nov", "tz": "America/New_York",
+            "dates_2026": ["2026-03-08", "2026-11-01"], "dates_2027": ["2027-03-14", "2027-11-07"] },
+    "EU": { "start": "last Sun Mar", "end": "last Sun Oct", "tz": "Europe/London",
+            "dates_2026": ["2026-03-29", "2026-10-25"], "dates_2027": ["2027-03-28", "2027-10-31"] },
+    "JP": null,
+    "RU": null,
+    "MD": { "start": "last Sun Mar", "end": "last Sun Oct", "tz": "Europe/Chisinau",
+            "note": "Молдова переходит вместе с ЕС" }
+  },
+
+  "zones": [
+    { "id": "UTC",       "tz": "UTC",               "label_ru": "UTC",      "label_ro": "UTC",      "label_en": "UTC",      "default": true },
+    { "id": "chisinau",  "tz": "Europe/Chisinau",   "label_ru": "Кишинёв",  "label_ro": "Chișinău", "label_en": "Chisinau" },
+    { "id": "moscow",    "tz": "Europe/Moscow",     "label_ru": "Москва",   "label_ro": "Moscova",  "label_en": "Moscow" },
+    { "id": "astana",    "tz": "Asia/Almaty",       "label_ru": "Астана",   "label_ro": "Astana",   "label_en": "Astana",
+      "note_ru": "Казахстан с 1 марта 2024 живёт в едином поясе UTC+5" },
+    { "id": "london",    "tz": "Europe/London",     "label_ru": "Лондон",   "label_ro": "Londra",   "label_en": "London" },
+    { "id": "newyork",   "tz": "America/New_York",  "label_ru": "Нью-Йорк", "label_ro": "New York", "label_en": "New York" }
+  ],
+
+  "events": [
+    {
+      "id": "week_open", "kind": "session", "weight": 2, "risk": true,
+      "local_time": "17:00", "tz": "America/New_York", "dst": "US", "weekday": "sun",
+      "utc_dst": "21:00", "utc_std": "22:00",
+      "label_ru": "Открытие недели (Веллингтон–Сидней)", "label_ro": "Deschiderea săptămânii (Wellington–Sydney)", "label_en": "Weekly open (Wellington–Sydney)",
+      "what_ru": "Первые котировки после выходных. Книга тончайшая, гэпы выходного дня.",
+      "what_ro": "Primele cotații după weekend. Registrul e subțire, gap-uri de weekend.",
+      "what_en": "First quotes after the weekend. Thinnest book of the week, weekend gaps.",
+      "assets": ["ALL"], "source": "конвенция брокеров, 17:00 ET"
+    },
+    {
+      "id": "tse_open", "kind": "exchange", "weight": 3,
+      "local_time": "09:00", "tz": "Asia/Tokyo", "dst": null,
+      "utc_dst": "00:00", "utc_std": "00:00",
+      "label_ru": "Открытие Токийской фондовой биржи", "label_ro": "Deschiderea bursei din Tokyo", "label_en": "Tokyo Stock Exchange open",
+      "what_ru": "Реальная биржа, реальный аукцион открытия.",
+      "what_ro": "Bursă reală, licitație reală de deschidere.",
+      "what_en": "A real exchange with a real opening auction.",
+      "assets": ["USDJPY"], "source": "Japan Exchange Group"
+    },
+    {
+      "id": "tokyo_fix", "kind": "fix", "weight": 5, "highlight": true,
+      "local_time": "09:55", "tz": "Asia/Tokyo", "dst": null,
+      "utc_dst": "00:55", "utc_std": "00:55",
+      "label_ru": "Токийский фикс", "label_ro": "Fixing-ul de la Tokyo", "label_en": "Tokyo fix",
+      "what_ru": "Курс, по которому японские банки обслуживают клиентские платежи. Документированный предсказуемый поток; сильнее всего в «дни готоби» (числа, кратные пяти).",
+      "what_ro": "Cursul la care băncile japoneze decontează plățile clienților. Flux previzibil documentat; cel mai puternic în „zilele gotobi”.",
+      "what_en": "The rate Japanese banks settle client payments at. A documented, predictable flow; strongest on gotobi days.",
+      "assets": ["USDJPY"], "source": "Ito & Yamada, NBER w22820"
+    },
+    {
+      "id": "tse_lunch", "kind": "exchange", "weight": 3,
+      "local_time": "11:30", "local_time_end": "12:30", "tz": "Asia/Tokyo", "dst": null,
+      "utc_dst": "02:30", "utc_std": "02:30",
+      "label_ru": "Обеденный перерыв в Токио", "label_ro": "Pauza de prânz la Tokyo", "label_en": "Tokyo lunch break",
+      "what_ru": "Биржа физически закрыта — в наших данных виден провал активности.",
+      "what_ro": "Bursa e închisă fizic — în datele noastre se vede o cădere a activității.",
+      "what_en": "The exchange is physically closed — the activity dip is visible in our own data.",
+      "assets": ["USDJPY"], "source": "Japan Exchange Group"
+    },
+    {
+      "id": "tse_close", "kind": "exchange", "weight": 1,
+      "local_time": "15:30", "tz": "Asia/Tokyo", "dst": null,
+      "utc_dst": "06:30", "utc_std": "06:30",
+      "label_ru": "Закрытие Токийской фондовой биржи", "label_ro": "Închiderea bursei din Tokyo", "label_en": "Tokyo Stock Exchange close",
+      "what_ru": "С 5 ноября 2024 — на полчаса позже прежнего.",
+      "what_ro": "Din 5 noiembrie 2024 — cu o jumătate de oră mai târziu.",
+      "what_en": "Since 5 November 2024 — half an hour later than before.",
+      "assets": ["USDJPY"], "source": "Japan Exchange Group"
+    },
+    {
+      "id": "lse_open", "kind": "exchange", "weight": 5,
+      "local_time": "08:00", "tz": "Europe/London", "dst": "EU",
+      "utc_dst": "07:00", "utc_std": "08:00",
+      "label_ru": "Открытие Лондонской фондовой биржи", "label_ro": "Deschiderea bursei din Londra", "label_en": "London Stock Exchange open",
+      "what_ru": "Начало европейского рабочего дня, первый большой приток ликвидности.",
+      "what_ro": "Începutul zilei de lucru europene, primul aflux mare de lichiditate.",
+      "what_en": "The European working day begins — the first large influx of liquidity.",
+      "assets": ["EURUSD", "GBPUSD", "GOLD"], "source": "London Stock Exchange"
+    },
+    {
+      "id": "lbma_am", "kind": "fix", "weight": 5, "highlight": true,
+      "local_time": "10:30", "tz": "Europe/London", "dst": "EU",
+      "utc_dst": "09:30", "utc_std": "10:30",
+      "label_ru": "Утренний аукцион LBMA Gold", "label_ro": "Licitația LBMA Gold de dimineață", "label_en": "LBMA Gold morning auction",
+      "what_ru": "Официальная цена золота, по которой считаются контракты по всему миру. С 2015 года администрирует ICE Benchmark Administration.",
+      "what_ro": "Prețul oficial al aurului, după care se decontează contracte în toată lumea. Din 2015 administrat de ICE Benchmark Administration.",
+      "what_en": "The official gold price the world's contracts settle against. Administered by ICE Benchmark Administration since 2015.",
+      "assets": ["GOLD"], "source": "LBMA / ICE Benchmark Administration"
+    },
+    {
+      "id": "us_macro", "kind": "release", "weight": 5, "highlight": true,
+      "local_time": "08:30", "tz": "America/New_York", "dst": "US",
+      "utc_dst": "12:30", "utc_std": "13:30",
+      "label_ru": "Макростатистика США", "label_ro": "Datele macro din SUA", "label_en": "US macro releases",
+      "what_ru": "NFP, CPI, розничные продажи, заявки на пособия. Главный источник суточных всплесков — и именно это, а не открытие NYSE, стоит за пиком суток.",
+      "what_ro": "NFP, CPI, vânzări cu amănuntul, cereri de șomaj. Principala sursă a vârfurilor zilnice — nu deschiderea NYSE.",
+      "what_en": "NFP, CPI, retail sales, jobless claims. The main source of the daily volatility peak — not the NYSE opening bell.",
+      "assets": ["GOLD", "EURUSD", "SPX"], "source": "BLS release schedule"
+    },
+    {
+      "id": "nyse_open", "kind": "exchange", "weight": 3,
+      "local_time": "09:30", "tz": "America/New_York", "dst": "US",
+      "utc_dst": "13:30", "utc_std": "14:30",
+      "label_ru": "Открытие NYSE", "label_ro": "Deschiderea NYSE", "label_en": "NYSE open",
+      "what_ru": "Именно здесь, а не часом раньше. Всплеск на час раньше делают данные, а не звонок биржи.",
+      "what_ro": "Aici, nu cu o oră mai devreme. Vârful de mai devreme e făcut de date, nu de clopoțelul bursei.",
+      "what_en": "Here — not an hour earlier. The earlier spike is made by data releases, not by the opening bell.",
+      "assets": ["SPX", "NASDAQ", "DJI"], "source": "NYSE"
+    },
+    {
+      "id": "lbma_pm", "kind": "fix", "weight": 5, "highlight": true,
+      "local_time": "15:00", "tz": "Europe/London", "dst": "EU",
+      "utc_dst": "14:00", "utc_std": "15:00",
+      "label_ru": "Дневной аукцион LBMA Gold", "label_ro": "Licitația LBMA Gold de după-amiază", "label_en": "LBMA Gold afternoon auction",
+      "what_ru": "Тот самый «лондонский фиксинг», второй за сутки.",
+      "what_ro": "Faimosul „fixing londonez”, al doilea din zi.",
+      "what_en": "The famous London fix — the second of the day.",
+      "assets": ["GOLD"], "source": "LBMA / ICE Benchmark Administration"
+    },
+    {
+      "id": "overlap", "kind": "overlap", "weight": 5, "highlight": true,
+      "local_time": "09:30", "local_time_end": "12:00", "tz": "America/New_York", "dst": "US",
+      "utc_dst": "13:30", "utc_std": "14:30",
+      "label_ru": "Перекрытие Лондон + Нью-Йорк", "label_ro": "Suprapunerea Londra + New York", "label_en": "London + New York overlap",
+      "what_ru": "Оба центра за столом одновременно. Пик ликвидности суток: здесь рыночный ордер стоит дешевле всего.",
+      "what_ro": "Ambele centre la masă simultan. Vârful de lichiditate al zilei: aici ordinul la piață costă cel mai puțin.",
+      "what_en": "Both centres at the table at once. The daily liquidity peak — where a market order costs you least.",
+      "assets": ["ALL"], "source": "производное от расписаний LSE и NYSE"
+    },
+    {
+      "id": "wmr_fix", "kind": "fix", "weight": 4, "highlight": true,
+      "local_time": "15:57:30", "local_time_end": "16:02:30", "tz": "Europe/London", "dst": "EU",
+      "utc_dst": "14:57:30", "utc_std": "15:57:30",
+      "label_ru": "Фикс WM/Reuters", "label_ro": "Fixing-ul WM/Reuters", "label_en": "WM/Reuters fix",
+      "what_ru": "Главный валютный бенчмарк планеты: по нему переоценивают портфели индексные фонды. С 15 февраля 2015 окно расширено с одной минуты до пяти.",
+      "what_ro": "Principalul benchmark valutar: fondurile indexate își reevaluează portofoliile după el. Din 15 februarie 2015 fereastra a fost lărgită de la un minut la cinci.",
+      "what_en": "The planet's main FX benchmark — index funds revalue against it. The window was widened from one minute to five on 15 February 2015.",
+      "assets": ["EURUSD", "GBPUSD"], "source": "Ito & Yamada, NBER w23327"
+    },
+    {
+      "id": "lse_close", "kind": "exchange", "weight": 3,
+      "local_time": "16:30", "tz": "Europe/London", "dst": "EU",
+      "utc_dst": "15:30", "utc_std": "16:30",
+      "label_ru": "Закрытие Лондонской фондовой биржи", "label_ro": "Închiderea bursei din Londra", "label_en": "London Stock Exchange close",
+      "what_ru": "Европа уходит из-за стола, книга редеет.",
+      "what_ro": "Europa pleacă de la masă, registrul se subțiază.",
+      "what_en": "Europe leaves the table and the book thins out.",
+      "assets": ["EURUSD", "GBPUSD"], "source": "London Stock Exchange"
+    },
+    {
+      "id": "fomc", "kind": "release", "weight": 5, "conditional": true,
+      "local_time": "14:00", "tz": "America/New_York", "dst": "US",
+      "utc_dst": "18:00", "utc_std": "19:00",
+      "label_ru": "Решение FOMC (в дни заседаний)", "label_ro": "Decizia FOMC (în zilele ședințelor)", "label_en": "FOMC decision (meeting days)",
+      "what_ru": "См. главу 2. В свои дни — сильнейшее событие суток.",
+      "what_ro": "Vezi capitolul 2. În zilele sale — cel mai puternic eveniment al zilei.",
+      "what_en": "See chapter 2. On its days, the strongest event of the session.",
+      "assets": ["ALL"], "source": "Federal Reserve"
+    },
+    {
+      "id": "nyse_close", "kind": "exchange", "weight": 1,
+      "local_time": "16:00", "tz": "America/New_York", "dst": "US",
+      "utc_dst": "20:00", "utc_std": "21:00",
+      "label_ru": "Закрытие NYSE", "label_ro": "Închiderea NYSE", "label_en": "NYSE close",
+      "what_ru": "На форексе почти не видно — американский день ещё не кончился.",
+      "what_ro": "Pe forex aproape nu se vede — ziua americană încă nu s-a încheiat.",
+      "what_en": "Barely visible on FX — the American day is not over yet.",
+      "assets": ["SPX", "NASDAQ", "DJI"], "source": "NYSE"
+    },
+    {
+      "id": "rollover", "kind": "broker", "weight": 2, "risk": true,
+      "local_time": "17:00", "tz": "America/New_York", "dst": "US",
+      "utc_dst": "21:00", "utc_std": "22:00",
+      "label_ru": "Ролловер — начало нового торгового дня у брокера", "label_ro": "Rollover — începutul noii zile de tranzacționare", "label_en": "Rollover — broker's new trading day",
+      "what_ru": "Начисление свопов, смена даты дневной свечи, кратковременное расширение спреда. Рыночный ордер в эту минуту — самый дорогой ордер суток. В ночь со среды на четверг своп тройной.",
+      "what_ro": "Se calculează swap-urile, se schimbă data lumânării zilnice, spread-ul se lărgește pentru scurt timp. De miercuri spre joi swap-ul e triplu.",
+      "what_en": "Swaps are charged, the daily candle rolls over, the spread widens briefly. Wednesday-to-Thursday the swap is triple.",
+      "assets": ["ALL"], "source": "конвенция брокеров, 17:00 ET"
+    }
+  ]
+}

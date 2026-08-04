@@ -444,8 +444,12 @@ def publish_all() -> None:
     fast_fns = (publish_market, publish_technical, publish_signals,
                 publish_buzz, publish_report)
     # Медленнее / зависят от истории
+    # publish_calendar снят из пайплайна: читает мёртвую таблицу `calendar` в
+    # signals.db (её пишет только collect_calendar(), которого никто не вызывает) —
+    # реальный календарь теперь в econ_events, отдаётся через /api/calendar/events
+    # и build_brief_v2.py. Витрину calendar.json не читал ни один фронтенд-код.
     slow_fns = (publish_stories, publish_regime, publish_verification,
-                publish_calendar, publish_macro, publish_divergence,
+                publish_macro, publish_divergence,
                 publish_anomalies, publish_health, publish_charts, publish_charts_mt5)
 
     layers = []

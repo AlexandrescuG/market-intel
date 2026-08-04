@@ -39,7 +39,7 @@
 <!-- ── REACT + BABEL (no npm, no build step) ── -->
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"></script>
 
 <script type="text/babel" data-presets="react">
 // Язык из Flask — прокидывается через Jinja2
@@ -75,9 +75,9 @@ const TR = {
     bookTitle:"Биржевая торговля",bookSubtitle:"ПОЛНОЕ РУКОВОДСТВО",
     pathLabel:"ВЫБЕРИТЕ ПУТЬ",pathHint:"Это настроит акценты в контенте",
     paths:[
-      {id:"investor",icon:"◈",title:"Инвестор",desc:"Долгосрочный рост. Buy&Hold, дивиденды, портфели."},
-      {id:"trader",icon:"◎",title:"Трейдер",desc:"Активная торговля. Теханализ, паттерны, риск."},
       {id:"explorer",icon:"◇",title:"Исследователь",desc:"Хочу разобраться в рынках. Начну с основ."},
+      {id:"trader",icon:"◎",title:"Трейдер",desc:"Активная торговля. Теханализ, паттерны, риск."},
+      {id:"investor",icon:"◈",title:"Инвестор",desc:"Долгосрочный рост. Buy&Hold, дивиденды, портфели."},
     ],
     startBtn:"Начать путь",live:"LIVE",
     antiMythTag:"АНТИ-МИФ",voiceTag:"ГОЛОС SBF",priceTag:"ЦЕНА НЕЗНАНИЯ",
@@ -118,9 +118,9 @@ const TR = {
     bookTitle:"Exchange Trading",bookSubtitle:"COMPLETE GUIDE",
     pathLabel:"CHOOSE YOUR PATH",pathHint:"This adjusts the content focus for you",
     paths:[
-      {id:"investor",icon:"◈",title:"Investor",desc:"Long-term growth. Buy&Hold, dividends, portfolios."},
-      {id:"trader",icon:"◎",title:"Trader",desc:"Active trading. Technical analysis, patterns, risk."},
       {id:"explorer",icon:"◇",title:"Explorer",desc:"I want to understand markets. Starting from basics."},
+      {id:"trader",icon:"◎",title:"Trader",desc:"Active trading. Technical analysis, patterns, risk."},
+      {id:"investor",icon:"◈",title:"Investor",desc:"Long-term growth. Buy&Hold, dividends, portfolios."},
     ],
     startBtn:"Begin",live:"LIVE",
     antiMythTag:"ANTI-MYTH",voiceTag:"SBF VOICE",priceTag:"COST OF NOT KNOWING",
@@ -161,9 +161,9 @@ const TR = {
     bookTitle:"Trading la Bursă",bookSubtitle:"GHID COMPLET",
     pathLabel:"ALEGEȚI CALEA",pathHint:"Aceasta personalizează conținutul pentru tine",
     paths:[
-      {id:"investor",icon:"◈",title:"Investitor",desc:"Creștere pe termen lung. Buy&Hold, dividende, portofolii."},
-      {id:"trader",icon:"◎",title:"Trader",desc:"Tranzacționare activă. Analiză tehnică, tipare, risc."},
       {id:"explorer",icon:"◇",title:"Explorator",desc:"Vreau să înțeleg piețele. Pornind de la baze."},
+      {id:"trader",icon:"◎",title:"Trader",desc:"Tranzacționare activă. Analiză tehnică, tipare, risc."},
+      {id:"investor",icon:"◈",title:"Investitor",desc:"Creștere pe termen lung. Buy&Hold, dividende, portofolii."},
     ],
     startBtn:"Începe",live:"LIVE",
     antiMythTag:"ANTI-MIT",voiceTag:"VOCEA SBF",priceTag:"COSTUL NEȘTIINȚEI",

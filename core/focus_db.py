@@ -17,6 +17,8 @@ from pathlib import Path
 
 from core.focus import DEFAULT_UNIVERSE, NO_LIVE_FEED, FocusState, anomaly, running_tr
 from core.sessions import us_dst_active
+from core import journal_brief
+from core.journal_symbols import to_chart_symbol
 
 _BOT_DB = Path("/mnt/sbfdata/sbf-platform/SBFAcademy_bot/bot.db")
 
@@ -260,3 +262,28 @@ def build_candidates(symbols: list[str], today: str) -> list[tuple[str, float | 
         return out
     finally:
         con.close()
+
+
+def active_user_scopes() -> list[str]:
+    """Пользователи (не 'default') с непустым ватчлистом и БЕЗ пина
+    (запиненным select_focus() не нужен -- пин читается напрямую в API).
+    Общее для focus_live.py (каждый тик) и focus_batch_job.py (раз в день,
+    чтобы персональные scope тоже получали source="batch" -> LLM-разбор,
+    не только 'default' -- см. серию находок про "куцую" карточку у
+    залогиненных пользователей с собственным watchlist/пином)."""
+    return [uid for uid in journal_brief.list_watchlist_user_ids(exclude_default=True)
+            if not journal_brief.get_pinned(uid)]
+
+
+def scope_symbols(user_id: str | None) -> list[str]:
+    if user_id is None:
+        return DEFAULT_UNIVERSE
+    raw = journal_brief.get_watchlist(user_id)
+    if not raw:
+        return DEFAULT_UNIVERSE
+    mapped = []
+    for s in raw:
+        chart_sym = to_chart_symbol(s) or (s if s in DEFAULT_UNIVERSE else None)
+        if chart_sym:
+            mapped.append(chart_sym)
+    return mapped or DEFAULT_UNIVERSE

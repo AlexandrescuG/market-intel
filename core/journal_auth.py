@@ -202,6 +202,16 @@ def ensure_schema() -> None:
         "ALTER TABLE user_prefs ADD COLUMN broker_tz_offset INTEGER",
         "ALTER TABLE user_prefs ADD COLUMN prestige_count INTEGER NOT NULL DEFAULT 0",
         "ALTER TABLE users ADD COLUMN sbfacademy_user_id INTEGER",
+        # SBF_Charts_Layer4_Spec, Фаза 1.4/1.2.3: тогглы слоёв графика (зеркало
+        # localStorage для входа с нового устройства) и последний просмотренный
+        # инструмент (приоритет над первым из ватчлиста при открытии графика).
+        "ALTER TABLE user_prefs ADD COLUMN chart_layers TEXT NOT NULL DEFAULT '{}'",
+        "ALTER TABLE user_prefs ADD COLUMN last_symbol TEXT",
+        # SPEC_morning_brief_v2.md блок 6 ("Твоё окно"): JSON {"start_h","end_h",
+        # "archetype"} -- глава 5 курса (MyWindowBlock) уже считает это на клиенте,
+        # но никогда не сохраняла -- отдельная колонка (не chart_layers), чтобы
+        # /api/journal/brief мог читать одно поле без парсинга чужого блока.
+        "ALTER TABLE user_prefs ADD COLUMN trading_window TEXT",
     ]:
         try:
             conn.execute(ddl)
@@ -930,6 +940,80 @@ def update_broker_tz(user_id: str, offset_minutes: int) -> dict:
     conn.commit()
     conn.close()
     return {"ok": True}
+
+
+def update_chart_prefs(user_id: str, layers: dict | None = None, last_symbol: str | None = None) -> dict:
+    """SBF_Charts_Layer4_Spec, Фаза 1.4/1.2.3 (+ 1.2.2 использует то же поле
+    для тумблера «Мои инструменты» календаря — тот же per-user JSON-блок мелких
+    UI-настроек, не только графика, несмотря на имя колонки chart_layers):
+    зеркало тогглов слоёв + последний просмотренный инструмент, один UPDATE.
+
+    `layers` — ЧАСТИЧНОЕ обновление (merge в существующий JSON), не замена
+    целиком: несколько независимых вызывающих (chart.html, calendar.html)
+    пишут в одну и ту же колонку разными ключами, полная перезапись одного
+    затирала бы ключи, записанные другим."""
+    import json as _json
+    conn = _get_conn()
+    sets, args = [], []
+    if layers is not None:
+        row = conn.execute("SELECT chart_layers FROM user_prefs WHERE user_id=?", (user_id,)).fetchone()
+        try:
+            merged = _json.loads(row[0]) if row and row[0] else {}
+        except (ValueError, TypeError):
+            merged = {}
+        merged.update(layers)
+        sets.append("chart_layers=?")
+        args.append(_json.dumps(merged, ensure_ascii=False))
+    if last_symbol is not None:
+        sets.append("last_symbol=?")
+        args.append(last_symbol)
+    if not sets:
+        conn.close()
+        return {"error": "nothing to update"}
+    sets.append("updated_at=strftime('%Y-%m-%dT%H:%M:%S','now')")
+    args.append(user_id)
+    conn.execute(f"UPDATE user_prefs SET {', '.join(sets)} WHERE user_id=?", args)
+    conn.commit()
+    conn.close()
+    return {"ok": True}
+
+
+_ARCHETYPES = {"morning", "evening", "night"}
+
+
+def update_trading_window(user_id: str, start_h: int, end_h: int, archetype: str | None = None) -> dict:
+    """SPEC_morning_brief_v2.md блок 6 -- сохранить выбранное торговое окно
+    (глава 5 курса, MyWindowBlock, раньше только setSaved(true) локально).
+    Как update_tz/update_broker_tz — валидация диапазона, один UPDATE."""
+    import json as _json
+    if not isinstance(start_h, int) or not isinstance(end_h, int):
+        return {"error": "invalid hours"}
+    if not (0 <= start_h < 24) or not (0 <= end_h <= 24):
+        return {"error": "invalid hours"}
+    if archetype is not None and archetype not in _ARCHETYPES:
+        return {"error": "invalid archetype"}
+    payload = {"start_h": start_h, "end_h": end_h, "archetype": archetype}
+    conn = _get_conn()
+    conn.execute(
+        "UPDATE user_prefs SET trading_window=?, updated_at=strftime('%Y-%m-%dT%H:%M:%S','now') WHERE user_id=?",
+        (_json.dumps(payload, ensure_ascii=False), user_id),
+    )
+    conn.commit()
+    conn.close()
+    return {"ok": True}
+
+
+def get_trading_window(user_id: str) -> dict | None:
+    import json as _json
+    conn = _get_conn()
+    row = conn.execute("SELECT trading_window FROM user_prefs WHERE user_id=?", (user_id,)).fetchone()
+    conn.close()
+    if not row or not row[0]:
+        return None
+    try:
+        return _json.loads(row[0])
+    except (ValueError, TypeError):
+        return None
 
 
 def prestige(user_id: str) -> dict:

@@ -94,7 +94,19 @@ const STRINGS = {
   },
 };
 
-const {C, Mono, Chip, Rule, AskAnalystBtn, getChUrl, QuizBlock, ComplianceFootnote} = window.AcademyShared;
+const {C, Mono, Chip, Rule, AskAnalystBtn, getChUrl, QuizBlock, ComplianceFootnote, ColdStart} = window.AcademyShared;
+
+function fillTemplate(str, vars) {
+  if (!str) return str;
+  return str.replace(/\{\{(\w+)\}\}/g, (m, key) => {
+    const v = vars ? vars[key] : undefined;
+    if (v === undefined || v === null || (typeof v === "number" && isNaN(v))) {
+      console.error("[ch14] отсутствует значение для {{" + key + "}}");
+      return "—";
+    }
+    return String(v);
+  });
+}
 
 const SectionTitle = ({children,sub,align="left",id}) => (
   <div id={id} style={{textAlign:align,marginBottom:36,scrollMarginTop:130}}>
@@ -152,18 +164,26 @@ function useGateStatus(refreshKey) {
 }
 
 // ─── Cold open ──────────────────────────────────────────────────────────────
-function ColdOpen14() {
+// ─── Cold start: "Сколько ты платишь" (SPEC_coldstart_interactives_ch6_15.md
+// §10). Заменяет ColdOpen14. Спред 0.3 и цель 5 пунктов -- те же реальные
+// числа, что заданы по умолчанию в CostArithmetic ниже, не новые.
+function ColdStart14Entry() {
   const T = window.Ch14Content[INITIAL_LANG] || window.Ch14Content.ru;
-  const co = T.coldOpen;
+  const cs = T.coldStart;
+  const SPREAD = 0.3, TARGET = 5, TRADING_DAYS = 252;
   return (
-    <div id="secColdOpen" style={{background:C.black,padding:"70px 5vw 56px",color:"#fff",scrollMarginTop:130}}>
-      <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:24,textAlign:"center"}}>{co.tag}</Mono>
-      <div style={{maxWidth:840,margin:"0 auto 12px"}}>
-        {co.lines.map((line,i) => (
-          <p key={i} style={{fontSize: i===co.lines.length-1 ? 17 : 15.5, color: i>=4?"#fff":"rgba(255,255,255,0.72)", fontWeight: i>=4?600:400, lineHeight:1.75, marginBottom:14, fontFamily: i===co.lines.length-1 ? "'DM Serif Display',serif" : "inherit"}}>{line}</p>
-        ))}
-      </div>
-      <p style={{textAlign:"center",fontFamily:"monospace",fontSize:12,color:C.gold}}>{co.cta}</p>
+    <div id="secColdOpen" style={{scrollMarginTop:130}}>
+      <ColdStart
+        tag={cs.tag}
+        ask={cs.ask}
+        action={{ type: "numberInput", numberInput: { default: 10, placeholder: cs.placeholder, unit: cs.unit } }}
+        reveal={(n) => {
+          const annual = Math.round(SPREAD * n * TRADING_DAYS * 100) / 100;
+          const equivWins = Math.round(annual / TARGET * 10) / 10;
+          return fillTemplate(cs.revealTemplate, { n, annual, equivWins });
+        }}
+        bridge={cs.bridge}
+      />
     </div>
   );
 }
@@ -618,7 +638,7 @@ function Chapter14() {
 
       <div style={{maxWidth:1060,margin:"0 auto",padding:"0 0 120px"}}>
 
-        <div style={{margin:"0 -5vw 56px"}}><ColdOpen14/></div>
+        <div style={{margin:"0 -5vw 56px"}}><ColdStart14Entry/></div>
 
         <div style={{padding:"0 5vw"}}>
 

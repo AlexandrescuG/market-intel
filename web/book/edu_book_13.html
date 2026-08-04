@@ -103,7 +103,19 @@ const STRINGS = {
   },
 };
 
-const {C, Mono, Chip, Rule, AskAnalystBtn, getChUrl, QuizBlock, ComplianceFootnote} = window.AcademyShared;
+const {C, Mono, Chip, Rule, AskAnalystBtn, getChUrl, QuizBlock, ComplianceFootnote, ColdStart} = window.AcademyShared;
+
+function fillTemplate(str, vars) {
+  if (!str) return str;
+  return str.replace(/\{\{(\w+)\}\}/g, (m, key) => {
+    const v = vars ? vars[key] : undefined;
+    if (v === undefined || v === null || (typeof v === "number" && isNaN(v))) {
+      console.error("[ch13] отсутствует значение для {{" + key + "}}");
+      return "—";
+    }
+    return String(v);
+  });
+}
 
 const SectionTitle = ({children,sub,align="left",id}) => (
   <div id={id} style={{textAlign:align,marginBottom:36,scrollMarginTop:130}}>
@@ -164,19 +176,20 @@ function SeriesCounter({ progress, loading, lang }) {
 }
 
 // ─── Cold open ──────────────────────────────────────────────────────────────
-function ColdOpen13() {
+// ─── Cold start: "Отыграть" (SPEC_coldstart_interactives_ch6_15.md §9).
+// Заменяет ColdOpen13. Данные не нужны -- это чистая арифметика асимметрии
+// просадки/восстановления, dd/(1-dd).
+function ColdStart13Entry() {
   const T = window.Ch13Content[INITIAL_LANG] || window.Ch13Content.ru;
-  const co = T.coldOpen;
+  const cs = T.coldStart;
   return (
-    <div style={{background:C.black,padding:"70px 5vw 56px",color:"#fff"}}>
-      <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:24,textAlign:"center"}}>{co.tag}</Mono>
-      <div style={{maxWidth:840,margin:"0 auto 12px"}}>
-        {co.lines.map((line,i) => (
-          <p key={i} style={{fontSize: i===co.lines.length-1 ? 17 : 15.5, color: i>=4?"#fff":"rgba(255,255,255,0.72)", fontWeight: i>=4?600:400, lineHeight:1.75, marginBottom:14, fontFamily: i===co.lines.length-1 ? "'DM Serif Display',serif" : "inherit"}}>{line}</p>
-        ))}
-      </div>
-      <p style={{textAlign:"center",fontFamily:"monospace",fontSize:12,color:C.gold}}>{co.cta}</p>
-    </div>
+    <ColdStart
+      tag={cs.tag}
+      ask={cs.ask}
+      action={{ type: "slider", slider: { min: 10, max: 90, step: 5, default: 50, format: (v) => "−" + v + "%" } }}
+      reveal={(dd) => fillTemplate(cs.revealTemplate, { dd, need: Math.round(dd / (100 - dd) * 100 * 100) / 100 })}
+      bridge={cs.bridge}
+    />
   );
 }
 
@@ -625,11 +638,22 @@ function LadderStep8() {
 }
 
 // ─── Предикт недели ─────────────────────────────────────────────────────────
+// SPEC_coldstart_interactives_ch6_15.md §9 / SPEC_charts_and_interactivity_
+// standard.md ре-аудит: раньше печатал highlight.zero_pct на любой выбор --
+// уровень 0 в костюме уровня 3. bucketIdx сравнивает реальное измерение с
+// диапазоном, который выбрал читатель, и явно говорит, попал он или нет.
+function bucketIdxBreakeven(pct) {
+  if (pct < 30) return 0;
+  if (pct < 60) return 1;
+  if (pct < 85) return 2;
+  return 3;
+}
 function PredictBreakeven({ be }) {
   const T = window.Ch13Content[INITIAL_LANG] || window.Ch13Content.ru;
   const p = T.predict;
   const [picked, setPicked] = React.useState(null);
   const highlight = be && be.highlight;
+  const correctIdx = highlight ? bucketIdxBreakeven(highlight.zero_pct) : null;
   return (
     <div style={{border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px",marginTop:8,marginBottom:24}}>
       <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{p.tag}</Mono>
@@ -639,7 +663,7 @@ function PredictBreakeven({ be }) {
           <button key={i} onClick={()=>setPicked(i)} style={{fontFamily:"monospace",fontSize:12,padding:"9px 20px",cursor:"pointer",background:picked===i?C.gold:"#fff",color:picked===i?"#18181a":C.inkMid,border:`1px solid ${picked===i?C.gold:C.border}`,borderRadius:4}}>{o}</button>
         ))}
       </div>
-      {picked !== null && highlight && <p style={{fontSize:12.5,color:C.inkMid,lineHeight:1.7,marginBottom:10,background:C.goldPale,padding:"12px 16px",borderRadius:4}}>{p.answerNote(highlight.zero_pct)}</p>}
+      {picked !== null && highlight && <p style={{fontSize:12.5,color:C.inkMid,lineHeight:1.7,marginBottom:10,background:C.goldPale,padding:"12px 16px",borderRadius:4}}>{p.answerNote(highlight.zero_pct, picked === correctIdx)}</p>}
       <p style={{fontSize:11,color:C.inkFaint}}>{p.xpNote}</p>
     </div>
   );
@@ -687,7 +711,7 @@ function Chapter13() {
 
       <div style={{maxWidth:1060,margin:"0 auto",padding:"0 0 120px"}}>
 
-        <div style={{margin:"0 -5vw 56px"}}><ColdOpen13/></div>
+        <div style={{margin:"0 -5vw 56px"}}><ColdStart13Entry/></div>
 
         <div style={{padding:"0 5vw"}}>
 

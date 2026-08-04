@@ -13,6 +13,81 @@ from core import scoring
 from core.config import DB_PATH
 
 SCHEMA = """
+-- WP1 Истории
+CREATE TABLE IF NOT EXISTS stories (
+    id TEXT PRIMARY KEY,
+    title TEXT,
+    summary TEXT DEFAULT '',
+    status TEXT DEFAULT 'emerging',
+    momentum REAL DEFAULT 0,
+    source_diversity INTEGER DEFAULT 0,
+    first_seen TEXT, last_seen TEXT, peak_seen TEXT,
+    market_tickers TEXT DEFAULT '[]',
+    raw TEXT DEFAULT '{}'
+);
+CREATE TABLE IF NOT EXISTS story_signals (
+    story_id TEXT, signal_uid TEXT, added TEXT,
+    PRIMARY KEY (story_id, signal_uid)
+);
+CREATE INDEX IF NOT EXISTS idx_stories_status ON stories(status);
+CREATE INDEX IF NOT EXISTS idx_stories_seen   ON stories(last_seen);
+
+-- WP2 Доверие к источникам
+CREATE TABLE IF NOT EXISTS sources (
+    handle TEXT PRIMARY KEY,
+    source_type TEXT,
+    seed_tier INTEGER DEFAULT 2,
+    claims_total INTEGER DEFAULT 0,
+    claims_confirmed INTEGER DEFAULT 0,
+    trust REAL DEFAULT 0.5,
+    updated TEXT
+);
+
+-- WP3 Верификация
+CREATE TABLE IF NOT EXISTS observations (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    created TEXT, source_handle TEXT,
+    text TEXT,
+    ticker TEXT,
+    metric TEXT DEFAULT 'close',
+    baseline REAL,
+    checkpoint TEXT,
+    direction TEXT,
+    status TEXT DEFAULT 'pending',
+    resolved REAL, resolved_at TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_obs_checkpoint ON observations(checkpoint);
+CREATE INDEX IF NOT EXISTS idx_obs_status     ON observations(status);
+
+-- WP7 Календарь
+CREATE TABLE IF NOT EXISTS calendar (
+    id TEXT PRIMARY KEY,
+    event_date TEXT,
+    name TEXT,
+    importance INTEGER DEFAULT 1,
+    forecast REAL, previous REAL, actual REAL,
+    country TEXT DEFAULT '', currency TEXT DEFAULT '',
+    url TEXT DEFAULT '',
+    resolved INTEGER DEFAULT 0,
+    market_move REAL
+);
+CREATE INDEX IF NOT EXISTS idx_cal_date ON calendar(event_date);
+
+-- WP10 Аномалии
+CREATE TABLE IF NOT EXISTS baselines (
+    key TEXT PRIMARY KEY,
+    mean_mentions REAL, std_mentions REAL,
+    mean_engagement REAL, std_engagement REAL,
+    samples INTEGER, updated TEXT
+);
+
+-- WP12 Здоровье
+CREATE TABLE IF NOT EXISTS heartbeats (
+    component TEXT PRIMARY KEY,
+    last_run TEXT, last_ok TEXT, last_error TEXT,
+    error_count INTEGER DEFAULT 0
+);
+
 CREATE TABLE IF NOT EXISTS signals (
     uid              TEXT PRIMARY KEY,   -- 'twitter:123', 'reddit:abc', 'rss:<hash>'
     source           TEXT NOT NULL,      -- twitter | reddit | rss
@@ -217,6 +292,39 @@ def cashtag_heatmap(hours: int, limit: int = 20) -> list[tuple[str, int, float]]
             imp[t] += s["importance"]
     ranked = sorted(counts.items(), key=lambda kv: kv[1], reverse=True)[:limit]
     return [(t, c, round(imp[t] / c, 3)) for t, c in ranked]
+
+
+def heartbeat(component: str, ok: bool, error: str = "") -> None:
+    """WP12: Записать хартбит компонента."""
+    now = _now()
+    with sqlite3.connect(DB_PATH) as db:
+        row = db.execute(
+            "SELECT error_count FROM heartbeats WHERE component=?", (component,)
+        ).fetchone()
+        if row is None:
+            db.execute(
+                """INSERT INTO heartbeats (component, last_run, last_ok, last_error, error_count)
+                   VALUES (?,?,?,?,?)""",
+                (component, now, now if ok else None, error if not ok else None, 0 if ok else 1)
+            )
+        else:
+            err_count = 0 if ok else (row[0] + 1)
+            db.execute(
+                """UPDATE heartbeats SET last_run=?,
+                   last_ok=CASE WHEN ? THEN ? ELSE last_ok END,
+                   last_error=CASE WHEN ? THEN ? ELSE last_error END,
+                   error_count=?
+                   WHERE component=?""",
+                (now, ok, now, not ok, error, err_count, component)
+            )
+        db.commit()
+
+
+def get_heartbeats() -> list[dict]:
+    with sqlite3.connect(DB_PATH) as db:
+        cur = db.execute("SELECT * FROM heartbeats")
+        cols = [c[0] for c in cur.description]
+        return [dict(zip(cols, r)) for r in cur.fetchall()]
 
 
 if __name__ == "__main__":

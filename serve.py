@@ -17,7 +17,7 @@ from urllib.parse import urlparse, parse_qs
 
 # Journal modules (добавляем core/ в path)
 sys.path.insert(0, str(Path(__file__).parent))
-from core import journal_db, journal_crypto, journal_ocr, journal_csv, journal_meta, journal_discipline, journal_alerts, journal_brief, journal_setups, journal_tilt, journal_gamification, journal_goals, journal_account, journal_auth, journal_feedback, journal_import, journal_analytics, journal_review, journal_cooldown, i18n
+from core import journal_db, journal_crypto, journal_ocr, journal_csv, journal_meta, journal_discipline, journal_alerts, journal_brief, journal_setups, journal_tilt, journal_gamification, journal_goals, journal_account, journal_auth, journal_feedback, journal_import, journal_analytics, journal_review, journal_cooldown, journal_rules, journal_tradeplan, journal_gate, i18n
 from core.event_types import normalize_event_type
 from core.config import DB_PATH as _SIGNALS_DB
 from core.patterns import PATTERNS, detect as _detect_patterns
@@ -96,9 +96,21 @@ def _ensure_schema() -> None:
             event_type TEXT NOT NULL, symbol TEXT NOT NULL, n INT NOT NULL,
             avg_move_30m REAL, avg_move_60m REAL, max_move_60m REAL,
             volatile_share REAL, computed_ts INT,
+            median_move_30m REAL, median_atr_30m REAL,
             PRIMARY KEY(event_type, symbol, n)
         );
     """)
+    # SPEC_morning_brief_v2.md блок 1 ("в прошлые разы") хочет медиану,
+    # нормированную на дневной ATR14 -- avg_move_30m/60m остаются как были
+    # (сырые пункты, среднее), эти две колонки добавлены отдельно, не заменяют.
+    for ddl in [
+        "ALTER TABLE event_reaction_stats ADD COLUMN median_move_30m REAL",
+        "ALTER TABLE event_reaction_stats ADD COLUMN median_atr_30m REAL",
+    ]:
+        try:
+            con.execute(ddl)
+        except Exception:
+            pass
     con.executemany(
         "INSERT OR IGNORE INTO symbol_map(our_key, twelvedata, mt5, yahoo) VALUES(?,?,?,?)",
         [
@@ -595,6 +607,46 @@ def _build_edu_page(ch: int, lang: str) -> bytes:
     if 'grafik-engine.js' not in html:
         html = html.replace("</head>", f"{grafik_tags}\n</head>", 1)
 
+    # window.sbfAuth (SPEC_academy_level1_interactivity.md, попытки квиза
+    # привязываются к реальному user_id, не к общему "default") -- те же
+    # тег и версия, что на index.html/journal.html/chart.html, книжные главы
+    # раньше вообще не грузили sbf-auth.js.
+    if 'sbf-auth.js' not in html:
+        html = html.replace(
+            "</head>", '<script src="/assets/sbf-auth.js?v=1" defer></script>\n</head>', 1)
+
+    # Общий "хром" книги (C/Mono/Chip/Rule/GlossWord/AskAnalystPopup/
+    # AskAnalystBtn/getChUrl/QuizBlock/ComplianceFootnote) -- SPEC_academy_
+    # chapter3_integration.md §5/§7, три независимые копии уже разошлись
+    # практически (не только гипотетически), см. план. НЕ defer: инлайновый
+    # <script type="text/babel"> главы (обычный, синхронный, в <body>)
+    # деструктурирует window.AcademyShared сразу при выполнении -- если
+    # этот тег отложить, глава попытается прочитать AcademyShared раньше,
+    # чем он появится.
+    # Проверяем именно тег, а не голую подстроку "academy-shared.js" -- главы
+    # сами упоминают это имя файла в комментариях, и подстрочная проверка
+    # решила бы, что тег "уже есть", и тег так и не добавлялся бы вовсе.
+    if '<script src="/assets/academy-shared.js' not in html:
+        html = html.replace(
+            "</head>", '<script src="/assets/academy-shared.js?v=1"></script>\n</head>', 1)
+
+    # Якоря с возвратом (SPEC_ch2_debug_and_chart_engine.md §5) -- курс-wide,
+    # не привязан к конкретной главе (источник и цель ссылки могут быть
+    # любыми двумя главами), поэтому грузится так же глобально, как
+    # academy-shared.js/sbf-header.js, а не через per-chapter <script>.
+    if '<script src="/edu/assets/anchor-return.js' not in html:
+        html = html.replace(
+            "</head>", '<script src="/edu/assets/anchor-return.js?v=1" defer></script>\n</head>', 1)
+
+    # Переключатель «Просто / Как есть» (SPEC_ch2_debug_and_chart_engine.md
+    # §3) -- состояние (localStorage) грузится глобально, чтобы выбор,
+    # сделанный на одной главе, был виден на любой другой, даже раньше, чем
+    # в ней появятся _simple-блоки; сам переключатель в шапке пока рисует
+    # только глава 2 (§3.3: раскатка по главам постепенная, не разом).
+    if '<script src="/edu/assets/simple-lang.js' not in html:
+        html = html.replace(
+            "</head>", '<script src="/edu/assets/simple-lang.js?v=1"></script>\n</head>', 1)
+
     # Хедер инжектирует sbf-header.js (добавлен через css_tags выше)
 
     # Инжектируем nav + прогресс + дисклеймер перед </body>
@@ -652,6 +704,9 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             return
         if path_clean == "/api/user/chart-prefs":
             self._handle_user_chart_prefs_put()
+            return
+        if path_clean == "/api/user/trading-window":
+            self._handle_user_trading_window_put()
             return
         user_id = self._current_user_id()
         if re.match(r"^/api/journal/setups/\d+$", path_clean):
@@ -718,6 +773,12 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self._handle_journal_save_account(user_id)
         elif path_clean == "/api/journal/meta":
             self._handle_journal_save_meta()
+        elif path_clean == "/api/journal/rules":
+            self._handle_journal_start_series(user_id)
+        elif path_clean == "/api/journal/tradeplan":
+            self._handle_journal_save_tradeplan(user_id)
+        elif path_clean == "/api/journal/gate-flag":
+            self._handle_journal_set_gate_flag(user_id)
         elif path_clean == "/api/journal/discipline/config":
             self._handle_discipline_save_config(user_id)
         elif path_clean == "/api/journal/discipline/eval":
@@ -764,6 +825,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self._handle_flashcard_review(user_id)
         elif path_clean == "/api/journal/course/complete":
             self._handle_course_complete(user_id)
+        elif path_clean == "/api/academy/quiz-attempt":
+            self._handle_academy_quiz_attempt(user_id)
         elif path_clean.startswith("/api/journal/course/") and path_clean.endswith("/complete"):
             chapter_n = int(path_clean.split("/")[-2])
             self._send_json(journal_gamification.complete_chapter(chapter_n, user_id))
@@ -929,8 +992,14 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self._send_json(journal_db.get_stats(user_id))
         elif path_clean == "/api/journal/accounts":
             self._send_json(journal_db.list_investor_accounts(user_id))
+        elif path_clean == "/api/journal/tradeplan":
+            self._send_json(journal_tradeplan.list_plans(user_id))
+        elif path_clean == "/api/journal/gate-status":
+            self._send_json(journal_gate.get_gate_status(user_id))
         elif path_clean == "/api/journal/behavioral":
             self._send_json(journal_meta.get_behavioral_data(user_id))
+        elif path_clean == "/api/journal/series-progress":
+            self._send_json(journal_rules.get_series_progress(user_id))
         elif path_clean == "/api/journal/discipline":
             self._send_json(journal_discipline.get_discipline_data(user_id))
         elif path_clean == "/api/journal/discipline/config":
@@ -1263,7 +1332,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         self.wfile.write(body)
 
     def _handle_calendar_api(self):
-        from datetime import datetime as _dt, timezone as _tz
+        from core.calendar_api import query_events
         params  = parse_qs(urlparse(self.path).query)
         date    = params.get("date",    [None])[0]
         from_d  = params.get("from",    [None])[0]
@@ -1271,53 +1340,13 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         impact  = params.get("impact",  [None])[0]
         country = params.get("country", [None])[0]
         symbols = params.get("symbols", [None])[0]  # Layer4 Ф1.2.2: тумблер «Мои инструменты»
+        limit   = params.get("limit",   [None])[0]
         try:
-            con = sqlite3.connect(str(_BOT_DB))
-            con.row_factory = sqlite3.Row
-            # Фильтр по scheduled_ts (INTEGER, индексирован) с fallback на ts_utc
-            query = "SELECT * FROM econ_events WHERE 1=1"
-            args: list = []
-            if date:
-                try:
-                    day_start = int(_dt.strptime(date, "%Y-%m-%d").replace(tzinfo=_tz.utc).timestamp())
-                    query += " AND (scheduled_ts >= ? AND scheduled_ts < ?" \
-                             " OR scheduled_ts IS NULL AND ts_utc LIKE ?)"
-                    args.extend([day_start, day_start + 86400, f"{date}%"])
-                except ValueError:
-                    query += " AND ts_utc LIKE ?"
-                    args.append(f"{date}%")
-            elif from_d or to_d:
-                if from_d:
-                    try:
-                        ts = int(_dt.strptime(from_d, "%Y-%m-%d").replace(tzinfo=_tz.utc).timestamp())
-                        query += " AND (scheduled_ts >= ? OR scheduled_ts IS NULL AND ts_utc >= ?)"
-                        args.extend([ts, f"{from_d}T00:00:00"])
-                    except ValueError:
-                        query += " AND ts_utc >= ?"
-                        args.append(f"{from_d}T00:00:00")
-                if to_d:
-                    try:
-                        ts = int(_dt.strptime(to_d, "%Y-%m-%d").replace(tzinfo=_tz.utc).timestamp()) + 86400
-                        query += " AND (scheduled_ts < ? OR scheduled_ts IS NULL AND ts_utc <= ?)"
-                        args.extend([ts, f"{to_d}T23:59:59"])
-                    except ValueError:
-                        query += " AND ts_utc <= ?"
-                        args.append(f"{to_d}T23:59:59")
-            if impact:
-                query += " AND impact = ?"
-                args.append(impact)
-            if country:
-                query += " AND country = ?"
-                args.append(country)
-            if symbols:
-                syms = [s.upper().strip() for s in symbols.split(",") if s.strip()]
-                if syms:
-                    placeholders = ",".join("?" * len(syms))
-                    query += f" AND country IN (SELECT country FROM event_instrument_map WHERE symbol IN ({placeholders}))"
-                    args.extend(syms)
-            query += " ORDER BY COALESCE(scheduled_ts, 0) ASC LIMIT 2000"
-            rows = [dict(r) for r in con.execute(query, args).fetchall()]
-            con.close()
+            rows = query_events(
+                date=date, from_d=from_d, to_d=to_d, impact=impact,
+                country=country, symbols=symbols,
+                limit=int(limit) if limit else 2000,
+            )
             body = json.dumps(rows, ensure_ascii=False).encode()
             self.send_response(200)
             self.send_header("Content-Type", "application/json; charset=utf-8")
@@ -1741,10 +1770,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         params = parse_qs(urlparse(self.path).query)
         scope_param = params.get("scope", ["me"])[0]
         is_anon = user_id == "default"
-        if scope_param == "default" or is_anon:
-            scope_key, pin_user = "default", None
-        else:
-            scope_key, pin_user = f"user:{user_id}", user_id
+        pin_user = None if (scope_param == "default" or is_anon) else user_id
 
         try:
             now_ts = int(time.time())
@@ -1761,6 +1787,21 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                     "last": last, "change_pct": change_pct,
                 })
                 return
+
+            # Персональный scope_key имеет смысл, только пока у пользователя
+            # реально есть непустой watchlist -- как только он опустел,
+            # focus_live.py/focus_batch_job.py перестают трогать этот scope
+            # (см. focus_db.active_user_scopes()) и его focus_state навсегда
+            # замораживается на последнем пике (нашли по жалобе: карточка
+            # показывала SILVER сутки спустя после того, как watchlist уже
+            # опустел, с только "живой" ценой поверх мёртвого символа).
+            # С пустым watchlist откатываемся на 'default' — те же символы
+            # (focus_db.scope_symbols() и так фоллбэчит на DEFAULT_UNIVERSE),
+            # но живое, постоянно обновляемое состояние с LLM-разбором.
+            if pin_user and journal_brief.get_watchlist(pin_user):
+                scope_key = f"user:{pin_user}"
+            else:
+                scope_key = "default"
 
             state = focus_db.load_focus_state(scope_key)
             if state is None:
@@ -1794,15 +1835,19 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             session_state = live_row["session_state"] if live_row else None
 
             # has_llm_analysis (§9): true только когда source=batch И файл с
-            # разбором реально существует (build_brief.py/prompt.md пишут
-            # его для scope='default' только -- см. план шаг 10). Смена на
-            # source="live" в течение дня естественно гасит has_llm_analysis,
-            # т.к. condition ниже проверяет ИМЕННО текущий source, не то,
-            # каким он был при первом коммите.
+            # разбором реально существует. Файл ключуется СИМВОЛОМ, не только
+            # датой (analysis_<date>_<symbol>.txt) -- build_brief.py/prompt.md
+            # теперь пишут разбор для 'default' И для каждого персонального
+            # scope с активным batch-пиком (см. focus_batch_job.py), дедуп по
+            # символу; поэтому лукап тоже идёт по фактическому символу ТЕКУЩЕГО
+            # scope, а не по одному файлу на весь день. Смена на source="live"
+            # в течение дня естественно гасит has_llm_analysis, т.к. condition
+            # ниже проверяет ИМЕННО текущий source, не то, каким он был при
+            # первом коммите.
             analysis = None
             has_llm = state.source == "batch"
             if has_llm:
-                f = Path(__file__).parent / "data" / "focus" / f"analysis_{focus_db.today_str()}.txt"
+                f = Path(__file__).parent / "data" / "focus" / f"analysis_{focus_db.today_str()}_{state.symbol}.txt"
                 if f.exists():
                     try:
                         analysis = f.read_text(encoding="utf-8").strip() or None
@@ -2258,6 +2303,49 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         self._send_json({"ok": True, "parsed": len(trades),
                          "added": added, "duplicates": dupes})
 
+    def _handle_journal_start_series(self, user_id: str = "default") -> None:
+        """Гл.12 ступень 7: новая серия правил (или ручной тик бумажной
+        версии). Фронтенд обязан подтвердить у пользователя, что старт новой
+        серии обнулит счётчик, ДО этого вызова, если активная серия уже
+        существует и в ней есть прогресс."""
+        body = self._read_body_json()
+        if body is None:
+            return
+        if body.get("action") == "tick":
+            result = journal_rules.tick_manual(user_id)
+            self._send_json(result, 200 if result.get("ok") else 400)
+            return
+        rules_text  = body.get("rules_text", "")
+        predict_pct = body.get("predict_pct")
+        try:
+            predict_pct = float(predict_pct) if predict_pct is not None else None
+        except (TypeError, ValueError):
+            predict_pct = None
+        result = journal_rules.start_series(user_id, rules_text, predict_pct)
+        self._send_json(result, 200 if result.get("ok") else 400)
+
+    def _handle_journal_save_tradeplan(self, user_id: str = "default") -> None:
+        """Гл.13 §3.6: план сделки, записанный ДО открытия позиции — не
+        привязан к trade_id, поэтому не через /api/journal/meta."""
+        body = self._read_body_json()
+        if body is None:
+            return
+        result = journal_tradeplan.save_plan(user_id, body.get("plan_text", ""))
+        self._send_json(result, 200 if result.get("ok") else 400)
+
+    def _handle_journal_set_gate_flag(self, user_id: str = "default") -> None:
+        """Гл.14 ступень 9: только risk_math_completed выставляется отсюда
+        сейчас (по завершении CostArithmetic §3.2)."""
+        body = self._read_body_json()
+        if body is None:
+            return
+        flag_key = body.get("flag_key")
+        if flag_key != "risk_math_completed":
+            self._send_json({"error": "unknown flag_key"}, 400)
+            return
+        result = journal_gate.set_flag(user_id, flag_key)
+        self._send_json(result)
+
     def _handle_discipline_save_config(self, user_id: str = "default") -> None:
         body = self._read_body_json()
         if body is None:
@@ -2476,6 +2564,19 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self._send_json({"error": "chapter_number required"}, 400)
             return
         self._send_json(journal_gamification.complete_chapter(int(chapter_n), user_id))
+
+    def _handle_academy_quiz_attempt(self, user_id: str = "default") -> None:
+        body = self._read_body_json()
+        if body is None:
+            return
+        level_id = body.get("level_id")
+        question_id = body.get("question_id")
+        correct = body.get("correct")
+        if not level_id or not question_id or correct is None:
+            self._send_json({"error": "level_id, question_id and correct required"}, 400)
+            return
+        self._send_json(journal_gamification.record_quiz_attempt(
+            str(level_id), str(question_id), bool(correct), user_id))
 
     def _handle_streak_freeze(self, user_id: str = "default") -> None:
         body = self._read_body_json()
@@ -2709,6 +2810,21 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 return
             last_symbol = last_symbol.upper()
         result = journal_auth.update_chart_prefs(user_id, layers=layers, last_symbol=last_symbol)
+        self._send_json(result, 200 if result.get("ok") else 400)
+
+    def _handle_user_trading_window_put(self) -> None:
+        """SPEC_morning_brief_v2.md блок 6 — сохранить окно из MyWindowBlock
+        (edu_book_5.html), см. journal_auth.update_trading_window()."""
+        user_id = self._lp_require_auth()
+        if not user_id:
+            return
+        body = self._read_body_json()
+        if body is None:
+            return
+        start_h = body.get("start_h")
+        end_h = body.get("end_h")
+        archetype = body.get("archetype")
+        result = journal_auth.update_trading_window(user_id, start_h, end_h, archetype)
         self._send_json(result, 200 if result.get("ok") else 400)
 
     def _handle_auth_my_path(self) -> None:

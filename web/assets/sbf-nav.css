@@ -1,0 +1,92 @@
+/* ── Глобальная навигация SBF ────────────────────────────────────────────── */
+/* Подключать на всех страницах. Автоматически скрывает .g-nav на мобайле
+   и показывает .g-bottom-nav вместо него.                                   */
+
+:root {
+  --g-bn-h: 58px;
+}
+
+/* ─── Desktop nav links (вставляются в существующий .top хедер) ─────────── */
+.g-nav {
+  display: flex;
+  gap: 2px;
+  margin-left: 16px;
+}
+
+.g-nav-item {
+  font-family: 'Montserrat', system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted, #7C7563);
+  text-decoration: none;
+  padding: 6px 11px;
+  border-radius: 7px;
+  transition: color .12s, background .12s;
+  letter-spacing: .2px;
+  white-space: nowrap;
+}
+
+.g-nav-item:hover {
+  color: var(--ink, #2B2B33);
+  background: rgba(201,162,39,.08);
+  text-decoration: none;
+}
+
+.g-nav-item.active {
+  color: var(--gold, #C9A227);
+  font-weight: 700;
+}
+
+/* ─── Mobile: скрываем desktop-nav ─────────────────────────────────────── */
+@media (max-width: 760px) {
+  .g-nav { display: none !important; }
+  body   { padding-bottom: var(--g-bn-h) !important; }
+}
+
+/* ─── Mobile bottom nav ─────────────────────────────────────────────────── */
+.g-bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--g-bn-h);
+  background: var(--paper, #FFFFFF);
+  border-top: 1px solid var(--line, #E7DFCF);
+  z-index: 200;
+  box-shadow: 0 -2px 16px rgba(43,43,51,.07);
+}
+
+@media (max-width: 760px) {
+  .g-bottom-nav { display: flex; }
+}
+
+.g-bn-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  text-decoration: none;
+  color: var(--muted, #7C7563);
+  padding: 6px 0 8px;
+  transition: color .12s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.g-bn-item.active {
+  color: var(--gold, #C9A227);
+}
+
+.g-bn-item:hover { color: var(--ink, #2B2B33); text-decoration: none; }
+
+.g-bn-ico { font-size: 20px; line-height: 1; }
+
+.g-bn-lbl {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .4px;
+  font-weight: 600;
+  text-transform: uppercase;
+}

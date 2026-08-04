@@ -3,9 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>SBF | {% if lang == 'ru' %}Глава 2. Глобальные Кукловоды{% elif lang == 'ro' %}Capitolul 2. Păpușarii Globali{% else %}Chapter 2. Global Puppeteers{% endif %}</title>
+  <title>SBF | {% if lang == 'ru' %}Глава 2. Крупнейшие Организации{% elif lang == 'ro' %}Capitolul 2. Cele Mai Mari Organizații{% else %}Chapter 2. The Largest Organizations{% endif %}</title>
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/edu/assets/history.css">
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     html,body{max-width:100vw;overflow-x:hidden;scroll-behavior:smooth}
@@ -21,7 +22,10 @@
 
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"></script>
+<script src="/edu/assets/chrono2.js"></script>
+<script src="/edu/assets/scene-engine.js"></script>
+<script src="/edu/assets/calendar-terms.js"></script>
 
 <script type="text/babel" data-presets="react">
 const INITIAL_LANG = "{{ lang }}";
@@ -31,33 +35,49 @@ const STRINGS = {
   ru: {
     // ── Sticky header ──
     stickyLevel: "УРОВЕНЬ 2",
-    stickyTitle: "Глобальные Кукловоды",
+    stepExplain:"ОБЪЯСНИ", stepShow:"ПОКАЖИ", stepDo:"ДАЙ СДЕЛАТЬ",
+    chronoTag:"ХРОНИКА ВЛАСТИ ЦБ", chronoTitle:"16 станций", chronoSub:"От первой паники без центробанка до сегодняшнего дня. После 1929-го — практически каждые два года.",
+    chronoChronicle:"Хроника", chronoXpNote:"тапни по станции", chronoNext:"Дальше →", chronoToday:"Сегодня",
+    sceneKicker:"СЦЕНА МАШИНЫ ВРЕМЕНИ",
+    predictTag:"ПРЕДИКТ НЕДЕЛИ", cliffTag:"КЛИФФХЭНГЕР → ГЛАВА 3",
+    stickyTitle: "Крупнейшие Организации",
     stickyFA: "ФА 60%",
     stickyTA: "ТА 40%",
     // ── Hero ──
     heroKicker: "SBF COMPANY — ГЛАВА 2",
-    heroTitleLine1: "Глобальные",
-    heroTitleLine2: "Кукловоды",
-    heroBody: "Почему графики вообще двигаются? Потому что центральные банки меняют стоимость денег — и вся финансовая система реагирует цепной реакцией.",
+    heroTitleLine1: "Крупнейшие",
+    heroTitleLine2: "Организации",
+    heroBody: "Почему графики вообще двигаются? Потому что горстка организаций — центральные банки, нефтяные картели, международные фонды — меняет правила игры, и вся финансовая система реагирует цепной реакцией.",
     heroChipFA: "Фундаментал 60%",
     heroChipTA: "Техника 40%",
     heroChipInteractive: "2 Интерактива",
     // ── Block 1: Central banks ──
-    sec1Title: "Центральные банки: кто управляет деньгами мира",
-    sec1Sub: "Центральные банки не торгуют на бирже — они устанавливают правила игры. Стоимость денег, доступность кредита, уровень инфляции — всё это в их руках.",
-    cb1Abbr: "ФРС", cb1Full: "Федеральная Резервная Система", cb1Country: "США 🇺🇸",
+    sec1Title: "Крупнейшие организации: кто управляет деньгами и рынками мира",
+    sec1Sub: "Эти организации не торгуют на бирже — они устанавливают правила игры. Стоимость денег, доступность кредита, цена нефти, спасение стран от дефолта — всё это в их руках.",
+    cb1Abbr: "ФРС", cb1Full: "Федеральная Резервная Система", cb1Country: "США",
     cb1Desc: "Управляет долларом — мировой резервной валютой. Решения Комитета FOMC двигают все рынки планеты одновременно.",
-    cb2Abbr: "ЕЦБ", cb2Full: "Европейский Центральный Банк", cb2Country: "ЕС 🇪🇺",
+    cb2Abbr: "ЕЦБ", cb2Full: "Европейский Центральный Банк", cb2Country: "ЕС",
     cb2Desc: "Контролирует евро для 20 стран еврозоны. Политика ЕЦБ задаёт тон для EUR/USD — самой торгуемой валютной пары.",
-    cb3Abbr: "Банк Японии", cb3Full: "Bank of Japan (BOJ)", cb3Country: "Япония 🇯🇵",
+    cb3Abbr: "Банк Японии", cb3Full: "Bank of Japan (BOJ)", cb3Country: "Япония",
     cb3Desc: "Создатель политики отрицательных ставок. Иена (JPY) — валюта-убежище и главная «финансирующая» валюта для кэрри-трейда.",
-    cb4Abbr: "Банк Англии", cb4Full: "Bank of England (BOE)", cb4Country: "Великобритания 🇬🇧",
+    cb4Abbr: "Банк Англии", cb4Full: "Bank of England (BOE)", cb4Country: "Великобритания",
     cb4Desc: "Один из старейших ЦБ мира (1694). Управляет фунтом стерлингов — третьей по значимости резервной валютой.",
+    cb5Abbr: "ОПЕК", cb5Full: "Организация стран-экспортёров нефти", cb5Country: "Вена, Австрия",
+    cb5Desc: "Картель 12 нефтедобывающих стран во главе с Саудовской Аравией. Устанавливает квоты на добычу — от их решений напрямую зависит цена WTI и Brent.",
+    cb6Abbr: "ОПЕК+", cb6Full: "ОПЕК плюс независимые экспортёры", cb6Country: "с 2016 года",
+    cb6Desc: "Расширенная коалиция ОПЕК и внешних экспортёров — Россия, Казахстан, Мексика и другие. Совместно регулирует мировую добычу нефти, отвечая на кризисы вроде обвала спроса 2020-го.",
+    cb7Abbr: "Всемирный банк", cb7Full: "World Bank Group", cb7Country: "Вашингтон",
+    cb7Desc: "Даёт кредиты и гранты на развитие бедным и развивающимся странам. Не двигает валюты напрямую, как ЦБ, — но его прогнозы по росту ВВП двигают рыночные ожидания.",
+    cb8Abbr: "МВФ", cb8Full: "Международный валютный фонд", cb8Country: "Вашингтон",
+    cb8Desc: "«Кредитор последней инстанции» для стран на грани дефолта — как Аргентина или Греция. Условия его кредитов часто двигают валюту и облигации страны сильнее, чем решения её же ЦБ.",
+    cb9Abbr: "Банк Канады", cb9Full: "Bank of Canada", cb9Country: "Канада",
+    cb9Desc: "Управляет канадским долларом (CAD) — валютой, тесно привязанной к цене нефти (Канада — крупный экспортёр). Одним из первых в G7 начал и завершил цикл повышения ставки в 2022–23.",
     rateMechKicker: "КАК РАБОТАЕТ ПРОЦЕНТНАЯ СТАВКА",
     rateStep1Title: "ФРС поднимает ставку",
     rateStep1Text: "Стоимость кредита растёт. Бизнесу дороже брать займы, потребители меньше тратят. Инфляция замедляется.",
     rateStep2Title: "Инвесторы перекладываются",
     rateStep2Text: "Безрисковая доходность US Treasuries растёт. Зачем рисковать в акциях, если государство платит 5%+?",
+    rateStep2Text_simple: "Гособлигации США теперь платят 5%+ вообще без риска. Зачем рисковать в акциях, если государство и так платит хорошо?",
     rateStep3Title: "Рынки реагируют",
     rateStep3Text: "DXY растёт — деньги текут в доллар. Акции, золото, крипто под давлением. Облигации дорожают.",
     // ── FED Simulator (interactive 1) ──
@@ -79,11 +99,19 @@ const STRINGS = {
     fedAssetBTCLabel: "Bitcoin", fedAssetBTCDesc: "Крипто = риск-актив",
     fedAssetBondLabel: "US 10Y Bond", fedAssetBondDesc: "Доходность гособлигаций",
     fedFootnote: "* Упрощённая модель корреляций на основе исторических данных 1990–2024",
+    fedPresetsLabel: "Реальные эпизоды:",
+    fedPresetModel: "Модель (слайдер)",
+    fedPreset2020: "Апрель 2020 — экстренный ноль",
+    fedPreset2023: "Пик цикла — авг. 2023",
+    fedPresetToday: "Сегодня",
+    fedSnapshotTag: "РЕАЛЬНЫЕ ЦЕНЫ НА ЭТУ ДАТУ",
+    fedSnapshotNote: "Это не модель — реальные котировки на указанную дату (или live, для «Сегодня»).",
     // ── Block 2: Macro indicators ──
     sec2Title: "Ключевые макроэкономические индикаторы",
     sec2Sub: "Прежде чем открыть сделку, опытный трейдер проверяет экономический календарь. Релизы макроданных — это «взрывы» волатильности.",
     macro1Title: "Инфляция (CPI)",
     macro1Text: "Consumer Price Index. ФРС таргетирует 2%. При CPI выше цели — ставки растут. Выходит ежемесячно — один из самых «взрывных» релизов для рынков.",
+    macro1Text_simple: "Индекс потребительских цен — насколько подорожали товары. ФРС держит цель 2% в год. Цены растут быстрее — ставки идут вверх. Выходит раз в месяц и почти всегда сильно двигает рынок.",
     macro2Title: "Рынок труда (NFP)",
     macro2Text: "Non-Farm Payrolls. Число рабочих мест в США за месяц. Выходит каждую первую пятницу. Сильный NFP = ставки выше = доллар крепче.",
     macro3Title: "ВВП (GDP)",
@@ -137,49 +165,76 @@ const STRINGS = {
     srCorrectLevelsPrefix: "Верных уровней: ",
     srCorrectLevelsMid: " из ",
     srCorrectLevelsSuffix: ". Зелёные линии — попадание, красные — промах.",
-    srFooter: "Инструмент: XAU/USD (Золото) · Таймфрейм: 4H · Условные данные для обучения",
+    srFooter: "Инструмент: XAU/USD (Золото) · Таймфрейм: 4H · Реальные котировки, уровни — реальные фрактальные S/R (не иллюстрация)",
+    srSaveBtn: "Сохранить разбор в журнал",
+    srSavedMsg: "Сохранено в журнал",
     // ── Conclusions ──
     concKicker: "ИТОГИ ГЛАВЫ 2",
     concTitle: "Что вы теперь знаете",
-    conc1: "ФРС — главный «кукловод»: одно решение по ставке двигает доллар, акции, облигации, золото и крипту одновременно",
+    conc1: "ФРС — самый влиятельный из всех: одно решение по ставке двигает доллар, акции, облигации, золото и крипту одновременно",
     conc2: "Ставка вверх → DXY вверх, рисковые активы вниз. Ставка вниз → деньги дешевеют, рисковые активы растут",
     conc3: "Макроэкономика (CPI, NFP, GDP) задаёт контекст, в котором работает технический анализ",
     conc4: "Уровни поддержки и сопротивления — это «память рынка»: ценовые зоны, где крупные игроки совершали крупные сделки",
     conc5: "Пробитое сопротивление становится поддержкой — принцип смены ролей работает на всех таймфреймах",
+    conc6: "Календарь заседаний ЦБ известен на год вперёд. Сюрприз даёт не сам факт решения, а его расхождение с ожиданием — про это глава 6",
     // ── Footer nav ──
     navPrev: "← Глава 1: Инфраструктура",
     navNext: "Уровень 3: Арсенал и Защита →",
+    askAnalyst: "Остался вопрос? Напиши аналитику",
+    quizKicker: "ПРОВЕРЬ СЕБЯ",
+    quizTitle: "Что ты узнал в этой главе",
+    quizNext: "Дальше →",
+    quizStuckAll: "Всё закрепилось.",
+    quizStuckSome: "Почти всё закрепилось.",
+    quizBackToSection: "← Вернуться к разделу",
+    fedIntro: "Ниже — интерактивная модель. Двигай ставку ФРС: дешёвые деньги (иногда через QE) включают режим риск-он/риск-офф — капитал либо течёт в рисковые активы, либо прячется в тихую гавань.",
   },
   en: {
     // ── Sticky header ──
     stickyLevel: "LEVEL 2",
-    stickyTitle: "Global Puppeteers",
+    stepExplain:"EXPLAIN", stepShow:"SHOW", stepDo:"LET YOU TRY",
+    chronoTag:"CHRONICLE OF CENTRAL BANK POWER", chronoTitle:"16 Stations", chronoSub:"From the first panic with no central bank to today. After 1929 — almost every two years.",
+    chronoChronicle:"Chronicle", chronoXpNote:"tap a station", chronoNext:"Next →", chronoToday:"Today",
+    sceneKicker:"TIME MACHINE SCENE",
+    predictTag:"PREDICTION OF THE WEEK", cliffTag:"CLIFFHANGER → CHAPTER 3",
+    stickyTitle: "The Largest Organizations",
     stickyFA: "FA 60%",
     stickyTA: "TA 40%",
     // ── Hero ──
     heroKicker: "SBF COMPANY — CHAPTER 2",
-    heroTitleLine1: "Global",
-    heroTitleLine2: "Puppeteers",
-    heroBody: "Why do charts even move? Because central banks change the cost of money — and the entire financial system reacts in a chain reaction.",
+    heroTitleLine1: "The Largest",
+    heroTitleLine2: "Organizations",
+    heroBody: "Why do charts even move? Because a handful of organizations — central banks, oil cartels, international funds — change the rules of the game, and the entire financial system reacts in a chain reaction.",
     heroChipFA: "Fundamental 60%",
     heroChipTA: "Technical 40%",
     heroChipInteractive: "2 Interactives",
     // ── Block 1: Central banks ──
-    sec1Title: "Central banks: who runs the world's money",
-    sec1Sub: "Central banks don't trade on the exchange — they set the rules of the game. The cost of money, access to credit, the level of inflation — it's all in their hands.",
-    cb1Abbr: "Fed", cb1Full: "Federal Reserve System", cb1Country: "USA 🇺🇸",
+    sec1Title: "The largest organizations: who runs the world's money and markets",
+    sec1Sub: "These organizations don't trade on the exchange — they set the rules of the game. The cost of money, access to credit, the price of oil, bailing out a country from default — it's all in their hands.",
+    cb1Abbr: "Fed", cb1Full: "Federal Reserve System", cb1Country: "USA",
     cb1Desc: "Manages the dollar — the world's reserve currency. FOMC decisions move every market on the planet at once.",
-    cb2Abbr: "ECB", cb2Full: "European Central Bank", cb2Country: "EU 🇪🇺",
+    cb2Abbr: "ECB", cb2Full: "European Central Bank", cb2Country: "EU",
     cb2Desc: "Controls the euro for the 20 eurozone countries. ECB policy sets the tone for EUR/USD — the most traded currency pair.",
-    cb3Abbr: "Bank of Japan", cb3Full: "Bank of Japan (BOJ)", cb3Country: "Japan 🇯🇵",
+    cb3Abbr: "Bank of Japan", cb3Full: "Bank of Japan (BOJ)", cb3Country: "Japan",
     cb3Desc: "Pioneer of negative rate policy. The yen (JPY) is a safe-haven currency and the main «funding» currency for the carry trade.",
-    cb4Abbr: "Bank of England", cb4Full: "Bank of England (BOE)", cb4Country: "United Kingdom 🇬🇧",
+    cb4Abbr: "Bank of England", cb4Full: "Bank of England (BOE)", cb4Country: "United Kingdom",
     cb4Desc: "One of the oldest central banks in the world (1694). Manages the pound sterling — the third most important reserve currency.",
+    cb5Abbr: "OPEC", cb5Full: "Organization of the Petroleum Exporting Countries", cb5Country: "Vienna, Austria",
+    cb5Desc: "A cartel of 12 oil-producing countries led by Saudi Arabia. Sets production quotas — its decisions directly drive the price of WTI and Brent.",
+    cb6Abbr: "OPEC+", cb6Full: "OPEC plus independent exporters", cb6Country: "since 2016",
+    cb6Desc: "An extended coalition of OPEC and outside exporters — Russia, Kazakhstan, Mexico, and others. Jointly manages global oil output, responding to crises like the 2020 demand collapse.",
+    cb7Abbr: "World Bank", cb7Full: "World Bank Group", cb7Country: "Washington, D.C.",
+    cb7Desc: "Provides loans and grants for development in poor and developing countries. Doesn't move currencies directly like a central bank — but its GDP-growth forecasts move market expectations.",
+    cb8Abbr: "IMF", cb8Full: "International Monetary Fund", cb8Country: "Washington, D.C.",
+    cb8Desc: "The «lender of last resort» for countries on the verge of default — like Argentina or Greece. Its loan conditions often move a country's currency and bonds harder than its own central bank's decisions do.",
+    cb9Abbr: "Bank of Canada", cb9Full: "Bank of Canada", cb9Country: "Canada",
+    cb9Desc: "Manages the Canadian dollar (CAD) — a currency tightly linked to the price of oil (Canada is a major exporter). Among the first in the G7 to start and finish its 2022–23 hiking cycle.",
     rateMechKicker: "HOW THE INTEREST RATE WORKS",
     rateStep1Title: "The Fed raises the rate",
     rateStep1Text: "The cost of credit rises. Borrowing becomes more expensive for businesses, and consumers spend less. Inflation slows down.",
     rateStep2Title: "Investors reallocate",
     rateStep2Text: "The risk-free yield on US Treasuries rises. Why risk it in stocks if the government pays 5%+?",
+    rateStep2Text_simple: "US government bonds now pay 5%+ with no risk at all. Why risk it in stocks if the government already pays well?",
     rateStep3Title: "Markets react",
     rateStep3Text: "DXY rises — money flows into the dollar. Stocks, gold, and crypto come under pressure. Bonds get more expensive.",
     // ── FED Simulator (interactive 1) ──
@@ -201,11 +256,19 @@ const STRINGS = {
     fedAssetBTCLabel: "Bitcoin", fedAssetBTCDesc: "Crypto = risk asset",
     fedAssetBondLabel: "US 10Y Bond", fedAssetBondDesc: "Government bond yield",
     fedFootnote: "* Simplified correlation model based on historical data 1990–2024",
+    fedPresetsLabel: "Real episodes:",
+    fedPresetModel: "Model (slider)",
+    fedPreset2020: "April 2020 — emergency zero",
+    fedPreset2023: "Cycle peak — Aug 2023",
+    fedPresetToday: "Today",
+    fedSnapshotTag: "REAL PRICES ON THIS DATE",
+    fedSnapshotNote: "This isn't a model — real quotes on the given date (or live, for \"Today\").",
     // ── Block 2: Macro indicators ──
     sec2Title: "Key macroeconomic indicators",
     sec2Sub: "Before opening a trade, an experienced trader checks the economic calendar. Macro data releases are volatility «explosions».",
     macro1Title: "Inflation (CPI)",
     macro1Text: "Consumer Price Index. The Fed targets 2%. When CPI is above target — rates rise. Released monthly — one of the most «explosive» releases for markets.",
+    macro1Text_simple: "Consumer Price Index — how much everyday prices rose. The Fed targets 2% a year. Prices rising faster means rates go up. Comes out monthly and almost always moves markets hard.",
     macro2Title: "Labor market (NFP)",
     macro2Text: "Non-Farm Payrolls. The number of jobs added in the US per month. Released every first Friday. A strong NFP = higher rates = a stronger dollar.",
     macro3Title: "GDP",
@@ -259,49 +322,76 @@ const STRINGS = {
     srCorrectLevelsPrefix: "Correct levels: ",
     srCorrectLevelsMid: " out of ",
     srCorrectLevelsSuffix: ". Green lines — hit, red — miss.",
-    srFooter: "Instrument: XAU/USD (Gold) · Timeframe: 4H · Illustrative data for educational purposes",
+    srFooter: "Instrument: XAU/USD (Gold) · Timeframe: 4H · Real quotes, levels are real fractal S/R (not illustrative)",
+    srSaveBtn: "Save this read to the journal",
+    srSavedMsg: "Saved to journal",
     // ── Conclusions ──
     concKicker: "CHAPTER 2 TAKEAWAYS",
     concTitle: "What you now know",
-    conc1: "The Fed is the main «puppeteer»: a single rate decision moves the dollar, stocks, bonds, gold, and crypto simultaneously",
+    conc1: "The Fed is the most influential of all of them: a single rate decision moves the dollar, stocks, bonds, gold, and crypto simultaneously",
     conc2: "Rate up → DXY up, risk assets down. Rate down → money gets cheaper, risk assets rise",
     conc3: "Macroeconomics (CPI, NFP, GDP) sets the context in which technical analysis operates",
     conc4: "Support and resistance levels are the «market's memory»: price zones where big players made large trades",
     conc5: "Broken resistance becomes support — the role-reversal principle works on every timeframe",
+    conc6: "The calendar of central bank meetings is known a year in advance. The surprise doesn't come from the decision itself, but from how far it differs from expectations — chapter 6 covers this",
     // ── Footer nav ──
     navPrev: "← Chapter 1: Infrastructure",
     navNext: "Level 3: Arsenal and Defense →",
+    askAnalyst: "Have a question? Write to an analyst",
+    quizKicker: "TEST YOURSELF",
+    quizTitle: "What you learned in this chapter",
+    quizNext: "Next →",
+    quizStuckAll: "Everything stuck.",
+    quizStuckSome: "Almost everything stuck.",
+    quizBackToSection: "← Back to the section",
+    fedIntro: "Below is an interactive model. Move the Fed's rate: cheap money (sometimes via QE) switches on risk-on/risk-off mode — capital either flows into risk assets or hides in a safe haven.",
   },
   ro: {
     // ── Sticky header ──
     stickyLevel: "NIVEL 2",
-    stickyTitle: "Păpușarii Globali",
+    stepExplain:"EXPLICĂ", stepShow:"ARATĂ", stepDo:"LASĂ SĂ ÎNCERCE",
+    chronoTag:"CRONICA PUTERII BĂNCILOR CENTRALE", chronoTitle:"16 Stații", chronoSub:"De la prima panică fără bancă centrală până azi. După 1929 — aproape la fiecare doi ani.",
+    chronoChronicle:"Cronică", chronoXpNote:"atinge o stație", chronoNext:"Continuă →", chronoToday:"Astăzi",
+    sceneKicker:"SCENĂ MAȘINA TIMPULUI",
+    predictTag:"PREDICȚIA SĂPTĂMÂNII", cliffTag:"CLIFFHANGER → CAPITOLUL 3",
+    stickyTitle: "Cele Mai Mari Organizații",
     stickyFA: "AF 60%",
     stickyTA: "AT 40%",
     // ── Hero ──
     heroKicker: "SBF COMPANY — CAPITOLUL 2",
-    heroTitleLine1: "Păpușarii",
-    heroTitleLine2: "Globali",
-    heroBody: "De ce se mișcă graficele, de fapt? Pentru că băncile centrale schimbă costul banilor — iar întregul sistem financiar reacționează printr-o reacție în lanț.",
+    heroTitleLine1: "Cele Mai Mari",
+    heroTitleLine2: "Organizații",
+    heroBody: "De ce se mișcă graficele, de fapt? Pentru că un mic număr de organizații — bănci centrale, carteluri petroliere, fonduri internaționale — schimbă regulile jocului, iar întregul sistem financiar reacționează printr-o reacție în lanț.",
     heroChipFA: "Fundamental 60%",
     heroChipTA: "Tehnică 40%",
     heroChipInteractive: "2 Exerciții Interactive",
     // ── Block 1: Central banks ──
-    sec1Title: "Băncile centrale: cine conduce banii lumii",
-    sec1Sub: "Băncile centrale nu tranzacționează la bursă — ele stabilesc regulile jocului. Costul banilor, accesul la credit, nivelul inflației — toate acestea sunt în mâinile lor.",
-    cb1Abbr: "Fed", cb1Full: "Rezerva Federală a SUA", cb1Country: "SUA 🇺🇸",
+    sec1Title: "Cele mai mari organizații: cine conduce banii și piețele lumii",
+    sec1Sub: "Aceste organizații nu tranzacționează la bursă — ele stabilesc regulile jocului. Costul banilor, accesul la credit, prețul petrolului, salvarea unei țări de la default — toate acestea sunt în mâinile lor.",
+    cb1Abbr: "Fed", cb1Full: "Rezerva Federală a SUA", cb1Country: "SUA",
     cb1Desc: "Administrează dolarul — moneda de rezervă a lumii. Deciziile Comitetului FOMC mișcă simultan toate piețele planetei.",
-    cb2Abbr: "BCE", cb2Full: "Banca Centrală Europeană", cb2Country: "UE 🇪🇺",
+    cb2Abbr: "BCE", cb2Full: "Banca Centrală Europeană", cb2Country: "UE",
     cb2Desc: "Controlează euro pentru cele 20 de țări din zona euro. Politica BCE dă tonul pentru EUR/USD — cea mai tranzacționată pereche valutară.",
-    cb3Abbr: "Banca Japoniei", cb3Full: "Bank of Japan (BOJ)", cb3Country: "Japonia 🇯🇵",
+    cb3Abbr: "Banca Japoniei", cb3Full: "Bank of Japan (BOJ)", cb3Country: "Japonia",
     cb3Desc: "Creatorul politicii ratelor negative. Yenul (JPY) este o monedă-refugiu și principala monedă de finanțare pentru carry trade.",
-    cb4Abbr: "Banca Angliei", cb4Full: "Bank of England (BOE)", cb4Country: "Marea Britanie 🇬🇧",
+    cb4Abbr: "Banca Angliei", cb4Full: "Bank of England (BOE)", cb4Country: "Marea Britanie",
     cb4Desc: "Una dintre cele mai vechi bănci centrale din lume (1694). Administrează lira sterlină — a treia monedă de rezervă ca importanță.",
+    cb5Abbr: "OPEC", cb5Full: "Organizația Țărilor Exportatoare de Petrol", cb5Country: "Viena, Austria",
+    cb5Desc: "Un cartel format din 12 țări producătoare de petrol, condus de Arabia Saudită. Stabilește cote de producție — deciziile sale mișcă direct prețul WTI și Brent.",
+    cb6Abbr: "OPEC+", cb6Full: "OPEC plus exportatori independenți", cb6Country: "din 2016",
+    cb6Desc: "O coaliție extinsă a OPEC și a exportatorilor din afara ei — Rusia, Kazahstan, Mexic și altele. Reglementează împreună producția globală de petrol, răspunzând la crize precum prăbușirea cererii din 2020.",
+    cb7Abbr: "Banca Mondială", cb7Full: "World Bank Group", cb7Country: "Washington, D.C.",
+    cb7Desc: "Oferă împrumuturi și granturi pentru dezvoltare țărilor sărace și în curs de dezvoltare. Nu mișcă valutele direct ca o bancă centrală — dar prognozele sale privind creșterea PIB mișcă așteptările pieței.",
+    cb8Abbr: "FMI", cb8Full: "Fondul Monetar Internațional", cb8Country: "Washington, D.C.",
+    cb8Desc: "„Creditorul de ultimă instanță” pentru țările aflate în pragul default-ului — precum Argentina sau Grecia. Condițiile împrumuturilor sale mișcă adesea valuta și obligațiunile unei țări mai puternic decât deciziile propriei bănci centrale.",
+    cb9Abbr: "Banca Canadei", cb9Full: "Bank of Canada", cb9Country: "Canada",
+    cb9Desc: "Administrează dolarul canadian (CAD) — o monedă strâns legată de prețul petrolului (Canada este un mare exportator). Printre primele din G7 care a început și încheiat ciclul de majorare a dobânzii din 2022–23.",
     rateMechKicker: "CUM FUNCȚIONEAZĂ RATA DOBÂNZII",
     rateStep1Title: "Fed majorează rata",
     rateStep1Text: "Costul creditului crește. Este mai scump pentru companii să ia împrumuturi, iar consumatorii cheltuiesc mai puțin. Inflația încetinește.",
     rateStep2Title: "Investitorii își redirecționează capitalul",
     rateStep2Text: "Randamentul fără risc al US Treasuries crește. De ce să-ți asumi riscul acțiunilor, dacă statul plătește 5%+?",
+    rateStep2Text_simple: "Obligațiunile de stat americane plătesc acum 5%+ fără niciun risc. De ce să riști în acțiuni, dacă statul plătește oricum bine?",
     rateStep3Title: "Piețele reacționează",
     rateStep3Text: "DXY crește — banii curg spre dolar. Acțiunile, aurul și cripto sunt sub presiune. Obligațiunile se scumpesc.",
     // ── FED Simulator (interactive 1) ──
@@ -323,11 +413,19 @@ const STRINGS = {
     fedAssetBTCLabel: "Bitcoin", fedAssetBTCDesc: "Cripto = activ de risc",
     fedAssetBondLabel: "US 10Y Bond", fedAssetBondDesc: "Randamentul obligațiunilor de stat",
     fedFootnote: "* Model simplificat de corelații bazat pe date istorice 1990–2024",
+    fedPresetsLabel: "Episoade reale:",
+    fedPresetModel: "Model (cursor)",
+    fedPreset2020: "Aprilie 2020 — zero de urgență",
+    fedPreset2023: "Vârful ciclului — aug. 2023",
+    fedPresetToday: "Astăzi",
+    fedSnapshotTag: "PREȚURI REALE LA ACEASTĂ DATĂ",
+    fedSnapshotNote: "Nu e un model — cotații reale la data indicată (sau live, pentru „Astăzi”).",
     // ── Block 2: Macro indicators ──
     sec2Title: "Indicatori macroeconomici cheie",
     sec2Sub: "Înainte de a deschide o poziție, un trader experimentat verifică calendarul economic. Publicările de date macro sunt adevărate «explozii» de volatilitate.",
     macro1Title: "Inflația (CPI)",
     macro1Text: "Consumer Price Index. Fed țintește 2%. Când CPI depășește ținta, ratele cresc. Se publică lunar — una dintre cele mai «explozive» publicări pentru piețe.",
+    macro1Text_simple: "Indicele prețurilor de consum — cât s-au scumpit bunurile. Fed țintește 2% pe an. Dacă cresc mai repede — dobânzile urcă. Apare lunar și aproape mereu mișcă puternic piața.",
     macro2Title: "Piața muncii (NFP)",
     macro2Text: "Non-Farm Payrolls. Numărul de locuri de muncă create în SUA într-o lună. Se publică în prima vineri a lunii. Un NFP puternic = rate mai mari = dolar mai puternic.",
     macro3Title: "PIB (GDP)",
@@ -381,66 +479,464 @@ const STRINGS = {
     srCorrectLevelsPrefix: "Niveluri corecte: ",
     srCorrectLevelsMid: " din ",
     srCorrectLevelsSuffix: ". Liniile verzi — nimerite, cele roșii — greșite.",
-    srFooter: "Instrument: XAU/USD (Aur) · Timeframe: 4H · Date convenționale, exclusiv în scop didactic",
+    srFooter: "Instrument: XAU/USD (Aur) · Timeframe: 4H · Cotații reale, nivelurile sunt S/R fractale reale (nu ilustrative)",
+    srSaveBtn: "Salvează analiza în jurnal",
+    srSavedMsg: "Salvat în jurnal",
     // ── Conclusions ──
     concKicker: "CONCLUZIILE CAPITOLULUI 2",
     concTitle: "Ce știi acum",
-    conc1: "Fed este principalul «păpușar»: o singură decizie privind rata dobânzii mișcă simultan dolarul, acțiunile, obligațiunile, aurul și cripto",
+    conc1: "Fed este cel mai influent dintre toate: o singură decizie privind rata dobânzii mișcă simultan dolarul, acțiunile, obligațiunile, aurul și cripto",
     conc2: "Rata în sus → DXY în sus, activele de risc în jos. Rata în jos → banii se ieftinesc, activele de risc cresc",
     conc3: "Macroeconomia (CPI, NFP, GDP) stabilește contextul în care funcționează analiza tehnică",
     conc4: "Nivelurile de suport și rezistență reprezintă «memoria pieței»: zone de preț unde jucătorii mari au făcut tranzacții mari",
     conc5: "Rezistența spartă devine suport — principiul schimbării rolurilor funcționează pe toate timeframe-urile",
+    conc6: "Calendarul ședințelor băncilor centrale e cunoscut cu un an înainte. Surpriza nu vine din decizia în sine, ci din diferența față de așteptări — despre asta e capitolul 6",
     // ── Footer nav ──
     navPrev: "← Capitolul 1: Infrastructura",
     navNext: "Nivelul 3: Arsenal și Apărare →",
+    askAnalyst: "Aveți o întrebare? Scrieți unui analist",
+    quizKicker: "TESTEAZĂ-TE",
+    quizTitle: "Ce ai învățat în acest capitol",
+    quizNext: "Continuă →",
+    quizStuckAll: "Totul s-a fixat.",
+    quizStuckSome: "Aproape totul s-a fixat.",
+    quizBackToSection: "← Înapoi la secțiune",
+    fedIntro: "Mai jos — un model interactiv. Mișcă rata Fed: banii ieftini (uneori prin QE) activează regimul risc-on/risc-off — capitalul fie curge spre active riscante, fie se refugiază într-un refugiu sigur.",
   },
 };
 const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
 
-const C = {
-  gold:"#c9973a", goldLight:"#f4d49f", goldPale:"#f7f0e3",
-  black:"#18181a", ink:"#18181a", inkMid:"#555555",
-  inkSoft:"rgba(24,24,26,0.58)", inkFaint:"rgba(24,24,26,0.28)",
-  white:"#ffffff", surface:"#faf8f5", surfaceMid:"#f0ebe0",
-  border:"rgba(24,24,26,0.1)", borderGold:"rgba(201,151,58,0.25)",
-  green:"#2d7a4f", greenPale:"#eaf5ee", red:"#c0392b", redPale:"#fdecea",
-  blue:"#2563eb", bluePale:"#eff6ff"
+// MSG_TR/AskAnalystPopup/AskAnalystBtn/C/Mono/Chip/Rule/getChUrl/GlossWord/
+// withGlossTerms -- см. window.AcademyShared (SPEC_academy_chapter3_
+// integration.md §5/§7).
+
+// Глоссарий-тултипы (SPEC_academy_chapter2_integration.md §4) — 5 новых
+// терминов главы 2. word = ключ словаря (базовая форма), children в месте
+// использования может быть в другом падеже/написании (см. GlossWord ниже).
+const GLOSSARY = {
+  ru: {
+    "FOMC": {s:"Комитет ФРС, который решает судьбу процентной ставки", a:"Federal Open Market Committee — орган ФРС, 8 плановых заседаний в год", e:"Экстренное заседание FOMC в марте 2020 обнулило ставку за одну сессию"},
+    "кэрри-трейд": {s:"Занять в дешёвой валюте, вложить в доходную", a:"Carry trade — заём под низкую ставку (обычно JPY) с инвестицией в актив с более высокой доходностью", e:"Иена — главная «финансирующая» валюта кэрри-трейда на протяжении десятилетий"},
+    "QE": {s:"Центробанк печатает деньги и скупает облигации", a:"Quantitative Easing — количественное смягчение, инструмент стимулирования при ставке около нуля", e:"ФРС и ЕЦБ массово применяли QE после кризиса 2008 и в 2020"},
+    "риск-он/риск-офф": {s:"Режим рынка: аппетит к риску включён или выключен", a:"Risk-on — деньги текут в рисковые активы; risk-off — в защитные (доллар, гособлигации)", e:"Risk-off обычно совпадает с ростом VIX и падением акций/крипты одновременно"},
+    "тихая гавань": {s:"Актив, куда идут в шторм", a:"Safe haven — актив, спрос на который растёт при рыночной панике (доллар, US Treasuries, иногда золото)", e:"При обвале S&P 500 доллар и гособлигации США почти всегда укрепляются"},
+  },
+  en: {
+    "FOMC": {s:"The Fed committee that decides the fate of the interest rate", a:"Federal Open Market Committee — the Fed's rate-setting body, 8 scheduled meetings a year", e:"An emergency FOMC meeting in March 2020 cut rates to zero in a single session"},
+    "carry trade": {s:"Borrow in a cheap currency, invest in a high-yielding one", a:"Borrowing at a low rate (usually JPY) to invest in a higher-yielding asset", e:"The yen has been the main funding currency for carry trades for decades"},
+    "QE": {s:"The central bank prints money and buys bonds", a:"Quantitative Easing — a stimulus tool used when rates are near zero", e:"The Fed and ECB used QE heavily after the 2008 crisis and in 2020"},
+    "risk-on/risk-off": {s:"Market mode: risk appetite switched on or off", a:"Risk-on — money flows into risk assets; risk-off — into safe havens (dollar, government bonds)", e:"Risk-off usually coincides with a rising VIX and falling stocks/crypto at once"},
+    "safe haven": {s:"An asset investors run to in a storm", a:"An asset in demand during market panic (dollar, US Treasuries, sometimes gold)", e:"When the S&P 500 crashes, the dollar and US government bonds almost always strengthen"},
+  },
+  ro: {
+    "FOMC": {s:"Comitetul Fed care decide soarta ratei dobânzii", a:"Federal Open Market Committee — organul Fed care stabilește rata, 8 ședințe programate pe an", e:"O ședință FOMC de urgență din martie 2020 a redus rata la zero într-o singură sesiune"},
+    "carry trade": {s:"Împrumuți într-o monedă ieftină, investești într-una profitabilă", a:"Împrumut cu dobândă mică (de obicei JPY) investit într-un activ cu randament mai mare", e:"Yenul este principala monedă de finanțare a carry trade-ului de decenii"},
+    "QE": {s:"Banca centrală tipărește bani și cumpără obligațiuni", a:"Quantitative Easing — relaxare cantitativă, instrument de stimulare la rate aproape de zero", e:"Fed și BCE au folosit masiv QE după criza din 2008 și în 2020"},
+    "risc-on/risc-off": {s:"Regim de piață: apetitul pentru risc pornit sau oprit", a:"Risk-on — banii curg spre active riscante; risk-off — spre active sigure (dolar, obligațiuni de stat)", e:"Risk-off coincide de obicei cu creșterea VIX și scăderea simultană a acțiunilor/cripto"},
+    "refugiu sigur": {s:"Activul spre care se fuge în furtună", a:"Activ cu cerere în creștere în timpul panicii de piață (dolar, US Treasuries, uneori aur)", e:"La prăbușirea S&P 500, dolarul și obligațiunile guvernamentale SUA aproape întotdeauna se întăresc"},
+  },
 };
 
-const Mono = ({children,size=13,color=C.inkSoft,spacing=3,style={},className=""}) =>
-  <span className={className} style={{fontFamily:"'Courier New',monospace",fontSize:size,letterSpacing:spacing,color,...style}}>{children}</span>;
+// Тест на воспроизведение вместо статичного блока "Итоги главы" (SPEC_
+// academy_chapter2_integration.md §5) -- тот же паттерн, что QUIZ в
+// edu_book_1.html (quizIdx/quizAnswers/quizSelected, без медали).
+// section -- id на SectionTitle (secCB/secMacro/secSR), для ссылки при
+// промахе. Один вопрос на каждый из 5 выводов главы (conc1..conc5).
+const QUIZ2 = {
+  ru: [
+    {id:"q1", section:"secCB", prompt:"Что произойдёт с рисковыми активами при повышении ставки ФРС?",
+     options:[
+       {text:"Вырастут вместе с долларом", correct:false},
+       {text:"Обычно окажутся под давлением", correct:true},
+       {text:"Никак не отреагируют", correct:false},
+       {text:"Обязательно рухнут на 50%", correct:false},
+     ],
+     feedbackCorrect:"Верно. Дорогая ставка делает безрисковую доходность привлекательнее — капитал уходит из рисковых активов.",
+     feedbackWrong:"Не совсем. При росте ставки деньги дорожают — рисковые активы (акции, крипто) обычно оказываются под давлением."},
+    {id:"q2", section:"secMacro", prompt:"Зачем перед сессией проверяют экономический календарь?",
+     options:[
+       {text:"Для красоты интерфейса", correct:false},
+       {text:"Крупные релизы вызывают резкие всплески волатильности", correct:true},
+       {text:"Календарь не нужен опытным трейдерам", correct:false},
+       {text:"Только для крипторынка", correct:false},
+     ],
+     feedbackCorrect:"Верно. Перед CPI/NFP крупные игроки закрывают позиции — рынок «замирает» перед резким движением.",
+     feedbackWrong:"Не совсем. Календарь важен именно потому, что крупные релизы — CPI, NFP, GDP — вызывают резкие всплески волатильности."},
+    {id:"q3", section:"secSR", prompt:"Что происходит с сопротивлением после того, как цена его пробивает?",
+     options:[
+       {text:"Оно исчезает", correct:false},
+       {text:"Оно становится поддержкой", correct:true},
+       {text:"Оно удваивается", correct:false},
+       {text:"Ничего не меняется", correct:false},
+     ],
+     feedbackCorrect:"Верно. Это принцип смены ролей — пробитое сопротивление становится новой поддержкой.",
+     feedbackWrong:"Не совсем. Пробитое сопротивление не исчезает — оно становится поддержкой, это ключевой принцип технического анализа."},
+    {id:"q4", section:"secCB", prompt:"Какой центробанк управляет мировой резервной валютой?",
+     options:[
+       {text:"Банк Японии", correct:false},
+       {text:"Банк Англии", correct:false},
+       {text:"ФРС США", correct:true},
+       {text:"ЕЦБ", correct:false},
+     ],
+     feedbackCorrect:"Верно. ФРС управляет долларом — решения FOMC двигают рынки по всему миру одновременно.",
+     feedbackWrong:"Не совсем. Мировая резервная валюта — доллар, им управляет ФРС США, не другие центробанки из списка."},
+    {id:"q5", section:"secSR", prompt:"Что такое уровни поддержки и сопротивления по своей природе?",
+     options:[
+       {text:"Случайные числа", correct:false},
+       {text:"«Память рынка» — зоны прошлых крупных сделок", correct:true},
+       {text:"Официальные правила биржи", correct:false},
+       {text:"Прогноз будущей цены", correct:false},
+     ],
+     feedbackCorrect:"Верно. Это «память рынка» — зоны, где крупные игроки уже совершали сделки и могут повторить их снова.",
+     feedbackWrong:"Не совсем. Уровни — это не случайность и не официальные правила, а «память рынка»: зоны прошлых крупных сделок."},
+  ],
+  en: [
+    {id:"q1", section:"secCB", prompt:"What happens to risk assets when the Fed raises rates?",
+     options:[
+       {text:"They rise together with the dollar", correct:false},
+       {text:"They usually come under pressure", correct:true},
+       {text:"They don't react at all", correct:false},
+       {text:"They're guaranteed to crash 50%", correct:false},
+     ],
+     feedbackCorrect:"Correct. A higher rate makes risk-free yield more attractive — capital flows out of risk assets.",
+     feedbackWrong:"Not quite. When the rate rises, money gets more expensive — risk assets (stocks, crypto) usually come under pressure, not up."},
+    {id:"q2", section:"secMacro", prompt:"Why do traders check the economic calendar before a session?",
+     options:[
+       {text:"For interface decoration", correct:false},
+       {text:"Major releases cause sharp volatility spikes", correct:true},
+       {text:"Experienced traders don't need it", correct:false},
+       {text:"Only for the crypto market", correct:false},
+     ],
+     feedbackCorrect:"Correct. That's exactly why major players close positions before CPI/NFP — the market «freezes» before a sharp move.",
+     feedbackWrong:"Not quite. The calendar matters precisely because major releases — CPI, NFP, GDP — cause sharp volatility spikes."},
+    {id:"q3", section:"secSR", prompt:"What happens to resistance after price breaks through it?",
+     options:[
+       {text:"It disappears", correct:false},
+       {text:"It becomes support", correct:true},
+       {text:"It doubles", correct:false},
+       {text:"Nothing changes", correct:false},
+     ],
+     feedbackCorrect:"Correct. That's the role-reversal principle — broken resistance becomes new support.",
+     feedbackWrong:"Not quite. Broken resistance doesn't disappear — it becomes support, a key principle of technical analysis."},
+    {id:"q4", section:"secCB", prompt:"Which central bank manages the world's reserve currency?",
+     options:[
+       {text:"Bank of Japan", correct:false},
+       {text:"Bank of England", correct:false},
+       {text:"The US Fed", correct:true},
+       {text:"The ECB", correct:false},
+     ],
+     feedbackCorrect:"Correct. The Fed manages the dollar — FOMC decisions move markets worldwide at once.",
+     feedbackWrong:"Not quite. The world's reserve currency is the dollar, managed by the US Fed, not the other central banks listed."},
+    {id:"q5", section:"secSR", prompt:"What are support and resistance levels, by nature?",
+     options:[
+       {text:"Random numbers", correct:false},
+       {text:"The «market's memory» — zones of past large trades", correct:true},
+       {text:"Official exchange rules", correct:false},
+       {text:"A forecast of future price", correct:false},
+     ],
+     feedbackCorrect:"Correct. They're the «market's memory» — zones where big players already traded and may trade again.",
+     feedbackWrong:"Not quite. Levels aren't random or official rules — they're the «market's memory»: zones of past large trades."},
+  ],
+  ro: [
+    {id:"q1", section:"secCB", prompt:"Ce se întâmplă cu activele riscante când Fed majorează rata?",
+     options:[
+       {text:"Cresc odată cu dolarul", correct:false},
+       {text:"De obicei ajung sub presiune", correct:true},
+       {text:"Nu reacționează deloc", correct:false},
+       {text:"Se prăbușesc garantat cu 50%", correct:false},
+     ],
+     feedbackCorrect:"Corect. O rată mai mare face randamentul fără risc mai atractiv — capitalul iese din activele riscante.",
+     feedbackWrong:"Nu chiar. Când rata crește, banii se scumpesc — activele riscante (acțiuni, cripto) ajung de obicei sub presiune, nu cresc."},
+    {id:"q2", section:"secMacro", prompt:"De ce se verifică calendarul economic înainte de o sesiune?",
+     options:[
+       {text:"Pentru estetica interfeței", correct:false},
+       {text:"Publicările majore provoacă valuri bruște de volatilitate", correct:true},
+       {text:"Traderii experimentați nu au nevoie de el", correct:false},
+       {text:"Doar pentru piața cripto", correct:false},
+     ],
+     feedbackCorrect:"Corect. De aceea jucătorii mari își închid pozițiile înainte de CPI/NFP — piața «îngheață» înainte de o mișcare bruscă.",
+     feedbackWrong:"Nu chiar. Calendarul contează tocmai pentru că publicările majore — CPI, NFP, GDP — provoacă valuri bruște de volatilitate."},
+    {id:"q3", section:"secSR", prompt:"Ce se întâmplă cu rezistența după ce prețul o sparge?",
+     options:[
+       {text:"Dispare", correct:false},
+       {text:"Devine suport", correct:true},
+       {text:"Se dublează", correct:false},
+       {text:"Nimic nu se schimbă", correct:false},
+     ],
+     feedbackCorrect:"Corect. Acesta este principiul schimbării rolurilor — rezistența spartă devine noul suport.",
+     feedbackWrong:"Nu chiar. Rezistența spartă nu dispare — devine suport, un principiu-cheie al analizei tehnice."},
+    {id:"q4", section:"secCB", prompt:"Ce bancă centrală administrează moneda de rezervă a lumii?",
+     options:[
+       {text:"Banca Japoniei", correct:false},
+       {text:"Banca Angliei", correct:false},
+       {text:"Fed-ul SUA", correct:true},
+       {text:"BCE", correct:false},
+     ],
+     feedbackCorrect:"Corect. Fed administrează dolarul — deciziile FOMC mișcă piețele din toată lumea simultan.",
+     feedbackWrong:"Nu chiar. Moneda de rezervă a lumii este dolarul, administrat de Fed-ul SUA, nu de celelalte bănci centrale din listă."},
+    {id:"q5", section:"secSR", prompt:"Ce reprezintă, prin natura lor, nivelurile de suport și rezistență?",
+     options:[
+       {text:"Numere aleatorii", correct:false},
+       {text:"«Memoria pieței» — zone ale tranzacțiilor mari din trecut", correct:true},
+       {text:"Reguli oficiale ale bursei", correct:false},
+       {text:"O prognoză a prețului viitor", correct:false},
+     ],
+     feedbackCorrect:"Corect. Sunt «memoria pieței» — zone unde jucătorii mari au tranzacționat deja și pot repeta.",
+     feedbackWrong:"Nu chiar. Nivelurile nu sunt întâmplătoare și nici reguli oficiale — sunt «memoria pieței»: zone ale tranzacțiilor mari din trecut."},
+  ],
+};
 
-const Chip = ({children,color=C.gold}) =>
-  <span style={{fontFamily:"'Courier New',monospace",fontSize:11,letterSpacing:3,color,border:`1px solid ${color}`,padding:"4px 11px",display:"inline-block",textTransform:"uppercase"}}>{children}</span>;
+const {C, Mono, Chip, Rule, GlossWord, withGlossTerms, AskAnalystBtn, getChUrl, QuizBlock, ImpactMatrix, SimpleLangToggle, ComplianceFootnote} = window.AcademyShared;
 
-const Rule = ({w="50%",my=32}) =>
-  <div style={{height:1,background:`linear-gradient(90deg,transparent,${C.gold},transparent)`,width:w,margin:`${my}px auto`,opacity:0.4}}></div>;
-
-const SectionTitle = ({children,sub,align="left"}) => (
-  <div style={{textAlign:align,marginBottom:36}}>
+const SectionTitle = ({children,sub,align="left",id}) => (
+  <div id={id} style={{textAlign:align,marginBottom:36,scrollMarginTop:130}}>
     <h2 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(24px,3.2vw,36px)",fontWeight:400,color:C.black,lineHeight:1.15,marginBottom:sub?10:0}}>{children}</h2>
     {sub && <p style={{fontSize:15,color:C.inkSoft,lineHeight:1.65,maxWidth:680,margin:align==="center"?"0 auto":0}}>{sub}</p>}
   </div>
 );
 
+const ICON_SVG_ONLY = {waves:1}; // эти иконки существуют только как .svg (нет в 26-наборе .png)
 const InfoCard = ({icon,title,text,accent=C.gold}) => (
   <div style={{background:C.surface,border:`1px solid ${C.border}`,padding:"22px 26px",borderRadius:4,borderLeft:`3px solid ${accent}`}}>
-    <div style={{fontSize:20,marginBottom:8}}>{icon}</div>
+    <div style={{marginBottom:10}}><img className="mi-icon" src={`/assets/icons/icon-${icon}.${ICON_SVG_ONLY[icon]?"svg":"png"}`} alt="" width="22" height="22"/></div>
     <div style={{fontWeight:600,fontSize:13,color:C.black,letterSpacing:0.5,marginBottom:7,textTransform:"uppercase"}}>{title}</div>
     <div style={{fontSize:13,color:C.inkMid,lineHeight:1.65}}>{text}</div>
   </div>
 );
 
-const getChUrl = (ch) => {
-  const p = new URLSearchParams(window.location.search).get('path') || 'explorer';
-  let base = INITIAL_LANG === 'ru' ? '/edu/b' : `/edu/${INITIAL_LANG}/b`;
-  return ch === 'start' ? `${base}?path=${p}` : `${base}/${ch}?path=${p}`;
-};
+const StepTag = ({n,label}) => (
+  <Mono size={9.5} color={C.inkFaint} spacing={2} style={{display:"block",marginBottom:8,textTransform:"uppercase"}}>{n} · {label}</Mono>
+);
+
+// SceneEngine mounting helper -- same ref-callback convention as chapters 1-4.
+function SceneMount({ url, mode, symbol, copy }) {
+  const { useRef, useEffect } = React;
+  const ref = useRef(null);
+  useEffect(() => {
+    let cancelled = false;
+    fetch(url).then(r => r.json()).then(data => {
+      if (!cancelled && ref.current) window.SceneEngine.mount(ref.current, { mode, data, symbol, copy });
+    }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [url]);
+  return <div ref={ref}/>;
+}
+
+// n случаев/случая/случай -- RU numeral agreement (1/2-4/5+ с исключением
+// 11-14), RO/EN не имеют этой проблемы для наших n (1..12), но обрабатываем
+// единообразно, чтобы "1 cases"/"1 case" тоже было верно.
+function pluralCases(n, cm) {
+  if (INITIAL_LANG === "ru") {
+    const mod10 = n % 10, mod100 = n % 100;
+    if (mod10 === 1 && mod100 !== 11) return cm.casesLabelOne;
+    if (mod10 >= 2 && mod10 <= 4 && !(mod100 >= 12 && mod100 <= 14)) return cm.casesLabelFew;
+    return cm.casesLabel;
+  }
+  return n === 1 ? cm.casesLabelOne : cm.casesLabel;
+}
+
+// ─── Calendar impact matrix (§3.5, деферред при закрытии главы 27.07.2026) ───
+// Данные: tools/edu_build/build_ch2_calendar_matrix.py → calendar_matrix.json
+// (XAU/USD из живого движка Layer1 event_reaction_stats, DXY/S&P/BTC — свежий
+// расчёт по MT5-бэкфиллу). Ни одно число не написано руками -- см. cm.noDataCell
+// для честного "-" там, где случаев 0.
+function CalendarMatrixTable() {
+  const { useState, useEffect } = React;
+  const cm = (window.Chrono2Content[INITIAL_LANG] || window.Chrono2Content.ru).calendarMatrix;
+  const [data, setData] = useState(null);
+  const [showMethod, setShowMethod] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/data/edu_stats/calendar_matrix.json").then(r => r.json()).then(d => {
+      if (!cancelled) setData(d);
+    }).catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
+
+  const cols = [
+    { key: "GOLD", label: cm.colGold },
+    { key: "DXY", label: cm.colDxy },
+    { key: "SPX", label: cm.colSpx },
+    { key: "BTC", label: cm.colBtc },
+  ];
+
+  if (!data) return <div style={{padding:"20px 0",color:C.inkFaint,fontFamily:"monospace",fontSize:12}}>—</div>;
+
+  // SPEC_ch2_debug_and_chart_engine.md §2.2 -- ImpactMatrix ждёт уже
+  // ATR/дневной-диапазон-нормированные cell.norm (см. build_ch2_calendar_
+  // matrix.py), здесь только перекладка формы + перевод tooltip/copy.
+  const rows = data.rows.map(row => ({
+    key: row.event_type,
+    label: row.label,
+    cells: Object.fromEntries(cols.map(c => {
+      const cell = row.cells[c.key];
+      if (!cell) return [c.key, null];
+      return [c.key, {
+        norm: cell.norm != null ? cell.norm : null,
+        n: cell.n,
+        raw: cell.avg_move_60m != null ? Math.round(cell.avg_move_60m * 10) / 10 : null,
+        rawUnit: cm.rawUnit,
+        tooltip: cell.n === 0 ? cm.noDataCell : `${cell.n} ${pluralCases(cell.n, cm)}${cell.coverage_first ? " · " + cell.coverage_first + "–" + cell.coverage_last : ""}`,
+      }];
+    })),
+  }));
+
+  return (
+    <div>
+      <ImpactMatrix rows={rows} columns={cols} minCases={data.meta.min_cases} copy={{
+        rowHead: cm.colEvent, naLabel: cm.naLabel, lowSampleLegend: cm.lowSampleLegend,
+      }}/>
+      <button onClick={() => setShowMethod(v => !v)} style={{background:"none",border:"none",padding:0,fontFamily:"monospace",fontSize:11,color:C.gold,cursor:"pointer",textDecoration:"underline",marginTop:6}}>
+        {cm.methodologyTitle} {showMethod ? "▲" : "▼"}
+      </button>
+      {showMethod && <p style={{fontSize:11.5,color:C.inkFaint,lineHeight:1.65,marginTop:10,maxWidth:760}}>{cm.methodologyBody}</p>}
+    </div>
+  );
+}
+
+// ─── Live "next high-impact release" countdown — /api/calendar/events (live) ──
+function NextReleaseWidget() {
+  const { useState, useEffect } = React;
+  const cm = (window.Chrono2Content[INITIAL_LANG] || window.Chrono2Content.ru).calendarMatrix;
+  const [state, setState] = useState({ status: "loading", event: null });
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    let cancelled = false;
+    const today = new Date().toISOString().slice(0, 10);
+    const to = new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10);
+    fetch(`/api/calendar/events?from=${today}&to=${to}&impact=high&country=US`)
+      .then(r => r.json())
+      .then(rows => {
+        if (cancelled) return;
+        const nowSec = Date.now() / 1000;
+        const upcoming = (Array.isArray(rows) ? rows : [])
+          .filter(r => r.scheduled_ts && r.scheduled_ts > nowSec)
+          .sort((a, b) => a.scheduled_ts - b.scheduled_ts);
+        setState(upcoming.length ? { status: "ok", event: upcoming[0] } : { status: "empty", event: null });
+      })
+      .catch(() => { if (!cancelled) setState({ status: "error", event: null }); });
+    return () => { cancelled = true; };
+  }, []);
+
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  if (state.status === "loading") return <div style={{fontFamily:"monospace",fontSize:12,color:C.inkFaint}}>{cm.nextReleaseLoading}</div>;
+  if (state.status === "error") return <div style={{fontFamily:"monospace",fontSize:12,color:C.inkFaint}}>{cm.nextReleaseError}</div>;
+  if (state.status === "empty") return <div style={{fontFamily:"monospace",fontSize:12,color:C.inkFaint}}>{cm.nextReleaseNone}</div>;
+
+  const ev = state.event;
+  const diffMs = Math.max(0, ev.scheduled_ts * 1000 - now);
+  const d = Math.floor(diffMs / 86400000);
+  const h = Math.floor((diffMs % 86400000) / 3600000);
+  const m = Math.floor((diffMs % 3600000) / 60000);
+  const dt = new Date(ev.scheduled_ts * 1000);
+  const dateStr = dt.toISOString().slice(0, 16).replace("T", " ") + " UTC";
+
+  return (
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:14}}>
+      <div>
+        <div style={{fontWeight:700,fontSize:14,color:C.black}}>{window.translatedEventName ? window.translatedEventName(ev) : ev.title}</div>
+        <div style={{fontSize:11,color:C.inkFaint,fontFamily:"monospace",marginTop:2}}>{dateStr}</div>
+      </div>
+      <Mono size={18} color={C.gold} spacing={1}>
+        {d > 0 ? `${d}${cm.countdownDay} ` : ""}{String(h).padStart(2,"0")}{cm.countdownHour} {String(m).padStart(2,"0")}{cm.countdownMin}
+      </Mono>
+    </div>
+  );
+}
+
+// ─── Scene: CPI 10.11.2022, real Dukascopy tick-derived GOLD M30 (EVENT mode) ──
+function CpiCalendarScene() {
+  const cm = (window.Chrono2Content[INITIAL_LANG] || window.Chrono2Content.ru).calendarMatrix;
+  return (
+    <div style={{marginBottom:32}}>
+      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{cm.cpiSceneTag}</Mono>
+      <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,marginBottom:14,maxWidth:760}}>{cm.cpiSceneLegend}</p>
+      <SceneMount url="/data/edu_scenes/ch2_cpi_2022.json" mode="event" symbol="GOLD" copy={{
+        question: cm.cpiSceneQuestion, options: cm.cpiSceneOptions, revealText: cm.cpiSceneReveal, nextMarker: null,
+      }}/>
+    </div>
+  );
+}
+
+function CalendarMatrixSection() {
+  const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
+  const cm = (window.Chrono2Content[INITIAL_LANG] || window.Chrono2Content.ru).calendarMatrix;
+  return (
+    <div style={{marginBottom:56}}>
+      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{cm.tag}</Mono>
+      <div style={{fontFamily:"'DM Serif Display',serif",fontSize:24,color:C.black,marginBottom:12}}>{cm.title}</div>
+      <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.75,marginBottom:24,maxWidth:800}}>{cm.preamble}</p>
+
+      <CalendarMatrixTable/>
+
+      <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"20px 24px",marginTop:28,marginBottom:20}}>
+        <Mono size={10} color={C.inkSoft} spacing={2} style={{display:"block",marginBottom:10,textTransform:"uppercase"}}>{cm.nextReleaseTag}</Mono>
+        <NextReleaseWidget/>
+      </div>
+
+      <CpiCalendarScene/>
+
+      <div style={{background:C.redPale,border:"1px solid rgba(192,57,43,.25)",borderRadius:6,padding:"18px 22px",display:"flex",gap:14,alignItems:"flex-start"}}>
+        <span style={{fontSize:22,flexShrink:0}}>⚠️</span>
+        <div>
+          <div style={{fontWeight:700,fontSize:13,color:"#c0392b",marginBottom:6}}>{cm.safetyTag}</div>
+          <p style={{fontSize:12.5,color:C.inkMid,lineHeight:1.65,margin:"0 0 6px"}}>{cm.safetyBody}</p>
+          <a href="#2015_snb" onClick={(e) => { e.preventDefault(); window.SbfChrono2GoTo && window.SbfChrono2GoTo("2015_snb"); }}
+             style={{fontSize:11.5,fontFamily:"monospace",color:"#c0392b",textDecoration:"underline",cursor:"pointer"}}>
+            {cm.jumpToSnbStation}
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // ─── Interactive 1: FED Simulator ─────────────────────────────────────────────
+// Real snapshots for the 3 preset buttons -- actual fetched values, not the
+// simulator's own linear formula (build notes: 2020-04-15 from
+// edu_scenes/ch2_fed_2020.json [SPX/GOLD, real Yahoo] + Yahoo DXY/BTC-USD
+// fetched the same way; 2023-08-01 [real cycle peak, Fed 5.33%, not "2022"
+// as the round-number folk memory has it] and "today" from local MT5
+// backfill / live /api/quotes).
+const FED_PRESETS = {
+  "2020": { rate: 0.05, date: "2020-04-15", spx: 2783.36, gold: 1727.20, dxy: 99.46, btc: 6642 },
+  "2023": { rate: 5.33, date: "2023-08-01", spx: 4576.73, gold: 1940.70, dxy: 102.30, btc: 29676 },
+};
+
 function FedSimulator() {
-  const { useState, useMemo } = React;
+  const { useState, useMemo, useEffect } = React;
   const [rate, setRate] = useState(5.5);
+  const [preset, setPreset] = useState(null); // null | "2020" | "2023" | "today"
+  const [todayLive, setTodayLive] = useState(null);
+
+  useEffect(() => {
+    fetch("/api/quotes").then(r => r.json()).then(data => {
+      const rows = data && Array.isArray(data.quotes) ? data.quotes : [];
+      const byTicker = {};
+      rows.forEach(r => { byTicker[r.ticker] = r.price; });
+      if (byTicker["^GSPC"]) {
+        setTodayLive({ spx: byTicker["^GSPC"], gold: byTicker["GC=F"], dxy: byTicker["DX-Y.NYB"], btc: byTicker["BTC-USD"] });
+      }
+    }).catch(() => {});
+  }, []);
+
+  const selectPreset = (key) => {
+    setPreset(key);
+    if (key === "2020") setRate(FED_PRESETS["2020"].rate);
+    else if (key === "2023") setRate(FED_PRESETS["2023"].rate);
+    else if (key === "today") setRate(3.63);
+  };
+  const clearPreset = (val) => { setPreset(null); setRate(val); };
+
+  const snapshot = preset === "2020" ? FED_PRESETS["2020"]
+    : preset === "2023" ? FED_PRESETS["2023"]
+    : preset === "today" && todayLive ? { rate: 3.63, date: S.fedPresetToday, ...todayLive }
+    : null;
 
   // Correlations (simplified model)
   // Rate ↑ → DXY ↑, S&P ↓, Gold ↓, BTC ↓, Bonds ↑
@@ -482,11 +978,32 @@ function FedSimulator() {
         </div>
       </div>
 
+      {/* Real-episode presets */}
+      <div style={{marginBottom:24}}>
+        <div style={{fontSize:11,color:"rgba(255,255,255,0.4)",marginBottom:10,letterSpacing:0.5}}>{S.fedPresetsLabel}</div>
+        <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+          {[
+            {key:null, label:S.fedPresetModel},
+            {key:"2020", label:S.fedPreset2020},
+            {key:"2023", label:S.fedPreset2023},
+            {key:"today", label:S.fedPresetToday},
+          ].map(p => (
+            <button key={p.key||"model"} onClick={() => p.key ? selectPreset(p.key) : clearPreset(5.5)}
+              style={{padding:"8px 14px",borderRadius:16,cursor:"pointer",fontSize:11.5,fontFamily:"monospace",
+                background:preset===p.key?"rgba(201,151,58,0.18)":"rgba(255,255,255,0.04)",
+                border:preset===p.key?`1px solid ${C.gold}`:"1px solid rgba(255,255,255,0.1)",
+                color:preset===p.key?C.gold:"rgba(255,255,255,0.6)"}}>
+              {p.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Rate slider */}
       <div style={{marginBottom:32}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:10}}>
           <span style={{fontSize:14,color:"rgba(255,255,255,0.6)"}}>{S.fedRateLabel}</span>
-          <span style={{fontFamily:"'DM Serif Display',serif",fontSize:40,color:C.gold,lineHeight:1}}>{rate.toFixed(1)}<span style={{fontSize:22}}>%</span></span>
+          <span style={{fontFamily:"'DM Serif Display',serif",fontSize:40,color:C.gold,lineHeight:1}}>{rate.toFixed(2)}<span style={{fontSize:22}}>%</span></span>
         </div>
         <div style={{position:"relative",marginBottom:8}}>
           {/* Colored track */}
@@ -494,7 +1011,7 @@ function FedSimulator() {
             <div style={{position:"absolute",top:"50%",left:`${pct}%`,transform:"translate(-50%,-50%)",width:20,height:20,borderRadius:"50%",background:"#fff",boxShadow:"0 2px 8px rgba(0,0,0,0.5)",pointerEvents:"none"}}/>
           </div>
           <input type="range" min="0" max="10" step="0.25" value={rate}
-            onChange={e => setRate(+e.target.value)}
+            onChange={e => clearPreset(+e.target.value)}
             style={{position:"absolute",top:0,left:0,width:"100%",height:"100%",opacity:0,cursor:"pointer",margin:0}}/>
         </div>
         <div style={{display:"flex",justifyContent:"space-between",fontSize:11,color:"rgba(255,255,255,0.3)"}}>
@@ -504,25 +1021,49 @@ function FedSimulator() {
         </div>
       </div>
 
-      {/* Mode badge */}
-      <div style={{background:"rgba(255,255,255,0.06)",border:`1px solid rgba(255,255,255,0.1)`,borderRadius:6,padding:"16px 20px",marginBottom:24,display:"flex",gap:12,alignItems:"flex-start"}}>
-        <span style={{fontSize:22}}>{riskMode?"🟢":tightMode?"🔴":"🟡"}</span>
-        <div>
-          <div style={{fontWeight:700,fontSize:15,marginBottom:4}}>{modeLabel}</div>
-          <div style={{fontSize:13,color:"rgba(255,255,255,0.55)",lineHeight:1.6}}>{modeDesc}</div>
-        </div>
-      </div>
-
-      {/* Assets grid */}
-      <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:10}}>
-        {assets.map((a,i) => (
-          <div key={i} style={{background:"rgba(255,255,255,0.05)",borderRadius:4,padding:"14px 12px",textAlign:"center",border:`1px solid rgba(255,255,255,0.07)`}}>
-            <div style={{fontSize:10,color:"rgba(255,255,255,0.3)",marginBottom:6,letterSpacing:0.5}}>{a.label}</div>
-            <div style={{fontSize:16,fontWeight:700,color:a.color,fontFamily:"monospace"}}>{a.dir} {a.val}</div>
-            <div style={{fontSize:10,color:"rgba(255,255,255,0.2)",marginTop:4}}>{a.desc}</div>
+      {snapshot ? (
+        <React.Fragment>
+          <div style={{background:"rgba(201,151,58,0.08)",border:`1px solid ${C.gold}`,borderRadius:6,padding:"16px 20px",marginBottom:24}}>
+            <Mono size={10} color={C.gold} spacing={1} style={{display:"block",marginBottom:6}}>{S.fedSnapshotTag} · {snapshot.date}</Mono>
+            <div style={{fontSize:12,color:"rgba(255,255,255,0.6)"}}>{S.fedSnapshotNote}</div>
           </div>
-        ))}
-      </div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10}} className="grid-2">
+            {[
+              {label:S.fedAssetSPXLabel, val:snapshot.spx.toLocaleString(undefined,{maximumFractionDigits:0})},
+              {label:S.fedAssetGoldLabel, val:"$"+snapshot.gold.toLocaleString(undefined,{maximumFractionDigits:0})},
+              {label:S.fedAssetDXYLabel, val:snapshot.dxy.toFixed(1)},
+              {label:S.fedAssetBTCLabel, val:"$"+Math.round(snapshot.btc).toLocaleString()},
+            ].map((m,i) => (
+              <div key={i} style={{background:"rgba(255,255,255,0.05)",borderRadius:4,padding:"14px 12px",textAlign:"center",border:`1px solid rgba(255,255,255,0.07)`}}>
+                <div style={{fontSize:10,color:"rgba(255,255,255,0.3)",marginBottom:6,letterSpacing:0.5}}>{m.label}</div>
+                <div style={{fontSize:16,fontWeight:700,color:C.gold,fontFamily:"monospace"}}>{m.val}</div>
+              </div>
+            ))}
+          </div>
+        </React.Fragment>
+      ) : (
+        <React.Fragment>
+          {/* Mode badge */}
+          <div style={{background:"rgba(255,255,255,0.06)",border:`1px solid rgba(255,255,255,0.1)`,borderRadius:6,padding:"16px 20px",marginBottom:24,display:"flex",gap:12,alignItems:"flex-start"}}>
+            <span style={{fontSize:22}}>{riskMode?"🟢":tightMode?"🔴":"🟡"}</span>
+            <div>
+              <div style={{fontWeight:700,fontSize:15,marginBottom:4}}>{modeLabel}</div>
+              <div style={{fontSize:13,color:"rgba(255,255,255,0.55)",lineHeight:1.6}}>{modeDesc}</div>
+            </div>
+          </div>
+
+          {/* Assets grid */}
+          <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:10}}>
+            {assets.map((a,i) => (
+              <div key={i} style={{background:"rgba(255,255,255,0.05)",borderRadius:4,padding:"14px 12px",textAlign:"center",border:`1px solid rgba(255,255,255,0.07)`}}>
+                <div style={{fontSize:10,color:"rgba(255,255,255,0.3)",marginBottom:6,letterSpacing:0.5}}>{a.label}</div>
+                <div style={{fontSize:16,fontWeight:700,color:a.color,fontFamily:"monospace"}}>{a.dir} {a.val}</div>
+                <div style={{fontSize:10,color:"rgba(255,255,255,0.2)",marginTop:4}}>{a.desc}</div>
+              </div>
+            ))}
+          </div>
+        </React.Fragment>
+      )}
 
       <p style={{fontSize:11,color:"rgba(255,255,255,0.18)",marginTop:16,textAlign:"center"}}>
         {S.fedFootnote}
@@ -533,37 +1074,33 @@ function FedSimulator() {
 
 // ─── Interactive 2: Support & Resistance Trainer ──────────────────────────────
 function SRTrainer() {
-  const { useState, useRef, useCallback } = React;
+  const { useState, useRef, useCallback, useEffect, useMemo } = React;
 
   const W = 700, H = 320;
   const PAD = { l:40, r:20, t:20, b:30 };
 
-  // Pre-generated candle data (20 candles, price range 2400-2650)
-  const candles = [
-    {o:2480,h:2510,l:2460,c:2505},{o:2505,h:2530,l:2490,c:2515},
-    {o:2515,h:2540,l:2500,c:2498},{o:2498,h:2510,l:2470,c:2475},
-    {o:2475,h:2485,l:2440,c:2445},{o:2445,h:2460,l:2430,c:2458},
-    {o:2458,h:2490,l:2450,c:2488},{o:2488,h:2520,l:2480,c:2515},
-    {o:2515,h:2545,l:2510,c:2540},{o:2540,h:2560,l:2525,c:2530},
-    {o:2530,h:2540,l:2505,c:2508},{o:2508,h:2520,l:2488,c:2492},
-    {o:2492,h:2500,l:2460,c:2465},{o:2465,h:2480,l:2450,c:2478},
-    {o:2478,h:2510,l:2470,c:2505},{o:2505,h:2535,l:2498,c:2530},
-    {o:2530,h:2555,l:2520,c:2548},{o:2548,h:2570,l:2540,c:2558},
-    {o:2558,h:2575,l:2545,c:2550},{o:2550,h:2565,l:2535,c:2542},
-  ];
+  const [srData, setSrData] = useState(null);
+  useEffect(() => {
+    fetch("/data/edu_capsules/sr_trainer_gold.json").then(r => r.json()).then(setSrData).catch(() => {});
+  }, []);
 
-  // Correct zones (price levels)
-  const correctZones = [
-    {price:2450, label:S.srZoneSupport,   type:"support",    tolerance:18},
-    {price:2508, label:S.srZoneResistance,type:"resistance", tolerance:15},
-    {price:2540, label:S.srZoneResistance,type:"resistance", tolerance:16},
-  ];
+  // Real GOLD H4 candles + real fractal-detected S/R zones (see
+  // tools/edu_build/build_sr_trainer_gold.py) -- not the fake 20-bar array
+  // this trainer used to run on. Falls back to an empty shell while loading.
+  const candles = useMemo(() => (srData ? srData.candles.map(c => ({o:c.open,h:c.high,l:c.low,c:c.close})) : []), [srData]);
+  const correctZones = useMemo(() => (srData ? srData.zones.map(z => ({
+    price: z.price,
+    label: z.type === "support" ? S.srZoneSupport : S.srZoneResistance,
+    type: z.type,
+    tolerance: Math.max(z.tolerance, 10),
+  })) : []), [srData]);
 
-  const priceMin = 2410, priceMax = 2600;
+  const priceMin = useMemo(() => (candles.length ? Math.min(...candles.map(c=>c.l)) * 0.998 : 2410), [candles]);
+  const priceMax = useMemo(() => (candles.length ? Math.max(...candles.map(c=>c.h)) * 1.002 : 2600), [candles]);
   const priceRange = priceMax - priceMin;
   const chartW = W - PAD.l - PAD.r;
   const chartH = H - PAD.t - PAD.b;
-  const candleW = Math.floor(chartW / candles.length) - 3;
+  const candleW = candles.length ? Math.floor(chartW / candles.length) - 3 : 10;
 
   const toX = (i) => PAD.l + i * (chartW / candles.length) + candleW / 2;
   const toY = (p) => PAD.t + chartH - ((p - priceMin) / priceRange) * chartH;
@@ -573,6 +1110,7 @@ function SRTrainer() {
   const [dragY, setDragY] = useState(null);
   const [checked, setChecked] = useState(false);
   const [score, setScore] = useState(null);
+  const [saved, setSaved] = useState(false);
   const svgRef = useRef(null);
 
   const getSVGY = useCallback((e) => {
@@ -584,7 +1122,7 @@ function SRTrainer() {
   const yToPrice = (y) => priceMin + ((chartH - (y - PAD.t)) / chartH) * priceRange;
 
   const onMouseDown = (e) => {
-    if (checked) return;
+    if (checked || !candles.length) return;
     setDragging(true);
     setDragY(getSVGY(e));
   };
@@ -614,7 +1152,22 @@ function SRTrainer() {
     setChecked(true);
   };
 
-  const reset = () => { setLines([]); setChecked(false); setScore(null); };
+  const reset = () => { setLines([]); setChecked(false); setScore(null); setSaved(false); };
+
+  const saveToJournal = () => {
+    setSaved(true);
+    const doFetch = (window.sbfAuth && window.sbfAuth.isLoggedIn && window.sbfAuth.isLoggedIn()) ? window.sbfAuth.fetch : fetch;
+    doFetch('/api/journal/setups', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        symbol: "GOLD", timeframe: "H4", pattern_key: "sr_trainer",
+        levels: lines.map(l => ({ price: l.price, correct: !!l.correct })),
+        render_params: { window: srData && srData.meta ? srData.meta.range : null },
+        thesis: `SR trainer: ${lines.length} lines drawn, score ${score}%`,
+        status: "active",
+      }),
+    }).catch(() => {});
+  };
 
   return (
     <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"36px 40px"}}>
@@ -632,7 +1185,10 @@ function SRTrainer() {
           }
           {!checked
             ? <button onClick={checkAnswers} disabled={lines.length===0} style={{background:lines.length===0?C.surfaceMid:C.black,color:C.white,border:"none",padding:"10px 20px",cursor:lines.length===0?"not-allowed":"pointer",fontFamily:"monospace",fontSize:12,letterSpacing:1,borderRadius:3}}>{S.srCheck}</button>
-            : <button onClick={reset} style={{background:C.gold,color:C.black,border:"none",padding:"10px 20px",cursor:"pointer",fontFamily:"monospace",fontSize:12,letterSpacing:1,fontWeight:700,borderRadius:3}}>{S.srRetry}</button>
+            : <React.Fragment>
+                <button onClick={saveToJournal} disabled={saved} style={{background:"transparent",border:`1px solid ${C.gold}`,color:C.gold,padding:"10px 16px",cursor:saved?"default":"pointer",fontFamily:"monospace",fontSize:12,letterSpacing:0.5,borderRadius:3,opacity:saved?0.6:1}}>{saved?S.srSavedMsg:S.srSaveBtn}</button>
+                <button onClick={reset} style={{background:C.gold,color:C.black,border:"none",padding:"10px 20px",cursor:"pointer",fontFamily:"monospace",fontSize:12,letterSpacing:1,fontWeight:700,borderRadius:3}}>{S.srRetry}</button>
+              </React.Fragment>
           }
         </div>
       </div>
@@ -647,7 +1203,7 @@ function SRTrainer() {
       {/* Score */}
       {checked && score !== null && (
         <div style={{background: score>=67?C.greenPale:score>=33?"#fff8e1":C.redPale, border:`1px solid ${score>=67?"#2d7a4f":score>=33?C.gold:C.red}`, borderRadius:4,padding:"14px 20px",marginBottom:16,display:"flex",gap:12,alignItems:"center"}}>
-          <span style={{fontSize:32}}>{score>=67?"🏆":score>=33?"🎯":"📚"}</span>
+          <img className="mi-icon" width="28" height="28" alt="" src={`/assets/icons/icon-${score>=67?"trophy":score>=33?"target":"books"}.png`}/>
           <div>
             <div style={{fontWeight:700,fontSize:16,color:score>=67?C.green:score>=33?C.gold:C.red}}>
               {score}% {S.srAccuracyLabel} {score>=67?S.srScoreGreat:score>=33?S.srScoreOk:S.srScoreLow}
@@ -671,7 +1227,7 @@ function SRTrainer() {
           onMouseLeave={() => { if(dragging){setDragging(false);setDragY(null);} }}>
 
           {/* Grid lines */}
-          {[2450,2500,2550,2600].map(p => (
+          {[0,0.25,0.5,0.75,1].map(f => Math.round(priceMin + f*priceRange)).map(p => (
             <g key={p}>
               <line x1={PAD.l} y1={toY(p)} x2={W-PAD.r} y2={toY(p)} stroke="rgba(255,255,255,0.05)" strokeWidth="1"/>
               <text x={PAD.l-4} y={toY(p)+4} fontSize="9" fill="rgba(255,255,255,0.25)" textAnchor="end">{p}</text>
@@ -734,29 +1290,177 @@ function SRTrainer() {
   );
 }
 
+// ─── Chronicle of Central Bank Power: 16-station stepper + embedded scenes ───
+const CH2_SCENE_META = {
+  ch2_fed_2020: { mode: "event", symbol: "SPX" },
+  ch2_snb_2015: { mode: "story", symbol: null },
+  ch2_cycle_2022: { mode: "replay", symbol: "SPX" },
+  ch2_carry_2024: { mode: "story", symbol: null },
+};
+
+function Chrono2Section() {
+  const { useState, useEffect } = React;
+  const lang = INITIAL_LANG;
+  const stations = (window.Chrono2Stations && window.Chrono2Stations[lang]) || [];
+  // Перерисовка станции при переключении «Просто/Как есть» (§3) -- station.body
+  // рендерится через SbfSimpleLang.pick() ниже, но сам React об изменении
+  // module-level mode не узнает без явной подписки/re-render.
+  const [, setSimpleTick] = useState(0);
+  useEffect(() => {
+    if (!window.SbfSimpleLang) return undefined;
+    return window.SbfSimpleLang.subscribe(() => setSimpleTick(t => t + 1));
+  }, []);
+  // Якорь из адресной строки (SPEC_ch2_debug_and_chart_engine.md §5.2) --
+  // slug = station.illustration (уже уникален и смысловой, напр. "2015_snb"),
+  // не station.id (тот часто просто год, может повториться при добавлении
+  // станций в будущем).
+  const initialIdx = () => {
+    const h = (typeof location !== "undefined" ? location.hash : "").replace("#", "");
+    const i = h ? stations.findIndex(s => s.illustration === h) : -1;
+    return i >= 0 ? i : 0;
+  };
+  const [idx, setIdx] = useState(initialIdx);
+  const [done, setDone] = useState(() => stations.map((_,i) => i===initialIdx()));
+  const station = stations[idx];
+  const doneCount = done.filter(Boolean).length;
+
+  const go = (i) => {
+    setIdx(i);
+    setDone(prev => { const n=[...prev]; n[i]=true; return n; });
+    if (window.SbfAnchorReturn && stations[i]) window.SbfAnchorReturn.setStationAnchor(stations[i].illustration);
+  };
+
+  // Проброс "перейти к станции по slug" для несоседних блоков этой же
+  // страницы (напр. упоминание "станция 11" в ПРАВИЛЕ БЕЗОПАСНОСТИ ниже --
+  // SPEC_ch2_debug_and_chart_engine.md §5.1, ровно пример из спеки).
+  useEffect(() => {
+    window.SbfChrono2GoTo = (slug) => {
+      const i = stations.findIndex(s => s.illustration === slug);
+      if (i < 0) return;
+      go(i);
+      const el = document.getElementById("secChrono");
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    };
+    return () => { delete window.SbfChrono2GoTo; };
+  }, [stations, idx]);
+
+  const sceneMeta = station && station.scene ? CH2_SCENE_META[station.scene] : null;
+  const sceneCopy = station && station.scene && window.Chrono2SceneCopy[station.scene]
+    ? (window.Chrono2SceneCopy[station.scene][lang] || window.Chrono2SceneCopy[station.scene].ru)
+    : null;
+
+  return (
+    <div className="history-ep">
+      <SectionTitle id="secChrono" sub={S.chronoSub}>{S.chronoTitle}</SectionTitle>
+      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:16,marginTop:-24}}>{S.chronoTag}</Mono>
+      <div className="h-chrono">
+        {stations.map((s,i) => (
+          <React.Fragment key={s.id}>
+            {i>0 && <span className="h-sep">—</span>}
+            <button className={"h-node"+(i===idx?" active":done[i]?" done":"")} onClick={()=>go(i)}>
+              {s.id === "today" ? S.chronoToday : s.id}
+            </button>
+          </React.Fragment>
+        ))}
+      </div>
+      <p className="h-progress" style={{marginBottom:30}}>{S.chronoChronicle}: <b>{doneCount}/{stations.length}</b> · {S.chronoXpNote}</p>
+
+      {station && (
+        <div className="h-station" style={{marginBottom:40}}>
+          <div className="h-passepartout">
+            <div className="h-artwork" dangerouslySetInnerHTML={{__html: window.Chrono2StationArtHTML(station.illustration)}}/>
+            <div className="h-caption"><span>{station.year} · {station.place}</span><span className="h-src">{station.source}</span></div>
+          </div>
+          <div>
+            <div className="h-station-head"><span className="h-station-year">{station.year}</span><span className="h-station-place">{station.place}</span></div>
+            <h3 className="h-station-title">{station.title}</h3>
+            <p className="h-station-body">{window.SbfSimpleLang && station ? window.SbfSimpleLang.pick(station, "body") : (station && station.body)}</p>
+            {station.fact && <div className="h-callout h-callout-fact">{station.fact}</div>}
+            {station.legend && <div className="h-callout h-callout-legend">{station.legend}</div>}
+            {idx < stations.length-1 && (
+              <div style={{marginTop:14}}><button className="h-btn" onClick={()=>go(idx+1)}>{S.chronoNext}</button></div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {sceneMeta && sceneCopy && (
+        <div style={{marginTop:24,marginBottom:40}}>
+          <Mono size={10} color={C.inkFaint} spacing={1} style={{display:"block",marginBottom:10}}>{S.sceneKicker}</Mono>
+          <SceneMount url={`/data/edu_scenes/${station.scene}.json`} mode={sceneMeta.mode} symbol={sceneMeta.symbol} copy={sceneCopy}/>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Main Chapter 2 ────────────────────────────────────────────────────────────
 function Chapter2() {
+  const lang = INITIAL_LANG;
+  const ch2t = (window.Chrono2Content && window.Chrono2Content[lang]) || window.Chrono2Content.ru;
+
+  // Переключатель «Просто / Как есть» (SPEC_ch2_debug_and_chart_engine.md
+  // §3) -- локальный useState + подписка нужны, чтобы страница ПЕРЕРИСОВАЛАСЬ
+  // при переключении режима (SbfSimpleLang.pick() сам по себе читает mode
+  // синхронно на момент вызова, но без re-render React об этом не узнает).
+  // SIMPLIFIABLE_KEYS -- честный манифест кандидатов главы 2 под индикатор
+  // "упрощены N из M": часть уже имеет _simple, часть намеренно ещё нет --
+  // раскатка по спеке постепенная (§3.3), не вся глава разом.
+  const SIMPLIFIABLE_KEYS = [
+    "rateStep1Text", "rateStep2Text", "rateStep3Text",
+    "macro1Text", "macro2Text", "macro3Text", "macro4Text", "macro5Text", "macro6Text",
+    "srp1Text", "srp2Text", "srp3Text", "srp4Text",
+  ];
+  const [, setSimpleModeTick] = React.useState(0);
+  React.useEffect(() => {
+    if (!window.SbfSimpleLang) return undefined;
+    return window.SbfSimpleLang.subscribe(() => setSimpleModeTick(t => t + 1));
+  }, []);
+  const pick = (key) => (window.SbfSimpleLang ? window.SbfSimpleLang.pick(S, key) : S[key]);
+  const simplifiedCount = SIMPLIFIABLE_KEYS.filter(k => S[k + "_simple"] != null).length;
+  const carryTradeTerm = lang === "ru" ? "кэрри-трейда" : "carry trade";
+  const carryTradeWord = lang === "ru" ? "кэрри-трейд" : lang === "en" ? "carry trade" : "carry trade";
+  // fedRangeSoft/fedModeRiskOn-Off/fedDescRiskOn-Off внутри FedSimulator
+  // рендерятся УСЛОВНО (зависят от позиции слайдера, при дефолтной ставке
+  // 5.5 не показаны вовсе) — ненадёжно для "первого упоминания" глоссария.
+  // Отсюда — статичная вводная строка (fedIntro) перед интерактивом.
+  const fedIntroPairs = lang === "ru"
+    ? [{term:"QE", word:"QE"}, {term:"риск-он/риск-офф", word:"риск-он/риск-офф"}, {term:"тихую гавань", word:"тихая гавань"}]
+    : lang === "en"
+    ? [{term:"QE", word:"QE"}, {term:"risk-on/risk-off", word:"risk-on/risk-off"}, {term:"safe haven", word:"safe haven"}]
+    : [{term:"QE", word:"QE"}, {term:"risc-on/risc-off", word:"risc-on/risc-off"}, {term:"refugiu sigur", word:"refugiu sigur"}];
+
+  // Тест на воспроизведение -- QuizBlock (window.AcademyShared), level_id='level_2'.
+  const quiz = (window.Chrono2Quiz && window.Chrono2Quiz[lang]) || window.Chrono2Quiz.ru;
+  const predict = (window.Chrono2Predict && window.Chrono2Predict[lang]) || window.Chrono2Predict.ru;
+  const cliffhanger = (window.Chrono2Cliffhanger && window.Chrono2Cliffhanger[lang]) || window.Chrono2Cliffhanger.ru;
+
   const centralBanks = [
-    {abbr:S.cb1Abbr, full:S.cb1Full, country:S.cb1Country, desc:S.cb1Desc, color:C.blue},
+    {abbr:S.cb1Abbr, full:S.cb1Full, country:S.cb1Country, desc:S.cb1Desc, color:C.blue, glossTerm:"FOMC", glossWord:"FOMC"},
     {abbr:S.cb2Abbr, full:S.cb2Full, country:S.cb2Country, desc:S.cb2Desc, color:"#003399"},
-    {abbr:S.cb3Abbr, full:S.cb3Full, country:S.cb3Country, desc:S.cb3Desc, color:"#bc002d"},
+    {abbr:S.cb3Abbr, full:S.cb3Full, country:S.cb3Country, desc:S.cb3Desc, color:"#bc002d", glossTerm:carryTradeTerm, glossWord:carryTradeWord},
     {abbr:S.cb4Abbr, full:S.cb4Full, country:S.cb4Country, desc:S.cb4Desc, color:"#00247d"},
+    {abbr:S.cb5Abbr, full:S.cb5Full, country:S.cb5Country, desc:S.cb5Desc, color:"#8B5A2B"},
+    {abbr:S.cb6Abbr, full:S.cb6Full, country:S.cb6Country, desc:S.cb6Desc, color:"#B8860B"},
+    {abbr:S.cb7Abbr, full:S.cb7Full, country:S.cb7Country, desc:S.cb7Desc, color:"#009EDB"},
+    {abbr:S.cb8Abbr, full:S.cb8Full, country:S.cb8Country, desc:S.cb8Desc, color:"#642165"},
+    {abbr:S.cb9Abbr, full:S.cb9Full, country:S.cb9Country, desc:S.cb9Desc, color:"#E8112D"},
   ];
 
   const macroIndicators = [
-    {icon:"📊", title:S.macro1Title, text:S.macro1Text},
-    {icon:"💼", title:S.macro2Title, text:S.macro2Text},
-    {icon:"🏭", title:S.macro3Title, text:S.macro3Text},
-    {icon:"🛍️", title:S.macro4Title, text:S.macro4Text},
-    {icon:"🏠", title:S.macro5Title, text:S.macro5Text},
-    {icon:"📉", title:S.macro6Title, text:S.macro6Text},
+    {icon:"bar-chart", title:S.macro1Title, text:pick("macro1Text")},
+    {icon:"briefcase", title:S.macro2Title, text:S.macro2Text},
+    {icon:"rocket", title:S.macro3Title, text:S.macro3Text},
+    {icon:"shopping", title:S.macro4Title, text:S.macro4Text},
+    {icon:"house", title:S.macro5Title, text:S.macro5Text},
+    {icon:"trend-down", title:S.macro6Title, text:S.macro6Text},
   ];
 
   const srPrinciples = [
-    {icon:"🏔️", title:S.srp1Title, text:S.srp1Text},
-    {icon:"🛡️", title:S.srp2Title, text:S.srp2Text},
-    {icon:"🔄", title:S.srp3Title, text:S.srp3Text},
-    {icon:"📐", title:S.srp4Title, text:S.srp4Text},
+    {icon:"trend-down", title:S.srp1Title, text:S.srp1Text},
+    {icon:"shield", title:S.srp2Title, text:S.srp2Text},
+    {icon:"waves", title:S.srp3Title, text:S.srp3Text},
+    {icon:"target", title:S.srp4Title, text:S.srp4Text},
   ];
 
   const conclusions = [
@@ -765,6 +1469,7 @@ function Chapter2() {
     S.conc3,
     S.conc4,
     S.conc5,
+    S.conc6,
   ];
 
   return (
@@ -773,11 +1478,12 @@ function Chapter2() {
       {/* Sticky header */}
       <div style={{position:"sticky",top:106,background:"rgba(255,255,255,0.96)",backdropFilter:"blur(10px)",borderBottom:`1px solid ${C.border}`,padding:"15px 5vw",display:"flex",alignItems:"center",justifyContent:"space-between",zIndex:50}}>
         <div style={{display:"flex",alignItems:"center",gap:20}}>
-          <span onClick={() => window.location.href = getChUrl(1)} style={{color:C.gold,cursor:"pointer",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</span>
+          <span onClick={() => window.location.href = getChUrl(1, lang)} style={{color:C.gold,cursor:"pointer",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</span>
           <Chip>{S.stickyLevel}</Chip>
           <Mono size={14} color={C.inkSoft} spacing={0} className="hide-mobile">{S.stickyTitle}</Mono>
         </div>
-        <div style={{display:"flex",gap:8}}>
+        <div style={{display:"flex",gap:14,alignItems:"center"}}>
+          <div className="hide-mobile"><SimpleLangToggle lang={lang} simplified={simplifiedCount} total={SIMPLIFIABLE_KEYS.length}/></div>
           <Chip color={C.inkFaint}>{S.stickyFA}</Chip>
           <Chip color={C.inkFaint}>{S.stickyTA}</Chip>
         </div>
@@ -804,8 +1510,33 @@ function Chapter2() {
 
       <div style={{maxWidth:1060,margin:"0 auto",padding:"72px 5vw 120px"}}>
 
+        {/* ── Cold open ── */}
+        <div style={{marginBottom:48}}>
+          <h1 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(26px,3.6vw,40px)",fontWeight:400,color:C.black,lineHeight:1.2,marginBottom:16}}>{ch2t.coldOpen.headline}</h1>
+          <p style={{fontSize:16,color:C.inkMid,lineHeight:1.75,maxWidth:760}}>{ch2t.coldOpen.body}</p>
+        </div>
+
+        {/* ── АНТИ-МИФ → ГОЛОС SBF → ЦЕНА НЕЗНАНИЯ ── */}
+        <div style={{marginBottom:48}}>
+          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{ch2t.antiMyth.tag}</Mono>
+          <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px",marginBottom:28}}>
+            <p style={{fontWeight:600,fontSize:14.5,color:C.red,marginBottom:10}}>{ch2t.antiMyth.no}</p>
+            <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,margin:0}}>{ch2t.antiMyth.body}</p>
+          </div>
+
+          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{ch2t.voice.tag}</Mono>
+          <div style={{borderLeft:`4px solid ${C.gold}`,paddingLeft:24,marginBottom:28}}>
+            <p style={{fontSize:16,fontStyle:"italic",color:C.inkMid,lineHeight:1.7,fontFamily:"'DM Serif Display',serif",margin:0}}>{ch2t.voice.body}</p>
+          </div>
+
+          <div style={{background:C.black,borderRadius:8,padding:"26px 30px",color:C.white}}>
+            <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{ch2t.cost.tag}</Mono>
+            <p style={{fontSize:13.5,lineHeight:1.75,color:"rgba(255,255,255,0.7)",margin:0}}>{ch2t.cost.body}</p>
+          </div>
+        </div>
+
         {/* ── BLOCK 1: Central Banks ── */}
-        <SectionTitle sub={S.sec1Sub}>
+        <SectionTitle id="secCB" sub={S.sec1Sub}>
           {S.sec1Title}
         </SectionTitle>
 
@@ -817,24 +1548,31 @@ function Chapter2() {
                 <Mono size={10} color={C.inkFaint} spacing={1}>{cb.country}</Mono>
               </div>
               <div style={{fontSize:11,color:C.inkSoft,marginBottom:10,letterSpacing:0.5}}>{cb.full}</div>
-              <div style={{fontSize:13,color:C.inkMid,lineHeight:1.65}}>{cb.desc}</div>
+              <div style={{fontSize:13,color:C.inkMid,lineHeight:1.65}}>{cb.glossTerm ? withGlossTerms(cb.desc, [{term:cb.glossTerm, word:cb.glossWord}], GLOSSARY, lang) : cb.desc}</div>
             </div>
           ))}
         </div>
+
+        <Rule/>
+
+        {/* ── Хроника власти ЦБ: 16 станций + сцены машины времени ── */}
+        <Chrono2Section/>
+
+        <Rule/>
 
         {/* Rate mechanism explainer */}
         <div style={{background:C.black,borderRadius:6,padding:"32px 36px",marginBottom:48}}>
           <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:20}}>{S.rateMechKicker}</Mono>
           <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:0}} className="grid-3">
             {[
-              {step:"01", title:S.rateStep1Title, text:S.rateStep1Text, icon:"📈"},
-              {step:"02", title:S.rateStep2Title, text:S.rateStep2Text, icon:"💸"},
-              {step:"03", title:S.rateStep3Title, text:S.rateStep3Text, icon:"🌍"},
+              {step:"01", title:S.rateStep1Title, text:S.rateStep1Text, icon:"trend-up"},
+              {step:"02", title:S.rateStep2Title, text:pick("rateStep2Text"), icon:"money"},
+              {step:"03", title:S.rateStep3Title, text:S.rateStep3Text, icon:"globe"},
             ].map((s,i) => (
               <div key={i} style={{padding:"20px 24px",borderLeft:i>0?"1px solid rgba(255,255,255,0.08)":"none"}}>
                 <div style={{display:"flex",gap:10,alignItems:"center",marginBottom:12}}>
                   <Mono size={11} color={C.gold} spacing={1}>{s.step}</Mono>
-                  <span style={{fontSize:20}}>{s.icon}</span>
+                  <img className="mi-icon" src={`/assets/icons/icon-${s.icon}.png`} alt="" width="20" height="20" style={{filter:"invert(1)"}}/>
                 </div>
                 <div style={{fontWeight:600,fontSize:13,color:C.white,marginBottom:8}}>{s.title}</div>
                 <div style={{fontSize:12,color:"rgba(255,255,255,0.5)",lineHeight:1.65}}>{s.text}</div>
@@ -844,6 +1582,9 @@ function Chapter2() {
         </div>
 
         {/* ── INTERACTIVE 1: FED Simulator ── */}
+        <p style={{fontSize:15,color:C.inkMid,lineHeight:1.75,marginBottom:20,maxWidth:780}}>
+          {withGlossTerms(S.fedIntro, fedIntroPairs, GLOSSARY, lang)}
+        </p>
         <div style={{marginBottom:64}}>
           <FedSimulator/>
         </div>
@@ -851,7 +1592,7 @@ function Chapter2() {
         <Rule/>
 
         {/* ── BLOCK 2: Macro indicators ── */}
-        <SectionTitle sub={S.sec2Sub}>
+        <SectionTitle id="secMacro" sub={S.sec2Sub}>
           {S.sec2Title}
         </SectionTitle>
 
@@ -859,21 +1600,12 @@ function Chapter2() {
           {macroIndicators.map((m,i) => <InfoCard key={i} {...m}/>)}
         </div>
 
-        {/* Economic calendar note */}
-        <div style={{background:"rgba(201,151,58,0.06)",border:`1px solid ${C.borderGold}`,borderRadius:6,padding:"24px 28px",marginBottom:56,display:"flex",gap:16,alignItems:"flex-start"}}>
-          <span style={{fontSize:28,flexShrink:0}}><img class='mi-icon' style={{verticalAlign:'middle'}} src='/assets/icons/icon-calendar.png' alt='' width='20' height='20' /></span>
-          <div>
-            <div style={{fontWeight:600,fontSize:14,color:C.black,marginBottom:8}}>{S.calNoteTitle}</div>
-            <div style={{fontSize:13,color:C.inkMid,lineHeight:1.7}}>
-              {S.calNoteBefore}<strong style={{color:C.red}}>{S.calNoteImportant}</strong>{S.calNoteMiddle}<strong>{S.calNoteWarning}</strong>
-            </div>
-          </div>
-        </div>
+        <CalendarMatrixSection/>
 
         <Rule/>
 
         {/* ── BLOCK 3: Support & Resistance theory ── */}
-        <SectionTitle sub={S.sec3Sub}>
+        <SectionTitle id="secSR" sub={S.sec3Sub}>
           {S.sec3Title}
         </SectionTitle>
 
@@ -944,15 +1676,40 @@ function Chapter2() {
           </div>
         </div>
 
+        <Rule/>
+
+        <QuizBlock questions={quiz} levelId="level_2" lang={lang} copy={{
+          kicker: S.quizKicker, title: S.quizTitle, next: S.quizNext,
+          stuckAll: S.quizStuckAll, stuckSome: S.quizStuckSome, backToSection: S.quizBackToSection,
+        }} />
+
+        {/* ── Предикт недели → клиффхэнгер гл.3 ── */}
+        <div style={{border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px",marginTop:32,marginBottom:24}}>
+          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{S.predictTag}</Mono>
+          <p style={{fontSize:14.5,color:C.black,lineHeight:1.65,marginBottom:14}}>{predict.fallbackQ}</p>
+          <div style={{display:"flex",gap:10}}>
+            <button className="h-btn">{predict.yes}</button>
+            <button className="h-btn ghost">{predict.no}</button>
+          </div>
+        </div>
+
+        <div style={{border:`1px dashed ${C.borderGold}`,borderRadius:8,padding:"20px 24px",marginBottom:32,background:C.surface}}>
+          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{S.cliffTag}</Mono>
+          <p style={{fontSize:14,color:C.inkMid,lineHeight:1.7,margin:0}}>{cliffhanger.body}</p>
+        </div>
+
+        <ComplianceFootnote lang={lang} />
+
         {/* Footer navigation */}
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",paddingTop:48,marginTop:48,borderTop:`1px solid ${C.border}`}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:20,paddingTop:48,marginTop:48,borderTop:`1px solid ${C.border}`}}>
           <span
-            onClick={() => window.location.href = getChUrl(1)}
+            onClick={() => window.location.href = getChUrl(1, lang)}
             style={{fontSize:14,color:C.inkSoft,fontFamily:"monospace",borderBottom:`1px solid ${C.border}`,cursor:"pointer"}}>
             {S.navPrev}
           </span>
+          <AskAnalystBtn tr={{askAnalyst:S.askAnalyst}} chapterNum={2} lang={lang} />
           <button
-            onClick={() => window.location.href = getChUrl(3)}
+            onClick={() => window.location.href = getChUrl(3, lang)}
             style={{background:C.black,color:C.white,border:"none",padding:"18px 35px",cursor:"pointer",fontFamily:"monospace",fontSize:14,letterSpacing:2,fontWeight:700,transition:"background .2s"}}
             onMouseEnter={e=>e.target.style.background=C.gold}
             onMouseLeave={e=>e.target.style.background=C.black}>

@@ -89,7 +89,6 @@ var CALENDAR_TERMS = {
   "CPI seasonally adjusted": {ru: "CPI с сезонной корректировкой", ro: "CPI ajustat sezonier"},
   "CPI y/y": {ru: "CPI (г/г)", ro: "CPI (a/a)"},
   "CPI-Common": {ru: "Общий CPI", ro: "CPI comun"},
-  "Calendar": {ru: "Календарь", ro: "Calendar"},
   "Capacity Utilization": {ru: "Загрузка производственных мощностей", ro: "Gradul de utilizare a capacităților"},
   "Capacity Utilization Rate": {ru: "Уровень загрузки мощностей", ro: "Rata de utilizare a capacităților"},
   "Capital Flows": {ru: "Движение капитала", ro: "Fluxuri de capital"},
@@ -583,3 +582,107 @@ var CALENDAR_TERMS = {
   "nationwide housing prices yoy": {ru: "Общенациональные цены на жильё г/г", ro: "Prețurile naționale ale locuințelor a/a"},
   "services pmi": {ru: "PMI сферы услуг", ro: "PMI servicii"}
 };
+
+/* Квалификаторы в скобках после названия события -- SPEC_ch2_debug_and_chart_
+   engine.md §1.4. CALENDAR_TERMS переводит базу ("GDP Q2 2026"), но title
+   часто несёт ещё суффикс вида " (Advance)" -- он не входит в indicator и
+   раньше оставался непереведённым. См. translateQualifier() в calendar.html. */
+var CALENDAR_QUALIFIERS = {
+  "Advance":         {ru: "предварительная оценка", ro: "estimare preliminară"},
+  "Preliminary":     {ru: "предварительно",         ro: "preliminar"},
+  "Second Estimate": {ru: "вторая оценка",          ro: "a doua estimare"},
+  "Third Estimate":  {ru: "третья оценка",          ro: "a treia estimare"},
+  "Final":           {ru: "итоговая",               ro: "finală"},
+  "Flash":           {ru: "флеш-оценка",            ro: "estimare flash"},
+  "Revised":         {ru: "пересмотр",              ro: "revizuit"},
+  "MoM":             {ru: "м/м",                    ro: "l/l"},
+  "YoY":             {ru: "г/г",                    ro: "a/a"},
+  "QoQ":             {ru: "кв/кв",                  ro: "t/t"}
+};
+
+// Переводит квалификатор в скобках после названия ("(Advance)" -> "(предварительная
+// оценка)"). Несколько квалификаторов через запятую ("(Advance, MoM)") -- переводит
+// каждый по отдельности, неизвестный оставляет как есть и логирует промах, а не
+// молча теряет часть текста (SPEC_ch2_debug_and_chart_engine.md §1.4).
+function translateQualifier(suffix, lang){
+  var m = suffix.match(/^(\s*)\(([^)]+)\)(\s*)$/);
+  if (m) {
+    var parts = m[2].split(',').map(function(p){
+      var key = p.trim();
+      var q = CALENDAR_QUALIFIERS[key];
+      if (!q || !q[lang]) {
+        if (window.console) console.warn('[calendar] untranslated qualifier:', key);
+        return key;
+      }
+      return q[lang];
+    });
+    return m[1] + '(' + parts.join(', ') + ')' + m[3];
+  }
+  // SPEC_site_fixes_2026-07-29 §2: источник шлёт квалификатор и БЕЗ скобок,
+  // напрямую в title ("Inflation Rate YoY", не "Inflation Rate (YoY)") --
+  // раньше такой суффикс не матчил regex выше и возвращался как есть,
+  // латиницей поверх русского/румынского перевода базы.
+  var bare = suffix.match(/^(\s*)(\S+)(\s*)$/);
+  if (bare) {
+    var q2 = CALENDAR_QUALIFIERS[bare[2]];
+    if (q2 && q2[lang]) return bare[1] + q2[lang] + bare[3];
+  }
+  return suffix;
+}
+
+// SPEC_site_fixes_2026-07-29 §2 п.4: "<Банк> Gov <Фамилия> Speech/Speaks" --
+// шаблон, а не уникальный термин. Со временем в словаре накопились ручные
+// переводы вида "RBA Gov Bullock Speaks" -> "Выступление главы RBA Буллок"
+// (фамилия склонена в родительный падеж) -- но то же самое событие иногда
+// приходит от источника как "RBA Gov Bullock Speech" (другой глагол), и это
+// уже ДРУГОЙ ключ словаря, который никто не заводил. Фамилии в принципе
+// меняются с составом ЦБ -- словарь на глаголах и фамилиях будет протухать
+// вечно. Фолбэк ниже страхует именно эти случаи: фамилия НЕ склоняется (в
+// скобках, как и предлагает сама спека) -- надёжнее, чем угадывать русское
+// склонение произвольной иностранной фамилии. Не подменяет существующие
+// ручные записи словаря -- вызывается только когда точного ключа нет.
+var GOV_SPEECH_RE = /^(\S+) Gov (\S+) (Speech|Speaks)$/;
+function _govSpeechFallback(indicator, lang){
+  var m = indicator.match(GOV_SPEECH_RE);
+  if (!m) return null;
+  var bank = m[1], surname = m[2];
+  if (lang === 'ro') return 'Discurs guvernator ' + bank + ' (' + surname + ')';
+  return 'Выступление главы ' + bank + ' (' + surname + ')';
+}
+
+// Переводит название события календаря: базу через CALENDAR_TERMS[ev.indicator],
+// квалификатор в скобках -- через translateQualifier(). Раньше вызывалось только
+// с calendar.html; теперь общее -- используется также NextReleaseWidget главы 2
+// (SPEC_ch2_debug_and_chart_engine.md §1.4), поэтому экспортировано на window.
+function translatedEventName(ev){
+  var lang = window.sbfI18n && window.sbfI18n.lang;
+  if (!lang || lang === 'en' || !ev.indicator) {
+    return ev.title || '';
+  }
+  // 'Calendar' -- служебный catch-all indicator источника для ~550 из 7367
+  // событий без отдельной категории (аукционы, встречи типа Eurogroup/ECOFIN,
+  // отчёты вроде WASDE). Название события живёт только в title и никак не
+  // связано префиксом с indicator, так что переводить по словарю нечего --
+  // раньше здесь ошибочно подставлялось общее слово "Календарь"/"Calendar"
+  // вместо реального названия (SPEC_ch2_debug_and_chart_engine.md, найдено
+  // при живой Playwright-проверке §1.4).
+  if (ev.indicator === 'Calendar') {
+    return ev.title || '';
+  }
+  var entry = CALENDAR_TERMS[ev.indicator];
+  if (!entry || !entry[lang]) {
+    var govTpl = _govSpeechFallback(ev.indicator, lang);
+    if (govTpl) return govTpl;
+    if (window.console) console.warn('[calendar] no translation for indicator:', ev.indicator);
+    return ev.title || '';
+  }
+  var suffix = (ev.title && ev.title.indexOf(ev.indicator) === 0)
+    ? ev.title.slice(ev.indicator.length)
+    : '';
+  return entry[lang] + translateQualifier(suffix, lang);
+}
+
+window.translatedEventName = translatedEventName;
+window.translateQualifier = translateQualifier;
+window.CALENDAR_QUALIFIERS = CALENDAR_QUALIFIERS;
+window.CALENDAR_TERMS = CALENDAR_TERMS;

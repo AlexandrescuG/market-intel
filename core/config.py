@@ -38,7 +38,6 @@ ALERT_MIN_ENGAGEMENT = int(os.getenv("ALERT_MIN_ENGAGEMENT", "2000"))
 ALERT_MIN_GROWTH = int(os.getenv("ALERT_MIN_GROWTH", "1500"))
 # Сохранение в БД (для дайджеста) — мягче: всё что хоть как-то про экономику.
 STORE_MIN_ECON_RELEVANCE = float(os.getenv("STORE_MIN_ECON_RELEVANCE", "0.25"))
-ALERT_MIN_RSS_RELEVANCE = float(os.getenv("ALERT_MIN_RSS_RELEVANCE", "0.60"))
 
 # ── Twitter: запросы по топикам (узкие и точные, без мусорных OR) ───────────────
 TWITTER_QUERIES = {
@@ -56,14 +55,16 @@ TWITTER_QUERIES = {
     ],
 }
 
-# ── Reddit: сабреддиты трейдеров/инвесторов ─────────────────────────────────────
-REDDIT_SUBS = [
-    "wallstreetbets", "stocks", "investing", "StockMarket", "options",
-    "economics", "Economics", "finance", "SecurityAnalysis", "Daytrading",
-    "cryptocurrency", "Bitcoin", "geopolitics", "wallstreetbetsELITE",
+# ── Reddit (ОТКЛЮЧЁН: заблокировали скрапинг, заменён на StockTwits) ─────────────
+REDDIT_SUBS = ["wallstreetbets", "stocks", "investing", "economics"]
+REDDIT_SORTS = ["hot", "rising"]
+REDDIT_LIMIT = 25
+
+# ── StockTwits: базовый watchlist (∪ кэштеги из свежих сигналов) ─────────────────
+STOCKTWITS_WATCHLIST = [
+    "SPY", "QQQ", "NVDA", "TSLA", "AAPL", "MSFT", "AMD", "META", "AMZN",
+    "BTC.X", "ETH.X", "GLD", "USO", "DXY", "SPX", "VIX",
 ]
-REDDIT_SORTS = ["hot", "rising"]   # rising ловит то, что ВЗЛЕТАЕТ прямо сейчас
-REDDIT_LIMIT = 25                  # постов на сабреддит/сортировку
 
 # ── RSS: мировые + региональные + рыночные ленты ────────────────────────────────
 RSS_FEEDS = {

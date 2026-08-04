@@ -73,7 +73,19 @@ const STRINGS = {
   },
 };
 
-const {C, Mono, Chip, Rule, getChUrl, ComplianceFootnote} = window.AcademyShared;
+const {C, Mono, Chip, Rule, getChUrl, ComplianceFootnote, ColdStart} = window.AcademyShared;
+
+function fillTemplate(str, vars) {
+  if (!str) return str;
+  return str.replace(/\{\{(\w+)\}\}/g, (m, key) => {
+    const v = vars ? vars[key] : undefined;
+    if (v === undefined || v === null || (typeof v === "number" && isNaN(v))) {
+      console.error("[ch15] отсутствует значение для {{" + key + "}}");
+      return "—";
+    }
+    return String(v);
+  });
+}
 
 const SectionTitle = ({children,sub,align="left",id}) => (
   <div id={id} style={{textAlign:align,marginBottom:36,scrollMarginTop:130}}>
@@ -83,25 +95,56 @@ const SectionTitle = ({children,sub,align="left",id}) => (
 );
 
 // ─── Cold open ──────────────────────────────────────────────────────────────
-function ColdOpen15() {
+// ─── Cold start: "Проверь нас" (SPEC_coldstart_interactives_ch6_15.md §11).
+// Заменяет ColdOpen15. Заменяет собой прежний VerifyUs (был в самом конце
+// главы, показывал все 8 claims сразу списком без выбора) -- та же таблица
+// course_claims.json, но читатель выбирает ОДНО утверждение и только потом
+// видит метод и дату проверки.
+function scriptBasename(path) {
+  if (!path) return path;
+  const parts = path.split("/");
+  return parts[parts.length - 1];
+}
+function ColdStart15Entry({ lang }) {
   const T = window.Ch15Content[INITIAL_LANG] || window.Ch15Content.ru;
-  const co = T.coldOpen;
+  const cs = T.coldStart;
+  const claims = useClaims();
+  const claimField = "claim_" + lang;
+  if (!claims) return <div style={{background:C.black,padding:"60px 5vw",textAlign:"center"}}><Mono size={11} color={C.gold} spacing={4}>{cs.tag}</Mono></div>;
+
   return (
-    <div style={{background:C.black,padding:"70px 5vw 56px",color:"#fff"}}>
-      <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:24,textAlign:"center"}}>{co.tag}</Mono>
-      <div style={{maxWidth:840,margin:"0 auto 12px"}}>
-        <div style={{border:"1px solid rgba(255,255,255,0.15)",borderRadius:8,padding:"18px 22px",marginBottom:24,background:"rgba(255,255,255,0.03)"}}>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:10}} className="g3">
-            {[1,2,3].map(i => <div key={i} style={{height:46,borderRadius:4,background:"rgba(255,255,255,0.06)",border:`1px solid ${i===1?C.gold:"rgba(255,255,255,0.1)"}`}}/>)}
-          </div>
-          <Mono size={9} color="rgba(255,255,255,0.4)" spacing={0.5}>{co.screenshotCaption}</Mono>
+    <ColdStart
+      tag={cs.tag}
+      ask={cs.ask}
+      action={{ type: "custom", render: (csCommit, committed, answer) => (
+        <div style={{border:"1px solid rgba(255,255,255,0.15)", borderRadius:8, overflow:"hidden"}}>
+          {claims.map((c, i) => {
+            const isPicked = answer === i;
+            return (
+              <div key={i} onClick={() => csCommit(i)} style={{
+                padding:"14px 18px", borderBottom: i < claims.length - 1 ? "1px solid rgba(255,255,255,0.1)" : "none",
+                cursor: committed ? "default" : "pointer", background: isPicked ? "rgba(201,151,58,0.12)" : "transparent",
+              }}>
+                <p style={{fontSize:13, color:"#fff", lineHeight:1.55, margin:0}}>{c[claimField] || c.claim_ru}</p>
+              </div>
+            );
+          })}
         </div>
-        {co.lines.map((line,i) => (
-          <p key={i} style={{fontSize: i===co.lines.length-1 ? 17 : 15.5, color: i>=3?"#fff":"rgba(255,255,255,0.72)", fontWeight: i>=3?600:400, lineHeight:1.75, marginBottom:14, fontFamily: i===co.lines.length-1 ? "'DM Serif Display',serif" : "inherit"}}>{line}</p>
-        ))}
-      </div>
-      <p style={{textAlign:"center",fontFamily:"monospace",fontSize:12,color:C.gold}}>{co.cta}</p>
-    </div>
+      )}}
+      reveal={(i) => {
+        const c = claims[i];
+        const method = c.script ? fillTemplate(cs.methodScript, { script: scriptBasename(c.script) }) : cs.methodArithmetic;
+        const date = fillTemplate(cs.dateLabel, { date: c.checked_at });
+        const dl = c.csv || c.json;
+        return (
+          <div>
+            <div>{method} · {date}</div>
+            {dl && <a href={dl} download style={{display:"inline-block", marginTop:10, fontFamily:"monospace", fontSize:12, color:C.gold, textDecoration:"none", border:`1px solid ${C.gold}`, padding:"8px 14px", borderRadius:4}}>{cs.downloadLabel}</a>}
+          </div>
+        );
+      }}
+      bridge={cs.bridge}
+    />
   );
 }
 
@@ -366,37 +409,6 @@ function useClaims() {
   return claims;
 }
 
-function VerifyUs({ lang }) {
-  const T = window.Ch15Content[INITIAL_LANG] || window.Ch15Content.ru;
-  const v = T.verifyUs;
-  const claims = useClaims();
-  const claimField = "claim_" + lang;
-
-  return (
-    <div style={{marginBottom:48}}>
-      <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.black,marginBottom:14}}>{v.title}</div>
-      <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.75,marginBottom:12,maxWidth:800}}>{v.body1}</p>
-      <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.75,marginBottom:22,maxWidth:800}}>{v.body2}</p>
-
-      {claims === null ? <p style={{fontSize:12.5,color:C.inkFaint}}>…</p> : (
-        <div style={{border:`1px solid ${C.border}`,borderRadius:8,overflow:"hidden",marginBottom:20}}>
-          {claims.map((c,i) => (
-            <div key={i} style={{padding:"13px 18px",borderBottom: i<claims.length-1 ? `1px solid ${C.border}` : "none",display:"flex",gap:14,alignItems:"flex-start",flexWrap:"wrap"}}>
-              <Mono size={9} color={C.gold} spacing={0.5} style={{minWidth:60}}>{v.chapterLabel}{c.chapter}</Mono>
-              <p style={{fontSize:12.5,color:C.black,lineHeight:1.55,margin:0,flex:1,minWidth:220}}>{c[claimField] || c.claim_ru}</p>
-              <Mono size={9} color={C.inkFaint} spacing={0.5}>{v.typeLabels[c.type] || c.type}</Mono>
-              {c.csv && <a href={c.csv} download style={{fontFamily:"monospace",fontSize:9.5,color:C.gold,textDecoration:"none",border:`1px solid ${C.gold}`,padding:"2px 8px",borderRadius:3}}>CSV</a>}
-              {!c.csv && c.json && <a href={c.json} download style={{fontFamily:"monospace",fontSize:9.5,color:C.inkFaint,textDecoration:"none",border:`1px solid ${C.border}`,padding:"2px 8px",borderRadius:3}}>JSON</a>}
-            </div>
-          ))}
-        </div>
-      )}
-
-      <a href="/data/edu_stats/course_claims.json" download style={{fontFamily:"monospace",fontSize:12,color:C.gold,textDecoration:"none",border:`1px solid ${C.gold}`,padding:"10px 18px",borderRadius:4,display:"inline-block"}}>{v.downloadClaims}</a>
-    </div>
-  );
-}
-
 // ─── Main Chapter 15 ────────────────────────────────────────────────────────
 function Chapter15() {
   const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
@@ -434,7 +446,7 @@ function Chapter15() {
 
       <div style={{maxWidth:1060,margin:"0 auto",padding:"0 0 100px"}}>
 
-        <div style={{margin:"0 -5vw 56px"}}><ColdOpen15/></div>
+        <div style={{margin:"0 -5vw 56px"}}><ColdStart15Entry lang={lang}/></div>
 
         <div style={{padding:"0 5vw"}}>
 
@@ -456,9 +468,6 @@ function Chapter15() {
 
         <SectionTitle sub={S.pathsSub}>{T.threePaths.tag}</SectionTitle>
         <ThreePaths lang={lang}/>
-
-        <SectionTitle sub={S.verifySub}>{T.verifyUs.tag}</SectionTitle>
-        <VerifyUs lang={lang}/>
 
         <div style={{marginBottom:32}}>
           <Mono size={10} color={C.inkFaint} spacing={2} style={{display:"block",marginBottom:10,textTransform:"uppercase"}}>{T.sources.tag}</Mono>

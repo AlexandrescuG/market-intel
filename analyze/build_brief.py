@@ -1,7 +1,11 @@
 """Сборка дневного брифа (06:00). Читает сигналы за окно, агрегирует, пишет
 структурный markdown, который потом читает claude -p.
 
-Бриф НЕ анализирует — он только раскладывает факты так, чтобы LLM было удобно.
+Бриф НЕ анализирует — он только раскладывает факты так, чтобы LLM было удобно:
+  - топ-сигналы по трём измерениям (экономика / геополитика / толпа)
+  - повестка СМИ (что чаще всего гонят ленты)
+  - тепловая карта тикеров (что обсуждают трейдеры)
+  - «на что реагируют сильнее всего» (по engagement)
 """
 from __future__ import annotations
 
@@ -11,38 +15,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from core import db
-from core.config import BRIEFS_DIR, DATA_DIR
+from core.config import BRIEFS_DIR
 from collectors.rss import media_agenda
-
-OBSERVATIONS_PATH = DATA_DIR / "observations.md"
-
-# Источники RSS, которые считаются агентствами (не первоисточник, но репортаж)
-_RSS_WIRE = {"BBC World", "BBC Business", "Guardian World", "Al Jazeera",
-             "CNBC Finance", "Yahoo Finance", "MarketWatch", "RBC",
-             "Interfax", "Investing.com"}
-
-
-def _credibility_tag(s: dict) -> str:
-    """Тег достоверности по типу источника и характеристикам сигнала."""
-    src = s["source"]
-    crowd = s.get("crowd_intensity", 0) or 0
-
-    if src == "rss":
-        # RSS от агентств — репортаж, не первоисточник
-        return "[СООБЩЕНИЕ]"
-    if src == "twitter":
-        if crowd >= 0.45:
-            return "[НАСТРОЕНИЕ]"
-        return "[СЛУХ]"
-    if src == "reddit":
-        if crowd >= 0.45:
-            return "[НАСТРОЕНИЕ]"
-        return "[СЛУХ]"
-    return "[СЛУХ]"
 
 
 def _fmt_signal(s: dict, idx: int) -> str:
-    tag = _credibility_tag(s)
     eng = f" · 👁 {s['engagement']:,}" if s["engagement"] else ""
     rep = f" · 💬 {s['replies']:,}" if s["replies"] else ""
     tags = json.loads(s["cashtags"] or "[]")
@@ -50,7 +27,7 @@ def _fmt_signal(s: dict, idx: int) -> str:
     head = (s["title"] or s["text"] or "").replace("\n", " ").strip()[:240]
     src = s["source"]
     who = f"@{s['author']}" if src == "twitter" else s["author"]
-    return (f"{idx}. {tag} [{src}] {who} · imp={s['importance']:.2f} "
+    return (f"{idx}. [{src}] {who} · imp={s['importance']:.2f} "
             f"· econ={s['econ_relevance']:.2f} · crowd={s['crowd_intensity']:.2f}"
             f"{eng}{rep}{tagstr}\n"
             f"   {head}\n   {s['url']}")
@@ -64,95 +41,89 @@ def _section(title: str, dimension: str, hours: int, limit: int) -> str:
     return f"## {title}  ({len(rows)} сигналов)\n{body}\n"
 
 
-def _observations_section(limit: int = 14) -> str:
-    """Читает последние N наблюдений из observations.md для включения в бриф."""
-    if not OBSERVATIONS_PATH.exists():
-        OBSERVATIONS_PATH.write_text(
-            "# История наблюдений\n"
-            "_Заполняется автоматически из дневных отчётов._\n\n",
-            encoding="utf-8",
-        )
-        return ""
-    lines = OBSERVATIONS_PATH.read_text(encoding="utf-8").splitlines()
-    # берём строки вида "YYYY-MM-DD | ..."
-    obs = [l for l in lines if l.strip() and l[:4].isdigit() and "|" in l]
-    if not obs:
-        return ""
-    recent = obs[-limit:]
-    return (
-        "## 🔭 ИСТОРИЯ НАБЛЮДЕНИЙ (для раздела «Табло»)\n"
-        + "\n".join(recent)
-        + "\n"
-    )
-
-
 def build(hours: int = 24) -> Path:
     db.init_db()
     all_signals = db.recent_since(hours)
-    by_source: dict[str, int] = {}
+    by_source = {}
     for s in all_signals:
         by_source[s["source"]] = by_source.get(s["source"], 0) + 1
 
     parts: list[str] = []
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     parts.append(f"# RAW BRIEF · {today} · окно {hours}ч")
-    parts.append(
-        f"Всего сигналов: {len(all_signals)} "
-        f"({', '.join(f'{k}={v}' for k, v in sorted(by_source.items()))})\n"
-    )
+    parts.append(f"Всего сигналов: {len(all_signals)} "
+                 f"({', '.join(f'{k}={v}' for k, v in sorted(by_source.items()))})\n")
 
-    # Теги достоверности — легенда
-    parts.append(
-        "**Теги достоверности:** "
-        "[ДАННЫЕ] официальная публикация (дата+эмитент) · "
-        "[СООБЩЕНИЕ] репортаж агентства · "
-        "[СЛУХ] единичный пост/инсайд · "
-        "[НАСТРОЕНИЕ] эмоция/engagement без фактуры\n"
-    )
+    # реальное состояние рынка — ВВЕРХУ, как якорь верификации
+    try:
+        from core.market import market_state_block
+        heat_tags = [t for t, _c, _i in db.cashtag_heatmap(hours, limit=10)]
+        parts.append(market_state_block(extra_tags=heat_tags))
+    except Exception as e:
+        parts.append(f"_(market-state недоступен: {e})_\n")
 
-    # История наблюдений для раздела «Табло»
-    obs = _observations_section()
-    if obs:
-        parts.append(obs)
+    # Focus Engine (SPEC_focus_engine.md §9) — инструмент(ы) дня, выбранные
+    # focus_batch_job.py (запускается ДО этого скрипта, см. run_daily.sh шаг
+    # 0) как наиболее отклонившиеся от СВОЕЙ нормы сегодня. Собираем
+    # scope='default' И каждый персональный scope с активным watchlist/пином
+    # (тоже получает source="batch" от того же джоба раз в день) — иначе
+    # залогиненный пользователь со своим watchlist никогда не видит LLM-разбор,
+    # только шаблон (нашли по жалобе на "куцую" карточку). Дедуп по символу:
+    # если несколько scope сошлись на одном и том же инструменте, в брифе
+    # он один, разбор потом тоже пишется один раз на символ, не на scope.
+    try:
+        from core import focus_db
+        seen = {}
+        scope_keys = ["default"] + [f"user:{uid}" for uid in focus_db.active_user_scopes()]
+        for scope_key in scope_keys:
+            state = focus_db.load_focus_state(scope_key)
+            if state and state.symbol and state.source == "batch":
+                if state.symbol not in seen or (state.anomaly or 0) > (seen[state.symbol][1] or 0):
+                    seen[state.symbol] = (state.symbol, state.anomaly)
+        if seen:
+            lines = [f"## 🎯 В ФОКУСЕ СЕГОДНЯ (Focus Engine)\n"]
+            for symbol, anomaly_v in seen.values():
+                inst = focus_db.load_instrument(symbol)
+                name = inst["name"] if inst else symbol
+                mult = round(anomaly_v, 1) if anomaly_v is not None else "?"
+                lines.append(
+                    f"- **{name}** ({symbol}): аномальность ×{mult} относительно "
+                    f"обычной волатильности (ATR14). Выбран по овернайт-гэпу/"
+                    f"утреннему диапазону, не по абсолютной величине хода."
+                )
+            parts.append("\n".join(lines) + "\n")
+    except Exception as e:
+        parts.append(f"_(focus-engine недоступен: {e})_\n")
 
     parts.append(_section("💰 ЭКОНОМИКА", "economy", hours, 20))
     parts.append(_section("🌍 ГЕОПОЛИТИКА", "geopolitics", hours, 20))
 
-    # психология толпы
+    # психология толпы — по силе эмоции, поверх любой темы
     crowd_rows = db.top_by_crowd(hours, limit=15)
     if crowd_rows:
         body = "\n".join(_fmt_signal(s, i + 1) for i, s in enumerate(crowd_rows))
-        parts.append(
-            f"## 🔥 ПСИХОЛОГИЯ ТОЛПЫ (по силе эмоции/реакции)  "
-            f"({len(crowd_rows)} сигналов)\n{body}\n"
-        )
+        parts.append(f"## 🔥 ПСИХОЛОГИЯ ТОЛПЫ (по силе эмоции/реакции)  "
+                     f"({len(crowd_rows)} сигналов)\n{body}\n")
 
     # повестка СМИ
     agenda = media_agenda(hours, top=20)
     if agenda:
-        parts.append(
-            "## 📰 ПОВЕСТКА СМИ (частота терминов в RSS)\n"
-            + "\n".join(f"  {c:3}× {t}" for t, c in agenda)
-            + "\n"
-        )
+        parts.append("## 📰 ПОВЕСТКА СМИ (частота терминов в RSS)\n"
+                     + "\n".join(f"  {c:3}× {t}" for t, c in agenda) + "\n")
 
     # тикеры
     heat = db.cashtag_heatmap(hours, limit=20)
     if heat:
-        parts.append(
-            "## 📈 ТЕПЛОВАЯ КАРТА ТИКЕРОВ (упоминания · ср. importance)\n"
-            + "\n".join(f"  ${t:6} {c:3}× · imp~{imp:.2f}" for t, c, imp in heat)
-            + "\n"
-        )
+        parts.append("## 📈 ТЕПЛОВАЯ КАРТА ТИКЕРОВ (упоминания · ср. importance)\n"
+                     + "\n".join(f"  ${t:6} {c:3}× · imp~{imp:.2f}"
+                                 for t, c, imp in heat) + "\n")
 
-    # максимальная реакция
+    # на что реагируют сильнее всего
     most_react = sorted(all_signals, key=lambda s: s["engagement"], reverse=True)[:10]
     if most_react and most_react[0]["engagement"]:
-        parts.append(
-            "## 🌊 МАКСИМАЛЬНАЯ РЕАКЦИЯ (по engagement)\n"
-            + "\n".join(_fmt_signal(s, i + 1) for i, s in enumerate(most_react))
-            + "\n"
-        )
+        parts.append("## 🌊 МАКСИМАЛЬНАЯ РЕАКЦИЯ (по engagement)\n"
+                     + "\n".join(_fmt_signal(s, i + 1)
+                                 for i, s in enumerate(most_react)) + "\n")
 
     out = BRIEFS_DIR / f"brief_{today}.md"
     out.write_text("\n".join(parts), encoding="utf-8")

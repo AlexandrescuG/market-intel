@@ -200,6 +200,38 @@ a:hover{text-decoration:underline;color:var(--glow)}
 .rep-sec[open] summary{border-bottom:1px solid var(--line);background:var(--cream)}
 .rep-body{padding:12px 16px 14px}
 .rep-sec[open]{box-shadow:0 2px 12px rgba(43,43,51,.06)}
+/* SPEC_morning_brief_v2.md §4: свёрнутый вид -- шесть блоков, фиксированный
+   порядок, числа моноширинным шрифтом, без прокрутки на одном экране.
+   Блоки 1-4 не сворачиваются (это и есть "свёрнутый вид" целиком) --
+   раскрытие только у Блока 5 (см. #briefContext, переиспользует .rep-sec). */
+.brief-v2{margin-bottom:8px}
+.brief-headline{font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.6;color:var(--ink);padding:8px 2px 14px;border-bottom:1px solid var(--line);margin-bottom:10px}
+.brief-headline b{color:var(--gold)}
+.brief-block{margin-bottom:16px}
+.brief-block h3{font-size:12px;font-weight:700;letter-spacing:.04em;color:var(--muted);text-transform:uppercase;margin:0 0 8px}
+.brief-table{width:100%;max-width:100%;table-layout:fixed;border-collapse:collapse;font-size:12.5px}
+.brief-table td{padding:5px 8px;border-bottom:1px solid var(--line);vertical-align:top;overflow-wrap:break-word;word-break:break-word}
+.brief-table td.mono{color:var(--muted)}
+.brief-table td:first-child{width:52px;white-space:nowrap;overflow-wrap:normal}
+.brief-more{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);margin-top:6px}
+.brief-more a{color:var(--muted);text-decoration:none;border-bottom:1px dotted var(--muted)}
+.brief-more a:hover{color:var(--gold);border-bottom-color:var(--gold)}
+.brief-movers-cols{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}
+.brief-movers-cols h4{font-size:11px;font-weight:700;margin:0 0 6px;letter-spacing:.03em}
+.brief-movers-cols h4.up{color:var(--up)}
+.brief-movers-cols h4.down{color:var(--down)}
+.brief-mover-row{font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.7}
+.brief-mover-row b{color:var(--ink)}
+.brief-mover-row.up b{color:var(--up)}
+.brief-mover-row.down b{color:var(--down)}
+.brief-mover-event{display:block;font-family:Montserrat;font-size:11px;color:var(--faint);white-space:normal}
+.brief-pattern-row{font-size:12.5px;line-height:1.7;padding:4px 0;border-bottom:1px solid var(--line)}
+.brief-pattern-row .mono{color:var(--muted);margin-right:8px}
+.brief-pattern-row .agree{color:var(--faint);font-size:11.5px}
+.brief-context-list{list-style:none;margin:0 0 12px;padding:0;font-family:Montserrat;font-size:13.5px;line-height:1.6}
+.brief-context-list li{margin-bottom:8px;padding-left:14px;border-left:2px solid var(--line)}
+.brief-conf{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--faint)}
+@media (max-width:640px){.brief-movers-cols{grid-template-columns:1fr}.brief-movers-cols>div{margin-bottom:12px}}
 
 /* technical cards */
 .tcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
@@ -433,7 +465,20 @@ a:hover{text-decoration:underline;color:var(--glow)}
           <span class="fresh" id="reportFresh"></span>
         </div>
         <div class="personal-block" id="personalBlock"></div>
-        <div class="report" id="report"><div class="empty">{{ t('home.report_not_generated', lang) }}</div></div>
+        <div class="brief-v2" id="briefV2">
+          <div class="brief-headline" id="briefHeadline" style="display:none"></div>
+          <div class="brief-block" id="briefCalendar" style="display:none"></div>
+          <div class="brief-block" id="briefEarnings" style="display:none"></div>
+          <div class="brief-block" id="briefMovers" style="display:none"></div>
+          <div class="brief-block" id="briefPatterns" style="display:none"></div>
+          <details class="rep-sec" id="briefContext" style="display:none">
+            <summary>💬 <span id="briefContextTitle"></span><span class="rep-chev">▼</span></summary>
+            <div class="rep-body">
+              <ul class="brief-context-list" id="briefContextBody"></ul>
+              <div class="report" id="report"><div class="empty">{{ t('home.report_not_generated', lang) }}</div></div>
+            </div>
+          </details>
+        </div>
       </section>
 
       <section class="panel">
@@ -747,6 +792,178 @@ const I18N_REPORT = {
   focusDisclaimer: {{ t('home.focus_disclaimer', lang) | tojson }},
   focusMore: {{ t('home.focus_more_label', lang) | tojson }}
 };
+
+// SPEC_morning_brief_v2.md: шесть детерминированных блоков вместо пересказа
+// соцсетей. brief_today.json пишет analyze/build_brief_v2.py (числа) +
+// analyze/llm_context.py (headline/context) -- фронт только рендерит,
+// ничего не считает.
+const I18N_BRIEF = {
+  headlinePrefix: {{ t('home.brief_headline_prefix', lang) | tojson }},
+  calTitle: {{ t('home.brief_calendar_title', lang) | tojson }},
+  calMore: {{ t('home.brief_calendar_more', lang) | tojson }},
+  calMoreLink: {{ t('home.brief_calendar_more_link', lang) | tojson }},
+  reactionTpl: {{ t('home.brief_reaction_tpl', lang) | tojson }},
+  fewData: {{ t('home.brief_few_data', lang) | tojson }},
+  earnTitle: {{ t('home.brief_earnings_title', lang) | tojson }},
+  earnPre: {{ t('home.brief_earnings_pre', lang) | tojson }},
+  earnPost: {{ t('home.brief_earnings_post', lang) | tojson }},
+  earnConsensus: {{ t('home.brief_earnings_consensus', lang) | tojson }},
+  moversTitle: {{ t('home.brief_movers_title', lang) | tojson }},
+  moversUp: {{ t('home.brief_movers_up', lang) | tojson }},
+  moversDown: {{ t('home.brief_movers_down', lang) | tojson }},
+  moversRatioTpl: {{ t('home.brief_movers_ratio_tpl', lang) | tojson }},
+  moversOnEvent: {{ t('home.brief_movers_on_event', lang) | tojson }},
+  moversNoEvent: {{ t('home.brief_movers_no_event', lang) | tojson }},
+  patternsTitle: {{ t('home.brief_patterns_title', lang) | tojson }},
+  patternsAgreeTpl: {{ t('home.brief_patterns_agree_tpl', lang) | tojson }},
+  patternsNeutral: {{ t('home.brief_patterns_neutral', lang) | tojson }},
+  contextTitle: {{ t('home.brief_context_title', lang) | tojson }},
+  confQuotes: {{ t('home.brief_conf_quotes', lang) | tojson }},
+  confMedia: {{ t('home.brief_conf_media', lang) | tojson }},
+  confSocial: {{ t('home.brief_conf_social', lang) | tojson }}
+};
+
+function briefLocalTime(iso){
+  // hour12:false явно -- toLocaleTimeString([], {...}) без локали берёт
+  // системную локаль браузера (обычно en-US -> AM/PM), а не язык сайта;
+  // спека §4 хочет "15:30", не "3:00 PM", независимо от ru/ro/en страницы.
+  if(!iso) return '';
+  try{ return new Date(iso).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', hour12:false}); }
+  catch(e){ return ''; }
+}
+
+function briefReactionText(pr){
+  if(!pr) return '';
+  if(pr.median_atr_30m == null) return I18N_BRIEF.fewData;
+  return fmt_(I18N_BRIEF.reactionTpl, {atr: pr.median_atr_30m.toFixed(2), n: pr.n});
+}
+
+function renderBriefCalendar(b){
+  const el = document.getElementById('briefCalendar');
+  if(!el) return;
+  if(!b || !b.calendar || !b.calendar.length){ el.style.display='none'; return; }
+  const rows = b.calendar.map(function(e){
+    const time = briefLocalTime(e.ts_utc);
+    const syms = (e.symbols||[]).slice(0,4).join(' · ');
+    const name = (typeof translatedEventName === 'function') ? translatedEventName(e) : (e.title||'');
+    return '<tr><td class="mono">'+escapeHtmlIdx(time)+'</td><td>'+escapeHtmlIdx(name)+'</td>'
+      +'<td>'+escapeHtmlIdx(syms)+'</td><td class="mono">'+escapeHtmlIdx(briefReactionText(e.past_reaction))+'</td></tr>';
+  }).join('');
+  // §3: раньше был <div> без href и без обработчика -- выглядел кликабельным
+  // (выделен как ссылка на скриншоте аудита), но никуда не вёл. /calendar уже
+  // переводит названия событий (translatedEventName) -- цель готова и лучше,
+  // чем раскрытие на месте. Префикс языка снимается в serve.py без правок.
+  const calHref = _PAGE_LANG === 'ru' ? '/calendar' : '/' + _PAGE_LANG + '/calendar';
+  const more = b.calendar_more
+    ? '<div class="brief-more">'+fmt_(I18N_BRIEF.calMore,{n:b.calendar_more})+' — <a href="'+calHref+'">'+I18N_BRIEF.calMoreLink+'</a></div>'
+    : '';
+  el.innerHTML = '<h3>📅 '+I18N_BRIEF.calTitle+'</h3><table class="brief-table"><tbody>'+rows+'</tbody></table>'+more;
+  el.style.display = 'block';
+  linkInstrumentsInReport(el);
+}
+
+function renderBriefEarnings(b){
+  const el = document.getElementById('briefEarnings');
+  if(!el) return;
+  if(!b || !b.earnings || !b.earnings.length){ el.style.display='none'; return; }
+  const bySession = {pre:[], post:[]};
+  b.earnings.forEach(function(r){ (bySession[r.session]||bySession.post).push(r); });
+  var html = '<h3>📊 '+I18N_BRIEF.earnTitle+'</h3>';
+  ['pre','post'].forEach(function(sess){
+    if(!bySession[sess].length) return;
+    const label = sess==='pre' ? I18N_BRIEF.earnPre : I18N_BRIEF.earnPost;
+    const items = bySession[sess].map(function(r){
+      var eps = (r.eps_forecast!=null) ? fmt_(I18N_BRIEF.earnConsensus,{eps:r.eps_forecast}) : '';
+      return '<div class="brief-mover-row"><b>'+escapeHtmlIdx(r.ticker)+'</b> '+escapeHtmlIdx(r.name||'')
+        +' <span class="mono" style="font-size:11px">'+escapeHtmlIdx(eps)+'</span></div>';
+    }).join('');
+    html += '<div style="margin-bottom:8px"><div class="mono" style="font-size:11px;color:var(--muted);margin-bottom:4px">'+label+'</div>'+items+'</div>';
+  });
+  el.innerHTML = html;
+  el.style.display = 'block';
+  linkInstrumentsInReport(el);
+}
+
+function renderBriefMovers(b){
+  const el = document.getElementById('briefMovers');
+  if(!el) return;
+  const up = (b && b.movers && b.movers.up) || [];
+  const down = (b && b.movers && b.movers.down) || [];
+  if(!up.length && !down.length){ el.style.display='none'; return; }
+  function rowHtml(m, dir){
+    const ratio = (m.ratio!=null) ? fmt_(I18N_BRIEF.moversRatioTpl,{ratio:m.ratio.toFixed(1)}) : '';
+    const evt = m.event
+      ? fmt_(I18N_BRIEF.moversOnEvent,{title:m.event.title||'', time:briefLocalTime(m.event.ts_utc)})
+      : I18N_BRIEF.moversNoEvent;
+    const sign = m.chg_pct>0 ? '+' : '';
+    return '<div class="brief-mover-row '+dir+'"><b>'+escapeHtmlIdx(m.symbol)+'</b> '
+      +sign+m.chg_pct+'% '+ratio+'<span class="brief-mover-event">'+escapeHtmlIdx(evt)+'</span></div>';
+  }
+  var html = '<h3>↕ '+I18N_BRIEF.moversTitle+'</h3><div class="brief-movers-cols">';
+  html += '<div><h4 class="up">↑ '+I18N_BRIEF.moversUp+'</h4>'+(up.map(function(m){return rowHtml(m,'up');}).join('')||'—')+'</div>';
+  html += '<div><h4 class="down">↓ '+I18N_BRIEF.moversDown+'</h4>'+(down.map(function(m){return rowHtml(m,'down');}).join('')||'—')+'</div>';
+  html += '</div>';
+  el.innerHTML = html;
+  el.style.display = 'block';
+  linkInstrumentsInReport(el);
+}
+
+function renderBriefPatterns(b){
+  const el = document.getElementById('briefPatterns');
+  if(!el) return;
+  if(!b || !b.patterns || !b.patterns.length){ el.style.display='none'; return; }
+  const rows = b.patterns.map(function(p){
+    const stat = (p.direction==='neutral')
+      ? I18N_BRIEF.patternsNeutral
+      : fmt_(I18N_BRIEF.patternsAgreeTpl, {pct: Math.round((p.agree_share_5||0)*100), n: p.n});
+    return '<div class="brief-pattern-row"><span class="mono">'+escapeHtmlIdx(p.symbol)+' '+escapeHtmlIdx(p.tf)+'</span>'
+      +escapeHtmlIdx(p.display_name_ru)+' <span class="agree">— '+escapeHtmlIdx(stat)+'</span></div>';
+  }).join('');
+  el.innerHTML = '<h3>📐 '+I18N_BRIEF.patternsTitle+'</h3>'+rows;
+  el.style.display = 'block';
+  linkInstrumentsInReport(el);
+}
+
+// prompt.md сам требует "тикеры жирным" (**Золото** и т.п.) для ВСЕГО текста
+// модели, включая headline/context -- живой тестовый прогон подтвердил, что
+// модель это применяет и здесь. escapeHtmlIdx экранирует только &<>"', "**"
+// не трогает -- безопасно заменить на <b> ПОСЛЕ экранирования (никакой
+// произвольный HTML через это не протащить, только литеральные **пары**).
+function briefBold(s){
+  return escapeHtmlIdx(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+}
+
+function renderBriefContext(b){
+  const wrap = document.getElementById('briefContext');
+  const titleEl = document.getElementById('briefContextTitle');
+  const bodyEl = document.getElementById('briefContextBody');
+  if(!wrap) return;
+  if(!b || !b.context || !b.context.length){ wrap.style.display='none'; return; }
+  const confMap = {quotes:I18N_BRIEF.confQuotes, media:I18N_BRIEF.confMedia, social_unverified:I18N_BRIEF.confSocial};
+  titleEl.textContent = I18N_BRIEF.contextTitle;
+  bodyEl.innerHTML = b.context.map(function(c){
+    return '<li>'+briefBold(c.text)+' <span class="brief-conf">— '+escapeHtmlIdx(confMap[c.confidence]||c.confidence||'')+'</span></li>';
+  }).join('');
+  wrap.style.display = '';
+}
+
+function renderBriefHeadline(b){
+  const el = document.getElementById('briefHeadline');
+  if(!el) return;
+  if(!b || !b.headline){ el.style.display='none'; return; }
+  el.innerHTML = '▸ <b>'+I18N_BRIEF.headlinePrefix+'</b> '+briefBold(b.headline);
+  el.style.display = 'block';
+}
+
+function renderBrief(b){
+  renderBriefHeadline(b);
+  renderBriefCalendar(b);
+  renderBriefEarnings(b);
+  renderBriefMovers(b);
+  renderBriefPatterns(b);
+  renderBriefContext(b);
+}
+
 function renderReport(r){
   const el=document.getElementById('report');
   if(!r||!r.markdown){el.innerHTML='<div class="empty">'+I18N_REPORT.notGenerated+'</div>';return;}
@@ -1307,9 +1524,10 @@ document.getElementById('pulseTabs').addEventListener('click', e=>{
 
 async function load(){
   clockWindow();
-  const [m,t,s,r,meta,digest]=await Promise.all(
-    ['market','technical','signals','report','meta','news_digest'].map(get));
+  const [m,t,s,r,meta,brief,digest]=await Promise.all(
+    ['market','technical','signals','report','meta','brief_today','news_digest'].map(get));
   renderMarket(m); renderFng(m||{}); renderReport(r);
+  renderBrief(brief);
   try { renderTech(t); } catch(e) { /* tcards may not exist in current layout */ }
   loadPulse(_pulseCat);
   SIG=s; renderSignals('economy');

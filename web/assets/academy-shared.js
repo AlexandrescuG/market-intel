@@ -484,6 +484,192 @@
     return n + ' ' + (Math.abs(n) === 1 ? singular : plural);
   }
 
+  // ── ColdStart — единый интерактив "вопрос → действие → настоящий ответ"
+  // (SPEC_coldstart_interactives_ch6_15.md §1). Один компонент на все главы
+  // 6-15, отличаются только пропсы. Жёсткие правила спеки, которые компонент
+  // соблюдает сам, а не понадеявшись на вызывающую главу:
+  //  - ответ (reveal) не рендерится, пока action не зафиксирован (committed);
+  //  - один жест на действие: choice -- клик по кнопке, slider -- отпускание
+  //    указателя, numberInput -- Enter/blur, chartTap -- клик по свече;
+  //  - bridge и reveal показываются вместе, после commit, единым блоком.
+  // action.type: 'choice' | 'slider' | 'numberInput' | 'chartTap' | 'custom'.
+  // reveal может быть строкой/нодой или функцией (answer) => нода -- удобно,
+  // когда текст раскрытия зависит от того, что выбрал читатель.
+  function ColdStart(props) {
+    var tag = props.tag, ask = props.ask, action = props.action,
+        reveal = props.reveal, bridge = props.bridge;
+    var e = React.createElement;
+    var s1 = React.useState(false), committed = s1[0], setCommitted = s1[1];
+    var s2 = React.useState(null), answer = s2[0], setAnswer = s2[1];
+
+    function commit(value) {
+      if (committed) return;
+      setAnswer(value);
+      setCommitted(true);
+    }
+
+    var revealContent = committed ? (typeof reveal === "function" ? reveal(answer) : reveal) : null;
+
+    return e('div', {style:{background:C.black, padding:"64px 5vw 52px", color:"#fff"}},
+      tag ? e(Mono, {size:11, color:C.gold, spacing:4, style:{display:"block", marginBottom:22, textAlign:"center"}}, tag) : null,
+      e('p', {style:{fontFamily:"'DM Serif Display',serif", fontSize:"clamp(21px,3.2vw,28px)", color:"#fff",
+                     textAlign:"center", maxWidth:680, margin:"0 auto 30px", lineHeight:1.42}}, ask),
+      e('div', {style:{maxWidth:660, margin:"0 auto"}},
+        ColdStartAction({action: action, committed: committed, answer: answer, commit: commit})
+      ),
+      committed && revealContent ? e('div', {style:{maxWidth:640, margin:"26px auto 0", padding:"20px 24px",
+                    background:"rgba(201,151,58,0.1)", border:"1px solid rgba(201,151,58,0.3)", borderRadius:6}},
+        e('div', {style:{fontSize:16, lineHeight:1.62, color:"#fff"}}, revealContent)
+      ) : null,
+      committed && bridge ? e('p', {style:{textAlign:"center", fontFamily:"monospace", fontSize:12,
+                    color:C.gold, letterSpacing:0.5, marginTop:22, marginBottom:0}}, bridge) : null
+    );
+  }
+
+  function ColdStartAction(p) {
+    var action = p.action, committed = p.committed, answer = p.answer, commit = p.commit;
+    var e = React.createElement;
+    if (!action) return null;
+    if (action.type === "choice") return ColdStartChoice({options: action.options, committed: committed, answer: answer, commit: commit});
+    if (action.type === "slider") return ColdStartSlider({cfg: action.slider, committed: committed, commit: commit});
+    if (action.type === "numberInput") return ColdStartNumberInput({cfg: action.numberInput, committed: committed, commit: commit});
+    if (action.type === "chartTap") return ColdStartChartTap({cfg: action.chart, committed: committed, commit: commit});
+    if (action.type === "custom" && typeof action.render === "function") return action.render(commit, committed, answer);
+    return null;
+  }
+
+  function ColdStartChoice(p) {
+    var options = p.options, committed = p.committed, answer = p.answer, commit = p.commit;
+    var e = React.createElement;
+    return e('div', {style:{display:"flex", gap:10, flexWrap:"wrap", justifyContent:"center"}},
+      options.map(function (opt, i) {
+        var isPicked = committed && answer === opt.value;
+        return e('button', {
+          key: i, disabled: committed,
+          onClick: function () { commit(opt.value); },
+          style: {
+            fontFamily:"monospace", fontSize:14, fontWeight:700, letterSpacing:0.5,
+            padding:"14px 22px", borderRadius:4, cursor: committed ? "default" : "pointer",
+            background: isPicked ? C.gold : "rgba(255,255,255,0.06)",
+            color: isPicked ? C.black : "#fff",
+            border:"1px solid " + (isPicked ? C.gold : "rgba(255,255,255,0.22)"),
+            opacity: committed && !isPicked ? 0.45 : 1, transition:"all .15s", minWidth:96,
+          }
+        }, opt.label);
+      })
+    );
+  }
+
+  function ColdStartSlider(p) {
+    var cfg = p.cfg, committed = p.committed, commit = p.commit;
+    var e = React.createElement;
+    var s = React.useState(cfg.default), val = s[0], setVal = s[1];
+    var fmt = cfg.format || function (v) { return String(v); };
+    function release() { if (!committed) commit(val); }
+    return e('div', {style:{textAlign:"center"}},
+      e('div', {style:{fontFamily:"monospace", fontSize:28, fontWeight:700, color:C.gold, marginBottom:14}}, fmt(val)),
+      e('input', {
+        type:"range", min:cfg.min, max:cfg.max, step:cfg.step || 1, value:val, disabled:committed,
+        onChange: function (ev) { setVal(+ev.target.value); },
+        onMouseUp: release, onTouchEnd: release, onKeyUp: function (ev) { if (ev.key === "Enter") release(); },
+        style:{width:"100%", accentColor:C.gold, cursor: committed ? "default" : "pointer"}
+      })
+    );
+  }
+
+  function ColdStartNumberInput(p) {
+    var cfg = p.cfg, committed = p.committed, commit = p.commit;
+    var e = React.createElement;
+    var s = React.useState(cfg.default != null ? String(cfg.default) : ""), val = s[0], setVal = s[1];
+    function submit() {
+      if (committed) return;
+      var n = parseFloat(val);
+      if (!isNaN(n)) commit(n);
+    }
+    return e('div', {style:{display:"flex", gap:10, justifyContent:"center", alignItems:"center"}},
+      e('input', {
+        type:"number", value:val, disabled:committed, placeholder:cfg.placeholder || "",
+        onChange: function (ev) { setVal(ev.target.value); },
+        onKeyDown: function (ev) { if (ev.key === "Enter") submit(); },
+        onBlur: submit,
+        style:{fontFamily:"monospace", fontSize:20, padding:"12px 16px", width:120, textAlign:"center",
+               background:"rgba(255,255,255,0.06)", color:"#fff", border:"1px solid rgba(255,255,255,0.22)", borderRadius:4}
+      }),
+      cfg.unit ? e('span', {style:{fontFamily:"monospace", fontSize:14, color:"rgba(255,255,255,0.6)"}}, cfg.unit) : null,
+      !committed ? e('button', {
+        onClick: submit,
+        style:{fontFamily:"monospace", fontSize:14, fontWeight:700, padding:"12px 18px", borderRadius:4,
+               cursor:"pointer", background:C.gold, color:C.black, border:"none"}
+      }, "→") : null
+    );
+  }
+
+  // Тап по свече на реальном LightweightCharts-графике с закрытой правой
+  // частью -- тот же механизм, что уже проверен в SqueezeTrainer (Глава 6,
+  // SPEC_charts_and_interactivity_standard.md §2/§2.1): реальные бары,
+  // ценовая/временная ось, data-source, штора вместо нарисованного будущего.
+  // cfg = {candles:[{time,open,high,low,close}], visibleCount, dataSource,
+  //        isCorrect:(time)=>bool, height}.
+  function ColdStartChartTap(p) {
+    var cfg = p.cfg, committed = p.committed, commit = p.commit;
+    var e = React.createElement;
+    var containerRef = React.useRef(null);
+    var chartRef = React.useRef(null);
+    var seriesRef = React.useRef(null);
+    var tapHandlerRef = React.useRef(null);
+    var s = React.useState(false), missed = s[0], setMissed = s[1];
+
+    tapHandlerRef.current = function (time) {
+      if (committed) return;
+      if (cfg.isCorrect(time)) { setMissed(false); commit(time); }
+      else { setMissed(true); setTimeout(function () { setMissed(false); }, 500); }
+    };
+
+    React.useEffect(function () {
+      if (!containerRef.current || chartRef.current || typeof LightweightCharts === "undefined") return undefined;
+      var chart = LightweightCharts.createChart(containerRef.current, {
+        width: containerRef.current.clientWidth, height: cfg.height || 300,
+        layout: { background: { color: C.chartBg }, textColor: "rgba(255,255,255,0.55)" },
+        grid: { vertLines: { color: "rgba(255,255,255,0.05)" }, horzLines: { color: "rgba(255,255,255,0.05)" } },
+        rightPriceScale: { borderColor: "rgba(255,255,255,0.15)" },
+        timeScale: { borderColor: "rgba(255,255,255,0.15)", timeVisible: true, secondsVisible: false },
+      });
+      var series = chart.addCandlestickSeries({
+        upColor: C.chartGreen, downColor: C.chartRed, borderUpColor: C.chartGreen, borderDownColor: C.chartRed,
+        wickUpColor: C.chartGreen, wickDownColor: C.chartRed,
+      });
+      chartRef.current = chart; seriesRef.current = series;
+      chart.subscribeClick(function (param) { if (param.time != null && tapHandlerRef.current) tapHandlerRef.current(param.time); });
+      var ro = new ResizeObserver(function (entries) { if (entries[0]) chart.applyOptions({ width: entries[0].contentRect.width }); });
+      ro.observe(containerRef.current);
+      return function () { ro.disconnect(); chart.remove(); chartRef.current = null; };
+    }, []);
+
+    React.useEffect(function () {
+      var series = seriesRef.current;
+      if (!series || !cfg.candles || !cfg.candles.length) return;
+      var visibleCount = committed ? cfg.candles.length : Math.min(cfg.visibleCount, cfg.candles.length);
+      series.setData(cfg.candles.slice(0, visibleCount).map(function (c) {
+        return { time: c.time, open: +c.open, high: +c.high, low: +c.low, close: +c.close };
+      }));
+      if (committed && cfg.markerTime != null) {
+        series.setMarkers([{ time: cfg.markerTime, position:"aboveBar", color:C.gold, shape:"arrowDown", text: cfg.markerText || "" }]);
+      } else {
+        series.setMarkers([]);
+      }
+      chartRef.current.timeScale().fitContent();
+    }, [cfg.candles, cfg.visibleCount, committed, cfg.markerTime]);
+
+    return e('div', {style:{position:"relative", borderRadius:6, overflow:"hidden",
+                            border: missed ? "1px solid " + C.red : "1px solid transparent", transition:"border .2s",
+                            cursor: committed ? "default" : "crosshair"}},
+      e('div', {ref:containerRef, "data-source":cfg.dataSource}),
+      !committed ? e('div', {style:{position:"absolute", top:0, right:0, bottom:0,
+                    width: (100 - (cfg.visibleCount / cfg.candles.length * 100)) + "%",
+                    background:"rgba(19,23,34,0.92)", pointerEvents:"none"}}) : null
+    );
+  }
+
   window.AcademyShared = {
     C: C, Mono: Mono, Chip: Chip, Rule: Rule,
     GlossWord: GlossWord, withGlossTerms: withGlossTerms,
@@ -497,5 +683,6 @@
     declineRu: declineRu,
     declineRo: declineRo,
     declineEn: declineEn,
+    ColdStart: ColdStart,
   };
 })();

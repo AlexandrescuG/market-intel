@@ -438,18 +438,12 @@ function impLabel(imp){
 // CALENDAR_TERMS (edu/assets/calendar-terms.js), суффикс "(period)" оставляем
 // как есть (даты/месяцы не переводим, чтобы не тащить отдельный словарь
 // месяцев ради этого). Без словаря/перевода -- тихий fallback на оригинал.
-function translatedEventName(ev){
-  var lang = window.sbfI18n && window.sbfI18n.lang;
-  if (!lang || lang === 'en' || typeof CALENDAR_TERMS === 'undefined' || !ev.indicator) {
-    return ev.title || '';
-  }
-  var entry = CALENDAR_TERMS[ev.indicator];
-  if (!entry || !entry[lang]) return ev.title || '';
-  var suffix = (ev.title && ev.title.indexOf(ev.indicator) === 0)
-    ? ev.title.slice(ev.indicator.length)
-    : '';
-  return entry[lang] + suffix;
-}
+// translateQualifier()/translatedEventName() теперь общие -- живут в
+// /edu/assets/calendar-terms.js (window.translatedEventName), потому что их
+// уже стало нужно вызывать не только со страницы календаря, но и из глав
+// курса (гл.2 NextReleaseWidget -- SPEC_ch2_debug_and_chart_engine.md §1.4).
+// calendar-terms.js подключён на этой странице обычным <script> до этого места.
+var translatedEventName = window.translatedEventName;
 
 // ── §3 Глоссарий экономических данных ────────────────────────────────────
 // Примечание: term/short/full ниже остаются на русском как fallback-текст

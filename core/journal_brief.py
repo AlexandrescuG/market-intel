@@ -250,71 +250,44 @@ def _symbol_to_countries(symbol: str) -> set[str]:
 # ── Волатильность (вчерашняя сессия) ─────────────────────────────────────────
 def _get_yesterday_moves(symbols: list[str]) -> list[dict]:
     """
-    Выбирает самую свежую дневную свечу из price_bars для каждого символа.
-    Вычисляет % изменения цены и уровень волатильности (§5.3).
-
-    volatility_state:
-      extreme — (high - low) > ATR14 × 1.5
-      high    — (high - low) > ATR14
-      normal  — иначе
+    Обёртка над core.movers.full_universe_moves() (SPEC_morning_brief_v2.md,
+    Этап 1b). Раньше читало price_bars(bot.db) НАПРЯМУЮ по symbol=='GOLD' и
+    т.п. — но price_bars хранит золото как XAUUSD (0 строк на 'GOLD', 2654 на
+    'XAUUSD' — проверено), и вообще не содержит крипту/индексы/commodities
+    (только FX-пары + XAUUSD + 4 второстепенные валюты). Для watchlist с GOLD/
+    BTC/SPX/WTI и т.п. функция молча возвращала пусто по этим символам.
+    core.movers читает ohlc_{symbol}_D1.json — то же самое приложение
+    (DEFAULT_UNIVERSE, 16 символов), которым уже пользуется build_brief_v2.py,
+    покрывает весь набор. volatility_state теперь на Wilder ATR14 (через
+    core.focus.yesterday_deviation) вместо старого простого среднего (h-l) —
+    пороги (1.5x/1.0x) сохранены как были, значит будут отличаться от
+    предыдущего значения при том же дне (более отзывчивая формула).
     """
     if not symbols:
         return []
 
-    bc = _get_bot_conn()
-    if bc is None:
-        return []
+    from core.movers import full_universe_moves
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    moves = full_universe_moves(symbols, today)
 
     result = []
-    try:
-        for sym in symbols:
-            # Берём 15 последних дней: первый — «вчера», 2-15 — для ATR14
-            rows = bc.execute(
-                "SELECT ts, o, h, l, c FROM price_bars "
-                "WHERE symbol=? AND tf='1d' ORDER BY ts DESC LIMIT 15",
-                (sym,),
-            ).fetchall()
-
-            if not rows:
-                continue
-
-            yesterday = rows[0]
-            o, h, l, c = yesterday["o"], yesterday["h"], yesterday["l"], yesterday["c"]
-
-            # ATR14 из предшествующих свечей
-            prev_rows = rows[1:]
-            if prev_rows:
-                atr14 = sum(r["h"] - r["l"] for r in prev_rows) / len(prev_rows)
-            else:
-                atr14 = h - l
-
-            price_change_pct = round((c - o) / o * 100, 2) if o else 0.0
-            day_range = h - l
-
-            if atr14 > 0:
-                if day_range > atr14 * 1.5:
-                    vol_state = "extreme"
-                elif day_range > atr14:
-                    vol_state = "high"
-                else:
-                    vol_state = "normal"
-            else:
-                vol_state = "normal"
-
-            bar_date = datetime.fromtimestamp(
-                yesterday["ts"], tz=timezone.utc
-            ).strftime("%Y-%m-%d")
-
-            result.append({
-                "symbol":               sym,
-                "price_change_percent": price_change_pct,
-                "volatility_state":     vol_state,
-                "close":                round(c, 5),
-                "bar_date":             bar_date,
-            })
-    finally:
-        bc.close()
-
+    for m in moves:
+        ratio = m["ratio"]
+        if ratio is None:
+            vol_state = "normal"
+        elif ratio > 1.5:
+            vol_state = "extreme"
+        elif ratio > 1.0:
+            vol_state = "high"
+        else:
+            vol_state = "normal"
+        result.append({
+            "symbol":               m["symbol"],
+            "price_change_percent": m["chg_pct"],
+            "volatility_state":     vol_state,
+            "close":                round(m["close"], 5),
+            "bar_date":             m["bar_date"],
+        })
     return result
 
 
@@ -464,6 +437,8 @@ def generate_brief(user_id: str = "default") -> dict:
     today  = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     symbols = get_watchlist(user_id)
 
+    from core import journal_auth  # локальный импорт -- избегаем цикла на уровне модуля
+
     payload = {
         "date":                   today,
         "watchlist":              symbols,
@@ -471,6 +446,10 @@ def generate_brief(user_id: str = "default") -> dict:
         "today_macro_calendar":   _get_today_calendar(symbols),
         "yesterday_you":          _get_yesterday_you(user_id),
         "open_items":             _get_open_items(user_id),
+        # SPEC_morning_brief_v2.md блок 6 ("Твоё") -- сохранённое торговое окно
+        # (глава 5 курса, MyWindowBlock). None, если пользователь никогда не
+        # сохранял -- фронт не показывает строку "Твоё окно" вовсе, не 0..0.
+        "trading_window":         journal_auth.get_trading_window(user_id),
     }
 
     # Кэшировать результат

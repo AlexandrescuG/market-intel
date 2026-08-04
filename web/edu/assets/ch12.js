@@ -46,16 +46,12 @@
  */
 window.Ch12Content = {
   ru: {
-    coldOpen: {
-      tag: "ГЛАВА 12 — ПЯТЬ ПРИБЫЛЬНЫХ ПОДРЯД НИЧЕГО НЕ ЗНАЧАТ",
-      lines: [
-        "Пять сделок подряд в плюс. Приятно, и хочется сделать вывод.",
-        "Посчитаем, чего стоит этот вывод. Если бросать монету, пять «орлов» подряд выпадают примерно в трёх случаях из ста. Три из ста — это не чудо: это то, что происходит регулярно, если попыток много.",
-        "А теперь другая сторона, о которой почти не говорят. Если система действительно работает и даёт положительный исход в шести случаях из десяти, то серия из пяти убытков подряд случается у неё примерно раз в полтораста сделок. Не «если не повезёт». Регулярно, как часть нормальной работы.",
-        "Два человека начинают торговать по одной и той же системе в один день. Первому выпадают пять прибыльных, второму — пять убыточных. Первый увеличивает объём, второй бросает. Оба ошиблись одинаково. Просто второму это обошлось дешевле.",
-        "Следующие четырнадцать минут — про японскую систему, которой почти сто лет, и про вопрос, который она позволяет наконец задать: сколько сделок нужно, чтобы вообще что-то знать. Ответ тебе не понравится, и мы посчитаем его при тебе.",
-      ],
-      cta: "Посчитать ↓",
+    coldStart: {
+      tag: "СКОЛЬКО СДЕЛОК ДОСТАТОЧНО",
+      ask: "Стратегия с нулевым преимуществом — честная монета. Сколько сделок нужно, чтобы отличить её от рабочей?",
+      opt10: "10", opt50: "50", opt200: "200",
+      revealTemplate: "При {{n}} сделках и нулевом преимуществе у {{pct}}% случайных «трейдеров» win rate чисто по удаче окажется 60% и выше. При 200 сделках так повезёт лишь {{pct200}}% — мираж исчезает не сам, а с ростом выборки.",
+      bridge: "Дальше — сколько сделок нужно на самом деле, чтобы отличить преимущество от везения.",
     },
     antiMyth: {
       tag: "АНТИ-МИФ",
@@ -280,16 +276,12 @@ window.Ch12Content = {
   },
 
   en: {
-    coldOpen: {
-      tag: "CHAPTER 12 — FIVE WINS IN A ROW MEAN NOTHING",
-      lines: [
-        "Five trades in a row, all green. Feels good, and it's tempting to draw a conclusion.",
-        "Let's price out that conclusion. Flip a coin, and five heads in a row happens about three times in a hundred. Three in a hundred isn't a miracle — it's what regularly happens when you try often enough.",
-        "Now the flip side nobody mentions. If a system genuinely works and wins six times out of ten, a streak of five losses in a row happens roughly once every hundred and fifty trades for it. Not 'if you're unlucky.' Regularly, as part of normal operation.",
-        "Two people start trading the same system on the same day. The first gets five wins, the second gets five losses. The first increases their size, the second quits. Both made the same mistake. It just cost the second one less.",
-        "The next fourteen minutes are about a Japanese system that's almost a century old, and about the question it finally lets us ask: how many trades do you actually need to know anything? You won't like the answer, and we'll compute it in front of you.",
-      ],
-      cta: "Compute it ↓",
+    coldStart: {
+      tag: "HOW MANY TRADES ARE ENOUGH",
+      ask: "A strategy with zero edge — a fair coin. How many trades do you need to tell it apart from a real one?",
+      opt10: "10", opt50: "50", opt200: "200",
+      revealTemplate: "At {{n}} trades with zero edge, {{pct}}% of random «traders» will show a win rate of 60% or higher by pure luck. At 200 trades, only {{pct200}}% get that lucky — the illusion doesn't fade on its own, sample size fades it.",
+      bridge: "Next: how many trades you actually need to tell an edge apart from luck.",
     },
     antiMyth: {
       tag: "ANTI-MYTH",
@@ -499,16 +491,12 @@ window.Ch12Content = {
   },
 
   ro: {
-    coldOpen: {
-      tag: "CAPITOLUL 12 — CINCI CÂȘTIGURI LA RÂND NU ÎNSEAMNĂ NIMIC",
-      lines: [
-        "Cinci tranzacții la rând pe plus. Plăcut, și tentant să tragi o concluzie.",
-        "Să calculăm cât valorează concluzia asta. Dacă arunci o monedă, cinci «cap» la rând ies în aproximativ trei cazuri din o sută. Trei din o sută nu e miracol: e ceva ce se întâmplă regulat, dacă încerci suficient de des.",
-        "Acum cealaltă față, despre care aproape nimeni nu vorbește. Dacă un sistem chiar funcționează și are un rezultat pozitiv în șase cazuri din zece, o serie de cinci pierderi la rând i se întâmplă aproximativ o dată la o sută cincizeci de tranzacții. Nu «dacă ai ghinion». Regulat, ca parte normală a funcționării.",
-        "Doi oameni încep să tranzacționeze același sistem în aceeași zi. Primul are cinci câștiguri, al doilea cinci pierderi. Primul își mărește volumul, al doilea renunță. Amândoi au greșit la fel. Doar că pentru al doilea a costat mai puțin.",
-        "Următoarele paisprezece minute sunt despre un sistem japonez de aproape o sută de ani, și despre întrebarea pe care ne permite în sfârșit s-o punem: de câte tranzacții ai nevoie ca să știi ceva cu adevărat. Răspunsul nu-ți va plăcea, și îl calculăm chiar sub ochii tăi.",
-      ],
-      cta: "Calculează ↓",
+    coldStart: {
+      tag: "CÂTE TRANZACȚII SUNT SUFICIENTE",
+      ask: "O strategie cu avantaj zero — o monedă cinstită. De câte tranzacții ai nevoie ca s-o deosebești de una funcțională?",
+      opt10: "10", opt50: "50", opt200: "200",
+      revealTemplate: "La {{n}} tranzacții cu avantaj zero, {{pct}}% dintre «traderii» aleatori vor avea un win rate de 60% sau mai mult din pur noroc. La 200 de tranzacții, doar {{pct200}}% au acest noroc — mirajul nu dispare singur, ci odată cu creșterea eșantionului.",
+      bridge: "În continuare — de câte tranzacții ai nevoie cu adevărat ca să deosebești un avantaj de noroc.",
     },
     antiMyth: {
       tag: "ANTI-MIT",

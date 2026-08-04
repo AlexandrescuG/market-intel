@@ -20,16 +20,21 @@
  */
 window.Ch7Content = {
   ru: {
-    coldOpen: {
-      tag: "ГЛАВА 7 — КОМУ-ТО НУЖНО БЫЛО КУПИТЬ НА ЧЕТЫРЕСТА МИЛЛИОНОВ",
-      lines: [
-        "Прошлый эпизод закончился вопросом: кто двигает цену на дневной диапазон за тридцать минут.",
-        "Ответ скучнее, чем хотелось бы. Не тайный клуб. Пенсионный фонд, которому по мандату нужно к концу квартала держать определённую долю в золоте. Казначейство корпорации, закрывающее валютный риск по контракту. Индексный фонд, которому в 16:00 по Лондону надо переоценить портфель.",
-        "У всех троих одна и та же проблема, и она не про прогноз. Им нужно купить или продать много. А рынок в каждый момент времени готов принять мало.",
-        "Вот эта свеча. За ней стоит чьё-то решение на сумму, которую нельзя исполнить одним ордером, не сдвинув цену против себя на несколько процентов. И то, что ты видишь на графике, — не след их намерения. Это след их осторожности.",
-        "Следующие пятнадцать минут — про то, как выглядит эта осторожность, где её действительно видно, и почему то, что продают под названием «след умных денег», мы проверили на своих данных и результат публикуем ниже.",
-      ],
-      cta: "Показать, как исполняют такой объём ↓",
+    coldStart: {
+      tag: "ЦЕНА СПЕШКИ",
+      ask: "Нужно купить 500 лотов золота — тот же объём. Исполнить одним ордером прямо сейчас или растянуть на час?",
+      optNow: "Сейчас, одним ордером", optSlow: "Растянуть на час",
+      revealTemplate: "Сейчас: средняя цена {{avgNow}}, проскальзывание +{{slipNow}} на весь объём. За час, без давления на стакан: {{avgSlow}} — почти по лучшей котировке. Разница — {{diffPts}} пункта на {{size}} лотах.",
+      bridge: "Дальше — как выглядит эта осторожность в потоке заявок, а не в форме свечи.",
+    },
+    coldStartMiddle: {
+      tag: "ГДЕ БЫЛА АКТИВНОСТЬ",
+      ask: "Гистограмма тикового объёма скрыта. Выбери треть дня, где, по-твоему, сделок было больше всего.",
+      matchYes: "Совпало — здесь же был реальный пик активности.",
+      matchNo: "Не совпало — реальный пик был в другой трети.",
+      revealTemplate: "Больше всего изменений цены — в {{topLabel}} UTC ({{topVol}}). {{matchText}}",
+      noteTicks: "Это число изменений цены за период, а не проданные лоты.",
+      bridge: "Зоны показывают, где заявки должны быть. Объём — где активность была на самом деле. Совпадение или его отсутствие видно глазом.",
     },
     antiMyth: {
       tag: "АНТИ-МИФ",
@@ -187,16 +192,21 @@ window.Ch7Content = {
     },
   },
   ro: {
-    coldOpen: {
-      tag: "CAPITOLUL 7 — CINEVA TREBUIA SĂ CUMPERE DE PATRU SUTE DE MILIOANE",
-      lines: [
-        "Episodul trecut s-a încheiat cu o întrebare: cine mișcă prețul pe intervalul unei zile în treizeci de minute.",
-        "Răspunsul e mai plictisitor decât ai vrea. Nu un club secret. Un fond de pensii care, prin mandat, trebuie să dețină o anumită pondere în aur până la finalul trimestrului. Trezoreria unei corporații care închide un risc valutar dintr-un contract. Un fond indexat care la ora 16:00 la Londra trebuie să reevalueze portofoliul.",
-        "Toți trei au aceeași problemă, și nu ține de prognoză. Trebuie să cumpere sau să vândă mult. Iar piața, în fiecare moment, e dispusă să absoarbă puțin.",
-        "Iată această lumânare. În spatele ei stă decizia cuiva pe o sumă care nu poate fi executată printr-un singur ordin fără a mișca prețul împotriva sa cu câteva procente. Iar ce vezi pe grafic nu e urma intenției lor. E urma prudenței lor.",
-        "Următoarele cincisprezece minute — despre cum arată această prudență, unde se vede cu adevărat, și de ce am verificat pe datele noastre ceea ce se vinde sub numele de «urma banilor deștepți», iar rezultatul îl publicăm mai jos.",
-      ],
-      cta: "Arată cum se execută un asemenea volum ↓",
+    coldStart: {
+      tag: "PREȚUL GRABEI",
+      ask: "Trebuie să cumperi 500 loturi de aur — același volum. Execuți dintr-un singur ordin acum sau întinzi pe o oră?",
+      optNow: "Acum, un singur ordin", optSlow: "Întins pe o oră",
+      revealTemplate: "Acum: preț mediu {{avgNow}}, alunecare +{{slipNow}} pe tot volumul. Într-o oră, fără presiune pe carte: {{avgSlow}} — aproape la cea mai bună cotație. Diferența — {{diffPts}} puncte la {{size}} loturi.",
+      bridge: "În continuare — cum arată această prudență în fluxul de ordine, nu în forma unei lumânări.",
+    },
+    coldStartMiddle: {
+      tag: "UNDE A FOST ACTIVITATEA",
+      ask: "Histograma volumului de tranzacții e ascunsă. Alege treimea zilei unde crezi că au fost cele mai multe tranzacții.",
+      matchYes: "S-a potrivit — chiar acolo a fost vârful real de activitate.",
+      matchNo: "Nu s-a potrivit — vârful real a fost în altă treime.",
+      revealTemplate: "Cele mai multe schimbări de preț — în {{topLabel}} UTC ({{topVol}}). {{matchText}}",
+      noteTicks: "E numărul de schimbări de preț din perioadă, nu loturile tranzacționate.",
+      bridge: "Zonele arată unde ar trebui să fie ordinele. Volumul arată unde a fost activitatea real. Potrivirea sau lipsa ei se vede cu ochiul liber.",
     },
     antiMyth: {
       tag: "ANTI-MIT",
@@ -354,16 +364,21 @@ window.Ch7Content = {
     },
   },
   en: {
-    coldOpen: {
-      tag: "CHAPTER 7 — SOMEONE NEEDED TO BUY FOUR HUNDRED MILLION",
-      lines: [
-        "The last episode ended on a question: who moves price across a full day's range in thirty minutes.",
-        "The answer is more boring than you'd like. Not a secret club. A pension fund whose mandate requires holding a certain share in gold by quarter-end. A corporate treasury closing out a currency exposure on a contract. An index fund that has to reprice its portfolio at 4pm London time.",
-        "All three have the same problem, and it isn't about forecasting. They need to buy or sell a lot. And the market, at any given moment, is only willing to absorb a little.",
-        "Here's that candle. Behind it sits someone's decision on a sum that can't be filled with a single order without moving the price against them by a few percent. What you're seeing on the chart isn't the trace of their intent. It's the trace of their caution.",
-        "The next fifteen minutes are about what that caution looks like, where it's actually visible, and why we checked what gets sold under the name «smart money footprint» against our own data — the result is published below.",
-      ],
-      cta: "Show how that kind of size gets executed ↓",
+    coldStart: {
+      tag: "THE PRICE OF HASTE",
+      ask: "You need to buy 500 lots of gold — same size either way. Fill it with one order right now, or spread it over an hour?",
+      optNow: "Now, one order", optSlow: "Spread over an hour",
+      revealTemplate: "Now: average price {{avgNow}}, slippage +{{slipNow}} on the whole size. Over an hour, with no pressure on the book: {{avgSlow}} — close to the best quote. The difference — {{diffPts}} points on {{size}} lots.",
+      bridge: "Next: what that caution looks like in the order flow, not in the shape of a candle.",
+    },
+    coldStartMiddle: {
+      tag: "WHERE THE ACTIVITY WAS",
+      ask: "The tick-volume histogram is hidden. Pick the third of the day where you think trading was busiest.",
+      matchYes: "Matched — that's exactly where the real activity peak was.",
+      matchNo: "Didn't match — the real peak was in a different third.",
+      revealTemplate: "The most price changes happened in {{topLabel}} UTC ({{topVol}}). {{matchText}}",
+      noteTicks: "That's the number of price changes in the period, not lots traded.",
+      bridge: "Zones show where orders should be. Volume shows where the activity actually was. A match or a mismatch is visible at a glance.",
     },
     antiMyth: {
       tag: "ANTI-MYTH",

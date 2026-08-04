@@ -22,18 +22,18 @@
  */
 window.Ch6Content = {
   ru: {
-    coldOpen: {
-      tag: "ГЛАВА 6 — ВСЕ ЗНАЛИ ДАТУ. НИКТО НЕ ЗНАЛ ЧИСЛА.",
-      lines: [
-        "Прошлая глава закончилась на том, что пик суток делает не биржа, а пресс-релиз.",
-        "Вот он. Дата этого релиза была известна за год. Час — за месяц. Прогноз аналитиков — за неделю.",
-        "Не было известно одно: само значение. Одно число.",
-        "Посмотри на часы до него: рынок почти стоит. Это не затишье — это маркетмейкеры сняли заявки, потому что скоро прилетит цифра, которой они не знают (глава 4).",
-        "А теперь на этот бар. {{release_bar_range}} пункта за тридцать минут — в {{peak_vs_quiet}} раза больше типичного получасового бара тихих часов.",
-        "Следующие минуты — про то, откуда берётся этот бар, почему его размер можно оценить заранее, а направление — нет, и что из этого следует для тебя.",
-      ],
-      cta: "Показать, что было дальше ↓",
-      selectionPrefix: "Релиз выбран как типичный по силе реакции, а не как рекордный",
+    coldStart: {
+      tag: "НАЙДИ РЕЛИЗ",
+      ask: "Полный торговый день GOLD, без единой пометки. Тапни по свече, где, по-твоему, вышла новость.",
+      revealTemplate: "{{marker_label}} · {{date}}, {{time}} UTC. Бар движения — {{release_bar_range}} пункта, в {{peak_vs_quiet}} раза больше обычного получасового бара тихих часов этого дня.",
+      bridge: "Дальше — откуда берётся этот бар и почему его размер можно оценить заранее, а направление — нет.",
+    },
+    coldStartMiddle: {
+      tag: "СЮРПРИЗ ИЛИ ЧИСЛО",
+      askTemplate: "Реальный релиз: прогноз {{ex_forecast}}, факт {{ex_actual}}. Куда пошла цена в следующие три часа?",
+      dirUp: "Вверх", dirDown: "Вниз",
+      revealTemplate: "Цена ушла {{actualDirWord}} на {{move_pts}} пункта (с {{open0}} до {{closeLast}}). Но по {{n}} релизам с сюрпризом знак движения совпадает со знаком сюрприза лишь в {{hit_rate}}% случаев (95% ДИ {{ci_lo}}–{{ci_hi}}%) — неотличимо от подбрасывания монеты.",
+      bridge: "Двигает не сам факт, а разница между фактом и прогнозом — но даже её знак не предсказывает направление. Дальше — что предсказывает по-настоящему.",
     },
     antiMyth: {
       tag: "АНТИ-МИФ",
@@ -216,18 +216,18 @@ window.Ch6Content = {
     },
   },
   ro: {
-    coldOpen: {
-      tag: "CAPITOLUL 6 — TOȚI ȘTIAU DATA. NIMENI NU ȘTIA CIFRA.",
-      lines: [
-        "Capitolul trecut s-a încheiat cu ideea că vârful zilei nu-l face bursa, ci un comunicat de presă.",
-        "Iată-l. Data acestei publicații era cunoscută cu un an înainte. Ora — cu o lună înainte. Prognoza analiștilor — cu o săptămână înainte.",
-        "Un singur lucru nu era cunoscut: valoarea în sine. O singură cifră.",
-        "Uită-te la orele dinaintea ei: piața aproape că stă pe loc. Nu e liniște — e market maker-ul care și-a retras ordinele, pentru că urmează o cifră pe care nu o cunoaște (capitolul 4).",
-        "Și acum la această bară. {{release_bar_range}} puncte în treizeci de minute — de {{peak_vs_quiet}} ori mai mult decât bara tipică de 30 de minute din orele liniștite.",
-        "Următoarele minute — despre de unde vine această bară, de ce mărimea ei poate fi estimată dinainte, dar direcția nu, și ce înseamnă asta pentru tine.",
-      ],
-      cta: "Arată ce a urmat ↓",
-      selectionPrefix: "Publicația a fost aleasă ca tipică după forța reacției, nu ca record",
+    coldStart: {
+      tag: "GĂSEȘTE PUBLICAȚIA",
+      ask: "O zi completă de tranzacționare GOLD, fără nicio marcă. Atinge bara unde crezi că a apărut știrea.",
+      revealTemplate: "{{marker_label}} · {{date}}, ora {{time}} UTC. Bara de mișcare — {{release_bar_range}} puncte, de {{peak_vs_quiet}} ori mai mult decât bara tipică de 30 de minute din orele liniștite ale acestei zile.",
+      bridge: "În continuare — de unde vine această bară și de ce mărimea ei poate fi estimată dinainte, dar direcția nu.",
+    },
+    coldStartMiddle: {
+      tag: "SURPRIZĂ SAU CIFRĂ",
+      askTemplate: "O publicație reală: prognoză {{ex_forecast}}, fapt {{ex_actual}}. Încotro a mers prețul în următoarele trei ore?",
+      dirUp: "În sus", dirDown: "În jos",
+      revealTemplate: "Prețul a mers {{actualDirWord}} cu {{move_pts}} puncte (de la {{open0}} la {{closeLast}}). Dar la {{n}} publicații cu surpriză, semnul mișcării coincide cu semnul surprizei doar în {{hit_rate}}% din cazuri (IÎ 95% {{ci_lo}}–{{ci_hi}}%) — indistinguibil de aruncarea unei monede.",
+      bridge: "Nu faptul în sine mișcă prețul, ci diferența dintre fapt și prognoză — dar nici semnul ei nu prezice direcția. În continuare — ce prezice cu adevărat.",
     },
     antiMyth: {
       tag: "ANTI-MIT",
@@ -410,18 +410,18 @@ window.Ch6Content = {
     },
   },
   en: {
-    coldOpen: {
-      tag: "CHAPTER 6 — EVERYONE KNEW THE DATE. NO ONE KNEW THE NUMBER.",
-      lines: [
-        "The last chapter ended on the idea that a press release, not the exchange, makes the day's peak.",
-        "Here it is. This release's date was known a year ahead. Its hour — a month ahead. The analysts' forecast — a week ahead.",
-        "One thing wasn't known: the value itself. One number.",
-        "Look at the hours before it: the market is almost still. That's not calm — market makers pulled their orders because a number they don't know is about to land (chapter 4).",
-        "Now look at this bar. {{release_bar_range}} points in thirty minutes — {{peak_vs_quiet}}× the typical 30-minute bar during quiet hours.",
-        "The next few minutes are about where that bar comes from, why its size can be estimated in advance while its direction can't, and what that means for you.",
-      ],
-      cta: "Show what happened next ↓",
-      selectionPrefix: "The release was picked as typical by reaction strength, not as a record",
+    coldStart: {
+      tag: "FIND THE RELEASE",
+      ask: "One full GOLD trading day, with no markers. Tap the candle where you think the news came out.",
+      revealTemplate: "{{marker_label}} · {{date}}, {{time}} UTC. The move bar is {{release_bar_range}} points — {{peak_vs_quiet}}× the typical 30-minute bar during this day's quiet hours.",
+      bridge: "Next: where that bar comes from, and why its size can be estimated in advance while its direction can't.",
+    },
+    coldStartMiddle: {
+      tag: "SURPRISE OR NUMBER",
+      askTemplate: "A real release: forecast {{ex_forecast}}, actual {{ex_actual}}. Where did price go over the next three hours?",
+      dirUp: "Up", dirDown: "Down",
+      revealTemplate: "Price moved {{actualDirWord}} by {{move_pts}} points (from {{open0}} to {{closeLast}}). But across {{n}} releases with a surprise, the sign of the move matches the sign of the surprise in only {{hit_rate}}% of cases (95% CI {{ci_lo}}–{{ci_hi}}%) — indistinguishable from a coin flip.",
+      bridge: "What moves price isn't the fact itself, but the gap between fact and forecast — and even its sign doesn't predict direction. Next: what actually does.",
     },
     antiMyth: {
       tag: "ANTI-MYTH",

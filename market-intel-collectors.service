@@ -1,0 +1,19 @@
+[Unit]
+Description=Market Intel — real-time collectors (RSS/StockTwits/X)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=sbf
+WorkingDirectory=/mnt/sbfdata/sbf-platform/market_intel
+Environment=PYTHONPATH=/mnt/sbfdata/sbf-platform/market_intel
+ExecStart=/mnt/sbfdata/sbf-platform/market_intel/.venv/bin/python3 -m collectors.run
+Restart=always
+RestartSec=30
+StandardOutput=append:/mnt/sbfdata/sbf-platform/market_intel/collectors.log
+StandardError=append:/mnt/sbfdata/sbf-platform/market_intel/collectors.log
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target

@@ -92,7 +92,7 @@ const STRINGS = {
   },
 };
 
-const {C, Mono, Chip, Rule, AskAnalystBtn, getChUrl, QuizBlock, ComplianceFootnote} = window.AcademyShared;
+const {C, Mono, Chip, Rule, AskAnalystBtn, getChUrl, QuizBlock, ComplianceFootnote, ColdStart} = window.AcademyShared;
 
 const SectionTitle = ({children,sub,align="left",id}) => (
   <div id={id} style={{textAlign:align,marginBottom:36,scrollMarginTop:130}}>
@@ -194,84 +194,44 @@ function buildVars(ema_, lang) {
 }
 
 // ─── Cold open: два трейдера, две настройки ────────────────────────────────
-function ColdOpen8({ candles }) {
-  const { useState } = React;
+// ─── Cold start: "Какая скользящая лучше" (SPEC_coldstart_interactives_ch6_15.
+// md §4). Заменяет прежний ColdOpen8. Считает реальную OOS-статистику прямо
+// из ema_.lab (тот же массив, на котором стоит OverfitLab чуть ниже) --
+// для каждого фиксированного slow-периода (20/50/200), по ВСЕМ инструментам/
+// tf/fast-парам, доля случаев с положительным oos.sum_move_net.
+function ColdStart8Entry({ ema_ }) {
   const T8 = window.Ch8Content[INITIAL_LANG] || window.Ch8Content.ru;
-  const co = T8.coldOpen;
-  // SPEC_ch8_debug.md §2.1: раньше обе мини-карты рисовали ФИКСИРОВАННЫЕ пары
-  // EMA (9/21 слева, 50/200 справа) -- тезис главы ("один и тот же график,
-  // противоположные выводы, оба верны") был рассказан словами, а не показан.
-  // Теперь под каждой картой свой ползунок периода: слева короткие периоды
-  // (5-30, "тренд развернулся вчера"), справа длинные (30-250, "тренд не
-  // менялся третий месяц") -- одна линия EMA на карту, не пара, этого
-  // достаточно, чтобы история читалась на любом положении ползунка.
-  const [fastPeriod, setFastPeriod] = useState(9);
-  const [slowPeriod, setSlowPeriod] = useState(100);
-  if (!candles || candles.length < 210) {
-    return <div style={{background:C.black,padding:"60px 5vw",textAlign:"center"}}><Mono size={11} color={C.gold} spacing={4}>{co.tag}</Mono></div>;
-  }
-  const closes = candles.map(c => +c.close);
+  const cs = T8.coldStart;
+  if (!ema_ || !ema_.lab) return <div style={{background:C.black,padding:"60px 5vw",textAlign:"center"}}><Mono size={11} color={C.gold} spacing={4}>{cs.tag}</Mono></div>;
 
-  const MiniChart = ({ period, setPeriod, min, max, color, label, sliderLabel }) => {
-    const { useEffect, useRef } = React;
-    const containerRef = useRef(null);
-    const chartRef = useRef(null);
-    const seriesRef = useRef({});
-
-    useEffect(() => {
-      if (!containerRef.current || chartRef.current || typeof LightweightCharts === "undefined") return;
-      const chart = LightweightCharts.createChart(containerRef.current, {
-        width: containerRef.current.clientWidth, height: 160,
-        layout: { background: { color: "rgba(255,255,255,0.03)" }, textColor: "rgba(255,255,255,0.45)" },
-        grid: { vertLines: { visible: false }, horzLines: { color: "rgba(255,255,255,0.06)" } },
-        rightPriceScale: { borderColor: "rgba(255,255,255,0.12)" },
-        timeScale: { borderColor: "rgba(255,255,255,0.12)" },
-      });
-      const closeSeries = chart.addLineSeries({ color: "rgba(255,255,255,0.35)", lineWidth: 1, priceLineVisible: false, lastValueVisible: false });
-      const emaSeries = chart.addLineSeries({ color, lineWidth: 2, priceLineVisible: false, lastValueVisible: false });
-      chartRef.current = chart;
-      seriesRef.current = { closeSeries, emaSeries };
-      const ro = new ResizeObserver(entries => { if (entries[0]) chart.applyOptions({ width: entries[0].contentRect.width }); });
-      ro.observe(containerRef.current);
-      return () => { ro.disconnect(); chart.remove(); chartRef.current = null; };
-    }, []);
-
-    useEffect(() => {
-      const s = seriesRef.current;
-      if (!s.closeSeries) return;
-      const start = Math.max(0, candles.length - 200);
-      const emaFull = ema(closes, period);
-      s.closeSeries.setData(closes.slice(start).map((v,i) => ({ time: candles[start+i].time, value: v })));
-      s.emaSeries.setData(emaFull.slice(start).map((v,i) => v != null ? { time: candles[start+i].time, value: v } : null).filter(Boolean));
-      chartRef.current.timeScale().fitContent();
-    }, [period]);
-
-    return (
-      <div style={{flex:1,minWidth:280}}>
-        <div ref={containerRef} data-source="/data/ohlc_GOLD_D1.json" style={{borderRadius:6,overflow:"hidden"}}/>
-        <Mono size={11} color="rgba(255,255,255,0.5)" spacing={1} style={{display:"block",textAlign:"center",marginTop:8,marginBottom:10}}>{fillTemplate(label, {p: period})}</Mono>
-        <input type="range" min={min} max={max} step="1" value={period}
-          onChange={e => setPeriod(+e.target.value)}
-          style={{width:"100%",accentColor:color,cursor:"pointer"}}
-          aria-label={sliderLabel}/>
-      </div>
-    );
-  };
+  const stat = React.useMemo(() => {
+    const buckets = { 20: [], 50: [], 200: [] };
+    Object.values(ema_.lab).forEach(tfs => Object.values(tfs).forEach(obj => {
+      obj.grid.forEach(g => { if (buckets[g.slow]) buckets[g.slow].push(g.oos.sum_move_net); });
+    }));
+    const out = {};
+    let nTotal = 0;
+    Object.keys(buckets).forEach(k => {
+      const arr = buckets[k];
+      out[k] = { n: arr.length, pct: Math.round(arr.filter(x => x > 0).length / arr.length * 1000) / 10 };
+      nTotal += arr.length;
+    });
+    out.n_total = nTotal;
+    return out;
+  }, [ema_]);
 
   return (
-    <div style={{background:C.black,padding:"70px 5vw 56px",color:"#fff"}}>
-      <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:24,textAlign:"center"}}>{co.tag}</Mono>
-      <div style={{display:"flex",gap:20,flexWrap:"wrap",maxWidth:900,margin:"0 auto 30px"}}>
-        <MiniChart period={fastPeriod} setPeriod={setFastPeriod} min={5} max={30} color={C.gold} label={co.fastLabel} sliderLabel={co.fastLabel}/>
-        <MiniChart period={slowPeriod} setPeriod={setSlowPeriod} min={30} max={250} color="#6ea8fe" label={co.slowLabel} sliderLabel={co.slowLabel}/>
-      </div>
-      <div style={{maxWidth:840,margin:"0 auto 20px"}}>
-        {co.lines.map((line,i) => (
-          <p key={i} style={{fontSize: i<2 ? 15 : i===co.lines.length-1 ? 17 : 15.5, color: i>=3?"#fff":"rgba(255,255,255,0.72)", fontWeight: i>=3?600:400, lineHeight:1.75, marginBottom:14, fontFamily: i===co.lines.length-1 ? "'DM Serif Display',serif" : "inherit"}}>{line}</p>
-        ))}
-      </div>
-      <p style={{textAlign:"center",fontFamily:"monospace",fontSize:12,color:C.gold}}>{co.cta}</p>
-    </div>
+    <ColdStart
+      tag={cs.tag}
+      ask={cs.ask}
+      action={{ type: "choice", options: [
+        { label: cs.opt20, value: 20 }, { label: cs.opt50, value: 50 }, { label: cs.opt200, value: 200 },
+      ]}}
+      reveal={() => fillTemplate(cs.revealTemplate, {
+        n_total: stat.n_total, p20: stat[20].pct, n20: stat[20].n, p50: stat[50].pct, n50: stat[50].n, p200: stat[200].pct, n200: stat[200].n,
+      })}
+      bridge={cs.bridge}
+    />
   );
 }
 
@@ -819,7 +779,7 @@ function Chapter8() {
       {!loading && (
       <div style={{maxWidth:1060,margin:"0 auto",padding:"0 0 120px"}}>
 
-        <div style={{margin:"0 -5vw 56px"}}><ColdOpen8 candles={candles}/></div>
+        <div style={{margin:"0 -5vw 56px"}}><ColdStart8Entry ema_={ema_}/></div>
 
         <div style={{padding:"0 5vw"}}>
 

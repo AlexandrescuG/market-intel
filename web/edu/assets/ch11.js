@@ -27,16 +27,12 @@
  */
 window.Ch11Content = {
   ru: {
-    coldOpen: {
-      tag: "ГЛАВА 11 — МИЛЛИСЕКУНДА СТОИТ ДОРОЖЕ, ЧЕМ ТЫ ДУМАЕШЬ",
-      lines: [
-        "В 2010 году компания Spread Networks проложила кабель между Чикаго и Нью-Джерси — 827 миль почти по прямой линии, через горы, а не в обход, потому что в обход длиннее. Стоимость — около 300 миллионов долларов. Выигрыш — задержка сократилась с 16 до 13 миллисекунд.",
-        "Три миллисекунды. Столько же длится взмах крыла комара.",
-        "Кто-то посчитал, что эти три миллисекунды окупают 300 миллионов, и оказался прав: пропускную способность кабеля раскупили ещё до его официального запуска.",
-        "Следующие четырнадцать минут — про мир, где время измеряется в микросекундах, а расстояние до сервера биржи стоит денег. И про то, почему всё это, скорее всего, не имеет к тебе никакого отношения — а то, что имеет, находится гораздо ближе и считается за пятнадцать минут.",
-      ],
-      cta: "Разобраться, кто где стоит ↓",
-      source: "Spread Networks, ввод в эксплуатацию июнь 2010 — Wikipedia, Forbes, Chicago Booth Review.",
+    coldStart: {
+      tag: "ГОНКА",
+      ask: "Экран ждёт. В случайный момент число дёрнется — жми кнопку как можно быстрее.",
+      readyBtn: "Готов", waitLabel: "Жди…", jumpLabel: "СЕЙЧАС!", tooEarly: "Рано — жди сигнала.",
+      revealTemplate: "Твоя реакция: {{ms}} мс. Реакция колокации биржевого алгоритма: около 0.2 мс (200 микросекунд). Ты медленнее в {{ratio}} раз.",
+      bridge: "Соревноваться в скорости с этим бессмысленно — дальше о том, где скорость вообще ни при чём.",
     },
     antiMyth: {
       tag: "АНТИ-МИФ",
@@ -167,16 +163,12 @@ window.Ch11Content = {
     },
   },
   ro: {
-    coldOpen: {
-      tag: "CAPITOLUL 11 — O MILISECUNDĂ COSTĂ MAI MULT DECÂT CREZI",
-      lines: [
-        "În 2010, compania Spread Networks a instalat un cablu între Chicago și New Jersey — 827 de mile aproape în linie dreaptă, prin munți, nu ocolind, pentru că ocolul era mai lung. Costul — circa 300 de milioane de dolari. Câștigul — întârzierea a scăzut de la 16 la 13 milisecunde.",
-        "Trei milisecunde. Cam cât durează o bătaie din aripă de țânțar.",
-        "Cineva a calculat că aceste trei milisecunde recuperează 300 de milioane, și a avut dreptate: capacitatea cablului a fost cumpărată în întregime încă înainte de lansarea oficială.",
-        "Următoarele paisprezece minute — despre o lume în care timpul se măsoară în microsecunde, iar distanța până la serverul bursei costă bani. Și despre motivul pentru care toate astea, cel mai probabil, n-au nicio legătură cu tine — iar ce are legătură e mult mai aproape și se calculează în cincisprezece minute.",
-      ],
-      cta: "Află cine unde stă ↓",
-      source: "Spread Networks, dare în exploatare iunie 2010 — Wikipedia, Forbes, Chicago Booth Review.",
+    coldStart: {
+      tag: "CURSA",
+      ask: "Ecranul așteaptă. Într-un moment aleatoriu, cifra va tresări — apasă butonul cât poți de repede.",
+      readyBtn: "Gata", waitLabel: "Așteaptă…", jumpLabel: "ACUM!", tooEarly: "Prea devreme — așteaptă semnalul.",
+      revealTemplate: "Reacția ta: {{ms}} ms. Reacția unui algoritm co-locat la bursă: circa 0.2 ms (200 microsecunde). Ești mai lent de {{ratio}} ori.",
+      bridge: "A concura la viteză cu asta n-are sens — în continuare, unde viteza nu contează deloc.",
     },
     antiMyth: {
       tag: "ANTI-MIT",
@@ -309,16 +301,12 @@ window.Ch11Content = {
     },
   },
   en: {
-    coldOpen: {
-      tag: "CHAPTER 11 — A MILLISECOND COSTS MORE THAN YOU THINK",
-      lines: [
-        "In 2010, a company called Spread Networks laid a cable between Chicago and New Jersey — 827 miles, nearly a straight line, cutting through hills rather than around them, because around was longer. Cost: roughly $300 million. The payoff: latency dropped from 16 to 13 milliseconds.",
-        "Three milliseconds. About as long as a mosquito's wingbeat.",
-        "Someone calculated that those three milliseconds would pay back $300 million, and turned out to be right: the cable's capacity sold out before it was even officially switched on.",
-        "The next fourteen minutes are about a world where time is measured in microseconds and distance to an exchange's server costs real money. And about why all of that most likely has nothing to do with you — while what does have something to do with you is much closer, and takes fifteen minutes to work out.",
-      ],
-      cta: "Find out who stands where ↓",
-      source: "Spread Networks, brought online June 2010 — Wikipedia, Forbes, Chicago Booth Review.",
+    coldStart: {
+      tag: "THE RACE",
+      ask: "The screen is waiting. At a random moment the number will twitch — hit the button as fast as you can.",
+      readyBtn: "Ready", waitLabel: "Wait…", jumpLabel: "NOW!", tooEarly: "Too early — wait for the signal.",
+      revealTemplate: "Your reaction: {{ms}} ms. A co-located exchange algorithm's reaction: about 0.2 ms (200 microseconds). You're slower by {{ratio}}×.",
+      bridge: "Racing it on speed is pointless — next, where speed doesn't matter at all.",
     },
     antiMyth: {
       tag: "ANTI-MYTH",

@@ -1,0 +1,298 @@
+/* SBF Edu — общий стиль книги. Кремовая тема платформы. */
+:root {
+  --cream: #FBF6EF;
+  --paper: #FFFFFF;
+  --line:  #E7DFCF;
+  --ink:   #2B2B33;
+  --muted: #8A8275;
+  --gold:  #C9A227;
+  --glow:  #E6C257;
+  --up:    #1e8e5a;
+  --down:  #c0392b;
+  --signal:#b07d18;
+}
+
+/* ── Шрифты (override DM Sans / DM Serif где применимо) ── */
+body {
+  font-family: Montserrat, 'DM Sans', system-ui, sans-serif;
+  background: var(--cream) !important;
+}
+.mono, code, pre {
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+}
+
+/* ── Бренд-акценты (override старого золота #c9973a) ── */
+:root {
+  --edu-gold: #C9A227;
+  --edu-dark: #2B2B33;
+}
+
+/* ── Навигационная панель глав (инжектируется сервером) ── */
+.edu-nav {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: var(--paper);
+  border-top: 1px solid var(--line);
+  box-shadow: 0 -2px 12px rgba(43,43,51,.06);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  height: 48px;
+  padding: 0 8px;
+}
+.edu-nav a, .edu-nav button {
+  display: flex; align-items: center; justify-content: center;
+  height: 100%;
+  padding: 0 14px;
+  color: var(--muted);
+  text-decoration: none;
+  border: none; background: none; cursor: pointer;
+  font-family: inherit; font-size: inherit;
+  transition: color .15s;
+  white-space: nowrap;
+}
+.edu-nav a:hover, .edu-nav button:hover { color: var(--ink); }
+.edu-nav .nav-prev::before { content: '←  '; }
+.edu-nav .nav-next::after  { content: '  →'; }
+.edu-nav .nav-toc {
+  color: var(--gold);
+  font-weight: 700;
+  letter-spacing: .3px;
+  border-left: 1px solid var(--line);
+  border-right: 1px solid var(--line);
+}
+.edu-nav .nav-toc:hover { color: var(--glow); }
+.edu-nav .nav-counter {
+  color: var(--muted);
+  font-size: 11px;
+  padding: 0 10px;
+  border-right: 1px solid var(--line);
+  pointer-events: none;
+}
+.edu-nav .nav-live {
+  margin-left: auto;
+  background: rgba(201,162,39,.12);
+  border: 1px solid var(--gold);
+  border-radius: 6px;
+  color: var(--signal);
+  padding: 0 12px;
+  font-size: 11px;
+  height: 30px;
+  font-weight: 700;
+  letter-spacing: .3px;
+  text-decoration: none;
+  display: flex; align-items: center; gap: 6px;
+  margin-right: 4px;
+  transition: background .15s;
+}
+.edu-nav .nav-live:hover { background: rgba(201,162,39,.22); color: var(--gold); }
+.edu-nav .nav-live::before { content: '⬤ '; font-size: 7px; color: var(--up); }
+
+/* ── Прогресс-бар вверху страницы ── */
+.edu-progress-bar {
+  position: fixed;
+  top: 0; left: 0;
+  height: 3px;
+  background: var(--gold);
+  z-index: 1000;
+  transition: width .3s;
+}
+
+/* ── Дисклеймер ── */
+.edu-disclaimer {
+  margin: 32px auto 80px;
+  max-width: 780px;
+  padding: 12px 18px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(201,162,39,.05);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  line-height: 1.6;
+  letter-spacing: .2px;
+}
+.edu-disclaimer strong { color: var(--signal); }
+
+/* ── lang-bar: заменяем старое золото на бренд ── */
+.lang-links a.active {
+  color: var(--gold) !important;
+  border-bottom-color: var(--gold) !important;
+}
+
+/* ── Отступ снизу чтобы edu-nav не перекрывал контент ── */
+#sbf-book-root { padding-bottom: 56px; }
+
+/* ── Wire-1: встраиваемые виджеты ── */
+.sbf-widget {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 20px;
+  margin: 0 0 24px;
+}
+.sbf-widget-head {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 16px;
+}
+.sbf-sect-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 20px 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sbf-sect-n {
+  background: var(--line);
+  border-radius: 10px;
+  padding: 1px 7px;
+  font-size: 9px;
+}
+
+/* Калькулятор */
+.sbf-calc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+.sbf-panel {
+  background: rgba(201,162,39,.04);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 16px;
+}
+.sbf-panel-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 2px;
+}
+.sbf-panel-sub {
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+.sbf-field {
+  margin-bottom: 8px;
+}
+.sbf-field label {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 3px;
+}
+.sbf-field input {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 13px;
+  font-family: 'JetBrains Mono', monospace;
+}
+.sbf-field input:focus { outline: none; border-color: var(--gold); }
+.sbf-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.sbf-out {
+  margin-top: 12px;
+  padding: 10px;
+  background: var(--cream);
+  border-radius: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+}
+.sbf-o-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 3px 0;
+  border-bottom: 1px solid var(--line);
+}
+.sbf-o-row:last-child { border-bottom: none; }
+.sbf-o-k { color: var(--muted); }
+.sbf-o-v { font-weight: 700; color: var(--ink); }
+.sbf-o-v.pos { color: var(--up); }
+.sbf-o-v.neg { color: var(--down); }
+.sbf-o-v.gold { color: var(--gold); }
+.sbf-verdict {
+  margin-top: 10px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.sbf-seg {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+.sbf-seg-btn {
+  flex: 1;
+  padding: 5px 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: none;
+  color: var(--muted);
+  font-size: 11px;
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  transition: all .15s;
+}
+.sbf-seg-btn.active {
+  background: var(--gold);
+  color: #fff;
+  border-color: var(--gold);
+}
+
+/* Галерея паттернов */
+.sbf-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+.sbf-pat-card {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.sbf-pat-card svg { width: 100%; height: auto; border-radius: 6px; }
+.sbf-pat-name { font-size: 12px; font-weight: 700; color: var(--ink); }
+.sbf-pat-desc { font-size: 11px; color: var(--muted); line-height: 1.4; }
+
+/* CTA */
+.sbf-cta {
+  max-width: 780px;
+  margin: 32px auto 0;
+  padding: 0 24px;
+}
+.sbf-cta a {
+  display: block;
+  padding: 14px 20px;
+  background: var(--gold);
+  color: #fff;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .5px;
+  text-decoration: none;
+  border-radius: 10px;
+  text-align: center;
+  transition: opacity .15s;
+}
+.sbf-cta a:hover { opacity: .88; }

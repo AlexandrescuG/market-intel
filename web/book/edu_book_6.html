@@ -106,7 +106,7 @@ const STRINGS = {
   },
 };
 
-const {C, Mono, Chip, Rule, AskAnalystBtn, getChUrl, QuizBlock, ImpactMatrix, ComplianceFootnote} = window.AcademyShared;
+const {C, Mono, Chip, Rule, AskAnalystBtn, getChUrl, QuizBlock, ImpactMatrix, ComplianceFootnote, ColdStart} = window.AcademyShared;
 
 const SectionTitle = ({children,sub,align="left",id}) => (
   <div id={id} style={{textAlign:align,marginBottom:36,scrollMarginTop:130}}>
@@ -197,53 +197,64 @@ function buildVars(stats, scene, lang) {
   };
 }
 
-// ─── Cold open: "Все знали дату. Никто не знал числа." ────────────────────────
-function ColdOpen6({ scene }) {
+// ─── Cold start: "Найди релиз" (SPEC_coldstart_interactives_ch6_15.md §2) ──────
+// Заменяет прежний ColdOpen6 (статичная гистограмма) -- тот же сценарий
+// ch6_release_day.json, но теперь читатель сначала тапает по свече, где, по
+// его мнению, вышла новость, и только потом видит реальный ответ.
+function ColdStart6Entry({ scene }) {
   const T6 = window.Ch6Content[INITIAL_LANG] || window.Ch6Content.ru;
-  const co = T6.coldOpen;
-  if (!scene) {
-    return (
-      <div style={{background:C.black,padding:"60px 5vw",textAlign:"center"}}>
-        <Mono size={11} color={C.gold} spacing={4}>{co.tag}</Mono>
-      </div>
-    );
-  }
-  const meta = scene.meta, candles = scene.candles || [];
-  const maxRange = Math.max(...candles.map(c => c.high - c.low));
-  const markerTime = meta.marker_time;
-  const vars = { release_bar_range: meta.release_bar_range, peak_vs_quiet: meta.peak_vs_quiet };
+  const cs = T6.coldStart;
+  if (!scene) return <div style={{background:C.black,padding:"60px 5vw",textAlign:"center"}}><Mono size={11} color={C.gold} spacing={4}>{cs.tag}</Mono></div>;
+  const meta = scene.meta;
+  const candles = (scene.candles || []).map(c => ({ ...c, time: Math.floor(Date.parse(c.time) / 1000) }));
+  const markerTime = Math.floor(Date.parse(meta.marker_time) / 1000);
+  const timeLabel = meta.marker_time.slice(11, 16);
   return (
-    <div style={{background:C.black,padding:"70px 5vw 56px",color:"#fff"}}>
-      <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:24,textAlign:"center"}}>{co.tag}</Mono>
-      <div style={{maxWidth:840,margin:"0 auto 28px"}}>
-        {co.lines.map((line,i) => (
-          <p key={i} style={{fontSize: i<2 ? 15 : i===co.lines.length-1 ? 17 : 15.5, color: i>=4?"#fff":"rgba(255,255,255,0.72)", fontWeight: i>=4?600:400, lineHeight:1.75, marginBottom:14, fontFamily: i===co.lines.length-1 ? "'DM Serif Display',serif" : "inherit"}}>{fillTemplate(line, vars)}</p>
-        ))}
-      </div>
-      <div style={{display:"flex",alignItems:"flex-end",gap:2,height:140,maxWidth:900,margin:"0 auto 14px",padding:"0 4px"}}>
-        {candles.map((c,i) => {
-          const r = c.high - c.low;
-          const h = Math.max(2, (r / maxRange) * 140);
-          const isMarker = c.time === markerTime;
-          const hour = new Date(c.time).getUTCHours();
-          const isQuiet = hour < 8;
-          return (
-            <div key={i} title={c.time} style={{flex:1,height:h,background:isMarker?C.gold:isQuiet?"rgba(255,255,255,0.15)":"rgba(201,151,58,0.45)",borderRadius:1}}/>
-          );
-        })}
-      </div>
-      <div style={{display:"flex",justifyContent:"space-between",maxWidth:900,margin:"0 auto 30px",fontSize:10,fontFamily:"monospace",color:"rgba(255,255,255,0.35)",padding:"0 4px"}}>
-        <span>00:00 UTC</span><span>12:00 UTC</span><span>23:30 UTC</span>
-      </div>
-      <div style={{display:"flex",gap:24,justifyContent:"center",flexWrap:"wrap",maxWidth:900,margin:"0 auto 22px",fontFamily:"monospace",fontSize:11,color:"rgba(255,255,255,0.55)"}}>
-        <span>{meta.release_bar_range} pt</span>
-        <span>×{meta.peak_vs_quiet} · <Mono size={11} color="rgba(255,255,255,.55)" spacing={0}>{meta.marker_label}</Mono></span>
-      </div>
-      <p style={{textAlign:"center",fontSize:11,color:"rgba(255,255,255,0.4)",fontStyle:"italic",marginBottom:20}}>
-        {meta["selection_note_" + INITIAL_LANG] || meta.selection_note_ru} · {meta.date}
-      </p>
-      <p style={{textAlign:"center",fontFamily:"monospace",fontSize:12,color:C.gold}}>{co.cta}</p>
-    </div>
+    <ColdStart
+      tag={cs.tag}
+      ask={cs.ask}
+      action={{ type: "chartTap", chart: {
+        candles, visibleCount: candles.length, dataSource: "/data/edu_scenes/ch6_release_day.json",
+        height: 320, markerTime, markerText: meta.marker_label,
+        isCorrect: (t) => t === markerTime,
+      }}}
+      reveal={() => fillTemplate(cs.revealTemplate, {
+        marker_label: meta.marker_label, date: meta.date, time: timeLabel,
+        release_bar_range: meta.release_bar_range, peak_vs_quiet: meta.peak_vs_quiet,
+      })}
+      bridge={cs.bridge}
+    />
+  );
+}
+
+// ─── Cold start, середина: "Сюрприз или число" (§2 середина) ──────────────────
+// Один и тот же реальный релиз (big_positive, уже используется в SurpriseCalc
+// для объяснения сигмы) -- сначала как игра "угадай направление", позже как
+// разобранный пример. actualDir считается из его же настоящих свечей (open
+// первого бара -> close последнего, честные 3 часа окна), ничего не выдумано.
+function ColdStart6Middle({ stats }) {
+  const T6 = window.Ch6Content[INITIAL_LANG] || window.Ch6Content.ru;
+  const cm = T6.coldStartMiddle;
+  const dir = (stats && stats.direction) || null;
+  const ex = stats ? (stats.sim_releases || []).find(s => s.kind === "big_positive") : null;
+  if (!ex || !dir) return null;
+  const open0 = ex.candles[0].open, closeLast = ex.candles[ex.candles.length - 1].close;
+  const movePts = Math.round((closeLast - open0) * 100) / 100;
+  const actualDir = closeLast > open0 ? "up" : "down";
+  return (
+    <ColdStart
+      tag={cm.tag}
+      ask={fillTemplate(cm.askTemplate, { ex_forecast: ex.forecast, ex_actual: ex.actual })}
+      action={{ type: "choice", options: [
+        { label: cm.dirUp, value: "up" }, { label: cm.dirDown, value: "down" },
+      ]}}
+      reveal={() => fillTemplate(cm.revealTemplate, {
+        actualDirWord: actualDir === "up" ? cm.dirUp : cm.dirDown,
+        move_pts: Math.abs(movePts), open0: open0.toFixed(2), closeLast: closeLast.toFixed(2),
+        n: dir.n, hit_rate: dir.hit_rate, ci_lo: dir.ci95[0], ci_hi: dir.ci95[1],
+      })}
+      bridge={cm.bridge}
+    />
   );
 }
 
@@ -892,7 +903,7 @@ function Chapter6() {
             width:100vw + margin-left:50% + translateX(-50%) не зависит от
             ширины родителя вообще -- секция, а не карточка, как и требует
             правило §1 (cold open продолжает hero по смыслу). */}
-        <div style={{width:"100vw",marginLeft:"50%",transform:"translateX(-50%)",marginBottom:56}}><ColdOpen6 scene={scene}/></div>
+        <div style={{width:"100vw",marginLeft:"50%",transform:"translateX(-50%)",marginBottom:56}}><ColdStart6Entry scene={scene}/></div>
 
         <div style={{padding:"0 5vw"}}>
 
@@ -903,6 +914,8 @@ function Chapter6() {
 
         <SectionTitle sub={S.surpriseCalcSub}>{T6.surpriseCalc.title}</SectionTitle>
         <SurpriseCalc stats={stats} vars={vars}/>
+
+        <div style={{width:"100vw",marginLeft:"50%",transform:"translateX(-50%)",marginBottom:56}}><ColdStart6Middle stats={stats}/></div>
 
         <SectionTitle id="secCoreMeasure" sub={S.coreMeasureSub}>{T6.coreMeasure.title}</SectionTitle>
         <CoreMeasureBlock stats={stats} vars={vars}/>

@@ -20,6 +20,9 @@ from core.telegram import send_text
 
 log = setup("orchestrator")
 
+TWITTER_TIMEOUT = 300   # сек — предел на весь твиттер-шаг одного цикла
+CYCLE_TIMEOUT   = 900   # сек — предел на цикл целиком (запас до CHECK_INTERVAL)
+
 
 async def one_cycle(only: str | None = None) -> None:
     db.init_db()
@@ -27,38 +30,36 @@ async def one_cycle(only: str | None = None) -> None:
     # RSS — без браузера, дёшево, делаем всегда первым
     if only in (None, "rss"):
         from collectors import rss
-        from core.telegram import send_text
         try:
-            loop = asyncio.get_event_loop()
-            _, rss_alerts = await loop.run_in_executor(None, rss.collect)
-            for item in rss_alerts:
-                icon = {"economy": "💰", "geopolitics": "🌍"}.get(item["dimension"], "📰")
-                await send_text(
-                    f"{icon} <b>{item['source']}</b>\n{item['title']}\n\n🔗 {item['url']}"
-                )
-                await asyncio.sleep(0.5)
+            await asyncio.get_event_loop().run_in_executor(None, rss.collect)
         except Exception as e:
             log.error("rss failed: %s", e)
 
-    # Twitter + Reddit делят один stealth-контекст
-    if only in (None, "twitter", "reddit"):
+    # StockTwits — тоже без браузера (замена Reddit)
+    if only in (None, "stocktwits"):
+        from collectors import stocktwits
+        try:
+            await stocktwits.collect()
+        except Exception as e:
+            log.error("stocktwits failed: %s", e)
+
+    # Twitter делает stealth-контекст
+    if only in (None, "twitter"):
         ctx = await cloakbrowser.launch_persistent_context_async(
             user_data_dir=str(PROFILE_DIR), headless=HEADLESS,
             locale="en-US", timezone="Europe/Moscow",
             viewport={"width": 1280, "height": 900})
         try:
-            if only in (None, "twitter"):
-                from collectors import twitter
-                try:
-                    await twitter.collect_with_context(ctx)
-                except Exception as e:
-                    log.error("twitter failed: %s", e, exc_info=True)
-            if only in (None, "reddit"):
-                from collectors import reddit
-                try:
-                    await reddit.collect_with_context(ctx)
-                except Exception as e:
-                    log.error("reddit failed: %s", e, exc_info=True)
+            from collectors import twitter
+            try:
+                # x.com иногда вешает страницу без исключения (не только таймаут
+                # goto) — без внешнего предела это стопорит весь оркестратор на
+                # часы, как случилось 09.07 (BUG: посты из X перестали приходить).
+                await asyncio.wait_for(twitter.collect_with_context(ctx), timeout=TWITTER_TIMEOUT)
+            except asyncio.TimeoutError:
+                log.error("twitter timed out after %ds — пропускаем этот цикл", TWITTER_TIMEOUT)
+            except Exception as e:
+                log.error("twitter failed: %s", e, exc_info=True)
         finally:
             await ctx.close()
 
@@ -66,7 +67,7 @@ async def one_cycle(only: str | None = None) -> None:
 async def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--once", action="store_true")
-    ap.add_argument("--only", choices=["rss", "reddit", "twitter"])
+    ap.add_argument("--only", choices=["rss", "stocktwits", "twitter"])
     args = ap.parse_args()
 
     if args.once:
@@ -75,7 +76,10 @@ async def main() -> None:
 
     while True:
         try:
-            await one_cycle(args.only)
+            await asyncio.wait_for(one_cycle(args.only), timeout=CYCLE_TIMEOUT)
+        except asyncio.TimeoutError:
+            log.error("cycle timed out after %ds — переходим к следующему прогону", CYCLE_TIMEOUT)
+            await send_text(f"⚠️ Monitor: цикл завис дольше {CYCLE_TIMEOUT}s, прерван")
         except Exception as e:
             log.error("cycle error: %s", e, exc_info=True)
             await send_text(f"⚠️ Monitor error: {e}")
