@@ -53,7 +53,7 @@ def _sr_levels(symbol: str):
     except sqlite3.OperationalError:
         rows = []
     con.close()
-    return [(r["price"], 1.0, f"Исторический уровень, {r['touches']} касаний") for r in rows]
+    return [(r["price"], 1.0, "level", {"touches": r["touches"]}) for r in rows]
 
 
 def _pivot_factors(symbol: str):
@@ -70,7 +70,7 @@ def _pivot_factors(symbol: str):
         w = weight.get(L.get("name"))
         if w is None:
             continue
-        out.append((L["price"], w, f"Пивот {L['name']}"))
+        out.append((L["price"], w, "pivot", {"name": L["name"]}))
     return out
 
 
@@ -85,8 +85,7 @@ def _round_number_factors(symbol: str, price: float, atr: float):
     n = start
     while n <= hi:
         if lo <= n <= hi:
-            label = f"{n:.4f}".rstrip("0").rstrip(".") if step < 1 else f"{n:.0f}"
-            out.append((n, 1.0, f"Круглое число {label}"))
+            out.append((n, 1.0, "round", None))
         n += step
     return out
 
@@ -105,17 +104,17 @@ def _week_month_extremes(candles):
     months = sorted(by_month.keys())
     if len(weeks) >= 2:
         wk_candles = by_week[weeks[-2]]  # последняя ЗАВЕРШЁННАЯ неделя
-        out.append((max(c["h"] for c in wk_candles), 1.0, "Недельный максимум"))
-        out.append((min(c["l"] for c in wk_candles), 1.0, "Недельный минимум"))
+        out.append((max(c["h"] for c in wk_candles), 1.0, "week_high", None))
+        out.append((min(c["l"] for c in wk_candles), 1.0, "week_low", None))
     if len(months) >= 2:
         mo_candles = by_month[months[-2]]
-        out.append((max(c["h"] for c in mo_candles), 1.0, "Месячный максимум"))
-        out.append((min(c["l"] for c in mo_candles), 1.0, "Месячный минимум"))
+        out.append((max(c["h"] for c in mo_candles), 1.0, "month_high", None))
+        out.append((min(c["l"] for c in mo_candles), 1.0, "month_low", None))
     return out
 
 
 def _cluster_factors(points, window):
-    """points: [(price, weight, label)] -> жадная кластеризация по ЯКОРЮ
+    """points: [(price, weight, kind, params)] -> жадная кластеризация по ЯКОРЮ
     (первому элементу кластера), не по последнему добавленному — см. фикс
     того же бага в sr_levels_job.py._cluster: цепочка по последнему элементу
     даёт неограниченно широкие кластеры при плотных равномерных факторах
@@ -154,18 +153,26 @@ def compute_symbol(symbol: str, verbose=False):
     max_dist = atr * MAX_DIST_ATR_MULT
     zones = []
     for cluster in clusters:
-        score = sum(w for _, w, _ in cluster)
+        score = sum(w for _, w, _, _ in cluster)
         if score < ZONE_MIN_SCORE:
             continue
-        price_low = min(p for p, _, _ in cluster)
-        price_high = max(p for p, _, _ in cluster)
+        price_low = min(p for p, _, _, _ in cluster)
+        price_high = max(p for p, _, _, _ in cluster)
         mid = (price_low + price_high) / 2
         if abs(mid - price) > max_dist:
             continue
-        labels = [lbl for _, _, lbl in cluster]
+        # Раньше факторы схлопывались в готовые русские строки ("Пивот PP")
+        # и цена внутри каждого фактора терялась -- карточка могла показать
+        # только название, не число (SPEC_chart_fixes_and_staged_signup.md §1).
+        # kind — машиночитаемый тип для перевода на фронте (i18n, 3 языка),
+        # params — что нужно этому типу для форматирования строки.
+        factors = [
+            {"price": round(p, 6), "kind": kind, **({"params": params} if params else {})}
+            for p, _, kind, params in cluster
+        ]
         zones.append({
             "symbol": symbol, "price_low": round(price_low, 6), "price_high": round(price_high, 6),
-            "score": round(score, 2), "factors": labels,
+            "score": round(score, 2), "factors": factors,
         })
     zones.sort(key=lambda z: z["score"], reverse=True)
     zones = zones[:MAX_ZONES]

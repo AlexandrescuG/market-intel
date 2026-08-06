@@ -88,7 +88,9 @@ _SESSION_HOURS_SEED = [
 
 
 def _connect() -> sqlite3.Connection:
-    con = sqlite3.connect(str(_BOT_DB))
+    con = sqlite3.connect(str(_BOT_DB), timeout=10)
+    con.execute("PRAGMA journal_mode=WAL")
+    con.execute("PRAGMA busy_timeout=10000")
     con.row_factory = sqlite3.Row
     return con
 

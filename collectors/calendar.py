@@ -1,6 +1,17 @@
 """WP7 — Экономический календарь. FOMC, CPI, NFP, ECB, PMI.
 
 Источник: Investing.com scrape (fallback) или FMP free API.
+
+🔴 DEPRECATED (СПЕКА_календарь_и_движения_рынка.md §2): не канонично и не
+вызывается ниоткуда в проекте. Таблица `calendar` (signals.db), которую пишет
+collect_calendar(), пуста и не читается — реальный календарь живёт в таблице
+econ_events (SBFAcademy_bot/bot.db), наполняется calendar_pull.py
+(Forexfactory + TradingView, работает непрерывным потоком внутри
+sbf-web.service) и отдаётся через core/calendar_api.py (/api/calendar/events)
+и build_brief_v2.py. _fetch_scrape() ниже к тому же никогда не работал —
+возвращает [] безусловно. Файл оставлен как есть (не удалён) на случай, если
+FMP-ключ появится и понадобится альтернативный источник — но перед
+использованием сверить с econ_events, не подключать вслепую.
 """
 from __future__ import annotations
 

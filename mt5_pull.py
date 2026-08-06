@@ -66,7 +66,10 @@ SYMBOL_MAP = {
 }
 
 # наш tf-код -> константа таймфрейма MT5  (совпадает с тумблерами графика)
+# 15m — SPEC_chart_fixes_and_staged_signup.md §3 (добавлен на сервере
+# publish.py::publish_charts_mt5, ждёт бэкфилла отсюда).
 TIMEFRAMES = {
+    "15m": mt5.TIMEFRAME_M15,
     "30m": mt5.TIMEFRAME_M30,
     "1h":  mt5.TIMEFRAME_H1,
     "4h":  mt5.TIMEFRAME_H4,
@@ -75,7 +78,7 @@ TIMEFRAMES = {
 }
 
 # сколько последних баров тянуть в штатном режиме (без бэкфилла)
-RECENT_BARS = {"30m": 3000, "1h": 3000, "4h": 2000, "1d": 2000, "1w": 1000}
+RECENT_BARS = {"15m": 3000, "30m": 3000, "1h": 3000, "4h": 2000, "1d": 2000, "1w": 1000}
 
 HTTP_CHUNK = 5000          # баров в одном POST
 LOCAL_DB   = "price_bars.sqlite"

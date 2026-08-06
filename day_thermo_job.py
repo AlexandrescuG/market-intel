@@ -254,7 +254,9 @@ def compute_symbol(symbol: str, con_bot, con_signals, now: int, verbose=False):
 
 
 def run(verbose: bool = False) -> int:
-    con_bot = sqlite3.connect(str(_BOT_DB))
+    con_bot = sqlite3.connect(str(_BOT_DB), timeout=10)
+    con_bot.execute("PRAGMA journal_mode=WAL")
+    con_bot.execute("PRAGMA busy_timeout=10000")
     con_bot.executescript("""
         CREATE TABLE IF NOT EXISTS day_thermo(
           symbol TEXT PRIMARY KEY, ts INT,

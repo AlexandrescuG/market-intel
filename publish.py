@@ -20,6 +20,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from core import db
+from core import symbols as _symbols
 from core.config import BASE_DIR, REPORTS_DIR
 
 log = logging.getLogger("publish")
@@ -38,17 +39,6 @@ TECH_BASE = [
     "CL=F", "NG=F",
 ]
 
-# Читабельные имена для отображения на сайте
-TICKER_NAMES = {
-    "GC=F": "GOLD",       "SI=F": "SILVER",
-    "BTC-USD": "BTCUSD",  "ETH-USD": "ETHUSD",  "SOL-USD": "SOLUSD",
-    "EURUSD=X": "EURUSD", "GBPUSD=X": "GBPUSD",
-    "^GSPC": "S&P 500",   "^IXIC": "Nasdaq",    "^DJI": "Dow Jones",
-    "CL=F": "Нефть WTI",  "NG=F": "Природный газ",
-    "^VIX": "VIX",        "DX-Y.NYB": "DXY",
-}
-
-
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
@@ -61,15 +51,11 @@ def _write(name: str, payload: dict) -> None:
 
 def publish_market() -> None:
     from core.market import snapshot, crypto_fear_greed, DASHBOARD
-    names = {
-        "^GSPC": "S&P 500", "^IXIC": "Nasdaq", "^DJI": "Dow Jones", "^VIX": "VIX",
-        "GC=F": "GOLD", "SI=F": "SILVER", "CL=F": "Нефть WTI", "NG=F": "Природный газ",
-        "BTC-USD": "BTCUSD", "ETH-USD": "ETHUSD", "SOL-USD": "SOLUSD",
-        "EURUSD=X": "EURUSD", "GBPUSD=X": "GBPUSD",
-        "DX-Y.NYB": "DXY",
-    }
+    # "name" — фолбэк на случай, если фронт грузится без SBFSymbols (тот
+    # переозвучивает по window.SBFSymbols.symbolName на нужном языке сам,
+    # см. SPEC_symbol_names.md §3); здесь всегда русское имя реестра.
     snap = snapshot(DASHBOARD)
-    items = [{"name": names.get(t, t), "ticker": t, **snap.get(t, {})}
+    items = [{"name": _symbols.symbol_name(t, mode="name"), "ticker": t, **snap.get(t, {})}
              for t in DASHBOARD if snap.get(t, {}).get("price") is not None]
     _write("market.json", {"updated": _now(), "items": items,
                            "fear_greed": crypto_fear_greed()})
@@ -81,7 +67,7 @@ def publish_technical() -> None:
     for t in TECH_BASE:
         a = analyze(t)
         if a:
-            a["name"] = TICKER_NAMES.get(t, t)  # добавляем читабельное имя
+            a["name"] = _symbols.symbol_name(t, mode="name")  # читабельное имя из реестра
             cards.append(a)
     _write("technical.json", {"updated": _now(), "cards": cards})
 
@@ -174,12 +160,6 @@ def publish_verification() -> None:
     })
 
 
-def publish_calendar() -> None:
-    from collectors.calendar import upcoming, resolve_past_events
-    resolve_past_events()
-    _write("calendar.json", {"updated": _now(), "upcoming": upcoming(hours=72)})
-
-
 def publish_macro() -> None:
     from core.fred import macro_snapshot
     _write("macro.json", macro_snapshot())
@@ -206,20 +186,27 @@ def publish_charts() -> None:
     import pandas as pd
     import yfinance as yf
     from core.technical import analyze
+    from core.symbols_registry import chart_watch
 
-    WATCH = {
-        "GOLD": "GC=F", "SILVER": "SI=F",
-        "BTC": "BTC-USD", "ETH": "ETH-USD", "SOL": "SOL-USD",
-        "EURUSD": "EURUSD=X", "GBPUSD": "GBPUSD=X",
-        "SPX": "^GSPC", "NASDAQ": "^IXIC", "DJI": "^DJI",
-        "WTI": "CL=F", "NG": "NG=F",
-        "DXY": "DX-Y.NYB",  # Focus Engine DEFAULT_UNIVERSE (core/focus.py) -- уже
-                            # в core.market.DASHBOARD/quotes.json, не хватало
-                            # только дневного OHLC для ATR.
-    }
+    # СПЕКА_графики_и_починка_календаря.md §2: единственный источник истины —
+    # symbols.json ("chart": true), не захардкоженный словарь. Раньше здесь
+    # было 13 инструментов и НЕ было USDJPY (несмотря на то что для него уже
+    # существовали файлы баров и запись в symbols.json) — "добавляли отдельно,
+    # в обход" (см. serve.py::_M5_YF_TICKERS). Теперь WATCH = все с chart:true:
+    # старые 13 + USDJPY + 12 новых валютных пар (EURGBP/USDCAD/.../USDKRW,
+    # добавлены 06.08, проверены вживую на Yahoo — есть глубокий H1) +
+    # USDCNY/USDZAR/USDAED (были в реестре названий без единого файла баров) +
+    # USDKZT (был только один файл D1 без ясного источника).
+    WATCH = chart_watch()
     # (period, interval) — глубина истории под прокрутку назад
+    # M15 — SPEC_chart_fixes_and_staged_signup.md §3: статикой, как остальные
+    # (60 дней на 15m — тот же охват, что M30, ~0,8МБ/символ, терпимо). M5
+    # сюда намеренно НЕ входит — 60д на 5m это ~2,5МБ/символ и вес статики,
+    # которую grafik-engine.js тянет целиком; M5 отдаётся через отдельный
+    # API-эндпоинт с коротким окном (см. serve.py::_handle_chart_ohlc_m5).
     NATIVE = {
         "M30": ("60d",  "30m"),
+        "M15": ("60d",  "15m"),
         "H1":  ("730d", "60m"),
         "D1":  ("5y",   "1d"),
         "W1":  ("max",  "1wk"),
@@ -288,7 +275,7 @@ def publish_charts() -> None:
                     ).dropna()
                     overrides = {ts.date(): (float(r.Open), float(r.High), float(r.Low), float(r.Close))
                                  for ts, r in resampled.iterrows()}
-                candles, vol = rows_from(df, intraday=interval in ("30m", "60m"), overrides=overrides)
+                candles, vol = rows_from(df, intraday=interval in ("15m", "30m", "60m"), overrides=overrides)
                 _write(f"ohlc_{label}_{tf}.json",
                        {**meta, "interval": tf, "candles": candles, "volume": vol})
             except Exception as e:
@@ -366,8 +353,15 @@ def publish_charts_mt5() -> None:
     from core.technical import pivots as calc_pivots, _rsi
 
     MT5_SYMS = ["USDRUB", "USDKZT", "USDJPY"]
+    # M15 — SPEC_chart_fixes_and_staged_signup.md §3. Готово принять данные,
+    # как только они появятся в price_bars (tf='15m') -- заливает их
+    # mt5_pull.py на отдельной Windows-машине, не автоматизировано отсюда
+    # (см. project_mt5_wine_pipeline в памяти). Пока строк нет -- ветка ниже
+    # (`if not rows: continue`) просто не пишет ohlc_{sym}_M15.json, честно,
+    # без выдумки.
     TF_MAP = {
         "M30": ("30m", True),
+        "M15": ("15m", True),
         "H1":  ("1h",  True),
         "H4":  ("4h",  True),
         "D1":  ("1d",  False),
@@ -444,10 +438,12 @@ def publish_all() -> None:
     fast_fns = (publish_market, publish_technical, publish_signals,
                 publish_buzz, publish_report)
     # Медленнее / зависят от истории
-    # publish_calendar снят из пайплайна: читает мёртвую таблицу `calendar` в
-    # signals.db (её пишет только collect_calendar(), которого никто не вызывает) —
-    # реальный календарь теперь в econ_events, отдаётся через /api/calendar/events
-    # и build_brief_v2.py. Витрину calendar.json не читал ни один фронтенд-код.
+    # publish_calendar() удалена (СПЕКА_календарь_и_движения_рынка.md §2.4):
+    # читала мёртвую таблицу `calendar` в signals.db (её писал только
+    # collect_calendar(), которого никто не вызывал) и писала пустышку
+    # web/data/calendar.json, которую не читал ни один фронтенд-код —
+    # реальный календарь в econ_events, отдаётся через /api/calendar/events
+    # и build_brief_v2.py. Файл calendar.json удалён вместе с функцией.
     slow_fns = (publish_stories, publish_regime, publish_verification,
                 publish_macro, publish_divergence,
                 publish_anomalies, publish_health, publish_charts, publish_charts_mt5)

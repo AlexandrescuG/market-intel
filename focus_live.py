@@ -24,15 +24,12 @@ from core.focus import DEFAULT_UNIVERSE, NO_LIVE_FEED, select_focus
 
 _WEB_DATA = Path(__file__).parent / "web" / "data"
 
-# Тот же label->ticker, что publish.py's WATCH (+ DXY) -- quotes.json ключуется
+# Тот же label->ticker, что publish.py's WATCH -- quotes.json ключуется
 # тикером Yahoo, не site-меткой (см. план: "Preface #1" находки Plan-агента).
-LABEL_TO_TICKER = {
-    "GOLD": "GC=F", "SILVER": "SI=F",
-    "BTC": "BTC-USD", "ETH": "ETH-USD", "SOL": "SOL-USD",
-    "EURUSD": "EURUSD=X", "GBPUSD": "GBPUSD=X",
-    "SPX": "^GSPC", "NASDAQ": "^IXIC", "DJI": "^DJI",
-    "WTI": "CL=F", "NG": "NG=F", "DXY": "DX-Y.NYB",
-}
+# СПЕКА_графики_и_починка_календаря.md §2: оба теперь выводятся из
+# symbols.json ("chart": true), не два независимых захардкоженных словаря.
+from core.symbols_registry import chart_watch
+LABEL_TO_TICKER = chart_watch()
 
 
 def _read_quotes() -> dict:

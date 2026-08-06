@@ -27,14 +27,12 @@ _INDEX = {"SPX": "^GSPC", "NDX": "^IXIC", "DJI": "^DJI", "VIX": "^VIX", "RUT": "
 _ALIAS = {"DXY": "DX-Y.NYB", "GOLD": "GC=F", "XAU": "GC=F", "OIL": "CL=F",
           "WTI": "CL=F", "BRENT": "BZ=F", "GAS": "NG=F", "SILVER": "SI=F"}
 
-# базовый дашборд — всегда считаем реакцию по этим инструментам
-DASHBOARD = [
-    "^GSPC", "^IXIC", "^DJI", "^VIX",
-    "GC=F", "SI=F", "CL=F", "NG=F",
-    "BTC-USD", "ETH-USD", "SOL-USD",
-    "EURUSD=X", "GBPUSD=X",
-    "DX-Y.NYB",
-]
+# базовый дашборд — всегда считаем реакцию по этим инструментам.
+# СПЕКА_графики_и_починка_календаря.md §2: выведено из symbols.json
+# ("quote": true), не захардкожено -- те же 14 тикеров, что были, проверено
+# на равенство перед переключением.
+from core.symbols_registry import quote_dashboard, yahoo_ticker as _registry_yahoo_ticker
+DASHBOARD = quote_dashboard()
 
 _cache: dict[str, tuple[float, dict]] = {}
 _TTL = 600  # сек
@@ -48,6 +46,12 @@ def to_ticker(tag: str) -> str:
         return _ALIAS[t]
     if t in _CRYPTO:
         return f"{t}-USD"
+    # 🔴 Была здесь без фоллбека в реестр: for FX она возвращала тег как есть
+    # ("USDCAD" -> "USDCAD"), а Yahoo ждёт "USDCAD=X". Пока пары были только
+    # в _ALIAS выше, это не всплывало -- 12 новых пар (06.08) уже ловили баг.
+    reg = _registry_yahoo_ticker(t)
+    if reg:
+        return reg
     return t  # обычная акция как есть
 
 

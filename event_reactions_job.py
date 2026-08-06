@@ -1,26 +1,40 @@
 #!/usr/bin/env python3
 """
-event_reactions_job.py — SBF_Charts_Layer1_Spec, Фаза 2 («Прошлые разы»).
+event_reactions_job.py — SBF_Charts_Layer1_Spec, Фаза 2 («Прошлые разы»)
++ СПЕКА_календарь_и_движения_рынка.md §3 (нормировка на фон часа суток, период
+выборки, 4-часовое окно для сверки с Recognia).
 
 Офлайн-джоб (раз в сутки 04:30, см. sbf-event-reactions.timer): для каждого
 (event_type, symbol) с weight>=1 в event_instrument_map считает статистику
 реакции цены на прошлые публикации по M30 OHLCV из price_bars.
 
+Нормировка на фон часа суток (§3, "самое важное"): 38 пипс в 15:30 UTC и
+38 пипс в 03:00 UTC — разные события, во втором случае это аномалия. Берём
+типичный (без разбора событие/не событие) ход того же часа из уже
+посчитанного tools/edu_build/hourly_profile.py (глава 5) — не считаем заново.
+baseline_ratio_30m = медиана по случаям (ход/типичный ход ЭТОГО часа), не
+общий ход/общий типичный час — так каждый случай сравнивается со своим часом,
+а не усредняется вслепую по событиям, которые могут выходить в разное время.
+
 Использование:
   python3 event_reactions_job.py [--verbose]
 """
 import argparse
+import json
 import re
 import sqlite3
 import statistics
 import sys
 import time
+from datetime import datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 from core.event_types import normalize_event_type
 
 _BOT_DB = Path("/mnt/sbfdata/sbf-platform/SBFAcademy_bot/bot.db")
+_HOURLY_PROFILE = Path(__file__).parent / "web" / "data" / "edu_stats" / "hourly_profile.json"
+WINDOW_4H = 4 * 3600
 
 # GOLD на живом графике (chart.html) хранится в price_bars/symbol_map как XAUUSD —
 # два разных символьных пространства, см. память project_sbf_charts_layer1.
@@ -32,7 +46,18 @@ _CHART_TO_PRICE_BARS_SYMBOL = {"GOLD": "XAUUSD"}
 # верификации: EURUSD показывал avg_move=0.00 почти everywhere, хотя реальное
 # движение было). 1 пипс EURUSD/GBPUSD = 0.0001, USDJPY = 0.01, золото/индексы/
 # крипта/commodities — уже в "долларовых" пунктах, масштаб 1.
-_PIP_SCALE = {"EURUSD": 10000, "GBPUSD": 10000, "USDJPY": 100}
+# SPEC_графики_и_починка_календаря.md §2: 12 новых пар (06.08) без масштаба
+# показывали move в "0 п." (.toFixed(0) от сырой цены 0.xxxx) -- тот же класс
+# бага, что уже был найден для EURUSD/GBPUSD/USDJPY (см. комментарий выше про
+# avg_move=0.00). Курсы < ~50 -- 4-значный пункт (×10000), как у majors;
+# HUF/CZK/KRW котируются с ценой в сотнях-тысячах -- 2-значный пункт (×100),
+# та же конвенция, что уже применена к USDJPY.
+_PIP_SCALE = {
+    "EURUSD": 10000, "GBPUSD": 10000, "USDJPY": 100,
+    "EURGBP": 10000, "USDCAD": 10000, "USDCHF": 10000, "AUDUSD": 10000, "NZDUSD": 10000,
+    "USDBRL": 10000, "USDMXN": 10000, "USDTRY": 10000, "USDPLN": 10000,
+    "USDHUF": 100, "USDCZK": 100, "USDKRW": 100,
+}
 
 
 def _pip_scale(symbol: str) -> float:
@@ -45,6 +70,7 @@ _SOURCE_PRIORITY = {"curated_official": 0, "forexfactory": 1, "tradingview": 2}
 
 MIN_CASES = 4
 N_TIERS = (6, 12)
+MIN_DIR_CASES = 3  # мин. случаев beat/miss отдельно, чтобы показать долю направления (§"Влияние")
 WINDOW_30M = 1800
 WINDOW_60M = 3600
 
@@ -131,9 +157,42 @@ def _atr14(con, symbol):
     return (sum(trs) / len(trs)) * _pip_scale(symbol)
 
 
-def _case_metrics(con, symbol, release_ts):
-    """Метрики одного случая: ход 30м/60м (пункты), макс. амплитуда, направление."""
-    bars = _bars_by_ts(con, symbol, release_ts - 1800, release_ts + 3600 + 1800)
+def _load_hourly_baseline():
+    """symbol -> {hour_utc(int) -> typical M30-бар range (в тех же "пунктах",
+    что hourly_profile.py считает — сырая цена, БЕЗ _PIP_SCALE) усреднённый
+    по всем доступным периодам (месяцы/годы) — история короткая (2-3 месяца
+    у GOLD/EURUSD), матчить период события точь-в-точь избыточно, честнее
+    взять типичный ход часа по всему, что есть, чем молча пропустить событие,
+    для которого нет ровно того же месяца в hourly_profile.json.
+    Источник — tools/edu_build/hourly_profile.py, не пересчитываем заново
+    (§3 спеки: "брать делитель оттуда, не изобретать заново")."""
+    if not _HOURLY_PROFILE.exists():
+        return {}
+    try:
+        data = json.loads(_HOURLY_PROFILE.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    out: dict[str, dict[int, float]] = {}
+    for symbol, payload in data.items():
+        if symbol == "_meta" or not isinstance(payload, dict):
+            continue
+        by_period = payload.get("by_period") or {}
+        acc: dict[int, list[float]] = {}
+        for _period, hours in by_period.items():
+            for hh, cell in hours.items():
+                mp = cell.get("median_pts")
+                if mp is None:
+                    continue
+                acc.setdefault(int(hh), []).append(mp)
+        out[symbol] = {hh: statistics.mean(vals) for hh, vals in acc.items() if vals}
+    return out
+
+
+def _case_metrics(con, symbol, release_ts, hourly_baseline):
+    """Метрики одного случая: ход 30м/60м/4ч (пункты), макс. амплитуда,
+    направление, плюс нормировка 30-минутного хода на типичный ход ЭТОГО часа
+    суток (baseline_ratio) без разбора событие/не событие (§3 спеки)."""
+    bars = _bars_by_ts(con, symbol, release_ts - 1800, release_ts + WINDOW_4H + 1800)
     bar0 = _nearest_bar(bars, release_ts)
     if bar0 is None:
         return None
@@ -149,15 +208,61 @@ def _case_metrics(con, symbol, release_ts):
         true_range = (bar0["h"] - bar0["l"]) * scale
         close_ref = bar0["c"]
     direction = "up" if close_ref > bar0["o"] else "down" if close_ref < bar0["o"] else "flat"
+
+    # 4-часовое окно -- тот же горизонт, что у контрольных цифр Recognia (§0),
+    # используется для одноразовой сверки порядка величины, не для карточки.
+    window_bars = {ts: b for ts, b in bars.items() if release_ts <= ts <= release_ts + WINDOW_4H}
+    if window_bars:
+        true_range_4h = (max(b["h"] for b in window_bars.values())
+                          - min(b["l"] for b in window_bars.values())) * scale
+    else:
+        true_range_4h = None
+
+    hour_utc = datetime.fromtimestamp(release_ts, tz=timezone.utc).hour
+    baseline_30m = (hourly_baseline.get(symbol) or {}).get(hour_utc)
+    baseline_ratio = (move_30m / (baseline_30m * scale)) if baseline_30m else None
+
     return {
-        "move_30m": move_30m, "move_60m": move_60m,
+        "move_30m": move_30m, "move_60m": move_60m, "true_range_4h": true_range_4h,
         "true_range": true_range, "dir": direction,
+        "baseline_30m": (baseline_30m * scale) if baseline_30m else None,
+        "baseline_ratio": baseline_ratio,
     }
+
+
+def _migrate(con: sqlite3.Connection) -> None:
+    """Идемпотентно, джоб не зависит от того, перезапускался ли sbf-web.service
+    (там та же миграция дублирована в serve.py::_ensure_schema — единый список
+    колонок для читателя схемы, но каждый процесс сам себя обеспечивает)."""
+    for ddl in (
+        "ALTER TABLE event_reaction_stats ADD COLUMN hourly_baseline_30m REAL",
+        "ALTER TABLE event_reaction_stats ADD COLUMN baseline_ratio_30m REAL",
+        "ALTER TABLE event_reaction_stats ADD COLUMN period_from TEXT",
+        "ALTER TABLE event_reaction_stats ADD COLUMN period_to TEXT",
+        "ALTER TABLE event_reaction_stats ADD COLUMN avg_move_4h REAL",
+        "ALTER TABLE event_reaction_stats ADD COLUMN max_move_4h REAL",
+        "ALTER TABLE event_reaction_stats ADD COLUMN n_beat INT",
+        "ALTER TABLE event_reaction_stats ADD COLUMN beat_up_share REAL",
+        "ALTER TABLE event_reaction_stats ADD COLUMN beat_down_share REAL",
+        "ALTER TABLE event_reaction_stats ADD COLUMN n_miss INT",
+        "ALTER TABLE event_reaction_stats ADD COLUMN miss_up_share REAL",
+        "ALTER TABLE event_reaction_stats ADD COLUMN miss_down_share REAL",
+    ):
+        try:
+            con.execute(ddl)
+        except sqlite3.OperationalError:
+            pass  # колонка уже есть
 
 
 def run(verbose: bool = False) -> int:
     con = sqlite3.connect(str(_BOT_DB))
     con.row_factory = sqlite3.Row
+    _migrate(con)
+
+    hourly_baseline = _load_hourly_baseline()
+    if verbose:
+        print(f"hourly_profile.json: фон часа суток загружен для {len(hourly_baseline)} символов"
+              + (" (файл не найден — нормировка на фон часа отключена)" if not hourly_baseline else ""))
 
     # Джоб каждый раз пересчитывает ВСЁ с нуля из econ_events+price_bars — чистим
     # старые агрегаты перед записью. Иначе строки с n из прошлых прогонов (когда
@@ -183,22 +288,27 @@ def run(verbose: bool = False) -> int:
         rows.sort(key=lambda r: r["scheduled_ts"])
         cases = []
         for r in rows:
-            m = _case_metrics(con, symbol, r["scheduled_ts"])
+            m = _case_metrics(con, symbol, r["scheduled_ts"], hourly_baseline)
             if m is None:
                 continue
+            actual_n, forecast_n = _numeric(r["actual"]), _numeric(r["forecast"])
+            m["close_dir"] = ("beat" if actual_n > forecast_n else "miss" if actual_n < forecast_n else "inline") \
+                if actual_n is not None and forecast_n is not None else None
             cases.append((r, m))
-            # сырые метрики случая — для ручной сверки (Acceptance спеки)
-            for window, move in (("30m", m["move_30m"]), ("60m", m["move_60m"])):
+            # сырые метрики случая — для ручной сверки (Acceptance спеки).
+            # 4ч записывается тоже — тот же охват, что у контрольных цифр
+            # Recognia (§0), для одноразовой сверки порядка величины скриптом
+            # compare_recognia.py, не для показа на карточке.
+            for window, move, tr in (("30m", m["move_30m"], m["true_range"]),
+                                      ("60m", m["move_60m"], m["true_range"]),
+                                      ("4h", m["true_range_4h"], m["true_range_4h"])):
                 if move is None:
                     continue
-                actual_n, forecast_n = _numeric(r["actual"]), _numeric(r["forecast"])
-                close_dir = ("beat" if actual_n > forecast_n else "miss" if actual_n < forecast_n else "inline") \
-                    if actual_n is not None and forecast_n is not None else None
                 con.execute("""
                     INSERT OR REPLACE INTO event_reactions
                       (event_key, symbol, release_ts, window, pips, true_range, dir, close_dir)
                     VALUES (?,?,?,?,?,?,?,?)
-                """, (r["event_key"], symbol, r["scheduled_ts"], window, move, m["true_range"], m["dir"], close_dir))
+                """, (r["event_key"], symbol, r["scheduled_ts"], window, move, tr, m["dir"], m["close_dir"]))
                 cases_written += 1
 
         if len(cases) < MIN_CASES:
@@ -214,11 +324,16 @@ def run(verbose: bool = False) -> int:
             subset = cases[-n_target:]
             moves_30 = [m["move_30m"] for _, m in subset if m["move_30m"] is not None]
             moves_60 = [m["move_60m"] for _, m in subset if m["move_60m"] is not None]
+            moves_4h = [m["true_range_4h"] for _, m in subset if m["true_range_4h"] is not None]
+            ratios_30 = [m["baseline_ratio"] for _, m in subset if m["baseline_ratio"] is not None]
+            baselines_30 = [m["baseline_30m"] for _, m in subset if m["baseline_30m"] is not None]
             if not moves_60:
                 continue
             avg_30 = sum(moves_30) / len(moves_30) if moves_30 else None
             avg_60 = sum(moves_60) / len(moves_60)
             max_60 = max(moves_60)
+            avg_4h = sum(moves_4h) / len(moves_4h) if moves_4h else None
+            max_4h = max(moves_4h) if moves_4h else None
             volatile_share = (
                 sum(1 for v in moves_60 if atr_quarter and v > atr_quarter) / len(moves_60)
                 if atr_quarter else None
@@ -229,17 +344,46 @@ def run(verbose: bool = False) -> int:
             # см. _atr14() выше) -- "0.31 ATR за 30 мин", а не сырые пункты.
             median_30 = statistics.median(moves_30) if moves_30 else None
             median_atr_30m = (median_30 / atr) if (atr and median_30 is not None) else None
+            # СПЕКА_календарь §3, "самое важное": медиана ПО СЛУЧАЯМ отношения
+            # (ход / типичный ход ЭТОГО часа) -- каждый случай нормирован на
+            # фон своего собственного часа выхода, а не одного общего часа.
+            baseline_ratio_30m = statistics.median(ratios_30) if ratios_30 else None
+            hourly_baseline_30m = statistics.median(baselines_30) if baselines_30 else None
+            dates = [datetime.fromtimestamp(r["scheduled_ts"], tz=timezone.utc).strftime("%Y-%m-%d")
+                     for r, _ in subset]
+            period_from, period_to = min(dates), max(dates)
+
+            # "Влияние": доля up/down/flat ОТДЕЛЬНО среди случаев beat и miss —
+            # без предположения, в какую сторону "должно" двигать курс (у нас
+            # нет общей таблицы полярности индикаторов по всем странам, только
+            # то, что видно в самих данных). Описательно: что происходило,
+            # не что "должно" происходить.
+            beat_dirs = [m["dir"] for _, m in subset if m.get("close_dir") == "beat" and m["dir"]]
+            miss_dirs = [m["dir"] for _, m in subset if m.get("close_dir") == "miss" and m["dir"]]
+            n_beat, n_miss = len(beat_dirs), len(miss_dirs)
+            beat_up_share = beat_dirs.count("up") / n_beat if n_beat >= MIN_DIR_CASES else None
+            beat_down_share = beat_dirs.count("down") / n_beat if n_beat >= MIN_DIR_CASES else None
+            miss_up_share = miss_dirs.count("up") / n_miss if n_miss >= MIN_DIR_CASES else None
+            miss_down_share = miss_dirs.count("down") / n_miss if n_miss >= MIN_DIR_CASES else None
+
             con.execute("""
                 INSERT OR REPLACE INTO event_reaction_stats
                   (event_type, symbol, n, avg_move_30m, avg_move_60m, max_move_60m, volatile_share,
-                   median_move_30m, median_atr_30m, computed_ts)
-                VALUES (?,?,?,?,?,?,?,?,?,?)
+                   median_move_30m, median_atr_30m, hourly_baseline_30m, baseline_ratio_30m,
+                   period_from, period_to, avg_move_4h, max_move_4h,
+                   n_beat, beat_up_share, beat_down_share, n_miss, miss_up_share, miss_down_share,
+                   computed_ts)
+                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
             """, (etype, symbol, len(subset), avg_30, avg_60, max_60, volatile_share,
-                  median_30, median_atr_30m, now_ts))
+                  median_30, median_atr_30m, hourly_baseline_30m, baseline_ratio_30m,
+                  period_from, period_to, avg_4h, max_4h,
+                  n_beat, beat_up_share, beat_down_share, n_miss, miss_up_share, miss_down_share,
+                  now_ts))
             stats_written += 1
             if verbose:
-                print(f"  {etype}×{symbol} n={len(subset)}: avg60={avg_60:.2f} max60={max_60:.2f} "
-                      f"vol_share={volatile_share}")
+                ratio_s = f"{baseline_ratio_30m:.2f}×" if baseline_ratio_30m is not None else "—"
+                print(f"  {etype}×{symbol} n={len(subset)} [{period_from}→{period_to}]: avg60={avg_60:.2f} "
+                      f"max60={max_60:.2f} vol_share={volatile_share} baseline_ratio_30m={ratio_s}")
 
     con.commit()
     con.close()

@@ -18,6 +18,9 @@ from urllib.request import urlopen, Request
 from urllib.error import HTTPError, URLError
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).parent))
+from core.event_types import normalize_event_type
+
 _DB = Path("/mnt/sbfdata/sbf-platform/SBFAcademy_bot/bot.db")
 
 _FEEDS = {
@@ -238,6 +241,7 @@ def _migrate(con: sqlite3.Connection) -> None:
         ("unit",         "TEXT"),
         ("first_seen",   "INTEGER"),
         ("updated_ts",   "INTEGER"),
+        ("is_primary",   "INTEGER"),  # СПЕКА_графики_и_починка_календаря.md §3 — см. recompute_primary_flags()
     ]
     existing = {row[1] for row in con.execute("PRAGMA table_info(econ_events)")}
     for col, typ in new_cols:
@@ -309,6 +313,55 @@ def _migrate_stable_event_keys(con: sqlite3.Connection) -> None:
         )
         con.execute("DELETE FROM econ_event_history WHERE event_key=?", (old_key,))
     con.commit()
+
+
+# ── Дедупликация между источниками (СПЕКА_графики_и_починка_календаря.md §3) ─
+# Приоритет источника при коллизии — тот же порядок, что уже использует
+# event_reactions_job.py (_SOURCE_PRIORITY) для схлопывания при подсчёте
+# статистики; здесь та же логика материализуется в саму таблицу, чтобы
+# calendar.html (который просто листает econ_events без своей агрегации)
+# тоже не показывал одно и то же событие 2-3 раза.
+_SOURCE_PRIORITY = {"curated_official": 0, "forexfactory": 1, "tradingview": 2, "recognia_via_avatrade": 3}
+
+
+def recompute_primary_flags(con: sqlite3.Connection | None = None, verbose: bool = False) -> int:
+    """Группирует по (страна, время, НОРМАЛИЗОВАННЫЙ индикатор) — не по
+    event_key (тот всё ещё считается из сырого текста через _event_key, а
+    группировка для дедупликации намеренно использует более грубую
+    normalize_event_type, которая уже умеет узнавать "Initial Jobless Claims"
+    и "Unemployment Claims" как один и тот же релиз). У самой приоритетной
+    по источнику строки в группе — is_primary=1, у остальных — 0. Строки НЕ
+    удаляются и НЕ схлопываются в одну — расхождение прогнозов между
+    источниками само по себе интересный факт (§3, §7 спеки)."""
+    own_con = con is None
+    if own_con:
+        con = sqlite3.connect(str(_DB))
+    rows = con.execute(
+        "SELECT id, country, scheduled_ts, indicator, title, source FROM econ_events "
+        "WHERE scheduled_ts IS NOT NULL"
+    ).fetchall()
+    groups: dict[tuple, list[tuple[str, str]]] = {}
+    for eid, country, ts, indicator, title, source in rows:
+        etype = normalize_event_type(indicator or title or "")
+        groups.setdefault((country, ts, etype), []).append((eid, source))
+
+    updates: list[tuple[int, str]] = []
+    dup_groups = 0
+    for key, items in groups.items():
+        if len(items) > 1:
+            dup_groups += 1
+            items = sorted(items, key=lambda x: _SOURCE_PRIORITY.get(x[1], 9))
+        primary_id = items[0][0]
+        for eid, _src in items:
+            updates.append((1 if eid == primary_id else 0, eid))
+
+    con.executemany("UPDATE econ_events SET is_primary=? WHERE id=?", updates)
+    con.commit()
+    if verbose:
+        print(f"  is_primary: {len(groups)} групп, из них с дублями между источниками: {dup_groups}")
+    if own_con:
+        con.close()
+    return dup_groups
 
 
 # ── UPSERT + history ────────────────────────────────────────────────────────
@@ -451,6 +504,7 @@ def pull_forward(verbose: bool = True) -> int:
             print(f"  DB TV upsert: {e}", file=sys.stderr)
 
     con.commit()
+    recompute_primary_flags(con, verbose=verbose)  # §3 — дедуп между источниками, каждый forward-цикл
     con.close()
     if verbose:
         total = len(all_ff) + len(tv_raw)
