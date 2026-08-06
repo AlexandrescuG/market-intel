@@ -52,8 +52,29 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 WEB = ROOT / "web"
 OUT = WEB / "data" / "edu_stats"
 
-# Порядок важен: первый инструмент — дефолтный в UI главы.
-ASSETS = ["GOLD", "EURUSD", "USDJPY", "BTC", "SPX", "WTI"]
+# Порядок важен: первый инструмент — дефолтный в UI главы (GOLD).
+# SPEC_chart_fixes_and_staged_signup.md §2: график использует эти же данные
+# для полосы «активность по часам» на ВСЕХ инструментах (раньше был свой,
+# худший конвейер через hourly_vol_job.py — см. serve.py::_handle_chart_
+# sessions).
+#
+# СПЕКА_графики_и_починка_календаря.md §6: "hourly_profile посчитан по всем
+# символам с M30, без ручного списка" — раньше список был захардкожен и уже
+# один раз молча разошёлся с реальными файлами баров (12 новых пар 06.08
+# просто отсутствовали, пока не заметили). Теперь символы находятся тем же
+# glob-по-ohlc_*_M30.json приёмом, что уже используют hourly_vol_job.py /
+# sr_levels_job.py / pattern_stats_job.py (§1 спеки) — файлы появились,
+# список сам их подхватит. GOLD жёстко первым — только порядок для UI-дефолта,
+# не фильтр.
+def _discovered_assets() -> list[str]:
+    found = sorted({p.stem.replace("ohlc_", "").replace("_M30", "")
+                    for p in (WEB / "data").glob("ohlc_*_M30.json")})
+    ordered = [a for a in ("GOLD",) if a in found]
+    ordered += [a for a in found if a not in ordered]
+    return ordered
+
+
+ASSETS = _discovered_assets()
 
 MIN_BARS_PER_CELL = 30      # клетка карты не показывается при меньшей выборке
 MIN_BARS_PER_SUBSET = 20    # то же для разрезов (пятница / день NFP)

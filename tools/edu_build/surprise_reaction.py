@@ -63,7 +63,14 @@ MIN_TYPE_HISTORY = 12       # минимум наблюдений в типе, �
 MIN_CELL_N = 4               # порог показа клетки матрицы силы (как в предыдущих главах)
 _SOURCE_PRIORITY = {"curated_official": 0, "forexfactory": 1, "tradingview": 2}
 _CHART_TO_PRICE_BARS_SYMBOL = {"GOLD": "XAUUSD"}
-_PIP_SCALE = {"EURUSD": 10000, "GBPUSD": 10000, "USDJPY": 100}
+# Держать в синхроне с той же таблицей в event_reactions_job.py (см.
+# комментарий там — СПЕКА_графики_и_починка_календаря.md §2).
+_PIP_SCALE = {
+    "EURUSD": 10000, "GBPUSD": 10000, "USDJPY": 100,
+    "EURGBP": 10000, "USDCAD": 10000, "USDCHF": 10000, "AUDUSD": 10000, "NZDUSD": 10000,
+    "USDBRL": 10000, "USDMXN": 10000, "USDTRY": 10000, "USDPLN": 10000,
+    "USDHUF": 100, "USDCZK": 100, "USDKRW": 100,
+}
 
 FRESH_SYMBOLS_FALLBACK = ["GOLD", "EURUSD", "USDJPY", "DXY", "SPX", "BTC"]
 
