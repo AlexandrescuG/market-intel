@@ -530,7 +530,6 @@ def _edu_inject(ch: int, lang: str = i18n.DEFAULT_LANG) -> str:
   {i18n.t("edu.disclaimer_body", lang)}
 </div>
 
-<script src="/edu/concept_map.js"></script>
 <script src="/edu/widgets.js"></script>
 <script src="/edu/edu-live.js"></script>
 <div id="sbf-pro-toast" style="position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#2B2B33;color:#fff;font-family:'JetBrains Mono',monospace;font-size:12px;padding:10px 20px;border-radius:8px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:9999">{i18n.t("edu.pro_available_later", lang)}</div>
