@@ -94,7 +94,7 @@
   function el(id) { return document.getElementById(id); }
   function escHtml(s) {
     return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;')
-      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
   }
 
   // SPEC_symbol_names.md §4.3 — журнал сверяется с реальным терминалом,

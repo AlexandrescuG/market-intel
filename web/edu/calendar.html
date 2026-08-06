@@ -402,7 +402,7 @@ function _daysShort(){ var l=_curLang(); return l==='ro'?_DAYS_SHORT_RO:l==='en'
 function _dtLocale(){ var l=_curLang(); return l==='ro'?'ro-RO':l==='en'?'en-US':'ru'; }
 
 // ── Вспомогательные ────────────────────────────────────────────────────────
-function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 function fmt_(tpl, vars){ return tpl.replace(/\{(\w+)\}/g, function(_, k){ return vars[k] != null ? vars[k] : ''; }); }
 
 // SPEC_symbol_names.md §4.4 — раскрывающийся список валютных пар в фильтре
