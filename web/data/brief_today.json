@@ -1,103 +1,73 @@
 {
-  "date": "2026-08-03",
-  "generated_at": "2026-08-03T04:42:35.612501+00:00",
+  "date": "2026-08-06",
+  "generated_at": "2026-08-06T04:40:22.774443+00:00",
   "calendar": [
     {
-      "ts_utc": "2026-08-03T01:45:00Z",
-      "scheduled_ts": 1785721500,
-      "country": "CN",
-      "title": "RatingDog Manufacturing PMI",
-      "indicator": "Manufacturing PMI",
+      "ts_utc": "2026-08-06T01:30:00Z",
+      "scheduled_ts": 1785979800,
+      "country": "AU",
+      "title": "Balance of Trade",
+      "indicator": "Balance of Trade",
       "impact": "high",
-      "forecast": "51.5",
-      "previous": "51.7",
+      "forecast": "-1.1",
+      "previous": "-2.367",
+      "symbols": [],
+      "past_reaction": null
+    },
+    {
+      "ts_utc": "2026-08-06T07:00:00Z",
+      "scheduled_ts": 1785999600,
+      "country": "CH",
+      "title": "Unemployment Rate",
+      "indicator": "Unemployment Rate",
+      "impact": "medium",
+      "forecast": "3.1%",
+      "previous": "2.9",
+      "symbols": [],
+      "past_reaction": null
+    },
+    {
+      "ts_utc": "2026-08-06T08:30:00Z",
+      "scheduled_ts": 1786005000,
+      "country": "GB",
+      "title": "S&P Global Construction PMI",
+      "indicator": "Construction PMI",
+      "impact": "medium",
+      "forecast": "40",
+      "previous": "38.4",
       "symbols": [
-        "GOLD",
-        "SPX",
-        "WTI"
+        "GBPUSD"
       ],
-      "past_reaction": {
-        "symbol": "GOLD",
-        "n": 12,
-        "median_atr_30m": 0.10157681530965171
-      }
-    },
-    {
-      "ts_utc": "2026-08-03T06:30:00Z",
-      "scheduled_ts": 1785738600,
-      "country": "CH",
-      "title": "Inflation Rate YoY",
-      "indicator": "Inflation Rate",
-      "impact": "medium",
-      "forecast": null,
-      "previous": "0.5",
-      "symbols": [],
       "past_reaction": null
     },
     {
-      "ts_utc": "2026-08-03T06:30:00Z",
-      "scheduled_ts": 1785738600,
-      "country": "CH",
-      "title": "CPI m/m",
-      "indicator": "CPI m/m",
+      "ts_utc": "2026-08-06T09:00:00Z",
+      "scheduled_ts": 1786006800,
+      "country": "EU",
+      "title": "Retail Sales MoM",
+      "indicator": "Retail Sales MoM",
       "impact": "medium",
-      "forecast": "-0.1%",
-      "previous": "0.0%",
-      "symbols": [],
-      "past_reaction": null
-    },
-    {
-      "ts_utc": "2026-08-03T07:30:00Z",
-      "scheduled_ts": 1785742200,
-      "country": "CH",
-      "title": "procure.ch Manufacturing PMI",
-      "indicator": "Manufacturing PMI",
-      "impact": "medium",
-      "forecast": "54.5",
-      "previous": "54.3",
-      "symbols": [],
-      "past_reaction": null
-    },
-    {
-      "ts_utc": "2026-08-03T14:00:00Z",
-      "scheduled_ts": 1785765600,
-      "country": "US",
-      "title": "ISM Manufacturing PMI",
-      "indicator": "Business Confidence",
-      "impact": "high",
-      "forecast": "54",
-      "previous": "53.3",
+      "forecast": "0.1",
+      "previous": "0.2",
       "symbols": [
-        "BTC",
-        "DJI",
         "DXY",
-        "ETH",
-        "EURUSD",
-        "GBPUSD",
-        "GOLD",
-        "NASDAQ",
-        "SILVER",
-        "SOL",
-        "SPX",
-        "USDJPY",
-        "VIX",
-        "WTI"
+        "EURUSD"
       ],
       "past_reaction": {
-        "symbol": "GOLD",
+        "symbol": "EURUSD",
         "n": 12,
-        "median_atr_30m": 0.1299331969334692
+        "median_atr_30m": 0.08587731811698396
       }
     },
     {
-      "ts_utc": "2026-08-03T14:00:00Z",
-      "scheduled_ts": 1785765600,
+      "ts_utc": "2026-08-06T12:30:00Z",
+      "scheduled_ts": 1786019400,
       "country": "US",
-      "title": "ISM Manufacturing Employment",
-      "indicator": "ISM Manufacturing Employment",
+      "title": "Initial Jobless Claims",
+      "indicator": "Initial Jobless Claims",
       "impact": "medium",
-      "forecast": null,
-      "previous": "49.7",
+      "forecast": "202",
+      "previous": "197",
       "symbols": [
         "BTC",
         "DJI",
@@ -116,126 +86,147 @@
       ],
       "past_reaction": {
         "symbol": "EURUSD",
-        "n": 7,
-        "median_atr_30m": 0.1757489300998556
+        "n": 12,
+        "median_atr_30m": 0.13181169757486952
+      }
+    },
+    {
+      "ts_utc": "2026-08-06T12:30:00Z",
+      "scheduled_ts": 1786019400,
+      "country": "US",
+      "title": "Unit Labour Costs QoQ Prel",
+      "indicator": "Unit Labour Costs QoQ",
+      "impact": "medium",
+      "forecast": "2.1",
+      "previous": "1.8",
+      "symbols": [
+        "BTC",
+        "DJI",
+        "DXY",
+        "ETH",
+        "EURUSD",
+        "GBPUSD",
+        "GOLD",
+        "NASDAQ",
+        "SILVER",
+        "SOL",
+        "SPX",
+        "USDJPY",
+        "VIX",
+        "WTI"
+      ],
+      "past_reaction": {
+        "symbol": "EURUSD",
+        "n": 6,
+        "median_atr_30m": 0.07988587731813028
       }
     }
   ],
-  "calendar_more": 0,
+  "calendar_more": 5,
   "untranslated": [],
   "earnings": [],
   "movers": {
     "up": [
       {
-        "symbol": "WTI",
-        "bar_date": "2026-07-31",
-        "close": 84.67,
-        "chg_pct": 1.29,
-        "ratio": 1.286985561246705,
+        "symbol": "GOLD",
+        "bar_date": "2026-08-05",
+        "close": 4245.7998,
+        "chg_pct": 3.67,
+        "ratio": 2.4419234411111224,
         "event": {
-          "title": "NBS Non Manufacturing PMI",
-          "ts_utc": "2026-07-31T01:30:00Z"
+          "title": "RatingDog Services PMI",
+          "ts_utc": "2026-08-05T01:45:00Z"
         }
       },
       {
-        "symbol": "SPX",
-        "bar_date": "2026-07-31",
-        "close": 7489.7202,
-        "chg_pct": 0.7,
-        "ratio": 1.2803397425953065,
+        "symbol": "SILVER",
+        "bar_date": "2026-08-05",
+        "close": 62.099,
+        "chg_pct": 3.4,
+        "ratio": 1.4290520088344025,
         "event": {
-          "title": "NBS Non Manufacturing PMI",
-          "ts_utc": "2026-07-31T01:30:00Z"
+          "title": "MBA 30-Year Mortgage Rate",
+          "ts_utc": "2026-08-05T11:00:00Z"
         }
       },
       {
-        "symbol": "GBPUSD",
-        "bar_date": "2026-07-31",
-        "close": 1.3487,
-        "chg_pct": 0.15,
-        "ratio": 1.1478038658247207,
+        "symbol": "DJI",
+        "bar_date": "2026-08-05",
+        "close": 54349.1211,
+        "chg_pct": 0.49,
+        "ratio": 0.9947068152224301,
         "event": {
-          "title": "Nationwide Housing Prices YoY",
-          "ts_utc": "2026-07-31T06:00:00Z"
+          "title": "MBA 30-Year Mortgage Rate",
+          "ts_utc": "2026-08-05T11:00:00Z"
         }
       }
     ],
     "down": [
       {
+        "symbol": "NASDAQ",
+        "bar_date": "2026-08-05",
+        "close": 26363.4395,
+        "chg_pct": -0.83,
+        "ratio": 0.7841249991875769,
+        "event": {
+          "title": "MBA 30-Year Mortgage Rate",
+          "ts_utc": "2026-08-05T11:00:00Z"
+        }
+      },
+      {
+        "symbol": "SPX",
+        "bar_date": "2026-08-05",
+        "close": 7723.5498,
+        "chg_pct": -0.17,
+        "ratio": 0.7631380213565029,
+        "event": {
+          "title": "RatingDog Services PMI",
+          "ts_utc": "2026-08-05T01:45:00Z"
+        }
+      },
+      {
         "symbol": "DXY",
-        "bar_date": "2026-07-31",
-        "close": 99.8,
-        "chg_pct": -0.21,
-        "ratio": 1.5316028188224537,
+        "bar_date": "2026-08-05",
+        "close": 99.69,
+        "chg_pct": -0.2,
+        "ratio": 0.5334167941551584,
         "event": {
-          "title": "Core Inflation Rate YoY Flash",
-          "ts_utc": "2026-07-31T09:00:00Z"
-        }
-      },
-      {
-        "symbol": "EURUSD",
-        "bar_date": "2026-07-31",
-        "close": 1.1527,
-        "chg_pct": -0.03,
-        "ratio": 1.5041319084306213,
-        "event": {
-          "title": "Core Inflation Rate YoY Flash",
-          "ts_utc": "2026-07-31T09:00:00Z"
-        }
-      },
-      {
-        "symbol": "GOLD",
-        "bar_date": "2026-07-31",
-        "close": 4049.1001,
-        "chg_pct": -1.24,
-        "ratio": 1.1605376823299027,
-        "event": {
-          "title": "NBS Non Manufacturing PMI",
-          "ts_utc": "2026-07-31T01:30:00Z"
+          "title": "MBA 30-Year Mortgage Rate",
+          "ts_utc": "2026-08-05T11:00:00Z"
         }
       }
     ]
   },
   "patterns": [
     {
-      "symbol": "GBPUSD",
+      "symbol": "DJI",
       "tf": "D1",
-      "pattern_key": "pin_bar_bottom",
-      "display_name_ru": "Пин-бар снизу",
-      "direction": "bullish",
-      "ts": 1785456000,
-      "agree_share_5": 0.3015,
-      "n": 199
-    },
-    {
-      "symbol": "EURUSD",
-      "tf": "D1",
-      "pattern_key": "pin_bar_bottom",
-      "display_name_ru": "Пин-бар снизу",
-      "direction": "bullish",
-      "ts": 1785456000,
-      "agree_share_5": 0.3034,
-      "n": 89
-    },
-    {
-      "symbol": "NASDAQ",
-      "tf": "D1",
-      "pattern_key": "pin_bar_bottom",
-      "display_name_ru": "Пин-бар снизу",
-      "direction": "bullish",
-      "ts": 1785456000,
-      "agree_share_5": 0.64,
-      "n": 75
-    },
-    {
-      "symbol": "GOLD",
-      "tf": "D1",
-      "pattern_key": "bearish_engulfing",
-      "display_name_ru": "Медвежье поглощение",
+      "pattern_key": "pin_bar_top",
+      "display_name_ru": "Пин-бар сверху",
       "direction": "bearish",
-      "ts": 1785456000,
-      "agree_share_5": 0.4773,
-      "n": 44
+      "ts": 1785888000,
+      "agree_share_5": 0.375,
+      "n": 48
+    },
+    {
+      "symbol": "BTC",
+      "tf": "D1",
+      "pattern_key": "bullish_engulfing",
+      "display_name_ru": "Бычье поглощение",
+      "direction": "bullish",
+      "ts": 1785801600,
+      "agree_share_5": 0.4667,
+      "n": 135
+    },
+    {
+      "symbol": "USDJPY",
+      "tf": "D1",
+      "pattern_key": "bullish_engulfing",
+      "display_name_ru": "Бычье поглощение",
+      "direction": "bullish",
+      "ts": 1784160000,
+      "agree_share_5": 0.5769,
+      "n": 208
     }
   ],
   "_meta": {
@@ -249,20 +240,19 @@
       "patterns": "core.patterns.detect() + pattern_stats (bot.db), n>=15"
     }
   },
-  "headline": "Нефть WTI обвалилась на 5,8% до $79,76 на фоне переговоров Трампа по Ирану и решения ОПЕК+ нарастить квоты.",
+  "headline": "Золото скакнуло на +5,9% до $4 337 (×3,9 нормы) на фоне роста инфляционных ожиданий",
   "context": [
     {
-      "text": "Расчётные данные: Нефть WTI −5,8% до $79,76, Золото +1,69% (сегодня аномалия ×1,4), S&P 500 +0,7%; евро/доллар и фунт/доллар тоже вне обычного диапазона (31.07–02.08).",
-      "confidence": "quotes"
-    },
-    {
-      "text": "Сенат США близок к одобрению санкций Грэма против России (RBC); нефть просела на переговорах по Ирану и росте квот ОПЕК+ (RBC, ForexLive); дрон ударил у реактора ЗАЭС (RBC).",
+      "text": "Рубль под давлением: ЦБ держит доллар ниже 81, но в СберИнвестициях ждут 85 к концу августа на фоне ускорения инфляции и дефолта ЕвроТранса по трём выпускам облигаций.",
       "confidence": "media"
     },
     {
-      "text": "Соцсети расходятся по Ирану: от «сделка и перемирие» до предупреждений о нехватке ПВО США для защиты Израиля; растёт шум вокруг Crypto Clarity Act и его поддержки банками.",
+      "text": "По данным CNN, США в войне с Ираном израсходовали ~80% перехватчиков THAAD и почти половину ракет Patriot — истощение ПРО повышает геополитический риск.",
+      "confidence": "media"
+    },
+    {
+      "text": "Соцсети разгоняют тему скорого принятия Crypto Clarity Act Сенатом на этой неделе и подписание Путиным закона о структуре крипторынка в России — подтверждений СМИ нет.",
       "confidence": "social_unverified"
     }
-  ],
-  "unknown": "Исход по Ирану неясен: соцсети говорят и о сделке с перемирием, и о риторике удара «уровня Второй мировой»."
+  ]
 }
