@@ -15,17 +15,26 @@ DB_PATH = Path(__file__).parent.parent / "data" / "journal.db"
 
 VALID_TIERS    = ("free", "pro", "mentor_mam")
 VALID_STATUSES = ("active", "past_due", "canceled", "expired")
-VALID_BROKERS  = ("avatrade", "naga")
+# АУДИТ_легаси_market_intel_2026-08-06.md §3.9: было ("avatrade", "naga") против
+# пяти партнёров в web/data/partners.json — link_broker() отклонял xm/fxpro/instaforex.
+VALID_BROKERS  = ("avatrade", "naga", "xm", "fxpro", "instaforex")
 
 BROKER_LABELS = {
-    "avatrade": "AvaTrade",
-    "naga":     "NAGA",
+    "avatrade":   "AvaTrade",
+    "naga":       "NAGA",
+    "xm":         "XM",
+    "fxpro":      "FxPro",
+    "instaforex": "InstaForex",
 }
 
-# IB deep-link bases (§10.3) — placeholder URLs, replaced by real IB links in prod
+# Реальные партнёрские ссылки — сверено с web/data/partners.json::links.affiliate
+# (06.08.2026, страница /brokers). Было placeholder ?tag=sbf_consult для двух брокеров.
 BROKER_IB_LINKS = {
-    "avatrade": "https://www.avatrade.com/?tag=sbf_consult",
-    "naga":     "https://naga.com/?partner=sbf_consult",
+    "avatrade":   "https://www.avatrade.com/?tag=184200",
+    "naga":       "https://go.joinnaga.com/29LSS44/23JF6C/",
+    "xm":         "https://clicks.pipaffiliates.com/c?c=1258918&l=ru&p=1",
+    "fxpro":      "https://www.fxpro-direct.org/en/register/md/cri/32TQQFd7H",
+    "instaforex": "https://www.instaforex.com/en/fast_open_live_account?x=TTVDG",
 }
 
 _CODE_CHARS = string.ascii_uppercase + string.digits
