@@ -90,7 +90,7 @@ window.Ch13Content = {
       body2: (scalp, swing) => `Отсюда следствие, которое не про предпочтения: чем меньше средний ход, на который ты рассчитываешь, тем большую его долю съедает издержка. Цель в 15 пунктов при издержке в 1 пункт отдаёт ${scalp}% результата; цель в 150 пунктов при той же издержке — ${swing}%.`,
       body3: "Это единственный честный аргумент в пользу более длинных горизонтов, и он не про то, что свинг «лучше». Он про то, что при коротком горизонте требования к точности выше — ту же издержку надо отбить меньшим движением.",
       body4: "Обратная сторона называется сразу: длинная позиция живёт через события календаря (глава 6), через ролловеры и свопы (глава 5), и её риск за ночь не контролируется. Выбор горизонта — это выбор набора проблем, а не избавление от них.",
-      openOnChart: "Открыть GOLD на графике →",
+      openOnChart: "Открыть Золото на графике →",
     },
     tradeAnatomy: {
       tag: "АНАТОМИЯ ОДНОЙ СДЕЛКИ",
@@ -148,7 +148,7 @@ window.Ch13Content = {
         conclusion: "Вывод не «не добирай». Вывод: посчитай точку невозврата до первого добора и решай по ней, а не по тому, как выглядит тренд.",
       },
       compliance: "Это калькулятор последствий, а не торговая методика. Мы не рекомендуем ни добирать, ни воздерживаться — мы показываем арифметику решения.",
-      openOnChart: "Открыть GOLD на графике →",
+      openOnChart: "Открыть Золото на графике →",
     },
     breakeven: {
       tag: "ЧЕГО СТОИТ СТОП В БЕЗУБЫТОК — НАШЕ ИЗМЕРЕНИЕ",
@@ -163,7 +163,7 @@ window.Ch13Content = {
       honestPlate: "Измерено: движение цены по нашей истории, без учёта спреда и проскальзывания — то есть реальная доля закрытых в ноль ВЫШЕ нашей оценки. Не измерено: контекст входа. Мы считали механическое правило, потому что именно так его и применяют.",
       csvBtn: "Скачать наши числа (CSV)",
       tableXLabel: "X (доля ATR)", tableYLabel: "Y (доля ATR)", tableZeroLabel: "Закрыто в ноль", tableNLabel: "n",
-      openOnChart: "Открыть GOLD на графике →",
+      openOnChart: "Открыть Золото на графике →",
     },
     tradePlan: {
       tag: "ПЛАН СДЕЛКИ — ЧТО ЗАПИСЫВАЕТСЯ ДО",
@@ -263,7 +263,7 @@ window.Ch13Content = {
       body2: (scalp, swing) => `The consequence isn't about preference: the smaller the average move you're targeting, the larger the share cost eats out of it. A 15-point target at a 1-point cost gives up ${scalp}% of the result; a 150-point target at the same cost — ${swing}%.`,
       body3: "This is the only honest argument for longer horizons, and it isn't that swing is \"better.\" It's that a short horizon demands higher precision — the same cost has to be recovered by a smaller move.",
       body4: "The flip side gets named right away: a long position lives through calendar events (chapter 6), through rollovers and swaps (chapter 5), and its overnight risk isn't under your control. Choosing a horizon is choosing a set of problems, not escaping them.",
-      openOnChart: "Open GOLD on the chart →",
+      openOnChart: "Open Gold on the chart →",
     },
     tradeAnatomy: {
       tag: "ANATOMY OF ONE TRADE",
@@ -321,7 +321,7 @@ window.Ch13Content = {
         conclusion: "The conclusion isn't \"don't add.\" It's: compute the point of no return before the first add, and decide by that, not by how good the trend looks.",
       },
       compliance: "This is a consequences calculator, not a trading method. We don't recommend adding or holding off — we show the arithmetic of the decision.",
-      openOnChart: "Open GOLD on the chart →",
+      openOnChart: "Open Gold on the chart →",
     },
     breakeven: {
       tag: "WHAT A BREAKEVEN STOP ACTUALLY COSTS — OUR MEASUREMENT",
@@ -336,7 +336,7 @@ window.Ch13Content = {
       honestPlate: "Measured: price movement in our history, without spread or slippage — meaning the real share closed at zero is HIGHER than our estimate. Not measured: entry context. We tested the mechanical rule because that's exactly how it's applied.",
       csvBtn: "Download our numbers (CSV)",
       tableXLabel: "X (ATR fraction)", tableYLabel: "Y (ATR fraction)", tableZeroLabel: "Closed at zero", tableNLabel: "n",
-      openOnChart: "Open GOLD on the chart →",
+      openOnChart: "Open Gold on the chart →",
     },
     tradePlan: {
       tag: "THE TRADE PLAN — WHAT GETS WRITTEN DOWN BEFORE",
@@ -436,7 +436,7 @@ window.Ch13Content = {
       body2: (scalp, swing) => `De aici o consecință care nu ține de preferințe: cu cât mișcarea medie vizată e mai mică, cu atât o pondere mai mare din ea e mâncată de cost. O țintă de 15 puncte la un cost de 1 punct cedează ${scalp}% din rezultat; o țintă de 150 de puncte la același cost — ${swing}%.`,
       body3: "Acesta e singurul argument cinstit în favoarea orizonturilor mai lungi, și nu ține de faptul că swing-ul e „mai bun”. Ține de faptul că la un orizont scurt cerințele de precizie sunt mai mari — același cost trebuie recuperat printr-o mișcare mai mică.",
       body4: "Reversul se numește imediat: o poziție lungă trăiește prin evenimente de calendar (capitolul 6), prin rollover-uri și swap-uri (capitolul 5), iar riscul ei peste noapte nu e sub control. Alegerea orizontului e alegerea unui set de probleme, nu scăparea de ele.",
-      openOnChart: "Deschide GOLD pe grafic →",
+      openOnChart: "Deschide Aur pe grafic →",
     },
     tradeAnatomy: {
       tag: "ANATOMIA UNEI TRANZACȚII",
@@ -494,7 +494,7 @@ window.Ch13Content = {
         conclusion: "Concluzia nu e „nu adăuga”. Concluzia e: calculează punctul fără întoarcere înainte de prima adăugare și decide după el, nu după cum arată trendul.",
       },
       compliance: "Acesta e un calculator de consecințe, nu o metodă de tranzacționare. Nu recomandăm nici să adaugi, nici să te abții — arătăm aritmetica deciziei.",
-      openOnChart: "Deschide GOLD pe grafic →",
+      openOnChart: "Deschide Aur pe grafic →",
     },
     breakeven: {
       tag: "CÂT COSTĂ UN STOP LA BREAKEVEN — MĂSURĂTOAREA NOASTRĂ",
@@ -509,7 +509,7 @@ window.Ch13Content = {
       honestPlate: "Măsurat: mișcarea prețului din istoricul nostru, fără spread și slippage — deci ponderea reală închisă la zero e MAI MARE decât estimarea noastră. Nemăsurat: contextul intrării. Am testat regula mecanică, pentru că exact așa e aplicată.",
       csvBtn: "Descarcă cifrele noastre (CSV)",
       tableXLabel: "X (fracție ATR)", tableYLabel: "Y (fracție ATR)", tableZeroLabel: "Închise la zero", tableNLabel: "n",
-      openOnChart: "Deschide GOLD pe grafic →",
+      openOnChart: "Deschide Aur pe grafic →",
     },
     tradePlan: {
       tag: "PLANUL TRANZACȚIEI — CE SE SCRIE ÎNAINTE",

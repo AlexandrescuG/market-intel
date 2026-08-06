@@ -90,7 +90,7 @@ window.Ch11Content = {
       metricDelay: "Задержка", metricSpread: "Спред", metricRequote: "Вероятность реквота",
       releaseNote: "Связка с главой 6: заявки уходят перед релизом, и это не заговор против клиента, а поведение поставщика ликвидности.",
       finalPlate: "Ни одного микросекундного алгоритма на этой схеме нет. Зато есть два участка, где твоя издержка реальна и измерима, — и оба относятся к площадке, а не к рынку.",
-      openOnChart: "Открыть GOLD на графике →",
+      openOnChart: "Открыть Золото на графике →",
     },
     bookModels: {
       tag: "A-BOOK, B-BOOK И КОНФЛИКТ ИНТЕРЕСОВ",
@@ -116,7 +116,7 @@ window.Ch11Content = {
       m3Title: "3 · Проскальзывание", m3Text: "Сравни цену в заявке с ценой исполнения на нескольких рыночных ордерах. На демо это тоже видно.",
       m4Title: "4 · Своп", m4Text: "Сколько стоит перенос позиции через ночь и через среду. Часто оказывается главной издержкой у тех, кто держит позиции долго.",
       outro: "Запиши в журнал. В главе 14 мы посчитаем, во что это обходится на серии сделок, и там понадобятся твои числа, а не наши.",
-      openOnChart: "Открыть GOLD на графике →",
+      openOnChart: "Открыть Золото на графике →",
     },
     ladderLimit: {
       body: "Ты только что видел, что твой реальный контрагент — не абстрактный рынок, а конкретная компания с конкретной моделью дохода. Дальше логично спросить: а какая именно, и чем они отличаются между собой.\n\nВ этой главе мы не покажем сравнение площадок с цифрой процента теряющих клиентов крупно — не потому что не хотим, а потому что готовим её честно: с реальными данными по каждому партнёру, датой снятия и ссылкой на источник, без единого захардкоженного числа. Собираем это отдельно вместе с остальной инфраструктурой лестницы.",
@@ -226,7 +226,7 @@ window.Ch11Content = {
       metricDelay: "Întârziere", metricSpread: "Spread", metricRequote: "Probabilitate de requote",
       releaseNote: "Legătură cu capitolul 6: ordinele se retrag înaintea unei publicații, și nu e o conspirație împotriva clientului, ci comportamentul furnizorului de lichiditate.",
       finalPlate: "Niciun algoritm de microsecunde nu apare în această schemă. În schimb, există două segmente unde costul tău e real și măsurabil — și ambele țin de platformă, nu de piață.",
-      openOnChart: "Deschide GOLD pe grafic →",
+      openOnChart: "Deschide Aur pe grafic →",
     },
     bookModels: {
       tag: "A-BOOK, B-BOOK ȘI CONFLICTUL DE INTERESE",
@@ -252,7 +252,7 @@ window.Ch11Content = {
       m3Title: "3 · Slippage", m3Text: "Compară prețul din ordin cu prețul de execuție la câteva ordine de piață. Se vede și pe demo.",
       m4Title: "4 · Swap", m4Text: "Cât costă transferul unei poziții peste noapte și peste miercuri. Adesea se dovedește costul principal la cei care țin pozițiile mult timp.",
       outro: "Notează în jurnal. În capitolul 14 vom calcula cât costă asta pe o serie de tranzacții, și acolo va fi nevoie de cifrele tale, nu de ale noastre.",
-      openOnChart: "Deschide GOLD pe grafic →",
+      openOnChart: "Deschide Aur pe grafic →",
       multiplierLabel: "De câte ori e mai larg spread-ul la publicare",
       multiplierResultLabel: "ori mai larg decât normal",
     },
@@ -364,7 +364,7 @@ window.Ch11Content = {
       metricDelay: "Delay", metricSpread: "Spread", metricRequote: "Requote probability",
       releaseNote: "Ties back to chapter 6: orders pull back ahead of a release, and that isn't a conspiracy against the client — it's how a liquidity provider behaves.",
       finalPlate: "There isn't a single microsecond algorithm anywhere on this diagram. What there is: two spots where your cost is real and measurable — and both belong to the platform, not the market.",
-      openOnChart: "Open GOLD on the chart →",
+      openOnChart: "Open Gold on the chart →",
     },
     bookModels: {
       tag: "A-BOOK, B-BOOK, AND THE CONFLICT OF INTEREST",
@@ -390,7 +390,7 @@ window.Ch11Content = {
       m3Title: "3 · Slippage", m3Text: "Compare the price in your order to the fill price across a few market orders. You can see this on a demo too.",
       m4Title: "4 · Swap", m4Text: "What it costs to carry a position overnight, and over a Wednesday rollover. Often turns out to be the main cost for anyone holding positions for a while.",
       outro: "Write it in your journal. In chapter 14 we'll work out what this costs across a series of trades, and we'll need your numbers there, not ours.",
-      openOnChart: "Open GOLD on the chart →",
+      openOnChart: "Open Gold on the chart →",
       multiplierLabel: "How many times wider the spread gets on release",
       multiplierResultLabel: "x wider than normal",
     },

@@ -502,7 +502,7 @@ function PatternRealityTable({ patterns }) {
     <div>
       <div style={{display:"flex",gap:6,marginBottom:14,flexWrap:"wrap"}}>
         {symbols.map(s => (
-          <button key={s} onClick={()=>setInstrument(s)} style={{fontFamily:"monospace",fontSize:10.5,padding:"5px 10px",cursor:"pointer",background:s===instrument?C.gold:"#fff",color:s===instrument?"#18181a":C.inkMid,border:`1px solid ${s===instrument?C.gold:C.border}`,borderRadius:3}}>{s}</button>
+          <button key={s} onClick={()=>setInstrument(s)} style={{fontFamily:"monospace",fontSize:10.5,padding:"5px 10px",cursor:"pointer",background:s===instrument?C.gold:"#fff",color:s===instrument?"#18181a":C.inkMid,border:`1px solid ${s===instrument?C.gold:C.border}`,borderRadius:3}}>{window.SBFSymbols ? window.SBFSymbols.symbolName(s, {lang: INITIAL_LANG, mode:"name+ticker"}) : s}</button>
         ))}
       </div>
       <div style={{overflowX:"auto",marginBottom:8}}>
@@ -796,6 +796,12 @@ function Chapter7() {
   const T7 = window.Ch7Content[lang] || window.Ch7Content.ru;
   const { loading, error, patterns, xray } = useCh7Data();
   const vars = React.useMemo(() => buildVars(patterns, xray, lang), [patterns, xray, lang]);
+
+  // SPEC_chart_fixes_and_staged_signup.md §5: отметка прочтения главы —
+  // см. web/assets/sbf-anon.js (аноним) + sbf-auth.js (залогинен).
+  React.useEffect(() => {
+    if (window.SBFAnon) window.SBFAnon.markChapterRead(7);
+  }, []);
 
   return (
     <div style={{minHeight:"100vh",background:C.white,color:C.ink,fontFamily:"'DM Sans',sans-serif"}}>

@@ -604,6 +604,12 @@ function Chapter14() {
   const { data: gate, loading: gateLoading } = useGateStatus(gateRefresh);
   const { meta: hourlyMeta } = useHourlyProfile();
 
+  // SPEC_chart_fixes_and_staged_signup.md §5: отметка прочтения главы —
+  // см. web/assets/sbf-anon.js (аноним) + sbf-auth.js (залогинен).
+  React.useEffect(() => {
+    if (window.SBFAnon) window.SBFAnon.markChapterRead(14);
+  }, []);
+
   return (
     <div style={{minHeight:"100vh",background:C.white,color:C.ink,fontFamily:"'DM Sans',sans-serif"}}>
 

@@ -93,7 +93,7 @@ window.Ch8Content = {
       honestTitle: "Честная плашка",
       honestBody: "Что здесь измерено: механическое правило пересечения двух средних, с учётом фиксированной издержки на сделку ({{cost_per_trade_atr}} доли ATR за смену позиции). Чего здесь нет: контекста — новостей, сессии, режима рынка, управления позицией. Мы проверяли правило само по себе, потому что именно так его и продают. Настоящая торговая система состоит не из параметров. Наша сетка — {{grid_size}} пар на {{n_cells}} комбинациях инструмент×таймфрейм, и это не бесконечность: на большей истории числа изменятся, и мы их пересчитаем.",
       downloadCsv: "⬇ Скачать наши числа (CSV)",
-      colBestIs: "лучшая на 1-й половине (быстрая/медленная)", colOosRank: "место на 2-й половине", tfAll: "ВСЕ",
+      colBestIs: "лучшая на 1-й половине (быстрая/медленная)", colOosRank: "место на 2-й половине", tfAll: "ВСЕ", colSymbol: "Символ",
     },
     whatMaIsFor: {
       tag: "ДЛЯ ЧЕГО СКОЛЬЗЯЩАЯ СРЕДНЯЯ ДЕЙСТВИТЕЛЬНО ГОДИТСЯ",
@@ -231,7 +231,7 @@ window.Ch8Content = {
       honestTitle: "Placa onestă",
       honestBody: "Ce e măsurat aici: regula mecanică a intersecției a două medii, cu un cost fix pe tranzacție ({{cost_per_trade_atr}} din ATR pe schimbare de poziție). Ce nu e aici: contextul — știri, sesiune, regimul pieței, managementul poziției. Am verificat regula de una singură, pentru că exact așa se vinde. Un sistem de tranzacționare adevărat nu constă din parametri. Grila noastră — {{grid_size}} perechi pe {{n_cells}} combinații instrument×timeframe, și nu e infinit: pe un istoric mai lung cifrele se vor schimba, și le vom recalcula.",
       downloadCsv: "⬇ Descarcă cifrele noastre (CSV)",
-      colBestIs: "cea mai bună pe prima jumătate (rapidă/lentă)", colOosRank: "locul pe a doua jumătate", tfAll: "TOATE",
+      colBestIs: "cea mai bună pe prima jumătate (rapidă/lentă)", colOosRank: "locul pe a doua jumătate", tfAll: "TOATE", colSymbol: "Simbol",
     },
     whatMaIsFor: {
       tag: "PENTRU CE E CU ADEVĂRAT BUNĂ MEDIA MOBILĂ",
@@ -369,7 +369,7 @@ window.Ch8Content = {
       honestTitle: "The honest plate",
       honestBody: "What's measured here: the mechanical rule of two moving averages crossing, with a fixed cost per trade ({{cost_per_trade_atr}} of ATR per position change). What isn't here: context — news, session, market regime, position management. We tested the rule on its own, because that's exactly how it gets sold. A real trading system isn't made of parameters. Our grid is {{grid_size}} pairs across {{n_cells}} instrument×timeframe combinations, and that's not infinite — on a longer history these numbers will shift, and we'll recompute them.",
       downloadCsv: "⬇ Download our numbers (CSV)",
-      colBestIs: "best on 1st half (fast/slow)", colOosRank: "rank on 2nd half", tfAll: "ALL",
+      colBestIs: "best on 1st half (fast/slow)", colOosRank: "rank on 2nd half", tfAll: "ALL", colSymbol: "Symbol",
     },
     whatMaIsFor: {
       tag: "WHAT A MOVING AVERAGE IS ACTUALLY GOOD FOR",

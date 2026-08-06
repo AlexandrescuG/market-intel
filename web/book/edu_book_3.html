@@ -731,7 +731,7 @@ function OilStoryScene() {
   const nav = lang==="ru" ? {prev:"← Назад", next:"Дальше →"} : lang==="ro" ? {prev:"← Înapoi", next:"Continuă →"} : {prev:"← Back", next:"Next →"};
   return (
     <div style={{marginBottom:56}}>
-      <Mono size={10} color={C.inkFaint} spacing={1} style={{display:"block",marginBottom:10}}>STORY · WTI D1 · 17–22.04.2020</Mono>
+      <Mono size={10} color={C.inkFaint} spacing={1} style={{display:"block",marginBottom:10}}>STORY · {lang==="ru"?"Нефть WTI":lang==="ro"?"Petrol WTI":"WTI Crude"} · D1 · 17–22.04.2020</Mono>
       <SceneMount url="/data/edu_scenes/ch3_oil_negative.json" mode="story" copy={{ steps: s.steps, prev: nav.prev, next: nav.next }}/>
       <p style={{fontSize:12.5,color:C.inkSoft,marginTop:10,fontStyle:"italic",maxWidth:760}}>{s.conclusion}</p>
     </div>
@@ -743,7 +743,7 @@ function SolEventScene() {
   const s = T.scenes.ch3_sol_no_stop;
   return (
     <div style={{marginBottom:32}}>
-      <Mono size={10} color={C.inkFaint} spacing={1} style={{display:"block",marginBottom:10}}>EVENT · SOL D1 · 01.11.2021–30.12.2022</Mono>
+      <Mono size={10} color={C.inkFaint} spacing={1} style={{display:"block",marginBottom:10}}>EVENT · {INITIAL_LANG==="ru"?"Солана":INITIAL_LANG==="ro"?"Solana":"Solana"} · D1 · 01.11.2021–30.12.2022</Mono>
       <SceneMount url="/data/edu_scenes/ch3_sol_no_stop.json" mode="event" symbol="SOL" copy={{
         question: s.question, options: s.options, revealText: s.revealText, nextMarker: s.nextMarker,
       }}/>
@@ -1285,7 +1285,7 @@ function PositionCalculator() {
 
       {liveGold && (
         <p style={{fontSize:11.5,color:C.inkFaint,marginBottom:16}}>
-          <Mono size={11} color={C.green} spacing={0}>● LIVE</Mono> GOLD {liveGold.toFixed(2)}
+          <Mono size={11} color={C.green} spacing={0}>● LIVE</Mono> {window.SBFSymbols ? window.SBFSymbols.symbolName('GOLD', {lang: INITIAL_LANG, mode:'name'}) : 'GOLD'} {liveGold.toFixed(2)}
           {nearestBelow && ` · ${T.calc.liveNote} (${nearestBelow.price.toFixed(2)})`}
         </p>
       )}
@@ -1438,6 +1438,12 @@ function Chapter3() {
     S.concl4,
     S.concl5,
   ];
+
+  // SPEC_chart_fixes_and_staged_signup.md §5: отметка прочтения главы —
+  // см. web/assets/sbf-anon.js (аноним) + sbf-auth.js (залогинен).
+  React.useEffect(() => {
+    if (window.SBFAnon) window.SBFAnon.markChapterRead(3);
+  }, []);
 
   return (
     <div style={{minHeight:"100vh",background:C.white,color:C.ink,fontFamily:"'DM Sans',sans-serif"}}>

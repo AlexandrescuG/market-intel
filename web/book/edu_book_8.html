@@ -394,7 +394,7 @@ function OverfitLab({ ema_ }) {
         <div>
           <Mono size={10} color={C.inkFaint} spacing={1} style={{display:"block",marginBottom:6,textTransform:"uppercase"}}>{lb.symbolLabel}</Mono>
           <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
-            {symbols.map(s => <button key={s} onClick={()=>pick(s, Object.keys(ema_.lab[s])[0])} style={{fontFamily:"monospace",fontSize:10,padding:"5px 9px",cursor:"pointer",background:s===symbol?C.gold:"#fff",color:s===symbol?"#18181a":C.inkMid,border:`1px solid ${s===symbol?C.gold:C.border}`,borderRadius:3}}>{s}</button>)}
+            {symbols.map(s => <button key={s} onClick={()=>pick(s, Object.keys(ema_.lab[s])[0])} style={{fontFamily:"monospace",fontSize:10,padding:"5px 9px",cursor:"pointer",background:s===symbol?C.gold:"#fff",color:s===symbol?"#18181a":C.inkMid,border:`1px solid ${s===symbol?C.gold:C.border}`,borderRadius:3}}>{window.SBFSymbols ? window.SBFSymbols.symbolName(s, {lang: INITIAL_LANG, mode:"name+ticker"}) : s}</button>)}
           </div>
         </div>
         <div>
@@ -478,7 +478,7 @@ function OosTable({ ema_ }) {
   const [sortDir, setSortDir] = useState(1);
 
   const cols = [
-    { key: "symbol", label: "Symbol", get: c => c.symbol, align: "left" },
+    { key: "symbol", label: cm.colSymbol, get: c => c.symbol, align: "left" },
     { key: "tf", label: "TF", get: c => c.tf, align: "center" },
     { key: "best_is", label: cm.colBestIs, get: c => c.best_is.fast*1000+c.best_is.slow, align: "center" },
     { key: "rank", label: cm.colOosRank, get: c => c.oos.rank, align: "center" },
@@ -516,7 +516,7 @@ function OosTable({ ema_ }) {
           <tbody>
             {rows.map((c,i) => (
               <tr key={i}>
-                <td style={{padding:"7px 10px",fontSize:12,color:C.black,fontWeight:600,borderBottom:`1px solid ${C.border}`}}>{c.symbol}</td>
+                <td style={{padding:"7px 10px",fontSize:12,color:C.black,fontWeight:600,borderBottom:`1px solid ${C.border}`}}>{window.SBFSymbols ? window.SBFSymbols.symbolName(c.symbol, {lang: INITIAL_LANG, mode:"name+ticker"}) : c.symbol}</td>
                 <td style={{padding:"7px 10px",textAlign:"center",fontSize:11,fontFamily:"monospace",color:C.inkSoft,borderBottom:`1px solid ${C.border}`}}>{c.tf}</td>
                 <td style={{padding:"7px 10px",textAlign:"center",fontSize:11,fontFamily:"monospace",color:C.inkSoft,borderBottom:`1px solid ${C.border}`}}>{c.best_is.fast}/{c.best_is.slow}</td>
                 <td style={{padding:"7px 10px",textAlign:"center",fontSize:12,fontFamily:"monospace",fontWeight:600,color: c.oos.percentile<=25?C.green:c.oos.percentile>=75?C.red:C.inkMid,borderBottom:`1px solid ${C.border}`}}>{c.oos.rank} / {c.oos.of}</td>
@@ -741,6 +741,12 @@ function Chapter8() {
   const T8 = window.Ch8Content[lang] || window.Ch8Content.ru;
   const { loading, error, ema: ema_, candles } = useCh8Data();
   const vars = React.useMemo(() => buildVars(ema_, lang), [ema_, lang]);
+
+  // SPEC_chart_fixes_and_staged_signup.md §5: отметка прочтения главы —
+  // см. web/assets/sbf-anon.js (аноним) + sbf-auth.js (залогинен).
+  React.useEffect(() => {
+    if (window.SBFAnon) window.SBFAnon.markChapterRead(8);
+  }, []);
 
   return (
     <div style={{minHeight:"100vh",background:C.white,color:C.ink,fontFamily:"'DM Sans',sans-serif"}}>

@@ -528,8 +528,8 @@ function OscillatorRealityTable({ cells }) {
               <tr key={i}>
                 <td style={{padding:"6px 9px",fontSize:11.5,color:C.black,fontWeight:600,borderBottom:`1px solid ${C.border}`}}>
                   {CHART_SYMBOLS.has(r.symbol)
-                    ? <a href={"/chart.html?s="+r.symbol} target="_blank" rel="noopener" style={{color:C.black,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>{r.symbol}</a>
-                    : r.symbol}
+                    ? <a href={"/chart.html?s="+r.symbol} target="_blank" rel="noopener" style={{color:C.black,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>{window.SBFSymbols ? window.SBFSymbols.symbolName(r.symbol, {lang: INITIAL_LANG, mode:"name+ticker"}) : r.symbol}</a>
+                    : (window.SBFSymbols ? window.SBFSymbols.symbolName(r.symbol, {lang: INITIAL_LANG, mode:"name+ticker"}) : r.symbol)}
                 </td>
                 <td style={{padding:"6px 9px",textAlign:"center",fontSize:10.5,fontFamily:"monospace",color:C.inkSoft,borderBottom:`1px solid ${C.border}`}}>{r.tf}</td>
                 <td style={{padding:"6px 9px",textAlign:"center",fontSize:10.5,fontFamily:"monospace",color:C.inkSoft,borderBottom:`1px solid ${C.border}`}}>{r.n}</td>
@@ -678,6 +678,12 @@ function Chapter9() {
   const T9 = window.Ch9Content[lang] || window.Ch9Content.ru;
   const { loading, error, osc, cases, scene } = useCh9Data();
   const vars = React.useMemo(() => buildVars(osc, lang), [osc, lang]);
+
+  // SPEC_chart_fixes_and_staged_signup.md §5: отметка прочтения главы —
+  // см. web/assets/sbf-anon.js (аноним) + sbf-auth.js (залогинен).
+  React.useEffect(() => {
+    if (window.SBFAnon) window.SBFAnon.markChapterRead(9);
+  }, []);
 
   return (
     <div style={{minHeight:"100vh",background:C.white,color:C.ink,fontFamily:"'DM Sans',sans-serif"}}>

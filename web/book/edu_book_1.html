@@ -964,6 +964,12 @@ function App() {
   const [screen, setScreen] = React.useState("start");
   const [path, setPath] = React.useState("explorer");
 
+  // SPEC_chart_fixes_and_staged_signup.md §5: отметка прочтения главы —
+  // см. web/assets/sbf-anon.js (аноним) + sbf-auth.js (залогинен).
+  React.useEffect(() => {
+    if (window.SBFAnon) window.SBFAnon.markChapterRead(1);
+  }, []);
+
   if (screen === "level1") {
     return (
       <Level1 

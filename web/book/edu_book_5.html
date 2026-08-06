@@ -313,7 +313,6 @@ function buildVars(hp, as, cfg, lang) {
   };
 }
 
-const ASSET_LABELS = { GOLD:"GOLD (XAU/USD)", EURUSD:"EUR/USD", USDJPY:"USD/JPY", BTC:"BTC/USD", SPX:"S&P 500", WTI:"WTI" };
 const ASSET_ORDER = ["GOLD","EURUSD","USDJPY","BTC","SPX","WTI"];
 
 // ─── Cold open: "У прилива есть таблица" ─────────────────────────────────────
@@ -452,7 +451,7 @@ function HourStatsBlock({ hp, vars }) {
           <Mono size={10} color={C.inkFaint} spacing={1} style={{display:"block",marginBottom:6,textTransform:"uppercase"}}>{hs.switchInstrument}</Mono>
           <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
             {ASSET_ORDER.filter(a => hp && hp[a]).map(a => (
-              <button key={a} onClick={() => setAsset(a)} style={{fontFamily:"monospace",fontSize:10.5,padding:"5px 10px",cursor:"pointer",background:a===asset?C.gold:"#fff",color:a===asset?"#18181a":C.inkMid,border:`1px solid ${a===asset?C.gold:C.border}`,borderRadius:3}}>{a}</button>
+              <button key={a} onClick={() => setAsset(a)} style={{fontFamily:"monospace",fontSize:10.5,padding:"5px 10px",cursor:"pointer",background:a===asset?C.gold:"#fff",color:a===asset?"#18181a":C.inkMid,border:`1px solid ${a===asset?C.gold:C.border}`,borderRadius:3}}>{window.SBFSymbols ? window.SBFSymbols.symbolName(a, {lang: INITIAL_LANG, mode:"name+ticker"}) : a}</button>
             ))}
           </div>
         </div>
@@ -607,12 +606,42 @@ function LiquidityGlobe({ hp }) {
     return () => clearInterval(timerRef.current);
   }, [touring, asset]);
 
+  // 🔴 Исправлено 06.08.2026. Здесь стояли ЗАФИКСИРОВАННЫЕ окна без перехода
+  // на летнее время: Азия h<7||h>=21, Лондон 7-16, Нью-Йорк 13-22. Бэкенд
+  // (core/sessions.py:41-45) и график (chart.html:1196) считают иначе: Азия
+  // всегда (0,8), Лондон (7,16) летом и (8,17) зимой, Нью-Йорк (12,21) летом
+  // и (13,22) зимой. Глава построена на почасовых измерениях и при этом
+  // подсвечивала их по своим границам — расхождение до часа по обеим сессиям.
+  // Ниже — тот же расчёт, что в core/sessions.py, один в один.
+  const _lastSunday = (y, m) => {           // m: 1-12
+    const d = new Date(Date.UTC(y, m, 1));  // первое число следующего месяца
+    d.setUTCDate(d.getUTCDate() - 1);       // последний день месяца m
+    d.setUTCDate(d.getUTCDate() - d.getUTCDay());
+    return d;
+  };
+  const _nthSunday = (y, m, n) => {
+    const d = new Date(Date.UTC(y, m - 1, 1));
+    d.setUTCDate(d.getUTCDate() + ((7 - d.getUTCDay()) % 7) + (n - 1) * 7);
+    return d;
+  };
+  const sessionBounds = (dt) => {
+    const y = dt.getUTCFullYear();
+    const euDst = dt >= _lastSunday(y, 3) && dt < _lastSunday(y, 10);
+    const usDst = dt >= _nthSunday(y, 3, 2) && dt < _nthSunday(y, 11, 1);
+    return {
+      asia:   [0, 8],
+      london: euDst ? [7, 16] : [8, 17],
+      ny:     usDst ? [12, 21] : [13, 22],
+    };
+  };
   const sessionBand = (h) => {
-    // приблизительные календарные окна (см. таблицу §3.2), не измерение --
-    // используются только как фоновая подсказка "кто примерно за столом".
-    const inAsia = h < 7 || h >= 21;
-    const inLondon = h >= 7 && h < 16;
-    const inNy = h >= 13 && h < 22;
+    // ОГОВОРКА: тепловая карта усредняет много дней, часть из которых в летнем
+    // времени, часть в зимнем. Единой honest-границы для такой выборки не
+    // существует — берём режим на сегодня, как и остальной сайт.
+    const b = sessionBounds(new Date());
+    const inAsia   = h >= b.asia[0]   && h < b.asia[1];
+    const inLondon = h >= b.london[0] && h < b.london[1];
+    const inNy     = h >= b.ny[0]     && h < b.ny[1];
     if (inLondon && inNy) return "overlap";
     if (inLondon) return "london";
     if (inNy) return "ny";
@@ -631,7 +660,7 @@ function LiquidityGlobe({ hp }) {
               fontFamily:"monospace",fontSize:10.5,padding:"5px 10px",cursor:"pointer",
               background: a===asset ? C.gold : "transparent", color: a===asset ? "#18181a" : "rgba(255,255,255,0.55)",
               border:`1px solid ${a===asset?C.gold:"rgba(255,255,255,0.2)"}`,borderRadius:3
-            }}>{a}</button>
+            }}>{window.SBFSymbols ? window.SBFSymbols.symbolName(a, {lang: INITIAL_LANG, mode:"name+ticker"}) : a}</button>
           ))}
         </div>
       </div>
@@ -1246,6 +1275,12 @@ function Chapter5() {
   const T5 = window.Ch5Content[lang] || window.Ch5Content.ru;
   const { loading, error, hp, as, cfg, coldOpen } = useCh5Data();
   const vars = React.useMemo(() => buildVars(hp, as, cfg, lang), [hp, as, cfg, lang]);
+
+  // SPEC_chart_fixes_and_staged_signup.md §5: отметка прочтения главы —
+  // см. web/assets/sbf-anon.js (аноним) + sbf-auth.js (залогинен).
+  React.useEffect(() => {
+    if (window.SBFAnon) window.SBFAnon.markChapterRead(5);
+  }, []);
 
   return (
     <div style={{minHeight:"100vh",background:C.white,color:C.ink,fontFamily:"'DM Sans',sans-serif"}}>

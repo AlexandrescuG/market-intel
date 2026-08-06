@@ -435,7 +435,7 @@ function IchimokuLiveChart() {
         <Mono size={11} color={C.gold} spacing={2}>{lc.tag}</Mono>
         <div style={{display:"flex",gap:6}}>
           {ICHIMOKU_SYMBOLS.map(s => (
-            <button key={s} onClick={()=>setSymbol(s)} style={{fontFamily:"monospace",fontSize:10.5,padding:"5px 10px",cursor:"pointer",background:s===symbol?C.gold:"transparent",color:s===symbol?"#18181a":"rgba(255,255,255,0.6)",border:`1px solid ${s===symbol?C.gold:"rgba(255,255,255,0.2)"}`,borderRadius:3}}>{s}</button>
+            <button key={s} onClick={()=>setSymbol(s)} style={{fontFamily:"monospace",fontSize:10.5,padding:"5px 10px",cursor:"pointer",background:s===symbol?C.gold:"transparent",color:s===symbol?"#18181a":"rgba(255,255,255,0.6)",border:`1px solid ${s===symbol?C.gold:"rgba(255,255,255,0.2)"}`,borderRadius:3}}>{window.SBFSymbols ? window.SBFSymbols.symbolName(s, {lang: INITIAL_LANG, mode:"name+ticker"}) : s}</button>
           ))}
         </div>
       </div>
@@ -457,7 +457,7 @@ function IchimokuLiveChart() {
       </div>
       <p style={{fontSize:12,color:"rgba(255,255,255,0.5)",lineHeight:1.65,margin:0,maxWidth:680}}>{lc.caption}</p>
       <a href={"/chart.html?s=" + symbol} target="_blank" rel="noopener" style={{fontFamily:"monospace",fontSize:11.5,color:C.gold,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`,marginTop:10,display:"inline-block"}}>
-        {INITIAL_LANG==="ru"?`Открыть ${symbol} на графике →`:INITIAL_LANG==="ro"?`Deschide ${symbol} pe grafic →`:`Open ${symbol} on the chart →`}
+        {(() => { const symLabel = window.SBFSymbols ? window.SBFSymbols.symbolName(symbol, {lang: INITIAL_LANG, mode:"name+ticker"}) : symbol; return INITIAL_LANG==="ru"?`Открыть ${symLabel} на графике →`:INITIAL_LANG==="ro"?`Deschide ${symLabel} pe grafic →`:`Open ${symLabel} on the chart →`; })()}
       </a>
     </div>
   );
@@ -847,6 +847,12 @@ function Chapter12() {
   const [refreshKey, setRefreshKey] = React.useState(0);
   const { data: progress, loading } = useSeriesProgress(refreshKey);
   const bump = () => setRefreshKey(k => k+1);
+
+  // SPEC_chart_fixes_and_staged_signup.md §5: отметка прочтения главы —
+  // см. web/assets/sbf-anon.js (аноним) + sbf-auth.js (залогинен).
+  React.useEffect(() => {
+    if (window.SBFAnon) window.SBFAnon.markChapterRead(12);
+  }, []);
 
   return (
     <div style={{minHeight:"100vh",background:C.white,color:C.ink,fontFamily:"'DM Sans',sans-serif"}}>

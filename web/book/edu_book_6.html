@@ -376,7 +376,7 @@ function SurpriseScatter({ stats }) {
     <div>
       <div style={{display:"flex",gap:6,marginBottom:14,flexWrap:"wrap"}}>
         {symbols.map(s => (
-          <button key={s} onClick={()=>setInstrument(s)} style={{fontFamily:"monospace",fontSize:10.5,padding:"5px 10px",cursor:"pointer",background:s===instrument?C.gold:"#fff",color:s===instrument?"#18181a":C.inkMid,border:`1px solid ${s===instrument?C.gold:C.border}`,borderRadius:3}}>{s}</button>
+          <button key={s} onClick={()=>setInstrument(s)} style={{fontFamily:"monospace",fontSize:10.5,padding:"5px 10px",cursor:"pointer",background:s===instrument?C.gold:"#fff",color:s===instrument?"#18181a":C.inkMid,border:`1px solid ${s===instrument?C.gold:C.border}`,borderRadius:3}}>{window.SBFSymbols ? window.SBFSymbols.symbolName(s, {lang: INITIAL_LANG, mode:"name+ticker"}) : s}</button>
         ))}
       </div>
       <div style={{overflowX:"auto"}}>
@@ -397,7 +397,7 @@ function SurpriseScatter({ stats }) {
           <text x={W/2} y={H-8} textAnchor="middle" fontSize="9" fontFamily="monospace" fill={C.inkFaint}>surprise, σ</text>
         </svg>
       </div>
-      <p style={{fontSize:11,color:C.inkFaint,marginTop:8,fontStyle:"italic"}}>{instrument} · {points.length} {INITIAL_LANG==="ru"?"точек":INITIAL_LANG==="ro"?"puncte":"points"} · {INITIAL_LANG==="ru"?"красная линия — медиана по бину":INITIAL_LANG==="ro"?"linia roșie — mediana pe bin":"red line — bin median"}</p>
+      <p style={{fontSize:11,color:C.inkFaint,marginTop:8,fontStyle:"italic"}}>{window.SBFSymbols ? window.SBFSymbols.symbolName(instrument, {lang: INITIAL_LANG, mode:"name+ticker"}) : instrument} · {points.length} {INITIAL_LANG==="ru"?"точек":INITIAL_LANG==="ro"?"puncte":"points"} · {INITIAL_LANG==="ru"?"красная линия — медиана по бину":INITIAL_LANG==="ro"?"linia roșie — mediana pe bin":"red line — bin median"}</p>
     </div>
   );
 }
@@ -420,7 +420,7 @@ function StrengthMatrix({ stats }) {
   // SPEC_ch2_debug_and_chart_engine.md §2.2 -- общий ImpactMatrix с главой 2:
   // тот же приём (приглушение+штриховка малой выборки вместо полного скрытия
   // клетки), median_move уже нормирован на дневной диапазон в surprise_reaction.py.
-  const columns = MATRIX_SYMBOLS.map(s => ({ key: s, label: s }));
+  const columns = MATRIX_SYMBOLS.map(s => ({ key: s, label: window.SBFSymbols ? window.SBFSymbols.symbolName(s, {lang: INITIAL_LANG, mode:"name+ticker"}) : s }));
   const rows = CORE_EVENT_TYPES.map(et => ({
     key: et,
     label: labels[et] || et,
@@ -837,7 +837,7 @@ function SqueezeTrainer() {
       </div>
       <p style={{fontSize:12,color:C.inkSoft,lineHeight:1.65,marginTop:14,fontStyle:"italic",maxWidth:780}}>{sq.calendarLink}</p>
       <a href="/chart.html?s=GOLD" target="_blank" rel="noopener" style={{fontFamily:"monospace",fontSize:12,color:C.gold,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>
-        {INITIAL_LANG==="ru"?"Открыть GOLD на графике →":INITIAL_LANG==="ro"?"Deschide GOLD pe grafic →":"Open GOLD on the chart →"}
+        {(() => { const symLabel = window.SBFSymbols ? window.SBFSymbols.symbolName("GOLD", {lang: INITIAL_LANG, mode:"name+ticker"}) : "GOLD"; return INITIAL_LANG==="ru"?`Открыть ${symLabel} на графике →`:INITIAL_LANG==="ro"?`Deschide ${symLabel} pe grafic →`:`Open ${symLabel} on the chart →`; })()}
       </a>
 
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginTop:28}} className="g2">
@@ -857,6 +857,12 @@ function Chapter6() {
   const T6 = window.Ch6Content[lang] || window.Ch6Content.ru;
   const { loading, error, stats, scene } = useCh6Data();
   const vars = React.useMemo(() => buildVars(stats, scene, lang), [stats, scene, lang]);
+
+  // SPEC_chart_fixes_and_staged_signup.md §5: отметка прочтения главы —
+  // см. web/assets/sbf-anon.js (аноним) + sbf-auth.js (залогинен).
+  React.useEffect(() => {
+    if (window.SBFAnon) window.SBFAnon.markChapterRead(6);
+  }, []);
 
   return (
     <div style={{minHeight:"100vh",background:C.white,color:C.ink,fontFamily:"'DM Sans',sans-serif"}}>

@@ -24,7 +24,7 @@ window.Ch6Content = {
   ru: {
     coldStart: {
       tag: "НАЙДИ РЕЛИЗ",
-      ask: "Полный торговый день GOLD, без единой пометки. Тапни по свече, где, по-твоему, вышла новость.",
+      ask: "Полный торговый день Золото, без единой пометки. Тапни по свече, где, по-твоему, вышла новость.",
       revealTemplate: "{{marker_label}} · {{date}}, {{time}} UTC. Бар движения — {{release_bar_range}} пункта, в {{peak_vs_quiet}} раза больше обычного получасового бара тихих часов этого дня.",
       bridge: "Дальше — откуда берётся этот бар и почему его размер можно оценить заранее, а направление — нет.",
     },
@@ -218,7 +218,7 @@ window.Ch6Content = {
   ro: {
     coldStart: {
       tag: "GĂSEȘTE PUBLICAȚIA",
-      ask: "O zi completă de tranzacționare GOLD, fără nicio marcă. Atinge bara unde crezi că a apărut știrea.",
+      ask: "O zi completă de tranzacționare Aur, fără nicio marcă. Atinge bara unde crezi că a apărut știrea.",
       revealTemplate: "{{marker_label}} · {{date}}, ora {{time}} UTC. Bara de mișcare — {{release_bar_range}} puncte, de {{peak_vs_quiet}} ori mai mult decât bara tipică de 30 de minute din orele liniștite ale acestei zile.",
       bridge: "În continuare — de unde vine această bară și de ce mărimea ei poate fi estimată dinainte, dar direcția nu.",
     },
@@ -412,7 +412,7 @@ window.Ch6Content = {
   en: {
     coldStart: {
       tag: "FIND THE RELEASE",
-      ask: "One full GOLD trading day, with no markers. Tap the candle where you think the news came out.",
+      ask: "One full Gold trading day, with no markers. Tap the candle where you think the news came out.",
       revealTemplate: "{{marker_label}} · {{date}}, {{time}} UTC. The move bar is {{release_bar_range}} points — {{peak_vs_quiet}}× the typical 30-minute bar during this day's quiet hours.",
       bridge: "Next: where that bar comes from, and why its size can be estimated in advance while its direction can't.",
     },

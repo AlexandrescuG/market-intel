@@ -416,10 +416,11 @@ function Chapter15() {
   const T = window.Ch15Content[lang] || window.Ch15Content.ru;
 
   React.useEffect(() => {
-    fetch("/api/journal/course/complete", {
-      method: "POST", headers: {"Content-Type":"application/json"},
-      body: JSON.stringify({ chapter_number: 15 }),
-    }).catch(() => {});
+    // SPEC_chart_fixes_and_staged_signup.md §5: раньше голый fetch без auth-
+    // заголовков — прогресс ВСЕГДА уходил в общий "default", даже у
+    // залогиненных. window.SBFAnon.markChapterRead прикладывает и токен (если
+    // есть), и анонимный id (если нет) -- см. web/assets/sbf-anon.js.
+    if (window.SBFAnon) window.SBFAnon.markChapterRead(15);
   }, []);
 
   return (

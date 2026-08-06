@@ -515,7 +515,7 @@ function PatternBehaviorScreens({ patterns, examples }) {
             <div key={i} style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"20px 24px",borderLeft:`3px solid ${it.mechanic?"#c0392b":C.gold}`}}>
               <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,marginBottom:12}}>{it.behavior}</p>
               <PatternMiniChart example={example} patternKey={it.keys[0]}/>
-              {example && <Mono size={9} color={C.inkFaint} spacing={0.5} style={{display:"block",marginBottom:12}}>{PATTERN_CHART_SYMBOL} · {TF_LABEL} · {example.date} UTC</Mono>}
+              {example && <Mono size={9} color={C.inkFaint} spacing={0.5} style={{display:"block",marginBottom:12}}>{window.SBFSymbols ? window.SBFSymbols.symbolName(PATTERN_CHART_SYMBOL, {lang: INITIAL_LANG, mode:"name+ticker"}) : PATTERN_CHART_SYMBOL} · {TF_LABEL} · {example.date} UTC</Mono>}
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:10,marginBottom:it.mechanic?10:0}}>
                 <div style={{fontWeight:600,fontSize:14.5,color:C.black}}>{it.label}</div>
                 <div style={{display:"flex",gap:14,flexWrap:"wrap"}}>
@@ -556,7 +556,7 @@ function CoreMeasureBlock({ patterns }) {
       <p style={{fontSize:14,color:C.inkMid,lineHeight:1.75,marginBottom:20,maxWidth:820}}>{cm.preamble}</p>
       <div style={{display:"flex",gap:6,marginBottom:14,flexWrap:"wrap",alignItems:"center"}}>
         {symbols.map(s => (
-          <button key={s} onClick={()=>setInstrument(s)} style={{fontFamily:"monospace",fontSize:10.5,padding:"5px 10px",cursor:"pointer",background:s===instrument?C.gold:"#fff",color:s===instrument?"#18181a":C.inkMid,border:`1px solid ${s===instrument?C.gold:C.border}`,borderRadius:3}}>{s}</button>
+          <button key={s} onClick={()=>setInstrument(s)} style={{fontFamily:"monospace",fontSize:10.5,padding:"5px 10px",cursor:"pointer",background:s===instrument?C.gold:"#fff",color:s===instrument?"#18181a":C.inkMid,border:`1px solid ${s===instrument?C.gold:C.border}`,borderRadius:3}}>{window.SBFSymbols ? window.SBFSymbols.symbolName(s, {lang: INITIAL_LANG, mode:"name+ticker"}) : s}</button>
         ))}
         {MATRIX_SYMBOLS_10.includes(instrument) && (
           <a href={"/chart.html?s="+instrument} target="_blank" rel="noopener" style={{marginLeft:6,fontFamily:"monospace",fontSize:10.5,color:C.gold,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>{cm.instrumentLabel} →</a>
@@ -651,6 +651,12 @@ function Chapter10() {
   const lang = INITIAL_LANG;
   const T10 = window.Ch10Content[lang] || window.Ch10Content.ru;
   const { loading, error, patterns, examples } = useCh10Data();
+
+  // SPEC_chart_fixes_and_staged_signup.md §5: отметка прочтения главы —
+  // см. web/assets/sbf-anon.js (аноним) + sbf-auth.js (залогинен).
+  React.useEffect(() => {
+    if (window.SBFAnon) window.SBFAnon.markChapterRead(10);
+  }, []);
 
   return (
     <div style={{minHeight:"100vh",background:C.white,color:C.ink,fontFamily:"'DM Sans',sans-serif"}}>
