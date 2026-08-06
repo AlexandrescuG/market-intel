@@ -312,7 +312,12 @@ def get_xp_weekly(user_id: str = "default") -> int:
 
 
 def calc_level(xp: int) -> dict:
-    """Делегирует в journal_goals.evaluate_level_progression (§9.2: XP_req(L) = 100 × L^1.8)."""
+    """Делегирует в journal_goals.evaluate_level_progression (§9.2: XP_req(L) = floor(100 × L^2.2)).
+
+    Показатель степени в докстринге был 1.8 — устаревшее значение, не совпадавшее
+    с реальной формулой в journal_goals.py:65. Исправлено 06.08.2026 вместе
+    со сведением фронта (web/assets/sbf-profile.js) к этой же формуле.
+    """
     from .journal_goals import evaluate_level_progression
     return evaluate_level_progression(xp)
 
@@ -519,6 +524,43 @@ def complete_chapter(chapter_number: int, user_id: str = "default") -> dict:
         "xp_awarded": xp_awarded,
         "all_done": total_done == TOTAL_CHAPTERS,
     }
+
+
+def reset_course_progress(user_id: str) -> dict:
+    """Ручной сброс прогресса по главам (кнопка "сбросить" в /edu — раньше
+    висела на мёртвом localStorage-ключе sbf_edu_done, теперь на реальных
+    данных, см. SPEC_chart_fixes_and_staged_signup.md §5 п.7)."""
+    conn = _get_conn()
+    try:
+        conn.execute("DELETE FROM user_course_progress WHERE user_id=?", (user_id,))
+        conn.commit()
+    finally:
+        conn.close()
+    return {"ok": True}
+
+
+def migrate_anon_progress(anon_id: str, user_id: str) -> None:
+    """SPEC_chart_fixes_and_staged_signup.md §5, Этап 0: переносит прогресс
+    анонимного читателя (anon_id — токен из web/assets/sbf-anon.js, до этого
+    момента жил в user_course_progress как обычный user_id) на настоящего
+    пользователя при регистрации. INSERT OR IGNORE — если реальный юзер уже
+    сам отмечал главы (например, читал раньше залогиненным с другого
+    устройства), эта, более ранняя, запись не затирается анонимной."""
+    if not anon_id or not user_id or anon_id == user_id:
+        return
+    conn = _get_conn()
+    try:
+        conn.execute(
+            """INSERT OR IGNORE INTO user_course_progress
+               (user_id, chapter_number, is_completed, completed_at)
+               SELECT ?, chapter_number, is_completed, completed_at
+               FROM user_course_progress WHERE user_id=?""",
+            (user_id, anon_id),
+        )
+        conn.execute("DELETE FROM user_course_progress WHERE user_id=?", (anon_id,))
+        conn.commit()
+    finally:
+        conn.close()
 
 
 def record_quiz_attempt(level_id: str, question_id: str, correct: bool, user_id: str = "default") -> dict:

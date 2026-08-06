@@ -13,11 +13,12 @@ import sys
 import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import urlparse, parse_qs, unquote
 
 # Journal modules (добавляем core/ в path)
 sys.path.insert(0, str(Path(__file__).parent))
 from core import journal_db, journal_crypto, journal_ocr, journal_csv, journal_meta, journal_discipline, journal_alerts, journal_brief, journal_setups, journal_tilt, journal_gamification, journal_goals, journal_account, journal_auth, journal_feedback, journal_import, journal_analytics, journal_review, journal_cooldown, journal_rules, journal_tradeplan, journal_gate, i18n
+from core import symbols as _symbols
 from core.event_types import normalize_event_type
 from core.config import DB_PATH as _SIGNALS_DB
 from core.patterns import PATTERNS, detect as _detect_patterns
@@ -40,6 +41,27 @@ DIRECTORY = os.path.join(os.path.dirname(os.path.abspath(__file__)), "web")
 BOOK_DIR = Path(__file__).parent / "web" / "book"
 EDU_DIR  = Path(__file__).parent / "web" / "edu"
 WEB_DIR  = Path(__file__).parent / "web"
+
+# SPEC_chart_fixes_and_staged_signup.md §3: тикеры yfinance для живого
+# M5-эндпоинта (_handle_chart_ohlc_m5) — тот же список, что publish.py's
+# WATCH для статических таймфреймов, плюс USDJPY (yfinance отдаёт его
+# достаточно надёжно для короткого 7-дневного окна). USDRUB/USDKZT — нет:
+# yfinance ими не торгует, а MT5 M5 никто ещё не собирал.
+_M5_YF_TICKERS = {
+    "GOLD": "GC=F", "SILVER": "SI=F",
+    "BTC": "BTC-USD", "ETH": "ETH-USD", "SOL": "SOL-USD",
+    # 🔴 USDJPY: было "USDJPY=X". В этом же файле, в сидах symbol_map (строка ~164),
+    # тот же инструмент записан как "JPY=X", и так же он объявлен в chart.html:330.
+    # Одно значение из трёх отличалось — тот же инструмент кешировался под двумя
+    # ключами. Приведено к "JPY=X": это родная запись Yahoo для пар с долларом
+    # в базе (RUB=X, CNY=X, AED=X, ZAR=X в том же сид-списке), тогда как форма
+    # AAABBB=X у Yahoo используется для кроссов (EURUSD=X, GBPUSD=X).
+    "EURUSD": "EURUSD=X", "GBPUSD": "GBPUSD=X", "USDJPY": "JPY=X",
+    "SPX": "^GSPC", "NASDAQ": "^IXIC", "DJI": "^DJI",
+    "WTI": "CL=F", "NG": "NG=F", "DXY": "DX-Y.NYB",
+}
+_m5_cache: dict = {}
+_M5_CACHE_TTL = 90  # сек
 
 
 def _chart_symbols() -> set:
@@ -77,9 +99,20 @@ def _ensure_schema() -> None:
         CREATE TABLE IF NOT EXISTS symbol_map (
             our_key TEXT PRIMARY KEY, twelvedata TEXT, mt5 TEXT, yahoo TEXT
         );
+        -- 🔴 Исправлено 06.08.2026: было actual/forecast/previous REAL.
+        -- Ровно эта же таблица в этой же bot.db объявляется в calendar_pull.py:255
+        -- с типом TEXT. Кто первым выполнил CREATE TABLE IF NOT EXISTS, того
+        -- и типы — то есть аффинность зависела от порядка запуска процессов.
+        -- Верен TEXT: значения приходят строками вида "199k", "$62.396B", "5.1%",
+        -- "−0.4%" и в число не приводятся. При REAL-аффинности SQLite сохранял бы
+        -- "5.1" как число, а "199k" как текст — в одной колонке вперемешку,
+        -- что ломает сравнение и сортировку.
+        -- ВНИМАНИЕ: если таблица уже создана с REAL, этот DDL её не изменит —
+        -- нужна разовая миграция (ALTER/пересоздание). Проверить фактическую
+        -- схему: PRAGMA table_info(econ_event_history).
         CREATE TABLE IF NOT EXISTS econ_event_history (
             event_key TEXT NOT NULL, ts INTEGER NOT NULL,
-            actual REAL, forecast REAL, previous REAL, unit TEXT,
+            actual TEXT, forecast TEXT, previous TEXT, unit TEXT,
             PRIMARY KEY(event_key, ts)
         );
         CREATE TABLE IF NOT EXISTS event_reactions (
@@ -103,9 +136,27 @@ def _ensure_schema() -> None:
     # SPEC_morning_brief_v2.md блок 1 ("в прошлые разы") хочет медиану,
     # нормированную на дневной ATR14 -- avg_move_30m/60m остаются как были
     # (сырые пункты, среднее), эти две колонки добавлены отдельно, не заменяют.
+    # SPEC_календарь_и_движения_рынка.md §3: нормировка хода на медианный ход
+    # ТОГО ЖЕ ЧАСА СУТОК (без событий, hourly_profile.json), не только на ATR14 —
+    # без этого 38 пипс в 15:30 UTC и 38 пипс в 03:00 UTC читаются как одно и то
+    # же, хотя это обычный час против аномалии. Плюс период выборки (§4: любая
+    # публикуемая метрика обязана показывать n И период) и 4-часовое окно —
+    # тот же горизонт, что у контрольных цифр Recognia (§0), для сверки.
     for ddl in [
         "ALTER TABLE event_reaction_stats ADD COLUMN median_move_30m REAL",
         "ALTER TABLE event_reaction_stats ADD COLUMN median_atr_30m REAL",
+        "ALTER TABLE event_reaction_stats ADD COLUMN hourly_baseline_30m REAL",
+        "ALTER TABLE event_reaction_stats ADD COLUMN baseline_ratio_30m REAL",
+        "ALTER TABLE event_reaction_stats ADD COLUMN period_from TEXT",
+        "ALTER TABLE event_reaction_stats ADD COLUMN period_to TEXT",
+        "ALTER TABLE event_reaction_stats ADD COLUMN avg_move_4h REAL",
+        "ALTER TABLE event_reaction_stats ADD COLUMN max_move_4h REAL",
+        "ALTER TABLE event_reaction_stats ADD COLUMN n_beat INT",
+        "ALTER TABLE event_reaction_stats ADD COLUMN beat_up_share REAL",
+        "ALTER TABLE event_reaction_stats ADD COLUMN beat_down_share REAL",
+        "ALTER TABLE event_reaction_stats ADD COLUMN n_miss INT",
+        "ALTER TABLE event_reaction_stats ADD COLUMN miss_up_share REAL",
+        "ALTER TABLE event_reaction_stats ADD COLUMN miss_down_share REAL",
     ]:
         try:
             con.execute(ddl)
@@ -187,6 +238,7 @@ _jinja.globals["url_for"] = _url_for
 # жил без экранирования, но новый код это ни от чего не освобождает.
 _site_jinja = Environment(loader=FileSystemLoader(str(WEB_DIR)), autoescape=True)
 _site_jinja.globals["t"] = i18n.t
+_site_jinja.globals["symbol_name"] = _symbols.symbol_name
 
 
 def _tojson_filter(value) -> Markup:
@@ -381,30 +433,38 @@ def _edu_inject(ch: int, lang: str = i18n.DEFAULT_LANG) -> str:
         "order_block": i18n.t("edu.lvl.order_block", lang),
         "fvg_target":  i18n.t("edu.lvl.fvg_target", lang),
     }
+    # sym — «Название · ТИКЕР» из общего реестра (SPEC_symbol_names.md §3), не
+    # разрозненные литералы по главам: раньше главы 3/7/14 писали "человеческий"
+    # формат руками (EUR/USD, XAU/USD), а глава 13 — сырые US500/BTCUSD.
+    _eurusd = _symbols.symbol_name("EURUSD", lang=lang, mode="name+ticker")
+    _xauusd = _symbols.symbol_name("GOLD", lang=lang, mode="name+ticker")
+    _gbpusd = _symbols.symbol_name("GBPUSD", lang=lang, mode="name+ticker")
+    _us500 = _symbols.symbol_name("SPX", lang=lang, mode="name+ticker")
+    _btcusd = _symbols.symbol_name("BTC", lang=lang, mode="name+ticker")
     _TCARD_MAP: dict[int, str] = {
         3: (
-            f"sbfTechCard({{sym:'EUR/USD · D1',bias:'bull',"
+            f"sbfTechCard({{sym:'{_eurusd} · D1',bias:'bull',"
             f"levels:[['{_LVL['entry']}','1.0850'],['{_LVL['stop']}','1.0790'],['{_LVL['target']}','1.0980']],"
             f"note:'{i18n.t('edu.tcard.n1', lang)}'}}) +"
-            f"sbfTechCard({{sym:'XAU/USD · H4',bias:'bear',"
+            f"sbfTechCard({{sym:'{_xauusd} · H4',bias:'bear',"
             f"levels:[['{_LVL['entry']}','2020'],['{_LVL['stop']}','2045'],['{_LVL['target']}','1970']],"
             f"note:'{i18n.t('edu.tcard.n2', lang)}'}})"
         ),
         7: (
-            f"sbfTechCard({{sym:'GBP/USD · H1',bias:'bull',"
+            f"sbfTechCard({{sym:'{_gbpusd} · H1',bias:'bull',"
             f"levels:[['{_LVL['order_block']}','1.2640'],['{_LVL['entry']}','1.2660'],['{_LVL['stop']}','1.2610'],['{_LVL['fvg_target']}','1.2750']],"
             f"note:'{i18n.t('edu.tcard.n3', lang)}'}})"
         ),
         13: (
-            f"sbfTechCard({{sym:'US500 · D1',bias:'bear',"
+            f"sbfTechCard({{sym:'{_us500} · D1',bias:'bear',"
             f"levels:[['{_LVL['neckline']}','5180'],['{_LVL['target_h']}','5040']],"
             f"note:'{i18n.t('edu.tcard.n4', lang)}'}}) +"
-            f"sbfTechCard({{sym:'BTCUSD · H4',bias:'bear',"
+            f"sbfTechCard({{sym:'{_btcusd} · H4',bias:'bear',"
             f"levels:[['{_LVL['neckline']}','61 200'],['{_LVL['target_h']}','58 400']],"
             f"note:'{i18n.t('edu.tcard.n5', lang)}'}})"
         ),
         14: (
-            f"sbfTechCard({{sym:'EUR/USD · M5',bias:'bull',"
+            f"sbfTechCard({{sym:'{_eurusd} · M5',bias:'bull',"
             f"levels:[['{_LVL['entry']}','1.0902'],['{_LVL['stop']}','1.0893'],['{_LVL['target']}','1.0924']],"
             f"note:'{i18n.t('edu.tcard.n6', lang)}'}})"
         ),
@@ -590,6 +650,7 @@ def _build_edu_page(ch: int, lang: str) -> bytes:
         '<link rel="stylesheet" href="/edu/edu.css">\n'
         '<link rel="stylesheet" href="/assets/sbf-nav.css">\n'
         '<script src="/assets/i18n.js?v=2" defer></script>\n'
+        '<script src="/assets/sbf-symbols.js?v=2"></script>\n'
         '<script src="/assets/sbf-header.js?v=16" defer></script>'
     )
     if '/edu/edu.css' not in html:
@@ -598,6 +659,7 @@ def _build_edu_page(ch: int, lang: str) -> bytes:
         html = html.replace("</head>",
             '<link rel="stylesheet" href="/assets/sbf-nav.css">\n'
             '<script src="/assets/i18n.js?v=2" defer></script>\n'
+            '<script src="/assets/sbf-symbols.js?v=2"></script>\n'
             '<script src="/assets/sbf-header.js?v=16" defer></script>\n</head>', 1)
 
     grafik_tags = (
@@ -611,9 +673,20 @@ def _build_edu_page(ch: int, lang: str) -> bytes:
     # привязываются к реальному user_id, не к общему "default") -- те же
     # тег и версия, что на index.html/journal.html/chart.html, книжные главы
     # раньше вообще не грузили sbf-auth.js.
-    if 'sbf-auth.js' not in html:
+    # Проверка ИМЕННО на тег <script src="...">, не на голую подстроку
+    # "sbf-auth.js" -- та случайно совпадает с текстом обычных code-комментариев
+    # (см. markChapterRead-вызовы в главах, комментирующие сам этот механизм),
+    # из-за чего инъекция тихо пропускалась на всех 15 главах разом.
+    if '<script src="/assets/sbf-auth.js' not in html:
         html = html.replace(
             "</head>", '<script src="/assets/sbf-auth.js?v=1" defer></script>\n</head>', 1)
+
+    # Анонимная личность читателя для прогресса по главам, SPEC_chart_fixes_
+    # and_staged_signup.md §5, Этап 0 — БЕЗ defer (главы дёргают markChapterRead
+    # синхронно при монтировании, тот же порядок аргументов, что sbf-symbols.js).
+    if '<script src="/assets/sbf-anon.js' not in html:
+        html = html.replace(
+            "</head>", '<script src="/assets/sbf-anon.js"></script>\n</head>', 1)
 
     # Общий "хром" книги (C/Mono/Chip/Rule/GlossWord/AskAnalystPopup/
     # AskAnalystBtn/getChUrl/QuizBlock/ComplianceFootnote) -- SPEC_academy_
@@ -657,12 +730,6 @@ def _build_edu_page(ch: int, lang: str) -> bytes:
 
 
 # ── Quotes ───────────────────────────────────────────────────────────────────
-NAMES = {
-    "^GSPC": "S&P 500", "^IXIC": "Nasdaq", "^DJI": "Dow Jones", "^VIX": "VIX",
-    "GC=F": "GOLD", "SI=F": "SILVER", "CL=F": "Нефть WTI", "NG=F": "Природный газ",
-    "BTC-USD": "BTCUSD", "ETH-USD": "ETHUSD", "SOL-USD": "SOLUSD",
-    "EURUSD=X": "EURUSD", "GBPUSD=X": "GBPUSD", "DX-Y.NYB": "DXY",
-}
 QUOTES_FILE = Path(__file__).parent / "web" / "data" / "quotes.json"
 
 
@@ -671,7 +738,7 @@ def fetch_quotes() -> list[dict]:
         data = json.loads(QUOTES_FILE.read_text(encoding="utf-8"))
         quotes = data.get("quotes", {})
         return [
-            {"ticker": sym, "name": NAMES.get(sym, sym),
+            {"ticker": sym, "name": _symbols.symbol_name(sym, mode="name"),
              "price": q["price"], "change_pct": q.get("change_pct")}
             for sym, q in quotes.items() if q.get("price") is not None
         ]
@@ -704,6 +771,9 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             return
         if path_clean == "/api/user/chart-prefs":
             self._handle_user_chart_prefs_put()
+            return
+        if path_clean == "/api/auth/profile":
+            self._handle_auth_profile_put()
             return
         if path_clean == "/api/user/trading-window":
             self._handle_user_trading_window_put()
@@ -742,6 +812,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         elif re.match(r"^/api/journal/setups/\d+$", path_clean):
             setup_id = int(path_clean.split("/")[-1])
             self._send_json({"ok": journal_setups.delete_setup(setup_id, user_id)})
+        elif path_clean == "/api/journal/course":
+            self._send_json(journal_gamification.reset_course_progress(self._effective_user_id(user_id)))
         elif re.match(r"^/api/journal/checklist/items/\d+$", path_clean):
             item_id = int(path_clean.split("/")[-1])
             self._send_json({"ok": journal_tilt.delete_checklist_item(item_id, user_id)})
@@ -824,12 +896,12 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         elif path_clean == "/api/journal/flashcards/review":
             self._handle_flashcard_review(user_id)
         elif path_clean == "/api/journal/course/complete":
-            self._handle_course_complete(user_id)
+            self._handle_course_complete(self._effective_user_id(user_id))
         elif path_clean == "/api/academy/quiz-attempt":
             self._handle_academy_quiz_attempt(user_id)
         elif path_clean.startswith("/api/journal/course/") and path_clean.endswith("/complete"):
             chapter_n = int(path_clean.split("/")[-2])
-            self._send_json(journal_gamification.complete_chapter(chapter_n, user_id))
+            self._send_json(journal_gamification.complete_chapter(chapter_n, self._effective_user_id(user_id)))
         elif path_clean == "/api/journal/streaks/freeze":
             self._handle_streak_freeze(user_id)
         elif path_clean == "/api/journal/quests/event":
@@ -1070,7 +1142,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         elif path_clean == "/api/journal/achievements":
             self._send_json(journal_gamification.get_achievements(user_id))
         elif path_clean == "/api/journal/course":
-            self._send_json(journal_gamification.get_course_progress(user_id))
+            self._send_json(journal_gamification.get_course_progress(self._effective_user_id(user_id)))
         elif path_clean == "/api/journal/streaks":
             self._send_json(journal_gamification.get_streaks(user_id))
         elif path_clean == "/api/journal/leaderboard":
@@ -1206,6 +1278,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self._handle_chart_thermo_hist()
         elif path_clean == "/api/chart/sessions":
             self._handle_chart_sessions()
+        elif path_clean == "/api/chart/ohlc-m5":
+            self._handle_chart_ohlc_m5()
         elif path_clean == "/api/chart/sentiment":
             self._handle_chart_sentiment()
         elif path_clean == "/api/chart/symbols":
@@ -1285,6 +1359,16 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         if not (1 <= ch <= 15):
             self._redirect("/edu/b")
             return
+        # SPEC_chart_fixes_and_staged_signup.md §5: раньше _handle_edu не
+        # проверял вход вообще — все 15 глав были открыты анонимно по прямой
+        # ссылке, значки "PRO" на 6-15 чисто косметические. Теперь настоящий
+        # серверный гейт (не клиентский, который легко обойти прямой ссылкой).
+        # Главы 1-5 остаются бесплатными без проверки.
+        if ch >= 6:
+            user_id = self._current_user_id()
+            if not journal_auth.is_pro(user_id):
+                self._send_edu_paywall(ch, lang, logged_in=(user_id != "default"))
+                return
         try:
             body = _build_edu_page(ch, lang)
             self.send_response(200)
@@ -1297,6 +1381,47 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.send_header("Content-Type", "text/html")
             self.end_headers()
             self.wfile.write(body)
+
+    def _send_edu_paywall(self, ch: int, lang: str, logged_in: bool) -> None:
+        """Страница-заглушка для PRO-глав (6-15) без действующего PRO.
+        Тот же "хром" (шапка/нав/шрифты), что и у обычной главы, чтобы не
+        выглядело как ошибка — целенаправленный экран с понятным следующим
+        шагом, а не 403 в браузерном стиле."""
+        cta_href = f"/edu/{'' if lang == 'ru' else lang + '/'}b/4" if logged_in else (
+            "/register" if lang == "ru" else f"/{lang}/register")
+        cta_label = i18n.t("eduindex.paywall.cta_survey" if logged_in else "eduindex.paywall.cta_register", lang)
+        toc_href = "/edu" if lang == "ru" else f"/edu/{lang}/b"
+        html = f"""<!doctype html><html lang="{lang}"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{i18n.t('eduindex.paywall.title', lang)}</title>
+<link rel="stylesheet" href="/assets/design.css">
+<link rel="stylesheet" href="/edu/edu.css">
+<link rel="stylesheet" href="/assets/sbf-nav.css">
+<script src="/assets/i18n.js?v=2" defer></script>
+<script src="/assets/sbf-symbols.js?v=2"></script>
+<script src="/assets/sbf-header.js?v=16" defer></script>
+<script src="/assets/sbf-auth.js?v=1" defer></script>
+<style>
+.paywall-wrap{{max-width:560px;margin:80px auto;padding:0 20px;text-align:center}}
+.paywall-wrap h1{{font-size:24px;margin-bottom:14px}}
+.paywall-wrap p{{color:var(--muted);line-height:1.6;margin-bottom:24px}}
+.paywall-wrap a.btn{{display:inline-block;background:var(--gold);color:#18181a;font-weight:700;padding:12px 28px;border-radius:8px;text-decoration:none}}
+.paywall-wrap a.btn:hover{{opacity:.9}}
+.paywall-wrap .back{{display:block;margin-top:20px;color:var(--muted);text-decoration:underline;font-size:13px}}
+</style>
+</head><body>
+<div class="paywall-wrap">
+  <h1>{i18n.t('eduindex.paywall.title', lang)}</h1>
+  <p>{i18n.t('eduindex.paywall.body', lang)}</p>
+  <a class="btn" href="{cta_href}">{cta_label}</a>
+  <a class="back" href="{toc_href}">{i18n.t('eduindex.paywall.back_toc', lang)}</a>
+</div>
+</body></html>"""
+        body = html.encode("utf-8")
+        self.send_response(200)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.end_headers()
+        self.wfile.write(body)
 
     def _serve_static(self, path: Path, content_type: str = "text/html; charset=utf-8"):
         try:
@@ -1466,7 +1591,9 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             con = sqlite3.connect(str(_BOT_DB))
             con.row_factory = sqlite3.Row
             rows = con.execute(
-                """SELECT n, avg_move_30m, avg_move_60m, max_move_60m, volatile_share, computed_ts
+                """SELECT n, avg_move_30m, avg_move_60m, max_move_60m, volatile_share, computed_ts,
+                          baseline_ratio_30m, period_from, period_to,
+                          n_beat, beat_up_share, beat_down_share, n_miss, miss_up_share, miss_down_share
                    FROM event_reaction_stats WHERE event_type=? AND symbol=? ORDER BY n ASC""",
                 (event_type, symbol),
             ).fetchall()
@@ -1553,7 +1680,9 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 if from_ts <= ts <= to_ts:
                     items.append({"title": r["title"], "url": r["url"], "source": r["source"], "ts": int(ts)})
             items.sort(key=lambda x: x["ts"])
-            self._send_json(items)
+            # SPEC_chart_fixes_and_staged_signup.md §4: список без лимита разрастал
+            # карточку всплеска новостей за пределы экрана. 20 самых свежих в окне.
+            self._send_json(items[-20:])
         except Exception as e:
             self._send_json({"error": str(e)}, 500)
 
@@ -1916,12 +2045,19 @@ class Handler(http.server.SimpleHTTPRequestHandler):
     def _handle_chart_sessions(self) -> None:
         """SBF_Charts_Layer3_Spec, Фаза 2: границы торговых сессий (Азия/Лондон/NY,
         DST на сегодня — см. core/sessions.py) + 24-часовой профиль типичной
-        волатильности (hourly_vol_job.py, еженедельно). Публично — факты.
+        волатильности. Публично — факты.
         sessions_today отдаётся для удобства (акцептанс спеки прямо просит
         «границы сессий с учётом DST на сегодня»), но рендер полос на графике
         для ПРОИЗВОЛЬНОГО видимого дня фронтенд считает сам теми же правилами
         (см. комментарий в core/sessions.py) — иначе прокрутка к историческим
-        датам через переход DST показывала бы неверные границы."""
+        датам через переход DST показывала бы неверные границы.
+
+        SPEC_chart_fixes_and_staged_signup.md §2: profile раньше шёл из своего,
+        худшего конвейера (hourly_vol_job.py → sqlite hourly_vol_profile,
+        среднее без размера выборки). Главы книги уже читают edu_stats/
+        hourly_profile.json — тот же вопрос посчитан там честнее (медиана,
+        n, coverage, warnings) tools/edu_build/hourly_profile.py. Теперь
+        график берёт то же самое, а не второй параллельный расчёт."""
         params = parse_qs(urlparse(self.path).query)
         symbol = params.get("symbol", [None])[0]
         if not symbol:
@@ -1929,18 +2065,76 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             return
         try:
             bounds = session_bounds_utc(datetime.now(timezone.utc).date())
-            con = sqlite3.connect(str(_BOT_DB))
-            rows = con.execute(
-                "SELECT hour_utc, avg_range FROM hourly_vol_profile WHERE symbol=? ORDER BY hour_utc",
-                (symbol,),
-            ).fetchall()
-            con.close()
+            hp_path = WEB_DIR / "data" / "edu_stats" / "hourly_profile.json"
+            try:
+                hp = json.loads(hp_path.read_text(encoding="utf-8"))
+            except (FileNotFoundError, json.JSONDecodeError):
+                hp = {}
+            sym_data = hp.get(symbol) or {}
+            avg_share = sym_data.get("avg_share") or {}
+            n_by_hour: dict[str, int] = {}
+            for hours in (sym_data.get("by_period") or {}).values():
+                for hh, v in hours.items():
+                    n_by_hour[hh] = n_by_hour.get(hh, 0) + (v.get("n") or 0)
+            profile = [
+                {"hour_utc": int(h), "share": share, "n": n_by_hour.get(h, 0)}
+                for h, share in sorted(avg_share.items(), key=lambda kv: int(kv[0]))
+            ]
             self._send_json({
                 "sessions_today": {name: {"from_hour": fh, "to_hour": th} for name, (fh, th) in bounds.items()},
-                "profile": [{"hour_utc": h, "avg_range": r} for h, r in rows],
+                "profile": profile,
+                "coverage": sym_data.get("coverage"),
+                "warnings": sym_data.get("warnings", []),
             })
         except Exception as e:
             self._send_json({"error": str(e)}, 500)
+
+    def _handle_chart_ohlc_m5(self) -> None:
+        """SPEC_chart_fixes_and_staged_signup.md §3: M5 не отдаём статикой
+        (60д на 5m ≈ 2,5МБ/символ — grafik-engine.js тянет файл целиком,
+        неприемлемо на телефоне). Вместо этого — короткое окно (7 дней) по
+        запросу, с коротким кэшем (бар M5 не меняется чаще, чем раз в 5 мин).
+        rsi/bias/pivots/nearest в ответе намеренно нет — chart.html их и так
+        досчитывает на клиенте, если сервер их не прислал (SBFGrafik.calcRSI14/
+        calcBias/calcPivots/nearestPivot — тот же фолбэк, что уже был для
+        любого ответа без этих полей)."""
+        params = parse_qs(urlparse(self.path).query)
+        symbol = params.get("symbol", [None])[0]
+        if not symbol:
+            self._send_json({"error": "symbol required"}, 400)
+            return
+        ticker = _M5_YF_TICKERS.get(symbol)
+        if not ticker:
+            # Честно: нет надёжного источника M5 для этого символа (MT5-only
+            # валюты типа USDRUB/USDKZT никто ещё не собирал на этом ТФ) —
+            # не 500, а пустой набор баров, чтобы фронт показал "нет данных".
+            self._send_json({"ticker": symbol, "interval": "M5", "candles": [], "volume": []})
+            return
+        now = time.time()
+        cached = _m5_cache.get(symbol)
+        if cached and now - cached[0] < _M5_CACHE_TTL:
+            self._send_json(cached[1])
+            return
+        try:
+            import yfinance as yf
+            df = yf.Ticker(ticker).history(period="7d", interval="5m")
+            candles, volume = [], []
+            for ts, r in df.iterrows():
+                o, h, l, c = float(r["Open"]), float(r["High"]), float(r["Low"]), float(r["Close"])
+                up = c >= o
+                t = int(ts.timestamp())
+                candles.append({"time": t, "open": round(o, 4), "high": round(h, 4),
+                                 "low": round(l, 4), "close": round(c, 4)})
+                volume.append({"time": t, "value": int(r["Volume"] or 0),
+                                "color": "rgba(30,142,90,.5)" if up else "rgba(192,57,43,.5)"})
+            payload = {
+                "ticker": ticker, "interval": "M5", "candles": candles, "volume": volume,
+                "last": candles[-1]["close"] if candles else None,
+            }
+            _m5_cache[symbol] = (now, payload)
+            self._send_json(payload)
+        except Exception as e:
+            self._send_json({"ticker": ticker, "interval": "M5", "candles": [], "volume": [], "error": str(e)})
 
     def _handle_chart_sentiment(self) -> None:
         """SBF_Charts_Layer3_Spec, Фаза 3: сентимент толпы по часам (twitter+
@@ -2653,17 +2847,28 @@ class Handler(http.server.SimpleHTTPRequestHandler):
     # ── Auth / Onboarding handlers ───────────────────────────────────────────
 
     def _auth_token(self) -> str:
-        """Извлекает токен из заголовка X-Auth-Token или Authorization: Bearer.
+        """Извлекает токен из заголовка X-Auth-Token, Authorization: Bearer,
+        или куки sbf_session (в этом порядке).
         journal.html's _authHdr() отправляет именно Bearer — раньше сервер его
         не читал вообще (TZ-детект/MT4-импорт/cooldown/review/analytics/prestige
         были из-за этого молча сломаны), плюс SBFAcademy-мост должен работать
-        независимо от того, какой из двух заголовков прислал конкретный файл."""
+        независимо от того, какой из двух заголовков прислал конкретный файл.
+        Кука — SPEC_chart_fixes_and_staged_signup.md §5: обычная навигация
+        страницы (не fetch/XHR) не может приложить кастомный заголовок, а
+        серверный гейт PRO-глав (_handle_edu) должен знать, кто пришёл, именно
+        на такой навигации. web/assets/sbf-auth.js дублирует тот же токен в
+        куку sbf_session при каждом setTokens (логин/регистрация/тихий refresh)."""
         token = self.headers.get("X-Auth-Token", "")
         if token:
             return token
         auth = self.headers.get("Authorization", "")
         if auth.startswith("Bearer "):
             return auth[7:]
+        cookie_header = self.headers.get("Cookie", "")
+        for part in cookie_header.split(";"):
+            name, _, value = part.strip().partition("=")
+            if name == "sbf_session" and value:
+                return unquote(value)
         return ""
 
     def _current_user_id(self) -> str:
@@ -2673,6 +2878,20 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         передавал буквально строку "default" — из-за этого залогиненный
         пользователь читал/писал в общий анонимный набор данных, а не в свой."""
         return journal_auth.validate_session(self._auth_token()) or "default"
+
+    def _effective_user_id(self, user_id: str) -> str:
+        """user_id ('default', если сессии нет) с фолбэком на анонимный ID
+        (заголовок X-Anon-Id, web/assets/sbf-anon.js) — ТОЛЬКО для прогресса
+        по главам курса (SPEC_chart_fixes_and_staged_signup.md §5, Этап 0).
+        Не меняет поведение _current_user_id() в остальных ручках -- вызывается
+        точечно в get_course_progress/complete_chapter, не глобально: смешивать
+        анонимную identity с "default"-бакетом торговых данных (сделки/
+        дисциплина/цели) отдельный, гораздо более рискованный шаг, спека его
+        не просит."""
+        if user_id != "default":
+            return user_id
+        anon_id = self.headers.get("X-Anon-Id", "").strip()[:128]
+        return anon_id or "default"
 
     def _handle_auth_register(self) -> None:
         body = self._read_body_json()
@@ -2690,6 +2909,12 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             consent_disclaimer=bool(body.get("consent_disclaimer")),
             consent_marketing=bool(body.get("consent_marketing", False)),
         )
+        # SPEC_chart_fixes_and_staged_signup.md §5, Этап 0: анонимный прогресс
+        # по главам (web/assets/sbf-anon.js) переносится на настоящего
+        # пользователя ровно один раз, здесь, в момент когда он появляется.
+        anon_id = str(body.get("anon_id") or "").strip()[:128]
+        if anon_id and result.get("user_id"):
+            journal_gamification.migrate_anon_progress(anon_id, result["user_id"])
         status = 400 if "error" in result else 201
         self._send_json(result, status)
 
@@ -2810,6 +3035,30 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 return
             last_symbol = last_symbol.upper()
         result = journal_auth.update_chart_prefs(user_id, layers=layers, last_symbol=last_symbol)
+        self._send_json(result, 200 if result.get("ok") else 400)
+
+    def _handle_auth_profile_put(self) -> None:
+        """SPEC_chart_fixes_and_staged_signup.md §5, Этап 2 — форма внутри
+        главы 4 (имя/фамилия/телефон/дата рождения), см. journal_auth.
+        update_profile(). Телефон — отдельный явный флажок consent_phone,
+        не общий consent_data."""
+        user_id = self._lp_require_auth()
+        if not user_id:
+            return
+        body = self._read_body_json()
+        if body is None:
+            return
+        phone = str(body.get("phone") or "")
+        if phone and not body.get("consent_phone"):
+            self._send_json({"error": "consent_phone required with phone"}, 400)
+            return
+        result = journal_auth.update_profile(
+            user_id,
+            last_name=str(body.get("last_name") or ""),
+            phone=phone,
+            dob=str(body.get("dob") or ""),
+            consent_phone=bool(body.get("consent_phone")),
+        )
         self._send_json(result, 200 if result.get("ok") else 400)
 
     def _handle_user_trading_window_put(self) -> None:
