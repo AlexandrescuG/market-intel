@@ -387,7 +387,12 @@
   // ── Live-data utilities ────────────────────────────────────────────────────
 
   async function loadBars(symbol, tf) {
-    var r = await fetch('./data/ohlc_' + symbol + '_' + tf + '.json?t=' + Date.now());
+    // M5 — SPEC_chart_fixes_and_staged_signup.md §3: не статический файл
+    // (не весь охват на диске, дорого), а короткое окно по API-запросу.
+    var url = tf === 'M5'
+      ? './api/chart/ohlc-m5?symbol=' + symbol + '&t=' + Date.now()
+      : './data/ohlc_' + symbol + '_' + tf + '.json?t=' + Date.now();
+    var r = await fetch(url);
     var d = await r.json();
     var bars = (d.candles || []).map(function(c) {
       return {

@@ -401,36 +401,23 @@
     if (n == null) return '—';
     return Math.abs(n) >= 1000 ? n.toLocaleString('en-US', { maximumFractionDigits: 2 }) : String(n);
   };
-  var NAMES = {
-    'GC=F':'GOLD','SI=F':'SILVER',
-    'BTC-USD':'BTCUSD','ETH-USD':'ETHUSD','SOL-USD':'SOLUSD',
-    'EURUSD=X':'EURUSD','GBPUSD=X':'GBPUSD',
-    '^GSPC':'S&P 500','^IXIC':'Nasdaq','^DJI':'Dow Jones','^VIX':'VIX','DX-Y.NYB':'DXY'
-  };
+  // Названия инструментов — общий реестр (SPEC_symbol_names.md §3), не своя
+  // копия словаря: window.SBFSymbols грузит /data/symbols.json один раз для
+  // всех страниц сайта.
   function tickerName(ticker) {
-    if (ticker === 'CL=F') return t('ticker.wti', 'Нефть WTI');
-    if (ticker === 'NG=F') return t('ticker.gas', 'Природный газ');
-    return NAMES[ticker];
+    return window.SBFSymbols ? window.SBFSymbols.symbolName(ticker, {mode: 'name'}) : null;
   }
-  // Yahoo-тикер → символ графика (chart.html's `YF`, зеркалировано — общего
-  // модуля между этим файлом и инлайн-скриптом chart.html нет). Нужен для
-  // сопоставления ватчлиста (хранит символы графика: GOLD/BTC/...) с
-  // элементами тикер-ленты (ключи — Yahoo-тикеры).
-  var TICKER_TO_CHART_SYMBOL = {
-    'GC=F':'GOLD', 'SI=F':'SILVER', 'CL=F':'WTI', 'NG=F':'NG',
-    'BTC-USD':'BTC', 'ETH-USD':'ETH', 'SOL-USD':'SOL',
-    'EURUSD=X':'EURUSD', 'GBPUSD=X':'GBPUSD',
-    '^GSPC':'SPX', '^IXIC':'NASDAQ', '^DJI':'DJI', '^VIX':'VIX', 'DX-Y.NYB':'DXY',
-  };
   // SBF_Charts_Layer4_Spec, Фаза 1.2.1: инструменты ватчлиста первыми (в
-  // порядке ватчлиста), затем остальные в исходном порядке.
+  // порядке ватчлиста), затем остальные в исходном порядке. Yahoo-тикер →
+  // символ графика раньше жил в своей копии словаря (TICKER_TO_CHART_SYMBOL) —
+  // теперь общий canonOf() из того же реестра.
   function reorderByWatchlist(items) {
     var wl = (window.SBF && window.SBF.user && window.SBF.user.watchlist) || [];
     if (!wl.length) return items;
     var rank = {};
     wl.forEach(function (sym, i) { rank[sym] = i; });
     return items.map(function (it, idx) {
-      var chartSym = TICKER_TO_CHART_SYMBOL[it.ticker];
+      var chartSym = window.SBFSymbols ? window.SBFSymbols.canonOf(it.ticker) : null;
       var r = (chartSym && (chartSym in rank)) ? rank[chartSym] : 1000 + idx;
       return {it: it, r: r};
     }).sort(function (a, b) { return a.r - b.r; }).map(function (x) { return x.it; });

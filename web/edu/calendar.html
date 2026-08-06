@@ -10,6 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/design.css">
 <script src="/assets/i18n.js?v=2" defer></script>
+<script src="/assets/sbf-symbols.js?v=2"></script>
 <script src="/assets/sbf-header.js?v=16" defer></script>
 <script src="/edu/assets/grafik-engine.js"></script>
 <script src="/edu/assets/calendar-terms.js"></script>
@@ -335,17 +336,33 @@ if (window.sbfI18n) _rerenderEventsWhenI18nReady();
 else document.addEventListener('DOMContentLoaded', _rerenderEventsWhenI18nReady);
 
 // ── Константы ──────────────────────────────────────────────────────────────
+// Живой баг (06.08.2026): было 17 стран, остальные показывали 🌐. Расширено
+// до полного набора валют/стран, которые calendar_pull.py вообще умеет
+// нормализовать (_CUR в calendar_pull.py) + разово встречающиеся из TradingView
+// (напр. AL), чтобы новая редкая страна не превращалась в глобус молча.
 var FLAGS = {
   'US':'🇺🇸','EU':'🇪🇺','EA':'🇪🇺','GB':'🇬🇧','JP':'🇯🇵',
   'CN':'🇨🇳','DE':'🇩🇪','FR':'🇫🇷','IT':'🇮🇹','CA':'🇨🇦',
   'AU':'🇦🇺','CH':'🇨🇭','NZ':'🇳🇿','RU':'🇷🇺','ZA':'🇿🇦',
-  'AE':'🇦🇪','KZ':'🇰🇿'
+  'AE':'🇦🇪','KZ':'🇰🇿','SE':'🇸🇪','NO':'🇳🇴','SG':'🇸🇬',
+  'KR':'🇰🇷','MX':'🇲🇽','BR':'🇧🇷','TR':'🇹🇷','AL':'🇦🇱',
+  'IE':'🇮🇪','HU':'🇭🇺','CZ':'🇨🇿','ES':'🇪🇸','PT':'🇵🇹',
+  'NL':'🇳🇱','BE':'🇧🇪','AT':'🇦🇹','PL':'🇵🇱','GR':'🇬🇷',
+  'IN':'🇮🇳','ID':'🇮🇩','TH':'🇹🇭','MY':'🇲🇾','PH':'🇵🇭',
+  'VN':'🇻🇳','SA':'🇸🇦','IL':'🇮🇱','EG':'🇪🇬','NG':'🇳🇬'
 };
+// СПЕКА_графики_и_починка_календаря.md §4: те же прямые пары страна→инструмент,
+// что теперь в event_instrument_map (weight=2) -- иначе выбор символа для
+// "Волатильности"/"Влияния" молча падал на EURUSD по умолчанию для стран,
+// у которых уже есть своя прямая пара и собственные бары.
 var COUNTRY_SYM = {
   'US':'EURUSD','EU':'EURUSD','EA':'EURUSD','GB':'GBPUSD',
-  'JP':'USDJPY','CN':'USDCNY','RU':'USDRUB','ZA':'USDZAR','AE':'USDAED','KZ':'USDKZT'
+  'JP':'USDJPY','CN':'USDCNY','RU':'USDRUB','ZA':'USDZAR','AE':'USDAED','KZ':'USDKZT',
+  'CA':'USDCAD','CH':'USDCHF','AU':'AUDUSD','NZ':'NZDUSD','BR':'USDBRL',
+  'MX':'USDMXN','TR':'USDTRY','PL':'USDPLN','HU':'USDHUF','CZ':'USDCZK','KR':'USDKRW',
 };
-var SYMBOLS = ['EURUSD','GBPUSD','USDJPY','XAUUSD','USDRUB','USDCNY','USDZAR','USDAED','USDKZT'];
+var SYMBOLS = ['EURUSD','GBPUSD','USDJPY','XAUUSD','USDRUB','USDCNY','USDZAR','USDAED','USDKZT',
+  'EURGBP','USDCAD','USDCHF','AUDUSD','NZDUSD','USDBRL','USDMXN','USDTRY','USDPLN','USDHUF','USDCZK','USDKRW'];
 var MONTHS_RU = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
 
 var _lastEvents = [];
@@ -386,6 +403,14 @@ function _dtLocale(){ var l=_curLang(); return l==='ro'?'ro-RO':l==='en'?'en-US'
 
 // ── Вспомогательные ────────────────────────────────────────────────────────
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function fmt_(tpl, vars){ return tpl.replace(/\{(\w+)\}/g, function(_, k){ return vars[k] != null ? vars[k] : ''; }); }
+
+// SPEC_symbol_names.md §4.4 — раскрывающийся список валютных пар в фильтре
+// событий показывал сырые тикеры (EURUSD и т.п.). Сами значения SYMBOLS
+// остаются сырыми — они уходят как raw-ключ в loadPriceChart()/API, меняем
+// только отображаемый текст пункта. window.SBFSymbols грузится с defer,
+// поэтому проверка на существование и честный фолбэк на исходный тикер.
+function symLabel(sym){ return (window.SBFSymbols && sym) ? window.SBFSymbols.symbolName(sym, {mode:'name'}) : sym; }
 
 function fmtTime(ts_utc){
   if(!ts_utc) return '—';
@@ -911,21 +936,21 @@ function renderRows(events){
           +'<div class="seg-ctrl" id="seg-'+idx+'">'
             +'<button class="seg-btn on" data-tab="price" onclick="switchTab('+idx+',this)">'+t('calendar.tab_price','Ценовой график')+'</button>'
             +'<button class="seg-btn" data-tab="history" onclick="switchTab('+idx+',this)">'+t('calendar.tab_history','График событий')+'</button>'
-            +'<button class="seg-btn coming" title="'+t('calendar.phase2_tooltip','Фаза 2')+'">'+t('calendar.tab_volatility','Волатильность')+'</button>'
-            +'<button class="seg-btn coming" title="'+t('calendar.phase2_tooltip','Фаза 2')+'">'+t('calendar.tab_impact','Влияние')+'</button>'
+            +'<button class="seg-btn" data-tab="vol" onclick="switchTab('+idx+',this)">'+t('calendar.tab_volatility','Волатильность')+'</button>'
+            +'<button class="seg-btn" data-tab="impact" onclick="switchTab('+idx+',this)">'+t('calendar.tab_impact','Влияние')+'</button>'
           +'</div>'
           +'<div id="tab-price-'+idx+'" class="tab-pane on">'
             +'<div class="sym-sel">'
               +'<label>'+t('calendar.instrument_label','Инструмент:')+'</label>'
               +'<select id="sym-sel-'+idx+'" onchange="loadPriceChart('+idx+')">'
-                +SYMBOLS.map(function(s){return '<option value="'+s+'"'+(s===defSym?' selected':'')+'>'+s+'</option>';}).join('')
+                +SYMBOLS.map(function(s){return '<option value="'+s+'"'+(s===defSym?' selected':'')+'>'+esc(symLabel(s))+'</option>';}).join('')
               +'</select>'
             +'</div>'
             +'<div id="price-chart-'+idx+'"><div class="chart-loading">'+t('calendar.loading_chart','Загрузка графика…')+'</div></div>'
           +'</div>'
           +'<div id="tab-history-'+idx+'" class="tab-pane"><div class="chart-loading">'+t('calendar.loading_history','Загрузка истории…')+'</div></div>'
-          +'<div id="tab-vol-'+idx+'" class="tab-pane"><div class="soon-box"><b>'+t('calendar.tab_volatility','Волатильность')+'</b><p>'+t('calendar.vol_soon_desc','Исторические данные о реакции цены на событие появятся позже (Фаза 2).')+'</p></div></div>'
-          +'<div id="tab-impact-'+idx+'" class="tab-pane"><div class="soon-box"><b>'+t('calendar.tab_impact','Влияние')+'</b><p>'+t('calendar.impact_soon_desc','Статистика направления реакций за прошлые релизы появится позже (Фаза 2).')+'</p></div></div>'
+          +'<div id="tab-vol-'+idx+'" class="tab-pane"><div class="chart-loading">'+t('calendar.loading_reaction','Загрузка статистики…')+'</div></div>'
+          +'<div id="tab-impact-'+idx+'" class="tab-pane"><div class="chart-loading">'+t('calendar.loading_reaction','Загрузка статистики…')+'</div></div>'
         +'</div>'
       +'</div>'
       +'</div>';
@@ -987,6 +1012,105 @@ function switchTab(idx, btn){
   });
   if(tab==='history') loadEventHistory(idx);
   if(tab==='price') loadPriceChart(idx);
+  if(tab==='vol') loadReactionTab(idx, 'vol');
+  if(tab==='impact') loadReactionTab(idx, 'impact');
+}
+
+// ── Волатильность / Влияние (Фаза 2, event_reaction_stats) ─────────────────
+// Один и тот же /api/chart/event-reaction кормит обе вкладки — кэшируем один
+// фетч на (event_type,symbol), тот же паттерн, что _histCache выше.
+var _reactionCache = {};
+
+function _reactionKey(idx){
+  var row = document.querySelector('.ev-row[data-idx="'+idx+'"]');
+  var ev = _lastEvents[idx];
+  if(!row || !ev || !ev.event_type) return null;
+  var sel = document.getElementById('sym-sel-'+idx);
+  var sym = sel ? sel.value : row.dataset.sym;
+  return {eventType: ev.event_type, symbol: sym, cacheKey: ev.event_type+'|'+sym};
+}
+
+async function loadReactionTab(idx, which){
+  var pane = document.getElementById('tab-'+which+'-'+idx);
+  if(!pane) return;
+
+  if(!(window.sbfAuth && window.sbfAuth.isLoggedIn && window.sbfAuth.isLoggedIn())){
+    pane.innerHTML = '<div class="soon-box">🔒 '+t('calendar.reaction_locked','Доступно после регистрации')+'</div>';
+    return;
+  }
+
+  var k = _reactionKey(idx);
+  if(!k){
+    pane.innerHTML = '<div class="soon-box">'+t('calendar.reaction_no_symbol','Нет привязки к инструменту для этой страны')+'</div>';
+    return;
+  }
+
+  if(_reactionCache[k.cacheKey] !== undefined){
+    pane.innerHTML = _renderReactionPane(_reactionCache[k.cacheKey], which);
+    return;
+  }
+
+  pane.innerHTML = '<div class="chart-loading">'+t('calendar.loading_reaction','Загрузка статистики…')+'</div>';
+  try {
+    var r = await window.sbfAuth.fetch('/api/chart/event-reaction?event_type='+encodeURIComponent(k.eventType)+'&symbol='+encodeURIComponent(k.symbol));
+    var stats = null;
+    if(r.status !== 404 && r.ok){
+      var data = await r.json();
+      stats = data && (data.n6 || data.n12);
+    }
+    _reactionCache[k.cacheKey] = stats;
+    pane.innerHTML = _renderReactionPane(stats, which);
+  } catch(e){
+    pane.innerHTML = '<div class="chart-loading">'+t('calendar.generic_error','Ошибка:')+' '+esc(String(e))+'</div>';
+  }
+}
+
+function _renderReactionPane(stats, which){
+  if(!stats){
+    // < 4 публикаций у нас в истории — честно, не "скоро" и не прочерки
+    return '<div class="soon-box">'+t('calendar.reaction_not_enough','Пока недостаточно прошлых публикаций этого типа события для этого инструмента, чтобы посчитать статистику.')+'</div>';
+  }
+  if(which === 'vol'){
+    var avg = stats.avg_move_60m != null ? stats.avg_move_60m.toFixed(0) : '—';
+    var max = stats.max_move_60m != null ? stats.max_move_60m.toFixed(0) : '—';
+    var baseline = (stats.baseline_ratio_30m != null)
+      ? '<div class="hist-row"><span class="hd">'+fmt_(t('calendar.reaction_baseline_tpl','×{ratio} к обычному ходу этого часа суток (по всем дням, не только с этим событием)'), {ratio: stats.baseline_ratio_30m.toFixed(2)})+'</span></div>'
+      : '';
+    var period = (stats.period_from && stats.period_to)
+      ? '<div style="margin-top:6px;font-size:10.5px;color:var(--muted)">'+fmt_(t('calendar.reaction_period_tpl','Период: {from} — {to}'), {from: stats.period_from, to: stats.period_to})+'</div>'
+      : '';
+    return '<div class="chart-wrap"><div class="hist-list">'
+      + '<div class="hist-row"><span class="hd">'+fmt_(t('calendar.reaction_summary_tpl','За последние {n} публикаций инструмент в среднем двигался на {avg} п. в течение часа после выхода (максимум — {max} п.)'), {n: stats.n, avg: avg, max: max})+'</span></div>'
+      + baseline
+      + '</div>'
+      + period
+      + '<div style="margin-top:6px;font-size:10px;color:var(--muted);font-style:italic">'+t('calendar.reaction_disclaimer','Историческая статистика, не прогноз и не рекомендация.')+'</div>'
+      + '</div>';
+  }
+  // impact: доля up/down отдельно среди beat и miss -- описательно, без
+  // предположения о "правильном" направлении (нет общей таблицы полярности
+  // индикаторов по всем странам, только то, что реально видно в данных).
+  var rows = [];
+  if(stats.n_beat != null && stats.beat_up_share != null){
+    rows.push('<div class="hist-row"><span class="hd">'+t('calendar.impact_beat_label','Факт лучше прогноза')+' (n='+stats.n_beat+')</span>'
+      +'<span class="hv">'+Math.round(stats.beat_up_share*100)+'% ↑</span>'
+      +'<span class="hd">'+Math.round(stats.beat_down_share*100)+'% ↓</span></div>');
+  }
+  if(stats.n_miss != null && stats.miss_up_share != null){
+    rows.push('<div class="hist-row"><span class="hd">'+t('calendar.impact_miss_label','Факт хуже прогноза')+' (n='+stats.n_miss+')</span>'
+      +'<span class="hv">'+Math.round(stats.miss_up_share*100)+'% ↑</span>'
+      +'<span class="hd">'+Math.round(stats.miss_down_share*100)+'% ↓</span></div>');
+  }
+  if(!rows.length){
+    return '<div class="soon-box">'+t('calendar.reaction_not_enough','Пока недостаточно прошлых публикаций этого типа события для этого инструмента, чтобы посчитать статистику.')+'</div>';
+  }
+  var period = (stats.period_from && stats.period_to)
+    ? '<div style="margin-top:6px;font-size:10.5px;color:var(--muted)">'+fmt_(t('calendar.reaction_period_tpl','Период: {from} — {to}'), {from: stats.period_from, to: stats.period_to})+'</div>'
+    : '';
+  return '<div class="chart-wrap"><div class="hist-list">'+rows.join('')+'</div>'
+    + period
+    + '<div style="margin-top:6px;font-size:10px;color:var(--muted);font-style:italic">'+t('calendar.reaction_disclaimer','Историческая статистика, не прогноз и не рекомендация.')+'</div>'
+    + '</div>';
 }
 
 // ── График событий (факт vs прогноз) ──────────────────────────────────────

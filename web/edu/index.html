@@ -12,6 +12,8 @@
 <link rel="stylesheet" href="/edu/edu.css">
 <script src="/assets/i18n.js?v=2" defer></script>
 <script src="/assets/sbf-header.js?v=16" defer></script>
+<script src="/assets/sbf-auth.js?v=1" defer></script>
+<script src="/assets/sbf-anon.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
@@ -184,27 +186,50 @@ const CHAPTERS = [
   {n:15, tier:"pro",  ico:'<img class="mi-icon" src="/assets/icons/icon-trophy.png" alt="" width="20" height="20">', title:"От Теории к Практике",        sub:"Три пути, проп-трейдинг без иллюзий"},
 ];
 
-const DONE_KEY = 'sbf_edu_done';
+// SPEC_chart_fixes_and_staged_signup.md §5 п.7: раньше был localStorage-ключ
+// sbf_edu_done, который никто и никогда не писал (мёртвый код — прогресс-бар
+// и галочки на оглавлении всегда показывали 0/15). Теперь читаем настоящий
+// прогресс с сервера (user_course_progress) — для анонимного читателя через
+// X-Anon-Id (web/assets/sbf-anon.js), для залогиненного через sbfAuth.
+let _progress = {}; // {chapter_number: {is_completed, completed_at}}
 
-function getDone() {
-  try { return JSON.parse(localStorage.getItem(DONE_KEY) || '[]'); } catch { return []; }
+function _progressHeaders() {
+  const headers = {};
+  if (window.SBFAnon) {
+    const anonId = window.SBFAnon.getAnonId();
+    if (anonId) headers['X-Anon-Id'] = anonId;
+  }
+  return headers;
+}
+function _progressFetch(url, opts) {
+  const doFetch = (window.sbfAuth && window.sbfAuth.fetch) || fetch;
+  return doFetch(url, Object.assign({}, opts, {headers: Object.assign(_progressHeaders(), (opts && opts.headers) || {})}));
 }
 
-function resetProgress() {
+async function fetchProgress() {
+  try {
+    const r = await _progressFetch('/api/journal/course');
+    const data = await r.json();
+    _progress = (data && data.chapters) || {};
+  } catch (e) { _progress = {}; }
+}
+
+async function resetProgress() {
   if (!confirm(t('eduindex.confirm_reset', 'Сбросить прогресс?'))) return;
-  localStorage.removeItem(DONE_KEY);
+  try { await _progressFetch('/api/journal/course', {method: 'DELETE'}); } catch (e) {}
+  await fetchProgress();
   render();
 }
 
 function render() {
-  const done = getDone();
-  const pct = Math.round(done.length / 15 * 100);
+  const doneCount = Object.values(_progress).filter(c => c.is_completed).length;
+  const pct = Math.round(doneCount / 15 * 100);
   document.getElementById('pbar').style.width = pct + '%';
-  document.getElementById('ppct').textContent = done.length + ' ' + t('eduindex.of', 'из') + ' 15';
+  document.getElementById('ppct').textContent = doneCount + ' ' + t('eduindex.of', 'из') + ' 15';
 
   const toc = document.getElementById('toc');
   toc.innerHTML = CHAPTERS.map(c => {
-    const isDone = done.includes(c.n);
+    const isDone = !!(_progress[c.n] && _progress[c.n].is_completed);
     const tierBadge = c.tier === 'pro'
       ? `<span style="font-family:'JetBrains Mono';font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--gold);border:1px solid var(--gold);padding:1px 6px;border-radius:4px;margin-left:8px;opacity:.7">PRO</span>`
       : '';
@@ -222,6 +247,7 @@ function render() {
 }
 
 render();
+fetchProgress().then(render);
 _patchI18n(document);
 if (window.sbfI18n) {
   window.sbfI18n.ready.then(function () { _patchI18n(document); render(); });

@@ -97,6 +97,17 @@
       .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
+  // SPEC_symbol_names.md §4.3 — журнал сверяется с реальным терминалом,
+  // поэтому везде в этом файле режим 'name+ticker' ("Золото · GOLD"), не
+  // просто 'name'. window.SBFSymbols грузится с defer — на момент первого
+  // рендера может быть ещё не готов, поэтому проверка на существование и
+  // честный фолбэк на исходный тикер (сам symbolName() тоже фолбэкается,
+  // если тикера нет в реестре — см. sbf-symbols.js).
+  function symLabel(sym, mode) {
+    if (!sym) return sym;
+    return window.SBFSymbols ? window.SBFSymbols.symbolName(sym, { mode: mode || 'name+ticker' }) : sym;
+  }
+
   // ── API ───────────────────────────────────────────────────────────────────
   // НАЙДЕНО при работе над SBF_Charts_Layer4_Spec Фаза 4: apiFetch() делал
   // голый fetch() БЕЗ auth-заголовков вообще — ни X-Auth-Token, ни
@@ -403,7 +414,7 @@
         ? '<button class="j-journal-btn j-journaled" data-id="' + t.id + '" title="' + editAnalysisTip + '">✏️</button>'
         : '<button class="j-journal-btn j-unjournaled" data-id="' + t.id + '" title="' + addAnalysisTip + '">📝</button>';
       return '<tr data-trade-id="' + t.id + '">'
-        + '<td><span class="j-sym">' + escHtml(t.symbol) + '</span></td>'
+        + '<td><span class="j-sym">' + escHtml(symLabel(t.symbol)) + '</span></td>'
         + '<td><span class="' + dirCl + '">' + dirIc + ' ' + t.dir.toUpperCase() + '</span></td>'
         + '<td class="j-mono">' + fmt(t.size, 2) + '</td>'
         + '<td class="j-mono">' + fmt(t.entry_price, 5) + '</td>'
@@ -659,7 +670,7 @@
     if (summary) {
       var pnlCl = +trade.pnl >= 0 ? 'j-up' : 'j-dn';
       summary.innerHTML = '<div class="j-meta-trade-row">'
-        + kv(t('journal.field_instrument_short', 'Инструмент'), '<span class="j-sym">' + escHtml(trade.symbol) + '</span>')
+        + kv(t('journal.field_instrument_short', 'Инструмент'), '<span class="j-sym">' + escHtml(symLabel(trade.symbol)) + '</span>')
         + kv(t('journal.th_type', 'Тип'), trade.dir === 'buy' ? '<span class="j-up">▲ BUY</span>' : '<span class="j-dn">▼ SELL</span>')
         + kv('PnL', '<span class="' + pnlCl + '">' + (trade.pnl >= 0 ? '+' : '') + fmt(trade.pnl, 2) + '</span>')
         + kv('R', '<span class="' + pnlCl + '">' + (trade.pnl_r >= 0 ? '+' : '') + fmt(trade.pnl_r, 2) + 'R</span>')
@@ -1063,7 +1074,7 @@
           var vol   = m.volatility_state || 'normal';
           var chartUrl = '/chart.html?s=' + encodeURIComponent(m.symbol);
           return '<a class="j-retro-card" href="' + chartUrl + '" title="' + t('journal.open_chart_tip', 'Открыть график') + '">'
-            + '<div class="j-retro-sym">' + escHtml(m.symbol) + '</div>'
+            + '<div class="j-retro-sym">' + escHtml(symLabel(m.symbol)) + '</div>'
             + '<div class="j-retro-chg ' + cls + '">' + pct + '</div>'
             + '<span class="j-retro-vol ' + vol + '">' + volLabel(vol) + '</span>'
             + '<div class="j-retro-close">' + fmt(m.close, 5) + '</div>'
@@ -1165,7 +1176,7 @@
       .then(function (data) {
         if (!data || !sec) { if (sec) sec.style.display = 'none'; return; }
         var lbl = el('jThermoSymLabel');
-        if (lbl) lbl.textContent = symbol;
+        if (lbl) lbl.textContent = symLabel(symbol);
         var chips = el('jThermoChips');
         if (chips) {
           chips.innerHTML = window.SBFThermoWidget.buildChipsHtml(data, symbol, {t: t, fmt: _fmtTpl, esc: escHtml});
@@ -1200,7 +1211,7 @@
     var deleteTip = t('journal.delete_tip', 'Удалить');
     wrap.innerHTML = symbols.map(function (sym) {
       return '<div class="j-wl-chip">'
-        + '<span class="j-wl-chip-sym">' + escHtml(sym) + '</span>'
+        + '<span class="j-wl-chip-sym">' + escHtml(symLabel(sym)) + '</span>'
         + '<button class="j-wl-chip-del" data-wl-del="' + sym + '" title="' + deleteTip + '">✕</button>'
         + '</div>';
     }).join('');
@@ -1213,7 +1224,7 @@
     sel.innerHTML = '<option value="">' + t('journal.add_ellipsis', 'Добавить…') + '</option>'
       + _availableSymbols
           .filter(function (s) { return !currentSet.has(s); })
-          .map(function (s) { return '<option value="' + s + '">' + s + '</option>'; })
+          .map(function (s) { return '<option value="' + s + '">' + escHtml(symLabel(s)) + '</option>'; })
           .join('');
   }
 
@@ -1361,7 +1372,7 @@
       var label = alertKindLabel(r.kind);
       var onCls = r.is_active ? ' on' : '';
       var symBadge = r.symbol
-        ? '<span class="j-alert-rule-sym">' + escHtml(r.symbol) + '</span>'
+        ? '<span class="j-alert-rule-sym">' + escHtml(symLabel(r.symbol)) + '</span>'
         : '';
       var paramStr = _formatRuleParam(r.kind, r.param || {});
       return '<div class="j-alert-rule">'
@@ -1572,7 +1583,7 @@
       return '<div class="j-setup-card" data-setup-id="' + s.id + '">'
         + '<div class="j-setup-card-hd">'
         +   '<div class="j-setup-card-sym">'
-        +     '<a class="j-setup-sym-badge" href="' + chartUrl + '" title="' + openChartTip + '">' + escHtml(s.symbol) + '</a>'
+        +     '<a class="j-setup-sym-badge" href="' + chartUrl + '" title="' + openChartTip + '">' + escHtml(symLabel(s.symbol)) + '</a>'
         +     '<span class="j-setup-tf">' + escHtml(s.timeframe) + '</span>'
         +   '</div>'
         +   '<span class="j-setup-status ' + st + '">' + statusLabel(st) + '</span>'
@@ -1632,7 +1643,7 @@
       + _trades.slice(0, 50).map(function (t) {
         var sign = t.pnl >= 0 ? '+' : '';
         return '<option value="' + t.id + '">'
-          + t.symbol + ' ' + t.dir + ' ' + fmtDate(t.close_ts)
+          + symLabel(t.symbol) + ' ' + t.dir + ' ' + fmtDate(t.close_ts)
           + ' (' + sign + fmt(t.pnl, 2) + ')'
           + '</option>';
       }).join('');

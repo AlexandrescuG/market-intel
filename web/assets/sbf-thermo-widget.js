@@ -46,6 +46,17 @@
     const p = pctl == null ? 0 : Math.max(0, Math.min(100, pctl));
     return `<div class="tc-bar"><i style="width:${p}%"></i></div>`;
   }
+  // SPEC_symbol_names.md §4.3 — "Ожид. волатильность {sym}" подставляла
+  // сырой тикер. window.SBFSymbols грузится с defer на обеих вызывающих
+  // страницах (chart.html, journal.html), поэтому обращаемся к нему как к
+  // глобалу напрямую — по тому же паттерну, что уже применён к window.sbfI18n
+  // в weekdayShort() выше в этом файле. Режим 'name' (не 'name+ticker'): и
+  // на chart.html, и в "Твой день" journal.html тикер этого же инструмента
+  // уже виден в заголовке над карточкой термометра — второй раз дублировать
+  // не нужно.
+  function symDisplay(sym) {
+    return (window.SBFSymbols && sym) ? window.SBFSymbols.symbolName(sym, {mode: 'name'}) : sym;
+  }
   function thermoChipHtml(key, label, value, valueCls, extra, esc, hint) {
     return `<div class="thermo-chip" data-k="${key}"${hint ? ` title="${esc(hint)}"` : ''}>
       <div class="tc-label">${esc(label)}</div>
@@ -92,7 +103,7 @@
     let chip4;
     if (data.dvol_pctl != null) {
       const dvVal = fmt(t('chart.thermo_dvol_tpl', '{p}-й перцентиль'), {p: Math.round(data.dvol_pctl)});
-      chip4 = thermoChipHtml('dvol', fmt(t('chart.thermo_dvol_label_tpl', 'Ожид. волатильность {sym}'), {sym: symbol}),
+      chip4 = thermoChipHtml('dvol', fmt(t('chart.thermo_dvol_label_tpl', 'Ожид. волатильность {sym}'), {sym: symDisplay(symbol)}),
         dvVal, '', thermoBarHtml(data.dvol_pctl), esc,
         t('chart.thermo_dvol_hint', 'Подразумеваемая волатильность (ожидания рынка по амплитуде будущих движений) за последние 90 дней. Выше 50-го перцентиля — рынок закладывает более резкие движения, чем обычно.'));
     } else if (data.nearest_zone_low != null) {

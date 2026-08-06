@@ -24,11 +24,13 @@
 <link rel="stylesheet" href="/assets/design.css">
 <link rel="stylesheet" href="/assets/tokens.css?v=1">
 <script src="/assets/i18n.js?v=2" defer></script>
+<script src="/assets/sbf-symbols.js?v=2"></script>
 <script src="/assets/sbf-header.js?v=16" defer></script>
 <script src="/assets/sbf-auth.js?v=1"></script>
 <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
 <script src="/assets/grafik-engine.js"></script>
 <script src="/assets/sbf-thermo-widget.js"></script>
+<script src="/assets/sbf-glossary.js?v=2" defer></script>
 <style>
 :root{
   --cream:#FBF6EF; --paper:#FFFFFF; --line:#E7DFCF; --grid:#F0E9DA;
@@ -86,11 +88,17 @@ body.embed .card{border-radius:0;box-shadow:none;border:none;max-width:100%}
 .news-zone{position:absolute;top:0;bottom:20px;background:var(--gold);opacity:.08;cursor:pointer;pointer-events:auto}
 .news-zone:hover{opacity:.14}
 #confluenceLayer{position:absolute;inset:0;pointer-events:none;overflow:hidden}
-.confluence-band{position:absolute;left:0;right:0;background:var(--gold);cursor:pointer;pointer-events:auto}
-.confluence-band.mid{opacity:.10}
-.confluence-band.strong{opacity:.18}
-.confluence-band:hover{opacity:.26}
-.confluence-band.flash-highlight{opacity:.4;transition:opacity .3s}
+/* SPEC_chart_fixes_and_staged_signup.md §1: ширина полосы была артефактом
+   кластеризации (min/max факторов), не измеренной границей -- жёсткий
+   прямоугольник обещал читателю смысл, которого нет. Вместо него: мягкое
+   свечение (растушёванный градиент, шире самого скопления) + засечка на
+   каждом реальном факторе -- честно "здесь густо", а не "здесь от и до". */
+.confluence-zone{position:absolute;left:0;right:0;cursor:pointer;pointer-events:auto}
+.confluence-zone.mid{background:radial-gradient(ellipse at center, rgba(201,162,39,.22) 0%, rgba(201,162,39,.09) 55%, rgba(201,162,39,0) 100%)}
+.confluence-zone.strong{background:radial-gradient(ellipse at center, rgba(201,162,39,.32) 0%, rgba(201,162,39,.13) 55%, rgba(201,162,39,0) 100%)}
+.confluence-zone:hover{filter:brightness(1.35)}
+.confluence-zone.flash-highlight{filter:brightness(1.7);transition:filter .3s}
+.confluence-tick{position:absolute;left:6px;right:6px;height:2px;border-radius:1px;background:var(--gold);box-shadow:0 0 6px rgba(201,162,39,.75);pointer-events:none}
 
 /* Сессионная карта (Layer 3, Фаза 2) */
 #sessionLayer{position:absolute;inset:0;pointer-events:none;overflow:hidden}
@@ -100,10 +108,15 @@ body.embed .card{border-radius:0;box-shadow:none;border:none;max-width:100%}
 .sess-ny{background:var(--up);opacity:.05}
 .sess-overlap{background:var(--gold);opacity:.10}
 .sess-label{position:absolute;top:3px;left:5px;font-size:9px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.3px;white-space:nowrap;pointer-events:none}
-.heat-strip-wrap{padding:0 18px 10px;display:none}
-.heat-strip{display:flex;height:6px;border-radius:3px;overflow:hidden}
-.heat-strip .hs-seg{flex:1;background:var(--gold);cursor:pointer}
-.heat-strip .hs-seg:hover{outline:1px solid var(--gold)}
+/* SPEC_chart_fixes_and_staged_signup.md §2: столбики активности по часам,
+   привязанные к оси времени графика (см. redrawHourlyActivityLayer) --
+   раньше была отдельная полоса из 24 одинаковых сегментов под графиком. */
+#hourlyActivityLayer{position:absolute;left:0;right:0;bottom:22px;height:18px;pointer-events:none;overflow:visible;z-index:5}
+.hs-bar{position:absolute;bottom:0;background:var(--gold);opacity:.45;border-radius:1px 1px 0 0;cursor:pointer;pointer-events:auto}
+.hs-bar:hover{opacity:.75}
+.hs-bar.hs-peak{opacity:.85}
+.hs-peak-label{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);margin-bottom:2px;font-size:8px;font-family:'JetBrains Mono',monospace;color:var(--gold);text-transform:uppercase;letter-spacing:.3px;white-space:nowrap}
+.hs-title{position:absolute;left:6px;bottom:100%;margin-bottom:3px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:.03em;text-transform:uppercase;pointer-events:none;white-space:nowrap}
 .hs-edu-link{color:var(--gold);font-weight:600;text-decoration:none}
 .hs-edu-link:hover{text-decoration:underline}
 
@@ -138,6 +151,7 @@ body.embed .card{border-radius:0;box-shadow:none;border:none;max-width:100%}
 .evt-card .evt-close{position:absolute;top:8px;right:10px;cursor:pointer;color:var(--muted);font-size:15px;background:none;border:none;line-height:1;padding:4px}
 .evt-card .evt-item{padding:10px 0;border-top:1px solid var(--line)}
 .evt-card .evt-item:first-child{border-top:none}
+.evt-card .zone-factor-row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-size:12.5px}
 .evt-card h4{margin:0 0 6px;font-family:Montserrat,sans-serif;font-size:14px;line-height:1.35;padding-right:20px}
 .evt-card .evt-meta{font-size:11px;color:var(--muted);margin-bottom:8px}
 .evt-card .evt-countdown{font-size:12px;color:var(--gold);font-weight:600;margin-bottom:8px}
@@ -152,6 +166,8 @@ body.embed .card{border-radius:0;box-shadow:none;border:none;max-width:100%}
 .evt-reaction.locked{display:flex;align-items:center;gap:8px;color:var(--muted)}
 .evt-reaction .evt-lock{font-size:13px}
 .evt-reaction-title{font-weight:700;color:var(--ink);margin-bottom:4px;font-family:'JetBrains Mono'}
+.evt-reaction-baseline{margin-top:4px;color:var(--ink)}
+.evt-reaction-period{margin-top:2px;font-size:10.5px;color:var(--muted)}
 .evt-reaction-disclaimer{margin-top:6px;font-size:10px;color:var(--muted);font-style:italic}
 .pulse-feed-lock{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px;padding:8px 0}
 
@@ -209,6 +225,7 @@ body.embed .card{border-radius:0;box-shadow:none;border:none;max-width:100%}
   </div>
   <div class="ctrl-row">
     <div class="tf-grp" id="tf">
+      <button class="tf" data-tf="M5">M5</button><button class="tf" data-tf="M15">M15</button>
       <button class="tf" data-tf="M30">M30</button><button class="tf" data-tf="H1">H1</button>
       <button class="tf" data-tf="H4">H4</button><button class="tf on" data-tf="D1">D1</button>
       <button class="tf" data-tf="W1">W1</button>
@@ -243,6 +260,7 @@ body.embed .card{border-radius:0;box-shadow:none;border:none;max-width:100%}
     <div id="confluenceLayer"></div>
     <div id="newsLayer"></div>
     <div id="eventLayer"></div>
+    <div id="hourlyActivityLayer"></div>
     <svg id="tradesLayer" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:hidden"></svg>
   </div>
   <div class="sentiment-panel" id="sentimentPanel" style="display:none">
@@ -252,9 +270,6 @@ body.embed .card{border-radius:0;box-shadow:none;border:none;max-width:100%}
       <button class="thermo-chevron" id="sentimentChevron" aria-label="toggle">▾</button>
     </div>
     <div class="sentiment-body" id="sentimentBody"></div>
-  </div>
-  <div class="heat-strip-wrap" id="heatStripWrap">
-    <div class="heat-strip" id="heatStrip"></div>
   </div>
   <div class="beginner"><span class="ic">&#9432;</span><div id="explain">…</div></div>
   <div class="foot" data-i18n="chart.footer_disclaimer">образовательная подсветка паттернов — контекст, не инвестиционная рекомендация</div>
@@ -282,6 +297,11 @@ function _defaultChartSymbol() {
   return 'GOLD';
 }
 const PARAM = _SP.get('s') || _defaultChartSymbol();
+// Понятное название инструмента из общего реестра (SPEC_symbol_names.md §3);
+// без него — честный фолбэк на сырой символ, не выдумываем имя.
+function symName(sym, mode) {
+  return window.SBFSymbols ? window.SBFSymbols.symbolName(sym, {mode: mode || 'name'}) : sym;
+}
 if (_SP.get('embed') === '1') document.body.classList.add('embed');
 // SBF_Charts_Layer4_Spec, Фаза 3: переход из утреннего отчёта — график на
 // M30/H1 (default_tf пользователя, иначе H1), диапазон "сегодня+вчера",
@@ -289,10 +309,16 @@ if (_SP.get('embed') === '1') document.body.classList.add('embed');
 const FOCUS_TODAY = _SP.get('focus') === 'today';
 if (FOCUS_TODAY) localStorage.setItem('sbf_thermo_collapsed', '0'); // термометр раскрыт (спека Ф3) — ставим ДО initThermoCollapse() ниже по файлу, тот читает это же значение при построении DOM
 function _focusTodayTF() {
+  // SPEC_chart_fixes_and_staged_signup.md §3: раньше принимался только
+  // M30/H1 -- онбординг пишет default_tf='M5' скальперам (core/journal_auth.
+  // py _STYLE_TO_TF) и 'H4'/'D1' свинг/долгосрочным, но график молча
+  // откатывал ЛЮБОЕ из них на H1. TF_SEC (ниже по файлу, но функция
+  // вызывается уже после его определения) — тот же список ТФ, что рисуют
+  // кнопки, единственный источник "что вообще валидно".
   try {
     const cached = JSON.parse(localStorage.getItem('sbf_user_cache') || 'null');
     const dtf = cached && cached.prefs && cached.prefs.default_tf;
-    if (dtf === 'M30' || dtf === 'H1') return dtf;
+    if (dtf && TF_SEC[dtf] != null) return dtf;
   } catch (e) {}
   return 'H1';
 }
@@ -440,23 +466,48 @@ function findPatternAtX(x) {
   return best;
 }
 
+// SPEC_chart_fixes_and_staged_signup.md §4: раньше top клампился по
+// зашитой константе 120 (предполагаемая высота карточки) вместо реальной —
+// карточка (max-height:70vh) на клике у нижнего края уезжала за экран,
+// новостная сильнее всех, потому что самая высокая. Клампим по фактической
+// card.offsetHeight ПОСЛЕ показа (card.classList.add('on') уже должен
+// случиться до вызова), и если снизу не помещается — открываем выше клика,
+// а не ниже. На мобильном (≤760px) карточка — донный лист на чистом CSS,
+// JS-позиционирование не применяется (тот же guard, что был).
+function positionEventCard(clickX, clickY) {
+  if (window.innerWidth <= 760) return;
+  const card = document.getElementById('evtCard');
+  const margin = 10, w = 300;
+  const left = Math.max(margin, Math.min(clickX - w / 2, window.innerWidth - w - margin));
+  card.style.left = left + 'px';
+  const h = card.offsetHeight;
+  let top = clickY + 14;
+  if (top + h > window.innerHeight - margin) {
+    top = clickY - h - 14; // не влезает снизу -- открываем выше точки клика
+  }
+  card.style.top = Math.max(margin, Math.min(top, window.innerHeight - h - margin)) + 'px';
+}
+
 function openPatternCard(p, clickX, clickY) {
   const card = document.getElementById('evtCard');
   card.innerHTML = `<button class="evt-close" id="evtCardClose">✕</button>
-    <h4>${escapeHtml(p.display_name_ru)} · ${escapeHtml(PARAM)} · ${escapeHtml(curTF)}</h4>
+    <h4>${escapeHtml(p.display_name_ru)} · ${escapeHtml(symName(PARAM, 'name+ticker'))} · ${escapeHtml(curTF)}</h4>
     <div id="patternStatsBody"></div>`;
   document.getElementById('evtCardClose').addEventListener('click', closeEventCard);
   card.classList.add('on');
   document.getElementById('evtBackdrop').classList.add('on');
-  if (window.innerWidth > 760) {
-    const w = 300;
-    const left = Math.max(10, Math.min(clickX - w / 2, window.innerWidth - w - 10));
-    card.style.left = left + 'px';
-    card.style.top = Math.min(clickY + 14, window.innerHeight - 120) + 'px';
-  }
+  positionEventCard(clickX, clickY);
   const body = document.getElementById('patternStatsBody');
   if (!window.sbfAuth || !window.sbfAuth.isLoggedIn()) {
     body.innerHTML = `<div class="pulse-feed-lock">🔒 ${escapeHtml(t('chart.pattern_stats_locked', 'Доступно после регистрации'))}</div>`;
+    return;
+  }
+  // SPEC_chart_fixes_and_staged_signup.md §3: pattern_stats_job.py считает
+  // статистику только по H1/H4/D1 (TIMEFRAMES) -- на остальных ТФ раньше
+  // карточка молча оставалась без блока, неотличимо от "выборка мала".
+  // Честно говорим, что замера для этого ТФ вообще нет, не изображаем тишину.
+  if (!PATTERN_STATS_TFS.has(curTF)) {
+    body.innerHTML = `<div class="pulse-feed-lock">${escapeHtml(t('chart.pattern_stats_no_tf', 'Статистика по паттернам на этом таймфрейме не считается.'))}</div>`;
     return;
   }
   window.sbfAuth.fetch(`/api/chart/pattern-stats?pattern=${encodeURIComponent(p.pattern_key)}&symbol=${encodeURIComponent(PARAM)}&tf=${encodeURIComponent(curTF)}`)
@@ -471,6 +522,7 @@ function openPatternCard(p, clickX, clickY) {
           {n: stats.n, histDate, pct, avg: stats.avg_move_5.toFixed(1), adverse: stats.max_adverse_5.toFixed(1)})}</div>
         <div class="evt-reaction-disclaimer">${escapeHtml(t('chart.reaction_disclaimer', 'Историческая статистика, не прогноз и не рекомендация.'))}</div>
       </div>`;
+      positionEventCard(clickX, clickY); // блок статистики мог вырасти после позиционирования
     })
     .catch(() => {});
 }
@@ -541,6 +593,7 @@ function getTogHints() {
     cndl: t('chart.hint_patterns', '<b>Паттерны</b> — значимые свечные формации на последних 40 барах. ↑ зелёная стрелка — бычий сигнал (молот, бычье поглощение и др.), ↓ красная — медвежий (харами, медвежье поглощение и др.), ● жёлтый — нейтральный (доджи). Не сигнал к сделке, контекст.'),
     smc: t('chart.hint_smc', '<b>SMC — структура рынка:</b> <b>HH</b> (Higher High) — новый максимум выше предыдущего, тренд вверх; <b>HL</b> (Higher Low) — откат не пробивает предыдущий лой, тренд вверх; <b>LH</b> (Lower High) — максимум ниже предыдущего, слабость; <b>LL</b> (Lower Low) — новый минимум, тренд вниз. <b>BOS</b> — пробой структуры (подтверждение); <b>OB</b> — Order Block, зона крупных ордеров; <b>FVG</b> — разрыв ликвидности, цена часто его закрывает.'),
     lvl: t('chart.hint_levels', '<b>Уровни</b> — исторические зоны поддержки/сопротивления по прошлым разворотам цены (не текущие пивоты). Число вида <b>×30</b> — сколько раз цена разворачивалась у этого уровня: больше касаний — сильнее уровень. Показаны только 6 самых сильных, чтобы не перегружать график — остальные видны при клике на близкий уровень. Нажмите на линию для деталей.'),
+    zone: t('chart.hint_zones', '<b>Зоны</b> — места, где рядом сходятся несколько ориентиров разного рода: пивоты, круглые числа, исторические уровни, недельные и месячные экстремумы. Свечение — не измеренная граница, а густота скопления: чем ярче и больше засечек, тем больше причин цене задержаться здесь. Нажмите на зону для деталей.'),
   };
 }
 
@@ -613,7 +666,10 @@ function applyToggles() {
 }
 
 // ── Слой событий календаря (Фаза 1, SBF_Charts_Layer1_Spec) ────────────────
-const TF_SEC = {M30:1800, H1:3600, H4:14400, D1:86400, W1:604800};
+const TF_SEC = {M5:300, M15:900, M30:1800, H1:3600, H4:14400, D1:86400, W1:604800};
+// Совпадает с pattern_stats_job.py's TIMEFRAMES -- статистика по паттернам
+// считается офлайн-джобом только на этих ТФ (SPEC_chart_fixes_and_staged_signup.md §3).
+const PATTERN_STATS_TFS = new Set(['H1', 'H4', 'D1']);
 
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -708,9 +764,20 @@ function reactionBlockHtml(ev) {
 function renderReactionStats(stats) {
   const avg = stats.avg_move_60m != null ? stats.avg_move_60m.toFixed(0) : '—';
   const max = stats.max_move_60m != null ? stats.max_move_60m.toFixed(0) : '—';
+  // СПЕКА_календарь_и_движения_рынка.md §4: любая метрика — обязательно с
+  // периодом выборки рядом, не только с n. И нормировка на фон часа (§3) —
+  // описательно, без формулировок, из которых следует торговое действие.
+  const period = (stats.period_from && stats.period_to)
+    ? `<div class="evt-reaction-period">${fmt_(t('chart.reaction_period_tpl','Период: {from} — {to}'), {from: stats.period_from, to: stats.period_to})}</div>`
+    : '';
+  const baseline = (stats.baseline_ratio_30m != null)
+    ? `<div class="evt-reaction-baseline">${fmt_(t('chart.reaction_baseline_tpl','×{ratio} к обычному ходу этого часа суток (по всем дням, не только с этим событием)'), {ratio: stats.baseline_ratio_30m.toFixed(2)})}</div>`
+    : '';
   return `<div class="evt-reaction-title">${t('chart.reaction_title','Прошлые разы')}</div>
     <div>${fmt_(t('chart.reaction_summary_tpl','За последние {n} публикаций {sym} в среднем двигался на {avg} п. в течение часа после выхода (максимум — {max} п.)'),
-      {n: stats.n, sym: PARAM, avg, max})}</div>
+      {n: stats.n, sym: symName(PARAM), avg, max})}</div>
+    ${baseline}
+    ${period}
     <div class="evt-reaction-disclaimer">${t('chart.reaction_disclaimer','Историческая статистика, не прогноз и не рекомендация.')}</div>`;
 }
 
@@ -761,12 +828,7 @@ function openEventCard(items, clickX, clickY) {
   document.getElementById('evtCardClose').addEventListener('click', closeEventCard);
   card.classList.add('on');
   document.getElementById('evtBackdrop').classList.add('on');
-  if (window.innerWidth > 760) {
-    const w = 300;
-    const left = Math.max(10, Math.min(clickX - w / 2, window.innerWidth - w - 10));
-    card.style.left = left + 'px';
-    card.style.top = Math.min(clickY + 14, window.innerHeight - 120) + 'px';
-  }
+  positionEventCard(clickX, clickY);
   items.forEach(loadReactionBlock);
 }
 
@@ -822,7 +884,7 @@ async function refreshEvents(tf) {
 }
 
 function setupEventLayerObservers() {
-  const redrawBoth = () => { redrawEventLayer(); redrawNewsLayer(); redrawConfluenceLayer(); redrawSessionLayer(); redrawTradesLayer(); };
+  const redrawBoth = () => { redrawEventLayer(); redrawNewsLayer(); redrawConfluenceLayer(); redrawSessionLayer(); redrawHourlyActivityLayer(); redrawTradesLayer(); };
   chart.timeScale().subscribeVisibleTimeRangeChange(redrawBoth);
   if (_evtRO) { try { _evtRO.disconnect(); } catch (e) {} }
   _evtRO = new ResizeObserver(redrawBoth);
@@ -872,17 +934,13 @@ function openNewsCard(startTs, endTs, clickX, clickY) {
   document.getElementById('evtCardClose').addEventListener('click', closeEventCard);
   card.classList.add('on');
   document.getElementById('evtBackdrop').classList.add('on');
-  if (window.innerWidth > 760) {
-    const w = 300;
-    const left = Math.max(10, Math.min(clickX - w / 2, window.innerWidth - w - 10));
-    card.style.left = left + 'px';
-    card.style.top = Math.min(clickY + 14, window.innerHeight - 120) + 'px';
-  }
+  positionEventCard(clickX, clickY);
   fetch(`/api/chart/news?symbol=${encodeURIComponent(PARAM)}&from=${startTs}&to=${endTs}`)
     .then(r => r.ok ? r.json() : [])
     .then(items => {
       const body = document.getElementById('newsCardBody');
       if (body) body.outerHTML = `<div id="newsCardBody">${renderNewsHeadlines(Array.isArray(items) ? items : [])}</div>`;
+      positionEventCard(clickX, clickY); // список заголовков мог вырасти после позиционирования
     })
     .catch(() => {});
 }
@@ -973,12 +1031,7 @@ function openLevelCard(L, clickX, clickY) {
   document.getElementById('evtCardClose').addEventListener('click', closeEventCard);
   card.classList.add('on');
   document.getElementById('evtBackdrop').classList.add('on');
-  if (window.innerWidth > 760) {
-    const w = 300;
-    const left = Math.max(10, Math.min(clickX - w / 2, window.innerWidth - w - 10));
-    card.style.left = left + 'px';
-    card.style.top = Math.min(clickY + 14, window.innerHeight - 120) + 'px';
-  }
+  positionEventCard(clickX, clickY);
 }
 
 function findZoneAtY(y) {
@@ -993,22 +1046,49 @@ function findZoneAtY(y) {
   return null;
 }
 
+// Название типа фактора -- ключи kind приходят из confluence_job.py
+// структурированными (не готовой русской строкой), чтобы карточка могла
+// перевести их на язык страницы (SPEC_chart_fixes_and_staged_signup.md §1).
+function zoneFactorLabel(f) {
+  switch (f.kind) {
+    case 'pivot': return fmt_(t('chart.zone_factor_pivot_tpl', 'Пивот {name}'), {name: (f.params && f.params.name) || ''});
+    case 'round': return t('chart.zone_factor_round', 'Круглое число');
+    case 'level': return t('chart.zone_factor_level', 'Исторический уровень');
+    case 'week_high': return t('chart.zone_factor_week_high', 'Недельный максимум');
+    case 'week_low': return t('chart.zone_factor_week_low', 'Недельный минимум');
+    case 'month_high': return t('chart.zone_factor_month_high', 'Месячный максимум');
+    case 'month_low': return t('chart.zone_factor_month_low', 'Месячный минимум');
+    default: return f.kind || '';
+  }
+}
+function zoneFactorValue(f) {
+  let v = fmtPrice(f.price);
+  if (f.kind === 'level' && f.params && f.params.touches != null) {
+    v += ' · ' + fmt_(t('chart.zone_factor_level_touches_tpl', '{touches} касаний'), {touches: f.params.touches});
+  }
+  return v;
+}
+
 function openZoneCard(z, clickX, clickY) {
   const card = document.getElementById('evtCard');
-  const factorsHtml = z.factors.map(f => `<div class="evt-item">${escapeHtml(f)}</div>`).join('');
+  const factors = (z.factors || []).slice().sort((a, b) => b.price - a.price);
+  const factorsHtml = factors.map(f =>
+    `<div class="evt-item zone-factor-row"><span>${escapeHtml(zoneFactorLabel(f))}</span><b>${escapeHtml(zoneFactorValue(f))}</b></div>`
+  ).join('');
   card.innerHTML = `<button class="evt-close" id="evtCardClose">✕</button>
-    <h4>${fmt_(t('chart.zone_title_tpl', 'Зона внимания {low}–{high}'),
+    <h4>${fmt_(t('chart.zone_title_tpl', 'Скопление уровней · {low} – {high}'),
       {low: fmtPrice(z.price_low), high: fmtPrice(z.price_high)})}</h4>
-    ${factorsHtml}`;
+    <div class="evt-meta">${fmt_(t('chart.zone_explain_tpl',
+      'Здесь наблюдается скопление из {n} ориентиров разного рода — чем их больше, тем чаще цена останавливается рядом.'),
+      {n: factors.length})}</div>
+    ${factorsHtml}
+    <div style="margin-top:8px">${fmt_(t('chart.zone_score_tpl', 'Сила скопления: {score} из 5'), {score: z.score.toFixed(1)})}</div>
+    <div class="evt-reaction-disclaimer">${escapeHtml(t('chart.reaction_disclaimer', 'Историческая статистика, не прогноз и не рекомендация.'))}</div>
+    <div style="margin-top:10px"><a class="hs-edu-link" href="/edu/b/4" target="_blank" rel="noopener">${escapeHtml(t('chart.zone_edu_link', 'Что это значит? → Глава 4: Ликвидность и Ордера'))}</a></div>`;
   document.getElementById('evtCardClose').addEventListener('click', closeEventCard);
   card.classList.add('on');
   document.getElementById('evtBackdrop').classList.add('on');
-  if (window.innerWidth > 760) {
-    const w = 300;
-    const left = Math.max(10, Math.min(clickX - w / 2, window.innerWidth - w - 10));
-    card.style.left = left + 'px';
-    card.style.top = Math.min(clickY + 14, window.innerHeight - 120) + 'px';
-  }
+  positionEventCard(clickX, clickY);
 }
 
 // Один обработчик кликов на чарт для уровней (Ф1) и зон внимания (Ф2) — сначала
@@ -1061,17 +1141,30 @@ function redrawConfluenceLayer() {
     const yLo = candleSeries.priceToCoordinate(z.price_low);
     const yHi = candleSeries.priceToCoordinate(z.price_high);
     if (yLo == null || yHi == null) return;
-    const top = Math.min(yLo, yHi), height = Math.max(2, Math.abs(yHi - yLo));
-    const band = document.createElement('div');
-    band.className = 'confluence-band ' + (z.score > 3.5 ? 'strong' : 'mid');
-    band.style.top = top + 'px';
-    band.style.height = height + 'px';
-    band.title = fmt_(t('chart.zone_hint_tpl', 'Зона внимания, score {score}'), {score: z.score});
-    band.addEventListener('click', ev => {
+    const rawTop = Math.min(yLo, yHi), rawH = Math.max(2, Math.abs(yHi - yLo));
+    // Свечение шире самого скопления факторов -- иначе градиент обрывается
+    // ровно там же, где раньше была жёсткая граница полосы, и выглядит так,
+    // будто у зоны всё равно есть край (см. комментарий у CSS выше).
+    const pad = Math.max(14, rawH * 0.6);
+    const top = rawTop - pad, height = rawH + pad * 2;
+    const zoneEl = document.createElement('div');
+    zoneEl.className = 'confluence-zone ' + (z.score > 3.5 ? 'strong' : 'mid');
+    zoneEl.style.top = top + 'px';
+    zoneEl.style.height = height + 'px';
+    zoneEl.title = fmt_(t('chart.zone_hint_tpl', 'Скопление уровней, сила {score}'), {score: z.score.toFixed(1)});
+    zoneEl.addEventListener('click', ev => {
       ev.stopPropagation();
       openZoneCard(z, ev.clientX, ev.clientY);
     });
-    layer.appendChild(band);
+    (z.factors || []).forEach(f => {
+      const fy = candleSeries.priceToCoordinate(f.price);
+      if (fy == null) return;
+      const tick = document.createElement('div');
+      tick.className = 'confluence-tick';
+      tick.style.top = (fy - top) + 'px';
+      zoneEl.appendChild(tick);
+    });
+    layer.appendChild(zoneEl);
   });
 }
 
@@ -1079,7 +1172,8 @@ function redrawConfluenceLayer() {
 // DST-правила продублированы из core/sessions.py намеренно (см. комментарий
 // там) — нужно уметь считать границы для ЛЮБОГО видимого дня графика при
 // скролле в историю, не только для «сегодня», которое отдаёт API.
-let _curSessionProfile = []; // 24 значения avg_range из hourly_vol_profile
+let _curSessionProfile = []; // [{hour_utc, share, n}] из edu_stats/hourly_profile.json
+let _curHourlyMeta = null; // {coverage, warnings} того же символа, для карточки
 
 function nthSundayUTC(year, month, n) {
   const d0 = new Date(Date.UTC(year, month - 1, 1));
@@ -1125,7 +1219,7 @@ function redrawSessionLayer() {
   const layer = document.getElementById('sessionLayer');
   if (!layer) return;
   layer.innerHTML = '';
-  if (!TOGGLES.sess || !chart || !(curTF === 'M30' || curTF === 'H1')) return;
+  if (!TOGGLES.sess || !chart || !(curTF === 'M5' || curTF === 'M15' || curTF === 'M30' || curTF === 'H1')) return;
   const width = document.getElementById('chartContainer').clientWidth;
   const vr = chart.timeScale().getVisibleRange();
   if (!vr) return;
@@ -1152,62 +1246,111 @@ function redrawSessionLayer() {
   }
 }
 
-function renderHeatStrip() {
-  const wrap = document.getElementById('heatStripWrap');
-  const strip = document.getElementById('heatStrip');
-  if (!wrap || !strip) return;
-  const show = TOGGLES.sess && (curTF === 'M30' || curTF === 'H1') && _curSessionProfile.length > 0;
-  wrap.style.display = show ? 'block' : 'none';
-  strip.innerHTML = '';
-  if (!show) return;
+// SPEC_chart_fixes_and_staged_signup.md §2: раньше это была отдельная полоса
+// из 24 одинаковых сегментов ПОД графиком, никак не привязанная к оси
+// времени (совпадение с реальными часами на графике было случайным при любом
+// масштабе) и кодировалась только прозрачностью на 6px высоты. Теперь —
+// слой ВНУТРИ #chartContainer, тот же принцип проекции на ось, что и у
+// сессионных полос (tsToXClamp, повтор на каждый видимый день), столбики
+// высотой по доле от пикового часа, честная медиана с размером выборки
+// вместо среднего (edu_stats/hourly_profile.json, см. serve.py).
+function redrawHourlyActivityLayer() {
+  const layer = document.getElementById('hourlyActivityLayer');
+  if (!layer) return;
+  layer.innerHTML = '';
+  const show = TOGGLES.sess && (curTF === 'M5' || curTF === 'M15' || curTF === 'M30' || curTF === 'H1') && _curSessionProfile.length > 0;
+  if (!show || !chart) return;
+  const width = document.getElementById('chartContainer').clientWidth;
+  const vr = chart.timeScale().getVisibleRange();
+  if (!vr) return;
+  const fromTs = barTimeToUnix(vr.from), toTs = barTimeToUnix(vr.to);
+
   const byHour = {};
-  _curSessionProfile.forEach(r => { byHour[r.hour_utc] = r.avg_range; });
-  const maxRange = Math.max(...Object.values(byHour), 1e-9);
-  for (let h = 0; h < 24; h++) {
-    const v = byHour[h];
-    const seg = document.createElement('div');
-    seg.className = 'hs-seg';
-    seg.style.opacity = v != null ? Math.max(0.08, v / maxRange) : 0.03;
-    seg.addEventListener('click', ev => openHeatStripCard(h, byHour, maxRange, ev.clientX, ev.clientY));
-    strip.appendChild(seg);
+  _curSessionProfile.forEach(r => { byHour[r.hour_utc] = r; });
+  const shares = _curSessionProfile.map(r => r.share || 0);
+  const maxShare = Math.max(...shares, 1e-9);
+  let peakHour = null;
+  _curSessionProfile.forEach(r => { if (peakHour == null || r.share > byHour[peakHour].share) peakHour = r.hour_utc; });
+
+  const title = document.createElement('div');
+  title.className = 'hs-title';
+  title.textContent = t('chart.hourly_activity_label', 'Активность по часам');
+  layer.appendChild(title);
+
+  const BAR_MAX_H = 18;
+  const dayStart0 = Math.floor(fromTs / 86400) * 86400 - 86400;
+  for (let dayStart = dayStart0; dayStart <= toTs + 86400; dayStart += 86400) {
+    for (let h = 0; h < 24; h++) {
+      const r = byHour[h];
+      if (!r) continue;
+      const x1 = tsToXClamp(dayStart + h * 3600, width);
+      const x2 = tsToXClamp(dayStart + (h + 1) * 3600, width);
+      if (x1 == null || x2 == null || x2 <= x1) continue;
+      const bar = document.createElement('div');
+      bar.className = 'hs-bar' + (h === peakHour ? ' hs-peak' : '');
+      bar.style.left = x1 + 'px';
+      bar.style.width = Math.max(1, x2 - x1 - 1) + 'px';
+      bar.style.height = Math.max(2, Math.round(BAR_MAX_H * (r.share / maxShare))) + 'px';
+      if (h === peakHour) {
+        const mark = document.createElement('span');
+        mark.className = 'hs-peak-label';
+        mark.textContent = t('chart.hourly_activity_peak_mark', 'пик');
+        bar.appendChild(mark);
+      }
+      bar.addEventListener('click', ev => { ev.stopPropagation(); openHeatStripCard(h, byHour, maxShare, ev.clientX, ev.clientY); });
+      layer.appendChild(bar);
+    }
   }
 }
 
-function openHeatStripCard(hour, byHour, maxRange, clickX, clickY) {
+function openHeatStripCard(hour, byHour, maxShare, clickX, clickY) {
   const card = document.getElementById('evtCard');
-  const v = byHour[hour];
+  const r = byHour[hour];
   let peakHour = null;
-  Object.keys(byHour).forEach(h => { if (peakHour == null || byHour[h] > byHour[peakHour]) peakHour = h; });
+  Object.keys(byHour).forEach(h => { if (peakHour == null || byHour[h].share > byHour[peakHour].share) peakHour = h; });
   const rangeTxt = `${String(hour).padStart(2, '0')}:00–${String((hour + 1) % 24).padStart(2, '0')}:00 UTC`;
-  const bodyTxt = v == null
+  const bodyTxt = !r
     ? t('chart.heat_no_data', 'Недостаточно данных за это время суток.')
     : (Number(peakHour) === hour
-        ? fmt_(t('chart.heat_peak_tpl', 'Исторически самый активный час {sym}'), {sym: PARAM})
-        : fmt_(t('chart.heat_pct_tpl', '{pct}% от самого активного часа'), {pct: Math.round(100 * v / maxRange)}));
+        ? fmt_(t('chart.heat_peak_tpl', 'Исторически самый активный час {sym}'), {sym: symName(PARAM)})
+        : fmt_(t('chart.heat_pct_tpl', '{pct}% от самого активного часа'), {pct: Math.round(100 * r.share / maxShare)}));
+  const cov = _curHourlyMeta && _curHourlyMeta.coverage;
+  const sampleTxt = r
+    ? fmt_(t('chart.heat_sample_tpl', 'n={n}{cov}'), {
+        n: r.n || 0,
+        cov: cov ? fmt_(t('chart.heat_coverage_tpl', ' · окно {first} — {last}'), {first: cov.first, last: cov.last}) : '',
+      })
+    : '';
+  const warnings = (_curHourlyMeta && _curHourlyMeta.warnings) || [];
+  const warnLabels = {
+    short_history: t('chart.heat_warn_short_history', 'история короче года — сезонность не проверить'),
+    few_periods: t('chart.heat_warn_few_periods', 'мало периодов наблюдения — устойчивость не проверить'),
+    under_one_year: t('chart.heat_warn_under_one_year', 'меньше года данных'),
+  };
+  const warnTxt = warnings.map(w => warnLabels[w] || w).join(' · ');
   card.innerHTML = `<button class="evt-close" id="evtCardClose">✕</button>
     <h4>${escapeHtml(rangeTxt)}</h4>
     <div>${escapeHtml(bodyTxt)}</div>
+    ${sampleTxt ? `<div class="evt-meta">${escapeHtml(sampleTxt)}</div>` : ''}
+    ${warnTxt ? `<div class="evt-meta" style="color:var(--down)">⚠ ${escapeHtml(warnTxt)}</div>` : ''}
     <div class="evt-reaction-disclaimer">${escapeHtml(t('chart.reaction_disclaimer', 'Историческая статистика, не прогноз и не рекомендация.'))}</div>
     <div style="margin-top:10px"><a class="hs-edu-link" href="/edu/b/5" target="_blank" rel="noopener">${escapeHtml(t('chart.heat_edu_link', 'Почему так? → Глава 5: Глобальные Часы'))}</a></div>`;
   document.getElementById('evtCardClose').addEventListener('click', closeEventCard);
   card.classList.add('on');
   document.getElementById('evtBackdrop').classList.add('on');
-  if (window.innerWidth > 760) {
-    const w = 300;
-    const left = Math.max(10, Math.min(clickX - w / 2, window.innerWidth - w - 10));
-    card.style.left = left + 'px';
-    card.style.top = Math.min(clickY + 14, window.innerHeight - 120) + 'px';
-  }
+  positionEventCard(clickX, clickY);
 }
 
 async function refreshSessions() {
   _curSessionProfile = [];
+  _curHourlyMeta = null;
   try {
     const r = await fetch(`/api/chart/sessions?symbol=${encodeURIComponent(PARAM)}`);
     const data = await r.json();
     if (data && Array.isArray(data.profile)) _curSessionProfile = data.profile;
+    if (data) _curHourlyMeta = {coverage: data.coverage, warnings: data.warnings};
   } catch (e) {}
-  renderHeatStrip();
+  redrawHourlyActivityLayer();
 }
 
 // ── Сентимент толпы vs цена — Layer 3, Фаза 3 (SBF_Charts_Layer3_Spec) ─────
@@ -1249,12 +1392,7 @@ function openSentimentExplainCard(clickX, clickY) {
   document.getElementById('evtCardClose').addEventListener('click', closeEventCard);
   card.classList.add('on');
   document.getElementById('evtBackdrop').classList.add('on');
-  if (window.innerWidth > 760) {
-    const w = 300;
-    const left = Math.max(10, Math.min(clickX - w / 2, window.innerWidth - w - 10));
-    card.style.left = left + 'px';
-    card.style.top = Math.min(clickY + 14, window.innerHeight - 120) + 'px';
-  }
+  positionEventCard(clickX, clickY);
 }
 
 function renderSentimentChart() {
@@ -1505,7 +1643,7 @@ function openTradeCard(tr, clickX, clickY) {
   const dirCls = tr.direction === 'long' ? 'up' : 'down';
   const rTxt = tr.r != null ? (tr.r >= 0 ? '+' : '') + (+tr.r).toFixed(2) + 'R' : '—';
   card.innerHTML = `<button class="evt-close" id="evtCardClose">✕</button>
-    <h4><span class="evt-actual ${dirCls}" style="font-size:14px">${escapeHtml(dirLabel)}</span> · ${escapeHtml(PARAM)}</h4>
+    <h4><span class="evt-actual ${dirCls}" style="font-size:14px">${escapeHtml(dirLabel)}</span> · ${escapeHtml(symName(PARAM))}</h4>
     <div class="evt-meta">${fmtTradeDate(tr.entry_ts)} → ${tr.exit_ts ? fmtTradeDate(tr.exit_ts) : t('chart.trade_open', 'открыта')}</div>
     <div class="evt-nums">
       <div>${t('chart.trade_entry', 'Вход')}<b>${fmtPrice(tr.entry_price)}</b></div>
@@ -1519,17 +1657,12 @@ function openTradeCard(tr, clickX, clickY) {
   document.getElementById('evtCardClose').addEventListener('click', closeEventCard);
   card.classList.add('on');
   document.getElementById('evtBackdrop').classList.add('on');
-  if (window.innerWidth > 760) {
-    const w = 300;
-    const left = Math.max(10, Math.min(clickX - w / 2, window.innerWidth - w - 10));
-    card.style.left = left + 'px';
-    card.style.top = Math.min(clickY + 14, window.innerHeight - 120) + 'px';
-  }
+  positionEventCard(clickX, clickY);
   window.sbfAuth.fetch(`/api/chart/trade-context?trade_id=${tr.id}`)
     .then(r => r.ok ? r.json() : null)
     .then(ctx => {
       const body = document.getElementById('tradeCtxBody');
-      if (body && ctx) body.innerHTML = renderTradeContextHtml(ctx);
+      if (body && ctx) { body.innerHTML = renderTradeContextHtml(ctx); positionEventCard(clickX, clickY); }
     })
     .catch(() => {});
 }
@@ -1591,12 +1724,7 @@ function openThermoPopoverShell(title, clickX, clickY, caption) {
   document.getElementById('evtCardClose').addEventListener('click', closeEventCard);
   card.classList.add('on');
   document.getElementById('evtBackdrop').classList.add('on');
-  if (window.innerWidth > 760) {
-    const w = 300;
-    const left = Math.max(10, Math.min(clickX - w / 2, window.innerWidth - w - 10));
-    card.style.left = left + 'px';
-    card.style.top = Math.min(clickY + 14, window.innerHeight - 120) + 'px';
-  }
+  positionEventCard(clickX, clickY);
 }
 
 function renderThermoHist(rows) {
@@ -1613,7 +1741,7 @@ function renderThermoHist(rows) {
 
 function openThermoHistCard(kind, clickX, clickY) {
   const title = kind === 'dvol'
-    ? fmt_(t('chart.thermo_dvol_hist_title_tpl', 'DVOL {sym}, 90 дней'), {sym: PARAM})
+    ? fmt_(t('chart.thermo_dvol_hist_title_tpl', 'DVOL {sym}, 90 дней'), {sym: symName(PARAM)})
     : t('chart.thermo_range_hist_title', 'Диапазон дня, 60 дней');
   const caption = kind === 'dvol'
     ? t('chart.thermo_dvol_hist_caption', 'Каждый столбик — подразумеваемая волатильность за один день. Выше — рынок закладывал более резкие движения. Золотой столбик справа — сегодня.')
@@ -1621,25 +1749,20 @@ function openThermoHistCard(kind, clickX, clickY) {
   openThermoPopoverShell(title, clickX, clickY, caption);
   fetch(`/api/chart/thermo-hist?symbol=${encodeURIComponent(PARAM)}&kind=${kind}`)
     .then(r => r.ok ? r.json() : [])
-    .then(renderThermoHist)
-    .catch(() => renderThermoHist([]));
+    .then(rows => { renderThermoHist(rows); positionEventCard(clickX, clickY); })
+    .catch(() => { renderThermoHist([]); positionEventCard(clickX, clickY); });
 }
 
 function openThermoNewsCard(clickX, clickY) {
   const card = document.getElementById('evtCard');
   card.innerHTML = `<button class="evt-close" id="evtCardClose">✕</button>
-    <h4>${escapeHtml(t('chart.thermo_news_hist_title', 'Новостной фон'))} · ${escapeHtml(PARAM)}</h4>
+    <h4>${escapeHtml(t('chart.thermo_news_hist_title', 'Новостной фон'))} · ${escapeHtml(symName(PARAM))}</h4>
     <div class="thermo-hist-caption">${escapeHtml(t('chart.thermo_news_hist_caption', 'Публикации по этому инструменту за последние дни — их количество и определяет счётчик «Новостной фон». Заголовки — с оригинальных источников, обычно на английском.'))}</div>
     <div id="thermoNewsBody"></div>`;
   document.getElementById('evtCardClose').addEventListener('click', closeEventCard);
   card.classList.add('on');
   document.getElementById('evtBackdrop').classList.add('on');
-  if (window.innerWidth > 760) {
-    const w = 300;
-    const left = Math.max(10, Math.min(clickX - w / 2, window.innerWidth - w - 10));
-    card.style.left = left + 'px';
-    card.style.top = Math.min(clickY + 14, window.innerHeight - 120) + 'px';
-  }
+  positionEventCard(clickX, clickY);
   const body = document.getElementById('thermoNewsBody');
   if (!window.sbfAuth || !window.sbfAuth.isLoggedIn()) {
     body.innerHTML = `<div class="pulse-feed-lock">🔒 ${escapeHtml(t('chart.pattern_stats_locked', 'Доступно после регистрации'))}</div>`;
@@ -1657,7 +1780,7 @@ function openThermoNewsCard(clickX, clickY) {
   window.sbfAuth.fetch(newsUrl)
     .then(r => r.json())
     .then(items => {
-      if (!Array.isArray(items) || !items.length) { body.innerHTML = `<div class="pulse-feed-lock">—</div>`; return; }
+      if (!Array.isArray(items) || !items.length) { body.innerHTML = `<div class="pulse-feed-lock">—</div>`; positionEventCard(clickX, clickY); return; }
       // /api/pulse/feed сортирует по убыванию ts, /api/chart/news — по возрастанию
       // (окно всплеска, там порядок не важен) — сортируем сами, чтобы не зависеть
       // от конвенции конкретного источника.
@@ -1666,8 +1789,9 @@ function openThermoNewsCard(clickX, clickY) {
         <div>${it.url ? `<a href="${escapeHtml(it.url)}" target="_blank" rel="noopener">${escapeHtml(it.title)}</a>` : escapeHtml(it.title)}</div>
         <div class="evt-meta">${escapeHtml(it.source || '')} · ${fmtDaysAgo(it.ts)}</div>
       </div>`).join('');
+      positionEventCard(clickX, clickY);
     })
-    .catch(() => { body.innerHTML = `<div class="pulse-feed-lock">—</div>`; });
+    .catch(() => { body.innerHTML = `<div class="pulse-feed-lock">—</div>`; positionEventCard(clickX, clickY); });
 }
 
 function scrollToThermoZone() {
@@ -1680,7 +1804,7 @@ function scrollToThermoZone() {
   try { chart.timeScale().scrollToRealTime(); } catch (e) {}
   redrawConfluenceLayer();
   const layer = document.getElementById('confluenceLayer');
-  const bands = layer ? layer.querySelectorAll('.confluence-band') : [];
+  const bands = layer ? layer.querySelectorAll('.confluence-zone') : [];
   bands.forEach(b => {
     b.classList.add('flash-highlight');
     setTimeout(() => b.classList.remove('flash-highlight'), 1200);
@@ -1756,16 +1880,17 @@ setInterval(() => { if (_curThermo) renderThermo(); }, 30000);
 // ── Главный рендер «Наш» ───────────────────────────────────────────────────
 async function drawOurs(tf) {
   curTF = tf;
-  // По умолчанию ON на M30/H1, OFF на H4+ (см. спеку Фазы 3) — пересчитывается
-  // заново при каждой смене TF, ручной выбор пользователя между TF не хранится.
-  TOGGLES.news = (tf === 'M30' || tf === 'H1');
+  // По умолчанию ON на M5-H1, OFF на H4+ (см. спеку Фазы 3; M5/M15 добавлены
+  // SPEC_chart_fixes_and_staged_signup.md §3) — пересчитывается заново при
+  // каждой смене TF, ручной выбор пользователя между TF не хранится.
+  TOGGLES.news = (tf === 'M5' || tf === 'M15' || tf === 'M30' || tf === 'H1');
   document.querySelector('#tog [data-t="news"]').classList.toggle('on', TOGGLES.news);
-  // Зоны внимания: ON на H1-D1, OFF на M30 (шум) и W1 (масштаб) — см. Фаза 2 спеки.
-  TOGGLES.zone = !(tf === 'M30' || tf === 'W1');
+  // Зоны внимания: ON на H1-D1, OFF на M5/M15/M30 (шум) и W1 (масштаб) — см. Фаза 2 спеки.
+  TOGGLES.zone = !(tf === 'M5' || tf === 'M15' || tf === 'M30' || tf === 'W1');
   document.querySelector('#tog [data-t="zone"]').classList.toggle('on', TOGGLES.zone);
-  // Сессионная карта: ON только на M30/H1 (см. Layer3 Фаза2 — на H4+/D1/W1 сутки
+  // Сессионная карта: ON на M5-H1 (см. Layer3 Фаза2 — на H4+/D1/W1 сутки
   // сжаты слишком сильно, полосы сессий были бы неразличимы).
-  TOGGLES.sess = (tf === 'M30' || tf === 'H1');
+  TOGGLES.sess = (tf === 'M5' || tf === 'M15' || tf === 'M30' || tf === 'H1');
   document.querySelector('#tog [data-t="sess"]').classList.toggle('on', TOGGLES.sess);
   _curData = await SBFGrafik.loadBars(PARAM, tf);
   // Дождаться словаря i18n (если он есть) ДО построения текста — на первом
@@ -1776,7 +1901,7 @@ async function drawOurs(tf) {
   const m = _curData.meta;
 
   // Шапка
-  document.getElementById('sym').textContent = m.label + ' · ' + m.interval;
+  document.getElementById('sym').textContent = symName(PARAM, 'name+ticker') + ' · ' + m.interval;
   const pxEl = document.getElementById('px');
   pxEl.textContent = m.last != null ? fmtPrice(m.last) : '—';
 
@@ -1811,7 +1936,7 @@ async function drawOurs(tf) {
     layout: {background:{type:'solid',color:'#FFFFFF'}, textColor:'#2B2B33', fontFamily:'JetBrains Mono'},
     grid: {vertLines:{color:'#F0E9DA'}, horzLines:{color:'#F0E9DA'}},
     rightPriceScale: {borderColor:'#E7DFCF'},
-    timeScale: {borderColor:'#E7DFCF', timeVisible: tf==='M30'||tf==='H1'||tf==='H4', rightOffset:6},
+    timeScale: {borderColor:'#E7DFCF', timeVisible: tf!=='D1'&&tf!=='W1', rightOffset:6},
     crosshair: {mode: LightweightCharts.CrosshairMode.Normal,
       vertLine:{color:'#C9A227', labelBackgroundColor:'#C9A227'},
       horzLine:{color:'#C9A227', labelBackgroundColor:'#C9A227'}},
@@ -1948,7 +2073,7 @@ document.getElementById('tog').addEventListener('click', e => {
   redrawNewsLayer();
   redrawConfluenceLayer();
   redrawSessionLayer();
-  renderHeatStrip();
+  redrawHourlyActivityLayer();
 });
 
 function _reportHeight() {

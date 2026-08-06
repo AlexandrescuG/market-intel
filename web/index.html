@@ -67,6 +67,7 @@ if (new URLSearchParams(location.search).get("embed") === "1") {
 <link rel="stylesheet" href="/assets/design.css">
 <link rel="stylesheet" href="/assets/tokens.css?v=1">
 <script src="/assets/i18n.js?v=2" defer></script>
+<script src="/assets/sbf-symbols.js?v=2"></script>
 <script src="/edu/assets/calendar-terms.js?v=1" defer></script>
 <script src="/assets/sbf-header.js?v=16" defer></script>
 <script src="/assets/sbf-auth.js?v=1" defer></script>
@@ -423,6 +424,7 @@ a:hover{text-decoration:underline;color:var(--glow)}
     <a href="{{ ('/' + lang) if lang != 'ru' else '' }}/" class="g-nav-item active">{{ t('nav.today', lang) }}</a>
     <a href="{{ ('/' + lang) if lang != 'ru' else '' }}/edu/" class="g-nav-item">{{ t('nav.edu', lang) }}</a>
     <a href="{{ ('/' + lang) if lang != 'ru' else '' }}/calendar" class="g-nav-item">{{ t('nav.calendar', lang) }}</a>
+    <a href="{{ ('/' + lang) if lang != 'ru' else '' }}/brokers" class="g-nav-item">{{ t('nav.brokers', lang) }}</a>
   </nav>
   <div class="right sbf-right">
     <div class="win"><span class="dot" id="liveDot"></span><span id="liveTxt">—</span></div>
@@ -506,7 +508,7 @@ a:hover{text-decoration:underline;color:var(--glow)}
       <!-- Живой график актива -->
       <section class="panel" id="techChartPanel">
         <div class="panel-h">
-          <h2 id="techSymLabel">График · GOLD · D1</h2>
+          <h2 id="techSymLabel">{{ symbol_name('GOLD', lang, 'name+ticker') }} · D1</h2>
           <span class="tag verify">live</span>
         </div>
         <div class="ctrl-row">
@@ -630,13 +632,6 @@ function clockWindow(){
   document.getElementById('winTxt').textContent=inWin?{{ t('clock.morning_window', lang) | tojson }}:{{ t('clock.always_on', lang) | tojson }};
 }
 
-const NAMES = {
-  'GC=F':'GOLD','SI=F':'SILVER','CL=F':{{ t('ticker.wti', lang) | tojson }},'NG=F':{{ t('ticker.gas', lang) | tojson }},
-  'BTC-USD':'BTCUSD','ETH-USD':'ETHUSD','SOL-USD':'SOLUSD',
-  'EURUSD=X':'EURUSD','GBPUSD=X':'GBPUSD',
-  '^GSPC':'S&P 500','^IXIC':'Nasdaq','^DJI':'Dow Jones','^VIX':'VIX','DX-Y.NYB':'DXY'
-};
-
 // Bybit WebSocket: крипто → yfinance символ
 const BYBIT_MAP = {'BTCUSDT':'BTC-USD','ETHUSDT':'ETH-USD','SOLUSDT':'SOL-USD'};
 
@@ -644,19 +639,16 @@ const BYBIT_MAP = {'BTCUSDT':'BTC-USD','ETHUSDT':'ETH-USD','SOLUSDT':'SOL-USD'};
 // Зеркалирует ту же логику sbf-header.js (там — для не-главных страниц; здесь
 // — отдельная копия ленты специально для index.html, см. комментарий вверху
 // sbf-header.js "На главной странице index.html сам управляет данными").
-const TICKER_TO_CHART_SYMBOL = {
-  'GC=F':'GOLD', 'SI=F':'SILVER', 'CL=F':'WTI', 'NG=F':'NG',
-  'BTC-USD':'BTC', 'ETH-USD':'ETH', 'SOL-USD':'SOL',
-  'EURUSD=X':'EURUSD', 'GBPUSD=X':'GBPUSD',
-  '^GSPC':'SPX', '^IXIC':'NASDAQ', '^DJI':'DJI', '^VIX':'VIX', 'DX-Y.NYB':'DXY',
-};
+// Раньше здесь жила своя копия ticker→chart-symbol словаря (TICKER_TO_CHART_
+// SYMBOL) — заменена на общий реестр (SPEC_symbol_names.md §3): canonOf()
+// решает ту же задачу (yfinance-алиас → канонический символ графика).
 function reorderByWatchlist(items) {
   const wl = (window.SBF && window.SBF.user && window.SBF.user.watchlist) || [];
   if (!wl.length) return items;
   const rank = {};
   wl.forEach((sym, i) => { rank[sym] = i; });
   return items.map((it, idx) => {
-    const chartSym = TICKER_TO_CHART_SYMBOL[it.ticker];
+    const chartSym = window.SBFSymbols ? window.SBFSymbols.canonOf(it.ticker) : null;
     const r = (chartSym && (chartSym in rank)) ? rank[chartSym] : 1000 + idx;
     return {it, r};
   }).sort((a, b) => a.r - b.r).map(x => x.it);
@@ -677,7 +669,7 @@ function buildStrip(items) {
     const chg = i.change_pct;
     const cls = chg > 0 ? 'up' : chg < 0 ? 'down' : '';
     const sign = chg > 0 ? '+' : '';
-    const name = NAMES[i.ticker] || i.name || i.ticker;
+    const name = window.SBFSymbols ? window.SBFSymbols.symbolName(i.ticker, {mode:'name'}) : (i.name || i.ticker);
     _live[i.ticker] = i.price;
     return `<div class="tick"><div class="k">${name}</div>
       <div class="v" data-sym="${safeId(i.ticker)}">${fmt(i.price)}</div>
@@ -844,7 +836,9 @@ function renderBriefCalendar(b){
   if(!b || !b.calendar || !b.calendar.length){ el.style.display='none'; return; }
   const rows = b.calendar.map(function(e){
     const time = briefLocalTime(e.ts_utc);
-    const syms = (e.symbols||[]).slice(0,4).join(' · ');
+    const syms = (e.symbols||[]).slice(0,4).map(function(s){
+      return window.SBFSymbols ? window.SBFSymbols.symbolName(s, {mode:'name'}) : s;
+    }).join(' · ');
     const name = (typeof translatedEventName === 'function') ? translatedEventName(e) : (e.title||'');
     return '<tr><td class="mono">'+escapeHtmlIdx(time)+'</td><td>'+escapeHtmlIdx(name)+'</td>'
       +'<td>'+escapeHtmlIdx(syms)+'</td><td class="mono">'+escapeHtmlIdx(briefReactionText(e.past_reaction))+'</td></tr>';
@@ -896,7 +890,8 @@ function renderBriefMovers(b){
       ? fmt_(I18N_BRIEF.moversOnEvent,{title:m.event.title||'', time:briefLocalTime(m.event.ts_utc)})
       : I18N_BRIEF.moversNoEvent;
     const sign = m.chg_pct>0 ? '+' : '';
-    return '<div class="brief-mover-row '+dir+'"><b>'+escapeHtmlIdx(m.symbol)+'</b> '
+    const symName = window.SBFSymbols ? window.SBFSymbols.symbolName(m.symbol, {mode:'name'}) : m.symbol;
+    return '<div class="brief-mover-row '+dir+'"><b>'+escapeHtmlIdx(symName)+'</b> '
       +sign+m.chg_pct+'% '+ratio+'<span class="brief-mover-event">'+escapeHtmlIdx(evt)+'</span></div>';
   }
   var html = '<h3>↕ '+I18N_BRIEF.moversTitle+'</h3><div class="brief-movers-cols">';
@@ -916,7 +911,8 @@ function renderBriefPatterns(b){
     const stat = (p.direction==='neutral')
       ? I18N_BRIEF.patternsNeutral
       : fmt_(I18N_BRIEF.patternsAgreeTpl, {pct: Math.round((p.agree_share_5||0)*100), n: p.n});
-    return '<div class="brief-pattern-row"><span class="mono">'+escapeHtmlIdx(p.symbol)+' '+escapeHtmlIdx(p.tf)+'</span>'
+    const symName = window.SBFSymbols ? window.SBFSymbols.symbolName(p.symbol, {mode:'name'}) : p.symbol;
+    return '<div class="brief-pattern-row"><span class="mono">'+escapeHtmlIdx(symName)+' '+escapeHtmlIdx(p.tf)+'</span>'
       +escapeHtmlIdx(p.display_name_ru)+' <span class="agree">— '+escapeHtmlIdx(stat)+'</span></div>';
   }).join('');
   el.innerHTML = '<h3>📐 '+I18N_BRIEF.patternsTitle+'</h3>'+rows;
@@ -1061,13 +1057,14 @@ async function renderPersonalBlock() {
     const endOfDay = now - (now % 86400) + 86400;
     const parts = results.map((data, i) => {
       const sym = symbols[i];
+      const symName = window.SBFSymbols ? window.SBFSymbols.symbolName(sym, {mode:'name'}) : sym;
       const href = `/chart.html?s=${encodeURIComponent(sym)}&focus=today`;
       let txt;
       if (data && data.next_event_ts && data.next_event_ts <= endOfDay && data.next_event) {
         const time = new Date(data.next_event_ts * 1000).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
-        txt = `<b>${sym}</b> — ${escapeHtmlIdx(data.next_event.title || data.next_event.event_type)} ${time}`;
+        txt = `<b>${escapeHtmlIdx(symName)}</b> — ${escapeHtmlIdx(data.next_event.title || data.next_event.event_type)} ${time}`;
       } else {
-        txt = `<b>${sym}</b> — ${I18N_REPORT.calmToday || 'спокойно'}`;
+        txt = `<b>${escapeHtmlIdx(symName)}</b> — ${I18N_REPORT.calmToday || 'спокойно'}`;
       }
       return `<a href="${href}">${txt}</a>`;
     });
@@ -1114,7 +1111,8 @@ async function renderFocusCard() {
     // рабочую механику карточки. Движение не часть буквальной спеки §9 --
     // last/change_pct добавлены в /api/focus поверх спеки, т.к. данные уже
     // были в instrument_live, не хватало только отдать их наружу.
-    const tick = `<span class="focus-item__tick">${escapeHtmlIdx(data.symbol)}</span>`;
+    const focusSymName = window.SBFSymbols ? window.SBFSymbols.symbolName(data.symbol, {mode:'name'}) : data.symbol;
+    const tick = `<span class="focus-item__tick">${escapeHtmlIdx(focusSymName)}</span>`;
     let move = '';
     if (data.change_pct != null) {
       const sign = data.change_pct > 0 ? '+' : '';
@@ -1137,7 +1135,7 @@ async function renderFocusCard() {
       const mult = data.anomaly != null
         ? (_PAGE_LANG === 'en' ? data.anomaly.toFixed(1) : data.anomaly.toFixed(1).replace('.', ','))
         : '';
-      bodyText = escapeHtmlIdx(fmt_(I18N_REPORT.focusHeadlineTpl, {name: data.name || data.symbol, mult: mult}));
+      bodyText = escapeHtmlIdx(fmt_(I18N_REPORT.focusHeadlineTpl, {name: focusSymName, mult: mult}));
     }
 
     // P2.5: на 390px это была сплошная простыня серифного текста на
@@ -1280,9 +1278,10 @@ function renderTech(t){
     const scenSell=bear
       ? fmt_(I18N_CARD.scenShortTarget,{pp,targets:sellTargets})
       : fmt_(I18N_CARD.scenShortSupport,{pp,targets:sellTargets});
+    const techCardName = window.SBFSymbols ? window.SBFSymbols.symbolName(c.ticker, {mode:'name'}) : (c.name||c.ticker);
     return `<div class="tcard">
       <div class="hd">
-        <span class="sym">${c.name||c.ticker}</span>
+        <span class="sym">${techCardName}</span>
         <span class="bias ${bc}">${bull?I18N_CARD.biasBuy:bear?I18N_CARD.biasSell:I18N_CARD.biasNeutral}</span>
       </div>
       <div class="lv" style="margin-bottom:8px"><span>${I18N_CARD.lastPrice}</span>
@@ -1306,7 +1305,7 @@ function renderTech(t){
         <div style="color:var(--muted)">${scenSell}</div>
       </div>
       ${pats?`<div class="pat">◆ ${pats}</div>`:''}
-      <div class="mini-chart" data-sym="${(CHART_LABEL_MAP[c.ticker]||c.ticker.replace(/[^a-zA-Z0-9]/g,''))}"></div>
+      <div class="mini-chart" data-sym="${chartLabelOf(c.ticker)}"></div>
       <div class="obs">${I18N_CARD.observation}</div>
       <button class="btn-secondary" style="margin-top:10px;width:100%;font-size:11px;letter-spacing:.4px" onclick="openChart('${c.ticker}')">${I18N_CARD.openFullChart}</button>
     </div>`;
@@ -1314,16 +1313,11 @@ function renderTech(t){
   loadMiniCharts();
 }
 
-const CHART_LABEL_MAP = {
-  'GC=F':'GOLD','SI=F':'SILVER',
-  'BTC-USD':'BTC','ETH-USD':'ETH','SOL-USD':'SOL',
-  'EURUSD=X':'EURUSD','GBPUSD=X':'GBPUSD',
-  '^GSPC':'SPX','^IXIC':'NASDAQ','^DJI':'DJI',
-  'CL=F':'WTI','NG=F':'NG','^VIX':'VIX','DX-Y.NYB':'DXY',
-  'USDRUB':'USDRUB','USDJPY':'USDJPY','USDKZT':'USDKZT',
-};
-// backward compat alias
-const CHART_LABEL = CHART_LABEL_MAP;
+// Yahoo-тикер → канонический символ графика — раньше своя копия словаря
+// (CHART_LABEL_MAP/CHART_LABEL), теперь общий реестр (SPEC_symbol_names.md §3).
+function chartLabelOf(ticker) {
+  return (window.SBFSymbols && window.SBFSymbols.canonOf(ticker)) || ticker.replace(/[^a-zA-Z0-9]/g, '');
+}
 
 async function loadMiniCharts() {
   const els = document.querySelectorAll('.mini-chart[data-sym]');
@@ -1342,7 +1336,7 @@ async function loadMiniCharts() {
 }
 
 function openChart(ticker){
-  const label = CHART_LABEL[ticker] || ticker.replace(/[^a-zA-Z0-9]/g,'');
+  const label = chartLabelOf(ticker);
   document.getElementById('chartFrame').src = `./chart.html?s=${label}`;
   document.getElementById('chartOverlay').classList.add('open');
 }
@@ -1452,8 +1446,9 @@ function renderPulseList(data){
   if(!active.length){ listEl.innerHTML=''; return; }
   const [lo,hi] = pulseGlobalRange(active);
   let html = active.map(it=>{
+    const symName = window.SBFSymbols ? window.SBFSymbols.symbolName(it.symbol, {mode:'name'}) : it.symbol;
     return `<div class="pulse-row" data-symbol="${escapeHtmlIdx(it.symbol)}">
-      <span class="pulse-sym">${escapeHtmlIdx(it.symbol)}</span>
+      <span class="pulse-sym">${escapeHtmlIdx(symName)}</span>
       ${sparklineSvg(it.sparkline, lo, hi)}
       <span class="pulse-score">${fmt_(I18N_PULSE.scoreTpl,{score:it.score.toFixed(1)})}</span>
       <span class="pulse-chevron" aria-hidden="true">›</span>
@@ -1488,14 +1483,15 @@ document.getElementById('pulseFeedBackdrop').addEventListener('click', closePuls
 
 function openPulseFeed(symbol){
   const card=document.getElementById('pulseFeedCard'), backdrop=document.getElementById('pulseFeedBackdrop');
+  const symName = window.SBFSymbols ? window.SBFSymbols.symbolName(symbol, {mode:'name'}) : symbol;
   if(!window.sbfAuth || !window.sbfAuth.isLoggedIn()){
-    card.innerHTML=`<button class="pf-close" id="pfClose">✕</button><h4>${escapeHtmlIdx(symbol)}</h4>
+    card.innerHTML=`<button class="pf-close" id="pfClose">✕</button><h4>${escapeHtmlIdx(symName)}</h4>
       <div class="pulse-feed-lock">🔒 ${escapeHtmlIdx(I18N_PULSE.locked)}</div>`;
     document.getElementById('pfClose').addEventListener('click', closePulseFeed);
     card.classList.add('on'); backdrop.classList.add('on');
     return;
   }
-  card.innerHTML=`<button class="pf-close" id="pfClose">✕</button><h4>${escapeHtmlIdx(symbol)}</h4><div id="pfBody">…</div>`;
+  card.innerHTML=`<button class="pf-close" id="pfClose">✕</button><h4>${escapeHtmlIdx(symName)}</h4><div id="pfBody">…</div>`;
   document.getElementById('pfClose').addEventListener('click', closePulseFeed);
   card.classList.add('on'); backdrop.classList.add('on');
   window.sbfAuth.fetch('/api/pulse/feed?symbol='+encodeURIComponent(symbol))
@@ -1626,7 +1622,9 @@ _tickerRAF = requestAnimationFrame(_tickerFrame);
 
 // ── Tech View: живой LW-график + библиотека паттернов ───────────────────────
 (function() {
-  var TECH_SYMS = ['GOLD','SILVER','BTC','ETH','SOL','SPX','NASDAQ','DJI','VIX','WTI','NG','EURUSD','GBPUSD','DXY','USDRUB','USDJPY','USDKZT'];
+  // VIX убран из списка (SPEC_symbol_names.md §0/§6): ohlc_VIX_D1.json не
+  // существует (нет сборщика данных под этот инструмент) — пункт вёл в никуда.
+  var TECH_SYMS = ['GOLD','SILVER','BTC','ETH','SOL','SPX','NASDAQ','DJI','WTI','NG','EURUSD','GBPUSD','DXY','USDRUB','USDJPY','USDKZT'];
   var YF_MAP = {GOLD:'GC=F',SILVER:'SI=F',BTC:'BTC-USD',ETH:'ETH-USD',SOL:'SOL-USD',
     SPX:'^GSPC',NASDAQ:'^IXIC',DJI:'^DJI',VIX:'^VIX',WTI:'CL=F',
     NG:'NG=F',EURUSD:'EURUSD=X',GBPUSD:'GBPUSD=X',DXY:'DX-Y.NYB'};
@@ -1641,7 +1639,7 @@ _tickerRAF = requestAnimationFrame(_tickerFrame);
     if (!wrap || document.getElementById('techSymSel')) return;
     var sel = document.createElement('select'); sel.id = 'techSymSel';
     sel.style.cssText = 'position:absolute;top:8px;left:8px;z-index:21;font-family:"JetBrains Mono",monospace;font-size:12px;font-weight:700;border:1px solid rgba(231,223,207,.85);border-radius:5px;background:rgba(251,246,239,.92);color:#2B2B33;padding:4px 8px;cursor:pointer;min-width:72px';
-    TECH_SYMS.forEach(function(s){var o=document.createElement('option');o.value=s;o.textContent=s;sel.appendChild(o);});
+    TECH_SYMS.forEach(function(s){var o=document.createElement('option');o.value=s;o.textContent=window.SBFSymbols?window.SBFSymbols.symbolName(s,{mode:'name+ticker'}):s;sel.appendChild(o);});
     sel.value = techSym;
     sel.addEventListener('change', function(){techSym=sel.value;techRender();});
     wrap.appendChild(sel);
@@ -1654,7 +1652,7 @@ _tickerRAF = requestAnimationFrame(_tickerFrame);
     catch(e) { el.innerHTML='<div style="padding:20px;font-family:JetBrains Mono;color:var(--muted)">'+fmt_({{ t('home.no_data_for', lang) | tojson }},{sym:techSym+' '+tf})+'</div>'; return; }
     var m = techData.meta;
     var lbl = document.getElementById('techSymLabel');
-    if (lbl) lbl.textContent = (m.label||techSym) + ' · ' + (m.interval||tf);
+    if (lbl) lbl.textContent = (window.SBFSymbols ? window.SBFSymbols.symbolName(techSym,{mode:'name+ticker'}) : techSym) + ' · ' + (m.interval||tf);
 
     techChart = LightweightCharts.createChart(el, {
       localization:{locale:'en'},
@@ -1738,7 +1736,7 @@ _tickerRAF = requestAnimationFrame(_tickerFrame);
     (techData.levels||[]).forEach(function(L){ lvlMap[L.name] = (+L.price).toLocaleString('en',{maximumFractionDigits:3}); });
 
     // Дополнительные данные из техкарточки (ожидаемый ход, паттерны)
-    var card = _techCards.find(function(c){ return (CHART_LABEL_MAP[c.ticker]||c.ticker)===techSym; });
+    var card = _techCards.find(function(c){ return chartLabelOf(c.ticker)===techSym; });
     var pp = lvlMap['PP'] || (card&&card.pivots&&card.pivots.PP?(+card.pivots.PP).toLocaleString('en'):'—');
     var r1 = lvlMap['R1'] || (card&&card.resistance&&card.resistance[0]?(+card.resistance[0]).toLocaleString('en'):'—');
     var r2 = lvlMap['R2'] || (card&&card.resistance&&card.resistance[1]?(+card.resistance[1]).toLocaleString('en'):'—');
@@ -1747,7 +1745,7 @@ _tickerRAF = requestAnimationFrame(_tickerFrame);
     var last = m.last?(+m.last).toLocaleString('en',{maximumFractionDigits:3}):'—';
     var moveStr = card&&card.expected_move?card.expected_move[0]+'–'+card.expected_move[1]+' '+(card.expected_unit||''):'';
     var pats = card?(card.patterns||[]).join(', '):'';
-    var symLabel = m.label || techSym;
+    var symLabel = window.SBFSymbols ? window.SBFSymbols.symbolName(techSym, {mode:'name'}) : techSym;
 
     var focusBuyTargets = r1+(r2!=='—'?' '+I18N_TECH.and+' '+r2:'');
     var focusSellTargets = s1+(s2!=='—'?' '+I18N_TECH.and+' '+s2:'');
