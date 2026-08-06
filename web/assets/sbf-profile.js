@@ -1135,56 +1135,10 @@
     });
   }
 
-  // m.html: верхняя полоса (.app) и нижний навигатор (nav.nav#nav)
-  function injectIntoMobileApp() {
-    var appBar = document.querySelector('.app');
-    if (!appBar || appBar.querySelector('.sbf-av')) return;
-    var btn = document.createElement('button');
-    btn.className = 'sbf-av';
-    btn.setAttribute('data-i18n-aria', 'profile.profile_label');
-    btn.setAttribute('aria-label', t('profile.profile_label', 'Профиль'));
-    btn.style.cssText = 'width:32px;height:32px;margin-left:8px;flex-shrink:0;';
-    applyAvatar(btn, load(), 32);
-    btn.addEventListener('click', openPanel);
-    _avEls.push({ el: btn, size: 32 });
-    appBar.appendChild(btn);
-  }
-
-  function injectIntoMobileNav() {
-    var nav = document.getElementById('nav');
-    if (!nav || nav.querySelector('.sbf-bn-prof')) return;
-    var item = document.createElement('button');
-    item.className = 'sbf-bn-prof';
-    item.setAttribute('data-i18n-aria', 'profile.profile_label');
-    item.setAttribute('aria-label', t('profile.profile_label', 'Профиль'));
-    // стили m.html nav-кнопок
-    item.style.cssText = 'flex:1;border:none;background:none;padding:10px 0 9px;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--muted);font-family:Montserrat;font-size:10px;font-weight:600;cursor:pointer;';
-    item.innerHTML = '';
-    var ic = document.createElement('span');
-    ic.style.cssText = 'font-size:19px;line-height:1;';
-    ic.appendChild(makeNavAvatar(22));
-    item.appendChild(ic);
-    var lbl = document.createElement('span');
-    lbl.setAttribute('data-i18n', 'profile.profile_label');
-    lbl.textContent = t('profile.profile_label', 'Профиль');
-    item.appendChild(lbl);
-    item.addEventListener('click', function (e) {
-      e.stopPropagation(); // не передаём в m.js nav-обработчик
-      openPanel();
-    });
-    // Вставляем 3-м (перед Сигналами, то есть истинный центр из 5)
-    var btns = nav.querySelectorAll('button');
-    var insertBefore = btns.length >= 3 ? btns[2] : null;
-    if (insertBefore) nav.insertBefore(item, insertBefore);
-    else              nav.appendChild(item);
-  }
-
   // ── Инициализация ─────────────────────────────────────────────────────────────
   function inject() {
     injectIntoStandardHeader();
     injectIntoStandardBottomNav();
-    injectIntoMobileApp();
-    injectIntoMobileNav();
   }
 
   function init() {
@@ -1214,9 +1168,6 @@
       injectIntoStandardBottomNav();
       afterInject();
     }
-
-    injectIntoMobileApp();
-    injectIntoMobileNav();
   }
 
   if (document.readyState === 'loading') {

@@ -194,8 +194,7 @@ def get_setup(setup_id: int, user_id: str = "default") -> dict | None:
     if not row:
         return None
     d = _row_to_dict(row)
-    # Include render_params for full view
-    raw = conn if False else None  # render_params already in SELECT *
+    # render_params already in SELECT *
     d["render_params"] = json.loads(row["render_params"] or "[]")
     return d
 

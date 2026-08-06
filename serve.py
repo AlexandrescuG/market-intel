@@ -1226,7 +1226,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.send_response(301)
             self.send_header("Location", "/")
             self.end_headers()
-        elif path_clean in ("/glossary", "/glossary.html", "/m/glossary"):
+        elif path_clean in ("/glossary", "/glossary.html"):
             self._render_site_page("glossary.html", req_lang)
         # ── Gated LP API endpoints ──
         elif path_clean == "/api/lp/signals":
