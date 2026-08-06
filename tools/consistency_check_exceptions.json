@@ -9,10 +9,23 @@
 
   "unreferenced_data_files_ok": [
     "_D1.json",
-    "consistency_check_exceptions.json"
+    "consistency_check_exceptions.json",
+    "charts_meta.json",
+    "verification.json",
+    "anomalies.json",
+    "divergence.json",
+    "ichimoku_trend.json",
+    "macd_signal.json",
+    "fxpro.json",
+    "instaforex.json",
+    "naga.json",
+    "xm.json"
   ],
+  "_note_guides": "web/data/guides/{fxpro,instaforex,naga,xm}.json читаются guide.js через fetch('/data/guides/' + brokerIdFromPath() + '.json') — путь целиком динамический (id из URL), статически не резолвится регэкспом.",
 
   "unreferenced_data_files_glob_ok": [],
+
+  "_note_wp7_candidates": "charts_meta.json/verification.json/anomalies.json/divergence.json/ichimoku_trend.json/macd_signal.json добавлены в exceptions не потому что они используются, а потому что WP9 подтвердил: их НЕ читает никто (не 'пустые данные, которые врут пользователю' — для них попросту нет UI). Это находки для WP7 (мёртвый код/данные), не WP9. Не удалять здесь молча — см. АУДИТ §3.8 и отчёт сессии 2026-08-06.",
 
   "hardcoded_symbols_ok": [],
 

@@ -244,10 +244,13 @@ def check_data_files(exceptions: list[str], glob_exceptions: list[str]) -> dict:
     anywhere_on_disk = {p.name for p in ROOT.rglob("*.json") if not any(part in SKIP_DIR_NAMES for part in p.parts)}
 
     referenced = set()
-    # Пути здесь чаще собираются pathlib-сегментами (WEB_DIR / "data" / "buzz.json"),
-    # а не строкой "data/buzz.json" целиком — поэтому ищем голое имя файла в кавычках
-    # где угодно, без требования префикса пути перед ним.
-    ref_re = re.compile(r"""['"`]([a-zA-Z0-9_\-]+\.json)['"`]""")
+    # Два разных стиля путей в этом кодовом стиле: pathlib-сегменты
+    # (WEB_DIR / "data" / "buzz.json" — литерал "buzz.json" сам по себе) и
+    # цельные строки-пути ("/data/edu_stats/market_hours.json" — литерал внутри
+    # более длинной строки). Плюс fetch()-вызовы часто добавляют cache-buster
+    # ("partners.json?t=" + Date.now()) — закрывающая кавычка не сразу после
+    # ".json". Ловим basename в обоих случаях, кавычка допускает "?..." после.
+    ref_re = re.compile(r"""['"`][a-zA-Z0-9_\-/]*?([a-zA-Z0-9_\-]+\.json)(?:\?[^'"`]*)?['"`]""")
     # f-строки/format вида f"ohlc_{symbol}_{tf}.json" — собираются из переменных,
     # литерала целиком в источнике нет. Ловим сам паттерн отдельно, чтобы не считать
     # ohlc_GOLD_D1.json и еже с ним "никем не читаемыми".
@@ -263,6 +266,13 @@ def check_data_files(exceptions: list[str], glob_exceptions: list[str]) -> dict:
         for m in fstring_re.finditer(text):
             # "ohlc_{symbol}_{tf}.json" → "ohlc_*_*.json"
             pat = re.sub(r"\{[a-zA-Z0-9_]+\}", "*", m.group(1))
+            # Вырожденный случай f"{lang}.json" → "*.json" матчит вообще всё —
+            # такой паттерн ничего не говорит о конкретном файле, отбрасываем
+            # (нашлось на собственном core/i18n.py::f"{lang}.json" — и на этой
+            # же строке скрипта, раз он сканирует .py-файлы репозитория целиком).
+            stem_literal = pat[:-len(".json")].replace("*", "")
+            if len(stem_literal) < 2:
+                continue
             fstring_patterns.add(pat)
 
     def is_referenced(name: str) -> bool:
