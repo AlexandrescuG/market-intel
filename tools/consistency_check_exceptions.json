@@ -1,0 +1,20 @@
+{
+  "_comment": "СПЕКА_устранение_легаси.md §10.5: ложные срабатывания не молчать, а вести здесь явным списком. Каждая запись — почему она тут.",
+
+  "external_endpoints": [
+    "/api/lp/signals", "/api/lp/buzz", "/api/lp/patterns", "/api/lp/gold-scenarios",
+    "/api/ingest/bars",
+    "/api/push/deliver"
+  ],
+
+  "unreferenced_data_files_ok": [
+    "_D1.json",
+    "consistency_check_exceptions.json"
+  ],
+
+  "unreferenced_data_files_glob_ok": [],
+
+  "hardcoded_symbols_ok": [],
+
+  "_note_data_files_missing": "consistency_check_exceptions.json сам матчится как '*.json' строка в своём же исходнике при само-чтении EXCEPTIONS_PATH — не настоящая пропажа. '_D1.json' — обрывок конкатенации вида SUFFIX = \"_D1.json\"; filename = symbol + SUFFIX где-то в tools/edu_build — регэксп не резолвит конкатенацию, аналогично динамическим i18n-ключам."
+}
