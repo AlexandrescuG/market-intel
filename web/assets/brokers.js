@@ -1,15 +1,17 @@
 /* ============================================================================
-   brokers.js — /brokers (SPEC_brokers_comparison_page.md) + BrokerPicker
+   brokers.js — /brokers (SPEC_brokers_page_build.md) + BrokerPicker
    встраиваемый в главу 11 (§1: "один источник данных, две поверхности").
 
-   Единственный источник данных — /data/partners.json. Ни одно число в этом
-   файле и в brokers.html не написано руками — см. правило в самом JSON.
+   Два источника данных, оба на диске, ни одно число не написано руками:
+   - /data/partners.json          — резолв юрлица по стране, коммерческие поля;
+   - /data/partners_licences.json — key_finding (офшорный факт), лицензии/реестры
+     с уровнем проверки (register/broker_site/unverified).
 
    Правило показа (жёсткое, из partners.json._meta.rules): партнёр без
    актуального loss_pct у РЕЗОЛВЛЕННОГО для страны пользователя юрлица не
    отображается. Исключение — юрлицо, у которого НЕ ПУБЛИКУЕТСЯ процент
    подтверждено (entity.loss_pct_confirmed_not_published), и у бренда есть
-   юрлицо-сосед с реальным числом для раскрытия (кейс XM, см. §5.2 спеки).
+   юрлицо-сосед с реальным числом для раскрытия (кейс XM/NAGA).
    ============================================================================ */
 (function (global) {
   'use strict';
@@ -46,15 +48,25 @@
   ];
   var DEFAULT_COUNTRY = 'MD'; // компания молдавская — честный дефолт, не догадка
 
+  // Юрисдикции офшорных юрлиц (key_finding) — короткий фиксированный список,
+  // тот же паттерн, что COUNTRIES выше.
+  var JURISDICTIONS = {
+    BZ: { ru: 'Белиз', ro: 'Belize', en: 'Belize' },
+    VG: { ru: 'БВО', ro: 'Insulele Virgine Britanice', en: 'British Virgin Islands' },
+    BS: { ru: 'Багамы', ro: 'Bahamas', en: 'Bahamas' },
+    SC: { ru: 'Сейшелы', ro: 'Seychelles', en: 'Seychelles' },
+  };
+  function jurisdictionLabel(code) {
+    var j = JURISDICTIONS[code];
+    return j ? (j[_i18n.lang] || j.ru) : code;
+  }
+
   function countryLabel(code, lang) {
     var c = COUNTRIES.filter(function (x) { return x.code === code; })[0];
     return c ? (c[lang] || c.ru) : code;
   }
 
   // ── Резолв юрлица по стране ────────────────────────────────────────────────
-  // entity_resolution.<lowercase country> — явный override спеки (см. XM.md),
-  // приоритетнее общей логики serves/excludes/EEA. Общая логика — фолбэк для
-  // партнёров без явного оверрайда.
   function resolveEntity(partner, countryCode) {
     var entities = partner.entities || [];
     if (!entities.length) return null;
@@ -77,7 +89,6 @@
   }
 
   // ── Достоверность процента теряющих для отображения ────────────────────────
-  // Возвращает null, если партнёра вообще нельзя показывать (жёсткое правило).
   function lossInfo(partner, entity) {
     if (entity && typeof entity.loss_pct === 'number') {
       return { kind: 'value', value: entity.loss_pct, checked: entity.loss_pct_checked, source: entity.loss_pct_source };
@@ -111,8 +122,40 @@
     return _dataPromise;
   }
 
+  var _licencesPromise = null;
+  function loadLicences() {
+    if (!_licencesPromise) {
+      _licencesPromise = fetch('/data/partners_licences.json?t=' + Date.now()).then(function (r) {
+        if (!r.ok) throw new Error('partners_licences.json HTTP ' + r.status);
+        return r.json();
+      }).catch(function (err) {
+        console.error('[brokers] licences load failed', err);
+        return { partners: {}, key_finding: null };
+      });
+    }
+    return _licencesPromise;
+  }
+  var _licencesData = null; // module-level, установлен при монтировании
+
   function groupOf(data, partnerId) {
     return (data.groups || []).filter(function (g) { return (g.members || []).indexOf(partnerId) !== -1; })[0] || null;
+  }
+
+  // ── Лицензия конкретного юрлица из partners_licences.json ──────────────────
+  // Поля проверки в источнике названы непоследовательно (verification,
+  // verification_licence_no, verification_licence, verification_entity) —
+  // берём самое специфичное для НОМЕРА лицензии, иначе общее, иначе unverified.
+  function licenceEntityFor(partnerId, entityId) {
+    if (!_licencesData || !entityId) return null;
+    var lp = _licencesData.partners && _licencesData.partners[partnerId];
+    if (!lp || !lp.entities) return null;
+    var raw = lp.entities.filter(function (x) { return x.id === entityId; })[0];
+    if (!raw) return null;
+    return {
+      licence_no: raw.licence_no || null,
+      licence_verification: raw.verification_licence_no || raw.verification_licence || raw.verification || 'unverified',
+      register_url: raw.register_url || raw.register_url_company || null,
+    };
   }
 
   // ── Построение отображаемых строк для страны ───────────────────────────────
@@ -125,8 +168,6 @@
       if (!loss) return; // жёсткое правило: без числа -- не показываем
       rows.push({ partner: p, entity: entity, loss: loss, group: groupOf(data, p.id) });
     });
-    // Сортировка по умолчанию: loss_pct по возрастанию; "не публикуется" -- в конец,
-    // без собственного числа сортировать нечем, но и скрывать нельзя.
     rows.sort(function (a, b) {
       var av = a.loss.kind === 'value' ? a.loss.value : Infinity;
       var bv = b.loss.kind === 'value' ? b.loss.value : Infinity;
@@ -151,107 +192,52 @@
       '">' + (stale ? '⚠ ' : '') + dateStr + '</span>';
   }
 
-  // ── Рендер одной строки таблицы (используется и полной, и BrokerPicker) ────
-  function renderRow(row, opts) {
-    opts = opts || {};
-    var p = row.partner, e = row.entity, loss = row.loss;
-    var lang = _i18n.lang;
-
-    var lossCell;
-    if (loss.kind === 'value') {
-      lossCell = '<b class="loss-val">' + fmtPct(loss.value) + '%</b> ' + dateBadge(loss.checked) + ' ' + sourceLink(loss.source);
-    } else {
-      var d = loss.disclose;
-      lossCell = '<span class="loss-np">' + t('brokers.loss_pct_not_published', 'не публикуется') + '</span>';
-      if (d) {
-        lossCell += '<div class="loss-disclose">' + t('brokers.loss_pct_disclosure_tpl',
-          'У юрлица {{entity}} — {{pct}}%, но другое плечо ({{lev}}) и {{fund}}', {
-            entity: d.legal_name, pct: fmtPct(d.loss_pct),
-            lev: d.leverage_retail || '—',
-            fund: d.compensation_scheme ? (d.compensation_scheme.amount + ' ' + d.compensation_scheme.currency) : t('brokers.no_fund', 'нет фонда'),
-          }) + '</div>';
-      }
-    }
-
-    var groupBadge = '';
-    if (row.group) {
-      var others = row.group.members.filter(function (m) { return m !== p.id; });
-      groupBadge = '<div class="group-badge">' + (row.group['label_' + lang] || row.group.label_ru) +
-        (others.length ? ' · ' + t('brokers.group_same_as', 'та же группа: {{other}}', { other: others.join(', ') }) : '') + '</div>';
-    }
-
-    var entityCell = e
-      ? escapeHtml(e.legal_name || '—') + '<div class="entity-sub">' + escapeHtml([e.regulator, e.licence_no].filter(Boolean).join(' · ')) + '</div>'
-      : '<span class="no-data">' + t('brokers.entity_not_served', 'не обслуживает эту страну') + '</span>';
-
-    var leverage = (e && e.leverage_retail) ? escapeHtml(String(e.leverage_retail)) : '<span class="no-data">' + t('brokers.no_data', '—') + '</span>';
-
-    var spreads = (p.spreads || []).filter(function (s) { return s.typical != null; });
-    var spreadCell = spreads.length
-      ? spreads.map(function (s) { return escapeHtml(s.symbol) + ': ' + s.typical + (s.account_type ? ' (' + escapeHtml(s.account_type) + ')' : ''); }).join('<br>')
-      : '<span class="no-data">' + t('brokers.spreads_not_collected', 'не снято') + '</span>';
-
-    var commission = (p.commission && p.commission.value != null)
-      ? escapeHtml(p.commission.model || '') + ' ' + p.commission.value + ' ' + (p.commission.currency || '') + (p.commission.per_volume ? ' / ' + p.commission.per_volume : '')
-      : '<span class="no-data">' + t('brokers.no_data', '—') + '</span>';
-
-    var nbp = e && e.negative_balance_protection === true ? t('brokers.yes', 'да')
-      : e && e.negative_balance_protection === false ? t('brokers.no', 'нет')
-      : '<span class="no-data">' + t('brokers.no_data', '—') + '</span>';
-
-    var comp = e && e.compensation_scheme && e.compensation_scheme.amount
-      ? escapeHtml(e.compensation_scheme.name || '') + ' — ' + e.compensation_scheme.amount + ' ' + (e.compensation_scheme.currency || '')
-      : (e && e.compensation_scheme === null ? t('brokers.no_fund', 'нет фонда') : '<span class="no-data">' + t('brokers.no_data', '—') + '</span>');
-
-    var minDep = p.min_deposit && p.min_deposit.value != null
-      ? p.min_deposit.value + ' ' + (p.min_deposit.currency || '')
-      : '<span class="no-data">' + t('brokers.no_data', '—') + '</span>';
-
-    var platforms = (p.platforms || []).length ? escapeHtml(p.platforms.join(' / ')) : '<span class="no-data">' + t('brokers.no_data', '—') + '</span>';
-
-    var demo = p.demo_requires_verification === true ? t('brokers.no', 'нет')
-      : p.demo_requires_verification === false ? t('brokers.yes', 'да')
-      : '<span class="no-data">' + t('brokers.no_data', '—') + '</span>';
-
-    var affLink = (p.links && p.links.affiliate) || '#';
-
-    var cols = [
-      '<td class="col-entity">' + entityCell + groupBadge + '</td>',
-      '<td class="col-leverage">' + leverage + '</td>',
-      '<td class="col-spread">' + spreadCell + '</td>',
-      '<td class="col-commission">' + commission + '</td>',
-      '<td class="col-loss">' + lossCell + '</td>',
-      '<td class="col-comp">' + comp + '</td>',
-      '<td class="col-nbp">' + nbp + '</td>',
-      '<td class="col-mindep">' + minDep + '</td>',
-      '<td class="col-platforms">' + platforms + '</td>',
-      '<td class="col-demo">' + demo + '</td>',
-    ];
-    if (opts.compact) cols = [cols[0], cols[4], cols[1]]; // BrokerPicker: юрлицо, % теряющих, плечо
-
-    return '<tr data-partner="' + p.id + '">' +
-      '<td class="col-name"><a href="' + affLink + '" target="_blank" rel="noopener sponsored">' + escapeHtml(p.name) + '</a></td>' +
-      cols.join('') + '</tr>';
-  }
-
   function escapeHtml(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
     });
   }
 
-  var FULL_COLS = ['name', 'entity', 'leverage', 'spread', 'commission', 'loss', 'comp', 'nbp', 'mindep', 'platforms', 'demo'];
+  // "Компенсация"/comp, "% теряющих"/loss и "Демо без верификации"/demo убраны
+  // из основной таблицы и карточки по прямому запросу 2026-08-06 -- поля
+  // по-прежнему считаются в buildFieldHtml() (нужны COMPACT_COLS/BrokerPicker
+  // в главе 11, который loss использует как жёсткий фильтр), просто не
+  // попадают в порядок рендера главной страницы.
+  var FULL_COLS = ['name', 'entity', 'licence', 'leverage', 'nbp', 'spread', 'commission', 'mindep', 'platforms'];
   var COMPACT_COLS = ['name', 'entity', 'loss', 'leverage'];
+  var SORTABLE_COLS = ['name', 'entity', 'leverage', 'nbp', 'commission', 'mindep', 'platforms']; // спред -- НИКОГДА (§5: разные размеры лота, сравнение в пунктах даёт 10-кратную ошибку)
+
+  // Логотипы партнёров (файлы взяты из проекта sbf-nexus, assets/partners/)
+  // 2026-08-06. Имя брокера остаётся в alt/title для скринридеров и на случай
+  // если картинка не загрузится.
+  var LOGOS = {
+    xm: '/assets/logos/xm.svg',
+    avatrade: '/assets/logos/avatrade.svg',
+    fxpro: '/assets/logos/fxpro.svg',
+    naga: '/assets/logos/naga.png',
+    instaforex: '/assets/logos/instaforex.svg'
+  };
+  // Инлайн-размер, а не только CSS-класс: этот же nameHtml() используется
+  // и в BrokerPicker (main.js -> ch11.js/ch14.js), у которых нет собственной
+  // стилизации .broker-logo -- без явного размера часть логотипов (InstaForex,
+  // NAGA) раздулась бы до исходных сотен пикселей и сломала бы вёрстку главы.
+  function nameHtml(p) {
+    var logo = LOGOS[p.id];
+    return logo
+      ? '<img class="broker-logo" src="' + escapeHtml(logo) + '" alt="' + escapeHtml(p.name) + '" title="' + escapeHtml(p.name) + '" style="display:block;height:22px;width:auto;max-width:100px;object-fit:contain">'
+      : escapeHtml(p.name);
+  }
 
   function colLabel(col) {
     var map = {
       name: t('brokers.col_name', 'Брокер'),
       entity: t('brokers.col_entity', 'Юрлицо и регулятор'),
-      leverage: t('brokers.col_leverage', 'Плечо'),
+      licence: t('brokers.col_licence', 'Лицензия'),
+      leverage: t('brokers.col_leverage', 'Плечо для тебя'),
       spread: t('brokers.col_spread', 'Спред'),
       commission: t('brokers.col_commission', 'Комиссия'),
       loss: t('brokers.col_loss', '% теряющих'),
-      comp: t('brokers.col_comp', 'Компенсация'),
+      comp: t('brokers.col_comp', 'Защита при банкротстве'),
       nbp: t('brokers.col_nbp', 'Защита от отриц. баланса'),
       mindep: t('brokers.col_mindep', 'Мин. депозит'),
       platforms: t('brokers.col_platforms', 'Платформы'),
@@ -260,15 +246,223 @@
     return map[col] || col;
   }
 
+  // ── Значения полей одной строки (общие и для <td>, и для мобильной карточки) ─
+  function buildFieldHtml(row) {
+    var p = row.partner, e = row.entity, loss = row.loss;
+    var lic = licenceEntityFor(p.id, e ? e.id : null);
+    var dash = '<span class="no-data">' + t('brokers.no_data', '—') + '</span>';
+
+    var f = {};
+
+    // Юрлицо и регулятор + ссылка на реестр (partners_licences.json.register_url
+    // ведёт ТОЛЬКО на реестр регулятора, никогда на сайт брокера -- см. _meta.rules)
+    if (e) {
+      f.entity = escapeHtml(e.legal_name || '—') +
+        (e.regulator ? '<div class="entity-sub">' + escapeHtml(e.regulator) + '</div>' : '') +
+        (lic && lic.register_url ? sourceLink(lic.register_url, t('brokers.register_link', 'реестр')) : '');
+    } else {
+      f.entity = '<span class="no-data">' + t('brokers.entity_not_served', 'не обслуживает эту страну') + '</span>';
+    }
+
+    // Лицензия: unverified не показывается вовсе; register -- номер+ссылка;
+    // broker_site -- номер+пометка "со слов брокера" (§4.1)
+    if (!lic || !lic.licence_no || lic.licence_verification === 'unverified') {
+      f.licence = dash;
+    } else if (lic.licence_verification === 'register') {
+      f.licence = escapeHtml(lic.licence_no) + (lic.register_url ? ' ' + sourceLink(lic.register_url, t('brokers.register_link', 'реестр')) : '');
+    } else {
+      f.licence = escapeHtml(lic.licence_no) + '<div class="licence-note">' + t('brokers.licence_broker_site_note', 'по данным брокера — в реестре номер не публикуется') + '</div>';
+    }
+
+    // % теряющих
+    if (loss.kind === 'value') {
+      f.loss = '<b class="loss-val">' + fmtPct(loss.value) + '%</b> ' + dateBadge(loss.checked) + ' ' + sourceLink(loss.source);
+    } else {
+      var d = loss.disclose;
+      f.loss = '<span class="loss-np">' + t('brokers.loss_pct_not_published', 'не публикуется') + '</span>';
+      if (d) {
+        f.loss += '<div class="loss-disclose">' + t('brokers.loss_pct_disclosure_tpl',
+          'У юрлица {{entity}} — {{pct}}%, но другое плечо ({{lev}}) и {{fund}}', {
+            entity: d.legal_name, pct: fmtPct(d.loss_pct),
+            lev: d.leverage_retail || '—',
+            fund: d.compensation_scheme ? (d.compensation_scheme.amount + ' ' + d.compensation_scheme.currency) : t('brokers.no_fund', 'нет компенсационного фонда'),
+          }) + '</div>';
+      }
+    }
+
+    // Плечо. Сначала — значение ЮРЛИЦА, которое достаётся именно этой стране:
+    // это единственная честная цифра, потому что потолок задаётся юрисдикцией.
+    // Если у юрлица не заполнено — берём то, что брокер заявляет о себе на
+    // сайте (partner.leverage_retail), с подписью "по данным брокера".
+    if (e && e.leverage_retail) {
+      f.leverage = escapeHtml(String(e.leverage_retail));
+    } else if (p.leverage_retail && p.leverage_retail.value) {
+      f.leverage = escapeHtml(String(p.leverage_retail.value)) +
+        '<div class="spread-src">' + t('brokers.spread_by_broker', 'по данным брокера') + '</div>';
+    } else {
+      f.leverage = dash;
+    }
+
+    f.comp = e && e.compensation_scheme && e.compensation_scheme.amount
+      ? escapeHtml(e.compensation_scheme.name || '') + ' — ' + e.compensation_scheme.amount + ' ' + (e.compensation_scheme.currency || '')
+      : (e && e.compensation_scheme === null ? '<span class="loss-np">' + t('brokers.no_fund', 'нет компенсационного фонда') + '</span>' : dash);
+
+    // Защита от отрицательного баланса: сначала юрлицо, потом заявление
+    // брокера о себе. Красный флаг ставим только на явное "нет".
+    var nbpVal = (e && e.negative_balance_protection != null)
+      ? e.negative_balance_protection
+      : (p.negative_balance_protection != null ? p.negative_balance_protection : null);
+    if (nbpVal === true) f.nbp = t('brokers.yes', 'да');
+    else if (nbpVal === false) f.nbp = '<span class="nbp-warn">🔴 ' + t('brokers.no', 'нет') + '</span>';
+    else f.nbp = dash;
+
+    // Спред. Правило пересмотрено 2026-08-06 (partners.json → _meta.source_priority):
+    // основой стали цифры, опубликованные самим брокером. Показываем ИМЕННО их,
+    // с явной подписью "по данным брокера" -- читатель должен видеть, что это
+    // заявление площадки, а не наше измерение.
+    // spread_probe (контрольный снимок вне окон методички) НЕ показываем никогда.
+    // Колонка по-прежнему НЕ сортируется (SORTABLE_COLS): размеры лота у партнёров
+    // разные, сравнение в пунктах даёт десятикратную ошибку -- см. §5 методички.
+    (function () {
+      var sp = p.spreads_published;
+      if (!sp) {
+        f.spread = '<span class="no-data">' + t('brokers.spread_not_published', 'брокер не публикует') + '</span>';
+        return;
+      }
+      // Источники в порядке приоритета: per_instrument (снято постранично,
+      // не завязано на живой тикер) -> items (живая лента, но только если
+      // render !== false -- у части брокеров она расходится с реальным счётом,
+      // см. FxPro) -> sample_rows (алфавитная выгрузка таблицы условий, ещё
+      // не покрывает EURUSD у части брокеров, но данные настоящие).
+      var items = null;
+      if (sp.per_instrument && sp.per_instrument.items && sp.per_instrument.items.length) {
+        items = sp.per_instrument.items.map(function (i) {
+          return { symbol: i.symbol, val: (i.spread_observed != null) ? i.spread_observed : i.spread, unit: i.unit };
+        });
+      } else if (sp.render !== false && sp.items && sp.items.length) {
+        items = sp.items.map(function (i) {
+          return { symbol: i.symbol, val: (i.avg != null) ? i.avg : i.spread, unit: i.unit || sp.unit };
+        });
+      } else if (sp.sample_rows && sp.sample_rows.length) {
+        items = sp.sample_rows.map(function (i) {
+          return { symbol: i.symbol, val: (i.avg != null) ? i.avg : i.spread, unit: i.unit || 'пипс' };
+        });
+      }
+      if (!items || !items.length) {
+        f.spread = '<span class="no-data">' + t('brokers.spread_not_published', 'брокер не публикует') + '</span>';
+        return;
+      }
+      var base = items.filter(function (i) { return i.symbol === 'EURUSD'; })[0] || items[0];
+      var val = base.val;
+      if (val == null) {
+        f.spread = '<span class="no-data">' + t('brokers.spread_not_published', 'брокер не публикует') + '</span>';
+        return;
+      }
+      var unit = base.unit || sp.unit || '';
+      f.spread = escapeHtml(base.symbol) + ' ' + escapeHtml(String(val)) + (unit ? ' ' + escapeHtml(unit) : '') +
+        '<div class="spread-src">' + t('brokers.spread_by_broker', 'по данным брокера') +
+        (sp.checked ? ', ' + escapeHtml(sp.checked) : '') + '</div>';
+    })();
+
+    // Комиссия. Сначала наше подтверждённое числовое поле, затем — то, что
+    // брокер публикует сам (published_specs.commission), с той же подписью
+    // "по данным брокера", что и спред. Пусто остаётся пустым: ноль не
+    // додумываем, отсутствие комиссии по спецификации ещё не факт (§4).
+    if (p.commission && p.commission.value != null) {
+      f.commission = escapeHtml(p.commission.model || '') + ' ' + p.commission.value + ' ' + (p.commission.currency || '') +
+        (p.commission.per_volume ? ' / ' + p.commission.per_volume : '');
+    } else if (p.published_specs && p.published_specs.commission && p.published_specs.commission.value != null) {
+      var pc = String(p.published_specs.commission.value);
+      f.commission = escapeHtml(pc.length > 90 ? pc.slice(0, 88) + '…' : pc) +
+        '<div class="spread-src">' + t('brokers.spread_by_broker', 'по данным брокера') + '</div>';
+    } else {
+      f.commission = dash;
+    }
+
+    f.mindep = p.min_deposit && p.min_deposit.value != null
+      ? p.min_deposit.value + ' ' + (p.min_deposit.currency || '')
+      : dash;
+
+    f.platforms = (p.platforms || []).length ? escapeHtml(p.platforms.join(' / ')) : dash;
+
+    f.demo = p.demo_requires_verification === true ? t('brokers.no', 'нет')
+      : p.demo_requires_verification === false ? t('brokers.yes', 'да')
+      : dash;
+
+    return f;
+  }
+
+  // ── Рендер одной строки таблицы (используется и полной, и BrokerPicker) ────
+  function renderRow(row, opts) {
+    opts = opts || {};
+    var p = row.partner;
+    var f = buildFieldHtml(row);
+    var order = (opts.compact ? COMPACT_COLS : FULL_COLS).filter(function (c) { return c !== 'name'; });
+
+    var groupBadge = '';
+    if (row.group) {
+      var others = row.group.members.filter(function (m) { return m !== p.id; });
+      groupBadge = '<div class="group-badge">' + (row.group['label_' + _i18n.lang] || row.group.label_ru) +
+        (others.length ? ' · ' + t('brokers.group_same_as', 'та же группа: {{other}}', { other: others.join(', ') }) : '') + '</div>';
+    }
+    if (groupBadge) f.entity += groupBadge;
+
+    var affLink = (p.links && p.links.affiliate) || '#';
+    var tds = order.map(function (c) { return '<td class="col-' + c + '">' + f[c] + '</td>'; });
+
+    return '<tr data-partner="' + p.id + '">' +
+      '<td class="col-name"><a href="' + affLink + '" target="_blank" rel="noopener sponsored">' + nameHtml(p) + '</a></td>' +
+      tds.join('') + '</tr>';
+  }
+
+  // ── Мобильная карточка — все поля, не подмножество (§7) ─────────────────────
+  function renderCard(row) {
+    var p = row.partner;
+    var f = buildFieldHtml(row);
+    var order = FULL_COLS.filter(function (c) { return c !== 'name'; });
+    var rows = order.map(function (c) {
+      return '<div class="bc-row"><span>' + colLabel(c) + '</span><div class="bc-val">' + f[c] + '</div></div>';
+    }).join('');
+    return '<div class="broker-card">' +
+      '<div class="bc-head"><a href="' + ((p.links && p.links.affiliate) || '#') + '" target="_blank" rel="noopener sponsored">' + nameHtml(p) + '</a>' +
+      (row.group ? '<span class="group-badge">' + (row.group['label_' + _i18n.lang] || row.group.label_ru) + '</span>' : '') + '</div>' +
+      rows + '</div>';
+  }
+
+  // Блок key_finding (офшорный факт над таблицей) удалён 2026-08-06 по решению
+  // владельца вместе с блоком предикта и опросником. Ключи переводов и данные
+  // key_finding из partners_licences.json вычищены в том же заходе.
+
+  // renderLossFootnote() ("где на самом деле есть проценты теряющих счетов")
+  // удалена 2026-08-06 вместе с колонкой "% теряющих" -- раскрытие было целиком
+  // о ней, без колонки в таблице выше стало сиротой без контекста.
+
+  // Калькулятор годовых издержек (renderCalculator + symName) удалён
+  // 2026-08-06 по прямому запросу.
+
+  // Опросник «что для тебя важнее» (renderQuiz + QUIZ) удалён 2026-08-06 вместе
+  // с блоком предикта и key_finding. Поля _state.quizFilter / quizExplain
+  // оставлены со значениями null и '' — на них опирается renderTable, теперь
+  // они просто никогда не заполняются, и таблица всегда показывается целиком.
+
   // ── Полная таблица (страница /brokers) ─────────────────────────────────────
-  var _state = { country: DEFAULT_COUNTRY, sortCol: 'loss', sortDir: 'asc' };
+  // Сортировка по умолчанию — по названию: колонка "% теряющих" (была
+  // умолчанием) убрана из таблицы 2026-08-06, сортировать по невидимой
+  // колонке было бы непонятно читателю.
+  var _state = { country: DEFAULT_COUNTRY, sortCol: 'name', sortDir: 'asc', quizFilter: null, quizExplain: '' };
 
   function sortRows(rows, col, dir) {
     var key = {
       name: function (r) { return r.partner.name; },
+      entity: function (r) { return (r.entity && r.entity.legal_name) || ''; },
       leverage: function (r) { return r.entity && r.entity.leverage_retail ? String(r.entity.leverage_retail) : ''; },
       loss: function (r) { return r.loss.kind === 'value' ? r.loss.value : Infinity; },
+      comp: function (r) { return (r.entity && r.entity.compensation_scheme && r.entity.compensation_scheme.amount) || -1; },
+      nbp: function (r) { return r.entity && r.entity.negative_balance_protection === true ? 1 : (r.entity && r.entity.negative_balance_protection === false ? 0 : -1); },
+      commission: function (r) { return (r.partner.commission && r.partner.commission.value != null) ? r.partner.commission.value : Infinity; },
       mindep: function (r) { return (r.partner.min_deposit && r.partner.min_deposit.value) || Infinity; },
+      platforms: function (r) { return (r.partner.platforms || []).length; },
+      demo: function (r) { return r.partner.demo_requires_verification === false ? 1 : (r.partner.demo_requires_verification === true ? 0 : -1); },
     }[col];
     if (!key) return rows;
     var sorted = rows.slice().sort(function (a, b) {
@@ -282,23 +476,33 @@
 
   function renderTable(root, data) {
     var rows = buildRows(data, _state.country);
+    if (_state.quizFilter) rows = rows.filter(_state.quizFilter);
     var sorted = sortRows(rows, _state.sortCol, _state.sortDir);
-    var isDefaultSort = (_state.sortCol === 'loss' && _state.sortDir === 'asc');
+    var isDefaultSort = (_state.sortCol === 'name' && _state.sortDir === 'asc');
 
     var thead = '<tr>' + FULL_COLS.map(function (c) {
-      var sortable = ['name', 'leverage', 'loss', 'mindep'].indexOf(c) !== -1;
+      var sortable = SORTABLE_COLS.indexOf(c) !== -1;
       var active = _state.sortCol === c;
       return '<th' + (sortable ? ' data-sort="' + c + '" class="sortable' + (active ? ' active' : '') + '"' : '') + '>' +
         colLabel(c) + (active ? (_state.sortDir === 'asc' ? ' ▲' : ' ▼') : '') + '</th>';
     }).join('') + '</tr>';
 
+    var emptyMsg = _state.quizFilter
+      ? t('brokers.empty_state_filtered', 'Ни один партнёр не подошёл под условия ответа выше — это тоже честный результат, не ошибка.')
+      : t('brokers.empty_state', 'Для этой страны нет ни одного партнёра с достаточно проверенными данными — таблица пуста, потому что мы не показываем непроверенное.');
+
     var tbody = sorted.length
       ? sorted.map(function (r) { return renderRow(r); }).join('')
-      : '<tr><td colspan="' + FULL_COLS.length + '" class="empty-row">' + t('brokers.empty_state', 'Ни один партнёр не публикует актуальный процент теряющих счетов для этой страны — таблица пуста, потому что мы не показываем оценки без подтверждённого числа.') + '</td></tr>';
+      : '<tr><td colspan="' + FULL_COLS.length + '" class="empty-row">' + emptyMsg + '</td></tr>';
 
     var sortNote = !isDefaultSort
-      ? '<div class="sort-note">' + t('brokers.sort_differs', '⚠ Сортировка отличается от умолчания (% теряющих, по возрастанию)') +
+      ? '<div class="sort-note">' + t('brokers.sort_differs', '⚠ Сортировка отличается от умолчания (по названию, А→Я)') +
         ' <button class="reset-sort">' + t('brokers.sort_reset', 'сбросить') + '</button></div>'
+      : '';
+
+    var quizNote = _state.quizFilter
+      ? '<div class="sort-note quiz-filter-note">' + t('brokers.quiz_filter_active', '⚠ Таблица отфильтрована по твоим ответам ниже') +
+        ' <button class="clear-quiz-filter">' + t('brokers.sort_reset', 'сбросить') + '</button></div>'
       : '';
 
     root.innerHTML =
@@ -308,10 +512,10 @@
             return '<option value="' + c.code + '"' + (c.code === _state.country ? ' selected' : '') + '>' + (c[_i18n.lang] || c.ru) + '</option>';
           }).join('') + '</select>' +
       '  </label>' +
-      '  ' + sortNote +
+      '  ' + sortNote + quizNote +
       '</div>' +
       '<div class="brokers-table-wrap"><table class="brokers-table"><thead>' + thead + '</thead><tbody>' + tbody + '</tbody></table></div>' +
-      '<div class="brokers-cards">' + (sorted.length ? sorted.map(renderCard).join('') : '<div class="empty-row">' + t('brokers.empty_state', 'Ни один партнёр не публикует актуальный процент теряющих счетов для этой страны — таблица пуста, потому что мы не показываем оценки без подтверждённого числа.') + '</div>') + '</div>';
+      '<div class="brokers-cards">' + (sorted.length ? sorted.map(renderCard).join('') : '<div class="empty-row">' + emptyMsg + '</div>') + '</div>';
 
     root.querySelector('#brokersCountry').addEventListener('change', function (e) {
       _state.country = e.target.value;
@@ -327,136 +531,28 @@
     });
     var resetBtn = root.querySelector('.reset-sort');
     if (resetBtn) resetBtn.addEventListener('click', function () {
-      _state.sortCol = 'loss'; _state.sortDir = 'asc';
+      _state.sortCol = 'name'; _state.sortDir = 'asc';
+      renderTable(root, data);
+    });
+    var clearQuizBtn = root.querySelector('.clear-quiz-filter');
+    if (clearQuizBtn) clearQuizBtn.addEventListener('click', function () {
+      _state.quizFilter = null; _state.quizExplain = '';
       renderTable(root, data);
     });
 
-    return rows; // для калькулятора/опросника ниже
-  }
-
-  // ── Мобильная карточка (вместо горизонтальной прокрутки таблицы) ───────────
-  function renderCard(row) {
-    var p = row.partner, e = row.entity, loss = row.loss;
-    var lossHtml = loss.kind === 'value'
-      ? '<b class="loss-val">' + fmtPct(loss.value) + '%</b> ' + dateBadge(loss.checked)
-      : '<span class="loss-np">' + t('brokers.loss_pct_not_published', 'не публикуется') + '</span>';
-    return '<div class="broker-card">' +
-      '<div class="bc-head"><a href="' + ((p.links && p.links.affiliate) || '#') + '" target="_blank" rel="noopener sponsored">' + escapeHtml(p.name) + '</a>' +
-      (row.group ? '<span class="group-badge">' + (row.group['label_' + _i18n.lang] || row.group.label_ru) + '</span>' : '') + '</div>' +
-      '<div class="bc-row"><span>' + t('brokers.col_entity', 'Юрлицо') + '</span><span>' + (e ? escapeHtml(e.legal_name) + ' · ' + escapeHtml(e.regulator || '') : t('brokers.entity_not_served', 'не обслуживает эту страну')) + '</span></div>' +
-      '<div class="bc-row"><span>' + t('brokers.col_loss', '% теряющих') + '</span><span>' + lossHtml + '</span></div>' +
-      '<div class="bc-row"><span>' + t('brokers.col_leverage', 'Плечо') + '</span><span>' + (e && e.leverage_retail ? escapeHtml(String(e.leverage_retail)) : '—') + '</span></div>' +
-      '<div class="bc-row"><span>' + t('brokers.col_mindep', 'Мин. депозит') + '</span><span>' + (p.min_deposit && p.min_deposit.value != null ? p.min_deposit.value + ' ' + p.min_deposit.currency : '—') + '</span></div>' +
-      '</div>';
-  }
-
-  // ── Класс A: калькулятор годовых издержек ──────────────────────────────────
-  function renderCalculator(root, data) {
-    root.innerHTML =
-      '<div class="calc-inputs">' +
-      '  <label>' + t('brokers.calc_trades_label', 'Сделок в месяц') + ' <input type="number" id="calcTrades" min="1" value="15"></label>' +
-      '  <label>' + t('brokers.calc_volume_label', 'Типичный объём (лоты)') + ' <input type="number" id="calcVolume" min="0.01" step="0.01" value="0.5"></label>' +
-      '  <label>' + t('brokers.calc_instrument_label', 'Инструмент') + ' <select id="calcInstrument"><option value="XAUUSD">XAUUSD</option><option value="EURUSD">EURUSD</option></select></label>' +
-      '</div>' +
-      '<div id="calcResults" class="calc-results"></div>';
-
-    function recompute() {
-      var trades = Math.max(1, parseFloat(root.querySelector('#calcTrades').value) || 0);
-      var volume = Math.max(0.01, parseFloat(root.querySelector('#calcVolume').value) || 0);
-      var instrument = root.querySelector('#calcInstrument').value;
-      var rows = buildRows(data, _state.country);
-      var out = rows.map(function (r) {
-        var p = r.partner;
-        var spread = (p.spreads || []).filter(function (s) { return s.symbol === instrument && s.typical != null; })[0];
-        var comm = p.commission;
-        if (!spread) return { name: p.name, insufficient: true };
-        // Комиссия: per_side * 2 либо round_turn, приведено к $ на сделку при заданном объёме
-        var commPerTrade = 0;
-        if (comm && comm.value != null && comm.per_volume) {
-          var notional = volume * 100000; // 1 лот = 100000 единиц базовой валюты (стандартная конвенция FX/металлы)
-          var units = notional / comm.per_volume;
-          commPerTrade = (comm.round_turn != null ? comm.round_turn : comm.value * 2) * units;
-        }
-        // Спред в валюте инструмента: типовое значение спреда уже в пунктах/units котировки,
-        // без единой таблицы контрактных размеров это не переводится в $ надёжно -- честно
-        // показываем как "нет данных", если нет спреда, но НЕ считаем спред-компонент в деньгах
-        // без размера контракта (иначе это будет придуманное число).
-        var annual = commPerTrade * trades * 12;
-        return { name: p.name, annual: annual, hasSpreadCost: false, spread: spread.typical, account: spread.account_type };
-      });
-      var el = root.querySelector('#calcResults');
-      el.innerHTML = '<table class="calc-table"><thead><tr><th>' + t('brokers.col_name', 'Брокер') + '</th><th>' + t('brokers.calc_result_col', 'Комиссия/год') + '</th><th>' + t('brokers.calc_spread_col', 'Тип. спред') + '</th></tr></thead><tbody>' +
-        out.map(function (o) {
-          if (o.insufficient) return '<tr><td>' + escapeHtml(o.name) + '</td><td colspan="2" class="no-data">' + t('brokers.calc_insufficient_data', 'нет данных о спреде — расчёт невозможен') + '</td></tr>';
-          return '<tr><td>' + escapeHtml(o.name) + '</td><td>' + (o.annual ? o.annual.toFixed(2) + ' USD' : '<span class="no-data">' + t('brokers.no_data', '—') + '</span>') + '</td><td>' + o.spread + (o.account ? ' (' + escapeHtml(o.account) + ')' : '') + '</td></tr>';
-        }).join('') + '</tbody></table>' +
-        '<p class="calc-note">' + t('brokers.calc_note', 'Показана только комиссия (там, где известен размер контракта на объём). Стоимость спреда в деньгах не считаем без подтверждённого контрактного размера — это было бы придуманным числом.') + '</p>';
-    }
-
-    root.querySelectorAll('#calcTrades,#calcVolume,#calcInstrument').forEach(function (elm) {
-      elm.addEventListener('input', recompute);
-      elm.addEventListener('change', recompute);
-    });
-    recompute();
-  }
-
-  // ── Класс B: опросник «что для тебя важнее» ────────────────────────────────
-  var QUIZ = [
-    { id: 'horizon', q: t('brokers.quiz_q_horizon', 'Как долго обычно держишь позицию?'),
-      options: [
-        { v: 'scalp', label: t('brokers.quiz_o_scalp', 'Минуты-часы') },
-        { v: 'swing', label: t('brokers.quiz_o_swing', 'Дни-недели') },
-      ] },
-    { id: 'fund', q: t('brokers.quiz_q_fund', 'Важна ли компенсационная схема на случай банкротства брокера?'),
-      options: [
-        { v: 'yes', label: t('brokers.quiz_o_yes', 'Да, это важно') },
-        { v: 'no', label: t('brokers.quiz_o_no', 'Не критично') },
-      ] },
-  ];
-
-  function renderQuiz(root, data, onResult) {
-    var answers = {};
-    function step(i) {
-      if (i >= QUIZ.length) { return finish(); }
-      var qz = QUIZ[i];
-      root.innerHTML = '<div class="quiz-q"><p>' + qz.q + '</p>' +
-        qz.options.map(function (o) { return '<button class="quiz-opt" data-v="' + o.v + '">' + o.label + '</button>'; }).join('') + '</div>';
-      root.querySelectorAll('.quiz-opt').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-          answers[qz.id] = btn.getAttribute('data-v');
-          step(i + 1);
-        });
-      });
-    }
-    function finish() {
-      var sortCol = 'loss', explain = '';
-      if (answers.horizon === 'swing') {
-        sortCol = 'loss';
-        explain = t('brokers.quiz_explain_swing', 'Ты сказал, что держишь позиции днями-неделями — своп (плата за перенос) важнее спреда, но своп в этой таблице пока не собран по всем партнёрам, поэтому сортировка осталась по % теряющих.');
-      } else {
-        explain = t('brokers.quiz_explain_scalp', 'Короткий горизонт — важнее спред и комиссия, смотри калькулятор издержек ниже.');
-      }
-      if (answers.fund === 'yes') {
-        explain += ' ' + t('brokers.quiz_explain_fund', 'Компенсационная схема есть не у всех юрлиц в таблице — смотри колонку «Компенсация».');
-      }
-      root.innerHTML = '<div class="quiz-result"><p>' + explain + '</p><button class="quiz-restart">' + t('brokers.quiz_restart', 'Пройти заново') + '</button></div>';
-      root.querySelector('.quiz-restart').addEventListener('click', function () { step(0); });
-      if (onResult) onResult({ sortCol: sortCol, answers: answers });
-    }
-    step(0);
+    return rows;
   }
 
   // ── Публичный API: страница /brokers ────────────────────────────────────────
   function mountPage(rootId) {
     var root = document.getElementById(rootId);
     if (!root) return;
-    _i18n.ready.then(loadData).then(function (data) {
+    _i18n.ready.then(function () { return Promise.all([loadData(), loadLicences()]); }).then(function (results) {
+      var data = results[0];
+      _licencesData = results[1];
+
       var tableRoot = root.querySelector('#brokersTableRoot');
       renderTable(tableRoot, data);
-      var calcRoot = root.querySelector('#brokersCalcRoot');
-      if (calcRoot) renderCalculator(calcRoot, data);
-      var quizRoot = root.querySelector('#brokersQuizRoot');
-      if (quizRoot) renderQuiz(quizRoot, data, function () { renderTable(tableRoot, data); });
     }).catch(function (err) {
       root.innerHTML = '<div class="brokers-error">' + t('brokers.load_error', 'Не удалось загрузить данные партнёров.') + '</div>';
       console.error('[brokers]', err);
@@ -473,7 +569,9 @@
   function mountPicker(el, opts) {
     opts = opts || {};
     var country = opts.country || DEFAULT_COUNTRY;
-    loadData().then(function (data) {
+    Promise.all([loadData(), loadLicences()]).then(function (results) {
+      var data = results[0];
+      _licencesData = _licencesData || results[1];
       var rows = buildRows(data, country).filter(function (r) { return r.loss.kind === 'value'; });
       var sorted = sortRows(rows, 'loss', 'asc');
       var thead = '<tr>' + COMPACT_COLS.map(function (c) { return '<th>' + colLabel(c) + '</th>'; }).join('') + '</tr>';

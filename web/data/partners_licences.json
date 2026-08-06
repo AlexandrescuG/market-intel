@@ -1,0 +1,326 @@
+{
+  "_meta": {
+    "schema_version": 1,
+    "checked": "2026-08-05",
+    "note": "Лицензии и юрлица партнёров. Отдельный файл от partners.json, потому что объём большой и обновляется по своему циклу. Связь по partners[].id. Каждое утверждение несёт уровень проверки.",
+    "verification_levels": {
+      "register": "Подтверждено на публичном реестре регулятора. Ссылка ведёт на реестр, а не на сайт брокера.",
+      "broker_site": "Сказано только на сайте или в документах самого брокера. Реестр прочитать не удалось или номер там не публикуется.",
+      "unverified": "Не подтверждено ни реестром, ни сайтом брокера. В публикацию не идёт."
+    },
+    "rules": [
+      "На странице показывается юрлицо, которое подпишет договор С ЧИТАТЕЛЕМ. Европейская лицензия рядом с офшорным договором — обман, даже если обе строчки правдивы по отдельности.",
+      "Рядом с каждым номером лицензии — ссылка на реестр регулятора. Если ссылки нет, номер помечен broker_site и подаётся как заявление брокера, а не как факт.",
+      "Уровень unverified не публикуется вообще.",
+      "Реестры многих регуляторов — JS-приложения и машинно не читаются. Это не повод брать данные с обзорных сайтов: они партнёрские и устаревают."
+    ]
+  },
+
+  "_removed_key_finding": "Блок key_finding удалён из рендера и из данных 2026-08-06 по решению владельца — вместе с блоком предикта и опросником «что для тебя важнее» на странице /brokers. Удалены: renderKeyFinding и renderPredict/renderQuiz в web/assets/brokers.js, контейнеры brokersKeyFindingRoot и brokersQuizRoot в web/brokers.html, ключи brokers.key_finding_* / brokers.predict_* / brokers.quiz_* в i18n/site/{ru,ro,en}.json. Сведения о юрлицах никуда не делись — они живут в partners.json → entity_resolution и в partners.entities этого файла. Отдельно: на момент удаления таблица блока была устаревшей, FxPro в ней значился как FxPro Global Markets Ltd (Багамы), тогда как по клиентскому договору молдавского маршрута контрагент — Costa Rica Markets Ltd (Коста-Рика).",
+
+  "partners": {
+
+    "xm": {
+      "serves_md": "xm_global",
+      "serves_md_confidence": "вывод, не опубликованный факт; косвенно подтверждён плечом 1:1000 на реальном счёте",
+      "entities": [
+        {
+          "id": "xm_global", "legal_name": "XM Global Limited", "jurisdiction": "BZ",
+          "regulator": "Financial Services Commission (Belize)", "licence_no": "8557558",
+          "verification": "broker_site",
+          "register_url": null,
+          "register_note": "Публичный реестр FSC Белиза машинно не читается.",
+          "source": "https://www.xm.com/regulation",
+          "serves": "global, кроме US/CA/IL/IR",
+          "leverage_retail": "1:1000", "loss_pct": null, "loss_pct_published": false,
+          "negative_balance_protection": true, "compensation_scheme": null
+        },
+        {
+          "id": "trading_point_cy", "legal_name": "Trading Point of Financial Instruments Limited",
+          "reg_no": "HE251334", "jurisdiction": "CY", "regulator": "CySEC", "licence_no": "120/10",
+          "licenced_since": "2010-08-05",
+          "verification": "register",
+          "register_url": "https://www.cysec.gov.cy/en-GB/entities/investment-firms/cypriot/37582/",
+          "serves": "EEA", "leverage_retail": "1:30", "loss_pct": 74.3,
+          "loss_pct_source": "https://www.xm.com/legal-documents",
+          "negative_balance_protection": true,
+          "compensation_scheme": { "name": "CySEC Investor Compensation Fund", "amount": 20000, "currency": "EUR" }
+        },
+        {
+          "id": "trading_point_mena", "legal_name": "Trading Point MENA Limited",
+          "jurisdiction": "AE-DIFC", "regulator": "DFSA", "licence_no": "F003484",
+          "licenced_since": "2019-09-10",
+          "verification": "register",
+          "register_url": "https://www.dfsa.ae/public-register/firms/trading-point-mena-limited",
+          "serves": "MENA", "loss_pct": 73.04
+        }
+      ],
+      "stale_claims": [
+        "Австралийское подразделение ушло из бренда: теперь Trading.com Markets PTY Ltd, AFSL 443670. Источник, называющий XM «регулируемым ASIC», устарел.",
+        "Британское юрлицо (FRN 705428) переименовано в Trading.com Markets UK Limited."
+      ]
+    },
+
+    "avatrade": {
+      "serves_md": "ava_trade_markets_bvi",
+      "serves_md_confidence": "🔴 НЕОДНОЗНАЧНО — см. contracting_name_conflict",
+      "contracting_name_conflict": {
+        "severity": "critical",
+        "note": "Футер сайта называет контрагентом Ava Trade Markets Ltd — эта компания на реестре БВО ДЕЙСТВУЮЩАЯ. Но международный договор §2.2 называет контрагентом «Ava Trade Ltd» — а под этим именем на реестре БВО числятся ДВЕ записи со статусом Cancelled. Тот же номер SIBA/L/13/1049 стоит в футере каждой статьи support.avatrade.com и в футере avatrade.it. То есть брокер в собственном договоре называет юрлицо с аннулированной лицензией. Таблицы соответствия стран и юрлиц не публикуется.",
+        "register_url": "https://www.bvifsc.vg/regulated-entities-investment-business?combine=Ava",
+        "action": "НЕ ПУБЛИКОВАТЬ номер SIBA/L/13/1049 как действующий. До выяснения в карточке AvaTrade писать, что контрагент определяется при регистрации и в документах брокера назван непоследовательно."
+      },
+      "entities": [
+        {
+          "id": "ava_trade_eu", "legal_name": "AVA Trade EU Ltd", "jurisdiction": "IE",
+          "regulator": "Central Bank of Ireland", "licence_no": "C53877",
+          "licenced_since": "2009-07-09",
+          "verification": "register",
+          "register_url": "https://registers.centralbank.ie/FirmRegisterDataPage.aspx?firmReferenceNumber=C53877&register=32",
+          "serves": "EEA (свобода оказания услуг; в Польше — через учреждение)",
+          "leverage_retail": "1:30 валюты, 1:20 индексы (ESMA)", "leverage_verification": "broker_site",
+          "loss_pct": null, "loss_pct_published": false,
+          "loss_pct_note": "🔴 Процент теряющих счетов НЕ ПОКАЗАН ни на одном европейском сайте AvaTrade (.it, .es, .com) — только общее предупреждение. Для юрлица под надзором ЦБ Ирландии это требование раскрытия ESMA.",
+          "compensation_scheme": { "name": "Investor Compensation Company Ltd (ICCL)", "amount": 20000, "currency": "EUR",
+            "verification": "broker_site", "source": "https://origin.avatrades.net/legal-docs/eu/risk-disclosure/en.pdf" },
+          "inconsistency": "avatrade.es в шапке рекламирует «Apalancamiento hasta 400:1» при европейском потолке 30:1."
+        },
+        {
+          "id": "ava_trade_markets_bvi", "legal_name": "Ava Trade Markets Ltd", "jurisdiction": "VG",
+          "regulator": "BVI Financial Services Commission", "licence_no": null,
+          "verification": "register",
+          "register_url": "https://www.bvifsc.vg/regulated-entities/ava-trade-markets-ltd-0",
+          "register_note": "Статус «Currently Regulated Entities», Dealing as Principal, запись от 14.07.2026. Номер лицензии реестр БВО не публикует.",
+          "serves": "global", "leverage_retail": "до 1:400 валюты, 1:200 индексы", "leverage_verification": "broker_site",
+          "loss_pct": null, "loss_pct_published": false,
+          "compensation_scheme": null,
+          "negative_balance_protection": "🔴 ПРОТИВОРЕЧИЕ. Страница сравнения регулирования обещает «нельзя потерять больше депозита», а международный договор §24.8.3 делает клиента «полностью ответственным за погашение любого отрицательного баланса».",
+          "nbp_source": "https://origin.avatrades.net/legal-docs/intl/terms-and-conditions/en.pdf"
+        },
+        {
+          "id": "dt_direct", "legal_name": "DT Direct Investment Hub Ltd", "reg_no": "354263",
+          "jurisdiction": "CY", "regulator": "CySEC", "licence_no": "347/17", "licenced_since": "2017-12-11",
+          "verification": "register",
+          "register_url": "https://www.cysec.gov.cy/en-GB/entities/investment-firms/cypriot/79651/",
+          "caution": "🔴 НЕ ВЫДАВАТЬ ЗА ЛИЦЕНЗИЮ AVATRADE НА CFD. Разрешены только приём и передача поручений, управление портфелем и консультирование — БЕЗ сделок за свой счёт и без исполнения поручений. Одобренные домены — dtdirectinvestment.com и duplitrade.com, не avatrade.com."
+        },
+        {
+          "id": "ava_trade_me", "legal_name": "Ava Trade Middle East Ltd", "jurisdiction": "AE-ADGM",
+          "regulator": "FSRA", "licence_no": "190018", "licenced_since": "2020-02-06",
+          "verification": "register",
+          "register_url": "https://www.adgm.com/public-registers/fsra/firms/financial-firms/ava-trade-middle-east-limited-190018",
+          "register_note": "Статус Active. В реестре также значится взыскание по CRS от 09.06.2022."
+        },
+        {
+          "id": "ava_trade_kenya", "legal_name": "Ava Trade Kenya Limited", "jurisdiction": "KE",
+          "regulator": "Capital Markets Authority", "licence_no": "262",
+          "verification": "register",
+          "register_url": "https://licensees.cma.or.ke/licenses/5/"
+        },
+        {
+          "id": "ava_capital_au", "legal_name": "Ava Capital Markets Australia Pty Ltd", "jurisdiction": "AU",
+          "regulator": "ASIC", "licence_no": "AFSL 406684",
+          "verification": "unverified",
+          "register_note": "connectonline.asic.gov.au отдаёт пустую оболочку, выгрузка data.gov.au тоже пуста.",
+          "loss_pct": 57.0, "loss_pct_verification": "broker_site",
+          "loss_pct_source": "https://www.avatrade.com.au/about-avatrade/why-avatrade/regulation",
+          "note": "Единственная площадка группы AvaTrade, где вообще опубликован процент теряющих счетов. Только для резидентов Австралии."
+        },
+        {
+          "id": "ava_trade_jp", "legal_name": "Ava Trade Japan K.K.", "jurisdiction": "JP",
+          "regulator": "FSA / FFAJ", "licence_no": null,
+          "verification": "register",
+          "register_url": "https://www.ffaj.or.jp/en/members/member_list/",
+          "register_note": "Членство в FFAJ подтверждено; номера лицензий ни один реестр не показывает."
+        }
+      ],
+      "enforcement": [
+        {
+          "date": "2024-05-14", "entity": "ava_trade_jp", "severity": "high",
+          "regulator": "Kanto Local Finance Bureau / JFSA",
+          "note": "Предписание об улучшении деятельности по ст. 51 FIEA: данные клиентов фальсифицировались, чтобы занизить результаты стресс-тестов, причём в этом участвовал руководитель комплаенса материнской компании. На странице регулирования AvaTrade не раскрыто.",
+          "verification": "register",
+          "urls": ["https://lfb.mof.go.jp/kantou/kinyuu/pagekthp20240514.html", "https://www.fsa.go.jp/sesc/news/c_2024/2024/20240514-1.html"]
+        }
+      ]
+    },
+
+    "fxpro": {
+      "serves_md": "fxpro_global_markets",
+      "serves_md_confidence": "не подтверждено; косвенно — все кнопки регистрации на fxpro.com жёстко ведут на /register/us/gm, где gm = Global Markets",
+      "entities": [
+        {
+          "id": "fxpro_uk", "legal_name": "FxPro UK Limited", "reg_no": "06925128",
+          "incorporated": "2009-06-05", "jurisdiction": "GB", "regulator": "FCA", "licence_no": "509956",
+          "verification_company": "register",
+          "register_url_company": "https://find-and-update.company-information.service.gov.uk/company/06925128",
+          "verification_licence": "unverified",
+          "register_note": "Реестр FCA — приложение на Salesforce, отдаёт пустую оболочку. Номер FRN взят с сайта брокера.",
+          "leverage_retail": "1:30", "compensation_scheme": { "name": "FSCS", "amount": null, "verification": "broker_site" },
+          "loss_pct": null, "loss_pct_published": false,
+          "loss_pct_note": "🔴 fxpro.co.uk редиректит на fxpro.com; обязательная по правилам FCA цифра не найдена ни на одной странице FxPro."
+        },
+        {
+          "id": "fxpro_global_markets", "legal_name": "FxPro Global Markets Limited", "reg_no": "198285 B",
+          "jurisdiction": "BS", "regulator": "Securities Commission of The Bahamas", "licence_no": "SIA-F184",
+          "verification_entity": "register",
+          "register_url": "https://scb.gov.bs/wp-content/uploads/2026/07/SIA-Firms-as-at-30-June-2026-1.pdf",
+          "register_note": "Компания есть в списке зарегистрированных по SIA на 30.06.2026. Номер лицензии в списке не печатается — SIA-F184 только со слов брокера.",
+          "verification_licence_no": "broker_site",
+          "serves": "не-ЕС", "leverage_retail": "1:200", "compensation_scheme": null,
+          "loss_pct": null, "loss_pct_published": false
+        },
+        {
+          "id": "invemonde", "legal_name": "Invemonde Trading Ltd", "jurisdiction": "SC",
+          "regulator": "Seychelles FSA", "licence_no": "SD120",
+          "verification": "broker_site",
+          "note": "На странице лицензий FxPro значится «в партнёрстве с FxPro Global Markets Ltd». Это стороннее юрлицо, не входящее в бренд по названию."
+        }
+      ],
+      "stale_claims": [
+        {
+          "claim": "FxPro Financial Services Ltd, CySEC 078/07",
+          "severity": "critical",
+          "note": "🔴 НЕ ПУБЛИКОВАТЬ КАК ДЕЙСТВУЮЩЕЕ. На собственной странице лицензий FxPro сегодня перечислены только FCA, Багамы и Сейшелы — кипрского юрлица там нет. Косвенные признаки сворачивания в ЕС: Кипр исчез из раздела контактов (остались Великобритания, Багамы, ОАЭ), fxpro.eu отдаёт пустую страницу, раскрытие про компенсационный фонд на €20 000 со страниц пропало. Статус лицензии по реестру CySEC прочитать не удалось (сайт блокирует автоматические запросы), поэтому утверждать отзыв тоже нельзя. Вероятно, самое частое устаревшее утверждение на любой сравнительной странице сегодня.",
+          "check_url": "https://www.cysec.gov.cy/en-GB/entities/investment-firms/cypriot/37670/"
+        },
+        {
+          "claim": "FxPro регулируется FSCA (ЮАР)",
+          "note": "Не подтверждается ни одной действующей страницей FxPro. Не публиковать."
+        },
+        {
+          "claim": "FXPRO FINANCIAL SERVICES LTD, Companies House FC028662",
+          "note": "Запись ЗАКРЫТА 22.07.2013. Это была регистрация британского представительства кипрской компании — известный источник путаницы, к статусу кипрской лицензии отношения не имеет.",
+          "register_url": "https://find-and-update.company-information.service.gov.uk/company/FC028662"
+        }
+      ],
+      "negative_balance_protection": { "value": true, "verification": "broker_site",
+        "note": "Заявлена для всех клиентов независимо от категории и юрисдикции, с оговорками против злоупотреблений." }
+    },
+
+    "naga": {
+      "serves_md": "naga_capital",
+      "serves_md_confidence": "высокая — европейское юрлицо прямо заявляет, что не оказывает услуг в третьих странах, а Молдовы нет в списке ограничений офшорного",
+      "group": "После слияния с Key Way Group (CAPEX.com), завершённого 29.08.2024, обе марки принадлежат одной группе.",
+      "entities": [
+        {
+          "id": "naga_markets_europe", "legal_name": "NAGA Markets Europe Ltd", "reg_no": "HE 251168",
+          "jurisdiction": "CY", "regulator": "CySEC", "licence_no": "204/13", "licenced_since": "2013-06-20",
+          "verification": "register",
+          "register_url": "https://www.cysec.gov.cy/en-GB/entities/investment-firms/cypriot/37704/",
+          "register_note": "Ссылка рабочая и ведёт на карточку компании, но тело страницы при автоматическом чтении пустое — дата лицензии не перепроверена сегодня. Для публикации ссылка годится, глазами открыть стоит.",
+          "also_registered": { "regulator": "ASF (Румыния)", "reg_no": "PJM01SFIM/400019", "verification": "broker_site" },
+          "serves": "ЕЭЗ, кроме Бельгии; услуг в третьих странах не оказывает",
+          "leverage_retail": "1:30 основные пары, 1:20 прочие и золото, 1:10 индексы и товары, 1:5 акции, 1:2 крипта",
+          "loss_pct": 77.41,
+          "loss_pct_verification": "broker_site",
+          "loss_pct_note": "ПОДТВЕРЖДЕНО дословно в футере: «77.41% of retail investor accounts lose money when trading CFDs with this provider». Цифра есть только в вебе, в PDF раскрытия её нет.",
+          "loss_pct_source": "https://naga.com/eu/documents/risk_disclosure_and_warning_notice",
+          "negative_balance_protection": true,
+          "compensation_scheme": { "name": "Cyprus Investor Compensation Fund", "amount": 20000, "currency": "EUR",
+            "note": "максимум €20 000 или 90% требования, что меньше" }
+        },
+        {
+          "id": "naga_capital", "legal_name": "NAGA Capital Ltd", "reg_no": "8422455-1",
+          "jurisdiction": "SC", "regulator": "Seychelles FSA", "licence_no": "SD026",
+          "verification_entity": "register",
+          "register_url": "https://fsaseychelles.sc/regulated-entities/capital-markets",
+          "register_note": "Компания есть в реестре как действующий Securities Dealer. Номер SD026 реестр не публикует — он только со слов брокера. Адрес в реестре (Victoria) расходится с адресом во всех документах NAGA (Mont Fleuri).",
+          "verification_licence_no": "broker_site",
+          "serves": "вне ЕЭЗ/Великобритании/США/Австралии",
+          "leverage_retail": "числового потолка в политике нет; примеры 1:300 и 1:200, реклама по золоту — до 1:500",
+          "loss_pct": null, "loss_pct_published": false,
+          "compensation_scheme": null,
+          "compensation_note": "Схемы нет вообще. В договоре от марта 2026 нет ни одного упоминания компенсационного фонда, единственная инстанция обжалования — сам регулятор Сейшел, применимое право — сейшельское.",
+          "negative_balance_protection": true,
+          "internal_contradiction": "Уровень принудительного закрытия: 50% в политике плеча §6.5 и 20% в договоре §12.2. Оба документа действующие."
+        },
+        {
+          "id": "key_way_investments", "legal_name": "Key Way Investments Ltd", "reg_no": "341196",
+          "jurisdiction": "CY", "regulator": "CySEC", "licence_no": "292/16", "licenced_since": "2016-01-21",
+          "verification": "register",
+          "register_url": "https://www.cysec.gov.cy/en-GB/entities/investment-firms/cypriot/77479/",
+          "note": "Юрлицо CAPEX.com. Формально лицензия на реестре действует, но capex.com/eu редиректит на глобальный сайт, CySEC убран со страницы лицензий CAPEX, а счета резидентам ЕС не открываются. Не публиковать «CAPEX регулируется CySEC» как действующий факт. Партнёр из пула выведен — брокер закрывается."
+        }
+      ],
+      "enforcement": [
+        { "date": "2023-12-29", "entity": "naga_markets_europe", "regulator": "CySEC",
+          "amount": 150000, "currency": "EUR", "verification": "register",
+          "url": "https://www.cysec.gov.cy/en-GB/public-info/decisions/95953/",
+          "note": "Ссылка и заголовок решения подтверждены, тело страницы при автоматическом чтении не открылось — сумму и дату стоит подтвердить глазами перед публикацией." }
+      ]
+    },
+
+    "instaforex": {
+      "serves_md": "instafinance",
+      "serves_md_confidence": "высокая, с оговоркой — список ограниченных стран глобального сайта не публикуется вовсе, но кипрское юрлицо Молдову не обслуживает, а форма регистрации глобального сайта Молдову принимает",
+      "entities": [
+        {
+          "id": "instant_trading_eu", "legal_name": "Instant Trading EU Ltd", "reg_no": "266937",
+          "jurisdiction": "CY", "regulator": "CySEC", "licence_no": "266/15", "licenced_since": "2015-01-13",
+          "verification": "register",
+          "register_url": "https://www.cysec.gov.cy/en-GB/entities/investment-firms/cypriot/71294/",
+          "register_note": "Карточка прочитана полностью. ЛИЦЕНЗИЯ ДЕЙСТВУЮЩАЯ. Прежние названия — Tradomart Ltd, Fxco Trading Ltd. Филиалы в Чехии, Польше, Словакии.",
+          "serves": "ЕЭЗ + третьи страны: Египет, Нигерия, Швейцария, Украина, ОАЭ, БВО, Сент-Винсент, Индонезия. МОЛДОВЫ В СПИСКЕ НЕТ.",
+          "domains": "instaforex.eu, forexmart.eu",
+          "leverage_retail": "потолки ESMA 1:30 / 1:20 / 1:10 / 1:5 / 1:2",
+          "loss_pct": 75.02,
+          "loss_pct_verification": "broker_site",
+          "loss_pct_source": "https://www.instaforex.eu/eu_files/forex_pairs.pdf",
+          "loss_pct_note": "🔴 Цифра существует ТОЛЬКО внутри PDF с ключевой информацией (дата 19.02.2025). В HTML сайта instaforex.eu баннера с процентом нет нигде. Для юрлица под CySEC это само по себе странность, достойная сноски.",
+          "negative_balance_protection": true,
+          "compensation_scheme": { "name": "CySEC Investor Compensation Fund", "amount": 20000, "currency": "EUR" }
+        },
+        {
+          "id": "instafinance", "legal_name": "InstaFinance Ltd", "reg_no": "1811672",
+          "jurisdiction": "VG", "regulator": "BVI Financial Services Commission", "licence_no": "SIBA/L/14/1082",
+          "verification_entity": "register",
+          "register_url": "https://www.bvifsc.vg/regulated-entities/instafinance-ltd-0",
+          "register_note": "Действующая компания в четырёх категориях, запись от 09.09.2024. Номер лицензии реестр БВО не публикует — привязка номера к этой компании только со слов брокера.",
+          "verification_licence_no": "broker_site",
+          "serves": "global",
+          "leverage_retail": "до 1:5000 по таблице типов счетов; в договоре 1:1000 снижается до 1:600 при балансе выше $1000",
+          "loss_pct": null, "loss_pct_published": false,
+          "compensation_scheme": null,
+          "compensation_note": "Схемы нет. Единственная «страховка» — акция, обусловленная привлечением рефералов или десятикратным депозитом.",
+          "negative_balance_protection": false,
+          "nbp_note": "🔴 ЗАЩИТЫ ОТ ОТРИЦАТЕЛЬНОГО БАЛАНСА НЕТ, и договор заявляет обратное право: «Компания оставляет за собой право восстановить отрицательный баланс на одном из счетов Клиента за счёт средств, доступных на других его счетах». Единственный партнёр пула с таким условием — в таблице это должно быть видно.",
+          "nbp_source": "https://www.instaforex.com/key_documents.php?type=pdf&file=client"
+        },
+        {
+          "id": "insta_global", "legal_name": "Insta Global Ltd", "jurisdiction": "VC",
+          "regulator": null, "licence_no": null,
+          "verification": "broker_site",
+          "note": "Есть только в футере сайта. Лицензии нет, регулятора нет, в публичном договоре компания не фигурирует вовсе. Регулятор Сент-Винсента форекс не лицензирует в принципе. Считать маркетинговой или платёжной оболочкой."
+        }
+      ],
+      "stale_claims": [
+        {
+          "claim": "InstaForex работает через Instant Trading Ltd (БВО), лицензия SIBA/L/14/1082",
+          "severity": "high",
+          "note": "🔴 УСТАРЕЛО. Действующий футер instaforex.com и публичный договор называют InstaFinance Ltd. При этом в реестре БВО в разделе бывших регулируемых лиц поиск по «Instant Trading» не даёт ничего, и ни уведомления о смене имени, ни объявления самого брокера не существует — то есть переход НЕ ПОДТВЕРЖДЁН первоисточником. Старое название до сих пор встречается на части страниц с соглашениями.",
+          "register_url": "https://www.bvifsc.vg/regulated-entities-investment-business?combine=Instant+Trading&field_entity_status_tid%5B%5D=73"
+        }
+      ],
+      "enforcement": [
+        { "date": "2018-08-02", "entity": "instant_trading_eu", "regulator": "CySEC",
+          "amount": 130000, "currency": "EUR", "verification": "register",
+          "url": "https://www.cysec.gov.cy/en-GB/public-info/decisions/80150/",
+          "note": "Штраф €90 000 + €40 000, решение совета от 11.06.2018. Более поздних решений не найдено." }
+      ]
+    }
+  },
+
+  "unreadable_registers": {
+    "note": "Реестры, которые не удалось прочитать автоматически. Данные оттуда помечены broker_site или unverified. Обзорные сайты как замену НЕ использовали — они партнёрские и устаревают.",
+    "list": [
+      "FCA (Великобритания) — приложение Salesforce, пустая оболочка",
+      "ASIC Connect (Австралия) — пустая оболочка, выгрузка data.gov.au тоже пуста",
+      "FSCA (ЮАР) — поиск только через POST, прямой ссылкой не открывается",
+      "CySEC — блокирует автоматические запросы выборочно: карточки 71294 и 77479 открылись, 37704 и решение 95953 — нет",
+      "Securities Commission of The Bahamas — интерактивный поиск «в разработке», использованы списки PDF",
+      "ISA (Израиль) — живой список на JS, использован PDF-снимок 2020 года",
+      "BVI FSC — карточки компаний открываются, но номера лицензий реестр не печатает в принципе"
+    ]
+  }
+}

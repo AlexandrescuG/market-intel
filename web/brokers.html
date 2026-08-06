@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="/assets/design.css">
 <link rel="stylesheet" href="/assets/tokens.css?v=1">
 <script src="/assets/i18n.js?v=2" defer></script>
+<script src="/assets/sbf-symbols.js?v=2"></script>
 <script src="/assets/sbf-auth.js?v=1" defer></script>
 <script src="/assets/sbf-header.js?v=16" defer></script>
 <style>
@@ -32,9 +33,9 @@
 
 /* Таблица (desktop) */
 .brokers-table-wrap{overflow-x:auto}
-.brokers-table{width:100%;border-collapse:collapse;font-size:12.5px}
+.brokers-table{width:100%;border-collapse:collapse;font-size:15px}
 .brokers-table th{text-align:left;padding:9px 10px;background:var(--cream,#faf8f3);
-  border-bottom:2px solid var(--line);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);white-space:nowrap}
+  border-bottom:2px solid var(--line);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);white-space:nowrap}
 .brokers-table th.sortable{cursor:pointer;user-select:none}
 .brokers-table th.sortable:hover{color:var(--ink)}
 .brokers-table th.active{color:var(--gold)}
@@ -44,11 +45,11 @@
 .entity-sub{font-size:11px;color:var(--muted);margin-top:2px}
 .loss-val{color:var(--down);font-size:14px}
 .loss-np{color:var(--muted);font-style:italic}
-.loss-disclose{font-size:11px;color:var(--muted);margin-top:4px;max-width:220px;line-height:1.5}
+.loss-disclose{font-size:13px;color:var(--muted);margin-top:4px;max-width:260px;line-height:1.5}
 .group-badge{font-size:10px;color:var(--gold);margin-top:4px;font-weight:600}
-.date-badge{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.date-badge{font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace}
 .date-badge.stale{color:var(--down)}
-.src-link{font-size:10px;color:var(--muted);text-decoration:underline;margin-left:4px}
+.src-link{font-size:12px;color:var(--muted);text-decoration:underline;margin-left:4px}
 .no-data{color:var(--faint,#c5baa8);font-style:italic}
 .empty-row{text-align:center;padding:30px;color:var(--muted);font-size:13px}
 
@@ -60,27 +61,10 @@
   .broker-card{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:12px}
   .bc-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
   .bc-head a{font-weight:700;font-size:15px;color:var(--ink);text-decoration:none}
-  .bc-row{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;padding:4px 0;border-top:1px solid var(--line)}
+  .bc-row{display:flex;justify-content:space-between;gap:10px;font-size:15px;padding:4px 0;border-top:1px solid var(--line)}
   .bc-row span:first-child{color:var(--muted)}
 }
 
-/* Калькулятор */
-.calc-section, .quiz-section{margin-top:36px;padding:20px 22px;background:var(--paper);border:1px solid var(--line);border-radius:10px}
-.section-title{font-size:16px;font-weight:800;margin-bottom:12px;color:var(--ink)}
-.calc-inputs{display:flex;flex-wrap:wrap;gap:16px;margin-bottom:16px}
-.calc-inputs label{font-size:12px;color:var(--muted);display:flex;flex-direction:column;gap:4px}
-.calc-inputs input, .calc-inputs select{padding:7px 9px;border:1px solid var(--line);border-radius:6px;font-size:13px}
-.calc-table{width:100%;border-collapse:collapse;font-size:13px}
-.calc-table th, .calc-table td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left}
-.calc-note{font-size:11.5px;color:var(--muted);margin-top:10px;line-height:1.5}
-
-/* Опросник */
-.quiz-q p{font-size:14px;margin-bottom:12px;color:var(--ink)}
-.quiz-opt{display:block;width:100%;text-align:left;padding:10px 14px;margin-bottom:8px;
-  border:1px solid var(--line);border-radius:8px;background:var(--paper);cursor:pointer;font-size:13px}
-.quiz-opt:hover{border-color:var(--gold)}
-.quiz-result p{font-size:13.5px;line-height:1.6;color:var(--ink);margin-bottom:12px}
-.quiz-restart{font-size:12px;padding:6px 12px;border:1px solid var(--line);border-radius:6px;background:var(--paper);cursor:pointer}
 
 /* Риск-предупреждение — полная форма, тёплая подложка, не мелкий серый текст в подвале */
 .rwarn{margin-top:28px;padding:14px 18px;background:#FFF9F0;border:1px solid rgba(201,162,39,.35);border-radius:6px}
@@ -88,6 +72,21 @@
 .rwarn strong{color:var(--down)}
 
 .brokers-error{padding:30px;text-align:center;color:var(--down)}
+
+/* Спред: пометка "по данным брокера" под значением */
+.spread-src{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.35}
+
+/* Лицензия: пометка "со слов брокера" */
+.licence-note{font-size:11px;color:var(--muted);margin-top:2px;max-width:200px;line-height:1.4}
+
+/* Красный флаг — нет защиты от отрицательного баланса (§4.3) */
+.nbp-warn{color:var(--down);font-weight:700}
+
+.quiz-filter-note{color:var(--gold)}
+
+/* Мобильная карточка — значение может содержать блочные элементы (лицензия, %) */
+.bc-val{text-align:right;font-size:15px}
+.bc-val .entity-sub, .bc-val .licence-note, .bc-val .loss-disclose{text-align:right;margin-left:auto}
 </style>
 </head>
 <body>
@@ -102,16 +101,6 @@
   </div>
 
   <div id="brokersTableRoot"></div>
-
-  <div class="calc-section">
-    <div class="section-title">{{ t('brokers.calc_title', lang) }}</div>
-    <div id="brokersCalcRoot"></div>
-  </div>
-
-  <div class="quiz-section">
-    <div class="section-title">{{ t('brokers.quiz_title', lang) }}</div>
-    <div id="brokersQuizRoot"></div>
-  </div>
 
   <aside class="rwarn" role="note">
     <p>{{ t('brokers.risk_warning_full', lang) }}</p>
