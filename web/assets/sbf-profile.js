@@ -33,6 +33,15 @@
   function save(d) { localStorage.setItem(KEY, JSON.stringify(d)); }
 
   // ── Утилиты ──────────────────────────────────────────────────────────────────
+  // SPEC_symbol_names.md §4.3 — редактор списка наблюдения показывал сырые
+  // тикеры как есть. window.SBFSymbols грузится с defer — на момент первого
+  // рендера может быть ещё не готов, поэтому проверка на существование и
+  // честный фолбэк на исходный тикер.
+  function symLabel(sym, mode) {
+    if (!sym) return sym;
+    return window.SBFSymbols ? window.SBFSymbols.symbolName(sym, { mode: mode || 'name' }) : sym;
+  }
+
   function getInitials(p) {
     var a = (p.firstName || '').trim(), b = (p.lastName || '').trim();
     if (!a && !b) return '?';
@@ -49,27 +58,48 @@
     return GRADS[h % GRADS.length];
   }
 
-  // Алгоритм уровней (спецификация 0.2): XP_total(n) = 500 * (n-1)^1.3
+  // Алгоритм уровней. ЕДИНСТВЕННЫЙ ИСТОЧНИК ИСТИНЫ — core/journal_goals.py
+  // (evaluate_level_progression, §9.2): XP_req(L) = floor(100 · L^2.2) — это
+  // ПРИРОСТ от уровня L к L+1, а не суммарный XP.
+  //
+  // 🔴 Исправлено 06.08.2026. Здесь стояло XP_total(n) = 500 · n^1.3 и оно
+  // трактовалось как СУММАРНЫЙ XP — то есть и формула, и её смысл отличались
+  // от бэкенда. Один и тот же пользователь видел разный уровень в зависимости
+  // от того, кто отрисовал: API или эта функция. Сверено с journal_goals.py:65.
   function calcLevel(xp) {
     xp = Math.max(0, xp | 0);
     var lvl = 1;
+    var accumulated = 0;
     for (;;) {
-      if (xp >= Math.floor(500 * Math.pow(lvl, 1.3))) lvl++; else break;
+      var need = Math.floor(100 * Math.pow(lvl, 2.2));
+      if (xp >= accumulated + need) { accumulated += need; lvl++; }
+      else {
+        var xpIn = xp - accumulated;
+        return { level: lvl, xp: xp,
+                 progress: need > 0 ? xpIn / need : 0,
+                 xpInLevel: xpIn, xpToNext: need };
+      }
     }
-    var base = lvl === 1 ? 0 : Math.floor(500 * Math.pow(lvl - 1, 1.3));
-    var next = Math.floor(500 * Math.pow(lvl, 1.3));
-    return { level: lvl, xp: xp, progress: (next > base) ? (xp - base) / (next - base) : 0,
-             xpInLevel: xp - base, xpToNext: next - base };
   }
 
-  var TITLES = ['Новичок','Наблюдатель','Аналитик','Тактик','Стратег','Мастер','Эксперт','Профессионал'];
-  var TITLE_KEYS = [
-    'profile.level_title_1', 'profile.level_title_2', 'profile.level_title_3', 'profile.level_title_4',
-    'profile.level_title_5', 'profile.level_title_6', 'profile.level_title_7', 'profile.level_title_8'
+  // Титулы — те же пять ярусов, что в core/journal_goals.py:38-44 (_LEVEL_TITLES).
+  // Раньше здесь было восемь титулов по индексу уровня — они не совпадали
+  // с бэкендом ни числом, ни названиями.
+  var LEVEL_TITLES = [
+    [1,  4,   'Новичок Процесса',      'profile.level_title_novice'],
+    [5,  9,   'Осознанный Трейдер',    'profile.level_title_aware'],
+    [10, 19,  'Мастер Риска',          'profile.level_title_risk'],
+    [20, 34,  'Хранитель Дисциплины',  'profile.level_title_discipline'],
+    [35, 999, 'Легенда SBF',           'profile.level_title_legend']
   ];
   function lvlTitle(n) {
-    var idx = Math.min(n - 1, TITLES.length - 1);
-    return t(TITLE_KEYS[idx], TITLES[idx]);
+    for (var i = 0; i < LEVEL_TITLES.length; i++) {
+      if (n >= LEVEL_TITLES[i][0] && n <= LEVEL_TITLES[i][1]) {
+        return t(LEVEL_TITLES[i][3], LEVEL_TITLES[i][2]);
+      }
+    }
+    var last = LEVEL_TITLES[LEVEL_TITLES.length - 1];
+    return t(last[3], last[2]);
   }
 
   function esc(s) {
@@ -615,7 +645,7 @@
       '    <a href="/journal.html#account" class="sbf-pp-jlink">',
       '      <span class="sbf-pp-jlink-ico">🤝</span>',
       '      <span class="sbf-pp-jlink-lbl" data-i18n="profile.link_referral">' + t('profile.link_referral', 'Реферал') + '</span></a>',
-      '    <a href="/journal.html#account" class="sbf-pp-jlink">',
+      '    <a href="/brokers" class="sbf-pp-jlink">',
       '      <span class="sbf-pp-jlink-ico">🏦</span>',
       '      <span class="sbf-pp-jlink-lbl" data-i18n="profile.link_brokers">' + t('profile.link_brokers', 'Брокеры') + '</span></a>',
       '    <a href="/register.html?retake=1" class="sbf-pp-jlink">',
@@ -771,7 +801,9 @@
     if (!el) return;
     el.innerHTML = '';
     var txt = document.createElement('span');
-    txt.textContent = _wlSymbols.length ? _wlSymbols.join(', ') : t('profile.watchlist_empty', 'не выбрано');
+    txt.textContent = _wlSymbols.length
+      ? _wlSymbols.map(function (s) { return symLabel(s, 'name'); }).join(', ')
+      : t('profile.watchlist_empty', 'не выбрано');
     var ico = document.createElement('span');
     ico.className = 'sbf-pp-wl-edit-ico';
     ico.textContent = '✎';
@@ -787,7 +819,7 @@
       var chip = document.createElement('div');
       chip.className = 'sbf-pp-wl-chip';
       var label = document.createElement('span');
-      label.textContent = sym;
+      label.textContent = symLabel(sym, 'name');
       chip.appendChild(label);
       if (idx > 0) {
         var up = document.createElement('button');
@@ -841,7 +873,7 @@
     sel.innerHTML = '<option value="">' + t('profile.watchlist_add_placeholder', '+ добавить инструмент') + '</option>';
     _wlAvailable.filter(function (s) { return _wlSymbols.indexOf(s) === -1; }).forEach(function (s) {
       var o = document.createElement('option');
-      o.value = s; o.textContent = s;
+      o.value = s; o.textContent = symLabel(s, 'name+ticker');
       sel.appendChild(o);
     });
     sel.disabled = _wlSymbols.length >= 10;
