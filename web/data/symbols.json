@@ -1,0 +1,838 @@
+{
+  "GOLD": {
+    "ru": "Золото",
+    "ro": "Aur",
+    "en": "Gold",
+    "aliases": [
+      "XAUUSD",
+      "XAU",
+      "XAU/USD",
+      "GC=F"
+    ],
+    "class": "metal",
+    "chart": true,
+    "yahoo": "GC=F",
+    "quote": true
+  },
+  "SILVER": {
+    "ru": "Серебро",
+    "ro": "Argint",
+    "en": "Silver",
+    "aliases": [
+      "XAGUSD",
+      "XAG",
+      "XAG/USD",
+      "SI=F"
+    ],
+    "class": "metal",
+    "chart": true,
+    "yahoo": "SI=F",
+    "quote": true
+  },
+  "WTI": {
+    "ru": "Нефть WTI",
+    "ro": "Petrol WTI",
+    "en": "WTI Crude",
+    "aliases": [
+      "USOIL",
+      "WTIUSD",
+      "CL=F",
+      "OIL",
+      "CL"
+    ],
+    "class": "commodity",
+    "chart": true,
+    "yahoo": "CL=F",
+    "quote": true
+  },
+  "BRENT": {
+    "ru": "Нефть Brent",
+    "ro": "Petrol Brent",
+    "en": "Brent Crude",
+    "aliases": [
+      "UKOIL",
+      "BZ=F"
+    ],
+    "class": "commodity"
+  },
+  "NG": {
+    "ru": "Природный газ",
+    "ro": "Gaz natural",
+    "en": "Natural Gas",
+    "aliases": [
+      "NATGAS",
+      "XNGUSD",
+      "NG=F"
+    ],
+    "class": "commodity",
+    "chart": true,
+    "yahoo": "NG=F",
+    "quote": true
+  },
+  "EURUSD": {
+    "ru": "Евро / доллар",
+    "ro": "Euro / dolar",
+    "en": "EUR/USD",
+    "aliases": [
+      "EURUSD=X",
+      "EUR/USD"
+    ],
+    "class": "fx",
+    "chart": true,
+    "yahoo": "EURUSD=X",
+    "quote": true
+  },
+  "GBPUSD": {
+    "ru": "Фунт / доллар",
+    "ro": "Liră / dolar",
+    "en": "GBP/USD",
+    "aliases": [
+      "GBPUSD=X",
+      "GBP/USD"
+    ],
+    "class": "fx",
+    "chart": true,
+    "yahoo": "GBPUSD=X",
+    "quote": true
+  },
+  "USDJPY": {
+    "ru": "Доллар / иена",
+    "ro": "Dolar / yen",
+    "en": "USD/JPY",
+    "aliases": [
+      "USDJPY=X",
+      "JPY=X",
+      "USD/JPY"
+    ],
+    "class": "fx",
+    "chart": true,
+    "yahoo": "USDJPY=X"
+  },
+  "USDRUB": {
+    "ru": "Доллар / рубль",
+    "ro": "Dolar / rublă",
+    "en": "USD/RUB",
+    "aliases": [
+      "USDRUB=X",
+      "RUB=X",
+      "USD/RUB"
+    ],
+    "class": "fx"
+  },
+  "USDKZT": {
+    "ru": "Доллар / тенге",
+    "ro": "Dolar / tenge",
+    "en": "USD/KZT",
+    "aliases": [
+      "USDKZT=X",
+      "USD/KZT"
+    ],
+    "class": "fx",
+    "chart": true,
+    "yahoo": "USDKZT=X"
+  },
+  "USDCNY": {
+    "ru": "Доллар / юань",
+    "ro": "Dolar / yuan",
+    "en": "USD/CNY",
+    "aliases": [
+      "USDCNY=X",
+      "CNY=X",
+      "USD/CNY"
+    ],
+    "class": "fx",
+    "chart": true,
+    "yahoo": "USDCNY=X"
+  },
+  "USDZAR": {
+    "ru": "Доллар / ранд",
+    "ro": "Dolar / rand",
+    "en": "USD/ZAR",
+    "aliases": [
+      "USDZAR=X",
+      "ZAR=X",
+      "USD/ZAR"
+    ],
+    "class": "fx",
+    "chart": true,
+    "yahoo": "USDZAR=X"
+  },
+  "USDAED": {
+    "ru": "Доллар / дирхам",
+    "ro": "Dolar / dirham",
+    "en": "USD/AED",
+    "aliases": [
+      "USDAED=X",
+      "AED=X",
+      "USD/AED"
+    ],
+    "class": "fx",
+    "chart": true,
+    "yahoo": "USDAED=X"
+  },
+  "EURGBP": {
+    "ru": "Евро / фунт",
+    "ro": "Euro / liră",
+    "en": "EUR/GBP",
+    "aliases": [
+      "EURGBP=X",
+      "EUR/GBP"
+    ],
+    "class": "fx",
+    "chart": true,
+    "yahoo": "EURGBP=X"
+  },
+  "USDCAD": {
+    "ru": "Доллар / канадский доллар",
+    "ro": "Dolar / dolar canadian",
+    "en": "USD/CAD",
+    "aliases": [
+      "USDCAD=X",
+      "USD/CAD",
+      "CAD=X"
+    ],
+    "class": "fx",
+    "chart": true,
+    "yahoo": "USDCAD=X"
+  },
+  "USDCHF": {
+    "ru": "Доллар / франк",
+    "ro": "Dolar / franc",
+    "en": "USD/CHF",
+    "aliases": [
+      "USDCHF=X",
+      "USD/CHF",
+      "CHF=X"
+    ],
+    "class": "fx",
+    "chart": true,
+    "yahoo": "USDCHF=X"
+  },
+  "AUDUSD": {
+    "ru": "Австралийский доллар / доллар",
+    "ro": "Dolar australian / dolar",
+    "en": "AUD/USD",
+    "aliases": [
+      "AUDUSD=X",
+      "AUD/USD"
+    ],
+    "class": "fx",
+    "chart": true,
+    "yahoo": "AUDUSD=X"
+  },
+  "NZDUSD": {
+    "ru": "Новозеландский доллар / доллар",
+    "ro": "Dolar neozeelandez / dolar",
+    "en": "NZD/USD",
+    "aliases": [
+      "NZDUSD=X",
+      "NZD/USD"
+    ],
+    "class": "fx",
+    "chart": true,
+    "yahoo": "NZDUSD=X"
+  },
+  "USDBRL": {
+    "ru": "Доллар / бразильский реал",
+    "ro": "Dolar / real brazilian",
+    "en": "USD/BRL",
+    "aliases": [
+      "USDBRL=X",
+      "USD/BRL",
+      "BRL=X"
+    ],
+    "class": "fx",
+    "chart": true,
+    "yahoo": "USDBRL=X"
+  },
+  "USDMXN": {
+    "ru": "Доллар / мексиканское песо",
+    "ro": "Dolar / peso mexican",
+    "en": "USD/MXN",
+    "aliases": [
+      "USDMXN=X",
+      "USD/MXN",
+      "MXN=X"
+    ],
+    "class": "fx",
+    "chart": true,
+    "yahoo": "USDMXN=X"
+  },
+  "USDTRY": {
+    "ru": "Доллар / турецкая лира",
+    "ro": "Dolar / liră turcească",
+    "en": "USD/TRY",
+    "aliases": [
+      "USDTRY=X",
+      "USD/TRY",
+      "TRY=X"
+    ],
+    "class": "fx",
+    "chart": true,
+    "yahoo": "USDTRY=X"
+  },
+  "USDPLN": {
+    "ru": "Доллар / польский злотый",
+    "ro": "Dolar / zlot polonez",
+    "en": "USD/PLN",
+    "aliases": [
+      "USDPLN=X",
+      "USD/PLN",
+      "PLN=X"
+    ],
+    "class": "fx",
+    "chart": true,
+    "yahoo": "USDPLN=X"
+  },
+  "USDHUF": {
+    "ru": "Доллар / венгерский форинт",
+    "ro": "Dolar / forint maghiar",
+    "en": "USD/HUF",
+    "aliases": [
+      "USDHUF=X",
+      "USD/HUF",
+      "HUF=X"
+    ],
+    "class": "fx",
+    "chart": true,
+    "yahoo": "USDHUF=X"
+  },
+  "USDCZK": {
+    "ru": "Доллар / чешская крона",
+    "ro": "Dolar / coroană cehă",
+    "en": "USD/CZK",
+    "aliases": [
+      "USDCZK=X",
+      "USD/CZK",
+      "CZK=X"
+    ],
+    "class": "fx",
+    "chart": true,
+    "yahoo": "USDCZK=X"
+  },
+  "USDKRW": {
+    "ru": "Доллар / южнокорейская вона",
+    "ro": "Dolar / won sud-coreean",
+    "en": "USD/KRW",
+    "aliases": [
+      "USDKRW=X",
+      "USD/KRW",
+      "KRW=X"
+    ],
+    "class": "fx",
+    "chart": true,
+    "yahoo": "USDKRW=X"
+  },
+  "DXY": {
+    "ru": "Индекс доллара",
+    "ro": "Indicele dolarului",
+    "en": "Dollar Index",
+    "aliases": [
+      "DX-Y.NYB",
+      "DXY.X"
+    ],
+    "class": "fx",
+    "chart": true,
+    "yahoo": "DX-Y.NYB",
+    "quote": true
+  },
+  "SPX": {
+    "ru": "S&P 500",
+    "ro": "S&P 500",
+    "en": "S&P 500",
+    "aliases": [
+      "US500",
+      "SPX500",
+      "SPY",
+      "^GSPC"
+    ],
+    "class": "index",
+    "chart": true,
+    "yahoo": "^GSPC",
+    "quote": true
+  },
+  "NASDAQ": {
+    "ru": "Nasdaq 100",
+    "ro": "Nasdaq 100",
+    "en": "Nasdaq 100",
+    "aliases": [
+      "NDX",
+      "NAS100",
+      "USTEC",
+      "QQQ",
+      "^IXIC"
+    ],
+    "class": "index",
+    "chart": true,
+    "yahoo": "^IXIC",
+    "quote": true
+  },
+  "DJI": {
+    "ru": "Dow Jones",
+    "ro": "Dow Jones",
+    "en": "Dow Jones",
+    "aliases": [
+      "US30",
+      "DOW",
+      "DJ30",
+      "DIA",
+      "^DJI"
+    ],
+    "class": "index",
+    "chart": true,
+    "yahoo": "^DJI",
+    "quote": true
+  },
+  "RUT": {
+    "ru": "Russell 2000",
+    "ro": "Russell 2000",
+    "en": "Russell 2000",
+    "aliases": [
+      "IWM"
+    ],
+    "class": "index"
+  },
+  "DAX": {
+    "ru": "DAX",
+    "ro": "DAX",
+    "en": "DAX",
+    "aliases": [],
+    "class": "index"
+  },
+  "FTSE": {
+    "ru": "FTSE 100",
+    "ro": "FTSE 100",
+    "en": "FTSE 100",
+    "aliases": [],
+    "class": "index"
+  },
+  "NIKKEI": {
+    "ru": "Nikkei 225",
+    "ro": "Nikkei 225",
+    "en": "Nikkei 225",
+    "aliases": [],
+    "class": "index"
+  },
+  "VIX": {
+    "ru": "VIX",
+    "ro": "VIX",
+    "en": "VIX",
+    "aliases": [
+      "^VIX"
+    ],
+    "class": "index",
+    "quote": true,
+    "yahoo": "^VIX"
+  },
+  "BTC": {
+    "ru": "Биткоин",
+    "ro": "Bitcoin",
+    "en": "Bitcoin",
+    "aliases": [
+      "BTC-USD",
+      "BTCUSD",
+      "XBTUSD"
+    ],
+    "class": "crypto",
+    "chart": true,
+    "yahoo": "BTC-USD",
+    "quote": true
+  },
+  "ETH": {
+    "ru": "Эфириум",
+    "ro": "Ethereum",
+    "en": "Ethereum",
+    "aliases": [
+      "ETH-USD",
+      "ETHUSD"
+    ],
+    "class": "crypto",
+    "chart": true,
+    "yahoo": "ETH-USD",
+    "quote": true
+  },
+  "SOL": {
+    "ru": "Солана",
+    "ro": "Solana",
+    "en": "Solana",
+    "aliases": [
+      "SOL-USD",
+      "SOLUSD"
+    ],
+    "class": "crypto",
+    "chart": true,
+    "yahoo": "SOL-USD",
+    "quote": true
+  },
+  "ADA": {
+    "ru": "Cardano",
+    "ro": "Cardano",
+    "en": "Cardano",
+    "aliases": [
+      "ADA-USD",
+      "ADAUSD"
+    ],
+    "class": "crypto"
+  },
+  "DOT": {
+    "ru": "Polkadot",
+    "ro": "Polkadot",
+    "en": "Polkadot",
+    "aliases": [
+      "DOT-USD",
+      "DOTUSD"
+    ],
+    "class": "crypto"
+  },
+  "AVAX": {
+    "ru": "Avalanche",
+    "ro": "Avalanche",
+    "en": "Avalanche",
+    "aliases": [
+      "AVAX-USD",
+      "AVAXUSD"
+    ],
+    "class": "crypto"
+  },
+  "LINK": {
+    "ru": "Chainlink",
+    "ro": "Chainlink",
+    "en": "Chainlink",
+    "aliases": [
+      "LINK-USD",
+      "LINKUSD"
+    ],
+    "class": "crypto"
+  },
+  "ATOM": {
+    "ru": "Cosmos",
+    "ro": "Cosmos",
+    "en": "Cosmos",
+    "aliases": [
+      "ATOM-USD",
+      "ATOMUSD"
+    ],
+    "class": "crypto"
+  },
+  "HBAR": {
+    "ru": "Hedera",
+    "ro": "Hedera",
+    "en": "Hedera",
+    "aliases": [
+      "HBAR-USD",
+      "HBARUSD"
+    ],
+    "class": "crypto"
+  },
+  "XLM": {
+    "ru": "Stellar",
+    "ro": "Stellar",
+    "en": "Stellar",
+    "aliases": [
+      "XLM-USD",
+      "XLMUSD"
+    ],
+    "class": "crypto"
+  },
+  "TRX": {
+    "ru": "Tron",
+    "ro": "Tron",
+    "en": "Tron",
+    "aliases": [
+      "TRX-USD",
+      "TRXUSD"
+    ],
+    "class": "crypto"
+  },
+  "LTC": {
+    "ru": "Litecoin",
+    "ro": "Litecoin",
+    "en": "Litecoin",
+    "aliases": [
+      "LTC-USD",
+      "LTCUSD"
+    ],
+    "class": "crypto"
+  },
+  "UNI": {
+    "ru": "Uniswap",
+    "ro": "Uniswap",
+    "en": "Uniswap",
+    "aliases": [
+      "UNI-USD",
+      "UNIUSD"
+    ],
+    "class": "crypto"
+  },
+  "NEAR": {
+    "ru": "NEAR",
+    "ro": "NEAR",
+    "en": "NEAR",
+    "aliases": [
+      "NEAR-USD",
+      "NEARUSD"
+    ],
+    "class": "crypto"
+  },
+  "ARB": {
+    "ru": "Arbitrum",
+    "ro": "Arbitrum",
+    "en": "Arbitrum",
+    "aliases": [
+      "ARB-USD",
+      "ARBUSD"
+    ],
+    "class": "crypto"
+  },
+  "OP": {
+    "ru": "Optimism",
+    "ro": "Optimism",
+    "en": "Optimism",
+    "aliases": [
+      "OP-USD",
+      "OPUSD"
+    ],
+    "class": "crypto"
+  },
+  "APT": {
+    "ru": "Aptos",
+    "ro": "Aptos",
+    "en": "Aptos",
+    "aliases": [
+      "APT-USD",
+      "APTUSD"
+    ],
+    "class": "crypto"
+  },
+  "SUI": {
+    "ru": "Sui",
+    "ro": "Sui",
+    "en": "Sui",
+    "aliases": [
+      "SUI-USD",
+      "SUIUSD"
+    ],
+    "class": "crypto"
+  },
+  "TON": {
+    "ru": "Toncoin",
+    "ro": "Toncoin",
+    "en": "Toncoin",
+    "aliases": [
+      "TON-USD",
+      "TONUSD"
+    ],
+    "class": "crypto"
+  },
+  "ICP": {
+    "ru": "Internet Computer",
+    "ro": "Internet Computer",
+    "en": "Internet Computer",
+    "aliases": [
+      "ICP-USD",
+      "ICPUSD"
+    ],
+    "class": "crypto"
+  },
+  "FIL": {
+    "ru": "Filecoin",
+    "ro": "Filecoin",
+    "en": "Filecoin",
+    "aliases": [
+      "FIL-USD",
+      "FILUSD"
+    ],
+    "class": "crypto"
+  },
+  "ETC": {
+    "ru": "Ethereum Classic",
+    "ro": "Ethereum Classic",
+    "en": "Ethereum Classic",
+    "aliases": [
+      "ETC-USD",
+      "ETCUSD"
+    ],
+    "class": "crypto"
+  },
+  "VET": {
+    "ru": "VeChain",
+    "ro": "VeChain",
+    "en": "VeChain",
+    "aliases": [
+      "VET-USD",
+      "VETUSD"
+    ],
+    "class": "crypto"
+  },
+  "ALGO": {
+    "ru": "Algorand",
+    "ro": "Algorand",
+    "en": "Algorand",
+    "aliases": [
+      "ALGO-USD",
+      "ALGOUSD"
+    ],
+    "class": "crypto"
+  },
+  "AAVE": {
+    "ru": "Aave",
+    "ro": "Aave",
+    "en": "Aave",
+    "aliases": [
+      "AAVE-USD",
+      "AAVEUSD"
+    ],
+    "class": "crypto"
+  },
+  "MKR": {
+    "ru": "Maker",
+    "ro": "Maker",
+    "en": "Maker",
+    "aliases": [
+      "MKR-USD",
+      "MKRUSD"
+    ],
+    "class": "crypto"
+  },
+  "INJ": {
+    "ru": "Injective",
+    "ro": "Injective",
+    "en": "Injective",
+    "aliases": [
+      "INJ-USD",
+      "INJUSD"
+    ],
+    "class": "crypto"
+  },
+  "RUNE": {
+    "ru": "THORChain",
+    "ro": "THORChain",
+    "en": "THORChain",
+    "aliases": [
+      "RUNE-USD",
+      "RUNEUSD"
+    ],
+    "class": "crypto"
+  },
+  "SEI": {
+    "ru": "Sei",
+    "ro": "Sei",
+    "en": "Sei",
+    "aliases": [
+      "SEI-USD",
+      "SEIUSD"
+    ],
+    "class": "crypto"
+  },
+  "TIA": {
+    "ru": "Celestia",
+    "ro": "Celestia",
+    "en": "Celestia",
+    "aliases": [
+      "TIA-USD",
+      "TIAUSD"
+    ],
+    "class": "crypto"
+  },
+  "PYTH": {
+    "ru": "Pyth",
+    "ro": "Pyth",
+    "en": "Pyth",
+    "aliases": [
+      "PYTH-USD",
+      "PYTHUSD"
+    ],
+    "class": "crypto"
+  },
+  "JUP": {
+    "ru": "Jupiter",
+    "ro": "Jupiter",
+    "en": "Jupiter",
+    "aliases": [
+      "JUP-USD",
+      "JUPUSD"
+    ],
+    "class": "crypto"
+  },
+  "MATIC": {
+    "ru": "Polygon",
+    "ro": "Polygon",
+    "en": "Polygon",
+    "aliases": [
+      "MATIC-USD",
+      "MATICUSD",
+      "POL"
+    ],
+    "class": "crypto"
+  },
+  "DOGE": {
+    "ru": "Dogecoin",
+    "ro": "Dogecoin",
+    "en": "Dogecoin",
+    "aliases": [
+      "DOGE-USD",
+      "DOGEUSD"
+    ],
+    "class": "crypto"
+  },
+  "SHIB": {
+    "ru": "Shiba Inu",
+    "ro": "Shiba Inu",
+    "en": "Shiba Inu",
+    "aliases": [
+      "SHIB-USD",
+      "SHIBUSD"
+    ],
+    "class": "crypto"
+  },
+  "PEPE": {
+    "ru": "Pepe",
+    "ro": "Pepe",
+    "en": "Pepe",
+    "aliases": [
+      "PEPE-USD",
+      "PEPEUSD"
+    ],
+    "class": "crypto"
+  },
+  "BONK": {
+    "ru": "Bonk",
+    "ro": "Bonk",
+    "en": "Bonk",
+    "aliases": [
+      "BONK-USD",
+      "BONKUSD"
+    ],
+    "class": "crypto"
+  },
+  "WIF": {
+    "ru": "dogwifhat",
+    "ro": "dogwifhat",
+    "en": "dogwifhat",
+    "aliases": [
+      "WIF-USD",
+      "WIFUSD"
+    ],
+    "class": "crypto"
+  },
+  "XRP": {
+    "ru": "XRP",
+    "ro": "XRP",
+    "en": "XRP",
+    "aliases": [
+      "XRP-USD",
+      "XRPUSD"
+    ],
+    "class": "crypto"
+  },
+  "BNB": {
+    "ru": "BNB",
+    "ro": "BNB",
+    "en": "BNB",
+    "aliases": [
+      "BNB-USD",
+      "BNBUSD"
+    ],
+    "class": "crypto"
+  }
+}
