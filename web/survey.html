@@ -195,6 +195,42 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);
     </div>
   </div>
 
+  <!-- ── Профиль (Этап 2) — SPEC_chart_fixes_and_staged_signup.md §5:
+       фамилия/телефон/дата рождения, отдельно от Этапа 1 (там только почта+
+       пароль). Телефон — личные данные, отдельный явный флажок, не общий. ── -->
+  <div class="step" id="stepProfile">
+    <div class="step-title">{{ t('survey.profile_title', lang) }}</div>
+    <div class="step-sub">{{ t('survey.profile_subtitle', lang) }}</div>
+    <div class="q-block">
+      <div class="q-label">{{ t('register.last_name_label', lang) }}</div>
+      <input type="text" id="profLastName" placeholder="{{ t('register.last_name_placeholder', lang) }}" autocomplete="family-name"
+        style="width:100%;padding:11px 13px;border:1.5px solid var(--line);border-radius:10px;
+        font-size:14px;font-family:inherit;background:var(--paper);color:var(--text);margin-top:2px;box-sizing:border-box">
+    </div>
+    <div class="q-block">
+      <div class="q-label">{{ t('survey.profile_dob_label', lang) }}</div>
+      <input type="date" id="profDob" autocomplete="bday"
+        style="width:100%;padding:11px 13px;border:1.5px solid var(--line);border-radius:10px;
+        font-size:14px;font-family:inherit;background:var(--paper);color:var(--text);margin-top:2px;box-sizing:border-box">
+    </div>
+    <div class="q-block">
+      <div class="q-label">{{ t('register.phone_label', lang) }} <span class="q-hint">{{ t('register.optional_suffix', lang) }}</span></div>
+      <input type="tel" id="profPhone" placeholder="+7 900 000-00-00" autocomplete="tel"
+        style="width:100%;padding:11px 13px;border:1.5px solid var(--line);border-radius:10px;
+        font-size:14px;font-family:inherit;background:var(--paper);color:var(--text);margin-top:2px;box-sizing:border-box">
+    </div>
+    <div class="q-block">
+      <label style="display:flex;gap:10px;align-items:flex-start;font-size:13px;cursor:pointer">
+        <input type="checkbox" id="profConsentPhone" style="margin-top:2px;accent-color:var(--gold);flex-shrink:0">
+        <span>{{ t('survey.consent_phone', lang) }}</span>
+      </label>
+    </div>
+    <div class="nav-row">
+      <button class="btn btn-primary" id="profSubmitBtn" onclick="submitProfile()" style="flex:1">{{ t('register.next_button', lang) }}</button>
+    </div>
+    <button class="btn-skip" onclick="skipProfile()">{{ t('survey.skip_button', lang) }}</button>
+  </div>
+
   <!-- ── Блок A: Опыт и знания ── -->
   <div class="step" id="stepA">
     <div class="step-title">{{ t('survey.block_a_title', lang) }}</div>
@@ -571,6 +607,50 @@ function goStep(id) {
     $('progNum').textContent = '— / 4';
     $('progFill').style.width = '80%';
   }
+  if (id === 'Profile') {
+    $('progText').textContent = {{ t('survey.profile_label', lang) | tojson }};
+    $('progNum').textContent = '— / 4';
+    $('progFill').style.width = '10%';
+  }
+}
+
+// ── Профиль (Этап 2: фамилия/телефон/ДР) ──────────────────────────────────────
+// Куда идти после stepProfile: 'A' — свежий вход (ничего ещё не отвечено),
+// 'D' — пришли из stepReg (A/B/C уже пройдены анонимно перед регистрацией).
+var _afterProfileTarget = 'A';
+
+function submitProfile() {
+  showErr('');
+  var lastName = ($('profLastName').value || '').trim();
+  var dob      = ($('profDob').value || '').trim();
+  var phone    = ($('profPhone').value || '').trim();
+  var consentPhone = $('profConsentPhone').checked;
+  if (phone && !consentPhone) { showErr({{ t('survey.err_consent_phone', lang) | tojson }}); return; }
+
+  var btn = $('profSubmitBtn');
+  btn.disabled = true;
+  sbfAuth.fetch('/api/auth/profile', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ last_name: lastName, dob: dob, phone: phone, consent_phone: consentPhone }),
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    btn.disabled = false;
+    if (d.error) { showErr(d.error); return; }
+    goBlock(_afterProfileTarget);
+  })
+  .catch(function(e) {
+    btn.disabled = false;
+    showErr({{ t('register.err_network_prefix', lang) | tojson }} + e.message);
+  });
+}
+
+// Спека §5: "отказ должен закрываться и не спрашивать повторно в той же
+// главе" — пропуск просто идёт дальше без сохранения полей, ничего не ломает
+// (можно вернуться и заполнить позже — опросник доступен всегда).
+function skipProfile() {
+  goBlock(_afterProfileTarget);
 }
 
 // ── Регистрация через опросник ────────────────────────────────────────────────
@@ -627,8 +707,10 @@ function submitViaRegister() {
       localStorage.setItem('sbfSurveyDone', '1');
     }
     localStorage.removeItem(DRAFT_KEY);
-    // Переходим к блоку D (финальные вопросы / можно пропустить)
-    goBlock('D');
+    // Аккаунт создан -- теперь можно сохранить фамилию/телефон/ДР (Этап 2),
+    // дальше в блок D (финальные вопросы / можно пропустить).
+    _afterProfileTarget = 'D';
+    goStep('Profile');
   })
   .catch(function(e) {
     btn.disabled = false;
@@ -668,7 +750,20 @@ function goLogin() {
           })
           .catch(function() { goBlock('A'); });
       } else {
-        goBlock('A');
+        // SPEC_chart_fixes_and_staged_signup.md §5, Этап 2: у пользователей
+        // с "лёгкой" Этап-1-регистрацией (только почта+пароль) фамилии/
+        // телефона/ДР ещё нет — просим их здесь, ПЕРЕД вопросами, не после.
+        _afterProfileTarget = 'A';
+        sbfAuth.fetch('/api/auth/me')
+          .then(function(r) { return r.json(); })
+          .then(function(me) {
+            if (me && !me.error && !me.last_name && !me.dob) {
+              goStep('Profile');
+            } else {
+              goBlock('A');
+            }
+          })
+          .catch(function() { goBlock('A'); });
       }
     })
     .catch(function() { goBlock('A'); });

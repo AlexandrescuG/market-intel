@@ -17,18 +17,41 @@
   var SBF_API      = 'https://web.sbfconsult.com';
   var TOKEN_KEY     = 'sbf_token';
   var REFRESH_KEY   = 'sbf_refresh';
+  var COOKIE_KEY    = 'sbf_session';
 
   function token() { return localStorage.getItem(TOKEN_KEY) || ''; }
   function refreshToken() { return localStorage.getItem(REFRESH_KEY) || ''; }
 
+  // SPEC_chart_fixes_and_staged_signup.md §5: токен раньше жил только в
+  // localStorage — сервер НЕ может прочитать его на обычной навигации
+  // страницы (не fetch/XHR, заголовки не приложить), поэтому серверный гейт
+  // PRO-глав (_handle_edu) был технически невозможен, только косметический
+  // на клиенте. Кука с тем же значением дублируется на каждый setTokens —
+  // и при логине/регистрации, и при тихом refresh (doRefresh ниже тоже
+  // вызывает setTokens) — чтобы кука не протухала раньше localStorage.
+  // Не HttpOnly: тот же токен и так уже читаем из localStorage любым JS на
+  // странице, HttpOnly здесь не даёт дополнительной защиты от XSS, зато
+  // ломает эту синхронизацию.
+  function _setCookie(value) {
+    try {
+      if (value) {
+        document.cookie = COOKIE_KEY + '=' + encodeURIComponent(value) + '; path=/; max-age=' + (30 * 86400) + '; SameSite=Lax';
+      } else {
+        document.cookie = COOKIE_KEY + '=; path=/; max-age=0; SameSite=Lax';
+      }
+    } catch (e) {}
+  }
+
   function setTokens(access, refresh) {
     if (access) localStorage.setItem(TOKEN_KEY, access);
     if (refresh) localStorage.setItem(REFRESH_KEY, refresh);
+    if (access) _setCookie(access);
   }
 
   function clear() {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(REFRESH_KEY);
+    _setCookie(null);
   }
 
   function isLoggedIn() { return !!token(); }

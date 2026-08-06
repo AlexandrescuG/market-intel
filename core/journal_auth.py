@@ -212,6 +212,10 @@ def ensure_schema() -> None:
         # но никогда не сохраняла -- отдельная колонка (не chart_layers), чтобы
         # /api/journal/brief мог читать одно поле без парсинга чужого блока.
         "ALTER TABLE user_prefs ADD COLUMN trading_window TEXT",
+        # SPEC_chart_fixes_and_staged_signup.md §5, Этап 2: телефон — личные
+        # данные, отдельный явный флажок, а не общий consent_data (тот про
+        # обработку данных вообще, не про конкретно телефон).
+        "ALTER TABLE users ADD COLUMN consent_phone INTEGER NOT NULL DEFAULT 0",
     ]:
         try:
             conn.execute(ddl)
@@ -667,6 +671,53 @@ _CORE_SURVEY_KEYS: frozenset[str] = frozenset({
     "goal", "style", "time", "markets",                             # B
     "drawdown_reaction", "risk_per_trade",                          # C
 })
+
+
+def is_pro(user_id: str) -> bool:
+    """Есть ли у user_id хоть одно живое PRO-право (любой source — сейчас
+    только 'survey', но entitlements спроектирована под несколько источников
+    сразу, см. UNIQUE(user_id, source)). SPEC_chart_fixes_and_staged_signup.md
+    §5: единственная точка правды для серверного гейта глав 6+ (_handle_edu)."""
+    if not user_id or user_id == "default":
+        return False
+    ensure_schema()
+    conn = _get_conn()
+    try:
+        row = conn.execute(
+            """SELECT 1 FROM entitlements WHERE user_id=? AND tier='pro'
+               AND expires_ts > strftime('%Y-%m-%dT%H:%M:%S','now') LIMIT 1""",
+            (user_id,),
+        ).fetchone()
+        return row is not None
+    finally:
+        conn.close()
+
+
+def update_profile(user_id: str, last_name: str = "", phone: str = "",
+                    dob: str = "", consent_phone: bool = False) -> dict:
+    """SPEC_chart_fixes_and_staged_signup.md §5, Этап 2: имя/фамилия/телефон/
+    дата рождения — форма внутри главы 4, отдельно от Этапа 1 (там только
+    почта+пароль). Пустые значения не затирают уже сохранённые (COALESCE на
+    NULLIF) -- повторный визит на форму не должен стирать то, что человек уже
+    когда-то заполнил, если сейчас поле оставили пустым."""
+    if not user_id or user_id == "default":
+        return {"error": "unauthorized"}
+    ensure_schema()
+    conn = _get_conn()
+    try:
+        conn.execute(
+            """UPDATE users SET
+                 last_name = COALESCE(NULLIF(?, ''), last_name),
+                 phone = COALESCE(NULLIF(?, ''), phone),
+                 dob = COALESCE(NULLIF(?, ''), dob),
+                 consent_phone = CASE WHEN ? THEN 1 ELSE consent_phone END
+               WHERE id=?""",
+            (last_name.strip(), phone.strip(), dob.strip(), bool(consent_phone), user_id),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+    return {"ok": True}
 
 
 def grant_survey_pro(user_id: str = "default") -> dict:
