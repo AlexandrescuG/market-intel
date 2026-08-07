@@ -2109,6 +2109,60 @@ async function pollQuotes() {
   } catch(e){}
 }
 
+// SPEC_fix_live_chart.md §2: тейл-эндпоинт — реальные бары вместо синтеза из
+// котировки (close=price, high/low растянуты по 8-секундным точкам, open —
+// из последней публикации статики). Частота привязана к таймфрейму: четверть
+// бара, но не чаще 30с — на D1 форма меняется медленно, опрашивать как на M5
+// бессмысленно. Крипта (BYBIT[PARAM]) свой поток через WS, тейл ей не нужен.
+let _tailTimer = null;
+let _tailInFlight = false;
+
+function scheduleTail() {
+  if (_tailTimer) { clearInterval(_tailTimer); _tailTimer = null; }
+  if (BYBIT[PARAM] || !YF[PARAM]) return;
+  const intervalMs = Math.max(30000, (TF_SEC[curTF] || 86400) * 1000 / 4);
+  pollTail();
+  _tailTimer = setInterval(pollTail, intervalMs);
+}
+
+async function pollTail() {
+  if (_tailInFlight || !lastCandle || !candleSeries) return;
+  _tailInFlight = true;
+  try {
+    // -1: "since" исключает бар с ровно этим time (сервер фильтрует time >
+    // since) — без сдвига текущая незакрытая свеча никогда бы не попадала в
+    // ответ и не обновлялась бы реальными данными, только последующие бары
+    // после границы. Спека прямо просит "включая текущий незакрытый".
+    const since = barTimeToUnix(lastCandle.time) - 1;
+    // /api/chart/tail ждёт метку сайта (PARAM, "GOLD"), сам резолвит тикер —
+    // не YF[PARAM] ("GC=F"): это ключ для /api/quotes (§3), а тут другой
+    // сервер-сайд справочник (serve.py::_M5_YF_TICKERS), другой формат ключа.
+    const r = await fetch(`/api/chart/tail?s=${encodeURIComponent(PARAM)}&tf=${encodeURIComponent(curTF)}&since=${since}`);
+    const data = await r.json();
+    if (Array.isArray(data.candles)) {
+      for (const c of data.candles) {
+        const bar = { time: unixToBarTime(c.time), open: c.open, high: c.high, low: c.low, close: c.close };
+        try {
+          // LightweightCharts.update() кидает "Cannot update oldest data",
+          // если bar.time старше уже отрисованного последнего бара — реальный
+          // сценарий гонки: applyLive() (цикл pollQuotes, 15с) мог продвинуть
+          // свечу вперёд, пока этот fetch был в полёте. Единичный try/catch
+          // НА КАЖДЫЙ бар, а не один общий на весь цикл — иначе одна отставшая
+          // свеча в середине массива обрывала бы применение всех последующих,
+          // более новых. Устаревший бар просто пропускаем: он уже неактуален.
+          candleSeries.update(bar);
+          lastCandle = bar;
+        } catch (e) { /* бар устарел за время запроса — пропускаем, не критично */ }
+      }
+    }
+  } catch (e) {
+    // тихо: следующий цикл попробует снова, applyLive() тем временем держит
+    // текущую свечу живой по котировке (§1) — тейл лишь уточняет её форму
+  } finally {
+    _tailInFlight = false;
+  }
+}
+
 function startCryptoWS() {
   if (!BYBIT[PARAM]) return false;
   try {
@@ -2126,6 +2180,7 @@ function stopWS() { if (ws) { try { ws.close(); } catch(e){}; ws = null; } }
 // ── Переключение ────────────────────────────────────────────────────────────
 async function render(tf) {
   await drawOurs(tf);
+  scheduleTail(); // §2: перезапускаем с новым таймфреймом/since после каждой перерисовки
 }
 
 document.getElementById('tf').addEventListener('click', e => {

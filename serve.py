@@ -63,6 +63,21 @@ _M5_YF_TICKERS = {
 _m5_cache: dict = {}
 _M5_CACHE_TTL = 90  # сек
 
+# SPEC_fix_live_chart.md §2: тейл-эндпоинт для _handle_chart_tail. Тикеры —
+# тот же _M5_YF_TICKERS (не core.symbols_registry.yahoo_ticker: у USDJPY там
+# всё ещё "USDJPY=X", не приведён к канону "JPY=X" из этого же файла —
+# отдельная находка, вне зоны этой спеки, не трогаю symbols.json здесь).
+# H4/W1 у Yahoo нет нативно — ресэмплим из H1/D1, как publish.py::publish_charts.
+_TAIL_YF_INTERVAL = {"M5": "5m", "M15": "15m", "M30": "30m", "H1": "60m",
+                     "H4": "60m", "D1": "1d", "W1": "1d"}
+_TAIL_YF_PERIOD   = {"M5": "2d", "M15": "5d", "M30": "7d", "H1": "1mo",
+                     "H4": "1mo", "D1": "3mo", "W1": "1y"}
+_TAIL_RESAMPLE    = {"H4": "4h", "W1": "1W"}
+_TAIL_TF_SEC      = {"M5": 300, "M15": 900, "M30": 1800, "H1": 3600,
+                     "H4": 14400, "D1": 86400, "W1": 604800}
+_tail_cache: dict = {}
+_TAIL_CACHE_TTL = 25  # чуть меньше минимальной частоты клиента (30с, §2)
+
 
 def _chart_symbols() -> set:
     """Список инструментов графика — те же 15, что day_thermo_job.py/
@@ -1292,6 +1307,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self._handle_chart_sessions()
         elif path_clean == "/api/chart/ohlc-m5":
             self._handle_chart_ohlc_m5()
+        elif path_clean == "/api/chart/tail":
+            self._handle_chart_tail()
         elif path_clean == "/api/chart/sentiment":
             self._handle_chart_sentiment()
         elif path_clean == "/api/chart/symbols":
@@ -2147,6 +2164,85 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self._send_json(payload)
         except Exception as e:
             self._send_json({"ticker": ticker, "interval": "M5", "candles": [], "volume": [], "error": str(e)})
+
+    def _handle_chart_tail(self) -> None:
+        """SPEC_fix_live_chart.md §2. Живая свеча раньше синтезировалась из
+        котировки (close=price, high/low растянуты по 8-секундным точкам
+        опроса, open — из последней публикации publish_charts()). Тут —
+        честный хвост реальных баров: те же йfinance-данные, что и статика,
+        просто короткое окно и короткий кэш, модель — _handle_chart_ohlc_m5.
+
+        market_open честно ИЗМЕРЯЕТСЯ (не декларируется по календарю сессий —
+        это отдельная, более точная работа §7 на фронте): если последний
+        полученный от Yahoo бар свежее ~2.5 таймфреймов, считаем рынок
+        открытым, иначе закрытым. Календарным способом (session_bounds_utc)
+        не дублирую — §7 сделает выключение опроса на фронте отдельно,
+        market_open здесь просто честная метка для текущего снимка данных."""
+        params = parse_qs(urlparse(self.path).query)
+        symbol = params.get("s", [None])[0]
+        tf = params.get("tf", [None])[0]
+        since_raw = params.get("since", ["0"])[0]
+        if not symbol or tf not in _TAIL_YF_INTERVAL:
+            self._send_json({"error": "s and tf (M5/M15/M30/H1/H4/D1/W1) required"}, 400)
+            return
+        try:
+            since = int(since_raw)
+        except ValueError:
+            since = 0
+
+        ticker = _M5_YF_TICKERS.get(symbol)
+        if not ticker:
+            self._send_json({"candles": [], "updated": datetime.now(timezone.utc).isoformat(),
+                              "delay_sec": None, "market_open": None})
+            return
+
+        now = time.time()
+        cache_key = (symbol, tf)
+        cached = _tail_cache.get(cache_key)
+        if cached and now - cached[0] < _TAIL_CACHE_TTL:
+            payload = cached[1]
+        else:
+            try:
+                import yfinance as yf
+                interval = _TAIL_YF_INTERVAL[tf]
+                period = _TAIL_YF_PERIOD[tf]
+                df = yf.Ticker(ticker).history(period=period, interval=interval)
+                resample_to = _TAIL_RESAMPLE.get(tf)
+                if resample_to and not df.empty:
+                    # label='left': пандас по умолчанию метит недельный бин концом
+                    # недели (воскресеньем) -- для ТЕКУЩЕЙ незавершённой недели это
+                    # дата в будущем относительно "сейчас", ломает delay_sec ниже
+                    # (now - last_ts стал бы отрицательным). H4 своей выравненной
+                    # сеткой (00/04/08…) этой проблемы не имеет, но label='left'
+                    # ей тоже не вредит -- ставим на оба ресэмпла для единообразия.
+                    df = df.resample(resample_to, label="left").agg(
+                        {"Open": "first", "High": "max", "Low": "min", "Close": "last"}
+                    ).dropna()
+                candles = []
+                for ts, r in df.iterrows():
+                    candles.append({
+                        "time": int(ts.timestamp()),
+                        "open": round(float(r["Open"]), 4), "high": round(float(r["High"]), 4),
+                        "low": round(float(r["Low"]), 4), "close": round(float(r["Close"]), 4),
+                    })
+                last_ts = candles[-1]["time"] if candles else None
+                delay_sec = max(0, int(now - last_ts)) if last_ts else None
+                tf_sec = _TAIL_TF_SEC[tf]
+                market_open = (delay_sec is not None) and (delay_sec < tf_sec * 2.5)
+                payload = {
+                    "updated": datetime.now(timezone.utc).isoformat(),
+                    "delay_sec": delay_sec, "market_open": market_open,
+                    "candles": candles,
+                }
+                _tail_cache[cache_key] = (now, payload)
+            except Exception as e:
+                self._send_json({"error": str(e), "candles": [],
+                                  "updated": datetime.now(timezone.utc).isoformat(),
+                                  "delay_sec": None, "market_open": None})
+                return
+
+        filtered = [c for c in payload["candles"] if c["time"] > since]
+        self._send_json({**payload, "candles": filtered})
 
     def _handle_chart_sentiment(self) -> None:
         """SBF_Charts_Layer3_Spec, Фаза 3: сентимент толпы по часам (twitter+
