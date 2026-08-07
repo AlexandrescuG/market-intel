@@ -2086,7 +2086,13 @@ function setStale(isStale, updatedIso) {
 
 async function pollQuotes() {
   try {
-    const q = await (await fetch('./data/quotes.json?t='+Date.now())).json();
+    // SPEC_fix_live_chart.md §3: было fetch('./data/quotes.json?t='+Date.now())
+    // — ?t= убивал браузерный кэш, а статика отдаётся с no-store (serve.py::
+    // end_headers, общий для всех не-/api/ путей). /api/quotes не подпадает
+    // под это правило и отвечает max-age=10 — повторные опросы внутри 10с
+    // (несколько вкладок с одним и тем же символом) не доходят до сервера.
+    const r = await fetch('/api/quotes');
+    const q = await r.json();
     const ageSec = q.updated ? (Date.now() / 1000 - Date.parse(q.updated) / 1000) : Infinity;
     if (ageSec > 30) {
       setStale(true, q.updated);
@@ -2095,9 +2101,10 @@ async function pollQuotes() {
     }
     setStale(false);
     const sym = YF[PARAM];
-    if (q.quotes && q.quotes[sym]) {
-      applyLive(q.quotes[sym].price);
-      setLiveSourceLabel('yahoo', q.quotes[sym].delay_sec);
+    const row = Array.isArray(q.quotes) ? q.quotes.find(x => x.ticker === sym) : null;
+    if (row) {
+      applyLive(row.price);
+      setLiveSourceLabel('yahoo', row.delay_sec);
     }
   } catch(e){}
 }
@@ -2166,7 +2173,10 @@ if (FOCUS_TODAY) {
   document.querySelectorAll('#tf .tf').forEach(b => b.classList.toggle('on', b.dataset.tf === _initialTF));
 }
 render(_initialTF).then(() => {
-  if (!startCryptoWS()) { pollQuotes(); setInterval(pollQuotes, 8000); }
+  // SPEC_fix_live_chart.md §3: было 8000мс против записи раз в 15с (publish_quotes)
+  // — две трети опросов получали те же байты. Частота опроса не должна быть
+  // чаще частоты записи.
+  if (!startCryptoWS()) { pollQuotes(); setInterval(pollQuotes, 15000); }
   SBFGrafik.chartFullscreenButton(document.querySelector('.card'));
   _reportHeight();
 });

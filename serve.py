@@ -732,17 +732,22 @@ def _build_edu_page(ch: int, lang: str) -> bytes:
 QUOTES_FILE = Path(__file__).parent / "web" / "data" / "quotes.json"
 
 
-def fetch_quotes() -> list[dict]:
+def fetch_quotes() -> tuple[list[dict], str | None]:
+    """SPEC_fix_live_chart.md §3: возвращает ещё и "updated" из quotes.json —
+    /api/quotes переиспользует его, чтобы фронт мог определить устаревание
+    (§4) не читая напрямую статический файл вторым запросом."""
     try:
         data = json.loads(QUOTES_FILE.read_text(encoding="utf-8"))
         quotes = data.get("quotes", {})
-        return [
+        rows = [
             {"ticker": sym, "name": _symbols.symbol_name(sym, mode="name"),
-             "price": q["price"], "change_pct": q.get("change_pct")}
+             "price": q["price"], "change_pct": q.get("change_pct"),
+             "delay_sec": q.get("delay_sec")}
             for sym, q in quotes.items() if q.get("price") is not None
         ]
+        return rows, data.get("updated")
     except Exception:
-        return []
+        return [], None
 
 
 # ── HTTP Handler ─────────────────────────────────────────────────────────────
@@ -1219,6 +1224,14 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self._render_site_page("survey.html", req_lang)
         elif path_clean in ("/brokers", "/brokers.html"):
             self._render_site_page("brokers.html", req_lang)
+        elif path_clean in ("/brokers/xm", "/brokers/naga", "/brokers/fxpro", "/brokers/instaforex", "/brokers/avatrade"):
+            # Инструкции по брокерам со скриншотами (SPEC_broker_guides_screenshots.md).
+            # broker_guide.html не параметризован через Jinja -- guide.js сам
+            # берёт id брокера из location.pathname и качает /data/guides/<id>.json,
+            # поэтому один и тот же шаблон обслуживает все маршруты без сервер-side
+            # переменных. Список литеральный (не regex): маршрут добавляется только
+            # когда для брокера реально есть данные в web/data/guides/.
+            self._render_site_page("broker_guide.html", req_lang)
         elif path_clean == "/journal":
             self._serve_static(WEB_DIR / "journal.html")
         # ── Legacy /m/* routes → redirect to unified index ──
@@ -3754,12 +3767,21 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 
     def _handle_quotes(self):
         try:
-            quotes = fetch_quotes()
-            body = json.dumps({"ok": True, "quotes": quotes}, ensure_ascii=False).encode()
+            quotes, updated = fetch_quotes()
+            body = json.dumps({"ok": True, "quotes": quotes, "updated": updated}, ensure_ascii=False).encode()
             self.send_response(200)
             self.send_header("Content-Type", "application/json; charset=utf-8")
             self.send_header("Access-Control-Allow-Origin", "*")
-            self.send_header("Cache-Control", "no-store")
+            # SPEC_fix_live_chart.md §3: quotes.json пишется раз в 15с, читался
+            # раз в 8с через ?t=Date.now() (убивает браузерный кэш) на статику
+            # с no-store (serve.py::end_headers). Две трети опросов получали
+            # одни и те же байты полным походом до сервера. /api/quotes не
+            # подпадает под общий no-store (он только для не-/api/ путей) —
+            # здесь max-age вместо него. У этого эндпоинта до сих пор не было
+            # ни одного потребителя в проекте (только static quotes.json
+            # читали sbf-header.js/index.html/chart.html) — их не трогаем,
+            # только chart.html переведён на этот путь.
+            self.send_header("Cache-Control", "max-age=10")
             self.end_headers()
             self.wfile.write(body)
         except Exception as e:
