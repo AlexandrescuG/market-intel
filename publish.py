@@ -294,6 +294,14 @@ def publish_charts() -> None:
                 log.debug("chart %s H4: %s", label, e)
 
 
+# SPEC_fix_live_chart.md §5: состояние отката переживает между вызовами
+# publish_quotes() — сама функция дёргается раз в 15с из одного долгоживущего
+# процесса (quotes_loop.py), поэтому модульные переменные, а не локальные,
+# иначе после каждого вызова откат обнулялся бы сам собой.
+_quotes_backoff_until = 0.0
+_quotes_consecutive_429 = 0
+
+
 def publish_quotes() -> None:
     """Быстрые котировки для live-обновления графика и строки (каждые 15 с).
     Пишет web/data/quotes.json:
@@ -302,6 +310,14 @@ def publish_quotes() -> None:
     import requests
     from concurrent.futures import ThreadPoolExecutor
     from core.market import DASHBOARD
+
+    global _quotes_backoff_until, _quotes_consecutive_429
+
+    now_ts = datetime.now(timezone.utc).timestamp()
+    if now_ts < _quotes_backoff_until:
+        log.debug("publish_quotes: в откате ещё %.0fс (429 подряд: %d) — цикл пропущен",
+                   _quotes_backoff_until - now_ts, _quotes_consecutive_429)
+        return  # quotes.json не трогаем — "updated" честно стареет, §4 подхватит на фронте
 
     syms = list(dict.fromkeys(
         DASHBOARD + ["GC=F", "SI=F", "ETH-USD", "SOL-USD",
@@ -314,6 +330,11 @@ def publish_quotes() -> None:
     }
 
     def _fetch(sym):
+        # SPEC_fix_live_chart.md §5: НЕ менять на /v7/finance/quote ради
+        # "оптимизации" одного meta.regularMarketPrice вместо range=2d&interval=1d —
+        # v7 требует cookie+crumb (отдельный запрос за crumb, сессионные куки,
+        # хрупче к смене API Yahoo). Здесь стоит рабочий обход без авторизации,
+        # цена той же точности. Дороже по байтам, но не по надёжности.
         try:
             r = requests.get(
                 f"https://query2.finance.yahoo.com/v8/finance/chart/{sym}",
@@ -321,7 +342,10 @@ def publish_quotes() -> None:
                 headers=_HDR,
                 timeout=6,
             )
+            if r.status_code == 429:
+                return sym, "429"
             if not r.ok:
+                log.debug("publish_quotes: %s HTTP %d", sym, r.status_code)
                 return sym, None
             meta = r.json()["chart"]["result"][0]["meta"]
             price = float(meta["regularMarketPrice"])
@@ -331,17 +355,42 @@ def publish_quotes() -> None:
             # regularMarketTime это момент последней сделки на бирже по Yahoo,
             # разница с моментом нашего запроса и есть наблюдаемая задержка.
             trade_ts = meta.get("regularMarketTime")
-            now_ts = datetime.now(timezone.utc).timestamp()
             delay_sec = max(0, int(now_ts - trade_ts)) if trade_ts else None
             return sym, {"price": round(price, 4), "change_pct": chg, "delay_sec": delay_sec}
-        except Exception:
+        except requests.exceptions.Timeout:
+            log.debug("publish_quotes: %s таймаут", sym)
+            return sym, None
+        except Exception as e:
+            log.debug("publish_quotes: %s ошибка: %s", sym, e)
             return sym, None
 
     out = {}
+    n_429 = 0
+    n_fail = 0
     with ThreadPoolExecutor(max_workers=8) as ex:
         for sym, val in ex.map(_fetch, syms):
-            if val is not None:
+            if val == "429":
+                n_429 += 1
+            elif val is None:
+                n_fail += 1
+            else:
                 out[sym] = val
+
+    # SPEC_fix_live_chart.md §5: 429 почти всегда бьёт по всем параллельным
+    # запросам разом (один IP, один клиент) — не подсимвольная блокировка,
+    # поэтому откладываем цикл целиком, а не пытаемся слить частичный успех.
+    if n_429:
+        _quotes_consecutive_429 += 1
+        backoff_sec = min(300, 15 * (2 ** _quotes_consecutive_429))
+        _quotes_backoff_until = now_ts + backoff_sec
+        log.warning("publish_quotes: 429 от Yahoo на %d/%d тикеров, откат на %ds (подряд: %d)",
+                    n_429, len(syms), backoff_sec, _quotes_consecutive_429)
+        return  # quotes.json не пишем в этом цикле вообще
+    if _quotes_consecutive_429:
+        log.info("publish_quotes: 429 прекратились после %d циклов отката", _quotes_consecutive_429)
+    _quotes_consecutive_429 = 0
+    if n_fail:
+        log.debug("publish_quotes: %d/%d тикеров не ответили (не 429 — таймаут/ошибка)", n_fail, len(syms))
 
     _write("quotes.json", {"updated": _now(), "quotes": out})
 
