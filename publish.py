@@ -296,7 +296,8 @@ def publish_charts() -> None:
 
 def publish_quotes() -> None:
     """Быстрые котировки для live-обновления графика и строки (каждые 15 с).
-    Пишет web/data/quotes.json: {"quotes": {"GC=F": {"price": ..., "change_pct": ...}, ...}}
+    Пишет web/data/quotes.json:
+    {"quotes": {"GC=F": {"price": ..., "change_pct": ..., "delay_sec": ...}, ...}}
     Использует прямые HTTP запросы к Yahoo Finance v8 — обходит кеш yfinance."""
     import requests
     from concurrent.futures import ThreadPoolExecutor
@@ -326,7 +327,13 @@ def publish_quotes() -> None:
             price = float(meta["regularMarketPrice"])
             prev = meta.get("chartPreviousClose")
             chg = round((price / prev - 1) * 100, 2) if prev else None
-            return sym, {"price": round(price, 4), "change_pct": chg}
+            # SPEC_fix_live_chart.md §6.1: задержка измеренная, не декларируемая —
+            # regularMarketTime это момент последней сделки на бирже по Yahoo,
+            # разница с моментом нашего запроса и есть наблюдаемая задержка.
+            trade_ts = meta.get("regularMarketTime")
+            now_ts = datetime.now(timezone.utc).timestamp()
+            delay_sec = max(0, int(now_ts - trade_ts)) if trade_ts else None
+            return sym, {"price": round(price, 4), "change_pct": chg, "delay_sec": delay_sec}
         except Exception:
             return sym, None
 

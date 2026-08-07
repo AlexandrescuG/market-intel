@@ -272,6 +272,14 @@ body.embed .card{border-radius:0;box-shadow:none;border:none;max-width:100%}
     <div class="sentiment-body" id="sentimentBody"></div>
   </div>
   <div class="beginner"><span class="ic">&#9432;</span><div id="explain">…</div></div>
+  <!-- SPEC_fix_live_chart.md §6: единственное место на сайте, где число было
+       без даты и источника — измеренная задержка (не декларируемая) и явное
+       "это не цена брокера". Текст источника меняется вместе с ним (§8: Yahoo/Bybit). -->
+  <div class="foot" id="liveSourceFoot" style="display:none"></div>
+  <div class="foot">
+    <span data-i18n="chart.not_broker_price">Справочная цена Yahoo Finance. У брокера цена будет отличаться на спред.</span>
+    <a href="/brokers" data-i18n="chart.not_broker_price_link">Сравнить брокеров →</a>
+  </div>
   <div class="foot" data-i18n="chart.footer_disclaimer">образовательная подсветка паттернов — контекст, не инвестиционная рекомендация</div>
 </div>
 <div class="evt-card-backdrop" id="evtBackdrop"></div>
@@ -2008,18 +2016,54 @@ function applyLive(price) {
   pxEl.textContent = fmtPrice(price);
   if (!isNaN(prev) && price !== prev) flash(pxEl, price > prev);
   if (lastCandle && candleSeries) {
-    lastCandle.close = price;
-    lastCandle.high  = Math.max(lastCandle.high, price);
-    lastCandle.low   = Math.min(lastCandle.low,  price);
+    // SPEC_fix_live_chart.md §1: без проверки границы бара lastCandle.time
+    // никогда не менялся до полного render() — час чтения превращал
+    // получасовую свечу в часовую. now/bucket в unix-секундах всегда (даже
+    // для D1/W1, где Time графика — 'YYYY-MM-DD'), сравниваем и создаём
+    // новую свечу тоже в unix через barTimeToUnix/unixToBarTime.
+    const now        = Math.floor(Date.now() / 1000);
+    const bucket     = Math.floor(now / TF_SEC[curTF]) * TF_SEC[curTF];
+    const lastBucket = barTimeToUnix(lastCandle.time);
+    if (bucket > lastBucket) {
+      // Разрыв больше одного бара (вкладка была свёрнута) на клиенте не
+      // достраивается — это выдумывание данных. Пропущенные бары дозапросит
+      // тейл-эндпоинт (§2), здесь только честно откроется новая текущая свеча.
+      lastCandle = { time: unixToBarTime(bucket), open: price, high: price, low: price, close: price };
+    } else {
+      lastCandle.close = price;
+      lastCandle.high  = Math.max(lastCandle.high, price);
+      lastCandle.low   = Math.min(lastCandle.low,  price);
+    }
     candleSeries.update(lastCandle);
   }
+}
+
+// SPEC_fix_live_chart.md §6.1/§8: подпись источника и измеренной задержки
+// под графиком — общая для Yahoo/Bybit функция, текст меняется вместе с
+// источником (kind), а не показывает одно и то же для разных свойств данных.
+function setLiveSourceLabel(kind, delaySec) {
+  const el = document.getElementById('liveSourceFoot');
+  if (!el) return;
+  if (kind === 'yahoo') {
+    el.textContent = delaySec != null
+      ? fmt_(t('chart.delay_yahoo_tpl', 'Источник: Yahoo Finance · задержка ~{sec} с'), {sec: delaySec})
+      : t('chart.delay_yahoo_unknown', 'Источник: Yahoo Finance');
+  } else if (kind === 'bybit') {
+    el.textContent = t('chart.delay_bybit_live', 'Источник: Bybit · живой поток, без задержки');
+  } else {
+    el.textContent = '';
+  }
+  el.style.display = el.textContent ? '' : 'none';
 }
 
 async function pollQuotes() {
   try {
     const q = await (await fetch('./data/quotes.json?t='+Date.now())).json();
     const sym = YF[PARAM];
-    if (q.quotes && q.quotes[sym]) applyLive(q.quotes[sym].price);
+    if (q.quotes && q.quotes[sym]) {
+      applyLive(q.quotes[sym].price);
+      setLiveSourceLabel('yahoo', q.quotes[sym].delay_sec);
+    }
   } catch(e){}
 }
 
