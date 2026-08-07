@@ -53,6 +53,11 @@ body{margin:0;background:var(--cream);color:var(--ink);font-family:Montserrat,sa
 .live{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);font-family:'JetBrains Mono'}
 .live .dot{width:7px;height:7px;border-radius:50%;background:var(--up);box-shadow:0 0 7px var(--up);animation:pulse 1.6s infinite}
 @keyframes pulse{50%{opacity:.35}}
+/* SPEC_fix_live_chart.md §4: если сборщик умер, цена гаснет честно, а не
+   молча стоит как текущая. Серая точка без пульса + текст "не обновляется с". */
+.live.stale{color:var(--down)}
+.live.stale .dot{background:var(--muted);box-shadow:none;animation:none}
+.hd .px.stale{color:var(--muted)}
 .hd .stat{font-family:'JetBrains Mono';font-size:12px;color:var(--muted)}
 .hd .stat b{color:var(--ink);font-weight:600}
 .bias{font-size:11px;padding:3px 9px;border-radius:5px;font-family:'JetBrains Mono'}
@@ -218,7 +223,7 @@ body.embed .card{border-radius:0;box-shadow:none;border:none;max-width:100%}
   <div class="hd">
     <span class="sym" id="sym">—</span>
     <span class="px mono" id="px">—</span>
-    <span class="live"><span class="dot"></span>live</span>
+    <span class="live" id="chartLiveDot"><span class="dot"></span><span class="live-txt" data-i18n="chart.live_label">live</span></span>
     <span class="bias" id="bias">—</span>
     <span class="stat">RSI <b id="rsi">—</b></span>
     <span class="stat"><span data-i18n="chart.nearest_label">ближайший:</span> <b id="near">—</b></span>
@@ -2056,9 +2061,39 @@ function setLiveSourceLabel(kind, delaySec) {
   el.style.display = el.textContent ? '' : 'none';
 }
 
+// SPEC_fix_live_chart.md §4: publish_quotes() пишет quotes.json раз в 15с —
+// старше двух циклов (30с) означает, что сборщик умер. Честный простой
+// лучше тихой неправды: цена гаснет, точка live гаснет, время последней
+// записи показывается явно, вместо того чтобы бесконечно держать вчерашнюю
+// цену как текущую.
+function setStale(isStale, updatedIso) {
+  const liveEl = document.getElementById('chartLiveDot');
+  const pxEl   = document.getElementById('px');
+  if (!liveEl || !pxEl) return;
+  liveEl.classList.toggle('stale', isStale);
+  pxEl.classList.toggle('stale', isStale);
+  const txt = liveEl.querySelector('.live-txt');
+  if (!txt) return;
+  if (isStale) {
+    const hhmm = updatedIso
+      ? new Date(updatedIso).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'})
+      : '?';
+    txt.textContent = fmt_(t('chart.data_stale_tpl', 'не обновляется с {time}'), {time: hhmm});
+  } else {
+    txt.textContent = t('chart.live_label', 'live');
+  }
+}
+
 async function pollQuotes() {
   try {
     const q = await (await fetch('./data/quotes.json?t='+Date.now())).json();
+    const ageSec = q.updated ? (Date.now() / 1000 - Date.parse(q.updated) / 1000) : Infinity;
+    if (ageSec > 30) {
+      setStale(true, q.updated);
+      applyLive(null); // не подменяем цену устаревшей — applyLive(null) выходит сразу
+      return;
+    }
+    setStale(false);
     const sym = YF[PARAM];
     if (q.quotes && q.quotes[sym]) {
       applyLive(q.quotes[sym].price);
