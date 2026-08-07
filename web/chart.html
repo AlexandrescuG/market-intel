@@ -2222,19 +2222,55 @@ async function pollTail() {
   }
 }
 
+// SPEC_fix_live_chart.md §8: у сокета не было переподключения при обрыве —
+// один разрыв соединения (не редкость для долго открытой вкладки) навсегда
+// убивал живые обновления цены крипты без единого признака на странице.
+let _wsReconnectAttempts = 0;
+let _wsReconnectTimer = null;
+let _wsDeliberateClose = false;
+const WS_MAX_RECONNECT_ATTEMPTS = 5;
+
 function startCryptoWS() {
   if (!BYBIT[PARAM]) return false;
   try {
+    _wsDeliberateClose = false;
     ws = new WebSocket('wss://stream.bybit.com/v5/public/spot');
-    ws.onopen = () => ws.send(JSON.stringify({op:'subscribe', args:['tickers.'+BYBIT[PARAM]]}));
+    ws.onopen = () => {
+      _wsReconnectAttempts = 0;
+      setLiveSourceLabel('bybit', null); // §6.1/§8: подпись источника меняется вместе с ним
+      ws.send(JSON.stringify({op:'subscribe', args:['tickers.'+BYBIT[PARAM]]}));
+    };
     ws.onmessage = ev => {
       const m = JSON.parse(ev.data);
       if (m.topic && m.data && m.data.lastPrice) applyLive(parseFloat(m.data.lastPrice));
     };
+    ws.onclose = () => { if (!_wsDeliberateClose) scheduleWSReconnect(); };
+    ws.onerror = () => { try { ws.close(); } catch (e) {} }; // onclose сработает следом сам
     return true;
-  } catch(e) { return false; }
+  } catch (e) { return false; }
 }
-function stopWS() { if (ws) { try { ws.close(); } catch(e){}; ws = null; } }
+
+function scheduleWSReconnect() {
+  ws = null;
+  _wsReconnectAttempts++;
+  if (_wsReconnectAttempts > WS_MAX_RECONNECT_ATTEMPTS) {
+    // Сокет не поднимается — сдаёмся честно, откатываемся на Yahoo через
+    // pollQuotes() (задержанные котировки крипты тоже приходят в
+    // publish_quotes(), см. YF.BTC/ETH/SOL) вместо тихой мёртвой цены.
+    setLiveSourceLabel('yahoo', null);
+    pollQuotes();
+    return;
+  }
+  const delay = Math.min(30000, 1000 * Math.pow(2, _wsReconnectAttempts));
+  if (_wsReconnectTimer) clearTimeout(_wsReconnectTimer);
+  _wsReconnectTimer = setTimeout(startCryptoWS, delay);
+}
+
+function stopWS() {
+  _wsDeliberateClose = true;
+  if (_wsReconnectTimer) { clearTimeout(_wsReconnectTimer); _wsReconnectTimer = null; }
+  if (ws) { try { ws.close(); } catch(e){}; ws = null; }
+}
 
 // ── Переключение ────────────────────────────────────────────────────────────
 async function render(tf) {
