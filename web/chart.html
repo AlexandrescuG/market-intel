@@ -2084,7 +2084,57 @@ function setStale(isStale, updatedIso) {
   }
 }
 
+// SPEC_fix_live_chart.md §7: рынок закрыт (выходные) — Yahoo продолжает
+// отвечать 200 с той же ценой сколько угодно, meta.regularMarketTime просто
+// не двигается. Это ДРУГОЙ сигнал, чем §4 (свежесть НАШЕЙ записи в
+// quotes.json — publish_quotes пишет исправно раз в 15с, сборщик жив):
+// delay_sec (§6.1) в этом случае растёт неограниченно. Порог 2ч — с большим
+// запасом выше типичной задержки Yahoo (обычно единицы минут).
+const MARKET_CLOSED_DELAY_SEC = 7200;
+let _marketClosed = false;
+let _pollQuotesTimer = null;
+
+function computeReopenEstimate() {
+  // Приближение по модели core/sessions.py: Азия (Токио) там зафиксирована
+  // 00:00-08:00 UTC без пересчёта на Сидней (см. докстринг файла — реальный
+  // форекс открывается раньше, с Сиднея, эта модель его не считает).
+  // "Не позже этого времени", а не точная минута открытия.
+  const now = new Date();
+  const day = now.getUTCDay(); // 0=вс..6=сб
+  if (day >= 1 && day <= 4) return null; // будний день — не про закрытие выходных
+  const reopen = new Date(now);
+  reopen.setUTCHours(0, 0, 0, 0);
+  reopen.setUTCDate(reopen.getUTCDate() + (day === 0 ? 1 : (8 - day) % 7 || 7));
+  return reopen;
+}
+
+function setMarketClosed(isClosed) {
+  if (isClosed === _marketClosed) return;
+  const wasClosed = _marketClosed;
+  _marketClosed = isClosed;
+  const liveEl = document.getElementById('chartLiveDot');
+  const txt = liveEl ? liveEl.querySelector('.live-txt') : null;
+  if (isClosed) {
+    if (_tailTimer) { clearInterval(_tailTimer); _tailTimer = null; }
+    const reopen = computeReopenEstimate();
+    const msg = reopen
+      ? fmt_(t('chart.market_closed_eta_tpl', 'рынок закрыт · откроется ~{time}'),
+             {time: reopen.toLocaleString([], {weekday: 'short', hour: '2-digit', minute: '2-digit'})})
+      : t('chart.market_closed', 'рынок закрыт');
+    if (liveEl) liveEl.classList.add('stale');
+    if (txt) txt.textContent = msg;
+  } else {
+    if (liveEl) liveEl.classList.remove('stale');
+    if (txt) txt.textContent = t('chart.live_label', 'live');
+    // §7: по открытии — один полный render(), а не догоняющие обновления
+    // (частичный тейл после многочасового простоя означал бы десятки
+    // пропущенных баров россыпью через since — проще перечитать статику).
+    if (wasClosed) render(curTF);
+  }
+}
+
 async function pollQuotes() {
+  let nextDelayMs = 15000;
   try {
     // SPEC_fix_live_chart.md §3: было fetch('./data/quotes.json?t='+Date.now())
     // — ?t= убивал браузерный кэш, а статика отдаётся с no-store (serve.py::
@@ -2097,16 +2147,25 @@ async function pollQuotes() {
     if (ageSec > 30) {
       setStale(true, q.updated);
       applyLive(null); // не подменяем цену устаревшей — applyLive(null) выходит сразу
-      return;
+    } else {
+      setStale(false);
+      const sym = YF[PARAM];
+      const row = Array.isArray(q.quotes) ? q.quotes.find(x => x.ticker === sym) : null;
+      if (row) {
+        const closed = row.delay_sec != null && row.delay_sec > MARKET_CLOSED_DELAY_SEC;
+        setMarketClosed(closed);
+        if (!closed) {
+          applyLive(row.price);
+          setLiveSourceLabel('yahoo', row.delay_sec);
+          // §7: опрос не крутится бессмысленно при закрытом рынке — раз в 5мин
+          // достаточно, чтобы заметить открытие, а не 15с ни за чем.
+        } else {
+          nextDelayMs = 300000;
+        }
+      }
     }
-    setStale(false);
-    const sym = YF[PARAM];
-    const row = Array.isArray(q.quotes) ? q.quotes.find(x => x.ticker === sym) : null;
-    if (row) {
-      applyLive(row.price);
-      setLiveSourceLabel('yahoo', row.delay_sec);
-    }
-  } catch(e){}
+  } catch (e) {}
+  _pollQuotesTimer = setTimeout(pollQuotes, nextDelayMs);
 }
 
 // SPEC_fix_live_chart.md §2: тейл-эндпоинт — реальные бары вместо синтеза из
@@ -2228,10 +2287,11 @@ if (FOCUS_TODAY) {
   document.querySelectorAll('#tf .tf').forEach(b => b.classList.toggle('on', b.dataset.tf === _initialTF));
 }
 render(_initialTF).then(() => {
-  // SPEC_fix_live_chart.md §3: было 8000мс против записи раз в 15с (publish_quotes)
-  // — две трети опросов получали те же байты. Частота опроса не должна быть
-  // чаще частоты записи.
-  if (!startCryptoWS()) { pollQuotes(); setInterval(pollQuotes, 15000); }
+  // SPEC_fix_live_chart.md §3/§7: было 8000мс фиксированным setInterval против
+  // записи раз в 15с (publish_quotes) — две трети опросов получали те же
+  // байты. pollQuotes() теперь сам себя перепланирует через setTimeout (15с
+  // открыт рынок / 5мин закрыт, §7) — здесь только первый вызов.
+  if (!startCryptoWS()) { pollQuotes(); }
   SBFGrafik.chartFullscreenButton(document.querySelector('.card'));
   _reportHeight();
 });
