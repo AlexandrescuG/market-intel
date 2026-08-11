@@ -1,10 +1,13 @@
 """Конфиг: env, пути, пороги. Один источник правды для всех модулей."""
 from __future__ import annotations
 
+import logging
 import os
 from pathlib import Path
 
 from dotenv import load_dotenv
+
+log = logging.getLogger("config")
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR / "data"
@@ -12,6 +15,15 @@ BRIEFS_DIR = DATA_DIR / "briefs"
 REPORTS_DIR = DATA_DIR / "reports"
 PROFILE_DIR = DATA_DIR / "browser_profile"
 DB_PATH = DATA_DIR / "signals.db"
+
+# PROFILE_DIR — не обычный каталог данных: в нём живёт залогиненная сессия
+# X, которую нельзя восстановить автоматически. Если его нет — это авария
+# (потеря сессии), а не первый запуск, поэтому громко предупреждаем, а не
+# создаём тихо пустую замену (см. ЗАДАЧА_починить_ленту_X.md, 06.08.2026).
+if not PROFILE_DIR.exists():
+    log.warning("PROFILE_DIR отсутствует (%s) — сессия X потеряна, коллектор "
+                "будет разлогинен пока профиль не восстановят вручную", PROFILE_DIR)
+
 for d in (DATA_DIR, BRIEFS_DIR, REPORTS_DIR, PROFILE_DIR):
     d.mkdir(parents=True, exist_ok=True)
 

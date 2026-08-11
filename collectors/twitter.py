@@ -134,6 +134,7 @@ async def _ensure_login(page) -> bool:
         return True
     if not TWITTER_USERNAME or not TWITTER_PASSWORD:
         log.error("not logged in and no credentials")
+        await send_text("⚠️ Twitter/X: сессия разлогинена, автологин не настроен (нет TWITTER_USERNAME/PASSWORD) — сбор твитов не идёт")
         return False
     try:
         await page.goto("https://x.com/i/flow/login", wait_until="domcontentloaded", timeout=40_000)
@@ -152,9 +153,13 @@ async def _ensure_login(page) -> bool:
         if "home" in page.url:
             return True
         log.info("жду 60с на ручной 2FA…"); await asyncio.sleep(60)
-        return "home" in page.url
+        ok = "home" in page.url
+        if not ok:
+            await send_text("⚠️ Twitter/X: автологин не прошёл (2FA/challenge?) — сбор твитов не идёт")
+        return ok
     except Exception as e:
         log.error("login error: %s", e)
+        await send_text(f"⚠️ Twitter/X: ошибка логина — {e}")
         return False
 
 
@@ -205,11 +210,15 @@ async def _scan_query(page, dimension: str, query: str) -> list[dict]:
     return tweets
 
 
+_consecutive_empty_cycles = 0
+
+
 async def collect_with_context(ctx) -> int:
     """Один прогон по всем запросам. Пишет сигналы, шлёт алерты. Возвращает #алертов."""
     db.init_db()
     page = await ctx.new_page()
     alerts = 0
+    total_tweets = 0
     try:
         if not await _ensure_login(page):
             return 0
@@ -217,6 +226,7 @@ async def collect_with_context(ctx) -> int:
         for dimension, queries in TWITTER_QUERIES.items():
             for q in queries:
                 tweets = await _scan_query(page, dimension, q)
+                total_tweets += len(tweets)
                 log.info("twitter [%s] %d tweets", dimension, len(tweets))
                 for tw in tweets:
                     eng = tw["likes"] + tw["retweets"]
@@ -252,6 +262,18 @@ async def collect_with_context(ctx) -> int:
             alerts += 1
         if not uniq:
             log.info("twitter: нет новых важных тредов")
+
+        global _consecutive_empty_cycles
+        if total_tweets == 0:
+            _consecutive_empty_cycles += 1
+            log.warning("twitter: 0 постов за весь цикл (подряд: %d)", _consecutive_empty_cycles)
+            if _consecutive_empty_cycles == 2:
+                await send_text(
+                    "⚠️ Twitter/X: 0 постов два цикла подряд — похоже на разлогин "
+                    "или блокировку, а не на тишину. Проверь сессию (data/browser_profile)."
+                )
+        else:
+            _consecutive_empty_cycles = 0
     finally:
         await page.close()
     return alerts
