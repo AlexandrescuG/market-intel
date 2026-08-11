@@ -20,6 +20,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 from sr_levels_job import _load_d1_candles, _atr14, _WEB_DATA
+import core.price_bars as _price_bars
 
 _BOT_DB = Path("/mnt/sbfdata/sbf-platform/SBFAcademy_bot/bot.db")
 
@@ -192,9 +193,7 @@ def run(verbose: bool = False) -> int:
     con.commit()
 
     now_ts = int(time.time())
-    import glob
-    symbols = sorted({Path(f).stem.replace("ohlc_", "").replace("_D1", "")
-                       for f in glob.glob(str(_WEB_DATA / "ohlc_*_D1.json"))})
+    symbols = _price_bars.available_symbols("1d")
 
     written = 0
     for symbol in symbols:

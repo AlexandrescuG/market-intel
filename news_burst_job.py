@@ -135,7 +135,8 @@ def detect_bursts(con, verbose=False) -> int:
 
 
 def run(verbose: bool = False) -> None:
-    con = sqlite3.connect(str(DB_PATH))
+    con = sqlite3.connect(str(DB_PATH), timeout=10)
+    con.execute("PRAGMA busy_timeout=10000")
     con.row_factory = sqlite3.Row
     con.executescript("""
         CREATE TABLE IF NOT EXISTS news_instrument_tags(

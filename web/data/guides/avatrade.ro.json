@@ -1,0 +1,158 @@
+{
+  "id": "avatrade",
+  "name": "AvaTrade",
+  "logo": "/assets/logos/avatrade.svg",
+  "affiliate": "https://www.avatrade.com/?tag=184200",
+  "table_link": "/brokers",
+  "account_kind": "real",
+  "account_label": "CFD",
+  "lead": "Înainte de a vă înregistra, ar trebui să știți: formularul de înregistrare nu menționează niciodată entitatea juridică ce vă administrează contul — pe niciun ecran. Mai jos este întregul traseu de la înregistrare până la verificarea contului, pas cu pas.",
+  "processes": [
+    {
+      "key": "registration",
+      "label": "Înregistrare",
+      "platform": "avatrade.com, web",
+      "captured": "2026-08-07",
+      "needed": ["Email", "Datele actului de identitate (vă vor trebui mai târziu, la verificare — introduceți-le exact ca pe document)"],
+      "blocks": [
+        { "type": "steps", "items": [
+          { "img": "/assets/guides/avatrade/registration/01_start.png",
+            "caption": "[Deschideți avatrade.com](https://www.avatrade.com/?tag=184200) și apăsați „Register Now”. Țara se determină automat după IP." },
+          { "img": "/assets/guides/avatrade/registration/02_country.png",
+            "caption": "Introduceți email-ul și parola.",
+            "note": "Parola trebuie să aibă minimum 8 caractere și să conțină o literă mare, o cifră și un caracter special — de exemplu, Aa12345$." },
+          { "img": "/assets/guides/avatrade/registration/06_personal_details.png",
+            "caption": "Completați datele personale (2/4): nume, data nașterii, adresa.",
+            "note": "Introduceți-le exact ca în pașaport — aceste date sunt verificate cu documentul la verificare (pasul 4 de mai jos)." },
+          { "img": "/assets/guides/avatrade/registration/07_financial_details.png",
+            "caption": "Răspundeți la chestionarul financiar (3/4): ocupație, angajare, sursa fondurilor, venit, economii, toleranță la risc.",
+            "note": "Aceasta este o verificare KYC standard („cunoaște-ți clientul”) — o parte obligatorie a înregistrării la orice broker reglementat, nu o particularitate a AvaTrade. Ordinea răspunsurilor nu contează, iar răspunsurile în sine nu influențează condițiile de tranzacționare." },
+          { "img": "/assets/guides/avatrade/registration/08_terms_conditions.png",
+            "caption": "Bifați punctele necesare din Terms & Conditions (4/4)." }
+        ] },
+        { "type": "callout", "style": "note", "title": "Ce înseamnă fiecare comutator",
+          "body": [
+            "„I confirm that I am not a U.S. citizen...” — obligatoriu: AvaTrade nu deservește rezidenți SUA, iar fără această bifă nu se poate continua.",
+            "„I have read, understood and accepted the Terms and Conditions” — obligatoriu, acceptul contractului.",
+            "„I consent to receive account updates via WhatsApp” — opțional, doar despre canalul de notificare.",
+            "Notificarea despre plățile către parteneri este doar o divulgare: AvaTrade are dreptul să plătească un comision unor platforme precum a noastră pentru atragerea unui client. Nu necesită consimțământ, nu este un comutator, ci o informare."
+          ] },
+        { "type": "entity", "unresolved": true,
+          "title": "Cine semnează contractul — nu s-a stabilit",
+          "body": [
+            "Entitatea juridică nu este menționată pe formularul de înregistrare. Subsolul site-ului enumeră zece regulatori la rând — Japonia (FFAJ și FSA), Cipru (CySEC), Israel (ISA), Canada (CIRO), Abu Dhabi (ADGM/FSRA), Irlanda (Central Bank of Ireland), Insulele Virgine Britanice (BVI FSC), Africa de Sud (FSCA), Australia (ASIC), Columbia. Care dintre ei se aplică unui client din afara acestor jurisdicții (de exemplu, din CSI sau din restul Europei) nu se spune nicăieri.",
+            "Drepturile de autor ale site-ului aparțin Ava Trade Markets Ltd, care apare în aceeași listă sub BVI FSC, licența SIBA/L/13/1049. Dar interfața nu oferă o legătură directă între „țara clientului” și „această entitate”, iar noi nu punem o presupunere în locul unui fapt."
+          ],
+          "checked": "2026-08-05"
+        }
+      ]
+    },
+    {
+      "key": "activation",
+      "label": "Activarea contului",
+      "captured": "2026-08-07",
+      "blocks": [
+        { "type": "steps", "items": [
+          { "img": "/assets/guides/avatrade/activation/02_cabinet_overview.png",
+            "caption": "Imediat după înregistrare ajungeți în contul de tranzacționare. Contul este deja deschis — dar încă nealimentat și neverificat." },
+          { "img": "/assets/guides/avatrade/activation/01_account_management.png",
+            "caption": "Lista conturilor dumneavoastră se află la „Account Management” (pictograma ☰ din stânga sus) → „Accounts”. Butonul „Add A New Account” permite deschiderea unui alt cont pentru o strategie separată; filtrele de deasupra sunt după tip (CFD/Webtrader/MetaTrader 4) și valută." }
+        ] },
+        { "type": "table", "columns": ["Parametru", "Valoare"], "rows": [
+          ["Platforma la înregistrare", "CFD — MT5 (se alege la pasul 2 al înregistrării, poate fi schimbată ulterior în setările contului)"],
+          ["Valuta de bază", "USD (se alege tot la înregistrare)"]
+        ] }
+      ]
+    },
+    {
+      "key": "funding",
+      "label": "Alimentare",
+      "captured": "2026-08-06",
+      "blocks": [
+        { "type": "steps", "items": [
+          { "img": "/assets/guides/avatrade/funding/01_methods.png",
+            "caption": "În meniul din stânga deschideți „Finance” → „Online Payments” și alegeți o metodă: card (MasterCard, Maestro, Visa, Electron), Google Pay, Skrill, Neteller. O filă separată este pentru transfer bancar.",
+            "note": "Skrill și Neteller necesită un cont în aceste sisteme, Google Pay necesită un card asociat." },
+          { "img": "/assets/guides/avatrade/funding/02_amount_form.png",
+            "caption": "Indicați suma și valuta.",
+            "note": "Urmează introducerea datelor de plată ale cardului — acest ecran nu îl arătăm în mod deliberat." },
+          { "img": "/assets/guides/avatrade/funding/03_wire_transfer.png",
+            "caption": "Pentru transfer bancar există o filă separată cu datele deja pregătite: bancă, beneficiar, număr de cont, SWIFT, IBAN.",
+            "note": "Beneficiarul plății indicat este Ava Trade Markets Ltd — același nume ca în subsolul site-ului (vezi nota despre entitate din secțiunea „Înregistrare”). Aceasta confirmă ce companie primește efectiv banii dumneavoastră, dar nu schimbă faptul că niciun regulator nu este numit nicăieri specific pentru clienții din CSI și Europa." }
+        ] },
+        { "type": "table", "columns": ["Parametru", "Valoare", "Sursă"], "rows": [
+          ["Depozit minim cu cardul", "100 USD", "site-ul brokerului, verificat 2026-08-06"],
+          ["Transfer bancar minim", "$100 / €100 / £100", "formularul de transfer, 2026-08-07"]
+        ] }
+      ]
+    },
+    {
+      "key": "verification",
+      "label": "Verificare",
+      "platform": "avatrade.com, cont",
+      "captured": "2026-08-07",
+      "intro": "Fără verificare, unele funcții sunt indisponibile — în special retragerea integrală a fondurilor. Confirmarea se face pe un singur ecran, cu încărcarea a două documente.",
+      "blocks": [
+        { "type": "steps", "items": [
+          { "img": "/assets/guides/avatrade/verification/01_menu_confirm_account.png",
+            "caption": "Apăsați cele trei linii (☰) din colțul stânga sus → „Account Management” → „Verify account”.",
+            "note": "„Verify account” nu este pe ecranul principal — doar în acest meniu derulant. Dacă îl căutați la „Account” din panoul lateral, nu îl veți găsi: sunt puncte de meniu diferite." },
+          { "img": "/assets/guides/avatrade/verification/02_upload_empty.png",
+            "caption": "Se deschide „Document upload” cu statusul „Account not verified” — sunt două blocuri aici: act de identitate și dovadă de adresă." },
+          { "img": "/assets/guides/avatrade/verification/03_doctype_dropdown.png",
+            "caption": "În blocul „ID card”, alegeți tipul documentului și atașați fața și versoul." },
+          { "img": "/assets/guides/avatrade/verification/04_citizenship_submit.png",
+            "caption": "Mai jos, confirmați cetățenia și rezidența fiscală, apoi apăsați „Submit”." }
+        ] },
+        { "type": "callout", "style": "note", "title": "Cerințe pentru documentul „ID card”",
+          "body": [
+            "Documente acceptate: buletin, carte de identitate, pașaport, permis de conducere.",
+            "Trebuie trimise fața și versoul documentului.",
+            "Pe document trebuie să fie vizibile: numele complet, data nașterii, data emiterii și data expirării (dacă este cazul)."
+          ] },
+        { "type": "callout", "style": "note", "title": "Cerințe pentru documentul „dovadă de adresă”",
+          "body": [
+            "Documente acceptate: facturi de gaz/electricitate, extrase bancare, polițe de asigurare pentru locuință sau auto, documente fiscale.",
+            "Documentul trebuie să fie emis cu cel mult 6 luni înainte de data curentă.",
+            "Pe document trebuie să fie indicată adresa dumneavoastră de reședință."
+          ] },
+        { "type": "callout", "style": "note", "title": "Dacă se deschide un cont pentru o persoană juridică",
+          "body": "Vor mai fi necesare: actul constitutiv cu toate modificările, o hotărâre a consiliului director, un certificat de înregistrare, înregistrarea acționarilor, o procură notarială pentru tranzacționare, o procură pentru fiecare director, pentru fiecare acționar și pentru traderul autorizat, plus formularul de deschidere de cont Ava." }
+      ]
+    },
+    {
+      "key": "trading",
+      "label": "Tranzacționare",
+      "blocks": [
+        { "type": "text", "body": "Cum aflați spreadul și swap-ul pentru un instrument. Aceste două cifre determină cât costă tranzacția dumneavoastră: spreadul se plătește imediat la deschidere, swap-ul în fiecare noapte cât timp țineți poziția." },
+        { "type": "steps", "items": [
+          { "caption": "Deschideți pagina instrumentului. Pentru euro-dolar aceasta este [EUR/USD](https://www.avatrade.com/trading-info/financial-instruments-index/forex/eur-usd?i_key=EUR%2FUSD)." },
+          { "caption": "Găsiți blocul Instrument Details — este sub grafic. Acolo sunt cinci cifre: Spread, Leverage, Margin, Minimum Nominal Trade Size și două rânduri Overnight Interest — separat pentru cumpărare și vânzare." }
+        ] },
+        { "type": "callout", "style": "note", "title": "Ce să observați",
+          "body": "Ratele overnight diferă pentru cumpărare și vânzare, iar una dintre ele este de obicei negativă: la euro-dolar, cumpărarea costă −0,0084% pe zi, iar vânzarea aduce +0,0009%. Dacă țineți poziția săptămâni întregi, asta contează mai mult decât spreadul. (Verificat 2026-08-06 pe pagina instrumentului.)" },
+        { "type": "callout", "style": "gap", "title": "Dacă vreți să comparați mai multe instrumente deodată — nu se poate",
+          "body": "Lista generală de condiții a AvaTrade [nu se încarcă](https://www.avatrade.com/trading-info/financial-instruments-index): antetele tabelului sunt acolo, rândurile nu — nici la fila „Most Popular”, nici la Forex, nici după căutarea unui instrument. Va trebui să deschideți instrumentele pe rând, sau să folosiți [tabelul nostru de comparație](/brokers).",
+          "img": "/assets/guides/avatrade/99_instruments_spinner.png" },
+        { "type": "text", "body": "Terminalul în sine este un instrument separat de site, care se deschide imediat după autentificarea în cont. Condițiile se văd diferit acolo: nu instrument cu instrument, ci sub formă de listă, cu spreadul live într-o coloană separată." },
+        { "type": "steps", "items": [
+          { "img": "/assets/guides/avatrade/trading_terminal_01_overview.png",
+            "caption": "Lista instrumentelor este în stânga (coloana „Spread” este live, se actualizează odată cu prețul), graficul este în dreapta, iar butoanele Sell/Buy sunt pe fiecare rând din listă." },
+          { "img": "/assets/guides/avatrade/trading_terminal_02_order_ticket.png",
+            "caption": "Un click pe un instrument deschide un tichet în dreapta: preț de vânzare/cumpărare, volum în loturi, sumă în dolari, levier, și casetele de bifat Stop-Loss și Take-Profit.",
+            "note": "Levierul din tichet este specific acelui instrument — poate diferi de levierul general al contului." }
+        ] },
+        { "type": "callout", "style": "note", "title": "Ce să observați în tichet",
+          "body": "Stop-Loss și Take-Profit sunt casete separate, ambele dezactivate implicit. Fără Stop-Loss, o poziție nu are nicio limită a pierderii, în afară de soldul contului." },
+        { "type": "callout", "style": "fact", "title": "Semnale de tranzacționare gata făcute — chiar în terminal",
+          "body": [
+            "Secțiunea „Signals” arată idei gata făcute de la Trading Central: instrument, direcție, preț de intrare, stop loss, take profit și un scenariu pe înțelesul tuturor — „Sell scenario”, „Buy scenario”, niveluri cheie de suport și rezistență.",
+            "Aceasta nu este recomandarea noastră și nici un sfat personal: Trading Central este partenerul de marketing al AvaTrade, semnalele sunt generate automat după metodologia lor și sunt disponibile în mod egal oricărui client."
+          ],
+          "img": "/assets/guides/avatrade/trading_terminal_03_signals.png" },
+        { "type": "callout", "style": "note", "title": "Ce mai găsiți în cont",
+          "body": "Fila „Overview” adună: opinii ale analiștilor (mișcarea așteptată în pips și punctele de întoarcere pentru perechile valutare), Market Buzz (ce acțiuni sunt discutate acum), o selecție de idei pentru Forex și un calendar economic — toate de la același partener Trading Central, fără cost suplimentar." }
+      ]
+    }
+  ]
+}

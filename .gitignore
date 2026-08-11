@@ -18,3 +18,9 @@ __pycache__/
 .pytest_cache/
 node_modules/
 web/data/ohlc_*.json
+
+# Локальные бэкапы и копии профиля браузера — содержат сессии и пароли
+backups/
+data/browser_profile.bak/
+*.db-shm
+*.db-wal

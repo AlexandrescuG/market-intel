@@ -1914,7 +1914,10 @@ async function drawOurs(tf) {
   const m = _curData.meta;
 
   // Шапка
-  document.getElementById('sym').textContent = symName(PARAM, 'name+ticker') + ' · ' + m.interval;
+  // WP1.2 SPEC_alpha_engine_implementation.md: m.interval может быть null,
+  // если для этого ТФ у price_bars честно нет данных (loadBars -> _emptyBars) --
+  // fallback на сам tf, а не буквальный текст "null" в заголовке.
+  document.getElementById('sym').textContent = symName(PARAM, 'name+ticker') + ' · ' + (m.interval || tf);
   const pxEl = document.getElementById('px');
   pxEl.textContent = m.last != null ? fmtPrice(m.last) : '—';
 

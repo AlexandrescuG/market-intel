@@ -12,6 +12,7 @@
     "class": "metal",
     "chart": true,
     "yahoo": "GC=F",
+    "price_bars": "XAUUSD",
     "quote": true
   },
   "SILVER": {
@@ -53,7 +54,8 @@
       "UKOIL",
       "BZ=F"
     ],
-    "class": "commodity"
+    "class": "commodity",
+    "yahoo": "BZ=F"
   },
   "NG": {
     "ru": "Природный газ",
@@ -62,7 +64,8 @@
     "aliases": [
       "NATGAS",
       "XNGUSD",
-      "NG=F"
+      "NG=F",
+      "GAS"
     ],
     "class": "commodity",
     "chart": true,
@@ -106,7 +109,7 @@
     ],
     "class": "fx",
     "chart": true,
-    "yahoo": "USDJPY=X"
+    "yahoo": "JPY=X"
   },
   "USDRUB": {
     "ru": "Доллар / рубль",
@@ -390,7 +393,8 @@
     "aliases": [
       "IWM"
     ],
-    "class": "index"
+    "class": "index",
+    "yahoo": "^RUT"
   },
   "DAX": {
     "ru": "DAX",

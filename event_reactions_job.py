@@ -231,27 +231,12 @@ def _case_metrics(con, symbol, release_ts, hourly_baseline):
 
 
 def _migrate(con: sqlite3.Connection) -> None:
-    """Идемпотентно, джоб не зависит от того, перезапускался ли sbf-web.service
-    (там та же миграция дублирована в serve.py::_ensure_schema — единый список
-    колонок для читателя схемы, но каждый процесс сам себя обеспечивает)."""
-    for ddl in (
-        "ALTER TABLE event_reaction_stats ADD COLUMN hourly_baseline_30m REAL",
-        "ALTER TABLE event_reaction_stats ADD COLUMN baseline_ratio_30m REAL",
-        "ALTER TABLE event_reaction_stats ADD COLUMN period_from TEXT",
-        "ALTER TABLE event_reaction_stats ADD COLUMN period_to TEXT",
-        "ALTER TABLE event_reaction_stats ADD COLUMN avg_move_4h REAL",
-        "ALTER TABLE event_reaction_stats ADD COLUMN max_move_4h REAL",
-        "ALTER TABLE event_reaction_stats ADD COLUMN n_beat INT",
-        "ALTER TABLE event_reaction_stats ADD COLUMN beat_up_share REAL",
-        "ALTER TABLE event_reaction_stats ADD COLUMN beat_down_share REAL",
-        "ALTER TABLE event_reaction_stats ADD COLUMN n_miss INT",
-        "ALTER TABLE event_reaction_stats ADD COLUMN miss_up_share REAL",
-        "ALTER TABLE event_reaction_stats ADD COLUMN miss_down_share REAL",
-    ):
-        try:
-            con.execute(ddl)
-        except sqlite3.OperationalError:
-            pass  # колонка уже есть
+    """WP1.4 SPEC_alpha_engine_implementation.md: раньше был свой список
+    ALTER TABLE, независимый от serve.py::_ensure_schema -- и уже разошёлся
+    (тут не было median_move_30m/median_atr_30m). core.db_migrations —
+    общий версионированный источник, идемпотентен сам по себе."""
+    from core.db_migrations import apply_all
+    apply_all(con)
 
 
 def run(verbose: bool = False) -> int:

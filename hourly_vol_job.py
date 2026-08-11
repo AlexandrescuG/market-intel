@@ -15,12 +15,12 @@ chart.html) считает средний диапазон (high-low) по ча�
   python3 hourly_vol_job.py [--verbose]
 """
 import argparse
-import glob
-import json
 import sqlite3
 import time
 from datetime import datetime, timezone
 from pathlib import Path
+
+import core.price_bars as _price_bars
 
 _BOT_DB = Path("/mnt/sbfdata/sbf-platform/SBFAcademy_bot/bot.db")
 _WEB_DATA = Path(__file__).parent / "web" / "data"
@@ -28,30 +28,21 @@ _WEB_DATA = Path(__file__).parent / "web" / "data"
 WINDOW_DAYS = 90
 
 
-def _load_m30_candles(symbol: str):
-    f = _WEB_DATA / f"ohlc_{symbol}_M30.json"
-    if not f.exists():
-        return None
-    try:
-        data = json.loads(f.read_text())
-    except (json.JSONDecodeError, OSError):
-        return None
-    return data.get("candles") or []
-
-
 def compute_symbol(symbol: str, now_ts: int, verbose=False):
-    candles = _load_m30_candles(symbol)
+    # WP1.2 SPEC_alpha_engine_implementation.md: раньше свой парсинг
+    # ohlc_{symbol}_M30.json -- теперь price_bars напрямую.
+    candles = _price_bars.load_candles(symbol, "30m")
     if not candles:
         return []
     cutoff = now_ts - WINDOW_DAYS * 86400
     buckets = {h: [] for h in range(24)}
     for c in candles:
-        ts = c.get("time")
-        if not isinstance(ts, (int, float)) or ts < cutoff:
+        ts = c["ts"]
+        if ts < cutoff:
             continue
         try:
             h = datetime.fromtimestamp(ts, timezone.utc).hour
-            buckets[h].append(float(c["high"]) - float(c["low"]))
+            buckets[h].append(c["h"] - c["l"])
         except (ValueError, TypeError, KeyError):
             continue
 
@@ -76,8 +67,7 @@ def run(verbose: bool = False) -> int:
     con.commit()
 
     now_ts = int(time.time())
-    symbols = sorted({Path(f).stem.replace("ohlc_", "").replace("_M30", "")
-                       for f in glob.glob(str(_WEB_DATA / "ohlc_*_M30.json"))})
+    symbols = _price_bars.available_symbols("30m")
 
     written = 0
     for symbol in symbols:

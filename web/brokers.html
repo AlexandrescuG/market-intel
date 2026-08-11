@@ -18,12 +18,6 @@
 .brokers-h1{font-size:26px;font-weight:800;letter-spacing:-.01em;color:var(--ink);margin-bottom:6px}
 .brokers-sub{font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:20px;max-width:760px}
 
-/* Раскрытие вознаграждения — вверху, не в подвале (§2 п.4 спеки) */
-.disclosure{margin:0 0 20px;padding:12px 16px;background:var(--cream,#faf8f3);
-  border-left:3px solid var(--gold);font-size:13px;line-height:1.6;color:var(--ink)}
-.disclosure b{color:var(--ink)}
-.disclosure a{color:var(--ink);border-bottom:1px solid var(--gold);text-decoration:none}
-
 /* Тулбар: страна + пометка сортировки */
 .brokers-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin-bottom:16px}
 .country-picker{font-size:13px;color:var(--muted)}
@@ -42,6 +36,8 @@
 .brokers-table td{padding:10px;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.5}
 .brokers-table .col-name a{color:var(--ink);font-weight:700;text-decoration:none}
 .brokers-table .col-name a:hover{color:var(--gold)}
+.guide-link{display:block;font-size:11px;color:var(--muted);text-decoration:none;margin-top:4px}
+.guide-link:hover{color:var(--gold)}
 .entity-sub{font-size:11px;color:var(--muted);margin-top:2px}
 .loss-val{color:var(--down);font-size:14px}
 .loss-np{color:var(--muted);font-style:italic}
@@ -79,9 +75,6 @@
 /* Лицензия: пометка "со слов брокера" */
 .licence-note{font-size:11px;color:var(--muted);margin-top:2px;max-width:200px;line-height:1.4}
 
-/* Красный флаг — нет защиты от отрицательного баланса (§4.3) */
-.nbp-warn{color:var(--down);font-weight:700}
-
 .quiz-filter-note{color:var(--gold)}
 
 /* Мобильная карточка — значение может содержать блочные элементы (лицензия, %) */
@@ -94,11 +87,6 @@
 <div class="wrap" id="brokersPageRoot">
   <h1 class="brokers-h1">{{ t('brokers.h1', lang) }}</h1>
   <p class="brokers-sub">{{ t('brokers.subtitle', lang) }}</p>
-
-  <div class="disclosure">
-    <b>{{ t('brokers.disclosure_mark', lang) }}</b>
-    {{ t('brokers.disclosure_revshare', lang) }}
-  </div>
 
   <div id="brokersTableRoot"></div>
 

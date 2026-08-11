@@ -49,36 +49,13 @@ import requests  # для режима post
 
 # ------------------------------------------------------------------ КОНФИГ ---
 
-# наш ключ  ->  имя символа у брокера (проверь в MarketWatch! у брокеров разнится).
-# Текущий брокер (Daoti.io-Server, счёт 1012535) суффиксует майоры точкой —
-# проверено mt5.symbols_get() 2026-07-16: EURUSD./USDJPY./GBPUSD./USDCNH./
-# USDZAR. существуют, USDRUB/USDKZT/USDAED у этого брокера нет вообще (не 404
-# скрипта — просто не торгуются здесь).
-SYMBOL_MAP = {
-    "EURUSD": "EURUSD.",
-    "USDJPY": "USDJPY.",
-    "XAUUSD": "XAUUSD",   # без точки — у этого брокера уникально для золота
-    "USDRUB": "USDRUB",   # недоступен у Daoti.io-Server — останется пустым
-    "USDCNY": "USDCNH.",
-    "USDZAR": "USDZAR.",
-    "USDKZT": "USDKZT",   # недоступен у Daoti.io-Server — останется пустым
-    "USDAED": "USDAED",   # недоступен у Daoti.io-Server — останется пустым
-}
+# SYMBOL_MAP / RECENT_BARS — общие с mt5_bridge_pull.py, см. mt5_config.py.
+from mt5_config import SYMBOL_MAP, TIMEFRAME_ATTR, RECENT_BARS
 
 # наш tf-код -> константа таймфрейма MT5  (совпадает с тумблерами графика)
 # 15m — SPEC_chart_fixes_and_staged_signup.md §3 (добавлен на сервере
 # publish.py::publish_charts_mt5, ждёт бэкфилла отсюда).
-TIMEFRAMES = {
-    "15m": mt5.TIMEFRAME_M15,
-    "30m": mt5.TIMEFRAME_M30,
-    "1h":  mt5.TIMEFRAME_H1,
-    "4h":  mt5.TIMEFRAME_H4,
-    "1d":  mt5.TIMEFRAME_D1,
-    "1w":  mt5.TIMEFRAME_W1,
-}
-
-# сколько последних баров тянуть в штатном режиме (без бэкфилла)
-RECENT_BARS = {"15m": 3000, "30m": 3000, "1h": 3000, "4h": 2000, "1d": 2000, "1w": 1000}
+TIMEFRAMES = {name: getattr(mt5, attr) for name, attr in TIMEFRAME_ATTR.items()}
 
 HTTP_CHUNK = 5000          # баров в одном POST
 LOCAL_DB   = "price_bars.sqlite"

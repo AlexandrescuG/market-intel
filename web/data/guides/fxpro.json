@@ -1,0 +1,156 @@
+{
+  "id": "fxpro",
+  "name": "FxPro",
+  "logo": "/assets/logos/fxpro.svg",
+  "affiliate": "https://www.fxpro-direct.org/en/register/md/cri/32TQQFd7H",
+  "table_link": "/brokers",
+  "account_kind": "real",
+  "account_label": "MT5 Hedging, не пополнен",
+  "lead": "Единственный брокер в нашем сравнении, у которого название компании-контрагента не удаётся узнать с экрана регистрации вообще. Оно находится — но только внутри PDF клиентского договора.",
+  "processes": [
+    {
+      "key": "registration",
+      "label": "Регистрация",
+      "platform": "direct.fxpro.com, веб",
+      "captured": "2026-08-07",
+      "needed": ["Email", "Пара минут на форму — и ещё 2 перехода, если хотите увидеть юрлицо"],
+      "blocks": [
+        { "type": "steps", "items": [
+          { "img": "/assets/guides/fxpro/registration/02_country.png",
+            "caption": "Заполните страну, email и пароль.",
+            "note": "Страна определяется по IP автоматически и подставляется в адрес формы — так FxPro выбирает, какое юрлицо группы станет вашим контрагентом. Например, маршрут .../register/md/crc ведёт на коста-риканское юрлицо (crc = Costa Rica Markets Ltd)." },
+          { "img": "/assets/guides/fxpro/registration/06_personal_details.png",
+            "caption": "На следующем экране укажите имя, дату рождения и телефон.",
+            "note": "Код страны для номера телефона подставляется по выбранной ранее стране." }
+        ] },
+        { "type": "callout", "style": "gap", "title": "На форме регистрации юрлицо не названо",
+          "body": "Единственная строка внизу формы — «FxPro is a registered trademark utilised under an approved licensing agreement». Ни компании, ни юрисдикции, ни номера лицензии.",
+          "img": "/assets/guides/fxpro/registration/03_entity_absent.png" },
+        { "type": "steps", "items": [
+          { "img": "/assets/guides/fxpro/registration/04_terms.png",
+            "caption": "Чтобы всё же узнать, с кем заключается договор, откройте ссылку «Terms and conditions» на форме → раздел Legal Documentation." },
+          { "img": "/assets/guides/fxpro/registration/05_agreement_cover.png",
+            "caption": "Откройте «Client Agreement». Уже в названии файла видно: «Costa Rica Markets Ltd — June 2026 New entity…»." }
+        ] },
+        { "type": "entity",
+          "img": "/assets/guides/fxpro/registration/05_agreement_clause12.png",
+          "legal_name": "Costa Rica Markets Ltd",
+          "jurisdiction": "Коста-Рика",
+          "regulator": null,
+          "licence_no": null,
+          "register_url": null,
+          "register_note": "У бренда FxPro регуляторы есть — FCA (Великобритания), Комиссия по ценным бумагам Багамских островов, FSA Сейшел (fxpro.com/about/licences). Но все они лицензируют ДРУГИЕ юрлица группы. Costa Rica Markets Ltd, с которым реально подписывает договор клиент из большинства стран СНГ и Европы, не упомянуто ни на одном из этих регуляторов, и в самом договоре нет ссылки ни на какой регулирующий орган вообще.",
+          "quote": "«FxPro is the brand and trading name of Costa Rica Markets Ltd. which is a private limited company incorporated in Costa Rica.» (п. 1.2 клиентского договора)",
+          "confirmed": true,
+          "confirm_note": "На самом экране регистрации юрлицо НЕ называется вовсе — только строка про товарный знак. Узнать реального контрагента можно только открыв PDF-договор через два перехода вглубь документации, которые обычный пользователь при регистрации проходить не обязан.",
+          "missing": [
+            "регулятора и лицензии у ЭТОГО юрлица — при том что у бренда FxPro в целом регуляторы есть (см. выше), просто не у него",
+            "компенсационного фонда — защита FSCS относится к британскому FxPro UK Limited, не к коста-риканскому юрлицу, которое реально обслуживает большинство клиентов из СНГ и Европы",
+            "публикуемого процента теряющих счетов — не публикуется ни на одной странице"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "activation",
+      "label": "Активация счёта",
+      "platform": "direct.fxpro.com, кабинет",
+      "captured": "2026-08-07",
+      "blocks": [
+        { "type": "steps", "items": [
+          { "img": "/assets/guides/fxpro/activation/01_ready_modal.png",
+            "caption": "Сразу после регистрации появляется экран «You are Ready to Start!» с QR-кодом для мобильного приложения.",
+            "note": "Если приложение не нужно — нажмите «Proceed with web»." },
+          { "img": "/assets/guides/fxpro/activation/02_wallet_accounts.png",
+            "caption": "Вы попадаете в «Wallet & Accounts»: отдельно кошелёк (для расчётов между счетами) и торговый счёт — уже созданный, вкладка «Real account»." }
+        ] },
+        { "type": "callout", "style": "note", "title": "На что обратить внимание",
+          "body": "Счёт, который FxPro создаёт по умолчанию, помечен «Real», а не «Demo» — хотя баланс нулевой и торговать нельзя, пока нет депозита. Если хотите потренироваться без денег, переключитесь на вкладку «Demo accounts» и создайте демо-счёт отдельно — по умолчанию она не выбрана." },
+        { "type": "table", "columns": ["Параметр", "Значение"], "rows": [
+          ["Тип счёта, создаётся по умолчанию", "MT5 Hedging, Real"],
+          ["Платформы", "FxPro WebTrader, MT4, MT5, cTrader, TradingView, мобильное приложение"],
+          ["Комиссия", "Standard — нет; Raw+ и Elite — 3,5 USD за лот в одну сторону по основным парам и золоту; cTrader — 35 USD за 1 000 000 оборота"]
+        ] }
+      ]
+    },
+    {
+      "key": "funding",
+      "label": "Пополнение",
+      "platform": "direct.fxpro.com, кабинет",
+      "captured": "2026-08-07",
+      "blocks": [
+        { "type": "steps", "items": [
+          { "img": "/assets/guides/fxpro/funding/01_deposit_form.png",
+            "caption": "В боковом меню откройте «Deposit», выберите способ и введите сумму.",
+            "note": "Способы: карта (Visa/Mastercard), Binance Pay, USDT, BTC, Ethereum, другие крипто, Skrill, Neteller, банковский перевод." }
+        ] },
+        { "type": "table", "columns": ["Параметр", "Значение"], "rows": [
+          ["Диапазон депозита картой", "50–50 000 USD за раз"],
+          ["Комиссия платформы", "0%"]
+        ] },
+        { "type": "callout", "style": "note", "title": "На что обратить внимание",
+          "body": "0% — это комиссия самой платформы FxPro. Комиссию своего банка или платёжной системы (особенно для карт не в USD) это не отменяет — уточняйте отдельно у эмитента карты." }
+      ]
+    },
+    {
+      "key": "verification",
+      "label": "Верификация",
+      "platform": "direct.fxpro.com, кабинет",
+      "captured": "2026-08-07",
+      "intro": "Без верификации счёт создаётся и виден в кабинете, но документы всё равно попросят перед первым выводом средств.",
+      "blocks": [
+        { "type": "steps", "items": [
+          { "img": "/assets/guides/fxpro/verification/00_profile_menu.png",
+            "caption": "Откройте меню профиля (значок в правом верхнем углу) → «Settings»." },
+          { "img": "/assets/guides/fxpro/verification/01_identity_not_uploaded.png",
+            "caption": "На вкладке «Your documents» — статус «Identity Verification: Not uploaded». Нажмите «Upload», чтобы прикрепить документ." },
+          { "img": "/assets/guides/fxpro/verification/02_optional_doctypes.png",
+            "caption": "Отдельно есть блок «Optional documents» — сюда загружают то, что площадка запросила дополнительно, помимо стандартной верификации.",
+            "note": "Выпадающий список — это варианты типа документа, а не готовый список требований: Debit/credit card copy, Bank statement, FxPro Internal Form, KYC Request, Accounting Request, Other. Выбирайте тот, который соответствует конкретному запросу от FxPro." }
+        ] }
+      ]
+    },
+    {
+      "key": "trading",
+      "label": "Торговля",
+      "platform": "MT5 WebTrader, демо-счёт",
+      "captured": "2026-08-07",
+      "blocks": [
+        { "type": "steps", "items": [
+          { "img": "/assets/guides/fxpro/99_trading_terminal_overview.png",
+            "caption": "Открывается MT5 WebTrader: слева список инструментов с текущим спредом, справа график, снизу — открытые позиции." }
+        ] },
+        { "type": "callout", "style": "note", "title": "Почему мы не публикуем спред FxPro одним числом",
+          "body": ["У нас есть три независимых измерения одного и того же евродоллара, и все три расходятся: живая котировка на публичной странице сайта — около 1,4 пипса; в этом же терминале, в списке избранного — 0,2; в полном поиске инструментов терминала (ниже) — 0,1.", "Частичное объяснение нашлось на самой странице инструмента: «Note: Price data indicated above may be delayed by 15 minutes». Но пятнадцатиминутная задержка не даёт семикратной разницы между сайтом и терминалом, так что вопрос закрыт не полностью.", "Пока причина неизвестна, «спред FxPro» не имеет одного определённого значения, и мы предпочитаем сказать это прямо, а не выбрать из чисел то, которое выглядит лучше. Разрешается это только замером на реальном счёте в конкретный момент сделки."] },
+        { "type": "steps", "items": [
+          { "img": "/assets/guides/fxpro/99_trading_spread_table.png",
+            "caption": "Чтобы увидеть спред по любому инструменту сразу, откройте поиск (значок лупы вверху) — появится таблица со всеми парами и живым спредом в средней колонке." }
+        ] },
+        { "type": "table", "columns": ["Инструмент", "Спред"], "rows": [
+          ["EUR/USD", "0,1"],
+          ["GBP/USD", "0,6"],
+          ["USD/JPY", "0,3"],
+          ["USD/CHF", "0,4"],
+          ["USD/CAD", "0,4"],
+          ["EUR/GBP", "0,4"],
+          ["EUR/JPY", "0,2"],
+          ["GBP/JPY", "1,3"]
+        ], "caption": "Снимок терминала, 2026-08-07, вне окон методики — приведён как ориентир, не как замер по правилам." },
+        { "type": "table", "columns": ["Инструмент", "Спред (сайт)", "Своп long", "Своп short"], "rows": [
+          ["EUR/USD", "~1,4 пипса (с задержкой 15 мин)", "−8,9 пункта", "+1,9 пункта"]
+        ], "caption": "Это то, что FxPro публикует официально — на странице инструмента, не сводной таблицей (сводной у него нет). Своп собран только для EUR/USD; остальные одиннадцать инструментов — по тому же шаблону адреса." },
+        { "type": "steps", "items": [
+          { "img": "/assets/guides/fxpro/99_trading_order_ticket.png",
+            "caption": "Чтобы выставить сделку, кликните по инструменту в списке — откроется тикет с вкладками Market / Limit / Stop.",
+            "note": "Market — по текущей цене; Limit — сработает, когда цена дойдёт до вашей отметки; Stop — противоположность Limit, для входа по пробою." },
+          { "caption": "Укажите объём (Volume), при желании отметьте Stop Loss и Take Profit — оба необязательны, но без Stop Loss сделка ничем не ограничена сверху убытка." }
+        ] },
+        { "type": "callout", "style": "note", "title": "На что обратить внимание",
+          "body": "«Margin required» под тикетом — это не комиссия, а сумма, которая блокируется на счёте под открытую позицию. Она возвращается при закрытии сделки, но пока позиция открыта — ей нельзя пользоваться." },
+        { "type": "callout", "style": "note", "title": "Ценовые оповещения — без открытой позиции",
+          "body": "В терминале можно поставить оповещение на цену (значок колокольчика) — придёт уведомление, когда инструмент дойдёт до нужного уровня, без необходимости держать сделку открытой или сидеть у графика.",
+          "img": "/assets/guides/fxpro/99_trading_alerts.png" }
+      ]
+    }
+  ]
+}

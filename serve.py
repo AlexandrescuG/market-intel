@@ -19,6 +19,7 @@ from urllib.parse import urlparse, parse_qs, unquote
 sys.path.insert(0, str(Path(__file__).parent))
 from core import journal_db, journal_crypto, journal_ocr, journal_csv, journal_meta, journal_discipline, journal_alerts, journal_brief, journal_setups, journal_tilt, journal_gamification, journal_goals, journal_account, journal_auth, journal_feedback, journal_import, journal_analytics, journal_review, journal_cooldown, journal_rules, journal_tradeplan, journal_gate, i18n
 from core import symbols as _symbols
+from core.symbols_registry import yahoo_ticker as _registry_yahoo_ticker
 from core.event_types import normalize_event_type
 from core.config import DB_PATH as _SIGNALS_DB
 from core.patterns import PATTERNS, detect as _detect_patterns
@@ -42,31 +43,14 @@ BOOK_DIR = Path(__file__).parent / "web" / "book"
 EDU_DIR  = Path(__file__).parent / "web" / "edu"
 WEB_DIR  = Path(__file__).parent / "web"
 
-# SPEC_chart_fixes_and_staged_signup.md §3: тикеры yfinance для живого
-# M5-эндпоинта (_handle_chart_ohlc_m5) — тот же список, что publish.py's
-# WATCH для статических таймфреймов, плюс USDJPY (yfinance отдаёт его
-# достаточно надёжно для короткого 7-дневного окна). USDRUB/USDKZT — нет:
-# yfinance ими не торгует, а MT5 M5 никто ещё не собирал.
-_M5_YF_TICKERS = {
-    "GOLD": "GC=F", "SILVER": "SI=F",
-    "BTC": "BTC-USD", "ETH": "ETH-USD", "SOL": "SOL-USD",
-    # 🔴 USDJPY: было "USDJPY=X". В этом же файле, в сидах symbol_map (строка ~164),
-    # тот же инструмент записан как "JPY=X", и так же он объявлен в chart.html:330.
-    # Одно значение из трёх отличалось — тот же инструмент кешировался под двумя
-    # ключами. Приведено к "JPY=X": это родная запись Yahoo для пар с долларом
-    # в базе (RUB=X, CNY=X, AED=X, ZAR=X в том же сид-списке), тогда как форма
-    # AAABBB=X у Yahoo используется для кроссов (EURUSD=X, GBPUSD=X).
-    "EURUSD": "EURUSD=X", "GBPUSD": "GBPUSD=X", "USDJPY": "JPY=X",
-    "SPX": "^GSPC", "NASDAQ": "^IXIC", "DJI": "^DJI",
-    "WTI": "CL=F", "NG": "NG=F", "DXY": "DX-Y.NYB",
-}
+# SPEC_chart_fixes_and_staged_signup.md §3 / WP1.1 SPEC_alpha_engine_implementation.md:
+# тикеры yfinance для live M5- и tail-эндпоинтов — раньше был свой хардкод-словарь
+# _M5_YF_TICKERS (независимый от core.symbols_registry.yahoo_ticker(), с которым уже
+# успел разойтись: тут USDJPY был "JPY=X", в реестре — устаревшее "USDJPY=X". Реестр
+# теперь исправлен на "JPY=X" — единственный источник, дубль убран).
 _m5_cache: dict = {}
 _M5_CACHE_TTL = 90  # сек
 
-# SPEC_fix_live_chart.md §2: тейл-эндпоинт для _handle_chart_tail. Тикеры —
-# тот же _M5_YF_TICKERS (не core.symbols_registry.yahoo_ticker: у USDJPY там
-# всё ещё "USDJPY=X", не приведён к канону "JPY=X" из этого же файла —
-# отдельная находка, вне зоны этой спеки, не трогаю symbols.json здесь).
 # H4/W1 у Yahoo нет нативно — ресэмплим из H1/D1, как publish.py::publish_charts.
 _TAIL_YF_INTERVAL = {"M5": "5m", "M15": "15m", "M30": "30m", "H1": "60m",
                      "H4": "60m", "D1": "1d", "W1": "1d"}
@@ -157,26 +141,12 @@ def _ensure_schema() -> None:
     # же, хотя это обычный час против аномалии. Плюс период выборки (§4: любая
     # публикуемая метрика обязана показывать n И период) и 4-часовое окно —
     # тот же горизонт, что у контрольных цифр Recognia (§0), для сверки.
-    for ddl in [
-        "ALTER TABLE event_reaction_stats ADD COLUMN median_move_30m REAL",
-        "ALTER TABLE event_reaction_stats ADD COLUMN median_atr_30m REAL",
-        "ALTER TABLE event_reaction_stats ADD COLUMN hourly_baseline_30m REAL",
-        "ALTER TABLE event_reaction_stats ADD COLUMN baseline_ratio_30m REAL",
-        "ALTER TABLE event_reaction_stats ADD COLUMN period_from TEXT",
-        "ALTER TABLE event_reaction_stats ADD COLUMN period_to TEXT",
-        "ALTER TABLE event_reaction_stats ADD COLUMN avg_move_4h REAL",
-        "ALTER TABLE event_reaction_stats ADD COLUMN max_move_4h REAL",
-        "ALTER TABLE event_reaction_stats ADD COLUMN n_beat INT",
-        "ALTER TABLE event_reaction_stats ADD COLUMN beat_up_share REAL",
-        "ALTER TABLE event_reaction_stats ADD COLUMN beat_down_share REAL",
-        "ALTER TABLE event_reaction_stats ADD COLUMN n_miss INT",
-        "ALTER TABLE event_reaction_stats ADD COLUMN miss_up_share REAL",
-        "ALTER TABLE event_reaction_stats ADD COLUMN miss_down_share REAL",
-    ]:
-        try:
-            con.execute(ddl)
-        except Exception:
-            pass
+    # WP1.4 SPEC_alpha_engine_implementation.md: раньше здесь и в
+    # event_reactions_job.py._migrate() было по независимой копии этого же
+    # списка -- уже успели разойтись (там не было двух первых колонок).
+    # core.db_migrations — общий источник, версионированный, идемпотентный.
+    from core.db_migrations import apply_all as _apply_migrations
+    _apply_migrations(con)
     con.executemany(
         "INSERT OR IGNORE INTO symbol_map(our_key, twelvedata, mt5, yahoo) VALUES(?,?,?,?)",
         [
@@ -2132,7 +2102,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         if not symbol:
             self._send_json({"error": "symbol required"}, 400)
             return
-        ticker = _M5_YF_TICKERS.get(symbol)
+        ticker = _registry_yahoo_ticker(symbol)
         if not ticker:
             # Честно: нет надёжного источника M5 для этого символа (MT5-only
             # валюты типа USDRUB/USDKZT никто ещё не собирал на этом ТФ) —
@@ -2190,7 +2160,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         except ValueError:
             since = 0
 
-        ticker = _M5_YF_TICKERS.get(symbol)
+        ticker = _registry_yahoo_ticker(symbol)
         if not ticker:
             self._send_json({"candles": [], "updated": datetime.now(timezone.utc).isoformat(),
                               "delay_sec": None, "market_open": None})

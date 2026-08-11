@@ -11,7 +11,6 @@ pattern_stats_job.py — SBF_Charts_Layer2_Spec, Фаза 3, Шаг 2 (бэкт�
   python3 pattern_stats_job.py [--verbose]
 """
 import argparse
-import glob
 import sqlite3
 import sys
 import time
@@ -19,39 +18,52 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 from core.patterns import PATTERNS, detect
-from sr_levels_job import _load_d1_candles, _WEB_DATA
+import core.price_bars as _price_bars
 from event_reactions_job import _pip_scale
 
 _BOT_DB = Path("/mnt/sbfdata/sbf-platform/SBFAcademy_bot/bot.db")
 TIMEFRAMES = ["H1", "H4", "D1"]
+# наш код ТФ -> код в price_bars. Шире, чем TIMEFRAMES (бэктест-петля выше) --
+# 🔴 живой /api/chart/patterns (serve.py:_handle_chart_patterns) зовёт ЭТУ ЖЕ
+# _load_candles() с любым ТФ кнопок графика (M15/M30/W1 тоже), не только тремя
+# бэктестируемыми -- KeyError на M30 не был пойман curl'ом по H1, нашёлся
+# только кликом по вкладке (см. Core-лог WP1.2). M5 намеренно не сюда -- у
+# price_bars нет '5m', честный None лучше падения.
+_TF_TO_PB = {"M15": "15m", "M30": "30m", "H1": "1h", "H4": "4h", "D1": "1d", "W1": "1w"}
 CHECKPOINTS = (3, 5, 10)
+MIN_GAP_BARS = 6  # дедупликация — симметрично chart.html:436-442 ("не ближе 6 баров")
+
+
+def _dedup_by_gap(occs, ts_to_idx, min_gap_bars=MIN_GAP_BARS):
+    """Не ближе min_gap_bars баров подряд на один pattern_key.
+
+    Якорь — индекс ПОСЛЕДНЕГО ОСТАВЛЕННОГО срабатывания (не последнего вообще),
+    та же логика, что в chart.html:438-440 и что уже описана как правильная
+    в confluence_job.py._cluster_factors — цепочка по последнему элементу
+    (а не по якорю) занижает разрыв и завышает n.
+    """
+    kept = []
+    last_kept_idx = None
+    for occ in occs:
+        i = ts_to_idx.get(occ["ts"])
+        if i is None:
+            continue
+        if last_kept_idx is not None and (i - last_kept_idx) < min_gap_bars:
+            continue
+        last_kept_idx = i
+        kept.append(occ)
+    return kept
 
 
 def _load_candles(symbol: str, tf: str):
-    if tf == "D1":
-        return _load_d1_candles(symbol)
-    f = _WEB_DATA / f"ohlc_{symbol}_{tf}.json"
-    if not f.exists():
+    """WP1.2 SPEC_alpha_engine_implementation.md: раньше D1 шёл через
+    sr_levels_job._load_d1_candles (JSON), H1/H4 — свой парсинг того же
+    ohlc_{symbol}_{tf}.json. Один источник (price_bars) убирает саму
+    развилку -- обе ветки были одним и тем же чтением из разных файлов."""
+    pb_tf = _TF_TO_PB.get(tf)
+    if pb_tf is None:
         return None
-    import json
-    try:
-        data = json.loads(f.read_text())
-    except (json.JSONDecodeError, OSError):
-        return None
-    out = []
-    for c in data.get("candles") or []:
-        t = c.get("time")
-        try:
-            ts = int(t) if not isinstance(t, str) else None
-            if ts is None:
-                from datetime import datetime, timezone
-                ts = int(datetime.strptime(t, "%Y-%m-%d").replace(tzinfo=timezone.utc).timestamp())
-            out.append({"ts": ts, "o": float(c["open"]), "h": float(c["high"]),
-                        "l": float(c["low"]), "c": float(c["close"])})
-        except (ValueError, TypeError, KeyError):
-            continue
-    out.sort(key=lambda b: b["ts"])
-    return out
+    return _price_bars.load_candles(symbol, pb_tf)
 
 
 def _load_levels(con, symbol: str):
@@ -84,6 +96,8 @@ def backtest_symbol_tf(symbol: str, tf: str, levels, verbose=False):
 
     results = []
     for pattern_key, occs in by_pattern.items():
+        occs = sorted(occs, key=lambda e: e["ts"])
+        occs = _dedup_by_gap(occs, ts_to_idx)
         agree = {3: [], 5: [], 10: []}
         moves_5, adverse_5 = [], []
         history_from_ts = candles[0]["ts"]
@@ -138,11 +152,16 @@ def run(verbose: bool = False) -> int:
     con.commit()
 
     now_ts = int(time.time())
-    symbols = sorted({Path(f).stem.replace("ohlc_", "").replace("_D1", "")
-                       for f in glob.glob(str(_WEB_DATA / "ohlc_*_D1.json"))})
+    symbols = _price_bars.available_symbols("1d")
 
     written = 0
     for symbol in symbols:
+        # WP1.2 SPEC_alpha_engine_implementation.md: полный пересчёт символа с
+        # нуля -- без этого DELETE строки H1/H4, посчитанные раньше из
+        # ohlc_*.json (Yahoo-проекция), остаются в таблице протухшими для
+        # символов, у которых price_bars честно не имеет этого ТФ (см. Core-лог
+        # 07-08.08: только 6 инструментов Daoti-покрытия дают H1/H4 нативно).
+        con.execute("DELETE FROM pattern_stats WHERE symbol=?", (symbol,))
         levels = _load_levels(con, symbol)
         for tf in TIMEFRAMES:
             for r in backtest_symbol_tf(symbol, tf, levels, verbose):

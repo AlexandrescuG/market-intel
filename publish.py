@@ -181,117 +181,125 @@ def publish_anomalies() -> None:
 
 
 def publish_charts() -> None:
-    """OHLC + уровни для интерактивных Lightweight Charts.
-    Таймфреймы: M30 / H1 / H4 (ресемпл) / D1 / W1 с глубокой историей."""
+    """OHLC + уровни для интерактивных Lightweight Charts, из price_bars.
+
+    WP1.2 SPEC_alpha_engine_implementation.md: раньше был Yahoo (yfinance) для
+    большинства символов + отдельная publish_charts_mt5() из price_bars только
+    для USDRUB/USDKZT/USDJPY -- ДВА несвязанных пространства цен (§1.2 спеки).
+    Теперь единственный источник для всех символов -- price_bars. Нативная
+    гранулярность 15m/1h/4h есть только у 5-6 инструментов покрытия Daoti
+    (проверено при миграции, см. Core-лог 08.08); там, где её нет -- H1/H4
+    ресэмплятся из 30m, W1 -- из D1. Та же техника, что раньше уже применялась
+    здесь для H4-из-H1 на Yahoo-данных, просто теперь применяется шире и из
+    честного единственного источника, а не из двух вперемешку.
+    M15 намеренно НЕ синтезируется ресэмплом -- из более грубого ТФ более
+    мелкий получить нельзя, там где нативных 15m-баров нет, файл просто не
+    пишется (тот же принцип "без выдумки", что уже был в publish_charts_mt5).
+    """
+    import sqlite3
     import pandas as pd
-    import yfinance as yf
-    from core.technical import analyze
-    from core.symbols_registry import chart_watch
+    from core.technical import pivots as calc_pivots, _rsi, patterns as _tech_patterns
+    from core.price_bars import available_symbols
+    from core.symbols_registry import alias_for
 
-    # СПЕКА_графики_и_починка_календаря.md §2: единственный источник истины —
-    # symbols.json ("chart": true), не захардкоженный словарь. Раньше здесь
-    # было 13 инструментов и НЕ было USDJPY (несмотря на то что для него уже
-    # существовали файлы баров и запись в symbols.json) — "добавляли отдельно,
-    # в обход" (см. serve.py::_M5_YF_TICKERS). Теперь WATCH = все с chart:true:
-    # старые 13 + USDJPY + 12 новых валютных пар (EURGBP/USDCAD/.../USDKRW,
-    # добавлены 06.08, проверены вживую на Yahoo — есть глубокий H1) +
-    # USDCNY/USDZAR/USDAED (были в реестре названий без единого файла баров) +
-    # USDKZT (был только один файл D1 без ясного источника).
-    WATCH = chart_watch()
-    # (period, interval) — глубина истории под прокрутку назад
-    # M15 — SPEC_chart_fixes_and_staged_signup.md §3: статикой, как остальные
-    # (60 дней на 15m — тот же охват, что M30, ~0,8МБ/символ, терпимо). M5
-    # сюда намеренно НЕ входит — 60д на 5m это ~2,5МБ/символ и вес статики,
-    # которую grafik-engine.js тянет целиком; M5 отдаётся через отдельный
-    # API-эндпоинт с коротким окном (см. serve.py::_handle_chart_ohlc_m5).
-    NATIVE = {
-        "M30": ("60d",  "30m"),
-        "M15": ("60d",  "15m"),
-        "H1":  ("730d", "60m"),
-        "D1":  ("5y",   "1d"),
-        "W1":  ("max",  "1wk"),
-    }
+    def _frame(con, pb_sym, tf):
+        rows = con.execute(
+            "SELECT ts,o,h,l,c,v FROM price_bars WHERE symbol=? AND tf=? ORDER BY ts ASC",
+            (pb_sym, tf)).fetchall()
+        if not rows:
+            return None
+        df = pd.DataFrame(rows, columns=["ts", "Open", "High", "Low", "Close", "Volume"])
+        return df.astype({"Open": float, "High": float, "Low": float, "Close": float, "Volume": float})
 
-    def rows_from(df, intraday, overrides=None):
+    def _resample(df, rule):
+        idx = pd.to_datetime(df["ts"], unit="s", utc=True)
+        agg = df.set_index(idx).resample(rule).agg(
+            {"Open": "first", "High": "max", "Low": "min", "Close": "last", "Volume": "sum"}
+        ).dropna(subset=["Open"])
+        out = agg.reset_index(names="ts")
+        # 🔴 pandas 3.0: datetime64 по умолчанию в секундах, не в наносекундах —
+        # старое ".astype('int64') // 10**9" делило уже-секунды ещё раз на
+        # 10**9 и давало ts=1 для каждой строки. Эпоха вычитанием — не зависит
+        # от того, в чём именно pandas хранит разрешение сейчас или потом.
+        out["ts"] = ((out["ts"] - pd.Timestamp("1970-01-01", tz="UTC"))
+                     // pd.Timedelta(seconds=1)).astype("int64")
+        return out
+
+    def _rows_from(df, intraday):
         candles, vol = [], []
-        for ts, r in df.iterrows():
-            t = int(ts.timestamp()) if intraday else ts.strftime("%Y-%m-%d")
-            o, h, l, c = float(r["Open"]), float(r["High"]), float(r["Low"]), float(r["Close"])
-            if overrides is not None:
-                ov = overrides.get(ts.date())
-                if ov is not None:
-                    o, h, l, c = ov
+        for _, r in df.iterrows():
+            ts, o, h, l, c = int(r["ts"]), float(r["Open"]), float(r["High"]), float(r["Low"]), float(r["Close"])
+            t = ts if intraday else pd.Timestamp(ts, unit="s", tz="utc").strftime("%Y-%m-%d")
             up = c >= o
-            candles.append({"time": t,
-                             "open":  round(o, 4), "high": round(h, 4),
-                             "low":   round(l, 4), "close": round(c, 4)})
+            candles.append({"time": t, "open": round(o, 4), "high": round(h, 4),
+                             "low": round(l, 4), "close": round(c, 4)})
             vol.append({"time": t, "value": int(r["Volume"] or 0),
                         "color": "rgba(30,142,90,.5)" if up else "rgba(192,57,43,.5)"})
         return candles, vol
 
-    for label, ticker in WATCH.items():
-        a = analyze(ticker)
-        if not a:
-            continue
-        p = a["pivots"]
-        levels = [
-            ("R2", p["R2"], "#c0392b"), ("R1", p["R1"], "#c0392b"),
-            ("PP", p["PP"], "#C9A227"),
-            ("S1", p["S1"], "#1e8e5a"), ("S2", p["S2"], "#1e8e5a"),
-        ]
-        nearest = min(levels, key=lambda L: abs(L[1] - a["price"]))
-        meta = {
-            "ticker": ticker, "label": label,
-            "last": a["price"], "rsi": a["rsi"],
-            "bias": a["bias"], "patterns": a["patterns"],
-            "levels": [{"name": n, "price": round(v, 4), "color": c}
-                       for n, v, c in levels],
-            "nearest": {"name": nearest[0], "price": round(nearest[1], 4),
-                        "dist_pct": round(
-                            (a["price"] - nearest[1]) / a["price"] * 100, 2)},
-        }
-        h1_df = None
-        for tf, (period, interval) in NATIVE.items():
-            try:
-                df = yf.Ticker(ticker).history(period=period, interval=interval)
+    con = sqlite3.connect(str(_BOT_DB))
+    try:
+        for canonical in available_symbols("1d"):
+            pb_sym = alias_for(canonical, "price_bars") or canonical
+            d1 = _frame(con, pb_sym, "1d")
+            if d1 is None:
+                continue
+            price = float(d1["Close"].iloc[-1])
+            pv = calc_pivots(
+                float(d1["High"].iloc[-2]), float(d1["Low"].iloc[-2]), float(d1["Close"].iloc[-2])
+            ) if len(d1) >= 2 else calc_pivots(
+                float(d1["High"].max()), float(d1["Low"].min()), price)
+            rsi_val = round(_rsi(d1["Close"]), 1)
+            ma20 = float(d1["Close"].rolling(20).mean().iloc[-1])
+            ma50 = float(d1["Close"].rolling(50).mean().iloc[-1]) if len(d1) >= 50 else ma20
+            mom = price - float(d1["Close"].iloc[-11]) if len(d1) > 11 else 0.0
+            bull = sum([price > pv["PP"], ma20 > ma50, mom > 0, rsi_val > 50])
+            bias = ("техническая картина бычья" if bull >= 3
+                    else "техническая картина медвежья" if bull <= 1
+                    else "смешанная / нейтральная")
+            pats = _tech_patterns(d1) if len(d1) >= 2 else []
+
+            levels = [
+                ("R2", pv["R2"], "#c0392b"), ("R1", pv["R1"], "#c0392b"),
+                ("PP", pv["PP"], "#C9A227"),
+                ("S1", pv["S1"], "#1e8e5a"), ("S2", pv["S2"], "#1e8e5a"),
+            ]
+            nearest = min(levels, key=lambda L: abs(L[1] - price))
+            meta = {
+                "ticker": pb_sym, "label": canonical,
+                "last": round(price, 4), "rsi": rsi_val, "bias": bias, "patterns": pats,
+                "levels": [{"name": n, "price": round(v, 4), "color": c} for n, v, c in levels],
+                "nearest": {"name": nearest[0], "price": round(nearest[1], 4),
+                            "dist_pct": round((price - nearest[1]) / price * 100, 2)},
+            }
+
+            m30 = _frame(con, pb_sym, "30m")
+            m15 = _frame(con, pb_sym, "15m")
+            h1_native = _frame(con, pb_sym, "1h")
+            h1 = h1_native if h1_native is not None else (_resample(m30, "1h") if m30 is not None else None)
+            h4_native = _frame(con, pb_sym, "4h")
+            h4 = h4_native if h4_native is not None else (_resample(h1, "4h") if h1 is not None else None)
+            w1_native = _frame(con, pb_sym, "1w")
+            w1 = w1_native if w1_native is not None else _resample(d1, "1W")
+
+            for web_tf, df, intraday in (
+                ("M15", m15, True), ("M30", m30, True), ("H1", h1, True),
+                ("H4", h4, True), ("D1", d1, False), ("W1", w1, False),
+            ):
+                fname = f"ohlc_{canonical}_{web_tf}.json"
                 if df is None or df.empty:
+                    # 🔴 Найдено при миграции: раньше M15 шёл из Yahoo для всех
+                    # 31 символа, у price_bars нативные 15m есть только у 5.
+                    # Без явного удаления старый Yahoo-файл остался бы на диске
+                    # НАВСЕГДА нетронутым (_write просто не перезаписал бы его)
+                    # -- график показывал бы протухающий M15 молча. "Честно
+                    # без выдумки" должно значить "нет файла", а не "старый файл".
+                    (WEB_DATA / fname).unlink(missing_ok=True)
                     continue
-                if tf == "H1":
-                    h1_df = df
-                overrides = None
-                if tf == "D1" and ticker.endswith("=X") and h1_df is not None and not h1_df.empty:
-                    # Yahoo's нативный дневной OHLC для FX (=X) вырожден: Open
-                    # почти всегда ≈ Close ТОГО ЖЕ дня (тело свечи ~0, только
-                    # фитиль -- каждый день выглядит доджи), и есть разрывы на
-                    # границах дней (вчерашний Close != сегодняшний Open) --
-                    # проверено вручную сравнением с непрерывным H1-рядом.
-                    # H1-ресемпл (уже используется для H4 ниже) даёт здоровые,
-                    # непрерывные дневные бары. Подменяем только там, где есть
-                    # H1-покрытие (~2 года, period H1 = 730d) -- за пределами
-                    # этого окна оставляем родной (пусть менее надёжный) D1,
-                    # чтобы не резать глубину истории для дальнего скролла.
-                    resampled = h1_df.resample("1D").agg(
-                        {"Open": "first", "High": "max", "Low": "min", "Close": "last"}
-                    ).dropna()
-                    overrides = {ts.date(): (float(r.Open), float(r.High), float(r.Low), float(r.Close))
-                                 for ts, r in resampled.iterrows()}
-                candles, vol = rows_from(df, intraday=interval in ("15m", "30m", "60m"), overrides=overrides)
-                _write(f"ohlc_{label}_{tf}.json",
-                       {**meta, "interval": tf, "candles": candles, "volume": vol})
-            except Exception as e:
-                log.debug("chart %s %s: %s", label, tf, e)
-        # H4 — ресемпл из H1
-        if h1_df is not None and not h1_df.empty:
-            try:
-                h4 = h1_df.resample("4h").agg(
-                    {"Open": "first", "High": "max",
-                     "Low": "min", "Close": "last", "Volume": "sum"}
-                ).dropna()
-                candles, vol = rows_from(h4, intraday=True)
-                _write(f"ohlc_{label}_H4.json",
-                       {**meta, "interval": "H4", "candles": candles, "volume": vol})
-            except Exception as e:
-                log.debug("chart %s H4: %s", label, e)
+                candles, vol = _rows_from(df, intraday)
+                _write(fname, {**meta, "interval": web_tf, "candles": candles, "volume": vol})
+    finally:
+        con.close()
 
 
 # SPEC_fix_live_chart.md §5: состояние отката переживает между вызовами
@@ -401,92 +409,6 @@ def publish_health() -> None:
     _write("health.json", {"updated": _now(), "components": beats})
 
 
-def publish_charts_mt5() -> None:
-    """OHLC-файлы для MT5-символов (USDRUB, USDKZT, USDJPY) из bot.db."""
-    import sqlite3
-    import pandas as pd
-    from datetime import datetime, timezone as tz
-    from core.technical import pivots as calc_pivots, _rsi
-
-    MT5_SYMS = ["USDRUB", "USDKZT", "USDJPY"]
-    # M15 — SPEC_chart_fixes_and_staged_signup.md §3. Готово принять данные,
-    # как только они появятся в price_bars (tf='15m') -- заливает их
-    # mt5_pull.py на отдельной Windows-машине, не автоматизировано отсюда
-    # (см. project_mt5_wine_pipeline в памяти). Пока строк нет -- ветка ниже
-    # (`if not rows: continue`) просто не пишет ohlc_{sym}_M15.json, честно,
-    # без выдумки.
-    TF_MAP = {
-        "M30": ("30m", True),
-        "M15": ("15m", True),
-        "H1":  ("1h",  True),
-        "H4":  ("4h",  True),
-        "D1":  ("1d",  False),
-        "W1":  ("1w",  False),
-    }
-
-    con = sqlite3.connect(str(_BOT_DB))
-    try:
-        for sym in MT5_SYMS:
-            d1 = con.execute(
-                "SELECT ts,o,h,l,c FROM price_bars WHERE symbol=? AND tf='1d' ORDER BY ts ASC",
-                (sym,)).fetchall()
-            if not d1:
-                continue
-
-            df = pd.DataFrame(d1, columns=["ts", "Open", "High", "Low", "Close"]).astype(
-                {"Open": float, "High": float, "Low": float, "Close": float})
-            price = float(df["Close"].iloc[-1])
-
-            pv = calc_pivots(
-                float(df["High"].iloc[-2]), float(df["Low"].iloc[-2]), float(df["Close"].iloc[-2])
-            ) if len(df) >= 2 else calc_pivots(
-                float(df["High"].max()), float(df["Low"].min()), price)
-
-            rsi_val = round(_rsi(df["Close"]), 1)
-            ma20 = float(df["Close"].rolling(20).mean().iloc[-1])
-            ma50 = float(df["Close"].rolling(50).mean().iloc[-1]) if len(df) >= 50 else ma20
-            mom  = price - float(df["Close"].iloc[-11]) if len(df) > 11 else 0.0
-            bull = sum([price > pv["PP"], ma20 > ma50, mom > 0, rsi_val > 50])
-            bias = ("техническая картина бычья" if bull >= 3
-                    else "техническая картина медвежья" if bull <= 1
-                    else "смешанная / нейтральная")
-
-            levels = [
-                ("R2", pv["R2"], "#c0392b"), ("R1", pv["R1"], "#c0392b"),
-                ("PP", pv["PP"], "#C9A227"),
-                ("S1", pv["S1"], "#1e8e5a"), ("S2", pv["S2"], "#1e8e5a"),
-            ]
-            nearest = min(levels, key=lambda L: abs(L[1] - price))
-            meta = {
-                "ticker": sym, "label": sym,
-                "last": round(price, 4), "rsi": rsi_val, "bias": bias, "patterns": [],
-                "levels": [{"name": n, "price": round(v, 4), "color": c} for n, v, c in levels],
-                "nearest": {"name": nearest[0], "price": round(nearest[1], 4),
-                            "dist_pct": round((price - nearest[1]) / price * 100, 2)},
-            }
-
-            for web_tf, (mt5_tf, intraday) in TF_MAP.items():
-                rows = con.execute(
-                    "SELECT ts,o,h,l,c,v FROM price_bars WHERE symbol=? AND tf=? ORDER BY ts ASC",
-                    (sym, mt5_tf)).fetchall()
-                if not rows:
-                    continue
-                candles, volume = [], []
-                for ts, o, h, l, c, v in rows:
-                    o, h, l, c = float(o), float(h), float(l), float(c)
-                    t = int(ts) if intraday else datetime.fromtimestamp(
-                        int(ts), tz=tz.utc).strftime("%Y-%m-%d")
-                    up = c >= o
-                    candles.append({"time": t, "open": round(o, 4), "high": round(h, 4),
-                                    "low": round(l, 4), "close": round(c, 4)})
-                    volume.append({"time": t, "value": int(v or 0),
-                                   "color": "rgba(30,142,90,.5)" if up else "rgba(192,57,43,.5)"})
-                _write(f"ohlc_{sym}_{web_tf}.json",
-                       {**meta, "interval": web_tf, "candles": candles, "volume": volume})
-    finally:
-        con.close()
-
-
 def publish_all() -> None:
     db.init_db()
 
@@ -502,7 +424,7 @@ def publish_all() -> None:
     # и build_brief_v2.py. Файл calendar.json удалён вместе с функцией.
     slow_fns = (publish_stories, publish_regime, publish_verification,
                 publish_macro, publish_divergence,
-                publish_anomalies, publish_health, publish_charts, publish_charts_mt5)
+                publish_anomalies, publish_health, publish_charts)
 
     layers = []
     for fn in fast_fns + slow_fns:

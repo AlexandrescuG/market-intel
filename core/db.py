@@ -121,8 +121,14 @@ def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+def _connect() -> sqlite3.Connection:
+    con = sqlite3.connect(DB_PATH, timeout=10)
+    con.execute("PRAGMA busy_timeout=10000")
+    return con
+
+
 def init_db() -> None:
-    with sqlite3.connect(DB_PATH) as db:
+    with _connect() as db:
         db.executescript(SCHEMA)
         db.commit()
 
@@ -175,7 +181,7 @@ def upsert(
     blob = f"{title}\n{text}".strip()
     now = _now()
 
-    with sqlite3.connect(DB_PATH) as db:
+    with _connect() as db:
         row = db.execute(
             "SELECT engagement, last_alerted_eng FROM signals WHERE uid=?", (uid,)
         ).fetchone()
@@ -234,7 +240,7 @@ def upsert(
 
 
 def mark_alerted(uid: str, engagement: int) -> None:
-    with sqlite3.connect(DB_PATH) as db:
+    with _connect() as db:
         db.execute(
             "UPDATE signals SET last_alerted_eng=?, alerted=1 WHERE uid=?",
             (engagement, uid),
@@ -251,7 +257,7 @@ def _rows(cur) -> list[dict]:
 
 def recent_since(hours: int = 24) -> list[dict]:
     cutoff = (datetime.now(timezone.utc) - timedelta(hours=hours)).isoformat()
-    with sqlite3.connect(DB_PATH) as db:
+    with _connect() as db:
         return _rows(db.execute(
             "SELECT * FROM signals WHERE last_seen >= ? ORDER BY importance DESC",
             (cutoff,),
@@ -260,7 +266,7 @@ def recent_since(hours: int = 24) -> list[dict]:
 
 def top_by_dimension(hours: int, dimension: str, limit: int = 15) -> list[dict]:
     cutoff = (datetime.now(timezone.utc) - timedelta(hours=hours)).isoformat()
-    with sqlite3.connect(DB_PATH) as db:
+    with _connect() as db:
         return _rows(db.execute(
             """SELECT * FROM signals
                WHERE last_seen >= ? AND dimension = ?
@@ -272,7 +278,7 @@ def top_by_dimension(hours: int, dimension: str, limit: int = 15) -> list[dict]:
 def top_by_crowd(hours: int, limit: int = 15, min_intensity: float = 0.45) -> list[dict]:
     """Самые «эмоциональные» сигналы независимо от темы — для секции психологии толпы."""
     cutoff = (datetime.now(timezone.utc) - timedelta(hours=hours)).isoformat()
-    with sqlite3.connect(DB_PATH) as db:
+    with _connect() as db:
         return _rows(db.execute(
             """SELECT * FROM signals
                WHERE last_seen >= ? AND crowd_intensity >= ?
@@ -297,7 +303,7 @@ def cashtag_heatmap(hours: int, limit: int = 20) -> list[tuple[str, int, float]]
 def heartbeat(component: str, ok: bool, error: str = "") -> None:
     """WP12: Записать хартбит компонента."""
     now = _now()
-    with sqlite3.connect(DB_PATH) as db:
+    with _connect() as db:
         row = db.execute(
             "SELECT error_count FROM heartbeats WHERE component=?", (component,)
         ).fetchone()
@@ -321,7 +327,7 @@ def heartbeat(component: str, ok: bool, error: str = "") -> None:
 
 
 def get_heartbeats() -> list[dict]:
-    with sqlite3.connect(DB_PATH) as db:
+    with _connect() as db:
         cur = db.execute("SELECT * FROM heartbeats")
         cols = [c[0] for c in cur.description]
         return [dict(zip(cols, r)) for r in cur.fetchall()]

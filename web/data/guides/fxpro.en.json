@@ -1,0 +1,156 @@
+{
+  "id": "fxpro",
+  "name": "FxPro",
+  "logo": "/assets/logos/fxpro.svg",
+  "affiliate": "https://www.fxpro-direct.org/en/register/md/cri/32TQQFd7H",
+  "table_link": "/brokers",
+  "account_kind": "real",
+  "account_label": "MT5 Hedging, not funded",
+  "lead": "The only broker in our comparison where the counterparty company's name can't be found on the registration screen at all. It's there — but only inside the PDF client agreement.",
+  "processes": [
+    {
+      "key": "registration",
+      "label": "Registration",
+      "platform": "direct.fxpro.com, web",
+      "captured": "2026-08-07",
+      "needed": ["Email", "A couple of minutes for the form — plus 2 extra clicks if you want to see the legal entity"],
+      "blocks": [
+        { "type": "steps", "items": [
+          { "img": "/assets/guides/fxpro/registration/02_country.png",
+            "caption": "Fill in country, email, and password.",
+            "note": "Country is detected automatically by IP and inserted into the form's URL — that's how FxPro picks which group entity becomes your counterparty. For example, the .../register/md/crc route leads to the Costa Rica entity (crc = Costa Rica Markets Ltd)." },
+          { "img": "/assets/guides/fxpro/registration/06_personal_details.png",
+            "caption": "On the next screen, enter your name, date of birth, and phone number.",
+            "note": "The phone country code is filled in based on the country you selected earlier." }
+        ] },
+        { "type": "callout", "style": "gap", "title": "The legal entity isn't named on the registration form",
+          "body": "The only line at the bottom of the form reads \"FxPro is a registered trademark utilised under an approved licensing agreement.\" No company, no jurisdiction, no licence number.",
+          "img": "/assets/guides/fxpro/registration/03_entity_absent.png" },
+        { "type": "steps", "items": [
+          { "img": "/assets/guides/fxpro/registration/04_terms.png",
+            "caption": "To find out who you're actually signing the contract with, open the \"Terms and conditions\" link on the form → Legal Documentation section." },
+          { "img": "/assets/guides/fxpro/registration/05_agreement_cover.png",
+            "caption": "Open the \"Client Agreement\". Right in the file name you can see: \"Costa Rica Markets Ltd — June 2026 New entity...\"." }
+        ] },
+        { "type": "entity",
+          "img": "/assets/guides/fxpro/registration/05_agreement_clause12.png",
+          "legal_name": "Costa Rica Markets Ltd",
+          "jurisdiction": "Costa Rica",
+          "regulator": null,
+          "licence_no": null,
+          "register_url": null,
+          "register_note": "The FxPro brand does have regulators — the FCA (UK), the Bahamas Securities Commission, the Seychelles FSA (fxpro.com/about/licences). But all of them license OTHER entities in the group. Costa Rica Markets Ltd, which is the entity clients from most CIS and European countries actually sign a contract with, isn't mentioned under any of these regulators, and the contract itself contains no reference to any regulatory body at all.",
+          "quote": "«FxPro is the brand and trading name of Costa Rica Markets Ltd. which is a private limited company incorporated in Costa Rica.» (клиентский договор, п. 1.2)",
+          "confirmed": true,
+          "confirm_note": "The registration screen itself doesn't name the entity at all — only the trademark line. You can only find out the real counterparty by opening the PDF agreement, two clicks deep into the documentation, which a regular user isn't required to go through during registration.",
+          "missing": [
+            "a regulator and licence for THIS entity — even though the FxPro brand overall does have regulators (see above), just not for this one",
+            "a compensation fund — FSCS protection belongs to the UK entity, FxPro UK Limited, not to the Costa Rica entity that actually serves most clients from the CIS and Europe",
+            "a published percentage of losing accounts — not published on any page"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "activation",
+      "label": "Account activation",
+      "platform": "direct.fxpro.com, dashboard",
+      "captured": "2026-08-07",
+      "blocks": [
+        { "type": "steps", "items": [
+          { "img": "/assets/guides/fxpro/activation/01_ready_modal.png",
+            "caption": "Right after registration, a \"You are Ready to Start!\" screen appears with a QR code for the mobile app.",
+            "note": "If you don't need the app, click \"Proceed with web\"." },
+          { "img": "/assets/guides/fxpro/activation/02_wallet_accounts.png",
+            "caption": "You land on \"Wallet & Accounts\": a separate wallet (for moving money between accounts) and a trading account — already created, under the \"Real account\" tab." }
+        ] },
+        { "type": "callout", "style": "note", "title": "What to notice",
+          "body": "The account FxPro creates by default is labelled \"Real\", not \"Demo\" — even though the balance is zero and you can't trade until it's funded. If you want to practise without money, switch to the \"Demo accounts\" tab and create a demo account separately — it isn't selected by default." },
+        { "type": "table", "columns": ["Parameter", "Value"], "rows": [
+          ["Account type created by default", "MT5 Hedging, Real"],
+          ["Platforms", "FxPro WebTrader, MT4, MT5, cTrader, TradingView, mobile app"],
+          ["Commission", "Standard — none; Raw+ and Elite — 3.5 USD per lot one-way on major pairs and gold; cTrader — 35 USD per 1,000,000 turnover"]
+        ] }
+      ]
+    },
+    {
+      "key": "funding",
+      "label": "Funding",
+      "platform": "direct.fxpro.com, dashboard",
+      "captured": "2026-08-07",
+      "blocks": [
+        { "type": "steps", "items": [
+          { "img": "/assets/guides/fxpro/funding/01_deposit_form.png",
+            "caption": "In the sidebar, open \"Deposit\", pick a method, and enter an amount.",
+            "note": "Methods: card (Visa/Mastercard), Binance Pay, USDT, BTC, Ethereum, other crypto, Skrill, Neteller, bank transfer." }
+        ] },
+        { "type": "table", "columns": ["Parameter", "Value"], "rows": [
+          ["Card deposit range", "50–50,000 USD per transaction"],
+          ["Platform fee", "0%"]
+        ] },
+        { "type": "callout", "style": "note", "title": "What to notice",
+          "body": "0% is the fee charged by the FxPro platform itself. It doesn't cancel out your own bank's or payment provider's fees (especially for cards not denominated in USD) — check with your card issuer separately." }
+      ]
+    },
+    {
+      "key": "verification",
+      "label": "Verification",
+      "platform": "direct.fxpro.com, dashboard",
+      "captured": "2026-08-07",
+      "intro": "Without verification the account is created and visible in the dashboard, but documents will still be requested before your first withdrawal.",
+      "blocks": [
+        { "type": "steps", "items": [
+          { "img": "/assets/guides/fxpro/verification/00_profile_menu.png",
+            "caption": "Open the profile menu (icon in the top right corner) → \"Settings\"." },
+          { "img": "/assets/guides/fxpro/verification/01_identity_not_uploaded.png",
+            "caption": "On the \"Your documents\" tab — status \"Identity Verification: Not uploaded\". Click \"Upload\" to attach a document." },
+          { "img": "/assets/guides/fxpro/verification/02_optional_doctypes.png",
+            "caption": "There's a separate \"Optional documents\" block — this is where you upload whatever the platform has asked for beyond standard verification.",
+            "note": "The dropdown is a list of document-type options, not a ready-made requirements list: Debit/credit card copy, Bank statement, FxPro Internal Form, KYC Request, Accounting Request, Other. Pick whichever matches FxPro's specific request." }
+        ] }
+      ]
+    },
+    {
+      "key": "trading",
+      "label": "Trading",
+      "platform": "MT5 WebTrader, demo account",
+      "captured": "2026-08-07",
+      "blocks": [
+        { "type": "steps", "items": [
+          { "img": "/assets/guides/fxpro/99_trading_terminal_overview.png",
+            "caption": "MT5 WebTrader opens: an instrument list with the current spread on the left, a chart on the right, and open positions at the bottom." }
+        ] },
+        { "type": "callout", "style": "note", "title": "Why we don't publish FxPro's spread as a single number",
+          "body": ["We have three independent measurements of the same EUR/USD, and all three disagree: the live quote on the site's public page — about 1.4 pips; in the same terminal's favourites list — 0.2; in the terminal's full instrument search (below) — 0.1.", "A partial explanation turned up right on the instrument page: \"Note: Price data indicated above may be delayed by 15 minutes.\" But a fifteen-minute delay doesn't explain a sevenfold difference between the site and the terminal, so the question isn't fully resolved.", "As long as the reason is unknown, \"FxPro's spread\" doesn't have a single defined value, and we'd rather say that directly than pick whichever number looks best. Only a measurement on a real account, at the actual moment of a trade, resolves it."] },
+        { "type": "steps", "items": [
+          { "img": "/assets/guides/fxpro/99_trading_spread_table.png",
+            "caption": "To see the spread for any instrument at once, open search (the magnifying glass icon at the top) — a table appears with every pair and a live spread in the middle column." }
+        ] },
+        { "type": "table", "columns": ["Instrument", "Spread"], "rows": [
+          ["EUR/USD", "0.1"],
+          ["GBP/USD", "0.6"],
+          ["USD/JPY", "0.3"],
+          ["USD/CHF", "0.4"],
+          ["USD/CAD", "0.4"],
+          ["EUR/GBP", "0.4"],
+          ["EUR/JPY", "0.2"],
+          ["GBP/JPY", "1.3"]
+        ], "caption": "Terminal snapshot, 2026-08-07, outside the methodology windows — shown as a reference point, not a rules-compliant measurement." },
+        { "type": "table", "columns": ["Instrument", "Spread (site)", "Swap long", "Swap short"], "rows": [
+          ["EUR/USD", "~1.4 pips (with a 15-min delay)", "−8.9 points", "+1.9 points"]
+        ], "caption": "This is what FxPro officially publishes — on the instrument page, not as a summary table (it doesn't have one). Swap was collected only for EUR/USD; the other eleven instruments follow the same URL pattern." },
+        { "type": "steps", "items": [
+          { "img": "/assets/guides/fxpro/99_trading_order_ticket.png",
+            "caption": "To place a trade, click an instrument in the list — a ticket opens with Market / Limit / Stop tabs.",
+            "note": "Market — at the current price; Limit — triggers once the price reaches your level; Stop — the opposite of Limit, for entering on a breakout." },
+          { "caption": "Enter the volume, and if you want, set Stop Loss and Take Profit — both optional, but without a Stop Loss the trade has no limit on losses." }
+        ] },
+        { "type": "callout", "style": "note", "title": "What to notice",
+          "body": "\"Margin required\" under the ticket isn't a fee — it's the amount locked in your account against the open position. It's released when the trade closes, but while the position is open, you can't use it." },
+        { "type": "callout", "style": "note", "title": "Price alerts — without an open position",
+          "body": "In the terminal you can set a price alert (the bell icon) — you'll get a notification once the instrument reaches the level you want, without having to keep a trade open or watch the chart.",
+          "img": "/assets/guides/fxpro/99_trading_alerts.png" }
+      ]
+    }
+  ]
+}

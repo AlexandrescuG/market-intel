@@ -19,9 +19,6 @@ python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env          # заполни токены/логины
 python3 -m core.db            # создать БД
-
-# перенести историю из старого монитора (1144 твита, со скорингом):
-python3 migrate_old_db.py /path/to/old/data/threads.db
 ```
 
 ⚠️ **Безопасность:** старый Telegram-токен из `monitor.log` скомпрометирован —

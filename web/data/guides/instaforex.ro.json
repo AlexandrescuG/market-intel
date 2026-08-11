@@ -1,0 +1,101 @@
+{
+  "id": "instaforex",
+  "name": "InstaForex",
+  "logo": "/assets/logos/instaforex.svg",
+  "affiliate": "https://www.instaforex.com/en/fast_open_live_account?x=TTVDG",
+  "table_link": "/brokers",
+  "account_kind": "real",
+  "account_label": "Insta.Standard",
+  "lead": "Singurul care publică spread, comision, swap-uri și dimensiunea lotului fără înregistrare. Și singurul la care dimensiunea contractului diferă de toți ceilalți — o greșeală ușor de făcut, de zece ori mai mare.",
+  "processes": [
+    {
+      "key": "registration",
+      "label": "Înregistrare",
+      "platform": "instaforex.com, web",
+      "captured": "2026-08-05",
+      "needed": ["Nume, email, telefon", "Circa două minute"],
+      "blocks": [
+        { "type": "steps", "items": [
+          { "img": "/assets/guides/instaforex/registration/01_start.png", "caption": "Deschideți instaforex.com." },
+          { "img": "/assets/guides/instaforex/registration/02_country.png", "caption": "Formular de înregistrare: nume, email, telefon, țară/regiune (determinată automat după IP), valută și tip de cont (MT4/MT5)." },
+          { "img": "/assets/guides/instaforex/registration/05_account_type.png", "caption": "Pagina completă de specificații arată toate cele 5 tipuri de cont deodată și un tabel spread/swap/lot pentru fiecare — util de verificat înainte de a alege." },
+          { "img": "/assets/guides/instaforex/registration/06_consents.png", "caption": "Caseta de acord cu termenii — NU este bifată implicit, se bifează manual." }
+        ] },
+        { "type": "text", "body": "După trimiterea formularului, pagina de confirmare emite două parole — una de tranzacționare și una de investitor. Parola de tranzacționare este pentru autentificarea în terminal; cea de investitor oferă acces doar de vizualizare a contului, fără drept de tranzacționare." },
+        { "type": "entity",
+          "img": "/assets/guides/instaforex/registration/03_entity_named.png",
+          "legal_name": "InstaFinance Ltd",
+          "jurisdiction": "Insulele Virgine Britanice (BVI)",
+          "regulator": "BVI Financial Services Commission",
+          "licence_no": "SIBA/L/14/1082",
+          "register_url": "https://www.bvifsc.vg/regulated-entities/instafinance-ltd-0",
+          "register_note": "O companie activă în registrul BVI. Registrul nu publică numărul licenței în sine — legătura acesteia cu compania provine doar din declarația brokerului.",
+          "quote": "«InstaFinance Ltd, reg. number 1811672 ... License number SIBA/L/14/1082 issued by the BVI FSC.»",
+          "confirmed": true,
+          "confirm_note": "Menționată chiar în subsolul paginii principale, după derularea completă — formularul de înregistrare în sine nu menționează entitatea. Chiar alături, o a doua companie din grup — Insta Global Ltd, Kingstown, Saint Vincent și Grenadine — fără licență și fără regulator, doar deținătoare a mărcii înregistrate.",
+          "missing": [
+            "un fond de compensare — în locul unei asigurări, doar o promoție condiționată de aducerea de recomandări sau de un depozit de zece ori mai mare",
+            "un procent publicat al conturilor în pierdere",
+            "🔴 protecție împotriva soldului negativ — singurul dintre cei cinci parteneri fără aceasta. Contractul afirmă explicit dreptul opus: „Compania își rezervă dreptul de a restabili un sold negativ pe unul dintre conturile Clientului folosind fonduri disponibile pe celelalte conturi ale sale”"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "activation",
+      "label": "Activarea contului",
+      "blocks": [
+        { "type": "callout", "style": "gap", "title": "Fără capturi — necesită autentificare în cont" },
+        { "type": "table", "columns": ["Parametru", "Valoare"], "rows": [
+          ["Tip de cont", "Insta.Standard"],
+          ["Levier", "până la 1:1000"],
+          ["Lot minim", "0,01"],
+          ["Platforme", "MT4, MT5, terminal web"]
+        ] }
+      ]
+    },
+    {
+      "key": "funding",
+      "label": "Alimentare",
+      "blocks": [
+        { "type": "callout", "style": "gap", "title": "Fără capturi — necesită autentificare în cont" },
+        { "type": "table", "columns": ["Parametru", "Valoare", "Sursă"], "rows": [
+          ["Depozit minim", "1 USD", "site-ul brokerului"],
+          ["Comision de inactivitate", "10 USD/lună după 3 luni", "contractul BVI"],
+          ["Metode", "card, transfer bancar și electronic, Bitcoin, Tether, Litecoin, Ethereum și altele", "site-ul brokerului"]
+        ] },
+        { "type": "callout", "style": "note", "title": "Comisioanele pentru metodele de alimentare nu se pot vedea",
+          "body": "Paginile de depunere și retragere sunt ascunse după autentificare, deci nu puteți compara costul metodelor înainte de înregistrare. Este singurul lucru pe care InstaForex nu îl arată public — tot restul, îl arată." }
+      ]
+    },
+    {
+      "key": "verification",
+      "label": "Verificare",
+      "blocks": [
+        { "type": "callout", "style": "gap", "title": "Fără capturi — necesită autentificare în cont" },
+        { "type": "text", "body": "Un cont demo nu necesită verificare: formularul cere doar țara, email-ul, valuta și mărimea depozitului virtual." }
+      ]
+    },
+    {
+      "key": "trading",
+      "label": "Tranzacționare",
+      "blocks": [
+        { "type": "callout", "style": "fact", "title": "Condițiile sunt publicate integral, fără înregistrare" },
+        { "type": "table", "columns": ["Instrument", "Spread", "Comision", "Swap L / S", "Lot"], "rows": [
+          ["EUR/USD", "0,6 puncte", "0", "−10,1 / +1,1", "10.000"],
+          ["GBP/USD", "0,8", "0", "−5,9 / −3,6", "10.000"],
+          ["USD/JPY", "0,7", "0", "−14,5 / −24,2", "10.000"],
+          ["Aur", "$0,15", "$10", "−327 / +0,69", "100 uncii"],
+          ["Argint", "$0,35", "$10", "−51,68 / +0,09", "500 uncii"],
+          ["Bitcoin", "$0,25", "0,1% din volum", "−0,05%/zi", "1 BTC"]
+        ], "caption": "Specificația contului Insta.Standard, verificat 2026-08-05." },
+        { "type": "callout", "style": "note", "title": "Aici lotul este 10.000, nu 100.000",
+          "body": ["Acesta este lucrul esențial de știut despre InstaForex când comparați brokeri. Un spread de „0,6 puncte” aici nu costă 6 dolari per rundă, ci 60 de cenți — dar și poziția este de zece ori mai mică. Nu se pot compara spread-urile în puncte cu alți brokeri, ci doar prin costul în bani al unei runde.", "Argintul are 500 de uncii în loc de standardul de 5.000. Și atenție: aurul are două simboluri cu o diferență de cinci ori a contractului — GOLD.m are 100 de uncii, XAUUSD.m are 500 de uncii. Dacă deschideți o poziție pe simbolul greșit, veți obține un volum de cinci ori mai mare decât cel așteptat."] },
+        { "type": "callout", "style": "note", "title": "Unde se ascunde costul la cripto",
+          "body": "Spreadul la Bitcoin este de 25 de cenți, și e ușor să vă opriți aici. Dar un comision de 0,1% din volum, la un preț de circa 64.000 de dolari, înseamnă aproximativ 64 de dolari într-un sens și 128 pentru o rundă completă. Costul real al tranzacției nu se află acolo unde priviți." },
+        { "type": "callout", "style": "note", "title": "Swap-ul la aur în poziție long",
+          "body": "−327 față de +0,69 la short. Menținerea unei poziții de cumpărare la aur peste noapte costă aici aproximativ cât trei spread-uri. Pentru cei care tranzacționează aurul dincolo de intraday, asta contează mai mult decât spreadul." }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,156 @@
+{
+  "id": "fxpro",
+  "name": "FxPro",
+  "logo": "/assets/logos/fxpro.svg",
+  "affiliate": "https://www.fxpro-direct.org/en/register/md/cri/32TQQFd7H",
+  "table_link": "/brokers",
+  "account_kind": "real",
+  "account_label": "MT5 Hedging, nealimentat",
+  "lead": "Singurul broker din comparația noastră la care numele companiei-contraparte nu poate fi aflat deloc de pe ecranul de înregistrare. Se găsește — dar doar în interiorul PDF-ului contractului de client.",
+  "processes": [
+    {
+      "key": "registration",
+      "label": "Înregistrare",
+      "platform": "direct.fxpro.com, web",
+      "captured": "2026-08-07",
+      "needed": ["Email", "Câteva minute pentru formular — plus încă 2 pași dacă vreți să vedeți entitatea juridică"],
+      "blocks": [
+        { "type": "steps", "items": [
+          { "img": "/assets/guides/fxpro/registration/02_country.png",
+            "caption": "Completați țara, email-ul și parola.",
+            "note": "Țara se determină automat după IP și este inserată în adresa formularului — așa alege FxPro ce entitate din grup vă devine contraparte. De exemplu, ruta .../register/md/crc duce la entitatea din Costa Rica (crc = Costa Rica Markets Ltd)." },
+          { "img": "/assets/guides/fxpro/registration/06_personal_details.png",
+            "caption": "Pe ecranul următor, introduceți numele, data nașterii și telefonul.",
+            "note": "Codul țării pentru numărul de telefon se completează pe baza țării alese anterior." }
+        ] },
+        { "type": "callout", "style": "gap", "title": "Entitatea juridică nu este menționată pe formularul de înregistrare",
+          "body": "Singura linie din josul formularului este „FxPro is a registered trademark utilised under an approved licensing agreement”. Nicio companie, nicio jurisdicție, niciun număr de licență.",
+          "img": "/assets/guides/fxpro/registration/03_entity_absent.png" },
+        { "type": "steps", "items": [
+          { "img": "/assets/guides/fxpro/registration/04_terms.png",
+            "caption": "Ca să aflați totuși cu cine se semnează contractul, deschideți linkul „Terms and conditions” de pe formular → secțiunea Legal Documentation." },
+          { "img": "/assets/guides/fxpro/registration/05_agreement_cover.png",
+            "caption": "Deschideți „Client Agreement”. Chiar din numele fișierului se vede: „Costa Rica Markets Ltd — June 2026 New entity…”." }
+        ] },
+        { "type": "entity",
+          "img": "/assets/guides/fxpro/registration/05_agreement_clause12.png",
+          "legal_name": "Costa Rica Markets Ltd",
+          "jurisdiction": "Costa Rica",
+          "regulator": null,
+          "licence_no": null,
+          "register_url": null,
+          "register_note": "Brandul FxPro are regulatori — FCA (Marea Britanie), Comisia de Valori Mobiliare din Bahamas, FSA Seychelles (fxpro.com/about/licences). Dar toți aceștia licențiază ALTE entități din grup. Costa Rica Markets Ltd, entitatea cu care semnează efectiv contractul clienții din majoritatea țărilor CSI și Europa, nu este menționată la niciunul dintre acești regulatori, iar în contract nu există nicio referire la vreun organism de reglementare.",
+          "quote": "«FxPro is the brand and trading name of Costa Rica Markets Ltd. which is a private limited company incorporated in Costa Rica.» (contractul de client, pct. 1.2)",
+          "confirmed": true,
+          "confirm_note": "Pe ecranul de înregistrare în sine, entitatea NU este menționată deloc — doar linia despre marca înregistrată. Contrapartea reală poate fi aflată doar deschizând contractul PDF, la doi pași în adâncul documentației, pe care un utilizator obișnuit nu este obligat să îi parcurgă la înregistrare.",
+          "missing": [
+            "un regulator și o licență pentru ACEASTĂ entitate — deși brandul FxPro în ansamblu are regulatori (vezi mai sus), doar nu pentru aceasta",
+            "un fond de compensare — protecția FSCS aparține entității din Marea Britanie, FxPro UK Limited, nu entității din Costa Rica care deservește efectiv majoritatea clienților din CSI și Europa",
+            "un procent publicat al conturilor în pierdere — nepublicat pe nicio pagină"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "activation",
+      "label": "Activarea contului",
+      "platform": "direct.fxpro.com, cont",
+      "captured": "2026-08-07",
+      "blocks": [
+        { "type": "steps", "items": [
+          { "img": "/assets/guides/fxpro/activation/01_ready_modal.png",
+            "caption": "Imediat după înregistrare apare ecranul „You are Ready to Start!” cu un cod QR pentru aplicația mobilă.",
+            "note": "Dacă nu aveți nevoie de aplicație, apăsați „Proceed with web”." },
+          { "img": "/assets/guides/fxpro/activation/02_wallet_accounts.png",
+            "caption": "Ajungeți în „Wallet & Accounts”: separat un portofel (pentru transferuri între conturi) și un cont de tranzacționare — deja creat, la fila „Real account”." }
+        ] },
+        { "type": "callout", "style": "note", "title": "Ce să observați",
+          "body": "Contul pe care FxPro îl creează implicit este marcat „Real”, nu „Demo” — deși soldul este zero și nu se poate tranzacționa până la primul depozit. Dacă vreți să exersați fără bani, treceți la fila „Demo accounts” și creați un cont demo separat — nu este selectat implicit." },
+        { "type": "table", "columns": ["Parametru", "Valoare"], "rows": [
+          ["Tip de cont creat implicit", "MT5 Hedging, Real"],
+          ["Platforme", "FxPro WebTrader, MT4, MT5, cTrader, TradingView, aplicație mobilă"],
+          ["Comision", "Standard — niciunul; Raw+ și Elite — 3,5 USD per lot într-un sens la perechile majore și aur; cTrader — 35 USD la 1.000.000 rulaj"]
+        ] }
+      ]
+    },
+    {
+      "key": "funding",
+      "label": "Alimentare",
+      "platform": "direct.fxpro.com, cont",
+      "captured": "2026-08-07",
+      "blocks": [
+        { "type": "steps", "items": [
+          { "img": "/assets/guides/fxpro/funding/01_deposit_form.png",
+            "caption": "În meniul lateral deschideți „Deposit”, alegeți o metodă și introduceți suma.",
+            "note": "Metode: card (Visa/Mastercard), Binance Pay, USDT, BTC, Ethereum, alte criptomonede, Skrill, Neteller, transfer bancar." }
+        ] },
+        { "type": "table", "columns": ["Parametru", "Valoare"], "rows": [
+          ["Interval depozit cu cardul", "50–50.000 USD per tranzacție"],
+          ["Comisionul platformei", "0%"]
+        ] },
+        { "type": "callout", "style": "note", "title": "Ce să observați",
+          "body": "0% este comisionul platformei FxPro în sine. Asta nu anulează comisionul propriei bănci sau al sistemului de plată (mai ales pentru carduri care nu sunt în USD) — verificați separat cu emitentul cardului." }
+      ]
+    },
+    {
+      "key": "verification",
+      "label": "Verificare",
+      "platform": "direct.fxpro.com, cont",
+      "captured": "2026-08-07",
+      "intro": "Fără verificare, contul este creat și vizibil în cont, dar documentele vor fi oricum cerute înainte de prima retragere.",
+      "blocks": [
+        { "type": "steps", "items": [
+          { "img": "/assets/guides/fxpro/verification/00_profile_menu.png",
+            "caption": "Deschideți meniul de profil (pictograma din colțul dreapta sus) → „Settings”." },
+          { "img": "/assets/guides/fxpro/verification/01_identity_not_uploaded.png",
+            "caption": "La fila „Your documents” — statusul „Identity Verification: Not uploaded”. Apăsați „Upload” pentru a atașa un document." },
+          { "img": "/assets/guides/fxpro/verification/02_optional_doctypes.png",
+            "caption": "Separat există un bloc „Optional documents” — aici se încarcă ce a cerut suplimentar platforma, pe lângă verificarea standard.",
+            "note": "Lista derulantă reprezintă opțiuni de tip document, nu o listă gata făcută de cerințe: Debit/credit card copy, Bank statement, FxPro Internal Form, KYC Request, Accounting Request, Other. Alegeți-l pe cel care corespunde cererii concrete de la FxPro." }
+        ] }
+      ]
+    },
+    {
+      "key": "trading",
+      "label": "Tranzacționare",
+      "platform": "MT5 WebTrader, cont demo",
+      "captured": "2026-08-07",
+      "blocks": [
+        { "type": "steps", "items": [
+          { "img": "/assets/guides/fxpro/99_trading_terminal_overview.png",
+            "caption": "Se deschide MT5 WebTrader: în stânga lista instrumentelor cu spreadul curent, în dreapta graficul, jos pozițiile deschise." }
+        ] },
+        { "type": "callout", "style": "note", "title": "De ce nu publicăm spreadul FxPro printr-un singur număr",
+          "body": ["Avem trei măsurători independente pentru aceeași pereche EUR/USD, și toate trei diferă: cotația live de pe pagina publică a site-ului — circa 1,4 pips; în același terminal, în lista de favorite — 0,2; în căutarea completă de instrumente din terminal (mai jos) — 0,1.", "O explicație parțială a apărut chiar pe pagina instrumentului: „Note: Price data indicated above may be delayed by 15 minutes”. Dar o întârziere de cincisprezece minute nu explică o diferență de șapte ori între site și terminal, așa că întrebarea nu este pe deplin lămurită.", "Cât timp motivul rămâne necunoscut, „spreadul FxPro” nu are o valoare unică definită, iar noi preferăm să spunem asta direct, nu să alegem cifra care arată cel mai bine. Doar o măsurătoare pe un cont real, chiar în momentul tranzacției, ar lămuri lucrurile."] },
+        { "type": "steps", "items": [
+          { "img": "/assets/guides/fxpro/99_trading_spread_table.png",
+            "caption": "Ca să vedeți spreadul pentru orice instrument dintr-o dată, deschideți căutarea (pictograma lupă din partea de sus) — apare un tabel cu toate perechile și spreadul live în coloana din mijloc." }
+        ] },
+        { "type": "table", "columns": ["Instrument", "Spread"], "rows": [
+          ["EUR/USD", "0,1"],
+          ["GBP/USD", "0,6"],
+          ["USD/JPY", "0,3"],
+          ["USD/CHF", "0,4"],
+          ["USD/CAD", "0,4"],
+          ["EUR/GBP", "0,4"],
+          ["EUR/JPY", "0,2"],
+          ["GBP/JPY", "1,3"]
+        ], "caption": "Captură din terminal, 2026-08-07, în afara ferestrelor metodologiei — prezentată ca punct de referință, nu ca măsurătoare conform regulilor." },
+        { "type": "table", "columns": ["Instrument", "Spread (site)", "Swap long", "Swap short"], "rows": [
+          ["EUR/USD", "~1,4 pips (cu întârziere de 15 min)", "−8,9 puncte", "+1,9 puncte"]
+        ], "caption": "Acesta este ce publică oficial FxPro — pe pagina instrumentului, nu într-un tabel centralizator (nu are unul). Swap-ul a fost colectat doar pentru EUR/USD; celelalte unsprezece instrumente urmează același model de adresă." },
+        { "type": "steps", "items": [
+          { "img": "/assets/guides/fxpro/99_trading_order_ticket.png",
+            "caption": "Ca să plasați o tranzacție, apăsați pe un instrument din listă — se deschide un tichet cu filele Market / Limit / Stop.",
+            "note": "Market — la prețul curent; Limit — se declanșează când prețul ajunge la nivelul dorit; Stop — opusul lui Limit, pentru intrare pe breakout." },
+          { "caption": "Indicați volumul (Volume) și, dacă doriți, bifați Stop Loss și Take Profit — ambele opționale, dar fără Stop Loss tranzacția nu are nicio limită a pierderii." }
+        ] },
+        { "type": "callout", "style": "note", "title": "Ce să observați",
+          "body": "„Margin required” de sub tichet nu este un comision, ci suma blocată în cont pentru poziția deschisă. Este eliberată la închiderea tranzacției, dar cât timp poziția este deschisă, nu poate fi folosită." },
+        { "type": "callout", "style": "note", "title": "Alerte de preț — fără poziție deschisă",
+          "body": "În terminal puteți seta o alertă de preț (pictograma clopoțel) — veți primi o notificare când instrumentul ajunge la nivelul dorit, fără să fie nevoie să țineți o tranzacție deschisă sau să stați lângă grafic.",
+          "img": "/assets/guides/fxpro/99_trading_alerts.png" }
+      ]
+    }
+  ]
+}

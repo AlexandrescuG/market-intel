@@ -26,19 +26,24 @@ import datetime
 import json
 import pathlib
 import sys
+from urllib.parse import quote as _urlquote
 
 import requests
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))
+from core.symbols_registry import yahoo_ticker as _yahoo_ticker
 
 OUT_PATH = pathlib.Path(__file__).resolve().parents[2] / "web" / "data" / "edu_scenes" / "ch2_fed_2020.json"
 
 START = "2020-02-10"
 END = "2020-04-17"
 
-SYMBOLS = {
-    "SPX": "%5EGSPC",
-    "GOLD": "GC=F",
-    "EURUSD": "EURUSD=X",
-}
+# WP1.1 SPEC_alpha_engine_implementation.md: раньше был свой хардкод
+# {"SPX": "%5EGSPC", "GOLD": "GC=F", "EURUSD": "EURUSD=X"} -- те же значения,
+# что в core/symbols_registry (GC=F/EURUSD=X совпадали буквально, ^GSPC был
+# заранее URL-квотирован вручную). Теперь квотится сама эта функция, а не
+# по памяти при правке словаря.
+SYMBOLS = {label: _urlquote(_yahoo_ticker(label), safe="=") for label in ("SPX", "GOLD", "EURUSD")}
 
 MARKERS = [
     {"date": "2020-03-03", "label": "Fed emergency intermeeting cut: -50bp to 1.00-1.25%"},

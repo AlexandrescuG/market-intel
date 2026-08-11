@@ -6,6 +6,7 @@ feedparser>=6.0
 deep-translator>=1.11
 yfinance>=0.2.40
 cloakbrowser
+rpyc>=6.0  # mt5_bridge_pull.py -> mt5_server.py внутри Wine-бутылки Trading (WP0.3)
 # news_pipeline
 telethon>=1.36
 aiosqlite>=0.20

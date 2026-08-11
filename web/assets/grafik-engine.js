@@ -386,6 +386,20 @@
 
   // ── Live-data utilities ────────────────────────────────────────────────────
 
+  // WP1.2 SPEC_alpha_engine_implementation.md: до миграции ohlc_*.json на
+  // price_bars ТФ-файл существовал для КАЖДОГО символа (публиковался из
+  // Yahoo). Теперь M15/H1/H4 у части символов честно не пишутся (price_bars
+  // не имеет этой гранулярности у брокера) -- 404 на статике. Раньше сюда
+  // такой ответ не приходил вообще, поэтому r.json() на HTML-странице 404
+  // ронял всю функцию необработанным исключением (пойман кликом по вкладке
+  // в Playwright, не curl'ом -- см. Core-лог). "Нет данных" -- валидный,
+  // не аварийный исход.
+  function _emptyBars() {
+    return { meta: { ticker: null, label: null, last: null, interval: null,
+                      bias: null, rsi: null, nearest: null, patterns: [] },
+             levels: [], bars: [], lw: [], volume: [] };
+  }
+
   async function loadBars(symbol, tf) {
     // M5 — SPEC_chart_fixes_and_staged_signup.md §3: не статический файл
     // (не весь охват на диске, дорого), а короткое окно по API-запросу.
@@ -393,6 +407,7 @@
       ? './api/chart/ohlc-m5?symbol=' + symbol + '&t=' + Date.now()
       : './data/ohlc_' + symbol + '_' + tf + '.json?t=' + Date.now();
     var r = await fetch(url);
+    if (!r.ok) return _emptyBars();
     var d = await r.json();
     var bars = (d.candles || []).map(function(c) {
       return {

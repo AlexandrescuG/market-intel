@@ -96,7 +96,8 @@ def _recent_rss(hours: int = LOOKBACK_HOURS) -> list[dict]:
     время публикации -- raw.published (rss.py пишет его при первом сборе,
     _entry_time() из feed) -- фильтруем по нему, last_seen тут только широкий
     SQL-предфильтр, чтобы не сканировать всю таблицу."""
-    con = sqlite3.connect(str(DB_PATH))
+    con = sqlite3.connect(str(DB_PATH), timeout=10)
+    con.execute("PRAGMA busy_timeout=10000")
     con.row_factory = sqlite3.Row
     sql_prefilter = (datetime.now(timezone.utc) - timedelta(hours=24)).isoformat()
     rows = con.execute(

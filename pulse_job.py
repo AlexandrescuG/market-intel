@@ -95,7 +95,8 @@ def _news_tag_counts(con, since_ts: float) -> dict[str, int]:
 
 
 def run(verbose: bool = False) -> int:
-    con = sqlite3.connect(str(DB_PATH))
+    con = sqlite3.connect(str(DB_PATH), timeout=10)
+    con.execute("PRAGMA busy_timeout=10000")
     con.executescript("""
         CREATE TABLE IF NOT EXISTS pulse_scores(
             symbol TEXT NOT NULL, category TEXT NOT NULL, ts INT NOT NULL,

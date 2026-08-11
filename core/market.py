@@ -21,17 +21,21 @@ from datetime import datetime, timezone
 
 log = logging.getLogger("market")
 
-# кэштег → тикер yfinance
+# кэштег → тикер yfinance. Не в реестре вообще (нет price_bars/symbols.json
+# записи ни на одну) -- формула, а не таблица данных, оставлена как есть.
 _CRYPTO = {"BTC", "ETH", "SOL", "XRP", "DOGE", "ADA", "BNB", "AVAX", "LINK", "DOT", "MATIC", "LTC"}
-_INDEX = {"SPX": "^GSPC", "NDX": "^IXIC", "DJI": "^DJI", "VIX": "^VIX", "RUT": "^RUT"}
-_ALIAS = {"DXY": "DX-Y.NYB", "GOLD": "GC=F", "XAU": "GC=F", "OIL": "CL=F",
-          "WTI": "CL=F", "BRENT": "BZ=F", "GAS": "NG=F", "SILVER": "SI=F"}
 
 # базовый дашборд — всегда считаем реакцию по этим инструментам.
 # СПЕКА_графики_и_починка_календаря.md §2: выведено из symbols.json
 # ("quote": true), не захардкожено -- те же 14 тикеров, что были, проверено
 # на равенство перед переключением.
-from core.symbols_registry import quote_dashboard, yahoo_ticker as _registry_yahoo_ticker
+# WP1.1 SPEC_alpha_engine_implementation.md: были ещё _INDEX/_ALIAS —
+# независимые хардкод-копии части тех же Yahoo-тикеров (SPX/NDX/DJI/VIX/RUT,
+# DXY/GOLD/XAU/OIL/WTI/BRENT/GAS/SILVER), убраны в пользу resolve()+
+# alias_for() -- по пути починены 2 реальных дыры реестра, из-за которых
+# resolve() раньше не мог их заменить: RUT и BRENT не имели поля "yahoo"
+# вообще, GAS не был записан как алиас NG нигде.
+from core.symbols_registry import quote_dashboard, resolve as _resolve_symbol, alias_for as _alias_for
 DASHBOARD = quote_dashboard()
 
 _cache: dict[str, tuple[float, dict]] = {}
@@ -40,18 +44,16 @@ _TTL = 600  # сек
 
 def to_ticker(tag: str) -> str:
     t = tag.upper().lstrip("$")
-    if t in _INDEX:
-        return _INDEX[t]
-    if t in _ALIAS:
-        return _ALIAS[t]
-    if t in _CRYPTO:
-        return f"{t}-USD"
+    canonical = _resolve_symbol(t)
+    if canonical:
+        y = _alias_for(canonical, "yahoo")
+        if y:
+            return y
     # 🔴 Была здесь без фоллбека в реестр: for FX она возвращала тег как есть
     # ("USDCAD" -> "USDCAD"), а Yahoo ждёт "USDCAD=X". Пока пары были только
     # в _ALIAS выше, это не всплывало -- 12 новых пар (06.08) уже ловили баг.
-    reg = _registry_yahoo_ticker(t)
-    if reg:
-        return reg
+    if t in _CRYPTO:
+        return f"{t}-USD"
     return t  # обычная акция как есть
 
 

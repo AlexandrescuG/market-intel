@@ -1,0 +1,107 @@
+{
+  "id": "xm",
+  "name": "XM",
+  "logo": "/assets/logos/xm.svg",
+  "affiliate": "https://clicks.pipaffiliates.com/c?c=1258918&l=ru&p=1",
+  "table_link": "/brokers",
+  "account_kind": "real",
+  "account_label": "MT5 Standard",
+  "lead": "A guide to four processes. Every screenshot is ours, with a date underneath. Where there's no screenshot, we say so directly — a guide shouldn't make empty promises.",
+  "processes": [
+    {
+      "key": "registration",
+      "label": "Registration",
+      "platform": "xm.com, web",
+      "captured": "2026-08-05",
+      "needed": ["Email", "A couple of minutes — the form is a single screen"],
+      "blocks": [
+        { "type": "steps", "items": [
+          { "img": "/assets/guides/xm/registration/01_start.png", "caption": "Open xm.com and click \"Get Started\"." },
+          { "img": "/assets/guides/xm/registration/02_country.png", "caption": "Choose your country of residence — detected automatically by IP. This field decides which group company you'll sign the contract with." },
+          { "img": "/assets/guides/xm/registration/04_form.png", "caption": "Enter your email and password. Account type and leverage aren't asked here — that's decided after registration." },
+          { "img": null, "caption": "Tick the data-processing consent and click \"Register\".",
+            "note": "We couldn't capture this screen technically (the capture tool kept timing out), but the consent text is recorded verbatim: \"By registering, I state that I have carefully read, understood, and accept the full text of the company's adopted legal documents and Privacy Policy. I also understand that I will receive letters, company news, and information on new products from the company.\" A separate checkbox covers marketing emails — it can be withdrawn at any time and doesn't affect account opening." }
+        ] },
+        { "type": "entity",
+          "img": "/assets/guides/xm/registration/03_entity.png",
+          "legal_name": "XM Global Limited",
+          "jurisdiction": "Belize",
+          "regulator": "Financial Services Commission (Belize)",
+          "licence_no": "8557558",
+          "register_url": null,
+          "register_note": "Belize's FSC public register can't be read by automated tools — there's no direct link to the company's record.",
+          "quote": "«Компания XM Global Limited имеет лицензию на ведение деятельности от Комиссии по финансовым услугам (FSC) Белиза, согласно закону «О рынке ценных бумаг» 2021 года, номер лицензии 8557558.»",
+          "confirmed": false,
+          "confirm_note": "Careful with the reading: this line is the footer of the site's global build — it's the same regardless of the country you selected. It proves \"the global site is run by XM Global\", not directly that \"this specific entity is assigned to your country\". There's indirect confirmation: a real account opened from a CIS/non-EU European country has 1:1000 leverage — that's the Belize entity's ceiling (the Cyprus entity's is 1:30).",
+          "missing": [
+            "a compensation fund (the Cyprus XM entity has one — €20,000; the Belize one doesn't)",
+            "a published percentage of losing accounts"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "activation",
+      "label": "Account activation",
+      "blocks": [
+        { "type": "steps", "items": [
+          { "img": "/assets/guides/xm/activation/01_cabinet_overview.png",
+            "caption": "The dashboard's main screen: an account card with \"Actions\" and \"Deposit\" buttons, and an account summary on the right that shows the 1000:1 leverage right away.",
+            "note": "A yellow banner at the top — \"Verify your account and get a 100% deposit bonus\" with a \"Verify account\" button — is the entry point to verification. We've blacked out account details and amounts." }
+        ] },
+        { "type": "callout", "style": "note", "title": "What to notice on this screen",
+          "body": ["1:1000 leverage isn't \"broker generosity\" — it's a sign of an offshore entity: the European company under the same brand caps out at 1:30. Worth seeing right away, not later.", "Separately: verification is offered here bundled with a bonus. The bonus isn't a reason to rush uploading documents — verification is needed in its own right, to be able to withdraw money."] },
+        { "type": "table", "columns": ["Parameter", "Value"], "rows": [
+          ["Account type", "MT5 Standard"],
+          ["Leverage", "1:1000"],
+          ["Contract size", "standard: 100,000 units of the base currency"],
+          ["Platforms", "MT4, MT5, MT5 web version, XM app"]
+        ] }
+      ]
+    },
+    {
+      "key": "funding",
+      "label": "Funding",
+      "blocks": [
+        { "type": "callout", "style": "gap", "title": "No screenshots this time",
+          "body": "This time we did get into the dashboard, but the funding section wouldn't open: my.xm.com/ru/member/deposit returns a 404, and the \"Deposit\" button on the account card didn't respond to clicks — the SPA wasn't reacting. Either way, this section is only ever captured up to the confirmation screen: no real transfer is made, and the card form is captured empty." },
+        { "type": "table", "columns": ["Parameter", "Value", "Source"], "rows": [
+          ["Minimum deposit", "5 USD", "broker's website"],
+          ["Inactivity fee", "5 USD/month after 90 days without trades", "XM costs document"]
+        ] },
+        { "type": "callout", "style": "note", "title": "What to watch for when funding",
+          "body": "The inactivity fee isn't trivial: an account forgotten for a year loses 60 USD against a minimum deposit of just 5 USD. If you're opening an account \"just to look\" and don't plan to trade, it's smarter to withdraw the balance than leave it sitting there." }
+      ]
+    },
+    {
+      "key": "verification",
+      "label": "Verification",
+      "blocks": [
+        { "type": "text", "body": "It starts not with documents but with a phone number. The \"Verify account\" button from the banner leads to the first step: \"Phone number verification\" — a country-code field (filled in automatically based on your country), a number field, and a \"Get code\" button. A progress bar at the top shows the phone is only the first of several stages." },
+        { "type": "callout", "style": "gap", "title": "We couldn't save a screenshot of this screen",
+          "body": ["XM's verification page consistently breaks our capture tool — the same thing happened on the registration page. The screen is described verbatim above, but there's no screenshot, and we don't substitute a similar-looking image in its place.", "We deliberately didn't click \"Get code\": that sends an SMS to a real phone number, which is an action, not just viewing."] },
+        { "type": "text", "body": "The next steps — document upload — are only ever captured with a deliberately fake sample. A real passport photo is never published in any form." }
+      ]
+    },
+    {
+      "key": "trading",
+      "label": "Trading",
+      "blocks": [
+        { "type": "callout", "style": "gap", "title": "No screenshots" },
+        { "type": "text", "body": "What we measured ourselves in the XM terminal (a snapshot outside the methodology windows, 2026-08-05, around 10:00 UTC) versus what the broker publishes about itself:" },
+        { "type": "table", "columns": ["Instrument", "Broker's average spread", "Our terminal snapshot"], "rows": [
+          ["EUR/USD", "2.0 pips", "1.9"],
+          ["GBP/USD", "2.4", "2.4"],
+          ["USD/JPY", "2.5", "2.3"],
+          ["Gold", "5.5", "$0.55"],
+          ["WTI Oil", "0.05", "$0.05"],
+          ["Bitcoin", "50.00", "$50.00"]
+        ] },
+        { "type": "callout", "style": "fact", "title": "XM publishes an average spread, and it matches our measurement",
+          "body": ["That's rare: most platforms in our comparison either show \"spread from...\" or nothing at all. XM publishes average and minimum spreads for every instrument class, and for Bitcoin and Ether the figures matched our terminal snapshot exactly.", "Sources: XM's condition pages by instrument class, checked 2026-08-06. Our own snapshot is from a real account's terminal, taken outside the methodology windows, shown here as a reference point."] },
+        { "type": "callout", "style": "note", "title": "Watch the unit of measurement",
+          "body": "XM's \"pip\" is ten quote points, not the last digit. For gold, 5.5 pips means $0.55. If you treat a pip as the last digit, the error on gold becomes tenfold." }
+      ]
+    }
+  ]
+}

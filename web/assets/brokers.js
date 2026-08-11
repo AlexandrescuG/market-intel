@@ -35,6 +35,7 @@
   var MENA_SET = {}; MENA.forEach(function (c) { MENA_SET[c] = true; });
 
   var COUNTRIES = [
+    { code: '', ru: 'Не выбрано', ro: 'Nespecificat', en: 'Not selected' },
     { code: 'MD', ru: 'Молдова', ro: 'Moldova', en: 'Moldova' },
     { code: 'RO', ru: 'Румыния', ro: 'România', en: 'Romania' },
     { code: 'DE', ru: 'Германия', ro: 'Germania', en: 'Germany' },
@@ -46,7 +47,11 @@
     { code: 'GB', ru: 'Великобритания', ro: 'Marea Britanie', en: 'United Kingdom' },
     { code: 'ZZ', ru: 'Другая страна', ro: 'Altă țară', en: 'Other country' },
   ];
-  var DEFAULT_COUNTRY = 'MD'; // компания молдавская — честный дефолт, не догадка
+  // Страна не выбрана -- дефолт зависит от языка страницы, не от одной
+  // зашитой страны: EN/RO читатель ориентирован на Европу (юрлицо из
+  // entity_resolution.eea), RU -- на СНГ (entity_resolution.md, тот же факт,
+  // что раньше был жёстко привязан к литеральной Молдове). См. resolveEntity().
+  var DEFAULT_COUNTRY = '';
 
   // Юрисдикции офшорных юрлиц (key_finding) — короткий фиксированный список,
   // тот же паттерн, что COUNTRIES выше.
@@ -66,10 +71,63 @@
     return c ? (c[lang] || c.ru) : code;
   }
 
+  // Единицы спреда — маленький фиксированный набор слов, зашитых в данных
+  // (partners.json) на русском. Переводить целиком partners.json ради трёх
+  // слов избыточно, поэтому здесь -- локальная таблица, тот же приём, что
+  // JURISDICTIONS выше.
+  var UNITS = {
+    'пипс': { ru: 'пипс', ro: 'pips', en: 'pips' },
+    'пункт': { ru: 'пункт', ro: 'punct', en: 'point' },
+    'пункт индекса': { ru: 'пункт индекса', ro: 'punct index', en: 'index point' },
+  };
+  function unitLabel(u) {
+    var m = u && UNITS[u];
+    return m ? (m[_i18n.lang] || m.ru) : u;
+  }
+
+  // Код модели комиссии (p.commission.model) — техническое слово из данных,
+  // не через t()/партнёрский JSON. Единственное встречающееся значение сейчас
+  // -- 'per_side' (XM), но таблица на случай появления других моделей.
+  var COMMISSION_MODELS = {
+    'per_side': { ru: 'за сторону', ro: 'per parte', en: 'per side' },
+  };
+  function commissionModelLabel(m) {
+    var x = m && COMMISSION_MODELS[m];
+    return x ? (x[_i18n.lang] || x.ru) : (m || '');
+  }
+
+  // Свободный текст в самих данных (leverage_retail, published_specs.commission
+  // и т.п.) -- в отличие от единиц, это не закрытый список из пары слов,
+  // поэтому перевод живёт РЯДОМ с фактом в самом JSON, как <field>_en/<field>_ro,
+  // а не в отдельной таблице здесь. Факт остаётся один (RU), перевод -- его
+  // представление, не второй источник правды.
+  function loc(obj, key) {
+    if (!obj) return undefined;
+    if (_i18n.lang === 'en' || _i18n.lang === 'ro') {
+      var v = obj[key + '_' + _i18n.lang];
+      if (v != null) return v;
+    }
+    return obj[key];
+  }
+
   // ── Резолв юрлица по стране ────────────────────────────────────────────────
   function resolveEntity(partner, countryCode) {
     var entities = partner.entities || [];
     if (!entities.length) return null;
+    if (!countryCode) {
+      // Страна не выбрана -- показываем юрлицо, релевантное языку страницы,
+      // а не подставляем первое попавшееся по массиву. EN/RO: юрисдикция
+      // ЕЭЗ (entity_resolution.eea). RU и остальные: СНГ-профиль
+      // (entity_resolution.md — тот же снятый факт, что раньше был
+      // единственным дефолтом). Если у брокера нет юрлица в этом бакете
+      // (например, у FxPro сейчас нет действующего европейского юрлица) --
+      // честно null, а не ближайшее по массиву: это самостоятельная находка,
+      // не пробел.
+      var bucketKey = (_i18n.lang === 'en' || _i18n.lang === 'ro') ? 'eea' : 'md';
+      var wantId = partner.entity_resolution && partner.entity_resolution[bucketKey];
+      if (!wantId) return null;
+      return entities.filter(function (e) { return e.id === wantId; })[0] || null;
+    }
     var key = String(countryCode || '').toLowerCase();
     if (partner.entity_resolution && partner.entity_resolution[key]) {
       var wantId = partner.entity_resolution[key];
@@ -198,14 +256,14 @@
     });
   }
 
-  // "Компенсация"/comp, "% теряющих"/loss и "Демо без верификации"/demo убраны
-  // из основной таблицы и карточки по прямому запросу 2026-08-06 -- поля
-  // по-прежнему считаются в buildFieldHtml() (нужны COMPACT_COLS/BrokerPicker
-  // в главе 11, который loss использует как жёсткий фильтр), просто не
-  // попадают в порядок рендера главной страницы.
-  var FULL_COLS = ['name', 'entity', 'licence', 'leverage', 'nbp', 'spread', 'commission', 'mindep', 'platforms'];
+  // "Компенсация"/comp, "% теряющих"/loss, "Демо без верификации"/demo и
+  // "Защита от отриц. баланса"/nbp убраны из основной таблицы и карточки по
+  // прямому запросу -- поля по-прежнему считаются в buildFieldHtml() (нужны
+  // COMPACT_COLS/BrokerPicker в главе 11, который loss использует как жёсткий
+  // фильтр), просто не попадают в порядок рендера главной страницы.
+  var FULL_COLS = ['name', 'entity', 'licence', 'leverage', 'spread', 'commission', 'mindep', 'platforms'];
   var COMPACT_COLS = ['name', 'entity', 'loss', 'leverage'];
-  var SORTABLE_COLS = ['name', 'entity', 'leverage', 'nbp', 'commission', 'mindep', 'platforms']; // спред -- НИКОГДА (§5: разные размеры лота, сравнение в пунктах даёт 10-кратную ошибку)
+  var SORTABLE_COLS = ['name', 'entity', 'leverage', 'commission', 'mindep', 'platforms']; // спред -- НИКОГДА (§5: разные размеры лота, сравнение в пунктах даёт 10-кратную ошибку)
 
   // Логотипы партнёров (файлы взяты из проекта sbf-nexus, assets/partners/)
   // 2026-08-06. Имя брокера остаётся в alt/title для скринридеров и на случай
@@ -226,6 +284,23 @@
     return logo
       ? '<img class="broker-logo" src="' + escapeHtml(logo) + '" alt="' + escapeHtml(p.name) + '" title="' + escapeHtml(p.name) + '" style="display:block;height:22px;width:auto;max-width:100px;object-fit:contain">'
       : escapeHtml(p.name);
+  }
+
+  // Ссылки на другие страницы сайта должны сохранять текущий язык (/en/,
+  // /ro/) -- иначе переход с англ./рум. страницы всегда сбрасывает в RU.
+  // См. тот же приём в serve.py::_edu_inject (_book_lang_seg).
+  function langPrefix() {
+    return (_i18n.lang === 'en' || _i18n.lang === 'ro') ? '/' + _i18n.lang : '';
+  }
+
+  // Инструкции по регистрации со скриншотами (SPEC_broker_guides_screenshots.md,
+  // 2026-08-06). Список литеральный: пополнение/верификация и AvaTrade ещё
+  // не сняты, ссылка появляется только там, где инструкция реально существует.
+  var GUIDES = { xm: 1, naga: 1, fxpro: 1, instaforex: 1, avatrade: 1 };
+  function guideLinkHtml(p) {
+    return GUIDES[p.id]
+      ? '<a class="guide-link" href="' + langPrefix() + '/brokers/' + p.id + '">' + t('brokers.guide_link', 'инструкция →') + '</a>'
+      : '';
   }
 
   function colLabel(col) {
@@ -295,9 +370,9 @@
     // Если у юрлица не заполнено — берём то, что брокер заявляет о себе на
     // сайте (partner.leverage_retail), с подписью "по данным брокера".
     if (e && e.leverage_retail) {
-      f.leverage = escapeHtml(String(e.leverage_retail));
+      f.leverage = escapeHtml(String(loc(e, 'leverage_retail')));
     } else if (p.leverage_retail && p.leverage_retail.value) {
-      f.leverage = escapeHtml(String(p.leverage_retail.value)) +
+      f.leverage = escapeHtml(String(loc(p.leverage_retail, 'value'))) +
         '<div class="spread-src">' + t('brokers.spread_by_broker', 'по данным брокера') + '</div>';
     } else {
       f.leverage = dash;
@@ -358,7 +433,7 @@
         f.spread = '<span class="no-data">' + t('brokers.spread_not_published', 'брокер не публикует') + '</span>';
         return;
       }
-      var unit = base.unit || sp.unit || '';
+      var unit = unitLabel(base.unit || sp.unit || '');
       f.spread = escapeHtml(base.symbol) + ' ' + escapeHtml(String(val)) + (unit ? ' ' + escapeHtml(unit) : '') +
         '<div class="spread-src">' + t('brokers.spread_by_broker', 'по данным брокера') +
         (sp.checked ? ', ' + escapeHtml(sp.checked) : '') + '</div>';
@@ -369,10 +444,10 @@
     // "по данным брокера", что и спред. Пусто остаётся пустым: ноль не
     // додумываем, отсутствие комиссии по спецификации ещё не факт (§4).
     if (p.commission && p.commission.value != null) {
-      f.commission = escapeHtml(p.commission.model || '') + ' ' + p.commission.value + ' ' + (p.commission.currency || '') +
+      f.commission = escapeHtml(commissionModelLabel(p.commission.model)) + ' ' + p.commission.value + ' ' + (p.commission.currency || '') +
         (p.commission.per_volume ? ' / ' + p.commission.per_volume : '');
     } else if (p.published_specs && p.published_specs.commission && p.published_specs.commission.value != null) {
-      var pc = String(p.published_specs.commission.value);
+      var pc = String(loc(p.published_specs.commission, 'value'));
       f.commission = escapeHtml(pc.length > 90 ? pc.slice(0, 88) + '…' : pc) +
         '<div class="spread-src">' + t('brokers.spread_by_broker', 'по данным брокера') + '</div>';
     } else {
@@ -411,7 +486,8 @@
     var tds = order.map(function (c) { return '<td class="col-' + c + '">' + f[c] + '</td>'; });
 
     return '<tr data-partner="' + p.id + '">' +
-      '<td class="col-name"><a href="' + affLink + '" target="_blank" rel="noopener sponsored">' + nameHtml(p) + '</a></td>' +
+      '<td class="col-name"><a href="' + affLink + '" target="_blank" rel="noopener sponsored">' + nameHtml(p) + '</a>' +
+      guideLinkHtml(p) + '</td>' +
       tds.join('') + '</tr>';
   }
 
@@ -426,6 +502,7 @@
     return '<div class="broker-card">' +
       '<div class="bc-head"><a href="' + ((p.links && p.links.affiliate) || '#') + '" target="_blank" rel="noopener sponsored">' + nameHtml(p) + '</a>' +
       (row.group ? '<span class="group-badge">' + (row.group['label_' + _i18n.lang] || row.group.label_ru) + '</span>' : '') + '</div>' +
+      guideLinkHtml(p) +
       rows + '</div>';
   }
 
@@ -579,7 +656,7 @@
         ? sorted.map(function (r) { return renderRow(r, { compact: true }); }).join('')
         : '<tr><td colspan="' + COMPACT_COLS.length + '" class="empty-row">' + t('brokers.empty_state', 'Пока ни один партнёр не показывает актуальный процент теряющих счетов.') + '</td></tr>';
       el.innerHTML = '<div class="broker-picker"><table class="brokers-table compact"><thead>' + thead + '</thead><tbody>' + tbody + '</tbody></table>' +
-        '<a class="broker-picker-more" href="/brokers">' + t('brokers.full_compare_link', 'Полное сравнение →') + '</a></div>';
+        '<a class="broker-picker-more" href="' + langPrefix() + '/brokers">' + t('brokers.full_compare_link', 'Полное сравнение →') + '</a></div>';
     }).catch(function (err) { console.error('[BrokerPicker]', err); });
   }
 

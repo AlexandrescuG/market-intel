@@ -13,13 +13,12 @@ S/R-уровни по fractal-свингам, кластеризует по ATR,
   python3 sr_levels_job.py [--verbose]
 """
 import argparse
-import glob
-import json
 import sqlite3
 import sys
 import time
-from datetime import datetime, timezone
 from pathlib import Path
+
+import core.price_bars as _price_bars
 
 _BOT_DB = Path("/mnt/sbfdata/sbf-platform/SBFAcademy_bot/bot.db")
 _WEB_DATA = Path(__file__).parent / "web" / "data"
@@ -33,27 +32,11 @@ TOUCH_MIN_GAP = 2         # свечей между засчитываемыми
 
 
 def _load_d1_candles(symbol: str):
-    f = _WEB_DATA / f"ohlc_{symbol}_D1.json"
-    if not f.exists():
-        return None
-    try:
-        data = json.loads(f.read_text())
-    except (json.JSONDecodeError, OSError):
-        return None
-    out = []
-    for c in data.get("candles") or []:
-        t = c.get("time")
-        try:
-            if isinstance(t, str):
-                ts = int(datetime.strptime(t, "%Y-%m-%d").replace(tzinfo=timezone.utc).timestamp())
-            else:
-                ts = int(t)
-            out.append({"ts": ts, "o": float(c["open"]), "h": float(c["high"]),
-                        "l": float(c["low"]), "c": float(c["close"])})
-        except (ValueError, TypeError, KeyError):
-            continue
-    out.sort(key=lambda b: b["ts"])
-    return out
+    """WP1.2 SPEC_alpha_engine_implementation.md: раньше парсил
+    ohlc_{symbol}_D1.json напрямую (входом для расчёта был файл-проекция,
+    а не price_bars — см. §1.2 спеки, "два несвязанных пространства цен").
+    Теперь price_bars — источник, JSON остаётся только выходом для графика."""
+    return _price_bars.load_candles(symbol, "1d")
 
 
 def _atr14(candles) -> float | None:
@@ -194,8 +177,7 @@ def run(verbose: bool = False) -> int:
     con.commit()
 
     now_ts = int(time.time())
-    symbols = sorted({Path(f).stem.replace("ohlc_", "").replace("_D1", "")
-                       for f in glob.glob(str(_WEB_DATA / "ohlc_*_D1.json"))})
+    symbols = _price_bars.available_symbols("1d")
 
     written = 0
     for symbol in symbols:

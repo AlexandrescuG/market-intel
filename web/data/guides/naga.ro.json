@@ -1,0 +1,155 @@
+{
+  "id": "naga",
+  "name": "NAGA",
+  "logo": "/assets/logos/naga.png",
+  "affiliate": "https://go.joinnaga.com/29LSS44/23JF6C/",
+  "table_link": "/brokers",
+  "account_kind": "real",
+  "account_label": "Cont live, nealimentat",
+  "lead": "Cea mai completă divulgare a condițiilor de tranzacționare din comparația noastră, copy trading integrat cu un clasament real și singurul dintre cei cinci brokeri la care mai jos este arătat întregul traseu de la înregistrare până la un cont real, pas cu pas.",
+  "processes": [
+    {
+      "key": "registration",
+      "label": "Înregistrare",
+      "platform": "naga.com, web",
+      "captured": "2026-08-05",
+      "needed": ["Email sau autentificare prin Facebook/Apple", "Sub un minut — formularul e pe un singur ecran"],
+      "blocks": [
+        { "type": "steps", "items": [
+          { "img": "/assets/guides/naga/registration/01_start.png", "caption": "Deschideți naga.com și apăsați „Get started”." },
+          { "img": "/assets/guides/naga/registration/02_country.png", "caption": "Completați formularul: nume, email, parolă. Țara și codul telefonic se determină automat după IP." },
+          { "img": "/assets/guides/naga/registration/06_consents.png", "caption": "Chiar sub butonul „Sign up” — o linie scurtă despre regulator, înainte de a trimite formularul." }
+        ] },
+        { "type": "entity",
+          "img": "/assets/guides/naga/registration/03_entity.png",
+          "legal_name": "NAGA Capital Ltd",
+          "jurisdiction": "Seychelles",
+          "regulator": "Financial Services Authority Seychelles (FSA)",
+          "licence_no": "SD026",
+          "register_url": "https://fsaseychelles.sc/regulated-entities/capital-markets",
+          "register_note": "Compania figurează în registru ca Securities Dealer activ. Numărul SD026 în sine nu este publicat de registru — provine doar din declarația brokerului.",
+          "quote": "«The website is operated by NAGA Capital Ltd which is authorised and regulated by the Financial Services Authority Seychelles (FSA) under licence No. SD026.»",
+          "confirmed": true,
+          "confirm_note": "Entitatea este menționată de două ori: chiar pe formularul de înregistrare și integral în subsolul site-ului. Alături, pe un rând separat, o a doua entitate din grup — NAGA Markets Europe Ltd (CySEC 204/13) — este marcată explicit drept „other group entity”: nu cea care operează site-ul pentru clienții din CSI și Europa.",
+          "missing": [
+            "un fond de compensare — nicio mențiune în contract, singura instanță de contestație este chiar regulatorul din Seychelles",
+            "un procent publicat al conturilor în pierdere",
+            "un plafon numeric al levierului în politică — doar exemple (1:300, 1:200), la aur publicitate până la 1:500"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "activation",
+      "label": "Activarea contului",
+      "platform": "app.naga.com, cont",
+      "captured": "2026-08-07",
+      "intro": "După înregistrare, deschideți contul — acesta este deja creat. Înainte de a tranzacționa, completați un chestionar scurt: acesta deblochează limite mai mari și este necesar pentru verificare.",
+      "blocks": [
+        { "type": "steps", "items": [
+          { "img": "/assets/guides/naga/activation/02_setup_wizard_start.png",
+            "caption": "Apăsați „Get Started” la mesajul „Set Up Your Live Account” — durează câteva minute." },
+          { "img": "/assets/guides/naga/activation/03_personal_details.png",
+            "caption": "Introduceți datele exact ca în pașaport: nume, data nașterii, cetățenia. Vi se va cere separat dacă sunteți persoană expusă politic (PEP) și rezident fiscal SUA." },
+          { "img": "/assets/guides/naga/activation/04_address.png",
+            "caption": "Indicați adresa de reședință." },
+          { "img": "/assets/guides/naga/activation/06_financial_employment.png",
+            "caption": "Un chestionar separat („Financial Details”) întreabă despre ocupație, domeniu de activitate și experiență de tranzacționare, apoi despre sursa fondurilor, obiectivul investiției, venit și averea totală.",
+            "note": "Tot acolo se cere țara din care vor veni depunerile și retragerile, precum și numărul de identificare fiscală (TIN) — dacă țara dumneavoastră nu emite unul, există o opțiune de răspuns separată." }
+        ] },
+        { "type": "callout", "style": "note", "title": "Contul devine „real” după completarea chestionarului",
+          "body": "Imediat după completare, contul trimite o notificare „You upgraded to a real-money account!” — aceasta nu este același lucru cu verificarea identității (vezi secțiunea de mai jos), ci doar o confirmare că datele de bază au fost acceptate și metodele de alimentare sunt disponibile." }
+      ]
+    },
+    {
+      "key": "funding",
+      "label": "Alimentare",
+      "platform": "app.naga.com, cont",
+      "captured": "2026-08-07",
+      "blocks": [
+        { "type": "steps", "items": [
+          { "img": "/assets/guides/naga/funding/01_deposit_form.png",
+            "caption": "În secțiunea „Funds” → „Deposit” alegeți o metodă: card (Visa/Mastercard), Skrill, Neteller sau transfer bancar — și introduceți suma." }
+        ] },
+        { "type": "table", "columns": ["Parametru", "Valoare"], "rows": [
+          ["Depozit minim", "10 USD"],
+          ["Comision de depunere", "„No charge” pentru toate metodele listate"]
+        ] },
+        { "type": "callout", "style": "note", "title": "„Withdrawable” nu este același lucru cu soldul",
+          "body": "Suma disponibilă pentru retragere poate fi mai mică decât ce se află în cont: dacă aveți poziții deschise, puteți retrage doar o sumă care să mențină nivelul marjei peste 150% — altfel sistemul nu vă permite să trimiteți cererea, pentru a vă proteja de închiderea forțată a pozițiilor.",
+          "img": "/assets/guides/naga/funding/02_withdrawable.png" }
+      ]
+    },
+    {
+      "key": "verification",
+      "label": "Verificare",
+      "platform": "app.naga.com, cont · Sumsub",
+      "captured": "2026-08-07",
+      "intro": "Fără verificarea identității, NAGA permite alimentarea contului cu cel mult 2.000 € — cifra este indicată chiar pe ecranul unde începe verificarea, înainte ca procesul să înceapă. Verificarea propriu-zisă este efectuată de un serviciu terț, Sumsub, nu direct de NAGA.",
+      "blocks": [
+        { "type": "steps", "items": [
+          { "img": "/assets/guides/naga/verification/01_consent.png",
+            "caption": "Apăsați „Agree and continue” pe ecranul de consimțământ — acesta explică faptul că datele sunt prelucrate de Sumsub și oferă linkuri către politica de confidențialitate." },
+          { "img": "/assets/guides/naga/verification/02_sumsub_optin.png",
+            "caption": "Un pas opțional: puteți crea un Sumsub ID pentru a nu mai trece prin verificare din nou la alte servicii care folosesc tot Sumsub.",
+            "note": "Comutatorul este activat implicit — dacă nu doriți ca datele să fie refolosite, dezactivați-l înainte de a apăsa „Start verification”." },
+          { "img": "/assets/guides/naga/verification/03_doctype_select.png",
+            "caption": "Pasul 1 din 2: alegeți țara emitentă a documentului și tipul acestuia — pașaport, buletin sau permis de conducere.",
+            "note": "Există un buton „Continue on phone” — puteți scana un cod QR și parcurge pasul cu camera telefonului, dacă nu aveți încredere în camera calculatorului." },
+          { "img": "/assets/guides/naga/verification/04_upload_tips.png",
+            "caption": "Înainte de încărcare — trei cerințe scurte: fotografie color, lumină bună, fără imagini editate." },
+          { "img": "/assets/guides/naga/verification/05_upload_doc.png",
+            "caption": "Atașați un fișier (JPG, PNG, HEIC, WEBP sau PDF, până la 50 MB) sau fotografiați documentul chiar aici." },
+          { "img": "/assets/guides/naga/verification/06_liveness_intro.png",
+            "caption": "Pasul 2 din 2 — verificarea de vitalitate (liveness check): sistemul captează fața și fundalul prin cameră, pentru a confirma că documentul este prezentat chiar de titularul său." }
+        ] },
+        { "type": "callout", "style": "note", "title": "Dacă nu pornește camera",
+          "body": "Sumsub afișează instrucțiuni chiar pe ecran: deschideți pictograma site-ului din bara de adrese a browserului → găsiți „Camera” → activați accesul → reveniți și apăsați „Try again”. În medii de browser automatizate sau izolate (de exemplu, mașini virtuale fără cameră fizică), accesul la cameră este tehnic imposibil — atunci rămâne doar opțiunea „Continue on phone”.",
+          "img": "/assets/guides/naga/verification/07_camera_blocked.png" }
+      ]
+    },
+    {
+      "key": "trading",
+      "label": "Tranzacționare",
+      "platform": "app.naga.com, terminal web",
+      "captured": "2026-08-07",
+      "blocks": [
+        { "type": "steps", "items": [
+          { "img": "/assets/guides/naga/trading/01_markets_overview.png",
+            "caption": "În secțiunea „Markets”, instrumentele sunt grupate pe categorii — indici, forex, materii prime, cripto — cu preț live și variația zilei." },
+          { "img": "/assets/guides/naga/trading/02_positions_empty.png",
+            "caption": "„Positions” arată tranzacțiile deschise, în așteptare și închise — până la prima tranzacție, secțiunea e goală, cu un buton „Start Trading”." },
+          { "img": "/assets/guides/naga/trading/03_order_ticket.png",
+            "caption": "Deschideți un instrument — în dreapta apare un tichet: Sell/Buy, preț de piață sau specific, volum în loturi sau sumă în dolari.",
+            "note": "„Order Protector” înseamnă Stop Loss și Take Profit, ambele dezactivate implicit (comutatoare în dreapta). Fără Stop Loss, o poziție nu are nicio limită a pierderii, în afară de soldul contului." }
+        ] },
+        { "type": "callout", "style": "fact", "title": "Nivelul marjei este explicat chiar în interfață",
+          "body": "Formula: (Equity ÷ Margin used) × 100. Sub 50%, NAGA începe să închidă forțat poziții — de la cea mai neprofitabilă, până când marja devine suficientă. Între 51% și 150% — avertisment și recomandarea de a alimenta contul sau de a închide o parte din poziții. Peste 150% — totul este în regulă.",
+          "img": "/assets/guides/naga/trading/04_margin_level.png" },
+        { "type": "callout", "style": "fact", "title": "Cea mai bună divulgare a condițiilor dintre cei cinci",
+          "body": "NAGA publică într-un singur tabel ceea ce ceilalți fie nu publică deloc, fie împart pe mai multe pagini: swap long și short, spread mediu în pips, marjă, comision, dimensiunea lotului și limitele de volum." },
+        { "type": "table", "columns": ["Instrument", "Spread mediu", "Swap L/S", "Marjă", "Comision", "Lot", "Volum"], "rows": [
+          ["AUD/USD", "1,0", "−1,1 / −4,4", "0,20%", "0,00%", "100.000", "0,01–50"],
+          ["AUD/CAD", "1,4", "−9,95 / −3,7", "0,40%", "0,00%", "100.000", "0,01–50"]
+        ], "caption": "Pagina „Hours & Fees”, verificat la 2026-08-06. Sunt arătate primele rânduri drept confirmare; tabelul este alfabetic și se încarcă în tranșe." },
+        { "type": "callout", "style": "note", "title": "O observație despre simboluri",
+          "body": "În terminal, instrumentele au sufixul _Pro: EURUSD_Pro, XAUUSD_Pro. Iar indicele DAX 40 este notat GER30 (DAX) — ticker-ul este în urma indicelui cu zece acțiuni." },
+        { "type": "callout", "style": "fact", "title": "Semnale gata făcute de la Trading Central",
+          "body": [
+            "Secțiunea „Trading Signals” conține idei de la Trading Central (același furnizor terț folosit și de AvaTrade): instrument, direcție, niveluri țintă și un scenariu scurt, pe înțelesul tuturor.",
+            "La nivelul de bază sunt disponibile 5 semnale pe zi — pentru mai multe este nevoie de statutul Silver Trader. La fel ca la AvaTrade, aceasta nu este recomandarea noastră: semnalele sunt generate automat după metodologia Trading Central și sunt disponibile în mod egal tuturor clienților de nivelul respectiv."
+          ],
+          "img": "/assets/guides/naga/trading/05_signals.png" },
+        { "type": "callout", "style": "fact", "title": "Copy trading integrat, cu clasament public",
+          "body": [
+            "„Find Leaders” arată un clasament real al traderilor după profit, pe ultimele 30 și 7 zile — cu numărul de urmăritori și conturi care copiază pentru fiecare. Butonul „Autocopy” conectează copierea automată a tranzacțiilor unui trader anume.",
+            "Nu este o garanție a rezultatelor: performanța trecută a unui lider nu promite nimic pentru viitor, iar profitul afișat este profitul liderului, nu un profit garantat pentru cel care copiază (comisioanele și întârzierea copierii îl reduc)."
+          ],
+          "img": "/assets/guides/naga/trading/06_find_leaders.png" },
+        { "type": "callout", "style": "note", "title": "Puteți câștiga și din proprii urmăritori",
+          "body": "„Copy Premium” din secțiunea „Wallet” plătește traderul care este copiat — până la 0,90 $ per lot la activele populare, la nivelul Diamond. Condiții: să fiți cel puțin la nivelul Iron, să tranzacționați pe propriul cont (nu prin copiere), să țineți tranzacția mai mult de 5 minute, să investiți în ea peste 100 $ și să o închideți pe profit. Nivelul depinde de suma din cont — pornind de la zero, devine disponibil abia după un depozit de la 250 $.",
+          "img": "/assets/guides/naga/trading/07_copy_premium.png" }
+      ]
+    }
+  ]
+}

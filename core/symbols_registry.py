@@ -28,6 +28,7 @@ from pathlib import Path
 
 _PATH = Path(__file__).parent.parent / "web" / "data" / "symbols.json"
 _cache: dict | None = None
+_alias_index: dict[str, str] | None = None
 
 
 def _load() -> dict:
@@ -35,6 +36,65 @@ def _load() -> dict:
     if _cache is None:
         _cache = json.loads(_PATH.read_text(encoding="utf-8"))
     return _cache
+
+
+def _build_alias_index() -> dict[str, str]:
+    """alias.upper() -> canonical. Каждый canonical-ключ резолвит сам в себя,
+    плюс каждый элемент его "aliases". При коллизии (один alias у двух
+    canonical) побеждает первый встреченный по порядку словаря в JSON —
+    не ловилось на текущих 74 записях, но явный порядок лучше молчаливого."""
+    d = _load()
+    idx: dict[str, str] = {}
+    for canonical, entry in d.items():
+        idx.setdefault(canonical.upper(), canonical)
+        if isinstance(entry, dict):
+            for a in entry.get("aliases") or []:
+                idx.setdefault(str(a).upper(), canonical)
+    return idx
+
+
+def resolve(alias: str) -> str | None:
+    """Любой алиас (тикер MT5/Yahoo, разговорное имя, сам canonical) ->
+    canonical-ключ реестра (тот, что использует UI/i18n — напр. "GOLD",
+    не "XAUUSD"). None, если реестр вообще не знает такого имени.
+    WP1.1 SPEC_alpha_engine_implementation.md — раньше это делали 3
+    независимых хардкод-словаря (serve.py/core/market.py/build_ch2_fed_2020.py),
+    каждый знал только тикеры Yahoo и не знал про алиасы вообще (NDX, XAU,
+    OIL, GAS резолвились только потому, что были прописаны там буква в букву)."""
+    global _alias_index
+    if _alias_index is None:
+        _alias_index = _build_alias_index()
+    return _alias_index.get(alias.upper())
+
+
+def alias_for(canonical: str, vendor: str) -> str | None:
+    """canonical-ключ реестра -> имя символа у конкретного vendor'а.
+
+    vendor="yahoo"      -> поле "yahoo" записи.
+    vendor="price_bars" -> поле "price_bars", если оно есть (сейчас только
+                            у GOLD, единственный известный случай расхождения
+                            канонического имени и имени в price_bars —
+                            остальные 73 совпадают с canonical напрямую).
+    vendor="mt5"        -> через mt5_config.SYMBOL_MAP по price_bars-имени
+                            (SYMBOL_MAP исторически ключуется по нему же).
+    Любой другой vendor  -> прямое поле entry.get(vendor) — задел под
+                            TwelveData/Deribit/Bybit/CFTC, когда для них
+                            появятся реальные данные (см. §1.8 — не
+                            выдумывать значения заранее).
+    """
+    d = _load()
+    entry = d.get(canonical)
+    if not isinstance(entry, dict):
+        return None
+    if vendor == "price_bars":
+        return entry.get("price_bars", canonical)
+    if vendor == "mt5":
+        pb_symbol = entry.get("price_bars", canonical)
+        import sys
+        sys.path.insert(0, str(Path(__file__).parent.parent))  # mt5_config.py в корне market_intel
+        from mt5_config import SYMBOL_MAP  # локальный импорт: чисто данные, без mt5
+        return SYMBOL_MAP.get(pb_symbol)
+    return entry.get(vendor)
 
 
 def chart_watch() -> dict[str, str]:
