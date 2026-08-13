@@ -38,6 +38,12 @@ TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")            # лента для контента (алерты)
 TELEGRAM_REPORT_CHAT_ID = os.getenv("TELEGRAM_REPORT_CHAT_ID", "")  # куда слать дайджест (по умолч. = CHAT_ID)
 
+# @gdenigi_bot -- WP4.7 SPEC_alpha_engine_wp4_continuous_cycle.md, ОТДЕЛЬНЫЙ
+# бот/канал от TELEGRAM_* выше (прогнозы агента при BSS>0, не операционные
+# алерты). Пусто, пока Георгий не создаст бота через @BotFather.
+GDENIGI_BOT_TOKEN = os.getenv("GDENIGI_BOT_TOKEN", "")
+GDENIGI_CHAT_ID = os.getenv("GDENIGI_CHAT_ID", "")
+
 # ── Поведение ──────────────────────────────────────────────────────────────────
 HEADLESS = os.getenv("HEADLESS", "false").lower() in ("1", "true", "yes")
 CHECK_INTERVAL = int(os.getenv("CHECK_INTERVAL_MINUTES", "20")) * 60

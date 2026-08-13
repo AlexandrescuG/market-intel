@@ -53,6 +53,10 @@ MIGRATIONS: list[tuple[int, str, str]] = [
      "ALTER TABLE event_reaction_stats ADD COLUMN miss_up_share REAL"),
     (14, "event_reaction_stats.miss_down_share",
      "ALTER TABLE event_reaction_stats ADD COLUMN miss_down_share REAL"),
+    (15, "factor_registry.history",
+     "ALTER TABLE factor_registry ADD COLUMN history INTEGER DEFAULT 1"),
+    (16, "forecasts.call_id",
+     "ALTER TABLE forecasts ADD COLUMN call_id TEXT"),
 ]
 
 
