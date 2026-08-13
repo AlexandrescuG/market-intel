@@ -27,11 +27,19 @@ PATTERNS = {
     "double_top":        {"display_name_ru": "Двойная вершина", "direction": "bearish"},
     "double_bottom":     {"display_name_ru": "Двойное дно", "direction": "bullish"},
     "break_retest":      {"display_name_ru": "Пробой с ретестом", "direction": "neutral"},
+    # WP3.1 SPEC_alpha_engine_implementation.md, решение Георгия 11.08:
+    # пороги геометрии — те же числа, что pin_bar_*/уже в core/technical.py
+    # (doji), без подтверждения следующей свечой, на всех ТФ.
+    "doji":              {"display_name_ru": "Доджи", "direction": "neutral"},
+    "shooting_star":     {"display_name_ru": "Падающая звезда", "direction": "bearish"},
+    "hammer":            {"display_name_ru": "Молот", "direction": "bullish"},
 }
 
 MIN_CANDLES = 20
 DOUBLE_MIN_GAP, DOUBLE_MAX_GAP = 5, 30
 BREAK_RETEST_WINDOW = 5
+DOJI_MAX_BODY_SHARE = 0.1     # тело <= 10% диапазона — то же правило, что в core/technical.py::patterns()
+TREND_LOOKBACK = 5            # [ДОПУЩЕНИЕ] не откалибровано, см. WP3.1 в Core-логе 11.08
 
 
 def _body(c):
@@ -75,6 +83,52 @@ def _detect_pin_bars(candles):
             out.append({"pattern_key": "pin_bar_top", "ts": c["ts"], "direction": "bearish"})
         if lower_shadow >= b * 2 and in_upper_third:
             out.append({"pattern_key": "pin_bar_bottom", "ts": c["ts"], "direction": "bullish"})
+    return out
+
+
+def _detect_doji(candles):
+    """Тело <= 10% диапазона. Маркер неопределённости, НЕ сигнал (§3.1
+    спеки) — его место в факторах волатильности, не в направленных
+    гипотезах, direction='neutral' закрывает это на уровне схемы."""
+    out = []
+    for c in candles:
+        r = _range(c)
+        if r <= 0:
+            continue
+        if _body(c) <= DOJI_MAX_BODY_SHARE * r:
+            out.append({"pattern_key": "doji", "ts": c["ts"], "direction": "neutral"})
+    return out
+
+
+def _detect_shooting_star_hammer(candles):
+    """Контекстные версии pin_bar_top/pin_bar_bottom — ТА ЖЕ геометрия
+    (тень >= 2x тела, тело в противоположной трети диапазона), ПЛЮС
+    требование предшествующего движения в противоположную сторону: без
+    этого shooting_star неотличим от pin_bar_top (см. WP3.1 спеки —
+    "разница содержательная: классическое определение требует
+    предшествующего восходящего движения, а pin_bar_top — чистая геометрия
+    без контекста"). Контекст — свежий локальный экстремум относительно
+    TREND_LOOKBACK баров до (свой high/low бара строго не хуже, чем весь
+    window) — простая, не выдуманная под конкретный результат мера "перед
+    этим баром был тренд туда, откуда паттерн разворачивает"."""
+    out = []
+    for i, c in enumerate(candles):
+        if i < TREND_LOOKBACK:
+            continue
+        b, r = _body(c), _range(c)
+        if b <= 0 or r <= 0:
+            continue
+        body_top, body_bottom = max(c["o"], c["c"]), min(c["o"], c["c"])
+        upper_shadow, lower_shadow = c["h"] - body_top, body_bottom - c["l"]
+        in_lower_third = (body_top - c["l"]) <= r / 3
+        in_upper_third = (c["h"] - body_bottom) <= r / 3
+        window = candles[i - TREND_LOOKBACK:i]
+        preceded_by_uptrend = c["h"] >= max(w["h"] for w in window)
+        preceded_by_downtrend = c["l"] <= min(w["l"] for w in window)
+        if upper_shadow >= b * 2 and in_lower_third and preceded_by_uptrend:
+            out.append({"pattern_key": "shooting_star", "ts": c["ts"], "direction": "bearish"})
+        if lower_shadow >= b * 2 and in_upper_third and preceded_by_downtrend:
+            out.append({"pattern_key": "hammer", "ts": c["ts"], "direction": "bullish"})
     return out
 
 
@@ -163,6 +217,8 @@ def detect(ohlcv, levels=None):
     out = []
     out += _detect_engulfing(ohlcv)
     out += _detect_pin_bars(ohlcv)
+    out += _detect_doji(ohlcv)
+    out += _detect_shooting_star_hammer(ohlcv)
     out += _detect_inside_bar(ohlcv)
     out += _detect_double_extremes(ohlcv)
     out += _detect_break_retest(ohlcv, levels)

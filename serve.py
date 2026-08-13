@@ -1283,6 +1283,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self._handle_chart_sentiment()
         elif path_clean == "/api/chart/symbols":
             self._send_json(sorted(_chart_symbols()))
+        elif path_clean == "/api/chart/smc":
+            self._handle_chart_smc()
         elif path_clean == "/api/focus":
             self._handle_focus(user_id)
         elif path_clean == "/api/chart/my-trades":
@@ -2418,6 +2420,39 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                  "display_name_ru": PATTERNS.get(e["pattern_key"], {}).get("display_name_ru", e["pattern_key"])}
                 for e in events if from_ts <= e["ts"] <= to_ts
             ]
+            self._send_json(items)
+        except Exception as e:
+            self._send_json({"error": str(e)}, 500)
+
+    def _handle_chart_smc(self) -> None:
+        """WP3.2 SPEC_alpha_engine_implementation.md: структура рынка
+        (свинги HH/LH/HL/LL, BOS/CHoCH, FVG, OB, пулы ликвидности, sweep) —
+        живой детект через core.smc.detect(), порт SBFGrafik.detectSMC
+        (grafik-engine.js:528-609), сверенный с ним на 200 барах (Core-лог
+        11.08). SBFGrafik.detectSMC остаётся только для образовательной
+        галереи (§3 спеки) — та же развилка, что уже у detectCandles
+        (chart.html:431-432)."""
+        params = parse_qs(urlparse(self.path).query)
+        symbol = params.get("symbol", [None])[0]
+        tf = params.get("tf", ["D1"])[0]
+        if not symbol:
+            self._send_json({"error": "symbol required"}, 400)
+            return
+        try:
+            from_ts = int(params.get("from", [None])[0] or 0)
+            to_ts = int(params.get("to", [None])[0] or int(time.time()) + 365 * 86400)
+        except ValueError:
+            self._send_json({"error": "invalid from/to"}, 400)
+            return
+        try:
+            from pattern_stats_job import _load_candles as _load_ohlc
+            from core.smc import detect as _detect_smc
+            candles = _load_ohlc(symbol, tf)
+            if not candles:
+                self._send_json([])
+                return
+            events = _detect_smc(candles)
+            items = [e for e in events if from_ts <= e["ts"] <= to_ts]
             self._send_json(items)
         except Exception as e:
             self._send_json({"error": str(e)}, 500)

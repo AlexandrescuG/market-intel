@@ -355,6 +355,7 @@ let _curLevelsShown = [];      // после top-N фильтра — то, чт
 let _curConfluence = [];       // зоны внимания для текущего symbol (Layer 2, Фаза 2)
 let _curPatterns = [];         // паттерны из core.patterns.detect() (Layer 2, Фаза 3)
 let _curPatternsShown = [];    // после дедупликации — то, что реально на графике (для хит-теста клика)
+let _curSMC = [];              // структура рынка из core.smc.detect() (WP3.2 SPEC_alpha_engine_implementation.md)
 let _evtRO = null;             // ResizeObserver слоя событий
 const TOGGLES = {piv:true, cndl:false, smc:false, evt: FOCUS_TODAY || localStorage.getItem('sbf_chart_evt') !== '0', news:false,
   lvl: localStorage.getItem('sbf_chart_lvl') !== '0', zone:false, sess:false, trades:true};
@@ -467,6 +468,24 @@ async function refreshPatterns(tf) {
   }
 }
 
+// WP3.2 SPEC_alpha_engine_implementation.md: раньше SBFGrafik.detectSMC
+// считался синхронно на клиенте по _curData.bars — теперь как и паттерны,
+// живой Python-эндпоинт (core.smc.detect(), сверен с JS на 200 барах,
+// см. Core-лог 11.08). Тот же from/to по видимым барам, что у паттернов.
+async function refreshSMC(tf) {
+  _curSMC = [];
+  if (_curData && _curData.lw.length) {
+    const bars = _curData.lw;
+    const from = barTimeToUnix(bars[0].time);
+    const to = barTimeToUnix(bars[bars.length - 1].time) + (TF_SEC[tf] || 86400) * 6;
+    try {
+      const r = await fetch(`/api/chart/smc?symbol=${encodeURIComponent(PARAM)}&tf=${tf}&from=${from}&to=${to}`);
+      const data = await r.json();
+      if (Array.isArray(data)) _curSMC = data;
+    } catch (e) {}
+  }
+}
+
 function findPatternAtX(x) {
   if (!chart || !_curPatternsShown.length) return null;
   let best = null, bestDist = 8;
@@ -540,56 +559,64 @@ function openPatternCard(p, clickX, clickY) {
     .catch(() => {});
 }
 
+// WP3.2 SPEC_alpha_engine_implementation.md: _curSMC теперь из живого
+// Python-эндпоинта (core.smc.detect(), сверен с этой же JS-функцией на
+// 200 барах XAUUSD H1 — полное совпадение по HH/LH/HL/LL, см. Core-лог
+// 11.08). SBFGrafik.detectSMC больше не вызывается здесь — остаётся
+// только в образовательной галерее (та же развилка, что у detectCandles).
 function getSMCMarkers() {
-  if (!_curData) return [];
-  const evts = SBFGrafik.detectSMC(_curData.bars, 5);
-  const start = Math.max(0, _curData.bars.length - 60);
+  if (!_curData || !_curSMC.length) return [];
+  const bars = _curData.lw;
+  const recentFromTs = bars.length > 60 ? barTimeToUnix(bars[bars.length - 60].time) : 0;
   const swingTypes = ['hh','lh','hl','ll'];
-  return evts
-    .filter(e => swingTypes.includes(e.type) && e.i >= start)
-    .map(e => {
-      const lw = _curData.lw[e.i];
-      if (!lw) return null;
-      return {
-        time: lw.time,
-        position: e.dir==='bull' ? 'belowBar' : 'aboveBar',
-        color: e.dir==='bull' ? '#2E8B6F' : '#C0504D',
-        shape: 'circle',
-        text: e.label
-      };
-    }).filter(Boolean);
+  return _curSMC
+    .filter(e => swingTypes.includes(e.event) && e.ts >= recentFromTs)
+    .map(e => ({
+      time: unixToBarTime(e.ts),
+      position: e.direction === 'bullish' ? 'belowBar' : 'aboveBar',
+      color: e.direction === 'bullish' ? '#2E8B6F' : '#C0504D',
+      shape: 'circle',
+      text: e.event.toUpperCase()
+    }));
 }
 
+// Python-бэкенд отдаёт ВСЮ историю (JS ограничивал 5 FVG/3 OB "для
+// читаемости", BOS считал только последний — недопустимо в расчёте, но
+// на графике так же рисовать ВСЁ означало бы сотни горизонтальных линий.
+// Берём последние по времени N — та же визуальная плотность, что была,
+// просто корректный (не структурно ограниченный) источник под капотом.
 function applySMCLines(evts) {
   const lines = [];
   if (!candleSeries) return lines;
-  evts.forEach(ev => {
-    if (ev.type === 'bos') {
-      const col = ev.dir==='bear' ? '#c0392b' : '#1e8e5a';
+  const byEvent = (key, n) => evts.filter(e => e.event === key).slice(-n);
+  const shown = [...byEvent('bos', 5), ...byEvent('choch', 5), ...byEvent('fvg', 5), ...byEvent('ob', 3)];
+  shown.forEach(ev => {
+    if (ev.event === 'bos' || ev.event === 'choch') {
+      const col = ev.direction === 'bearish' ? '#c0392b' : '#1e8e5a';
       lines.push(candleSeries.createPriceLine({
         price: ev.y, color: col, lineWidth: 1, lineStyle: 2,
-        axisLabelVisible: true, title: ev.label
+        axisLabelVisible: true, title: ev.event.toUpperCase()
       }));
     }
-    if (ev.type === 'fvg') {
-      const col = ev.dir==='bull' ? '#1D9E75' : '#c0392b';
+    if (ev.event === 'fvg') {
+      const col = ev.direction === 'bullish' ? '#1D9E75' : '#c0392b';
       lines.push(candleSeries.createPriceLine({
-        price: ev.yTop, color: col, lineWidth: 1, lineStyle: 3,
+        price: ev.top, color: col, lineWidth: 1, lineStyle: 3,
         axisLabelVisible: false, title: 'FVG'
       }));
       lines.push(candleSeries.createPriceLine({
-        price: ev.yBot, color: col, lineWidth: 1, lineStyle: 3,
+        price: ev.bottom, color: col, lineWidth: 1, lineStyle: 3,
         axisLabelVisible: false, title: ''
       }));
     }
-    if (ev.type === 'ob') {
-      const col = ev.dir==='bull' ? '#C9A227' : '#B07CC6';
+    if (ev.event === 'ob') {
+      const col = ev.direction === 'bullish' ? '#C9A227' : '#B07CC6';
       lines.push(candleSeries.createPriceLine({
-        price: ev.yTop, color: col, lineWidth: 1, lineStyle: 2,
+        price: ev.top, color: col, lineWidth: 1, lineStyle: 2,
         axisLabelVisible: false, title: 'OB'
       }));
       lines.push(candleSeries.createPriceLine({
-        price: ev.yBot, color: col, lineWidth: 1, lineStyle: 2,
+        price: ev.bottom, color: col, lineWidth: 1, lineStyle: 2,
         axisLabelVisible: false, title: ''
       }));
     }
@@ -637,10 +664,9 @@ function applyToggles() {
     });
   }
 
-  // SMC priceLine (BOS, FVG, OB)
-  if (TOGGLES.smc && _curData) {
-    const smcEvts = SBFGrafik.detectSMC(_curData.bars, 5);
-    _curLines = _curLines.concat(applySMCLines(smcEvts));
+  // SMC priceLine (BOS, FVG, OB) — из _curSMC (refreshSMC), не клиентский detectSMC
+  if (TOGGLES.smc && _curSMC.length) {
+    _curLines = _curLines.concat(applySMCLines(_curSMC));
   }
 
   // Исторические S/R-уровни (Layer 2, Фаза 1) — сплошная линия (пивоты — пунктир),
@@ -1996,6 +2022,7 @@ async function drawOurs(tf) {
   // applyToggles(), т.к. их рендер идёт оттуда же.
   await refreshLevels();
   await refreshPatterns(tf);
+  await refreshSMC(tf);
 
   // Слои (пивоты/паттерны/SMC/уровни)
   applyToggles();
