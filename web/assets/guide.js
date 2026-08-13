@@ -172,10 +172,16 @@
       // <id>.ro.json это полные переводы той же структуры. Если файла для языка
       // нет (ещё не переведён брокер), тихо падаем обратно на RU, а не на пустую
       // страницу -- отсутствие перевода не должно ломать чтение факта.
+      // Кэш-бастер -- без него правка ТОЛЬКО JSON-данных (без изменения самого
+      // guide.js) не долетала бы до вернувшегося читателя без хард-релоада:
+      // static-serving в serve.py (SimpleHTTPRequestHandler) не шлёт
+      // Cache-Control, версия в query у guide.js на этот случай не спасает.
+      // Тот же приём, что уже в brokers.js -> loadData()/loadLicences().
       var suffix = (_i18n.lang === 'en' || _i18n.lang === 'ro') ? '.' + _i18n.lang : '';
-      return fetch('/data/guides/' + id + suffix + '.json').then(function (r) {
+      var bust = '?t=' + Date.now();
+      return fetch('/data/guides/' + id + suffix + '.json' + bust).then(function (r) {
         if (r.ok) return r.json();
-        if (suffix) return fetch('/data/guides/' + id + '.json').then(function (r2) {
+        if (suffix) return fetch('/data/guides/' + id + '.json' + bust).then(function (r2) {
           if (!r2.ok) throw new Error('not found');
           return r2.json();
         });
