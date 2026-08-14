@@ -52,14 +52,46 @@ GRID = {
     "horizon_bars": (20, 30, 60),
 }
 
+# 🔴 14.08 (ревью, п.4 -- альтернативные конфиги входа, pilot на GOLD
+# подтвердил содержательный эффект: разрыв engulfing-vs-pin_bar сократился
+# с ~24 п.п. до ~5-7 п.п. при geometry="next_open"): "close" -- текущее,
+# единственное поведение до этой правки (entry=close сигнального бара,
+# stop=atr_mult*atr) -- ВСЕ существующие 5+ млн строк labels посчитаны
+# только с ним, config_key для него НЕ меняется (обратная совместимость).
+# "next_open" -- entry=open СЛЕДУЮЩЕГО сигнального бара (паттерн физически
+# не может быть известен раньше закрытия сигнального бара -- close этого
+# же бара технически "видит" часть внутридневного движения, которое и
+# формирует сам паттерн). "extreme" -- entry как в "close", но stop за
+# экстремумом (high/low) сигнального бара вместо atr_mult*atr.
+ENTRY_GEOMETRIES = ("close", "next_open", "extreme")
 
-def config_key(atr_mult: float, rr: float, horizon_bars: int) -> str:
-    return f"a{atr_mult}_r{rr}_h{horizon_bars}_{_costs.config_key_suffix()}"
+# Только _GATE_CONFIG (analyze/gate.py) для next_open/extreme -- полная
+# GRID×3-geometry сетка (81 конфиг) не нужна для ЭТОГО вопроса ("устойчива
+# ли разница между паттернами к geometry входа") и утроила бы стоимость
+# перепрогона без содержательной пользы: сравниваем geometry на РЕАЛЬНО
+# обслуживаемой живым гейтом постановке барьеров, не на всей сетке.
+_GEOMETRY_PILOT_CONFIG = (1.5, 2.0, 30)
+
+
+def config_key(atr_mult: float, rr: float, horizon_bars: int, entry_geometry: str = "close") -> str:
+    base = f"a{atr_mult}_r{rr}_h{horizon_bars}_{_costs.config_key_suffix()}"
+    return base if entry_geometry == "close" else f"{base}_g{entry_geometry}"
 
 
 def all_configs():
+    """GRID полностью, geometry="close" -- НЕ меняется, обратная
+    совместимость с существующими labels. Новые geometry -- см.
+    geometry_configs(), отдельная, меньшая сетка."""
     for atr_mult, rr, horizon_bars in product(GRID["atr_mult"], GRID["rr"], GRID["horizon_bars"]):
-        yield atr_mult, rr, horizon_bars, config_key(atr_mult, rr, horizon_bars)
+        yield atr_mult, rr, horizon_bars, "close", config_key(atr_mult, rr, horizon_bars)
+
+
+def geometry_configs():
+    """next_open/extreme на _GEOMETRY_PILOT_CONFIG -- добавочный прогон
+    поверх all_configs(), не входит в неё (см. докстринг ENTRY_GEOMETRIES)."""
+    atr_mult, rr, horizon_bars = _GEOMETRY_PILOT_CONFIG
+    for geometry in ("next_open", "extreme"):
+        yield atr_mult, rr, horizon_bars, geometry, config_key(atr_mult, rr, horizon_bars, geometry)
 
 
 def init_schema(con: sqlite3.Connection) -> None:
@@ -91,6 +123,56 @@ def _barriers(entry: float, direction: str, atr_val: float, atr_mult: float, rr:
     if direction == "bullish":
         return entry + target_dist, entry - stop_dist  # upper=target, lower=stop
     return entry + stop_dist, entry - target_dist       # upper=stop, lower=target
+
+
+def _entry_and_barriers(entry_geometry: str, direction: str, atr_val: float, atr_mult: float, rr: float,
+                         signal_ts: int, res_candles: list[dict], ts_to_idx: dict[int, int],
+                         signal_candles: list[dict] | None, signal_i: int | None) -> dict | None:
+    """Единая точка (entry, entry_ts, i0, upper, lower) для ВСЕХ geometry --
+    14.08, найдено на разведочном pilot-скрипте (Core-лог 14.08): entry
+    price и i0 (точка старта _walk_barriers) считались бы в двух разных
+    местах, если добавлять geometry "в лоб" -- рассогласование (entry из
+    конца дня, i0 из начала) дало систематически заниженный winrate на
+    КАЖДОМ occurrence, где цена прошла путь от open к close. Централизация
+    здесь делает это структурно невозможным: entry/entry_ts/i0 -- одна
+    geometry-специфичная ветка, никогда не смешиваются между geometry.
+
+    "next_open" требует signal_candles+signal_i (следующий бар СИГНАЛЬНОГО
+    tf, не res_candles) -- None, если их не передали (вызывающий код обязан
+    знать, что не-"close" geometry нуждается в них)."""
+    if entry_geometry == "next_open":
+        if signal_candles is None or signal_i is None or signal_i + 1 >= len(signal_candles):
+            return None
+        entry_ts = signal_candles[signal_i + 1]["ts"]
+        i0 = ts_to_idx.get(entry_ts)
+        if i0 is None:
+            i0 = next((i for i, c in enumerate(res_candles) if c["ts"] >= entry_ts), None)
+        if i0 is None or abs(res_candles[i0]["ts"] - entry_ts) > 3 * 86400:
+            return None
+        entry = signal_candles[signal_i + 1]["o"]
+    else:
+        entry_ts = signal_ts
+        i0 = ts_to_idx.get(entry_ts)
+        if i0 is None:
+            i0 = next((i for i, c in enumerate(res_candles) if c["ts"] >= entry_ts), None)
+        if i0 is None or abs(res_candles[i0]["ts"] - entry_ts) > 3 * 86400:
+            return None
+        entry = res_candles[i0]["c"]
+
+    if entry_geometry == "extreme":
+        if signal_candles is None or signal_i is None:
+            return None
+        sig_bar = signal_candles[signal_i]
+        stop_dist = (entry - sig_bar["l"]) if direction == "bullish" else (sig_bar["h"] - entry)
+        if stop_dist <= 0:
+            return None
+        target_dist = rr * stop_dist
+        upper, lower = ((entry + target_dist, entry - stop_dist) if direction == "bullish"
+                        else (entry + stop_dist, entry - target_dist))
+    else:
+        upper, lower = _barriers(entry, direction, atr_val, atr_mult, rr)
+
+    return {"entry": entry, "entry_ts": entry_ts, "i0": i0, "upper": upper, "lower": lower}
 
 
 def _walk_barriers(res_candles: list[dict], i0: int, upper: float, lower: float,
@@ -147,7 +229,8 @@ def _mfe_mae(candles: list[dict], i0: int, i_end: int, direction: str, entry: fl
 
 def label_one(canonical_symbol: str, direction: str, signal_ts: int, signal_tf_seconds: int,
               res_candles: list[dict], ts_to_idx: dict[int, int], atr_val: float | None,
-              atr_mult: float, rr: float, horizon_bars: int) -> dict | None:
+              atr_mult: float, rr: float, horizon_bars: int, entry_geometry: str = "close",
+              signal_candles: list[dict] | None = None, signal_i: int | None = None) -> dict | None:
     """Одна метка на одну (occurrence, config). direction: 'bullish'/'bearish'
     (neutral-паттерны, напр. inside_bar/doji, размечать нечем — нет
     направленной гипотезы, см. WP3.1 спеки).
@@ -178,28 +261,28 @@ def label_one(canonical_symbol: str, direction: str, signal_ts: int, signal_tf_s
     if atr_val is None or atr_val <= 0:
         return None
     signal_tf = _SECONDS_TO_SIGNAL_TF.get(signal_tf_seconds)
-    i0 = ts_to_idx.get(signal_ts)
-    if i0 is None:
-        # сигнал на грубом ТФ (H1/H4/D1) — его ts может не совпасть ровно с
-        # баром RESOLUTION_TF; вход не раньше, чем сигнал стал известен.
-        i0 = next((i for i, c in enumerate(res_candles) if c["ts"] >= signal_ts), None)
-        if i0 is None:
-            return None
-        # 🔴 Найдено на реальных данных WP2.5: у XAUUSD 30m начинается
-        # 2024-07-16, а D1-сигналы есть с 2018 -- без этой проверки ВСЕ
-        # сигналы 2018-2024 молча привязывались к одному и тому же первому
-        # 30m-бару (2024 год) -- см. Core-лог 11.08. Резолюция честна
-        # только если найденный бар реально близко к моменту сигнала.
-        if abs(res_candles[i0]["ts"] - signal_ts) > 3 * 86400:
-            return None
-    entry = res_candles[i0]["c"]
-    upper, lower = _barriers(entry, direction, atr_val, atr_mult, rr)
+
+    # 🔴 14.08: entry/entry_ts/i0/upper/lower -- ОДНА geometry-специфичная
+    # ветка (_entry_and_barriers), не раскиданы по этой функции -- см. её
+    # докстринг про класс бага, который это устраняет. geometry="close"
+    # (дефолт) даёт БИТ-В-БИТ то же entry/i0/barriers, что было здесь до
+    # рефакторинга -- существующие labels не требуют пересчёта.
+    geo = _entry_and_barriers(entry_geometry, direction, atr_val, atr_mult, rr, signal_ts,
+                               res_candles, ts_to_idx, signal_candles, signal_i)
+    if geo is None:
+        return None
+    entry, entry_ts, i0, upper, lower = geo["entry"], geo["entry_ts"], geo["i0"], geo["upper"], geo["lower"]
+
     cost = _costs.entry_cost_price(canonical_symbol, atr_val, signal_tf)
     risk = abs(entry - (lower if direction == "bullish" else upper))
     if risk <= 0:
         return None
 
-    deadline_ts = signal_ts + horizon_bars * signal_tf_seconds
+    # entry_ts, не signal_ts -- horizon/nights_held отсчитываются от РЕАЛЬНОГО
+    # момента входа (для geometry="close" entry_ts==signal_ts, не меняет
+    # поведение; для "next_open" horizon "30 баров" означает 30 баров
+    # ДЕРЖАНИЯ ПОЗИЦИИ, не 30 баров от появления сигнала).
+    deadline_ts = entry_ts + horizon_bars * signal_tf_seconds
     walk = _walk_barriers(res_candles, i0, upper, lower, deadline_ts, direction)
     if walk["censored"]:
         mfe, mae = _mfe_mae(res_candles, i0, walk["last_i"], direction, entry, risk)
@@ -207,7 +290,7 @@ def label_one(canonical_symbol: str, direction: str, signal_ts: int, signal_tf_s
                 "bars_to_resolve": walk["bars_to_resolve"], "censored": 1}
 
     gross = (walk["exit_price"] - entry) if direction == "bullish" else (entry - walk["exit_price"])
-    nights_held = (res_candles[walk["last_i"]]["ts"] - signal_ts) // 86400
+    nights_held = (res_candles[walk["last_i"]]["ts"] - entry_ts) // 86400
     swap_pnl = _costs.swap_cost_price(canonical_symbol, direction, nights_held)
     r_realized = round((gross - cost + swap_pnl) / risk, 4)
     mfe, mae = _mfe_mae(res_candles, i0, walk["last_i"], direction, entry, risk)
@@ -230,14 +313,21 @@ def _load_levels(con: sqlite3.Connection, canonical_symbol: str) -> list[dict]:
     return [{"price": r[0], "tolerance": r[1], "kind": r[2]} for r in rows]
 
 
-def label_symbol(canonical_symbol: str, signal_tfs: list[str] = SIGNAL_TFS, verbose: bool = False) -> list[dict]:
+def label_symbol(canonical_symbol: str, signal_tfs: list[str] = SIGNAL_TFS, verbose: bool = False,
+                  configs: list[tuple] | None = None) -> list[dict]:
     """Все метки для одного символа: 8 паттернов × запрошенные signal_tf ×
-    вся сетка конфигураций. Возвращает готовые к put_many-style INSERT строки."""
+    сетка конфигураций. Возвращает готовые к put_many-style INSERT строки.
+
+    configs -- явный список (atr_mult,rr,horizon_bars,geometry,config_key);
+    None -- полная GRID (all_configs(), geometry="close", как раньше).
+    Параметр -- ради ЦЕЛЕВОГО добавочного прогона (напр. только
+    geometry_configs() для next_open/extreme, см. Core-лог 14.08) без
+    траты часов на пересчёт уже существующих geometry="close" строк."""
     res_candles = _price_bars.load_candles(canonical_symbol, RESOLUTION_TF)
     if not res_candles:
         return []
     ts_to_idx = {c["ts"]: i for i, c in enumerate(res_candles)}
-    configs = list(all_configs())
+    configs = list(all_configs()) if configs is None else configs
     con = sqlite3.connect(str(_BOT_DB))
     levels = _load_levels(con, canonical_symbol)
     con.close()
@@ -262,9 +352,10 @@ def label_symbol(canonical_symbol: str, signal_tfs: list[str] = SIGNAL_TFS, verb
             # в ревью 12.08.
             signal_i = signal_ts_to_idx.get(ts)
             atr_val = _atr14(signal_candles, signal_i) if signal_i is not None else None
-            for atr_mult, rr, horizon_bars, ckey in configs:
+            for atr_mult, rr, horizon_bars, geometry, ckey in configs:
                 lbl = label_one(canonical_symbol, direction, ts, signal_tf_seconds,
-                                 res_candles, ts_to_idx, atr_val, atr_mult, rr, horizon_bars)
+                                 res_candles, ts_to_idx, atr_val, atr_mult, rr, horizon_bars,
+                                 entry_geometry=geometry, signal_candles=signal_candles, signal_i=signal_i)
                 if lbl is None:
                     continue
                 rows.append({
@@ -290,13 +381,14 @@ def write_labels(con: sqlite3.Connection, rows: list[dict]) -> int:
     return len(rows)
 
 
-def run(symbols: list[str] | None, signal_tfs: list[str], verbose: bool = False) -> int:
+def run(symbols: list[str] | None, signal_tfs: list[str], verbose: bool = False,
+        configs: list[tuple] | None = None) -> int:
     con = sqlite3.connect(str(_BOT_DB))
     init_schema(con)
     syms = symbols or _price_bars.available_symbols("1d")
     total = 0
     for sym in syms:
-        rows = label_symbol(sym, signal_tfs, verbose)
+        rows = label_symbol(sym, signal_tfs, verbose, configs=configs)
         n = write_labels(con, rows)
         total += n
         if verbose:
@@ -310,8 +402,12 @@ if __name__ == "__main__":
     ap.add_argument("--symbols", nargs="+", help="Канонические имена (GOLD, EURUSD, ...)")
     ap.add_argument("--all", action="store_true", help="Все доступные символы")
     ap.add_argument("--tf", nargs="+", default=SIGNAL_TFS, choices=SIGNAL_TFS)
+    ap.add_argument("--geometry-only", action="store_true",
+                     help="Только geometry_configs() (next_open/extreme на _GEOMETRY_PILOT_CONFIG) -- "
+                          "добавочный прогон поверх существующих geometry=close labels, не пересчитывает их")
     ap.add_argument("--verbose", action="store_true")
     args = ap.parse_args()
     symbols = None if args.all else args.symbols
-    total = run(symbols, args.tf, args.verbose)
+    cfgs = list(geometry_configs()) if args.geometry_only else None
+    total = run(symbols, args.tf, args.verbose, configs=cfgs)
     print(f"готово: {total} строк labels")

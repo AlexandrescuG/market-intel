@@ -172,7 +172,18 @@ def snapshot(symbol: str, tf: str, ts: int, as_of: int | None = None) -> dict[st
     фактора. as_of=None — без ограничения по asof_ts (берёт самую свежую
     ревизию как есть, для live-использования). as_of=T — правило 2: НЕ
     возвращает ни одного значения с asof_ts>T (защита от lookahead в
-    бэктесте, тестируется на подложенных данных в Acceptance WP1)."""
+    бэктесте, тестируется на подложенных данных в Acceptance WP1).
+
+    🔴 14.08 (ревью, п.5): as_of не None семантически ВСЕГДА означает
+    исторический/бэктест-вызов (live-код передаёт as_of=None) -- поэтому
+    фильтр non-history факторов (снэпшот-семейства WP1.5 категории B,
+    `factor_keys_without_history()`) стоит ЗДЕСЬ, а не только в
+    `snapshot_for_backtest()`. Раньше защита была ТОЛЬКО в обёртке — любой
+    код, вызвавший голый `snapshot(as_of=T)` напрямую (например, забыв про
+    существование `_for_backtest`), получал их без предупреждения. Сейчас
+    оба пути защищены одинаково; `snapshot_for_backtest()` остаётся ради
+    обязательного (не Optional) as_of в сигнатуре — так вызывающий код,
+    случайно забывший as_of, ловит TypeError, а не тихий live-режим."""
     con = _connect()
     try:
         if as_of is None:
@@ -181,31 +192,23 @@ def snapshot(symbol: str, tf: str, ts: int, as_of: int | None = None) -> dict[st
                 "WHERE symbol=? AND tf=? AND ts=? GROUP BY factor_key",
                 (symbol, tf, ts),
             ).fetchall()
-        else:
-            rows = con.execute(
-                "SELECT factor_key, value, MAX(rev) FROM factor_values "
-                "WHERE symbol=? AND tf=? AND ts=? AND asof_ts<=? GROUP BY factor_key",
-                (symbol, tf, ts, as_of),
-            ).fetchall()
-        return {fk: v for fk, v, _ in rows}
+            return {fk: v for fk, v, _ in rows}
+        rows = con.execute(
+            "SELECT factor_key, value, MAX(rev) FROM factor_values "
+            "WHERE symbol=? AND tf=? AND ts=? AND asof_ts<=? GROUP BY factor_key",
+            (symbol, tf, ts, as_of),
+        ).fetchall()
     finally:
         con.close()
+    no_history = factor_keys_without_history()
+    return {fk: v for fk, v, _ in rows if fk not in no_history}
 
 
 def snapshot_for_backtest(symbol: str, tf: str, ts: int, as_of: int) -> dict[str, float]:
-    """🔴 Guard, ревью §4 (12.08): обёртка над `snapshot()` для БЭКТЕСТА
-    (историческое окно, НЕ live) — `as_of` обязателен (в отличие от
-    `snapshot()`, где None разрешён для live-использования: здесь его
-    отсутствие означало бы честную ошибку вызывающего кода, не смягчаем).
-
-    Дополнительно ВСЕГДА выкидывает из результата любые factor_key с
-    history=0 в реестре (снэпшот-семейства WP1.5 категории B) — даже
-    формально пройдя asof_ts<=as_of, их единственная запись физически
-    отражает "как это выглядело в момент repack-прогона", а не честную
-    историю на баре ts (см. `register_factor`). Тихая фильтрация, не
-    исключение — бэктест на 20+ факторах не должен падать из-за одного
-    снэпшот-семейства; вызывающий код видит недостачу по составу ключей
-    в возвращённом dict, не по краху."""
-    no_history = factor_keys_without_history()
-    values = snapshot(symbol, tf, ts, as_of=as_of)
-    return {fk: v for fk, v in values.items() if fk not in no_history}
+    """Обёртка над `snapshot()` с ОБЯЗАТЕЛЬНЫМ (не Optional) as_of — бэктест-
+    код, забывший его передать, получает TypeError на вызове, а не тихий
+    live-режим (`snapshot(as_of=None)`). Сама фильтрация non-history
+    факторов теперь встроена в `snapshot()` при любом as_of не None (см. её
+    докстринг) — эта функция больше не единственная линия защиты, только
+    более строгий контракт вызова для бэктест-кода."""
+    return snapshot(symbol, tf, ts, as_of=as_of)
