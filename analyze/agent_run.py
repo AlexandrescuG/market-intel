@@ -59,7 +59,8 @@ _JSON_SCHEMA = {
             "items": {
                 "type": "object",
                 "properties": {
-                    "symbol": {"type": "string"}, "pattern_key": {"type": "string"},
+                    "symbol": {"type": "string"}, "tf": {"type": "string"},
+                    "pattern_key": {"type": "string"},
                     "direction": {"type": "string"}, "config_key": {"type": "string"},
                     "base_rate": {"type": ["number", "null"]},
                     "base_n": {"type": ["integer", "null"]},
@@ -70,7 +71,7 @@ _JSON_SCHEMA = {
                     "final_p": {"type": ["number", "null"]},
                     "thesis": {"type": "string"}, "invalidation": {"type": "string"},
                 },
-                "required": ["symbol", "pattern_key", "direction", "config_key", "adjustment",
+                "required": ["symbol", "tf", "pattern_key", "direction", "config_key", "adjustment",
                              "adjustment_reason", "cited_factors", "thesis", "invalidation"],
             },
         }
@@ -86,10 +87,15 @@ def build_prompt(bundle_md_path: Path) -> str:
 
 Прочитай (Read) файл: {bundle_md_path}
 
-Секция "focus" — инструменты, прошедшие гейт внимания в этом цикле. Для
-КАЖДОГО кандидата из "focus" верни один объект в массиве forecasts, со
-ВСЕМИ полями схемы. Секции "calendar"/"news"/"macro"/"watch"/"calibration"
-— контекст для твоего решения, не требуют отдельного вывода.
+Секция "focus" — инструменты, прошедшие гейт внимания в этом цикле, один
+блок "### SYMBOL TF" на каждый (symbol,tf) — один и тот же символ может
+встретиться несколько раз с РАЗНЫМИ tf (например "### GOLD D1" и
+"### GOLD H4" одновременно), это разные наблюдения, не дубли. Для КАЖДОГО
+кандидата из каждого такого блока верни один объект в массиве forecasts,
+со ВСЕМИ полями схемы, включая "tf" — ТОЧНО тот tf, что указан в заголовке
+блока, откуда взят этот кандидат (не единый tf на весь ответ). Секции
+"calendar"/"news"/"macro"/"watch"/"calibration" — контекст для твоего
+решения, не требуют отдельного вывода.
 
 ЖЁСТКИЕ ПРАВИЛА КОНТРАКТА (нарушение -> твой ответ будет отклонён целиком):
   - base_rate/base_n/base_backoff_level -- ПЕРЕПИШИ буквально из bundle

@@ -42,8 +42,16 @@ def ema20_state(candles: list[dict], i: int, ema_ser: list[float] | None = None,
     подставляем частичное/неполное значение."""
     if i < 20 or atr_val is None or atr_val <= 0:
         return None
-    closes = [c["c"] for c in candles[: i + 1]]
-    ser = ema_ser if ema_ser is not None else ema_series(closes, period=20)
+    # 🔴 REVIEW_wp4_cycle_2026-08-13.md §5 (найдено при диагностике N+1):
+    # раньше closes строился БЕЗУСЛОВНО -- O(i) список на КАЖДЫЙ вызов,
+    # даже когда ema_ser уже передан и closes вообще не используется. На
+    # H1 (i до ~54000) и тысячах исторических вызовов в base_rate.py это
+    # было главным источником медленности, не сам календарный N+1.
+    if ema_ser is not None:
+        ser = ema_ser
+    else:
+        closes = [c["c"] for c in candles[: i + 1]]
+        ser = ema_series(closes, period=20)
     if len(ser) <= i or i < slope_lookback:
         return None
     price = candles[i]["c"]

@@ -41,7 +41,7 @@ from tools.agent.attention_trigger import attention_score
 import core.price_bars as _price_bars
 
 _BOT_DB = Path("/mnt/sbfdata/sbf-platform/SBFAcademy_bot/bot.db")
-_TF_TO_PB = {"D1": "1d"}  # v1 -- только D1 (см. план, экономика lookup_base_rate)
+_TF_TO_PB = {"D1": "1d", "H4": "4h", "H1": "1h"}
 
 # Тот же конфиг, что WP2.5 baseline -- наиболее изученный, не изобретаем
 # отдельную сетку для гейта.
@@ -209,30 +209,40 @@ def _symbol_step(con: sqlite3.Connection, symbol: str, tf: str, now_ts: int) -> 
 
 
 def decide(con: sqlite3.Connection, universe: list[str], now_ts: int,
-           budget_calls_per_day: int = 5) -> dict:
+           tfs: tuple[str, ...] = ("D1", "H4", "H1"), budget_calls_per_day: int = 5) -> dict:
     """{"run_id", "gated": [...], "per_symbol": {...}, "model_should_run": bool}.
-    Никогда не raise -- каждый символ независим."""
+    Никогда не raise -- каждый (symbol,tf) независим.
+
+    🔴 REVIEW_wp4_cycle_2026-08-13.md §5, разблокировано фиксом N+1 выше:
+    ключ в `gated`/`per_symbol` теперь "symbol:tf" (не просто symbol) --
+    один символ может пройти гейт на нескольких ТФ одновременно (напр.
+    GOLD:D1 и GOLD:H4 разными паттернами в одном цикле). Живой замер
+    13.08 на 5 символах × 3 ТФ: 74.6с суммарно (fx_exotic-класс дороже
+    остальных -- 13 номинальных членов, из них 3 реально с H1-данными --
+    известно, приемлемо при текущем бюджете таймаута)."""
     init_schema(con)
     run_id = str(uuid.uuid4())
     per_symbol: dict[str, dict] = {}
     gated: list[str] = []
     for symbol in universe:
-        try:
-            result = _symbol_step(con, symbol, "D1", now_ts)
-        except Exception as e:
-            result = {"ok": False, "error": f"{type(e).__name__}: {e}"}
-        per_symbol[symbol] = result
-        if result.get("ok") and result.get("gated"):
-            gated.append(symbol)
-        bd = result.get("breakdown", {})
-        con.execute(
-            """INSERT INTO gate_log (run_id, symbol, tf, move_atr, news_burst_z, calendar_prox,
-                                      base_rate_shift, level_break, total_score, threshold, gated, ts)
-               VALUES (?,?,?,?,?,?,?,?,?,?,?,?)""",
-            (run_id, symbol, "D1", bd.get("move_atr"), None, bd.get("calendar_prox"),
-             bd.get("base_rate_shift"), bd.get("level_break"), result.get("score"),
-             None, int(bool(result.get("gated"))), now_ts),
-        )
+        for tf in tfs:
+            key = f"{symbol}:{tf}"
+            try:
+                result = _symbol_step(con, symbol, tf, now_ts)
+            except Exception as e:
+                result = {"ok": False, "error": f"{type(e).__name__}: {e}"}
+            per_symbol[key] = result
+            if result.get("ok") and result.get("gated"):
+                gated.append(key)
+            bd = result.get("breakdown", {})
+            con.execute(
+                """INSERT INTO gate_log (run_id, symbol, tf, move_atr, news_burst_z, calendar_prox,
+                                          base_rate_shift, level_break, total_score, threshold, gated, ts)
+                   VALUES (?,?,?,?,?,?,?,?,?,?,?,?)""",
+                (run_id, symbol, tf, bd.get("move_atr"), None, bd.get("calendar_prox"),
+                 bd.get("base_rate_shift"), bd.get("level_break"), result.get("score"),
+                 None, int(bool(result.get("gated"))), now_ts),
+            )
     con.commit()
     return {"run_id": run_id, "gated": gated, "per_symbol": per_symbol,
             "model_should_run": len(gated) > 0}
@@ -243,6 +253,7 @@ def main() -> None:
     import json
     ap = argparse.ArgumentParser()
     ap.add_argument("--universe", nargs="+", default=["GOLD", "EURUSD", "USDJPY", "USDCNY", "USDZAR"])
+    ap.add_argument("--tfs", nargs="+", default=["D1", "H4", "H1"])
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
     con = sqlite3.connect(str(_BOT_DB))
@@ -250,14 +261,15 @@ def main() -> None:
     if args.dry_run:
         init_schema(con)
         for sym in args.universe:
-            r = _symbol_step(con, sym, "D1", now_ts)
-            print(f"{sym}: ok={r.get('ok')} gated={r.get('gated')} score={r.get('score')} "
-                  f"breakdown={r.get('breakdown')}")
-            for c in r.get("candidates", []):
-                print(f"    candidate: {c['pattern_key']} {c['direction']} base_rate={c['base_rate']}")
+            for tf in args.tfs:
+                r = _symbol_step(con, sym, tf, now_ts)
+                print(f"{sym}:{tf}: ok={r.get('ok')} gated={r.get('gated')} score={r.get('score')} "
+                      f"breakdown={r.get('breakdown')}")
+                for c in r.get("candidates", []):
+                    print(f"    candidate: {c['pattern_key']} {c['direction']} base_rate={c['base_rate']}")
         con.rollback()  # dry-run: не фиксируем gate_last_bar/gate_base_rate_prev/gate_log
     else:
-        result = decide(con, args.universe, now_ts)
+        result = decide(con, args.universe, now_ts, tfs=tuple(args.tfs))
         print(json.dumps({"run_id": result["run_id"], "gated": result["gated"],
                            "model_should_run": result["model_should_run"]}, ensure_ascii=False))
     con.close()

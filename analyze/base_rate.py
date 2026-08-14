@@ -40,7 +40,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from analyze.backtest import _decided, load_labels
 from analyze.report import _pattern_occurrence_keys
-from analyze.state_vector import build_indicator_cache, build_state_vector_historical
+from analyze.state_vector import build_indicator_cache, build_state_vector_historical, load_high_impact_events
 from core.costs import INSTRUMENT_CLASS, _DEFAULT_CLASS
 from tools.edu_build.pattern_reality import wilson
 import core.price_bars as _price_bars
@@ -68,7 +68,15 @@ def _collect_rows(con: sqlite3.Connection, pattern_key: str, direction: str,
                    symbols: list[str], tf: str, config_key: str) -> list[tuple[dict, dict, str]]:
     """[(labels_row, historical_state_vector, symbol)] — censored исключены
     (_decided), только occurrence этого pattern_key+direction (join по
-    (ts,direction), как report.py._pattern_occurrence_keys)."""
+    (ts,direction), как report.py._pattern_occurrence_keys).
+
+    🔴 REVIEW_wp4_cycle_2026-08-13.md §5: events загружается ОДИН раз для
+    ВСЕХ symbols/строк (не на каждую строку) -- раньше build_state_vector_
+    historical сама дёргала SQL на econ_events per-row (N+1, живой замер:
+    15.8с на один lookup_base_rate() на H1 -- при H1/H4 это на порядки
+    хуже, чем на D1). Экономика для H1/H4/более широкого universe была
+    непроверенной именно из-за этого."""
+    events = load_high_impact_events(con)
     out = []
     for sym in symbols:
         candles = _price_bars.load_candles(sym, _TF_TO_PB[tf])
@@ -89,7 +97,7 @@ def _collect_rows(con: sqlite3.Connection, pattern_key: str, direction: str,
             i = ts_to_idx.get(r["ts"])
             if i is None:
                 continue
-            sv = build_state_vector_historical(sym, tf, i, candles, cache, con)
+            sv = build_state_vector_historical(sym, tf, i, candles, cache, events)
             out.append((r, sv, sym))
     return out
 

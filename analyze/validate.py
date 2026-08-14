@@ -29,8 +29,15 @@ ADJUSTMENT_CAP = 0.15
 
 
 def _find_bundle_candidate(bundle_json: dict, cand: dict) -> dict | None:
+    """🔴 REVIEW_wp4_cycle_2026-08-13.md §5, разблокировано фиксом N+1:
+    ключ focus теперь "symbol:tf" (один символ может пройти гейт на
+    нескольких tf одновременно) -- модель обязана вернуть "tf" (см.
+    agent_run.py JSON-схему), иначе кандидат не находится вообще
+    (симметрично тому, как отсутствие/несовпадение любого другого
+    natural-key поля уже не находит кандидата)."""
     focus = bundle_json.get("focus", {}) or {}
-    symbol_focus = focus.get(cand.get("symbol"), {})
+    key = f"{cand.get('symbol')}:{cand.get('tf')}"
+    symbol_focus = focus.get(key, {})
     for c in symbol_focus.get("candidates", []):
         if (c.get("pattern_key") == cand.get("pattern_key")
                 and c.get("direction") == cand.get("direction")
@@ -106,7 +113,7 @@ def _write_one(con: sqlite3.Connection, cand: dict, bundle_cand: dict, call_id: 
     thesis_full = (f"{cand.get('thesis', '')}\n[adjustment_reason] {cand.get('adjustment_reason', '')}\n"
                    f"[novel_risk] {cand.get('novel_risk') or '—'}")
     forecast = {
-        "symbol": cand["symbol"], "horizon": "D1", "event_key": f"barrier:{cand['config_key']}",
+        "symbol": cand["symbol"], "horizon": cand["tf"], "event_key": f"barrier:{cand['config_key']}",
         "direction": cand["direction"], "conviction": cand.get("final_p"),
         "entry": bundle_cand["entry"], "entry_kind": bundle_cand["entry_kind"],
         "stop": bundle_cand["stop"], "target": bundle_cand["target"],
@@ -151,7 +158,7 @@ def run_validate(con: sqlite3.Connection, bundle_json: dict, agent_result: dict)
     # bundle_cand.["_state"] -- пришиваем вектор состояния символа к каждому
     # его кандидату один раз, чтобы _write_one() не таскал bundle_json целиком.
     focus = bundle_json.get("focus", {}) or {}
-    for sym, f in focus.items():
+    for f in focus.values():
         for c in f.get("candidates", []):
             c["_state"] = f.get("state", {})
 
@@ -162,7 +169,7 @@ def run_validate(con: sqlite3.Connection, bundle_json: dict, agent_result: dict)
         if not ok:
             rejected.append({"candidate": cand, "reason": reason})
             continue
-        horizon = "D1"  # v1 -- см. bundle.py/gate.py SIGNAL_TF_V1
+        horizon = cand["tf"]  # H1/H4/D1 -- реальный tf кандидата, не хардкод (см. §5 ревью 13.08)
         event_key = f"barrier:{cand['config_key']}"
         if _is_duplicate(con, cand["symbol"], horizon, event_key, cand["direction"], bundle_cand["created_ts"]):
             rejected.append({"candidate": cand, "reason": "дубль: прогноз на этот бар уже записан "

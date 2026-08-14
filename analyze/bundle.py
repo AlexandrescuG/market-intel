@@ -50,13 +50,18 @@ def _step(name: str, fn, *args, **kwargs) -> dict:
 
 def _focus_section(gate_result: dict) -> dict:
     """Берёт ГОТОВОЕ из gate.decide() -- state_vector + candidates + base_rate
-    по каждому gated символу. Не пересчитывает."""
+    по каждому gated (symbol,tf). Не пересчитывает. Ключ -- составной
+    "symbol:tf" (один символ может пройти гейт на нескольких ТФ
+    одновременно), но symbol/tf также явно дублируются полями внутри --
+    модель должна вернуть tf в своём ответе (см. agent_run.py), не
+    восстанавливать его разбором ключа."""
     out = {}
-    for sym in gate_result["gated"]:
-        per = gate_result["per_symbol"].get(sym, {})
+    for key in gate_result["gated"]:
+        per = gate_result["per_symbol"].get(key, {})
         if not per.get("ok"):
             continue
-        out[sym] = {"state": per["state"], "candidates": per["candidates"]}
+        symbol, tf = key.rsplit(":", 1)
+        out[key] = {"symbol": symbol, "tf": tf, "state": per["state"], "candidates": per["candidates"]}
     return out
 
 
@@ -132,17 +137,19 @@ def _macro_section() -> dict:
     return {k: v for k, v in d.items() if k != "_updated"}
 
 
-def _watch_section(gate_result: dict, universe: list[str]) -> list[dict]:
+def _watch_section(gate_result: dict, universe: list[str], tfs: tuple[str, ...]) -> list[dict]:
     out = []
     for sym in universe:
-        if sym in gate_result["gated"]:
-            continue
-        per = gate_result["per_symbol"].get(sym, {})
-        if not per.get("ok"):
-            out.append({"symbol": sym, "note": "нет данных"})
-            continue
-        bd = per.get("breakdown", {})
-        out.append({"symbol": sym, "move_atr": bd.get("move_atr"), "score": per.get("score")})
+        for tf in tfs:
+            key = f"{sym}:{tf}"
+            if key in gate_result["gated"]:
+                continue
+            per = gate_result["per_symbol"].get(key, {})
+            if not per.get("ok"):
+                out.append({"symbol": sym, "tf": tf, "note": "нет данных"})
+                continue
+            bd = per.get("breakdown", {})
+            out.append({"symbol": sym, "tf": tf, "move_atr": bd.get("move_atr"), "score": per.get("score")})
     return out
 
 
@@ -157,12 +164,12 @@ def _render_md(bundle: dict) -> str:
     lines.append("")
     lines.append("## focus")
     if bundle["focus"]:
-        for sym, f in bundle["focus"].items():
-            lines.append(f"### {sym}")
+        for f in bundle["focus"].values():
+            lines.append(f"### {f['symbol']} {f['tf']}")
             lines.append(f"вектор состояния: {json.dumps(f['state'], ensure_ascii=False)}")
             for c in f["candidates"]:
-                lines.append(f"- кандидат {c['pattern_key']} {c['direction']} config={c['config_key']}: "
-                              f"base_rate={json.dumps(c['base_rate'], ensure_ascii=False)}")
+                lines.append(f"- кандидат {c['pattern_key']} {c['direction']} config={c['config_key']} "
+                              f"tf={f['tf']}: base_rate={json.dumps(c['base_rate'], ensure_ascii=False)}")
     else:
         lines.append("(гейт никого не пропустил)")
     lines.append("")
@@ -213,7 +220,8 @@ def _truncate(bundle: dict, char_limit: int) -> tuple[dict, list[str]]:
     return bundle, notes
 
 
-def build_bundle(con: sqlite3.Connection, gate_result: dict, universe: list[str], now_ts: int) -> dict:
+def build_bundle(con: sqlite3.Connection, gate_result: dict, universe: list[str], now_ts: int,
+                  tfs: tuple[str, ...] = ("D1", "H4", "H1")) -> dict:
     _init_forecast_schema(con)  # calibration-секция читает forecasts/forecast_outcomes
     generated_at_iso = datetime.fromtimestamp(now_ts, tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
@@ -222,14 +230,14 @@ def build_bundle(con: sqlite3.Connection, gate_result: dict, universe: list[str]
         "calendar": _step("calendar", _calendar_section, con, universe, now_ts, CYCLE_HORIZON_SEC),
         "news": _step("news", _news_section, universe),
         "macro": _step("macro", _macro_section),
-        "watch": _step("watch", _watch_section, gate_result, universe),
+        "watch": _step("watch", _watch_section, gate_result, universe, tfs),
         "calibration": _step("calibration", _calibration_build_report, con, "barrier", None),
     }
 
     gaps = [f"{name}: {r['error']}" for name, r in steps.items() if not r["ok"]]
-    for sym, per in gate_result["per_symbol"].items():
+    for key, per in gate_result["per_symbol"].items():
         if not per.get("ok"):
-            gaps.append(f"{sym}: {per.get('error', 'нет данных')}")
+            gaps.append(f"{key}: {per.get('error', 'нет данных')}")
 
     bundle = {
         "generated_at_iso": generated_at_iso, "generated_at_ts": now_ts,

@@ -130,25 +130,38 @@ def _vol_percentile(atr_ser: list[float | None], i: int, window: int = 60) -> fl
     return round(100.0 * sum(1 for a in win if a <= today) / len(win), 1)
 
 
-def calendar_prox_minutes(con: sqlite3.Connection, ts: int, as_of_ts: int | None) -> float | None:
-    """Минуты до БЛИЖАЙШЕГО high-impact релиза (в обе стороны — пострелизный
-    дрейф важен для барьера не меньше, чем позиционирование до релиза).
+def load_high_impact_events(con: sqlite3.Connection) -> list[tuple[int, int]]:
+    """🔴 REVIEW_wp4_cycle_2026-08-13.md §5: устраняет N+1 -- раньше
+    calendar_prox_minutes() делала SQL-запрос к econ_events НА КАЖДУЮ
+    историческую строку внутри base_rate.py._collect_rows() (тысячи
+    запросов на один lookup_base_rate() при H1/H4 -- живой замер: 15.8с на
+    один вызов на H1 GOLD). [(scheduled_ts, first_seen)] для ВСЕХ
+    high-impact событий -- 548 строк на 13.08.2026, загружаются ОДИН раз
+    вызывающим кодом (`_collect_rows` перед циклом по символам), не на
+    каждую строку."""
+    rows = con.execute(
+        "SELECT scheduled_ts, first_seen FROM econ_events "
+        "WHERE impact='high' AND scheduled_ts IS NOT NULL AND first_seen IS NOT NULL"
+    ).fetchall()
+    return [(int(s), int(f)) for s, f in rows]
+
+
+def _calendar_prox_from_events(events: list[tuple[int, int]], ts: int, as_of_ts: int | None) -> float | None:
+    """IN-MEMORY версия -- events уже загружены (load_high_impact_events).
     as_of_ts — честная историческая точка отсечения по first_seen (не видим
     объявления, сделанные ПОЗЖЕ ts); as_of_ts=None -- live (всё известное сейчас)."""
-    if as_of_ts is not None:
-        rows = con.execute(
-            "SELECT scheduled_ts FROM econ_events WHERE impact='high' "
-            "AND scheduled_ts IS NOT NULL AND first_seen IS NOT NULL AND first_seen<=?",
-            (as_of_ts,),
-        ).fetchall()
-    else:
-        rows = con.execute(
-            "SELECT scheduled_ts FROM econ_events WHERE impact='high' AND scheduled_ts IS NOT NULL",
-        ).fetchall()
-    if not rows:
+    candidates = [s for s, f in events if f <= as_of_ts] if as_of_ts is not None else [s for s, _ in events]
+    if not candidates:
         return None
-    diffs = [abs(int(r[0]) - ts) / 60.0 for r in rows]
-    return round(min(diffs), 1)
+    return round(min(abs(s - ts) / 60.0 for s in candidates), 1)
+
+
+def calendar_prox_minutes(con: sqlite3.Connection, ts: int, as_of_ts: int | None) -> float | None:
+    """Однократный (live) вызов -- сама загружает события. Для батча
+    (base_rate.py, много строк за один вызов) используй
+    `load_high_impact_events()` один раз + `_calendar_prox_from_events()` —
+    см. докстринг `load_high_impact_events`, иначе фикс N+1 не работает."""
+    return _calendar_prox_from_events(load_high_impact_events(con), ts, as_of_ts)
 
 
 def _nearest_level_dist_atr(con: sqlite3.Connection, canonical_symbol: str,
@@ -165,14 +178,14 @@ def _nearest_level_dist_atr(con: sqlite3.Connection, canonical_symbol: str,
     return abs(price - row[0]) / atr_val
 
 
-def _common_fields(candles: list[dict], i: int, cache: dict, con: sqlite3.Connection,
+def _common_fields(candles: list[dict], i: int, cache: dict, events: list[tuple[int, int]],
                     ts: int, as_of_ts: int | None) -> dict:
     from datetime import datetime, timezone
     atr_val = cache["atr14"][i]
     ema_st = ema20_state(candles, i, ema_ser=cache["ema20"], atr_val=atr_val)
     regime = trend_or_range(candles, i, adx_ser=cache["adx14"])
     vol_pctl = _vol_percentile(cache["atr14"], i)
-    cal_min = calendar_prox_minutes(con, ts, as_of_ts)
+    cal_min = _calendar_prox_from_events(events, ts, as_of_ts)
     d = datetime.fromtimestamp(ts, tz=timezone.utc)
     return {
         "atr14": atr_val,
@@ -193,12 +206,16 @@ def _common_fields(candles: list[dict], i: int, cache: dict, con: sqlite3.Connec
 
 def build_state_vector_live(canonical_symbol: str, pb_symbol: str, tf: str,
                              candles: list[dict], con: sqlite3.Connection,
-                             cache: dict | None = None) -> dict:
-    """Полный вектор "как сейчас" — включает level_dist_atr_bucket."""
+                             cache: dict | None = None,
+                             events: list[tuple[int, int]] | None = None) -> dict:
+    """Полный вектор "как сейчас" — включает level_dist_atr_bucket. events —
+    предзагруженный load_high_impact_events(); None -- загружается здесь
+    (однократный live-вызов, N+1 не актуален)."""
     i = len(candles) - 1
     cache = cache or build_indicator_cache(candles)
+    events = events if events is not None else load_high_impact_events(con)
     ts = candles[i]["ts"]
-    fields = _common_fields(candles, i, cache, con, ts, as_of_ts=None)
+    fields = _common_fields(candles, i, cache, events, ts, as_of_ts=None)
     fields["level_dist_atr_bucket"] = None
     lvl = _nearest_level_dist_atr(con, canonical_symbol, candles[i]["c"], fields["atr14"])
     if lvl is not None:
@@ -208,9 +225,13 @@ def build_state_vector_live(canonical_symbol: str, pb_symbol: str, tf: str,
 
 def build_state_vector_historical(canonical_symbol: str, tf: str, i: int,
                                    candles: list[dict], cache: dict,
-                                   con: sqlite3.Connection) -> dict:
+                                   events: list[tuple[int, int]]) -> dict:
     """Вектор для base_rate.py — БЕЗ level_dist_atr_bucket (см. докстринг
-    модуля), calendar_prox честно отфильтрован по first_seen<=ts бара i."""
+    модуля), calendar_prox честно отфильтрован по first_seen<=ts бара i.
+    events -- ОБЯЗАТЕЛЬНЫЙ, без дефолта: вызывающий код (`base_rate.py`)
+    должен загрузить `load_high_impact_events()` ОДИН раз на весь
+    lookup_base_rate(), не на каждую строку -- иначе фикс N+1 молча
+    перестаёт работать при следующей правке."""
     ts = candles[i]["ts"]
-    fields = _common_fields(candles, i, cache, con, ts, as_of_ts=ts)
+    fields = _common_fields(candles, i, cache, events, ts, as_of_ts=ts)
     return {"symbol": canonical_symbol, "tf": tf, "ts": ts, **fields}
