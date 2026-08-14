@@ -77,7 +77,7 @@
 
     return '<div class="entity-box">' +
       '<div class="entity-box-title">' + t('guide.entity_box_title', 'С кем на самом деле заключается договор') + '</div>' +
-      (e.img ? '<img src="' + escapeHtml(e.img) + '" alt="">' : '') +
+      (e.img ? '<img src="' + escapeHtml(e.img) + '" alt="' + escapeHtml(t('guide.entity_box_title', 'С кем на самом деле заключается договор')) + '" loading="lazy" decoding="async">' : '') +
       rows + register +
       (e.quote ? '<p class="entity-quote">' + escapeHtml(e.quote) + '</p>' : '') +
       confirmNote + missing +
@@ -90,8 +90,11 @@
   // изначально текстовый (например, "откройте страницу инструмента"), плашка
   // здесь была бы враньём про несуществующую попытку съёмки.
   function renderStep(s, i) {
+    // alt берём из подписи шага, а не пустой: скриншот здесь несёт смысл
+    // (какое юрлицо названо на экране), а не декорация. loading="lazy" —
+    // на странице до 23 таких кадров, все грузились сразу (аудит 14.08.2026).
     var media = s.img
-      ? '<img src="' + escapeHtml(s.img) + '" alt="">'
+      ? '<img src="' + escapeHtml(s.img) + '" alt="' + escapeHtml(String(s.caption || '').replace(/<[^>]*>/g, '')).slice(0, 120) + '" loading="lazy" decoding="async">'
       : ('img' in s ? '<div class="guide-step-nomedia">' + t('guide.step_no_image', 'Скриншот этого шага недоступен') + '</div>' : '');
     return '<div class="guide-step">' +
       '<div class="guide-step-cap"><span class="guide-step-num">' + (i + 1) + '</span>' + linkify(s.caption) + '</div>' +
@@ -105,7 +108,7 @@
     return '<div class="callout ' + escapeHtml(b.style || 'note') + '">' +
       (b.title ? '<div class="callout-title">' + linkify(b.title) + '</div>' : '') +
       paragraphs(b.body) +
-      (b.img ? '<img src="' + escapeHtml(b.img) + '" alt="">' : '') +
+      (b.img ? '<img src="' + escapeHtml(b.img) + '" alt="' + escapeHtml(String(b.title || '').replace(/<[^>]*>/g, '')).slice(0, 120) + '" loading="lazy" decoding="async">' : '') +
       '</div>';
   }
 
