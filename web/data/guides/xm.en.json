@@ -6,7 +6,7 @@
   "table_link": "/brokers",
   "account_kind": "real",
   "account_label": "MT5 Standard",
-  "lead": "A guide to four processes. Every screenshot is ours, with a date underneath. Where there's no screenshot, we say so directly — a guide shouldn't make empty promises.",
+  "lead": "A guide to all five processes — from registration to a real order in the terminal, almost all on real screenshots. Every screenshot has a date underneath. Where there's still no screenshot, we say so directly — a guide shouldn't make empty promises.",
   "processes": [
     {
       "key": "registration",
@@ -30,7 +30,7 @@
           "licence_no": "8557558",
           "register_url": null,
           "register_note": "Belize's FSC public register can't be read by automated tools — there's no direct link to the company's record.",
-          "quote": "«Компания XM Global Limited имеет лицензию на ведение деятельности от Комиссии по финансовым услугам (FSC) Белиза, согласно закону «О рынке ценных бумаг» 2021 года, номер лицензии 8557558.»",
+          "quote": "«Компания XM Global Limited имеет лицензию на ведение деятельности от Комиссии по финансовым услугам (FSC) Белиза, согласно закону «О рынке ценных бумаг» 2021 года, номер лицензии 8557558.» — captured from the Russian-language build of the site; translation: \"The company XM Global Limited is licensed to conduct business by the Financial Services Commission (FSC) of Belize under the Securities Industry Act 2021, licence number 8557558.\"",
           "confirmed": false,
           "confirm_note": "Careful with the reading: this line is the footer of the site's global build — it's the same regardless of the country you selected. It proves \"the global site is run by XM Global\", not directly that \"this specific entity is assigned to your country\". There's indirect confirmation: a real account opened from a CIS/non-EU European country has 1:1000 leverage — that's the Belize entity's ceiling (the Cyprus entity's is 1:30).",
           "missing": [
@@ -62,9 +62,17 @@
     {
       "key": "funding",
       "label": "Funding",
+      "platform": "my.xm.com, dashboard",
+      "captured": "2026-08-13",
+      "intro": "The funding section was captured again — last time the \"Deposit\" button wouldn't open (the SPA wasn't responding). This time the payment-methods panel opened, and it revealed why that matters: on an unverified account, there's nothing to fund with at all.",
       "blocks": [
-        { "type": "callout", "style": "gap", "title": "No screenshots this time",
-          "body": "This time we did get into the dashboard, but the funding section wouldn't open: my.xm.com/ru/member/deposit returns a 404, and the \"Deposit\" button on the account card didn't respond to clicks — the SPA wasn't reacting. Either way, this section is only ever captured up to the confirmation screen: no real transfer is made, and the card form is captured empty." },
+        { "type": "steps", "items": [
+          { "img": "/assets/guides/xm/funding/01_deposit_locked.png",
+            "caption": "The \"Deposit methods\" panel: all five methods — Credit/Debit Cards, Neteller, Skrill, Binance Pay, Cryptocurrencies — show a lock icon under \"Disabled methods\".",
+            "note": "Account number in the screenshot redacted by us." }
+        ] },
+        { "type": "callout", "style": "gap", "title": "You can't fund the account before verifying",
+          "body": "The caption under the locks, verbatim: \"These payment methods are unavailable because they're only available to verified clients.\" Not some of the methods, not a lower limit — all five are locked at once. At XM, verification isn't a formality for withdrawing profit — it's a condition for the very first deposit." },
         { "type": "table", "columns": ["Parameter", "Value", "Source"], "rows": [
           ["Minimum deposit", "5 USD", "broker's website"],
           ["Inactivity fee", "5 USD/month after 90 days without trades", "XM costs document"]
@@ -76,18 +84,47 @@
     {
       "key": "verification",
       "label": "Verification",
+      "platform": "my.xm.com, dashboard · Sumsub",
+      "captured": "2026-08-13",
+      "intro": "The capture tool no longer breaks on this page — last time it failed here and on registration too, this time the whole path was captured properly. The \"Verify account\" button from the yellow banner leads through five screens in a row: phone, personal details, address, an investor questionnaire, and only then documents via Sumsub (the same verification provider NAGA uses).",
       "blocks": [
-        { "type": "text", "body": "It starts not with documents but with a phone number. The \"Verify account\" button from the banner leads to the first step: \"Phone number verification\" — a country-code field (filled in automatically based on your country), a number field, and a \"Get code\" button. A progress bar at the top shows the phone is only the first of several stages." },
-        { "type": "callout", "style": "gap", "title": "We couldn't save a screenshot of this screen",
-          "body": ["XM's verification page consistently breaks our capture tool — the same thing happened on the registration page. The screen is described verbatim above, but there's no screenshot, and we don't substitute a similar-looking image in its place.", "We deliberately didn't click \"Get code\": that sends an SMS to a real phone number, which is an action, not just viewing."] },
-        { "type": "text", "body": "The next steps — document upload — are only ever captured with a deliberately fake sample. A real passport photo is never published in any form." }
+        { "type": "steps", "items": [
+          { "img": "/assets/guides/xm/verification/01_phone_verify.png",
+            "caption": "Step 1 — \"Phone number verification\": the country code fills in automatically, then a \"Get code\" button.",
+            "note": "We deliberately didn't click \"Get code\": that sends an SMS to a real phone number, which is an action, not just viewing." },
+          { "img": "/assets/guides/xm/verification/02_personal_details.png",
+            "caption": "\"Enter your details\": first name, middle name (optional), last name, and date of birth — exactly as they appear on your ID document." },
+          { "img": "/assets/guides/xm/verification/03_investor_profile.png",
+            "caption": "\"Enter your investor details\" — a yes/no question: have you completed forex trading education, and made at least 15 trades in derivative instruments (forex, CFDs)? This is a genuine investor-experience test, not a box-ticking form — the answer decides what risk warnings this specific account sees." },
+          { "img": "/assets/guides/xm/verification/04_confirm_identity.png",
+            "caption": "\"Confirm your identity\": you'll need copies of an ID document and proof of address, and optionally a selfie." },
+          { "img": "/assets/guides/xm/verification/05_doc_type.png",
+            "caption": "Next — Sumsub: the document's country of issue and type (ID card, passport, residence permit, driving licence)." },
+          { "img": "/assets/guides/xm/verification/06_upload.png",
+            "caption": "Document upload — front and back separately, JPG/PNG/HEIC/WEBP/PDF up to 50 MB.",
+            "note": "We didn't upload or photograph a real document — these fields are shown empty." },
+          { "img": "/assets/guides/xm/verification/07_phone_qr.png",
+            "caption": "Every Sumsub step has a \"Continue on phone\" button — the QR code opens the same process on your phone's camera, if that's easier than shooting the document from a computer." }
+        ] },
+        { "type": "callout", "style": "note", "title": "The difficulty ramps up as you go",
+          "body": "Phone and name are a formality. The investor questionnaire is already a substantive question about trading experience. Uploading a two-sided document plus a liveness check (Sumsub, the same provider NAGA uses) is where a chunk of users actually drop off. Until every step is complete, funding is unavailable through any method (see the Funding section)." }
       ]
     },
     {
       "key": "trading",
       "label": "Trading",
+      "platform": "my.xm.com/markets, web terminal",
+      "captured": "2026-08-13",
       "blocks": [
-        { "type": "callout", "style": "gap", "title": "No screenshots" },
+        { "type": "steps", "items": [
+          { "img": "/assets/guides/xm/trading/01_terminal_order.png",
+            "caption": "The \"Markets\" section: an instrument list on the left with live quotes, a gold chart, and a one-click order panel on the right.",
+            "note": "The account balance is 0 USD, so under the order button it says \"Insufficient margin to place this order\" — that's an honest message from the terminal itself, not something we staged." },
+          { "img": "/assets/guides/xm/trading/02_copytrading.png",
+            "caption": "A separate \"Copy trading\" tab — a strategy marketplace with real numbers: monthly profit, the manager's own funds, amount invested, minimum investment, commission, number of investors, drawdown." }
+        ] },
+        { "type": "callout", "style": "note", "title": "Copy trading isn't just a NAGA thing",
+          "body": "XM has the same kind of feature we already showed at NAGA (\"Find Leaders\"): subscribing to a specific trader's trades for a cut of the profit (10% to 30% here, depending on the strategy). A leader's past return isn't a guarantee of future return, and the profit shown is the leader's profit, not the subscriber's — commission and copy delay both eat into it." },
         { "type": "text", "body": "What we measured ourselves in the XM terminal (a snapshot outside the methodology windows, 2026-08-05, around 10:00 UTC) versus what the broker publishes about itself:" },
         { "type": "table", "columns": ["Instrument", "Broker's average spread", "Our terminal snapshot"], "rows": [
           ["EUR/USD", "2.0 pips", "1.9"],
