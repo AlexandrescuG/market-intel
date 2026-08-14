@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 """
 analyze/run_cycle.py — WP4.6 SPEC_alpha_engine_wp4_continuous_cycle.md,
-оркестратор непрерывного цикла (sbf-alpha-cycle.timer, 5 раз/сутки).
+оркестратор непрерывного цикла. Один процесс = один профиль = один tf
+(--profile d1|h4|h1, см. CYCLE_PROFILES ниже), три независимых systemd timer.
 
 Python, не bash — §0 спеки ("шаг возвращает {ok,data,error,degraded},
 никогда не raise") контролируется try/except внутри одного процесса
@@ -17,6 +18,15 @@ Python, не bash — §0 спеки ("шаг возвращает {ok,data,erro
   1 — прогон с пропусками (часть источников недоступна / часть кандидатов отклонена)
   2 — гейт не пропустил, модель не звалась (норма, не инцидент)
   3 — пакет не собрался вообще / необработанное исключение (алерт человеку)
+🔴 14.08: единая частота 5 прогонов/сутки на все 3 tf разом сменилась
+разделением по горизонтам (CYCLE_PROFILES) -- прямой вывод из разового
+скрипта /tmp/.../scratchpad/h1_grid_coverage.py (эта же 5-часовая сетка
+захватывала лишь 19.3% реальных H1-триггеров паттернов, 80.7% пропадали
+между тиками незамеченными). Новое правило: интервал цикла не должен
+превышать интервал самого быстрого анализируемого tf -- иначе это не
+мониторинг, а выборочное подглядывание. Каждый профиль -- один tf, свой
+маленький срез bundle (см. analyze/bundle.py::ALL_SECTIONS), свой systemd
+timer с собственной частотой (~/.config/systemd/user/sbf-alpha-cycle-{d1,h4,h1}.timer).
 """
 from __future__ import annotations
 
@@ -35,14 +45,31 @@ from analyze import gate as _gate
 from analyze import resolve as _resolve
 from analyze import validate as _validate
 from core import db as _core_db
+from core import db_migrations as _db_migrations
 
 _BOT_DB = Path("/mnt/sbfdata/sbf-platform/SBFAcademy_bot/bot.db")
 FOCUS_UNIVERSE_V1 = ["GOLD", "EURUSD", "USDJPY", "USDCNY", "USDZAR"]
 
+# tfs -- см. gate.py::_TF_TO_PB/decide(). sections -- см. bundle.py::ALL_SECTIONS,
+# необязательные секции этого профиля (focus всегда считается). interval_sec --
+# ожидаемый шаг МЕЖДУ прогонами этого профиля (соответствует systemd OnCalendar
+# ниже) -- используется только для gap-детектора алерта, не читается gate/bundle.
+# calendar_horizon_sec -- окно "на сколько вперёд" в calendar-секции, равно
+# interval_sec (события не задваиваются и не пропадают между соседними
+# прогонами ОДНОГО профиля).
+CYCLE_PROFILES: dict[str, dict] = {
+    "d1": {"tfs": ("D1",), "sections": ("calendar", "news", "macro", "watch", "calibration"),
+           "calendar_horizon_sec": 86400, "interval_sec": 86400},
+    "h4": {"tfs": ("H4",), "sections": ("calendar", "news", "watch"),
+           "calendar_horizon_sec": 14400, "interval_sec": 14400},
+    "h1": {"tfs": ("H1",), "sections": ("news",),
+           "calendar_horizon_sec": None, "interval_sec": 3600},
+}
+
 _SCHEMA = """
     CREATE TABLE IF NOT EXISTS cycle_runs (
       run_id TEXT PRIMARY KEY, started_ts INTEGER, finished_ts INTEGER,
-      exit_code INTEGER, gated_symbols TEXT,
+      exit_code INTEGER, profile TEXT, gated_symbols TEXT,
       bundle_chars INTEGER, input_tokens INTEGER, output_tokens INTEGER,
       model TEXT, forecasts_written INTEGER, validation_failed INTEGER,
       duration_sec REAL, notes TEXT
@@ -53,17 +80,18 @@ _SCHEMA = """
 def init_schema(con: sqlite3.Connection) -> None:
     con.executescript(_SCHEMA)
     con.commit()
+    _db_migrations.apply_all(con)  # миграция №17: cycle_runs.profile на БД, где таблица уже была без неё
 
 
-def _recent_exit_codes(con: sqlite3.Connection, n: int = 3) -> list[int]:
+def _recent_exit_codes(con: sqlite3.Connection, profile: str, n: int = 3) -> list[int]:
     rows = con.execute(
-        "SELECT exit_code FROM cycle_runs ORDER BY started_ts DESC LIMIT ?", (n,)
+        "SELECT exit_code FROM cycle_runs WHERE profile=? ORDER BY started_ts DESC LIMIT ?", (profile, n)
     ).fetchall()
     return [r[0] for r in rows]
 
 
-def _last_run_ts(con: sqlite3.Connection) -> int | None:
-    row = con.execute("SELECT MAX(started_ts) FROM cycle_runs").fetchone()
+def _last_run_ts(con: sqlite3.Connection, profile: str) -> int | None:
+    row = con.execute("SELECT MAX(started_ts) FROM cycle_runs WHERE profile=?", (profile,)).fetchone()
     return row[0] if row and row[0] is not None else None
 
 
@@ -85,9 +113,12 @@ def _alert(message: str, verbose: bool) -> None:
 def main() -> None:
     import argparse
     ap = argparse.ArgumentParser()
+    ap.add_argument("--profile", required=True, choices=sorted(CYCLE_PROFILES),
+                     help="d1 (раз/сутки) | h4 (каждые 4ч) | h1 (каждый час) -- см. CYCLE_PROFILES")
     ap.add_argument("--verbose", action="store_true")
     ap.add_argument("--universe", nargs="+", default=FOCUS_UNIVERSE_V1)
     args = ap.parse_args()
+    profile_cfg = CYCLE_PROFILES[args.profile]
 
     run_id = str(uuid.uuid4())
     started_ts = int(time.time())
@@ -107,10 +138,13 @@ def main() -> None:
         resolve_result = _resolve.run_resolve(con, args.verbose)
         notes.append(f"resolved={resolve_result['n_resolved']}")
 
-        gate_result = _gate.decide(con, args.universe, started_ts)
+        gate_result = _gate.decide(con, args.universe, started_ts, tfs=profile_cfg["tfs"])
         gated_symbols = gate_result["gated"]
 
-        bundle_result = _bundle.build_bundle(con, gate_result, args.universe, started_ts)
+        bundle_result = _bundle.build_bundle(
+            con, gate_result, args.universe, started_ts, tfs=profile_cfg["tfs"],
+            sections=profile_cfg["sections"],
+            calendar_horizon_sec=profile_cfg["calendar_horizon_sec"] or _bundle.CYCLE_HORIZON_SEC)
         bundle_chars = bundle_result["meta"]["bundle_chars"]
         if bundle_result["json"]["gaps"]:
             exit_code = max(exit_code, 1)
@@ -148,11 +182,12 @@ def main() -> None:
 
     try:
         con.execute(
-            """INSERT INTO cycle_runs (run_id, started_ts, finished_ts, exit_code, gated_symbols,
+            """INSERT INTO cycle_runs (run_id, started_ts, finished_ts, exit_code, profile, gated_symbols,
                                         bundle_chars, input_tokens, output_tokens, model,
                                         forecasts_written, validation_failed, duration_sec, notes)
-               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)""",
-            (run_id, started_ts, finished_ts, exit_code, json.dumps(gated_symbols, ensure_ascii=False),
+               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+            (run_id, started_ts, finished_ts, exit_code, args.profile,
+             json.dumps(gated_symbols, ensure_ascii=False),
              bundle_chars, input_tokens, output_tokens, model, forecasts_written, validation_failed,
              duration_sec, "; ".join(notes)[:2000]),
         )
@@ -164,31 +199,34 @@ def main() -> None:
             print(f"не удалось записать cycle_runs: {e}", file=sys.stderr)
 
     try:
-        _core_db.heartbeat("alpha_cycle", ok=(exit_code != 3),
+        _core_db.heartbeat(f"alpha_cycle_{args.profile}", ok=(exit_code != 3),
                             error="; ".join(notes)[:500] if exit_code == 3 else "")
     except Exception:
         pass
 
     should_alert = exit_code == 3
     if not should_alert:
-        recent = _recent_exit_codes(con, 3)
+        recent = _recent_exit_codes(con, args.profile, 3)
         if len(recent) == 3 and all(c == 3 for c in recent):
             should_alert = True
-        last_ts = _last_run_ts(con)
         # last_ts включает ЭТОТ прогон (уже вставлен выше) -- сравниваем со
-        # ВТОРЫМ по свежести, иначе разрыв всегда будет "0" от самого себя.
+        # ВТОРЫМ по свежести ЭТОГО ЖЕ профиля, иначе разрыв всегда будет "0"
+        # от самого себя. Порог -- 2.5×interval_sec, масштабируется под
+        # частоту профиля (H1: >2.5ч простоя тревожит, D1: >2.5 суток).
         prev_runs = con.execute(
-            "SELECT started_ts FROM cycle_runs WHERE run_id != ? ORDER BY started_ts DESC LIMIT 1", (run_id,)
+            "SELECT started_ts FROM cycle_runs WHERE run_id != ? AND profile=? ORDER BY started_ts DESC LIMIT 1",
+            (run_id, args.profile),
         ).fetchone()
-        if prev_runs and (started_ts - prev_runs[0]) > 12 * 3600:
+        gap_threshold = 2.5 * profile_cfg["interval_sec"]
+        if prev_runs and (started_ts - prev_runs[0]) > gap_threshold:
             should_alert = True
     if should_alert:
-        _alert(f"run_id={run_id} exit_code={exit_code} notes={'; '.join(notes)}", args.verbose)
+        _alert(f"[{args.profile}] run_id={run_id} exit_code={exit_code} notes={'; '.join(notes)}", args.verbose)
 
     con.close()
     if args.verbose:
         print(json.dumps({
-            "run_id": run_id, "exit_code": exit_code, "gated": gated_symbols,
+            "run_id": run_id, "profile": args.profile, "exit_code": exit_code, "gated": gated_symbols,
             "bundle_chars": bundle_chars, "forecasts_written": forecasts_written,
             "validation_failed": validation_failed, "duration_sec": duration_sec,
             "cycle_runs_ok": cycle_runs_ok, "notes": notes,

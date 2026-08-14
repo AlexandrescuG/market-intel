@@ -34,9 +34,17 @@ _MACRO_JSON = Path(__file__).parent.parent / "web" / "data" / "macro.json"
 _REGIME_JSON = Path(__file__).parent.parent / "web" / "data" / "regime.json"
 _CYCLE_DIR = Path(__file__).parent.parent / "data" / "cycle"
 
-CYCLE_HORIZON_SEC = 5 * 3600  # частота цикла (WP4.6: 5 прогонов/сутки)
+CYCLE_HORIZON_SEC = 24 * 3600  # 14.08: горизонт calendar-секции = период D1-профиля (единственный, где calendar включена по умолчанию), см. ALL_SECTIONS/run_cycle.py::CYCLE_PROFILES
 BUNDLE_CHAR_LIMIT = 25_000  # [ДОПУЩЕНИЕ] ~2.5 симв/токен для русского; калибровать по реальному usage
 NEWS_MAX_ITEMS = 20
+
+# 🔴 14.08 (разделение цикла по горизонтам, вывод из H1-grid-coverage анализа
+# 14.08): единый бандл на все 3 tf раз в 5ч сменился тремя профилями с разной
+# частотой (run_cycle.py::CYCLE_PROFILES) -- calendar/macro/watch/calibration
+# дороги (SQL/пересчёт) и малоинформативны на часовом масштабе, пересчитывать
+# их каждый час бессмысленно. ALL_SECTIONS -- дефолт для обратной совместимости
+# (ручные вызовы/старые тесты без explicit sections получают прежнее поведение).
+ALL_SECTIONS = ("calendar", "news", "macro", "watch", "calibration")
 
 
 def _step(name: str, fn, *args, **kwargs) -> dict:
@@ -167,34 +175,66 @@ def _render_md(bundle: dict) -> str:
         for f in bundle["focus"].values():
             lines.append(f"### {f['symbol']} {f['tf']}")
             lines.append(f"вектор состояния: {json.dumps(f['state'], ensure_ascii=False)}")
-            for c in f["candidates"]:
-                lines.append(f"- кандидат {c['pattern_key']} {c['direction']} config={c['config_key']} "
-                              f"tf={f['tf']}: base_rate={json.dumps(c['base_rate'], ensure_ascii=False)}")
+            if f["candidates"]:
+                for c in f["candidates"]:
+                    lines.append(f"- кандидат {c['pattern_key']} {c['direction']} config={c['config_key']} "
+                                  f"tf={f['tf']}: base_rate={json.dumps(c['base_rate'], ensure_ascii=False)}")
+            else:
+                # 🔴 14.08, найдено живым H4-прогоном: пустой список без ЛЮБОГО
+                # текста здесь визуально сливал этот блок со следующим "### SYMBOL
+                # TF" -- модель (Haiku) реально приписала кандидатов СЛЕДУЮЩЕГО
+                # символа (USDJPY) этому (EURUSD), у которого gate сработал по
+                # общему движению/календарю без направленного паттерна на баре.
+                # Явная строка-разделитель — граница блока не зависит от того,
+                # есть у символа кандидаты или нет.
+                lines.append("- (гейт сработал по движению/календарю/сдвигу базовой ставки, "
+                              "направленного паттерна на этом баре нет — кандидатов для разбора нет)")
     else:
         lines.append("(гейт никого не пропустил)")
+    included = bundle.get("sections_included", ALL_SECTIONS)
+
     lines.append("")
     lines.append("## calendar")
-    for ev in bundle["calendar"]:
-        lines.append(f"- {ev['title']} ({ev['country']}, ts={ev['scheduled_ts']}): reactions={ev['reactions']}")
-    if not bundle["calendar"]:
+    if "calendar" not in included:
+        lines.append("(вне профиля этого цикла -- см. более редкий профиль)")
+    elif bundle["calendar"]:
+        for ev in bundle["calendar"]:
+            lines.append(f"- {ev['title']} ({ev['country']}, ts={ev['scheduled_ts']}): reactions={ev['reactions']}")
+    else:
         lines.append("(нет high-impact релизов в горизонте цикла)")
     lines.append("")
     lines.append("## news")
-    for n in bundle["news"]:
-        lines.append(f"- [{n['symbol']}] {n['title']} ({n['url']})")
-    if not bundle["news"]:
+    if "news" not in included:
+        lines.append("(вне профиля этого цикла -- см. более редкий профиль)")
+    elif bundle["news"]:
+        for n in bundle["news"]:
+            lines.append(f"- [{n['symbol']}] {n['title']} ({n['url']})")
+    else:
         lines.append("(нет свежих заголовков по focus-инструментам)")
     lines.append("")
     lines.append("## macro")
-    for k, v in bundle["macro"].items():
-        lines.append(f"- {k}: {v}")
+    if "macro" not in included:
+        lines.append("(вне профиля этого цикла -- см. более редкий профиль)")
+    elif bundle["macro"]:
+        for k, v in bundle["macro"].items():
+            lines.append(f"- {k}: {v}")
+    else:
+        lines.append("(нет данных)")
     lines.append("")
     lines.append("## watch")
-    for w in bundle["watch"]:
-        lines.append(f"- {w}")
+    if "watch" not in included:
+        lines.append("(вне профиля этого цикла -- см. более редкий профиль)")
+    elif bundle["watch"]:
+        for w in bundle["watch"]:
+            lines.append(f"- {w}")
+    else:
+        lines.append("(нет данных)")
     lines.append("")
     lines.append("## calibration")
-    lines.append(json.dumps(bundle["calibration"], ensure_ascii=False))
+    if "calibration" not in included:
+        lines.append("(вне профиля этого цикла -- см. более редкий профиль)")
+    else:
+        lines.append(json.dumps(bundle["calibration"], ensure_ascii=False))
     return "\n".join(lines)
 
 
@@ -221,18 +261,29 @@ def _truncate(bundle: dict, char_limit: int) -> tuple[dict, list[str]]:
 
 
 def build_bundle(con: sqlite3.Connection, gate_result: dict, universe: list[str], now_ts: int,
-                  tfs: tuple[str, ...] = ("D1", "H4", "H1")) -> dict:
+                  tfs: tuple[str, ...] = ("D1", "H4", "H1"), sections: tuple[str, ...] = ALL_SECTIONS,
+                  calendar_horizon_sec: int = CYCLE_HORIZON_SEC) -> dict:
+    """sections -- какие из необязательных секций (calendar/news/macro/watch/
+    calibration; focus всегда обязателен) реально считать в этом прогоне.
+    Профили с высокой частотой (H1) не должны платить SQL/пересчётом за
+    секции, которые почти не меняются на их масштабе (macro/calibration) --
+    см. run_cycle.py::CYCLE_PROFILES. Непосчитанная секция остаётся в
+    bundle пустой, но помечена в "sections_included" -- отличие от "посчитано
+    и оказалось пусто" важно для модели (и для _render_md)."""
     _init_forecast_schema(con)  # calibration-секция читает forecasts/forecast_outcomes
     generated_at_iso = datetime.fromtimestamp(now_ts, tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
-    steps = {
-        "focus": _step("focus", _focus_section, gate_result),
-        "calendar": _step("calendar", _calendar_section, con, universe, now_ts, CYCLE_HORIZON_SEC),
-        "news": _step("news", _news_section, universe),
-        "macro": _step("macro", _macro_section),
-        "watch": _step("watch", _watch_section, gate_result, universe, tfs),
-        "calibration": _step("calibration", _calibration_build_report, con, "barrier", None),
-    }
+    steps = {"focus": _step("focus", _focus_section, gate_result)}
+    if "calendar" in sections:
+        steps["calendar"] = _step("calendar", _calendar_section, con, universe, now_ts, calendar_horizon_sec)
+    if "news" in sections:
+        steps["news"] = _step("news", _news_section, universe)
+    if "macro" in sections:
+        steps["macro"] = _step("macro", _macro_section)
+    if "watch" in sections:
+        steps["watch"] = _step("watch", _watch_section, gate_result, universe, tfs)
+    if "calibration" in sections:
+        steps["calibration"] = _step("calibration", _calibration_build_report, con, "barrier", None)
 
     gaps = [f"{name}: {r['error']}" for name, r in steps.items() if not r["ok"]]
     for key, per in gate_result["per_symbol"].items():
@@ -241,13 +292,14 @@ def build_bundle(con: sqlite3.Connection, gate_result: dict, universe: list[str]
 
     bundle = {
         "generated_at_iso": generated_at_iso, "generated_at_ts": now_ts,
+        "sections_included": list(sections),
         "gaps": gaps,
         "focus": steps["focus"]["data"] or {},
-        "calendar": steps["calendar"]["data"] or [],
-        "news": steps["news"]["data"] or [],
-        "macro": steps["macro"]["data"] or {},
-        "watch": steps["watch"]["data"] or [],
-        "calibration": steps["calibration"]["data"] or {},
+        "calendar": steps.get("calendar", {}).get("data") or [],
+        "news": steps.get("news", {}).get("data") or [],
+        "macro": steps.get("macro", {}).get("data") or {},
+        "watch": steps.get("watch", {}).get("data") or [],
+        "calibration": steps.get("calibration", {}).get("data") or {},
     }
     bundle, trunc_notes = _truncate(bundle, BUNDLE_CHAR_LIMIT)
     bundle["gaps"].extend(trunc_notes)

@@ -28,7 +28,6 @@ import sqlite3
 import sys
 import time
 import uuid
-from datetime import datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -133,19 +132,24 @@ def _symbol_step(con: sqlite3.Connection, symbol: str, tf: str, now_ts: int) -> 
     историческим барам (labeler.py), а живой candidate снимался с
     открытого -- плюс репейнт (паттерн на открытом баре может появиться и
     исчезнуть между циклами). Тот же класс ошибки, что уже был в
-    Signals/monitor.py (`iloc[-1]` на формирующемся баре). Фильтр -- по
-    образцу build_brief_v2.py:208 (сравнение UTC-дат строками, не now_ts
-    внутри -- используем ПЕРЕДАННЫЙ now_ts, не datetime.now(), симметрично
-    bundle.py's принципу явного времени для детерминизма)."""
+    Signals/monitor.py (`iloc[-1]` на формирующемся баре).
+
+    🔴 Найдено 14.08 при подготовке анализа частоты H1/H4: исходный фикс
+    сравнивал КАЛЕНДАРНУЮ ДАТУ (по образцу build_brief_v2.py:208), что
+    верно только для D1 (бар = ровно сутки). На H4/H1 это отбрасывало
+    ВСЕ бары сегодняшнего дня целиком, даже уже закрытые -- живой замер
+    в 08:21 UTC: H1 "последний закрытый" через дата-фильтр оказывался
+    23:00 ВЧЕРА (устаревание 9.4ч вместо ~20 минут), H4 -- 20:00 вчера
+    вместо реального 04:00 сегодня. TF-агностичная проверка -- бар закрыт,
+    если его конец уже наступил, а не "дата началась раньше сегодня"."""
     pb_tf = _TF_TO_PB[tf]
     all_candles = _price_bars.load_candles(symbol, pb_tf)
     if not all_candles:
         return {"ok": False, "error": f"нет данных {symbol} {tf}"}
-    today_str = datetime.fromtimestamp(now_ts, tz=timezone.utc).strftime("%Y-%m-%d")
-    candles = [c for c in all_candles
-               if datetime.fromtimestamp(c["ts"], tz=timezone.utc).strftime("%Y-%m-%d") < today_str]
+    tf_sec = _SIGNAL_TF_SECONDS[tf]
+    candles = [c for c in all_candles if c["ts"] + tf_sec <= now_ts]
     if len(candles) < 30:
-        return {"ok": False, "error": f"нет закрытых баров {symbol} {tf} (после фильтра сегодняшнего дня)"}
+        return {"ok": False, "error": f"нет закрытых баров {symbol} {tf} (после фильтра закрытости бара)"}
     i = len(candles) - 1
     last = candles[i]
     atr_val = _atr14(candles, i)

@@ -129,10 +129,12 @@ def build_context(canonical_symbol: str, tf: str, pattern_key: str,
     # 🔴 REVIEW_wp4_cycle_2026-08-13.md §1: тот же баг, что был в gate.py --
     # без фильтра "i = len(candles)-1" брал сегодняшний, ещё формирующийся
     # D1-бар (train/serve skew против base_rate, посчитанной на закрытых
-    # барах). Фильтр по образцу build_brief_v2.py:208.
-    today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    candles = [c for c in all_candles
-               if datetime.fromtimestamp(c["ts"], tz=timezone.utc).strftime("%Y-%m-%d") < today_str]
+    # барах). 🔴 14.08: дата-фильтр верен только для D1 -- на H4/H1 отбрасывал
+    # ВСЕ бары сегодняшнего дня, даже уже закрытые (см. gate.py::_symbol_step
+    # докстринг, тот же живой замер). TF-агностичная проверка -- закрыт, если
+    # конец бара уже наступил.
+    now_ts = int(datetime.now(timezone.utc).timestamp())
+    candles = [c for c in all_candles if c["ts"] + _SIGNAL_TF_SECONDS[tf] <= now_ts]
     if len(candles) < 30:
         return None
     con = sqlite3.connect(str(_BOT_DB), timeout=5)
