@@ -88,10 +88,22 @@ def signals_forward_track_line() -> str:
     справляется в целом". Кросс-проектное чтение (Signals -- отдельный git-
     репозиторий) -- та же инфраструктурная связь, что уже есть в обратную
     сторону (market_intel пишет resolve_only.py в директорию Signals).
-    Read-only, недоступность БД не должна ронять формирование сообщения."""
+    Read-only, недоступность БД не должна ронять формирование сообщения.
+
+    🔴 17.08.2026: считает ТОЛЬКО по резолюциям, прошедшим проверку
+    правдоподобия. Резолюция Signals не проверяла приходящие бары на
+    соответствие инструменту (в отличие от генерации), и 184 из 338
+    сигналов были размечены по барам чужого инструмента -- закрывались за
+    один бар с ходом в тысячи R. Битая часть завышала винрейт: 48.4%
+    против 39.9% на чистой. Предикат тот же, что в
+    Signals/tracker.py::TRUSTWORTHY_RESOLUTION_SQL -- цифры не должны
+    разъезжаться между проектами."""
     try:
         con = sqlite3.connect(f"file:{_SIGNALS_DB}?mode=ro", uri=True, timeout=5)
-        rows = dict(con.execute("SELECT status, COUNT(*) FROM signals GROUP BY status").fetchall())
+        rows = dict(con.execute(
+            "SELECT status, COUNT(*) FROM signals "
+            "WHERE ABS(COALESCE(mfe,0)) <= 10.0 AND ABS(COALESCE(mae,0)) <= 10.0 "
+            "GROUP BY status").fetchall())
         con.close()
     except Exception:
         return "форвард-трек Signals: недоступен"
