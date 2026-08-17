@@ -60,7 +60,7 @@ def _symbols_with_labels(con: sqlite3.Connection, tf: str, config_key: str) -> l
 
 def build_baseline_report(con: sqlite3.Connection, config: tuple[float, float, int] = DEFAULT_CONFIG,
                            tfs: tuple[str, ...] = DEFAULT_TFS, method: str = "fdr_bh",
-                           entry_geometry: str = "close") -> dict:
+                           entry_geometry: str = "close", pool_tfs: bool = False) -> dict:
     """Одна клетка = (pattern_key, tf), symbols объединены в пул. Пустые
     клетки (n=0 — паттерн ни разу не сработал на этом tf с этим config)
     не идут в проверку -- m считает только РЕАЛЬНО протестированные
@@ -70,17 +70,30 @@ def build_baseline_report(con: sqlite3.Connection, config: tuple[float, float, i
     "close" -- дефолт, полная GRID. "next_open"/"extreme" -- только на
     _GEOMETRY_PILOT_CONFIG (labeler.py), т.к. только он реально посчитан
     (см. Core-лог 14.08) -- передавать любой другой config с ними бессмысленно,
-    labels для такой комбинации физически не существует."""
+    labels для такой комбинации физически не существует.
+
+    pool_tfs -- WP6.5 (SPEC_alpha_engine_wp6_volatility.md): одна клетка на
+    ПАТТЕРН, symbols И tfs объединены в один пул (m~8-9, не 27) -- per-cell
+    FDR по pattern×tf почти не имеет мощности обнаружить реальный, но
+    небольшой эффект. Симметрично report.py::pattern_report() -- список tf
+    вместо строки пулит и там."""
     ckey = _config_key(*config, entry_geometry)
     reports = []
-    for tf in tfs:
-        symbols = _symbols_with_labels(con, tf, ckey)
-        if not symbols:
-            continue
+    if pool_tfs:
+        symbols = sorted(set().union(*(_symbols_with_labels(con, tf, ckey) for tf in tfs)))
         for pattern_key in PATTERNS:
-            r = pattern_report(con, symbols, tf, ckey, pattern_key)
+            r = pattern_report(con, symbols, list(tfs), ckey, pattern_key)
             if r["n"] > 0:
                 reports.append(r)
+    else:
+        for tf in tfs:
+            symbols = _symbols_with_labels(con, tf, ckey)
+            if not symbols:
+                continue
+            for pattern_key in PATTERNS:
+                r = pattern_report(con, symbols, tf, ckey, pattern_key)
+                if r["n"] > 0:
+                    reports.append(r)
 
     summary = apply_multiple_comparisons_correction(reports, method=method)
     reports.sort(key=lambda r: (r.get("p_value") if r.get("p_value") is not None else 1.0))
@@ -120,13 +133,15 @@ def main() -> None:
     ap.add_argument("--tfs", nargs="+", default=list(DEFAULT_TFS))
     ap.add_argument("--method", choices=["fdr_bh", "holm"], default="fdr_bh")
     ap.add_argument("--entry-geometry", choices=["close", "next_open", "extreme"], default="close")
+    ap.add_argument("--pool-tfs", action="store_true",
+                     help="WP6.5: одна клетка на паттерн, symbols И tfs в одном пуле (не 27 клеток, ~8-9)")
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
 
     atr_mult, rr, horizon_bars = args.config
     con = sqlite3.connect(str(_BOT_DB), timeout=10)
     report = build_baseline_report(con, (atr_mult, rr, int(horizon_bars)), tuple(args.tfs), args.method,
-                                    args.entry_geometry)
+                                    args.entry_geometry, args.pool_tfs)
     con.close()
 
     md = _render_md(report)

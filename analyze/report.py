@@ -61,6 +61,27 @@ def expectancy_p_value(r_values: list[float]) -> float | None:
     return round(1 - _norm_cdf(mean / se), 6)
 
 
+def two_proportion_p_value(x1: int, n1: int, x2: int, n2: int) -> float | None:
+    """Одностороннее p-value для H0: p1<=p2 (пропорция 1 не выше пропорции 2),
+    z-test на разности двух НЕЗАВИСИМЫХ (непересекающихся) пропорций с
+    объединённой (pooled) дисперсией -- нужно для WP6 (волатильность/
+    диапазон, SPEC_alpha_engine_wp6_volatility.md): в проекте до сих пор не
+    было теста для пропорций, только expectancy_p_value для непрерывного R
+    (проверено разведкой перед WP6 -- ни z_test, ни chi2 нигде не встречались).
+    При n1<1 или n2<1 не определено."""
+    if n1 < 1 or n2 < 1:
+        return None
+    p1, p2 = x1 / n1, x2 / n2
+    p_pooled = (x1 + x2) / (n1 + n2)
+    if p_pooled <= 0 or p_pooled >= 1:
+        return 0.0 if p1 > p2 else 1.0
+    se = math.sqrt(p_pooled * (1 - p_pooled) * (1 / n1 + 1 / n2))
+    if se == 0:
+        return 0.0 if p1 > p2 else 1.0
+    z = (p1 - p2) / se
+    return round(1 - _norm_cdf(z), 6)
+
+
 def apply_multiple_comparisons_correction(reports: list[dict], alpha: float = 0.05,
                                            method: str = "fdr_bh") -> dict:
     """🔴 Ревью §2 (12.08): без поправки на число проверенных клеток
@@ -84,10 +105,21 @@ def apply_multiple_comparisons_correction(reports: list[dict], alpha: float = 0.
     разведочного скрининга факторов (это WP2.5 и есть), Holm — если нужна
     более консервативная гарантия перед тем, как что-то пойдёт в прод.
 
-    Возвращает summary: {m, method, alpha, n_candidate_before, n_candidate_after}."""
+    Возвращает summary: {m, method, alpha, n_candidate_before, n_candidate_after}.
+
+    🔴 14.08 (WP6): "_r_values_for_pvalue" непустой -- p_value пересчитывается
+    из него (исходное поведение, r_realized-семейство). Пустой/отсутствует --
+    p_value НЕ трогается, если вызывающий код уже посчитал его сам иным
+    способом (напр. two_proportion_p_value для пропорций, у которых нет
+    непрерывного r_realized вообще -- см. volatility_report.py). Раньше
+    любой report без r_values молча получал p_value=None, что стёрло бы
+    заранее посчитанный p_value -- поймано ДО первого прогона WP6.0."""
     for r in reports:
         r_values = r.get("_r_values_for_pvalue")
-        r["p_value"] = expectancy_p_value(r_values) if r_values else None
+        if r_values:
+            r["p_value"] = expectancy_p_value(r_values)
+        else:
+            r.setdefault("p_value", None)
 
     testable = [r for r in reports if r["p_value"] is not None]
     m = len(testable)
@@ -231,31 +263,43 @@ def _pattern_occurrence_keys(con: sqlite3.Connection, canonical_symbol: str, tf:
     return {(e["ts"], e["direction"]) for e in detect_patterns(candles, levels) if e["pattern_key"] == pattern_key}
 
 
-def pattern_report(con: sqlite3.Connection, symbols: list[str], tf: str, config_key: str,
+def pattern_report(con: sqlite3.Connection, symbols: list[str], tf: str | list[str], config_key: str,
                     pattern_key: str | None = None) -> dict:
-    """Отчёт по одной гипотезе (набору символов на одном ТФ/конфиге),
-    сшитый по всем нужным метрикам. "Кривая калибровки" спеки заменена на
-    разбивку по инструменту -- у детерминированного детектора паттерна нет
-    предсказанной вероятности на срабатывание (это не модель, выдающая p),
-    поэтому классическая калибровочная кривая (predicted vs realized bucket)
-    здесь вырождена в одну точку; разбивка по инструменту -- содержательный
-    эквивалент: показывает, расходятся ли отдельные инструменты с пулом,
-    что и есть практический смысл калибровки на этом уровне.
+    """Отчёт по одной гипотезе (набору символов на одном/нескольких ТФ и
+    конфиге), сшитый по всем нужным метрикам. "Кривая калибровки" спеки
+    заменена на разбивку по инструменту -- у детерминированного детектора
+    паттерна нет предсказанной вероятности на срабатывание (это не модель,
+    выдающая p), поэтому классическая калибровочная кривая (predicted vs
+    realized bucket) здесь вырождена в одну точку; разбивка по инструменту --
+    содержательный эквивалент: показывает, расходятся ли отдельные
+    инструменты с пулом, что и есть практический смысл калибровки на этом
+    уровне.
 
     pattern_key: labels НЕ хранит его (исход барьера не зависит от того,
     какой детектор предложил направление — см. Core-лог 11.08), поэтому
     фильтрация по паттерну — это join с живым detect() по (ts,direction),
-    не столбец в WHERE."""
+    не столбец в WHERE.
+
+    🔴 14.08 (WP6.5, SPEC_alpha_engine_wp6_volatility.md): tf теперь строка
+    ИЛИ список строк -- список пулит ВСЕ (symbol,tf) комбинации в ОДНУ
+    клетку. Обоснование: per-cell FDR по pattern×tf (m=27) почти не имеет
+    мощности -- истинный эффект 5пп при n=100 на клетку даёт p≈0.3, не
+    переживает никакой поправки. Пул по symbol И tf разом (m=8-9, по одному
+    на паттерн) поднимает n на клетку на порядок, тот же эффект переживает
+    FDR. Обратная совместимость: tf-строка (как раньше) не меняет поведение
+    ни для одного существующего вызывающего кода."""
+    tfs = [tf] if isinstance(tf, str) else list(tf)
     per_symbol_rows = {}
     all_rows = []
     for sym in symbols:
-        rows = load_labels(con, symbol=sym, tf=tf, config_key=config_key)
-        if pattern_key is not None:
-            occ_keys = _pattern_occurrence_keys(con, sym, tf, pattern_key)
-            rows = [r for r in rows if (r["ts"], r["direction"]) in occ_keys]
-        if rows:
-            per_symbol_rows[sym] = rows
-            all_rows.extend(rows)
+        for t in tfs:
+            rows = load_labels(con, symbol=sym, tf=t, config_key=config_key)
+            if pattern_key is not None:
+                occ_keys = _pattern_occurrence_keys(con, sym, t, pattern_key)
+                rows = [r for r in rows if (r["ts"], r["direction"]) in occ_keys]
+            if rows:
+                per_symbol_rows.setdefault(sym, []).extend(rows)
+                all_rows.extend(rows)
 
     decided_all = _decided(all_rows)
     decided_all_sorted = sorted(decided_all, key=lambda r: r["ts"])
@@ -287,7 +331,8 @@ def pattern_report(con: sqlite3.Connection, symbols: list[str], tf: str, config_
     status = "experimental" if (exp_ci_lo is None or exp_ci_lo <= 0) else "candidate"
 
     return {
-        "pattern_key": pattern_key, "symbols": symbols, "tf": tf, "config_key": config_key,
+        "pattern_key": pattern_key, "symbols": symbols,
+        "tf": tf if isinstance(tf, str) else "+".join(tfs), "config_key": config_key,
         "n": n, "n_effective": n_eff, "avg_cross_instrument_corr": avg_corr,
         "winrate": winrate, "winrate_ci95_pct": ci95_winrate,
         "expectancy_r": expectancy, "expectancy_ci95_r": [exp_ci_lo, exp_ci_hi],

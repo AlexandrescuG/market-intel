@@ -25,3 +25,6 @@ backups/
 data/browser_profile.bak/
 *.db-shm
 *.db-wal
+
+# Бандлы прогонов цикла — генерируются, как data/reports и data/briefs
+data/cycle/
