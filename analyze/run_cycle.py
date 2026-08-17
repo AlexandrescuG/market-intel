@@ -42,6 +42,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from analyze import agent_run as _agent_run
 from analyze import bundle as _bundle
 from analyze import gate as _gate
+from analyze import notify_gdenigi as _notify
 from analyze import resolve as _resolve
 from analyze import validate as _validate
 from core import db as _core_db
@@ -171,6 +172,16 @@ def main() -> None:
                 if validation_failed > 0:
                     exit_code = max(exit_code, 1)
                     notes.append(f"validation_failed={validation_failed}")
+
+                # Пункт 5 SPEC_alpha_engine_finish_handoff: прогнозы агента идут
+                # в тот же outbox, что и Signals, с той же обязательной
+                # status_label. Отправляет не этот код, а sbf-outbox-sender.timer.
+                if val["written_details"]:
+                    notified = _notify.send_written_forecasts(con, val["written_details"])
+                    notes.append(f"outbox: {notified['enqueued']} прогноз(ов)")
+                    if notified["failed"]:
+                        exit_code = max(exit_code, 1)
+                        notes.append(f"outbox_failed={notified['failed']}")
     except Exception as e:
         exit_code = 3
         notes.append(f"CRASH: {type(e).__name__}: {e}")

@@ -132,8 +132,14 @@ def format_message(forecast: dict, base: dict, status_label: str, outcome_hint: 
         ci_lo, ci_hi, n = base.get("ci95_lo"), base.get("ci95_hi"), base.get("n")
         if p is None or ci_lo is None or ci_hi is None or n is None:
             raise ValueError("format_message: base не insufficient, но conviction/ci95/n не заданы")
-        lines.append(f"Вероятность: {p:.1%} (CI95 [{ci_lo:.1f}%, {ci_hi:.1f}%], n={n})")
-        lines.append(f"База: {base.get('p', 0):.1%} + поправка агента: {(p - base.get('p', 0)):+.1%}")
+        # CI и n относятся к БАЗОВОЙ СТАВКЕ (она измерена), а не к итоговой
+        # вероятности (база + поправка агента, поправка ничем не измерена).
+        # Раньше строка читалась как "17.7% (CI95 [16.2%, 35.6%])" — интервал
+        # выглядел как интервал для 17.7%, хотя посчитан вокруг 24.7%.
+        lines.append(f"Вероятность (база + поправка агента): {p:.1%}")
+        lines.append(f"База: {base.get('p', 0):.1%}, измерена — CI95 "
+                     f"[{ci_lo:.1f}%, {ci_hi:.1f}%], n={n}")
+        lines.append(f"Поправка агента: {(p - base.get('p', 0)):+.1%} (не измерена)")
     lines.append(f"Инвалидация: {forecast.get('invalidation', '—')}")
     if outcome_hint:
         lines.append(outcome_hint)
@@ -153,3 +159,35 @@ def send_forecast(con: sqlite3.Connection, forecast: dict, base: dict) -> str:
     status_label = determine_status_label(con, family="barrier")
     text = format_message(forecast, base, status_label)
     return _outbox.enqueue(con, source="agent", status_label=status_label, payload=text)
+
+
+def send_written_forecasts(con: sqlite3.Connection, written_details: list[dict]) -> dict:
+    """Точка подключения прогнозов агента к общему каналу (пункт 5
+    SPEC_alpha_engine_finish_handoff). Вызывается из run_cycle.py после
+    run_validate().
+
+    written_details: [{"id": <forecast_id>, "base": <base_rate или None>}] --
+    из validate.run_validate(). Прогноз читается ОБРАТНО из таблицы forecasts
+    по id, а не берётся из ответа модели: в сообщение должно попасть ровно то,
+    что записано в журнал, иначе доставленное и учтённое при калибровке — два
+    разных текста.
+
+    Доставка не имеет права ронять цикл: прогноз уже записан и учтён, а
+    неотправленное сообщение чинится следующим тиком отправщика. Поэтому
+    каждая ошибка гасится поштучно и возвращается счётчиком."""
+    enqueued, failed = 0, 0
+    for item in written_details:
+        try:
+            row = con.execute(
+                "SELECT symbol, horizon, event_key, conviction, invalidation "
+                "FROM forecasts WHERE id=?", (item["id"],)).fetchone()
+            if row is None:
+                failed += 1
+                continue
+            forecast = {"symbol": row[0], "horizon": row[1], "event_key": row[2],
+                        "conviction": row[3], "invalidation": row[4]}
+            send_forecast(con, forecast, item.get("base"))
+            enqueued += 1
+        except Exception:
+            failed += 1
+    return {"enqueued": enqueued, "failed": failed}

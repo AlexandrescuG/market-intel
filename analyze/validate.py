@@ -153,7 +153,8 @@ def run_validate(con: sqlite3.Connection, bundle_json: dict, agent_result: dict)
         status = "timeout" if agent_result.get("exit_code") == -1 else "cli_error"
         _log_call(con, call_id, agent_result, status, agent_result.get("error", "") or "")
         con.commit()
-        return {"written": [], "rejected": [], "validation_failed": 0, "call_id": call_id}
+        return {"written": [], "written_details": [], "rejected": [],
+                "validation_failed": 0, "call_id": call_id}
 
     # bundle_cand.["_state"] -- пришиваем вектор состояния символа к каждому
     # его кандидату один раз, чтобы _write_one() не таскал bundle_json целиком.
@@ -163,6 +164,13 @@ def run_validate(con: sqlite3.Connection, bundle_json: dict, agent_result: dict)
             c["_state"] = f.get("state", {})
 
     written, rejected = [], []
+    # written_details -- id записанного прогноза рядом с ЕГО базовой ставкой.
+    # Нужен для доставки (notify_gdenigi.send_written_forecasts): базовая
+    # ставка с CI и n живёт только в бандле, в таблицу forecasts она не
+    # попадает, а сообщение обязано нести "вероятность С ИНТЕРВАЛОМ И n,
+    # не голое число" (WP6.3). Собирается здесь, потому что это единственная
+    # точка, где прогноз и его bundle_cand уже сопоставлены.
+    written_details = []
     for cand in agent_result.get("forecasts", []):
         bundle_cand = _find_bundle_candidate(bundle_json, cand)
         ok, reason = _validate_one(cand, bundle_cand)
@@ -177,9 +185,11 @@ def run_validate(con: sqlite3.Connection, bundle_json: dict, agent_result: dict)
             continue
         fid = _write_one(con, cand, bundle_cand, call_id, agent_result.get("model", "unknown"))
         written.append(fid)
+        written_details.append({"id": fid, "base": bundle_cand.get("base_rate")})
 
     validation_status = "ok" if written or not agent_result.get("forecasts") else "business_reject"
     validation_reason = "; ".join(r["reason"] for r in rejected)[:2000] if rejected else ""
     _log_call(con, call_id, agent_result, validation_status, validation_reason)
     con.commit()
-    return {"written": written, "rejected": rejected, "validation_failed": len(rejected), "call_id": call_id}
+    return {"written": written, "written_details": written_details,
+            "rejected": rejected, "validation_failed": len(rejected), "call_id": call_id}
