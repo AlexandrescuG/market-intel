@@ -21,6 +21,7 @@ determine_status_label ниже). Доставлять себе можно чт�
 """
 from __future__ import annotations
 
+import re
 import sqlite3
 import sys
 from pathlib import Path
@@ -118,6 +119,29 @@ def signals_forward_track_line() -> str:
             f"CI95 [{ci_lo:.1f}%, {ci_hi:.1f}%], безубыток {breakeven:.1%}")
 
 
+_RR_RE = re.compile(r"_r(\d+(?:\.\d+)?)_")
+
+
+def breakeven_from_event_key(event_key: str) -> float | None:
+    """Безубыток для barrier-конфигурации, вытащенный из её же ключа.
+
+    event_key вида "barrier:a1.5_r2.0_h30_costsv1" -> rr=2.0 -> 1/(1+rr).
+
+    Зачем в сообщении (замечание Георгия 17.08): без этой величины
+    "Вероятность 17.7%" не читается вообще. 17.7% — это много или мало?
+    Ответ зависит от RR: при 2:1 порог 33.3%, при 1:1 — 50%. В сообщении
+    число 33.3% стояло, но в строке форвард-трека Signals, то есть
+    относилось к ДРУГОЙ системе; сопоставлять приходилось в уме.
+
+    None, если rr из ключа не извлекается — лучше промолчать, чем
+    подставить дефолт и выдать чужой порог за свой."""
+    m = _RR_RE.search(event_key or "")
+    if not m:
+        return None
+    rr = float(m.group(1))
+    return 1.0 / (1.0 + rr) if rr > 0 else None
+
+
 def format_message(forecast: dict, base: dict, status_label: str, outcome_hint: str | None = None) -> str:
     """Событие+горизонт, вероятность С ИНТЕРВАЛОМ И n (не голое число) ИЛИ
     честное "не определена", база и поправка агента раздельно, условие
@@ -140,6 +164,13 @@ def format_message(forecast: dict, base: dict, status_label: str, outcome_hint: 
         lines.append(f"База: {base.get('p', 0):.1%}, измерена — CI95 "
                      f"[{ci_lo:.1f}%, {ci_hi:.1f}%], n={n}")
         lines.append(f"Поправка агента: {(p - base.get('p', 0)):+.1%} (не измерена)")
+
+        # Вердикт словами. Вероятность без порога безубытка не интерпретируется,
+        # а порог до этого стоял только в строке про Signals — другую систему.
+        be = breakeven_from_event_key(forecast.get("event_key", ""))
+        if be is not None:
+            verdict = "ВЫШЕ порога" if p > be else "НИЖЕ порога — сделка убыточна в ожидании"
+            lines.append(f"Безубыток этой конфигурации: {be:.1%} → {verdict}")
     lines.append(f"Инвалидация: {forecast.get('invalidation', '—')}")
     if outcome_hint:
         lines.append(outcome_hint)
