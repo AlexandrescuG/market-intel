@@ -83,7 +83,8 @@ def two_proportion_p_value(x1: int, n1: int, x2: int, n2: int) -> float | None:
 
 
 def apply_multiple_comparisons_correction(reports: list[dict], alpha: float = 0.05,
-                                           method: str = "fdr_bh") -> dict:
+                                           method: str = "fdr_bh",
+                                           m_override: int | None = None) -> dict:
     """🔴 Ревью §2 (12.08): без поправки на число проверенных клеток
     (`pattern_report` per-cell правило "CI95 ожидания > 0 -> candidate")
     при типичной сетке WP2.5 (8 паттернов × 3 ТФ = 24 клетки) и alpha=0.05
@@ -122,7 +123,14 @@ def apply_multiple_comparisons_correction(reports: list[dict], alpha: float = 0.
             r.setdefault("p_value", None)
 
     testable = [r for r in reports if r["p_value"] is not None]
-    m = len(testable)
+    # m_override -- число клеток, ЗАФИКСИРОВАННОЕ пререгистрацией, а не
+    # выведенное из того, сколько клеток по факту набрало данных
+    # (WP6.1: "m входит в поправку целиком и не пересчитывается по факту
+    # того, сколько клеток окажется с достаточным n -- иначе m
+    # подстраивается под результат"). Если часть клеток не набрала n и
+    # выпала из testable, поправка с исходным m строже, а не слабее -- то
+    # есть ошибка в безопасную сторону.
+    m = m_override if m_override is not None else len(testable)
     n_before = sum(1 for r in testable if r["status"] == "candidate")
     summary = {"m": m, "method": method, "alpha": alpha,
                "n_candidate_before": n_before, "n_candidate_after": n_before}

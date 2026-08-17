@@ -136,13 +136,124 @@ def _render_md(reports: list[dict], summary: dict) -> str:
     return "\n".join(lines)
 
 
+# ─── WP6.2: отчёт по полному семейству ──────────────────────────────────────
+#
+# Критерий взят из analyze/preregistration/2026-08-17_volatility.md §6
+# (коммит 12fb40b, ДО прогона) и здесь не смягчается.
+PREREG_M = 30
+PREREG_ALPHA = 0.05
+PREREG_MIN_N_PER_GROUP = 500
+PREREG_MIN_DIFF_PP = 10.0
+
+PREREG_HYPOTHESES = ["range_gt_p75", "range_lt_p25", "atr_expansion_5"]
+PREREG_CONDITIONS = ["range_top_quintile", "doji", "inside_bar"]
+PREREG_TFS = ["D1", "H4", "H1"]
+
+
+def prereg_cells() -> list[tuple[str, str]]:
+    """(event_key, tf) для всех 30 клеток. Список строится из пререгистрации,
+    а НЕ из того, что нашлось в БД: клетка, не набравшая данных, обязана
+    остаться в знаменателе m."""
+    cells = [(f"{h}@{c}", tf) for h in PREREG_HYPOTHESES
+             for c in PREREG_CONDITIONS for tf in PREREG_TFS]
+    cells += [(f"event_move_gt_1atr@{c}", "M30") for c in PREREG_CONDITIONS]
+    return cells
+
+
+def family_report(con: sqlite3.Connection) -> tuple[list[dict], dict]:
+    reports = []
+    for event_key, tf in prereg_cells():
+        symbols = _symbols_with_labels(con, tf, event_key)
+        if not symbols:
+            reports.append({"event_key": event_key, "tf": tf, "n": 0,
+                            "insufficient": True, "reason": "нет размеченных строк",
+                            "p_value": None, "status": "insufficient"})
+            continue
+        r = volatility_control_report(con, symbols, tf, event_key)
+        n1, n0 = r["n_condition"], r["n_complement"]
+        if n1 < PREREG_MIN_N_PER_GROUP or n0 < PREREG_MIN_N_PER_GROUP:
+            # Клетка не интерпретируется НИ В КАКУЮ сторону -- ни как
+            # подтверждение, ни как опровержение (§5 пререгистрации).
+            r.update({"insufficient": True,
+                      "reason": f"n_condition={n1}, n_complement={n0} < {PREREG_MIN_N_PER_GROUP}",
+                      "p_value": None, "status": "insufficient"})
+        else:
+            r["insufficient"] = False
+            # Критерий §6 -- ВСЕ три условия сразу. |diff_pp|: отрицательный
+            # эффект (напр. условие СНИЖАЕТ вероятность расширения) -- такая
+            # же находка, как положительный.
+            r["status"] = "candidate" if (
+                r["diff_pp"] is not None and abs(r["diff_pp"]) >= PREREG_MIN_DIFF_PP
+                and r["bss_condition"] is not None and r["bss_condition"] > 0
+            ) else "experimental"
+        reports.append(r)
+
+    summary = apply_multiple_comparisons_correction(
+        reports, alpha=PREREG_ALPHA, method="fdr_bh", m_override=PREREG_M)
+    # FDR понижает candidate -> experimental по q; §6 требует ещё и
+    # q < alpha явно, что BH-процедура и обеспечивает для выживших.
+    return reports, summary
+
+
+def _render_family_md(reports: list[dict], summary: dict) -> str:
+    lines = [
+        "# WP6.2 — семейство «волатильность / диапазон»", "",
+        "Пререгистрация: `analyze/preregistration/2026-08-17_volatility.md`, коммит `12fb40b` "
+        "(до прогона).", "",
+        f"**m={summary['m']} (зафиксировано пререгистрацией), alpha={summary['alpha']}, "
+        f"метод={summary['method']}**", "",
+        f"candidate до FDR: {summary['n_candidate_before']} → после: {summary['n_candidate_after']}", "",
+        "| гипотеза | условие | tf | n | n_eff | p(cond) | CI95 | p(compl) | CI95 | diff_pp | p | q | BSS | статус |",
+        "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|",
+    ]
+    for r in reports:
+        ek = r.get("event_key", "?")
+        hyp, _, cond = ek.partition("@")
+        if r.get("insufficient"):
+            lines.append(f"| {hyp} | {cond} | {r['tf']} | {r.get('n', 0)} | — | — | — | — | — | — | — | — | — | "
+                         f"insufficient ({r.get('reason', '')}) |")
+            continue
+        def f(x, nd=3):
+            return "—" if x is None else (round(x, nd) if isinstance(x, float) else x)
+        ci1, ci2 = r["ci95_condition"], r["ci95_complement"]
+        lines.append(
+            f"| {hyp} | {cond} | {r['tf']} | {r['n']} | {r['n_effective']} | {f(r['p_condition'])} | "
+            f"[{f(ci1[0],1)}, {f(ci1[1],1)}] | {f(r['p_complement'])} | [{f(ci2[0],1)}, {f(ci2[1],1)}] | "
+            f"{f(r['diff_pp'],2)} | {f(r['p_value'],6)} | {f(r.get('q_value'),6)} | "
+            f"{f(r['bss_condition'],4)} | {r['status']} |")
+
+    cands = [r for r in reports if r.get("status") == "candidate"]
+    n_insuf = sum(1 for r in reports if r.get("insufficient"))
+    lines += ["", f"Клеток insufficient (не интерпретируются): {n_insuf} из {len(reports)}", ""]
+    if cands:
+        lines += [f"**ВЕРДИКТ: семейство показало сигнал** — {len(cands)} клеток прошли все три "
+                  "условия §6 (q<0.05, |diff_pp|>=10, BSS>0):", ""]
+        for r in cands:
+            lines.append(f"- `{r['event_key']}` {r['tf']}: diff_pp={r['diff_pp']}, "
+                         f"q={r.get('q_value')}, BSS={round(r['bss_condition'], 4)}, n={r['n']}")
+    else:
+        lines += ["**ВЕРДИКТ: семейство не показало сигнала** — ни одна клетка не прошла все три "
+                  "условия §6. Результат записывается как есть: отрицательный результат после "
+                  "пререгистрации — это знание, а не неудача."]
+    return "\n".join(lines)
+
+
 def main() -> None:
     import argparse
     ap = argparse.ArgumentParser()
     ap.add_argument("--tfs", nargs="+", default=["D1", "H4", "H1"])
     ap.add_argument("--event-key", default="vol_autocorr_control")
     ap.add_argument("--method", choices=["fdr_bh", "holm"], default="fdr_bh")
+    ap.add_argument("--family", action="store_true",
+                    help="WP6.2: полное семейство по пререгистрации (вместо контроля WP6.0)")
     args = ap.parse_args()
+
+    if args.family:
+        con = sqlite3.connect(str(_BOT_DB), timeout=30)
+        reports, summary = family_report(con)
+        con.close()
+        print(_render_family_md(reports, summary))
+        return
 
     con = sqlite3.connect(str(_BOT_DB), timeout=10)
     reports = []

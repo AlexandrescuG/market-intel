@@ -91,6 +91,29 @@ def _recent_exit_codes(con: sqlite3.Connection, profile: str, n: int = 3) -> lis
     return [r[0] for r in rows]
 
 
+def _agent_unreachable_streak(con: sqlite3.Connection, n: int = 3) -> str | None:
+    """Последние n вызовов агента подряд — техническая недоступность?
+
+    🔴 Найдено ручным аудитом 17.08 (пункт 9 спеки finish_handoff). С 15.08
+    агент отвечал HTTP 403 «Your organization has disabled Claude subscription
+    access for Claude Code» на КАЖДОМ автономном прогоне по таймеру — 47
+    вызовов за двое суток. Никто этого не заметил, потому что:
+      * отказ agent_run даёт exit_code=1, а алерт слался только при 3,
+      * run_cycle всегда завершается sys.exit(0), и systemd видел успех.
+    То есть цикл двое суток был «зелёный» и не делал ничего.
+
+    Отличать техническую недоступность (cli_error/timeout) от business_reject
+    обязательно: дубли и отклонённые кандидаты — штатная работа валидатора,
+    алертить на них значит приучить себя игнорировать алерты."""
+    rows = con.execute(
+        "SELECT validation_status, raw_response FROM agent_calls ORDER BY ts DESC LIMIT ?", (n,)
+    ).fetchall()
+    if len(rows) < n or not all(r[0] in ("cli_error", "timeout") for r in rows):
+        return None
+    last = (rows[0][1] or "")[:300]
+    return f"агент недоступен {n} вызова подряд ({rows[0][0]}): {last}"
+
+
 def _last_run_ts(con: sqlite3.Connection, profile: str) -> int | None:
     row = con.execute("SELECT MAX(started_ts) FROM cycle_runs WHERE profile=?", (profile,)).fetchone()
     return row[0] if row and row[0] is not None else None
@@ -220,6 +243,10 @@ def main() -> None:
         recent = _recent_exit_codes(con, args.profile, 3)
         if len(recent) == 3 and all(c == 3 for c in recent):
             should_alert = True
+        streak = _agent_unreachable_streak(con, 3)
+        if streak:
+            should_alert = True
+            notes.append(streak)
         # last_ts включает ЭТОТ прогон (уже вставлен выше) -- сравниваем со
         # ВТОРЫМ по свежести ЭТОГО ЖЕ профиля, иначе разрыв всегда будет "0"
         # от самого себя. Порог -- 2.5×interval_sec, масштабируется под
