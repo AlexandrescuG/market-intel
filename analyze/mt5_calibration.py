@@ -97,7 +97,7 @@ class Bridge:
         self.mt5 = self.conn.modules.MetaTrader5
         if not self.mt5.initialize(path=TERMINAL_PATH, timeout=60000):
             raise SafetyRefusal("bridge_down", f"initialize(): {self.mt5.last_error()}")
-        return self.mt5
+        return self.mt5, self.conn
 
     def __exit__(self, *exc):
         try:
@@ -109,7 +109,40 @@ class Bridge:
 
 # ─── отправка ───────────────────────────────────────────────────────────────
 
-def send_one(mt5, con: sqlite3.Connection, *, symbol: str, tf: str, direction: str,
+def remote_order_send(conn, symbol: str, volume: float, is_buy: bool, price: float):
+    """order_send выполняется ЦЕЛИКОМ на стороне Wine.
+
+    🔴 Первый живой ордер 18.08 вернул (-2, 'Unnamed arguments not allowed').
+    Причина не в брокере: MetaTrader5 — C-расширение, оно проверяет аргумент
+    через PyDict_Check, а rpyc отдаёт ему прокси-объект. Не помогает и dict,
+    созданный через conn.builtins.dict() — по ту сторону он настоящий, но
+    при передаче в функцию снова оборачивается.
+
+    Единственный работающий путь — собрать словарь и вызвать функцию одним
+    куском кода ТАМ, где живёт MetaTrader5. Подтверждено order_check():
+    retcode=0, comment='Done', margin=2.89.
+
+    Все подставляемые значения — из нашей карты символов и из symbol_info(),
+    строки идут через repr(), произвольного ввода здесь нет."""
+    conn.execute("import MetaTrader5 as _m")
+    conn.execute(
+        "_req = {"
+        "'action': _m.TRADE_ACTION_DEAL,"
+        f"'symbol': {symbol!r},"
+        f"'volume': {float(volume)!r},"
+        f"'type': _m.ORDER_TYPE_{'BUY' if is_buy else 'SELL'},"
+        f"'price': {float(price)!r},"
+        "'deviation': 20,"
+        f"'magic': {MAGIC},"
+        "'comment': 'sbf_cost_calib',"
+        "'type_time': _m.ORDER_TIME_GTC}")
+    check = conn.eval("_m.order_check(_req)")
+    if getattr(check, "retcode", None) != 0:
+        return None, f"order_check retcode={getattr(check,'retcode',None)} {getattr(check,'comment','')}"
+    return conn.eval("_m.order_send(_req)"), None
+
+
+def send_one(mt5, conn, con: sqlite3.Connection, *, symbol: str, tf: str, direction: str,
              forecast_id: str | None, account, server: str,
              pred_cost_price: float | None = None, pred_swap_night: float | None = None,
              pred_spread_atr: float | None = None) -> str:
@@ -129,18 +162,12 @@ def send_one(mt5, con: sqlite3.Connection, *, symbol: str, tf: str, direction: s
         tick = mt5.symbol_info_tick(broker_symbol)
         is_buy = direction.lower() in ("bullish", "buy", "long")
         price = tick.ask if is_buy else tick.bid
-        req = {
-            "action": mt5.TRADE_ACTION_DEAL,
-            "symbol": broker_symbol,
-            "volume": volume,
-            "type": mt5.ORDER_TYPE_BUY if is_buy else mt5.ORDER_TYPE_SELL,
-            "price": price,
-            "deviation": 20,
-            "magic": MAGIC,
-            "comment": "sbf_cost_calib",
-            "type_time": mt5.ORDER_TIME_GTC,
-        }
-        res = mt5.order_send(req)
+        res, check_err = remote_order_send(conn, broker_symbol, volume, is_buy, price)
+        if check_err:
+            record(con, **base, volume=volume, req_price=price, req_ts=int(time.time()),
+                   spread_at_entry=(tick.ask - tick.bid), order_status="order_rejected",
+                   note=check_err)
+            return "order_rejected"
         if res is None or res.retcode != mt5.TRADE_RETCODE_DONE:
             rc = getattr(res, "retcode", None)
             cm = getattr(res, "comment", mt5.last_error())
@@ -161,6 +188,64 @@ def send_one(mt5, con: sqlite3.Connection, *, symbol: str, tf: str, direction: s
     except Exception as e:                                     # мост/rpyc/что угодно
         record(con, **base, volume=0.0, order_status="error", note=f"{type(e).__name__}: {e}")
         return "error"
+
+
+def close_position(conn, mt5, position) -> tuple[bool, str]:
+    """Закрытие нашей позиции встречной сделкой.
+
+    🔴 Без этого контур только открывает: комиссия и своп приходят из
+    history_deals_get ТОЛЬКО по закрытой позиции, а открытые копились бы до
+    потолка в 10 штук и контур встал бы навсегда, формально «работая».
+
+    Закрываются ТОЛЬКО позиции с нашим magic — фильтр в our_positions()."""
+    ticket = int(position.ticket)
+    sym = str(position.symbol)
+    vol = float(position.volume)
+    is_long = int(position.type) == 0                 # POSITION_TYPE_BUY
+    tick = mt5.symbol_info_tick(sym)
+    price = float(tick.bid if is_long else tick.ask)
+    conn.execute("import MetaTrader5 as _m")
+    conn.execute(
+        "_creq = {"
+        "'action': _m.TRADE_ACTION_DEAL,"
+        f"'symbol': {sym!r},"
+        f"'volume': {vol!r},"
+        f"'type': _m.ORDER_TYPE_{'SELL' if is_long else 'BUY'},"
+        f"'position': {ticket},"
+        f"'price': {price!r},"
+        "'deviation': 20,"
+        f"'magic': {MAGIC},"
+        "'comment': 'sbf_cost_calib_close',"
+        "'type_time': _m.ORDER_TIME_GTC}")
+    res = conn.eval("_m.order_send(_creq)")
+    rc = getattr(res, "retcode", None)
+    if rc != mt5.TRADE_RETCODE_DONE:
+        return False, f"retcode={rc} {getattr(res, 'comment', '')}"
+    return True, ""
+
+
+def close_aged(mt5, conn, con: sqlite3.Connection, max_age_sec: int) -> int:
+    """Закрывает наши синтетические позиции старше max_age_sec.
+
+    Только те, что заведены БЕЗ forecast_id: у сигнальных наблюдений
+    геометрия выхода задана прогнозом (стоп/цель), закрывать их по таймеру
+    значило бы измерять не то."""
+    synthetic = {r[0] for r in con.execute(
+        "SELECT ticket FROM cost_observations "
+        "WHERE order_status='sent' AND ticket IS NOT NULL AND forecast_id IS NULL")}
+    now = int(time.time())
+    n = 0
+    for p in our_positions(mt5.positions_get()):
+        if int(p.ticket) not in synthetic:
+            continue
+        if now - int(getattr(p, "time", now)) < max_age_sec:
+            continue
+        ok, err = close_position(conn, mt5, p)
+        if ok:
+            n += 1
+        else:
+            log.error("не удалось закрыть %s: %s", p.ticket, err)
+    return n
 
 
 # ─── добор закрытых ─────────────────────────────────────────────────────────
@@ -195,21 +280,24 @@ def collect_closed(mt5, con: sqlite3.Connection) -> int:
 
 # ─── прогон ─────────────────────────────────────────────────────────────────
 
-def run(symbols: list[str], tf: str, direction: str, synthetic: bool, verbose: bool) -> int:
+def run(symbols: list[str], tf: str, direction: str, synthetic: bool, verbose: bool,
+        close_after_sec: int = 900) -> int:
     """Возвращает exit-код: 0 — что-то отправлено или добрано; 2 —
     систематический отказ. Ненулевой код нужен, чтобы systemd видел
     разницу между «отработал» и «отработал вхолостую» (§5)."""
     con = sqlite3.connect(str(BOT_DB), timeout=30)
     apply_all(con)
-    stats = {"sent": 0, "closed": 0}
+    stats = {"sent": 0, "closed": 0, "aged_closed": 0}
     refusals: dict[str, int] = {}
     try:
-        with Bridge() as mt5:
+        with Bridge() as (mt5, conn):
             account = mt5.account_info()
             server = getattr(account, "server", CALIBRATION_SERVER) if account else CALIBRATION_SERVER
-            stats["closed"] = collect_closed(mt5, con) if account else 0
+            if account:
+                stats["aged_closed"] = close_aged(mt5, conn, con, close_after_sec)
+                stats["closed"] = collect_closed(mt5, con)
             for sym in symbols:
-                st = send_one(mt5, con, symbol=sym, tf=tf, direction=direction,
+                st = send_one(mt5, conn, con, symbol=sym, tf=tf, direction=direction,
                               forecast_id=None if synthetic else None,
                               account=account, server=server)
                 if st == "sent":
@@ -223,14 +311,15 @@ def run(symbols: list[str], tf: str, direction: str, synthetic: bool, verbose: b
                    order_status=e.status, note=str(e))
         refusals[e.status] = len(symbols)
 
-    log.info("отправлено=%d добрано закрытых=%d отказы=%s", stats["sent"], stats["closed"], refusals)
+    log.info("отправлено=%d закрыто по возрасту=%d добрано закрытых=%d отказы=%s",
+             stats["sent"], stats["aged_closed"], stats["closed"], refusals)
     if consecutive_failures(con):
         msg = (f"{CONSECUTIVE_FAILURES_FOR_ALERT} наблюдений подряд неудачны; "
                f"последние отказы: {refusals}")
         log.error(msg)
         _alert_operational(msg)
     con.close()
-    return 0 if (stats["sent"] or stats["closed"]) else 2
+    return 0 if (stats["sent"] or stats["closed"] or stats["aged_closed"]) else 2
 
 
 def main() -> None:
@@ -242,12 +331,14 @@ def main() -> None:
                     help="наблюдение не по сигналу (forecast_id NULL) — для комиссии и свопа "
                          "они полноценны, для проскальзывания смешивать с сигнальными нельзя")
     ap.add_argument("--collect-only", action="store_true", help="только добрать закрытые")
+    ap.add_argument("--close-after", type=int, default=900,
+                    help="закрывать синтетические позиции старше N секунд (по умолчанию 15 мин)")
     ap.add_argument("--verbose", action="store_true")
     args = ap.parse_args()
     logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO,
                         format="%(asctime)s | [mt5_calib] %(message)s")
     code = run([] if args.collect_only else args.symbols,
-               args.tf, args.direction, args.synthetic, args.verbose)
+               args.tf, args.direction, args.synthetic, args.verbose, args.close_after)
     sys.exit(code)
 
 
