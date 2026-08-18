@@ -59,6 +59,48 @@ MIGRATIONS: list[tuple[int, str, str]] = [
      "ALTER TABLE forecasts ADD COLUMN call_id TEXT"),
     (17, "cycle_runs.profile",
      "ALTER TABLE cycle_runs ADD COLUMN profile TEXT"),
+    # §3 SPEC_mt5_cost_calibration_2026-08-18.md. Таблица ОТДЕЛЬНАЯ от
+    # forecasts: связь по forecast_id, но никакого влияния обратно.
+    # Контур калибрует core/costs.py и не участвует ни в резолюции, ни в
+    # bss, ни в форвард-треке — «если изменится хоть одна цифра
+    # трек-рекорда, это дефект, а не фича» (§0 спеки).
+    #
+    # order_status NOT NULL без DEFAULT намеренно, по той же причине, по
+    # которой обязателен status_label в сообщениях: состояние «непонятно,
+    # что произошло» не должно быть представимо.
+    (18, "cost_observations",
+     """CREATE TABLE IF NOT EXISTS cost_observations (
+          id INTEGER PRIMARY KEY,
+          forecast_id TEXT,
+          created_ts INTEGER NOT NULL,
+          account INTEGER NOT NULL,
+          server TEXT NOT NULL,
+          symbol TEXT NOT NULL,
+          broker_symbol TEXT NOT NULL,
+          tf TEXT NOT NULL,
+          direction TEXT NOT NULL,
+          volume REAL NOT NULL,
+          magic INTEGER NOT NULL,
+          pred_cost_price REAL,
+          pred_swap_night REAL,
+          pred_spread_atr REAL,
+          req_price REAL,
+          req_ts INTEGER,
+          ticket INTEGER,
+          deal_entry_price REAL,
+          deal_exit_price REAL,
+          commission REAL,
+          swap REAL,
+          spread_at_entry REAL,
+          slippage_entry REAL,
+          nights_held INTEGER,
+          closed_ts INTEGER,
+          order_status TEXT NOT NULL,
+          note TEXT
+        )"""),
+    (19, "cost_observations: индексы для добора закрытых и отчёта",
+     "CREATE INDEX IF NOT EXISTS idx_cost_obs_open "
+     "ON cost_observations(order_status, ticket)"),
 ]
 
 
