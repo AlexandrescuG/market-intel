@@ -18,7 +18,7 @@
         { "type": "steps", "items": [
           { "img": "/assets/guides/fxpro/registration/02_country.png",
             "caption": "Completați țara, email-ul și parola.",
-            "note": "Țara se determină automat după IP și este inserată în adresa formularului — așa alege FxPro ce entitate din grup vă devine contraparte. De exemplu, ruta .../register/md/crc duce la entitatea din Costa Rica (crc = Costa Rica Markets Ltd)." },
+            "note": "Țara se determină automat după IP și este inserată în adresa formularului — așa alege FxPro ce entitate din grup vă devine contraparte. Atenție: brokerul are două rute costaricane, cu entități diferite. Ruta .../register/md/cri duce la FxPro Markets Direct Costa Rica Latam, SRL, iar ruta .../register/md/crc — la Costa Rica Markets Ltd. Verificați ce cod apare în adresa formularului dumneavoastră." },
           { "img": "/assets/guides/fxpro/registration/06_personal_details.png",
             "caption": "Pe ecranul următor, introduceți numele, data nașterii și telefonul.",
             "note": "Codul țării pentru numărul de telefon se completează pe baza țării alese anterior." }
@@ -30,17 +30,17 @@
           { "img": "/assets/guides/fxpro/registration/04_terms.png",
             "caption": "Ca să aflați totuși cu cine se semnează contractul, deschideți linkul „Terms and conditions” de pe formular → secțiunea Legal Documentation." },
           { "img": "/assets/guides/fxpro/registration/05_agreement_cover.png",
-            "caption": "Deschideți „Client Agreement”. Chiar din numele fișierului se vede: „Costa Rica Markets Ltd — June 2026 New entity…”." }
+            "caption": "Deschideți „Client Agreement” și găsiți punctul 1.2 — acolo este numită entitatea cu care semnați contractul." }
         ] },
         { "type": "entity",
           "img": "/assets/guides/fxpro/registration/05_agreement_clause12.png",
-          "legal_name": "Costa Rica Markets Ltd",
+          "legal_name": "FxPro Markets Direct Costa Rica Latam, SRL",
           "jurisdiction": "Costa Rica",
           "regulator": null,
           "licence_no": null,
           "register_url": null,
-          "register_note": "Brandul FxPro are regulatori — FCA (Marea Britanie), Comisia de Valori Mobiliare din Bahamas, FSA Seychelles (fxpro.com/about/licences). Dar toți aceștia licențiază ALTE entități din grup. Costa Rica Markets Ltd, entitatea cu care semnează efectiv contractul clienții din majoritatea țărilor CSI și Europa, nu este menționată la niciunul dintre acești regulatori, iar în contract nu există nicio referire la vreun organism de reglementare.",
-          "quote": "«FxPro is the brand and trading name of Costa Rica Markets Ltd. which is a private limited company incorporated in Costa Rica.» (contractul de client, pct. 1.2)",
+          "register_note_removed": "🔴 Paragraf eliminat de pe pagină la 14.08.2026 la indicația directă a proprietarului (versiunea rusă a fost eliminată prima; aceasta a rămas în urmă și a fost eliminată în aceeași trecere). Faptele rămân neschimbate și sunt afișate în continuare: regulator și licence_no rămân null, iar blocul missing enumeră în continuare, pe primul loc, absența unei autorități și a unei licențe. A nu se restaura fără o decizie separată a proprietarului.",
+          "quote": "«FxPro is the brand and trading name of FxPro Markets Direct Costa Rica Latam, SRL which is a private limited company incorporated in Costa Rica.» (contractul de client, pct. 1.2)",
           "confirmed": true,
           "confirm_note": "Pe ecranul de înregistrare în sine, entitatea NU este menționată deloc — doar linia despre marca înregistrată. Contrapartea reală poate fi aflată doar deschizând contractul PDF, la doi pași în adâncul documentației, pe care un utilizator obișnuit nu este obligat să îi parcurgă la înregistrare.",
           "missing": [

@@ -321,7 +321,13 @@
   // данные под код — строка здесь осмысленна и переписывать её в массив
   // значило бы потерять формулировку.
   function excludesText(ent) {
-    var ex = ent && ent.excludes;
+    if (!ent) return '';
+    // Готовый человеческий список названий, если он есть в данных: строка
+    // «не обслуживает: US, CA, IL, IR» читателю мало что говорит, коды стран
+    // на витрине выглядят как служебное поле (замечание владельца 14.08.2026).
+    var named = loc(ent, 'excludes_names');
+    if (named) return String(named);
+    var ex = ent.excludes;
     if (!ex) return '';
     if (Array.isArray(ex)) return ex.length ? ex.join(', ') : '';
     return String(ex);

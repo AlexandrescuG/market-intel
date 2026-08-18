@@ -18,7 +18,7 @@
         { "type": "steps", "items": [
           { "img": "/assets/guides/fxpro/registration/02_country.png",
             "caption": "Заполните страну, email и пароль.",
-            "note": "Страна определяется по IP автоматически и подставляется в адрес формы — так FxPro выбирает, какое юрлицо группы станет вашим контрагентом. Например, маршрут .../register/md/crc ведёт на коста-риканское юрлицо (crc = Costa Rica Markets Ltd)." },
+            "note": "Страна определяется по IP автоматически и подставляется в адрес формы — так FxPro выбирает, какое юрлицо группы станет вашим контрагентом. Осторожно: коста-риканских маршрутов у брокера два, и юрлица у них разные. Маршрут .../register/md/cri ведёт на FxPro Markets Direct Costa Rica Latam, SRL, маршрут .../register/md/crc — на Costa Rica Markets Ltd. Смотрите, какой код стоит в адресе именно вашей формы." },
           { "img": "/assets/guides/fxpro/registration/06_personal_details.png",
             "caption": "На следующем экране укажите имя, дату рождения и телефон.",
             "note": "Код страны для номера телефона подставляется по выбранной ранее стране." }
@@ -30,17 +30,19 @@
           { "img": "/assets/guides/fxpro/registration/04_terms.png",
             "caption": "Чтобы всё же узнать, с кем заключается договор, откройте ссылку «Terms and conditions» на форме → раздел Legal Documentation." },
           { "img": "/assets/guides/fxpro/registration/05_agreement_cover.png",
-            "caption": "Откройте «Client Agreement». Уже в названии файла видно: «Costa Rica Markets Ltd — June 2026 New entity…»." }
+            "caption": "Откройте «Client Agreement» и найдите пункт 1.2 — там названо юрлицо, с которым вы подписываете договор." }
         ] },
         { "type": "entity",
           "img": "/assets/guides/fxpro/registration/05_agreement_clause12.png",
-          "legal_name": "Costa Rica Markets Ltd",
+          "legal_name": "FxPro Markets Direct Costa Rica Latam, SRL",
           "jurisdiction": "Коста-Рика",
           "regulator": null,
           "licence_no": null,
           "register_url": null,
-          "register_note": "У бренда FxPro регуляторы есть — FCA (Великобритания), Комиссия по ценным бумагам Багамских островов, FSA Сейшел (fxpro.com/about/licences). Но все они лицензируют ДРУГИЕ юрлица группы. Costa Rica Markets Ltd, с которым реально подписывает договор клиент из большинства стран СНГ и Европы, не упомянуто ни на одном из этих регуляторов, и в самом договоре нет ссылки ни на какой регулирующий орган вообще.",
-          "quote": "«FxPro is the brand and trading name of Costa Rica Markets Ltd. which is a private limited company incorporated in Costa Rica.» (п. 1.2 клиентского договора)",
+          "register_note_removed": "🔴 Абзац убран со страницы 2026-08-14 по прямому указанию владельца. Текст был: «У бренда FxPro регуляторы есть — FCA (Великобритания), Комиссия по ценным бумагам Багамских островов, FSA Сейшел (fxpro.com/about/licences). Но все они лицензируют ДРУГИЕ юрлица группы. Costa Rica Markets Ltd, с которым реально подписывает договор клиент из большинства стран СНГ и Европы, не упомянуто ни на одном из этих регуляторов, и в самом договоре нет ссылки ни на какой регулирующий орган вообще.» Сам факт никуда не делся и продолжает отображаться: regulator и licence_no у этого юрлица остаются null, в блоке missing первым пунктом стоит отсутствие регулятора и лицензии. Удалена именно развёрнутая формулировка, не сведения. Не восстанавливать без отдельного решения владельца.",
+          "quote": "«FxPro is the brand and trading name of FxPro Markets Direct Costa Rica Latam, SRL which is a private limited company incorporated in Costa Rica.» (п. 1.2 клиентского договора)",
+          "entity_corrected": "🔴 ИСПРАВЛЕНО 2026-08-14. Здесь стояло «Costa Rica Markets Ltd» — юрлицо из договора маршрута crc, тогда как наша партнёрская ссылка ведёт на маршрут cri с другим контрагентом. Читателю показывалось не то юрлицо, с которым он подпишет договор по нашей же кнопке.",
+          "img_stale": "🔴 СКРИНШОТ УСТАРЕЛ: /assets/guides/fxpro/registration/05_agreement_clause12.png снят с договора маршрута crc и показывает старое название «Costa Rica Markets Ltd». Пересъёмка обязательна — кадр должен быть с договора маршрута cri, того самого, куда ведёт партнёрская ссылка. До пересъёмки подпись и картинка расходятся.",
           "confirmed": true,
           "confirm_note": "На самом экране регистрации юрлицо НЕ называется вовсе — только строка про товарный знак. Узнать реального контрагента можно только открыв PDF-договор через два перехода вглубь документации, которые обычный пользователь при регистрации проходить не обязан.",
           "missing": [

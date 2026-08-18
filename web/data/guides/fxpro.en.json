@@ -18,7 +18,7 @@
         { "type": "steps", "items": [
           { "img": "/assets/guides/fxpro/registration/02_country.png",
             "caption": "Fill in country, email, and password.",
-            "note": "Country is detected automatically by IP and inserted into the form's URL — that's how FxPro picks which group entity becomes your counterparty. For example, the .../register/md/crc route leads to the Costa Rica entity (crc = Costa Rica Markets Ltd)." },
+            "note": "Country is detected automatically by IP and inserted into the form's URL — that's how FxPro picks which group entity becomes your counterparty. Careful: the broker runs two Costa Rican routes with different entities. The .../register/md/cri route leads to FxPro Markets Direct Costa Rica Latam, SRL; the .../register/md/crc route leads to Costa Rica Markets Ltd. Check which code appears in the URL of your own form." },
           { "img": "/assets/guides/fxpro/registration/06_personal_details.png",
             "caption": "On the next screen, enter your name, date of birth, and phone number.",
             "note": "The phone country code is filled in based on the country you selected earlier." }
@@ -30,17 +30,17 @@
           { "img": "/assets/guides/fxpro/registration/04_terms.png",
             "caption": "To find out who you're actually signing the contract with, open the \"Terms and conditions\" link on the form → Legal Documentation section." },
           { "img": "/assets/guides/fxpro/registration/05_agreement_cover.png",
-            "caption": "Open the \"Client Agreement\". Right in the file name you can see: \"Costa Rica Markets Ltd — June 2026 New entity...\"." }
+            "caption": "Open the \"Client Agreement\" and find clause 1.2 — that is where the entity you are contracting with is named." }
         ] },
         { "type": "entity",
           "img": "/assets/guides/fxpro/registration/05_agreement_clause12.png",
-          "legal_name": "Costa Rica Markets Ltd",
+          "legal_name": "FxPro Markets Direct Costa Rica Latam, SRL",
           "jurisdiction": "Costa Rica",
           "regulator": null,
           "licence_no": null,
           "register_url": null,
-          "register_note": "The FxPro brand does have regulators — the FCA (UK), the Bahamas Securities Commission, the Seychelles FSA (fxpro.com/about/licences). But all of them license OTHER entities in the group. Costa Rica Markets Ltd, which is the entity clients from most CIS and European countries actually sign a contract with, isn't mentioned under any of these regulators, and the contract itself contains no reference to any regulatory body at all.",
-          "quote": "«FxPro is the brand and trading name of Costa Rica Markets Ltd. which is a private limited company incorporated in Costa Rica.» (client agreement, clause 1.2)",
+          "register_note_removed": "🔴 Paragraph removed from the page on 2026-08-14 by the owner's direct instruction (the Russian version was removed first; this one lagged behind and was removed in the same pass). The facts themselves are unchanged and still displayed: regulator and licence_no stay null, and the missing block still lists the absence of a regulator and a licence first. Do not restore without a separate decision from the owner.",
+          "quote": "«FxPro is the brand and trading name of FxPro Markets Direct Costa Rica Latam, SRL which is a private limited company incorporated in Costa Rica.» (client agreement, clause 1.2)",
           "confirmed": true,
           "confirm_note": "The registration screen itself doesn't name the entity at all — only the trademark line. You can only find out the real counterparty by opening the PDF agreement, two clicks deep into the documentation, which a regular user isn't required to go through during registration.",
           "missing": [
