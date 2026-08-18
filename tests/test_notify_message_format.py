@@ -109,3 +109,53 @@ def test_нераспознанный_конфиг_не_выдумывается
     assert describe_config("vol_autocorr_control") is None
     msg = format_message(_fc(event_key="странный_ключ"), None, "ТЕСТ")
     assert "странный_ключ" in msg, "сырой ключ должен остаться, если не разобран"
+
+
+# ─── P2-8: встречная гипотеза по тому же бару ───────────────────────────────
+
+import sqlite3
+
+from analyze.notify_gdenigi import counter_hypothesis
+
+_FC_DDL = """CREATE TABLE forecasts (
+  id TEXT PRIMARY KEY, created_ts INTEGER, symbol TEXT, horizon TEXT,
+  event_key TEXT, direction TEXT)"""
+
+
+def _con_with(rows):
+    con = sqlite3.connect(":memory:")
+    con.execute(_FC_DDL)
+    con.executemany("INSERT INTO forecasts VALUES (?,?,?,?,?,?)", rows)
+    con.commit()
+    return con
+
+
+def test_встречная_гипотеза_найдена():
+    con = _con_with([("a", 1000, "USDZAR", "H1", EK, "bullish"),
+                     ("b", 1000, "USDZAR", "H1", EK, "bearish")])
+    assert counter_hypothesis(con, "a") and counter_hypothesis(con, "b")
+
+
+def test_одиночный_прогноз_не_помечается():
+    con = _con_with([("a", 1000, "USDZAR", "H1", EK, "bullish")])
+    assert not counter_hypothesis(con, "a")
+
+
+def test_другой_бар_не_считается_встречным():
+    """created_ts — это ts БАРА (перезаписывается в _write_one), значит
+    противоположное направление на соседнем баре встречной гипотезой не является."""
+    con = _con_with([("a", 1000, "USDZAR", "H1", EK, "bullish"),
+                     ("b", 4600, "USDZAR", "H1", EK, "bearish")])
+    assert not counter_hypothesis(con, "a")
+
+
+def test_другой_инструмент_не_считается():
+    con = _con_with([("a", 1000, "USDZAR", "H1", EK, "bullish"),
+                     ("b", 1000, "EURUSD", "H1", EK, "bearish")])
+    assert not counter_hypothesis(con, "a")
+
+
+def test_пометка_попадает_в_текст():
+    msg = format_message(_fc(), None, "ТЕСТ", counter=True)
+    assert "встречная гипотеза по этому же бару" in msg
+    assert "встречная" not in format_message(_fc(), None, "ТЕСТ", counter=False)

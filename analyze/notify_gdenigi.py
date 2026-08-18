@@ -241,7 +241,38 @@ def verdict_vs_breakeven(base_p: float | None, ci_lo: float | None, ci_hi: float
     return "неотличимо от безубытка при текущем n"
 
 
-def format_message(forecast: dict, base: dict, status_label: str, outcome_hint: str | None = None) -> str:
+_COUNTER_NOTE = "⟷ встречная гипотеза по этому же бару"
+
+
+def counter_hypothesis(con: sqlite3.Connection, forecast_id: str) -> bool:
+    """Есть ли по ТОМУ ЖЕ бару прогноз противоположного направления.
+
+    P2-8: модель имеет право видеть обе стороны, и естественный ключ
+    (symbol, horizon, event_key, direction, created_ts) их дублями не считает —
+    это по замыслу. Но в ленте они выглядят как две карточки, спорящие друг с
+    другом, без указания, что они об одном баре. Владелец 18.08: обе оставить,
+    пометить.
+
+    Опора на то, что _write_one перезаписывает created_ts значением
+    bundle_cand["created_ts"], то есть ts БАРА, а не времени записи — иначе
+    два прогноза одного цикла не совпали бы по ключу.
+
+    На 18.08 это 44 прогноза из 97 — не редкий случай, а половина ленты."""
+    row = con.execute(
+        "SELECT symbol, horizon, event_key, direction, created_ts FROM forecasts WHERE id=?",
+        (forecast_id,)).fetchone()
+    if row is None:
+        return False
+    symbol, horizon, event_key, direction, created_ts = row
+    other = con.execute(
+        "SELECT 1 FROM forecasts WHERE symbol=? AND horizon=? AND event_key=? "
+        "AND created_ts=? AND direction<>? LIMIT 1",
+        (symbol, horizon, event_key, created_ts, direction)).fetchone()
+    return other is not None
+
+
+def format_message(forecast: dict, base: dict, status_label: str,
+                   outcome_hint: str | None = None, counter: bool = False) -> str:
     """Событие+горизонт, направление и уровни, вероятность С ИНТЕРВАЛОМ И n
     (не голое число) ИЛИ честное "не определена", база и поправка агента
     раздельно, условие инвалидации, status_label (WP6.3, обязателен),
@@ -275,6 +306,8 @@ def format_message(forecast: dict, base: dict, status_label: str, outcome_hint: 
         if verdict:
             lines.append(f"Безубыток конфигурации: {be:.1%} → {verdict}")
     lines.append(f"Инвалидация: {forecast.get('invalidation', '—')}")
+    if counter:
+        lines.append(_COUNTER_NOTE)
     if outcome_hint:
         lines.append(outcome_hint)
     lines.append(status_label)
@@ -283,7 +316,8 @@ def format_message(forecast: dict, base: dict, status_label: str, outcome_hint: 
     return "\n".join(lines)
 
 
-def send_forecast(con: sqlite3.Connection, forecast: dict, base: dict) -> str:
+def send_forecast(con: sqlite3.Connection, forecast: dict, base: dict,
+                  counter: bool = False) -> str:
     """Пишет в analyze/outbox.py вместо прямой отправки (WP6.3, единый
     канал с Signals, 15.08) -- реальная доставка (или тихий no-op без
     токена) происходит централизованно в outbox.send_pending(), не здесь.
@@ -291,7 +325,7 @@ def send_forecast(con: sqlite3.Connection, forecast: dict, base: dict) -> str:
     сегодня, см. analyze/forecast_journal.py."""
     from analyze import outbox as _outbox
     status_label = determine_status_label(con, family="barrier")
-    text = format_message(forecast, base, status_label)
+    text = format_message(forecast, base, status_label, counter=counter)
     return _outbox.enqueue(con, source="agent", status_label=status_label, payload=text)
 
 
@@ -324,7 +358,8 @@ def send_written_forecasts(con: sqlite3.Connection, written_details: list[dict])
                 failed += 1
                 continue
             forecast = dict(zip(cols, row))
-            send_forecast(con, forecast, item.get("base"))
+            send_forecast(con, forecast, item.get("base"),
+                          counter=counter_hypothesis(con, item["id"]))
             enqueued += 1
         except Exception:
             failed += 1
