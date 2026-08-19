@@ -40,7 +40,7 @@ HOST, PORT = "127.0.0.1", 18812
 TERMINAL_PATH = r"C:\Program Files\MetaTrader 5\terminal64.exe"
 BOT_DB = Path("/mnt/sbfdata/sbf-platform/SBFAcademy_bot/bot.db")
 
-# §5: N подряд идущих неудач -> алерт в ОПЕРАЦИОННЫЙ канал (core/telegram.py),
+# §5: N подряд идущих неудач -> алерт в @gdenigi_bot через общую очередь,
 # не в @gdenigi_bot: там исследовательский лог, а это эксплуатация.
 CONSECUTIVE_FAILURES_FOR_ALERT = 5
 
@@ -65,11 +65,8 @@ def record(con: sqlite3.Connection, **kw) -> int:
 def _alert_operational(message: str) -> None:
     """Тот же канал, куда идут дневной дайджест и операционные алерты."""
     try:
-        import asyncio
-
-        from core.config import TELEGRAM_REPORT_CHAT_ID
-        from core.telegram import send_text
-        asyncio.run(send_text(f"⚠️ mt5_calibration: {message}", chat_id=TELEGRAM_REPORT_CHAT_ID))
+        from analyze.outbox import enqueue_ops
+        enqueue_ops(f"⚠️ mt5_calibration: {message}")
     except Exception as e:                                    # алерт не обязан работать
         log.error("не удалось отправить алерт: %s", e)
 

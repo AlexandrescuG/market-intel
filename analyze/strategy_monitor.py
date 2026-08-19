@@ -208,14 +208,10 @@ def stop_trading(reason: str) -> None:
 
 
 def alert(text: str) -> None:
-    try:
-        import asyncio
-
-        from core.config import TELEGRAM_REPORT_CHAT_ID
-        from core.telegram import send_text
-        asyncio.run(send_text(f"📉 strategy_monitor: {text}", chat_id=TELEGRAM_REPORT_CHAT_ID))
-    except Exception as e:
-        log.error("алерт не отправлен: %s", e)
+    """В @gdenigi_bot, через общую очередь — тот же канал, что и у прогнозов."""
+    from analyze.outbox import enqueue_ops
+    if enqueue_ops(f"📉 strategy_monitor: {text}") is None:
+        log.error("алерт ушёл запасным каналом или не ушёл вовсе: %s", text)
 
 
 def ask_agent(m: dict, trades: list[dict]) -> str | None:

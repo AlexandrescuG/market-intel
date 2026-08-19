@@ -60,6 +60,41 @@ def enqueue(con: sqlite3.Connection, source: str, status_label: str, payload: st
     return oid
 
 
+def enqueue_ops(message: str, source: str = "ops") -> str | None:
+    """Операционный алерт в тот же канал, что и содержательные сообщения.
+
+    🔴 19.08, по замечанию владельца. До этого действовало разделение WP4.7:
+    содержательное — в @gdenigi_bot через эту очередь, операционное — прямым
+    вызовом core.telegram, то есть от @Markgandon_bot. Разные назначения,
+    разные каналы. На практике оба бота пишут в один и тот же чат владельца,
+    и разделение выглядит не как замысел, а как сбой: половина сообщений по
+    проекту приходит от постороннего бота.
+
+    Единственный аргумент за прямой канал остаётся в силе, и он здесь учтён:
+    если сломается сама очередь, алерт об этом застрянет в очереди, которая
+    сломалась. Поэтому при отказе enqueue сообщение уходит прежним путём —
+    хуже прийти не от того бота, чем не прийти вовсе."""
+    try:
+        con = sqlite3.connect(str(_BOT_DB), timeout=60)
+        try:
+            return enqueue(con, source=source, status_label="операционный алерт",
+                           payload=message)
+        finally:
+            con.close()
+    except Exception as e:
+        try:
+            import asyncio
+
+            from core.config import TELEGRAM_REPORT_CHAT_ID
+            from core.telegram import send_text
+            asyncio.run(send_text(f"{message}\n\n<i>(запасным каналом: очередь "
+                                  f"недоступна — {type(e).__name__})</i>",
+                                  chat_id=TELEGRAM_REPORT_CHAT_ID))
+        except Exception:
+            pass
+        return None
+
+
 def pending(con: sqlite3.Connection) -> list[dict]:
     init_schema(con)
     rows = con.execute(

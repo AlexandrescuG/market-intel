@@ -126,14 +126,14 @@ def _last_run_ts(con: sqlite3.Connection, profile: str) -> int | None:
 
 def _alert(message: str, verbose: bool) -> None:
     """exit_code=3 (или 3 подряд, или разрыв >12ч) -- единственное, что
-    будит человека. core.telegram/TELEGRAM_REPORT_CHAT_ID -- операционный
-    алерт человеку, НЕ @gdenigi_bot (разные назначения, разные каналы,
-    см. WP4.7). Отказ отправки НЕ должен ронять сам цикл."""
+    будит человека. Идёт в @gdenigi_bot через общую очередь: разделение
+    каналов из WP4.7 отменено 19.08 по замечанию владельца — оба бота
+    пишут в один чат, и операционные сообщения от @Markgandon_bot
+    читались как сбой, а не как замысел. Отказ отправки НЕ должен ронять
+    сам цикл."""
     try:
-        import asyncio
-        from core.telegram import send_text
-        from core.config import TELEGRAM_REPORT_CHAT_ID
-        asyncio.run(send_text(f"⚠️ alpha_cycle: {message}", chat_id=TELEGRAM_REPORT_CHAT_ID))
+        from analyze.outbox import enqueue_ops
+        enqueue_ops(f"⚠️ alpha_cycle: {message}")
     except Exception as e:
         if verbose:
             print(f"алерт не отправлен: {e}", file=sys.stderr)
