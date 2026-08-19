@@ -313,12 +313,20 @@
 
   // ── Публичные рендереры для Календаря ─────────────────────────────────────
   var MONTHS_RU=['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
+  var MONTHS_EN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var MONTHS_RO=['ian','feb','mar','apr','mai','iun','iul','aug','sep','oct','noi','dec'];
+  var MONTHS=LANG==='en'?MONTHS_EN:(LANG==='ro'?MONTHS_RO:MONTHS_RU);
+  var EH_TXT=({
+    ru:{empty:'История нарастает по мере выхода релизов',noData:'Нет данных',fact:'Факт',forecast:'Прогноз',noPrice:'Нет ценовых данных. Запустите twelvedata_pull.py для загрузки.'},
+    en:{empty:'History builds up as releases come out',noData:'No data',fact:'Actual',forecast:'Forecast',noPrice:'No price data. Run twelvedata_pull.py to load it.'},
+    ro:{empty:'Istoricul se acumulează pe măsură ce apar datele',noData:'Fără date',fact:'Fapt',forecast:'Prognoză',noPrice:'Fără date de preț. Rulați twelvedata_pull.py pentru a le încărca.'}
+  })[LANG]||{empty:'История нарастает по мере выхода релизов',noData:'Нет данных',fact:'Факт',forecast:'Прогноз',noPrice:'Нет ценовых данных. Запустите twelvedata_pull.py для загрузки.'};
 
   function renderEventHistory(data){
-    if(!data||!data.length)return'<div style="padding:30px;text-align:center;color:'+P.muted+';font-family:JetBrains Mono,monospace;font-size:12px">История нарастает по мере выхода релизов</div>';
+    if(!data||!data.length)return'<div style="padding:30px;text-align:center;color:'+P.muted+';font-family:JetBrains Mono,monospace;font-size:12px">'+EH_TXT.empty+'</div>';
     var W=600,H=170,pL=38,pR=12,pT=14,pB=22,plotW=W-pL-pR,plotH=H-pT-pB,n=data.length;
     var vals=[];data.forEach(function(d){if(d.actual!=null)vals.push(+d.actual);if(d.forecast!=null)vals.push(+d.forecast);});
-    if(!vals.length)return'<div style="padding:30px;text-align:center;color:'+P.muted+';font-family:JetBrains Mono,monospace;font-size:12px">Нет данных</div>';
+    if(!vals.length)return'<div style="padding:30px;text-align:center;color:'+P.muted+';font-family:JetBrains Mono,monospace;font-size:12px">'+EH_TXT.noData+'</div>';
     var lo=Math.min.apply(null,vals),hi=Math.max.apply(null,vals),pad=(hi-lo)*0.18||0.4;lo-=pad;hi+=pad;
     var BW=Math.max(5,Math.min(plotW/n*0.5,22));
     var X=function(i){return pL+(i+0.5)*(plotW/n);},Y=function(v){return pT+(hi-v)/(hi-lo)*plotH;},Y0=Math.max(pT,Math.min(pT+plotH,Y(0)));
@@ -358,18 +366,18 @@
         s+='<line x1="'+(xx-BW/2-3).toFixed(1)+'" y1="'+fy.toFixed(1)+'" x2="'+(xx+BW/2+3).toFixed(1)+'" y2="'+fy.toFixed(1)+'" stroke="'+P.gold+'" stroke-width="1.6" stroke-linecap="round" opacity="0.9"/>';
       }
       if(i===n-1&&d.actual!=null){var col2=surp>=0?P.up:P.down;s+='<text x="'+(xx+BW/2+4).toFixed(1)+'" y="'+(Math.min(Y(+d.actual),Y0)-3).toFixed(1)+'" font-family="JetBrains Mono,monospace" font-size="11" fill="'+col2+'">'+((+d.actual).toFixed(2))+unit+'</text>';}
-      var dt=new Date(d.ts*1000);s+='<text x="'+xx.toFixed(1)+'" y="'+(H-5)+'" font-family="JetBrains Mono,monospace" font-size="11" fill="'+P.muted+'" text-anchor="middle">'+MONTHS_RU[dt.getUTCMonth()]+' \''+String(dt.getUTCFullYear()).slice(2)+'</text>';
+      var dt=new Date(d.ts*1000);s+='<text x="'+xx.toFixed(1)+'" y="'+(H-5)+'" font-family="JetBrains Mono,monospace" font-size="11" fill="'+P.muted+'" text-anchor="middle">'+MONTHS[dt.getUTCMonth()]+' \''+String(dt.getUTCFullYear()).slice(2)+'</text>';
     });
-    s+='<rect x="'+(W-pR-52)+'" y="'+pT+'" width="8" height="8" fill="url(#'+gid+'-up)" rx="2"/><text x="'+(W-pR-41)+'" y="'+(pT+7)+'" font-family="JetBrains Mono,monospace" font-size="11" fill="'+P.muted+'">Факт</text>';
+    s+='<rect x="'+(W-pR-52)+'" y="'+pT+'" width="8" height="8" fill="url(#'+gid+'-up)" rx="2"/><text x="'+(W-pR-41)+'" y="'+(pT+7)+'" font-family="JetBrains Mono,monospace" font-size="11" fill="'+P.muted+'">'+EH_TXT.fact+'</text>';
     // Легенда прогноза -- только если хоть у одной точки он реально есть
     // (иначе показываем ключ, который ни разу не используется — выглядит
     // как неиспользуемый плейсхолдер).
-    if(hasForecast)s+='<line x1="'+(W-pR-52)+'" y1="'+(pT+15)+'" x2="'+(W-pR-44)+'" y2="'+(pT+15)+'" stroke="'+P.gold+'" stroke-width="1.6" stroke-linecap="round"/><text x="'+(W-pR-41)+'" y="'+(pT+18)+'" font-family="JetBrains Mono,monospace" font-size="11" fill="'+P.muted+'">Прогноз</text>';
+    if(hasForecast)s+='<line x1="'+(W-pR-52)+'" y1="'+(pT+15)+'" x2="'+(W-pR-44)+'" y2="'+(pT+15)+'" stroke="'+P.gold+'" stroke-width="1.6" stroke-linecap="round"/><text x="'+(W-pR-41)+'" y="'+(pT+18)+'" font-family="JetBrains Mono,monospace" font-size="11" fill="'+P.muted+'">'+EH_TXT.forecast+'</text>';
     return s+'</svg>';
   }
 
   function renderPriceChart(bars, markers){
-    if(!bars||!bars.length)return'<div style="padding:30px;text-align:center;color:'+P.muted+';font-family:JetBrains Mono,monospace;font-size:12px">Нет ценовых данных. Запустите twelvedata_pull.py для загрузки.</div>';
+    if(!bars||!bars.length)return'<div style="padding:30px;text-align:center;color:'+P.muted+';font-family:JetBrains Mono,monospace;font-size:12px">'+EH_TXT.noPrice+'</div>';
     var tsIdx={};bars.forEach(function(b,i){tsIdx[b.ts]=i;});
     var layers=[];
     (markers||[]).forEach(function(m){
