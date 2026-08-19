@@ -16,6 +16,30 @@ RUNNER="/home/sbf/.var/app/com.usebottles.bottles/data/bottles/runners/soda-9.0-
 PYTHON_WIN="C:\\users\\steamuser\\AppData\\Local\\Programs\\Python\\Python311\\python.exe"
 SERVER_SCRIPT="C:\\mt5_server\\mt5_server.py"
 
+# 🔴 Диск ПРОВЕРЯЕТСЯ, а не подразумевается.
+#
+# 19-20.08 /mnt/D был отмонтирован, а скрипт сразу шёл в `mkdir -p`. Итог:
+# "mkdir: cannot create directory '/mnt/D/Bottles': Permission denied",
+# выход 1, systemd перезапускает каждые 15 секунд — 973 раза подряд. Снаружи
+# это выглядело как "MT5 иногда лежит", а по существу в журнале была одна
+# строка про mkdir, которую никто не искал.
+#
+# Опаснее другой исход: будь /mnt доступен на запись, скрипт СОЗДАЛ бы пустое
+# дерево бутылки на корневом диске. Wine поднялся бы на пустом префиксе, а
+# монтирование настоящего диска сверху спрятало бы мусор. Поэтому проверка
+# именно на точку монтирования, а не на существование каталога: существующий
+# каталог здесь ничего не доказывает — он мог быть создан этим же скриптом.
+if ! mountpoint -q /mnt/D; then
+    echo "ОТКАЗ: /mnt/D не примонтирован — бутылки MT5 нет." >&2
+    echo "Смонтируйте диск и повторите; каталоги на его месте не создаю." >&2
+    exit 1
+fi
+if [ ! -d "${BOTTLE_PATH}/drive_c" ]; then
+    echo "ОТКАЗ: ${BOTTLE_PATH}/drive_c не найден — диск примонтирован не тот" >&2
+    echo "или бутылка Trading отсутствует." >&2
+    exit 1
+fi
+
 # Путь к скрипту относительно бутылки — копируем в drive_c
 SCRIPT_SRC="$(dirname "$0")/mt5_server.py"
 SCRIPT_DST="${BOTTLE_PATH}/drive_c/mt5_server"
