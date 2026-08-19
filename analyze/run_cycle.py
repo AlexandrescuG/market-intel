@@ -61,9 +61,14 @@ FOCUS_UNIVERSE_V1 = ["GOLD", "EURUSD", "USDJPY", "USDCNY", "USDZAR"]
 CYCLE_PROFILES: dict[str, dict] = {
     "d1": {"tfs": ("D1",), "sections": ("calendar", "news", "macro", "watch", "calibration"),
            "calendar_horizon_sec": 86400, "interval_sec": 86400},
-    "h4": {"tfs": ("H4",), "sections": ("calendar", "news", "watch"),
+    # 🔴 19.08: "macro" добавлен в h4 и h1. До этого фундаментальный блок
+    # был только в d1 — а d1 за сутки выпускал НОЛЬ прогнозов (гейт никого
+    # не пропускал), тогда как h1 давал 48 из 56. То есть фундаментал не
+    # участвовал практически ни в одном реально выпущенном прогнозе.
+    # Секция дешёвая: семь чисел из кэша macro.json, без сетевых вызовов.
+    "h4": {"tfs": ("H4",), "sections": ("calendar", "news", "macro", "watch"),
            "calendar_horizon_sec": 14400, "interval_sec": 14400},
-    "h1": {"tfs": ("H1",), "sections": ("news",),
+    "h1": {"tfs": ("H1",), "sections": ("news", "macro"),
            "calendar_horizon_sec": None, "interval_sec": 3600},
 }
 
