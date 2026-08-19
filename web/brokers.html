@@ -125,17 +125,18 @@ a{color:inherit}
 .bstat.loss .bstat-v{color:var(--down,#c0392b)}
 .bstat.loss .loss-np{font-size:14px;font-weight:600;font-family:inherit;color:var(--ink-2,#6E6A63);font-style:italic}
 
-/* Подробности — свёрнуты, чтобы не превращать карточку в справочник */
-.bcard-more{margin-bottom:14px;border-top:1px solid var(--line,#E7DFCF);padding-top:10px}
-.bcard-more>summary{
-  list-style:none;cursor:pointer;min-height:40px;display:flex;align-items:center;gap:6px;
-  font-size:14px;font-weight:600;color:var(--ink-2,#6E6A63);
+/* Подробности — раньше разворачивались в карточке (<details>), теперь
+   открывают модалку (14.08.2026, вторая правка тем же днём) — длинный
+   список лицензий разъезжал высоту карточек в сетке между собой. */
+.bcard-more-btn{
+  display:flex;align-items:center;gap:6px;width:100%;margin-bottom:14px;padding:10px 0 0;
+  border:0;border-top:1px solid var(--line,#E7DFCF);background:none;cursor:pointer;
+  font-family:inherit;font-size:14px;font-weight:600;color:var(--ink-2,#6E6A63);text-align:left;min-height:40px;
 }
-.bcard-more>summary::-webkit-details-marker{display:none}
-.bcard-more>summary::after{content:'▾';font-size:12px;transition:transform .15s ease}
-.bcard-more[open]>summary::after{transform:rotate(180deg)}
-.bcard-more>summary:hover{color:var(--gold)}
+.bcard-more-btn::after{content:'›';margin-left:auto;font-size:18px;line-height:1}
+.bcard-more-btn:hover{color:var(--gold)}
 .more-row{display:flex;flex-direction:column;gap:2px;padding:9px 0;border-top:1px solid var(--rule-soft,rgba(43,43,51,.07));font-size:14px}
+.more-row:first-child{border-top:0;padding-top:0}
 .more-row>.mr-k{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.03em;color:var(--ink-2,#6E6A63)}
 .entity-item{padding:7px 0}
 .entity-item+.entity-item{border-top:1px dashed var(--line,#E7DFCF);margin-top:5px}

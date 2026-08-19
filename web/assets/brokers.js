@@ -831,15 +831,6 @@
       statHtml('spread', f.spread) +
       commStat;
 
-    var moreLic = lics.map(function (ent) {
-      return '<div class="lic-row">' + licenceChip(p, ent) + '</div>';
-    }).join('');
-    var more =
-      '<div class="more-row"><span class="mr-k">' + colLabel('licence') + '</span><div class="lic-list">' + moreLic + '</div></div>' +
-      '<div class="more-row"><span class="mr-k">' + colLabel('inactivity') + '</span><div>' + f.inactivity + '</div></div>' +
-      '<div class="more-row"><span class="mr-k">' + colLabel('restrictions') + '</span><div>' + f.restrictions + '</div></div>' +
-      '<div class="more-row"><span class="mr-k">' + colLabel('platforms') + '</span><div>' + f.platforms + '</div></div>';
-
     return '<article class="bcard" data-partner="' + escapeHtml(p.id) + '">' +
       '<div class="bcard-top">' + cardLogoHtml(p) +
         (row.group ? '<span class="bcard-group">' + escapeHtml(row.group['label_' + _i18n.lang] || row.group.label_ru) + '</span>' : '') +
@@ -849,7 +840,12 @@
       // внутри модалки, отдельной строкой.
       (lead ? '<div class="bcard-lead">' + licenceChip(p, lead, { lead: true }) + '</div>' : '') +
       '<div class="bcard-stats">' + stats + '</div>' +
-      '<details class="bcard-more"><summary>' + t('brokers.card_details', 'Все юрлица, лицензии и платформы') + '</summary>' + more + '</details>' +
+      // Раньше <details> разворачивался внутри карточки — список лицензий
+      // разной длины у разных брокеров разъезжал высоту карточек в сетке
+      // между собой. Теперь кнопка открывает модалку (та же allLicencesModalHtml,
+      // что бы использовалась под <details>, просто в bindModalTriggers).
+      '<button type="button" class="bcard-more-btn" data-modal="' + escapeHtml('all::' + p.id) + '">' +
+      t('brokers.card_details', 'Все юрлица, лицензии и платформы') + '</button>' +
       '<div class="bcard-cta">' +
         '<a class="btn-open" href="' + affLink + '" target="_blank" rel="noopener sponsored"' +
         ' data-aff="' + escapeHtml(p.id) + '" data-place="card">' +
@@ -1158,6 +1154,27 @@
     return body;
   }
 
+  // Модалка «Все юрлица, лицензии и платформы» — раньше это был <details>,
+  // разворачивающийся прямо в карточке; при разной длине списка лицензий
+  // (у AvaTrade 7 юрлиц, у XM 3) карточки в сетке разъезжались по высоте.
+  // Содержимое то же самое (список лицензий кликабелен и здесь — каждая
+  // плашка открывает свою licenceModalHtml поверх этой же модалки), просто
+  // строится по требованию при клике, а не на каждый рендер карточки.
+  function allLicencesModalHtml(p, contractingEntityId) {
+    var lics = licencesOf(p);
+    var moreLic = lics.map(function (ent) {
+      return '<div class="lic-row">' + licenceChip(p, ent) + '</div>';
+    }).join('');
+    var entRec = contractingEntityId ? _entityIndex[p.id + '::' + contractingEntityId] : null;
+    // loss-заглушка: buildFieldHtml() требует row.loss, но здесь нужны только
+    // inactivity/restrictions/platforms — эти поля от loss не зависят.
+    var f = buildFieldHtml({ partner: p, entity: entRec ? entRec.entity : null, loss: { kind: 'not_published', disclose: null } });
+    return '<div class="more-row"><span class="mr-k">' + colLabel('licence') + '</span><div class="lic-list">' + moreLic + '</div></div>' +
+      '<div class="more-row"><span class="mr-k">' + colLabel('inactivity') + '</span><div>' + f.inactivity + '</div></div>' +
+      '<div class="more-row"><span class="mr-k">' + colLabel('restrictions') + '</span><div>' + f.restrictions + '</div></div>' +
+      '<div class="more-row"><span class="mr-k">' + colLabel('platforms') + '</span><div>' + f.platforms + '</div></div>';
+  }
+
   // ── Сравнение двух брокеров ────────────────────────────────────────────────
   // Открывается из тулбара, показывает двух рядом с возможностью подменить
   // любого из двух. Данные берутся из тех же row, что и карточки, поэтому
@@ -1268,8 +1285,12 @@
     });
   }
 
-  function bindModalTriggers(root, resolvedEntityIdByPartner) {
-    root.querySelectorAll('button[data-entity]').forEach(function (btn) {
+  // Плашки лицензий (data-entity) встречаются в двух местах: одна лид-плашка
+  // прямо на карточке (root) и полный список внутри модалки «Все юрлица»
+  // (allLicencesModalHtml, вставляется в .bm-body ПОСЛЕ открытия модалки —
+  // поэтому её нужно биндить отдельным вызовом, не один раз через root).
+  function bindEntityChips(container, resolvedEntityIdByPartner) {
+    container.querySelectorAll('button[data-entity]').forEach(function (btn) {
       btn.addEventListener('click', function () {
         var rec = _entityIndex[btn.getAttribute('data-entity')];
         if (!rec) return;
@@ -1277,6 +1298,24 @@
         openModal(rec.entity.legal_name || rec.partner.name,
           licenceModalHtml(rec.partner, rec.entity, isContracting), btn);
         track('broker_licence_modal', { partner: rec.partner.id, entity: rec.entity.id });
+      });
+    });
+  }
+
+  function bindModalTriggers(root, resolvedEntityIdByPartner) {
+    bindEntityChips(root, resolvedEntityIdByPartner);
+    root.querySelectorAll('button[data-modal^="all::"]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var pid = btn.getAttribute('data-modal').slice(5);
+        var rec = Object.keys(_entityIndex).map(function (k) { return _entityIndex[k]; })
+          .filter(function (x) { return x.partner.id === pid; })[0];
+        if (!rec) return;
+        var p = rec.partner;
+        openModal(t('brokers.card_details', 'Все юрлица, лицензии и платформы') + ' · ' + (p.name || ''),
+          allLicencesModalHtml(p, resolvedEntityIdByPartner[pid]), btn);
+        var m = modalEl();
+        if (m) bindEntityChips(m.querySelector('.bm-body'), resolvedEntityIdByPartner);
+        track('broker_licences_modal', { partner: pid });
       });
     });
     root.querySelectorAll('button[data-modal^="lev::"]').forEach(function (btn) {
