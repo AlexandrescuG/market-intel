@@ -109,7 +109,8 @@ class Bridge:
 
 # ─── отправка ───────────────────────────────────────────────────────────────
 
-def remote_order_send(conn, symbol: str, volume: float, is_buy: bool, price: float):
+def remote_order_send(conn, symbol: str, volume: float, is_buy: bool, price: float,
+                      sl: float | None = None, tp: float | None = None):
     """order_send выполняется ЦЕЛИКОМ на стороне Wine.
 
     🔴 Первый живой ордер 18.08 вернул (-2, 'Unnamed arguments not allowed').
@@ -135,7 +136,9 @@ def remote_order_send(conn, symbol: str, volume: float, is_buy: bool, price: flo
         "'deviation': 20,"
         f"'magic': {MAGIC},"
         "'comment': 'sbf_cost_calib',"
-        "'type_time': _m.ORDER_TIME_GTC}")
+        + (f"'sl': {float(sl)!r}," if sl is not None else "")
+        + (f"'tp': {float(tp)!r}," if tp is not None else "")
+        + "'type_time': _m.ORDER_TIME_GTC}")
     check = conn.eval("_m.order_check(_req)")
     if getattr(check, "retcode", None) != 0:
         return None, f"order_check retcode={getattr(check,'retcode',None)} {getattr(check,'comment','')}"
