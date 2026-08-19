@@ -149,3 +149,46 @@ def test_снос_делает_цель_ниже_входа():
     assert target_from_bar < ask, "цель должна оказаться ниже входа — ради этого и предохранитель"
     _, target_from_fill = geometry(ask, atr)
     assert target_from_fill > ask, "от цены входа цель обязана быть выше"
+
+
+# ── 5. строка журнала заводится ДО отправки ордера ─────────────────────────
+
+def test_журнал_заводится_до_отправки_ордера():
+    """🔴 19.08 18:02: ордер ушёл, позиция 67494399 открылась, INSERT упал с
+    "database is locked". Позиция у брокера без строки в журнале выпадает и
+    из горизонта, и из EV — и найти её может только сверка.
+
+    Тест смотрит на порядок в исходнике намеренно: инвариант тут не в
+    значении, а в последовательности двух необратимых действий, и проверить
+    его поведением можно только подняв мост к терминалу."""
+    import inspect
+
+    from analyze.live_strategy import run
+    src = inspect.getsource(run)
+    i_rec = src.index('order_status="pending"')
+    i_send = src.index("remote_order_send(")
+    assert i_rec < i_send, "запись в журнал обязана предшествовать отправке ордера"
+
+
+# ── 6. сверка находит позицию, которой нет в журнале ───────────────────────
+
+class _Orphan:
+    ticket, magic, symbol, volume, type = 999, MAGIC, "GOLD", 0.01, 0
+    price_open, time = 4500.0, int(time.time()) - 600
+
+
+def test_сверка_заводит_потерянную_позицию(con, monkeypatch):
+    import analyze.strategy_monitor as sm
+    bars = [{"ts": _Orphan.time - (60 - k) * 3600, "o": 4500.0, "h": 4510.0,
+             "l": 4490.0, "c": 4500.0} for k in range(60)]
+    monkeypatch.setattr("core.price_bars.load_candles", lambda *a, **k: bars)
+    monkeypatch.setattr(sm, "alert", lambda *a, **k: None)
+
+    assert sm.reconcile(con, [_Orphan()]) == 1
+    row = con.execute("SELECT ticket, order_status, note FROM cost_observations").fetchone()
+    assert row[0] == 999 and row[1] == "sent"
+    assert "strategy=gold_oil" in row[2], "иначе горизонт её не увидит"
+    assert "orphan=1" in row[2], "иначе разбор не отличит её от обычной сделки"
+    assert "atr=" in row[2], "без ATR сделка молча выпадет из метрик"
+
+    assert sm.reconcile(con, [_Orphan()]) == 0, "повторная сверка не должна дублировать"

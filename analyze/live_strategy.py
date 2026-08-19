@@ -149,7 +149,7 @@ def evaluate(con: sqlite3.Connection) -> dict:
 
 
 def run(dry: bool, verbose: bool) -> int:
-    con = sqlite3.connect(str(BOT_DB), timeout=30)
+    con = sqlite3.connect(str(BOT_DB), timeout=120)
     s = evaluate(con)
     if not s["ok"]:
         log.info("сигнала нет: %s", s["reason"])
@@ -205,21 +205,36 @@ def run(dry: bool, verbose: bool) -> int:
             # всё, что происходит на нашей стороне.
             digits = int(getattr(si, "digits", 2))
             stop, target = geometry(float(tick.ask), s["atr"])
-            res, err = remote_order_send(conn, broker, volume, True, float(tick.ask),
-                                          sl=round(stop, digits),
-                                          tp=round(target, digits))
             base = dict(forecast_id=None, account=account.login, server=server,
                         symbol=SYMBOL, broker_symbol=broker, tf="H1", direction="bullish",
                         volume=volume, req_price=float(tick.ask), req_ts=int(time.time()),
                         spread_at_entry=float(tick.ask - tick.bid))
+            # 🔴 СТРОКА ЖУРНАЛА ЗАВОДИТСЯ ДО ОТПРАВКИ, А НЕ ПОСЛЕ.
+            # 19.08 18:02 порядок был обратный: ордер ушёл, позиция 67494399
+            # открылась у брокера, а INSERT упал с "database is locked" —
+            # 30 секунд ожидания не хватило, bot.db пишут ещё десяток задач.
+            # Получилась сделка, которой нет ни в журнале, ни под горизонтом:
+            # settle() ищет её по ticket в cost_observations и не находит,
+            # значит висела бы до стопа или цели, а исход не попал бы в EV.
+            # Позиция у брокера, не подтверждённая записью, — худший из
+            # возможных исходов, хуже пропуска входа. Поэтому теперь: не
+            # смогли записать — не отправляем.
+            row_id = record(con, **base, order_status="pending", note=note)
+            res, err = remote_order_send(conn, broker, volume, True, float(tick.ask),
+                                          sl=round(stop, digits),
+                                          tp=round(target, digits))
             if err or res is None or res.retcode != mt5.TRADE_RETCODE_DONE:
-                record(con, **base, order_status="order_rejected",
-                       note=f"{note} | {err or getattr(res, 'comment', '')}")
+                con.execute("UPDATE cost_observations SET order_status='order_rejected', "
+                            "note=? WHERE id=?",
+                            (f"{note} | {err or getattr(res, 'comment', '')}", row_id))
+                con.commit()
                 con.close()
                 return 2
-            record(con, **base, ticket=res.order, deal_entry_price=res.price,
-                   slippage_entry=res.price - float(tick.ask),
-                   order_status="sent", note=f"{note} drift_atr={drift:.2f}")
+            con.execute("UPDATE cost_observations SET order_status='sent', ticket=?, "
+                        "deal_entry_price=?, slippage_entry=?, note=? WHERE id=?",
+                        (res.order, res.price, res.price - float(tick.ask),
+                         f"{note} drift_atr={drift:.2f}", row_id))
+            con.commit()
             log.info("вход отправлен: ticket=%s по %.2f", res.order, res.price)
     except SafetyRefusal as e:
         record(con, forecast_id=None, account=0, server=CALIBRATION_SERVER, symbol=SYMBOL,

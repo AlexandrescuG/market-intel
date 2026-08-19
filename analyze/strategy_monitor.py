@@ -44,6 +44,51 @@ HORIZON_SEC = 12 * 3600     # 12 баров H1 — горизонт из пре�
 log = logging.getLogger("strategy_monitor")
 
 
+def reconcile(con: sqlite3.Connection, positions) -> int:
+    """Позиции у брокера, которых нет в журнале, — завести и закричать.
+
+    🔴 19.08 18:02: ордер ушёл, позиция 67494399 открылась, а INSERT упал с
+    "database is locked". Порядок в live_strategy с тех пор исправлен, но
+    сверка нужна всё равно: между «отправили» и «записали» всегда остаётся
+    окно, а любая ненайденная позиция выпадает и из горизонта, и из EV —
+    молча, потому что искать её никто не станет.
+
+    Пропущенная сделка не смещает ожидание (замок не знает, куда пойдёт
+    цена), но она занимает место под потолком открытых позиций и живёт без
+    горизонта. ATR восстанавливается из price_bars на момент открытия — то
+    же вычисление, что в live_strategy, поэтому величина настоящая, а не
+    придуманная; помечается orphan=1, чтобы разбор мог её отделить."""
+    import core.price_bars as _pb
+    from analyze.live_strategy import atr as _atr
+
+    known = {r[0] for r in con.execute(
+        "SELECT ticket FROM cost_observations WHERE ticket IS NOT NULL")}
+    found = 0
+    for pos in positions:
+        t = int(pos.ticket)
+        if t in known:
+            continue
+        opened = int(getattr(pos, "time", 0))
+        c = _pb.load_candles("XAUUSD", "1h")
+        i = max((k for k in range(len(c)) if c[k]["ts"] + 3600 <= opened), default=None)
+        a = _atr(c, i) if i is not None else None
+        note = (f"strategy=gold_oil orphan=1 atr={a:.4f} horizon_bars=12 "
+                f"bar_ts={c[i]['ts']} | восстановлена сверкой: ордер прошёл, "
+                f"строка журнала не записалась" if a else
+                "strategy=gold_oil orphan=1 | восстановлена сверкой, ATR не определён")
+        from analyze.mt5_calibration import record
+        record(con, forecast_id=None, account=0, server="Ava-Demo 1-MT5", symbol="XAUUSD",
+               broker_symbol=str(pos.symbol), tf="H1", direction="bullish",
+               volume=float(pos.volume), ticket=t, deal_entry_price=float(pos.price_open),
+               req_price=float(pos.price_open), req_ts=opened, created_ts=opened,
+               order_status="sent", note=note)
+        found += 1
+        log.error("позиция %s была у брокера без строки в журнале — заведена сверкой", t)
+        alert(f"позиция {t} ({pos.symbol} по {pos.price_open}) открылась без записи в "
+              f"журнале и восстановлена сверкой. Проверьте, не повторяется ли.")
+    return found
+
+
 def settle(con: sqlite3.Connection) -> tuple[int, int]:
     """Закрыть сделки, дожившие до горизонта, и добрать закрывшиеся.
 
@@ -68,7 +113,14 @@ def settle(con: sqlite3.Connection) -> tuple[int, int]:
     try:
         with Bridge() as (mt5, conn):
             now = int(time.time())
-            for pos in our_positions(mt5.positions_get()):
+            mine = our_positions(mt5.positions_get())
+            if reconcile(con, mine):
+                # заведённые сверкой тикеты нужны сразу, иначе горизонт
+                # применится к ним только на следующем прогоне
+                tickets |= {r[0] for r in con.execute(
+                    "SELECT ticket FROM cost_observations WHERE order_status='sent' "
+                    "AND ticket IS NOT NULL AND note LIKE '%strategy=gold_oil%'")}
+            for pos in mine:
                 if int(pos.ticket) not in tickets:
                     continue
                 age = now - int(getattr(pos, "time", now))
