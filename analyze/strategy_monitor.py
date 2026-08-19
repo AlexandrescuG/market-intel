@@ -39,8 +39,57 @@ MIN_N_CHECK = 20
 MIN_N_STOP = 30
 MIN_N_CONFIRM = 50
 MAX_DRAWDOWN_ATR = -15.0
+HORIZON_SEC = 12 * 3600     # 12 баров H1 — горизонт из пререгистрации
 
 log = logging.getLogger("strategy_monitor")
+
+
+def settle(con: sqlite3.Connection) -> tuple[int, int]:
+    """Закрыть сделки, дожившие до горизонта, и добрать закрывшиеся.
+
+    🔴 19.08: горизонт не исполнялся вообще. У брокера стояли стоп и цель,
+    и позиция висела до одного из них — хоть неделю. А §2 пререгистрации
+    считает ожидание с горизонтом: «незакрытые по горизонту сделки входят
+    по цене закрытия горизонта». Без этого замерялась бы другая величина:
+    геометрия без горизонта — это RR 0.5 со стопом вдвое дальше цели, у неё
+    доля выигрышных заведомо выше, и накопленное EV сравнивалось бы с
+    планкой, посчитанной не для неё. Правила §3 при этом срабатывали бы
+    штатно — просто не по той стратегии.
+
+    Делается в одном сеансе с добором: правило, применённое к данным до
+    добора, срабатывает на сделку позже, чем должно."""
+    from analyze.mt5_calibration import Bridge, close_position, collect_closed
+    from analyze.mt5_safety import our_positions
+
+    tickets = {r[0] for r in con.execute(
+        "SELECT ticket FROM cost_observations WHERE order_status='sent' "
+        "AND ticket IS NOT NULL AND note LIKE '%strategy=gold_oil%'")}
+    closed_by_horizon, collected = 0, 0
+    try:
+        with Bridge() as (mt5, conn):
+            now = int(time.time())
+            for pos in our_positions(mt5.positions_get()):
+                if int(pos.ticket) not in tickets:
+                    continue
+                age = now - int(getattr(pos, "time", now))
+                if age < HORIZON_SEC:
+                    continue
+                ok, err = close_position(conn, mt5, pos)
+                if ok:
+                    closed_by_horizon += 1
+                    log.info("горизонт исчерпан (%.1f ч) — закрыт %s", age / 3600, pos.ticket)
+                else:
+                    # Молчать здесь нельзя: позиция за горизонтом продолжает
+                    # жить и её исход попадёт в журнал как исход стратегии,
+                    # которой он не принадлежит.
+                    log.error("НЕ закрыт по горизонту %s: %s", pos.ticket, err)
+                    alert(f"сделка {pos.ticket} за горизонтом ({age / 3600:.1f} ч) "
+                          f"не закрывается: {err}")
+            collected = collect_closed(mt5, con)
+    except Exception as e:
+        log.error("сведение не выполнено: %s: %s", type(e).__name__, e)
+        alert(f"мост MT5 недоступен, горизонт и добор не отработали: {type(e).__name__}: {e}")
+    return closed_by_horizon, collected
 
 
 def closed_trades(con: sqlite3.Connection) -> list[dict]:
@@ -153,6 +202,9 @@ def ask_agent(m: dict, trades: list[dict]) -> str | None:
 
 def run(with_agent: bool) -> int:
     con = sqlite3.connect(str(BOT_DB), timeout=30)
+    by_horizon, collected = settle(con)
+    if by_horizon or collected:
+        log.info("закрыто по горизонту=%d добрано=%d", by_horizon, collected)
     trades = closed_trades(con)
     m = metrics(trades)
     if m["n"] == 0:

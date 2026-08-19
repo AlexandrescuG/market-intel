@@ -47,6 +47,23 @@ ATR_MULT, RR, HORIZON_BARS = 2.0, 0.5, 12
 OIL = "DCOILWTICO"
 OIL_LOOKBACK = 20          # публикаций назад, §3 пререгистрации
 GOLD_MOMENTUM_BARS = 120   # ~5 суток H1, только для логирования
+BAR_SEC = 3600             # рабочий ТФ — H1
+# Сигнальный бар не старше двух баров на момент входа. Доливка price_bars
+# идёт своим таймером и отстаёт (а 19.08 на час вставала целиком: у Ava
+# symbol_select("GOLD") вернул False на одном прогоне). Торговать по бару
+# трёхчасовой давности — это ставить стоп и цель вокруг цены, которой уже
+# нет: ATR ещё как-то переживает, а расстояние до барьеров едет вместе с
+# ушедшей ценой. Лучше пропустить час, чем войти с поехавшей геометрией.
+MAX_SIGNAL_LAG_SEC = 2 * BAR_SEC
+# Насколько цена вправе уйти от закрытия сигнального бара к моменту входа.
+# Не подобранное число: в бэктесте, которым измерена планка и прирост,
+# вход стоит РОВНО на закрытии сигнального бара. Если цена уже прошла
+# расстояние до цели, то движение, ради которого сделка бралась, случилось
+# ДО входа — берётся не та сделка, которую измеряли, и её исход попадёт в
+# журнал под тем же именем. Порог выражен через саму геометрию
+# (RR * ATR_MULT — это и есть расстояние до цели), а не задан отдельно,
+# чтобы его нельзя было тихо подкрутить под результат.
+MAX_ENTRY_DRIFT_ATR = RR * ATR_MULT
 
 log = logging.getLogger("live_strategy")
 
@@ -71,13 +88,46 @@ def atr(candles: list[dict], i: int, period: int = 14) -> float | None:
     return sum(tr) / period
 
 
+def geometry(anchor: float, a: float) -> tuple[float, float]:
+    """Стоп и цель от ЦЕНЫ ВХОДА, а не от закрытия сигнального бара.
+
+    🔴 19.08, найдено на первой же сделке форварда. Барьеры считались от
+    `bar_close`, а ордер уходил по рыночному `ask`; между ними — весь разрыв
+    доливки баров. Первая сделка: сигнальный бар закрылся на 4367.22, вход
+    прошёл по 4369.73, барьеры встали на 4339.42/4381.12. То есть риск
+    получился 2.18 ATR вместо 2.0, а награда 0.82 ATR вместо 1.0 — реальное
+    RR 0.38 при пререгистрированном 0.5. Сделка закрылась по цели с +11.39,
+    и в журнал легло EV=+0.82 ATR вместо +1.0.
+
+    Смещение не случайное: разрыв между ценой сигнального бара и текущей
+    ценой в среднем растёт вместе с задержкой доливки, и знак у него тот же,
+    что у движения, которое признак ловит. То есть в удачных случаях награда
+    урезается сильнее всего — ровно там, где её измеряют.
+
+    Это не изменение геометрии, а её восстановление: 2.0/1.0 ATR
+    пререгистрировано ОТ ВХОДА (`2026-08-19_geometry.md`)."""
+    return anchor - ATR_MULT * a, anchor + RR * ATR_MULT * a
+
+
 def evaluate(con: sqlite3.Connection) -> dict:
     """Состояние сигнала на последнем ЗАКРЫТОМ баре."""
     c = _pb.load_candles(SYMBOL, "1h")
     if not c or len(c) < GOLD_MOMENTUM_BARS + 20:
         return {"ok": False, "reason": "недостаточно баров"}
-    i = len(c) - 2                       # -1 может быть незакрытым
+    # Последний ЗАКРЫВШИЙСЯ бар. Было `len(c)-2` вслепую: доливка кладёт и
+    # текущий формирующийся бар, поэтому «минус два» безопасно, но когда
+    # последний бар УЖЕ закрыт, оно выбрасывает свежий бар и добавляет к
+    # задержке доливки ещё час на ровном месте.
+    now = int(time.time())
+    i = len(c) - 1
+    if c[i]["ts"] + BAR_SEC > now:
+        i -= 1
     ts = c[i]["ts"]
+    lag = now - (ts + BAR_SEC)
+    if lag > MAX_SIGNAL_LAG_SEC:
+        return {"ok": False,
+                "reason": f"бары устарели: сигнальный бар закрылся {lag // 60} мин назад "
+                          f"(предел {MAX_SIGNAL_LAG_SEC // 60})"}
     a = atr(c, i)
     if not a:
         return {"ok": False, "reason": "ATR не считается"}
@@ -89,11 +139,13 @@ def evaluate(con: sqlite3.Connection) -> dict:
     oil_rising = oil_now > oil_prev
     gold_up = c[i]["c"] > c[i - GOLD_MOMENTUM_BARS]["c"]
     entry = c[i]["c"]
-    return {"ok": True, "ts": ts, "bar_close": entry, "atr": a,
+    ref_stop, ref_target = geometry(entry, a)
+    return {"ok": True, "ts": ts, "bar_close": entry, "atr": a, "lag_sec": lag,
             "oil_rising": oil_rising, "gold_up": gold_up,
             "signal": oil_rising,                       # пререгистрированное условие
             "divergence": oil_rising and not gold_up,   # разведочное уточнение
-            "stop": entry - ATR_MULT * a, "target": entry + RR * ATR_MULT * a}
+            # справочно, для dry-run: реальные барьеры считаются от цены входа
+            "stop": ref_stop, "target": ref_target}
 
 
 def run(dry: bool, verbose: bool) -> int:
@@ -115,7 +167,8 @@ def run(dry: bool, verbose: bool) -> int:
 
     note = (f"strategy=gold_oil oil_rising={int(s['oil_rising'])} "
             f"gold_up={int(s['gold_up'])} divergence={int(s['divergence'])} "
-            f"atr={s['atr']:.4f} horizon_bars={HORIZON_BARS}")
+            f"atr={s['atr']:.4f} horizon_bars={HORIZON_BARS} "
+            f"bar_ts={s['ts']} lag_sec={s['lag_sec']}")
     try:
         with Bridge() as (mt5, conn):
             account = mt5.account_info()
@@ -125,6 +178,25 @@ def run(dry: bool, verbose: bool) -> int:
             si = mt5.symbol_info(broker)
             volume = preflight(account, mt5.terminal_info(), mt5.positions_get(), si)
             tick = mt5.symbol_info_tick(broker)
+            # 🔴 Отказ от входа, если цена ушла от сигнального бара дальше,
+            # чем до цели. Поймано на живой сделке 19.08 16:02: сигнальный
+            # бар закрылся на 4365.95, за следующий час золото прошло
+            # вертикально до 4442 (+5.4 ATR), и вход по рынку оказался
+            # выше цели, посчитанной от бара. Со старым кодом это была бы
+            # заявка на покупку с целью НИЖЕ цены входа — брокер отвергает
+            # её как invalid stops, и в журнале копились бы order_rejected
+            # без внятной причины.
+            drift = abs(float(tick.ask) - s["bar_close"]) / s["atr"]
+            if drift > MAX_ENTRY_DRIFT_ATR:
+                record(con, forecast_id=None, account=account.login, server=server,
+                       symbol=SYMBOL, broker_symbol=broker, tf="H1", direction="bullish",
+                       volume=0.0, req_price=float(tick.ask), req_ts=int(time.time()),
+                       order_status="drift_reject",
+                       note=f"{note} drift_atr={drift:.2f} | цена ушла от сигнального "
+                            f"бара на {drift:.2f} ATR при пределе {MAX_ENTRY_DRIFT_ATR}")
+                log.info("вход отменён: снос %.2f ATR от закрытия сигнального бара", drift)
+                con.close()
+                return 2
             # 🔴 Стоп и цель ставятся В ЗАЯВКЕ, а не «закроем потом сами».
             # Без них позиция висит бесконечно: калибровочный сборщик её не
             # тронет (он закрывает по возрасту, а у стратегии свой горизонт),
@@ -132,9 +204,10 @@ def run(dry: bool, verbose: bool) -> int:
             # может быть перезапущен. Барьеры на стороне брокера переживают
             # всё, что происходит на нашей стороне.
             digits = int(getattr(si, "digits", 2))
+            stop, target = geometry(float(tick.ask), s["atr"])
             res, err = remote_order_send(conn, broker, volume, True, float(tick.ask),
-                                          sl=round(s["stop"], digits),
-                                          tp=round(s["target"], digits))
+                                          sl=round(stop, digits),
+                                          tp=round(target, digits))
             base = dict(forecast_id=None, account=account.login, server=server,
                         symbol=SYMBOL, broker_symbol=broker, tf="H1", direction="bullish",
                         volume=volume, req_price=float(tick.ask), req_ts=int(time.time()),
@@ -146,7 +219,7 @@ def run(dry: bool, verbose: bool) -> int:
                 return 2
             record(con, **base, ticket=res.order, deal_entry_price=res.price,
                    slippage_entry=res.price - float(tick.ask),
-                   order_status="sent", note=note)
+                   order_status="sent", note=f"{note} drift_atr={drift:.2f}")
             log.info("вход отправлен: ticket=%s по %.2f", res.order, res.price)
     except SafetyRefusal as e:
         record(con, forecast_id=None, account=0, server=CALIBRATION_SERVER, symbol=SYMBOL,

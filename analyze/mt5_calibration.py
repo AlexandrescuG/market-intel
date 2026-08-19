@@ -232,10 +232,23 @@ def close_aged(mt5, conn, con: sqlite3.Connection, max_age_sec: int) -> int:
 
     Только те, что заведены БЕЗ forecast_id: у сигнальных наблюдений
     геометрия выхода задана прогнозом (стоп/цель), закрывать их по таймеру
-    значило бы измерять не то."""
+    значило бы измерять не то.
+
+    🔴 19.08: `forecast_id IS NULL` перестало значить «без геометрии выхода».
+    live_strategy.py пишет свои сделки с forecast_id=None (прогноза нет, есть
+    признак), но у них ЕСТЬ преререгистрированная геометрия: стоп 2.0 ATR,
+    цель 1.0 ATR, горизонт 12 баров H1. А этот сборщик вызывается из
+    sbf-strategy-monitor.service КАЖДЫЕ 15 МИНУТ с close_after=900 — то есть
+    ровно тот таймер, который должен форвард измерять, закрывал бы каждую
+    сделку через 15 минут вместо 12 часов. Замер получился бы не «работает ли
+    признак», а «куда уйдёт золото за четверть часа» — шум минус спред,
+    гарантированное срабатывание СТОП-УБЫТКА на неопровергнутой гипотезе.
+    Отбор — по метке стратегии в note, а не по forecast_id: метка есть у
+    сделки с момента вставки строки и не зависит от того, чем она вызвана."""
     synthetic = {r[0] for r in con.execute(
         "SELECT ticket FROM cost_observations "
-        "WHERE order_status='sent' AND ticket IS NOT NULL AND forecast_id IS NULL")}
+        "WHERE order_status='sent' AND ticket IS NOT NULL AND forecast_id IS NULL "
+        "AND (note IS NULL OR note NOT LIKE '%strategy=%')")}
     now = int(time.time())
     n = 0
     for p in our_positions(mt5.positions_get()):
