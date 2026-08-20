@@ -35,7 +35,7 @@ TECH_BASE = [
     "GC=F", "SI=F",
     "BTC-USD", "ETH-USD", "SOL-USD",
     "EURUSD=X", "GBPUSD=X",
-    "^GSPC", "^IXIC", "^DJI",
+    "^GSPC", "^NDX", "^DJI",
     "CL=F", "NG=F",
 ]
 

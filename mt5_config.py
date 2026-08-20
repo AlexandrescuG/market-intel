@@ -103,6 +103,28 @@ def symbol_map_for(server: str | None) -> dict:
 # BARS_SERVER — поведение доливки баров этой правкой НЕ меняется.
 SYMBOL_MAP = SYMBOL_MAP_BY_SERVER[BARS_SERVER]
 
+# Имена инструментов у Ava для РЕАЛ-ТАЙМ отдачи графиков (serve.py::_handle_chart_tail).
+# Отдельно от SYMBOL_MAP (та — только для доливки price_bars по 5-6 символам): сюда
+# входят ВСЕ инструменты, что есть у брокера, чтобы внутридневка (M1..H4) шла из MT5
+# в реальном времени (~0.3 мин), а не из Yahoo, у которого фьючерсы/индексы отстают
+# ~10 мин. Проверено symbols_get()/copy_rates M1 19.08.2026. Индексы/энергия у Ava
+# названы по-своему: S&P500=US_500, Nasdaq100=US_TECH100, Dow=US_30, DXY=DOLLAR_INDX,
+# нефть WTI=CrudeOIL (WTICrude — мёртвый символ), газ=NATURAL_GAS. Отсутствуют у Ava:
+# USDAED/USDBRL/USDCZK/USDKZT/USDRUB — для них остаётся Yahoo (FX, задержка мала).
+CHART_BROKER_MAP = {
+    "EURUSD": "EURUSD", "GBPUSD": "GBPUSD", "AUDUSD": "AUDUSD", "NZDUSD": "NZDUSD",
+    "EURGBP": "EURGBP", "USDJPY": "USDJPY", "USDCAD": "USDCAD", "USDCHF": "USDCHF",
+    "USDCNY": "USDCNY", "USDHUF": "USDHUF", "USDMXN": "USDMXN",
+    # USDKRW у Ava ЕСТЬ как символ, но котировки мёртвые с 10.02.2026 (проверено
+    # 20.08: последний M15 — 10.02 11:30, тик той же давности). Символ в карте
+    # заставлял график отдавать февральские данные как настоящие; убран, чтобы
+    # вон уходил на Yahoo. Мёртвый фид хуже отсутствующего: отсутствующий видно.
+    "USDPLN": "USDPLN", "USDTRY": "USDTRY", "USDZAR": "USDZAR",
+    "GOLD": "GOLD", "SILVER": "SILVER", "WTI": "CrudeOIL", "NG": "NATURAL_GAS",
+    "DXY": "DOLLAR_INDX", "SPX": "US_500", "NASDAQ": "US_TECH100", "DJI": "US_30",
+    "BTC": "BTCUSD", "ETH": "ETHUSD", "SOL": "SOLUSD",
+}
+
 # наш tf-код -> имя константы TIMEFRAME_* в пакете MetaTrader5.
 # Хранится строкой (не самой константой), потому что mt5_bridge_pull.py
 # резолвит её через getattr() на УДАЛЁННОМ модуле (нет локального MetaTrader5

@@ -74,7 +74,7 @@ if (new URLSearchParams(location.search).get("embed") === "1") {
 <script src="/assets/sbf-profile.js?v=2" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.0/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
-<script src="/assets/grafik-engine.js"></script>
+<script src="/assets/grafik-engine.js?v=20260819c"></script>
 <script src="/assets/sbf-glossary.js?v=2" defer></script>
 <style>
 :root{
@@ -509,10 +509,13 @@ a:hover{text-decoration:underline;color:var(--glow)}
       <section class="panel" id="techChartPanel">
         <div class="panel-h">
           <h2 id="techSymLabel">{{ symbol_name('GOLD', lang, 'name+ticker') }} · D1</h2>
-          <span class="tag verify">live</span>
+          <span class="tag verify" id="techLiveTag">live</span>
         </div>
         <div class="ctrl-row">
           <div class="ctrl-tf" id="techTf">
+            <button class="tf" data-tf="M1">M1</button>
+            <button class="tf" data-tf="M5">M5</button>
+            <button class="tf" data-tf="M15">M15</button>
             <button class="tf" data-tf="M30">M30</button>
             <button class="tf" data-tf="H1">H1</button>
             <button class="tf" data-tf="H4">H4</button>
@@ -1571,16 +1574,23 @@ function setView(v) {
 document.getElementById('segCtrl').addEventListener('click', e => {
   if (e.target.dataset.v) setView(e.target.dataset.v);
 });
-// Всегда открываем Фундаментальный первым; #tech — для прямых ссылок
+// Восстанавливаем последнюю вкладку (localStorage переживает перезагрузку и
+// смену языка — навигация на /{lang}/ остаётся в том же origin). #tech в ссылке
+// имеет приоритет. Раньше всегда открывался Фундаментальный — из-за чего после
+// перезагрузки/смены языка пользователя выбрасывало с его вкладки.
 (function() {
-  var startView = (location.hash || '').startsWith('#tech') ? 'tech' : 'fund';
+  var startView = (location.hash || '').startsWith('#tech')
+    ? 'tech'
+    : (localStorage.getItem(SEG_KEY) || 'fund');
   setView(startView);
 })();
 
 load();
 startBybitStrip();
 pollLiveStrip();
-setInterval(clockWindow, 60000);
+// Тик раз в секунду, не в минуту: 60с-интервал не выровнен по границе минуты,
+// поэтому HH:MM отставали до минуты от реального времени. Функция дешёвая.
+setInterval(clockWindow, 1000);
 
 // SPEC_site_fixes_2026-07-29 §1: единственная реализация переключателя языков
 // живёт в sbf-header.js (defer) -- этот инлайн-скрипт синхронный и выполняется
@@ -1626,13 +1636,72 @@ _tickerRAF = requestAnimationFrame(_tickerFrame);
   // существует (нет сборщика данных под этот инструмент) — пункт вёл в никуда.
   var TECH_SYMS = ['GOLD','SILVER','BTC','ETH','SOL','SPX','NASDAQ','DJI','WTI','NG','EURUSD','GBPUSD','DXY','USDRUB','USDJPY','USDKZT'];
   var YF_MAP = {GOLD:'GC=F',SILVER:'SI=F',BTC:'BTC-USD',ETH:'ETH-USD',SOL:'SOL-USD',
-    SPX:'^GSPC',NASDAQ:'^IXIC',DJI:'^DJI',VIX:'^VIX',WTI:'CL=F',
+    SPX:'^GSPC',NASDAQ:'^NDX',DJI:'^DJI',VIX:'^VIX',WTI:'CL=F',
     NG:'NG=F',EURUSD:'EURUSD=X',GBPUSD:'GBPUSD=X',DXY:'DX-Y.NYB'};
   // MT5-символы не имеют Yahoo Finance тикера — live-пуш через MT5 пайплайн
 
-  var techSym = 'GOLD', techTF = 'D1';
+  // Привязка символа/ТФ графика: восстанавливаем последний выбор из localStorage
+  // (переживает перезагрузку и смену языка). Дефолт GOLD/D1.
+  var TECH_SYM_KEY='sbf_tech_sym', TECH_TF_KEY='sbf_tech_tf';
+  var _validTf={M1:1,M5:1,M15:1,M30:1,H1:1,H4:1,D1:1,W1:1};
+  var _savedSym=localStorage.getItem(TECH_SYM_KEY), _savedTf=localStorage.getItem(TECH_TF_KEY);
+  var techSym = (_savedSym && TECH_SYMS.indexOf(_savedSym)>=0) ? _savedSym : 'GOLD';
+  var techTF  = (_savedTf && _validTf[_savedTf]) ? _savedTf : 'D1';
   var techChart = null, techSeries = null, techLastC = null;
   var techData = null, techLines = [], techToggles = {piv:true,cndl:false,smc:false};
+  // Живой дозапрос новых баров (как pollTail в chart.html): без него график
+  // «застревает» на последнем баре — quotes-цикл двигал только цену последней
+  // свечи, но новые минуты/бары не появлялись.
+  var techLastRealUnix = null, techTailTimer = null;
+  var TECH_TF_SEC = {M1:60,M5:300,M15:900,M30:1800,H1:3600,H4:14400,D1:86400,W1:604800};
+  function _techBarToUnix(t){ return (typeof t==='number')?t:Math.floor(Date.parse(t+'T00:00:00Z')/1000); }
+  function _techUnixToBar(ts){ return (techTF==='D1'||techTF==='W1')?new Date(ts*1000).toISOString().slice(0,10):ts; }
+
+  function techScheduleTail(){
+    if(techTailTimer){clearInterval(techTailTimer);techTailTimer=null;}
+    // §6: M1 — раз в минуту; прочие — четверть бара, но не чаще 30с.
+    // M1 — каждые 10с (источник брокер, дёшево): чтобы текущая минута появлялась
+    // быстро, а не с отставанием до минуты. Прочие ТФ — четверть бара, не чаще 30с.
+    var ms = techTF==='M1' ? 10000 : Math.max(30000,(TECH_TF_SEC[techTF]||86400)*1000/4);
+    techPollTail();
+    techTailTimer = setInterval(techPollTail, ms);
+  }
+
+  async function techPollTail(){
+    if(!techLastC||!techSeries)return;
+    try{
+      var anchor = techLastRealUnix!=null
+        ? Math.min(_techBarToUnix(techLastC.time), techLastRealUnix)
+        : _techBarToUnix(techLastC.time);
+      var r = await fetch('/api/chart/tail?s='+encodeURIComponent(techSym)+'&tf='+encodeURIComponent(techTF)+'&since='+(anchor-1)+'&t='+Date.now());
+      var data = await r.json();
+      if(Array.isArray(data.candles)){
+        for(var i=0;i<data.candles.length;i++){
+          var c=data.candles[i];
+          var bar={time:_techUnixToBar(c.time),open:c.open,high:c.high,low:c.low,close:c.close};
+          try{ techSeries.update(bar); techLastC=bar; techLastRealUnix=_techBarToUnix(bar.time); }catch(e){}
+        }
+      }
+      _techUpdateLiveTag();
+    }catch(e){}
+  }
+
+  // Честный статус по величине задержки последнего бара. Не берём market_open от
+  // tail: там порог 2.5 бара (для M1 = 150с), и 10-минутная задержка Yahoo на
+  // фьючерсах (GOLD/SILVER/WTI) давала бы ложное «рынок закрыт». Реальное
+  // закрытие рынка — это часы простоя (индексы ночью ~16ч), отсюда порог 90 мин.
+  function _techUpdateLiveTag(){
+    var el=document.getElementById('techLiveTag'); if(!el||techLastRealUnix==null)return;
+    // Порог зависит от ТФ: последний бар может быть «в процессе» и отставать до
+    // целого периода — на H1 41 мин это норма, не задержка. «Задержка» только для
+    // внутридневки (M1..H4) и только если отстаём больше 2 баров.
+    var period=TECH_TF_SEC[techTF]||3600;
+    var lagSec=Date.now()/1000 - techLastRealUnix;
+    var intraday=(techTF!=='D1'&&techTF!=='W1');
+    if(lagSec > period*40){ el.textContent='рынок закрыт'; el.classList.remove('verify'); }
+    else if(intraday && lagSec > period*2+120){ el.textContent='задержка ~'+Math.round(lagSec/60)+' мин'; el.classList.remove('verify'); }
+    else { el.textContent='live'; el.classList.add('verify'); }
+  }
 
   function buildSymDrop() {
     var wrap = document.getElementById('techChartWrap');
@@ -1641,12 +1710,13 @@ _tickerRAF = requestAnimationFrame(_tickerFrame);
     sel.style.cssText = 'position:absolute;top:8px;left:8px;z-index:21;font-family:"JetBrains Mono",monospace;font-size:12px;font-weight:700;border:1px solid rgba(231,223,207,.85);border-radius:5px;background:rgba(251,246,239,.92);color:#2B2B33;padding:4px 8px;cursor:pointer;min-width:72px';
     TECH_SYMS.forEach(function(s){var o=document.createElement('option');o.value=s;o.textContent=window.SBFSymbols?window.SBFSymbols.symbolName(s,{mode:'name+ticker'}):s;sel.appendChild(o);});
     sel.value = techSym;
-    sel.addEventListener('change', function(){techSym=sel.value;techRender();});
+    sel.addEventListener('change', function(){techSym=sel.value;localStorage.setItem(TECH_SYM_KEY,techSym);techRender();});
     wrap.appendChild(sel);
   }
 
   async function techDrawOurs(tf) {
     techTF = tf;
+    if(techTailTimer){clearInterval(techTailTimer);techTailTimer=null;}  // сброс живого дозапроса при смене ТФ/символа
     var el = document.getElementById('techLW'); el.innerHTML = '';
     try { techData = await SBFGrafik.loadBars(techSym, tf); }
     catch(e) { el.innerHTML='<div style="padding:20px;font-family:JetBrains Mono;color:var(--muted)">'+fmt_({{ t('home.no_data_for', lang) | tojson }},{sym:techSym+' '+tf})+'</div>'; return; }
@@ -1655,16 +1725,23 @@ _tickerRAF = requestAnimationFrame(_tickerFrame);
     if (lbl) lbl.textContent = (window.SBFSymbols ? window.SBFSymbols.symbolName(techSym,{mode:'name+ticker'}) : techSym) + ' · ' + (m.interval||tf);
 
     techChart = LightweightCharts.createChart(el, {
-      localization:{locale:'en'},
+      localization:{locale:'en',timeFormatter:SBFGrafik.lwCrosshairFmt},
       layout:{background:{type:'solid',color:'#FFFFFF'},textColor:'#2B2B33',fontFamily:'JetBrains Mono'},
       grid:{vertLines:{color:'#F0E9DA'},horzLines:{color:'#F0E9DA'}},
       rightPriceScale:{borderColor:'#E7DFCF'},
-      timeScale:{borderColor:'#E7DFCF',timeVisible:tf==='M30'||tf==='H1'||tf==='H4',rightOffset:5},
+      timeScale:{borderColor:'#E7DFCF',timeVisible:tf!=='D1'&&tf!=='W1',rightOffset:5,tickMarkFormatter:SBFGrafik.lwTickFmt},
       crosshair:{mode:1,vertLine:{color:'#C9A227',labelBackgroundColor:'#C9A227'},horzLine:{color:'#C9A227',labelBackgroundColor:'#C9A227'}},
     });
-    techSeries = techChart.addCandlestickSeries({upColor:'#1e8e5a',downColor:'#c0392b',borderVisible:false,wickUpColor:'#1e8e5a',wickDownColor:'#c0392b'});
+    // Точность цены по величине (как в chart.html): FX-майоры (<10) — 4 знака,
+    // не 2. Без явного priceFormat LightweightCharts угадывает точность и рисует
+    // EURUSD в 2 знака — старый баг «два знака после запятой».
+    var _refPx = Math.abs(m && m.last != null ? m.last : (techData.lw.length ? techData.lw[techData.lw.length-1].close : 1));
+    var _pxPrec = _refPx < 10 ? 4 : _refPx < 1000 ? 2 : 1;
+    techSeries = techChart.addCandlestickSeries({upColor:'#1e8e5a',downColor:'#c0392b',borderVisible:false,wickUpColor:'#1e8e5a',wickDownColor:'#c0392b',
+      priceFormat:{type:'price',precision:_pxPrec,minMove:1/Math.pow(10,_pxPrec)}});
     techSeries.setData(techData.lw);
     techLastC = techData.lw.length ? Object.assign({}, techData.lw[techData.lw.length-1]) : null;
+    techLastRealUnix = techLastC ? _techBarToUnix(techLastC.time) : null;
     var volS = techChart.addHistogramSeries({priceFormat:{type:'volume'},priceScaleId:'vol'});
     techChart.priceScale('vol').applyOptions({scaleMargins:{top:0.88,bottom:0}});
     volS.setData(techData.volume);
@@ -1672,6 +1749,7 @@ _tickerRAF = requestAnimationFrame(_tickerFrame);
     techChart.timeScale().setVisibleLogicalRange({from:Math.max(0,n-120),to:n+5});
     renderTechAnalysisBlock(m);
     techApplyToggles();
+    techScheduleTail();   // запустить живой дозапрос новых баров
   }
 
   var I18N_TECH = {
@@ -1701,6 +1779,14 @@ _tickerRAF = requestAnimationFrame(_tickerFrame);
     analysisSuffix: {{ t('home.analysis_suffix', lang) | tojson }}
   };
 
+  // Формат цены по величине: FX-майоры (<10) — 4 знака, не 2/3. toLocaleString
+  // без minimumFractionDigits резал EURUSD до «1.16» («старый баг с 2 знаками»).
+  function techFmtPx(v){
+    v = +v; if(!isFinite(v)) return '—';
+    var p = Math.abs(v) < 10 ? 4 : Math.abs(v) < 1000 ? 2 : 1;
+    return v.toLocaleString('en',{minimumFractionDigits:p, maximumFractionDigits:p});
+  }
+
   function renderTechAnalysisBlock(m) {
     var el = document.getElementById('techAnalysis'); if (!el||!techData) return;
     var rsi = m.rsi!=null?m.rsi:(SBFGrafik.calcRSI14(techData.bars)||'—');
@@ -1711,11 +1797,11 @@ _tickerRAF = requestAnimationFrame(_tickerFrame);
     var near = m.nearest;
     var pivs = SBFGrafik.calcPivots(techData.bars);
     if (!near&&pivs&&m.last) near = SBFGrafik.nearestPivot(m.last, pivs);
-    var lvls = (techData.levels||[]).map(function(L){return '<span style="color:'+L.color+';margin-right:10px"><b>'+L.name+'</b> '+(+L.price).toLocaleString('en')+'</span>';}).join('');
+    var lvls = (techData.levels||[]).map(function(L){return '<span style="color:'+L.color+';margin-right:10px"><b>'+L.name+'</b> '+techFmtPx(L.price)+'</span>';}).join('');
     el.innerHTML = '<div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center">'+
       '<span>RSI <b>'+rsi+'</b></span>'+
       '<span>Bias <b style="color:'+bCol+'">'+bTxt+'</b></span>'+
-      (near?'<span>'+I18N_TECH.nearest+' <b>'+near.name+' '+(+near.price).toLocaleString('en')+'</b> ('+(near.dist_pct>0?'+':'')+near.dist_pct+'%)</span>':'')+
+      (near?'<span>'+I18N_TECH.nearest+' <b>'+near.name+' '+techFmtPx(near.price)+'</b> ('+(near.dist_pct>0?'+':'')+near.dist_pct+'%)</span>':'')+
       (lvls?'<span style="margin-left:auto;display:flex;flex-wrap:wrap;gap:6px">'+lvls+'</span>':'')+
       '</div>';
     renderTechFocus(m, rsi, bias);
@@ -1733,16 +1819,16 @@ _tickerRAF = requestAnimationFrame(_tickerFrame);
 
     // Уровни из techData.levels (PP, R1, R2, S1, S2)
     var lvlMap = {};
-    (techData.levels||[]).forEach(function(L){ lvlMap[L.name] = (+L.price).toLocaleString('en',{maximumFractionDigits:3}); });
+    (techData.levels||[]).forEach(function(L){ lvlMap[L.name] = techFmtPx(L.price); });
 
     // Дополнительные данные из техкарточки (ожидаемый ход, паттерны)
     var card = _techCards.find(function(c){ return chartLabelOf(c.ticker)===techSym; });
-    var pp = lvlMap['PP'] || (card&&card.pivots&&card.pivots.PP?(+card.pivots.PP).toLocaleString('en'):'—');
-    var r1 = lvlMap['R1'] || (card&&card.resistance&&card.resistance[0]?(+card.resistance[0]).toLocaleString('en'):'—');
-    var r2 = lvlMap['R2'] || (card&&card.resistance&&card.resistance[1]?(+card.resistance[1]).toLocaleString('en'):'—');
-    var s1 = lvlMap['S1'] || (card&&card.support&&card.support[0]?(+card.support[0]).toLocaleString('en'):'—');
-    var s2 = lvlMap['S2'] || (card&&card.support&&card.support[1]?(+card.support[1]).toLocaleString('en'):'—');
-    var last = m.last?(+m.last).toLocaleString('en',{maximumFractionDigits:3}):'—';
+    var pp = lvlMap['PP'] || (card&&card.pivots&&card.pivots.PP?techFmtPx(card.pivots.PP):'—');
+    var r1 = lvlMap['R1'] || (card&&card.resistance&&card.resistance[0]?techFmtPx(card.resistance[0]):'—');
+    var r2 = lvlMap['R2'] || (card&&card.resistance&&card.resistance[1]?techFmtPx(card.resistance[1]):'—');
+    var s1 = lvlMap['S1'] || (card&&card.support&&card.support[0]?techFmtPx(card.support[0]):'—');
+    var s2 = lvlMap['S2'] || (card&&card.support&&card.support[1]?techFmtPx(card.support[1]):'—');
+    var last = m.last?techFmtPx(m.last):'—';
     var moveStr = card&&card.expected_move?card.expected_move[0]+'–'+card.expected_move[1]+' '+(card.expected_unit||''):'';
     var pats = card?(card.patterns||[]).join(', '):'';
     var symLabel = window.SBFSymbols ? window.SBFSymbols.symbolName(techSym, {mode:'name'}) : techSym;
@@ -1929,13 +2015,15 @@ _tickerRAF = requestAnimationFrame(_tickerFrame);
   window._initTechView=function(){
     if(techInited)return; techInited=true;
     buildSymDrop();
+    // подсветить восстановленный ТФ (в разметке жёстко «on» на D1)
+    document.querySelectorAll('#techTf button').forEach(function(x){x.classList.toggle('on', x.dataset.tf===techTF);});
     var chartWrap=document.getElementById('techChartWrap');
     if(chartWrap&&SBFGrafik.chartFullscreenButton)SBFGrafik.chartFullscreenButton(chartWrap);
     techRender();
     document.getElementById('techTf').addEventListener('click',function(e){
       if(!e.target.dataset.tf)return;
       document.querySelectorAll('#techTf button').forEach(function(x){x.classList.remove('on');});
-      e.target.classList.add('on'); techTF=e.target.dataset.tf; techRender();
+      e.target.classList.add('on'); techTF=e.target.dataset.tf; localStorage.setItem(TECH_TF_KEY,techTF); techRender();
     });
     document.getElementById('techTog').addEventListener('click',function(e){
       if(!e.target.dataset.t)return;

@@ -17,7 +17,7 @@
 
   const RSI_MAP = {
     '^GSPC': 'ohlc_SPX_D1.json',
-    '^IXIC': 'ohlc_NASDAQ_D1.json',
+    '^NDX': 'ohlc_NASDAQ_D1.json',
     '^VIX':  null,
     'GC=F':  'ohlc_GOLD_D1.json',
     'EURUSD=X': 'ohlc_EURUSD_D1.json',
@@ -27,7 +27,7 @@
   };
 
   const RSI_LABEL = {
-    '^GSPC': 'S&P 500', '^IXIC': 'Nasdaq', '^VIX': 'VIX',
+    '^GSPC': 'S&P 500', '^NDX': 'Nasdaq 100', '^VIX': 'VIX',
     'GC=F': t('eduindex.live.ticker_gold', 'Золото'), 'EURUSD=X': 'EUR/USD', 'GBPUSD=X': 'GBP/USD',
     'BTC-USD': 'Bitcoin', 'CL=F': t('eduindex.live.ticker_wti', 'Нефть WTI'),
   };

@@ -28,7 +28,7 @@
 <script src="/assets/sbf-header.js?v=16" defer></script>
 <script src="/assets/sbf-auth.js?v=1"></script>
 <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
-<script src="/assets/grafik-engine.js"></script>
+<script src="/assets/grafik-engine.js?v=20260819c"></script>
 <script src="/assets/sbf-thermo-widget.js"></script>
 <script src="/assets/sbf-glossary.js?v=2" defer></script>
 <style>
@@ -230,7 +230,7 @@ body.embed .card{border-radius:0;box-shadow:none;border:none;max-width:100%}
   </div>
   <div class="ctrl-row">
     <div class="tf-grp" id="tf">
-      <button class="tf" data-tf="M5">M5</button><button class="tf" data-tf="M15">M15</button>
+      <button class="tf" data-tf="M1">M1</button><button class="tf" data-tf="M5">M5</button><button class="tf" data-tf="M15">M15</button>
       <button class="tf" data-tf="M30">M30</button><button class="tf" data-tf="H1">H1</button>
       <button class="tf" data-tf="H4">H4</button><button class="tf on" data-tf="D1">D1</button>
       <button class="tf" data-tf="W1">W1</button>
@@ -338,7 +338,7 @@ function _focusTodayTF() {
 const YF = {
   GOLD:'GC=F', SILVER:'SI=F',
   BTC:'BTC-USD', ETH:'ETH-USD', SOL:'SOL-USD',
-  SPX:'^GSPC', NASDAQ:'^IXIC', DJI:'^DJI', VIX:'^VIX',
+  SPX:'^GSPC', NASDAQ:'^NDX', DJI:'^DJI', VIX:'^VIX',
   WTI:'CL=F', NG:'NG=F',
   EURUSD:'EURUSD=X', GBPUSD:'GBPUSD=X', USDJPY:'JPY=X', DXY:'DX-Y.NYB',
 };
@@ -346,6 +346,19 @@ const BYBIT = {BTC:'BTCUSDT', ETH:'ETHUSDT', SOL:'SOLUSDT'};
 
 // ── Состояние ───────────────────────────────────────────────────────────────
 let chart = null, candleSeries = null, lastCandle = null, ws = null, curTF = 'D1';
+// §1a (SPEC_chart_m1_m5): время последнего РЕАЛЬНОГО бара (из статики/тейла),
+// unix-сек. applyLive() его НЕ двигает — иначе since тейла считался бы от
+// выдуманной свечи и дыра самозапечатывалась (26 инструментов стояли с 6 авг).
+let _lastRealBarUnix = null;
+// Ряд пришёл из MT5 -> живую цену берём ТОЛЬКО оттуда же. Котировка из
+// /api/quotes для таких символов принадлежит другому инструменту (YF-карта
+// указывает на фьючерсы GC=F/SI=F/CL=F, а свечи спотовые) и рисует шип.
+let _liveFromMt5 = false;
+// §1a #3: данные протухли (последний реальный бар старше max(2 периода, 3 сут)).
+// Порог 3 сут отделяет мёртвый фид (USDRUB — 35 дней, Yahoo не отдаёт) от
+// обычного закрытия рынка на выходные (пт→пн ≈ 2.5 сут). Когда true — бейдж
+// показывает «данные от <дата>», а не зелёный live, и pollQuotes его не зеленит.
+let _dataStale = false;
 let _curData = null;           // результат SBFGrafik.loadBars
 let _curLines = [];            // priceLine refs (для удаления)
 let _curEvents = [];           // события календаря для текущего symbol/tf (Фаза 1)
@@ -705,7 +718,7 @@ function applyToggles() {
 }
 
 // ── Слой событий календаря (Фаза 1, SBF_Charts_Layer1_Spec) ────────────────
-const TF_SEC = {M5:300, M15:900, M30:1800, H1:3600, H4:14400, D1:86400, W1:604800};
+const TF_SEC = {M1:60, M5:300, M15:900, M30:1800, H1:3600, H4:14400, D1:86400, W1:604800};
 // Совпадает с pattern_stats_job.py's TIMEFRAMES -- статистика по паттернам
 // считается офлайн-джобом только на этих ТФ (SPEC_chart_fixes_and_staged_signup.md §3).
 const PATTERN_STATS_TFS = new Set(['H1', 'H4', 'D1']);
@@ -1258,7 +1271,7 @@ function redrawSessionLayer() {
   const layer = document.getElementById('sessionLayer');
   if (!layer) return;
   layer.innerHTML = '';
-  if (!TOGGLES.sess || !chart || !(curTF === 'M5' || curTF === 'M15' || curTF === 'M30' || curTF === 'H1')) return;
+  if (!TOGGLES.sess || !chart || !(curTF === 'M1' || curTF === 'M5' || curTF === 'M15' || curTF === 'M30' || curTF === 'H1')) return;
   const width = document.getElementById('chartContainer').clientWidth;
   const vr = chart.timeScale().getVisibleRange();
   if (!vr) return;
@@ -1297,7 +1310,7 @@ function redrawHourlyActivityLayer() {
   const layer = document.getElementById('hourlyActivityLayer');
   if (!layer) return;
   layer.innerHTML = '';
-  const show = TOGGLES.sess && (curTF === 'M5' || curTF === 'M15' || curTF === 'M30' || curTF === 'H1') && _curSessionProfile.length > 0;
+  const show = TOGGLES.sess && (curTF === 'M1' || curTF === 'M5' || curTF === 'M15' || curTF === 'M30' || curTF === 'H1') && _curSessionProfile.length > 0;
   if (!show || !chart) return;
   const width = document.getElementById('chartContainer').clientWidth;
   const vr = chart.timeScale().getVisibleRange();
@@ -1922,14 +1935,14 @@ async function drawOurs(tf) {
   // По умолчанию ON на M5-H1, OFF на H4+ (см. спеку Фазы 3; M5/M15 добавлены
   // SPEC_chart_fixes_and_staged_signup.md §3) — пересчитывается заново при
   // каждой смене TF, ручной выбор пользователя между TF не хранится.
-  TOGGLES.news = (tf === 'M5' || tf === 'M15' || tf === 'M30' || tf === 'H1');
+  TOGGLES.news = (tf === 'M1' || tf === 'M5' || tf === 'M15' || tf === 'M30' || tf === 'H1');
   document.querySelector('#tog [data-t="news"]').classList.toggle('on', TOGGLES.news);
   // Зоны внимания: ON на H1-D1, OFF на M5/M15/M30 (шум) и W1 (масштаб) — см. Фаза 2 спеки.
-  TOGGLES.zone = !(tf === 'M5' || tf === 'M15' || tf === 'M30' || tf === 'W1');
+  TOGGLES.zone = !(tf === 'M1' || tf === 'M5' || tf === 'M15' || tf === 'M30' || tf === 'W1');
   document.querySelector('#tog [data-t="zone"]').classList.toggle('on', TOGGLES.zone);
   // Сессионная карта: ON на M5-H1 (см. Layer3 Фаза2 — на H4+/D1/W1 сутки
   // сжаты слишком сильно, полосы сессий были бы неразличимы).
-  TOGGLES.sess = (tf === 'M5' || tf === 'M15' || tf === 'M30' || tf === 'H1');
+  TOGGLES.sess = (tf === 'M1' || tf === 'M5' || tf === 'M15' || tf === 'M30' || tf === 'H1');
   document.querySelector('#tog [data-t="sess"]').classList.toggle('on', TOGGLES.sess);
   _curData = await SBFGrafik.loadBars(PARAM, tf);
   // Дождаться словаря i18n (если он есть) ДО построения текста — на первом
@@ -1974,11 +1987,11 @@ async function drawOurs(tf) {
   document.getElementById('chart').innerHTML = '';
   chart = LightweightCharts.createChart(document.getElementById('chart'), {
     autoSize: true,
-    localization: {locale:'en'},
+    localization: {locale:'en', timeFormatter:SBFGrafik.lwCrosshairFmt},
     layout: {background:{type:'solid',color:'#FFFFFF'}, textColor:'#2B2B33', fontFamily:'JetBrains Mono'},
     grid: {vertLines:{color:'#F0E9DA'}, horzLines:{color:'#F0E9DA'}},
     rightPriceScale: {borderColor:'#E7DFCF'},
-    timeScale: {borderColor:'#E7DFCF', timeVisible: tf!=='D1'&&tf!=='W1', rightOffset:6},
+    timeScale: {borderColor:'#E7DFCF', timeVisible: tf!=='D1'&&tf!=='W1', rightOffset:6, tickMarkFormatter:SBFGrafik.lwTickFmt},
     crosshair: {mode: LightweightCharts.CrosshairMode.Normal,
       vertLine:{color:'#C9A227', labelBackgroundColor:'#C9A227'},
       horzLine:{color:'#C9A227', labelBackgroundColor:'#C9A227'}},
@@ -1999,6 +2012,10 @@ async function drawOurs(tf) {
   });
   candleSeries.setData(_curData.lw);
   lastCandle = _curData.lw.length ? Object.assign({}, _curData.lw[_curData.lw.length-1]) : null;
+  // §1a: точка отсчёта тейла — последний реальный бар статики, не lastCandle
+  // (который applyLive может двигать текущей ценой).
+  _lastRealBarUnix = lastCandle ? barTimeToUnix(lastCandle.time) : null;
+  _updateDataStale();   // §1a #3: честный бейдж по свежести данных
 
   // Объём
   const vol = chart.addHistogramSeries({priceFormat:{type:'volume'}, priceScaleId:'vol'});
@@ -2060,9 +2077,14 @@ function applyLive(price) {
     const bucket     = Math.floor(now / TF_SEC[curTF]) * TF_SEC[curTF];
     const lastBucket = barTimeToUnix(lastCandle.time);
     if (bucket > lastBucket) {
-      // Разрыв больше одного бара (вкладка была свёрнута) на клиенте не
-      // достраивается — это выдумывание данных. Пропущенные бары дозапросит
-      // тейл-эндпоинт (§2), здесь только честно откроется новая текущая свеча.
+      // §1a (SPEC_chart_m1_m5): при разрыве больше 2 баров фид мёртв/пропущен —
+      // НЕ открываем свечу текущей ценой поверх старого ряда. Именно это рисовало
+      // одиночный вертикальный скачок на 26 инструментах и скармливало выдуманный
+      // бар в RSI/Bias/пивоты под подписью «ФАКТ». Пропущенное дозапросит pollTail
+      // от _lastRealBarUnix; цена в шапке при этом обновляется (выше по функции).
+      if ((bucket - lastBucket) > TF_SEC[curTF] * 2) return;
+      // Разрыв в пределах пары баров (вкладка была свёрнута) — честно открываем
+      // новую текущую свечу; остальное дособерёт тейл.
       lastCandle = { time: unixToBarTime(bucket), open: price, high: price, low: price, close: price };
     } else {
       lastCandle.close = price;
@@ -2079,7 +2101,9 @@ function applyLive(price) {
 function setLiveSourceLabel(kind, delaySec) {
   const el = document.getElementById('liveSourceFoot');
   if (!el) return;
-  if (kind === 'yahoo') {
+  if (kind === 'mt5') {
+    el.textContent = t('chart.source_broker', 'Источник: брокер MT5 · живые бары');
+  } else if (kind === 'yahoo') {
     el.textContent = delaySec != null
       ? fmt_(t('chart.delay_yahoo_tpl', 'Источник: Yahoo Finance · задержка ~{sec} с'), {sec: delaySec})
       : t('chart.delay_yahoo_unknown', 'Источник: Yahoo Finance');
@@ -2112,6 +2136,26 @@ function setStale(isStale, updatedIso) {
   } else {
     txt.textContent = t('chart.live_label', 'live');
   }
+}
+
+// §1a #3: бейдж отражает свежесть ДАННЫХ графика, а не факт опроса котировок.
+// Для мёртвого фида (данные старше 3 сут, Yahoo не оживил — напр. USDRUB)
+// зелёный live — активная неправда. Показываем «данные от <дата последнего
+// реального бара>». Порог обновляется при render() и после каждого pollTail.
+function _updateDataStale() {
+  if (_lastRealBarUnix == null) { _dataStale = false; return; }
+  const age = Math.floor(Date.now() / 1000) - _lastRealBarUnix;
+  _dataStale = age > Math.max(TF_SEC[curTF] * 2, 3 * 86400);
+  if (_dataStale) setDataStaleBadge(_lastRealBarUnix);
+}
+function setDataStaleBadge(unix) {
+  const liveEl = document.getElementById('chartLiveDot');
+  const pxEl   = document.getElementById('px');
+  if (liveEl) liveEl.classList.add('stale');
+  if (pxEl)   pxEl.classList.add('stale');
+  const txt = liveEl ? liveEl.querySelector('.live-txt') : null;
+  if (txt) txt.textContent = fmt_(t('chart.data_from_tpl', 'данные от {date}'),
+                                   {date: new Date(unix * 1000).toISOString().slice(0, 10)});
 }
 
 // SPEC_fix_live_chart.md §7: рынок закрыт (выходные) — Yahoo продолжает
@@ -2177,6 +2221,10 @@ async function pollQuotes() {
     if (ageSec > 30) {
       setStale(true, q.updated);
       applyLive(null); // не подменяем цену устаревшей — applyLive(null) выходит сразу
+    } else if (_dataStale) {
+      // §1a #3: сборщик котировок жив, но САМИ данные графика мертвы (фид не
+      // оживляется даже Yahoo). Не зеленим «live» — держим честную метку даты.
+      setDataStaleBadge(_lastRealBarUnix);
     } else {
       setStale(false);
       const sym = YF[PARAM];
@@ -2185,8 +2233,10 @@ async function pollQuotes() {
         const closed = row.delay_sec != null && row.delay_sec > MARKET_CLOSED_DELAY_SEC;
         setMarketClosed(closed);
         if (!closed) {
-          applyLive(row.price);
-          setLiveSourceLabel('yahoo', row.delay_sec);
+          // Для MT5-ряда цену ведёт pollTail() из того же фида — котировка
+          // Yahoo здесь относится к другому инструменту (см. _liveFromMt5).
+          if (!_liveFromMt5) applyLive(row.price);
+          if (!_liveFromMt5) setLiveSourceLabel('yahoo', row.delay_sec);
           // §7: опрос не крутится бессмысленно при закрытом рынке — раз в 5мин
           // достаточно, чтобы заметить открытие, а не 15с ни за чем.
         } else {
@@ -2209,7 +2259,11 @@ let _tailInFlight = false;
 function scheduleTail() {
   if (_tailTimer) { clearInterval(_tailTimer); _tailTimer = null; }
   if (BYBIT[PARAM] || !YF[PARAM]) return;
-  const intervalMs = Math.max(30000, (TF_SEC[curTF] || 86400) * 1000 / 4);
+  // §6: на M1 опрос раз в минуту (бар закрывается раз в 60с — чаще бессмысленно
+  // и лишняя нагрузка на Yahoo). Прочие ТФ — четверть бара, но не чаще 30с.
+  const intervalMs = curTF === 'M1'
+    ? 10000
+    : Math.max(30000, (TF_SEC[curTF] || 86400) * 1000 / 4);
   pollTail();
   _tailTimer = setInterval(pollTail, intervalMs);
 }
@@ -2222,7 +2276,13 @@ async function pollTail() {
     // since) — без сдвига текущая незакрытая свеча никогда бы не попадала в
     // ответ и не обновлялась бы реальными данными, только последующие бары
     // после границы. Спека прямо просит "включая текущий незакрытый".
-    const since = barTimeToUnix(lastCandle.time) - 1;
+    // §1a: считаем since от последнего РЕАЛЬНОГО бара, а не от lastCandle
+    // (applyLive мог продвинуть его текущей ценой). Иначе тейл спрашивал бы
+    // бары новее «сейчас», получал пусто и никогда не достраивал разрыв.
+    const _anchor = _lastRealBarUnix != null
+      ? Math.min(barTimeToUnix(lastCandle.time), _lastRealBarUnix)
+      : barTimeToUnix(lastCandle.time);
+    const since = _anchor - 1;
     // /api/chart/tail ждёт метку сайта (PARAM, "GOLD"), сам резолвит тикер —
     // не YF[PARAM] ("GC=F"): это ключ для /api/quotes (§3), а тут другой
     // сервер-сайд справочник (serve.py::_M5_YF_TICKERS), другой формат ключа.
@@ -2241,8 +2301,20 @@ async function pollTail() {
           // более новых. Устаревший бар просто пропускаем: он уже неактуален.
           candleSeries.update(bar);
           lastCandle = bar;
+          _lastRealBarUnix = barTimeToUnix(bar.time);   // §1a: продвигаем реальный якорь
         } catch (e) { /* бар устарел за время запроса — пропускаем, не критично */ }
       }
+      _updateDataStale();   // §1a #3: свежесть могла измениться после достройки
+    }
+    // Живая цена — из ответа тейла, а не из чужого фида. Ставится ПОСЛЕ
+    // применения баров: applyLive двигает ту же lastCandle, и обратный
+    // порядок затирал бы только что полученную реальную форму свечи.
+    if (data.source === 'mt5') {
+      _liveFromMt5 = true;
+      setLiveSourceLabel('mt5', data.delay_sec);
+      if (data.live_price != null) applyLive(data.live_price);
+    } else if (data.source !== undefined || Array.isArray(data.candles)) {
+      _liveFromMt5 = false;
     }
   } catch (e) {
     // тихо: следующий цикл попробует снова, applyLive() тем временем держит

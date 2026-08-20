@@ -135,16 +135,43 @@ def enrich_cashtags(tags: list[str], limit: int = 12) -> list[dict]:
     return [{"tag": t, "ticker": tk, **snap.get(tk, {})} for t, tk in tickers.items()]
 
 
+def _registry_labels() -> dict[str, str]:
+    """yahoo-тикер -> человеческое имя из symbols.json (ru)."""
+    try:
+        from core.symbols_registry import _load
+        out = {}
+        for _k, v in _load().items():
+            y = v.get("yahoo") if isinstance(v, dict) else None
+            if y:
+                out[y] = v.get("ru") or v.get("en") or _k
+        return out
+    except Exception:
+        return {}
+
+
 def market_state_block(extra_tags: list[str] | None = None) -> str:
     """Готовый markdown-блок для брифа: дашборд + крипто F&G + тикеры из брифа."""
     lines = ["## 📉 РЕАЛЬНОЕ СОСТОЯНИЕ РЫНКА (yfinance, d/d)"]
     snap = snapshot(DASHBOARD)
-    names = {"^GSPC": "S&P 500", "^IXIC": "Nasdaq", "DX-Y.NYB": "DXY",
-             "GC=F": "Gold", "CL=F": "WTI", "BTC-USD": "BTC", "^VIX": "VIX"}
-    for tk in DASHBOARD:
-        d = snap.get(tk, {})
-        if d.get("price") is not None:
-            lines.append(f"  {names[tk]:9} {d['price']:>10,.2f}  {d['change_pct']:+.2f}%")
+    # DASHBOARD собирается из реестра (symbols.json, quote=true), а подписи
+    # жили тут отдельным словарём — и обращение шло по names[tk] без запаса.
+    # 20.08 это чуть не уронило бриф: смена тикера Nasdaq на ^NDX (реестр
+    # называл инструмент «Nasdaq 100», а тянул ^IXIC — Composite, другой
+    # индекс) дала бы KeyError на первом же прогоне. Подпись по .get с
+    # фолбэком на сам тикер: неизвестный инструмент должен появиться в брифе
+    # своим именем, а не обрушить весь блок.
+    # Подписи берём из того же реестра, что и сам список тикеров, иначе это
+    # два источника правды: локальный словарь покрывал 7 тикеров из 14, и
+    # остальные (SI=F, NG=F, ^DJI, ETH-USD…) выводились бы сырыми кодами.
+    names = _registry_labels()
+    # Ширина колонки — по самому длинному ИМЕЮЩЕМУСЯ имени, а не константа 9:
+    # с русскими подписями «Природный газ» и «Индекс доллара» фиксированная
+    # ширина ломала выравнивание всей таблицы.
+    shown = [tk for tk in DASHBOARD if snap.get(tk, {}).get("price") is not None]
+    w = max((len(names.get(tk, tk)) for tk in shown), default=9)
+    for tk in shown:
+        d = snap[tk]
+        lines.append(f"  {names.get(tk, tk):<{w}} {d['price']:>12,.2f}  {d['change_pct']:+.2f}%")
     fng = crypto_fear_greed()
     if fng:
         lines.append(f"  Crypto F&G: {fng['value']} ({fng['label']})")

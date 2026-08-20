@@ -10,6 +10,7 @@ import subprocess
 import socketserver
 import os
 import sys
+import threading
 import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -52,15 +53,107 @@ _m5_cache: dict = {}
 _M5_CACHE_TTL = 90  # сек
 
 # H4/W1 у Yahoo нет нативно — ресэмплим из H1/D1, как publish.py::publish_charts.
-_TAIL_YF_INTERVAL = {"M5": "5m", "M15": "15m", "M30": "30m", "H1": "60m",
+# M1 (SPEC_chart_m1_m5 §5): минутка on-demand из Yahoo, окно сутки. Отдельного
+# фида/ретенции в price_bars намеренно нет — Yahoo даёт 1m за ~7 дней, а нам для
+# графика нужно «последние сутки». Тот же оконный механизм, что M5, а не третья
+# подсистема. Yahoo нативно даёт 1m/5m/15m/30m/60m/1d; H4 и W1 ресэмплим.
+_TAIL_YF_INTERVAL = {"M1": "1m", "M5": "5m", "M15": "15m", "M30": "30m", "H1": "60m",
                      "H4": "60m", "D1": "1d", "W1": "1d"}
-_TAIL_YF_PERIOD   = {"M5": "2d", "M15": "5d", "M30": "7d", "H1": "1mo",
+_TAIL_YF_PERIOD   = {"M1": "1d", "M5": "2d", "M15": "5d", "M30": "7d", "H1": "1mo",
                      "H4": "1mo", "D1": "3mo", "W1": "1y"}
 _TAIL_RESAMPLE    = {"H4": "4h", "W1": "1W"}
-_TAIL_TF_SEC      = {"M5": 300, "M15": 900, "M30": 1800, "H1": 3600,
+_TAIL_TF_SEC      = {"M1": 60, "M5": 300, "M15": 900, "M30": 1800, "H1": 3600,
                      "H4": 14400, "D1": 86400, "W1": 604800}
 _tail_cache: dict = {}
 _TAIL_CACHE_TTL = 25  # чуть меньше минимальной частоты клиента (30с, §2)
+
+# ── Real-time внутридневка из брокера MT5 (SPEC_chart_m1_m5) ─────────────────
+# Yahoo отдаёт фьючерсы/индексы (GOLD/SILVER/WTI/US_500…) с задержкой ~10 мин.
+# У брокера те же инструменты идут в реальном времени (~0.3 мин, проверено).
+# Отдаём внутридневку (M1..H4) из моста для символов CHART_BROKER_MAP, Yahoo —
+# фолбэк. Выборка 200-400 баров ~0.17с, кэш 20с, блокировка (мост последователен),
+# любая ошибка -> None -> Yahoo (график не ломается, если мост лёг).
+_mt5_lock = threading.Lock()
+_mt5_conn = None
+_mt5_tail_cache: dict = {}
+_MT5_TAIL_TTL = 20
+_MT5_TF_ATTR = {"M1": "TIMEFRAME_M1", "M5": "TIMEFRAME_M5", "M15": "TIMEFRAME_M15",
+                "M30": "TIMEFRAME_M30", "H1": "TIMEFRAME_H1", "H4": "TIMEFRAME_H4"}
+# Глубина хвоста. 🔴 20.08: было 300 на всех внутридневных ТФ, и на M1 это
+# давало ПЯТЬ ЧАСОВ истории — график начинался посреди вчерашнего вечера и
+# читался как «недостроенный». Замер стоимости выборки через мост:
+# 300 баров — 0.07 с, 10000 баров — 0.11 с. То есть ограничение в 300
+# ничего не экономило: время уходит на сам вызов, не на объём.
+# Глубина по ТФ: M1 ~7 суток, M5 ~17, M15 ~31, M30 ~62, H1 ~125, H4 ~330.
+_MT5_COUNT = {"M1": 10000, "M5": 5000, "M15": 3000, "M30": 3000,
+              "H1": 3000, "H4": 2000}
+_MT5_PATH = r"C:\Program Files\MetaTrader 5\terminal64.exe"
+
+
+def _mt5_bridge():
+    global _mt5_conn
+    if _mt5_conn is not None:
+        try:
+            _mt5_conn.ping()
+            return _mt5_conn
+        except Exception:
+            _mt5_conn = None
+    import rpyc
+    _mt5_conn = rpyc.classic.connect("127.0.0.1", 18812)
+    _mt5_conn.modules["MetaTrader5"].initialize(path=_MT5_PATH, timeout=60000)
+    return _mt5_conn
+
+
+def _mt5_tail(our_key, tf):
+    """Свечи из брокера в реальном времени для внутридневных ТФ. None -> Yahoo-фолбэк."""
+    global _mt5_conn
+    from mt5_config import CHART_BROKER_MAP
+    bs = CHART_BROKER_MAP.get(our_key)
+    if not bs or tf not in _MT5_TF_ATTR:
+        return None
+    now = time.time()
+    ck = (our_key, tf)
+    # M1 — короткий кэш (8с): бар минутный, текущую минуту надо показывать быстро,
+    # иначе график «отстаёт на минуту». Выборка из моста дешёвая (~0.17с).
+    ttl = 8 if tf == "M1" else _MT5_TAIL_TTL
+    c = _mt5_tail_cache.get(ck)
+    if c and now - c[0] < ttl:
+        return c[1]
+    with _mt5_lock:
+        c = _mt5_tail_cache.get(ck)
+        if c and now - c[0] < ttl:
+            return c[1]
+        data = None
+        # Две попытки: sbf-mt5-pull в конце прогона вызывает mt5.shutdown() на ОБЩЕМ
+        # серверном модуле — после каждого прогона первая выборка иначе падала и
+        # отдавала Yahoo (а Yahoo M1 у FX плоский, o=h=l=c). Переинициализируем на
+        # каждой выборке (initialize() идемпотентен) и при обрыве соединения
+        # сбрасываем его и пробуем ещё раз.
+        for _attempt in (1, 2):
+            try:
+                import rpyc
+                conn = _mt5_bridge()
+                mt5 = conn.modules["MetaTrader5"]
+                mt5.initialize(path=_MT5_PATH, timeout=60000)
+                if not mt5.symbol_select(bs, True):
+                    return None
+                tfc = getattr(mt5, _MT5_TF_ATTR[tf])
+                rates = mt5.copy_rates_from_pos(bs, tfc, 0, _MT5_COUNT.get(tf, 300))
+                if rates is None or len(rates) == 0:
+                    return None
+                data = rpyc.classic.obtain(rates)
+                break
+            except Exception:
+                _mt5_conn = None  # сбросить и попробовать заново
+                data = None
+        if data is None:
+            return None
+        candles = [{"time": int(x["time"]),
+                    "open": round(float(x["open"]), 5), "high": round(float(x["high"]), 5),
+                    "low": round(float(x["low"]), 5), "close": round(float(x["close"]), 5)}
+                   for x in data]
+        _mt5_tail_cache[ck] = (now, candles)
+        return candles
 
 
 def _chart_symbols() -> set:
@@ -249,7 +342,7 @@ _EDU_TOC_RE = re.compile(r'^/edu/?(?:\?.*)?$')
 _EDU_LIVE = {
     1: "^GSPC", 2: "^GSPC", 3: "GC=F",      4: "^GSPC",    5: "EURUSD=X",
     6: "^VIX",  7: "^GSPC", 8: "^GSPC",     9: "GC=F",     10: "^GSPC",
-    11: "^IXIC",12: "EURUSD=X",13: "GC=F",  14: "EURUSD=X",15: "^GSPC",
+    11: "^NDX", 12: "EURUSD=X",13: "GC=F",  14: "EURUSD=X",15: "^GSPC",
 }
 _EDU_LIVE_LABEL = {
     1: "S&P 500", 2: "S&P 500", 3: "Золото",  4: "S&P 500",  5: "EUR/USD",
@@ -566,7 +659,7 @@ function sbfNavigate(tool) {{
   }}).then(function(){{
     // Добавить RSI из OHLC
     var OHLC_MAP = {{'GC=F':'ohlc_GOLD_D1.json','EURUSD=X':'ohlc_EURUSD_D1.json',
-      '^GSPC':'ohlc_SPX_D1.json','^IXIC':'ohlc_NASDAQ_D1.json',
+      '^GSPC':'ohlc_SPX_D1.json','^NDX':'ohlc_NASDAQ_D1.json',
       'CL=F':'ohlc_WTI_D1.json','BTC-USD':'ohlc_BTC_D1.json'}};
     var ohlcFile = OHLC_MAP[TICK];
     if(!ohlcFile) return;
@@ -2155,12 +2248,56 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         tf = params.get("tf", [None])[0]
         since_raw = params.get("since", ["0"])[0]
         if not symbol or tf not in _TAIL_YF_INTERVAL:
-            self._send_json({"error": "s and tf (M5/M15/M30/H1/H4/D1/W1) required"}, 400)
+            self._send_json({"error": "s and tf (M1/M5/M15/M30/H1/H4/D1/W1) required"}, 400)
             return
         try:
             since = int(since_raw)
         except ValueError:
             since = 0
+
+        # Real-time из брокера для внутридневки (GOLD/US_500/… без задержки Yahoo).
+        from mt5_config import CHART_BROKER_MAP
+        broker = _mt5_tail(symbol, tf)
+        if broker:
+            filtered = [c for c in broker if c["time"] > since]
+            last_ts = broker[-1]["time"]
+            delay_sec = max(0, int(time.time() - last_ts))
+            market_open = delay_sec < _TAIL_TF_SEC[tf] * 3
+            # 🔴 live_price — цена ТОГО ЖЕ инструмента, что и свечи.
+            # Фронт до 20.08 брал живую цену из /api/quotes по карте YF, где у
+            # золота стоит GC=F, у серебра SI=F, у нефти CL=F — это ФЬЮЧЕРСЫ, а
+            # ряд идёт из MT5 по СПОТУ. Фьючерс торгуется с базисом: замер
+            # 20.08 — 4546.4 против спота 4492.7, разница 54 пункта. applyLive()
+            # растягивал текущую свечу до фьючерсной цены, и получался одиночный
+            # вертикальный шип. По валютам (EURUSD=X) базиса почти нет — поэтому
+            # ломалось «на некоторых активах», а не на всех.
+            # Последняя свеча MT5 — незакрытая, её close и есть текущая цена.
+            self._send_json({"updated": datetime.now(timezone.utc).isoformat(),
+                             "delay_sec": delay_sec, "market_open": market_open,
+                             "candles": filtered, "source": "mt5",
+                             "live_price": broker[-1]["close"]})
+            return
+
+        # 🔴 Ряд НЕ склеивается из двух источников.
+        #
+        # Симптом, с которым это найдено: свеча EURUSD прыгала вертикально на
+        # ровном месте. Замер 20.08 02:11 — MT5 bid 1.16754, Yahoo close
+        # 1.16795, разница 4.1 пункта, и она держится. Пока мост падал
+        # (973 перезапуска из-за отмонтированного диска), хвост переключался
+        # между двумя фидами каждые 8-20 секунд по TTL кэша, и график рисовал
+        # эту разницу как движение цены. Данные при этом целы — испорчена
+        # именно склейка.
+        #
+        # Yahoo остаётся источником для символов, которых у брокера нет. Но
+        # если внутридневка символа ЖИВЁТ в MT5, а мост сейчас молчит, честный
+        # ответ — пустой хвост: график замирает на последней настоящей свече.
+        # Пауза — правда, скачок на 4 пункта — нет. Фронт видит feed_down и
+        # может сказать об этом словами вместо того, чтобы дорисовывать.
+        if CHART_BROKER_MAP.get(symbol) and tf in _MT5_TF_ATTR:
+            self._send_json({"candles": [], "updated": datetime.now(timezone.utc).isoformat(),
+                             "delay_sec": None, "market_open": None,
+                             "source": "mt5", "feed_down": True})
+            return
 
         ticker = _registry_yahoo_ticker(symbol)
         if not ticker:
