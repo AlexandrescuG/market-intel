@@ -1653,6 +1653,14 @@ _tickerRAF = requestAnimationFrame(_tickerFrame);
   // «застревает» на последнем баре — quotes-цикл двигал только цену последней
   // свечи, но новые минуты/бары не появлялись.
   var techLastRealUnix = null, techTailTimer = null;
+  // 🔴 Ряд пришёл из MT5 -> живую цену берём ТОЛЬКО оттуда же.
+  // YF_MAP указывает на ФЬЮЧЕРСЫ (GOLD:'GC=F', SILVER:'SI=F', WTI:'CL=F'),
+  // а свечи из MT5 спотовые: замер 20.08 дал спот 4492.25 против фьючерса
+  // 4547.60, +1.23%. techApplyLivePrice() растягивал текущую свечу до
+  // фьючерсной цены и рисовал одиночный вертикальный шип.
+  // В chart.html это уже исправлено; здесь ВТОРАЯ, независимая копия того
+  // же механизма — её пропустили при первой правке.
+  var techLiveFromMt5 = false;
   var TECH_TF_SEC = {M1:60,M5:300,M15:900,M30:1800,H1:3600,H4:14400,D1:86400,W1:604800};
   function _techBarToUnix(t){ return (typeof t==='number')?t:Math.floor(Date.parse(t+'T00:00:00Z')/1000); }
   function _techUnixToBar(ts){ return (techTF==='D1'||techTF==='W1')?new Date(ts*1000).toISOString().slice(0,10):ts; }
@@ -1681,6 +1689,14 @@ _tickerRAF = requestAnimationFrame(_tickerFrame);
           var bar={time:_techUnixToBar(c.time),open:c.open,high:c.high,low:c.low,close:c.close};
           try{ techSeries.update(bar); techLastC=bar; techLastRealUnix=_techBarToUnix(bar.time); }catch(e){}
         }
+      }
+      // Живая цена — из ответа тейла, того же фида, что и свечи. Ставится
+      // ПОСЛЕ применения баров: иначе затрёт только что полученную форму.
+      if(data.source==='mt5'){
+        techLiveFromMt5=true;
+        if(data.live_price!=null)techApplyLivePrice(data.live_price);
+      }else if(data.source!==undefined){
+        techLiveFromMt5=false;
       }
       _techUpdateLiveTag();
     }catch(e){}
@@ -2031,6 +2047,9 @@ _tickerRAF = requestAnimationFrame(_tickerFrame);
       e.target.classList.toggle('on',techToggles[t]); techApplyToggles();
     });
     setInterval(function(){
+      // Для MT5-ряда цену ведёт techPollTail() из того же фида; котировка
+      // Yahoo здесь относится к другому инструменту (см. techLiveFromMt5).
+      if(techLiveFromMt5)return;
       var yfSym=YF_MAP[techSym]; if(!yfSym)return;
       fetch('./data/quotes.json?t='+Date.now()).then(function(r){return r.json();}).then(function(q){
         var d=q.quotes&&q.quotes[yfSym]; if(d&&d.price)techApplyLivePrice(d.price);
