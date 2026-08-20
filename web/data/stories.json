@@ -1,6 +1,46 @@
 {
-  "updated": "2026-08-11T08:30:39.320222+00:00",
+  "updated": "2026-08-20T10:53:59.774603+00:00",
   "stories": [
+    {
+      "id": "3ef1de0e384f",
+      "title": "federal reserve · interest rate · central bank",
+      "summary": "",
+      "status": "peak",
+      "momentum": 24.0,
+      "source_diversity": 3,
+      "first_seen": "2026-07-10T23:53:00.306936+00:00",
+      "last_seen": "2026-08-19T22:13:47.551527+00:00",
+      "peak_seen": null,
+      "market_tickers": "[\"NDAQ\", \"BTC\", \"MRNA\", \"V\", \"NVDA\"]",
+      "raw": "{}",
+      "market_snap": {
+        "NDAQ": {
+          "price": 96.35,
+          "prev": 96.71,
+          "change_pct": -0.37
+        },
+        "BTC": {
+          "price": 30.27,
+          "prev": 28.57,
+          "change_pct": 5.95
+        },
+        "MRNA": {
+          "price": 174.38,
+          "prev": 62.96,
+          "change_pct": 176.97
+        },
+        "V": {
+          "price": 365.54,
+          "prev": 364.25,
+          "change_pct": 0.35
+        },
+        "NVDA": {
+          "price": 217.56,
+          "prev": 219.74,
+          "change_pct": -0.99
+        }
+      }
+    },
     {
       "id": "c7189e368289",
       "title": "stock market · central bank · bear market",
@@ -14,25 +54,25 @@
       "market_tickers": "[\"SOL\", \"LINK\", \"BONK\", \"BTC\", \"GXT\", \"ETH\"]",
       "raw": "{}",
       "market_snap": {
+        "BTC": {
+          "price": 30.27,
+          "prev": 28.57,
+          "change_pct": 5.95
+        },
         "SOL": {
           "price": null,
           "prev": null,
           "change_pct": null
         },
         "LINK": {
-          "price": 5.2,
-          "prev": 5.1,
-          "change_pct": 1.96
+          "price": 5.17,
+          "prev": 5.13,
+          "change_pct": 0.78
         },
         "BONK": {
           "price": null,
           "prev": null,
           "change_pct": null
-        },
-        "BTC": {
-          "price": 28.28,
-          "prev": 28.73,
-          "change_pct": -1.57
         },
         "GXT": {
           "price": null,
@@ -40,9 +80,44 @@
           "change_pct": null
         },
         "ETH": {
-          "price": 17.91,
-          "prev": 18.29,
-          "change_pct": -2.08
+          "price": 20.07,
+          "prev": 18.26,
+          "change_pct": 9.91
+        }
+      }
+    },
+    {
+      "id": "68dfd88b1b6e",
+      "title": "interest rate · stagflation · inflation",
+      "summary": "",
+      "status": "peak",
+      "momentum": 22.5,
+      "source_diversity": 3,
+      "first_seen": "2026-07-18T15:55:24.889667+00:00",
+      "last_seen": "2026-08-19T19:41:29.510561+00:00",
+      "peak_seen": null,
+      "market_tickers": "[\"BTC\", \"MRNA\", \"NDAQ\", \"NVDA\"]",
+      "raw": "{}",
+      "market_snap": {
+        "BTC": {
+          "price": 30.27,
+          "prev": 28.57,
+          "change_pct": 5.95
+        },
+        "MRNA": {
+          "price": 174.38,
+          "prev": 62.96,
+          "change_pct": 176.97
+        },
+        "NDAQ": {
+          "price": 96.35,
+          "prev": 96.71,
+          "change_pct": -0.37
+        },
+        "NVDA": {
+          "price": 217.56,
+          "prev": 219.74,
+          "change_pct": -0.99
         }
       }
     },
@@ -70,9 +145,9 @@
           "change_pct": null
         },
         "LINK": {
-          "price": 5.2,
-          "prev": 5.1,
-          "change_pct": 1.96
+          "price": 5.17,
+          "prev": 5.13,
+          "change_pct": 0.78
         },
         "WIF": {
           "price": null,
@@ -80,9 +155,9 @@
           "change_pct": null
         },
         "LTC": {
-          "price": 39.42,
-          "prev": 39.85,
-          "change_pct": -1.08
+          "price": 40.31,
+          "prev": 40.0,
+          "change_pct": 0.78
         },
         "ZEC": {
           "price": null,
@@ -92,44 +167,124 @@
       }
     },
     {
-      "id": "a6b177f00271",
-      "title": "federal reserve · central bank · stagflation",
+      "id": "f00d9b2308da",
+      "title": "stablecoin · treasury",
       "summary": "",
       "status": "peak",
-      "momentum": 20.0,
+      "momentum": 19.333,
       "source_diversity": 3,
-      "first_seen": "2026-07-28T04:34:14.040468+00:00",
-      "last_seen": "2026-07-29T22:27:33.068697+00:00",
+      "first_seen": "2026-08-17T18:11:29.774431+00:00",
+      "last_seen": "2026-08-20T00:19:10.247548+00:00",
       "peak_seen": null,
-      "market_tickers": "[\"USDT\", \"LTC\", \"SOL\", \"GXT\", \"ZEC\", \"LINK\"]",
+      "market_tickers": "[\"NDAQ\", \"V\", \"BTC\", \"MRNA\", \"NVDA\"]",
       "raw": "{}",
       "market_snap": {
-        "LTC": {
-          "price": 39.42,
-          "prev": 39.85,
-          "change_pct": -1.08
+        "NDAQ": {
+          "price": 96.35,
+          "prev": 96.71,
+          "change_pct": -0.37
         },
+        "V": {
+          "price": 365.54,
+          "prev": 364.25,
+          "change_pct": 0.35
+        },
+        "BTC": {
+          "price": 30.27,
+          "prev": 28.57,
+          "change_pct": 5.95
+        },
+        "MRNA": {
+          "price": 174.38,
+          "prev": 62.96,
+          "change_pct": 176.97
+        },
+        "NVDA": {
+          "price": 217.56,
+          "prev": 219.74,
+          "change_pct": -0.99
+        }
+      }
+    },
+    {
+      "id": "1fd2b0ae0b23",
+      "title": "federal reserve · interest rate · central bank",
+      "summary": "",
+      "status": "peak",
+      "momentum": 19.0,
+      "source_diversity": 3,
+      "first_seen": "2026-07-26T06:45:24.051663+00:00",
+      "last_seen": "2026-08-20T01:05:47.852704+00:00",
+      "peak_seen": null,
+      "market_tickers": "[\"NDAQ\", \"NVDA\", \"MRNA\", \"BTC\", \"V\"]",
+      "raw": "{}",
+      "market_snap": {
+        "NDAQ": {
+          "price": 96.35,
+          "prev": 96.71,
+          "change_pct": -0.37
+        },
+        "NVDA": {
+          "price": 217.56,
+          "prev": 219.74,
+          "change_pct": -0.99
+        },
+        "MRNA": {
+          "price": 174.38,
+          "prev": 62.96,
+          "change_pct": 176.97
+        },
+        "BTC": {
+          "price": 30.27,
+          "prev": 28.57,
+          "change_pct": 5.95
+        },
+        "V": {
+          "price": 365.54,
+          "prev": 364.25,
+          "change_pct": 0.35
+        }
+      }
+    },
+    {
+      "id": "50462ceda38d",
+      "title": "federal reserve · central bank · jobs report",
+      "summary": "",
+      "status": "peak",
+      "momentum": 19.0,
+      "source_diversity": 3,
+      "first_seen": "2026-08-07T20:15:32.361675+00:00",
+      "last_seen": "2026-08-20T10:48:49.406385+00:00",
+      "peak_seen": null,
+      "market_tickers": "[\"HYPE\", \"SOL\", \"BMNP\", \"CRV\", \"BTC\", \"INJ\"]",
+      "raw": "{}",
+      "market_snap": {
         "SOL": {
           "price": null,
           "prev": null,
           "change_pct": null
         },
-        "GXT": {
+        "BTC": {
+          "price": 30.27,
+          "prev": 28.57,
+          "change_pct": 5.95
+        },
+        "HYPE": {
           "price": null,
           "prev": null,
           "change_pct": null
         },
-        "ZEC": {
+        "BMNP": {
+          "price": 91.4,
+          "prev": 91.0,
+          "change_pct": 0.44
+        },
+        "CRV": {
           "price": null,
           "prev": null,
           "change_pct": null
         },
-        "LINK": {
-          "price": 5.2,
-          "prev": 5.1,
-          "change_pct": 1.96
-        },
-        "USDT": {
+        "INJ": {
           "price": null,
           "prev": null,
           "change_pct": null
@@ -150,9 +305,9 @@
       "raw": "{}",
       "market_snap": {
         "LINK": {
-          "price": 5.2,
-          "prev": 5.1,
-          "change_pct": 1.96
+          "price": 5.17,
+          "prev": 5.13,
+          "change_pct": 0.78
         },
         "ZEC": {
           "price": null,
@@ -165,9 +320,9 @@
           "change_pct": null
         },
         "LTC": {
-          "price": 39.42,
-          "prev": 39.85,
-          "change_pct": -1.08
+          "price": 40.31,
+          "prev": 40.0,
+          "change_pct": 0.78
         },
         "WIF": {
           "price": null,
@@ -175,9 +330,54 @@
           "change_pct": null
         },
         "GOLD": {
-          "price": 43.47,
-          "prev": 43.51,
-          "change_pct": -0.09
+          "price": 45.53,
+          "prev": 41.84,
+          "change_pct": 8.82
+        }
+      }
+    },
+    {
+      "id": "8f9937b617f6",
+      "title": "selloff · s&p 500 · nasdaq",
+      "summary": "",
+      "status": "peak",
+      "momentum": 17.833,
+      "source_diversity": 3,
+      "first_seen": "2026-06-21T09:57:06.636346+00:00",
+      "last_seen": "2026-08-20T10:53:48.734621+00:00",
+      "peak_seen": null,
+      "market_tickers": "[\"SPX\", \"XRP\", \"BMNP\", \"BTC\", \"BMNR\", \"BNB\"]",
+      "raw": "{}",
+      "market_snap": {
+        "BMNP": {
+          "price": 91.4,
+          "prev": 91.0,
+          "change_pct": 0.44
+        },
+        "BTC": {
+          "price": 30.27,
+          "prev": 28.57,
+          "change_pct": 5.95
+        },
+        "SPX": {
+          "price": null,
+          "prev": null,
+          "change_pct": null
+        },
+        "XRP": {
+          "price": 11.92,
+          "prev": 11.19,
+          "change_pct": 6.52
+        },
+        "BMNR": {
+          "price": 20.24,
+          "prev": 18.28,
+          "change_pct": 10.72
+        },
+        "BNB": {
+          "price": null,
+          "prev": null,
+          "change_pct": null
         }
       }
     },
@@ -195,14 +395,14 @@
       "raw": "{}",
       "market_snap": {
         "XRP": {
-          "price": 11.4,
-          "prev": 11.42,
-          "change_pct": -0.18
+          "price": 11.92,
+          "prev": 11.19,
+          "change_pct": 6.52
         },
         "META": {
-          "price": 594.92,
-          "prev": 592.1,
-          "change_pct": 0.48
+          "price": 546.03,
+          "prev": 543.67,
+          "change_pct": 0.43
         },
         "SATS": {
           "price": null,
@@ -210,19 +410,44 @@
           "change_pct": null
         },
         "AMZN": {
-          "price": 278.09,
-          "prev": 274.48,
-          "change_pct": 1.32
+          "price": 265.84,
+          "prev": 259.45,
+          "change_pct": 2.46
         },
         "GOOGL": {
-          "price": 357.52,
-          "prev": 354.3,
-          "change_pct": 0.91
+          "price": 344.72,
+          "prev": 344.2,
+          "change_pct": 0.15
         },
         "MSFT": {
-          "price": 506.06,
-          "prev": 499.99,
-          "change_pct": 1.21
+          "price": 484.31,
+          "prev": 481.63,
+          "change_pct": 0.56
+        }
+      }
+    },
+    {
+      "id": "1bc300a128c0",
+      "title": "federal reserve · interest rate · unemployment",
+      "summary": "",
+      "status": "peak",
+      "momentum": 17.5,
+      "source_diversity": 3,
+      "first_seen": "2026-08-12T14:33:26.935576+00:00",
+      "last_seen": "2026-08-12T14:50:19.822890+00:00",
+      "peak_seen": null,
+      "market_tickers": "[\"STRC\", \"MSTR\"]",
+      "raw": "{}",
+      "market_snap": {
+        "STRC": {
+          "price": 95.31,
+          "prev": 94.01,
+          "change_pct": 1.38
+        },
+        "MSTR": {
+          "price": 104.25,
+          "prev": 92.52,
+          "change_pct": 12.68
         }
       }
     },
@@ -240,204 +465,14 @@
       "raw": "{}",
       "market_snap": {
         "BTC": {
-          "price": 28.28,
-          "prev": 28.73,
-          "change_pct": -1.57
-        },
-        "USDT": {
-          "price": null,
-          "prev": null,
-          "change_pct": null
+          "price": 30.27,
+          "prev": 28.57,
+          "change_pct": 5.95
         },
         "ETH": {
-          "price": 17.91,
-          "prev": 18.29,
-          "change_pct": -2.08
-        },
-        "USDC": {
-          "price": 0.0012,
-          "prev": 0.0012,
-          "change_pct": 0.0
-        },
-        "TRUMP": {
-          "price": null,
-          "prev": null,
-          "change_pct": null
-        }
-      }
-    },
-    {
-      "id": "19675fe63816",
-      "title": "inflation · rate cut · ethereum",
-      "summary": "",
-      "status": "peak",
-      "momentum": 17.0,
-      "source_diversity": 3,
-      "first_seen": "2026-07-16T02:53:55.178896+00:00",
-      "last_seen": "2026-07-29T16:55:24.785896+00:00",
-      "peak_seen": null,
-      "market_tickers": "[\"SATA\", \"WIF\", \"MSTR\", \"STRC\", \"BONK\", \"GXT\"]",
-      "raw": "{}",
-      "market_snap": {
-        "WIF": {
-          "price": null,
-          "prev": null,
-          "change_pct": null
-        },
-        "BONK": {
-          "price": null,
-          "prev": null,
-          "change_pct": null
-        },
-        "GXT": {
-          "price": null,
-          "prev": null,
-          "change_pct": null
-        },
-        "SATA": {
-          "price": 98.67,
-          "prev": 99.42,
-          "change_pct": -0.75
-        },
-        "MSTR": {
-          "price": 97.33,
-          "prev": 100.01,
-          "change_pct": -2.68
-        },
-        "STRC": {
-          "price": 94.35,
-          "prev": 95.01,
-          "change_pct": -0.69
-        }
-      }
-    },
-    {
-      "id": "7622a188061f",
-      "title": "federal reserve · disinflation · central bank",
-      "summary": "",
-      "status": "peak",
-      "momentum": 17.0,
-      "source_diversity": 3,
-      "first_seen": "2026-08-07T19:27:32.246723+00:00",
-      "last_seen": "2026-08-07T22:45:24.205464+00:00",
-      "peak_seen": null,
-      "market_tickers": "[\"SPX\"]",
-      "raw": "{}",
-      "market_snap": {
-        "SPX": {
-          "price": null,
-          "prev": null,
-          "change_pct": null
-        }
-      }
-    },
-    {
-      "id": "ef19a1c7db04",
-      "title": "stock market · central bank · market crash",
-      "summary": "",
-      "status": "peak",
-      "momentum": 16.833,
-      "source_diversity": 3,
-      "first_seen": "2026-06-18T10:52:14.611237+00:00",
-      "last_seen": "2026-06-18T13:06:53.512312+00:00",
-      "peak_seen": null,
-      "market_tickers": "[\"TE\", \"NOW\", \"KLAC\", \"TQQQ\", \"NEU\", \"TSMC\"]",
-      "raw": "{}",
-      "market_snap": {
-        "TE": {
-          "price": 5.31,
-          "prev": 5.85,
-          "change_pct": -9.23
-        },
-        "NOW": {
-          "price": 127.44,
-          "prev": 124.88,
-          "change_pct": 2.05
-        },
-        "KLAC": {
-          "price": 192.74,
-          "prev": 198.11,
-          "change_pct": -2.71
-        },
-        "TQQQ": {
-          "price": 73.8,
-          "prev": 74.47,
-          "change_pct": -0.9
-        },
-        "NEU": {
-          "price": 909.98,
-          "prev": 889.71,
-          "change_pct": 2.28
-        },
-        "TSMC": {
-          "price": null,
-          "prev": null,
-          "change_pct": null
-        }
-      }
-    },
-    {
-      "id": "686b7bab1bf1",
-      "title": "federal reserve · interest rate · escalation",
-      "summary": "",
-      "status": "peak",
-      "momentum": 16.833,
-      "source_diversity": 3,
-      "first_seen": "2026-07-31T15:22:32.749716+00:00",
-      "last_seen": "2026-07-31T19:22:33.435485+00:00",
-      "peak_seen": null,
-      "market_tickers": "[\"ETH\", \"HYPE\", \"BTC\", \"USDC\", \"ZEC\", \"LTC\"]",
-      "raw": "{}",
-      "market_snap": {
-        "ETH": {
-          "price": 17.91,
-          "prev": 18.29,
-          "change_pct": -2.08
-        },
-        "BTC": {
-          "price": 28.28,
-          "prev": 28.73,
-          "change_pct": -1.57
-        },
-        "USDC": {
-          "price": 0.0012,
-          "prev": 0.0012,
-          "change_pct": 0.0
-        },
-        "ZEC": {
-          "price": null,
-          "prev": null,
-          "change_pct": null
-        },
-        "LTC": {
-          "price": 39.42,
-          "prev": 39.85,
-          "change_pct": -1.08
-        },
-        "HYPE": {
-          "price": null,
-          "prev": null,
-          "change_pct": null
-        }
-      }
-    },
-    {
-      "id": "59707a9cb279",
-      "title": "interest rate · stock market · inflation",
-      "summary": "",
-      "status": "peak",
-      "momentum": 16.667,
-      "source_diversity": 3,
-      "first_seen": "2026-07-31T15:00:25.304931+00:00",
-      "last_seen": "2026-07-31T15:33:33.305227+00:00",
-      "peak_seen": null,
-      "market_tickers": "[\"ETH\", \"USDC\", \"USDT\", \"BTC\", \"TRUMP\"]",
-      "raw": "{}",
-      "market_snap": {
-        "ETH": {
-          "price": 17.91,
-          "prev": 18.29,
-          "change_pct": -2.08
+          "price": 20.07,
+          "prev": 18.26,
+          "change_pct": 9.91
         },
         "USDC": {
           "price": 0.0012,
@@ -449,50 +484,10 @@
           "prev": null,
           "change_pct": null
         },
-        "BTC": {
-          "price": 28.28,
-          "prev": 28.73,
-          "change_pct": -1.57
-        },
         "TRUMP": {
           "price": null,
           "prev": null,
           "change_pct": null
-        }
-      }
-    },
-    {
-      "id": "78d4b6fe626a",
-      "title": "bitcoin · crypto",
-      "summary": "",
-      "status": "peak",
-      "momentum": 15.833,
-      "source_diversity": 3,
-      "first_seen": "2026-06-26T13:56:13.597883+00:00",
-      "last_seen": "2026-08-07T16:21:32.781642+00:00",
-      "peak_seen": null,
-      "market_tickers": "[\"ETH\", \"BTC\", \"STRC\", \"MSTR\"]",
-      "raw": "{}",
-      "market_snap": {
-        "ETH": {
-          "price": 17.91,
-          "prev": 18.29,
-          "change_pct": -2.08
-        },
-        "BTC": {
-          "price": 28.28,
-          "prev": 28.73,
-          "change_pct": -1.57
-        },
-        "STRC": {
-          "price": 94.35,
-          "prev": 95.01,
-          "change_pct": -0.69
-        },
-        "MSTR": {
-          "price": 97.33,
-          "prev": 100.01,
-          "change_pct": -2.68
         }
       }
     }

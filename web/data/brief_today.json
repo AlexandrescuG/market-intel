@@ -1,152 +1,186 @@
 {
-  "date": "2026-08-11",
-  "generated_at": "2026-08-11T07:36:03.338463+00:00",
+  "date": "2026-08-20",
+  "generated_at": "2026-08-20T04:32:54.153346+00:00",
   "calendar": [
     {
-      "ts_utc": "2026-08-11T01:30:00Z",
-      "scheduled_ts": 1786411800,
+      "ts_utc": "2026-08-20T01:15:00Z",
+      "scheduled_ts": 1787188500,
+      "country": "CN",
+      "title": "Loan Prime Rate 1Y",
+      "indicator": "Interest Rate",
+      "impact": "medium",
+      "forecast": "3",
+      "previous": "3",
+      "symbols": [
+        "GOLD",
+        "SPX",
+        "USDCNY",
+        "WTI"
+      ],
+      "past_reaction": {
+        "symbol": "GOLD",
+        "n": 12,
+        "median_atr_30m": 0.10987901672189193
+      }
+    },
+    {
+      "ts_utc": "2026-08-20T01:15:00Z",
+      "scheduled_ts": 1787188500,
+      "country": "CN",
+      "title": "Loan Prime Rate 5Y",
+      "indicator": "Loan Prime Rate 5Y",
+      "impact": "medium",
+      "forecast": "3.5",
+      "previous": "3.5",
+      "symbols": [
+        "GOLD",
+        "SPX",
+        "USDCNY",
+        "WTI"
+      ],
+      "past_reaction": {
+        "symbol": "GOLD",
+        "n": 7,
+        "median_atr_30m": 0.0690452338753139
+      }
+    },
+    {
+      "ts_utc": "2026-08-20T01:30:00Z",
+      "scheduled_ts": 1787189400,
       "country": "AU",
-      "title": "NAB Business Confidence",
-      "indicator": "Business Confidence",
-      "impact": "high",
-      "forecast": null,
-      "previous": "-6",
+      "title": "Employment Change",
+      "indicator": "Employment Change",
+      "impact": "medium",
+      "forecast": "15",
+      "previous": "80.3",
+      "symbols": [
+        "AUDUSD"
+      ],
+      "past_reaction": null
+    },
+    {
+      "ts_utc": "2026-08-20T01:30:00Z",
+      "scheduled_ts": 1787189400,
+      "country": "AU",
+      "title": "Unemployment Rate",
+      "indicator": "Unemployment Rate",
+      "impact": "medium",
+      "forecast": "4.4",
+      "previous": "4.4",
       "symbols": [
         "AUDUSD"
       ],
       "past_reaction": {
         "symbol": "AUDUSD",
         "n": 5,
-        "median_atr_30m": 0.022653721682845376
+        "median_atr_30m": 0.33980582524270575
       }
     },
     {
-      "ts_utc": "2026-08-11T04:30:00Z",
-      "scheduled_ts": 1786422600,
+      "ts_utc": "2026-08-20T01:30:00Z",
+      "scheduled_ts": 1787189400,
       "country": "AU",
-      "title": "RBA Interest Rate Decision",
-      "indicator": "Interest Rate",
-      "impact": "high",
-      "forecast": "4.35",
-      "previous": "4.35",
-      "symbols": [
-        "AUDUSD"
-      ],
-      "past_reaction": null
-    },
-    {
-      "ts_utc": "2026-08-11T04:30:00Z",
-      "scheduled_ts": 1786422600,
-      "country": "AU",
-      "title": "Cash Rate",
-      "indicator": "Cash Rate",
-      "impact": "high",
-      "forecast": "4.35%",
-      "previous": "4.35%",
-      "symbols": [
-        "AUDUSD"
-      ],
-      "past_reaction": null
-    },
-    {
-      "ts_utc": "2026-08-11T04:30:00Z",
-      "scheduled_ts": 1786422600,
-      "country": "AU",
-      "title": "RBA Monetary Policy Statement",
-      "indicator": "RBA Monetary Policy Statement",
-      "impact": "high",
-      "forecast": null,
-      "previous": null,
-      "symbols": [
-        "AUDUSD"
-      ],
-      "past_reaction": null
-    },
-    {
-      "ts_utc": "2026-08-11T04:30:00Z",
-      "scheduled_ts": 1786422600,
-      "country": "AU",
-      "title": "RBA Rate Statement",
-      "indicator": "RBA Rate Statement",
-      "impact": "high",
-      "forecast": null,
-      "previous": null,
-      "symbols": [
-        "AUDUSD"
-      ],
-      "past_reaction": null
-    },
-    {
-      "ts_utc": "2026-08-11T05:30:00Z",
-      "scheduled_ts": 1786426200,
-      "country": "AU",
-      "title": "RBA Press Conference",
-      "indicator": "Interest Rate",
+      "title": "Full Time Employment Chg",
+      "indicator": "Full Time Employment",
       "impact": "medium",
       "forecast": null,
-      "previous": null,
+      "previous": "48.9",
       "symbols": [
         "AUDUSD"
       ],
       "past_reaction": null
+    },
+    {
+      "ts_utc": "2026-08-20T06:00:00Z",
+      "scheduled_ts": 1787205600,
+      "country": "CH",
+      "title": "Balance of Trade",
+      "indicator": "Balance of Trade",
+      "impact": "medium",
+      "forecast": null,
+      "previous": "3.8",
+      "symbols": [
+        "USDCHF"
+      ],
+      "past_reaction": {
+        "symbol": "USDCHF",
+        "n": 6,
+        "median_atr_30m": 0.0750670241286887
+      }
     }
   ],
-  "calendar_more": 5,
-  "untranslated": [
-    "Cash Rate",
-    "RBA Monetary Policy Statement",
-    "RBA Rate Statement"
-  ],
+  "calendar_more": 10,
+  "untranslated": [],
   "earnings": [],
   "movers": {
     "up": [
       {
-        "symbol": "USDJPY",
-        "bar_date": "2026-08-10",
-        "close": 159.152,
-        "chg_pct": 0.79,
-        "ratio": 1.3519080927399307,
+        "symbol": "EURUSD",
+        "bar_date": "2026-08-19",
+        "close": 1.1674,
+        "chg_pct": 0.85,
+        "ratio": 2.65098245257972,
         "event": {
-          "title": "Fed Hammack Speech",
-          "ts_utc": "2026-08-10T19:00:00Z"
+          "title": "ECB President Lagarde Speech",
+          "ts_utc": "2026-08-19T07:10:00Z"
         }
       },
       {
         "symbol": "GOLD",
-        "bar_date": "2026-08-10",
-        "close": 4402.45,
-        "chg_pct": 1.6,
-        "ratio": 1.0573889477426262,
+        "bar_date": "2026-08-19",
+        "close": 4511.51,
+        "chg_pct": 4.13,
+        "ratio": 2.492179514201867,
         "event": {
-          "title": "Fed Hammack Speech",
-          "ts_utc": "2026-08-10T19:00:00Z"
+          "title": "FDI (YTD) YoY",
+          "ts_utc": "2026-08-19T09:00:00Z"
         }
       }
     ],
     "down": [
       {
-        "symbol": "EURUSD",
-        "bar_date": "2026-08-10",
-        "close": 1.1546,
-        "chg_pct": -0.08,
-        "ratio": 0.543777300524785,
+        "symbol": "USDJPY",
+        "bar_date": "2026-08-19",
+        "close": 158.256,
+        "chg_pct": -0.81,
+        "ratio": 1.6328785220840054,
         "event": {
-          "title": "Fed Hammack Speech",
-          "ts_utc": "2026-08-10T19:00:00Z"
+          "title": "MBA 30-Year Mortgage Rate",
+          "ts_utc": "2026-08-19T11:00:00Z"
         }
       }
     ]
   },
   "patterns": [
     {
+      "symbol": "EURUSD",
+      "tf": "D1",
+      "pattern_key": "bullish_engulfing",
+      "display_name_ru": "Бычье поглощение",
+      "direction": "bullish",
+      "ts": 1787097600,
+      "agree_share_5": 0.5235,
+      "n": 149
+    },
+    {
       "symbol": "GOLD",
       "tf": "D1",
       "pattern_key": "bullish_engulfing",
       "display_name_ru": "Бычье поглощение",
       "direction": "bullish",
-      "ts": 1786320000,
+      "ts": 1787097600,
       "agree_share_5": 0.5211,
       "n": 142
+    },
+    {
+      "symbol": "USDJPY",
+      "tf": "D1",
+      "pattern_key": "bearish_engulfing",
+      "display_name_ru": "Медвежье поглощение",
+      "direction": "bearish",
+      "ts": 1787097600,
+      "agree_share_5": 0.4894,
+      "n": 141
     },
     {
       "symbol": "SILVER",
@@ -157,16 +191,6 @@
       "ts": 1785974400,
       "agree_share_5": 0.4,
       "n": 50
-    },
-    {
-      "symbol": "DJI",
-      "tf": "D1",
-      "pattern_key": "pin_bar_top",
-      "display_name_ru": "Пин-бар сверху",
-      "direction": "bearish",
-      "ts": 1785888000,
-      "agree_share_5": 0.3514,
-      "n": 37
     }
   ],
   "_meta": {
@@ -180,20 +204,19 @@
       "patterns": "core.patterns.detect() + pattern_stats (bot.db), n>=15"
     }
   },
-  "headline": "Золото у рекордных $4 345 перед CPI США в среду; нефть Brent выше $88 на риске вокруг Ормуза",
+  "headline": "Золото $4554 и серебро $67 продолжают рост, биткоин у $69 000 после ликвидации шортов на $1,1 млрд",
   "context": [
     {
-      "text": "Золото в пятницу +2,19% до рекордных $4 345 (×1,7 к своей норме волатильности), на дневном графике бычье поглощение; евро/доллар 1,1555, доллар/иена −0,43%.",
+      "text": "Котировки: золото $4554 (+1,4%) после вчерашних +4,1%, серебро $67 (+2,4%), евро/доллар 1,1681 (+0,9%), нефть WTI $84,6 (−1,5%); S&P 500 −0,5%, VIX 14,9 (−6%).",
       "confidence": "quotes"
     },
     {
-      "text": "Нефть Brent впервые с конца июля выше $88 на фоне напряжённости вокруг Ормузского пролива; в Палату представителей США внесён законопроект о санкциях против России.",
+      "text": "СМИ: FT — Иран готовит удары по целям в Европе при эскалации, НАТО заявила о готовности защищать; ЦБ РФ держит доллар выше ₽85, инфляционные ожидания россиян упали до 13,7%.",
       "confidence": "media"
     },
     {
-      "text": "Крипта (соцсети, цена не подтверждена): недельный приток в биткоин-ETF ~$853 млн — максимум за 3 мес., в эфириум-ETF ~$244 млн; фон эйфоричный — прогнозы «$1 млрд», мемкоин-мания.",
+      "text": "Соцсети: «$500 млрд стёрто с азиатских рынков за 30 минут» и «биткоин выше $70 000» — котировка биткоина $69 287, VIX упал до 14,9, S&P 500 потерял лишь 0,5%.",
       "confidence": "social_unverified"
     }
-  ],
-  "unknown": "Главный риск недели — CPI США в среду: золото перегрето, и инфляционный принт способен качнуть металл и доллар в любую сторону."
+  ]
 }

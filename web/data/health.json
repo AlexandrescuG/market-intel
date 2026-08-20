@@ -1,11 +1,39 @@
 {
-  "updated": "2026-08-11T08:30:53.289814+00:00",
+  "updated": "2026-08-20T10:54:04.819903+00:00",
   "components": [
     {
       "component": "publish",
-      "last_run": "2026-08-11T08:26:22.253184+00:00",
-      "last_ok": "2026-08-11T08:26:22.253184+00:00",
+      "last_run": "2026-08-20T10:49:58.031625+00:00",
+      "last_ok": "2026-08-20T10:49:58.031625+00:00",
       "last_error": null,
+      "error_count": 0
+    },
+    {
+      "component": "alpha_cycle",
+      "last_run": "2026-08-14T05:24:35.445925+00:00",
+      "last_ok": "2026-08-14T05:24:35.445925+00:00",
+      "last_error": null,
+      "error_count": 0
+    },
+    {
+      "component": "alpha_cycle_h1",
+      "last_run": "2026-08-20T10:02:04.541019+00:00",
+      "last_ok": "2026-08-20T10:02:04.541019+00:00",
+      "last_error": "resolved=0; CRASH: OperationalError: database is locked",
+      "error_count": 0
+    },
+    {
+      "component": "alpha_cycle_h4",
+      "last_run": "2026-08-20T08:59:54.400168+00:00",
+      "last_ok": "2026-08-20T08:59:54.400168+00:00",
+      "last_error": "resolved=3; CRASH: OperationalError: database is locked",
+      "error_count": 0
+    },
+    {
+      "component": "alpha_cycle_d1",
+      "last_run": "2026-08-20T01:10:23.984895+00:00",
+      "last_ok": "2026-08-20T01:10:23.984895+00:00",
+      "last_error": "resolved=5; CRASH: OperationalError: database is locked",
       "error_count": 0
     }
   ]
