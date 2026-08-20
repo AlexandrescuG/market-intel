@@ -58,7 +58,19 @@ def to_ticker(tag: str) -> str:
 
 
 def snapshot(tickers: list[str]) -> dict[str, dict]:
-    """{ticker: {price, change_pct, prev}} по дневным барам. Кэш на _TTL."""
+    """{ticker: {price, change_pct, prev}} по дневным барам. Кэш на _TTL.
+
+    🔴 20.08.2026: инструменты, что есть у брокера, берутся у НЕГО, а не у
+    Yahoo. Через эту функцию идут market.json, утренний бриф, режим рынка,
+    дивергенции и проверка прогнозов — то есть почти всё, что говорит о
+    цене словами. Пока она ходила в yfinance, сайт произносил про золото
+    два разных числа: график 4 487 (спот брокера), а всё остальное 4 545
+    (фьючерс GC=F). См. core/mt5_quotes.py — там же, почему это нельзя
+    было закрыть подменой тикера.
+
+    Отказ моста не роняет функцию и не маскируется: те тикеры, что он не
+    дал, честно уходят в ветку Yahoo ниже, о чём пишется предупреждение.
+    """
     import yfinance as yf
     out: dict[str, dict] = {}
     fresh = []
@@ -69,6 +81,23 @@ def snapshot(tickers: list[str]) -> dict[str, dict]:
             out[t] = c[1]
         else:
             fresh.append(t)
+
+    if fresh:
+        try:
+            from core import mt5_quotes
+            broker = mt5_quotes.snapshot(set(fresh))
+        except Exception as e:
+            broker = {}
+            log.warning("snapshot: мост MT5 недоступен (%s) — цены от Yahoo; "
+                        "по золоту это фьючерс против спота на графике", e)
+        for t, data in broker.items():
+            _cache[t] = (now, data)
+            out[t] = data
+        missed = [t for t in fresh if t not in broker]
+        if broker and missed:
+            log.debug("snapshot: у брокера нет %s — остаются на Yahoo", missed)
+        fresh = missed
+
     for t in fresh:
         try:
             h = yf.Ticker(t).history(period="6d", interval="1d")

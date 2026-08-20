@@ -25,7 +25,7 @@
 <link rel="stylesheet" href="/assets/tokens.css?v=1">
 <script src="/assets/i18n.js?v=2" defer></script>
 <script src="/assets/sbf-symbols.js?v=2"></script>
-<script src="/assets/sbf-header.js?v=16" defer></script>
+<script src="/assets/sbf-header.js?v=17" defer></script>
 <script src="/assets/sbf-auth.js?v=1"></script>
 <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
 <script src="/assets/grafik-engine.js?v=20260820a"></script>
@@ -279,10 +279,13 @@ body.embed .card{border-radius:0;box-shadow:none;border:none;max-width:100%}
   <div class="beginner"><span class="ic">&#9432;</span><div id="explain">…</div></div>
   <!-- SPEC_fix_live_chart.md §6: единственное место на сайте, где число было
        без даты и источника — измеренная задержка (не декларируемая) и явное
-       "это не цена брокера". Текст источника меняется вместе с ним (§8: Yahoo/Bybit). -->
+       "это не цена вашего брокера". Конкретный источник называет liveSourceFoot
+       ниже и меняет вместе с ним; 20.08 строка под ним перестала называть Yahoo
+       поимённо — для большинства инструментов цена теперь брокерская, и
+       «Справочная цена Yahoo Finance» стала неправдой на самом видном месте. -->
   <div class="foot" id="liveSourceFoot" style="display:none"></div>
   <div class="foot">
-    <span data-i18n="chart.not_broker_price">Справочная цена Yahoo Finance. У брокера цена будет отличаться на спред.</span>
+    <span data-i18n="chart.not_broker_price">Справочная цена. У вашего брокера она будет отличаться на спред.</span>
     <a href="/brokers" data-i18n="chart.not_broker_price_link">Сравнить брокеров →</a>
   </div>
   <div class="foot" data-i18n="chart.footer_disclaimer">образовательная подсветка паттернов — контекст, не инвестиционная рекомендация</div>
@@ -2231,10 +2234,18 @@ async function pollQuotes() {
         const closed = row.delay_sec != null && row.delay_sec > MARKET_CLOSED_DELAY_SEC;
         setMarketClosed(closed);
         if (!closed) {
-          // Для MT5-ряда цену ведёт pollTail() из того же фида — котировка
-          // Yahoo здесь относится к другому инструменту (см. _liveFromMt5).
-          if (!_liveFromMt5) applyLive(row.price);
-          if (!_liveFromMt5) setLiveSourceLabel('yahoo', row.delay_sec);
+          // 🔴 Правило одно на весь файл: живая цена применяется ТОЛЬКО если она
+          // из того же фида, что и свечи. Раньше проверялся один случай (ряд из
+          // MT5 — цену ведёт pollTail), но с 20.08 quotes.json сам стал
+          // брокерским для инструментов Ava, и зеркальный случай стал реальным:
+          // на D1 у символов без брокерской статики свечи ещё из Yahoo, а
+          // котировка уже из MT5 — расхождение по BTC на замере 06.08 было 0.8%.
+          // Не смешиваем ни в ту, ни в другую сторону.
+          const quoteFromMt5 = row.source === 'mt5';
+          if (!_liveFromMt5 && !quoteFromMt5) {
+            applyLive(row.price);
+            setLiveSourceLabel('yahoo', row.delay_sec);
+          }
           // §7: опрос не крутится бессмысленно при закрытом рынке — раз в 5мин
           // достаточно, чтобы заметить открытие, а не 15с ни за чем.
         } else {
@@ -2313,6 +2324,10 @@ async function pollTail() {
       if (data.live_price != null) applyLive(data.live_price);
     } else if (data.source !== undefined || Array.isArray(data.candles)) {
       _liveFromMt5 = false;
+      // Подпись источника ставит тейл и в Yahoo-ветке: pollQuotes() теперь
+      // может законно не применить котировку (чужой фид) и не дойти до метки,
+      // а строка «Источник: …» под графиком не должна от этого пустеть.
+      if (data.delay_sec != null) setLiveSourceLabel('yahoo', data.delay_sec);
     }
   } catch (e) {
     // тихо: следующий цикл попробует снова, applyLive() тем временем держит

@@ -400,6 +400,20 @@ def publish_quotes() -> None:
     if n_fail:
         log.debug("publish_quotes: %d/%d тикеров не ответили (не 429 — таймаут/ошибка)", n_fail, len(syms))
 
+    # Инструменты брокера — ценой брокера, поверх Yahoo. См. core/mt5_quotes.py.
+    try:
+        from core import mt5_quotes
+        broker = mt5_quotes.quotes(now_ts, set(syms))
+    except Exception as e:
+        broker = {}
+        log.warning("publish_quotes: мост MT5 недоступен (%s) — цены остались "
+                    "от Yahoo, по золоту это фьючерс против спота на графике", e)
+    if broker:
+        out.update(broker)
+    else:
+        log.warning("publish_quotes: мост MT5 не дал ни одной цены — "
+                    "quotes.json целиком от Yahoo")
+
     _write("quotes.json", {"updated": _now(), "quotes": out})
 
 

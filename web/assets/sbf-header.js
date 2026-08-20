@@ -422,7 +422,6 @@
       return {it: it, r: r};
     }).sort(function (a, b) { return a.r - b.r; }).map(function (x) { return x.it; });
   }
-  var BYBIT_MAP = { 'BTCUSDT':'BTC-USD','ETHUSDT':'ETH-USD','SOLUSDT':'SOL-USD' };
   var _fng = null;
   var _live = {};
 
@@ -519,7 +518,7 @@
     if (winTxt) winTxt.textContent = inWin ? t('clock.morning_window', 'Утренний синтез') : t('clock.always_on', 'Скрипты 24/7');
   }
   clockTick();
-  setInterval(clockTick, 60000);
+  setInterval(clockTick, 1000);  // раз в секунду: 60с-тик не выровнен по минуте → часы отставали до минуты
   _i18n.ready.then(clockTick); // подставить перевод сразу, не ждать минуту до первого interval
 
   function setLive(ok) {
@@ -531,7 +530,7 @@
     if (mobLiveDot) mobLiveDot.className = 'mob-dot' + (ok ? '' : ' off');
   }
 
-  // ── Данные: market.json + quotes.json + Bybit WS ─────────────────────────
+  // ── Данные: market.json + quotes.json ────────────────────────────────────
   async function pollQuotes() {
     try {
       var r = await fetch('/data/quotes.json?t=' + Date.now());
@@ -572,35 +571,16 @@
     if (_lastMarketItems) buildStrip(reorderByWatchlist(_lastMarketItems));
   });
 
-  var _ws = null;
-  function startBybitWS() {
-    try {
-      _ws = new WebSocket('wss://stream.bybit.com/v5/public/spot');
-      _ws.onopen = function () {
-        _ws.send(JSON.stringify({
-          op: 'subscribe',
-          args: Object.keys(BYBIT_MAP).map(function (s) { return 'tickers.' + s; })
-        }));
-      };
-      _ws.onmessage = function (ev) {
-        try {
-          var m = JSON.parse(ev.data);
-          if (!m.topic || !m.data || !m.data.lastPrice) return;
-          var bsym = m.topic.replace('tickers.', '');
-          var ysym = BYBIT_MAP[bsym];
-          if (ysym) updateStripPrice(ysym, parseFloat(m.data.lastPrice));
-        } catch (e) {}
-      };
-      _ws.onerror = function () {};
-      _ws.onclose = function () { setTimeout(startBybitWS, 5000); };
-    } catch (e) { setTimeout(startBybitWS, 5000); }
-  }
+  // 🔴 20.08: Bybit-WebSocket убран — это был третий источник цены крипты.
+  // quotes.json теперь несёт BTC/ETH/SOL от брокера (тот же фид, что рисует
+  // свечи на графике), а сокет затирал их спотом Bybit: замер 20.08 давал
+  // расхождение 0.1–0.24%. В ленте и на графике стояли разные числа под
+  // одной подписью — та же болезнь, что у золота, только мельче.
 
   loadMarket();
   pollQuotes();
   setInterval(pollQuotes, 10000);
   setInterval(loadMarket, 300000);
-  startBybitWS();
 
   // Strip scroll-hide (mobile only): slides up on scroll down, returns on scroll up
   (function() {

@@ -69,7 +69,7 @@ if (new URLSearchParams(location.search).get("embed") === "1") {
 <script src="/assets/i18n.js?v=2" defer></script>
 <script src="/assets/sbf-symbols.js?v=2"></script>
 <script src="/edu/assets/calendar-terms.js?v=1" defer></script>
-<script src="/assets/sbf-header.js?v=16" defer></script>
+<script src="/assets/sbf-header.js?v=17" defer></script>
 <script src="/assets/sbf-auth.js?v=1" defer></script>
 <script src="/assets/sbf-profile.js?v=2" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.0/marked.min.js"></script>
@@ -635,8 +635,6 @@ function clockWindow(){
   document.getElementById('winTxt').textContent=inWin?{{ t('clock.morning_window', lang) | tojson }}:{{ t('clock.always_on', lang) | tojson }};
 }
 
-// Bybit WebSocket: крипто → yfinance символ
-const BYBIT_MAP = {'BTCUSDT':'BTC-USD','ETHUSDT':'ETH-USD','SOLUSDT':'SOL-USD'};
 
 // SBF_Charts_Layer4_Spec, Фаза 1.2.1: инструменты ватчлиста первыми в тикере.
 // Зеркалирует ту же логику sbf-header.js (там — для не-главных страниц; здесь
@@ -736,28 +734,11 @@ async function pollLiveStrip() {
   }
 }
 
-// ── Bybit WebSocket: BTC / ETH / SOL в реальном времени ─────────────────────
-let _ws = null;
-function startBybitStrip() {
-  try {
-    _ws = new WebSocket('wss://stream.bybit.com/v5/public/spot');
-    _ws.onopen = () => _ws.send(JSON.stringify({
-      op: 'subscribe',
-      args: Object.keys(BYBIT_MAP).map(s => 'tickers.' + s)
-    }));
-    _ws.onmessage = ev => {
-      try {
-        const m = JSON.parse(ev.data);
-        if (!m.topic || !m.data || !m.data.lastPrice) return;
-        const bybitSym = m.topic.replace('tickers.', '');
-        const yfSym = BYBIT_MAP[bybitSym];
-        if (yfSym) updateStripPrice(yfSym, parseFloat(m.data.lastPrice));
-      } catch(e) {}
-    };
-    _ws.onerror = () => {};
-    _ws.onclose = () => { setTimeout(startBybitStrip, 5000); };
-  } catch(e) { setTimeout(startBybitStrip, 5000); }
-}
+// 🔴 20.08: Bybit-WebSocket убран — это был третий источник цены крипты.
+// quotes.json теперь несёт BTC/ETH/SOL от брокера (тот же фид, что рисует
+// свечи на графике), а сокет затирал их спотом Bybit: замер 20.08 давал
+// расхождение 0.1–0.24%. В ленте и на графике стояли разные числа под
+// одной подписью — та же болезнь, что у золота, только мельче.
 
 function renderMarket(m) {
   if (m && m.fear_greed) _fng = m.fear_greed;
@@ -1586,7 +1567,6 @@ document.getElementById('segCtrl').addEventListener('click', e => {
 })();
 
 load();
-startBybitStrip();
 pollLiveStrip();
 // Тик раз в секунду, не в минуту: 60с-интервал не выровнен по границе минуты,
 // поэтому HH:MM отставали до минуты от реального времени. Функция дешёвая.
@@ -2047,12 +2027,15 @@ _tickerRAF = requestAnimationFrame(_tickerFrame);
       e.target.classList.toggle('on',techToggles[t]); techApplyToggles();
     });
     setInterval(function(){
-      // Для MT5-ряда цену ведёт techPollTail() из того же фида; котировка
-      // Yahoo здесь относится к другому инструменту (см. techLiveFromMt5).
+      // 🔴 То же правило, что в chart.html: цена применяется ТОЛЬКО из фида
+      // своих свечей. Ряд из MT5 ведёт techPollTail(); а с 20.08 стал реальным
+      // и зеркальный случай — quotes.json сам брокерский, и накладывать его на
+      // ещё-Yahoo-свечи D1 нельзя (по BTC расхождение фидов 0.8%).
       if(techLiveFromMt5)return;
       var yfSym=YF_MAP[techSym]; if(!yfSym)return;
       fetch('./data/quotes.json?t='+Date.now()).then(function(r){return r.json();}).then(function(q){
-        var d=q.quotes&&q.quotes[yfSym]; if(d&&d.price)techApplyLivePrice(d.price);
+        var d=q.quotes&&q.quotes[yfSym];
+        if(d&&d.price&&d.source!=='mt5')techApplyLivePrice(d.price);
       }).catch(function(){});
     },8000);
     initGrafik();
