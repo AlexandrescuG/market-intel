@@ -78,7 +78,18 @@ _mt5_conn = None
 _mt5_tail_cache: dict = {}
 _MT5_TAIL_TTL = 20
 _MT5_TF_ATTR = {"M1": "TIMEFRAME_M1", "M5": "TIMEFRAME_M5", "M15": "TIMEFRAME_M15",
-                "M30": "TIMEFRAME_M30", "H1": "TIMEFRAME_H1", "H4": "TIMEFRAME_H4"}
+                "M30": "TIMEFRAME_M30", "H1": "TIMEFRAME_H1", "H4": "TIMEFRAME_H4",
+                # 🔴 20.08.2026: D1/W1 сюда добавлены после того, как шип нашёлся
+                # на ДЕФОЛТНОМ таймфрейме. До этого дневки/недельки уходили в
+                # Yahoo-ветку ниже, и получалось так: история — из price_bars
+                # (спот брокера, GOLD 4483.5), а сегодняшний бар тейл приносил
+                # из GC=F (фьючерс, o=4580 c=4540.3) и клал его через
+                # series.update() поверх. На экране это ровно «две цены сразу»:
+                # весь ряд в одном масштабе цен и последняя свеча в другом,
+                # оторванная вверх на 1.3%. Проверено живым Chrome 20.08:
+                # lastCandle {open:4580, close:4542.5} против предыдущего
+                # закрытия 4483.5.
+                "D1": "TIMEFRAME_D1", "W1": "TIMEFRAME_W1"}
 # Глубина хвоста. 🔴 20.08: было 300 на всех внутридневных ТФ, и на M1 это
 # давало ПЯТЬ ЧАСОВ истории — график начинался посреди вчерашнего вечера и
 # читался как «недостроенный». Замер стоимости выборки через мост:
@@ -86,7 +97,7 @@ _MT5_TF_ATTR = {"M1": "TIMEFRAME_M1", "M5": "TIMEFRAME_M5", "M15": "TIMEFRAME_M1
 # ничего не экономило: время уходит на сам вызов, не на объём.
 # Глубина по ТФ: M1 ~7 суток, M5 ~17, M15 ~31, M30 ~62, H1 ~125, H4 ~330.
 _MT5_COUNT = {"M1": 10000, "M5": 5000, "M15": 3000, "M30": 3000,
-              "H1": 3000, "H4": 2000}
+              "H1": 3000, "H4": 2000, "D1": 3000, "W1": 1000}
 _MT5_PATH = r"C:\Program Files\MetaTrader 5\terminal64.exe"
 
 
@@ -104,12 +115,29 @@ def _mt5_bridge():
     return _mt5_conn
 
 
+def _mt5_tail_supported(our_key, tf):
+    """Можно ли отдавать хвост этого символа/ТФ из брокера.
+
+    Условие НЕ сводится к «инструмент есть у брокера»: для D1/W1 хвост ложится
+    на статику, набранную publish_charts из price_bars, и склеивать два фида в
+    одном ряду нельзя. Внутридневка у брокера есть для всех CHART_BROKER_MAP;
+    дневки/недельки — только там, где статика тоже брокерская
+    (mt5_config.bars_from_broker(), там же замеры расхождения).
+    """
+    from mt5_config import CHART_BROKER_MAP, bars_from_broker
+    if not CHART_BROKER_MAP.get(our_key) or tf not in _MT5_TF_ATTR:
+        return False
+    if tf in ("D1", "W1"):
+        return our_key in bars_from_broker()
+    return True
+
+
 def _mt5_tail(our_key, tf):
-    """Свечи из брокера в реальном времени для внутридневных ТФ. None -> Yahoo-фолбэк."""
+    """Свечи из брокера в реальном времени. None -> Yahoo-фолбэк."""
     global _mt5_conn
     from mt5_config import CHART_BROKER_MAP
     bs = CHART_BROKER_MAP.get(our_key)
-    if not bs or tf not in _MT5_TF_ATTR:
+    if not _mt5_tail_supported(our_key, tf):
         return None
     now = time.time()
     ck = (our_key, tf)
@@ -2255,8 +2283,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         except ValueError:
             since = 0
 
-        # Real-time из брокера для внутридневки (GOLD/US_500/… без задержки Yahoo).
-        from mt5_config import CHART_BROKER_MAP
+        # Real-time из брокера (GOLD/US_500/… без задержки Yahoo).
         broker = _mt5_tail(symbol, tf)
         if broker:
             filtered = [c for c in broker if c["time"] > since]
@@ -2293,7 +2320,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         # ответ — пустой хвост: график замирает на последней настоящей свече.
         # Пауза — правда, скачок на 4 пункта — нет. Фронт видит feed_down и
         # может сказать об этом словами вместо того, чтобы дорисовывать.
-        if CHART_BROKER_MAP.get(symbol) and tf in _MT5_TF_ATTR:
+        if _mt5_tail_supported(symbol, tf):
             self._send_json({"candles": [], "updated": datetime.now(timezone.utc).isoformat(),
                              "delay_sec": None, "market_open": None,
                              "source": "mt5", "feed_down": True})
