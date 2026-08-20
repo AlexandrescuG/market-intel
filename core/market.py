@@ -180,7 +180,12 @@ def _registry_labels() -> dict[str, str]:
 
 def market_state_block(extra_tags: list[str] | None = None) -> str:
     """Готовый markdown-блок для брифа: дашборд + крипто F&G + тикеры из брифа."""
-    lines = ["## 📉 РЕАЛЬНОЕ СОСТОЯНИЕ РЫНКА (yfinance, d/d)"]
+    # 🔴 20.08: заголовок больше не называет yfinance. С переводом snapshot()
+    # на брокера 13 строк из 14 приходят от MT5, и подпись «yfinance» стала
+    # неправдой ровно в том месте, которое эту неправду и должно опровергать
+    # («приоритет над ценами из соцсетей» — то есть блок ЗАЯВЛЯЕТ источник).
+    # Источник теперь проставляется по факту, из самих данных.
+    lines = ["## 📉 РЕАЛЬНОЕ СОСТОЯНИЕ РЫНКА (d/d)"]
     snap = snapshot(DASHBOARD)
     # DASHBOARD собирается из реестра (symbols.json, quote=true), а подписи
     # жили тут отдельным словарём — и обращение шло по names[tk] без запаса.
@@ -212,7 +217,13 @@ def market_state_block(extra_tags: list[str] | None = None) -> str:
         if rows:
             lines.append("\n  Тикеры из брифа:")
             lines += rows
-    lines.append("\n  ⚠️ Цифры из yfinance — приоритет над ценами из соцсетей.")
+    # Порядок фиксированный, не sorted(): по кодам символов латиница идёт
+    # раньше кириллицы, и получалось «из yfinance и брокер MT5» — и порядок
+    # не тот, и падеж.
+    srcs = {snap[tk].get("source") for tk in shown}
+    parts = [n for k, n in (("mt5", "брокера MT5"), (None, "yfinance")) if k in srcs]
+    src_txt = " и ".join(parts) or "yfinance"
+    lines.append(f"\n  ⚠️ Цифры из {src_txt} — приоритет над ценами из соцсетей.")
     return "\n".join(lines) + "\n"
 
 

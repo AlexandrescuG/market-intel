@@ -160,6 +160,10 @@ def snapshot(want: set) -> dict:
             continue
         prev, last = pair
         prec = 4 if abs(last) < 10 else 2
+        # source нужен потребителям, которые ЗАЯВЛЯЮТ источник вслух
+        # (core.market.market_state_block — блок брифа). Без него заголовок
+        # пришлось бы захардкодить, и он снова разошёлся бы с фактом.
         out[y] = {"price": round(last, prec), "prev": round(prev, prec),
-                  "change_pct": round((last / prev - 1) * 100, 2)}
+                  "change_pct": round((last / prev - 1) * 100, 2),
+                  "source": "mt5"}
     return out
