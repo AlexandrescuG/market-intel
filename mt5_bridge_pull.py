@@ -65,7 +65,12 @@ def fetch_and_write(verbose: bool) -> int:
     подряд честно тянул все бары и терял их все, ничего не попадало в
     price_bars (см. Core-лог 10.08). Теперь коммит после КАЖДОГО символа —
     таймаут теряет только необработанный остаток, не всю работу целиком."""
-    con = sqlite3.connect(str(BOT_DB))
+    con = sqlite3.connect(str(BOT_DB), timeout=120)
+    # 🔴 bot.db пишут соседние джобы (alpha-цикл, event_reactions, журнал).
+    # Без ожидания замка прогон падал с "database is locked" — поймано 20.08
+    # сразу после расширения доливки с 5 символов до 28: транзакций стало
+    # впятеро больше, и вероятность попасть на чужую запись выросла так же.
+    con.execute("PRAGMA busy_timeout=120000")
     conn = rpyc.classic.connect(HOST, PORT)
     total = 0
     try:
