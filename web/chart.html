@@ -342,10 +342,9 @@ const YF = {
   WTI:'CL=F', NG:'NG=F',
   EURUSD:'EURUSD=X', GBPUSD:'GBPUSD=X', USDJPY:'JPY=X', DXY:'DX-Y.NYB',
 };
-const BYBIT = {BTC:'BTCUSDT', ETH:'ETHUSDT', SOL:'SOLUSDT'};
 
 // ── Состояние ───────────────────────────────────────────────────────────────
-let chart = null, candleSeries = null, lastCandle = null, ws = null, curTF = 'D1';
+let chart = null, candleSeries = null, lastCandle = null, curTF = 'D1';
 // §1a (SPEC_chart_m1_m5): время последнего РЕАЛЬНОГО бара (из статики/тейла),
 // unix-сек. applyLive() его НЕ двигает — иначе since тейла считался бы от
 // выдуманной свечи и дыра самозапечатывалась (26 инструментов стояли с 6 авг).
@@ -2096,8 +2095,9 @@ function applyLive(price) {
 }
 
 // SPEC_fix_live_chart.md §6.1/§8: подпись источника и измеренной задержки
-// под графиком — общая для Yahoo/Bybit функция, текст меняется вместе с
-// источником (kind), а не показывает одно и то же для разных свойств данных.
+// под графиком — текст меняется вместе с источником (kind), а не показывает
+// одно и то же для разных свойств данных. Ветка 'bybit' убрана 20.08 вместе
+// с самим сокетом.
 function setLiveSourceLabel(kind, delaySec) {
   const el = document.getElementById('liveSourceFoot');
   if (!el) return;
@@ -2107,8 +2107,6 @@ function setLiveSourceLabel(kind, delaySec) {
     el.textContent = delaySec != null
       ? fmt_(t('chart.delay_yahoo_tpl', 'Источник: Yahoo Finance · задержка ~{sec} с'), {sec: delaySec})
       : t('chart.delay_yahoo_unknown', 'Источник: Yahoo Finance');
-  } else if (kind === 'bybit') {
-    el.textContent = t('chart.delay_bybit_live', 'Источник: Bybit · живой поток, без задержки');
   } else {
     el.textContent = '';
   }
@@ -2252,13 +2250,13 @@ async function pollQuotes() {
 // котировки (close=price, high/low растянуты по 8-секундным точкам, open —
 // из последней публикации статики). Частота привязана к таймфрейму: четверть
 // бара, но не чаще 30с — на D1 форма меняется медленно, опрашивать как на M5
-// бессмысленно. Крипта (BYBIT[PARAM]) свой поток через WS, тейл ей не нужен.
+// бессмысленно. Крипта идёт этим же путём — см. удалённый Bybit-WS ниже.
 let _tailTimer = null;
 let _tailInFlight = false;
 
 function scheduleTail() {
   if (_tailTimer) { clearInterval(_tailTimer); _tailTimer = null; }
-  if (BYBIT[PARAM] || !YF[PARAM]) return;
+  if (!YF[PARAM]) return;
   // §6: на M1 опрос раз в минуту (бар закрывается раз в 60с — чаще бессмысленно
   // и лишняя нагрузка на Yahoo). Прочие ТФ — четверть бара, но не чаще 30с.
   const intervalMs = curTF === 'M1'
@@ -2324,55 +2322,15 @@ async function pollTail() {
   }
 }
 
-// SPEC_fix_live_chart.md §8: у сокета не было переподключения при обрыве —
-// один разрыв соединения (не редкость для долго открытой вкладки) навсегда
-// убивал живые обновления цены крипты без единого признака на странице.
-let _wsReconnectAttempts = 0;
-let _wsReconnectTimer = null;
-let _wsDeliberateClose = false;
-const WS_MAX_RECONNECT_ATTEMPTS = 5;
-
-function startCryptoWS() {
-  if (!BYBIT[PARAM]) return false;
-  try {
-    _wsDeliberateClose = false;
-    ws = new WebSocket('wss://stream.bybit.com/v5/public/spot');
-    ws.onopen = () => {
-      _wsReconnectAttempts = 0;
-      setLiveSourceLabel('bybit', null); // §6.1/§8: подпись источника меняется вместе с ним
-      ws.send(JSON.stringify({op:'subscribe', args:['tickers.'+BYBIT[PARAM]]}));
-    };
-    ws.onmessage = ev => {
-      const m = JSON.parse(ev.data);
-      if (m.topic && m.data && m.data.lastPrice) applyLive(parseFloat(m.data.lastPrice));
-    };
-    ws.onclose = () => { if (!_wsDeliberateClose) scheduleWSReconnect(); };
-    ws.onerror = () => { try { ws.close(); } catch (e) {} }; // onclose сработает следом сам
-    return true;
-  } catch (e) { return false; }
-}
-
-function scheduleWSReconnect() {
-  ws = null;
-  _wsReconnectAttempts++;
-  if (_wsReconnectAttempts > WS_MAX_RECONNECT_ATTEMPTS) {
-    // Сокет не поднимается — сдаёмся честно, откатываемся на Yahoo через
-    // pollQuotes() (задержанные котировки крипты тоже приходят в
-    // publish_quotes(), см. YF.BTC/ETH/SOL) вместо тихой мёртвой цены.
-    setLiveSourceLabel('yahoo', null);
-    pollQuotes();
-    return;
-  }
-  const delay = Math.min(30000, 1000 * Math.pow(2, _wsReconnectAttempts));
-  if (_wsReconnectTimer) clearTimeout(_wsReconnectTimer);
-  _wsReconnectTimer = setTimeout(startCryptoWS, delay);
-}
-
-function stopWS() {
-  _wsDeliberateClose = true;
-  if (_wsReconnectTimer) { clearTimeout(_wsReconnectTimer); _wsReconnectTimer = null; }
-  if (ws) { try { ws.close(); } catch(e){}; ws = null; }
-}
+// 🔴 20.08: блок Bybit-WebSocket удалён — это был ТРЕТИЙ источник цены.
+// Бары крипты приходят от брокера (BTCUSD/ETHUSD/SOLUSD у Ava, /api/chart/tail),
+// а lastPrice тянулся со спота Bybit: замер 20.08 — BTC 72181 против 72110.6
+// (+0.098%), ETH +0.108%, SOL +0.24%. applyLive() растягивал текущую свечу до
+// чужой цены — та же болезнь, что у золота, только на порядок мельче и потому
+// незаметная. Вдобавок _liveFromMt5 путь сокета не закрывал, а блок «Технический»
+// на главной уже брал крипту из MT5 — один и тот же инструмент показывал две
+// цены на двух страницах одного сайта.
+// stopWS() при этом не вызывался ниоткуда — сокет и закрыть было некому.
 
 // ── Переключение ────────────────────────────────────────────────────────────
 async function render(tf) {
@@ -2429,7 +2387,7 @@ render(_initialTF).then(() => {
   // записи раз в 15с (publish_quotes) — две трети опросов получали те же
   // байты. pollQuotes() теперь сам себя перепланирует через setTimeout (15с
   // открыт рынок / 5мин закрыт, §7) — здесь только первый вызов.
-  if (!startCryptoWS()) { pollQuotes(); }
+  pollQuotes();
   SBFGrafik.chartFullscreenButton(document.querySelector('.card'));
   _reportHeight();
 });
