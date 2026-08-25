@@ -2762,6 +2762,14 @@ document.addEventListener('sbf:user-ready', async ev => {
       catalog = cat_.items || [];
       applyQuotes(q);
       rebuild();
+      // Открытый инструмент должен быть виден, а не найден прокруткой: при
+      // 842 строках GOLD лежит за сотней валютных пар, и список без этого
+      // выглядит так, будто он к графику не относится.
+      const curIdx = view.findIndex(it => it.canonical === current() || it.symbol === current());
+      if (curIdx > 3) {
+        listEl.scrollTop = Math.max(0, (curIdx - 3) * ROW_H);
+        render();
+      }
     } catch (e) {
       // Панель не приехала — страница графика обязана остаться рабочей: она
       // и до этой спеки работала без списка.
