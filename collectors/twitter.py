@@ -35,6 +35,18 @@ def _is_russian(t: str) -> bool:
     return sum(1 for c in t if "Ѐ" <= c <= "ӿ") / max(len(t), 1) > 0.25
 
 
+# @Markgandon_bot, 25.08.2026: пользователь заметил, что вместо перевода
+# в подписи иногда приходит "🇷🇺 Error 500 (Server Error)!!1500.That's an
+# error...." — это дословный текст generic-страницы ошибки Google (когда
+# translate.google.com отдаёт её вместо перевода), а не наш текст. Причина в
+# deep_translator: он не бросает исключение на такой ответ, а возвращает тело
+# страницы как будто это успешный перевод, и старый except Exception это не
+# ловил. Сигнатура специфичная (реальный перевод экономического твита никогда
+# не будет содержать эту точную английскую фразу) — считаем такой ответ
+# неудачей и просто опускаем строку с переводом, как и при любом другом сбое.
+_GOOGLE_ERROR_SIGNATURE = "Error 500 (Server Error)"
+
+
 async def _translate(text: str) -> str | None:
     if not TRANSLATE or not text or _is_russian(text):
         return None
@@ -43,6 +55,9 @@ async def _translate(text: str) -> str | None:
         loop = asyncio.get_event_loop()
         tr = await loop.run_in_executor(
             _pool, lambda: GoogleTranslator(source="auto", target="ru").translate(text[:1500]))
+        if tr and _GOOGLE_ERROR_SIGNATURE in tr:
+            log.warning("translate: Google отдал страницу ошибки вместо перевода — пропускаю")
+            return None
         return tr if tr and tr.strip() != text.strip() else None
     except Exception as e:
         log.debug("translate failed: %s", e)
