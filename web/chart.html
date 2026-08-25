@@ -77,6 +77,12 @@ body{margin:0;background:var(--cream);color:var(--ink);font-family:Montserrat,sa
 .inst-row.on{background:rgba(201,162,39,.11)}
 .inst-row.on .inst-tick{color:#8a6c10}
 .inst-row.noq{opacity:.5;cursor:default}
+/* Строка, по которой график пока не построится (нет баров, ярус 3 не сделан):
+   курсор обычный и тикер приглушён. Строка, выглядящая кликабельной и молча
+   ничего не делающая по клику, — это интерфейс, который врёт. */
+.inst-row.nochart{cursor:default}
+.inst-row.nochart .inst-tick{color:var(--muted);font-weight:500}
+.inst-row.nochart:hover{background:none}
 .inst-id{min-width:0}
 .inst-tick{font-size:12px;font-weight:600;font-family:'JetBrains Mono',monospace;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -2632,10 +2638,31 @@ document.addEventListener('sbf:user-ready', async ev => {
       if (!q) return true;
       return it.symbol.toLowerCase().includes(q) || (it.name || '').toLowerCase().includes(q);
     });
+    // Порядок: избранное -> точность совпадения с запросом -> те, что реально
+    // открываются -> порядок каталога брокера.
+    //
+    // 🔴 Открывающиеся выше остальных — не косметика. Бары есть только у 31
+    // инструмента реестра, остальные 800+ пока инертны (ярус 3 не сделан), и
+    // список, где сверху лежит то, что не открывается, читается как сломанный.
+    // Живой пример: поиск «GOLD» первым выдавал PAX_GOLD — крипту без
+    // котировки и без графика, — а само золото уходило вниз.
+    const rank = it => {
+      if (!q) return 0;
+      const sym = it.symbol.toLowerCase(), nm = (it.name || '').toLowerCase();
+      if (sym === q) return 0;
+      if (sym.startsWith(q)) return 1;
+      if (nm.startsWith(q)) return 2;
+      if (sym.includes(q)) return 3;
+      return 4;
+    };
     view.sort((a, b) => {
       const fa = favs.has(a.symbol) ? 0 : 1, fb = favs.has(b.symbol) ? 0 : 1;
       if (fa !== fb) return fa - fb;
-      return 0;   // внутри групп — порядок каталога брокера (мажоры первыми)
+      const ra = rank(a), rb = rank(b);
+      if (ra !== rb) return ra - rb;
+      const ca = a.canonical ? 0 : 1, cb = b.canonical ? 0 : 1;
+      if (ca !== cb) return ca - cb;
+      return 0;
     });
     render();
   }
@@ -2650,6 +2677,7 @@ document.addEventListener('sbf:user-ready', async ev => {
     // отсутствие данных за данные, чего этот проект уже наелся.
     const chartable = !!it.canonical;
     const cls = ['inst-row'];
+    if (!chartable) cls.push('nochart');
     if (isCur) cls.push('on');
     if (!q || q.ts == null) cls.push('noq');
     const up = q && q.chg != null ? q.chg >= 0 : true;
