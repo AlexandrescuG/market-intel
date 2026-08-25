@@ -185,14 +185,28 @@ def _mt5_tail(our_key, tf):
 
 
 def _chart_symbols() -> set:
-    """Список инструментов графика — те же 15, что day_thermo_job.py/
-    sr_levels_job.py используют как "все инструменты" (glob по ohlc_*_D1.json).
+    """Инструменты, которые умеет рисовать ДЕТАЛЬНЫЙ график.
+
     SBF_Charts_Layer4_Spec, Фаза 1.3: валидация ватчлиста ДОЛЖНА идти против
     этого списка, не journal_brief.get_available_symbols() (тот читает
     price_bars — другой, гораздо более узкий и по-другому именованный набор:
-    XAUUSD вместо GOLD, нет крипты/индексов/commodities вовсе — не тот домен)."""
-    return {Path(f).stem.replace("ohlc_", "").replace("_D1", "")
-            for f in glob.glob(str(WEB_DIR / "data" / "ohlc_*_D1.json"))}
+    XAUUSD вместо GOLD, нет крипты/индексов/commodities вовсе — не тот домен).
+
+    SPEC_chart_all_instruments §5: раньше список был глобом по
+    web/data/ohlc_*_D1.json — то есть инструмент существовал ровно постольку,
+    поскольку для него заранее опубликовали файлы по каждому ТФ. На каталоге
+    брокера (842 символа x 6 ТФ) это пять тысяч файлов, которых не будет
+    никогда. Источник — реестр; множество то же самое, проверено сверкой:
+    глоб и реестр дают одни и те же 31, разницы ноль в обе стороны.
+
+    🔴 Это НЕ каталог брокера. Каталог (broker_symbols, 842 позиции) —
+    список для ЛЕВОЙ панели, там нужны только котировки. Здесь — то, для чего
+    есть бары. Смешать их значило бы разрешить положить в ватчлист _BMW.DE,
+    у которого график не построится: бар по нему взять неоткуда, пока не
+    сделан ярус 3 (доливка по запросу)."""
+    from core.symbols_registry import _load as _load_symbol_registry
+    return {k for k, v in _load_symbol_registry().items()
+            if isinstance(v, dict) and v.get("chart")}
 _BOT_DB  = Path("/mnt/sbfdata/sbf-platform/SBFAcademy_bot/bot.db")
 
 _COUNTRY_SYM = {
