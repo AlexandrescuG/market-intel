@@ -157,6 +157,12 @@ MIGRATIONS: list[tuple[int, str, str]] = [
     # те заголовки, которые модель видела, — JSON-список.
     (25, "news_clusters.summary_sources",
      "ALTER TABLE news_clusters ADD COLUMN summary_sources TEXT"),
+    # §2.4. Готовый текст алерта для строк, которые забирает бот. Форматирует
+    # market_intel (он владеет числами, источниками и подписью), бот решает
+    # только КОМУ и КОГДА. Иначе формат алерта жил бы в двух зонах сразу и
+    # разошёлся бы на первой же правке §2.5.
+    (26, "market_outliers.alert_payload",
+     "ALTER TABLE market_outliers ADD COLUMN alert_payload TEXT"),
 ]
 
 

@@ -198,8 +198,12 @@ def dispatch(con, cfg: dict, now_ts: int) -> dict:
             sent += 1
         else:
             # Адресат — подписчики. Отправляет бот: у него аудитория,
-            # часовые пояса и «тихие часы». Строку не трогаем, он её найдёт
-            # по alerted_ts IS NULL AND alert_suppressed IS NULL.
+            # часовые пояса и «тихие часы». Здесь только кладём готовый текст:
+            # бот не форматирует алерты, иначе формат §2.5 жил бы в двух зонах
+            # и разошёлся бы на первой правке. Строку он найдёт по
+            # alert_payload IS NOT NULL AND alerted_ts IS NULL.
+            con.execute("UPDATE market_outliers SET alert_payload=? WHERE id=?",
+                        (alert_text(r), r["id"]))
             left_for_bot += 1
 
     if over_cap:
