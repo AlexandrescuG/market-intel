@@ -147,11 +147,11 @@ def settle(con: sqlite3.Connection) -> tuple[int, int]:
 def closed_trades(con: sqlite3.Connection) -> list[dict]:
     """Закрытые сделки стратегии, с результатом в ATR."""
     rows = con.execute(
-        "SELECT id, deal_entry_price, deal_exit_price, note, closed_ts "
+        "SELECT id, deal_entry_price, deal_exit_price, note, closed_ts, created_ts "
         "FROM cost_observations WHERE order_status='closed' AND note LIKE '%strategy=gold_oil%' "
         "ORDER BY closed_ts").fetchall()
     out = []
-    for oid, entry, exit_, note, cts in rows:
+    for oid, entry, exit_, note, cts, ots in rows:
         if entry is None or exit_ is None:
             continue
         atr = None
@@ -164,8 +164,33 @@ def closed_trades(con: sqlite3.Connection) -> list[dict]:
         if not atr:
             continue
         out.append({"id": oid, "r_atr": (exit_ - entry) / atr, "closed_ts": cts,
+                    "open_ts": ots,
                     "divergence": "divergence=1" in (note or "")})
     return out
+
+
+def _mean_overlap(trades: list[dict]) -> float:
+    """Сколько сделок в среднем жило одновременно.
+
+    Стратегия входит раз в час, а горизонт — 12 часов, поэтому сделки
+    перекрываются по построению. Замер 25.08 на 73 сделках: в среднем 3.93
+    одновременно, максимум 10."""
+    ev = []
+    for t in trades:
+        o = t.get("open_ts") or t["closed_ts"]
+        ev.append((o, 1))
+        ev.append((t["closed_ts"], -1))
+    ev.sort()
+    span = ev[-1][0] - ev[0][0]
+    if span <= 0:
+        return 1.0
+    cur = area = 0
+    prev = ev[0][0]
+    for ts, d in ev:
+        area += cur * (ts - prev)
+        cur += d
+        prev = ts
+    return max(1.0, area / span)
 
 
 def metrics(trades: list[dict]) -> dict:
@@ -179,8 +204,24 @@ def metrics(trades: list[dict]) -> dict:
         se = sd / math.sqrt(n)
     else:
         se = float("inf")
+    # 🔴 25.08: CI считался как для НЕЗАВИСИМЫХ наблюдений, а сделки
+    # перекрываются — одна и та же цена золота входит в исход сразу нескольких.
+    # На 73 сделках наивный CI95 дал [+0.0295, +0.5759] при планке 0.036: нижняя
+    # граница разошлась с планкой на 0.007 ATR. Ещё чуть-чуть — и правило §3
+    # объявило бы признак ПОДТВЕРЖДЁННЫМ по перекрывающимся наблюдениям, то есть
+    # по одному и тому же движению рынка, посчитанному четыре раза.
+    # Поправка: эффективный размер выборки n/k, где k — среднее перекрытие;
+    # SE растёт в sqrt(k) раз. С k=3.93 тот же интервал становится
+    # [-0.2391, +0.8445] — то есть ноль внутри, подтверждать нечего.
+    # Поправка ТОЛЬКО ужесточает: интервал шире, подтвердить труднее,
+    # остановить по убытку — тоже труднее. В сторону «раньше остановиться»
+    # она не двигает, поэтому не может создать ложную остановку.
+    k = _mean_overlap(trades) if n > 1 else 1.0
+    se_eff = se * math.sqrt(k)
     return {"n": n, "ev": mean, "total": sum(vals),
-            "ci_lo": mean - 1.96 * se, "ci_hi": mean + 1.96 * se,
+            "ci_lo": mean - 1.96 * se_eff, "ci_hi": mean + 1.96 * se_eff,
+            "ci_lo_naive": mean - 1.96 * se, "ci_hi_naive": mean + 1.96 * se,
+            "overlap": k, "n_eff": n / k,
             "wins": sum(1 for v in vals if v > 0)}
 
 
@@ -196,7 +237,9 @@ def apply_rules(m: dict) -> tuple[str, str]:
                                f"при n={m['n']} — признак опровергнут форвардом")
     if m["n"] >= MIN_N_CONFIRM and m["ci_lo"] > PLANKA_ATR:
         return "ПОДТВЕРЖДЁН", f"низ CI95 {m['ci_lo']:+.4f} выше планки при n={m['n']}"
-    return "продолжать", f"n={m['n']}, EV={m['ev']:+.4f}, CI95 [{m['ci_lo']:+.4f}, {m['ci_hi']:+.4f}]"
+    return "продолжать", (f"n={m['n']}, EV={m['ev']:+.4f}, CI95 [{m['ci_lo']:+.4f}, "
+                         f"{m['ci_hi']:+.4f}] (перекрытие {m.get('overlap', 1):.1f}x, "
+                         f"n_eff={m.get('n_eff', m['n']):.0f})")
 
 
 def stop_trading(reason: str) -> None:
