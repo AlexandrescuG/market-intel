@@ -60,7 +60,15 @@
   var isCalendar = _bare === '/calendar' || _bare.startsWith('/edu/calendar');
   var isJournal  = _bare === '/journal.html' || _bare === '/journal';
   var isBrokers  = _bare === '/brokers' || _bare === '/brokers.html';
-  var isEdu      = !isMain && !isCalendar && !isJournal && !isBrokers;
+  // Был объявлен ниже и ни разу не использован — задел под пункт меню,
+  // который так и не подключили. Подключён 25.08 (SPEC_chart_all_instruments):
+  // страница графика была доступна только из карточек журнала и календаря.
+  var isCharts   = _bare === '/chart.html' || _bare === '/chart' || _bare.startsWith('/chart');
+  // isEdu — catch-all «всё остальное», поэтому он присваивал себе и страницу
+  // графика: на /chart.html пункт «Обучение» подсвечивался как активный
+  // задолго до этой правки, просто в глаза не бросалось, пока рядом не
+  // появился второй активный пункт.
+  var isEdu      = !isMain && !isCalendar && !isJournal && !isBrokers && !isCharts;
 
   // Detect edu book pages for RU/RO/EN switcher: /edu/b/n, /edu/ro/b/n, /edu/en/b/n
   var _bookM = path.match(/\/edu\/(ro\/|en\/)?b\/(\d+)/);
@@ -73,6 +81,7 @@
     if (page === 'journal'  && isJournal)  return 'active';
     if (page === 'edu'      && isEdu)      return 'active';
     if (page === 'brokers'  && isBrokers)  return 'active';
+    if (page === 'charts'   && isCharts)   return 'active';
     return '';
   }
 
@@ -321,8 +330,6 @@
   }
 
   // ── HTML ─────────────────────────────────────────────────────────────────
-  var isCharts = path === '/chart.html' || path.includes('/chart');
-
   var _hdHtml = [
     '<header class="sbf-hd">',
     '  <a href="' + navHref('/') + '" class="sbf-brand">',
@@ -331,6 +338,7 @@
     '  </a>',
     '  <nav class="g-nav">',
     '    <a href="' + navHref('/') + '"           class="g-nav-item ' + navCls('today')    + '" data-i18n="nav.today">' + t('nav.today', 'Сегодня') + '</a>',
+    '    <a href="' + navHref('/chart.html') + '" class="g-nav-item ' + navCls('charts')   + '" data-i18n="nav.charts">' + t('nav.charts', 'Графики') + '</a>',
     '    <a href="' + navHref('/edu/') + '"       class="g-nav-item ' + navCls('edu')       + '" data-i18n="nav.edu">' + t('nav.edu', 'Обучение') + '</a>',
     '    <a href="' + navHref('/calendar') + '"   class="g-nav-item ' + navCls('calendar')  + '" data-i18n="nav.calendar">' + t('nav.calendar', 'Календарь') + '</a>',
     '    <a href="' + navHref('/brokers') + '"     class="g-nav-item ' + navCls('brokers')   + '" data-i18n="nav.brokers">' + t('nav.brokers', 'Брокеры') + '</a>',
@@ -356,6 +364,7 @@
     '<a href="' + navHref('/') + '"           class="g-bn-item ' + navCls('today')    + '"><span class="g-bn-ico"><img class="mi-icon" src="/assets/icons/icon-sun.svg" alt="" width="20" height="20"></span><span class="g-bn-lbl" data-i18n="nav.today">' + t('nav.today', 'Сегодня') + '</span></a>',
     // Profile injected here as 2nd by sbf-profile.js
     '<a href="' + navHref('/edu/') + '"     class="g-bn-item ' + navCls('edu')       + '"><span class="g-bn-ico"><img class="mi-icon" src="/assets/icons/icon-books.png" alt="" width="20" height="20"></span><span class="g-bn-lbl" data-i18n="nav.edu">' + t('nav.edu', 'Обучение') + '</span></a>',
+    '<a href="' + navHref('/chart.html') + '" class="g-bn-item ' + navCls('charts')   + '"><span class="g-bn-ico"><img class="mi-icon" src="/assets/icons/icon-bar-chart.png" alt="" width="20" height="20"></span><span class="g-bn-lbl" data-i18n="nav.charts">' + t('nav.charts', 'Графики') + '</span></a>',
     '<a href="' + navHref('/calendar') + '" class="g-bn-item ' + navCls('calendar')  + '"><span class="g-bn-ico"><img class="mi-icon" src="/assets/icons/icon-calendar.png" alt="" width="20" height="20"></span><span class="g-bn-lbl" data-i18n="nav.calendar">' + t('nav.calendar', 'Календарь') + '</span></a>',
     '<a href="' + navHref('/brokers') + '"   class="g-bn-item ' + navCls('brokers')   + '"><span class="g-bn-ico"><img class="mi-icon" src="/assets/icons/icon-briefcase.png" alt="" width="20" height="20"></span><span class="g-bn-lbl" data-i18n="nav.brokers">' + t('nav.brokers', 'Брокеры') + '</span></a>'
   ].join('\n');
