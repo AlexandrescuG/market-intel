@@ -62,6 +62,13 @@ echo "[$(date +%T)] 2b/3 деривация brief_today.json (SPEC_morning_brief
 # report.json/Telegram-отправка ниже не читают. Порядок важен: build_brief_v2
 # перезаписывает brief_today.json целиком, llm_context.py домердживает
 # headline/context ПОВЕРХ него -- в обратном порядке правки потерялись бы.
+# SPEC_brief_outliers §3.2: спросить модель, что из тем дня — событие. Строго
+# ДО build_brief_v2: он читает уже проставленные summary_status='ok', и в
+# обратном порядке блок «Выбивается из контекста» собрался бы по вчерашним
+# темам. Скан выбросов (sbf-outliers.timer, раз в 15 мин) триаж не делает —
+# 96 вызовов модели в сутки ради одного блока это цена без содержания.
+python3 outliers_job.py --triage || echo "триаж выбросов не отработал, блок «вне контекста» будет пуст"
+
 python3 -m analyze.build_brief_v2 || echo "build_brief_v2 упал, brief_today.json не обновлён"
 python3 -m analyze.llm_context || echo "llm_context упал, headline/context не смержены"
 

@@ -254,6 +254,21 @@ def topic_bursts(headlines: list[dict], min_publishers: int = MIN_PUBLISHERS) ->
     return kept
 
 
+def headlines_for_cluster(kind: str, key: str, label: str,
+                          headlines: list[dict]) -> list[dict]:
+    """Заголовки одной темы — обратная операция к тому, как тема собиралась.
+
+    Нужна триажу (§3.2): модели показывают не «тему» абстрактно, а сами
+    заголовки, из которых ей формулировать. Ветвление ровно то же, что при
+    сборке, поэтому лежит здесь, рядом с ним, а не в вызывающем модуле:
+    разъехавшись, они дали бы модели заголовки не той темы.
+    """
+    if kind == "company":
+        return _name_hits(label or key, headlines)
+    pool = [h for h in headlines if not mentions_known_instrument(h["title"])]
+    return [h for h in pool if key in _tokens(h["title"])]
+
+
 def _upsert_cluster(con, *, day, kind, key, label, publishers, items,
                     sample_title, sample_url, outlier_symbol, now_ts) -> int:
     cur = con.execute("SELECT id FROM news_clusters WHERE day=? AND kind=? AND key=?",

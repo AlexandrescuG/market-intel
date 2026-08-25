@@ -150,6 +150,13 @@ MIGRATIONS: list[tuple[int, str, str]] = [
     (24, "news_clusters: одна тема на сутки",
      "CREATE UNIQUE INDEX IF NOT EXISTS idx_news_cluster_day "
      "ON news_clusters(day, kind, key)"),
+    # §3.2. sample_title выбирался при СБОРКЕ темы и к фразе модели отношения
+    # не имеет: у темы «reserve» он оказался про штрафы сотрудникам банков, а
+    # фраза — про попытку взять ФРС под контроль. Показать такой заголовок
+    # как источник фразы значит приписать ей чужую причину. Здесь лежат ровно
+    # те заголовки, которые модель видела, — JSON-список.
+    (25, "news_clusters.summary_sources",
+     "ALTER TABLE news_clusters ADD COLUMN summary_sources TEXT"),
 ]
 
 

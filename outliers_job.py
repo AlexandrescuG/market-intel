@@ -275,6 +275,35 @@ def publish_json(con, cfg: dict, now_ts: int) -> Path:
     return out
 
 
+def triage(now_ts: int, force: bool = False, verbose: bool = False) -> int:
+    """§3.2. Отдельный вход, а НЕ часть 15-минутного скана: скан идёт 96 раз в
+    сутки, а вопрос «что сегодня выбилось из контекста» имеет смысл задать
+    один раз, перед утренним брифингом (analyze/run_daily.sh). Девяносто шесть
+    вызовов модели в день ради одного блока — цена без содержания."""
+    from core import news_clusters as NC
+    from core import outlier_triage as T
+
+    day = datetime.fromtimestamp(now_ts, timezone.utc).strftime("%Y-%m-%d")
+    try:
+        headlines = NC.recent_headlines(24, now_ts)
+    except Exception as e:
+        log.error("триаж: лента новостей недоступна (%s) — блока не будет", e)
+        return 1
+
+    con = _connect()
+    try:
+        stats = T.run(con, day, headlines, now_ts=now_ts, force=force, verbose=verbose)
+    finally:
+        con.close()
+
+    print(f"триаж: предложено {stats['offered']}, сформулировано {stats['ok']}, "
+          f"отклонено валидатором {stats['rejected']}, не выбрано {stats['skipped']}, "
+          f"модель молчит {stats['failed']}")
+    # Ненулевой код только когда модель не ответила вовсе: «предложили и
+    # ничего не выбрано» — штатный тихий день, а не отказ.
+    return 1 if stats["failed"] else 0
+
+
 def report(cfg: dict, top: int) -> int:
     """Что близко к порогу — для калибровки. Ничего не пишет."""
     eq, market_open = O.fetch_equity({**cfg, "equity": {**cfg["equity"], "abs_chg_pct": 0,
@@ -303,6 +332,11 @@ def main() -> int:
     ap.add_argument("--report", type=int, metavar="N",
                     help="показать N ближайших к порогу и выйти, ничего не записывая")
     ap.add_argument("--config", help="другой файл порогов (для прогона на других значениях)")
+    ap.add_argument("--triage", action="store_true",
+                    help="§3.2: спросить модель, что из тем дня — событие, и выйти "
+                         "(раз в сутки, перед брифингом; скан этого не делает)")
+    ap.add_argument("--force", action="store_true",
+                    help="с --triage: переспросить и по темам, о которых модель уже высказалась")
     ap.add_argument("--verbose", action="store_true")
     args = ap.parse_args()
     logging.basicConfig(level=logging.INFO if args.verbose else logging.WARNING,
@@ -318,6 +352,9 @@ def main() -> int:
 
     if args.report:
         return report(cfg, args.report)
+
+    if args.triage:
+        return triage(int(time.time()), force=args.force, verbose=args.verbose)
 
     now_ts = int(time.time())
     failures = []
