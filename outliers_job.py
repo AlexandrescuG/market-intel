@@ -138,7 +138,8 @@ def _attach_news(con, rows: list[dict]) -> None:
         text = title or label or ""
         if url:
             text = f'<a href="{url}">{text}</a>'
-        r["_news"] = f"📰 {text} — пишут {publishers} изданий"
+        r["_news"] = (f"📰 {text} — пишут {publishers} "
+                      f"{_plural(publishers, 'издание', 'издания', 'изданий')}")
 
 
 def dispatch(con, cfg: dict, now_ts: int) -> dict:
@@ -231,6 +232,29 @@ def _enqueue_operational_text(con, source: str, text: str) -> None:
     outbox.enqueue(con, source=source, status_label="ФАКТ", payload=text)
 
 
+def _link_news(con, now_ts: int) -> tuple[int, int]:
+    """§3.1. Отказ здесь НЕ роняет скан: выброс без объяснения — рабочий
+    случай (факт движения самоценен, придумывать причину нельзя), а вот
+    молча потерянный скан был бы потерей данных."""
+    from core import news_clusters as NC
+    day = datetime.fromtimestamp(now_ts, timezone.utc).strftime("%Y-%m-%d")
+    try:
+        headlines = NC.recent_headlines(24, now_ts)
+    except Exception as e:
+        log.error("outliers: лента новостей недоступна (%s) — выбросы без объяснений", e)
+        return 0, 0
+    linked = topics = 0
+    try:
+        linked = NC.link_outliers(con, O.today_rows(con, now_ts), headlines, day, now_ts)
+    except Exception as e:
+        log.error("outliers: связь выброс-заголовок не построена: %s", e)
+    try:
+        topics = NC.store_topics(con, NC.topic_bursts(headlines), day, now_ts)
+    except Exception as e:
+        log.error("outliers: темы-всплески не посчитаны: %s", e)
+    return linked, topics
+
+
 def publish_json(con, cfg: dict, now_ts: int) -> Path:
     """§6. Пишется этим же джобом, а не общим publish_all(): у него свой такт
     (15 минут против часа) и свои источники."""
@@ -318,12 +342,17 @@ def main() -> int:
     con = _connect()
     try:
         new, updated = O.upsert(con, eq + cr, now_ts)
+        # §3.1 ступень 1 — ДО рассылки: связь «выброс ↔ заголовок» должна
+        # успеть попасть в сам алерт строкой объяснения, иначе смысл ловить
+        # её вообще пропадает (к утру движение уже история).
+        linked, topics = _link_news(con, now_ts)
         stats = dispatch(con, cfg, now_ts)
         path = publish_json(con, cfg, now_ts)
     finally:
         con.close()
 
-    print(f"outliers: новых {new}, обновлено {updated}, отправлено {stats['sent']}, "
+    print(f"outliers: новых {new}, обновлено {updated}, объяснено новостью {linked}, "
+          f"тем-всплесков {topics}, отправлено {stats['sent']}, "
           f"придержано {stats['suppressed']}, ждёт бота {stats['pending_for_bot']}, "
           f"тихий режим {stats['quiet']}, рынок США открыт {market_open} -> {path.name}")
     # Частичный отказ источника — ненулевой код: таймер это покажет в journalctl,

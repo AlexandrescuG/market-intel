@@ -57,6 +57,44 @@ _CASHTAG_ALIASES = {
 }
 
 
+def mentions_known_instrument(text: str) -> str | None:
+    """Тикер нашего списка, упомянутый в тексте, или None.
+
+    Вынесено наружу 25.08 (SPEC_brief_outliers §3.1): подсистема «выбивается
+    из контекста» ищет темы, где НЕ упомянут ни один наш инструмент, и ей
+    нужен ровно этот словарь. Заводить второй список алиасов рядом значило бы
+    развести их через месяц — тот же класс ошибки, что уже был с четырьмя
+    независимыми списками инструментов до symbols.json.
+    """
+    low = (text or "").lower()
+    for tag, patterns in _CASHTAG_ALIASES.items():
+        for pat in patterns:
+            if re.search(pat, low):
+                return tag
+    # Дополнительно — сами коды инструментов из реестра (USDJPY, NASDAQ, DJI…).
+    # Расширяется ФУНКЦИЯ, а не _CASHTAG_ALIASES: словарь читает ещё
+    # _report_flag_for() для пометок ленты сайта, и правка словаря молча
+    # изменила бы поведение require_cashtag на другой поверхности.
+    for code in _registry_codes():
+        if re.search(r"(?<![\w$])" + re.escape(code.lower()) + r"(?![\w])", low):
+            return code
+    return None
+
+
+_registry_codes_cache: list | None = None
+
+
+def _registry_codes() -> list:
+    global _registry_codes_cache
+    if _registry_codes_cache is None:
+        try:
+            from core.symbols_registry import _load
+            _registry_codes_cache = [k for k in _load() if len(k) >= 3]
+        except Exception:
+            _registry_codes_cache = []
+    return _registry_codes_cache
+
+
 def load_config() -> dict:
     try:
         cfg = json.loads(_CONFIG_PATH.read_text(encoding="utf-8"))
