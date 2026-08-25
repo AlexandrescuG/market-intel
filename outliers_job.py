@@ -259,6 +259,15 @@ def publish_json(con, cfg: dict, now_ts: int) -> Path:
     """§6. Пишется этим же джобом, а не общим publish_all(): у него свой такт
     (15 минут против часа) и свои источники."""
     rows = O.today_rows(con, now_ts)
+    day = datetime.fromtimestamp(now_ts, timezone.utc).strftime("%Y-%m-%d")
+    # Темы «вне контекста» кладём в ЭТОТ же файл, а не в brief_today.json:
+    # бриф пересобирается раз в сутки в 06:00, а тут такт 15 минут. Иначе
+    # сайт до следующего утра показывал бы вчерашние темы рядом со свежими
+    # движениями — два блока об одном дне с разным возрастом.
+    topics = con.execute(
+        "SELECT label, key, summary, publishers, items, outlier_symbol "
+        "FROM news_clusters WHERE day=? AND summary_status='ok' "
+        "ORDER BY publishers DESC LIMIT 3", (day,)).fetchall()
     WEB_DATA.mkdir(parents=True, exist_ok=True)
     out = WEB_DATA / "outliers.json"
     out.write_text(json.dumps({
@@ -270,7 +279,15 @@ def publish_json(con, cfg: dict, now_ts: int) -> Path:
             "price": r["price"], "dollar_volume": r["dollar_volume"],
             "screener": r["screener"],
             "seen_utc": datetime.fromtimestamp(r["last_seen_ts"], timezone.utc).isoformat(),
+            "explained": bool(r["news_cluster_id"]),
         } for r in rows],
+        "off_context": [{
+            "label": t[0] or t[1],
+            "text": t[2],
+            "publishers": t[3],
+            "items": t[4],
+            "symbol": t[5],
+        } for t in topics],
     }, ensure_ascii=False, indent=2), encoding="utf-8")
     return out
 

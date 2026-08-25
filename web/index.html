@@ -473,6 +473,8 @@ a:hover{text-decoration:underline;color:var(--glow)}
           <div class="brief-block" id="briefEarnings" style="display:none"></div>
           <div class="brief-block" id="briefMovers" style="display:none"></div>
           <div class="brief-block" id="briefPatterns" style="display:none"></div>
+          <div class="brief-block" id="briefOutliers" style="display:none"></div>
+          <div class="brief-block" id="briefOffContext" style="display:none"></div>
           <details class="rep-sec" id="briefContext" style="display:none">
             <summary>💬 <span id="briefContextTitle"></span><span class="rep-chev">▼</span></summary>
             <div class="rep-body">
@@ -935,6 +937,48 @@ function renderBriefHeadline(b){
   el.style.display = 'block';
 }
 
+// SPEC_brief_outliers §6. Источник — web/data/outliers.json, а не
+// brief_today.json: бриф пересобирается раз в сутки, скринер идёт каждые 15
+// минут, и «рост в моменте» к утру уже история. Числа в блоке — как их снял
+// скринер, включая пик за день: он и есть причина, по которой инструмент сюда
+// попал, даже если к вечеру от роста ничего не осталось.
+function renderOutliers(o){
+  const el = document.getElementById('briefOutliers');
+  if(!el) return;
+  const items = (o && o.items) || [];
+  if(!items.length){ el.style.display='none'; return; }
+  const rows = items.map(function(it){
+    const sign = it.chg_pct>0 ? '+' : '';
+    const peak = (it.peak_chg_pct!=null && Math.abs(it.peak_chg_pct) > Math.abs(it.chg_pct)+0.5)
+      ? ' <span class="agree">'+escapeHtmlIdx(fmt_(I18N_OUTLIERS.peakTpl,
+          {peak:(it.peak_chg_pct>0?'+':'')+it.peak_chg_pct.toFixed(1)+'%'}))+'</span>'
+      : '';
+    const dir = it.chg_pct>0 ? 'up' : 'down';
+    return '<div class="brief-pattern-row"><span class="mono">'+escapeHtmlIdx(it.symbol)+'</span> '
+      +escapeHtmlIdx(it.name||'')+' <b class="'+dir+'">'+sign+it.chg_pct.toFixed(1)+'%</b>'+peak+'</div>';
+  }).join('');
+  el.innerHTML = '<h3>⚡ '+I18N_OUTLIERS.title+'</h3>'+rows;
+  el.style.display = 'block';
+}
+
+// Фразы пишет модель и только по-русски (как и ежечасная сводка): показывать
+// русский текст на /ro/ и /en/ было бы той же ошибкой «не тот язык», которую
+// в этом проекте уже ловили. Блок там скрыт целиком, а не переведён наполовину.
+function renderOffContext(o){
+  const el = document.getElementById('briefOffContext');
+  if(!el) return;
+  const items = (o && o.off_context) || [];
+  if(!items.length || _PAGE_LANG !== 'ru'){ el.style.display='none'; return; }
+  const rows = items.map(function(it){
+    const pub = (it.publishers!=null)
+      ? ' <span class="agree">— '+escapeHtmlIdx(fmt_(I18N_OUTLIERS.offPubTpl,{n:it.publishers}))+'</span>'
+      : '';
+    return '<div class="brief-pattern-row">'+escapeHtmlIdx(it.text||'')+pub+'</div>';
+  }).join('');
+  el.innerHTML = '<h3>🌐 '+I18N_OUTLIERS.offTitle+'</h3>'+rows;
+  el.style.display = 'block';
+}
+
 function renderBrief(b){
   renderBriefHeadline(b);
   renderBriefCalendar(b);
@@ -1389,6 +1433,14 @@ const I18N_DIGEST = {
   stale: {{ t('home.news_digest_stale', lang) | tojson }},
 };
 
+const I18N_OUTLIERS = {
+  title:     {{ t('home.outliers_title', lang) | tojson }},
+  sub:       {{ t('home.outliers_sub', lang) | tojson }},
+  peakTpl:   {{ t('home.outliers_peak_tpl', lang) | tojson }},
+  offTitle:  {{ t('home.off_context_title', lang) | tojson }},
+  offPubTpl: {{ t('home.off_context_pub_tpl', lang) | tojson }},
+};
+
 function escapeHtmlIdx(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
 // SPEC_site_fixes_2026-07-29 §5: спарклайн нормализуется по ОБЩЕЙ шкале (lo/hi
@@ -1504,14 +1556,15 @@ document.getElementById('pulseTabs').addEventListener('click', e=>{
 
 async function load(){
   clockWindow();
-  const [m,t,s,r,meta,brief,digest]=await Promise.all(
-    ['market','technical','signals','report','meta','brief_today','news_digest'].map(get));
+  const [m,t,s,r,meta,brief,digest,outliers]=await Promise.all(
+    ['market','technical','signals','report','meta','brief_today','news_digest','outliers'].map(get));
   renderMarket(m); renderFng(m||{}); renderReport(r);
   renderBrief(brief);
   try { renderTech(t); } catch(e) { /* tcards may not exist in current layout */ }
   loadPulse(_pulseCat);
   SIG=s; renderSignals('economy');
   renderNewsDigest(digest);
+  renderOutliers(outliers); renderOffContext(outliers);
   const techFreshEl=document.getElementById('techFresh');
   if(t&&techFreshEl)techFreshEl.textContent=ago(t.updated);
   if(s)document.getElementById('sigFresh').textContent=ago(s.updated);
