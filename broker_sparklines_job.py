@@ -2,21 +2,24 @@
 # -*- coding: utf-8 -*-
 """broker_sparklines_job.py — спарклайны по всему каталогу (SPEC_chart_all_instruments §4, ярус 2).
 
-ПОЧЕМУ ЗДЕСЬ НЕТ ОЧЕРЕДИ ПО ВИДИМОЙ ОБЛАСТИ. Спека закладывала запрос
-спарклайнов пачками по мере прокрутки (IntersectionObserver + кэш), исходя из
-того, что «~24 бара H1 на символ, то есть тысяча вызовов» — дорого. Замер
-25.08 через мост: 0,22 с на символ (10 шт — 0,5 с, 50 — 5,2 с, 200 — 44 с),
-то есть ВЕСЬ каталог из 842 обходится примерно за три минуты. Это укладывается
-в то самое окно кэша в 10-15 минут, которое спека и предлагала.
+РОТАЦИЯ С БЮДЖЕТОМ ВРЕМЕНИ, А НЕ ПОЛНЫЙ ОБХОД. Первый замер (0,22 с на
+символ на валютах) обещал, что весь каталог берётся за три минуты, и первая
+версия ходила подряд по всем 834. На живом прогоне 25.08 это оказалось
+неправдой: 569 рядов за 1881 с, а на хвосте каталога — больше 6 с на символ,
+потому что по акциям терминал докачивает историю с сервера брокера при первом
+обращении.
 
-Значит, целой подсистемы «спроси то, что видно, положи в кэш, покажи заглушку»
-можно не строить: страница получает готовый файл со всеми рядами сразу, без
-заглушек, дозагрузок и мигания при прокрутке. Меньше движущихся частей — и
-меньше мест, где спарклайн молча не приедет.
+🔴 Чем это кончилось, и почему здесь теперь бюджет. Тридцать минут занятого
+моста уронили САЙТ: serve.py зовёт мост синхронно из обработчика запроса
+(_mt5_tail <- /api/chart/tail), а сервер однопоточный — один ждущий запрос
+заморозил все остальные, и снаружи пришёл bad gateway. Ограничение времени
+ответа в serve.py добавлено отдельно, но фоновая работа не имеет права
+создавать такое давление в принципе.
 
-ОБХОД ИДЁТ КУСКАМИ. Три минуты подряд держать мост нельзя: на нём же висит
-ежечасная доливка баров и 15-секундный снимок котировок. Между кусками пауза,
-соединение переоткрывается — мост свободен почти всё время обхода.
+Поэтому: каждый прогон берёт символы, у которых ряд самый старый, и работает
+не дольше BUDGET_SEC. Файл ДОПОЛНЯЕТСЯ, а не переписывается — за несколько
+прогонов каталог покрывается целиком, и ни один из них не держит мост дольше
+пары минут.
 
 Расписание: sbf-broker-sparklines.timer, раз в 15 минут.
 
@@ -40,14 +43,23 @@ from core.config import BASE_DIR
 
 WEB_DATA = BASE_DIR / "web" / "data"
 OUT_PATH = WEB_DATA / "broker_sparklines.json"
+STATE_FILE = BASE_DIR / "data" / "sparklines_state.json"
 CATALOG_PATH = WEB_DATA / "broker_catalog.json"
 QUOTES_PATH = WEB_DATA / "broker_quotes.json"
 
 HOST, PORT = "127.0.0.1", 18812
-CHUNK = 30                  # столько символов за одно соединение
-PAUSE_SEC = 1.0             # пауза между кусками — мост нужен не только нам
+# 🔴 Размер куска и таймаут выставлены по ЗАМЕРУ, а не по интуиции. Первый
+# полный обход 25.08: 569 рядов из 834 за 1881 с, и последние девять кусков по
+# 30 символов отвалились с "result expired" — на хвосте каталога уходит больше
+# 6 с на символ (терминал докачивает историю с сервера брокера при первом
+# обращении), и кусок в 30 не помещался в 180 с. Куски по 10 при таймауте 300 с
+# дают троекратный запас даже на самых медленных символах.
+CHUNK = 10
+PAUSE_SEC = 0.4             # пауза между кусками — мост нужен не только нам
 BARS = 24                   # сутки по часам
-RPC_TIMEOUT = 180
+RPC_TIMEOUT = 120
+BUDGET_SEC = 120            # столько мост занимает ОДИН прогон, не дольше
+REFRESH_SEC = 3600          # ряд старше часа считается устаревшим
 
 log = logging.getLogger("broker_sparklines")
 
@@ -85,6 +97,13 @@ for _s in _names:
             pass
 
 
+def _load_json(path: Path, default):
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return default
+
+
 def run(limit: int | None = None) -> int:
     try:
         names = _symbols()
@@ -97,29 +116,45 @@ def run(limit: int | None = None) -> int:
         log.error("спарклайны: в снимке нет ни одного символа с котировкой")
         return 1
 
+    prev = _load_json(OUT_PATH, {}).get("series") or {}
+    state = _load_json(STATE_FILE, {})
+    now = time.time()
+
+    # Сначала те, у кого ряда нет вовсе, потом самые старые. Так первый
+    # прогон покрывает начало каталога, следующие — остальное, и ни один не
+    # перебирает уже свежее.
+    stale = [n for n in names if (now - state.get(n, 0)) > REFRESH_SEC]
+    stale.sort(key=lambda n: state.get(n, 0))
+    if not stale:
+        print(f"спарклайны: все {len(names)} рядов свежее {REFRESH_SEC // 60} мин, обход не нужен")
+        return 0
+
     t0 = time.time()
-    series: dict[str, list[float]] = {}
-    empty = 0
-    failed_chunks = 0
-    for i in range(0, len(names), CHUNK):
-        chunk = names[i:i + CHUNK]
+    series = dict(prev)
+    done = empty = failed_chunks = 0
+    for i in range(0, len(stale), CHUNK):
+        if time.time() - t0 > BUDGET_SEC:
+            break
+        chunk = stale[i:i + CHUNK]
         try:
             got = _fetch_chunk(chunk)
         except Exception as e:
-            # Кусок не удался — остальные всё равно берём: половина рядов
-            # лучше, чем ни одного, а тихо отдать пустой файл нельзя.
             failed_chunks += 1
             log.warning("спарклайны: кусок %d-%d не снят: %s", i, i + len(chunk), e)
             continue
+        stamp = int(time.time())
         for sym, vals in got.items():
-            if vals:
+            state[sym] = stamp          # отметку ставим и пустым: иначе символ
+            if vals:                    # без баров перебирался бы каждый прогон
                 series[sym] = vals
+                done += 1
             else:
                 empty += 1
+                series.pop(sym, None)
         time.sleep(PAUSE_SEC)
 
     if not series:
-        log.error("спарклайны: ни одного ряда не снято — файл не переписываем, "
+        log.error("спарклайны: ни одного ряда — файл не переписываем, "
                   "прошлый остаётся с прежней датой")
         return 1
 
@@ -134,12 +169,13 @@ def run(limit: int | None = None) -> int:
         "series": series,
     }, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     tmp.replace(OUT_PATH)
+    STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
+    STATE_FILE.write_text(json.dumps(state, separators=(",", ":")), encoding="utf-8")
 
     took = time.time() - t0
-    print(f"спарклайны: {len(series)} рядов из {len(names)} за {took:.0f} c "
-          f"(пустых {empty}, неудачных кусков {failed_chunks}) -> {OUT_PATH.name}")
-    # Частичный обход — ненулевой код: «прошло успешно, просто половина рядов
-    # отсутствует» ровно тот отказ, который не должен выглядеть как норма.
+    left = max(0, len(stale) - done - empty)
+    print(f"спарклайны: обновлено {done} за {took:.0f} c, всего в файле {len(series)}/{len(names)}, "
+          f"осталось устаревших {left} (пустых {empty}, неудачных кусков {failed_chunks})")
     return 2 if failed_chunks else 0
 
 
