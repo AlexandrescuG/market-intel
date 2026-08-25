@@ -163,6 +163,38 @@ MIGRATIONS: list[tuple[int, str, str]] = [
     # разошёлся бы на первой же правке §2.5.
     (26, "market_outliers.alert_payload",
      "ALTER TABLE market_outliers ADD COLUMN alert_payload TEXT"),
+    # SPEC_chart_all_instruments_2026-08-25.md §5. Реестр инструментов вместо
+    # глоба по файлам: сейчас список на странице графика — это буквально
+    # ohlc_*_D1.json на диске, и на каталоге брокера (842 символа) это 5000
+    # файлов, которых никогда не будет.
+    #
+    # quote_ts NULL — обязательное состояние: «инструмент в каталоге есть, но
+    # котировка не приходила». Такая строка показывается серой с подписью, а
+    # не пустым местом и не нулём. Иначе повторим то, что уже случилось с
+    # графиками: 26 инструментов двенадцать дней рисовали август как
+    # настоящее, потому что отсутствие данных было неотличимо от данных.
+    #
+    # last_seen_ts вместо удаления: брокер снимает инструменты с торгов, и
+    # молчаливое исчезновение строки хуже, чем помеченная неактивной.
+    (27, "broker_symbols: каталог инструментов брокера",
+     """CREATE TABLE IF NOT EXISTS broker_symbols (
+          broker_symbol TEXT PRIMARY KEY,
+          canonical TEXT,
+          display_name TEXT,
+          category TEXT NOT NULL,
+          subgroup TEXT,
+          digits INTEGER,
+          is_selected INTEGER NOT NULL,
+          quote_ts INTEGER,
+          bid REAL,
+          ask REAL,
+          chg_pct REAL,
+          first_seen_ts INTEGER NOT NULL,
+          last_seen_ts INTEGER NOT NULL
+        )"""),
+    (28, "broker_symbols: выборка по категории",
+     "CREATE INDEX IF NOT EXISTS idx_broker_symbols_cat "
+     "ON broker_symbols(category, broker_symbol)"),
 ]
 
 
