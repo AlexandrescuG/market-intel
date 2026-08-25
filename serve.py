@@ -222,8 +222,16 @@ _COUNTRY_CURRENCY = {
 }
 
 def _ensure_schema() -> None:
-    """Создаёт новые таблицы БД Фазы 1 если не существуют."""
-    con = sqlite3.connect(str(_BOT_DB))
+    """Создаёт новые таблицы БД Фазы 1 если не существуют.
+
+    🔴 busy_timeout обязателен. bot.db пишут соседние джобы (доливка баров,
+    снимок каталога брокера), и без ожидания ЛЮБАЯ их запись в момент старта
+    роняет весь веб-сервер: 25.08 sbf-web.service упал на этой строке с
+    "database is locked", когда каталог инструментов писал свои 842 строки.
+    Сервис поднялся рестартом, но падать веб-серверу из-за чужой транзакции
+    незачем — тот же приём уже применён в outliers_job и доливке баров."""
+    con = sqlite3.connect(str(_BOT_DB), timeout=60)
+    con.execute("PRAGMA busy_timeout=60000")
     con.executescript("""
         CREATE TABLE IF NOT EXISTS price_bars (
             symbol TEXT NOT NULL, tf TEXT NOT NULL, ts INTEGER NOT NULL,

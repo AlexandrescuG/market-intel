@@ -43,6 +43,71 @@ body{margin:0;background:var(--cream);color:var(--ink);font-family:Montserrat,sa
 .chart-top a{font-size:11px;color:var(--muted);text-decoration:none;letter-spacing:.3px}
 .chart-top a:hover{color:var(--gold)}
 .chart-body{padding:18px}
+/* ── Панель инструментов (SPEC_chart_all_instruments §6) ──────────────────
+   Список слева, детальный график справа. Токены — из :root этой же страницы
+   (cream/paper/line/ink/muted/gold), новых hex не заводим: у SBF уже есть
+   бренд, и панель обязана выглядеть как часть страницы, а не как вставка. */
+.chart-layout{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:14px;
+  max-width:1320px;margin:0 auto;align-items:start}
+.chart-layout > .card{max-width:none;margin:0}
+.inst-panel{background:var(--paper);border:1px solid var(--line);border-radius:14px;overflow:hidden;
+  box-shadow:0 6px 24px rgba(43,43,51,.06);position:sticky;top:14px}
+.inst-head{padding:10px;border-bottom:1px solid var(--line)}
+.inst-search{display:flex;align-items:center;gap:6px;border:1px solid var(--line);
+  border-radius:9px;padding:6px 9px;background:var(--cream)}
+.inst-search svg{flex:none;color:var(--muted)}
+.inst-search input{border:0;outline:0;background:transparent;font:inherit;font-size:12px;
+  color:var(--ink);width:100%}
+.inst-search input::placeholder{color:var(--muted)}
+.inst-search:focus-within{border-color:var(--gold)}
+.inst-cats{display:flex;gap:4px;margin-top:8px;flex-wrap:wrap}
+.inst-cat{font-size:11px;padding:3px 8px;border-radius:8px;border:1px solid transparent;
+  background:none;color:var(--muted);cursor:pointer;font-family:inherit;line-height:1.5}
+.inst-cat:hover{color:var(--ink)}
+.inst-cat.on{background:rgba(201,162,39,.13);color:#8a6c10;border-color:rgba(201,162,39,.3)}
+.inst-cat:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+.inst-list{max-height:calc(100vh - 190px);overflow-y:auto;overflow-x:hidden}
+.inst-group{font-size:10px;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);
+  padding:7px 10px 4px;font-family:'JetBrains Mono',monospace}
+.inst-row{display:grid;grid-template-columns:1fr 52px 58px 16px;gap:6px;align-items:center;
+  padding:7px 10px;border-bottom:1px solid var(--grid);cursor:pointer;text-decoration:none;
+  color:inherit;height:44px}
+.inst-row:hover{background:var(--cream)}
+.inst-row:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}
+.inst-row.on{background:rgba(201,162,39,.11)}
+.inst-row.on .inst-tick{color:#8a6c10}
+.inst-row.noq{opacity:.5;cursor:default}
+.inst-id{min-width:0}
+.inst-tick{font-size:12px;font-weight:600;font-family:'JetBrains Mono',monospace;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.inst-name{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.inst-spark{display:block}
+.inst-px{text-align:right;font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums}
+.inst-last{font-size:11px}
+.inst-chg{font-size:11px}
+.inst-chg.up{color:var(--up)} .inst-chg.down{color:var(--down)}
+.inst-none{font-size:11px;color:var(--muted)}
+.inst-fav{border:0;background:none;padding:0;cursor:pointer;color:var(--line);font-size:13px;
+  line-height:1;opacity:0;transition:opacity .12s}
+.inst-row:hover .inst-fav,.inst-fav.on,.inst-fav:focus-visible{opacity:1}
+.inst-fav.on{color:var(--gold)}
+.inst-foot{padding:8px 10px;font-size:11px;color:var(--muted);text-align:center;
+  border-top:1px solid var(--line)}
+.inst-back{display:none}
+@media(max-width:900px){
+  /* §6: список и график рядом не помещаются. Список — отдельный экран,
+     график открывается поверх, назад — к списку. Не пытаемся ужать две
+     колонки в одну ширину телефона. */
+  .chart-layout{grid-template-columns:minmax(0,1fr)}
+  .inst-panel{position:static}
+  .inst-list{max-height:none}
+  body.has-symbol .inst-panel{display:none}
+  body.has-symbol .inst-back{display:inline-block;font-size:12px;color:var(--muted);
+    text-decoration:none;padding:0 0 10px}
+  body.has-symbol .inst-back:hover{color:var(--gold)}
+  body:not(.has-symbol) .chart-layout > .card{display:none}
+}
+@media(prefers-reduced-motion:reduce){.inst-fav{transition:none}}
 .mono{font-family:'JetBrains Mono',monospace}
 .card{background:var(--paper);border:1px solid var(--line);border-radius:14px;overflow:hidden;max-width:960px;margin:0 auto;
   box-shadow:0 6px 24px rgba(43,43,51,.06)}
@@ -219,6 +284,20 @@ body.embed .card{border-radius:0;box-shadow:none;border:none;max-width:100%}
   </nav>
 </div>
 <div class="chart-body">
+<div class="chart-layout">
+<aside class="inst-panel" id="instPanel">
+  <div class="inst-head">
+    <label class="inst-search">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="instSearch" type="search" autocomplete="off" spellcheck="false" aria-label="search">
+    </label>
+    <div class="inst-cats" id="instCats"></div>
+  </div>
+  <div class="inst-list" id="instList"><div id="instRows"></div></div>
+  <div class="inst-foot" id="instFoot"></div>
+</aside>
+<a class="inst-back" href="?" data-i18n="chart.inst_back_to_list">← К списку инструментов</a>
 <div class="card">
   <div class="hd">
     <span class="sym" id="sym">—</span>
@@ -289,6 +368,7 @@ body.embed .card{border-radius:0;box-shadow:none;border:none;max-width:100%}
     <a href="/brokers" data-i18n="chart.not_broker_price_link">Сравнить брокеров →</a>
   </div>
   <div class="foot" data-i18n="chart.footer_disclaimer">образовательная подсветка паттернов — контекст, не инвестиционная рекомендация</div>
+</div>
 </div>
 <div class="evt-card-backdrop" id="evtBackdrop"></div>
 <div class="evt-card" id="evtCard"></div>
@@ -2458,5 +2538,248 @@ document.addEventListener('sbf:user-ready', async ev => {
 });
 </script>
 </div><!-- /.chart-body -->
+
+<script>
+/* ── Панель инструментов (SPEC_chart_all_instruments_2026-08-25.md §4/§6) ───
+   Список читает СНИМОК (web/data/broker_*.json), который пишет фоновый цикл
+   broker_catalog_loop.py. В MT5 из браузера не ходим никогда: мост живёт в
+   Wine, отвечает неровно и уже бывал заблокирован зависшим прогоном —
+   синхронный вызов из веб-запроса означал бы, что одно зависание вешает сайт.
+
+   Три файла с разным тактом, а не один: каталог (имена и категории, 85 КБ)
+   меняется раз в недели и тянется один раз; котировки (37 КБ) опрашиваются
+   каждые 15 с; спарклайны обновляет отдельный джоб раз в 15 минут. Общий файл
+   означал бы 138 КБ на каждый опрос, а сервер ничего не жмёт. */
+(function(){
+  const listEl = document.getElementById('instList');
+  const rowsEl = document.getElementById('instRows');
+  const footEl = document.getElementById('instFoot');
+  const catsEl = document.getElementById('instCats');
+  const searchEl = document.getElementById('instSearch');
+  if (!listEl || !rowsEl) return;
+
+  const ROW_H = 44;          // синхронно с .inst-row height в CSS
+  const OVERSCAN = 8;        // строк сверх видимой области — чтобы прокрутка не мигала
+  const FAV_KEY = 'sbf_chart_favorites';
+  const QUOTES_MS = 15000;
+  const SPARKS_MS = 5 * 60 * 1000;
+
+  const CATS = [
+    ['',          'chart.cat_all',       'Все'],
+    ['fx',        'chart.cat_fx',        'Валюты'],
+    ['index',     'chart.cat_index',     'Индексы'],
+    ['commodity', 'chart.cat_commodity', 'Сырьё'],
+    ['stock',     'chart.cat_stock',     'Акции'],
+    ['crypto',    'chart.cat_crypto',    'Крипта'],
+    ['etf',       'chart.cat_etf',       'ETF'],
+    ['bond',      'chart.cat_bond',      'Облигации'],
+    ['other',     'chart.cat_other',     'Прочее'],
+  ];
+
+  let catalog = [];            // [{symbol,name,canonical,category,...}]
+  let quotes = new Map();      // symbol -> {bid, chg, ts}
+  let sparks = {};             // symbol -> [24 close]
+  let cat = '';
+  let query = '';
+  let view = [];               // отфильтрованный и отсортированный список
+  let favs = loadFavs();
+
+  function loadFavs(){
+    try { return new Set(JSON.parse(localStorage.getItem(FAV_KEY) || '[]')); }
+    catch(e){ return new Set(); }   // приватное окно / очищенные данные — не повод падать
+  }
+  function saveFavs(){
+    try { localStorage.setItem(FAV_KEY, JSON.stringify([...favs])); } catch(e){}
+  }
+
+  function esc(x){ return String(x == null ? '' : x)
+    .replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+  function fmtPrice(v, digits){
+    if (v == null) return '—';
+    const d = (digits == null) ? (Math.abs(v) >= 1000 ? 1 : Math.abs(v) >= 100 ? 2 : 4)
+                               : Math.min(digits, 6);
+    return v.toFixed(d);
+  }
+  function fmtChg(v){
+    if (v == null) return '';
+    const s = (v > 0 ? '+' : '') + v.toFixed(2).replace('.', ',') + '%';
+    return s.replace('-', '−');
+  }
+
+  /* Спарклайн нормализуется по СВОИМ краям: строка отвечает на вопрос «как
+     ходил этот инструмент за сутки», а не «сильнее ли он соседа» — общая шкала
+     на разнородном каталоге (EURUSD и биткоин в одном списке) сделала бы почти
+     все линии плоскими. */
+  function sparkSvg(vals, up){
+    if (!vals || vals.length < 2) return '<div class="inst-none" style="text-align:center">—</div>';
+    let lo = Infinity, hi = -Infinity;
+    for (const v of vals){ if (v < lo) lo = v; if (v > hi) hi = v; }
+    const span = (hi - lo) || 1;
+    const pts = vals.map((v, i) =>
+      (i * 52 / (vals.length - 1)).toFixed(1) + ',' + (18 - ((v - lo) / span) * 16).toFixed(1)).join(' ');
+    return '<svg class="inst-spark" viewBox="0 0 52 20" width="52" height="20" aria-hidden="true">'
+      + '<polyline points="' + pts + '" fill="none" stroke="' + (up ? 'var(--up)' : 'var(--down)')
+      + '" stroke-width="1.4" stroke-linejoin="round"/></svg>';
+  }
+
+  function current(){ return (typeof PARAM === 'string') ? PARAM : ''; }
+
+  function rebuild(){
+    const q = query.trim().toLowerCase();
+    view = catalog.filter(it => {
+      if (cat && it.category !== cat) return false;
+      if (!q) return true;
+      return it.symbol.toLowerCase().includes(q) || (it.name || '').toLowerCase().includes(q);
+    });
+    view.sort((a, b) => {
+      const fa = favs.has(a.symbol) ? 0 : 1, fb = favs.has(b.symbol) ? 0 : 1;
+      if (fa !== fb) return fa - fb;
+      return 0;   // внутри групп — порядок каталога брокера (мажоры первыми)
+    });
+    render();
+  }
+
+  function rowHtml(it){
+    const q = quotes.get(it.symbol);
+    const fav = favs.has(it.symbol);
+    const isCur = it.canonical === current() || it.symbol === current();
+    // 🔴 Клик разрешён только там, где график построится. Бары есть для
+    // инструментов реестра (canonical), для остальных 800+ ярус 3 (доливка по
+    // запросу) ещё не сделан — открыть по ним пустой график значило бы выдать
+    // отсутствие данных за данные, чего этот проект уже наелся.
+    const chartable = !!it.canonical;
+    const cls = ['inst-row'];
+    if (isCur) cls.push('on');
+    if (!q || q.ts == null) cls.push('noq');
+    const up = q && q.chg != null ? q.chg >= 0 : true;
+    const px = (!q || q.ts == null)
+      ? '<div class="inst-none">' + esc(t('chart.inst_noquote', 'нет котировки')) + '</div>'
+      : '<div class="inst-last">' + esc(fmtPrice(q.bid, it.digits)) + '</div>'
+        + '<div class="inst-chg ' + (up ? 'up' : 'down') + '">' + esc(fmtChg(q.chg)) + '</div>';
+    return '<div class="' + cls.join(' ') + '" data-s="' + esc(it.symbol) + '"'
+      + (chartable ? ' data-go="' + esc(it.canonical) + '" role="button" tabindex="0"'
+                   : ' title="' + esc(t('chart.inst_no_bars', 'график пока недоступен')) + '"')
+      + '><div class="inst-id"><div class="inst-tick">' + esc(it.symbol) + '</div>'
+      // Имя, совпадающее с тикером, — это не имя, а его отсутствие: у 800+
+      // символов брокера своего названия у нас нет. Вместо «EURCHF / EURCHF»
+      // показываем подгруппу каталога («Minors», «Germany») — она хотя бы
+      // что-то сообщает, а повтор не сообщает ничего.
+      + '<div class="inst-name">' + esc(it.name && it.name !== it.symbol ? it.name : (it.subgroup || '')) + '</div></div>'
+      + sparkSvg(sparks[it.symbol], up)
+      + '<div class="inst-px">' + px + '</div>'
+      + '<button class="inst-fav' + (fav ? ' on' : '') + '" data-fav="' + esc(it.symbol) + '"'
+      + ' aria-label="' + esc(t('chart.inst_fav_add', 'В избранное')) + '">' + (fav ? '★' : '☆')
+      + '</button></div>';
+  }
+
+  /* Оконный рендер: тысяча строк в DOM уронила бы телефон, а готовую
+     библиотеку тащить незачем — рисуем только то, что попадает в видимую
+     область, а место остальных занимают отступы контейнера. */
+  function render(){
+    const total = view.length;
+    const h = listEl.clientHeight || 480;
+    const start = Math.max(0, Math.floor(listEl.scrollTop / ROW_H) - OVERSCAN);
+    const end = Math.min(total, Math.ceil((listEl.scrollTop + h) / ROW_H) + OVERSCAN);
+    rowsEl.style.paddingTop = (start * ROW_H) + 'px';
+    rowsEl.style.paddingBottom = Math.max(0, (total - end) * ROW_H) + 'px';
+    rowsEl.innerHTML = total
+      ? view.slice(start, end).map(rowHtml).join('')
+      : '<div class="inst-foot">' + esc(t('chart.inst_nothing', 'Ничего не найдено')) + '</div>';
+    footEl.textContent = total
+      ? fmt_(t('chart.inst_more', 'ещё {n}'), {n: Math.max(0, total - (end - start))})
+      : '';
+  }
+
+  function applyQuotes(data){
+    const f = data.fields || [];
+    const iS = f.indexOf('symbol'), iB = f.indexOf('bid'), iC = f.indexOf('chg_pct'), iT = f.indexOf('quote_ts');
+    if (iS < 0) return;
+    const m = new Map();
+    for (const row of (data.items || [])) m.set(row[iS], {bid: row[iB], chg: row[iC], ts: row[iT]});
+    quotes = m;
+    if (searchEl && !searchEl.placeholder) {
+      searchEl.placeholder = fmt_(t('chart.inst_search', 'Поиск по {n} инструментам'), {n: catalog.length});
+    }
+  }
+
+  async function get(url){
+    const r = await fetch(url + '?t=' + Date.now());
+    if (!r.ok) throw new Error(url + ' -> ' + r.status);
+    return r.json();
+  }
+
+  catsEl.innerHTML = CATS.map(c =>
+    '<button class="inst-cat' + (c[0] === cat ? ' on' : '') + '" data-cat="' + c[0] + '">'
+    + esc(t(c[1], c[2])) + '</button>').join('');
+
+  catsEl.addEventListener('click', e => {
+    const b = e.target.closest('[data-cat]');
+    if (!b) return;
+    cat = b.dataset.cat;
+    catsEl.querySelectorAll('.inst-cat').forEach(x => x.classList.toggle('on', x.dataset.cat === cat));
+    listEl.scrollTop = 0;
+    rebuild();
+  });
+
+  let searchTimer = null;
+  searchEl.addEventListener('input', () => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => { query = searchEl.value; listEl.scrollTop = 0; rebuild(); }, 120);
+  });
+
+  listEl.addEventListener('scroll', () => render(), {passive: true});
+
+  function activate(el){
+    const go = el && el.dataset.go;
+    if (!go) return;
+    // Адрес меняется по-настоящему: ссылка на инструмент обязана продолжать
+    // работать, её кладут в закладки и присылают друг другу.
+    location.href = '?s=' + encodeURIComponent(go);
+  }
+  rowsEl.addEventListener('click', e => {
+    const favBtn = e.target.closest('[data-fav]');
+    if (favBtn){
+      const sym = favBtn.dataset.fav;
+      favs.has(sym) ? favs.delete(sym) : favs.add(sym);
+      saveFavs(); rebuild(); return;
+    }
+    activate(e.target.closest('.inst-row'));
+  });
+  rowsEl.addEventListener('keydown', e => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    const row = e.target.closest('.inst-row');
+    if (!row) return;
+    e.preventDefault();
+    activate(row);
+  });
+
+  if (_SP.get('s')) document.body.classList.add('has-symbol');
+
+  (async function init(){
+    try {
+      const [cat_, q] = await Promise.all([get('/data/broker_catalog.json'), get('/data/broker_quotes.json')]);
+      catalog = cat_.items || [];
+      applyQuotes(q);
+      rebuild();
+    } catch (e) {
+      // Панель не приехала — страница графика обязана остаться рабочей: она
+      // и до этой спеки работала без списка.
+      footEl.textContent = '';
+      console.warn('inst panel:', e);
+      return;
+    }
+    try { sparks = (await get('/data/broker_sparklines.json')).series || {}; render(); }
+    catch (e) { console.warn('sparklines:', e); }
+
+    setInterval(async () => {
+      try { applyQuotes(await get('/data/broker_quotes.json')); render(); } catch (e) {}
+    }, QUOTES_MS);
+    setInterval(async () => {
+      try { sparks = (await get('/data/broker_sparklines.json')).series || {}; render(); } catch (e) {}
+    }, SPARKS_MS);
+  })();
+})();
+</script>
 </body>
 </html>
