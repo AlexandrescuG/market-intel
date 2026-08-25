@@ -101,6 +101,55 @@ MIGRATIONS: list[tuple[int, str, str]] = [
     (19, "cost_observations: индексы для добора закрытых и отчёта",
      "CREATE INDEX IF NOT EXISTS idx_cost_obs_open "
      "ON cost_observations(order_status, ticket)"),
+    # SPEC_brief_outliers_2026-08-25.md §2.3
+    (20, "market_outliers: аномальные движения из скринеров",
+     """CREATE TABLE IF NOT EXISTS market_outliers (
+          id INTEGER PRIMARY KEY,
+          first_seen_ts INTEGER NOT NULL,
+          last_seen_ts  INTEGER NOT NULL,
+          symbol TEXT NOT NULL,
+          name TEXT,
+          asset_class TEXT NOT NULL,
+          chg_pct REAL NOT NULL,
+          price REAL,
+          dollar_volume REAL,
+          screener TEXT,
+          peak_chg_pct REAL,
+          news_cluster_id INTEGER,
+          alerted_ts INTEGER,
+          alert_suppressed TEXT,
+          alert_chg_pct REAL,
+          brief_date TEXT
+        )"""),
+    (21, "market_outliers: один инструмент — одна запись в сутки",
+     "CREATE UNIQUE INDEX IF NOT EXISTS idx_outlier_day "
+     "ON market_outliers(symbol, date(first_seen_ts,'unixepoch'))"),
+    (22, "market_outliers: выборка неотправленных",
+     "CREATE INDEX IF NOT EXISTS idx_outlier_pending "
+     "ON market_outliers(alerted_ts, last_seen_ts)"),
+    # §3.1: темы-всплески. Кластер живёт отдельно от новостей — одна тема
+    # собирает много заголовков, и связь с выбросом цены (news_cluster_id
+    # выше) должна указывать на ТЕМУ, а не на конкретную публикацию.
+    (23, "news_clusters: темы со всплеском охвата",
+     """CREATE TABLE IF NOT EXISTS news_clusters (
+          id INTEGER PRIMARY KEY,
+          created_ts INTEGER NOT NULL,
+          day TEXT NOT NULL,
+          kind TEXT NOT NULL,
+          key TEXT NOT NULL,
+          label TEXT,
+          publishers INTEGER NOT NULL,
+          items INTEGER NOT NULL,
+          sample_title TEXT,
+          sample_url TEXT,
+          outlier_symbol TEXT,
+          summary TEXT,
+          summary_status TEXT,
+          brief_date TEXT
+        )"""),
+    (24, "news_clusters: одна тема на сутки",
+     "CREATE UNIQUE INDEX IF NOT EXISTS idx_news_cluster_day "
+     "ON news_clusters(day, kind, key)"),
 ]
 
 
