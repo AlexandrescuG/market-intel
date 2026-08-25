@@ -72,6 +72,13 @@ python3 outliers_job.py --triage || echo "триаж выбросов не от�
 python3 -m analyze.build_brief_v2 || echo "build_brief_v2 упал, brief_today.json не обновлён"
 python3 -m analyze.llm_context || echo "llm_context упал, headline/context не смержены"
 
+# SPEC_brief_outliers §4.2/§5: картинка (котировки + 4 часовых графика) по уже
+# собранному брифу. Строго ПОСЛЕ него — рисуется по тем же числам, что и текст,
+# иначе картинка и текст разойдутся в первый же день. Падение здесь не трогает
+# ни отчёт, ни текстовый брифинг: бот шлёт фото отдельным сообщением и,
+# не найдя файла, просто его не шлёт.
+python3 brief_image_job.py || echo "картинка брифинга не отрисована, уйдёт только текст"
+
 echo "[$(date +%T)] 3/3 отправка в Telegram + публикация на сайт…"
 python3 -m core.telegram --send-file "$REPORT"
 # обновить report.json, чтобы дашборд показал свежий отчёт
