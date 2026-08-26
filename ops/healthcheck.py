@@ -242,6 +242,15 @@ def check_price_bars(cfg: dict, verbose: bool) -> tuple[list[Finding], bool]:
     if not rows:
         return [Finding("bars-empty", f"price_bars: ни одного бара с tf={tf}")], True
 
+    if verbose:
+        # Ни одно исключение не должно быть молчаливым: заглушённый символ
+        # печатаем с его настоящим возрастом, чтобы «известная дыра» не
+        # превратилась незаметно в «дыра, про которую все забыли».
+        for s, ts in sorted(rows):
+            if s in ignore:
+                print(f"  ok   price_bars {s}: заглушён по known_gaps, "
+                      f"фактически {_age(now - ts)}")
+
     ages = {s: now - ts for s, ts in rows if s not in ignore}
     if not ages:
         return [Finding("bars-empty", f"price_bars: после исключений не осталось символов")], True
@@ -320,6 +329,108 @@ def check_quotes_json(cfg: dict, verbose: bool) -> list[Finding]:
     if verbose:
         print(f"  ok   {cfg['path']}: {_age(age)} назад")
     return []
+
+
+def check_broker_quotes(cfg: dict, verbose: bool) -> list[Finding]:
+    """🔴 Каталог брокера — 842 котировки левой панели графика.
+
+    Это самая широкая поверхность с ценами в проекте, и до 26.08 её не
+    сторожило НИЧЕГО. В тот день broker_catalog_loop не мог достучаться до
+    моста семь часов подряд: по замыслу он кричит ровно один раз после
+    четвёртого отказа и дальше молчит, чтобы не забить лог. Сервис при этом
+    оставался active, файл просто перестал переписываться, и панель показывала
+    вчерашние цены без единого признака, что они вчерашние.
+
+    Меряем ДВЕ вещи, потому что одной мало:
+      • `updated` — пишет ли цикл вообще (то, что встало 26.08);
+      • `quoted` — сколько символов реально отдали цену. Мост может отвечать,
+        а терминал вернуть пустой Market Watch: файл свежий, а внутри дыра.
+
+    Возраст самих котировок (`quote_ts`) НЕ проверяем: у акций и ETF из этого
+    каталога он честно старый вне часов их биржи — медиана 11,5 ч в обычный
+    рабочий день. Порог по нему был бы вечно ложным."""
+    path = BASE / cfg["path"]
+    if not path.exists():
+        return [Finding("bq-missing", f"{cfg['path']}: файла нет — левая панель графика пуста")]
+    try:
+        d = json.loads(path.read_text(encoding="utf-8"))
+        ts = datetime.fromisoformat(d["updated"]).timestamp()
+        quoted, count = int(d.get("quoted", 0)), int(d.get("count", 0))
+    except Exception as e:
+        return [Finding("bq-broken", f"{cfg['path']}: не читается ({e})")]
+
+    out = []
+    age = time.time() - ts
+    if age > cfg["max_age_sec"]:
+        out.append(Finding("bq-stale",
+                           f"{cfg['path']}: обновлён {_age(age)} назад "
+                           f"(предел {_age(cfg['max_age_sec'])}) — broker_catalog_loop "
+                           f"не пишет, а сервис при этом active"))
+    if count and quoted < count * cfg["min_quoted_ratio"]:
+        out.append(Finding("bq-thin",
+                           f"{cfg['path']}: цену отдали только {quoted} из {count} "
+                           f"инструментов — Market Watch терминала пуст или наполовину"))
+    if not out and verbose:
+        print(f"  ok   {cfg['path']}: {_age(age)} назад, котируется {quoted}/{count}")
+    return out
+
+
+def check_registry(cfg: dict, verbose: bool) -> list[Finding]:
+    """🔴 Сверка «что сайт обещает» с «что есть».
+
+    Проверки выше идут ОТ ДАННЫХ: они видят символ, только если он уже лежит
+    в price_bars или для него уже опубликован ohlc-файл. Символ, который
+    добавили в реестр сайта и забыли завести источник, для них не существует
+    вовсе — и молчание выглядит как здоровье.
+
+    Здесь наоборот: идём ОТ РЕЕСТРА web/data/symbols.json. Всё, у чего стоит
+    `chart: true`, сайт предлагает нарисовать — значит, часовые бары обязаны
+    быть. Так поймались USDBRL/USDCZK/USDKRW: страница их предлагает, publish
+    переписывает их файлы каждые пять минут, а часовых баров у них ноль.
+
+    known_gaps — то же, что строки `off` в units.txt: дыра, о которой знают,
+    с причиной. Молча исключать нельзя, поэтому при --verbose они печатаются
+    всегда."""
+    reg_path = BASE / cfg["registry"]
+    db = Path(cfg["db"])
+    if not reg_path.exists():
+        return [Finding("reg-missing", f"{cfg['registry']}: реестра символов нет")]
+    try:
+        reg = json.loads(reg_path.read_text(encoding="utf-8"))
+    except Exception as e:
+        return [Finding("reg-broken", f"{cfg['registry']}: не читается ({e})")]
+
+    gaps = cfg.get("known_gaps", {})
+    tf = cfg["timeframe"]
+    con = sqlite3.connect(str(db), timeout=30)
+    con.execute("PRAGMA busy_timeout=30000")
+    try:
+        have = {s for (s,) in con.execute(
+            "SELECT DISTINCT symbol FROM price_bars WHERE tf=?", (tf,))}
+    finally:
+        con.close()
+
+    missing = []
+    for key, meta in sorted(reg.items()):
+        if not isinstance(meta, dict) or not meta.get("chart"):
+            continue
+        pb = meta.get("price_bars") or key
+        if pb in have:
+            continue
+        if pb in gaps or key in gaps:
+            if verbose:
+                print(f"  ok   реестр {key}: известная дыра — {gaps.get(pb) or gaps.get(key)}")
+            continue
+        missing.append((key, pb))
+
+    if not missing:
+        if verbose:
+            print(f"  ok   реестр: у всех символов с chart:true есть бары {tf}")
+        return []
+    names = ", ".join(f"{k} ({pb})" for k, pb in missing)
+    return [Finding("reg-nobars-" + ",".join(sorted(k for k, _ in missing)),
+                    f"реестр сайта обещает график, а баров {tf} нет вовсе: {names}. "
+                    f"Страница рисует их из старого ohlc-файла")]
 
 
 def check_ohlc_json(cfg: dict, market_open: bool, verbose: bool) -> list[Finding]:
@@ -556,6 +667,8 @@ def main() -> int:
         bars, market_open = check_price_bars(cfg["price_bars"], args.verbose)
         findings += bars
         findings += check_quotes_json(cfg["quotes_json"], args.verbose)
+        findings += check_broker_quotes(cfg["broker_quotes"], args.verbose)
+        findings += check_registry(cfg["registry_coverage"], args.verbose)
         findings += check_ohlc_json(cfg["ohlc_json"], market_open, args.verbose)
         findings += check_bridge(cfg["bridge"], args.verbose)
         findings += check_heartbeats(cfg["heartbeats"], args.verbose)
