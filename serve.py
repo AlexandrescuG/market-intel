@@ -77,6 +77,17 @@ _mt5_lock = threading.Lock()
 _mt5_conn = None
 _mt5_tail_cache: dict = {}
 _MT5_TAIL_TTL = 20
+# 🔴 Символы, у которых фид брокера МЁРТВ (а не «на паузе»).
+# Пустой ответ моста бывает двух разных природ, и путать их нельзя:
+#   • пауза/сбой — брокер скоро продолжит, подставлять сюда Yahoo нельзя
+#     (получится чужой скачок поверх брокерского ряда, семейство бага 20.08);
+#   • фид умер — брокер перестал котировать символ насовсем (USDRUB стоит с
+#     17 марта), и держать пустой график, когда у Yahoo есть свежие часовые
+#     бары, — это не осторожность, а потеря данных.
+# Заполняется в _mt5_tail, читается в _mt5_tail_supported. Час TTL: если
+# брокер вернёт символ к жизни, запись протухнет сама.
+_mt5_dead_feed: dict = {}
+_MT5_DEAD_TTL = 3600
 _MT5_TF_ATTR = {"M1": "TIMEFRAME_M1", "M5": "TIMEFRAME_M5", "M15": "TIMEFRAME_M15",
                 "M30": "TIMEFRAME_M30", "H1": "TIMEFRAME_H1", "H4": "TIMEFRAME_H4",
                 # 🔴 20.08.2026: D1/W1 сюда добавлены после того, как шип нашёлся
@@ -134,21 +145,45 @@ def _mt5_tail_supported(our_key, tf):
     одном ряду нельзя. Внутридневка у брокера есть для всех CHART_BROKER_MAP;
     дневки/недельки — только там, где статика тоже брокерская
     (mt5_config.bars_from_broker(), там же замеры расхождения).
+
+    🔴 Для инструментов КАТАЛОГА оговорка про D1/W1 не действует, и это не
+    послабление, а следствие: склеивать нечего. Ограничение существует потому,
+    что у 31 символа реестра дневки/недельки уже опубликованы статикой из
+    price_bars, и хвост из другого фида поверх неё давал бы «две цены сразу»
+    (шип 20.08). У символа каталога статики нет вовсе — весь ряд приходит
+    одним источником, из моста, и смешивать его не с чем.
     """
     from mt5_config import CHART_BROKER_MAP, bars_from_broker
-    if not CHART_BROKER_MAP.get(our_key) or tf not in _MT5_TF_ATTR:
+    if tf not in _MT5_TF_ATTR:
         return False
-    if tf in ("D1", "W1"):
-        return our_key in bars_from_broker()
-    return True
+    dead = _mt5_dead_feed.get((our_key, tf))
+    if dead and time.time() - dead < _MT5_DEAD_TTL:
+        # Фид этого символа мёртв — отвечаем «брокер его не умеет», и
+        # обработчик честно уходит на Yahoo вместо пустого графика.
+        return False
+    if CHART_BROKER_MAP.get(our_key):
+        if tf in ("D1", "W1"):
+            return our_key in bars_from_broker()
+        return True
+    return our_key in _broker_catalog_symbols()
+
+
+def _mt5_broker_symbol(our_key):
+    """Имя инструмента у брокера. Для реестра — через карту (GOLD -> XAUUSD),
+    для каталога ключ И ЕСТЬ имя брокера (#3M, _BMW.DE): каталог снят с самого
+    терминала, переводить нечего."""
+    from mt5_config import CHART_BROKER_MAP
+    bs = CHART_BROKER_MAP.get(our_key)
+    if bs:
+        return bs
+    return our_key if our_key in _broker_catalog_symbols() else None
 
 
 def _mt5_tail(our_key, tf):
     """Свечи из брокера в реальном времени. None -> Yahoo-фолбэк."""
     global _mt5_conn
-    from mt5_config import CHART_BROKER_MAP
-    bs = CHART_BROKER_MAP.get(our_key)
-    if not _mt5_tail_supported(our_key, tf):
+    bs = _mt5_broker_symbol(our_key)
+    if not bs or not _mt5_tail_supported(our_key, tf):
         return None
     now = time.time()
     ck = (our_key, tf)
@@ -191,6 +226,23 @@ def _mt5_tail(our_key, tf):
                     "open": round(float(x["open"]), 5), "high": round(float(x["high"]), 5),
                     "low": round(float(x["low"]), 5), "close": round(float(x["close"]), 5)}
                    for x in data]
+        # 🔴 Мёртвый фид брокера НЕ выдаём: пусть лучше сработает Yahoo.
+        #
+        # Поймано 26.08 при открытии каталога ярусу 3. У USDRUB символ в
+        # каталоге есть, copy_rates_from_pos() честно отдаёт 3000 баров — вот
+        # только последний из них от 17 марта: брокер перестал его котировать
+        # и с тех пор просто хранит старое. До расширения на каталог USDRUB
+        # сюда не попадал и уходил на Yahoo со свежими часовыми барами;
+        # молча подменить их пятимесячной заморозкой было бы ухудшением.
+        #
+        # Неделя — порог, который не задевает ни выходные (макс ~60 ч), ни
+        # праздники, ни закрытые биржи: столько подряд не стоит ни один живой
+        # рынок. Возврат None роняет запрос в Yahoo-ветку обработчика.
+        if candles and (time.time() - candles[-1]["time"]) > 7 * 86400:
+            _mt5_dead_feed[ck] = now
+            _mt5_tail_cache[ck] = (now, None)
+            return None
+        _mt5_dead_feed.pop(ck, None)
         _mt5_tail_cache[ck] = (now, candles)
         return candles
 
@@ -210,15 +262,67 @@ def _chart_symbols() -> set:
     никогда. Источник — реестр; множество то же самое, проверено сверкой:
     глоб и реестр дают одни и те же 31, разницы ноль в обе стороны.
 
-    🔴 Это НЕ каталог брокера. Каталог (broker_symbols, 842 позиции) —
-    список для ЛЕВОЙ панели, там нужны только котировки. Здесь — то, для чего
-    есть бары. Смешать их значило бы разрешить положить в ватчлист _BMW.DE,
-    у которого график не построится: бар по нему взять неоткуда, пока не
-    сделан ярус 3 (доливка по запросу)."""
+    🔴 Это НЕ каталог брокера. Здесь — ИМЕНОВАННЫЕ инструменты реестра: у них
+    есть человеческое название, переводы и заранее опубликованная статика
+    ohlc_*.json. Их и предлагает выпадающий список ватчлиста
+    (/api/chart/symbols): вывалить туда 842 сырых тикера вроде #3M значило бы
+    сломать выбор ради полноты.
+
+    Множество «что вообще можно нарисовать» — шире, см. _chartable_symbols()."""
     from core.symbols_registry import _load as _load_symbol_registry
     return {k for k, v in _load_symbol_registry().items()
             if isinstance(v, dict) and v.get("chart")}
 _BOT_DB  = Path("/mnt/sbfdata/sbf-platform/SBFAcademy_bot/bot.db")
+
+_catalog_cache: tuple = (0.0, set())
+_CATALOG_TTL = 300
+
+
+def _broker_catalog_symbols() -> set:
+    """Тикеры каталога брокера (broker_symbols, ~842). Кэш на 5 минут: состав
+    каталога меняется раз в недели, а спрашивают его на каждый запрос графика."""
+    global _catalog_cache
+    now = time.time()
+    if now - _catalog_cache[0] < _CATALOG_TTL and _catalog_cache[1]:
+        return _catalog_cache[1]
+    try:
+        con = sqlite3.connect(str(_BOT_DB), timeout=10)
+        con.execute("PRAGMA busy_timeout=10000")
+        try:
+            syms = {s for (s,) in con.execute("SELECT broker_symbol FROM broker_symbols")}
+        finally:
+            con.close()
+    except Exception:
+        # Пустой ответ = «не знаю», а не «пусто»: отдать старый кэш честнее,
+        # чем молча сузить платформу до реестра из-за занятой на секунду базы.
+        return _catalog_cache[1]
+    if syms:
+        _catalog_cache = (now, syms)
+    return _catalog_cache[1]
+
+
+def _chartable_symbols() -> set:
+    """Всё, что платформа умеет нарисовать: именованный реестр ПЛЮС весь
+    каталог брокера.
+
+    Ярус 3 из SPEC_chart_all_instruments §4 — «детальный график по клику; для
+    инструментов, которых нет у Yahoo, из MT5 по запросу с кэшем». До 26.08
+    здесь было только 31 имя реестра, и клик по любой из остальных 811 строк
+    левой панели упирался в пустой график: котировка в списке есть, свечей
+    взять неоткуда.
+
+    Замер 26.08, по одному символу каждой категории (H1, 3000 баров): акции
+    1.06 с, ETF 1.35, индексы 1.23, крипта 1.18, FX 0.73, облигации 0.60,
+    сырьё 0.01. Бары есть у ВСЕХ категорий каталога.
+
+    🔴 Почему это не повторяет аварию 25.08. Тогда сайт лёг из-за фонового
+    ОБХОДА каталога (спарклайны: сотни вызовов подряд насытили мост, а сервер
+    однопоточный). Здесь обхода нет вовсе: один открытый график — один вызов
+    с кэшем на 20 с, ровно та же стоимость, что у нынешних 31 инструмента.
+    Массовой заливки каталога в price_bars тоже нет и не предполагается: 842
+    символа x 6 ТФ — это ~84 минуты на проход при часовом такте и ~30 млн
+    строк, то есть возврат к той же нагрузке, что мост уже не выдержал."""
+    return _chart_symbols() | _broker_catalog_symbols()
 
 _COUNTRY_SYM = {
     "US": "EURUSD", "EU": "EURUSD", "EA": "EURUSD",
@@ -3292,7 +3396,10 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         if len(symbols) > 10:
             self._send_json({"error": "max 10 symbols"}, 400)
             return
-        valid = _chart_symbols()
+        # Ватчлист принимает всё, что платформа умеет нарисовать, включая
+        # каталог брокера (ярус 3). Выпадающий СПИСОК при этом остаётся
+        # именованным реестром — см. /api/chart/symbols.
+        valid = _chartable_symbols()
         cleaned = []
         for s in symbols:
             if not isinstance(s, str):
@@ -3340,7 +3447,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self._send_json({"error": "layers must be an object"}, 400)
             return
         if last_symbol is not None:
-            if not isinstance(last_symbol, str) or last_symbol.upper() not in _chart_symbols():
+            if not isinstance(last_symbol, str) or last_symbol.upper() not in _chartable_symbols():
                 self._send_json({"error": "invalid last_symbol"}, 400)
                 return
             last_symbol = last_symbol.upper()
