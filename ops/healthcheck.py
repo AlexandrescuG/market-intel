@@ -375,6 +375,25 @@ def check_broker_quotes(cfg: dict, verbose: bool) -> list[Finding]:
     return out
 
 
+def _tail_alive(symbol: str, base_url: str, timeout: int = 20) -> bool:
+    """Отдаёт ли платформа свечи по этому инструменту ПРЯМО СЕЙЧАС.
+
+    С 26.08 график строится не только из price_bars: ярус 3 отдаёт свечи по
+    запросу из моста (весь каталог брокера) или из Yahoo. Поэтому «нет строк
+    в price_bars» больше НЕ равно «пользователь видит пустой график» — и
+    надзор, спрашивающий только базу, начал бы ругаться на то, что работает.
+    Спрашиваем ровно то же, что спросит браузер."""
+    import urllib.parse, urllib.request
+    url = f"{base_url}/api/chart/tail?s={urllib.parse.quote(symbol)}&tf=H1&since=0"
+    try:
+        with urllib.request.urlopen(url, timeout=timeout) as r:
+            d = json.loads(r.read())
+        return bool(d.get("candles"))
+    except Exception as e:
+        log.warning("проба хвоста %s: %s", symbol, e)
+        return False
+
+
 def check_registry(cfg: dict, verbose: bool) -> list[Finding]:
     """🔴 Сверка «что сайт обещает» с «что есть».
 
@@ -421,6 +440,13 @@ def check_registry(cfg: dict, verbose: bool) -> list[Finding]:
             if verbose:
                 print(f"  ok   реестр {key}: известная дыра — {gaps.get(pb) or gaps.get(key)}")
             continue
+        # Баров в базе нет — но, может, ярус 3 закрывает инструмент вживую.
+        # Спрашиваем прежде, чем кричать: пустой график у пользователя и
+        # пустая таблица у нас — с 26.08 разные вещи.
+        if _tail_alive(pb, cfg.get("base_url", "http://localhost:8085")):
+            if verbose:
+                print(f"  ok   реестр {key}: баров в базе нет, но живой хвост отдаёт свечи")
+            continue
         missing.append((key, pb))
 
     if not missing:
@@ -429,8 +455,8 @@ def check_registry(cfg: dict, verbose: bool) -> list[Finding]:
         return []
     names = ", ".join(f"{k} ({pb})" for k, pb in missing)
     return [Finding("reg-nobars-" + ",".join(sorted(k for k, _ in missing)),
-                    f"реестр сайта обещает график, а баров {tf} нет вовсе: {names}. "
-                    f"Страница рисует их из старого ohlc-файла")]
+                    f"реестр сайта обещает график, а данных нет нигде: {names}. "
+                    f"Ни баров {tf} в базе, ни живого хвоста — у пользователя пусто")]
 
 
 def check_ohlc_json(cfg: dict, market_open: bool, verbose: bool) -> list[Finding]:
@@ -465,6 +491,21 @@ def check_ohlc_json(cfg: dict, market_open: bool, verbose: bool) -> list[Finding
     if not market_open and all(a is not None for _, a in stale):
         if verbose:
             print(f"  ok   ohlc_*_H1.json: {len(stale)} стоят, рынок закрыт")
+        return []
+    # Протухшая статика — ещё не пустой график: loadBars() во фронтенде сам
+    # уходит на живой хвост, если файл устарел. Ругаемся только на то, что
+    # ничем не закрыто. Иначе надзор кричал бы про USDBRL/USDCZK/USDKRW,
+    # у которых с 26.08 график работает — просто не из этих файлов.
+    base = cfg.get("base_url", "http://localhost:8085")
+    really_broken = []
+    for sym, a in stale:
+        if _tail_alive(sym, base):
+            if verbose:
+                print(f"  ok   ohlc {sym}: статика протухла, но живой хвост отдаёт свечи")
+            continue
+        really_broken.append((sym, a))
+    stale = really_broken
+    if not stale:
         return []
     names = ", ".join(f"{s} ({_age(a) if a else 'нет свечей'})" for s, a in stale[:6])
     more = f" и ещё {len(stale) - 6}" if len(stale) > 6 else ""

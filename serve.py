@@ -88,6 +88,12 @@ _MT5_TAIL_TTL = 20
 # брокер вернёт символ к жизни, запись протухнет сама.
 _mt5_dead_feed: dict = {}
 _MT5_DEAD_TTL = 3600
+# Метка времени котировки каждого символа каталога — её уже собирает
+# broker_catalog_loop раз в 15 с и кладёт в broker_symbols.quote_ts.
+# Позволяет узнать, что фид мёртв, НЕ дёргая мост вообще.
+_quote_ts_cache: tuple = (0.0, {})
+_QUOTE_TS_TTL = 300
+_FROZEN_SEC = 7 * 86400
 _MT5_TF_ATTR = {"M1": "TIMEFRAME_M1", "M5": "TIMEFRAME_M5", "M15": "TIMEFRAME_M15",
                 "M30": "TIMEFRAME_M30", "H1": "TIMEFRAME_H1", "H4": "TIMEFRAME_H4",
                 # 🔴 20.08.2026: D1/W1 сюда добавлены после того, как шип нашёлся
@@ -161,6 +167,15 @@ def _mt5_tail_supported(our_key, tf):
         # Фид этого символа мёртв — отвечаем «брокер его не умеет», и
         # обработчик честно уходит на Yahoo вместо пустого графика.
         return False
+    if not CHART_BROKER_MAP.get(our_key):
+        # Каталожный символ: спрашиваем УЖЕ СОБРАННУЮ метку котировки, а не
+        # мост. Инвентарь 26.08: из 842 инструментов каталога 773 живые, 61
+        # заморожен (делистинг — #TWITTER, #SVBFINANCIAL, USDRUB, VIX…), 8 без
+        # котировки вовсе. По каждому из 69 мёртвых иначе уходил бы напрасный
+        # вызов в мост на каждый первый запрос.
+        age = _broker_quote_ages().get(our_key)
+        if age is None or age > _FROZEN_SEC:
+            return False
     if CHART_BROKER_MAP.get(our_key):
         if tf in ("D1", "W1"):
             return our_key in bars_from_broker()
@@ -299,6 +314,33 @@ def _broker_catalog_symbols() -> set:
     if syms:
         _catalog_cache = (now, syms)
     return _catalog_cache[1]
+
+
+def _broker_quote_ages() -> dict:
+    """{тикер: возраст его котировки в секундах} из broker_symbols.
+
+    Данные уже собраны — broker_catalog_loop пишет туда снимок каждые 15 с.
+    Спрашивать у моста то, что лежит в базе, незачем: замер 26.08 показал,
+    что обход каталога через мост (842 вызова) насыщает его настолько, что
+    график перестаёт отвечать вовсе. Тот же ответ отсюда стоит один SELECT."""
+    global _quote_ts_cache
+    now = time.time()
+    if now - _quote_ts_cache[0] < _QUOTE_TS_TTL and _quote_ts_cache[1]:
+        return _quote_ts_cache[1]
+    try:
+        con = sqlite3.connect(str(_BOT_DB), timeout=10)
+        con.execute("PRAGMA busy_timeout=10000")
+        try:
+            ages = {s: (now - ts if ts else None)
+                    for s, ts in con.execute(
+                        "SELECT broker_symbol, quote_ts FROM broker_symbols")}
+        finally:
+            con.close()
+    except Exception:
+        return _quote_ts_cache[1]
+    if ages:
+        _quote_ts_cache = (now, ages)
+    return _quote_ts_cache[1]
 
 
 def _chartable_symbols() -> set:
