@@ -1,0 +1,79 @@
+# ops/units.txt — ЕДИНЫЙ список того, что должно работать на этой машине.
+# SPEC_supervision_2026-08-26 §4.2. Сверка: 26.08.2026.
+#
+# Читают этот файл: ~/sbf-start-all.sh (шаг market_intel) и ops/healthcheck.py.
+# Больше нигде список юнитов дублировать нельзя — вся суть файла в этом.
+#
+# ФОРМАТ (колонки через пробелы, «#» до конца строки — комментарий):
+#   <юнит>  <роль>  <макс_простой_сек>  [флаги]
+#
+# РОЛИ:
+#   daemon   — долгоживущий сервис, обязан быть active. Простой не меряется.
+#   timer    — таймер, обязан быть active; сверх того проверяется, что
+#              связанный сервис отработал не позже <макс_простой_сек> назад.
+#   off      — сознательно выключен. Проверяется ОБРАТНОЕ: если он вдруг
+#              active — это тоже расхождение с картой, и о нём надо сказать.
+#
+# ФЛАГИ:
+#   allow-failed — состояние failed у связанного сервиса штатно (см. коммент).
+#
+# <макс_простой_сек> = примерно два периода такта плюс запас на дрожание.
+
+# ── долгоживущие ────────────────────────────────────────────────────────────
+sbf-web.service              daemon  0        # serve.py :8085 — сам сайт lp.sbfconsult.com
+sbf-quotes.service           daemon  0        # quotes_loop.py — quotes.json, живые котировки
+sbf-mt5-bridge.service       daemon  0        # rpyc-мост в Wine-бутылку Trading (порт 18812)
+sbf-broker-catalog.service   daemon  0        # broker_quotes.json + каталог 842 инструментов
+sbf-focus-live.service       daemon  0        # Focus Engine, переназначение раз в 60 с
+
+# ── источники баров ─────────────────────────────────────────────────────────
+sbf-mt5-pull.timer           timer   7200     # *:05, доливка price_bars из MT5 (28 символов)
+sbf-yfinance-pull.timer      timer   5400     # *:20/30, ТОЛЬКО то, чего нет у брокера (§3.1)
+
+# ── публикация и витрины ────────────────────────────────────────────────────
+sbf-publish.timer            timer   1200     # каждые 5 мин, JSON для дашборда
+sbf-day-thermo.timer         timer   1200     # каждые 5 мин, термометр дня
+sbf-pulse.timer              timer   2400     # каждые 15 мин, pulse scoring
+sbf-outliers.timer           timer   2400     # каждые 15 мин, скан выбросов
+sbf-news-burst.timer         timer   2400     # каждые 15 мин, всплески новостей
+sbf-news-digest.timer        timer   7800     # ежечасно, сводка новостей
+sbf-sbfeconomics.timer       timer   7800     # ежечасно :50, ингест телеграм-канала
+sbf-sentiment.timer          timer   7800     # ежечасно :55, настроение толпы
+sbf-outbox-sender.timer      timer   1200     # каждые 5 мин, единый outbox → бот
+
+# ── аналитика по расписанию ─────────────────────────────────────────────────
+sbf-morning.timer            timer   180000   # 06:00, утренний синтез
+sbf-focus-batch.timer        timer   180000   # 05:50, батч Focus Engine
+sbf-sr-levels.timer          timer   180000   # 03:45, уровни S/R
+sbf-confluence.timer         timer   180000   # 03:55, зоны слияния
+sbf-event-reactions.timer    timer   180000   # 04:30, реакции на события
+sbf-factor-repack.timer      timer   180000   # 05:35, перепаковка factor_store
+sbf-pattern-stats.timer      timer   1300000  # Вс 05:00, бэктест паттернов (недельный)
+sbf-hourly-vol.timer         timer   1300000  # Вс 05:15, профиль волатильности (недельный)
+
+# ── alpha engine ────────────────────────────────────────────────────────────
+sbf-alpha-cycle-h1.timer     timer   7800     # ежечасно :44 UTC
+sbf-alpha-cycle-h4.timer     timer   30000    # каждые 4 ч :42 UTC
+sbf-alpha-cycle-d1.timer     timer   180000   # 00:40 UTC
+signals-resolver.timer       timer   30000    # каждые 4 ч, резолюция сигналов
+
+# ── форвард-проверка стратегии ──────────────────────────────────────────────
+# exit=2 («сигнала нет») — штатное состояние, юнит при этом висит failed.
+# Так задумано: успехом холостой прогон называть нельзя. Алерт по failed
+# здесь был бы шумом, поэтому allow-failed; за самим фактом прогона следим.
+sbf-live-strategy.timer      timer   7800     allow-failed
+sbf-strategy-monitor.timer   timer   2400     # каждые 15 мин, правила остановки
+
+# ── надзор ──────────────────────────────────────────────────────────────────
+sbf-healthcheck.timer        timer   2400     # каждые 15 мин, этот самый надзор (§5)
+
+# ── СОЗНАТЕЛЬНО ВЫКЛЮЧЕНО ───────────────────────────────────────────────────
+# Не «забыто»: каждая строка ниже — решение с причиной. Если причина отпала,
+# строка переносится наверх и юнит включается — но молча выключенным
+# ничего не остаётся.
+sbf-alpha-cycle.timer        off     0        # заменён на -h1/-h4/-d1 при разделении по горизонтам 14.08
+sbf-broker-sparklines.timer  off     0        # ярус 2 SPEC_chart_all_instruments: обход 842 символов ронял сайт через синхронный мост (25.08), включать только после асинхронного моста
+sbf-collectors.timer         off     0        # rss+stocktwits+twitter; StockTwits и Reddit мертвы (Layer3), ленту закрывают news-digest/news-burst
+sbf-mt5-calibration.timer    off     0        # SPEC_mt5_cost_calibration_2026-08-18: синтетические сделки на демо, включать осознанно
+sbf-strategy-review.timer    off     0        # static (нет [Install]) — спутник живой форвард-стратегии, запускается вручную
+sbf-newspipe.service         off     0        # News Pipeline v1 → @rostoklepestop, отключён

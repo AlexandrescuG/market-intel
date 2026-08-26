@@ -37,3 +37,6 @@ data/browser_profile.bak/
 
 # Бандлы прогонов цикла — генерируются, как data/reports и data/briefs
 data/cycle/
+
+# Состояние антиспама надзора — рантайм, не код (SPEC_supervision_2026-08-26 §5)
+data/ops_alert_state.json
