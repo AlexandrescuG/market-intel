@@ -71,10 +71,32 @@ log = logging.getLogger("live_strategy")
 def _macro_at(con: sqlite3.Connection, code: str, ts: int, back: int = 0) -> float | None:
     """Значение, ИЗВЕСТНОЕ на момент ts (asof_ts <= ts). Ради этого и делался
     бэкфилл FRED с датами публикации: брать по дате периода значило бы
-    заглядывать вперёд на недели."""
+    заглядывать вперёд на недели.
+
+    🔴 27.08.2026: `back` отсчитывался по СТРОКАМ с `ORDER BY asof_ts DESC`, без
+    вторичного ключа. Бэкфилл сложил историю под считанные даты публикации
+    (`macro.DCOILWTICO`: 30 760 строк на 812 дат, из них 19 119 на одной
+    `2011-04-06`), поэтому при одинаковых `asof_ts` порядок произвольный, и
+    «20 публикаций назад» означало «20-я строка неупорядоченного списка».
+    Видно по тому, как значение скакало день ото дня без связи с рынком:
+    77.33 -> 76.78 -> 78.88 -> 79.77 -> 83.76 -> 84.77 -> 77.33. Дефект общий
+    для всех макрофакторов с бэкфиллом, не только для нефти.
+
+    Теперь `back` считается по РАЗЛИЧНЫМ датам периода (`ts`), а внутри каждой
+    берётся последняя известная ревизия (`asof_ts`, затем `rev`) — это и есть
+    «публикация» в смысле §3 пререгистрации. Тот же ряд стал гладким:
+    80.44 -> 80.73 -> 80.03.
+
+    На знак сигнала за 19-27.08 правка не влияет (проверено: обе версии дают
+    oil_rising=True на всех девяти днях) — нефть в этом окне росла по-настоящему.
+    Она чинит не результат, а осмысленность сравнения."""
     rows = con.execute(
-        "SELECT value FROM factor_values WHERE factor_key=? AND asof_ts<=? "
-        "ORDER BY asof_ts DESC LIMIT ?", (f"macro.{code}", ts, back + 1)).fetchall()
+        "SELECT value FROM ("
+        "  SELECT ts, value, ROW_NUMBER() OVER ("
+        "    PARTITION BY ts ORDER BY asof_ts DESC, rev DESC) rn"
+        "  FROM factor_values WHERE factor_key=? AND asof_ts<=?"
+        ") WHERE rn=1 ORDER BY ts DESC LIMIT ?",
+        (f"macro.{code}", ts, back + 1)).fetchall()
     return rows[back][0] if len(rows) > back else None
 
 
