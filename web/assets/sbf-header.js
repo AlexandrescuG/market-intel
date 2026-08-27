@@ -619,6 +619,16 @@
 // <head> каждой страницы (до sbf-header.js). См. ниже — построение шапки
 // дожидается sbfI18n.ready.
 
+// Источник перехода (sbf-attrib.js) — грузим раньше всего: метки кампании
+// надо снять на ТОЙ странице, на которую человек приземлился, а регистрация
+// произойдёт двумя-тремя переходами позже, когда их в адресе уже не будет.
+(function () {
+  var s = document.createElement('script');
+  s.src = '/assets/sbf-attrib.js?v=1';
+  s.async = false;
+  document.head.appendChild(s);
+})();
+
 // Автозагрузка общего auth-клиента (sbf-auth.js) — ДО профиля и фидбека,
 // оба используют window.sbfAuth.
 (function () {
@@ -678,7 +688,7 @@ function _sbfLoadUserContext() {
 // Автозагрузка модуля профиля
 (function () {
   var s = document.createElement('script');
-  s.src = '/assets/sbf-profile.js?v=2';
+  s.src = '/assets/sbf-profile.js?v=3';
   s.async = false;
   document.head.appendChild(s);
 })();

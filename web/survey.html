@@ -113,7 +113,11 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);
 </style>
 <script>window.SBF_LANG_SWITCH_ONLY = true;</script>
 <script src="/assets/i18n.js?v=2" defer></script>
-<script src="/assets/sbf-header.js?v=18" defer></script>
+<!-- Подключён напрямую, а не только автозагрузкой из sbf-header.js: именно
+     на этой странице метки читаются при отправке, и window.sbfAttrib должен
+     существовать гарантированно. -->
+<script src="/assets/sbf-attrib.js?v=1"></script>
+<script src="/assets/sbf-header.js?v=19" defer></script>
 </head>
 <body>
 
@@ -685,6 +689,9 @@ function submitViaRegister() {
       consent_disclaimer: discOk,
       consent_marketing: mktOk,
       answers: _answers,
+      // Источник перехода, снятый на странице приземления (sbf-attrib.js).
+      // Пустой объект, если человек пришёл напрямую.
+      attrib: (window.sbfAttrib && window.sbfAttrib.get()) || {},
     }),
   })
   .then(function(r) { return r.json(); })

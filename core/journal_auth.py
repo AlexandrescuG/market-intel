@@ -216,6 +216,16 @@ def ensure_schema() -> None:
         # данные, отдельный явный флажок, а не общий consent_data (тот про
         # обработку данных вообще, не про конкретно телефон).
         "ALTER TABLE users ADD COLUMN consent_phone INTEGER NOT NULL DEFAULT 0",
+        # 27.08.2026: источник перехода. Отдельными колонками, а не одной
+        # строкой JSON — иначе не сгруппировать «сколько пришло с кампании X»
+        # обычным GROUP BY, а ради этого всё и делается.
+        "ALTER TABLE users ADD COLUMN utm_source TEXT",
+        "ALTER TABLE users ADD COLUMN utm_medium TEXT",
+        "ALTER TABLE users ADD COLUMN utm_campaign TEXT",
+        "ALTER TABLE users ADD COLUMN utm_content TEXT",
+        "ALTER TABLE users ADD COLUMN utm_term TEXT",
+        "ALTER TABLE users ADD COLUMN attrib_referrer TEXT",
+        "ALTER TABLE users ADD COLUMN attrib_landing TEXT",
     ]:
         try:
             conn.execute(ddl)
@@ -718,6 +728,50 @@ def update_profile(user_id: str, last_name: str = "", phone: str = "",
     finally:
         conn.close()
     return {"ok": True}
+
+
+_ATTRIB_FIELDS = {
+    "utm_source": "utm_source", "utm_medium": "utm_medium",
+    "utm_campaign": "utm_campaign", "utm_content": "utm_content",
+    "utm_term": "utm_term", "referrer": "attrib_referrer",
+    "landing": "attrib_landing",
+}
+
+
+def save_attribution(user_id: str, attrib: dict) -> bool:
+    """Источник перехода, снятый на странице приземления (web/assets/sbf-attrib.js).
+
+    Отдельной функцией, а не параметрами register(): ту зовут из нескольких
+    мест (обычная регистрация, регистрация через опрос, Telegram), и
+    расширять её сигнатуру ради необязательных полей значило бы трогать все
+    вызовы. Тот же приём, что save_onboarding_answers().
+
+    Пишем ТОЛЬКО непустое и только один раз — повторный вызов не затирает уже
+    записанный источник: первое касание важнее последнего, иначе переход
+    внутри сайта по ссылке с меткой подменил бы настоящую кампанию.
+
+    Возвращает True, если что-то записали. Ошибка здесь не должна ронять
+    регистрацию — аккаунт важнее метки, поэтому вызывающий гасит исключение.
+    """
+    if not user_id or user_id == "default" or not isinstance(attrib, dict):
+        return False
+    pairs = []
+    for key, col in _ATTRIB_FIELDS.items():
+        v = attrib.get(key)
+        if isinstance(v, str) and v.strip():
+            pairs.append((col, v.strip()[:200]))
+    if not pairs:
+        return False
+    ensure_schema()
+    conn = _get_conn()
+    try:
+        sets = ", ".join(f"{c} = COALESCE({c}, ?)" for c, _ in pairs)
+        conn.execute(f"UPDATE users SET {sets} WHERE id = ?",
+                     [v for _, v in pairs] + [user_id])
+        conn.commit()
+        return True
+    finally:
+        conn.close()
 
 
 def grant_survey_pro(user_id: str = "default") -> dict:

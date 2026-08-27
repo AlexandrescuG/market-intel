@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ t('privacy.page_title', lang) }}</title>
+<meta name="description" content="{{ t('privacy.page_description', lang) }}">
+<meta name="robots" content="index, follow">
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/design.css">
+<link rel="stylesheet" href="/assets/tokens.css?v=1">
+<script src="/assets/i18n.js?v=2" defer></script>
+<script src="/assets/sbf-symbols.js?v=2" defer></script>
+<script src="/assets/sbf-auth.js?v=1" defer></script>
+<script src="/assets/sbf-header.js?v=19" defer></script>
+<style>
+html,body{margin:0;padding:0}
+body{font-family:'Montserrat',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  background:var(--cream,#FBF6EF);color:var(--ink,#2B2B33);
+  -webkit-font-smoothing:antialiased;line-height:1.6}
+*{box-sizing:border-box}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:4px}
+.wrap{max-width:780px;margin:0 auto;padding:28px 20px 60px}
+.pp-h1{font-size:30px;font-weight:800;letter-spacing:-.02em;line-height:1.2;margin:0 0 8px}
+.pp-upd{font-size:13px;color:var(--ink-2,#6E6A63);margin:0 0 28px}
+.pp-sec{background:var(--paper,#fff);border:1px solid var(--line,#E7DFCF);border-radius:12px;
+  padding:18px 22px;margin-bottom:14px}
+.pp-sec h2{font-size:15px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;
+  color:var(--gold);margin:0 0 10px}
+.pp-sec p{font-size:15px;margin:0 0 10px}
+.pp-sec p:last-child{margin-bottom:0}
+.pp-sec ul{margin:0 0 10px;padding-left:20px}
+.pp-sec li{font-size:15px;margin-bottom:6px}
+.pp-sec b{font-weight:600}
+.pp-back{display:inline-block;font-size:14px;font-weight:600;color:var(--ink-2,#6E6A63);
+  text-decoration:none;margin-bottom:18px;min-height:44px;line-height:44px}
+.pp-back:hover{color:var(--gold)}
+@media (max-width:760px){.wrap{padding:20px 16px 40px}.pp-h1{font-size:24px}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <a class="pp-back" href="{{ '/' + lang if lang != 'ru' else '/' }}">{{ t('privacy.back', lang) }}</a>
+  <h1 class="pp-h1">{{ t('privacy.h1', lang) }}</h1>
+  <p class="pp-upd">{{ t('privacy.updated', lang) }}</p>
+
+  <div class="pp-sec">
+    <h2>{{ t('privacy.s1_title', lang) }}</h2>
+    <p>{{ t('privacy.s1_body', lang) }}</p>
+  </div>
+
+  <div class="pp-sec">
+    <h2>{{ t('privacy.s2_title', lang) }}</h2>
+    <p>{{ t('privacy.s2_account', lang) }}</p>
+    <p>{{ t('privacy.s2_survey', lang) }}</p>
+    <p>{{ t('privacy.s2_usage', lang) }}</p>
+    <p>{{ t('privacy.s2_tech', lang) }}</p>
+  </div>
+
+  <div class="pp-sec">
+    <h2>{{ t('privacy.s3_title', lang) }}</h2>
+    <ul>
+      <li>{{ t('privacy.s3_p1', lang) }}</li>
+      <li>{{ t('privacy.s3_p2', lang) }}</li>
+      <li>{{ t('privacy.s3_p3', lang) }}</li>
+      <li>{{ t('privacy.s3_p4', lang) }}</li>
+    </ul>
+  </div>
+
+  <div class="pp-sec">
+    <h2>{{ t('privacy.s4_title', lang) }}</h2>
+    <p>{{ t('privacy.s4_body', lang) }}</p>
+  </div>
+
+  <div class="pp-sec">
+    <h2>{{ t('privacy.s5_title', lang) }}</h2>
+    <p>{{ t('privacy.s5_body', lang) }}</p>
+  </div>
+
+  <div class="pp-sec">
+    <h2>{{ t('privacy.s6_title', lang) }}</h2>
+    <p>{{ t('privacy.s6_body', lang) }}</p>
+  </div>
+
+  <div class="pp-sec">
+    <h2>{{ t('privacy.s7_title', lang) }}</h2>
+    <p>{{ t('privacy.s7_body', lang) }}</p>
+  </div>
+
+  <div class="pp-sec">
+    <h2>{{ t('privacy.s8_title', lang) }}</h2>
+    <p>{{ t('privacy.s8_body', lang) }}</p>
+  </div>
+</div>
+
+</body>
+</html>

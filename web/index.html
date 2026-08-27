@@ -69,9 +69,9 @@ if (new URLSearchParams(location.search).get("embed") === "1") {
 <script src="/assets/i18n.js?v=2" defer></script>
 <script src="/assets/sbf-symbols.js?v=2"></script>
 <script src="/edu/assets/calendar-terms.js?v=1" defer></script>
-<script src="/assets/sbf-header.js?v=18" defer></script>
+<script src="/assets/sbf-header.js?v=19" defer></script>
 <script src="/assets/sbf-auth.js?v=1" defer></script>
-<script src="/assets/sbf-profile.js?v=2" defer></script>
+<script src="/assets/sbf-profile.js?v=3" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.0/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
 <script src="/assets/grafik-engine.js?v=20260820a"></script>
@@ -403,6 +403,19 @@ a:hover{text-decoration:underline;color:var(--glow)}
 .sbf-embed .top, .sbf-embed .strip, .sbf-embed .seg-wrap,
 .sbf-embed .sbf-fw-btn, .sbf-embed .sbf-fw-bubble, .sbf-embed .g-bottom-nav { display: none !important; }
 .sbf-embed .wrap { padding-top: 0; }
+/* Блок «что даёт аккаунт» — только для анонимов (27.08.2026) */
+.anon-value{border:1px solid rgba(201,162,39,.45);background:#FFFDF7}
+.anon-value-head{margin-bottom:12px}
+.anon-value-h{font-size:19px;font-weight:800;letter-spacing:-.01em;margin:0 0 6px}
+.anon-value-sub{font-size:14px;color:var(--muted);margin:0;line-height:1.55}
+.anon-value-list{margin:0 0 16px;padding-left:20px}
+.anon-value-list li{font-size:14.5px;line-height:1.7;margin-bottom:4px}
+.anon-value-cta{display:inline-flex;align-items:center;min-height:48px;padding:0 22px;
+  border-radius:9px;background:var(--gold);color:#1E1B12;font-size:15px;font-weight:700;
+  text-decoration:none;transition:background .15s}
+.anon-value-cta:hover{background:var(--glow,#E6C257)}
+.anon-value-note{font-size:12.5px;color:var(--muted);margin:10px 0 0}
+@media (max-width:760px){.anon-value-cta{width:100%;justify-content:center}}
 </style>
 <!-- SPEC_visual_migration.md: последним в <head>, чтобы выигрывать тай-брейки
      на одинаковой специфичности (напр. .sbf-embed .top { .. } выше) — см. план. -->
@@ -451,6 +464,31 @@ a:hover{text-decoration:underline;color:var(--glow)}
 
 <div class="wrap" id="mainWrap" data-view="fund">
   <main>
+
+    <!-- ── Что даёт аккаунт (27.08.2026) ─────────────────────────
+         Терминал открыт целиком, и это сознательно: он и есть первое
+         впечатление. Но до этого блока о том, что вообще существует за
+         регистрацией, не было сказано нигде, кроме одной строки на странице
+         входа про «один аккаунт для сайта и приложения». Человек из ролика
+         видел всё бесплатно и уходил, потому что терять было нечего.
+         Показывается только анонимам — см. showAnonValueBlock() ниже.
+         Пункты перечисляют то, что реально за гейтом, без выдумок:
+         главы 6-15 (serve.py::_handle_edu, is_pro), журнал, user_prefs
+         (watchlist_markets/default_tf/слои графика), связка с Telegram. -->
+    <section class="panel anon-value" id="anonValue" hidden>
+      <div class="anon-value-head">
+        <h2 class="anon-value-h">{{ t('home.anon_value_title', lang) }}</h2>
+        <p class="anon-value-sub">{{ t('home.anon_value_sub', lang) }}</p>
+      </div>
+      <ul class="anon-value-list">
+        <li>{{ t('home.anon_value_p1', lang) }}</li>
+        <li>{{ t('home.anon_value_p2', lang) }}</li>
+        <li>{{ t('home.anon_value_p3', lang) }}</li>
+        <li>{{ t('home.anon_value_p4', lang) }}</li>
+      </ul>
+      <a class="anon-value-cta" id="anonValueCta" href="/survey">{{ t('home.anon_value_cta', lang) }}</a>
+      <p class="anon-value-note">{{ t('home.anon_value_note', lang) }}</p>
+    </section>
 
     <!-- ── ФУНДАМЕНТАЛЬНЫЙ ──────────────────────────────────── -->
     <div class="view-fund">
@@ -1499,6 +1537,26 @@ function renderPulseList(data){
     row.addEventListener('click', ()=>openPulseFeed(row.dataset.symbol));
   });
 }
+
+/* Блок «что даёт аккаунт» показываем только анониму: залогиненному он
+   рекламирует то, что у него уже есть. Ждём sbf:user-ready — событие,
+   которым sbf-header.js сообщает, что /api/auth/me отработал; до него
+   isLoggedIn() ещё не знает ответа и блок мигнул бы у своих. */
+function showAnonValueBlock(){
+  var el=document.getElementById('anonValue');
+  if(!el) return;
+  if(window.sbfAuth && window.sbfAuth.isLoggedIn()){ el.hidden=true; return; }
+  var cta=document.getElementById('anonValueCta');
+  if(cta && window.sbfI18n){
+    var l=window.sbfI18n.lang;
+    cta.href=(l==='en'||l==='ro'?'/'+l:'')+'/survey';
+  }
+  el.hidden=false;
+}
+document.addEventListener('sbf:user-ready', showAnonValueBlock);
+/* Подстраховка: если событие не придёт (скрипт профиля не загрузился),
+   блок всё равно появится — анониму он нужнее, чем аккуратность. */
+setTimeout(showAnonValueBlock, 3000);
 
 let _pulseCat='crypto';
 async function loadPulse(cat){

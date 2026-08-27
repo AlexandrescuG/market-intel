@@ -935,16 +935,16 @@ def _build_edu_page(ch: int, lang: str) -> bytes:
         '<link rel="stylesheet" href="/assets/sbf-nav.css">\n'
         '<script src="/assets/i18n.js?v=2" defer></script>\n'
         '<script src="/assets/sbf-symbols.js?v=2"></script>\n'
-        '<script src="/assets/sbf-header.js?v=17" defer></script>'
+        '<script src="/assets/sbf-header.js?v=19" defer></script>'
     )
     if '/edu/edu.css' not in html:
         html = html.replace("</head>", f"{css_tags}\n</head>", 1)
-    elif '/assets/sbf-header.js?v=17' not in html:
+    elif '/assets/sbf-header.js?v=19' not in html:
         html = html.replace("</head>",
             '<link rel="stylesheet" href="/assets/sbf-nav.css">\n'
             '<script src="/assets/i18n.js?v=2" defer></script>\n'
             '<script src="/assets/sbf-symbols.js?v=2"></script>\n'
-            '<script src="/assets/sbf-header.js?v=17" defer></script>\n</head>', 1)
+            '<script src="/assets/sbf-header.js?v=19" defer></script>\n</head>', 1)
 
     grafik_tags = (
         '<script src="/edu/assets/grafik-engine.js"></script>\n'
@@ -1507,6 +1507,12 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self._render_site_page("login.html", req_lang)
         elif path_clean in ("/survey", "/survey.html"):
             self._render_site_page("survey.html", req_lang)
+        # 27.08.2026: обязательные согласия на /register и /survey ссылались
+        # на политику, которой не существовало — register.html вёл на "#",
+        # survey.html на /privacy с ответом 404. Человек соглашался с
+        # документом, которого нельзя открыть.
+        elif path_clean in ("/privacy", "/privacy.html"):
+            self._render_site_page("privacy.html", req_lang)
         elif path_clean in ("/brokers", "/brokers.html"):
             self._render_site_page("brokers.html", req_lang)
         elif path_clean in ("/brokers/xm", "/brokers/naga", "/brokers/fxpro", "/brokers/instaforex", "/brokers/avatrade"):
@@ -1688,8 +1694,15 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         Тот же "хром" (шапка/нав/шрифты), что и у обычной главы, чтобы не
         выглядело как ошибка — целенаправленный экран с понятным следующим
         шагом, а не 403 в браузерном стиле."""
-        cta_href = f"/edu/{'' if lang == 'ru' else lang + '/'}b/4" if logged_in else (
-            "/register" if lang == "ru" else f"/{lang}/register")
+        # 27.08.2026: для незалогиненного кнопка вела на /register — форму,
+        # которая просит почту с паролем и ничего не обещает взамен. При этом
+        # /survey делает ровно то же самое (тот же journal_auth.register), но
+        # одним заходом с опросом и сразу выдаёт 30 дней PRO через
+        # grant_survey_pro(). Человек, упёршийся в платную главу, — самый
+        # горячий посетитель на сайте; отправлять его в форму без обещания
+        # было прямой потерей.
+        lang_pref = "" if lang == "ru" else f"/{lang}"
+        cta_href = f"/edu/{'' if lang == 'ru' else lang + '/'}b/4" if logged_in else f"{lang_pref}/survey"
         cta_label = i18n.t("eduindex.paywall.cta_survey" if logged_in else "eduindex.paywall.cta_register", lang)
         toc_href = "/edu" if lang == "ru" else f"/edu/{lang}/b"
         html = f"""<!doctype html><html lang="{lang}"><head>
@@ -1700,7 +1713,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 <link rel="stylesheet" href="/assets/sbf-nav.css">
 <script src="/assets/i18n.js?v=2" defer></script>
 <script src="/assets/sbf-symbols.js?v=2"></script>
-<script src="/assets/sbf-header.js?v=17" defer></script>
+<script src="/assets/sbf-header.js?v=19" defer></script>
 <script src="/assets/sbf-auth.js?v=1" defer></script>
 <style>
 .paywall-wrap{{max-width:560px;margin:80px auto;padding:0 20px;text-align:center}}
@@ -4066,6 +4079,16 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         if answers:
             try:
                 journal_auth.save_onboarding_answers(user_id, answers)
+            except Exception:
+                pass
+        # Источник перехода (27.08.2026). До этого метки кампаний не доезжали
+        # до регистрации вообще: полей под них здесь не было, и ответить
+        # «из какого ролика пришёл этот человек» было нечем. Ошибка не роняет
+        # регистрацию — аккаунт важнее метки.
+        attrib = body.get("attrib") or {}
+        if attrib:
+            try:
+                journal_auth.save_attribution(user_id, attrib)
             except Exception:
                 pass
         # Grant PRO regardless (survey completion)

@@ -120,11 +120,29 @@
     'button.sbf-av:hover{box-shadow:0 0 0 3px rgba(201,162,39,.3);transform:scale(1.06);}',
     'button.sbf-av:focus-visible{box-shadow:0 0 0 3px rgba(201,162,39,.5);}',
 
-    '.sbf-login-link{margin-left:10px;padding:7px 16px;border-radius:8px;',
-    'background:var(--gold,#C9A227);color:#fff;font-family:Montserrat,sans-serif;',
+    // 27.08.2026: «Войти» была единственной кнопкой в шапке и единственным
+    // видимым действием на всём сайте. Холодный посетитель из ролика читает
+    // её как «для своих» — она не обещает ничего, чего он ещё не получил,
+    // потому что терминал и так открыт. Рядом появилась главная кнопка,
+    // ведущая в опрос: он даёт аккаунт И 30 дней PRO (grant_survey_pro,
+    // journal_auth.py:723), то есть главы курса с 6-й по 15-ю. Ведём именно
+    // на /survey, а не на /register: вторая просит почту с паролем и ничего
+    // не обещает взамен.
+    '.sbf-login-link{margin-left:10px;padding:7px 14px;border-radius:8px;',
+    'background:transparent;color:var(--ink,#2B2B33);font-family:Montserrat,sans-serif;',
+    'font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap;',
+    'border:1px solid var(--line,#E7DFCF);transition:border-color .12s,color .12s;}',
+    '.sbf-login-link:hover{border-color:var(--gold,#C9A227);color:var(--gold,#C9A227);}',
+
+    '.sbf-cta-link{margin-left:10px;padding:8px 16px;border-radius:8px;',
+    'background:var(--gold,#C9A227);color:#1E1B12;font-family:Montserrat,sans-serif;',
     'font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap;',
     'transition:background .12s;}',
-    '.sbf-login-link:hover{background:#B8931F;}',
+    '.sbf-cta-link:hover{background:var(--glow,#E6C257);}',
+    // На узком экране кнопки не должны выталкивать логотип: вторичная
+    // сжимается, главная остаётся целой.
+    '@media (max-width:520px){.sbf-login-link{padding:7px 10px;margin-left:6px;}',
+    '.sbf-cta-link{padding:8px 12px;margin-left:6px;}}',
     '.sbf-av img{width:100%;height:100%;object-fit:cover;display:block;}',
     // Аватар внутри кнопки (не кликабельный сам по себе)
     '.sbf-av-in{pointer-events:none;}',
@@ -1068,12 +1086,28 @@
   // связаны из обычной навигации. Аватар в шапке для гостя открывал только
   // локальный гостевой профиль (геймификация), что выглядело как "я уже
   // вошёл", а входа на самом деле не было. Найдено пользователем вживую.
+  // Язык страницы сохраняем в ссылке: без префикса переход из ro/en сбрасывал
+  // бы человека в русскую версию — тот же приём, что langPrefix() в brokers.js.
+  function _langPrefix() {
+    var l = (window.sbfI18n && window.sbfI18n.lang) || document.documentElement.lang || 'ru';
+    return (l === 'en' || l === 'ro') ? '/' + l : '';
+  }
+
   function makeLoginLink() {
     var a = document.createElement('a');
     a.className = 'sbf-login-link';
-    a.href = '/login.html';
+    a.href = _langPrefix() + '/login';
     a.setAttribute('data-i18n', 'nav.login');
     a.textContent = t('nav.login', 'Войти');
+    return a;
+  }
+
+  function makeSurveyCta() {
+    var a = document.createElement('a');
+    a.className = 'sbf-cta-link';
+    a.href = _langPrefix() + '/survey';
+    a.setAttribute('data-i18n', 'nav.cta_survey');
+    a.textContent = t('nav.cta_survey', '30 дней PRO');
     return a;
   }
 
@@ -1083,7 +1117,10 @@
     if (window.sbfAuth && window.sbfAuth.isLoggedIn()) {
       right.appendChild(makeHeaderAvatar());
     } else {
+      // Порядок важен: вторичная слева, главная справа — у правого края
+      // взгляд останавливается последним, и там должна быть регистрация.
       right.appendChild(makeLoginLink());
+      right.appendChild(makeSurveyCta());
     }
     return true;
   }

@@ -55,8 +55,8 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);
 .check-item.required{border-left:3px solid var(--gold)}
 .check-item input[type=checkbox]{width:18px;height:18px;flex-shrink:0;
   accent-color:var(--gold);margin-top:1px;cursor:pointer}
-.check-item label{font-size:13px;line-height:1.45;cursor:pointer;color:var(--text)}
-.check-item label a{color:var(--accent)}
+.check-item span{font-size:13px;line-height:1.45;cursor:pointer;color:var(--text)}
+.check-item span a{color:var(--accent)}
 
 /* PRO badge */
 .pro-teaser{display:flex;align-items:center;gap:10px;padding:12px 14px;
@@ -88,7 +88,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);
 </style>
 <script>window.SBF_LANG_SWITCH_ONLY = true;</script>
 <script src="/assets/i18n.js?v=2" defer></script>
-<script src="/assets/sbf-header.js?v=18" defer></script>
+<script src="/assets/sbf-header.js?v=19" defer></script>
 <script src="/assets/sbf-anon.js"></script>
 </head>
 <body>
@@ -119,11 +119,11 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);
     <div class="step-sub">{{ t('register.step1_subtitle', lang) }}</div>
 
     <div class="field">
-      <label>{{ t('register.email_label', lang) }}</label>
+      <label for="email">{{ t('register.email_label', lang) }}</label>
       <input type="email" id="email" placeholder="{{ t('register.email_placeholder', lang) }}" autocomplete="email">
     </div>
     <div class="field">
-      <label>{{ t('register.password_label', lang) }}</label>
+      <label for="password">{{ t('register.password_label', lang) }}</label>
       <input type="password" id="password" placeholder="••••••••" autocomplete="new-password">
     </div>
 
@@ -146,21 +146,29 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);
       </div>
     </div>
 
+    <!-- 27.08.2026: у всех четырёх согласий подпись была обёрнута во
+         вложенный ярлык внутри внешнего. Невалидный HTML: клик по тексту
+         всплывал наружу и переключал чекбокс повторно, то есть галочка
+         визуально не реагировала. Три из четырёх обязательные — форма не
+         отправлялась, и человек уходил, не поняв почему. Внутренний ярлык
+         заменён на span (тот же приём, что в survey.html:169-181).
+         Ссылка политики вела в никуда — теперь на /privacy, страница
+         создана в этом же заходе. -->
     <label class="check-item required">
       <input type="checkbox" id="consentAge">
-      <label for="consentAge">{{ t('register.consent_age_pre', lang) }} <strong>{{ t('register.consent_age_years', lang) }}</strong>{{ t('register.consent_age_post', lang) }}</label>
+      <span>{{ t('register.consent_age_pre', lang) }} <strong>{{ t('register.consent_age_years', lang) }}</strong>{{ t('register.consent_age_post', lang) }}</span>
     </label>
     <label class="check-item required">
       <input type="checkbox" id="consentData">
-      <label for="consentData">{{ t('register.consent_data_pre', lang) }} <a href="#" target="_blank">{{ t('register.consent_data_link', lang) }}</a>.</label>
+      <span>{{ t('register.consent_data_pre', lang) }} <a href="{{ '/' + lang if lang != 'ru' else '' }}/privacy" target="_blank" rel="noopener">{{ t('register.consent_data_link', lang) }}</a>.</span>
     </label>
     <label class="check-item required">
       <input type="checkbox" id="consentDisclaimer">
-      <label for="consentDisclaimer">{{ t('register.consent_disclaimer_pre', lang) }} <strong>{{ t('register.consent_disclaimer_bold', lang) }}</strong>{{ t('register.consent_disclaimer_post', lang) }}</label>
+      <span>{{ t('register.consent_disclaimer_pre', lang) }} <strong>{{ t('register.consent_disclaimer_bold', lang) }}</strong>{{ t('register.consent_disclaimer_post', lang) }}</span>
     </label>
     <label class="check-item">
       <input type="checkbox" id="consentMarketing">
-      <label for="consentMarketing">{{ t('register.consent_marketing', lang) }}</label>
+      <span>{{ t('register.consent_marketing', lang) }}</span>
     </label>
 
     <div class="nav-row">
