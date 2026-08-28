@@ -140,3 +140,11 @@ GOOGLE_NEWS_TOPICS = {
 }
 RSS_FEEDS.update({name: _google_news(q) for name, q in GOOGLE_NEWS_TOPICS.items()})
 RSS_TREND_WINDOW_HOURS = int(os.getenv("RSS_TREND_WINDOW_HOURS", "24"))
+
+# ── SBFCRM — новые регистрации платформы как лиды (27.08.2026) ───────────────
+# Пароль в .env кладёт владелец (tools/crm_setup.sh) — в репозитории его нет.
+# Без него core/crm_leads.is_configured() вернёт False и интеграция молчит.
+SBFCRM_URL         = os.getenv("SBFCRM_URL", "https://crm.sbf.md")
+SBFCRM_EMAIL       = os.getenv("SBFCRM_EMAIL", "")
+SBFCRM_PASSWORD    = os.getenv("SBFCRM_PASSWORD", "")
+SBFCRM_ASSIGNEE_ID = os.getenv("SBFCRM_ASSIGNEE_ID", "")

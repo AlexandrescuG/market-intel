@@ -3384,6 +3384,24 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         anon_id = str(body.get("anon_id") or "").strip()[:128]
         if anon_id and result.get("user_id"):
             journal_gamification.migrate_anon_progress(anon_id, result["user_id"])
+        # Источник перехода и лид в CRM (27.08.2026). Здесь опроса ещё нет —
+        # карточка создаётся «тонкой», а ответы к ней добавит
+        # crm_leads.enrich_with_survey(), когда человек дойдёт до опроса.
+        if result.get("user_id"):
+            attrib = body.get("attrib") or {}
+            if attrib:
+                try:
+                    journal_auth.save_attribution(result["user_id"], attrib)
+                except Exception:
+                    pass
+            try:
+                from core import crm_leads
+                crm_leads.create_lead(
+                    email=(body.get("email") or "").strip().lower(),
+                    name=" ".join(x for x in (body.get("first_name"), body.get("last_name")) if x).strip(),
+                    attrib=attrib)
+            except Exception as e:
+                log.error("CRM: лид не создан (обычная регистрация) — %s", e)
         status = 400 if "error" in result else 201
         self._send_json(result, status)
 
@@ -3572,6 +3590,18 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         result = journal_auth.save_onboarding_answers(user_id, answers)
         path = journal_auth.get_my_path(user_id)
         result["path"] = path
+        # Опрос пройден уже зарегистрированным человеком (пришёл с /register
+        # раньше, а до опроса дошёл позже) — ДОПОЛНЯЕМ его карточку в CRM,
+        # а не заводим вторую. Поиск по почте внутри enrich_with_survey.
+        try:
+            from core import crm_leads
+            prof = journal_auth.get_user(user_id)
+            email = (prof or {}).get("email")
+            if email and answers:
+                crm_leads.enrich_with_survey(email=email, answers=answers,
+                                             pro_until=result.get("pro_until"))
+        except Exception as e:
+            log.error("CRM: карточка не дополнена опросом — %s", e)
         self._send_json(result)
 
     # ── Feedback handlers ────────────────────────────────────────────────────
@@ -4098,6 +4128,17 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             result["pro_until"]   = pro.get("expires_ts")
         except Exception:
             result["pro_granted"] = False
+
+        # Лид в SBFCRM (27.08.2026). Регистрация через опрос — это сразу и
+        # аккаунт, и пройденный опрос, поэтому карточка создаётся уже полной:
+        # источник перехода, ответы, срок PRO. Ошибка CRM не должна отменять
+        # регистрацию — человек важнее записи в чужой системе.
+        try:
+            from core import crm_leads
+            crm_leads.create_lead(email=email, name=name, attrib=attrib,
+                                  answers=answers, pro_until=result.get("pro_until"))
+        except Exception as e:
+            log.error("CRM: лид не создан (регистрация через опрос) — %s", e)
 
         self._send_json(result, 201)
 
