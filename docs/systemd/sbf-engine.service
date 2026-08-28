@@ -1,0 +1,21 @@
+[Unit]
+# Торговый движок SBF: сигналы из всех источников -> риск -> ордера MT5.
+# Отдельно от sbf-live-strategy.service: у того свой magic (20260818),
+# своя одна гипотеза и своя незакрытая форвард-проверка. Смешивать их
+# в одном юните значило бы, что остановка одного глушит другой.
+Description=SBF — торговый движок (сигналы -> риск -> ордера), magic 20260827
+After=sbf-mt5-bridge.service
+Wants=sbf-mt5-bridge.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/mnt/sbfdata/sbf-platform/market_intel
+# --live: новые стратегии стартуют сразу в боевом режиме (решение владельца
+# 27.08). Стоп-кран по просадке от пика работает в обоих режимах и
+# останавливает стратегию персонально, не трогая остальные.
+ExecStart=/mnt/sbfdata/sbf-platform/market_intel/.venv/bin/python3 -m analyze.engine.run --live
+# Ненулевой код — штатный исход (2 = мост недоступен), не повод для
+# рестарт-петли: следующий тик таймера попробует снова.
+SuccessExitStatus=0 1 2
+TimeoutStartSec=600
+Nice=5
