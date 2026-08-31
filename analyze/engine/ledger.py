@@ -138,7 +138,8 @@ def record_decision(con: sqlite3.Connection, d: Decision) -> int:
 
 def open_trade(con: sqlite3.Connection, signal_id: int, d: Decision, *,
                mode: str, broker_symbol: str, req_price: float,
-               status: str = "pending", note: str = "") -> int:
+               status: str = "pending", note: str = "",
+               stop: float | None = None, target: float | None = None) -> int:
     """Строка заводится ДО отправки ордера.
 
     🔴 Порядок принципиален, это урок live_strategy от 19.08: ордер ушёл,
@@ -152,7 +153,9 @@ def open_trade(con: sqlite3.Connection, signal_id: int, d: Decision, *,
         "direction, mode, volume, risk_money, atr, req_price, req_ts, stop, target, "
         "horizon_until, status, note) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
         (signal_id, s.strategy, s.symbol, broker_symbol, s.tf, s.direction, mode,
-         d.volume, d.risk_money, s.atr, req_price, now, s.stop, s.target,
+         d.volume, d.risk_money, s.atr, req_price, now,
+         s.stop if stop is None else stop,
+         s.target if target is None else target,
          now + s.horizon_sec, status, note))
     con.commit()
     return int(cur.lastrowid)

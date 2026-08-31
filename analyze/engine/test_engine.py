@@ -195,6 +195,41 @@ class BrokerConstraints(unittest.TestCase):
         self.assertEqual(c.exception.status, "margin_unknown")
 
 
+class CostAndGeometry(unittest.TestCase):
+    """🔴 31.08, по 22 закрытым сделкам движка."""
+
+    def test_широкий_спред_отвергается(self):
+        """У USDCNY спред 105.7% ATR — он один съедает 35% награды.
+        Никакое улучшение сигнала этого не отыграет."""
+        tick = SimpleNamespace(bid=6.7205, ask=6.7225)      # спред 0.002
+        s = sig(symbol="USDCNY", ref_price=6.7215, stop=6.7187,
+                target=6.7271, atr=0.00189, direction=LONG)
+        with self.assertRaises(risk.RiskRefusal) as c:
+            risk.cost_gate(s, tick)
+        self.assertEqual(c.exception.status, "spread_too_wide")
+
+    def test_узкий_спред_проходит(self):
+        """У золота спред 0.6% награды."""
+        tick = SimpleNamespace(bid=4600.0, ask=4600.37)
+        risk.cost_gate(sig(atr=22.0, ref_price=4600.0, stop=4567.0,
+                           target=4666.0), tick)
+
+    def test_геометрия_привязана_к_цене_входа(self):
+        """Стоп и цель обязаны считаться от фактического входа, иначе снос
+        ломает RR несимметрично: заявленное 2.0 гуляло от 1.135 до 3.357,
+        и средняя награда вышла 1.73R вместо 2.0 — безубыточный винрейт
+        поднялся с 33.3% до 36.6%."""
+        s = sig(ref_price=4600.0, stop=4570.0, target=4660.0)   # RR 2.0
+        fill = 4610.0                                            # снос 0.33R
+        dist, rr = s.stop_distance, s.rr
+        stop, target = fill - dist, fill + rr * dist
+        got = abs(target - fill) / abs(fill - stop)
+        self.assertAlmostEqual(got, 2.0, places=9)
+        # а «как было»: барьеры от бара-основания при том же сносе
+        was = abs(s.target - fill) / abs(fill - s.stop)
+        self.assertLess(was, 1.3)
+
+
 class Drawdown(unittest.TestCase):
     def test_стоп_кран_меряет_просадку_от_пика(self):
         """🔴 Старое правило считало накопленную сумму: при пике +32 ATR оно

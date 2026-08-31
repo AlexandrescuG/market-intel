@@ -154,6 +154,38 @@ def drift_gate(signal: Signal, market_price: float) -> None:
             f"цена ушла от бара-основания на {drift:.2f}R при пределе {MAX_ENTRY_DRIFT_R}")
 
 
+# Какую долю награды разрешено отдать спреду.
+# 🔴 Замерено 31.08 на живых котировках — спред как доля цели (1.5 ATR × RR 2):
+#   XAUUSD  0.6%    USDJPY  3.0%    EURUSD  3.0%
+#   GBPUSD  4.0%    USDZAR 11.4%    USDCNY 35.2%
+# У USDCNY спред равен 105.7% ATR: он один съедает треть награды, и никакое
+# улучшение сигнала этого не отыграет — инструмент не торгуем при такой
+# геометрии, а не «торгуем осторожно». Порог 10% выбран так, чтобы отсечь
+# USDCNY и USDZAR и оставить остальных с запасом.
+MAX_SPREAD_SHARE_OF_TARGET = 0.10
+
+
+def cost_gate(signal: Signal, tick) -> None:
+    """Спред не должен съедать заметную долю награды.
+
+    Считается на КАЖДОМ сигнале по живому спреду, а не по списку
+    инструментов: спред расширяется ночью и на новостях, и инструмент,
+    торгуемый днём, может стать нерентабельным в 3 часа ночи. Статический
+    чёрный список этого не поймает."""
+    if tick is None:
+        return
+    spread = abs(float(tick.ask) - float(tick.bid))
+    reward = abs(signal.target - signal.ref_price)
+    if reward <= 0:
+        return
+    share = spread / reward
+    if share > MAX_SPREAD_SHARE_OF_TARGET:
+        raise RiskRefusal(
+            "spread_too_wide",
+            f"спред {spread:.5f} съедает {share * 100:.1f}% награды при пределе "
+            f"{MAX_SPREAD_SHARE_OF_TARGET * 100:.0f}%")
+
+
 def broker_barrier_gate(signal: Signal, symbol_info, tick) -> None:
     """Барьеры должны быть дальше минимума, который требует брокер.
 

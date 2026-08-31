@@ -155,14 +155,41 @@ def execute(con: sqlite3.Connection, mt5, conn, signal_id: int, d: Decision,
     price = float(tick.ask if s.is_long else tick.bid)
     digits = int(getattr(si, "digits", 5))
 
+    # 🔴 БАРЬЕРЫ ПЕРЕСЧИТЫВАЮТСЯ ОТ ЦЕНЫ ВХОДА, А НЕ ОТ ЗАКРЫТИЯ БАРА.
+    #
+    # 31.08: я воспроизвёл ровно тот дефект, который в этом же репозитории
+    # был найден и исправлен 19.08 (см. live_strategy.geometry). Источник
+    # считает стоп и цель от `ref_price` — закрытия сигнального бара, — а
+    # ордер уходит по рынку. Между ними снос, и он ломает геометрию
+    # НЕСИММЕТРИЧНО: если цена ушла в сторону цели, награда сжимается, а
+    # риск растёт, то есть входим выше с более тесным стопом.
+    #
+    # Замерено по 22 закрытым сделкам: заявленное RR 2.0 на деле гуляло от
+    # 1.135 до 3.357. Пять из шести сделок со сносом > 0.3R получили
+    # фактическое RR около 1.2 — и четыре из них закрылись стопом. Средняя
+    # награда на выигрышах вышла 1.73R вместо 2.0, из-за чего безубыточный
+    # винрейт поднялся с 33.3% до 36.6%: почти три процентных пункта
+    # преимущества сгорали ни за что.
+    #
+    # Геометрия сохраняется по построению: то же расстояние до стопа в ATR
+    # и то же RR, но привязанные к цене, по которой реально входим.
+    dist = s.stop_distance
+    rr = s.rr
+    if s.is_long:
+        stop, target = price - dist, price + rr * dist
+    else:
+        stop, target = price + dist, price - rr * dist
+
     # 🔴 Строка журнала заводится ДО отправки. 19.08 в старом контуре порядок
     # был обратный: ордер ушёл, позиция открылась, INSERT упал с
     # "database is locked" — сделка не попала ни в журнал, ни под горизонт.
     tid = ledger.open_trade(con, signal_id, d, mode=mode, broker_symbol=bsym,
                             req_price=price, status="pending",
-                            note=f"atr={s.atr:.5f} rr={s.rr:.2f}")
+                            note=f"atr={s.atr:.5f} rr={rr:.2f} "
+                                 f"снос={abs(price - s.ref_price) / dist:.3f}R",
+                            stop=stop, target=target)
 
-    res, err = send(conn, mt5, bsym, d.volume, s.is_long, price, s.stop, s.target, digits)
+    res, err = send(conn, mt5, bsym, d.volume, s.is_long, price, stop, target, digits)
     if err or res is None or getattr(res, "retcode", None) != mt5.TRADE_RETCODE_DONE:
         reason = err or f"retcode={getattr(res, 'retcode', None)} {getattr(res, 'comment', '')}"
         ledger.mark_rejected(con, tid, reason)

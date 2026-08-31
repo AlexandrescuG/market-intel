@@ -54,6 +54,7 @@ def decide(con, s, equity, symbol_info, tick, default_status: str, *,
     try:
         risk.strategy_gate(state)
         risk.geometry_gate(s)
+        risk.cost_gate(s, tick)
         risk.broker_barrier_gate(s, symbol_info, tick)
         volume, risk_money = risk.position_volume(s, equity, symbol_info)
         risk.opposite_open(con, s)
