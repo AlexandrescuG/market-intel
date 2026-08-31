@@ -198,9 +198,20 @@ def publish_charts() -> None:
     """
     import sqlite3
     import pandas as pd
+    from mt5_config import RECENT_BARS
     from core.technical import pivots as calc_pivots, _rsi, patterns as _tech_patterns
     from core.price_bars import available_symbols
     from core.symbols_registry import alias_for
+
+    # Сколько свечей уходит в файл. Ключи — веб-таймфреймы, значения берём из
+    # той же карты, по которой качаются бары из моста: один предел на оба конца
+    # конвейера, а не два разных числа в разных файлах.
+    _WEB_TF_LIMIT = {"M15": RECENT_BARS.get("15m", 3000),
+                     "M30": RECENT_BARS.get("30m", 3000),
+                     "H1":  RECENT_BARS.get("1h", 3000),
+                     "H4":  RECENT_BARS.get("4h", 2000),
+                     "D1":  RECENT_BARS.get("1d", 2000),
+                     "W1":  RECENT_BARS.get("1w", 1000)}
 
     def _frame(con, pb_sym, tf):
         rows = con.execute(
@@ -296,7 +307,23 @@ def publish_charts() -> None:
                     # без выдумки" должно значить "нет файла", а не "старый файл".
                     (WEB_DATA / fname).unlink(missing_ok=True)
                     continue
-                candles, vol = _rows_from(df, intraday)
+                # 🔴 В файл идёт хвост, а не вся история.
+                #
+                # Выгрузка была без предела: ohlc_GOLD_M30.json — 100 796 свечей
+                # с 2018 года, 22.7 МБ, и браузер скачивал их целиком при каждом
+                # переключении на M30. Вся выкладка занимала 251 МБ. На телефоне
+                # это просто не открывалось за разумное время.
+                #
+                # Пределы те же, что уже действуют при выкачке из моста
+                # (mt5_config.RECENT_BARS) — чтобы «глубина графика» не значила в
+                # двух местах разное. Три тысячи получасовых свечей это больше
+                # трёх месяцев: на экране всё равно помещается пара сотен.
+                #
+                # Обрезается ТОЛЬКО то, что пишется в файл. Пивоты, RSI, MA50 и
+                # паттерны выше посчитаны по полному ряду и не меняются.
+                keep = _WEB_TF_LIMIT.get(web_tf)
+                out_df = df.tail(keep) if keep else df
+                candles, vol = _rows_from(out_df, intraday)
                 _write(fname, {**meta, "interval": web_tf, "candles": candles, "volume": vol})
     finally:
         con.close()
