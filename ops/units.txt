@@ -28,6 +28,7 @@ sbf-focus-live.service       daemon  0        # Focus Engine, переназна
 sbf-vorovka2.service         daemon  0        # зона Платформа/Боты: репост markettwits -> @SBFEconomics (27.08: был голым процессом, умер от сетевого блипа)
 sbf-academy-bot.service      daemon  0        # зона Платформа/Боты: Telegram-бот SBFAcademy (31.08: был голым процессом, лиды в CRM молчали)
 sbf-academy-api.service      daemon  0        # зона Платформа/Боты: API мини-приложения на :8000 (31.08: был голым процессом)
+sbf-site.service             daemon  0        # зона Сайт/Контент: лендинг lp.sbf.md и воронка /edu (31.08: был голым процессом)
 
 # ── источники баров ─────────────────────────────────────────────────────────
 sbf-mt5-pull.timer           timer   7200     # *:05, доливка price_bars из MT5 (28 символов)
