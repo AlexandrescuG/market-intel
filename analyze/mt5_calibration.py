@@ -23,6 +23,7 @@ analyze/mt5_calibration.py — калибровочный контур изде�
 from __future__ import annotations
 
 import argparse
+import fcntl
 import logging
 import sqlite3
 import sys
@@ -84,23 +85,79 @@ def consecutive_failures(con: sqlite3.Connection, n: int = CONSECUTIVE_FAILURES_
 
 # ─── мост ───────────────────────────────────────────────────────────────────
 
+BRIDGE_LOCK = "/tmp/sbf-mt5-bridge.lock"
+BRIDGE_LOCK_WAIT_SEC = 180
+
+
 class Bridge:
     """Контекст-менеджер: соединение + initialize/shutdown. Недоступность
     моста — это SafetyRefusal('bridge_down'), а не исключение наружу:
-    контур не имеет права ронять цикл, прогноз важнее наблюдения."""
+    контур не имеет права ронять цикл, прогноз важнее наблюдения.
+
+    🔴 31.08.2026: ДОСТУП СЕРИАЛИЗОВАН ФАЙЛОВОЙ БЛОКИРОВКОЙ.
+
+    Симптом, с которого начали: терминал играл звуки подключения и
+    отключения. За ними стояло вот что — `mt5.shutdown()` в `__exit__`
+    закрывает сессию MetaTrader5 во ВСЁМ процессе `mt5_server.py`, а он
+    один на всех. Пока один клиент выходит, второй продолжает работать,
+    его следующий вызов заново делает `initialize()`, терминал
+    перелогинивается, и в журнале появляется пара
+    `connection ... lost` / `authorized on ...`.
+
+    Установлено опытом, а не рассуждением:
+        один Bridge подряд        -> 0 обрывов
+        два Bridge одновременно   -> 8 обрывов
+
+    Отсюда же росли и таймауты rpyc у live_strategy (10 падений на 38
+    прогонов): вызов приходил ровно в окно переподключения. А клиентов
+    много и они пересекаются по расписанию — mt5-pull в *:05,
+    strategy-monitor каждые 15 минут (открывает мост дважды), движок в
+    *:03, live-strategy в *:10, broker-catalog постоянно.
+
+    Блокировка межпроцессная (flock), потому что клиенты — разные
+    процессы под разными юнитами; внутрипроцессный замок их не увидел бы.
+    Ожидание длинное: очередь на мост лучше, чем обрыв у соседа."""
 
     def __enter__(self):
-        self.conn = rpyc.classic.connect(HOST, PORT)
-        self.mt5 = self.conn.modules.MetaTrader5
-        if not self.mt5.initialize(path=TERMINAL_PATH, timeout=60000):
-            raise SafetyRefusal("bridge_down", f"initialize(): {self.mt5.last_error()}")
+        self._lock = open(BRIDGE_LOCK, "a+")
+        deadline = time.time() + BRIDGE_LOCK_WAIT_SEC
+        while True:
+            try:
+                fcntl.flock(self._lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                break
+            except BlockingIOError:
+                if time.time() > deadline:
+                    self._lock.close()
+                    raise SafetyRefusal(
+                        "bridge_busy",
+                        f"мост занят другим процессом дольше {BRIDGE_LOCK_WAIT_SEC} с")
+                time.sleep(0.5)
+        try:
+            self.conn = rpyc.classic.connect(HOST, PORT)
+            self.mt5 = self.conn.modules.MetaTrader5
+            if not self.mt5.initialize(path=TERMINAL_PATH, timeout=60000):
+                raise SafetyRefusal("bridge_down", f"initialize(): {self.mt5.last_error()}")
+        except BaseException:
+            self._release()
+            raise
         return self.mt5, self.conn
+
+    def _release(self):
+        try:
+            fcntl.flock(self._lock, fcntl.LOCK_UN)
+        except Exception:
+            pass
+        try:
+            self._lock.close()
+        except Exception:
+            pass
 
     def __exit__(self, *exc):
         try:
             self.mt5.shutdown()
         except Exception:
             pass
+        self._release()
         return False
 
 
