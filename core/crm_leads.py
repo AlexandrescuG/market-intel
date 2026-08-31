@@ -127,13 +127,33 @@ def _find_lead_by_email(email: str) -> str | None:
         if r.status_code != 200:
             return None
         data = r.json()
-        items = data.get("items") if isinstance(data, dict) else data
+        # SBFCRM отдаёт список в ключе "data" ({data, total, page, limit,
+        # statusCounts}). Раньше здесь читался "items" — поиск всегда возвращал
+        # пустоту, и опрос заводил бы второго лида вместо дополнения первого.
+        if isinstance(data, dict):
+            items = data.get("data") or data.get("items") or []
+        else:
+            items = data
         for it in (items or []):
             if (it.get("email") or "").lower() == email.lower():
                 return it.get("id")
     except Exception as e:
         log.error("SBFCRM поиск лида по почте: %s", e)
     return None
+
+
+def _get_lead(lead_id: str) -> dict | None:
+    tok = _get_token()
+    if not tok:
+        return None
+    try:
+        r = requests.get(f"{SBFCRM_URL}/api/leads/{lead_id}",
+                         headers={"Authorization": f"Bearer {tok}"},
+                         timeout=_TIMEOUT)
+        return r.json() if r.status_code == 200 else None
+    except Exception as e:
+        log.error("SBFCRM чтение лида %s: %s", lead_id, e)
+        return None
 
 
 def _answers_to_lines(answers: dict) -> list[str]:
@@ -218,14 +238,28 @@ def enrich_with_survey(email: str, answers: dict, pro_until: str | None = None,
     if not lead_id:
         return bool(create_lead(email=email, answers=answers, pro_until=pro_until))
 
+    # Читаем карточку, чтобы дописать к заметкам, а не затереть их: при
+    # регистрации туда легли метки перехода, и они ценнее ответов опроса.
+    current = _get_lead(lead_id) or {}
+    old_notes = (current.get("notes") or "").rstrip()
+    old_tags = [t for t in (current.get("tags") or []) if isinstance(t, str)]
+
     lines = ["Опрос пройден."]
     if pro_until:
         lines.append(f"PRO выдан до: {pro_until}")
     lines.append("Ответы:")
     lines += _answers_to_lines(answers)
+    notes = (old_notes + "\n\n" if old_notes else "") + "\n".join(lines)
 
-    payload = {"notes": "\n".join(lines)[:5000],
-               "tags": ["lp.sbfconsult.com", "survey-done"]}
-    ok = _request("PATCH", f"/api/leads/{lead_id}", payload) is not None
+    tags = old_tags + [t for t in ("lp.sbfconsult.com", "survey-done")
+                       if t not in old_tags]
+    if pro_until and "pro-30d" not in tags:
+        tags.append("pro-30d")
+
+    # PUT, а не PATCH: в проде SBFCRM крутится сборка, где @Patch(':id') ещё
+    # нет (в исходниках он уже есть, но бэкенд не пересобран) — PATCH отвечал
+    # 404. UpdateLeadDto целиком @IsOptional, так что PUT здесь частичный.
+    payload = {"notes": notes[:5000], "tags": tags[:20]}
+    ok = _request("PUT", f"/api/leads/{lead_id}", payload) is not None
     log.info("CRM: карточка %s дополнена опросом: %s", lead_id, ok)
     return ok
