@@ -25,10 +25,10 @@
 <link rel="stylesheet" href="/assets/tokens.css?v=1">
 <script src="/assets/i18n.js?v=2" defer></script>
 <script src="/assets/sbf-symbols.js?v=2"></script>
-<script src="/assets/sbf-header.js?v=18" defer></script>
+<script src="/assets/sbf-header.js?v=19" defer></script>
 <script src="/assets/sbf-auth.js?v=1"></script>
 <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
-<script src="/assets/grafik-engine.js?v=20260820a"></script>
+<script src="/assets/grafik-engine.js?v=20260831a"></script>
 <script src="/assets/sbf-thermo-widget.js"></script>
 <script src="/assets/sbf-glossary.js?v=2" defer></script>
 <style>
@@ -142,6 +142,16 @@ body{margin:0;background:var(--cream);color:var(--ink);font-family:Montserrat,sa
 /* Разделитель в контролах */
 .ctrl-sep{width:1px;height:22px;background:var(--line);flex-shrink:0}
 #chart{height:440px}
+#chartMsg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  pointer-events:none;z-index:5}
+#chartMsg[hidden]{display:none}
+#chartMsg .cm-box{display:flex;align-items:center;gap:10px;padding:12px 18px;border-radius:10px;
+  background:rgba(251,246,239,.92);border:1px solid rgba(0,0,0,.08);
+  font:500 14px/1.4 'Montserrat',sans-serif;color:#6b6b76;max-width:80%;text-align:center}
+#chartMsg .cm-spin{width:14px;height:14px;border:2px solid rgba(0,0,0,.15);
+  border-top-color:#C9A227;border-radius:50%;animation:cmspin .8s linear infinite;flex:0 0 auto}
+#chartMsg .cm-spin[hidden]{display:none}
+@keyframes cmspin{to{transform:rotate(360deg)}}
 .card.sbf-fs{display:flex!important;flex-direction:column!important;overflow:hidden!important}
 .card.sbf-fs #chartContainer{flex:1;min-height:0;position:relative}
 .card.sbf-fs #chart{height:100%!important;width:100%!important}
@@ -346,6 +356,10 @@ body.embed .card{border-radius:0;box-shadow:none;border:none;max-width:100%}
   </div>
   <div id="chartContainer" style="position:relative">
     <div id="chart"></div>
+    <!-- Состояние графика словами. До 31.08.2026 отсутствие данных выглядело
+         как пустое белое поле без единого символа — неотличимо от поломки
+         страницы. Слой поверх холста, скрыт по умолчанию. -->
+    <div id="chartMsg" hidden><div class="cm-box"><span class="cm-spin" hidden></span><span class="cm-txt"></span></div></div>
     <div id="sessionLayer"></div>
     <div id="confluenceLayer"></div>
     <div id="newsLayer"></div>
@@ -2032,7 +2046,12 @@ async function drawOurs(tf) {
   // сжаты слишком сильно, полосы сессий были бы неразличимы).
   TOGGLES.sess = (tf === 'M1' || tf === 'M5' || tf === 'M15' || tf === 'M30' || tf === 'H1');
   document.querySelector('#tog [data-t="sess"]').classList.toggle('on', TOGGLES.sess);
+  // Показать «загружаем» ДО запроса: холодный каталожный инструмент отвечает
+  // 1.5-3.4 с, и всё это время пользователь смотрел на пустой холст.
+  setChartMsg('loading');
   _curData = await SBFGrafik.loadBars(PARAM, tf);
+  setChartMsg((_curData.lw && _curData.lw.length) ? null
+              : ((_curData.meta && _curData.meta.state) || 'nodata'));
   // Дождаться словаря i18n (если он есть) ДО построения текста — на первом
   // рендере этот async-код стартует раньше defer-скриптов (см. секцию i18n
   // выше); loadBars() — сетевой запрос, поэтому к этому моменту window.sbfI18n
@@ -2235,6 +2254,28 @@ function _updateDataStale() {
   _dataStale = age > Math.max(TF_SEC[curTF] * 2, 3 * 86400);
   if (_dataStale) setDataStaleBadge(_lastRealBarUnix);
 }
+// Состояние графика словами вместо пустого холста.
+//   'loading'   — идёт запрос (холодный инструмент отвечает до 3.4 с);
+//   'feed_down' — брокер сейчас не отдаёт этот инструмент, данные вернутся;
+//   'nodata'    — ряда по этому инструменту нет вовсе;
+//   null        — данные есть, слой убрать.
+function setChartMsg(kind) {
+  const el = document.getElementById('chartMsg');
+  if (!el) return;
+  if (!kind) { el.hidden = true; return; }
+  const spin = el.querySelector('.cm-spin');
+  const txt  = el.querySelector('.cm-txt');
+  const map = {
+    loading:   ['chart.msg_loading',   'Загружаем данные…'],
+    feed_down: ['chart.msg_feed_down', 'Брокер сейчас не передаёт этот инструмент. Данные появятся, когда фид возобновится.'],
+    nodata:    ['chart.msg_nodata',    'По этому инструменту данных нет.']
+  };
+  const pair = map[kind] || map.nodata;
+  if (txt)  txt.textContent = t(pair[0], pair[1]);
+  if (spin) spin.hidden = (kind !== 'loading');
+  el.hidden = false;
+}
+
 function setDataStaleBadge(unix) {
   const liveEl = document.getElementById('chartLiveDot');
   const pxEl   = document.getElementById('px');

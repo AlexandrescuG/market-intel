@@ -20,6 +20,7 @@ from urllib.parse import urlparse, parse_qs, unquote
 sys.path.insert(0, str(Path(__file__).parent))
 from core import journal_db, journal_crypto, journal_ocr, journal_csv, journal_meta, journal_discipline, journal_alerts, journal_brief, journal_setups, journal_tilt, journal_gamification, journal_goals, journal_account, journal_auth, journal_feedback, journal_import, journal_analytics, journal_review, journal_cooldown, journal_rules, journal_tradeplan, journal_gate, i18n
 from core import symbols as _symbols
+from core import candle_cache
 from core.symbols_registry import yahoo_ticker as _registry_yahoo_ticker
 from core.event_types import normalize_event_type
 from core.config import DB_PATH as _SIGNALS_DB
@@ -208,7 +209,25 @@ def _mt5_tail(our_key, tf):
     c = _mt5_tail_cache.get(ck)
     if c and now - c[0] < ttl:
         return c[1]
-    with _mt5_lock:
+
+    # ── Диск: свечи, взятые у брокера раньше ────────────────────────────────
+    # 🔴 Читаем ДО захвата _mt5_lock. Замок последователен (мост однопоточен), и
+    # если встать в очередь за ним, второй посетитель ждёт чужой поход в
+    # терминал — 1.5-3.4 с на холодном инструменте. Свежая копия на диске
+    # снимает вопрос за миллисекунды, не касаясь ни замка, ни моста.
+    disk, disk_stale = candle_cache.get(our_key, tf)
+    if disk and not disk_stale:
+        _mt5_tail_cache[ck] = (now, disk)
+        return disk
+
+    # 🔴 Замок с таймаутом, а не безусловное ожидание. Раньше запрос вставал в
+    # очередь к мосту насмерть, а сервер однопоточный — один посетитель,
+    # ждущий свой график, останавливал сайт для всех. Теперь: не дождались за
+    # секунду — отдаём устаревшую копию (она честно помечена возрастом
+    # последней свечи), а мост оставляем тому, кто его уже занял.
+    if not _mt5_lock.acquire(timeout=1.0):
+        return disk or None
+    try:
         c = _mt5_tail_cache.get(ck)
         if c and now - c[0] < ttl:
             return c[1]
@@ -225,18 +244,23 @@ def _mt5_tail(our_key, tf):
                 mt5 = conn.modules["MetaTrader5"]
                 mt5.initialize(path=_MT5_PATH, timeout=60000)
                 if not mt5.symbol_select(bs, True):
-                    return None
+                    return disk or None
                 tfc = getattr(mt5, _MT5_TF_ATTR[tf])
                 rates = mt5.copy_rates_from_pos(bs, tfc, 0, _MT5_COUNT.get(tf, 300))
                 if rates is None or len(rates) == 0:
-                    return None
+                    return disk or None
                 data = rpyc.classic.obtain(rates)
                 break
             except Exception:
                 _mt5_conn = None  # сбросить и попробовать заново
                 data = None
         if data is None:
-            return None
+            # 🔴 Мост не ответил — отдаём копию с диска, а не пустоту.
+            # Пустой ответ фронт рисует белым полем без единого слова, и это
+            # ровно то, что читается как «график сломан». Устаревший ряд честен:
+            # delay_sec считается от последней свечи, страница показывает
+            # «данные от …». Молчание моста — не повод терять данные.
+            return disk or None
         candles = [{"time": int(x["time"]),
                     "open": round(float(x["open"]), 5), "high": round(float(x["high"]), 5),
                     "low": round(float(x["low"]), 5), "close": round(float(x["close"]), 5)}
@@ -256,10 +280,14 @@ def _mt5_tail(our_key, tf):
         if candles and (time.time() - candles[-1]["time"]) > 7 * 86400:
             _mt5_dead_feed[ck] = now
             _mt5_tail_cache[ck] = (now, None)
+            candle_cache.drop(our_key, tf)
             return None
         _mt5_dead_feed.pop(ck, None)
         _mt5_tail_cache[ck] = (now, candles)
+        candle_cache.put(our_key, tf, candles)
         return candles
+    finally:
+        _mt5_lock.release()
 
 
 def _chart_symbols() -> set:

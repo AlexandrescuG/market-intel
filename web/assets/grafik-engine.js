@@ -394,21 +394,128 @@
   // ронял всю функцию необработанным исключением (пойман кликом по вкладке
   // в Playwright, не curl'ом -- см. Core-лог). "Нет данных" -- валидный,
   // не аварийный исход.
-  function _emptyBars() {
+  function _emptyBars(state) {
     return { meta: { ticker: null, label: null, last: null, interval: null,
-                      bias: null, rsi: null, nearest: null, patterns: [] },
+                      bias: null, rsi: null, nearest: null, patterns: [],
+                      // 'feed_down' — брокер молчит, данные вернутся;
+                      // 'nodata'    — такого ряда у нас нет вовсе.
+                      // Страница показывает это словами вместо белого поля.
+                      state: state || 'nodata' },
              levels: [], bars: [], lw: [], volume: [] };
   }
 
-  async function loadBars(symbol, tf) {
-    // M5 — SPEC_chart_fixes_and_staged_signup.md §3: не статический файл
-    // (не весь охват на диске, дорого), а короткое окно по API-запросу.
+  // Порог протухания статического ряда по ТФ (сек). Пол для внутридневки —
+  // 6ч: 26 из 31 инструментов стоят с 6 авг (их фид не запланирован, живой
+  // источник только Yahoo), а у 5 живых MT5-символов статика отстаёт лишь на
+  // лаг публикации (десятки минут). Без пола порог «3 периода» на M15 (45 мин)
+  // уводил бы и живые MT5-символы на Yahoo, тогда как на их брокерских барах
+  // считаются сигналы (§4.3) — их надо сохранить. Для D1/W1 порог с запасом
+  // на выходные (пт→пн ≈ 3 дня не должно считаться протуханием).
+  var _STALE_SEC = { M1: 21600, M5: 21600, M15: 21600, M30: 21600, H1: 21600,
+                     H4: 43200, D1: 345600, W1: 1209600 };
+
+  function _timeToUnix(t) {
+    return (typeof t === 'number') ? t : Math.floor(Date.parse(t + 'T00:00:00Z') / 1000);
+  }
+
+  // P0c: схлопнуть дубли по time (последний побеждает) и упорядочить по
+  // возрастанию — Lightweight Charts не терпит дублей/разворотов времени.
+  function _dedupeByTime(candles) {
+    var idx = Object.create(null), out = [];
+    for (var i = 0; i < candles.length; i++) {
+      var k = candles[i].time;
+      if (k in idx) { out[idx[k]] = candles[i]; }
+      else { idx[k] = out.length; out.push(candles[i]); }
+    }
+    out.sort(function(a, b) { return _timeToUnix(a.time) - _timeToUnix(b.time); });
+    return out;
+  }
+
+  // Живой оконный источник из Yahoo (тот же, что дорисовывает хвост, — §2
+  // инвентаря спеки). Возвращает только свечи; rsi/bias/pivots клиент
+  // досчитывает сам, ровно как уже делает для ответа /api/chart/ohlc-m5.
+  // Для D1/W1 время конвертируем в дата-строку 'YYYY-MM-DD' — тот же тип Time,
+  // что у статического дневного ряда и что ждёт pollTail (unixToBarTime).
+  async function _loadTail(symbol, tf) {
+    try {
+      // 🔴 encodeURIComponent обязателен. 585 из 842 инструментов каталога
+      // начинаются с '#' (#BOEING, #PFIZER — все акции США), а '#' в URL
+      // открывает фрагмент: браузер отправлял «s=» пустым, сервер отвечал 400,
+      // и график молча оставался белым. Отсюда и ощущение, что «большая часть
+      // графиков не работает»: не работали ровно те, чьё имя ломало ссылку.
+      var r = await fetch('./api/chart/tail?s=' + encodeURIComponent(symbol) +
+                          '&tf=' + encodeURIComponent(tf) + '&since=0&t=' + Date.now());
+      if (!r.ok) return null;
+      var d = await r.json();
+      // 🔴 Пустой ответ — НЕ то же самое, что сетевая ошибка, и раньше оба
+      // случая схлопывались в null. Сервер уже отличает «фид брокера молчит»
+      // (feed_down) от «такого инструмента у нас нет», а фронт этот флаг не
+      // читал вовсе — и рисовал белое поле без единого слова в обоих случаях.
+      if (!d || !d.candles || !d.candles.length) {
+        return { __empty: true, feed_down: !!(d && d.feed_down) };
+      }
+      var candles = d.candles;
+      if (tf === 'D1' || tf === 'W1') {
+        candles = candles.map(function(c) {
+          return { time: new Date(c.time * 1000).toISOString().slice(0, 10),
+                   open: c.open, high: c.high, low: c.low, close: c.close };
+        });
+      }
+      return { ticker: symbol, interval: tf, candles: candles, volume: [],
+               _live: true, market_open: d.market_open };
+    } catch (e) { return null; }
+  }
+
+  async function _loadStatic(symbol, tf) {
     var url = tf === 'M5'
-      ? './api/chart/ohlc-m5?symbol=' + symbol + '&t=' + Date.now()
-      : './data/ohlc_' + symbol + '_' + tf + '.json?t=' + Date.now();
-    var r = await fetch(url);
-    if (!r.ok) return _emptyBars();
-    var d = await r.json();
+      // Та же причина, что в _loadTail: '#' в имени инструмента рвёт и запрос
+      // к API, и путь к статическому файлу.
+      ? './api/chart/ohlc-m5?symbol=' + encodeURIComponent(symbol) + '&t=' + Date.now()
+      : './data/ohlc_' + encodeURIComponent(symbol) + '_' + tf + '.json?t=' + Date.now();
+    try {
+      var r = await fetch(url);
+      if (!r.ok) return null;
+      return await r.json();
+    } catch (e) { return null; }
+  }
+
+  function _isStale(d, tf) {
+    var c = d && d.candles;
+    if (!c || !c.length) return true;
+    var lastUnix = _timeToUnix(c[c.length - 1].time);
+    if (!isFinite(lastUnix)) return false;
+    return (Date.now() / 1000 - lastUnix) > (_STALE_SEC[tf] || 21600);
+  }
+
+  async function loadBars(symbol, tf) {
+    // Единый механизм: берём статику; если её последний бар протух (или файла
+    // нет — дыра M15 у 25 символов), подменяем живым оконным Yahoo (tail).
+    // Живые MT5-символы со свежей брокерской статикой остаются на ней (сигналы
+    // §4.3). Мёртвые фиды (26 шт с 6 авг) — на Yahoo, включая дефолтный D1.
+    var d = await _loadStatic(symbol, tf);
+    var lastState = null;
+    if (_isStale(d, tf)) {
+      var live = await _loadTail(symbol, tf);
+      // 🔴 Одна повторная попытка. Холодный каталожный инструмент отвечает
+      // 1.5-3.4 с (замер 31.08), и при заминке моста первый запрос приходит
+      // пустым, а следующий — с полными 3000 свечей. Раньше эта заминка
+      // показывалась как окончательно сломанный график: половина «нерабочих»
+      // графиков заработала бы со второй попытки. Ждём секунду и пробуем ещё
+      // раз — но ровно один, чтобы не устраивать мосту шторм из повторов.
+      if (live && live.__empty) {
+        await new Promise(function (r) { setTimeout(r, 1200); });
+        var retry = await _loadTail(symbol, tf);
+        live = retry;
+      }
+      if (live && live.__empty) { lastState = live.feed_down ? 'feed_down' : 'nodata'; live = null; }
+      if (live) d = live;
+    }
+    if (!d) return _emptyBars(lastState);
+    // P0c: Lightweight Charts требует строго возрастающий уникальный time,
+    // иначе рендерер свечей кидает "Value is null" и график пустой (ловилось
+    // на EURUSD D1 — 2 дубля дат от стыка брокеров). Схлопываем дубли (оставляя
+    // последний бар) и гарантируем порядок — защита от любого битого ряда.
+    d.candles = _dedupeByTime(d.candles || []);
     var bars = (d.candles || []).map(function(c) {
       return {
         ts:  c.time,
@@ -420,7 +527,11 @@
     });
     return {
       meta: {
-        ticker: d.ticker, label: d.label, last: d.last,
+        ticker: d.ticker, label: d.label,
+        // Оконные/живые ответы (tail, M1/M5) не присылают last — иначе
+        // nearestPivot(undefined,...) даёт dist_pct=NaN («в NaN% от сопротивления»).
+        // Берём close последней свечи как фолбэк.
+        last: (d.last != null ? d.last : (bars.length ? bars[bars.length - 1].c : null)),
         interval: d.interval, bias: d.bias, rsi: d.rsi,
         nearest: d.nearest, patterns: d.patterns || []
       },
@@ -663,6 +774,43 @@
     return { enter: enter, exit: exit };
   }
 
+  // ── Таймзона графика ────────────────────────────────────────────────────────
+  // Lightweight Charts рисует ось/крестик в UTC. Пользователь ждёт СВОЙ пояс.
+  // Форматтеры переводят метку в локальное время браузера (только отображение —
+  // сами timestamp'ы остаются UTC, координаты/оверлеи не трогаются). Для D1/W1
+  // time приходит как businessDay {year,month,day} — показываем дату.
+  function _pad2(n){ return (n < 10 ? '0' : '') + n; }
+  // 🔴 20.08: Lightweight Charts отдаёт форматтеру Time В ТОМ ЖЕ ВИДЕ, в каком
+  // его положили в setData. Дневной/недельный ряд мы кладём СТРОКОЙ
+  // 'YYYY-MM-DD' (см. _loadTail и ohlc_*_D1.json), а не объектом BusinessDay —
+  // поэтому time.day/time.month были undefined, и вся ось D1/W1 на chart.html и
+  // на главной подписывалась «undefined.undefined». Принимаем оба вида.
+  function _bday(time) {
+    if (typeof time === 'string') {
+      var p = time.split('-');
+      return { year: +p[0], month: +p[1], day: +p[2] };
+    }
+    return time;
+  }
+  function lwTickFmt(time) {
+    if (typeof time === 'number') {
+      // hour12:false — 24-часовой формат независимо от локали браузера (иначе
+      // en-US давал бы «03:24 PM» вместо «15:24»).
+      return new Date(time * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+    }
+    var b = _bday(time);
+    return _pad2(b.day) + '.' + _pad2(b.month);
+  }
+  function lwCrosshairFmt(time) {
+    if (typeof time === 'number') {
+      var d = new Date(time * 1000);
+      return _pad2(d.getDate()) + '.' + _pad2(d.getMonth() + 1) + ' ' +
+             _pad2(d.getHours()) + ':' + _pad2(d.getMinutes());
+    }
+    var b = _bday(time);
+    return b.year + '-' + _pad2(b.month) + '-' + _pad2(b.day);
+  }
+
   // ── Экспорт ────────────────────────────────────────────────────────────────
   root.SBFGrafik = {
     ITEMS: ITEMS, CATS: CATS, PALETTE: P,
@@ -673,6 +821,8 @@
     loadBars: loadBars, calcRSI14: calcRSI14, calcBias: calcBias,
     calcPivots: calcPivots, nearestPivot: nearestPivot, pivotLayers: pivotLayers,
     detectCandles: detectCandles, detectSMC: detectSMC,
+    // таймзона (локальное время на оси/крестике)
+    lwTickFmt: lwTickFmt, lwCrosshairFmt: lwCrosshairFmt,
     // UI-компоненты
     chartFullscreenButton: chartFullscreenButton
   };
