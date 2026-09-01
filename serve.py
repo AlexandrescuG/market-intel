@@ -517,6 +517,22 @@ _COUNTRY_CURRENCY = {
 }
 
 def _ensure_schema() -> None:
+    """Обёртка: досоздание схемы не имеет права уронить веб-сервер.
+
+    🔴 01.09 сайт лежал четыре минуты именно здесь. Цикл анализа держал запись
+    в bot.db, sbf-web стоял на executescript, порт никто не слушал, туннель
+    отдавал 502 — а юнит числился active. Ожидание чужой транзакции не должно
+    решать, работает ли сайт: страницы, графики и кэш свечей от bot.db не
+    зависят вовсе, а таблицы, которые тут создаются, к этому моменту почти
+    всегда уже существуют.
+    """
+    try:
+        _ensure_schema_inner()
+    except Exception as e:
+        print(f"схема bot.db недоступна ({e}) — поднимаюсь без неё", flush=True)
+
+
+def _ensure_schema_inner() -> None:
     """Создаёт новые таблицы БД Фазы 1 если не существуют.
 
     🔴 busy_timeout обязателен. bot.db пишут соседние джобы (доливка баров,
@@ -525,8 +541,25 @@ def _ensure_schema() -> None:
     "database is locked", когда каталог инструментов писал свои 842 строки.
     Сервис поднялся рестартом, но падать веб-серверу из-за чужой транзакции
     незачем — тот же приём уже применён в outliers_job и доливке баров."""
-    con = sqlite3.connect(str(_BOT_DB), timeout=60)
-    con.execute("PRAGMA busy_timeout=60000")
+    # 🔴 Ждать — но не бесконечно, и не ценой самого сайта.
+    #
+    # Ожидание в 60 секунд оказалось недостаточным: 01.09 цикл анализа
+    # (analyze.run_cycle --profile h4) держал запись в bot.db больше четырёх
+    # минут, sbf-web стоял на этой строке, порт 8085 никто не слушал, туннель
+    # отдавал 502 — сайт лежал целиком. Юнит при этом числился active: снаружи
+    # «работает», для посетителя пусто. Тот же класс отказа, который мы ловим
+    # в этом проекте третью неделю.
+    #
+    # Схема здесь только ДОСОЗДАЁТСЯ (всё CREATE IF NOT EXISTS). Если её сейчас
+    # не создать — почти всегда потому, что она уже есть, а база занята чужой
+    # транзакцией. Это не повод не поднимать сайт: страницы, графики и кэш
+    # свечей от bot.db не зависят вовсе.
+    try:
+        con = sqlite3.connect(str(_BOT_DB), timeout=15)
+        con.execute("PRAGMA busy_timeout=15000")
+    except Exception as e:
+        print(f"схема bot.db недоступна ({e}) — поднимаюсь без неё", flush=True)
+        return
     con.executescript("""
         CREATE TABLE IF NOT EXISTS price_bars (
             symbol TEXT NOT NULL, tf TEXT NOT NULL, ts INTEGER NOT NULL,
@@ -615,8 +648,14 @@ def _ensure_schema() -> None:
             ("CN", "GOLD", 1), ("CN", "WTI", 1), ("CN", "SPX", 1),
         ],
     )
-    con.commit()
-    con.close()
+    # Досоздание схемы не должно ронять сервер: если база занята чужой
+    # транзакцией, поднимаемся без неё — таблицы почти наверняка уже есть.
+    try:
+        con.commit()
+    except Exception as e:
+        print(f"схема bot.db не записана ({e}) — продолжаю", flush=True)
+    finally:
+        con.close()
 
 # ── Jinja2 ──────────────────────────────────────────────────────────────────
 def _url_for(endpoint, **values):
@@ -1613,6 +1652,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         # ── Auth / Onboarding ──
         elif path_clean == "/api/auth/me":
             self._handle_auth_me()
+        elif path_clean == "/api/user/watchlist-news":
+            self._handle_user_watchlist_news()
         elif path_clean == "/api/auth/my-path":
             self._handle_auth_my_path()
         elif path_clean == "/api/auth/survey-status":
@@ -3618,6 +3659,35 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             user["watchlist"] = journal_brief.get_watchlist(user_id)
             user["pinned"] = journal_brief.get_pinned(user_id)  # Focus Engine §6
         self._send_json(user or {"error": "not found"})
+
+    def _handle_user_watchlist_news(self) -> None:
+        """Что нового по инструментам, отмеченным звездой.
+
+        Ленту наполняет watchlist_news_job.py; здесь только чтение. Считать её
+        на лету по каждому запросу значило бы гонять соединение JOIN по 20 тыс.
+        тегов на каждое открытие страницы — ровно тот путь, который уже привёл
+        нас к однопоточному серверу в очереди за мостом.
+        """
+        user_id = self._lp_require_auth()
+        if not user_id:
+            return
+        try:
+            limit = min(int(parse_qs(urlparse(self.path).query).get("limit", ["30"])[0]), 100)
+        except ValueError:
+            limit = 30
+        try:
+            con = sqlite3.connect(str(Path(DIRECTORY).parent / "data" / "journal.db"))
+            con.row_factory = sqlite3.Row
+            rows = con.execute(
+                "SELECT symbol, title, url, source, ts, seen FROM watchlist_feed "
+                "WHERE user_id = ? ORDER BY ts DESC LIMIT ?", (user_id, limit)).fetchall()
+            unseen = con.execute(
+                "SELECT COUNT(*) FROM watchlist_feed WHERE user_id = ? AND seen = 0",
+                (user_id,)).fetchone()[0]
+            con.close()
+            self._send_json({"items": [dict(r) for r in rows], "unseen": unseen})
+        except Exception as e:
+            self._send_json({"error": str(e)}, 500)
 
     def _handle_user_watchlist_put(self) -> None:
         """SBF_Charts_Layer4_Spec, Фаза 1.3: PUT — полная замена ватчлиста

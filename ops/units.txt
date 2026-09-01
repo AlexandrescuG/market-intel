@@ -43,6 +43,7 @@ sbf-pulse.timer              timer   2400     # каждые 15 мин, pulse sc
 sbf-outliers.timer           timer   2400     # каждые 15 мин, скан выбросов
 sbf-news-burst.timer         timer   2400     # каждые 15 мин, всплески новостей
 sbf-news-digest.timer        timer   7800     # ежечасно, сводка новостей
+sbf-watchlist-news.timer     timer   600      # каждые 10 мин, лента новостей по отмеченным инструментам (01.09)
 sbf-sbfeconomics.timer       timer   7800     # ежечасно :50, ингест телеграм-канала
 sbf-sentiment.timer          timer   7800     # ежечасно :55, настроение толпы
 sbf-outbox-sender.timer      timer   1200     # каждые 5 мин, единый outbox → бот
