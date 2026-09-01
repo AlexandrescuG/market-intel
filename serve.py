@@ -197,6 +197,68 @@ def _mt5_broker_symbol(our_key):
     return our_key if our_key in _broker_catalog_symbols() else None
 
 
+_econ_ru: tuple = (0.0, {})
+
+
+def _econ_ru_dict() -> dict:
+    """Словарь русских названий макропоказателей. Файл, а не код.
+
+    В календаре 683 разных индикатора и 1208 заголовков — руками все не
+    перевести и не нужно: полсотни самых частых закрывают подавляющую часть
+    событий, доходящих до графика. Остальное показывается по-английски, и это
+    честнее выдуманного перевода: «Kansas Fed Composite Index» в вольном
+    пересказе читатель не сопоставит ни с чем.
+    """
+    global _econ_ru
+    path = Path(DIRECTORY).parent / "data" / "econ_indicator_ru.json"
+    try:
+        mtime = path.stat().st_mtime
+    except OSError:
+        return {}
+    if _econ_ru[0] == mtime:
+        return _econ_ru[1]
+    try:
+        _econ_ru = (mtime, json.loads(path.read_text(encoding="utf-8")))
+    except Exception:
+        return _econ_ru[1]
+    return _econ_ru[1]
+
+
+def _econ_title_ru(indicator, title, country) -> str | None:
+    """«Retail Sales MoM (November)» → «Розничные продажи, месяц к месяцу ·
+    США · ноябрь». None — перевода нет, показываем оригинал."""
+    d = _econ_ru_dict()
+    if not d:
+        return None
+    key = (indicator or "").strip().lower()
+    base = d.get(key)
+    if not base:
+        # Один и тот же показатель приходит в разных написаниях: «PPI MoM»,
+        # «PPI m/m», «PPI MoM Prel». Держать в словаре все варианты — значит
+        # обречь его на вечное отставание от источника. Приводим к общему виду:
+        # разделители к «mom/yoy/qoq», предварительные и финальные пометки прочь.
+        norm = re.sub(r"\bm\s*/\s*m\b", "mom", key)
+        norm = re.sub(r"\by\s*/\s*y\b", "yoy", norm)
+        norm = re.sub(r"\bq\s*/\s*q\b", "qoq", norm)
+        norm = re.sub(r"\b(prel|preliminary|final|flash|adv|advance|revised)\b", "", norm)
+        norm = re.sub(r"\s+", " ", norm).strip()
+        base = d.get(norm)
+    if not base:
+        return None
+    parts = [base]
+    cn = (d.get("_countries") or {}).get((country or "").upper())
+    if cn:
+        parts.append(cn)
+    # Период берём из скобок исходного заголовка: «PCE (November)». Своей
+    # колонки под него нет, а выбрасывать жалко — без месяца непонятно, к
+    # какому периоду относится цифра.
+    m = re.search(r"\(([^)]+)\)\s*$", title or "")
+    if m:
+        raw = m.group(1).strip().lower()
+        parts.append((d.get("_months") or {}).get(raw, m.group(1).strip()))
+    return " · ".join(parts)
+
+
 _ctrader_map: tuple = (0.0, {})
 
 
@@ -1959,6 +2021,12 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             for r in rows:
                 r["importance"] = r.pop("impact")
                 r["currency"] = _COUNTRY_CURRENCY.get(r["country"], r["country"])
+                # Русское название рядом с исходным, а не вместо него: фронт
+                # берёт его только на русской странице, английская остаётся как
+                # была. Нет перевода — ключа нет, и фронт покажет оригинал.
+                ru = _econ_title_ru(r.get("indicator"), r.get("title"), r.get("country"))
+                if ru:
+                    r["title_ru"] = ru
                 # Для блока "Прошлые разы" (Фаза 2) — фронтенд передаёт это как
                 # есть в /api/chart/event-reaction, не дублируя regex-словарь.
                 r["event_type"] = normalize_event_type(r.pop("indicator") or r["title"])
