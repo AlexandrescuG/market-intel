@@ -97,6 +97,29 @@ class SessionShape(unittest.TestCase):
         from analyze.ctrader import session as s
         self.assertIn("addTimeout", inspect.getsource(s.Session.request))
 
+    def test_отказ_определяется_по_errorCode_а_не_по_типу(self):
+        """🔴 Регрессия на живой дефект 31.08. `request` знал одну форму
+        неудачи — `ProtoOAErrorRes`, — а отвергнутый ордер вернулся как
+        `ProtoOAOrderErrorEvent`. Проверка его пропустила, скрипт напечатал
+        «ордер принят», позиции при этом не было. Третий раз за день один и
+        тот же класс: проверка знает одну форму отказа и молча пропускает
+        остальные. Поэтому теперь признак, а не перечень типов."""
+        import inspect
+
+        from analyze.ctrader import session as s
+        src = inspect.getsource(s.Session.request)
+        self.assertIn('getattr(r, "errorCode", None)', src)
+        self.assertNotIn('== "ProtoOAErrorRes"', src,
+                         "нельзя опираться на конкретный тип: форм отказа больше одной")
+
+    def test_есть_живая_котировка_а_не_только_бары(self):
+        """Барьеры обязаны считаться от рыночной цены. Первая попытка
+        отправить ордер взяла закрытие H1 (4420.15) при рынке 4375.74 —
+        расхождение ровно 1%, и брокер отверг заявку как TRADING_BAD_STOPS:
+        стоп для покупки оказался выше цены входа."""
+        from analyze.ctrader import session as s
+        self.assertTrue(hasattr(s.Session, "spot"))
+
     def test_неизвестный_символ_это_отказ(self):
         """Без тихого фолбэка: у Ava золото `GOLD`, у FxPro `XAUUSD`,
         и «вернём имя как есть» дало бы пустые данные, неотличимые от

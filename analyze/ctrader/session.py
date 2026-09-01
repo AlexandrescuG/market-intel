@@ -160,10 +160,68 @@ class Session:
             raise CTraderError("TRANSPORT", f"{type(e).__name__}: {e}", step) from e
 
         r = Protobuf.extract(msg)
-        if type(r).__name__ == "ProtoOAErrorRes":
-            raise CTraderError(getattr(r, "errorCode", "?"),
-                               getattr(r, "description", ""), step)
+        # 🔴 У отказа НЕ ОДНА форма. Первая версия знала только
+        # `ProtoOAErrorRes`, и отвергнутый ордер вернулся как
+        # `ProtoOAOrderErrorEvent` — проверка его пропустила, скрипт
+        # отрапортовал «ордер принят», а позиции не было. Третий раз за день
+        # один и тот же класс: проверка знает одну форму неудачи и потому
+        # молча пропускает остальные. Поэтому здесь не перечисление типов, а
+        # признак: есть поле `errorCode` — значит отказ.
+        code = getattr(r, "errorCode", None)
+        if code:
+            raise CTraderError(code, getattr(r, "description", ""), step)
         return r
+
+    # ── живые котировки ─────────────────────────────────────────────────
+
+    def spot(self, symbol: str, timeout: int = 15) -> tuple[float, float]:
+        """Текущие bid/ask. Возвращает (bid, ask).
+
+        🔴 Нужно именно это, а не закрытие последнего бара. Первая попытка
+        отправить ордер привязала стоп к закрытию H1 (4420.15) при рынке на
+        4375 — брокер отверг заявку как `TRADING_BAD_STOPS`, потому что стоп
+        для покупки оказался выше цены входа. Это тот же дефект, что чинили
+        в движке 31.08: барьеры считаются от ЦЕНЫ ВХОДА, а бар — не цена.
+
+        Котировки приходят событием, а не ответом на запрос, поэтому здесь
+        временный обработчик сообщений, а не обычный `request`."""
+        sid = self.symbol_id(symbol)
+        got = threading.Event()
+        box: dict[str, float] = {}
+
+        def on_message(_client, message):
+            if message.payloadType != ProtoOASpotEvent().payloadType:  # noqa: F405
+                return
+            ev = Protobuf.extract(message)
+            if ev.symbolId != sid:
+                return
+            if ev.HasField("bid"):
+                box["bid"] = ev.bid / 100_000.0
+            if ev.HasField("ask"):
+                box["ask"] = ev.ask / 100_000.0
+            if "bid" in box and "ask" in box:
+                got.set()
+
+        self._client.setMessageReceivedCallback(on_message)
+        try:
+            req = ProtoOASubscribeSpotsReq(                           # noqa: F405
+                ctidTraderAccountId=self.account_id)
+            req.symbolId.append(sid)
+            self.request(req, f"подписка на котировки {symbol}")
+            if not got.wait(timeout):
+                raise CTraderError("NO_QUOTE",
+                                   f"{symbol}: котировка не пришла за {timeout} с "
+                                   f"(рынок закрыт?)", "котировка")
+            return box["bid"], box["ask"]
+        finally:
+            self._client.setMessageReceivedCallback(lambda *a: None)
+            try:
+                u = ProtoOAUnsubscribeSpotsReq(                       # noqa: F405
+                    ctidTraderAccountId=self.account_id)
+                u.symbolId.append(sid)
+                self.request(u, "отписка")
+            except CTraderError:
+                pass
 
     def _auth(self):
         a = ProtoOAApplicationAuthReq()                              # noqa: F405
