@@ -28,7 +28,7 @@
 <script src="/assets/sbf-header.js?v=19" defer></script>
 <script src="/assets/sbf-auth.js?v=1"></script>
 <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
-<script src="/assets/grafik-engine.js?v=20260901a"></script>
+<script src="/assets/grafik-engine.js?v=20260901b"></script>
 <script src="/assets/sbf-thermo-widget.js"></script>
 <script src="/assets/sbf-glossary.js?v=2" defer></script>
 <style>
@@ -2687,9 +2687,26 @@ document.addEventListener('sbf:user-ready', async ev => {
 
   function current(){ return (typeof PARAM === 'string') ? PARAM : ''; }
 
+  // Проверенная доступность графика. Пустой объект = проверки ещё не было;
+  // тогда ничего не прячем — лучше показать лишнее, чем спрятать рабочее.
+  let availability = null;
+
+  function isChartable(it){
+    if (!availability) return !!it.canonical;
+    const rec = availability[it.symbol];
+    return !!(rec && rec.ok);
+  }
+
   function rebuild(){
     const q = query.trim().toLowerCase();
     view = catalog.filter(it => {
+      // 🔴 Инструменты без графика в список не попадают вовсе.
+      //
+      // Раньше они лежали здесь серыми некликабельными строками, и человек,
+      // ищущий золото, пролистывал десятки таких, прежде чем дойти до живого.
+      // Показывать в разделе «Графики» то, у чего графика нет, — это обещание,
+      // которого интерфейс не выполняет.
+      if (availability && !isChartable(it)) return false;
       if (cat && it.category !== cat) return false;
       if (!q) return true;
       return it.symbol.toLowerCase().includes(q) || (it.name || '').toLowerCase().includes(q);
@@ -2727,11 +2744,19 @@ document.addEventListener('sbf:user-ready', async ev => {
     const q = quotes.get(it.symbol);
     const fav = favs.has(it.symbol);
     const isCur = it.canonical === current() || it.symbol === current();
-    // 🔴 Клик разрешён только там, где график построится. Бары есть для
-    // инструментов реестра (canonical), для остальных 800+ ярус 3 (доливка по
-    // запросу) ещё не сделан — открыть по ним пустой график значило бы выдать
-    // отсутствие данных за данные, чего этот проект уже наелся.
-    const chartable = !!it.canonical;
+    // 🔴 Кликабельность определяется ПРОВЕРЕННЫМ наличием свечей, а не полем
+    // canonical.
+    //
+    // Раньше здесь стояло `!!it.canonical` — то есть «есть ли у инструмента имя
+    // в реестре». Реестр знает 37 имён из 842, поэтому 805 строк были мертвы
+    // для клика, включая те, что открываются прямой ссылкой безупречно
+    // (#BOEING, #REDDIT, _SAFRAN.FR). Список, где 95% строк не открывается,
+    // читается как сломанный сайт — и справедливо.
+    //
+    // Теперь источник правды — data/chart_available.json: там записан результат
+    // реального запроса /api/chart/tail по каждому инструменту. Не «мы думаем,
+    // что должно работать», а «мы спросили, и вот ответ».
+    const chartable = isChartable(it);
     const cls = ['inst-row'];
     if (!chartable) cls.push('nochart');
     if (isCur) cls.push('on');
@@ -2742,7 +2767,10 @@ document.addEventListener('sbf:user-ready', async ev => {
       : '<div class="inst-last">' + esc(fmtPrice(q.bid, it.digits)) + '</div>'
         + '<div class="inst-chg ' + (up ? 'up' : 'down') + '">' + esc(fmtChg(q.chg)) + '</div>';
     return '<div class="' + cls.join(' ') + '" data-s="' + esc(it.symbol) + '"'
-      + (chartable ? ' data-go="' + esc(it.canonical) + '" role="button" tabindex="0"'
+      // data-go — то, что уйдёт в ссылку ?s=. Для инструментов реестра это
+      // каноническое имя (GOLD), для каталожных — имя самого брокера
+      // (#BOEING): каталог снят с терминала, переводить там нечего.
+      + (chartable ? ' data-go="' + esc(it.canonical || it.symbol) + '" role="button" tabindex="0"'
                    : ' title="' + esc(t('chart.inst_no_bars', 'график пока недоступен')) + '"')
       + '><div class="inst-id"><div class="inst-tick">' + esc(it.symbol) + '</div>'
       // Имя, совпадающее с тикером, — это не имя, а его отсутствие: у 800+
@@ -2842,8 +2870,16 @@ document.addEventListener('sbf:user-ready', async ev => {
 
   (async function init(){
     try {
-      const [cat_, q] = await Promise.all([get('/data/broker_catalog.json'), get('/data/broker_quotes.json')]);
+      const [cat_, q, av] = await Promise.all([
+        get('/data/broker_catalog.json'),
+        get('/data/broker_quotes.json'),
+        // Доступность графиков — отдельным запросом и с мягким отказом: если
+        // файла нет (первая установка, проверка ещё не отработала), список
+        // просто останется прежним, а не опустеет. Пустой список хуже полного.
+        get('/data/chart_available.json').catch(function(){ return null; })
+      ]);
       catalog = cat_.items || [];
+      if (av && av.items) availability = av.items;
       applyQuotes(q);
       rebuild();
       // Открытый инструмент должен быть виден, а не найден прокруткой: при
