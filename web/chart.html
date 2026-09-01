@@ -28,7 +28,7 @@
 <script src="/assets/sbf-header.js?v=19" defer></script>
 <script src="/assets/sbf-auth.js?v=1"></script>
 <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
-<script src="/assets/grafik-engine.js?v=20260901h"></script>
+<script src="/assets/grafik-engine.js?v=20260901i"></script>
 <script src="/assets/sbf-thermo-widget.js"></script>
 <script src="/assets/sbf-glossary.js?v=2" defer></script>
 <style>
@@ -188,10 +188,16 @@ body.embed .card{border-radius:0;box-shadow:none;border:none;max-width:100%}
 .tog-hint-chip{font-family:'JetBrains Mono';font-size:11px;color:#444;padding:6px 14px;line-height:1.55;border-bottom:1px solid rgba(231,223,207,.6)}
 .tog-hint-chip:last-child{border-bottom:none}
 .tog-hint-chip b{color:#2B2B33;font-weight:600}
-#newsLayer{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+/* 🔴 z-index у ВСЕХ накладных слоёв. Полотна Lightweight Charts лежат с
+   z-index 1 и 2; слой без z-index уходит под них и не виден ни при какой
+   раскраске. Так молча пропадали сессии, события, новости и конфлюэнс — код
+   исправно считал координаты и добавлял узлы в DOM, на экране не было ничего.
+   Порядок снизу вверх: фон сессий → зоны схождения → новости → события.
+   События сверху: это точки на оси времени, их не должно перекрывать. */
+#newsLayer{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:5}
 .news-zone{position:absolute;top:0;bottom:20px;background:var(--gold);opacity:.08;cursor:pointer;pointer-events:auto}
 .news-zone:hover{opacity:.14}
-#confluenceLayer{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+#confluenceLayer{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:4}
 /* SPEC_chart_fixes_and_staged_signup.md §1: ширина полосы была артефактом
    кластеризации (min/max факторов), не измеренной границей -- жёсткий
    прямоугольник обещал читателю смысл, которого нет. Вместо него: мягкое
@@ -257,7 +263,7 @@ body.embed .card{border-radius:0;box-shadow:none;border:none;max-width:100%}
 .trades-teaser button{margin-left:auto;border:none;background:none;color:var(--muted);cursor:pointer;font-size:12px;padding:2px 4px}
 .evt-card .trade-context{margin-top:10px;padding:10px 12px;border-radius:10px;background:rgba(201,162,39,.07);border:1px solid rgba(201,162,39,.18);font-size:12px;line-height:1.6}
 .evt-card .trade-context div{margin-bottom:2px}
-#eventLayer{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+#eventLayer{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:6}
 .evt-line{position:absolute;top:0;bottom:20px;width:0;border-left:1px dashed rgba(43,43,51,.2);pointer-events:none}
 .evt-marker{position:absolute;bottom:4px;width:9px;height:9px;transform:translateX(-50%) rotate(45deg);cursor:pointer;pointer-events:auto;box-shadow:0 0 0 2px var(--paper)}
 .evt-marker.high{background:var(--gold)}
