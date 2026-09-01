@@ -46,6 +46,43 @@ _SYMBOL_PATTERNS = {
     "DXY":    re.compile(r"\bdxy\b|dollar index|индекс доллара", re.I),
 }
 
+def _load_catalog_patterns() -> dict:
+    """Выражения для инструментов каталога (tools/news_symbol_patterns.py).
+
+    🔴 Словарь выше писался под пятнадцать символов реестра и с тех пор не рос,
+    а витрина доросла до 334 инструментов, из них 206 акций. Новость про Boeing
+    физически не могла попасть на график Boeing: такого адреса в словаре нет.
+
+    Файл читается, а не встраивается в код, по двум причинам: каталог брокера
+    меняется, и правила сопоставления имён стоит пересматривать глазами — файл
+    для этого можно открыть и прочитать, а регулярку в коде никто не перечитает.
+
+    Нет файла — работаем на встроенном словаре. Отсутствие расширения не должно
+    ронять тегирование: пятнадцать символов лучше нуля.
+    """
+    path = Path(__file__).parent / "data" / "news_symbol_patterns.json"
+    if not path.exists():
+        return {}
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except Exception as e:
+        print(f"news_symbol_patterns.json не прочитан ({e}) — только встроенный словарь",
+              file=sys.stderr)
+        return {}
+    out = {}
+    for sym, meta in raw.items():
+        pat = (meta or {}).get("pattern")
+        if not pat or sym in _SYMBOL_PATTERNS:
+            continue
+        try:
+            out[sym] = re.compile(pat, re.I)
+        except re.error as e:
+            # Битое выражение — пропускаем именно его, а не весь файл: одна
+            # опечатка в одном инструменте не повод остаться без остальных 300.
+            print(f"выражение для {sym} не скомпилировалось: {e}", file=sys.stderr)
+    return out
+
+
 TAG_WINDOW_DAYS = 8      # тегируем немного шире окна всплеска (7д) с запасом
 BURST_WINDOW = 3600      # 1 час
 BASELINE_WINDOW = 7 * 86400
@@ -74,10 +111,12 @@ def tag_recent(con, verbose=False) -> int:
         "SELECT uid, title, text FROM signals WHERE source='rss' AND last_seen >= ?",
         (datetime.fromtimestamp(cutoff, timezone.utc).isoformat(),),
     ).fetchall()
+    patterns = dict(_SYMBOL_PATTERNS)
+    patterns.update(_load_catalog_patterns())
     tagged = 0
     for uid, title, text in rows:
         blob = f"{title}\n{text}"
-        for symbol, pat in _SYMBOL_PATTERNS.items():
+        for symbol, pat in patterns.items():
             if pat.search(blob):
                 cur = con.execute(
                     "INSERT OR IGNORE INTO news_instrument_tags(news_uid, symbol) VALUES(?,?)",
