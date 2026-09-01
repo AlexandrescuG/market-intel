@@ -107,8 +107,19 @@ def _published_ts(row) -> float:
 
 def tag_recent(con, verbose=False) -> int:
     cutoff = time.time() - TAG_WINDOW_DAYS * 86400
+    # 🔴 Тегируем не только RSS.
+    #
+    # Здесь стояло `source='rss'`, и это отсекало ДВА живых источника: X даёт
+    # 48 118 сигналов (1357 с текстом только за последние сутки, последний
+    # пришёл сегодня), Telegram — ещё 4116. Всё это собиралось, складывалось в
+    # базу и никуда не шло: на графике инструмента твит появиться не мог,
+    # потому что тегирование его не видело.
+    #
+    # Отдельно про stocktwits: он в перечне намеренно отсутствует — последняя
+    # запись оттуда от 8 июля, источник мёртв, и тянуть из него нечего.
     rows = con.execute(
-        "SELECT uid, title, text FROM signals WHERE source='rss' AND last_seen >= ?",
+        "SELECT uid, title, text FROM signals "
+        "WHERE source IN ('rss','twitter','telegram') AND last_seen >= ?",
         (datetime.fromtimestamp(cutoff, timezone.utc).isoformat(),),
     ).fetchall()
     patterns = dict(_SYMBOL_PATTERNS)
