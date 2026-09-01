@@ -28,7 +28,7 @@
 <script src="/assets/sbf-header.js?v=19" defer></script>
 <script src="/assets/sbf-auth.js?v=1"></script>
 <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
-<script src="/assets/grafik-engine.js?v=20260901j"></script>
+<script src="/assets/grafik-engine.js?v=20260901k"></script>
 <script src="/assets/sbf-thermo-widget.js?v=20260901a"></script>
 <script src="/assets/sbf-glossary.js?v=2" defer></script>
 <style>
@@ -2742,7 +2742,41 @@ document.addEventListener('sbf:user-ready', async ev => {
     try { return new Set(JSON.parse(localStorage.getItem(FAV_KEY) || '[]')); }
     catch(e){ return new Set(); }   // приватное окно / очищенные данные — не повод падать
   }
+  // 🔴 Избранное залогиненного пользователя живёт на сервере, а не в браузере.
+  //
+  // Звезда была чисто локальной: очистил кэш, сменил устройство — отметок нет.
+  // При этом серверный список (PUT /api/user/watchlist) в проекте уже был и
+  // использовался журналом, просто страница графиков о нём не знала. Две
+  // независимые копии одного и того же — источник расхождений, а не запас.
+  //
+  // Незалогиненному оставляем localStorage: отметить инструмент должно быть
+  // можно без регистрации, иначе звезда бесполезна ровно там, где человек ещё
+  // только присматривается.
+  function isLogged(){ return !!(window.SBF && window.SBF.user); }
+
   function saveFavs(){
+    try { localStorage.setItem(FAV_KEY, JSON.stringify([...favs])); } catch(e){}
+    if (!isLogged()) return;
+    // Сервер принимает не больше десяти — отправляем первые десять и не
+    // пытаемся хитрить: молча обрезанный список хуже, чем видимое ограничение.
+    fetch('/api/user/watchlist', {
+      method: 'PUT',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({symbols: [...favs].slice(0, 10)})
+    }).catch(function(){ /* сеть отвалилась — локальная копия уже сохранена */ });
+  }
+
+  // Серверный список при загрузке страницы главнее локального: человек мог
+  // отметить инструмент на телефоне, а открыть на компьютере.
+  // Отдельного GET за списком нет и не нужно: /api/auth/me уже отдаёт
+  // watchlist, и страница получает его в window.SBF.user при загрузке. Лишний
+  // запрос за тем, что уже приехало, — это лишний способ рассинхронизироваться.
+  function pullFavsFromServer(){
+    if (!isLogged()) return;
+    const list = window.SBF.user.watchlist;
+    if (!Array.isArray(list) || !list.length) return;
+    favs = new Set(list.map(function (x) { return typeof x === 'string' ? x : x.symbol; })
+                       .filter(Boolean));
     try { localStorage.setItem(FAV_KEY, JSON.stringify([...favs])); } catch(e){}
   }
 
@@ -3015,6 +3049,7 @@ document.addEventListener('sbf:user-ready', async ev => {
       ]);
       catalog = cat_.items || [];
       if (av && av.items) availability = av.items;
+      pullFavsFromServer();
       applyQuotes(q);
       updateSearchPlaceholder();
       rebuild();
