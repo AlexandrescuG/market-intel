@@ -2342,6 +2342,12 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                     ev = dict(ev)
                     ev["importance"] = ev.pop("impact")
                     ev["currency"] = _COUNTRY_CURRENCY.get(ev["country"], ev["country"])
+                    # Тот же перевод, что и в /api/chart/events: «Ближайшее
+                    # событие» в шапке графика — тот же самый релиз, и видеть его
+                    # по-английски там, где карточка уже по-русски, странно.
+                    ru = _econ_title_ru(ev.get("indicator"), ev.get("title"), ev.get("country"))
+                    if ru:
+                        ev["title_ru"] = ru
                     ev["event_type"] = normalize_event_type(ev.pop("indicator") or ev["title"])
                     out["next_event"] = ev
             con.close()

@@ -88,7 +88,14 @@
     let evVal, evLabel;
     if (within48h && data.next_event) {
       const cd = fmtCountdown(data.next_event_ts, t);
-      evVal = esc(data.next_event.title || data.next_event.event_type) + (cd ? ' · ' + cd : '');
+      // Русское название, если сервер его дал и страница русская: чип
+      // «Ближайшее событие» показывает тот же релиз, что и карточка при клике,
+      // и английский заголовок рядом с русской карточкой выглядит недоделкой.
+      const _lang = (window.sbfI18n && window.sbfI18n.lang) || 'ru';
+      const _evTitle = (_lang === 'ru' && data.next_event.title_ru)
+        ? data.next_event.title_ru
+        : (data.next_event.title || data.next_event.event_type);
+      evVal = esc(_evTitle) + (cd ? ' · ' + cd : '');
       evLabel = t('chart.thermo_event_label', 'Ближайшее событие');
     } else if (data.next_event_ts) {
       evVal = fmt(t('chart.thermo_calm_until_tpl', 'Спокоен до {day}'), {day: weekdayShort(data.next_event_ts)});
