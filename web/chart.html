@@ -28,7 +28,7 @@
 <script src="/assets/sbf-header.js?v=19" defer></script>
 <script src="/assets/sbf-auth.js?v=1"></script>
 <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
-<script src="/assets/grafik-engine.js?v=20260901d"></script>
+<script src="/assets/grafik-engine.js?v=20260901f"></script>
 <script src="/assets/sbf-thermo-widget.js"></script>
 <script src="/assets/sbf-glossary.js?v=2" defer></script>
 <style>
@@ -50,8 +50,18 @@ body{margin:0;background:var(--cream);color:var(--ink);font-family:Montserrat,sa
 .chart-layout{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:14px;
   max-width:1320px;margin:0 auto;align-items:start}
 .chart-layout > .card{max-width:none;margin:0}
+/* 🔴 Панель ровно по высоте окна, а не по угаданному числу.
+   Было: панель липкая, а высоту ограничивал только внутренний список
+   (max-height: 100vh - 190px). 190 — это оценка шапки с поиском, категориями и
+   подписи «ещё 304» снизу. Оценка не сходилась: панель вылезала за экран, и
+   чтобы добраться до её низа, приходилось скроллить страницу целиком — второй
+   скролл поверх списка.
+   Стало: панель — колонка высотой в окно, список внутри растягивается на весь
+   остаток. Сколько бы места ни занимали шапка и подпись, список займёт ровно
+   то, что останется, и никаких магических чисел. */
 .inst-panel{background:var(--paper);border:1px solid var(--line);border-radius:14px;overflow:hidden;
-  box-shadow:0 6px 24px rgba(43,43,51,.06);position:sticky;top:14px}
+  box-shadow:0 6px 24px rgba(43,43,51,.06);position:sticky;top:14px;
+  max-height:calc(100vh - 28px);display:flex;flex-direction:column}
 .inst-head{padding:10px;border-bottom:1px solid var(--line)}
 .inst-search{display:flex;align-items:center;gap:6px;border:1px solid var(--line);
   border-radius:9px;padding:6px 9px;background:var(--cream)}
@@ -66,7 +76,11 @@ body{margin:0;background:var(--cream);color:var(--ink);font-family:Montserrat,sa
 .inst-cat:hover{color:var(--ink)}
 .inst-cat.on{background:rgba(201,162,39,.13);color:#8a6c10;border-color:rgba(201,162,39,.3)}
 .inst-cat:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
-.inst-list{max-height:calc(100vh - 190px);overflow-y:auto;overflow-x:hidden}
+/* flex:1 + min-height:0 — список забирает весь остаток колонки и прокручивается
+   сам. min-height:0 обязателен: без него flex-элемент не даёт себя сжать ниже
+   содержимого, и список снова вылезет за окно. */
+.inst-list{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden}
+.inst-head{flex:none}
 .inst-group{font-size:10px;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);
   padding:7px 10px 4px;font-family:'JetBrains Mono',monospace}
 .inst-row{display:grid;grid-template-columns:1fr 52px 58px 16px;gap:6px;align-items:center;
@@ -98,15 +112,19 @@ body{margin:0;background:var(--cream);color:var(--ink);font-family:Montserrat,sa
 .inst-row:hover .inst-fav,.inst-fav.on,.inst-fav:focus-visible{opacity:1}
 .inst-fav.on{color:var(--gold)}
 .inst-foot{padding:8px 10px;font-size:11px;color:var(--muted);text-align:center;
-  border-top:1px solid var(--line)}
+  border-top:1px solid var(--line);flex:none}
 .inst-back{display:none}
 @media(max-width:900px){
   /* §6: список и график рядом не помещаются. Список — отдельный экран,
      график открывается поверх, назад — к списку. Не пытаемся ужать две
      колонки в одну ширину телефона. */
   .chart-layout{grid-template-columns:minmax(0,1fr)}
-  .inst-panel{position:static}
-  .inst-list{max-height:none}
+  /* На телефоне список — отдельный экран, ограничивать его высотой окна не
+     нужно: он и есть содержимое страницы, скроллится сама страница. Снимаем и
+     потолок, и колонку, иначе список схлопнется в узкую полосу с внутренним
+     скроллом внутри и без того скроллящейся страницы. */
+  .inst-panel{position:static;max-height:none;display:block}
+  .inst-list{max-height:none;overflow:visible}
   body.has-symbol .inst-panel{display:none}
   body.has-symbol .inst-back{display:inline-block;font-size:12px;color:var(--muted);
     text-decoration:none;padding:0 0 10px}
@@ -2852,6 +2870,38 @@ document.addEventListener('sbf:user-ready', async ev => {
   });
 
   listEl.addEventListener('scroll', () => render(), {passive: true});
+
+  // 🔴 Высота панели считается от её реального положения на экране, а не от
+  // одной только высоты окна.
+  //
+  // `max-height: calc(100vh - 28px)` даёт панель ровно в окно — но панель
+  // начинается не у верхнего края: над ней шапка сайта, лента котировок и
+  // хлебные крошки, вместе около двух сотен точек. Замер: окно 1077, панель
+  // 1049, её низ на 1248 — то есть она всё равно уходила за экран, и до низа
+  // списка приходилось прокручивать страницу. Ровно та жалоба, с которой всё
+  // началось.
+  //
+  // Считаем доступное место как «от верха панели до низа окна». Когда страница
+  // прокручена и панель прилипла к своим 14px, формула даёт полную высоту окна
+  // сама собой.
+  function fitPanel(){
+    if (!panelEl || getComputedStyle(panelEl).position !== 'sticky') {
+      if (panelEl) panelEl.style.maxHeight = '';
+      return;
+    }
+    const top = Math.max(14, panelEl.getBoundingClientRect().top);
+    panelEl.style.maxHeight = Math.max(240, window.innerHeight - top - 14) + 'px';
+  }
+  const panelEl = document.getElementById('instPanel');
+
+  // Список рисует только видимые строки, а сколько их видно — считается от
+  // высоты контейнера. Значит, после каждого пересчёта высоты нужен перерисов:
+  // иначе снизу останется пустая полоса, а список будет выглядеть коротким без
+  // причины.
+  function refit(){ fitPanel(); render(); }
+  window.addEventListener('resize', refit, {passive: true});
+  window.addEventListener('scroll', refit, {passive: true});
+  fitPanel();
 
   function activate(el){
     const go = el && el.dataset.go;
