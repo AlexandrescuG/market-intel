@@ -28,7 +28,7 @@
 <script src="/assets/sbf-header.js?v=19" defer></script>
 <script src="/assets/sbf-auth.js?v=1"></script>
 <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
-<script src="/assets/grafik-engine.js?v=20260831a"></script>
+<script src="/assets/grafik-engine.js?v=20260901a"></script>
 <script src="/assets/sbf-thermo-widget.js"></script>
 <script src="/assets/sbf-glossary.js?v=2" defer></script>
 <style>
@@ -2209,7 +2209,15 @@ function applyLive(price) {
 function setLiveSourceLabel(kind, delaySec) {
   const el = document.getElementById('liveSourceFoot');
   if (!el) return;
-  if (kind === 'mt5') {
+  if (kind === 'ctrader') {
+    // 🔴 Подпись обязана называть НАСТОЯЩИЙ источник. 01.09, сразу после
+    // перевода 80 инструментов на cTrader, под графиком EURUSD висело
+    // «Источник: Yahoo Finance · задержка ~131302 с»: ветки для нового
+    // источника не было, и он проваливался в ветку Yahoo вместе с чужой
+    // задержкой. Неверная подпись под верными данными — это не мелочь: по
+    // ней читатель судит, чьей цене он смотрит в глаза.
+    el.textContent = t('chart.source_ctrader', 'Источник: брокер cTrader · живые бары');
+  } else if (kind === 'mt5') {
     el.textContent = t('chart.source_broker', 'Источник: брокер MT5 · живые бары');
   } else if (kind === 'yahoo') {
     el.textContent = delaySec != null
@@ -2445,7 +2453,14 @@ async function pollTail() {
     // Живая цена — из ответа тейла, а не из чужого фида. Ставится ПОСЛЕ
     // применения баров: applyLive двигает ту же lastCandle, и обратный
     // порядок затирал бы только что полученную реальную форму свечи.
-    if (data.source === 'mt5') {
+    if (data.source === 'ctrader') {
+      // Свечи брокера, как и в ветке mt5: живая цена берётся из последней
+      // (незакрытой) свечи того же ряда, а не из чужого фида котировок —
+      // иначе на графике вырастает одиночный вертикальный шип на базисе.
+      _liveFromMt5 = true;
+      setLiveSourceLabel('ctrader', data.delay_sec);
+      if (data.live_price != null) applyLive(data.live_price);
+    } else if (data.source === 'mt5') {
       _liveFromMt5 = true;
       setLiveSourceLabel('mt5', data.delay_sec);
       if (data.live_price != null) applyLive(data.live_price);
