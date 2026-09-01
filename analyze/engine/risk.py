@@ -76,9 +76,19 @@ class RiskRefusal(RuntimeError):
 def money_per_price_unit(symbol_info) -> float:
     """Сколько денег даёт движение цены на 1.0 при объёме 1 лот.
 
-    Считается из tick_value/tick_size, а не из contract_size: для кросс-пар
-    и металлов contract_size не переводится в валюту счёта напрямую, а
-    tick_value терминал уже даёт в валюте счёта."""
+    Транспорт может передать готовый `SymbolInfo` (см. engine/market.py) —
+    тогда значение уже посчитано там, где известны особенности площадки.
+    Это предпочтительный путь: у MT5 цену пункта даёт сам терминал, у
+    cTrader её надо выводить из lotSize с разной формулой для прямых и
+    обратных пар, и сводить обе арифметики сюда значило бы завести развилку
+    ровно там, где ошибка тише всего — неверная цена пункта не падает, она
+    просто делает размер позиции не тем.
+
+    Ветка ниже оставлена для сырого MT5-объекта: движок ещё ходит обоими
+    путями, пока идёт параллельная работа двух площадок."""
+    ready = getattr(symbol_info, "money_per_unit", None)
+    if ready:
+        return float(ready)
     tv = getattr(symbol_info, "trade_tick_value", None)
     ts = getattr(symbol_info, "trade_tick_size", None)
     if not tv or not ts or ts <= 0:
@@ -204,14 +214,20 @@ def broker_barrier_gate(signal: Signal, symbol_info, tick) -> None:
 
     Спред добавляется к минимуму осознанно: стоп, стоящий внутри спреда,
     выбьет мгновенно и не по движению рынка."""
-    point = float(getattr(symbol_info, "point", 0.0) or 0.0)
-    stops_level = float(getattr(symbol_info, "trade_stops_level", 0) or 0)
-    if point <= 0:
-        return
+    # `stops_level` у MT5 в пунктах, у нашего SymbolInfo — сразу в цене:
+    # транспорт приводит к общему виду, чтобы здесь не было развилки.
+    ready = getattr(symbol_info, "stops_level", None)
+    if ready is not None:
+        need_barrier = float(ready)
+    else:
+        point = float(getattr(symbol_info, "point", 0.0) or 0.0)
+        if point <= 0:
+            return
+        need_barrier = float(getattr(symbol_info, "trade_stops_level", 0) or 0) * point
     spread = 0.0
     if tick is not None:
         spread = abs(float(tick.ask) - float(tick.bid))
-    need = stops_level * point + spread
+    need = need_barrier + spread
     if need <= 0:
         return
     have = signal.stop_distance
@@ -219,7 +235,7 @@ def broker_barrier_gate(signal: Signal, symbol_info, tick) -> None:
         raise RiskRefusal(
             "barrier_too_close",
             f"стоп {have:.5f} ближе минимума брокера {need:.5f} "
-            f"(stops_level {stops_level:.0f}п + спред {spread:.5f})")
+            f"(минимум брокера {need_barrier:.5f} + спред {spread:.5f})")
     tgt = abs(signal.target - signal.ref_price)
     if tgt < need:
         raise RiskRefusal(
