@@ -37,6 +37,7 @@ sbf-yfinance-pull.timer      timer   5400     # *:20/30, ТОЛЬКО то, че
 
 # ── публикация и витрины ────────────────────────────────────────────────────
 sbf-publish.timer            timer   1200     # каждые 5 мин, JSON для дашборда
+sbf-chart-availability.timer timer   0        # зона Платформа/Боты: проверка, какие графики реально открываются (01.09)
 sbf-day-thermo.timer         timer   1200     # каждые 5 мин, термометр дня
 sbf-pulse.timer              timer   2400     # каждые 15 мин, pulse scoring
 sbf-outliers.timer           timer   2400     # каждые 15 мин, скан выбросов

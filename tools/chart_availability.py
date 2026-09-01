@@ -35,9 +35,15 @@ import sys
 import time
 import urllib.parse
 import urllib.request
+from concurrent.futures import ThreadPoolExecutor
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-OUT = ROOT / "data" / "chart_available.json"
+# 🔴 web/data, а не data. Фронт читает /data/… — это web/data на диске.
+# Первая версия писала в служебный data/ рядом с базами: файл исправно
+# создавался, проверка исправно отрабатывала, а браузер получал 404 и молча
+# оставался на старом признаке. Отказ был невидим ровно так, как мы не любим:
+# всё «работает», результат не применяется.
+OUT = ROOT / "web" / "data" / "chart_available.json"
 BOT_DB = "/mnt/sbfdata/sbf-platform/SBFAcademy_bot/bot.db"
 BASE = "http://127.0.0.1:8085"
 
@@ -46,12 +52,20 @@ BASE = "http://127.0.0.1:8085"
 MIN_BARS = 30
 
 
+# 🔴 Шесть секунд, а не тридцать. Первый прогон с большим запасом уходил на два
+# часа: у восьмисот каталожных символов путь ведёт в Yahoo, а тот под нагрузкой
+# отвечает десятками секунд. Но и по сути ждать дольше незачем: график, который
+# не появился за шесть секунд, для посетителя не работает — он уже ушёл. Мы
+# отвечаем на вопрос «покажется ли график», а не «существуют ли данные вообще».
+PROBE_TIMEOUT = 6
+
+
 def probe(sym: str, tf: str) -> tuple[bool, str, int]:
     url = f"{BASE}/api/chart/tail?s={urllib.parse.quote(sym, safe='')}&tf={tf}"
     try:
-        d = json.load(urllib.request.urlopen(url, timeout=30))
+        d = json.load(urllib.request.urlopen(url, timeout=PROBE_TIMEOUT))
     except Exception:
-        return False, "error", 0
+        return False, "timeout", 0
     n = len(d.get("candles") or [])
     return n >= MIN_BARS, (d.get("source") or "yahoo"), n
 
@@ -59,8 +73,9 @@ def probe(sym: str, tf: str) -> tuple[bool, str, int]:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--tf", default="D1", help="на каком ТФ проверять (D1 — самый полный)")
-    ap.add_argument("--pace", type=float, default=1.0, help="пауза между запросами, с")
+    ap.add_argument("--workers", type=int, default=6, help="сколько проверок разом")
     ap.add_argument("--limit", type=int, default=0, help="проверить только первые N (для отладки)")
+    ap.add_argument("--no-retry", action="store_true", help="без второго прохода по неудачам")
     args = ap.parse_args()
 
     con = sqlite3.connect(BOT_DB)
@@ -70,16 +85,59 @@ def main() -> int:
     if args.limit:
         syms = syms[:args.limit]
 
+    # Несколько проверок разом. Последовательный обход уходил почти на два часа
+    # (842 холодных похода подряд), и это делало проверку бесполезной: она
+    # должна успевать за сменой каталога, а не отставать от неё.
+    # Шесть параллельных — заведомо меньше, чем создавал замер 12
+    # одновременных запросов после перехода на многопоточный сервер.
     result: dict[str, dict] = {}
     t0 = time.time()
-    for i, s in enumerate(syms, 1):
-        ok, source, n = probe(s, args.tf)
-        result[s] = {"ok": ok, "source": source, "bars": n}
-        if i % 50 == 0 or i == len(syms):
-            good = sum(1 for v in result.values() if v["ok"])
-            print(f"  {i}/{len(syms)}  открывается {good}  ({time.time()-t0:.0f} с)",
-                  flush=True)
-        time.sleep(args.pace)
+    done = 0
+
+    def work(sym):
+        ok, source, n = probe(sym, args.tf)
+        if not ok and args.tf != "H1":
+            # 🔴 Проверять один таймфрейм недостаточно. CrudeOIL уехал на
+            # cTrader и прекрасно рисует H1, но D1 пуллер ещё не успел забрать —
+            # по проверке только на D1 инструмент выпал бы из списка как
+            # неработающий. Спрашиваем второй ТФ прежде, чем вычёркивать:
+            # «графика нет» и «нет вот этого одного графика» — разные вещи.
+            ok, source, n = probe(sym, "H1")
+            if ok:
+                return sym, {"ok": True, "source": source, "bars": n, "tf": "H1"}
+        return sym, {"ok": ok, "source": source, "bars": n}
+
+    with ThreadPoolExecutor(max_workers=args.workers) as pool:
+        for sym, rec in pool.map(work, syms):
+            result[sym] = rec
+            done += 1
+            if done % 50 == 0 or done == len(syms):
+                good = sum(1 for v in result.values() if v["ok"])
+                print(f"  {done}/{len(syms)}  открывается {good}  ({time.time()-t0:.0f} с)",
+                      flush=True)
+
+    # 🔴 Второй проход по неудачам — по одному и без спешки.
+    #
+    # Первый проход идёт шестью потоками и режет по 6 с. Это честно отражает
+    # нагрузку, но НЕ отражает опыт посетителя: он открывает один график, а не
+    # шесть разом, и его запрос не конкурирует сам с собой. Без этого прохода мы
+    # вычеркнули бы из списка инструменты, которые у человека открываются
+    # прекрасно, — а вычеркнуть рабочее хуже, чем оставить сомнительное.
+    failed = [s for s, v in result.items() if not v["ok"]]
+    if failed and not args.no_retry:
+        print(f"\nвторой проход по {len(failed)} неудачам, по одному, до 20 с:", flush=True)
+        global PROBE_TIMEOUT
+        PROBE_TIMEOUT = 20
+        revived = 0
+        for i, s in enumerate(failed, 1):
+            ok, source, n = probe(s, args.tf)
+            if ok:
+                result[s] = {"ok": True, "source": source, "bars": n, "slow": True}
+                revived += 1
+            if i % 100 == 0 or i == len(failed):
+                print(f"  {i}/{len(failed)}  ожило {revived}  ({time.time()-t0:.0f} с)",
+                      flush=True)
+        print(f"  со второй попытки открылось: {revived}")
 
     good = sum(1 for v in result.values() if v["ok"])
     payload = {"checked_at": int(time.time()), "tf": args.tf,

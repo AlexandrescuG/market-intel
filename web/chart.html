@@ -28,7 +28,7 @@
 <script src="/assets/sbf-header.js?v=19" defer></script>
 <script src="/assets/sbf-auth.js?v=1"></script>
 <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
-<script src="/assets/grafik-engine.js?v=20260901b"></script>
+<script src="/assets/grafik-engine.js?v=20260901d"></script>
 <script src="/assets/sbf-thermo-widget.js"></script>
 <script src="/assets/sbf-glossary.js?v=2" defer></script>
 <style>
@@ -2810,9 +2810,20 @@ document.addEventListener('sbf:user-ready', async ev => {
     const m = new Map();
     for (const row of (data.items || [])) m.set(row[iS], {bid: row[iB], chg: row[iC], ts: row[iT]});
     quotes = m;
-    if (searchEl && !searchEl.placeholder) {
-      searchEl.placeholder = fmt_(t('chart.inst_search', 'Поиск по {n} инструментам'), {n: catalog.length});
-    }
+  }
+
+  // 🔴 Подсказка в поиске ставится ПОСЛЕ фильтрации и обновляется вместе с ней.
+  //
+  // Раньше она писалась один раз при первой порции котировок и брала
+  // catalog.length — «Поиск по 842 инструментам», хотя открывается 219. После
+  // перехода на view.length в том же месте вышло ещё хуже: «Поиск по 0», потому
+  // что список на тот момент ещё не построен. Число в подсказке — обещание;
+  // считать его надо там, где оно уже известно.
+  function updateSearchPlaceholder(){
+    if (!searchEl) return;
+    searchEl.placeholder = fmt_(t('chart.inst_search', 'Поиск по {n} инструментам'),
+                                {n: availability ? Object.values(availability).filter(v => v.ok).length
+                                                 : catalog.length});
   }
 
   async function get(url){
@@ -2881,6 +2892,7 @@ document.addEventListener('sbf:user-ready', async ev => {
       catalog = cat_.items || [];
       if (av && av.items) availability = av.items;
       applyQuotes(q);
+      updateSearchPlaceholder();
       rebuild();
       // Открытый инструмент должен быть виден, а не найден прокруткой: при
       // 842 строках GOLD лежит за сотней валютных пар, и список без этого
