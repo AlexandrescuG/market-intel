@@ -197,6 +197,52 @@ def _mt5_broker_symbol(our_key):
     return our_key if our_key in _broker_catalog_symbols() else None
 
 
+_ctrader_map: tuple = (0.0, {})
+
+
+def _ctrader_symbols() -> dict:
+    """Карта инструментов, переведённых на cTrader. Файл, не база.
+
+    Собирается tools/ctrader_build_map.py и дальше только читается: соответствие
+    имён — решение, принятое один раз и записанное, а не догадка в момент
+    показа страницы. Тихого фолбэка «возьмём имя как есть» здесь нет намеренно —
+    он однажды подставил бы фонду #XRP график монеты XRP.
+    """
+    global _ctrader_map
+    path = Path(DIRECTORY).parent / "data" / "ctrader_map.json"
+    try:
+        mtime = path.stat().st_mtime
+    except OSError:
+        return {}
+    if _ctrader_map[0] == mtime:
+        return _ctrader_map[1]
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return _ctrader_map[1]
+    _ctrader_map = (mtime, data)
+    return data
+
+
+def _ctrader_tail(our_key, tf):
+    """Свечи инструментов, переведённых на cTrader. None — не наш случай.
+
+    🔴 В брокера отсюда НЕ ходим. Наполнением занимается отдельный процесс
+    ctrader_pull.py, здесь только чтение с диска. Причина та же, по которой мы
+    уходили от MT5: сетевой вызов внутри обработчика веб-запроса связывает
+    живучесть сайта с живучестью чужого соединения. Пуллер упал — витрина
+    продолжает отдавать последние свечи, а не гаснет.
+
+    Возвращает ([], True), если инструмент наш, но кэш пуст: вызывающий должен
+    сказать об этом словами, а не свалиться на MT5 — иначе на графике окажется
+    ряд другого брокера, склеенный с нашим (семейство бага 20.08).
+    """
+    if our_key not in _ctrader_symbols():
+        return None
+    bars, _stale = candle_cache.get(our_key, tf)
+    return bars or []
+
+
 def _mt5_tail(our_key, tf):
     """Свечи из брокера в реальном времени. None -> Yahoo-фолбэк."""
     global _mt5_conn
@@ -2505,8 +2551,24 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         except ValueError:
             since = 0
 
-        # Real-time из брокера (GOLD/US_500/… без задержки Yahoo).
-        broker = _mt5_tail(symbol, tf)
+        # ── cTrader: 80 инструментов витрины переведены сюда (01.09.2026) ──
+        # Валюты, металлы, нефть, индексы, крипта. Читается с диска, к брокеру
+        # обработчик не ходит вовсе — ни к cTrader, ни к MT5.
+        ct = _ctrader_tail(symbol, tf)
+
+        # 🔴 Кэш ещё пуст (первое наполнение, пуллер лежит) — уходим на MT5, а
+        # не показываем пустой график.
+        #
+        # Сначала здесь стоял честный feed_down, и это было неверно: первый
+        # проход пуллера идёт по алфавиту около четырёх минут, и всё это время
+        # EURUSD, GOLD и US_500 отдавали пустоту, хотя MT5 рядом отдавал их
+        # прекрасно. Проверено на живом сервере — поймано ровно так.
+        #
+        # Подмена источника здесь безопасна, в отличие от случая 20.08: тогда
+        # хвост ДОПИСЫВАЛСЯ к чужому ряду и рисовал ступеньку на стыке. Мы
+        # отдаём весь ряд целиком из одного источника, и следующая загрузка
+        # страницы просто заменит его целиком же.
+        broker = ct if ct else _mt5_tail(symbol, tf)
         if broker:
             filtered = [c for c in broker if c["time"] > since]
             last_ts = broker[-1]["time"]
@@ -2523,7 +2585,11 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             # Последняя свеча MT5 — незакрытая, её close и есть текущая цена.
             self._send_json({"updated": datetime.now(timezone.utc).isoformat(),
                              "delay_sec": delay_sec, "market_open": market_open,
-                             "candles": filtered, "source": "mt5",
+                             # Источник помечаем честно: по нему на странице
+                             # подписано, чьи это котировки, и по нему же
+                             # различаются отказы в логах.
+                             "candles": filtered,
+                             "source": "ctrader" if ct else "mt5",
                              "live_price": broker[-1]["close"]})
             return
 

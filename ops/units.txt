@@ -22,6 +22,7 @@
 # ── долгоживущие ────────────────────────────────────────────────────────────
 sbf-web.service              daemon  0        # serve.py :8085 — сам сайт lp.sbfconsult.com
 sbf-quotes.service           daemon  0        # quotes_loop.py — quotes.json, живые котировки
+sbf-ctrader-pull.service     daemon  0        # зона Платформа/Боты: свечи витрины из cTrader (01.09: 80 инструментов ушли с моста MT5)
 sbf-mt5-bridge.service       daemon  0        # rpyc-мост в Wine-бутылку Trading (порт 18812)
 sbf-broker-catalog.service   daemon  0        # broker_quotes.json + каталог 842 инструментов
 sbf-focus-live.service       daemon  0        # Focus Engine, переназначение раз в 60 с
