@@ -166,7 +166,25 @@ def main() -> int:
         "AND email IS NOT NULL AND email <> '' "
         "AND (deleted_at IS NULL OR deleted_at = '')").fetchall()
     if args.only:
-        rows = [(uid, em) for uid, em in rows if em == args.only]
+        # 🔴 Проверочная отправка на один явно названный адрес идёт В ОБХОД
+        # фильтра согласия — но только если такой пользователь у нас есть.
+        #
+        # Обоснование: галочка про рассылку защищает человека от писем, которых
+        # он не просил. Здесь адрес называет владелец системы, чтобы посмотреть
+        # на вёрстку письма, и отказать ему в этом — формализм. Но обход
+        # ограничен одним адресом из базы: разослать «в обход» всем этим
+        # способом нельзя, и случайно превратить проверку в рассылку тоже.
+        #
+        # В brief_email_log проверка НЕ записывается: иначе настоящая утренняя
+        # рассылка сочла бы, что этому человеку уже отправляла.
+        found = con.execute(
+            "SELECT id, email FROM users WHERE email = ? "
+            "AND (deleted_at IS NULL OR deleted_at = '')", (args.only,)).fetchall()
+        if not found:
+            print(f"пользователя с адресом {args.only} в базе нет — не отправляю",
+                  file=sys.stderr)
+            return 1
+        rows = found
 
     sent = skipped = failed = 0
     for user_id, email in rows:
@@ -176,7 +194,9 @@ def main() -> int:
             skipped += 1
             continue
         ok = mailer.send(email, f"Утренний брифинг SBF · {day}", html, text, send=args.send)
-        if ok and args.send:
+        if ok and args.send and args.only:
+            sent += 1     # проверка: в журнал не пишем, см. комментарий выше
+        elif ok and args.send:
             con.execute("INSERT OR IGNORE INTO brief_email_log(day, user_id, sent_ts) "
                         "VALUES(?,?,strftime('%s','now'))", (day, user_id))
             sent += 1
