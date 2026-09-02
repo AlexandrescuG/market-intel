@@ -1,9 +1,8 @@
 """core/mailer.py — отправка писем пользователям платформы.
 
-ОТКУДА НАСТРОЙКИ. SMTP настроен в SBFAcademy_bot/.env и уже используется там для
-кодов входа — то есть проверен в бою. Читаем оттуда на месте, а не копируем к
-себе: копия пароля это второе место, где он может утечь, и второе место, которое
-надо не забыть обновить при смене.
+ОТКУДА НАСТРОЙКИ. Сначала свой market_intel/.env (его заполняет владелец через
+tools/mail_setup.sh), запасной вариант — SBFAcademy_bot/.env, где SMTP уже
+работает на кодах входа. Подробности выбора — в config() ниже.
 
 🔴 ПИСЬМО — ЭТО ДЕЙСТВИЕ НАРУЖУ, И ОНО НЕОБРАТИМО.
 Отправленное не отзовёшь, а адрес человека — не наш черновик. Поэтому здесь:
@@ -23,24 +22,49 @@ from email.message import EmailMessage
 
 log = logging.getLogger("mailer")
 
+OWN_ENV = pathlib.Path(__file__).resolve().parent.parent / ".env"
 ACADEMY_ENV = pathlib.Path("/mnt/sbfdata/sbf-platform/SBFAcademy_bot/.env")
 _cfg: dict | None = None
 
 
 def config() -> dict:
+    """Настройки почты: сначала свои, потом чужие.
+
+    🔴 Порядок важен. Свой .env читается ПЕРВЫМ, и если там есть SMTP_HOST —
+    берём его целиком, не подмешивая ничего из SBFAcademy. Иначе получилась бы
+    смесь: наш адрес отправителя с чужим паролем, и письмо бы не ушло с
+    непонятной ошибкой аутентификации.
+
+    Запасной вариант — почта SBFAcademy, с которой уходят коды входа. Она
+    работает, но это личный gmail: получатель видит личный адрес вместо
+    компании, у Gmail предел около 500 писем в сутки, а жалоба на спам из-за
+    рассылки бьёт по доставке кодов входа. Настроить свою — tools/mail_setup.sh.
+    """
     global _cfg
     if _cfg is not None:
         return _cfg
-    d = {}
-    try:
-        for line in ACADEMY_ENV.read_text(encoding="utf-8").splitlines():
-            if line.startswith("SMTP_") and "=" in line:
-                k, v = line.split("=", 1)
-                d[k.strip()] = v.strip()
-    except Exception as e:
-        log.warning("настройки SMTP не прочитаны: %s", e)
-    _cfg = d
-    return d
+
+    def _read(path: pathlib.Path) -> dict:
+        d = {}
+        try:
+            for line in path.read_text(encoding="utf-8").splitlines():
+                if line.startswith("SMTP_") and "=" in line:
+                    k, v = line.split("=", 1)
+                    if v.strip():
+                        d[k.strip()] = v.strip()
+        except Exception:
+            pass
+        return d
+
+    own = _read(OWN_ENV)
+    if own.get("SMTP_HOST") and own.get("SMTP_PASS"):
+        _cfg = own
+        return _cfg
+    fallback = _read(ACADEMY_ENV)
+    if not fallback:
+        log.warning("настройки SMTP не найдены ни в %s, ни в %s", OWN_ENV, ACADEMY_ENV)
+    _cfg = fallback
+    return _cfg
 
 
 def is_configured() -> bool:

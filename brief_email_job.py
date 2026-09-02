@@ -162,6 +162,38 @@ def _allowed_symbol(sym: str, user_country: str | None) -> bool:
     return need is None or need == (user_country or "").upper()
 
 
+_JARGON: list | None = None
+
+
+def _explain_jargon(text: str) -> str:
+    """Расшифровать биржевые сокращения при первом появлении в тексте.
+
+    🔴 Сводку пишет модель по англоязычным лентам и берёт термины оттуда как
+    есть: «августовский HICP прибавил 0.4%» — технически верно и нечитаемо для
+    того, кто не сидит в этом каждый день. Письмо идёт людям, которые только
+    учатся, и непонятное слово в первой же строке закрывает всё письмо.
+
+    Расшифровываем ОДИН раз на текст: во второй раз сокращение уже знакомо, и
+    повтор пояснения мешает читать. Заменяем только отдельное слово — чтобы
+    «CPI» внутри «CPIF» не превратилось в кашу.
+    """
+    global _JARGON
+    if _JARGON is None:
+        try:
+            d = json.loads((ROOT / "data" / "jargon_ru.json").read_text(encoding="utf-8"))
+        except Exception:
+            d = {}
+        # Длинные ключи первыми: иначе «OPEC» съест «OPEC+».
+        _JARGON = sorted(((k, v) for k, v in d.items() if not k.startswith("_")),
+                         key=lambda kv: -len(kv[0]))
+    out = text
+    for term, full in _JARGON:
+        pattern = r"(?<![\w])" + re.escape(term) + r"(?![\w])"
+        if re.search(pattern, out):
+            out = re.sub(pattern, full.replace("\\", r"\\"), out, count=1)
+    return out
+
+
 def build_html(brief: dict, user_country: str | None = None,
                unsub_url: str = "") -> tuple[str, str]:
     """(html, текстовая версия). Обе — из одних и тех же данных."""
@@ -214,7 +246,7 @@ def build_html(brief: dict, user_country: str | None = None,
     seen_txt: set[str] = set()
     off_items = []
     for o in off:
-        txt = (o.get("title") or o.get("text") or "").strip()
+        txt = _explain_jargon((o.get("title") or o.get("text") or "").strip())
         # Дедупликация: одна и та же новость приходит из нескольких источников,
         # и повтор в письме читается как сбой рассылки.
         key = txt[:80].lower()
