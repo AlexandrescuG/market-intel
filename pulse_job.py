@@ -95,8 +95,20 @@ def _news_tag_counts(con, since_ts: float) -> dict[str, int]:
 
 
 def run(verbose: bool = False) -> int:
-    con = sqlite3.connect(str(DB_PATH), timeout=10)
-    con.execute("PRAGMA busy_timeout=10000")
+    # 🔴 Ожидание 10 секунд не хватало: юнит падал с «database is locked» через
+    # раз, и в реестре это записано как «отказ перемежающийся, причина не
+    # установлена». Причина простая — signals.db в это же время пишут
+    # коллекторы, и десяти секунд им мало.
+    #
+    # WAL важнее самого таймаута: без него любой писатель блокирует всех
+    # читателей целиком. С ним чтение и запись расходятся, и конкуренция
+    # остаётся только между писателями.
+    #
+    # Тот же приём применён 02.09 к sbf-web, где ожидание чужой транзакции
+    # роняло весь сайт.
+    con = sqlite3.connect(str(DB_PATH), timeout=60)
+    con.execute("PRAGMA busy_timeout=60000")
+    con.execute("PRAGMA journal_mode=WAL")
     con.executescript("""
         CREATE TABLE IF NOT EXISTS pulse_scores(
             symbol TEXT NOT NULL, category TEXT NOT NULL, ts INT NOT NULL,
