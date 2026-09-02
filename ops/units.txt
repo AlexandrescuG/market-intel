@@ -50,7 +50,7 @@ sbf-outbox-sender.timer      timer   1200     # каждые 5 мин, един�
 
 # ── аналитика по расписанию ─────────────────────────────────────────────────
 sbf-morning.timer            timer   180000   # 06:00, утренний синтез
-sbf-brief-email.timer        off     0        # 06:20, брифинг на почту; включить после подтверждения владельца (01.09)
+sbf-brief-email.timer        timer   90000    # 06:20, брифинг на почту; включено владельцем 02.09, отправитель contact@sbf.md
 sbf-focus-batch.timer        timer   180000   # 05:50, батч Focus Engine
 sbf-sr-levels.timer          timer   180000   # 03:45, уровни S/R
 sbf-confluence.timer         timer   180000   # 03:55, зоны слияния
