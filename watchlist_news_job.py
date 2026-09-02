@@ -9,18 +9,16 @@
 инструментам из ватчлистов, и складывает их в таблицу `watchlist_feed` в
 journal.db. Сайт читает её через /api/user/watchlist-news и показывает.
 
-🔴 ПОЧЕМУ НЕ ПИСЬМО И НЕ TELEGRAM — СОЗНАТЕЛЬНО.
-Почты у market_intel нет вовсе (SMTP настроен в другом проекте), а связи
-«аккаунт на сайте ↔ чат в Telegram» не существует: её пришлось бы строить с
-кодами привязки и обработчиком в боте. Делать это до того, как понятно, что
-лента вообще полезна, — значит потратить день на доставку того, что, может
-быть, никому не нужно.
-Поэтому первый шаг — лента на сайте: она работает сразу, ничего не требует от
-владельца и показывает, есть ли смысл в рассылке. Появится смысл — доставка
-добавляется поверх готовой таблицы, не переделывая ничего.
+ДОСТАВКА. Кому привязан Telegram — уходит одним сообщением от @SBFAcademy_bot
+(именно от него: Telegram разрешает писать только тем, кто сам начал диалог с
+этим ботом, а вход на платформу идёт через SBFAcademy). Привязку ищем по цепочке
+users.sbfacademy_user_id → auth_identities(provider='telegram'). Кто входил через
+почту или Google, телеграм-адреса не имеет — для него остаётся лента на сайте, и
+это нормальный исход, а не ошибка.
 
-ЧЕГО НЕ ДЕЛАЕТ. Не шлёт ничего наружу и не хранит новость повторно: в таблице
-только ссылка на уже существующий сигнал.
+ЧЕГО НЕ ДЕЛАЕТ. Не хранит новость повторно: в таблице только заголовок и ссылка
+на уже существующий сигнал. Не пишет ночью (тихие часы) и не шлёт по сообщению
+на каждую заметку — всё за проход собирается в один список.
 
 Запуск:  python3 watchlist_news_job.py [--verbose]
 """
@@ -46,6 +44,12 @@ LOOKBACK_SEC = 3 * 3600
 # Сколько новостей на инструмент за проход. Без предела один шумный день по
 # золоту забил бы ленту так, что своих инструментов человек бы не нашёл.
 PER_SYMBOL_LIMIT = 5
+# Сколько заголовков помещаем в одно сообщение. Больше десяти — простыня,
+# которую не читают; остальное считаем и зовём на сайт.
+MAX_PER_MESSAGE = 10
+# Тихие часы по местному времени: ночью не пишем, накопленное уйдёт утром.
+QUIET_UNTIL_HOUR = 8
+QUIET_FROM_HOUR = 23
 
 
 def ensure_schema(con: sqlite3.Connection) -> None:
@@ -76,6 +80,64 @@ def _published_ts(raw: str | None, first_seen: str | None) -> int:
         return int(datetime.fromisoformat(first_seen).timestamp())
     except Exception:
         return 0
+
+
+def deliver_telegram(jcon: sqlite3.Connection, verbose: bool = False) -> int:
+    """Разослать непрочитанное тем, у кого привязан Telegram.
+
+    🔴 Одно письмо на человека за проход, а не сообщение на каждую новость.
+    По золоту в шумный день выходит два десятка заметок; двадцать уведомлений
+    подряд — это не забота, а повод отписаться. Собираем в один список.
+
+    Отправленное сразу помечаем прочитанным: иначе следующий проход пришлёт то
+    же самое, и лента на сайте будет вечно показывать непрочитанное, которое
+    человек уже видел в телеграме.
+
+    Тихие часы соблюдаем: ночью не пишем вовсе, накопленное уйдёт утром.
+    """
+    from core import tg_notify
+
+    hour = datetime.now().hour
+    if hour < QUIET_UNTIL_HOUR or hour >= QUIET_FROM_HOUR:
+        if verbose:
+            print(f"тихие часы ({hour}:00) — рассылку не делаем")
+        return 0
+
+    users = jcon.execute(
+        "SELECT DISTINCT f.user_id, u.sbfacademy_user_id FROM watchlist_feed f "
+        "JOIN users u ON u.id = f.user_id WHERE f.seen = 0").fetchall()
+    sent_total = 0
+    for user_id, sbf_uid in users:
+        chat_id = tg_notify.chat_id_for(sbf_uid)
+        if not chat_id:
+            continue  # Telegram не привязан — это нормальный исход, не ошибка
+        rows = jcon.execute(
+            "SELECT symbol, title, url FROM watchlist_feed "
+            "WHERE user_id = ? AND seen = 0 ORDER BY ts DESC LIMIT ?",
+            (user_id, MAX_PER_MESSAGE)).fetchall()
+        if not rows:
+            continue
+        lines = ["<b>Новое по вашим инструментам</b>", ""]
+        for symbol, title, url in rows:
+            title = (title or "").strip()
+            if len(title) > 150:
+                title = title[:147] + "…"
+            safe = title.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+            lines.append(f"<b>{symbol}</b> — " + (f'<a href="{url}">{safe}</a>' if url else safe))
+        left = jcon.execute(
+            "SELECT COUNT(*) FROM watchlist_feed WHERE user_id=? AND seen=0",
+            (user_id,)).fetchone()[0] - len(rows)
+        if left > 0:
+            lines.append(f"\n…и ещё {left} — на lp.sbfconsult.com")
+        if tg_notify.send(chat_id, "\n".join(lines)):
+            jcon.execute("UPDATE watchlist_feed SET seen=1 WHERE user_id=? AND seen=0",
+                         (user_id,))
+            sent_total += 1
+        # Не отправилось — seen не трогаем: попробуем в следующий проход.
+    jcon.commit()
+    if verbose:
+        print(f"уведомлений отправлено: {sent_total} (кандидатов: {len(users)})")
+    return sent_total
 
 
 def run(verbose: bool = False) -> int:
@@ -140,6 +202,8 @@ def run(verbose: bool = False) -> int:
     # в signals.db, дублировать его здесь незачем.
     jcon.execute("DELETE FROM watchlist_feed WHERE ts < ?", (int(time.time()) - 14 * 86400,))
     jcon.commit()
+
+    deliver_telegram(jcon, verbose)
 
     if verbose:
         total, = jcon.execute("SELECT COUNT(*) FROM watchlist_feed").fetchone()
