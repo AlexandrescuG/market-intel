@@ -138,26 +138,11 @@ def publish_report() -> None:
     })
 
 
-def publish_stories() -> None:
-    from core.stories import active_stories, attach_market, rebuild_stories
-    rebuild_stories(hours=48)
-    stories = [attach_market(s) for s in active_stories(limit=12)]
-    _write("stories.json", {"updated": _now(), "stories": stories})
-
 
 def publish_regime() -> None:
     from core.regime import detect_regime
     _write("regime.json", detect_regime())
 
-
-def publish_verification() -> None:
-    from core.verification import scorecard, recent_observations, resolve_due
-    resolve_due()
-    _write("verification.json", {
-        "updated": _now(),
-        "scorecard": scorecard(),
-        "recent": recent_observations(limit=15),
-    })
 
 
 def publish_macro() -> None:
@@ -165,19 +150,6 @@ def publish_macro() -> None:
     _write("macro.json", macro_snapshot())
 
 
-def publish_divergence() -> None:
-    from core.divergence import sentiment_price_divergence, changes_since
-    _write("divergence.json", {
-        "updated": _now(),
-        "divergences": sentiment_price_divergence(),
-        "changes": changes_since(),
-    })
-
-
-def publish_anomalies() -> None:
-    from core.anomaly import anomalies, update_baselines
-    update_baselines()
-    _write("anomalies.json", {"updated": _now(), "anomalies": anomalies()})
 
 
 def publish_charts() -> None:
@@ -444,11 +416,6 @@ def publish_quotes() -> None:
     _write("quotes.json", {"updated": _now(), "quotes": out})
 
 
-def publish_health() -> None:
-    from core import db as _db
-    beats = _db.get_heartbeats()
-    _write("health.json", {"updated": _now(), "components": beats})
-
 
 def publish_all() -> None:
     db.init_db()
@@ -463,9 +430,18 @@ def publish_all() -> None:
     # web/data/calendar.json, которую не читал ни один фронтенд-код —
     # реальный календарь в econ_events, отдаётся через /api/calendar/events
     # и build_brief_v2.py. Файл calendar.json удалён вместе с функцией.
-    slow_fns = (publish_stories, publish_regime, publish_verification,
-                publish_macro, publish_divergence,
-                publish_anomalies, publish_health, publish_charts)
+    # 02.09.2026: убраны publish_stories, publish_verification,
+    # publish_divergence, publish_anomalies, publish_health. Каждая писала свой
+    # JSON в web/data, и ни один из пяти файлов не читал никто — ни страницы,
+    # ни скрипты, ни серверные обработчики, ни утренний синтез (проверено
+    # поиском по web/*.html, assets/*.js, serve.py, analyze/*.py). Таймер при
+    # этом отрабатывал круглосуточно каждые пять минут.
+    # Модули core.stories / core.verification / core.divergence / core.anomaly
+    # тоже больше никем не используются — их побочные действия (rebuild_stories,
+    # resolve_due, update_baselines) никому не нужны, поэтому функции убраны
+    # целиком, а не оставлены ради них.
+    # Ровно так же выше однажды убрали publish_calendar.
+    slow_fns = (publish_regime, publish_macro, publish_charts)
 
     layers = []
     for fn in fast_fns + slow_fns:

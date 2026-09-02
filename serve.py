@@ -1713,15 +1713,15 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.end_headers()
         elif path_clean in ("/glossary", "/glossary.html"):
             self._render_site_page("glossary.html", req_lang)
-        # ── Gated LP API endpoints ──
-        elif path_clean == "/api/lp/signals":
-            self._handle_lp_signals()
-        elif path_clean == "/api/lp/buzz":
-            self._handle_lp_buzz()
-        elif path_clean == "/api/lp/patterns":
-            self._handle_lp_patterns()
-        elif path_clean == "/api/lp/gold-scenarios":
-            self._handle_lp_gold_scenarios()
+        # ── /api/lp/* удалены 02.09.2026 ──
+        # Четыре обработчика (signals, buzz, patterns, gold-scenarios) исправно
+        # отвечали 401 и требовали авторизации, то есть работали. Звал их при
+        # этом никто: поиск "api/lp/" по всему web/ (html + js) давал ноль
+        # совпадений. Данные они брали из signals.json и buzz.json, которые
+        # тоже никто больше не читает.
+        # Работающий код без единого вызывающего — не запас, а лишняя
+        # поверхность: его надо поддерживать при каждом изменении авторизации
+        # и он путает того, кто читает маршруты.
         elif path_clean.startswith("/api/calendar/events"):
             self._handle_calendar_api()
         elif path_clean.startswith("/api/event/"):
@@ -1730,8 +1730,12 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 self._handle_event_history(segs[0])
             elif len(segs) == 2 and segs[1] == "markers":
                 self._handle_event_markers(segs[0])
-            elif len(segs) == 2 and segs[1] == "reactions":
-                self._send_json({"error": "скоро (Фаза 2)", "status": 501}, 501)
+            # Заглушка /api/event/{key}/reactions → 501 «скоро (Фаза 2)»
+            # удалена 02.09.2026: Фаза 2 давно сделана в другом месте. Рабочий
+            # маршрут — /api/chart/event-reaction, его зовут chart.html и
+            # edu/calendar.html, таблица event_reaction_stats содержит 4092
+            # строки. Обещание «скоро» в коде, где функциональность уже год как
+            # есть, дезориентирует сильнее, чем честный 404.
             else:
                 self._send_json({"error": "not found"}, 404)
         elif path_clean == "/api/price":
@@ -4302,61 +4306,9 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             return None
         return user_id
 
-    def _handle_lp_signals(self) -> None:
-        if not self._lp_require_auth():
-            return
-        try:
-            data = json.loads((WEB_DIR / "data" / "signals.json").read_text())
-            self._send_json(data)
-        except Exception:
-            self._send_json({})
 
-    def _handle_lp_buzz(self) -> None:
-        if not self._lp_require_auth():
-            return
-        try:
-            data = json.loads((WEB_DIR / "data" / "buzz.json").read_text())
-            self._send_json(data)
-        except Exception:
-            self._send_json({"tickers": []})
 
-    def _handle_lp_patterns(self) -> None:
-        if not self._lp_require_auth():
-            return
-        from urllib.parse import urlparse, parse_qs
-        qs = parse_qs(urlparse(self.path).query)
-        sym = (qs.get("sym") or ["GOLD"])[0]
-        tf  = (qs.get("tf")  or ["D1"])[0]
-        sym = "".join(c for c in sym if c.isalnum() or c in "-.")[:10]
-        tf  = "".join(c for c in tf if c.isalnum())[:4]
-        try:
-            data = json.loads((WEB_DIR / "data" / f"ohlc_{sym}_{tf}.json").read_text())
-            result = {
-                "candles":  data.get("candles", []),
-                "volume":   data.get("volume", []),
-                "patterns": data.get("patterns", []),
-                "zones":    [{"price": L["price"], "color": L.get("color","#C9A227"), "name": L["name"]}
-                             for L in data.get("levels", [])],
-            }
-            self._send_json(result)
-        except Exception:
-            self._send_json({"candles": [], "patterns": [], "zones": []})
 
-    def _handle_lp_gold_scenarios(self) -> None:
-        if not self._lp_require_auth():
-            return
-        try:
-            data = json.loads((WEB_DIR / "data" / "ohlc_GOLD_D1.json").read_text())
-            # Build scenarios dict: level_name → short scenario description
-            scenarios: dict[str, str] = {}
-            for L in data.get("levels", []):
-                side = "покупка" if L["name"].startswith("S") else "продажа"
-                scenarios[L["name"]] = f"Реакция {side} при тесте {L['price']}"
-            self._send_json(scenarios)
-        except Exception:
-            self._send_json({})
-
-    # ── Survey fast-track registration ─────────────────────────────────────────
 
     def _handle_register_via_survey(self) -> None:
         body = self._read_body_json()
