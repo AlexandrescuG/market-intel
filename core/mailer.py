@@ -48,7 +48,8 @@ def is_configured() -> bool:
     return bool(c.get("SMTP_HOST") and c.get("SMTP_USER") and c.get("SMTP_PASS"))
 
 
-def send(to: str, subject: str, html: str, text: str = "", send: bool = True) -> bool:
+def send(to: str, subject: str, html: str, text: str = "", send: bool = True,
+         unsubscribe: str = "") -> bool:
     """Отправить письмо. send=False — только собрать и не отправлять."""
     c = config()
     if not is_configured():
@@ -58,6 +59,13 @@ def send(to: str, subject: str, html: str, text: str = "", send: bool = True) ->
     msg["From"] = c.get("SMTP_FROM") or c["SMTP_USER"]
     msg["To"] = to
     msg["Subject"] = subject
+    if unsubscribe:
+        # Заголовки List-Unsubscribe — то, из чего Gmail и почтовые клиенты
+        # рисуют собственную кнопку «Отписаться» рядом с отправителем. Без них
+        # человек, которому надоела рассылка, жмёт «Спам», и страдает домен, с
+        # которого мы шлём коды входа. Ссылка в подвале письма это не заменяет.
+        msg["List-Unsubscribe"] = f"<{unsubscribe}>"
+        msg["List-Unsubscribe-Post"] = "List-Unsubscribe=One-Click"
     msg.set_content(text or "Письмо в формате HTML.")
     msg.add_alternative(html, subtype="html")
 

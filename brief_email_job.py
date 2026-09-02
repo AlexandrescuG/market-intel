@@ -20,8 +20,11 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
+import hmac
 import html as html_mod
 import json
+import re
 import sqlite3
 import sys
 from datetime import date
@@ -35,6 +38,31 @@ from core import mailer  # noqa: E402
 JOURNAL_DB = ROOT / "data" / "journal.db"
 BRIEF = ROOT / "web" / "data" / "brief_today.json"
 SITE = "https://lp.sbfconsult.com"
+
+
+def _secret() -> bytes:
+    """Тот же JWT_SECRET, что у входа на платформу (SBFAcademy_bot/.env).
+
+    Свой секрет заводить незачем: это ещё один файл, который надо хранить,
+    ротировать и не потерять. Подпись здесь нужна ровно для одного — чтобы по
+    ссылке из письма нельзя было отписать чужого, подставив другой user_id.
+    """
+    env = Path("/mnt/sbfdata/sbf-platform/SBFAcademy_bot/.env")
+    try:
+        for line in env.read_text(encoding="utf-8").splitlines():
+            if line.startswith("JWT_SECRET="):
+                return line.split("=", 1)[1].strip().encode()
+    except Exception:
+        pass
+    return b""
+
+
+def unsub_token(user_id: str) -> str:
+    return hmac.new(_secret(), f"unsub:{user_id}".encode(), hashlib.sha256).hexdigest()[:32]
+
+
+def unsub_url(user_id: str) -> str:
+    return f"{SITE}/unsubscribe?u={user_id}&t={unsub_token(user_id)}"
 
 
 def ensure_log(con: sqlite3.Connection) -> None:
@@ -54,7 +82,31 @@ def _esc(x) -> str:
 _RU: dict | None = None
 
 
+def _norm(key: str) -> str:
+    """«PPI m/m», «GDP q/q Prel» → «ppi mom», «gdp qoq». Один показатель приходит
+    в разных написаниях, и держать в словаре все варианты — обречь его на вечное
+    отставание от источника."""
+    k = (key or "").strip().lower()
+    k = re.sub(r"\bm\s*/\s*m\b", "mom", k)
+    k = re.sub(r"\by\s*/\s*y\b", "yoy", k)
+    k = re.sub(r"\bq\s*/\s*q\b", "qoq", k)
+    k = re.sub(r"\b(prel|preliminary|final|flash|adv|advance|revised)\b", "", k)
+    return re.sub(r"\s+", " ", k).strip()
+
+
 def _ru_title(ev: dict) -> str:
+    """Название события по-русски, со страной.
+
+    🔴 Заголовок важнее показателя. В письме 02.09 «BoJ Takada Speech» стало
+    «Ставка ЦБ · Япония»: у события indicator='Interest Rate', и перевод шёл по
+    нему. Выступление чиновника превратилось в решение по ставке — это не
+    неточность формулировки, а сообщение о том, чего не было.
+    Поэтому сначала пробуем перевести сам заголовок, и только если он совпадает
+    с показателем или незнаком — берём показатель.
+
+    Страна подписывается ВСЕГДА, если известна: «ВВП» без страны не отвечает на
+    первый же вопрос читателя.
+    """
     global _RU
     if _RU is None:
         try:
@@ -62,18 +114,56 @@ def _ru_title(ev: dict) -> str:
                              .read_text(encoding="utf-8"))
         except Exception:
             _RU = {}
-    title = ev.get("title_ru") or ev.get("title") or ev.get("indicator") or ""
-    if ev.get("title_ru") or not _RU:
-        return title
-    key = (ev.get("indicator") or title).strip().lower()
-    base = _RU.get(key)
-    if not base:
-        return title
+    title = (ev.get("title") or "").strip()
+    indicator = (ev.get("indicator") or "").strip()
     country = (_RU.get("_countries") or {}).get((ev.get("country") or "").upper())
+
+    base = ev.get("title_ru")
+    if not base and _RU:
+        base = _RU.get(_norm(title))
+        if not base and indicator and _norm(indicator) != _norm(title):
+            # Показатель берём только когда заголовок ничего не сказал: он
+            # обобщённее и легко подменяет смысл конкретного события.
+            base = _RU.get(_norm(indicator))
+    if not base:
+        base = title or indicator
     return f"{base} · {country}" if country else base
 
 
-def build_html(brief: dict) -> tuple[str, str]:
+# Русские названия инструментов: в web/data/symbols.json у каждого есть поле ru.
+# «DJI» в письме — это внутренний код, а не имя; читатель не обязан его знать.
+_SYMS: dict | None = None
+
+
+def _sym_name(sym: str) -> str:
+    global _SYMS
+    if _SYMS is None:
+        try:
+            _SYMS = json.loads((ROOT / "web" / "data" / "symbols.json")
+                               .read_text(encoding="utf-8"))
+        except Exception:
+            _SYMS = {}
+    rec = _SYMS.get(sym) or {}
+    return rec.get("ru") or rec.get("en") or sym
+
+
+# 🔴 Локальные валютные пары не идут в общую рассылку.
+# Курс тенге интересен тому, кто в Казахстане, и бессмысленен остальным. Пара
+# показывается, только если страна пользователя совпадает. Пусто в профиле —
+# значит не показываем: домысливать страну по языку или домену почты нельзя,
+# ошибка здесь выглядит как «мне шлют чужое».
+LOCAL_ONLY = {"USDKZT": "KZ", "USDRUB": "RU", "USDZAR": "ZA", "USDAED": "AE",
+              "USDTRY": "TR", "USDPLN": "PL", "USDHUF": "HU", "USDCZK": "CZ",
+              "USDBRL": "BR", "USDMXN": "MX", "USDKRW": "KR", "USDCNY": "CN"}
+
+
+def _allowed_symbol(sym: str, user_country: str | None) -> bool:
+    need = LOCAL_ONLY.get((sym or "").upper())
+    return need is None or need == (user_country or "").upper()
+
+
+def build_html(brief: dict, user_country: str | None = None,
+               unsub_url: str = "") -> tuple[str, str]:
     """(html, текстовая версия). Обе — из одних и тех же данных."""
     day = brief.get("date") or str(date.today())
     blocks: list[str] = []
@@ -102,8 +192,13 @@ def build_html(brief: dict) -> tuple[str, str]:
         movers = list(_mv)
     if movers:
         items = []
-        for m in movers[:6]:
+        for m in movers:
             sym = m.get("symbol") or m.get("name") or ""
+            if not _allowed_symbol(sym, user_country):
+                continue
+            if len(items) >= 6:
+                break
+            sym = _sym_name(sym)
             chg = m.get("chg_pct")
             chg_s = f"{chg:+.2f}%" if isinstance(chg, (int, float)) else ""
             color = "#1e8e5a" if isinstance(chg, (int, float)) and chg >= 0 else "#c0392b"
@@ -112,12 +207,27 @@ def build_html(brief: dict) -> tuple[str, str]:
         blocks.append("<h3 style='margin:18px 0 6px;font-size:15px'>Заметные движения</h3>"
                       f"<ul style='margin:0;padding-left:18px;line-height:1.7'>{''.join(items)}</ul>")
 
+    # «Вне контекста рынка» — внутреннее название блока, попавшее в письмо как
+    # есть. Читателю оно ничего не говорит: внутри — макроновости, которых нет в
+    # календаре событий. Называем тем, что там лежит.
     off = brief.get("off_context") or []
-    if off:
-        items = "".join(f"<li>{_esc((o.get('title') or o.get('text') or ''))[:180]}</li>"
-                        for o in off[:4])
-        blocks.append("<h3 style='margin:18px 0 6px;font-size:15px'>Вне контекста рынка</h3>"
-                      f"<ul style='margin:0;padding-left:18px;line-height:1.7'>{items}</ul>")
+    seen_txt: set[str] = set()
+    off_items = []
+    for o in off:
+        txt = (o.get("title") or o.get("text") or "").strip()
+        # Дедупликация: одна и та же новость приходит из нескольких источников,
+        # и повтор в письме читается как сбой рассылки.
+        key = txt[:80].lower()
+        if not txt or key in seen_txt:
+            continue
+        seen_txt.add(key)
+        off_items.append(f"<li>{_esc(txt[:220])}</li>")
+        plain.append(f"— {txt[:220]}")
+        if len(off_items) >= 4:
+            break
+    if off_items:
+        blocks.append("<h3 style='margin:18px 0 6px;font-size:15px'>Важное вне календаря</h3>"
+                      f"<ul style='margin:0;padding-left:18px;line-height:1.7'>{''.join(off_items)}</ul>")
 
     if not blocks:
         # Пустой брифинг не рассылаем — см. main(). Здесь просто честный ответ.
@@ -134,7 +244,8 @@ def build_html(brief: dict) -> tuple[str, str]:
   <hr style="border:0;border-top:1px solid #e5ded3;margin:22px 0 10px">
   <p style="font-size:11px;color:#8a8a94;line-height:1.6">
     Вы получили это письмо, потому что согласились на рассылку при регистрации на
-    lp.sbfconsult.com. Отписаться можно в профиле.<br>
+    lp.sbfconsult.com.
+    {f'<a href="{unsub_url}" style="color:#8a8a94">Отписаться одним нажатием</a>.' if unsub_url else 'Отписаться можно в профиле.'}<br>
     Материал носит информационный характер и не является инвестиционной рекомендацией.
     Торговля CFD сопряжена с высоким риском потери капитала.
   </p>
@@ -152,8 +263,8 @@ def main() -> int:
         print(f"нет {BRIEF} — утренний синтез ещё не отработал", file=sys.stderr)
         return 1
     brief = json.loads(BRIEF.read_text(encoding="utf-8"))
-    html, text = build_html(brief)
-    if not html:
+    probe_html, _ = build_html(brief)
+    if not probe_html:
         print("брифинг пуст — рассылать нечего")
         return 0
 
@@ -162,7 +273,7 @@ def main() -> int:
     ensure_log(con)
 
     rows = con.execute(
-        "SELECT id, email FROM users WHERE consent_marketing = 1 "
+        "SELECT id, email, country FROM users WHERE consent_marketing = 1 "
         "AND email IS NOT NULL AND email <> '' "
         "AND (deleted_at IS NULL OR deleted_at = '')").fetchall()
     if args.only:
@@ -178,7 +289,7 @@ def main() -> int:
         # В brief_email_log проверка НЕ записывается: иначе настоящая утренняя
         # рассылка сочла бы, что этому человеку уже отправляла.
         found = con.execute(
-            "SELECT id, email FROM users WHERE email = ? "
+            "SELECT id, email, country FROM users WHERE email = ? "
             "AND (deleted_at IS NULL OR deleted_at = '')", (args.only,)).fetchall()
         if not found:
             print(f"пользователя с адресом {args.only} в базе нет — не отправляю",
@@ -187,13 +298,19 @@ def main() -> int:
         rows = found
 
     sent = skipped = failed = 0
-    for user_id, email in rows:
+    for user_id, email, country in rows:
         already = con.execute(
             "SELECT 1 FROM brief_email_log WHERE day=? AND user_id=?", (day, user_id)).fetchone()
         if already:
             skipped += 1
             continue
-        ok = mailer.send(email, f"Утренний брифинг SBF · {day}", html, text, send=args.send)
+        # 🔴 Письмо собирается ПОД КАЖДОГО получателя, а не один раз на всех:
+        # локальные валютные пары зависят от страны, ссылка отписки — от
+        # подписи конкретного пользователя. Общий шаблон дал бы всем одну
+        # ссылку, и отписка одного отписывала бы другого.
+        html, text = build_html(brief, country, unsub_url(user_id))
+        ok = mailer.send(email, f"Утренний брифинг SBF · {day}", html, text,
+                         send=args.send, unsubscribe=unsub_url(user_id))
         if ok and args.send and args.only:
             sent += 1     # проверка: в журнал не пишем, см. комментарий выше
         elif ok and args.send:

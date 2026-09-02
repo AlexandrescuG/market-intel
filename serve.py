@@ -1652,6 +1652,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         # ── Auth / Onboarding ──
         elif path_clean == "/api/auth/me":
             self._handle_auth_me()
+        elif path_clean in ("/unsubscribe", "/api/unsubscribe"):
+            self._handle_unsubscribe()
         elif path_clean == "/api/user/watchlist-news":
             self._handle_user_watchlist_news()
         elif path_clean == "/api/auth/my-path":
@@ -3659,6 +3661,50 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             user["watchlist"] = journal_brief.get_watchlist(user_id)
             user["pinned"] = journal_brief.get_pinned(user_id)  # Focus Engine §6
         self._send_json(user or {"error": "not found"})
+
+    def _handle_unsubscribe(self) -> None:
+        """Отписка от рассылки по ссылке из письма — без входа в аккаунт.
+
+        🔴 Требовать вход здесь нельзя. Человек, которому надоели письма, не
+        станет вспоминать пароль — он нажмёт «Спам», и пострадает домен, с
+        которого уходят коды входа. Одно нажатие должно работать.
+        Подпись в ссылке защищает от подстановки чужого id: без неё отписать
+        любого мог бы кто угодно, подобрав идентификатор.
+        """
+        params = parse_qs(urlparse(self.path).query)
+        user_id = (params.get("u", [""])[0] or "").strip()
+        token = (params.get("t", [""])[0] or "").strip()
+        ok = False
+        if user_id and token:
+            import hashlib
+            import hmac as _hmac
+            secret = (journal_auth._SBF_JWT_SECRET or "").encode()
+            expected = _hmac.new(secret, f"unsub:{user_id}".encode(),
+                                 hashlib.sha256).hexdigest()[:32]
+            if _hmac.compare_digest(expected, token):
+                try:
+                    con = sqlite3.connect(str(Path(DIRECTORY).parent / "data" / "journal.db"))
+                    con.execute("UPDATE users SET consent_marketing = 0 WHERE id = ?", (user_id,))
+                    con.commit()
+                    con.close()
+                    ok = True
+                except Exception as e:
+                    print(f"отписка {user_id}: {e}", flush=True)
+        body = ("<h2>Вы отписаны</h2><p>Больше не будем присылать утренний брифинг. "
+                "Вернуть рассылку можно в профиле на платформе.</p>" if ok else
+                "<h2>Ссылка не сработала</h2><p>Возможно, она устарела. "
+                "Отписаться можно в профиле на платформе.</p>")
+        html = ("<!doctype html><meta charset='utf-8'>"
+                "<meta name='viewport' content='width=device-width,initial-scale=1'>"
+                "<body style=\"font-family:-apple-system,Segoe UI,Arial,sans-serif;"
+                "background:#FBF6EF;color:#2B2B33;display:flex;min-height:90vh;"
+                "align-items:center;justify-content:center;text-align:center\">"
+                f"<div style='max-width:420px;padding:20px'>{body}"
+                "<p><a href='/' style='color:#C9A227'>На платформу →</a></p></div></body>")
+        self.send_response(200)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.end_headers()
+        self.wfile.write(html.encode("utf-8"))
 
     def _handle_user_watchlist_news(self) -> None:
         """Что нового по инструментам, отмеченным звездой.
