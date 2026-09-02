@@ -25,13 +25,20 @@ echo
 
 read -rp "Адрес отправителя [contact@sbf.md]: " FROM
 FROM="${FROM:-contact@sbf.md}"
-read -rp "SMTP-сервер [mail.sbf.md]: " HOST
-HOST="${HOST:-mail.sbf.md}"
-read -rp "Порт [465 для SSL, 587 для STARTTLS]: " PORT
-PORT="${PORT:-465}"
+# Почта sbf.md обслуживается Google Workspace — проверено по MX-записям домена
+# (aspmx.l.google.com) и по DKIM-селектору google._domainkey. Поэтому сервер
+# именно smtp.gmail.com, а mail.sbf.md вообще не существует: первая версия
+# скрипта предлагала его по умолчанию и завела бы владельца в тупик.
+read -rp "SMTP-сервер [smtp.gmail.com]: " HOST
+HOST="${HOST:-smtp.gmail.com}"
+read -rp "Порт [587]: " PORT
+PORT="${PORT:-587}"
 read -rp "Логин [$FROM]: " USER
 USER="${USER:-$FROM}"
-read -rsp "Пароль (не отображается): " PASS; echo
+# 🔴 У Google это НЕ пароль от почты, а пароль приложения (16 символов).
+# Обычный пароль сервер отклонит с «Username and Password not accepted», и
+# понять по этой строке, что дело в двухфакторке, невозможно.
+read -rsp "Пароль приложения Google (16 символов, не отображается): " PASS; echo
 
 if [ -z "$PASS" ]; then
   echo "Пароль пустой — ничего не записано." >&2
