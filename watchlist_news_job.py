@@ -142,6 +142,7 @@ def deliver_telegram(jcon: sqlite3.Connection, verbose: bool = False) -> int:
 
 def run(verbose: bool = False) -> int:
     jcon = sqlite3.connect(str(JOURNAL_DB))
+    jcon.execute("PRAGMA busy_timeout=60000")
     ensure_schema(jcon)
 
     watch = jcon.execute(
