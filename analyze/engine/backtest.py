@@ -46,7 +46,7 @@ from collections import defaultdict
 sys.path.insert(0, "/mnt/sbfdata/sbf-platform/market_intel")
 
 import core.price_bars as _pb                                    # noqa: E402
-from analyze.engine import sources                               # noqa: E402
+from analyze.engine import manage, sources                               # noqa: E402
 from analyze.engine.contracts import LONG, SHORT                 # noqa: E402
 from core.patterns import PATTERNS, FRACTAL_CONFIRM, _fractals   # noqa: E402
 from core.patterns import detect as detect_patterns              # noqa: E402
@@ -128,21 +128,42 @@ def break_retest_events(candles) -> dict:
     return out
 
 
-def _resolve(candles, start_idx, entry, stop, target, is_long):
-    """Исход сделки по будущим барам. Возвращает (R, причина, баров)."""
+def _resolve(candles, start_idx, entry, stop, target, is_long, rules=None):
+    """Исход сделки по будущим барам. Возвращает (R, причина, баров).
+
+    С `rules` моделируется сопровождение позиции: стоп двигается по итогам
+    КАЖДОГО закрытого бара, а не внутри него. Это осознанный пессимизм —
+    внутрибаровой последовательности мы не знаем, и подтягивать стоп по
+    экстремуму того же бара, на котором он сработал, значило бы подглядеть
+    будущее. Та же логика, что и приоритет стопа при неоднозначности."""
     risk = abs(entry - stop)
     if risk <= 0:
         return None
     end = min(start_idx + HORIZON_BARS, len(candles) - 1)
+    best = entry
     for j in range(start_idx, end + 1):
         c = candles[j]
         hit_stop = c["l"] <= stop if is_long else c["h"] >= stop
         hit_tgt = c["h"] >= target if is_long else c["l"] <= target
         if hit_stop:                       # пессимизм при неоднозначности
-            return -1.0, "stop", j - start_idx + 1
+            move = (stop - entry) if is_long else (entry - stop)
+            return move / risk, "stop", j - start_idx + 1
         if hit_tgt:
             move = (target - entry) if is_long else (entry - target)
             return move / risk, "target", j - start_idx + 1
+
+        if rules is not None and rules.enabled:
+            bars_held = j - start_idx + 1
+            why = manage.should_exit(rules, is_long=is_long, entry=entry, stop=stop,
+                                     price=c["c"], bars_held=bars_held)
+            if why:
+                move = (c["c"] - entry) if is_long else (entry - c["c"])
+                return move / risk, "early", bars_held
+            best = max(best, c["h"]) if is_long else min(best, c["l"])
+            moved = manage.new_stop(rules, is_long=is_long, entry=entry,
+                                    stop=stop, best_price=best)
+            if moved is not None:
+                stop = moved
     c = candles[end]
     move = (c["c"] - entry) if is_long else (entry - c["c"])
     return move / risk, "horizon", end - start_idx + 1
@@ -175,7 +196,7 @@ def _overlap(trades):
 
 def run_symbol(symbol: str, tf: str, geom_name: str, geom: dict, *,
                costs: bool = True, with_random: bool = False,
-               seed: int = 20260831) -> dict:
+               seed: int = 20260831, rules=None) -> dict:
     """Прогон по одному инструменту.
 
     `costs=False` и `with_random=True` — два контроля, без которых таблицу
@@ -214,7 +235,7 @@ def run_symbol(symbol: str, tf: str, geom_name: str, geom: dict, *,
             d = geom["stop_atr"] * a
             stop = entry - d if is_long else entry + d
             target = entry + geom["rr"] * d if is_long else entry - geom["rr"] * d
-            res = _resolve(candles, i + 1, entry, stop, target, is_long)
+            res = _resolve(candles, i + 1, entry, stop, target, is_long, rules)
             if res is None:
                 continue
             r, why, bars = res
