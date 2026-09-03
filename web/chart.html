@@ -28,7 +28,7 @@
 <script src="/assets/sbf-header.js?v=19" defer></script>
 <script src="/assets/sbf-auth.js?v=1"></script>
 <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
-<script src="/assets/grafik-engine.js?v=20260901k"></script>
+<script src="/assets/grafik-engine.js?v=20260903a"></script>
 <script src="/assets/sbf-thermo-widget.js?v=20260901a"></script>
 <script src="/assets/sbf-glossary.js?v=2" defer></script>
 <style>
@@ -155,6 +155,15 @@ body{margin:0;background:var(--cream);color:var(--ink);font-family:Montserrat,sa
 .bias.flat{color:var(--muted);border:1px solid var(--line)}
 /* Ряд контролов */
 .ctrl-row{display:flex;align-items:center;gap:8px;padding:9px 14px;border-bottom:1px solid var(--line);flex-wrap:wrap;background:var(--paper)}
+/* Ряд над графиком теперь несёт только таймфреймы — ему не нужен ни отступ
+   под слои, ни перенос строки. Всё остальное уехало под график (ТЗ 03.09). */
+.ctrl-row-top{padding-bottom:6px}
+/* Блок под графиком: слои, пояснения, тизер, термометр. Отделён от полотна
+   заметным полем — иначе кнопки читаются как часть графика. */
+.below-chart{padding:14px 0 4px;display:flex;flex-direction:column;gap:10px}
+.below-chart .tog{flex-wrap:wrap}
+.below-chart > :last-child{border-bottom:none}
+@media(max-width:760px){.below-chart{padding-top:10px;gap:8px}}
 .tf-grp,.mode,.tog{display:flex;gap:3px}
 .mode{margin-left:auto}
 /* Разделитель в контролах */
@@ -365,36 +374,20 @@ body.embed .card{border-radius:0;box-shadow:none;border:none;max-width:100%}
     <span class="stat">RSI <b id="rsi">—</b></span>
     <span class="stat"><span data-i18n="chart.nearest_label">ближайший:</span> <b id="near">—</b></span>
   </div>
-  <div class="ctrl-row">
+  <!-- 🔴 Над графиком остаётся только выбор таймфрейма.
+       ТЗ 03.09: «над графиком ставь только Time Frame и финансовый
+       инструмент, чтобы всё было проще». Инструмент, цена и RSI уже в
+       шапке карточки выше — здесь только таймфреймы.
+       Слои, их пояснения, тизер журнала и термометр переехали ПОД
+       график: человек приходит смотреть на цену, а не читать
+       инструкцию перед ней. -->
+  <div class="ctrl-row ctrl-row-top">
     <div class="tf-grp" id="tf">
       <button class="tf" data-tf="M1">M1</button><button class="tf" data-tf="M5">M5</button><button class="tf" data-tf="M15">M15</button>
       <button class="tf" data-tf="M30">M30</button><button class="tf" data-tf="H1">H1</button>
       <button class="tf" data-tf="H4">H4</button><button class="tf on" data-tf="D1">D1</button>
       <button class="tf" data-tf="W1">W1</button>
     </div>
-    <div class="ctrl-sep"></div>
-    <span class="tog-label" data-i18n="chart.layers_label">слои</span>
-    <div class="tog" id="tog">
-      <button class="chip on" data-t="piv" data-i18n="home.pivots_toggle">Пивоты</button>
-      <button class="chip" data-t="cndl" data-i18n="home.patterns_toggle">Паттерны</button>
-      <button class="chip" data-t="smc">SMC</button>
-      <button class="chip on" data-t="evt" data-i18n="chart.events_toggle">События</button>
-      <button class="chip" data-t="news" data-i18n="chart.news_toggle">Новости</button>
-      <button class="chip on" data-t="lvl" data-i18n="chart.levels_toggle">Уровни</button>
-      <button class="chip" data-t="zone" data-i18n="chart.zones_toggle">Зоны</button>
-      <button class="chip" data-t="sess" data-i18n="chart.sessions_toggle">Сессии</button>
-      <button class="chip on" data-t="trades" data-i18n="chart.trades_toggle" style="display:none">Мои сделки</button>
-    </div>
-  </div>
-  <div class="tog-hints" id="togHints"></div>
-  <div class="trades-teaser" id="tradesTeaser" style="display:none">
-    <span data-i18n="chart.trades_teaser_text">Записывай сделки в журнал — они появятся здесь, на графике.</span>
-    <a href="/journal.html#trades" data-i18n="chart.trades_teaser_link">Открыть журнал →</a>
-    <button id="tradesTeaserClose" aria-label="close">✕</button>
-  </div>
-  <div class="thermo" id="thermo">
-    <div class="thermo-chips" id="thermoChips"></div>
-    <button class="thermo-chevron" id="thermoChevron" aria-label="toggle">▾</button>
   </div>
   <div id="chartContainer" style="position:relative">
     <div id="chart"></div>
@@ -408,6 +401,31 @@ body.embed .card{border-radius:0;box-shadow:none;border:none;max-width:100%}
     <div id="eventLayer"></div>
     <div id="hourlyActivityLayer"></div>
     <svg id="tradesLayer" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:hidden"></svg>
+  </div>
+  <!-- Под графиком: слои, пояснения к ним и термометр (ТЗ 03.09). -->
+  <div class="below-chart">
+    <span class="tog-label" data-i18n="chart.layers_label">слои</span>
+    <div class="tog" id="tog">
+      <button class="chip on" data-t="piv" data-i18n="home.pivots_toggle">Пивоты</button>
+      <button class="chip" data-t="cndl" data-i18n="home.patterns_toggle">Паттерны</button>
+      <button class="chip" data-t="smc">SMC</button>
+      <button class="chip on" data-t="evt" data-i18n="chart.events_toggle">События</button>
+      <button class="chip" data-t="news" data-i18n="chart.news_toggle">Новости</button>
+      <button class="chip on" data-t="lvl" data-i18n="chart.levels_toggle">Уровни</button>
+      <button class="chip" data-t="zone" data-i18n="chart.zones_toggle">Зоны</button>
+      <button class="chip" data-t="sess" data-i18n="chart.sessions_toggle">Сессии</button>
+      <button class="chip on" data-t="trades" data-i18n="chart.trades_toggle" style="display:none">Мои сделки</button>
+    </div>
+  <div class="tog-hints" id="togHints"></div>
+  <div class="trades-teaser" id="tradesTeaser" style="display:none">
+    <span data-i18n="chart.trades_teaser_text">Записывай сделки в журнал — они появятся здесь, на графике.</span>
+    <a href="/journal.html#trades" data-i18n="chart.trades_teaser_link">Открыть журнал →</a>
+    <button id="tradesTeaserClose" aria-label="close">✕</button>
+  </div>
+  <div class="thermo" id="thermo">
+    <div class="thermo-chips" id="thermoChips"></div>
+    <button class="thermo-chevron" id="thermoChevron" aria-label="toggle">▾</button>
+  </div>
   </div>
   <div class="sentiment-panel" id="sentimentPanel" style="display:none">
     <div class="sentiment-hd" id="sentimentHd">
