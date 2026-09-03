@@ -327,11 +327,17 @@
 
 /* ── Mobile touch targets ─────────────────────────────────────────────── */
 @media (max-width: 760px) {
+  /* 🔴 Safari на iOS принудительно зумит страницу при тапе по любому полю с
+     font-size < 16px и обратно не отзумливает. На сайте таких полей было 17
+     из 17: вход, регистрация, опрос, поиск инструментов, все формы дневника.
+     Одно правило закрывает все. */
+  input, select, textarea { font-size: 16px; }
+
   .btn-primary, .btn-secondary { min-height: 44px; padding: 11px 18px; }
   .icon-btn  { width: 44px; height: 44px; }
-  .chip, .tab, .drng-btn { min-height: 36px; }
-  .tf        { min-height: 36px; padding: 8px 11px; }
-  .seg button, .seg-btn, .mseg-btn { min-height: 36px; }
+  .chip, .tab, .drng-btn { min-height: 44px; }
+  .tf        { min-height: 44px; padding: 8px 11px; }
+  .seg button, .seg-btn, .mseg-btn { min-height: 44px; }
 }
 
 /* Иконки взамен emoji (добавлено 2026-07-15) */

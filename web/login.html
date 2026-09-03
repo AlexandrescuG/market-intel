@@ -2,7 +2,7 @@
 <html lang="{{ lang }}">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1, viewport-fit=cover">
 <title>{{ t('login.title', lang) }}</title>
 <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
 <style>
@@ -17,7 +17,7 @@
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);
-  color:var(--text);min-height:100vh;display:flex;flex-direction:column;
+  color:var(--text);min-height:100dvh;display:flex;flex-direction:column;
   align-items:center;justify-content:flex-start;padding:24px 16px 60px}
 .logo{font-size:20px;font-weight:800;letter-spacing:-.5px;margin-bottom:32px;
   color:var(--gold);text-decoration:none}
@@ -50,7 +50,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);
 </style>
 <script>window.SBF_LANG_SWITCH_ONLY = true;</script>
 <script src="/assets/i18n.js?v=2" defer></script>
-<script src="/assets/sbf-header.js?v=18" defer></script>
+<script src="/assets/sbf-header.js?v=22" defer></script>
 </head>
 <body>
 
@@ -67,11 +67,11 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);
 
   <form onsubmit="return doLogin(event)">
     <div class="field">
-      <label>{{ t('register.email_label', lang) }}</label>
+      <label for="email">{{ t('register.email_label', lang) }}</label>
       <input type="email" id="email" placeholder="{{ t('register.email_placeholder', lang) }}" autocomplete="email" required>
     </div>
     <div class="field">
-      <label>{{ t('login.password_label', lang) }}</label>
+      <label for="password">{{ t('login.password_label', lang) }}</label>
       <input type="password" id="password" placeholder="••••••••" autocomplete="current-password" required>
     </div>
     <div class="nav-row">

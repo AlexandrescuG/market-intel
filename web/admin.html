@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1, viewport-fit=cover">
 <title data-i18n="admin.page_title">Админ-панель — SBF</title>
 <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
 <link rel="alternate icon" type="image/png" href="/assets/favicon.png">
@@ -16,12 +16,12 @@
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);
-  color:var(--text);min-height:100vh}
+  color:var(--text);min-height:100dvh}
 a{color:var(--gold);text-decoration:none}
 a:hover{text-decoration:underline}
 
 /* Layout */
-#app{display:grid;grid-template-columns:320px 1fr;min-height:100vh}
+#app{display:grid;grid-template-columns:320px 1fr;min-height:100dvh}
 #sidebar{background:var(--paper);border-right:1px solid var(--line);
   display:flex;flex-direction:column;overflow:hidden}
 #main{display:flex;flex-direction:column;overflow:hidden}
@@ -38,7 +38,7 @@ a:hover{text-decoration:underline}
 
 /* Login gate */
 #loginGate{display:flex;align-items:center;justify-content:center;
-  min-height:100vh;flex-direction:column;gap:16px;padding:24px}
+  min-height:100dvh;flex-direction:column;gap:16px;padding:24px}
 .adm-login-card{background:var(--paper);border:1px solid var(--line);
   border-radius:var(--radius);padding:28px 28px 24px;width:100%;max-width:340px}
 .adm-login-card h2{font-size:18px;font-weight:700;margin-bottom:4px}
@@ -163,6 +163,12 @@ a:hover{text-decoration:underline}
   #app{grid-template-columns:1fr}
   #sidebar{display:none}
 }
+
+/* Safari зумит страницу при тапе по полю с font-size < 16px. */
+@media(max-width:900px){
+  input,select,textarea{font-size:16px}
+  .adm-filter-chip,.adm-status-btn,.adm-action-btn,.adm-fb-split-btn{min-height:44px}
+}
 </style>
 </head>
 <body>
@@ -173,12 +179,12 @@ a:hover{text-decoration:underline}
     <h2 data-i18n="admin.login_title">Войти в админ-панель</h2>
     <p data-i18n="admin.login_subtitle">Доступ только для команды</p>
     <div class="adm-field">
-      <label data-i18n="admin.email_label">Email</label>
+      <label for="loginEmail" data-i18n="admin.email_label">Email</label>
       <input type="email" id="loginEmail" autocomplete="email" placeholder="admin@sbf.ru">
     </div>
     <div class="adm-field">
-      <label data-i18n="admin.password_label">Пароль</label>
-      <input type="password" id="loginPwd" placeholder="••••••••">
+      <label for="loginPwd" data-i18n="admin.password_label">Пароль</label>
+      <input type="password" id="loginPwd" autocomplete="current-password" placeholder="••••••••">
     </div>
     <button class="btn btn-gold" style="width:100%" id="loginBtn" onclick="doLogin()" data-i18n="admin.login_button">Войти</button>
     <div class="adm-err" id="loginErr"></div>

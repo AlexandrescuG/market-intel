@@ -1107,21 +1107,21 @@ def _build_edu_page(ch: int, lang: str) -> bytes:
     # главе независимо от lang (баг, существовавший и до английской версии --
     # главы никогда не грузили /assets/i18n.js, только сам sbf-header.js).
     css_tags = (
-        '<link rel="stylesheet" href="/assets/design.css">\n'
-        '<link rel="stylesheet" href="/edu/edu.css">\n'
-        '<link rel="stylesheet" href="/assets/sbf-nav.css">\n'
+        '<link rel="stylesheet" href="/assets/design.css?v=20260903b">\n'
+        '<link rel="stylesheet" href="/edu/edu.css?v=20260903b">\n'
+        '<link rel="stylesheet" href="/assets/sbf-nav.css?v=20260903b">\n'
         '<script src="/assets/i18n.js?v=2" defer></script>\n'
         '<script src="/assets/sbf-symbols.js?v=2"></script>\n'
-        '<script src="/assets/sbf-header.js?v=19" defer></script>'
+        '<script src="/assets/sbf-header.js?v=22" defer></script>'
     )
-    if '/edu/edu.css' not in html:
+    if '/edu/edu.css?v=20260903b' not in html:
         html = html.replace("</head>", f"{css_tags}\n</head>", 1)
-    elif '/assets/sbf-header.js?v=19' not in html:
+    elif '/assets/sbf-header.js?v=22' not in html:
         html = html.replace("</head>",
-            '<link rel="stylesheet" href="/assets/sbf-nav.css">\n'
+            '<link rel="stylesheet" href="/assets/sbf-nav.css?v=20260903b">\n'
             '<script src="/assets/i18n.js?v=2" defer></script>\n'
             '<script src="/assets/sbf-symbols.js?v=2"></script>\n'
-            '<script src="/assets/sbf-header.js?v=19" defer></script>\n</head>', 1)
+            '<script src="/assets/sbf-header.js?v=22" defer></script>\n</head>', 1)
 
     grafik_tags = (
         '<script src="/edu/assets/grafik-engine.js"></script>\n'
@@ -1893,12 +1893,12 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         html = f"""<!doctype html><html lang="{lang}"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{i18n.t('eduindex.paywall.title', lang)}</title>
-<link rel="stylesheet" href="/assets/design.css">
-<link rel="stylesheet" href="/edu/edu.css">
-<link rel="stylesheet" href="/assets/sbf-nav.css">
+<link rel="stylesheet" href="/assets/design.css?v=20260903b">
+<link rel="stylesheet" href="/edu/edu.css?v=20260903b">
+<link rel="stylesheet" href="/assets/sbf-nav.css?v=20260903b">
 <script src="/assets/i18n.js?v=2" defer></script>
 <script src="/assets/sbf-symbols.js?v=2"></script>
-<script src="/assets/sbf-header.js?v=19" defer></script>
+<script src="/assets/sbf-header.js?v=22" defer></script>
 <script src="/assets/sbf-auth.js?v=1" defer></script>
 <style>
 .paywall-wrap{{max-width:560px;margin:80px auto;padding:0 20px;text-align:center}}
@@ -4540,6 +4540,30 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(body)
 
+    # Статика, которую можно и нужно кэшировать. Ключ — расширение, значение —
+    # срок в секундах.
+    #
+    # 🔴 Правило `no-store на всё, кроме /api/` било далеко за пределы своей
+    # цели. Оно писалось про HTML (см. комментарий ниже), но `end_headers`
+    # вызывается и для картинок, и для шрифтов, и для скриптов, поэтому
+    # браузер выбрасывал их сразу и тянул заново на каждой странице.
+    # Замер на мобильном вьюпорте 390px: главная — 5799 КБ и 41 запрос,
+    # график — 5795 КБ, дневник — 5832 КБ, и в каждом случае 5481 КБ из них
+    # это один `logo.png`, скачиваемый заново при каждом переходе.
+    # (Сам логотип тоже починен: был 4000×4000 при показе в 32–44px.)
+    #
+    # Скрипты и стили держим на коротком сроке: у них есть `?v=N` в ссылках,
+    # но соглашение не проверяется автоматически, и забытый бамп версии при
+    # годовом кэше означал бы сломанный сайт у части людей без возможности
+    # это заметить. Пять минут — достаточно, чтобы переход между страницами
+    # не тянул одни и те же 200 КБ, и мало, чтобы правка доехала сама.
+    _STATIC_TTL = {
+        ".png": 604800, ".jpg": 604800, ".jpeg": 604800, ".webp": 604800,
+        ".gif": 604800, ".svg": 604800, ".ico": 604800,
+        ".woff": 2592000, ".woff2": 2592000, ".ttf": 2592000,
+        ".js": 300, ".css": 300, ".mjs": 300,
+    }
+
     def end_headers(self):
         # no-store (не no-cache): без ETag/Last-Modified эти страницы нечем
         # ревалидировать, и no-cache в таком виде на практике вело себя как
@@ -4549,7 +4573,11 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         # навигация/обновление страницы всегда идёт на сервер.
         path = self.path.split("?")[0]
         if not path.startswith("/api/"):
-            self.send_header("Cache-Control", "no-store")
+            ttl = self._STATIC_TTL.get(os.path.splitext(path)[1].lower())
+            if ttl and not path.endswith((".html", ".htm")):
+                self.send_header("Cache-Control", f"public, max-age={ttl}")
+            else:
+                self.send_header("Cache-Control", "no-store")
         super().end_headers()
 
     def log_message(self, fmt, *args):

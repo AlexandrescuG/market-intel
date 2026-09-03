@@ -57,7 +57,7 @@
   user-select: none;
   -webkit-tap-highlight-color: transparent;
 }
-@media (min-width: 761px) {
+@media (min-width: 901px) {
   .sbf-fw-btn { bottom: 24px; }
 }
 .sbf-fw-btn:hover { transform: scale(1.08); box-shadow: 0 5px 18px rgba(0,0,0,.32); }
@@ -78,7 +78,7 @@
   display: none;
   animation: sbf-fw-pop .18s cubic-bezier(.34,1.56,.64,1) both;
 }
-@media (min-width: 761px) {
+@media (min-width: 901px) {
   .sbf-fw-bubble { bottom: 24px; }
 }
 /* Поднимаем над .edu-nav (48px, fixed, bottom:0) на страницах глав курса --
@@ -127,7 +127,7 @@
   padding: 0 20px 20px;
   pointer-events: none;
 }
-@media (min-width: 761px) {
+@media (min-width: 901px) {
   .sbf-fw-form-wrap { align-items: flex-end; }
 }
 .sbf-fw-form-wrap.open { display: flex; pointer-events: all; }
@@ -141,7 +141,7 @@
   animation: sbf-fw-pop .2s cubic-bezier(.34,1.56,.64,1) both;
   margin-bottom: 56px;
 }
-@media (min-width: 761px) {
+@media (min-width: 901px) {
   .sbf-fw-form { margin-bottom: 80px; }
 }
 .sbf-fw-form-header {

@@ -88,7 +88,7 @@
   // ── CSS ──────────────────────────────────────────────────────────────────
   var CSS = [
     ':root{--cream:#FBF6EF;--paper:#FFFFFF;--line:#E7DFCF;',
-    '--ink:#2B2B33;--muted:#8A8275;--faint:#C5BAA8;',
+    '--ink:#2B2B33;--muted:#7C7563;--faint:#C5BAA8;',
     '--gold:#C9A227;--glow:#E6C257;--up:#1e8e5a;--down:#c0392b;}',
 
     '.sbf-hd{display:flex;align-items:center;gap:18px;padding:10px 24px;',
@@ -117,6 +117,14 @@
     '.sbf-lang-btn{display:flex;align-items:center;gap:4px;font-family:"JetBrains Mono",monospace;',
     'font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--muted);background:none;',
     'border:none;cursor:pointer;padding:4px 7px;border-radius:5px;transition:color .15s,background .15s;}',
+    // 🔴 42×22px на телефоне — вдвое меньше порога в 44px, и это единственный
+    // способ сменить язык. Отдельная жалоба руководителя 03.09: «шторка с
+    // языками — реально не видно». Увеличиваем и кнопку, и пункты списка.
+    '@media(max-width:900px){',
+    '.sbf-lang-btn{font-size:13px;padding:11px 12px;min-height:44px;}',
+    '.sbf-lang-chev{font-size:11px;}',
+    '.sbf-lang-list{min-width:96px;}',
+    '.sbf-lang-list a{padding:12px 14px;font-size:13px;min-height:44px;}}',
     '.sbf-lang-btn:hover,.sbf-lang-btn[aria-expanded="true"]{color:var(--ink);background:rgba(201,162,39,.08);}',
     '.sbf-lang-chev{font-size:9px;transition:transform .15s;}',
     '.sbf-lang-btn[aria-expanded="true"] .sbf-lang-chev{transform:rotate(180deg);}',
@@ -170,7 +178,7 @@
     '.sbf-mob-bar img{width:32px;height:32px;object-fit:contain;flex-shrink:0}',
     '.sbf-mob-bar .mob-brand{font-weight:700;font-size:13px;letter-spacing:.3px;color:var(--ink,#2B2B33)}',
     '.sbf-mob-bar .mob-time{margin-left:auto;display:flex;align-items:center;gap:5px;',
-    'font-size:11px;color:var(--muted,#8A8275);font-family:"JetBrains Mono",monospace}',
+    'font-size:11px;color:var(--muted,#7C7563);font-family:"JetBrains Mono",monospace}',
     '.sbf-mob-bar .mob-dot{width:7px;height:7px;border-radius:50%;',
     'background:var(--up,#1e8e5a);box-shadow:0 0 6px var(--up,#1e8e5a);',
     'animation:mobPulse 1.6s infinite;flex-shrink:0}',
@@ -178,12 +186,34 @@
     '@keyframes mobPulse{50%{opacity:.4}}',
     '.strip{transition:transform .2s ease;}',
 
-    '@media(max-width:760px){',
+    // 🔴 Порог 760, а не 900, означал, что на планшете в портрете (768 —
+    // ровно iPad) показывалась десктопная шапка, которой нужно 1180px.
+    // Замер 03.09: scrollWidth 1180 при ширине экрана 768 на 11 страницах из
+    // 15 — «Войти» и «30 дней PRO» уезжали за правый край, добраться до них
+    // можно было только горизонтальной прокруткой. Тот же порог в sbf-nexus
+    // поднимали до 900 в августе по той же причине.
+    '@media(max-width:900px){',
     '.sbf-hd{display:none!important;}',
     '.sbf-mob-bar{display:flex!important;}',
-    '.strip{top:50px!important;}',
-    'body{padding-bottom:58px!important;}',
+    // Высоту ленты котировок больше не задаём числом: она разная на разных
+    // страницах (74px на графике, 81px на главной — зависит от line-height),
+    // а мобильный бар считался ровно 50px при фактических 53. Реальные
+    // значения публикует _publishChromeVars() ниже.
+    '.strip{top:var(--sbf-bar-h,53px)!important;}',
+    '.sbf-has-bn body{padding-bottom:var(--sbf-bottom-h,58px)!important;}',
     '.g-bottom-nav{display:flex;}}',
+    // 🔴 Safari на iOS принудительно увеличивает страницу при тапе по полю с
+    // font-size < 16px и обратно не уменьшает. Таких полей на сайте было 17
+    // из 17: вход, регистрация, опрос, админка, поиск инструментов, поиск по
+    // глоссарию, все формы дневника. Человек тапал в «Email» — и оказывался
+    // на увеличенной странице, из которой не выбраться.
+    //
+    // Правило живёт здесь, а не в design.css, сознательно: страницы входа,
+    // регистрации и опроса подключают свои <style> ПОСЛЕ общей таблицы и
+    // перебивают её (проверено замером — там оставалось 14px). Этот блок
+    // добавляется в <head> скриптом, то есть последним, и выигрывает у всех.
+    '@media(max-width:900px){',
+    'input:not([type=checkbox]):not([type=radio]),select,textarea{font-size:16px!important}}',
     '.g-bn-item{flex:1;display:flex;flex-direction:column;align-items:center;',
     'justify-content:center;gap:3px;text-decoration:none;color:var(--muted);',
     'padding:6px 0 8px;transition:color .12s;-webkit-tap-highlight-color:transparent;}',
@@ -192,12 +222,75 @@
     '.g-bn-ico{font-size:20px;line-height:1;}',
     '.g-bn-lbl{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.4px;',
     'font-weight:600;text-transform:uppercase;}',
-    '.sbf-embed .g-bottom-nav, .sbf-embed .sbf-mob-bar, .sbf-embed .sbf-fw-btn, .sbf-embed .sbf-fw-bubble{display:none!important;}'
+    '.sbf-embed .g-bottom-nav, .sbf-embed .sbf-mob-bar, .sbf-embed .sbf-fw-btn, .sbf-embed .sbf-fw-bubble{display:none!important;}',
+
+    // Подписи нижнего нава на 390px не помещались в колонку 65px при 11px и
+    // letter-spacing .4px — «КАЛЕНДАРЬ» упиралась в края.
+    //
+    // ⚠️ Блок должен стоять последним в массиве. Базовые правила `.g-bn-lbl`
+    // и `.g-bn-item` объявлены НИЖЕ мобильного `@media`-блока, а медиазапрос
+    // не добавляет специфичности — поставленный раньше, он молча
+    // проигрывает обычному правилу, идущему следом. Первая версия этой
+    // правки так и не сработала: в CSS она была, в computed style — нет.
+    '@media(max-width:430px){',
+    '.g-bn-lbl{font-size:9.5px;letter-spacing:.1px}',
+    '.g-bn-item{min-width:0;padding:6px 2px 8px}}'
   ].join('');
 
   var st = document.createElement('style');
   st.textContent = CSS;
   document.head.appendChild(st);
+
+  // Высота хрома — в CSS-переменных, а не числами в десяти местах.
+  //
+  // 🔴 Раньше каждый липкий элемент помнил своё число: лента — top:50, блок
+  // «Фундаментальный/Технический» на главной — top:98, поиск глоссария —
+  // top:64, шапка главы курса — top:106. Ни одно из них не совпадало с
+  // фактической высотой: мобильный бар 53px, лента от 74 до 81 в зависимости
+  // от страницы. Итог — переключатель режима на главной был наполовину
+  // закрыт лентой, а поиск по глоссарию уезжал под неё целиком.
+  //
+  // Считаем по факту и пересчитываем на resize, повороте и смене языка
+  // (в RO/EN подписи длиннее и высота меняется).
+  function _publishChromeVars() {
+    var root = document.documentElement.style;
+    var bar  = document.querySelector('.sbf-mob-bar');
+    var hd   = document.querySelector('.sbf-hd');
+    var strip = document.querySelector('.strip');
+    var bn   = document.querySelector('.g-bottom-nav');
+    var h = function (el) {
+      if (!el) return 0;
+      var r = el.getBoundingClientRect();
+      return r.height > 0 ? Math.round(r.height) : 0;
+    };
+    var barH = h(bar) || h(hd);
+    root.setProperty('--sbf-bar-h', barH + 'px');
+    root.setProperty('--sbf-top-h', (barH + h(strip)) + 'px');
+    // Нижний нав на iPhone дорастает на env(safe-area-inset-bottom), а
+    // компенсация body была прибита к 58px — нижние ~27px контента уходили
+    // под нав навсегда. Берём фактическую высоту вместе с safe-area.
+    root.setProperty('--sbf-bottom-h', (h(bn) || 58) + 'px');
+  }
+  window.__sbfPublishChromeVars = _publishChromeVars;
+  if (window.ResizeObserver) {
+    var _ro = new ResizeObserver(_publishChromeVars);
+    ['.sbf-mob-bar', '.sbf-hd', '.strip', '.g-bottom-nav'].forEach(function (sel) {
+      var el = document.querySelector(sel);
+      if (el) _ro.observe(el);
+    });
+    // Разметку хрома этот же скрипт добавляет ниже — досматриваем позже.
+    setTimeout(function () {
+      ['.sbf-mob-bar', '.sbf-hd', '.strip', '.g-bottom-nav'].forEach(function (sel) {
+        var el = document.querySelector(sel);
+        if (el) { try { _ro.observe(el); } catch (e) {} }
+      });
+      _publishChromeVars();
+    }, 300);
+  }
+  window.addEventListener('resize', _publishChromeVars, { passive: true });
+  window.addEventListener('orientationchange', function () { setTimeout(_publishChromeVars, 250); });
+  document.addEventListener('DOMContentLoaded', _publishChromeVars);
+  setTimeout(_publishChromeVars, 60);
 
   // CSS применён (что и было нужно для уже существующей на странице разметки).
   // Дальше — добавление НОВОГО хедера/нава и живые котировки/часы: в iframe это
@@ -385,6 +478,12 @@
       nav.innerHTML = _navHtml;
       document.body.appendChild(nav);
     }
+    // 🔴 Отступ под нижний нав раньше вешался на body безусловно, а сам блок
+    // CSS инжектится ДО раннего return для SBF_LANG_SWITCH_ONLY. Из-за этого
+    // на /login, /register и /survey внизу оставалось 58px пустоты под нав,
+    // которого на этих страницах нет. Помечаем корень только тогда, когда
+    // нав действительно в DOM.
+    document.documentElement.classList.add('sbf-has-bn');
   }
   if (document.body) { inject(); }
   else { document.addEventListener('DOMContentLoaded', inject); }

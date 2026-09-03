@@ -1,16 +1,52 @@
 {
-  "date": "2026-08-20",
-  "generated_at": "2026-08-20T04:32:54.153346+00:00",
+  "date": "2026-09-03",
+  "generated_at": "2026-09-03T03:03:34.023769+00:00",
   "calendar": [
     {
-      "ts_utc": "2026-08-20T01:15:00Z",
-      "scheduled_ts": 1787188500,
-      "country": "CN",
-      "title": "Loan Prime Rate 1Y",
+      "ts_utc": "2026-09-03T01:00:00Z",
+      "scheduled_ts": 1788397200,
+      "country": "AU",
+      "title": "RBA Jones Speech",
       "indicator": "Interest Rate",
       "impact": "medium",
-      "forecast": "3",
-      "previous": "3",
+      "forecast": null,
+      "previous": null,
+      "symbols": [
+        "AUDUSD"
+      ],
+      "past_reaction": {
+        "symbol": "AUDUSD",
+        "n": 4,
+        "median_atr_30m": null
+      }
+    },
+    {
+      "ts_utc": "2026-09-03T01:30:00Z",
+      "scheduled_ts": 1788399000,
+      "country": "AU",
+      "title": "Balance of Trade",
+      "indicator": "Balance of Trade",
+      "impact": "high",
+      "forecast": "1.4",
+      "previous": "2.341",
+      "symbols": [
+        "AUDUSD"
+      ],
+      "past_reaction": {
+        "symbol": "AUDUSD",
+        "n": 6,
+        "median_atr_30m": 0.04587737843552277
+      }
+    },
+    {
+      "ts_utc": "2026-09-03T01:45:00Z",
+      "scheduled_ts": 1788399900,
+      "country": "CN",
+      "title": "RatingDog Services PMI",
+      "indicator": "Services PMI",
+      "impact": "medium",
+      "forecast": "50.6",
+      "previous": "50.4",
       "symbols": [
         "GOLD",
         "SPX",
@@ -20,177 +56,258 @@
       "past_reaction": {
         "symbol": "GOLD",
         "n": 12,
-        "median_atr_30m": 0.10987901672189193
+        "median_atr_30m": 0.06420313790256248
       }
     },
     {
-      "ts_utc": "2026-08-20T01:15:00Z",
-      "scheduled_ts": 1787188500,
-      "country": "CN",
-      "title": "Loan Prime Rate 5Y",
-      "indicator": "Loan Prime Rate 5Y",
-      "impact": "medium",
-      "forecast": "3.5",
-      "previous": "3.5",
-      "symbols": [
-        "GOLD",
-        "SPX",
-        "USDCNY",
-        "WTI"
-      ],
-      "past_reaction": {
-        "symbol": "GOLD",
-        "n": 7,
-        "median_atr_30m": 0.0690452338753139
-      }
-    },
-    {
-      "ts_utc": "2026-08-20T01:30:00Z",
-      "scheduled_ts": 1787189400,
+      "ts_utc": "2026-09-03T05:15:00Z",
+      "scheduled_ts": 1788412500,
       "country": "AU",
-      "title": "Employment Change",
-      "indicator": "Employment Change",
+      "title": "RBA Hunter Speech",
+      "indicator": "Interest Rate",
       "impact": "medium",
-      "forecast": "15",
-      "previous": "80.3",
-      "symbols": [
-        "AUDUSD"
-      ],
-      "past_reaction": null
-    },
-    {
-      "ts_utc": "2026-08-20T01:30:00Z",
-      "scheduled_ts": 1787189400,
-      "country": "AU",
-      "title": "Unemployment Rate",
-      "indicator": "Unemployment Rate",
-      "impact": "medium",
-      "forecast": "4.4",
-      "previous": "4.4",
+      "forecast": null,
+      "previous": null,
       "symbols": [
         "AUDUSD"
       ],
       "past_reaction": {
         "symbol": "AUDUSD",
-        "n": 5,
-        "median_atr_30m": 0.33980582524270575
+        "n": 4,
+        "median_atr_30m": null
       }
     },
     {
-      "ts_utc": "2026-08-20T01:30:00Z",
-      "scheduled_ts": 1787189400,
-      "country": "AU",
-      "title": "Full Time Employment Chg",
-      "indicator": "Full Time Employment",
-      "impact": "medium",
-      "forecast": null,
-      "previous": "48.9",
-      "symbols": [
-        "AUDUSD"
-      ],
-      "past_reaction": null
-    },
-    {
-      "ts_utc": "2026-08-20T06:00:00Z",
-      "scheduled_ts": 1787205600,
+      "ts_utc": "2026-09-03T06:30:00Z",
+      "scheduled_ts": 1788417000,
       "country": "CH",
-      "title": "Balance of Trade",
-      "indicator": "Balance of Trade",
+      "title": "Inflation Rate YoY",
+      "indicator": "Inflation Rate",
       "impact": "medium",
-      "forecast": null,
-      "previous": "3.8",
+      "forecast": "0.5",
+      "previous": "0.4",
       "symbols": [
         "USDCHF"
       ],
       "past_reaction": {
         "symbol": "USDCHF",
         "n": 6,
-        "median_atr_30m": 0.0750670241286887
+        "median_atr_30m": 0.18426626323752637
       }
+    },
+    {
+      "ts_utc": "2026-09-03T06:30:00Z",
+      "scheduled_ts": 1788417000,
+      "country": "CH",
+      "title": "CPI m/m",
+      "indicator": "CPI m/m",
+      "impact": "medium",
+      "forecast": "0.0%",
+      "previous": "-0.1%",
+      "symbols": [
+        "USDCHF"
+      ],
+      "past_reaction": null
     }
   ],
-  "calendar_more": 10,
+  "calendar_more": 11,
   "untranslated": [],
   "earnings": [],
   "movers": {
     "up": [
       {
-        "symbol": "EURUSD",
-        "bar_date": "2026-08-19",
-        "close": 1.1674,
-        "chg_pct": 0.85,
-        "ratio": 2.65098245257972,
+        "symbol": "DJI",
+        "bar_date": "2026-09-02",
+        "close": 53148.0,
+        "chg_pct": 0.59,
+        "ratio": 1.3314847567448203,
         "event": {
-          "title": "ECB President Lagarde Speech",
-          "ts_utc": "2026-08-19T07:10:00Z"
+          "title": "MBA 30-Year Mortgage Rate",
+          "ts_utc": "2026-09-02T11:00:00Z"
         }
       },
       {
         "symbol": "GOLD",
-        "bar_date": "2026-08-19",
-        "close": 4511.51,
-        "chg_pct": 4.13,
-        "ratio": 2.492179514201867,
+        "bar_date": "2026-09-02",
+        "close": 4385.32,
+        "chg_pct": 1.41,
+        "ratio": 1.2401912543464015,
         "event": {
-          "title": "FDI (YTD) YoY",
-          "ts_utc": "2026-08-19T09:00:00Z"
+          "title": "MBA 30-Year Mortgage Rate",
+          "ts_utc": "2026-09-02T11:00:00Z"
+        }
+      },
+      {
+        "symbol": "SPX",
+        "bar_date": "2026-09-02",
+        "close": 7679.75,
+        "chg_pct": 0.44,
+        "ratio": 1.1790700270035068,
+        "event": {
+          "title": "MBA 30-Year Mortgage Rate",
+          "ts_utc": "2026-09-02T11:00:00Z"
         }
       }
     ],
     "down": [
       {
         "symbol": "USDJPY",
-        "bar_date": "2026-08-19",
-        "close": 158.256,
+        "bar_date": "2026-09-02",
+        "close": 158.896,
         "chg_pct": -0.81,
-        "ratio": 1.6328785220840054,
+        "ratio": 2.8600070419672314,
+        "event": {
+          "title": "BoJ Takada Speech",
+          "ts_utc": "2026-09-02T01:30:00Z"
+        }
+      },
+      {
+        "symbol": "USDKZT",
+        "bar_date": "2026-09-02",
+        "close": 443.4151,
+        "chg_pct": -0.62,
+        "ratio": 1.6187198330994668,
+        "event": null
+      },
+      {
+        "symbol": "DXY",
+        "bar_date": "2026-09-02",
+        "close": 99.507,
+        "chg_pct": -0.1,
+        "ratio": 1.1140385452847248,
         "event": {
           "title": "MBA 30-Year Mortgage Rate",
-          "ts_utc": "2026-08-19T11:00:00Z"
+          "ts_utc": "2026-09-02T11:00:00Z"
         }
       }
     ]
   },
   "patterns": [
     {
-      "symbol": "EURUSD",
-      "tf": "D1",
-      "pattern_key": "bullish_engulfing",
-      "display_name_ru": "Бычье поглощение",
-      "direction": "bullish",
-      "ts": 1787097600,
-      "agree_share_5": 0.5235,
-      "n": 149
-    },
-    {
-      "symbol": "GOLD",
-      "tf": "D1",
-      "pattern_key": "bullish_engulfing",
-      "display_name_ru": "Бычье поглощение",
-      "direction": "bullish",
-      "ts": 1787097600,
-      "agree_share_5": 0.5211,
-      "n": 142
-    },
-    {
       "symbol": "USDJPY",
       "tf": "D1",
       "pattern_key": "bearish_engulfing",
       "display_name_ru": "Медвежье поглощение",
       "direction": "bearish",
-      "ts": 1787097600,
-      "agree_share_5": 0.4894,
-      "n": 141
+      "ts": 1788307200,
+      "agree_share_5": 0.5247,
+      "n": 162
     },
     {
-      "symbol": "SILVER",
+      "symbol": "NASDAQ",
       "tf": "D1",
-      "pattern_key": "pin_bar_top",
-      "display_name_ru": "Пин-бар сверху",
-      "direction": "bearish",
-      "ts": 1785974400,
-      "agree_share_5": 0.4,
-      "n": 50
+      "pattern_key": "pin_bar_bottom",
+      "display_name_ru": "Пин-бар снизу",
+      "direction": "bullish",
+      "ts": 1788307200,
+      "agree_share_5": 0.5566,
+      "n": 106
+    },
+    {
+      "symbol": "BTC",
+      "tf": "D1",
+      "pattern_key": "pin_bar_bottom",
+      "display_name_ru": "Пин-бар снизу",
+      "direction": "bullish",
+      "ts": 1788307200,
+      "agree_share_5": 0.5114,
+      "n": 88
+    },
+    {
+      "symbol": "SOL",
+      "tf": "D1",
+      "pattern_key": "pin_bar_bottom",
+      "display_name_ru": "Пин-бар снизу",
+      "direction": "bullish",
+      "ts": 1788307200,
+      "agree_share_5": 0.4308,
+      "n": 65
+    }
+  ],
+  "outliers": [
+    {
+      "symbol": "PSQL",
+      "name": "Pasqal Holding SA Ordinary Share",
+      "asset_class": "equity",
+      "chg_pct": -21.66,
+      "peak_chg_pct": -21.98,
+      "price": 12.19,
+      "dollar_volume": 6741436.0,
+      "screener": "day_losers",
+      "seen_utc": "2026-09-03T03:00:15+00:00",
+      "explained": false
+    },
+    {
+      "symbol": "CRDO",
+      "name": "Credo Technology Group Holding Ltd",
+      "asset_class": "equity",
+      "chg_pct": -20.04,
+      "peak_chg_pct": -21.62,
+      "price": 165.22,
+      "dollar_volume": 4907269934.0,
+      "screener": "day_losers",
+      "seen_utc": "2026-09-03T03:00:15+00:00",
+      "explained": true
+    }
+  ],
+  "off_context": [
+    {
+      "label": "iran",
+      "text": "Число погибших в Иране выросло до 18, Трамп заявил о новых ударах; нефть в Нью-Йорке росла третий день подряд, до уровня $91.",
+      "publishers": 25,
+      "items": 40,
+      "sources": [
+        {
+          "title": "Trump threatens more strikes as death toll in Iran rises to 18",
+          "url": "https://www.aljazeera.com/news/2026/9/3/trump-threatens-more-strikes-as-death-toll-in-iran-rises-to-19?traffic_source=rss",
+          "publisher": "Al Jazeera"
+        },
+        {
+          "title": "U.S. stock futures flat amid Iran, rate caution; Broadcom dips after earnings",
+          "url": "https://www.investing.com/news/stock-market-news/us-stock-futures-flat-amid-iran-rate-caution-broadcom-dips-after-earnings-4886896",
+          "publisher": "Investing.com"
+        },
+        {
+          "title": "China’s falling emissions amid Iran war spark hope of decarbonisation watershed",
+          "url": "https://www.theguardian.com/environment/2026/sep/03/china-co2-emissions-iran-war",
+          "publisher": "Guardian World"
+        },
+        {
+          "title": "NY Crude Rises for Third Straight Day to $91 Level as U.S.-Iran Conflict Escalation Fuels Supply Concerns",
+          "url": "https://news.google.com/rss/articles/CBMidkFVX3lxTE9sbFpiM0JQX0lwMVBiRzR3SWljY3RaQUFqSE41NnhvVHBlWWFrM19EMnotMkpwb1ZaLUNZOHdVdlNkSE5ld3hyeXA3RDRaS0owTHFRQlFINjRnc1B4T2ZJa3hidk5CY2NUQUxwZkp2Y1AyelpYRHc?oc=5",
+          "publisher": "finance.biggo.com"
+        }
+      ],
+      "symbol": null
+    },
+    {
+      "label": "williams",
+      "text": "Глава ФРБ Нью-Йорка Джон Уильямс допустил повышение ставки в сентябре и связал рост доходностей облигаций с состоянием экономики.",
+      "publishers": 16,
+      "items": 18,
+      "sources": [
+        {
+          "title": "Fed’s Williams ‘is opening options’ to interest-rate hikes. Why that could be ‘a bad trade.’",
+          "url": "https://www.marketwatch.com/story/feds-williams-is-opening-options-to-interest-rate-hikes-why-that-could-be-a-bad-trade-4ba6b32f?mod=mw_rss_topstories",
+          "publisher": "MarketWatch"
+        },
+        {
+          "title": "Fed's Williams not swayed that a rate hike is the answer yet",
+          "url": "https://news.google.com/rss/articles/CBMimwFBVV95cUxQSVVjYk1GcHZYcnRZQTVKMDlqX0JaN1lsSFRaZWNHUGVtcnE5R3p6WE5xWmp3Vl9scndha3h0aUp3UDhwTmhza1J1WUFlMmhvRXpQckVNVXFtN3NTeXNtNmVfYTJ4V0dlcmZ6amJaQ0gwQkFqTWZ4MEFLT3R4SkVfT1hpMUFZNkp2bXVIMzc0dEhoX3JZVEotUTI1OA?oc=5",
+          "publisher": "American Banker"
+        },
+        {
+          "title": "New York Fed's Williams says yield surge due to strong economic prospects",
+          "url": "https://www.cnbc.com/2026/09/02/new-york-feds-williams-says-yield-surge-due-to-strong-economic-prospects.html",
+          "publisher": "CNBC Finance"
+        },
+        {
+          "title": "NY Fed's John Williams signals openness to September rate hike",
+          "url": "https://news.google.com/rss/articles/CBMib0FVX3lxTE8ydHlkR1VkdktCSmNxQkdtYW1adnNqalc2RERFc2huU2VsZVpFS19hTG9IMFQzVHlmVWlTQndXUkNBOTdmSl95SjFtYlk2STRvTlJSZ3NIdzNPZ2lzWDRsY1gyMGp6TnVJSDhJTHppVQ?oc=5",
+          "publisher": "qz.com"
+        }
+      ],
+      "symbol": null
     }
   ],
   "_meta": {
@@ -201,21 +318,23 @@
       "calendar": "econ_events + event_reaction_stats (bot.db)",
       "earnings": "web/data/earnings_calendar.json (ручной, вариант A)",
       "movers": "ohlc_{symbol}_D1.json + core.focus.yesterday_deviation",
-      "patterns": "core.patterns.detect() + pattern_stats (bot.db), n>=15"
+      "patterns": "core.patterns.detect() + pattern_stats (bot.db), n>=15",
+      "outliers": "market_outliers (bot.db) <- outliers_job.py, скринеры Yahoo + Bybit",
+      "off_context": "news_clusters (bot.db), summary_status=ok <- core/outlier_triage.py"
     }
   },
-  "headline": "Золото $4554 и серебро $67 продолжают рост, биткоин у $69 000 после ликвидации шортов на $1,1 млрд",
+  "headline": "Барр из ФРС допустил повышение ставки — оценка вероятности 72%; VIX 15,20 (−6,98%), золото 4 420 (+0,80%)",
   "context": [
     {
-      "text": "Котировки: золото $4554 (+1,4%) после вчерашних +4,1%, серебро $67 (+2,4%), евро/доллар 1,1681 (+0,9%), нефть WTI $84,6 (−1,5%); S&P 500 −0,5%, VIX 14,9 (−6%).",
+      "text": "VIX 15,20 (−6,98%) при S&P 500 7 678 (−0,02%). Золото 4 420 (+0,80%), нефть WTI 91,05, Биткоин 77 735 (+0,57%), страх и жадность 65.",
       "confidence": "quotes"
     },
     {
-      "text": "СМИ: FT — Иран готовит удары по целям в Европе при эскалации, НАТО заявила о готовности защищать; ЦБ РФ держит доллар выше ₽85, инфляционные ожидания россиян упали до 13,7%.",
+      "text": "Барр из ФРС допустил повышение ставки при неснижающейся инфляции, рынок оценивает шаг в 72%. Инфляция в еврозоне 3,3% перед заседанием ЕЦБ.",
       "confidence": "media"
     },
     {
-      "text": "Соцсети: «$500 млрд стёрто с азиатских рынков за 30 минут» и «биткоин выше $70 000» — котировка биткоина $69 287, VIX упал до 14,9, S&P 500 потерял лишь 0,5%.",
+      "text": "Соцсети пишут о скачке нефти Brent к $95 на атаках на танкеры. В котировках подтверждения нет: нефть WTI 91,05 (+0,53%), VIX снизился на 7%.",
       "confidence": "social_unverified"
     }
   ]

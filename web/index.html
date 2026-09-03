@@ -2,7 +2,7 @@
 <html lang="{{ lang }}">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script>
 // ?embed=1 — для встраивания в iframe (SBFAcademy Mini App, вкладка «График»):
 // прячет свою шапку/тикер/переключатель Фундаментальный-Технический, т.к. снаружи
@@ -64,22 +64,22 @@ if (new URLSearchParams(location.search).get("embed") === "1") {
 <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Merriweather:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/design.css">
+<link rel="stylesheet" href="/assets/design.css?v=20260903b">
 <link rel="stylesheet" href="/assets/tokens.css?v=1">
 <script src="/assets/i18n.js?v=2" defer></script>
 <script src="/assets/sbf-symbols.js?v=2"></script>
 <script src="/edu/assets/calendar-terms.js?v=1" defer></script>
-<script src="/assets/sbf-header.js?v=19" defer></script>
+<script src="/assets/sbf-header.js?v=22" defer></script>
 <script src="/assets/sbf-auth.js?v=1" defer></script>
 <script src="/assets/sbf-profile.js?v=3" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.0/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
-<script src="/assets/grafik-engine.js?v=20260903a"></script>
+<script src="/assets/grafik-engine.js?v=20260903ba"></script>
 <script src="/assets/sbf-glossary.js?v=2" defer></script>
 <style>
 :root{
   --cream:#FBF6EF; --paper:#FFFFFF; --line:#E7DFCF; --grid:#F0E9DA;
-  --ink:#2B2B33;   --muted:#8A8275; --faint:#C5BAA8;
+  --ink:#2B2B33;   --muted:#7C7563; --faint:#C5BAA8;
   --gold:#C9A227;  --glow:#E6C257;
   --up:#1e8e5a;    --down:#c0392b;
   --signal:#b07d18;
@@ -416,6 +416,13 @@ a:hover{text-decoration:underline;color:var(--glow)}
 .anon-value-cta:hover{background:var(--glow,#E6C257)}
 .anon-value-note{font-size:12.5px;color:var(--muted);margin:10px 0 0}
 @media (max-width:760px){.anon-value-cta{width:100%;justify-content:center}}
+
+/* .focus-link и «Открыть график» — отдельные действия, а не ссылки внутри
+   абзаца: 19px по высоте мало для пальца. Строчные ссылки в тексте
+   сознательно не трогаем, там 44px ломает вёрстку абзаца. */
+@media(max-width:900px){
+  .focus-link,.tfoc-link,.gex-card a.primary{min-height:44px;display:inline-flex;align-items:center}
+}
 </style>
 <!-- SPEC_visual_migration.md: последним в <head>, чтобы выигрывать тай-брейки
      на одинаковой специфичности (напр. .sbf-embed .top { .. } выше) — см. план. -->
@@ -1833,6 +1840,13 @@ _tickerRAF = requestAnimationFrame(_tickerFrame);
     if (lbl) lbl.textContent = (window.SBFSymbols ? window.SBFSymbols.symbolName(techSym,{mode:'name+ticker'}) : techSym) + ' · ' + (m.interval||tf);
 
     techChart = LightweightCharts.createChart(el, {
+      // autoSize здесь не было: LWC меряет контейнер один раз при создании,
+      // поэтому после поворота телефона график оставался прежней ширины —
+      // либо с пустым полем справа, либо вылезал за карточку.
+      autoSize: true,
+      // Вертикальный свайп отдаём странице, иначе из полотна 360px не
+      // выскроллиться (то же, что на chart.html).
+      handleScroll: {vertTouchDrag: false},
       localization:{locale:'en',timeFormatter:SBFGrafik.lwCrosshairFmt},
       layout:{background:{type:'solid',color:'#FFFFFF'},textColor:'#2B2B33',fontFamily:'JetBrains Mono'},
       grid:{vertLines:{color:'#F0E9DA'},horzLines:{color:'#F0E9DA'}},

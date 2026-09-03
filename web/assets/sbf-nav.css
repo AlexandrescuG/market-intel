@@ -38,7 +38,7 @@
 }
 
 /* ─── Mobile: скрываем desktop-nav ─────────────────────────────────────── */
-@media (max-width: 760px) {
+@media (max-width: 900px) {
   .g-nav { display: none !important; }
   body   { padding-bottom: var(--g-bn-h) !important; }
 }
@@ -57,7 +57,7 @@
   box-shadow: 0 -2px 16px rgba(43,43,51,.07);
 }
 
-@media (max-width: 760px) {
+@media (max-width: 900px) {
   .g-bottom-nav { display: flex; }
 }
 

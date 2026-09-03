@@ -340,6 +340,13 @@ var CALENDAR_TERMS = {
   "Italian Trade Balance": {ru: "Италия: Торговый баланс", ro: "Italia: Balanța comercială"},
   "Ivey PMI": {ru: "Ivey PMI", ro: "Ivey PMI"},
   "JOLTS Job Openings": {ru: "JOLTS Открытые вакансии", ro: "JOLTS Locuri de muncă vacante"},
+  // 31.08.2026: события под служебным indicator "Calendar" (симпозиумы,
+  // саммиты, встречи) названия-категории не имеют — они живут целиком в
+  // title. Ключи ниже подобраны под title, их читает питоновский порт
+  // event_name_ru() в боте (SBFAcademy_bot/sbfacademy/briefing/calendar_ru.py).
+  // На фронте translatedEventName() до словаря в этом случае не доходит:
+  // ветка indicator === 'Calendar' возвращает title раньше.
+  "Jackson Hole Symposium": {ru: "Симпозиум в Джексон-Хоуле", ro: "Simpozionul de la Jackson Hole"},
   "Job Advertisements": {ru: "Объявления о вакансиях", ro: "Anunțuri de angajare"},
   "Job Offers": {ru: "Предложения о работе", ro: "Oferte de muncă"},
   "Job Quits": {ru: "Добровольные увольнения", ro: "Demisii voluntare"},

@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#FBF6EF">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -12,16 +12,16 @@
 <link rel="apple-touch-icon" href="/assets/icons/icon-192.png">
 <link rel="manifest" href="/manifest.json">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/design.css">
+<link rel="stylesheet" href="/assets/design.css?v=20260903b">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="/assets/sbf-thermo-widget.js"></script>
 <script src="/assets/i18n.js?v=2" defer></script>
 <script src="/assets/sbf-symbols.js?v=2"></script>
-<script src="/assets/sbf-header.js?v=18" defer></script>
+<script src="/assets/sbf-header.js?v=22" defer></script>
 
 <style>
 :root{--cream:#FBF6EF;--paper:#FFFFFF;--soft:#FCFAF5;--line:#E7DFCF;--ink:#2B2B33;
-  --muted:#8A8275;--gold:#C9A227;--up:#1e8e5a;--dn:#c0392b;--radius:12px}
+  --muted:#7C7563;--gold:#C9A227;--up:#1e8e5a;--dn:#c0392b;--radius:12px}
 *{box-sizing:border-box}
 body{margin:0;background:var(--cream);color:var(--ink);font-family:Montserrat,sans-serif;
   font-size:14px;padding-bottom:32px}
@@ -390,7 +390,15 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
 .j-sf-btn:hover,.j-sf-btn.on{border-color:var(--gold);color:var(--gold);
   background:rgba(201,162,39,.07)}
 .j-setup-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px}
-@media(max-width:500px){.j-setup-cards{grid-template-columns:1fr}}
+/* 🔴 `1fr` — это `minmax(auto,1fr)`, а `auto` не даёт колонке стать уже
+   min-content содержимого. Внутри карточки есть неразрывная строка (тезис
+   сделки без пробелов рвать негде), её min-content оказался 361px, и колонка
+   растянулась до 361 в контейнере 320 — страница дневника уезжала вправо на
+   12px вместе с нижней навигацией. Замер: scrollWidth 402 при ширине 390.
+   `minmax(0,1fr)` разрешает колонке сжиматься, `min-width:0` снимает то же
+   ограничение с самой карточки, `overflow-wrap` рвёт длинную строку. */
+@media(max-width:500px){.j-setup-cards{grid-template-columns:minmax(0,1fr)}}
+.j-setup-card{min-width:0;overflow-wrap:anywhere}
 
 /* Setup card */
 .j-setup-card{background:var(--soft);border:1px solid var(--line);
@@ -462,9 +470,17 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
   background:none;border:none;cursor:pointer;padding:0;font-size:12px}
 .j-wl-chip-del:hover{color:var(--dn)}
 .j-wl-add{display:flex;gap:6px;align-items:center;margin-top:8px}
+/* 🔴 Ширина селекта определяется самым длинным пунктом («Австралийский
+   доллар / доллар США · AUDUSD»). На 12px он ещё влезал, а после подъёма
+   шрифта полей до 16px (иначе Safari зумит страницу при тапе) вырос и утащил
+   за собой всю страницу — вылет 64px вместе с нижней навигацией.
+   `min-width:0` разрешает flex-элементу сжиматься ниже своего содержимого,
+   без него `flex:1` не помогает. */
+.j-wl-add select{flex:1 1 auto;min-width:0;max-width:100%}
 .j-wl-add select{border:1px solid var(--line);border-radius:8px;
   padding:6px 10px;font-family:Montserrat;font-size:12px;
-  background:var(--soft);color:var(--ink);outline:none;cursor:pointer}
+  background:var(--soft);color:var(--ink);outline:none;cursor:pointer;
+  text-overflow:ellipsis}
 .j-wl-add select:focus{border-color:var(--gold)}
 
 /* Yesterday's retrospective */
@@ -887,6 +903,21 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
   padding:8px 10px;background:var(--paper);border:1px solid var(--line);border-radius:6px;
   color:var(--text);outline:none;font-family:inherit}
 .j-debrief-field textarea:focus{border-color:var(--gold)}
+
+/* 🔴 Замер 03.09 на 390px: крестик в чипе списка наблюдения 10×12px, кнопка
+   «добавить» 31×27, «обновить» 96×26. Пальцем в 10 пикселей не попасть —
+   человек либо промахивается, либо удаляет не тот инструмент. Порог 44px
+   держим за счёт прозрачного поля вокруг глифа, чтобы вид не поехал. */
+@media(max-width:900px){
+  .j-wl-chip-del{min-width:28px;min-height:28px;padding:8px;margin:-8px -4px -8px 0;
+    display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+  .j-wl-chip{padding-right:4px}
+  #jWlAddBtn,.j-btn.j-btn-sec{min-height:44px;padding:0 14px}
+  .j-notif-bell{min-width:44px;min-height:44px}
+  .j-del-btn,.j-alert-del,.j-setup-action,.j-sf-btn,.j-inv-tip-btn{min-height:44px;
+    display:inline-flex;align-items:center;justify-content:center}
+  .j-alert-toggle{min-height:32px}
+}
 </style>
 </head>
 <body>
