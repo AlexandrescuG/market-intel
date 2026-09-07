@@ -115,8 +115,40 @@ def _agent_unreachable_streak(con: sqlite3.Connection, n: int = 3) -> str | None
     ).fetchall()
     if len(rows) < n or not all(r[0] in ("cli_error", "timeout") for r in rows):
         return None
-    last = (rows[0][1] or "")[:300]
-    return f"агент недоступен {n} вызова подряд ({rows[0][0]}): {last}"
+    return f"агент недоступен {n} вызова подряд ({rows[0][0]}): {_why(rows[0][1])}"
+
+
+def _why(raw: str | None) -> str:
+    """Причина отказа человеческим языком.
+
+    🔴 07.09: раньше в алерт уходили первые 300 символов сырого ответа CLI.
+    Это ровно те 300 символов, где нет ничего: `duration_api_ms`, счётчики
+    токенов по нулям, `service_tier`. А настоящая причина лежит в КОНЦЕ
+    конверта — `api_error_status` и `result`. В живом случае там было
+    «api_error_status: 429, result: You've hit your session limit · resets
+    4:40pm», то есть исчерпан лимит подписки, и делать с этим надо не
+    отладку кода, а паузу до сброса. Из старого алерта понять это было
+    невозможно.
+
+    Тот же класс, что у старых сигнальных сообщений: на видном месте самое
+    бесполезное, суть — мелким шрифтом или вовсе за обрезом."""
+    if not raw:
+        return "ответ пуст"
+    try:
+        d = json.loads(raw)
+    except (ValueError, TypeError):
+        return (raw or "")[:200]
+    status = d.get("api_error_status")
+    result = (d.get("result") or "").strip()
+    reason = d.get("terminal_reason") or d.get("subtype") or ""
+    parts = []
+    if status:
+        parts.append(f"HTTP {status}")
+    if result:
+        parts.append(result)
+    elif reason:
+        parts.append(str(reason))
+    return " · ".join(parts) if parts else (raw or "")[:200]
 
 
 def _last_run_ts(con: sqlite3.Connection, profile: str) -> int | None:
