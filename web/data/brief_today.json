@@ -1,310 +1,245 @@
 {
-  "date": "2026-09-03",
-  "generated_at": "2026-09-03T03:03:34.023769+00:00",
+  "date": "2026-09-07",
+  "generated_at": "2026-09-07T03:04:58.487304+00:00",
   "calendar": [
     {
-      "ts_utc": "2026-09-03T01:00:00Z",
-      "scheduled_ts": 1788397200,
-      "country": "AU",
-      "title": "RBA Jones Speech",
-      "indicator": "Interest Rate",
+      "ts_utc": "2026-09-07T06:00:00Z",
+      "scheduled_ts": 1788760800,
+      "country": "GB",
+      "title": "Lloyds House Price Index YoY",
+      "indicator": "House Price Index YoY",
       "impact": "medium",
       "forecast": null,
+      "previous": "0.1",
+      "symbols": [
+        "EURGBP",
+        "GBPUSD"
+      ],
+      "past_reaction": {
+        "symbol": "GBPUSD",
+        "n": 7,
+        "median_atr_30m": 0.08359676852827774
+      }
+    },
+    {
+      "ts_utc": "2026-09-07T06:00:00Z",
+      "scheduled_ts": 1788760800,
+      "country": "GB",
+      "title": "Lloyds House Price Index MoM",
+      "indicator": "House Price Index MoM",
+      "impact": "medium",
+      "forecast": "0.2",
       "previous": null,
       "symbols": [
-        "AUDUSD"
+        "EURGBP",
+        "GBPUSD"
       ],
       "past_reaction": {
-        "symbol": "AUDUSD",
-        "n": 4,
-        "median_atr_30m": null
+        "symbol": "GBPUSD",
+        "n": 5,
+        "median_atr_30m": 0.07622058306990673
       }
     },
     {
-      "ts_utc": "2026-09-03T01:30:00Z",
-      "scheduled_ts": 1788399000,
-      "country": "AU",
-      "title": "Balance of Trade",
-      "indicator": "Balance of Trade",
-      "impact": "high",
-      "forecast": "1.4",
-      "previous": "2.341",
-      "symbols": [
-        "AUDUSD"
-      ],
-      "past_reaction": {
-        "symbol": "AUDUSD",
-        "n": 6,
-        "median_atr_30m": 0.04587737843552277
-      }
-    },
-    {
-      "ts_utc": "2026-09-03T01:45:00Z",
-      "scheduled_ts": 1788399900,
-      "country": "CN",
-      "title": "RatingDog Services PMI",
-      "indicator": "Services PMI",
-      "impact": "medium",
-      "forecast": "50.6",
-      "previous": "50.4",
-      "symbols": [
-        "GOLD",
-        "SPX",
-        "USDCNY",
-        "WTI"
-      ],
-      "past_reaction": {
-        "symbol": "GOLD",
-        "n": 12,
-        "median_atr_30m": 0.06420313790256248
-      }
-    },
-    {
-      "ts_utc": "2026-09-03T05:15:00Z",
-      "scheduled_ts": 1788412500,
-      "country": "AU",
-      "title": "RBA Hunter Speech",
-      "indicator": "Interest Rate",
-      "impact": "medium",
-      "forecast": null,
-      "previous": null,
-      "symbols": [
-        "AUDUSD"
-      ],
-      "past_reaction": {
-        "symbol": "AUDUSD",
-        "n": 4,
-        "median_atr_30m": null
-      }
-    },
-    {
-      "ts_utc": "2026-09-03T06:30:00Z",
-      "scheduled_ts": 1788417000,
+      "ts_utc": "2026-09-07T07:00:00Z",
+      "scheduled_ts": 1788764400,
       "country": "CH",
-      "title": "Inflation Rate YoY",
-      "indicator": "Inflation Rate",
+      "title": "Unemployment Rate",
+      "indicator": "Unemployment Rate",
       "impact": "medium",
-      "forecast": "0.5",
-      "previous": "0.4",
+      "forecast": "3.1%",
+      "previous": "3",
       "symbols": [
         "USDCHF"
       ],
       "past_reaction": {
         "symbol": "USDCHF",
-        "n": 6,
-        "median_atr_30m": 0.18426626323752637
+        "n": 7,
+        "median_atr_30m": 0.7185388127854117
       }
     },
     {
-      "ts_utc": "2026-09-03T06:30:00Z",
-      "scheduled_ts": 1788417000,
-      "country": "CH",
-      "title": "CPI m/m",
-      "indicator": "CPI m/m",
+      "ts_utc": "2026-09-07T12:30:00Z",
+      "scheduled_ts": 1788784200,
+      "country": "GB",
+      "title": "Chancellor John Healey Speech",
+      "indicator": "Calendar",
       "impact": "medium",
-      "forecast": "0.0%",
-      "previous": "-0.1%",
+      "forecast": null,
+      "previous": null,
       "symbols": [
-        "USDCHF"
+        "EURGBP",
+        "GBPUSD"
+      ],
+      "past_reaction": {
+        "symbol": "EURGBP",
+        "n": 12,
+        "median_atr_30m": 0.05298570227080363
+      }
+    },
+    {
+      "ts_utc": "2026-09-07T23:01:00Z",
+      "scheduled_ts": 1788822060,
+      "country": "GB",
+      "title": "BRC Retail Sales Monitor YoY",
+      "indicator": "BRC Retail Sales Monitor YoY",
+      "impact": "medium",
+      "forecast": "1.2",
+      "previous": "1",
+      "symbols": [
+        "EURGBP",
+        "GBPUSD"
       ],
       "past_reaction": null
+    },
+    {
+      "ts_utc": "2026-09-07T23:50:00Z",
+      "scheduled_ts": 1788825000,
+      "country": "JP",
+      "title": "Current Account",
+      "indicator": "Current Account",
+      "impact": "medium",
+      "forecast": "2870",
+      "previous": "-92.3",
+      "symbols": [
+        "USDJPY"
+      ],
+      "past_reaction": {
+        "symbol": "USDJPY",
+        "n": 11,
+        "median_atr_30m": 0.038888888888890506
+      }
     }
   ],
-  "calendar_more": 11,
+  "calendar_more": 0,
   "untranslated": [],
   "earnings": [],
   "movers": {
     "up": [
       {
-        "symbol": "DJI",
-        "bar_date": "2026-09-02",
-        "close": 53148.0,
-        "chg_pct": 0.59,
-        "ratio": 1.3314847567448203,
+        "symbol": "DXY",
+        "bar_date": "2026-09-04",
+        "close": 99.112,
+        "chg_pct": 0.16,
+        "ratio": 1.0787057905738253,
         "event": {
-          "title": "MBA 30-Year Mortgage Rate",
-          "ts_utc": "2026-09-02T11:00:00Z"
+          "title": "Retail Sales MoM",
+          "ts_utc": "2026-09-04T09:00:00Z"
         }
       },
       {
-        "symbol": "GOLD",
-        "bar_date": "2026-09-02",
-        "close": 4385.32,
-        "chg_pct": 1.41,
-        "ratio": 1.2401912543464015,
-        "event": {
-          "title": "MBA 30-Year Mortgage Rate",
-          "ts_utc": "2026-09-02T11:00:00Z"
-        }
+        "symbol": "SOL",
+        "bar_date": "2026-09-06",
+        "close": 106.39,
+        "chg_pct": 3.27,
+        "ratio": 0.8422739497700259,
+        "event": null
       },
       {
-        "symbol": "SPX",
-        "bar_date": "2026-09-02",
-        "close": 7679.75,
-        "chg_pct": 0.44,
-        "ratio": 1.1790700270035068,
-        "event": {
-          "title": "MBA 30-Year Mortgage Rate",
-          "ts_utc": "2026-09-02T11:00:00Z"
-        }
+        "symbol": "ETH",
+        "bar_date": "2026-09-06",
+        "close": 2513.79,
+        "chg_pct": 1.37,
+        "ratio": 0.6457606572106529,
+        "event": null
       }
     ],
     "down": [
       {
-        "symbol": "USDJPY",
-        "bar_date": "2026-09-02",
-        "close": 158.896,
-        "chg_pct": -0.81,
-        "ratio": 2.8600070419672314,
-        "event": {
-          "title": "BoJ Takada Speech",
-          "ts_utc": "2026-09-02T01:30:00Z"
-        }
-      },
-      {
-        "symbol": "USDKZT",
-        "bar_date": "2026-09-02",
-        "close": 443.4151,
-        "chg_pct": -0.62,
-        "ratio": 1.6187198330994668,
+        "symbol": "USDRUB",
+        "bar_date": "2026-09-04",
+        "close": 86.6342,
+        "chg_pct": -0.76,
+        "ratio": 1.0205102514056517,
         "event": null
       },
       {
-        "symbol": "DXY",
-        "bar_date": "2026-09-02",
-        "close": 99.507,
-        "chg_pct": -0.1,
-        "ratio": 1.1140385452847248,
-        "event": {
-          "title": "MBA 30-Year Mortgage Rate",
-          "ts_utc": "2026-09-02T11:00:00Z"
-        }
+        "symbol": "USDJPY",
+        "bar_date": "2026-09-06",
+        "close": 156.2,
+        "chg_pct": -0.01,
+        "ratio": 0.27136830438738163,
+        "event": null
+      },
+      {
+        "symbol": "NG",
+        "bar_date": "2026-09-06",
+        "close": 2.924,
+        "chg_pct": -0.44,
+        "ratio": 0.2624364466795215,
+        "event": null
       }
     ]
   },
   "patterns": [
     {
-      "symbol": "USDJPY",
+      "symbol": "EURUSD",
       "tf": "D1",
-      "pattern_key": "bearish_engulfing",
-      "display_name_ru": "Медвежье поглощение",
+      "pattern_key": "pin_bar_bottom",
+      "display_name_ru": "Пин-бар снизу",
+      "direction": "bullish",
+      "ts": 1788652800,
+      "agree_share_5": 0.3929,
+      "n": 84
+    },
+    {
+      "symbol": "NG",
+      "tf": "D1",
+      "pattern_key": "pin_bar_top",
+      "display_name_ru": "Пин-бар сверху",
       "direction": "bearish",
-      "ts": 1788307200,
-      "agree_share_5": 0.5247,
-      "n": 162
+      "ts": 1788652800,
+      "agree_share_5": 0.4776,
+      "n": 67
     },
     {
       "symbol": "NASDAQ",
       "tf": "D1",
-      "pattern_key": "pin_bar_bottom",
-      "display_name_ru": "Пин-бар снизу",
+      "pattern_key": "double_bottom",
+      "display_name_ru": "Двойное дно",
       "direction": "bullish",
-      "ts": 1788307200,
-      "agree_share_5": 0.5566,
-      "n": 106
+      "ts": 1788652800,
+      "agree_share_5": 0.6087,
+      "n": 46
     },
     {
-      "symbol": "BTC",
+      "symbol": "DJI",
       "tf": "D1",
-      "pattern_key": "pin_bar_bottom",
-      "display_name_ru": "Пин-бар снизу",
+      "pattern_key": "double_bottom",
+      "display_name_ru": "Двойное дно",
       "direction": "bullish",
-      "ts": 1788307200,
-      "agree_share_5": 0.5114,
-      "n": 88
-    },
-    {
-      "symbol": "SOL",
-      "tf": "D1",
-      "pattern_key": "pin_bar_bottom",
-      "display_name_ru": "Пин-бар снизу",
-      "direction": "bullish",
-      "ts": 1788307200,
-      "agree_share_5": 0.4308,
-      "n": 65
+      "ts": 1788652800,
+      "agree_share_5": 0.6061,
+      "n": 33
     }
   ],
-  "outliers": [
-    {
-      "symbol": "PSQL",
-      "name": "Pasqal Holding SA Ordinary Share",
-      "asset_class": "equity",
-      "chg_pct": -21.66,
-      "peak_chg_pct": -21.98,
-      "price": 12.19,
-      "dollar_volume": 6741436.0,
-      "screener": "day_losers",
-      "seen_utc": "2026-09-03T03:00:15+00:00",
-      "explained": false
-    },
-    {
-      "symbol": "CRDO",
-      "name": "Credo Technology Group Holding Ltd",
-      "asset_class": "equity",
-      "chg_pct": -20.04,
-      "peak_chg_pct": -21.62,
-      "price": 165.22,
-      "dollar_volume": 4907269934.0,
-      "screener": "day_losers",
-      "seen_utc": "2026-09-03T03:00:15+00:00",
-      "explained": true
-    }
-  ],
+  "outliers": [],
   "off_context": [
     {
-      "label": "iran",
-      "text": "Число погибших в Иране выросло до 18, Трамп заявил о новых ударах; нефть в Нью-Йорке росла третий день подряд, до уровня $91.",
-      "publishers": 25,
-      "items": 40,
+      "label": "china",
+      "text": "Китай направил $54 млрд в государственные банки и страховые компании.",
+      "publishers": 8,
+      "items": 10,
       "sources": [
         {
-          "title": "Trump threatens more strikes as death toll in Iran rises to 18",
-          "url": "https://www.aljazeera.com/news/2026/9/3/trump-threatens-more-strikes-as-death-toll-in-iran-rises-to-19?traffic_source=rss",
-          "publisher": "Al Jazeera"
+          "title": "China to pump $54bn into state banks and insurers to boost economy",
+          "url": "https://www.bbc.co.uk/news/articles/cx2z37qj4wno?at_medium=RSS&at_campaign=rss",
+          "publisher": "BBC Business"
         },
         {
-          "title": "U.S. stock futures flat amid Iran, rate caution; Broadcom dips after earnings",
-          "url": "https://www.investing.com/news/stock-market-news/us-stock-futures-flat-amid-iran-rate-caution-broadcom-dips-after-earnings-4886896",
-          "publisher": "Investing.com"
+          "title": "China injects $54 billion stimulus for financial sector amid fears over sluggish growth",
+          "url": "https://www.fxstreet.com/news/china-injects-54-billion-stimulus-for-financial-sector-amid-fears-over-sluggish-growth-202609062351",
+          "publisher": "FXStreet"
         },
         {
-          "title": "China’s falling emissions amid Iran war spark hope of decarbonisation watershed",
-          "url": "https://www.theguardian.com/environment/2026/sep/03/china-co2-emissions-iran-war",
-          "publisher": "Guardian World"
+          "title": "China Piles Pressure on Taiwan With New Patrols Off Pacific Coast",
+          "url": "https://news.google.com/rss/articles/CBMitgFBVV95cUxPeEpZNF9UZHN3UXdwdlA0VUliMjc4NF9Da3hrRlpKY1M2YldLOXhtYVVPclp6ZnppZXAwU1JzeWRZejN5STZ0YklqRklKUGVpYjRkblBJMFBneXEzajVXZTQwUDluaXA5bE55Wlg3ZHl3STJGWXdyTXJxUTEyaHdraXV2TExOTnFpVFZpVWFGN1AzTFRmM1NKQ3kwQVNpWDJ2VGlWQ0MxTVAyRU9zRjFUUlFGWFg1Zw?oc=5",
+          "publisher": "Bloomberg.com"
         },
         {
-          "title": "NY Crude Rises for Third Straight Day to $91 Level as U.S.-Iran Conflict Escalation Fuels Supply Concerns",
-          "url": "https://news.google.com/rss/articles/CBMidkFVX3lxTE9sbFpiM0JQX0lwMVBiRzR3SWljY3RaQUFqSE41NnhvVHBlWWFrM19EMnotMkpwb1ZaLUNZOHdVdlNkSE5ld3hyeXA3RDRaS0owTHFRQlFINjRnc1B4T2ZJa3hidk5CY2NUQUxwZkp2Y1AyelpYRHc?oc=5",
-          "publisher": "finance.biggo.com"
-        }
-      ],
-      "symbol": null
-    },
-    {
-      "label": "williams",
-      "text": "Глава ФРБ Нью-Йорка Джон Уильямс допустил повышение ставки в сентябре и связал рост доходностей облигаций с состоянием экономики.",
-      "publishers": 16,
-      "items": 18,
-      "sources": [
-        {
-          "title": "Fed’s Williams ‘is opening options’ to interest-rate hikes. Why that could be ‘a bad trade.’",
-          "url": "https://www.marketwatch.com/story/feds-williams-is-opening-options-to-interest-rate-hikes-why-that-could-be-a-bad-trade-4ba6b32f?mod=mw_rss_topstories",
-          "publisher": "MarketWatch"
-        },
-        {
-          "title": "Fed's Williams not swayed that a rate hike is the answer yet",
-          "url": "https://news.google.com/rss/articles/CBMimwFBVV95cUxQSVVjYk1GcHZYcnRZQTVKMDlqX0JaN1lsSFRaZWNHUGVtcnE5R3p6WE5xWmp3Vl9scndha3h0aUp3UDhwTmhza1J1WUFlMmhvRXpQckVNVXFtN3NTeXNtNmVfYTJ4V0dlcmZ6amJaQ0gwQkFqTWZ4MEFLT3R4SkVfT1hpMUFZNkp2bXVIMzc0dEhoX3JZVEotUTI1OA?oc=5",
-          "publisher": "American Banker"
-        },
-        {
-          "title": "New York Fed's Williams says yield surge due to strong economic prospects",
-          "url": "https://www.cnbc.com/2026/09/02/new-york-feds-williams-says-yield-surge-due-to-strong-economic-prospects.html",
-          "publisher": "CNBC Finance"
-        },
-        {
-          "title": "NY Fed's John Williams signals openness to September rate hike",
-          "url": "https://news.google.com/rss/articles/CBMib0FVX3lxTE8ydHlkR1VkdktCSmNxQkdtYW1adnNqalc2RERFc2huU2VsZVpFS19hTG9IMFQzVHlmVWlTQndXUkNBOTdmSl95SjFtYlk2STRvTlJSZ3NIdzNPZ2lzWDRsY1gyMGp6TnVJSDhJTHppVQ?oc=5",
-          "publisher": "qz.com"
+          "title": "At Taiwan’s Temples, a Glimpse of What China Could Have Been",
+          "url": "https://news.google.com/rss/articles/CBMipwFBVV95cUxORkVQMzc0SHAzWlc4bHBrV0xkandDZE4tLUhLbDJpUDJkcVMwUUJJS2p5dXlfb3hFQ2VRMXByY0ZqeFdZV1RIVE50RUtWWGY2SzMwcGp4NzJWM25xYmtoT0VPQmFaRkFZZ0JnWWdqcl91SkxheUo0V3p4VmJEM2UwVk1VajZDSUx4dnFYd1hTTjV4Tm9NZHJjTkRzWEE4emlQT3F5azhvRQ?oc=5",
+          "publisher": "wsj.com"
         }
       ],
       "symbol": null
@@ -312,7 +247,8 @@
   ],
   "_meta": {
     "empty_blocks": [
-      "earnings"
+      "earnings",
+      "outliers"
     ],
     "sources": {
       "calendar": "econ_events + event_reaction_stats (bot.db)",
@@ -323,19 +259,19 @@
       "off_context": "news_clusters (bot.db), summary_status=ok <- core/outlier_triage.py"
     }
   },
-  "headline": "Барр из ФРС допустил повышение ставки — оценка вероятности 72%; VIX 15,20 (−6,98%), золото 4 420 (+0,80%)",
+  "headline": "Сильная занятость США подняла шансы на повышение ставки ФРС; тенге ослаб на 3,3% до 455,55",
   "context": [
     {
-      "text": "VIX 15,20 (−6,98%) при S&P 500 7 678 (−0,02%). Золото 4 420 (+0,80%), нефть WTI 91,05, Биткоин 77 735 (+0,57%), страх и жадность 65.",
+      "text": "S&P 500 7 715, Nasdaq 29 576, VIX 14,53. Золото 4 407, нефть WTI 92,14. Биткоин 79 809, индекс страха и жадности 71 — жадность.",
       "confidence": "quotes"
     },
     {
-      "text": "Барр из ФРС допустил повышение ставки при неснижающейся инфляции, рынок оценивает шаг в 72%. Инфляция в еврозоне 3,3% перед заседанием ЕЦБ.",
+      "text": "Трамп призвал ФРС резко снизить ставку и пригрозил остановить торговлю со странами, где у США дефицит. Сообщение прошло по шести изданиям.",
       "confidence": "media"
     },
     {
-      "text": "Соцсети пишут о скачке нефти Brent к $95 на атаках на танкеры. В котировках подтверждения нет: нефть WTI 91,05 (+0,53%), VIX снизился на 7%.",
-      "confidence": "social_unverified"
+      "text": "США уничтожили три иранских танкера после пуска ракет по кораблям ВМС. Заголовки о нефти у $100 расходятся с котировкой WTI 92,14.",
+      "confidence": "media"
     }
   ]
 }

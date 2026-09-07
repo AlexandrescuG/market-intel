@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T16:30:18.880774+00:00",
+  "updated": "2026-09-07T14:30:15.068862+00:00",
   "thresholds": {
     "equity": {
       "abs_chg_pct": 20.0,
@@ -11,57 +11,13 @@
       "min_dollar_volume": 20000000
     }
   },
-  "items": [
-    {
-      "symbol": "SNOW",
-      "name": "Snowflake Inc.",
-      "asset_class": "equity",
-      "chg_pct": 22.37,
-      "peak_chg_pct": 25.74,
-      "price": 374.26,
-      "dollar_volume": 5261483311.0,
-      "screener": "day_gainers",
-      "seen_utc": "2026-09-03T16:30:15+00:00",
-      "explained": true
-    },
-    {
-      "symbol": "PSQL",
-      "name": "Pasqal Holding SA Ordinary Share",
-      "asset_class": "equity",
-      "chg_pct": -21.66,
-      "peak_chg_pct": -21.98,
-      "price": 12.19,
-      "dollar_volume": 6741436.0,
-      "screener": "day_losers",
-      "seen_utc": "2026-09-03T13:15:15+00:00",
-      "explained": false
-    },
-    {
-      "symbol": "CRDO",
-      "name": "Credo Technology Group Holding Ltd",
-      "asset_class": "equity",
-      "chg_pct": -20.04,
-      "peak_chg_pct": -21.62,
-      "price": 165.22,
-      "dollar_volume": 4907269934.0,
-      "screener": "day_losers",
-      "seen_utc": "2026-09-03T13:15:15+00:00",
-      "explained": true
-    }
-  ],
+  "items": [],
   "off_context": [
     {
-      "label": "iran",
-      "text": "Число погибших в Иране выросло до 18, Трамп заявил о новых ударах; нефть в Нью-Йорке росла третий день подряд, до уровня $91.",
+      "label": "china",
+      "text": "Китай направил $54 млрд в государственные банки и страховые компании.",
       "publishers": 10,
-      "items": 22,
-      "symbol": null
-    },
-    {
-      "label": "williams",
-      "text": "Глава ФРБ Нью-Йорка Джон Уильямс допустил повышение ставки в сентябре и связал рост доходностей облигаций с состоянием экономики.",
-      "publishers": 7,
-      "items": 7,
+      "items": 18,
       "symbol": null
     }
   ]

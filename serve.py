@@ -454,6 +454,101 @@ def _broker_catalog_symbols() -> set:
     return _catalog_cache[1]
 
 
+_alias_cache: tuple = (0.0, {})
+
+
+def _canonical_alias_map() -> dict:
+    """{каноническое имя → тикер брокера}, например LINK → LINKUSD.
+
+    🔴 Зачем это вообще нужно. В каталоге у 18 инструментов имя брокера и
+    каноническое имя расходятся: `LINKUSD` / `LINK`, `US_500` / `SPX`,
+    `CrudeOIL` / `WTI`. Список инструментов на графике строит ссылку по
+    КАНОНИЧЕСКОМУ имени (`data-go = canonical || symbol`), а свечи лежат под
+    именем брокера. Для десяти из восемнадцати перевод был прописан руками в
+    `CHART_BROKER_MAP` — SPX, DJI, BTC, WTI открывались. Для остальных
+    восьми (XLM, LTC, XRP, LINK, UNI, DOGE, SHIB, MATIC, PEPE) его не было, и
+    страница честно отвечала «по этому инструменту данных нет», хотя те же
+    свечи прекрасно отдавались по `?s=LINKUSD`.
+
+    Проверка доступности этого не ловила: `chart_available.json` заполнялся по
+    именам брокера, а ломались ссылки по каноническим — то есть мерили одно
+    имя, а кликали по другому.
+
+    Карта строится из самого каталога, а не пишется руками: новый инструмент с
+    расходящимися именами начнёт работать сам.
+    """
+    global _alias_cache
+    now = time.time()
+    if now - _alias_cache[0] < _CATALOG_TTL and _alias_cache[1]:
+        return _alias_cache[1]
+    try:
+        raw = json.loads((WEB_DIR / "data" / "broker_catalog.json").read_text(encoding="utf-8"))
+        items = raw.get("items", raw) if isinstance(raw, dict) else raw
+        m = {}
+        for it in items:
+            canon, sym = it.get("canonical"), it.get("symbol")
+            if canon and sym and canon != sym:
+                m[canon] = sym
+    except Exception:
+        return _alias_cache[1]
+    if m:
+        _alias_cache = (now, m)
+    return _alias_cache[1]
+
+
+_LEVELS_LIMIT = 12
+# Полосы поиска вокруг текущей цены, от узкой к широкой. Берём первую, в
+# которой набирается достаточно уровней.
+_LEVEL_BANDS = (0.08, 0.15, 0.30, 0.60)
+
+
+def _levels_near_price(items: list, price) -> list:
+    """Топ-12 уровней рядом с ценой, а не топ-12 за всю историю.
+
+    🔴 Score = touches × log(age+1) — и ни слова о том, где цена сейчас. На
+    инструменте в тренде это выдаёт уровни из другой ценовой эпохи: у GOLD при
+    цене 4430 все двенадцать уровней лежали в 1302–1956, у ITALY_40 при 52 215
+    — в 27 880–35 030. График честно их рисовал, просто за пределами экрана, и
+    слой «Уровни» выглядел пустым. Замер 07.09 — на обоих инструментах ни
+    одной линии в видимой области.
+
+    Формула не менялась: старый уровень с многими касаниями действительно
+    ценнее свежего и случайного. Изменился отбор кандидатов — сначала берём те,
+    до которых цене есть дело, и уже среди них ранжируем.
+
+    Полоса расширяется, пока не наберётся достаточно уровней: у спокойного
+    инструмента хватит ±8%, у волатильного — нет, и жёсткий порог оставил бы
+    его вовсе без слоя. Если не набралось и в самой широкой — отдаём топ по
+    старой логике: показать далёкие уровни лучше, чем не показать ничего.
+    """
+    if not price or price <= 0:
+        return items[:_LEVELS_LIMIT]
+    for band in _LEVEL_BANDS:
+        lo, hi = price * (1 - band), price * (1 + band)
+        near = [it for it in items if lo <= it["price"] <= hi]
+        if len(near) >= _LEVELS_LIMIT:
+            return near[:_LEVELS_LIMIT]
+    near = [it for it in items
+            if price * (1 - _LEVEL_BANDS[-1]) <= it["price"] <= price * (1 + _LEVEL_BANDS[-1])]
+    return near[:_LEVELS_LIMIT] if near else items[:_LEVELS_LIMIT]
+
+
+def _resolve_chart_symbol(symbol: str) -> str:
+    """Имя, под которым инструмент реально лежит у брокера.
+
+    Порядок важен: сначала пробуем имя как есть (для реестра оно рабочее и
+    переведено через CHART_BROKER_MAP), и только если брокер такого не знает —
+    смотрим в карту канонических имён. Иначе можно сломать те десять, что уже
+    работали.
+    """
+    if not symbol:
+        return symbol
+    from mt5_config import CHART_BROKER_MAP
+    if symbol in CHART_BROKER_MAP or symbol in _broker_catalog_symbols():
+        return symbol
+    return _canonical_alias_map().get(symbol, symbol)
+
+
 def _broker_quote_ages() -> dict:
     """{тикер: возраст его котировки в секундах} из broker_symbols.
 
@@ -1112,16 +1207,16 @@ def _build_edu_page(ch: int, lang: str) -> bytes:
         '<link rel="stylesheet" href="/assets/sbf-nav.css?v=20260903b">\n'
         '<script src="/assets/i18n.js?v=2" defer></script>\n'
         '<script src="/assets/sbf-symbols.js?v=2"></script>\n'
-        '<script src="/assets/sbf-header.js?v=22" defer></script>'
+        '<script src="/assets/sbf-header.js?v=23" defer></script>'
     )
     if '/edu/edu.css?v=20260903b' not in html:
         html = html.replace("</head>", f"{css_tags}\n</head>", 1)
-    elif '/assets/sbf-header.js?v=22' not in html:
+    elif '/assets/sbf-header.js?v=23' not in html:
         html = html.replace("</head>",
             '<link rel="stylesheet" href="/assets/sbf-nav.css?v=20260903b">\n'
             '<script src="/assets/i18n.js?v=2" defer></script>\n'
             '<script src="/assets/sbf-symbols.js?v=2"></script>\n'
-            '<script src="/assets/sbf-header.js?v=22" defer></script>\n</head>', 1)
+            '<script src="/assets/sbf-header.js?v=23" defer></script>\n</head>', 1)
 
     grafik_tags = (
         '<script src="/edu/assets/grafik-engine.js"></script>\n'
@@ -1898,7 +1993,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 <link rel="stylesheet" href="/assets/sbf-nav.css?v=20260903b">
 <script src="/assets/i18n.js?v=2" defer></script>
 <script src="/assets/sbf-symbols.js?v=2"></script>
-<script src="/assets/sbf-header.js?v=22" defer></script>
+<script src="/assets/sbf-header.js?v=23" defer></script>
 <script src="/assets/sbf-auth.js?v=1" defer></script>
 <style>
 .paywall-wrap{{max-width:560px;margin:80px auto;padding:0 20px;text-align:center}}
@@ -2303,6 +2398,13 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         if not symbol:
             self._send_json({"error": "symbol required"}, 400)
             return
+        # Ссылка приходит с каноническим именем (LINK), а уровни и зоны
+        # посчитаны под именем брокера (LINKUSD) — см. _canonical_alias_map.
+        symbol = _resolve_chart_symbol(symbol)
+        try:
+            price = float(params.get("price", [""])[0])
+        except (TypeError, ValueError):
+            price = None
         try:
             con = sqlite3.connect(str(_BOT_DB))
             con.row_factory = sqlite3.Row
@@ -2316,7 +2418,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             for it in items:
                 it["score"] = round(it["touches"] * math.log(it["age_days"] + 1), 3)
             items.sort(key=lambda x: x["score"], reverse=True)
-            self._send_json(items[:12])
+            self._send_json(_levels_near_price(items, price))
         except Exception as e:
             self._send_json({"error": str(e)}, 500)
 
@@ -2328,6 +2430,9 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         if not symbol:
             self._send_json({"error": "symbol required"}, 400)
             return
+        # Ссылка приходит с каноническим именем (LINK), а уровни и зоны
+        # посчитаны под именем брокера (LINKUSD) — см. _canonical_alias_map.
+        symbol = _resolve_chart_symbol(symbol)
         try:
             con = sqlite3.connect(str(_BOT_DB))
             con.row_factory = sqlite3.Row
@@ -2361,6 +2466,10 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         if not symbol:
             self._send_json({"error": "symbol required"}, 400)
             return
+        # ⚠️ Здесь перевода имени НЕТ, в отличие от levels/confluence рядом.
+        # day_thermo индексирован символами графика (GOLD, SPX), то есть как
+        # раз каноническими — перевод в имя брокера сломал бы попадание.
+        # Ниже есть свой фолбэк через to_chart_symbol для journal-домена.
         try:
             con = sqlite3.connect(str(_BOT_DB))
             con.row_factory = sqlite3.Row
@@ -2671,6 +2780,10 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             since = int(since_raw)
         except ValueError:
             since = 0
+
+        # Ссылка из списка инструментов приходит с каноническим именем (LINK),
+        # а свечи лежат под именем брокера (LINKUSD) — см. _canonical_alias_map.
+        symbol = _resolve_chart_symbol(symbol)
 
         # ── cTrader: 80 инструментов витрины переведены сюда (01.09.2026) ──
         # Валюты, металлы, нефть, индексы, крипта. Читается с диска, к брокеру

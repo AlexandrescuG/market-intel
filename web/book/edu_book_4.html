@@ -909,8 +909,29 @@ function LimitCatcher() {
 
   const candleW = Math.floor(W / 15) - 4;
 
+  // 🔴 Последнее состояние в ref — чтобы тик таймера не зависел от него ссылкой.
+  //
+  // Было: addCandle — useCallback с deps [limitPrice, orderType,
+  // stopLimitTriggered, trailPeak, trailDistance], а эффект с таймером зависел
+  // от addCandle. Перетаскивание линии ордера меняет limitPrice на КАЖДОМ
+  // движении мыши, то есть на каждом кадре пересоздавалась функция, из-за неё
+  // пересоздавался эффект, а из-за него — clearInterval + setInterval.
+  // Итог: пока ведёшь линию, интервал в 1200 мс никогда не досчитывает до
+  // конца, свечи стоят, а после отпускания рывком догоняют. Это и читается
+  // как «тренажёр лагает».
+  //
+  // Присваивание во время рендера здесь намеренное: ref должен содержать
+  // значения ЭТОГО рендера к моменту, когда сработает тик. Побочных эффектов
+  // наружу нет, повторный рендер с теми же данными ничего не меняет.
+  const stateRef = useRef({});
+  stateRef.current = { candles, limitPrice, orderType, stopLimitTriggered,
+                       trailPeak, trailDistance };
+
   const addCandle = useCallback(() => {
-    setCandles(prev => {
+    const st = stateRef.current;
+    const { limitPrice, orderType, stopLimitTriggered, trailPeak, trailDistance } = st;
+    {
+      const prev = st.candles;
       const last = prev[prev.length - 1];
       const change = (Math.random() - 0.48) * 8;
       const open = last.close;
@@ -971,17 +992,24 @@ function LimitCatcher() {
       }
 
       const shifted = prev.slice(1).map(c => ({...c, x: c.x - W/15}));
-      return [...shifted, newCandle];
-    });
-  }, [limitPrice, orderType, stopLimitTriggered, trailPeak, trailDistance]);
+      setCandles([...shifted, newCandle]);
+    }
+    // 🔴 Пустой список зависимостей — в этом весь смысл правки: ссылка на
+    // функцию стабильна, эффект с таймером её не пересоздаёт. Свежие значения
+    // берутся из stateRef при каждом вызове.
+    //
+    // Заодно исчезла вторая проблема: setScore / setHits / setTrailPeak
+    // вызывались ВНУТРИ updater-функции setCandles(prev => ...). Такая функция
+    // обязана быть чистой, а React 18 в StrictMode вызывает её дважды именно
+    // чтобы это вскрыть — счёт исполненных ордеров мог удваиваться. Теперь
+    // все setState вызываются на одном уровне, из тела тика.
+  }, []);
 
   useEffect(() => {
-    if (running) {
-      intervalRef.current = setInterval(addCandle, 1200);
-    } else {
-      clearInterval(intervalRef.current);
-    }
-    return () => clearInterval(intervalRef.current);
+    if (!running) return undefined;
+    const id = setInterval(addCandle, 1200);
+    intervalRef.current = id;
+    return () => clearInterval(id);
   }, [running, addCandle]);
 
   const getSVGY = (e) => {
