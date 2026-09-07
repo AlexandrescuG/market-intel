@@ -208,6 +208,22 @@ class CostAndGeometry(unittest.TestCase):
             risk.cost_gate(s, tick)
         self.assertEqual(c.exception.status, "spread_too_wide")
 
+    def test_спред_как_доля_риска_ловит_USDZAR(self):
+        """🔴 07.09. Порог по награде (3 ATR) пропускал USDZAR: 0.010/0.088
+        = 11%, на грани. Но от риска (1.5 ATR = 0.044) это 23% — каждая
+        сделка стартует с четверти пути к стопу. За неделю живьём: 1 из 8,
+        -5.87 R, худший инструмент счёта."""
+        atr = 0.0294
+        # Спред чуть уже дневного, чтобы порог по награде ПРОШЁЛ (9.6% < 10%),
+        # а по риску — нет (19% > 12%). Именно эта щель и пропускала сделки.
+        tick = SimpleNamespace(bid=15.9727, ask=15.9812)          # спред 0.0085
+        s = sig(symbol="USDZAR", ref_price=15.977, stop=15.977 - 1.5 * atr,
+                target=15.977 + 3.0 * atr, atr=atr)
+        with self.assertRaises(risk.RiskRefusal) as c:
+            risk.cost_gate(s, tick)
+        self.assertEqual(c.exception.status, "spread_too_wide")
+        self.assertIn("риска", str(c.exception))
+
     def test_узкий_спред_проходит(self):
         """У золота спред 0.6% награды."""
         tick = SimpleNamespace(bid=4600.0, ask=4600.37)

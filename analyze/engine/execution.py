@@ -21,7 +21,7 @@ import logging
 import sqlite3
 import time
 
-from analyze.engine import ledger
+from analyze.engine import ledger, manage
 from analyze.engine.contracts import ENGINE_MAGIC, Decision
 from analyze.mt5_calibration import Bridge
 from analyze.mt5_safety import SafetyRefusal, assert_autotrading, assert_demo
@@ -197,6 +197,85 @@ def execute(con: sqlite3.Connection, mt5, conn, signal_id: int, d: Decision,
 
     ledger.mark_sent(con, tid, ticket=int(res.order), entry_price=float(res.price))
     return True, f"ticket={res.order} по {res.price}"
+
+
+# ─── сопровождение ──────────────────────────────────────────────────────────
+
+# 🔴 07.09: ВКЛЮЧЕНО. Измерено на 151 413 исторических сделках: безубыток +
+# трейлинг поднимают EV с -0.0603 до +0.0162 R на сделку (+0.0765) — больше,
+# чем стоит весь спред. Включается ВМЕСТЕ с пересчётом MAX_DRAWDOWN_R
+# (8 -> 20): под новую форму выплаты старый порог глушил бы стратегии на
+# нормальных полосах. См. analyze/engine/manage.py и ops/calibrate_drawdown.py.
+ACTIVE_RULES = manage.PRESETS["безубыток+трейлинг"]
+
+
+def modify_stop(conn, mt5, position, new_sl: float, digits: int) -> tuple[bool, str]:
+    """Перенос стопа у брокера. Цель не трогаем.
+
+    Та же механика, что у order_send: запрос собирается строкой и выполняется
+    на стороне Wine — MetaTrader5 это C-расширение, прокси rpyc оно не
+    принимает."""
+    conn.execute("import MetaTrader5 as _m")
+    conn.execute(
+        "_sreq = {"
+        "'action': _m.TRADE_ACTION_SLTP,"
+        f"'position': {int(position.ticket)},"
+        f"'symbol': {str(position.symbol)!r},"
+        f"'sl': {round(float(new_sl), digits)!r},"
+        f"'tp': {float(position.tp)!r},"
+        f"'magic': {ENGINE_MAGIC}}}")
+    res = conn.eval("_m.order_send(_sreq)")
+    rc = getattr(res, "retcode", None)
+    if rc != mt5.TRADE_RETCODE_DONE:
+        return False, f"retcode={rc} {getattr(res, 'comment', '')}"
+    return True, ""
+
+
+def manage_open(con: sqlite3.Connection, mt5, conn) -> dict:
+    """Подтянуть стопы по открытым живым позициям.
+
+    Лучшая цена берётся из price_bars с момента входа, а не из текущего
+    тика: правило «стоп только вперёд» требует знать экстремум за всё время
+    жизни сделки. Двигаем по ЗАКРЫТЫМ барам — тот же пессимизм, что и в
+    историческом прогоне, иначе живой результат разошёлся бы с измеренным."""
+    import core.price_bars as _pb
+    from analyze.engine import notify
+
+    stats = {"moved": 0, "errors": 0}
+    if not ACTIVE_RULES.enabled:
+        return stats
+    live = {int(p.ticket): p for p in engine_positions(mt5.positions_get())}
+    for t in ledger.open_trades(con):
+        if t["mode"] != "live" or not t["ticket"] or int(t["ticket"]) not in live:
+            continue
+        pos = live[int(t["ticket"])]
+        candles = _pb.load_candles(t["symbol"], t["tf"] or "1h") or []
+        since = [c for c in candles if c["ts"] >= (t["req_ts"] or 0)]
+        if not since:
+            continue
+        is_long = t["direction"] == "long"
+        best = max(c["h"] for c in since) if is_long else min(c["l"] for c in since)
+        entry = float(t["entry_price"] or pos.price_open)
+        cur_stop = float(t["stop"] or pos.sl)
+        new = manage.new_stop(ACTIVE_RULES, is_long=is_long, entry=entry,
+                              stop=cur_stop, best_price=best)
+        if new is None:
+            continue
+        si = mt5.symbol_info(pos.symbol)
+        digits = int(getattr(si, "digits", 5))
+        ok, err = modify_stop(conn, mt5, pos, new, digits)
+        if not ok:
+            stats["errors"] += 1
+            log.error("стоп не перенесён %s: %s", pos.ticket, err)
+            continue
+        con.execute("UPDATE engine_trades SET stop=? WHERE id=?", (new, t["id"]))
+        con.commit()
+        stats["moved"] += 1
+        moved_r = abs(best - entry) / abs(entry - cur_stop) if entry != cur_stop else 0
+        why = ("безубыток" if abs(new - entry) < abs(cur_stop - entry) * 0.2
+               else f"трейлинг, ход {moved_r:.1f}R")
+        notify.send(con, notify.stop_moved(t, cur_stop, new, why), "стоп")
+    return stats
 
 
 # ─── сведение ───────────────────────────────────────────────────────────────

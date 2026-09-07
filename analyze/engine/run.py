@@ -89,6 +89,11 @@ def run(*, dry: bool, live: bool, enabled: list[str] | None, verbose: bool) -> i
             if sh["closed"]:
                 log.info("теневых разрешено: %d", sh["closed"])
 
+            mg = execution.manage_open(con, mt5, conn)
+            if mg["moved"] or mg["errors"]:
+                log.info("сопровождение: стопов перенесено=%d ошибок=%d",
+                         mg["moved"], mg["errors"])
+
             acc = mt5.account_info()
             equity = float(getattr(acc, "equity", 0.0) or 0.0)
             free_margin = float(getattr(acc, "margin_free", 0.0) or 0.0)
