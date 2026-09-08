@@ -12,6 +12,7 @@ news_burst_job.py — SBF_Charts_Layer1_Spec, Фаза 3 («Новостные �
   python3 news_burst_job.py [--verbose]
 """
 import argparse
+import html
 import json
 import re
 import sqlite3
@@ -45,6 +46,24 @@ _SYMBOL_PATTERNS = {
     "USDJPY": re.compile(r"usd\s*/\s*jpy|\busdjpy\b|доллар.{0,15}йен", re.I),
     "DXY":    re.compile(r"\bdxy\b|dollar index|индекс доллара", re.I),
 }
+
+
+_TAG_RE = re.compile(r"<[^>]+>")
+_URL_RE = re.compile(r"https?://\S+|www\.\S+")
+
+
+def _searchable(title: str | None, text: str | None) -> str:
+    """Заголовок + текст без разметки и без ссылок.
+
+    Убираем именно ссылки, а не только теги: домен пишется буквами и проходит
+    любую проверку «слово целиком». Порядок важен — сперва ссылки, потом теги,
+    иначе href уже склеился бы с текстом. Сущности (&amp;, &nbsp;) распускаем,
+    чтобы «AT&amp;T» искалось как «AT&T».
+    """
+    blob = f"{title or ''}\n{text or ''}"
+    blob = _URL_RE.sub(" ", blob)
+    blob = _TAG_RE.sub(" ", blob)
+    return html.unescape(blob)
 
 def _load_catalog_patterns() -> dict:
     """Выражения для инструментов каталога (tools/news_symbol_patterns.py).
@@ -122,11 +141,27 @@ def tag_recent(con, verbose=False) -> int:
         "WHERE source IN ('rss','twitter','telegram') AND last_seen >= ?",
         (datetime.fromtimestamp(cutoff, timezone.utc).isoformat(),),
     ).fetchall()
+    # 🔴 Ищем по тексту, а не по разметке. Поле text у RSS-сигналов хранит сырой
+    # HTML целиком, вместе со ссылкой вида
+    # https://news.google.com/rss/articles/... — и выражение \bGOOGLE\b
+    # находило слово «google» в КАЖДОЙ новости, пришедшей через Google News.
+    # Замер 07.09: 4692 тега у #GOOGLE — второе место после биткоина, при этом
+    # ни в одном из проверенных заголовков Google не упоминался вовсе. На
+    # графике Alphabet висели «EUR/USD Weekly Forecast» и «Gold drops over 1%».
+    #
+    # Тот же механизм молча портил бы #AMAZON (amazon.com), #APPLE (apple.news),
+    # #REDDIT, #TWITTER и любую компанию, чьё имя встречается в доменах.
+    #
+    # Инструмент писался с оглядкой на ложные срабатывания в прозе — стоп-лист
+    # обычных слов, запрет коротких тикеров. Шум пришёл с той стороны, о
+    # которой не подумали: не из текста, а из разметки вокруг него.
+    #
+    # См. _searchable() ниже.
     patterns = dict(_SYMBOL_PATTERNS)
     patterns.update(_load_catalog_patterns())
     tagged = 0
     for uid, title, text in rows:
-        blob = f"{title}\n{text}"
+        blob = _searchable(title, text)
         for symbol, pat in patterns.items():
             if pat.search(blob):
                 cur = con.execute(

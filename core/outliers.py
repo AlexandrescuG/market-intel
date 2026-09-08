@@ -19,11 +19,17 @@ Bybit здесь — это НЕ возврат к тому, что убрали
 рынка (549 пар одним запросом) для поиска чужих движений, а цену наших
 инструментов он по-прежнему не трогает.
 
-ПОЧЕМУ ФИЛЬТРЫ ПО ЦЕНЕ И ОБОРОТУ ОБЯЗАТЕЛЬНЫ. Без них скринер день за днём
-выдаёт копеечные бумаги с ростом 300% на обороте в сто тысяч долларов. Это не
-рыночное событие, а шум, и он утопит настоящие находки. Замер 25.08: в
-`day_gainers` минимальный дневной оборот 203 тыс. при медиане 108 млн — то
-есть отсекаемый хвост там есть всегда.
+ПОЧЕМУ ФИЛЬТРЫ ПО ЦЕНЕ И ОБЪЁМУ ТОРГОВ ОБЯЗАТЕЛЬНЫ. Без них скринер день за
+днём выдаёт копеечные бумаги с ростом 300% при объёме торгов в сто тысяч
+долларов. Это не рыночное событие, а шум, и он утопит настоящие находки. Замер
+25.08: в `day_gainers` минимальный дневной объём 203 тыс. при медиане 108 млн —
+то есть отсекаемый хвост там есть всегда.
+
+ТЕРМИНОЛОГИЯ (02.09, поправка владельца). `dollar_volume` — это ОБЪЁМ ТОРГОВ в
+деньгах (цена × regularMarketVolume), сколько прошло через сделки с бумагой за
+день. Не «оборот»: оборотом компании называют её выручку, деньги внутри
+бизнеса, — это другое число из другого источника. В текстах наружу писать
+«объём торгов».
 """
 from __future__ import annotations
 
@@ -130,6 +136,12 @@ def fetch_equity(cfg: dict) -> tuple[list[dict], bool]:
                 "chg_pct": round(float(chg), 2),
                 "price": round(float(price), 4),
                 "dollar_volume": round(dollar_volume),
+                # 02.09: капитализация идёт рядом с объёмом торгов — одно
+                # число без другого вводит в заблуждение («$694 млн» читается
+                # как размер компании, хотя это дневной объём торгов). Скринер
+                # отдаёт marketCap в том же ответе, отдельный запрос не нужен.
+                "market_cap": (round(float(q["marketCap"]))
+                               if q.get("marketCap") is not None else None),
                 "screener": screener,
                 "peak_chg_pct": _peak_pct(q.get("regularMarketPreviousClose"),
                                           q.get("regularMarketDayHigh"),
@@ -156,7 +168,7 @@ def fetch_crypto(cfg: dict) -> list[dict]:
     for t in listing:
         sym = t.get("symbol") or ""
         # Котируем к USDT: пары к BTC/ETH дают то же движение дважды и
-        # засоряют выдачу, а сравнивать их порог по обороту не с чем.
+        # засоряют выдачу, а сравнивать их порог по объёму торгов не с чем.
         if not sym.endswith("USDT"):
             continue
         try:
@@ -199,10 +211,11 @@ def upsert(con, rows: list[dict], now_ts: int | None = None) -> tuple[int, int]:
         if cur is None:
             con.execute(
                 "INSERT INTO market_outliers (first_seen_ts, last_seen_ts, symbol, name, "
-                "asset_class, chg_pct, price, dollar_volume, screener, peak_chg_pct) "
-                "VALUES (?,?,?,?,?,?,?,?,?,?)",
+                "asset_class, chg_pct, price, dollar_volume, screener, peak_chg_pct, "
+                "market_cap) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
                 (now, now, r["symbol"], r["name"], r["asset_class"], r["chg_pct"],
-                 r["price"], r["dollar_volume"], r["screener"], peak),
+                 r["price"], r["dollar_volume"], r["screener"], peak,
+                 r.get("market_cap")),
             )
             new += 1
         else:
@@ -211,8 +224,12 @@ def upsert(con, rows: list[dict], now_ts: int | None = None) -> tuple[int, int]:
                 peak = old_peak
             con.execute(
                 "UPDATE market_outliers SET last_seen_ts=?, chg_pct=?, price=?, "
-                "dollar_volume=?, screener=?, peak_chg_pct=? WHERE id=?",
-                (now, r["chg_pct"], r["price"], r["dollar_volume"], r["screener"], peak, oid),
+                "dollar_volume=?, screener=?, peak_chg_pct=?, "
+                # COALESCE: у крипты market_cap нет вовсе, и пустое значение
+                # не должно затирать уже записанное по акции.
+                "market_cap=COALESCE(?, market_cap) WHERE id=?",
+                (now, r["chg_pct"], r["price"], r["dollar_volume"], r["screener"], peak,
+                 r.get("market_cap"), oid),
             )
             updated += 1
     con.commit()
@@ -223,7 +240,7 @@ def today_rows(con, now_ts: int | None = None) -> list[dict]:
     now = int(now_ts or time.time())
     cur = con.execute(
         "SELECT id, symbol, name, asset_class, chg_pct, peak_chg_pct, price, "
-        "dollar_volume, screener, first_seen_ts, last_seen_ts, alerted_ts, "
+        "dollar_volume, market_cap, screener, first_seen_ts, last_seen_ts, alerted_ts, "
         "alert_suppressed, news_cluster_id FROM market_outliers "
         "WHERE date(first_seen_ts,'unixepoch')=date(?,'unixepoch') "
         "ORDER BY abs(peak_chg_pct) DESC, abs(chg_pct) DESC",

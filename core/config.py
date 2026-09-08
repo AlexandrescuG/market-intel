@@ -38,6 +38,18 @@ TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")            # лента для контента (алерты)
 TELEGRAM_REPORT_CHAT_ID = os.getenv("TELEGRAM_REPORT_CHAT_ID", "")  # куда слать дайджест (по умолч. = CHAT_ID)
 
+# Публичный канал @SBFEconomics. 01.09.2026: алерты о выбросах публикуются
+# сюда постом, а подписчикам бот их форвардит из канала — так у поста есть
+# постоянная ссылка, и подписчик видит источник, а не пересказ.
+#
+# ⚠️ 01.09: getChatAdministrators по этому каналу обоим ботам отвечает 400 —
+# в канал они не добавлены, значит постить и форвардить пока не могут.
+# @Markgandon_bot нужен админом с правом «Публиковать сообщения»,
+# @SBFAcademy_bot — участником (иначе forward_message не пройдёт). До этого
+# post_sync вернёт None, channel_msg_id останется NULL, и бот отправит
+# подписчику текст напрямую — доставка не ломается, просто нет поста в канале.
+SBFECONOMICS_CHANNEL_ID = os.getenv("SBFECONOMICS_CHANNEL_ID", "-1002678764152")
+
 # @gdenigi_bot -- WP4.7 SPEC_alpha_engine_wp4_continuous_cycle.md, ОТДЕЛЬНЫЙ
 # бот/канал от TELEGRAM_* выше (прогнозы агента при BSS>0, не операционные
 # алерты). Пусто, пока Георгий не создаст бота через @BotFather.

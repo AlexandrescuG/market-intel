@@ -305,6 +305,47 @@ def _ctrader_tail(our_key, tf):
     return bars or []
 
 
+_crypto_map: tuple = (0.0, {})
+
+
+def _crypto_symbols() -> dict:
+    """Карта инструмент → пары на биржах (data/crypto_map.json).
+
+    Файл, а не код, и заполняется руками: тихого фолбэка «возьмём имя как
+    есть» здесь нет намеренно — он однажды подставил бы фонду #XRP график
+    монеты XRP. Ровно та же причина, что у карты cTrader выше.
+    """
+    global _crypto_map
+    path = Path(DIRECTORY).parent / "data" / "crypto_map.json"
+    try:
+        mtime = path.stat().st_mtime
+    except OSError:
+        return {}
+    if _crypto_map[0] == mtime:
+        return _crypto_map[1]
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+        data = {k: v for k, v in raw.items()
+                if not k.startswith("_") and isinstance(v, dict)}
+    except Exception:
+        return _crypto_map[1]
+    _crypto_map = (mtime, data)
+    return data
+
+
+def _crypto_tail(our_key, tf):
+    """Свечи с криптобиржи. None — инструмент не наш случай.
+
+    В биржу отсюда не ходим: наполняет crypto_pull.py, здесь только чтение с
+    диска. Причина та же, что у cTrader и MT5 — сетевой вызов внутри
+    обработчика веб-запроса связывает живучесть сайта с чужим соединением.
+    """
+    if our_key not in _crypto_symbols():
+        return None
+    bars, _stale = candle_cache.get(our_key, tf)
+    return bars or None
+
+
 def _mt5_tail(our_key, tf):
     """Свечи из брокера в реальном времени. None -> Yahoo-фолбэк."""
     global _mt5_conn
@@ -2803,6 +2844,20 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         # отдаём весь ряд целиком из одного источника, и следующая загрузка
         # страницы просто заменит его целиком же.
         broker = ct if ct else _mt5_tail(symbol, tf)
+        src = "ctrader" if ct else ("mt5" if broker else None)
+
+        # 🔴 Биржевые свечи — последними, а не первыми. У брокера живы
+        # шестнадцать монет из двадцати одной, и подменять их чужим рядом
+        # незачем: цена в списке инструментов, котировка и график должны
+        # приходить из одного места, иначе на стыке получается ступенька
+        # (семейство бага 20.08). Биржа закрывает ровно то, чего у брокера
+        # нет: SHIBUSD с котировкой 121-дневной давности, BTGUSD, ETHBTC,
+        # MELANIAUSD и PAX_GOLD — по ним баров не было вовсе.
+        if not broker:
+            broker = _crypto_tail(symbol, tf)
+            if broker:
+                src = "exchange"
+
         if broker:
             filtered = [c for c in broker if c["time"] > since]
             last_ts = broker[-1]["time"]
@@ -2823,7 +2878,11 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                              # подписано, чьи это котировки, и по нему же
                              # различаются отказы в логах.
                              "candles": filtered,
-                             "source": "ctrader" if ct else "mt5",
+                             # exchange — свечи с криптобиржи, не от брокера.
+                             # Подписывать их как «mt5» значило бы говорить
+                             # неправду в том самом месте, где страница
+                             # объясняет человеку, чьи это котировки.
+                             "source": src or "mt5",
                              "live_price": broker[-1]["close"]})
             return
 

@@ -1,245 +1,302 @@
 {
-  "date": "2026-09-07",
-  "generated_at": "2026-09-07T03:04:58.487304+00:00",
+  "date": "2026-09-08",
+  "generated_at": "2026-09-08T03:04:32.292692+00:00",
   "calendar": [
     {
-      "ts_utc": "2026-09-07T06:00:00Z",
-      "scheduled_ts": 1788760800,
-      "country": "GB",
-      "title": "Lloyds House Price Index YoY",
-      "indicator": "House Price Index YoY",
-      "impact": "medium",
+      "ts_utc": "2026-09-08T00:30:00Z",
+      "scheduled_ts": 1788827400,
+      "country": "AU",
+      "title": "Westpac Consumer Confidence Change",
+      "indicator": "Consumer Confidence MoM",
+      "impact": "high",
       "forecast": null,
-      "previous": "0.1",
+      "previous": "6",
       "symbols": [
-        "EURGBP",
-        "GBPUSD"
-      ],
-      "past_reaction": {
-        "symbol": "GBPUSD",
-        "n": 7,
-        "median_atr_30m": 0.08359676852827774
-      }
-    },
-    {
-      "ts_utc": "2026-09-07T06:00:00Z",
-      "scheduled_ts": 1788760800,
-      "country": "GB",
-      "title": "Lloyds House Price Index MoM",
-      "indicator": "House Price Index MoM",
-      "impact": "medium",
-      "forecast": "0.2",
-      "previous": null,
-      "symbols": [
-        "EURGBP",
-        "GBPUSD"
-      ],
-      "past_reaction": {
-        "symbol": "GBPUSD",
-        "n": 5,
-        "median_atr_30m": 0.07622058306990673
-      }
-    },
-    {
-      "ts_utc": "2026-09-07T07:00:00Z",
-      "scheduled_ts": 1788764400,
-      "country": "CH",
-      "title": "Unemployment Rate",
-      "indicator": "Unemployment Rate",
-      "impact": "medium",
-      "forecast": "3.1%",
-      "previous": "3",
-      "symbols": [
-        "USDCHF"
-      ],
-      "past_reaction": {
-        "symbol": "USDCHF",
-        "n": 7,
-        "median_atr_30m": 0.7185388127854117
-      }
-    },
-    {
-      "ts_utc": "2026-09-07T12:30:00Z",
-      "scheduled_ts": 1788784200,
-      "country": "GB",
-      "title": "Chancellor John Healey Speech",
-      "indicator": "Calendar",
-      "impact": "medium",
-      "forecast": null,
-      "previous": null,
-      "symbols": [
-        "EURGBP",
-        "GBPUSD"
-      ],
-      "past_reaction": {
-        "symbol": "EURGBP",
-        "n": 12,
-        "median_atr_30m": 0.05298570227080363
-      }
-    },
-    {
-      "ts_utc": "2026-09-07T23:01:00Z",
-      "scheduled_ts": 1788822060,
-      "country": "GB",
-      "title": "BRC Retail Sales Monitor YoY",
-      "indicator": "BRC Retail Sales Monitor YoY",
-      "impact": "medium",
-      "forecast": "1.2",
-      "previous": "1",
-      "symbols": [
-        "EURGBP",
-        "GBPUSD"
+        "AUDCAD",
+        "AUDCHF",
+        "AUDJPY",
+        "AUDNZD",
+        "AUDUSD",
+        "AUS_200",
+        "EURAUD",
+        "GBPAUD"
       ],
       "past_reaction": null
     },
     {
-      "ts_utc": "2026-09-07T23:50:00Z",
-      "scheduled_ts": 1788825000,
-      "country": "JP",
-      "title": "Current Account",
-      "indicator": "Current Account",
+      "ts_utc": "2026-09-08T00:30:00Z",
+      "scheduled_ts": 1788827400,
+      "country": "AU",
+      "title": "Westpac Consumer Confidence Index",
+      "indicator": "Consumer Confidence",
       "impact": "medium",
-      "forecast": "2870",
-      "previous": "-92.3",
+      "forecast": null,
+      "previous": "88.9",
       "symbols": [
-        "USDJPY"
+        "AUDCAD",
+        "AUDCHF",
+        "AUDJPY",
+        "AUDNZD",
+        "AUDUSD",
+        "AUS_200",
+        "EURAUD",
+        "GBPAUD"
       ],
       "past_reaction": {
-        "symbol": "USDJPY",
-        "n": 11,
-        "median_atr_30m": 0.038888888888890506
+        "symbol": "AUDUSD",
+        "n": 9,
+        "median_atr_30m": 0.09191759112520219
+      }
+    },
+    {
+      "ts_utc": "2026-09-08T01:30:00Z",
+      "scheduled_ts": 1788831000,
+      "country": "AU",
+      "title": "NAB Business Confidence",
+      "indicator": "Business Confidence",
+      "impact": "high",
+      "forecast": null,
+      "previous": "-6",
+      "symbols": [
+        "AUDCAD",
+        "AUDCHF",
+        "AUDJPY",
+        "AUDNZD",
+        "AUDUSD",
+        "AUS_200",
+        "EURAUD",
+        "GBPAUD"
+      ],
+      "past_reaction": {
+        "symbol": "AUDUSD",
+        "n": 7,
+        "median_atr_30m": 0.16798732171157885
+      }
+    },
+    {
+      "ts_utc": "2026-09-08T03:00:00Z",
+      "scheduled_ts": 1788836400,
+      "country": "CN",
+      "title": "Exports YoY",
+      "indicator": "Exports YoY",
+      "impact": "high",
+      "forecast": "25",
+      "previous": "23.9",
+      "symbols": [
+        "CHINA_A50",
+        "CHINA_INTERNET",
+        "USDCNY"
+      ],
+      "past_reaction": {
+        "symbol": "USDCNY",
+        "n": 6,
+        "median_atr_30m": 0.06125696101830309
+      }
+    },
+    {
+      "ts_utc": "2026-09-08T03:00:00Z",
+      "scheduled_ts": 1788836400,
+      "country": "CN",
+      "title": "Balance of Trade",
+      "indicator": "Balance of Trade",
+      "impact": "high",
+      "forecast": "119.1",
+      "previous": "112.5",
+      "symbols": [
+        "CHINA_A50",
+        "CHINA_INTERNET",
+        "USDCNY"
+      ],
+      "past_reaction": {
+        "symbol": "USDCNY",
+        "n": 12,
+        "median_atr_30m": 0.07796340493234528
+      }
+    },
+    {
+      "ts_utc": "2026-09-08T03:00:00Z",
+      "scheduled_ts": 1788836400,
+      "country": "CN",
+      "title": "Imports YoY",
+      "indicator": "Imports YoY",
+      "impact": "high",
+      "forecast": "30",
+      "previous": "27.5",
+      "symbols": [
+        "CHINA_A50",
+        "CHINA_INTERNET",
+        "USDCNY"
+      ],
+      "past_reaction": {
+        "symbol": "USDCNY",
+        "n": 6,
+        "median_atr_30m": 0.06125696101830309
       }
     }
   ],
-  "calendar_more": 0,
-  "untranslated": [],
+  "calendar_more": 5,
+  "untranslated": [
+    "Monetary Policy Report Hearings"
+  ],
   "earnings": [],
   "movers": {
     "up": [
       {
-        "symbol": "DXY",
-        "bar_date": "2026-09-04",
-        "close": 99.112,
-        "chg_pct": 0.16,
-        "ratio": 1.0787057905738253,
-        "event": {
-          "title": "Retail Sales MoM",
-          "ts_utc": "2026-09-04T09:00:00Z"
-        }
-      },
-      {
-        "symbol": "SOL",
-        "bar_date": "2026-09-06",
-        "close": 106.39,
-        "chg_pct": 3.27,
-        "ratio": 0.8422739497700259,
+        "symbol": "NG",
+        "bar_date": "2026-09-07",
+        "close": 2.983,
+        "chg_pct": 2.02,
+        "ratio": 0.8772658414790542,
         "event": null
       },
       {
-        "symbol": "ETH",
-        "bar_date": "2026-09-06",
-        "close": 2513.79,
-        "chg_pct": 1.37,
-        "ratio": 0.6457606572106529,
+        "symbol": "GBPUSD",
+        "bar_date": "2026-09-07",
+        "close": 1.3546,
+        "chg_pct": 0.22,
+        "ratio": 0.8654050786752344,
+        "event": {
+          "title": "Lloyds House Price Index YoY",
+          "ts_utc": "2026-09-07T06:00:00Z"
+        }
+      },
+      {
+        "symbol": "WTI",
+        "bar_date": "2026-09-07",
+        "close": 92.5,
+        "chg_pct": 0.47,
+        "ratio": 0.8001701653217268,
         "event": null
       }
     ],
     "down": [
       {
-        "symbol": "USDRUB",
-        "bar_date": "2026-09-04",
-        "close": 86.6342,
-        "chg_pct": -0.76,
-        "ratio": 1.0205102514056517,
-        "event": null
-      },
-      {
         "symbol": "USDJPY",
-        "bar_date": "2026-09-06",
-        "close": 156.2,
-        "chg_pct": -0.01,
-        "ratio": 0.27136830438738163,
+        "bar_date": "2026-09-07",
+        "close": 153.821,
+        "chg_pct": -1.52,
+        "ratio": 2.3682097351514106,
+        "event": {
+          "title": "Current Account",
+          "ts_utc": "2026-09-07T23:50:00Z"
+        }
+      },
+      {
+        "symbol": "DXY",
+        "bar_date": "2026-09-07",
+        "close": 98.872,
+        "chg_pct": -0.24,
+        "ratio": 0.8861231390741812,
         "event": null
       },
       {
-        "symbol": "NG",
-        "bar_date": "2026-09-06",
-        "close": 2.924,
-        "chg_pct": -0.44,
-        "ratio": 0.2624364466795215,
+        "symbol": "SOL",
+        "bar_date": "2026-09-07",
+        "close": 103.63,
+        "chg_pct": -2.59,
+        "ratio": 0.8293458142256035,
         "event": null
       }
     ]
   },
   "patterns": [
     {
-      "symbol": "EURUSD",
+      "symbol": "USDJPY",
       "tf": "D1",
-      "pattern_key": "pin_bar_bottom",
-      "display_name_ru": "Пин-бар снизу",
-      "direction": "bullish",
-      "ts": 1788652800,
-      "agree_share_5": 0.3929,
-      "n": 84
-    },
-    {
-      "symbol": "NG",
-      "tf": "D1",
-      "pattern_key": "pin_bar_top",
-      "display_name_ru": "Пин-бар сверху",
+      "pattern_key": "bearish_engulfing",
+      "display_name_ru": "Медвежье поглощение",
       "direction": "bearish",
-      "ts": 1788652800,
-      "agree_share_5": 0.4776,
-      "n": 67
+      "ts": 1788739200,
+      "agree_share_5": 0.5215,
+      "n": 163
     },
     {
-      "symbol": "NASDAQ",
+      "symbol": "WTI",
       "tf": "D1",
-      "pattern_key": "double_bottom",
-      "display_name_ru": "Двойное дно",
+      "pattern_key": "bullish_engulfing",
+      "display_name_ru": "Бычье поглощение",
       "direction": "bullish",
-      "ts": 1788652800,
-      "agree_share_5": 0.6087,
-      "n": 46
+      "ts": 1788739200,
+      "agree_share_5": 0.4966,
+      "n": 149
+    },
+    {
+      "symbol": "BTC",
+      "tf": "D1",
+      "pattern_key": "bearish_engulfing",
+      "display_name_ru": "Медвежье поглощение",
+      "direction": "bearish",
+      "ts": 1788739200,
+      "agree_share_5": 0.4789,
+      "n": 142
     },
     {
       "symbol": "DJI",
       "tf": "D1",
-      "pattern_key": "double_bottom",
-      "display_name_ru": "Двойное дно",
-      "direction": "bullish",
-      "ts": 1788652800,
-      "agree_share_5": 0.6061,
-      "n": 33
+      "pattern_key": "bearish_engulfing",
+      "display_name_ru": "Медвежье поглощение",
+      "direction": "bearish",
+      "ts": 1788739200,
+      "agree_share_5": 0.4593,
+      "n": 135
     }
   ],
   "outliers": [],
   "off_context": [
     {
-      "label": "china",
-      "text": "Китай направил $54 млрд в государственные банки и страховые компании.",
-      "publishers": 8,
-      "items": 10,
+      "label": "dollar",
+      "text": "Иена обновила семимесячный максимум, доллар остаётся сдержанным перед данными по инфляции в США; азиатские рынки двигались разнонаправленно.",
+      "publishers": 13,
+      "items": 38,
       "sources": [
         {
-          "title": "China to pump $54bn into state banks and insurers to boost economy",
-          "url": "https://www.bbc.co.uk/news/articles/cx2z37qj4wno?at_medium=RSS&at_campaign=rss",
-          "publisher": "BBC Business"
-        },
-        {
-          "title": "China injects $54 billion stimulus for financial sector amid fears over sluggish growth",
-          "url": "https://www.fxstreet.com/news/china-injects-54-billion-stimulus-for-financial-sector-amid-fears-over-sluggish-growth-202609062351",
+          "title": "Australian Dollar remains steady following China’s Trade Balance data",
+          "url": "https://www.fxstreet.com/news/australian-dollar-remains-steady-following-chinas-trade-balance-data-202609080252",
           "publisher": "FXStreet"
         },
         {
-          "title": "China Piles Pressure on Taiwan With New Patrols Off Pacific Coast",
-          "url": "https://news.google.com/rss/articles/CBMitgFBVV95cUxPeEpZNF9UZHN3UXdwdlA0VUliMjc4NF9Da3hrRlpKY1M2YldLOXhtYVVPclp6ZnppZXAwU1JzeWRZejN5STZ0YklqRklKUGVpYjRkblBJMFBneXEzajVXZTQwUDluaXA5bE55Wlg3ZHl3STJGWXdyTXJxUTEyaHdraXV2TExOTnFpVFZpVWFGN1AzTFRmM1NKQ3kwQVNpWDJ2VGlWQ0MxTVAyRU9zRjFUUlFGWFg1Zw?oc=5",
-          "publisher": "Bloomberg.com"
+          "title": "Yen extends rally to new seven-month high; dollar subdued ahead of CPI",
+          "url": "https://news.google.com/rss/articles/CBMiugFBVV95cUxNTzJTNlNmRkk4ZlAxN0diYXoyblUyaE41UTRRRFpZbURGSk9pZGlTVDc5QkpJSHpqWlRWY0ZjR1M1ZW1sdU5KNmJqUGZ6eTRleGRfektFaDFlMmprZW14T2RodGJMcVlfNG5fMmZTbFhqNERNeGZvVW1CcHQ5MUZ4R0pGbTF3WllEN2hqQkpTVUZrUmVlUnh2UWIwOTJSQU5IZ2pxRGJNelRPdU8wd0dYS0Q4QXB0bWNRSnc?oc=5",
+          "publisher": "Reuters"
         },
         {
-          "title": "At Taiwan’s Temples, a Glimpse of What China Could Have Been",
-          "url": "https://news.google.com/rss/articles/CBMipwFBVV95cUxORkVQMzc0SHAzWlc4bHBrV0xkandDZE4tLUhLbDJpUDJkcVMwUUJJS2p5dXlfb3hFQ2VRMXByY0ZqeFdZV1RIVE50RUtWWGY2SzMwcGp4NzJWM25xYmtoT0VPQmFaRkFZZ0JnWWdqcl91SkxheUo0V3p4VmJEM2UwVk1VajZDSUx4dnFYd1hTTjV4Tm9NZHJjTkRzWEE4emlQT3F5azhvRQ?oc=5",
-          "publisher": "wsj.com"
+          "title": "Dollar Index hugs support as bear flag breaks: Live levels",
+          "url": "https://www.investing.com/news/stock-market-news/dollar-index-hugs-support-as-bear-flag-breaks-live-levels-93CH-4890667",
+          "publisher": "Investing.com"
+        },
+        {
+          "title": "NY Fed: Dollar Reserve Drop Driven by Few Players",
+          "url": "https://news.google.com/rss/articles/CBMikgFBVV95cUxOQUo5VWJxR0VPcjk1Ni1yd3hjMGdLUDJNRGhId05wZnVwczRIOHljOENZYzNUN3hMMjRqa1R0cGhDYXRqNm5mc3lCS0xSRTZ2bVlaMDVhdUxPRGZ5cWV5TFotLWRlNVFkX2QySWNrcDVLNUhibnNxaHlUSmxfbjItN096cW1PQnN1bzNJTlFMLTVoZw?oc=5",
+          "publisher": "Briefs Finance"
+        }
+      ],
+      "symbol": null
+    },
+    {
+      "label": "trump",
+      "text": "Трамп пригрозил остановить продажу канадских самолётов Bombardier в США, Канада готовит ответные меры на пошлины.",
+      "publishers": 10,
+      "items": 11,
+      "sources": [
+        {
+          "title": "Trump threatens to stop sale of Canadian Bombardier jets in US",
+          "url": "https://www.bbc.co.uk/news/articles/c4gj8xx5010o?at_medium=RSS&at_campaign=rss",
+          "publisher": "BBC Business"
+        },
+        {
+          "title": "Trump threatens to stop sale of Canadian Bombardier jets in US",
+          "url": "https://www.bbc.co.uk/news/articles/c4gj8xx5010o?at_medium=RSS&at_campaign=rss",
+          "publisher": "BBC World"
+        },
+        {
+          "title": "UK's Burnham, Trump discuss working towards Ukraine-Russia ceasefire, Downing Street says",
+          "url": "https://news.google.com/rss/articles/CBMitwFBVV95cUxPWmxrUWIzN25kQzlJZVBjcy11SXlFeWJQZElmWi1ocVU1Qm94T2w3OXV4djNYd2JKTEE0QTFaeWVvQ2I4MmZZOEhwZVc2U1JmUEJTbXQ4SjdBb3lYNklqZDZJZ2s5MndibnlnMGw2YVJZWnB3R2MxWVNoWTlSSFlHNDFKdWd0STNGRFBselBtUDVrbGlsLUthbl9iQTFTMkFNYXhxUGJJWjJrT0oyNjFfRlJKNV9wWUE?oc=5",
+          "publisher": "Reuters"
+        },
+        {
+          "title": "Canada Set to Hit Back at Trump Tariffs, Risking Wider Trade War",
+          "url": "https://news.google.com/rss/articles/CBMitAFBVV95cUxOZE0tVzdBN21qWjZjZTVSV2ZhX1VibDN1eVgwcjZaeUxlR0RhRGVNWlN4ZnBiSkVlTUNiTXdPdW9BYjFqMWVtcHlNR01iNEJnbHZrM2stLUpMR2tFS3lCQnNLMnJiTVB4OUMyMTBqaG8ta0FLUW1rcVotbEJYbWZONXNOQnVfb2RGcFFBbkpUZU9nSmtUS1o2QnFrSFhMQmp4TVZ2bVFBaHd6Vmk5OXY4Y3lwc2g?oc=5",
+          "publisher": "Bloomberg.com"
         }
       ],
       "symbol": null
@@ -259,18 +316,18 @@
       "off_context": "news_clusters (bot.db), summary_status=ok <- core/outlier_triage.py"
     }
   },
-  "headline": "Сильная занятость США подняла шансы на повышение ставки ФРС; тенге ослаб на 3,3% до 455,55",
+  "headline": "Нефть у $93 при заголовках о $98, VIX +5,3% при плоских индексах: рынок закладывает риск Ормуза",
   "context": [
     {
-      "text": "S&P 500 7 715, Nasdaq 29 576, VIX 14,53. Золото 4 407, нефть WTI 92,14. Биткоин 79 809, индекс страха и жадности 71 — жадность.",
+      "text": "S&P 500 7 713, Nasdaq 29 660, Dow 53 091 — почти без изменений. VIX 15,30 (+5,3%). Нефть WTI 92,74, золото 4 424, биткоин 78 908.",
       "confidence": "quotes"
     },
     {
-      "text": "Трамп призвал ФРС резко снизить ставку и пригрозил остановить торговлю со странами, где у США дефицит. Сообщение прошло по шести изданиям.",
+      "text": "Августовский NFP — 162 тыс. против 55 тыс. консенсуса. Трамп призвал ФРС резко снизить ставку, а ленты СМИ обсуждают её повышение.",
       "confidence": "media"
     },
     {
-      "text": "США уничтожили три иранских танкера после пуска ракет по кораблям ВМС. Заголовки о нефти у $100 расходятся с котировкой WTI 92,14.",
+      "text": "Иран ограничил морскую зону за Ормузским проливом, Goldman Sachs назвал риск нефти $120. Заголовки о нефти выше $98 — это Brent, не WTI.",
       "confidence": "media"
     }
   ]

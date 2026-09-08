@@ -195,6 +195,23 @@ MIGRATIONS: list[tuple[int, str, str]] = [
     (28, "broker_symbols: выборка по категории",
      "CREATE INDEX IF NOT EXISTS idx_broker_symbols_cat "
      "ON broker_symbols(category, broker_symbol)"),
+    # 01.09.2026: выброс сначала публикуется постом в канал @SBFEconomics, и
+    # уже оттуда бот форвардит его подписчикам (решение владельца). Здесь —
+    # id поста в канале, по которому делается forward.
+    (29, "market_outliers.channel_msg_id",
+     "ALTER TABLE market_outliers ADD COLUMN channel_msg_id INTEGER"),
+    # 01.09.2026: выброс публикуется сразу, даже если причина ещё не известна
+    # (решение владельца: «просто пишем тикер и обозначаем рост, после
+    # обязательно дополнить, когда появится новость»). Флаг взводится, когда
+    # объяснение нашлось позже, и Vorovka2 правит уже опубликованный пост.
+    (30, "market_outliers.channel_edit_pending",
+     "ALTER TABLE market_outliers ADD COLUMN channel_edit_pending INTEGER"),
+    # 02.09.2026: в посте рядом с ценой стоял только dollar_volume (дневной
+    # объём торгов), и владелец справедливо спросил, не капитализация ли это.
+    # Числа разного порядка и разного смысла: у FRVO объём торгов $694 млн при
+    # капитализации $5,8 млрд. Теперь пишем оба, каждое со своей подписью.
+    (31, "market_outliers.market_cap",
+     "ALTER TABLE market_outliers ADD COLUMN market_cap INTEGER"),
 ]
 
 

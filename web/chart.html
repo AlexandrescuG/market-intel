@@ -410,14 +410,21 @@ body.embed .card{border-radius:0;box-shadow:none;border:none;max-width:100%}
   <div class="below-chart">
     <span class="tog-label" data-i18n="chart.layers_label">слои</span>
     <div class="tog" id="tog">
+      <!-- 🔴 Все слои, кроме пивотов, скрыты в разметке и показываются только
+           после того, как данные приехали (updateLayerChips). Раньше было
+           наоборот: страница открывалась с полным набором из восьми кнопок, а
+           через секунду лишние исчезали. Человек успевал увидеть «SMC» и
+           «Паттерны» на инструменте, где их нет, и нажать по исчезающей
+           кнопке. Пивоты считаются на фронте из тех же баров, что и график, —
+           они есть всегда, пока есть свечи. -->
       <button class="chip on" data-t="piv" data-i18n="home.pivots_toggle">Пивоты</button>
-      <button class="chip" data-t="cndl" data-i18n="home.patterns_toggle">Паттерны</button>
-      <button class="chip" data-t="smc">SMC</button>
-      <button class="chip on" data-t="evt" data-i18n="chart.events_toggle">События</button>
-      <button class="chip" data-t="news" data-i18n="chart.news_toggle">Новости</button>
-      <button class="chip on" data-t="lvl" data-i18n="chart.levels_toggle">Уровни</button>
-      <button class="chip" data-t="zone" data-i18n="chart.zones_toggle">Зоны</button>
-      <button class="chip" data-t="sess" data-i18n="chart.sessions_toggle">Сессии</button>
+      <button class="chip" data-t="cndl" data-i18n="home.patterns_toggle" style="display:none">Паттерны</button>
+      <button class="chip" data-t="smc" style="display:none">SMC</button>
+      <button class="chip on" data-t="evt" data-i18n="chart.events_toggle" style="display:none">События</button>
+      <button class="chip" data-t="news" data-i18n="chart.news_toggle" style="display:none">Новости</button>
+      <button class="chip on" data-t="lvl" data-i18n="chart.levels_toggle" style="display:none">Уровни</button>
+      <button class="chip" data-t="zone" data-i18n="chart.zones_toggle" style="display:none">Зоны</button>
+      <button class="chip" data-t="sess" data-i18n="chart.sessions_toggle" style="display:none">Сессии</button>
       <button class="chip on" data-t="trades" data-i18n="chart.trades_toggle" style="display:none">Мои сделки</button>
     </div>
   <div class="tog-hints" id="togHints"></div>
@@ -558,7 +565,18 @@ function fmt_(tpl, vars) { return tpl.replace(/\{(\w+)\}/g, (_, k) => (vars[k] !
 function fmtPrice(v) {
   if (v == null) return '—';
   const av = Math.abs(+v);
-  const prec = av < 10 ? 4 : av < 1000 ? 2 : 1;
+  // 🔴 Четырёх знаков хватало, пока самым мелким инструментом был евродоллар.
+  // У SHIB цена 0.00000546, у PEPE — того же порядка: заголовок графика писал
+  // «0.0000», и рядом «ближайший: PP 0.0000 (-0.79%)». Числа на экране были,
+  // читать в них было нечего. В каталоге у таких инструментов digits=7, но
+  // здесь его нет под рукой — считаем по величине самой цены.
+  let prec;
+  if (av === 0)          prec = 2;
+  else if (av < 0.0001)  prec = 8;
+  else if (av < 0.01)    prec = 6;
+  else if (av < 10)      prec = 4;
+  else if (av < 1000)    prec = 2;
+  else                   prec = 1;
   return (+v).toLocaleString('en', {minimumFractionDigits: prec, maximumFractionDigits: prec});
 }
 
@@ -1468,6 +1486,11 @@ function updateLayerChips() {
     news: _curNewsBursts.length > 0,
     smc:  _curSMC.length > 0,
     cndl: _curPatterns.length > 0,
+    // 🔴 Уровни и зоны в этом списке не значились вовсе, и их кнопки висели
+    // всегда — даже когда за ними ничего нет. Нажатие не давало ничего, и это
+    // читается хуже, чем отсутствие кнопки.
+    lvl:  _curLevels.length > 0,
+    zone: _curConfluence.length > 0,
     sess: SESSION_TFS.has(curTF)
   };
   Object.keys(has).forEach(function (key) {
@@ -2236,7 +2259,10 @@ async function drawOurs(tf) {
   // индексы/крипта/золото (>=1000) — 1-2. Точной карты по символам нет,
   // магнитудная эвристика — простой и достаточно надёжный прокси.
   const _refPx = Math.abs(m && m.last != null ? m.last : (_curData.lw.length ? _curData.lw[_curData.lw.length-1].close : 1));
-  const _pxPrecision = _refPx < 10 ? 4 : _refPx < 1000 ? 2 : 1;
+  // Та же шкала, что у fmtPrice выше: у мем-монет цена 0.00000546, и на
+  // четырёх знаках вся ось превращалась в столбик нулей.
+  const _pxPrecision = _refPx === 0 ? 2
+    : _refPx < 0.0001 ? 8 : _refPx < 0.01 ? 6 : _refPx < 10 ? 4 : _refPx < 1000 ? 2 : 1;
   candleSeries = chart.addCandlestickSeries({
     upColor:'#1e8e5a', downColor:'#c0392b', borderVisible:false,
     wickUpColor:'#1e8e5a', wickDownColor:'#c0392b',
