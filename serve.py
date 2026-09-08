@@ -372,7 +372,12 @@ def _board_symbol_meta() -> dict:
             continue
         key = canon or bs
         rec = {"key": key, "name": _board_display_name(bs, name), "price": bid,
-               "chg": round(chg, 2) if chg is not None else None}
+               "chg": round(chg, 2) if chg is not None else None,
+               # Короткая форма для мелких кругов на телефоне: у акций в
+               # каталоге display_name — это биржевой тикер (NFLX, HOOD), и
+               # он влезает туда, где «NETFLIX» обрезается на середине.
+               # У валют и сырья короткого имени нет — там и так EURUSD, GOLD.
+               "ticker": (name or "").strip() if bs.startswith(("#", "_")) else None}
         out[bs] = rec
         if canon:
             out[canon] = rec
@@ -2530,7 +2535,15 @@ class Handler(http.server.SimpleHTTPRequestHandler):
     # Сколько инструментов каждого направления берём на доску. Сумма 20 —
     # столько пузырей помещается на экран, оставаясь различимыми; при 30 мелкие
     # сливаются в кашу, при 10 доска перестаёт быть картой рынка.
-    _BOARD_QUOTA = {"crypto": 5, "stocks": 5, "indices": 4, "fx": 3, "commodity": 3}
+    #
+    # Квота одинаковая для всех пяти направлений: с 08.09 доска разбита на
+    # группы, и колонка из одного круга рядом с колонкой из шести читается как
+    # «здесь данных нет», хотя дело только в разной активности новостного
+    # потока. Ровные четыре на каждое направление держат картинку сравнимой.
+    _BOARD_QUOTA = {"crypto": 4, "stocks": 4, "indices": 4, "fx": 4, "commodity": 4}
+    # Добор до двадцати, если по какому-то направлению сегодня молчат. Потолок
+    # на группу не даёт одному направлению занять всю доску.
+    _BOARD_GROUP_CAP = 6
     _BOARD_TOTAL = 20
 
     def _handle_pulse_board(self) -> None:
@@ -2572,6 +2585,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 cur = merged.setdefault(key, {
                     "symbol": key, "name": m["name"], "category": r["category"],
                     "mentions": 0, "burst": 0.0, "price": m["price"], "chg": m["chg"],
+                    "ticker": m.get("ticker"),
                 })
                 cur["mentions"] += r["mentions_24h"] or 0
                 cur["burst"] = max(cur["burst"], round(r["score"] or 0, 2))
@@ -2585,12 +2599,16 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 taken[it["category"]] += 1
                 chosen.append(it)
             # Квоты добираем общим топом: если про сырьё сегодня молчат, место
-            # не должно пустовать.
+            # не должно пустовать. Но не больше потолка на группу — иначе
+            # акции, которых в каталоге 618, вытеснили бы все остальные.
             if len(chosen) < self._BOARD_TOTAL:
                 have = {c["symbol"] for c in chosen}
                 for it in pool:
                     if it["symbol"] in have:
                         continue
+                    if taken.get(it["category"], 0) >= self._BOARD_GROUP_CAP:
+                        continue
+                    taken[it["category"]] = taken.get(it["category"], 0) + 1
                     chosen.append(it)
                     if len(chosen) >= self._BOARD_TOTAL:
                         break

@@ -177,7 +177,20 @@ a:hover{text-decoration:underline;color:var(--glow)}
 /* ── Эпицентр: доска обсуждаемости ───────────────────────────────────────── */
 .buzz-board{position:relative;overflow:hidden}
 .board-sub{font-size:13px;line-height:1.5;color:var(--muted);margin:0 0 14px}
-.board-canvas{position:relative;width:100%;height:400px;margin-bottom:12px}
+/* Пять направлений — пять колонок. Раньше всё лежало одним облаком с
+   легендой по цветам: сравнить крипту с сырьём было можно, а понять, что
+   именно относится к сырью, — только сверяясь с легендой. */
+.board-groups{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.board-group{display:flex;flex-direction:column;min-width:0}
+.board-group-h{display:flex;align-items:center;gap:6px;margin-bottom:6px;
+  font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.6px;
+  text-transform:uppercase;color:var(--muted);font-weight:600}
+.board-group-h i{width:9px;height:9px;border-radius:50%;border:1.5px solid;flex-shrink:0}
+.board-cell{position:relative;width:100%;height:340px;
+  border-top:1px solid var(--line);padding-top:6px}
+.board-cell.empty::after{content:attr(data-empty);position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;text-align:center;
+  font-size:11px;color:var(--faint);padding:0 6px}
 .board-bubble{position:absolute;border-radius:50%;display:flex;flex-direction:column;
   align-items:center;justify-content:center;text-align:center;cursor:pointer;
   border:1.5px solid;text-decoration:none;overflow:hidden;
@@ -206,8 +219,22 @@ a:hover{text-decoration:underline;color:var(--glow)}
 .board-legend .bl i{width:10px;height:10px;border-radius:50%;border:1.5px solid;display:inline-block}
 .board-empty{display:flex;align-items:center;justify-content:center;height:100%;
   font-size:13px;color:var(--muted);text-align:center;padding:0 20px}
-@media(max-width:760px){
-  .board-canvas{height:320px}
+/* Планшет: пять колонок по 150px уже нечитаемы — переходим на три. */
+@media(max-width:1000px){
+  .board-groups{grid-template-columns:repeat(3,1fr)}
+  .board-cell{height:210px}
+}
+@media(max-width:640px){
+  /* Телефон: две колонки. Одна колонка на пять групп дала бы простыню в пять
+     экранов — это ровно то, от чего блок должен уводить. */
+  .board-groups{grid-template-columns:repeat(2,1fr);gap:8px}
+  .board-cell{height:150px}
+  /* Пятая группа в сетке из двух колонок оставалась одна в последнем ряду с
+     пустой половиной справа — читается как недогруженный блок. Растягиваем
+     её на всю ширину: круги раскладываются горизонтально и место работает. */
+  .board-group:last-child{grid-column:1 / -1}
+  .board-group:last-child .board-cell{height:130px}
+  .board-group-h{font-size:9.5px;letter-spacing:.3px}
   .board-sub{font-size:12.5px}
 }
 
@@ -534,8 +561,7 @@ a:hover{text-decoration:underline;color:var(--glow)}
         <span class="fresh" id="boardFresh"></span>
       </div>
       <p class="board-sub" data-i18n="home.board_sub">{{ t('home.board_sub', lang) }}</p>
-      <div class="board-canvas" id="boardCanvas"></div>
-      <div class="board-legend" id="boardLegend"></div>
+      <div class="board-groups" id="boardCanvas"></div>
     </section>
 
     <section class="panel anon-value" id="anonValue" hidden>
@@ -1705,21 +1731,24 @@ function packBubbles(items, W, H){
   // плотность точек по площади.
   const placed = [];
   const cx = W / 2, cy = H / 2;
-  const maxRad = Math.hypot(W, H) / 2;
-  const aspect = H / W;                 // панель шире, чем выше — сплющиваем спираль
-  const TRIES = 5000;
+  const TRIES = 9000;
   for (const it of items){
     const r = it.r;
     let put = null;
     for (let a = 0; a < TRIES && !put; a++){
-      const rad = maxRad * Math.sqrt(a / TRIES);
+      // 🔴 Спираль эллиптическая, вписанная в ячейку, а не круговая.
+      // С круговой спиралью в узкой высокой колонке (155×300) большая часть
+      // проб улетала за боковые края и отбрасывалась проверкой границ — из
+      // двадцати кругов доезжали семнадцать, причём молча. Растягивая радиус
+      // по каждой оси отдельно, мы получаем пробы, которые почти все внутри.
+      const t = Math.sqrt(a / TRIES);
       const ang = a * 0.4;              // ~золотой угол, витки не ложатся друг на друга
-      const x = cx + rad * Math.cos(ang);
-      const y = cy + rad * Math.sin(ang) * aspect;
+      const x = cx + (W / 2) * t * Math.cos(ang);
+      const y = cy + (H / 2) * t * Math.sin(ang);
       if (x - r < 0 || x + r > W || y - r < 0 || y + r > H) continue;
       let hit = false;
       for (const p of placed){
-        if (Math.hypot(p.x - x, p.y - y) < p.r + r + 3){ hit = true; break; }
+        if (Math.hypot(p.x - x, p.y - y) < p.r + r + 2){ hit = true; break; }
       }
       if (!hit) put = {x, y};
     }
@@ -1751,42 +1780,72 @@ async function loadBoard(){
   }
   sec.hidden = false;
 
-  const W = canvas.clientWidth || 700;
-  const H = canvas.clientHeight || 400;
-  const mob = W < 560;
-  const list = items.slice(0, mob ? 12 : 20);
-  const max = list[0].mentions;
-  const minR = mob ? 20 : 26, maxR = Math.min(mob ? 56 : 78, Math.floor(H / 4.6));
-  list.forEach(it => { it.r = boardRadius(it.mentions, max, minR, maxR); });
+  // Порядок групп фиксированный, а не по активности: доска должна выглядеть
+  // одинаково при каждом заходе, иначе человек каждый раз ищет заново, где
+  // тут крипта. Пустые направления всё равно показываем колонкой с подписью —
+  // «сегодня про сырьё молчат» это тоже факт о рынке.
+  const ORDER = ['crypto', 'commodity', 'fx', 'indices', 'stocks'];
+  const byCat = {};
+  ORDER.forEach(c => { byCat[c] = []; });
+  items.forEach(it => { if (byCat[it.category]) byCat[it.category].push(it); });
 
-  const placed = packBubbles(list, W, H);
-  canvas.innerHTML = placed.map((it, i) => {
-    const meta = BOARD_CATS[it.category] || BOARD_CATS.stocks;
-    const chg = it.chg == null ? '' : (it.chg >= 0 ? '+' : '') + it.chg.toFixed(2) + '%';
-    const dir = it.chg == null ? '' : (it.chg >= 0 ? 'up' : 'down');
-    const raw = it.symbol.replace(/^[#_]/, '').split('.')[0];
-    // Шрифт подгоняем под длину имени, а не режем имя: «COMMERZBA» вместо
-    // «COMMERZBANK» выглядит как ошибка, а не как сокращение.
-    let fs = Math.max(9, Math.min(15, Math.round(it.r / 3.1)));
-    if (raw.length > 6) fs = Math.max(8, Math.round(fs * 6 / raw.length * 1.15));
-    const showName = it.r >= 34;
-    const showChg = it.r >= 26;
-    const label = escapeHtmlIdx(raw);
-    return `<a class="board-bubble ${meta.cls}" href="/chart.html?s=${encodeURIComponent(it.symbol)}"
-      style="left:${Math.round(it.x - it.r)}px;top:${Math.round(it.y - it.r)}px;
-             width:${it.r*2}px;height:${it.r*2}px;animation-delay:${i*38}ms"
-      title="${escapeHtmlIdx(it.name)} — ${it.mentions} упоминаний за сутки">
-      <span class="bb-sym" style="font-size:${fs}px">${label}</span>
-      ${showName ? `<span class="bb-n" style="font-size:${Math.max(8, fs-4)}px">${it.mentions}</span>` : ''}
-      ${showChg && chg ? `<span class="bb-chg ${dir}" style="font-size:${Math.max(8, fs-4)}px">${chg}</span>` : ''}
-    </a>`;
+  // 🔴 Масштаб радиуса общий для всех групп, а не свой в каждой. Иначе самый
+  // обсуждаемый металл и самая обсуждаемая монета рисовались бы одинаковым
+  // кругом при 170 и 372 упоминаниях — и доска, задача которой сравнивать
+  // направления между собой, начала бы врать.
+  const maxMentions = Math.max(...items.map(x => x.mentions), 1);
+
+  canvas.innerHTML = ORDER.map(cat => {
+    const m = BOARD_CATS[cat];
+    return `<div class="board-group">
+      <div class="board-group-h"><i class="${m.cls}"></i>${escapeHtmlIdx(boardLabel(m))}</div>
+      <div class="board-cell" data-cat="${cat}" data-empty="${escapeHtmlIdx(
+        window.sbfI18n ? window.sbfI18n.t('home.board_quiet', 'сегодня тихо') : 'сегодня тихо')}"></div>
+    </div>`;
   }).join('');
 
-  const used = [...new Set(placed.map(p => p.category))];
-  document.getElementById('boardLegend').innerHTML = used.map(c => {
-    const m = BOARD_CATS[c] || BOARD_CATS.stocks;
-    return `<span class="bl"><i class="${m.cls}"></i>${escapeHtmlIdx(boardLabel(m))}</span>`;
-  }).join('');
+  let idx = 0;
+  ORDER.forEach(cat => {
+    const cell = canvas.querySelector(`.board-cell[data-cat="${cat}"]`);
+    const list = byCat[cat];
+    if (!cell) return;
+    if (!list.length){ cell.classList.add('empty'); return; }
+    const W = cell.clientWidth || 150, H = cell.clientHeight || 300;
+    // Потолок радиуса — от размера ячейки, иначе крупный круг просто не
+    // поместится и будет молча выброшен упаковкой. Делитель подобран по
+    // площади: четыре-шесть кругов должны укладываться в колонку, а самый
+    // большой из них — не занимать её целиком.
+    const maxR = Math.max(16, Math.floor(Math.min(W * 0.40, H / 4.6)));
+    const minR = Math.max(13, Math.round(maxR * 0.34));
+    list.forEach(it => { it.r = boardRadius(it.mentions, maxMentions, minR, maxR); });
+    const placed = packBubbles(list, W, H);
+    cell.innerHTML = placed.map(it => {
+      const chg = it.chg == null ? '' : (it.chg >= 0 ? '+' : '') + it.chg.toFixed(2) + '%';
+      const dir = it.chg == null ? '' : (it.chg >= 0 ? 'up' : 'down');
+      // В мелком круге длинное имя обрезается по краю: на телефоне
+      // «NETFLIX» превращался в «IETFLI». Для акций у брокера есть биржевой
+      // тикер (NFLX, HOOD) — он туда влезает. У валют и сырья короткой формы
+      // нет, но там имя и так короткое: EURUSD, GOLD.
+      let raw = it.symbol.replace(/^[#_]/, '').split('.')[0];
+      if (it.ticker && raw.length > 5 && it.r < 34) raw = it.ticker;
+      // Шрифт подгоняем под длину имени, а не режем имя: «COMMERZBA» вместо
+      // «COMMERZBANK» выглядит как ошибка, а не как сокращение.
+      let fs = Math.max(8, Math.min(15, Math.round(it.r / 3.1)));
+      if (raw.length > 6) fs = Math.max(7, Math.round(fs * 6 / raw.length * 1.15));
+      const showName = it.r >= 30;
+      const showChg = it.r >= 24;
+      const delay = (idx++) * 34;
+      return `<a class="board-bubble ${BOARD_CATS[cat].cls}" href="/chart.html?s=${encodeURIComponent(it.symbol)}"
+        style="left:${Math.round(it.x - it.r)}px;top:${Math.round(it.y - it.r)}px;
+               width:${it.r*2}px;height:${it.r*2}px;animation-delay:${delay}ms"
+        title="${escapeHtmlIdx(it.name)} — ${it.mentions} упоминаний за сутки">
+        <span class="bb-sym" style="font-size:${fs}px">${escapeHtmlIdx(raw)}</span>
+        ${showName ? `<span class="bb-n" style="font-size:${Math.max(8, fs-4)}px">${it.mentions}</span>` : ''}
+        ${showChg && chg ? `<span class="bb-chg ${dir}" style="font-size:${Math.max(8, fs-4)}px">${chg}</span>` : ''}
+      </a>`;
+    }).join('');
+  });
+
   const fresh = document.getElementById('boardFresh');
   if (fresh && d.updated) fresh.textContent = ago(d.updated);
 }
