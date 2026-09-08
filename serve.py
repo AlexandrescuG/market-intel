@@ -305,6 +305,112 @@ def _ctrader_tail(our_key, tf):
     return bars or []
 
 
+_board_meta_cache: tuple = (0.0, {})
+_BOARD_META_TTL = 60
+
+
+def _board_display_name(broker_symbol: str, name: str | None) -> str:
+    """Человеческое имя для доски.
+
+    У валют и сырья в каталоге лежит нормальное название («Евро / доллар»,
+    «Золото»), а у акций — биржевой тикер: `#NETFLIX` подписан как «NFLX»,
+    `_COMMERZBANK.DE` как «CBK». На доске, куда человек попадает с первого
+    экрана, три буквы не говорят ничего. Само имя инструмента при этом
+    читаемо — берём его.
+    """
+    s = broker_symbol
+    if s.startswith(("#", "_")):
+        base = s.lstrip("#_")
+        base = re.sub(r"\.(DE|UK|IT|FR|ES|NL|BE|PT|AT|FI|CH|SE|NO|DK|IE|PL)$", "", base)
+        base = base.replace("_", " ").strip()
+        if base:
+            # JP_MORGAN -> Jp Morgan; оставляем короткие аббревиатуры как есть
+            return base if len(base) <= 3 else base.capitalize()
+    return name or s
+
+
+def _board_symbol_meta() -> dict:
+    """{имя из счётчика упоминаний: как показать его на доске}.
+
+    Собирает три вещи в одном месте, потому что доске нужны все три сразу:
+    под каким именем открывать график, как назвать по-человечески и какая
+    сейчас цена. Источник — broker_symbols (там и цена, и изменение, и
+    каноническое имя) плюс список доступных графиков.
+
+    Ключ схлопывания — каноническое имя: WTI и CrudeOIL, NG и NATURAL_GAS,
+    XRP и XRPUSD это один актив под двумя именами.
+    """
+    global _board_meta_cache
+    now = time.time()
+    if now - _board_meta_cache[0] < _BOARD_META_TTL and _board_meta_cache[1]:
+        return _board_meta_cache[1]
+
+    blocked = set(_blocked_symbols())
+    try:
+        avail = json.loads((Path(DIRECTORY) / "data" / "chart_available.json")
+                           .read_text(encoding="utf-8"))["items"]
+    except Exception:
+        avail = {}
+
+    out: dict = {}
+    try:
+        con = sqlite3.connect(f"file:{_BOT_DB}?mode=ro", uri=True, timeout=10)
+        con.execute("PRAGMA busy_timeout=10000")
+        try:
+            rows = con.execute(
+                "SELECT broker_symbol, canonical, display_name, bid, chg_pct "
+                "FROM broker_symbols").fetchall()
+        finally:
+            con.close()
+    except Exception:
+        return _board_meta_cache[1]
+
+    for bs, canon, name, bid, chg in rows:
+        if bs in blocked or (canon and canon in blocked):
+            continue
+        if not (avail.get(bs) or {}).get("ok"):
+            continue
+        key = canon or bs
+        rec = {"key": key, "name": _board_display_name(bs, name), "price": bid,
+               "chg": round(chg, 2) if chg is not None else None}
+        out[bs] = rec
+        if canon:
+            out[canon] = rec
+    if out:
+        _board_meta_cache = (now, out)
+    return out
+
+
+_blocklist_cache: tuple = (0.0, {})
+
+
+def _blocked_symbols() -> dict:
+    """Инструменты, скрытые с витрины сознательно (data/instrument_blocklist.json).
+
+    Список инструментов уже не показывает их — он читает chart_available.json,
+    где они помечены отказом. Но прямая ссылка `?s=SHIBUSD` открывала бы график
+    как ни в чём не бывало: такие ссылки живут в закладках, в телеграме и в
+    поисковой выдаче. Решение «мы это не показываем» должно соблюдаться на
+    сервере, а не только в отрисовке списка.
+    """
+    global _blocklist_cache
+    path = Path(DIRECTORY).parent / "data" / "instrument_blocklist.json"
+    try:
+        mtime = path.stat().st_mtime
+    except OSError:
+        return {}
+    if _blocklist_cache[0] == mtime:
+        return _blocklist_cache[1]
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+        data = {k: v for k, v in raw.items()
+                if not k.startswith("_") and isinstance(v, dict)}
+    except Exception:
+        return _blocklist_cache[1]
+    _blocklist_cache = (mtime, data)
+    return data
+
+
 _crypto_map: tuple = (0.0, {})
 
 
@@ -579,15 +685,62 @@ def _resolve_chart_symbol(symbol: str) -> str:
 
     Порядок важен: сначала пробуем имя как есть (для реестра оно рабочее и
     переведено через CHART_BROKER_MAP), и только если брокер такого не знает —
-    смотрим в карту канонических имён. Иначе можно сломать те десять, что уже
-    работали.
+    смотрим карту канонических имён, а потом journal-домен. Иначе можно
+    сломать те, что уже работали.
+
+    🔴 Третья ветка про journal-домен добавлена 08.09 по живому вопросу «почему
+    по золоту нет данных» со ссылкой `?s=XAUUSD`. У золота три имени: `GOLD` в
+    каталоге и на графике, `XAUUSD` в дневнике сделок и у брокера, `GC=F` в
+    ленте котировок. Ссылка с `XAUUSD` приходила из дневника и из внешних
+    материалов — и отдавала пустой график, хотя те же свечи прекрасно
+    открывались по `?s=GOLD`.
     """
     if not symbol:
         return symbol
     from mt5_config import CHART_BROKER_MAP
     if symbol in CHART_BROKER_MAP or symbol in _broker_catalog_symbols():
         return symbol
-    return _canonical_alias_map().get(symbol, symbol)
+    alias = _canonical_alias_map().get(symbol)
+    if alias:
+        return alias
+    try:
+        from core.journal_symbols import to_chart_symbol
+        chart = to_chart_symbol(symbol)
+        if chart:
+            return chart
+    except Exception:
+        pass
+    return symbol
+
+
+def _canonical_link_name(symbol: str) -> str:
+    """Одно имя инструмента для ссылки — то, что видно в адресе страницы.
+
+    Не то же самое, что _resolve_chart_symbol: там мы ищем имя, под которым
+    лежат свечи (LINK → LINKUSD), а здесь — имя, под которым инструмент
+    показывается человеку и попадает в ссылку (LINKUSD → LINK, XAUUSD → GOLD).
+
+    Зачем вообще: у одного актива до трёх имён, и каждое открывало свою
+    страницу. Один и тот же график расходился по разным адресам в закладках,
+    в переписке и в поисковой выдаче — а для поисковика это ещё и две страницы
+    с одинаковым содержимым.
+    """
+    if not symbol:
+        return symbol
+    s = symbol.upper().strip()
+    # journal-домен → домен графика (XAUUSD → GOLD)
+    try:
+        from core.journal_symbols import to_chart_symbol
+        chart = to_chart_symbol(s)
+        if chart:
+            s = chart
+    except Exception:
+        pass
+    # имя брокера → каноническое имя каталога (LINKUSD → LINK)
+    for canon, broker in _canonical_alias_map().items():
+        if broker == s:
+            return canon
+    return s
 
 
 def _broker_quote_ages() -> dict:
@@ -1884,6 +2037,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self._handle_chart_news_bursts()
         elif path_clean == "/api/chart/news":
             self._handle_chart_news()
+        elif path_clean == "/api/pulse/board":
+            self._handle_pulse_board()
         elif path_clean == "/api/pulse":
             self._handle_pulse()
         elif path_clean == "/api/pulse/feed":
@@ -2372,6 +2527,83 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         except Exception as e:
             self._send_json({"error": str(e)}, 500)
 
+    # Сколько инструментов каждого направления берём на доску. Сумма 20 —
+    # столько пузырей помещается на экран, оставаясь различимыми; при 30 мелкие
+    # сливаются в кашу, при 10 доска перестаёт быть картой рынка.
+    _BOARD_QUOTA = {"crypto": 5, "stocks": 5, "indices": 4, "fx": 3, "commodity": 3}
+    _BOARD_TOTAL = 20
+
+    def _handle_pulse_board(self) -> None:
+        """Доска обсуждаемости для главной: ~20 активов по всем направлениям.
+
+        Отличие от /api/pulse (вкладки «крипта / акции / индексы»): там топ-8
+        внутри одного направления, здесь — срез по всему рынку сразу, ради
+        сравнения между направлениями. Размер пузыря на витрине — упоминания за
+        сутки, цвет — движение цены.
+        """
+        try:
+            con = sqlite3.connect(str(_SIGNALS_DB))
+            con.row_factory = sqlite3.Row
+            ts = con.execute("SELECT MAX(ts) FROM pulse_scores").fetchone()[0]
+            if ts is None:
+                self._send_json({"items": [], "updated": None})
+                con.close()
+                return
+            rows = con.execute(
+                "SELECT symbol, category, mentions, mentions_24h, score "
+                "FROM pulse_scores WHERE ts=?", (ts,)).fetchall()
+            con.close()
+
+            # 🔴 Схлопываем имена одного и того же актива. В счётчике WTI и
+            # CrudeOIL, NG и NATURAL_GAS, XRP и XRPUSD живут отдельными
+            # строками — это одно и то же, просто каноническое имя и имя
+            # брокера. Без слияния доска показала бы нефть дважды и заняла бы
+            # два места из двадцати.
+            meta = _board_symbol_meta()
+            merged: dict = {}
+            for r in rows:
+                m = meta.get(r["symbol"])
+                if not m:
+                    # Символа нет среди открывающихся инструментов — это
+                    # кештег вроде LUNA или GME, который мы не показываем.
+                    # Молча пропускаем: доска должна вести на график.
+                    continue
+                key = m["key"]
+                cur = merged.setdefault(key, {
+                    "symbol": key, "name": m["name"], "category": r["category"],
+                    "mentions": 0, "burst": 0.0, "price": m["price"], "chg": m["chg"],
+                })
+                cur["mentions"] += r["mentions_24h"] or 0
+                cur["burst"] = max(cur["burst"], round(r["score"] or 0, 2))
+
+            pool = sorted(merged.values(), key=lambda x: x["mentions"], reverse=True)
+            chosen, taken = [], {k: 0 for k in self._BOARD_QUOTA}
+            for it in pool:
+                q = self._BOARD_QUOTA.get(it["category"])
+                if q is None or taken[it["category"]] >= q:
+                    continue
+                taken[it["category"]] += 1
+                chosen.append(it)
+            # Квоты добираем общим топом: если про сырьё сегодня молчат, место
+            # не должно пустовать.
+            if len(chosen) < self._BOARD_TOTAL:
+                have = {c["symbol"] for c in chosen}
+                for it in pool:
+                    if it["symbol"] in have:
+                        continue
+                    chosen.append(it)
+                    if len(chosen) >= self._BOARD_TOTAL:
+                        break
+            chosen = chosen[:self._BOARD_TOTAL]
+            chosen.sort(key=lambda x: x["mentions"], reverse=True)
+            self._send_json({
+                "updated": datetime.fromtimestamp(ts, timezone.utc).isoformat(),
+                "window_hours": 24,
+                "items": chosen,
+            })
+        except Exception as e:
+            self._send_json({"error": str(e)}, 500)
+
     def _handle_pulse_feed(self) -> None:
         """Фаза 4: лента упоминаний по тикеру (тап на карточку) — за регистрацией,
         консистентно с /api/chart/event-reaction (см. _lp_require_auth)."""
@@ -2824,7 +3056,16 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 
         # Ссылка из списка инструментов приходит с каноническим именем (LINK),
         # а свечи лежат под именем брокера (LINKUSD) — см. _canonical_alias_map.
+        link_name = _canonical_link_name(symbol)
         symbol = _resolve_chart_symbol(symbol)
+
+        # Скрытые сознательно отвечают отказом с причиной, а не пустым рядом:
+        # пустой график человек читает как поломку сайта, а не как решение.
+        blocked = _blocked_symbols().get(symbol)
+        if blocked:
+            self._send_json({"candles": [], "blocked": True,
+                             "reason": blocked.get("причина", "не показывается")})
+            return
 
         # ── cTrader: 80 инструментов витрины переведены сюда (01.09.2026) ──
         # Валюты, металлы, нефть, индексы, крипта. Читается с диска, к брокеру
@@ -2883,6 +3124,10 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                              # неправду в том самом месте, где страница
                              # объясняет человеку, чьи это котировки.
                              "source": src or "mt5",
+                             # Одно имя для ссылки: страница по нему поправит
+                             # адрес, чтобы XAUUSD и GOLD не жили как две
+                             # разные страницы одного графика.
+                             "canonical": link_name,
                              "live_price": broker[-1]["close"]})
             return
 

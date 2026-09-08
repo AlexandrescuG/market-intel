@@ -3013,9 +3013,10 @@
 "source": "ctrader"
 },
 "BTGUSD": {
-"bars": 249,
-"ok": true,
-"source": "mt5"
+"bars": 0,
+"ok": false,
+"reason": "мёртвый форк: живые свечи есть ровно на одной бирже из восьми проверенных, у брокера котировка не обновляется",
+"source": "blocklist"
 },
 "CADCHF": {
 "bars": 1422,
@@ -3118,9 +3119,10 @@
 "source": "yahoo"
 },
 "DOGEUSD": {
-"bars": 1000,
-"ok": true,
-"source": "ctrader"
+"bars": 0,
+"ok": false,
+"reason": "мем-монета",
+"source": "blocklist"
 },
 "DOLLAR_INDX": {
 "bars": 2006,
@@ -3373,14 +3375,16 @@
 "source": "ctrader"
 },
 "MATICUSD": {
-"bars": 999,
-"ok": true,
-"source": "mt5"
+"bars": 0,
+"ok": false,
+"reason": "тикер переименован в POL, у брокера пара остановлена — показывать под старым именем значит вводить в заблуждение",
+"source": "blocklist"
 },
 "MELANIAUSD": {
-"bars": 596,
-"ok": true,
-"source": "exchange"
+"bars": 0,
+"ok": false,
+"reason": "политический токен",
+"source": "blocklist"
 },
 "NATURAL_GAS": {
 "bars": 1413,
@@ -3433,9 +3437,10 @@
 "source": "exchange"
 },
 "PEPEUSD": {
-"bars": 1000,
-"ok": true,
-"source": "mt5"
+"bars": 0,
+"ok": false,
+"reason": "мем-монета",
+"source": "blocklist"
 },
 "PLATINUM": {
 "bars": 2389,
@@ -3468,9 +3473,10 @@
 "source": "yahoo"
 },
 "SHIBUSD": {
-"bars": 1000,
-"ok": true,
-"source": "exchange"
+"bars": 0,
+"ok": false,
+"reason": "мем-монета",
+"source": "blocklist"
 },
 "SILVER": {
 "bars": 1413,
@@ -3523,9 +3529,10 @@
 "source": "yahoo"
 },
 "TRUMPUSD": {
-"bars": 598,
-"ok": true,
-"source": "ctrader"
+"bars": 0,
+"ok": false,
+"reason": "политический токен",
+"source": "blocklist"
 },
 "UK_100": {
 "bars": 1380,
@@ -4225,7 +4232,7 @@
 "source": "mt5"
 }
 },
-"ok": 783,
+"ok": 776,
 "tf": "D1",
 "total": 842
 }

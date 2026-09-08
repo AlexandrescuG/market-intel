@@ -70,6 +70,24 @@ def probe(sym: str, tf: str) -> tuple[bool, str, int]:
     return n >= MIN_BARS, (d.get("source") or "yahoo"), n
 
 
+
+def _blocklist() -> dict:
+    """Инструменты, которые мы не показываем сознательно (data/instrument_blocklist.json).
+
+    Проверка доступности отвечает на вопрос «есть ли свечи», а этот файл — на
+    вопрос «хотим ли мы это показывать». Второе сильнее первого: у мем-монеты
+    свечи есть, но на витрине консалтинговой платформы ей не место.
+    Держим решение в файле, а не в коде: его должно быть видно и понятно без
+    чтения исходников.
+    """
+    import json as _json
+    path = ROOT / "data" / "instrument_blocklist.json"
+    try:
+        raw = _json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+    return {k: v for k, v in raw.items() if not k.startswith("_") and isinstance(v, dict)}
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--tf", default="D1", help="на каком ТФ проверять (D1 — самый полный)")
@@ -140,6 +158,17 @@ def main() -> int:
         print(f"  со второй попытки открылось: {revived}")
 
     good = sum(1 for v in result.values() if v["ok"])
+    # Скрытые сознательно — помечаем отказом с причиной, а не удаляем из файла:
+    # список инструментов на фронте читает ok, и «нет строки» от «скрыт» ему
+    # не отличить, а нам в отчёте отличать надо.
+    blocked = _blocklist()
+    for sym, meta in blocked.items():
+        if sym in result:
+            result[sym] = {"ok": False, "source": "blocklist",
+                           "bars": 0, "reason": meta.get("причина", "скрыт")}
+    if blocked:
+        print(f"  скрыто сознательно: {len(blocked)} ({', '.join(sorted(blocked))})")
+
     payload = {"checked_at": int(time.time()), "tf": args.tf,
                "total": len(result), "ok": good, "items": result}
     OUT.write_text(json.dumps(payload, ensure_ascii=False, indent=0, sort_keys=True),

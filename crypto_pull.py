@@ -45,10 +45,21 @@ CYCLE_SEC = 300
 log = logging.getLogger("crypto_pull")
 
 
+BLOCKLIST_PATH = ROOT / "data" / "instrument_blocklist.json"
+
+
 def load_map() -> dict:
     raw = json.loads(MAP_PATH.read_text(encoding="utf-8"))
-    return {k: v for k, v in raw.items()
-            if not k.startswith("_") and isinstance(v, dict)}
+    out = {k: v for k, v in raw.items()
+           if not k.startswith("_") and isinstance(v, dict)}
+    # Скрытые с витрины не тянем вовсе: незачем ходить на биржу за данными,
+    # которые никто не увидит, и незачем держать их свежими в кэше.
+    try:
+        bl = json.loads(BLOCKLIST_PATH.read_text(encoding="utf-8"))
+        blocked = {k for k in bl if not k.startswith("_")}
+    except Exception:
+        blocked = set()
+    return {k: v for k, v in out.items() if k not in blocked}
 
 
 def run_once(only: str | None = None, verbose: bool = False) -> tuple[int, int]:

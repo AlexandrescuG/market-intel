@@ -28,7 +28,7 @@
 <script src="/assets/sbf-header.js?v=23" defer></script>
 <script src="/assets/sbf-auth.js?v=1"></script>
 <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
-<script src="/assets/grafik-engine.js?v=20260903ba"></script>
+<script src="/assets/grafik-engine.js?v=20260908"></script>
 <script src="/assets/sbf-thermo-widget.js?v=20260901a"></script>
 <script src="/assets/sbf-glossary.js?v=2" defer></script>
 <style>
@@ -484,6 +484,30 @@ function _defaultChartSymbol() {
   return 'GOLD';
 }
 const PARAM = _SP.get('s') || _defaultChartSymbol();
+
+// 🔴 Один инструмент — один адрес.
+//
+// У золота три имени: GOLD в каталоге и на графике, XAUUSD в дневнике сделок
+// и у брокера, GC=F в ленте котировок. Ссылка `?s=XAUUSD` приходила из
+// дневника и из внешних материалов и открывала пустой график, а после починки
+// открывала бы тот же самый график по второму адресу. Для человека это две
+// разные ссылки на одну страницу, для поисковика — две страницы с одинаковым
+// содержимым.
+//
+// Меняем ТОЛЬКО параметр `s`, остальные не трогаем: в адресе живут UTM-метки,
+// по которым считается, откуда пришёл лид, и стереть их здесь значило бы
+// потерять источник ровно у тех, кто пришёл по ссылке из рекламы.
+// replaceState, а не assign: перезагружать страницу ради переименования
+// параметра — значит выбросить уже нарисованный график.
+window.SBFCanonicalizeUrl = function (canonical) {
+  try {
+    if (!canonical) return;
+    const u = new URL(window.location.href);
+    if ((u.searchParams.get('s') || '') === canonical) return;
+    u.searchParams.set('s', canonical);
+    window.history.replaceState(null, '', u.pathname + u.search + u.hash);
+  } catch (e) { /* адрес не разобрался — просто оставляем как есть */ }
+};
 // Понятное название инструмента из общего реестра (SPEC_symbol_names.md §3);
 // без него — честный фолбэк на сырой символ, не выдумываем имя.
 function symName(sym, mode) {

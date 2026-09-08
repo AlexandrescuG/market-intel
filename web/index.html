@@ -74,7 +74,7 @@ if (new URLSearchParams(location.search).get("embed") === "1") {
 <script src="/assets/sbf-profile.js?v=3" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.0/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
-<script src="/assets/grafik-engine.js?v=20260903ba"></script>
+<script src="/assets/grafik-engine.js?v=20260908"></script>
 <script src="/assets/sbf-glossary.js?v=2" defer></script>
 <style>
 :root{
@@ -174,6 +174,43 @@ a:hover{text-decoration:underline;color:var(--glow)}
 .focus-item__more summary::before{content:"+ ";}
 .focus-item__more[open] summary::before{content:"− ";}
 .focus-item__more-body{margin-top:10px}
+/* ── Эпицентр: доска обсуждаемости ───────────────────────────────────────── */
+.buzz-board{position:relative;overflow:hidden}
+.board-sub{font-size:13px;line-height:1.5;color:var(--muted);margin:0 0 14px}
+.board-canvas{position:relative;width:100%;height:400px;margin-bottom:12px}
+.board-bubble{position:absolute;border-radius:50%;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;cursor:pointer;
+  border:1.5px solid;text-decoration:none;overflow:hidden;
+  transition:transform .18s cubic-bezier(.2,.8,.3,1.2),box-shadow .18s;
+  /* Появление снизу вверх с задержкой по индексу — задаётся инлайном в JS.
+     Без анимации доска выглядит статичной картинкой и не читается как живая. */
+  animation:bubbleIn .5s cubic-bezier(.2,.9,.3,1.3) both}
+@keyframes bubbleIn{from{transform:scale(.2);opacity:0}to{transform:scale(1);opacity:1}}
+.board-bubble:hover{transform:scale(1.07);text-decoration:none;
+  box-shadow:0 6px 22px rgba(43,43,51,.16);z-index:5}
+.board-bubble .bb-sym{font-family:'JetBrains Mono',monospace;font-weight:700;
+  line-height:1.1;letter-spacing:.2px;color:var(--ink)}
+.board-bubble .bb-n{font-family:'JetBrains Mono',monospace;line-height:1.2;color:var(--muted)}
+.board-bubble .bb-chg{font-family:'JetBrains Mono',monospace;line-height:1.2;font-weight:600}
+.board-bubble .bb-chg.up{color:var(--up)} .board-bubble .bb-chg.down{color:var(--down)}
+/* Цвет — направление рынка. Оттенки из брендовой палитры, не радуга:
+   доска должна читаться как часть сайта, а не как чужой виджет. */
+.bb-crypto{background:rgba(201,162,39,.13);border-color:rgba(201,162,39,.5)}
+.bb-stocks{background:rgba(43,43,51,.07);border-color:rgba(43,43,51,.26)}
+.bb-indices{background:rgba(30,142,90,.10);border-color:rgba(30,142,90,.42)}
+.bb-fx{background:rgba(58,102,168,.10);border-color:rgba(58,102,168,.42)}
+.bb-commodity{background:rgba(176,106,44,.11);border-color:rgba(176,106,44,.44)}
+.board-legend{display:flex;flex-wrap:wrap;gap:14px;font-size:11.5px;color:var(--muted);
+  font-family:'JetBrains Mono',monospace}
+.board-legend .bl{display:flex;align-items:center;gap:6px}
+.board-legend .bl i{width:10px;height:10px;border-radius:50%;border:1.5px solid;display:inline-block}
+.board-empty{display:flex;align-items:center;justify-content:center;height:100%;
+  font-size:13px;color:var(--muted);text-align:center;padding:0 20px}
+@media(max-width:760px){
+  .board-canvas{height:320px}
+  .board-sub{font-size:12.5px}
+}
+
 .focus-disclaimer{font-family:'JetBrains Mono',monospace;font-size:10.5px;line-height:1.5;color:var(--faint);letter-spacing:.02em;margin-top:16px;padding-left:11px;border-left:2px solid var(--line)}
 .focus-link{font-family:'JetBrains Mono',monospace;font-size:12px;display:inline-block;margin-top:16px}
 .personal-block a{color:inherit;text-decoration:none}
@@ -482,6 +519,25 @@ a:hover{text-decoration:underline;color:var(--glow)}
          Пункты перечисляют то, что реально за гейтом, без выдумок:
          главы 6-15 (serve.py::_handle_edu, is_pro), журнал, user_prefs
          (watchlist_markets/default_tf/слои графика), связка с Telegram. -->
+    <!-- ── ЭПИЦЕНТР: что обсуждают прямо сейчас ─────────────────────────────
+         Первый экран главной. Стоит выше блока «что даёт аккаунт» сознательно:
+         отзыв трейдеров и ТЗ руководителя 03.09 — «на сайте нас встречает
+         слишком много текста, что отпугивает». Живая картина рынка вместо
+         списка буллитов отвечает на это буквально.
+
+         Размер пузыря — упоминания за сутки, цвет — направление, подпись —
+         движение цены. Клик ведёт на график этого актива: блок не самоцель, а
+         вход в продукт. -->
+    <section class="panel buzz-board" id="buzzBoard" hidden>
+      <div class="panel-h">
+        <h2 data-i18n="home.board_title">{{ t('home.board_title', lang) }}</h2>
+        <span class="fresh" id="boardFresh"></span>
+      </div>
+      <p class="board-sub" data-i18n="home.board_sub">{{ t('home.board_sub', lang) }}</p>
+      <div class="board-canvas" id="boardCanvas"></div>
+      <div class="board-legend" id="boardLegend"></div>
+    </section>
+
     <section class="panel anon-value" id="anonValue" hidden>
       <div class="anon-value-head">
         <h2 class="anon-value-h">{{ t('home.anon_value_title', lang) }}</h2>
@@ -1613,6 +1669,136 @@ function openPulseFeed(symbol){
     .catch(()=>{});
 }
 
+// ── Эпицентр: доска обсуждаемости ───────────────────────────────────────────
+// Пузыри раскладываются упаковкой окружностей: самый обсуждаемый актив в
+// центре, остальные по спирали вокруг, каждый — в первую свободную точку.
+// Сила-направленная раскладка (d3-force) дала бы то же самое, но требует
+// библиотеки и кадров анимации; здесь достаточно одного прохода.
+// Подписи направлений — через словарь: блок стоит на первом экране всех трёх
+// языковых версий, и русское «сырьё» на /en/ выглядело бы как недоделка.
+const BOARD_CATS = {
+  crypto:    {cls:'bb-crypto',    key:'home.board_cat_crypto',    fb:'крипта'},
+  stocks:    {cls:'bb-stocks',    key:'home.board_cat_stocks',    fb:'акции'},
+  indices:   {cls:'bb-indices',   key:'home.board_cat_indices',   fb:'индексы'},
+  fx:        {cls:'bb-fx',        key:'home.board_cat_fx',        fb:'валюты'},
+  commodity: {cls:'bb-commodity', key:'home.board_cat_commodity', fb:'сырьё'}
+};
+const boardLabel = m => (window.sbfI18n ? window.sbfI18n.t(m.key, m.fb) : m.fb);
+
+function boardRadius(mentions, max, min, maxR){
+  // Площадь пропорциональна упоминаниям, а не диаметр: иначе актив с вдвое
+  // большим числом выглядит вчетверо крупнее и картинка врёт.
+  if (max <= 0) return min;
+  const k = Math.sqrt(Math.max(mentions, 0) / max);
+  return Math.round(min + (maxR - min) * k);
+}
+
+function packBubbles(items, W, H){
+  // Спиральная упаковка: идём от центра наружу и садим круг в первую точку,
+  // где он никого не задевает и не вылезает за поле.
+  //
+  // 🔴 Спираль обязана добивать до дальнего угла панели. В первой версии шаг
+  // был подобран на глаз (rad = 2.2·√a при a<4000) и доставал всего ~140px от
+  // центра при полуширине панели 438 — из двадцати пузырей помещались три,
+  // остальные молча выбрасывались. Поэтому радиус здесь считается ОТ РАЗМЕРА
+  // ПАНЕЛИ, а не от константы: √-распределение по числу проб даёт равномерную
+  // плотность точек по площади.
+  const placed = [];
+  const cx = W / 2, cy = H / 2;
+  const maxRad = Math.hypot(W, H) / 2;
+  const aspect = H / W;                 // панель шире, чем выше — сплющиваем спираль
+  const TRIES = 5000;
+  for (const it of items){
+    const r = it.r;
+    let put = null;
+    for (let a = 0; a < TRIES && !put; a++){
+      const rad = maxRad * Math.sqrt(a / TRIES);
+      const ang = a * 0.4;              // ~золотой угол, витки не ложатся друг на друга
+      const x = cx + rad * Math.cos(ang);
+      const y = cy + rad * Math.sin(ang) * aspect;
+      if (x - r < 0 || x + r > W || y - r < 0 || y + r > H) continue;
+      let hit = false;
+      for (const p of placed){
+        if (Math.hypot(p.x - x, p.y - y) < p.r + r + 3){ hit = true; break; }
+      }
+      if (!hit) put = {x, y};
+    }
+    // Не нашлось места — круг не рисуем. Наложить его поверх соседа хуже:
+    // доска перестаёт читаться как сравнение размеров.
+    if (put) placed.push({...it, x: put.x, y: put.y});
+  }
+  return placed;
+}
+
+async function loadBoard(){
+  const sec = document.getElementById('buzzBoard');
+  const canvas = document.getElementById('boardCanvas');
+  if (!sec || !canvas) return;
+  // Не через get(): тот ходит за статическими файлами в /data, а доска
+  // считается на лету из счётчика упоминаний.
+  let d = null;
+  try {
+    const r = await fetch('/api/pulse/board?t=' + Date.now());
+    d = r.ok ? await r.json() : null;
+  } catch(e) { d = null; }
+  const items = (d && d.items || []).filter(x => x.mentions > 0);
+  if (!items.length){
+    // Пусто — прячем секцию целиком. Заголовок «Что обсуждают прямо сейчас»
+    // над пустым полем — это обещание, которого страница не выполняет; ровно
+    // так до сегодняшнего дня и выглядел старый блок.
+    sec.hidden = true;
+    return;
+  }
+  sec.hidden = false;
+
+  const W = canvas.clientWidth || 700;
+  const H = canvas.clientHeight || 400;
+  const mob = W < 560;
+  const list = items.slice(0, mob ? 12 : 20);
+  const max = list[0].mentions;
+  const minR = mob ? 20 : 26, maxR = Math.min(mob ? 56 : 78, Math.floor(H / 4.6));
+  list.forEach(it => { it.r = boardRadius(it.mentions, max, minR, maxR); });
+
+  const placed = packBubbles(list, W, H);
+  canvas.innerHTML = placed.map((it, i) => {
+    const meta = BOARD_CATS[it.category] || BOARD_CATS.stocks;
+    const chg = it.chg == null ? '' : (it.chg >= 0 ? '+' : '') + it.chg.toFixed(2) + '%';
+    const dir = it.chg == null ? '' : (it.chg >= 0 ? 'up' : 'down');
+    const raw = it.symbol.replace(/^[#_]/, '').split('.')[0];
+    // Шрифт подгоняем под длину имени, а не режем имя: «COMMERZBA» вместо
+    // «COMMERZBANK» выглядит как ошибка, а не как сокращение.
+    let fs = Math.max(9, Math.min(15, Math.round(it.r / 3.1)));
+    if (raw.length > 6) fs = Math.max(8, Math.round(fs * 6 / raw.length * 1.15));
+    const showName = it.r >= 34;
+    const showChg = it.r >= 26;
+    const label = escapeHtmlIdx(raw);
+    return `<a class="board-bubble ${meta.cls}" href="/chart.html?s=${encodeURIComponent(it.symbol)}"
+      style="left:${Math.round(it.x - it.r)}px;top:${Math.round(it.y - it.r)}px;
+             width:${it.r*2}px;height:${it.r*2}px;animation-delay:${i*38}ms"
+      title="${escapeHtmlIdx(it.name)} — ${it.mentions} упоминаний за сутки">
+      <span class="bb-sym" style="font-size:${fs}px">${label}</span>
+      ${showName ? `<span class="bb-n" style="font-size:${Math.max(8, fs-4)}px">${it.mentions}</span>` : ''}
+      ${showChg && chg ? `<span class="bb-chg ${dir}" style="font-size:${Math.max(8, fs-4)}px">${chg}</span>` : ''}
+    </a>`;
+  }).join('');
+
+  const used = [...new Set(placed.map(p => p.category))];
+  document.getElementById('boardLegend').innerHTML = used.map(c => {
+    const m = BOARD_CATS[c] || BOARD_CATS.stocks;
+    return `<span class="bl"><i class="${m.cls}"></i>${escapeHtmlIdx(boardLabel(m))}</span>`;
+  }).join('');
+  const fresh = document.getElementById('boardFresh');
+  if (fresh && d.updated) fresh.textContent = ago(d.updated);
+}
+
+// Перекладываем при изменении ширины: раскладка считается от фактического
+// размера панели, и после поворота телефона круги оказались бы за краем.
+let _boardTimer = null;
+window.addEventListener('resize', () => {
+  clearTimeout(_boardTimer);
+  _boardTimer = setTimeout(loadBoard, 250);
+}, {passive:true});
+
 document.getElementById('pulseTabs').addEventListener('click', e=>{
   if(!e.target.dataset.cat) return;
   document.querySelectorAll('#pulseTabs .tab').forEach(x=>x.classList.remove('active'));
@@ -1628,6 +1814,7 @@ async function load(){
   renderBrief(brief);
   try { renderTech(t); } catch(e) { /* tcards may not exist in current layout */ }
   loadPulse(_pulseCat);
+  loadBoard();
   SIG=s; renderSignals('economy');
   renderNewsDigest(digest);
   renderOutliers(outliers); renderOffContext(outliers);
