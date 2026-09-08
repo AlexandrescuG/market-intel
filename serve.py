@@ -386,6 +386,49 @@ def _board_symbol_meta() -> dict:
     return out
 
 
+def _board_category_fill(cat: str) -> list:
+    """Инструменты направления, о которых сегодня не писали, — в порядке каталога.
+
+    Нужны, чтобы в выбранном направлении всегда было не меньше десяти кругов.
+    Счётчик упоминаний знает только тех, кого хоть раз упомянули за неделю; по
+    крипте это восемь инструментов из четырнадцати доступных. Остальные шесть
+    от этого не перестают отслеживаться — просто про них молчат, и честнее
+    показать их нулём, чем сделать вид, что мы следим за восемью.
+
+    Порядок каталога брокера — не случайный: там сверху мажоры. Сортировать
+    нечем (упоминаний ноль у всех), а стабильный порядок важнее — доска не
+    должна перетасовываться при каждом обновлении.
+    """
+    meta = _board_symbol_meta()
+    out, seen = [], set()
+    try:
+        raw = json.loads((WEB_DIR / "data" / "broker_catalog.json").read_text(encoding="utf-8"))
+        items = raw.get("items", raw) if isinstance(raw, dict) else raw
+    except Exception:
+        return out
+    for it in items:
+        our_cat = _BOARD_CATEGORY_OF.get(it.get("category"))
+        if our_cat != cat:
+            continue
+        m = meta.get(it["symbol"])
+        if not m or m["key"] in seen:
+            continue
+        seen.add(m["key"])
+        out.append({"symbol": m["key"], "name": m["name"], "category": cat,
+                    "mentions": 0, "burst": 0.0, "price": m["price"],
+                    "chg": m["chg"], "ticker": m.get("ticker")})
+    return out
+
+
+# Категория каталога → направление на доске. Тот же словарь, что в pulse_job:
+# держать два разных значило бы получить инструмент в одном направлении в
+# счётчике и в другом на витрине.
+_BOARD_CATEGORY_OF = {
+    "crypto": "crypto", "stock": "stocks", "index": "indices",
+    "fx": "fx", "commodity": "commodity", "etf": "stocks", "bond": "indices",
+}
+
+
 _blocklist_cache: tuple = (0.0, {})
 
 
@@ -2546,14 +2589,30 @@ class Handler(http.server.SimpleHTTPRequestHandler):
     _BOARD_GROUP_CAP = 6
     _BOARD_TOTAL = 20
 
+    # Сколько показываем, когда выбрано одно направление. Десять — нижняя
+    # граница, заданная владельцем: доска одного направления должна давать
+    # картину рынка, а не тройку самых шумных.
+    _BOARD_CAT_MIN = 10
+    _BOARD_CAT_MAX = 14
+
     def _handle_pulse_board(self) -> None:
-        """Доска обсуждаемости для главной: ~20 активов по всем направлениям.
+        """Доска обсуждаемости для главной.
+
+        Без параметра — срез по всему рынку: по четыре инструмента каждого из
+        пяти направлений, чтобы их можно было сравнить между собой.
+        С `?cat=<направление>` — одно направление и не меньше десяти
+        инструментов в нём.
 
         Отличие от /api/pulse (вкладки «крипта / акции / индексы»): там топ-8
-        внутри одного направления, здесь — срез по всему рынку сразу, ради
-        сравнения между направлениями. Размер пузыря на витрине — упоминания за
-        сутки, цвет — движение цены.
+        по всплеску внутри направления, здесь — по абсолютным упоминаниям за
+        сутки, потому что размер пузыря должен отвечать на вопрос «о чём
+        говорят больше», а не «где сильнее разогналось».
         """
+        params = parse_qs(urlparse(self.path).query)
+        cat = params.get("cat", [None])[0]
+        if cat and cat not in self._BOARD_QUOTA:
+            self._send_json({"error": "unknown cat"}, 400)
+            return
         try:
             con = sqlite3.connect(str(_SIGNALS_DB))
             con.row_factory = sqlite3.Row
@@ -2591,6 +2650,31 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 cur["burst"] = max(cur["burst"], round(r["score"] or 0, 2))
 
             pool = sorted(merged.values(), key=lambda x: x["mentions"], reverse=True)
+
+            # ── Одно направление ────────────────────────────────────────────
+            if cat:
+                items = [x for x in pool if x["category"] == cat][:self._BOARD_CAT_MAX]
+                # 🔴 Добираем до десяти инструментами, о которых сегодня не
+                # писали. Ноль упоминаний — это факт, а не пустота: инструмент
+                # отслеживается, просто про него молчат. Показать по валютам
+                # три круга вместо десяти значило бы соврать, что мы следим
+                # только за тремя.
+                if len(items) < self._BOARD_CAT_MIN:
+                    have = {x["symbol"] for x in items}
+                    for extra in _board_category_fill(cat):
+                        if extra["symbol"] in have:
+                            continue
+                        items.append(extra)
+                        have.add(extra["symbol"])
+                        if len(items) >= self._BOARD_CAT_MIN:
+                            break
+                items.sort(key=lambda x: x["mentions"], reverse=True)
+                self._send_json({
+                    "updated": datetime.fromtimestamp(ts, timezone.utc).isoformat(),
+                    "window_hours": 24, "category": cat, "items": items,
+                })
+                return
+
             chosen, taken = [], {k: 0 for k in self._BOARD_QUOTA}
             for it in pool:
                 q = self._BOARD_QUOTA.get(it["category"])

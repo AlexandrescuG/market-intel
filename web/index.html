@@ -180,7 +180,13 @@ a:hover{text-decoration:underline;color:var(--glow)}
 /* Пять направлений — пять колонок. Раньше всё лежало одним облаком с
    легендой по цветам: сравнить крипту с сырьём было можно, а понять, что
    именно относится к сырью, — только сверяясь с легендой. */
+.board-tabs{flex-wrap:wrap;margin-bottom:12px}
 .board-groups{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+/* Одно направление на всю ширину: сетка из одной колонки, ячейка выше —
+   в ней десять с лишним кругов вместо четырёх. */
+.board-groups.single{grid-template-columns:1fr}
+.board-groups.single .board-cell{height:380px}
+.board-groups.single .board-group-h{display:none}
 .board-group{display:flex;flex-direction:column;min-width:0}
 .board-group-h{display:flex;align-items:center;gap:6px;margin-bottom:6px;
   font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.6px;
@@ -234,6 +240,8 @@ a:hover{text-decoration:underline;color:var(--glow)}
      её на всю ширину: круги раскладываются горизонтально и место работает. */
   .board-group:last-child{grid-column:1 / -1}
   .board-group:last-child .board-cell{height:130px}
+  .board-groups.single .board-cell{height:320px}
+  .board-groups.single .board-group:last-child .board-cell{height:320px}
   .board-group-h{font-size:9.5px;letter-spacing:.3px}
   .board-sub{font-size:12.5px}
 }
@@ -561,6 +569,7 @@ a:hover{text-decoration:underline;color:var(--glow)}
         <span class="fresh" id="boardFresh"></span>
       </div>
       <p class="board-sub" data-i18n="home.board_sub">{{ t('home.board_sub', lang) }}</p>
+      <div class="tabs board-tabs" id="boardTabs"></div>
       <div class="board-groups" id="boardCanvas"></div>
     </section>
 
@@ -1497,6 +1506,21 @@ function openChart(ticker){
   document.getElementById('chartOverlay').classList.add('open');
 }
 
+// Открыть график в модальном окне по готовому символу, без перевода через
+// chartLabelOf: доска обсуждаемости уже отдаёт каноническое имя, а второй
+// перевод поверх него мог бы увести на другой инструмент.
+//
+// embed=1 — тот же режим, в котором график встраивается в мини-приложение:
+// без шапки, тикера и нижней навигации, только полотно с контролами. Без
+// него в окно 900×620 приезжала бы вся страница целиком, со своей шапкой
+// внутри чужой шапки.
+function openChartSymbol(symbol){
+  if (!symbol) return;
+  document.getElementById('chartFrame').src =
+    './chart.html?embed=1&s=' + encodeURIComponent(symbol);
+  document.getElementById('chartOverlay').classList.add('open');
+}
+
 function closeChart(){
   document.getElementById('chartOverlay').classList.remove('open');
   document.getElementById('chartFrame').src = '';
@@ -1759,18 +1783,64 @@ function packBubbles(items, W, H){
   return placed;
 }
 
+// Выбранное направление. null — общий срез по всем пяти.
+let _boardCat = null;
+
+function renderBoardTabs(){
+  const el = document.getElementById('boardTabs');
+  if (!el) return;
+  const t = (k, fb) => (window.sbfI18n ? window.sbfI18n.t(k, fb) : fb);
+  const tabs = [{cat: null, label: t('home.board_tab_all', 'Все')}]
+    .concat(['crypto','commodity','fx','indices','stocks'].map(c =>
+      ({cat: c, label: boardLabel(BOARD_CATS[c])})));
+  el.innerHTML = tabs.map(x =>
+    `<button class="tab chip${x.cat === _boardCat ? ' active' : ''}" data-bcat="${x.cat || ''}">${escapeHtmlIdx(x.label)}</button>`
+  ).join('');
+}
+
+document.addEventListener('click', e => {
+  const b = e.target.closest && e.target.closest('#boardTabs [data-bcat]');
+  if (!b) return;
+  _boardCat = b.dataset.bcat || null;
+  renderBoardTabs();
+  loadBoard();
+});
+
+// Клик по пузырю открывает график в модальном окне, а не уводит со страницы —
+// так же, как карточки в CRM. Человек смотрит доску, заглядывает в один
+// инструмент и возвращается к ней же, не теряя место и не перезагружая
+// главную.
+//
+// Ссылка при этом остаётся настоящей: href ведёт на страницу графика, и
+// «открыть в новой вкладке», средняя кнопка мыши и копирование адреса
+// работают как обычно. Перехватываем только простой левый клик — ровно то,
+// что делает большинство.
+document.addEventListener('click', e => {
+  const a = e.target.closest && e.target.closest('.board-bubble');
+  if (!a) return;
+  if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+  e.preventDefault();
+  openChartSymbol(a.dataset.sym);
+});
+
 async function loadBoard(){
   const sec = document.getElementById('buzzBoard');
   const canvas = document.getElementById('boardCanvas');
   if (!sec || !canvas) return;
+  renderBoardTabs();
   // Не через get(): тот ходит за статическими файлами в /data, а доска
   // считается на лету из счётчика упоминаний.
   let d = null;
   try {
-    const r = await fetch('/api/pulse/board?t=' + Date.now());
+    const r = await fetch('/api/pulse/board?t=' + Date.now() +
+                          (_boardCat ? '&cat=' + encodeURIComponent(_boardCat) : ''));
     d = r.ok ? await r.json() : null;
   } catch(e) { d = null; }
-  const items = (d && d.items || []).filter(x => x.mentions > 0);
+  // 🔴 В общем срезе показываем только то, о чём говорят. В выбранном
+  // направлении — всё, что отслеживается, включая нули: там вопрос не «что
+  // сейчас шумит», а «за чем мы вообще следим», и круг с нулём отвечает на
+  // него честнее, чем его отсутствие.
+  const items = (d && d.items || []).filter(x => _boardCat ? true : x.mentions > 0);
   if (!items.length){
     // Пусто — прячем секцию целиком. Заголовок «Что обсуждают прямо сейчас»
     // над пустым полем — это обещание, которого страница не выполняет; ровно
@@ -1784,7 +1854,8 @@ async function loadBoard(){
   // одинаково при каждом заходе, иначе человек каждый раз ищет заново, где
   // тут крипта. Пустые направления всё равно показываем колонкой с подписью —
   // «сегодня про сырьё молчат» это тоже факт о рынке.
-  const ORDER = ['crypto', 'commodity', 'fx', 'indices', 'stocks'];
+  const ORDER = _boardCat ? [_boardCat] : ['crypto', 'commodity', 'fx', 'indices', 'stocks'];
+  canvas.classList.toggle('single', !!_boardCat);
   const byCat = {};
   ORDER.forEach(c => { byCat[c] = []; });
   items.forEach(it => { if (byCat[it.category]) byCat[it.category].push(it); });
@@ -1817,8 +1888,32 @@ async function loadBoard(){
     // большой из них — не занимать её целиком.
     const maxR = Math.max(16, Math.floor(Math.min(W * 0.40, H / 4.6)));
     const minR = Math.max(13, Math.round(maxR * 0.34));
-    list.forEach(it => { it.r = boardRadius(it.mentions, maxMentions, minR, maxR); });
-    const placed = packBubbles(list, W, H);
+    // 🔴 Ужимаем, пока не поместятся ВСЕ. Дважды за два дня доска молча
+    // теряла круги — сперва из-за короткой спирали, потом из-за круговой в
+    // узкой колонке, — и оба раза это выглядело как нехватка данных, а не
+    // как ошибка раскладки. Здесь этот класс закрыт по-другому: если хоть
+    // один не влез, уменьшаем все на 8% и пробуем снова. Пропорции между
+    // кругами при этом сохраняются, а значит сравнение не портится.
+    let placed = [];
+    let scale = 1;
+    // Двенадцать попыток, а не шесть: при шаге 0.92 шести хватало ужать всего
+    // до 0.66, и в мобильной ячейке 336×319 четырнадцать примерно одинаковых
+    // кругов (акции — там у всех по 3-9 упоминаний) всё ещё не помещались.
+    // Ровно этот случай и ловит счётчик want/got ниже.
+    for (let attempt = 0; attempt < 12; attempt++){
+      list.forEach(it => {
+        it.r = Math.max(9, Math.round(boardRadius(it.mentions, maxMentions, minR, maxR) * scale));
+      });
+      placed = packBubbles(list, W, H);
+      if (placed.length === list.length) break;
+      scale *= 0.9;
+    }
+    // Сколько кругов ХОТЕЛИ нарисовать против того, сколько получилось.
+    // Дважды раскладка молча теряла элементы, и оба раза это выглядело как
+    // нехватка данных, а не как ошибка. Теперь расхождение видно прямо в
+    // разметке, и его ловит автопроверка, а не глаз.
+    cell.dataset.want = String(list.length);
+    cell.dataset.got = String(placed.length);
     cell.innerHTML = placed.map(it => {
       const chg = it.chg == null ? '' : (it.chg >= 0 ? '+' : '') + it.chg.toFixed(2) + '%';
       const dir = it.chg == null ? '' : (it.chg >= 0 ? 'up' : 'down');
@@ -1836,6 +1931,7 @@ async function loadBoard(){
       const showChg = it.r >= 24;
       const delay = (idx++) * 34;
       return `<a class="board-bubble ${BOARD_CATS[cat].cls}" href="/chart.html?s=${encodeURIComponent(it.symbol)}"
+        data-sym="${escapeHtmlIdx(it.symbol)}"
         style="left:${Math.round(it.x - it.r)}px;top:${Math.round(it.y - it.r)}px;
                width:${it.r*2}px;height:${it.r*2}px;animation-delay:${delay}ms"
         title="${escapeHtmlIdx(it.name)} — ${it.mentions} упоминаний за сутки">

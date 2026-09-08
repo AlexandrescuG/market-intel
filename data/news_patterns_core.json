@@ -1,0 +1,194 @@
+{
+  "_описание": "Выражения «новость → инструмент», написанные руками. Отдельный файл от news_symbol_patterns.json: тот генерируется из каталога и перезаписывается, а этот правится глазами и живёт дольше. При совпадении ключей побеждает этот.",
+  "_зачем": "Генератор строит выражение из имени инструмента: у AUDUSD получается \\bAUDUSD\\b. В новостях так не пишут — пишут «AUD/USD», «Australian dollar», «aussie». Поэтому по валютам тегировались 4 пары из 58, по индексам 6 из 32, и доска обсуждаемости не могла показать по десять инструментов в направлении просто потому, что столько не отслеживалось.",
+  "_правило": "Ложное срабатывание дороже пропуска. Пропущенная новость — это отсутствие отметки на графике; ложная — чужая новость под видом относящейся к активу, то есть дезинформация на публичной витрине. Поэтому: никаких коротких аббревиатур как отдельных слов (SMI, AEX, CAC без уточнения), никаких общих слов (\"gold\" в значении медали отсекается контекстом финансового потока, а вот \"corn\" в \"corned beef\" — нет, отсюда \\bcorn\\b без суффиксов). Каждое выражение проверялось на живом потоке 08.09.2026.",
+  "EURUSD": {
+    "pattern": "eur\\s*/\\s*usd|\\beurusd\\b|евро\\s*/\\s*доллар",
+    "коммент": "парная нотация; отдельное «евро» не берём — оно в каждой третьей новости"
+  },
+  "GBPUSD": {
+    "pattern": "gbp\\s*/\\s*usd|\\bgbpusd\\b|\\bcable\\b|фунт\\s*/\\s*доллар"
+  },
+  "USDJPY": {
+    "pattern": "usd\\s*/\\s*jpy|\\busdjpy\\b|доллар\\s*/\\s*иен"
+  },
+  "USDCHF": {
+    "pattern": "usd\\s*/\\s*chf|\\busdchf\\b|доллар\\s*/\\s*франк"
+  },
+  "USDCAD": {
+    "pattern": "usd\\s*/\\s*cad|\\busdcad\\b|\\bloonie\\b|доллар\\s*/\\s*кана"
+  },
+  "AUDUSD": {
+    "pattern": "aud\\s*/\\s*usd|\\baudusd\\b|australian dollar|австралийск\\w* доллар"
+  },
+  "NZDUSD": {
+    "pattern": "nzd\\s*/\\s*usd|\\bnzdusd\\b|new zealand dollar|новозеландск\\w* доллар"
+  },
+  "EURGBP": {
+    "pattern": "eur\\s*/\\s*gbp|\\beurgbp\\b"
+  },
+  "EURJPY": {
+    "pattern": "eur\\s*/\\s*jpy|\\beurjpy\\b"
+  },
+  "GBPJPY": {
+    "pattern": "gbp\\s*/\\s*jpy|\\bgbpjpy\\b"
+  },
+  "USDMXN": {
+    "pattern": "usd\\s*/\\s*mxn|\\busdmxn\\b|mexican peso|мексиканск\\w* песо"
+  },
+  "USDZAR": {
+    "pattern": "usd\\s*/\\s*zar|\\busdzar\\b|south african rand|южноафриканск\\w* ранд"
+  },
+  "USDTRY": {
+    "pattern": "usd\\s*/\\s*try|\\busdtry\\b|turkish lira|турецк\\w* лир"
+  },
+  "USDCNY": {
+    "pattern": "usd\\s*/\\s*cn[yh]|\\busdcn[yh]\\b|chinese yuan|\\brenminbi\\b|китайск\\w* юан"
+  },
+  "DOLLAR_INDX": {
+    "pattern": "\\bdxy\\b|dollar index|индекс доллара"
+  },
+  "US_500": {
+    "pattern": "s&p\\s*500|\\bspx\\b|standard\\s*&\\s*poor"
+  },
+  "US_30": {
+    "pattern": "dow\\s+jones|\\bdow\\s*30\\b|\\bus30\\b|\\bdjia\\b"
+  },
+  "US_TECH100": {
+    "pattern": "nasdaq\\s*100|\\bnas100\\b|\\bndx\\b"
+  },
+  "US_2000": {
+    "pattern": "russell\\s*2000|\\biwm\\b",
+    "коммент": "\\brut\\b убран: «stuck in a rut» и подобное давали ложные совпадения"
+  },
+  "VIX": {
+    "pattern": "\\bvix\\b|volatility index|индекс волатильности"
+  },
+  "GERMANY_40": {
+    "pattern": "\\bdax\\b|germany\\s*40"
+  },
+  "UK_100": {
+    "pattern": "ftse\\s*100|\\bftse\\b(?!\\s*mib)|uk\\s*100"
+  },
+  "JAPAN_225": {
+    "pattern": "\\bnikkei\\b|japan\\s*225|никкей"
+  },
+  "FRANCE_40": {
+    "pattern": "cac\\s*40|france\\s*40"
+  },
+  "EUROPE_50": {
+    "pattern": "euro\\s*stoxx\\s*50|eurostoxx|europe\\s*50"
+  },
+  "HK_50": {
+    "pattern": "hang\\s*seng|hong\\s*kong\\s*50|гонконгск\\w* индекс"
+  },
+  "CHINA_A50": {
+    "pattern": "china\\s*a50|ftse\\s*china"
+  },
+  "ITALY_40": {
+    "pattern": "ftse\\s*mib|italy\\s*40"
+  },
+  "SWISS_20": {
+    "pattern": "swiss\\s*market\\s*index|swiss\\s*20",
+    "коммент": "«SMI» тремя буквами не берём — совпадает со словами и аббревиатурами"
+  },
+  "AUS_200": {
+    "pattern": "asx\\s*200|australia\\s*200"
+  },
+  "CANADA_60": {
+    "pattern": "tsx\\s*60|s&p/tsx|canada\\s*60"
+  },
+  "SPAIN35": {
+    "pattern": "\\bibex\\b|spain\\s*35"
+  },
+  "NED_25": {
+    "pattern": "\\baex\\b\\s*(index|25)|netherlands\\s*25",
+    "коммент": "AEX только с уточнением: три буквы дают совпадения в чужих текстах"
+  },
+  "INDIA_50": {
+    "pattern": "nifty\\s*50|\\bnifty\\b"
+  },
+  "GOLD": {
+    "pattern": "\\bgold\\b(?!\\s*(medal|coast|man|smith))|золот|\\bxau\\b",
+    "коммент": "исключения на случай «gold medal», «Goldman», «Gold Coast»"
+  },
+  "SILVER": {
+    "pattern": "\\bsilver\\b(?!\\s*(medal|lake))|серебр|\\bxag\\b"
+  },
+  "CrudeOIL": {
+    "pattern": "\\bwti\\b|crude oil|west texas|нефт[ьияю]\\b"
+  },
+  "BRENT_OIL": {
+    "pattern": "\\bbrent\\b|брент"
+  },
+  "NATURAL_GAS": {
+    "pattern": "natural gas|природн\\w*\\s*газ|henry hub"
+  },
+  "COPPER": {
+    "pattern": "\\bcopper\\b|медь\\b|меди\\b"
+  },
+  "PLATINUM": {
+    "pattern": "\\bplatinum\\b|платин"
+  },
+  "PALLADIUM": {
+    "pattern": "\\bpalladium\\b|паллад"
+  },
+  "WHEAT": {
+    "pattern": "\\bwheat\\b|пшениц"
+  },
+  "CORN": {
+    "pattern": "\\bcorn\\b(?!\\w)|кукуруз"
+  },
+  "SOYBEAN": {
+    "pattern": "\\bsoybeans?\\b|\\bsoya?\\b(?=\\s*(bean|meal|oil))|соя\\b|сои\\b"
+  },
+  "COFFEE_C": {
+    "pattern": "\\bcoffee\\b\\s*(futures|prices|market|c\\b)|арабик|кофе\\s*(фьючерс|цен)",
+    "коммент": "просто «coffee» слишком часто про кофейни"
+  },
+  "COCOA": {
+    "pattern": "\\bcocoa\\b|какао"
+  },
+  "GASOLINE": {
+    "pattern": "\\bgasoline\\b|\\brbob\\b|бензин"
+  },
+  "HEATING_OIL": {
+    "pattern": "heating oil|мазут"
+  },
+  "BTC": {
+    "pattern": "\\bbitcoin\\b(?!\\s+cash)|биткои|биткойн|\\bbtc\\b(?!\\s*cash)",
+    "коммент": "исключаем Bitcoin Cash — это отдельный инструмент"
+  },
+  "ETH": {
+    "pattern": "\\bethereum\\b|эфириум|\\beth\\b(?!\\w)"
+  },
+  "XRP": {
+    "pattern": "\\bxrp\\b|\\bripple\\b|риппл"
+  },
+  "LTC": {
+    "pattern": "\\blitecoin\\b|\\bltc\\b|лайткоин"
+  },
+  "BCHUSD": {
+    "pattern": "bitcoin\\s+cash|\\bbch\\b"
+  },
+  "LINK": {
+    "pattern": "\\bchainlink\\b|чейнлинк|\\blink\\b\\s*(token|coin|crypto)",
+    "коммент": "голое «link» — обычное английское слово, берём только с уточнением"
+  },
+  "SOL": {
+    "pattern": "\\bsolana\\b|солана|\\bsol\\b\\s*(token|coin|crypto)"
+  },
+  "XLM": {
+    "pattern": "\\bxlm\\b|stellar\\s+(lumens?|network|blockchain|foundation|tokeniz)",
+    "коммент": "голое «stellar» — обычное прилагательное: поймало «India's stellar economic growth». Берём только с уточнением или по тикеру"
+  },
+  "UNI": {
+    "pattern": "\\buniswap\\b|юнисвап"
+  },
+  "PAX_GOLD": {
+    "pattern": "pax\\s*gold|\\bpaxg\\b"
+  },
+  "ETHBTC": {
+    "pattern": "eth\\s*/\\s*btc|\\bethbtc\\b"
+  }
+}

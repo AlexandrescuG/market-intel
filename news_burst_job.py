@@ -65,6 +65,39 @@ def _searchable(title: str | None, text: str | None) -> str:
     blob = _TAG_RE.sub(" ", blob)
     return html.unescape(blob)
 
+def _load_core_patterns() -> dict:
+    """Рукописные выражения (data/news_patterns_core.json).
+
+    Отдельный файл от сгенерированного: тот перезаписывается при каждом
+    пересборе каталога, а этот правится глазами и должен переживать пересборку.
+    Формат тот же — {символ: {"pattern": "..."}}, чтобы файлы были
+    взаимозаменяемы и их можно было сравнивать.
+    """
+    path = Path(__file__).parent / "data" / "news_patterns_core.json"
+    if not path.exists():
+        return {}
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except Exception as e:
+        print(f"news_patterns_core.json не прочитан ({e}) — работаем без него",
+              file=sys.stderr)
+        return {}
+    out = {}
+    for sym, meta in raw.items():
+        if sym.startswith("_") or not isinstance(meta, dict):
+            continue
+        pat = meta.get("pattern")
+        if not pat:
+            continue
+        try:
+            out[sym] = re.compile(pat, re.I)
+        except re.error as e:
+            # Битое выражение пропускаем поимённо: одна опечатка не повод
+            # остаться без остальных пятидесяти.
+            print(f"выражение для {sym} не скомпилировалось: {e}", file=sys.stderr)
+    return out
+
+
 def _load_catalog_patterns() -> dict:
     """Выражения для инструментов каталога (tools/news_symbol_patterns.py).
 
@@ -157,8 +190,14 @@ def tag_recent(con, verbose=False) -> int:
     # которой не подумали: не из текста, а из разметки вокруг него.
     #
     # См. _searchable() ниже.
+    # Порядок слияния = приоритет. Снизу вверх: встроенные 15 символов,
+    # поверх — сгенерированные из каталога (широкие, но буквальные), поверх
+    # всего — написанные руками (data/news_patterns_core.json). Рукописные
+    # должны побеждать: генератор для AUDUSD выдаёт \bAUDUSD\b, чего в
+    # новостях не бывает, а рукописное ловит «AUD/USD» и «Australian dollar».
     patterns = dict(_SYMBOL_PATTERNS)
     patterns.update(_load_catalog_patterns())
+    patterns.update(_load_core_patterns())
     tagged = 0
     for uid, title, text in rows:
         blob = _searchable(title, text)
