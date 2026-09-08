@@ -61,7 +61,7 @@
   "home.pulse_tab_stocks": "Acțiuni",
   "home.pulse_tab_indices": "Indici",
   "home.pulse_calm": "Fundal calm — top după mențiuni",
-  "home.pulse_explainer": "De câte ori mai des este menționat instrumentul în ultimele 24 de ore. Atenție, nu preț.",
+  "home.pulse_explainer": "De câte ori mai des decât de obicei este menționat instrumentul în ultima oră. Obișnuitul este ora medie din ultimele 7 zile. Este atenție, nu preț.",
   "home.pulse_score_tpl": "×{score} față de norma proprie",
   "home.pulse_zero_collapsed": "Încă {n} instrumente fără mențiuni notabile",
   "home.pulse_feed_locked": "Disponibil după înregistrare",
@@ -1651,5 +1651,6 @@
   "home.board_cat_fx": "valute",
   "home.board_cat_commodity": "materii prime",
   "home.board_quiet": "astăzi e liniște",
-  "home.board_tab_all": "Toate"
+  "home.board_tab_all": "Toate",
+  "home.pulse_norm_note": "Pentru instrumentele despre care se scrie rar, norma nu coboară sub 0,5 mențiuni pe oră. De aceea câteva mesaje la rând dau un multiplicator mare — este un vârf de atenție, nu un flux de zece ori mai mare."
 }

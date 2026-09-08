@@ -185,7 +185,9 @@ a:hover{text-decoration:underline;color:var(--glow)}
 /* Одно направление на всю ширину: сетка из одной колонки, ячейка выше —
    в ней десять с лишним кругов вместо четырёх. */
 .board-groups.single{grid-template-columns:1fr}
-.board-groups.single .board-cell{height:380px}
+/* Высота под полный список направления: в валютах 59 инструментов, в акциях
+   60. При 380px они помещались только ужавшись до нечитаемых 12-14px. */
+.board-groups.single .board-cell{height:540px}
 .board-groups.single .board-group-h{display:none}
 .board-group{display:flex;flex-direction:column;min-width:0}
 .board-group-h{display:flex;align-items:center;gap:6px;margin-bottom:6px;
@@ -240,8 +242,8 @@ a:hover{text-decoration:underline;color:var(--glow)}
      её на всю ширину: круги раскладываются горизонтально и место работает. */
   .board-group:last-child{grid-column:1 / -1}
   .board-group:last-child .board-cell{height:130px}
-  .board-groups.single .board-cell{height:320px}
-  .board-groups.single .board-group:last-child .board-cell{height:320px}
+  .board-groups.single .board-cell{height:560px}
+  .board-groups.single .board-group:last-child .board-cell{height:560px}
   .board-group-h{font-size:9.5px;letter-spacing:.3px}
   .board-sub{font-size:12.5px}
 }
@@ -726,7 +728,7 @@ a:hover{text-decoration:underline;color:var(--glow)}
       <section class="panel">
         <div class="panel-h"><h2>{{ t('home.market_buzz', lang) }}</h2>
           <span class="fresh" id="buzzFresh"></span></div>
-        <div class="pulse-explainer">{{ t('home.pulse_explainer', lang) }}</div>
+        <div class="pulse-explainer" title="{{ t('home.pulse_norm_note', lang) }}">{{ t('home.pulse_explainer', lang) }}</div>
         <div class="tabs" id="pulseTabs">
           <button class="tab chip active" data-cat="crypto">{{ t('home.pulse_tab_crypto', lang) }}</button>
           <button class="tab chip" data-cat="stocks">{{ t('home.pulse_tab_stocks', lang) }}</button>
@@ -1886,8 +1888,17 @@ async function loadBoard(){
     // поместится и будет молча выброшен упаковкой. Делитель подобран по
     // площади: четыре-шесть кругов должны укладываться в колонку, а самый
     // большой из них — не занимать её целиком.
-    const maxR = Math.max(16, Math.floor(Math.min(W * 0.40, H / 4.6)));
-    const minR = Math.max(13, Math.round(maxR * 0.34));
+    // Потолок радиуса зависит и от того, сколько кругов в ячейке: при
+    // пятидесяти девяти валютных парах круг в 0.4 ширины оставил бы остальным
+    // пятьдесят восемь пустое место, и всё ужалось бы до нечитаемого.
+    // Делим доступную площадь на число кругов и берём от неё радиус, с
+    // поправкой на то, что плотнее 55% упаковка не садится.
+    const area = W * H * 0.55 / Math.max(list.length, 1);
+    const fair = Math.sqrt(area / Math.PI);
+    const maxR = Math.max(16, Math.floor(Math.min(W * 0.40, H / 4.6, fair * 1.9)));
+    // Нижняя граница — чтобы подпись оставалась читаемой: при радиусе меньше
+    // 18px тикер уходит в 6px и превращается в серую точку.
+    const minR = Math.max(18, Math.round(maxR * 0.34));
     // 🔴 Ужимаем, пока не поместятся ВСЕ. Дважды за два дня доска молча
     // теряла круги — сперва из-за короткой спирали, потом из-за круговой в
     // узкой колонке, — и оба раза это выглядело как нехватка данных, а не
@@ -1929,7 +1940,10 @@ async function loadBoard(){
       if (raw.length > 6) fs = Math.max(7, Math.round(fs * 6 / raw.length * 1.15));
       const showName = it.r >= 30;
       const showChg = it.r >= 24;
-      const delay = (idx++) * 34;
+      // Каскад появления не длиннее секунды на весь блок. При шаге 34 мс и
+      // шестидесяти кругах последний выезжал через 2 секунды — человек
+      // успевал решить, что доска догрузилась, и увести взгляд.
+      const delay = Math.round((idx++) * Math.min(34, 900 / Math.max(list.length, 1)));
       return `<a class="board-bubble ${BOARD_CATS[cat].cls}" href="/chart.html?s=${encodeURIComponent(it.symbol)}"
         data-sym="${escapeHtmlIdx(it.symbol)}"
         style="left:${Math.round(it.x - it.r)}px;top:${Math.round(it.y - it.r)}px;

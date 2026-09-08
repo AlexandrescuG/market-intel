@@ -61,7 +61,7 @@
   "home.pulse_tab_stocks": "Stocks",
   "home.pulse_tab_indices": "Indices",
   "home.pulse_calm": "Calm background — top by mentions",
-  "home.pulse_explainer": "How many times more often the instrument is mentioned than usual, over the past 24 hours. Attention, not price.",
+  "home.pulse_explainer": "How many times more often than usual the instrument is mentioned in the last hour. Usual is the average hour over the last 7 days. This is attention, not price.",
   "home.pulse_score_tpl": "×{score} vs its own norm",
   "home.pulse_zero_collapsed": "{n} more instruments with no notable mentions",
   "home.pulse_feed_locked": "Available after registration",
@@ -1651,5 +1651,6 @@
   "home.board_cat_fx": "currencies",
   "home.board_cat_commodity": "commodities",
   "home.board_quiet": "quiet today",
-  "home.board_tab_all": "All"
+  "home.board_tab_all": "All",
+  "home.pulse_norm_note": "For rarely covered instruments the baseline never drops below 0.5 mentions per hour. That is why a handful of posts produces a large multiplier — it is a spike of attention, not a tenfold stream."
 }
