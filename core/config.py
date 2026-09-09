@@ -1,8 +1,10 @@
 """Конфиг: env, пути, пороги. Один источник правды для всех модулей."""
 from __future__ import annotations
 
+import json
 import logging
 import os
+import time
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -151,6 +153,70 @@ GOOGLE_NEWS_TOPICS = {
     "Google News: WSJ":       "site:wsj.com",
 }
 RSS_FEEDS.update({name: _google_news(q) for name, q in GOOGLE_NEWS_TOPICS.items()})
+
+
+# ── Запросы по инструментам витрины (09.09.2026) ─────────────────────────────
+#
+# 🔴 Запросов выше было восемь: EURUSD, GBPUSD, USDJPY, золото, нефть, биткоин,
+# ФРС, ЕЦБ. Ровно эти инструменты и стояли в топе доски обсуждаемости, а
+# остальные семьсот выглядели как «о них не пишут». Писали — мы не спрашивали.
+# Общие ленты (BBC World, Guardian, Al Jazeera) закрывают макро и политику, но
+# про DAX, какао или Nike в них попадается одна заметка в неделю.
+#
+# ПОЧЕМУ ПОРЦИЯМИ. Запросов около шестидесяти, и тянуть их все каждый цикл —
+# это шестьдесят обращений к Google News раз в двадцать минут. Ходим по кругу
+# порциями: полный оборот занимает несколько циклов, то есть меньше часа. Для
+# счётчика упоминаний за сутки этого достаточно с запасом, а нагрузка остаётся
+# на уровне сегодняшней.
+#
+# 🔴 Смещение считается ОТ ЧАСОВ, а не от счётчика в памяти процесса.
+#
+# Юнит sbf-collectors запускается таймером каждые 20 минут и каждый раз это
+# НОВЫЙ процесс (Type=oneshot, run.sh --once). Счётчик в переменной модуля
+# обнулялся бы при каждом запуске, круг начинался бы заново, и запросы после
+# двенадцатого не опрашивались бы никогда. Снаружи это выглядело бы как
+# работающая ротация: логи показывают разные ленты в пределах одного прогона.
+#
+# Время идёт независимо от перезапусков, поэтому окно берём от него.
+NEWS_QUERIES_PER_CYCLE = int(os.getenv("NEWS_QUERIES_PER_CYCLE", "12"))
+NEWS_ROTATION_STEP_SEC = int(os.getenv("NEWS_ROTATION_STEP_SEC", "1200"))  # 20 мин
+
+
+def _instrument_news_queries() -> dict:
+    """{имя ленты: запрос} — плоский список из data/news_queries.json."""
+    path = Path(__file__).resolve().parent.parent / "data" / "news_queries.json"
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+    out = {}
+    for group, items in raw.items():
+        if group.startswith("_") or not isinstance(items, dict):
+            continue
+        for symbol, query in items.items():
+            out[f"Google News: {symbol}"] = query
+    return out
+
+
+INSTRUMENT_NEWS_QUERIES = _instrument_news_queries()
+
+
+def rotating_news_feeds(cycle: int | None = None) -> dict:
+    """Порция инструментальных запросов для этого прогона сборщика.
+
+    cycle=None (обычный случай) — окно берётся от текущего времени, поэтому
+    ротация не сбрасывается при перезапуске процесса. Явный номер передаётся
+    только из тестов, где нужен предсказуемый набор.
+    """
+    names = sorted(INSTRUMENT_NEWS_QUERIES)
+    if not names:
+        return {}
+    n = max(1, NEWS_QUERIES_PER_CYCLE)
+    if cycle is None:
+        cycle = int(time.time() // max(60, NEWS_ROTATION_STEP_SEC))
+    start = (cycle * n) % len(names)
+    picked = [names[(start + i) % len(names)] for i in range(min(n, len(names)))]
+    return {name: _google_news(INSTRUMENT_NEWS_QUERIES[name]) for name in picked}
 RSS_TREND_WINDOW_HOURS = int(os.getenv("RSS_TREND_WINDOW_HOURS", "24"))
 
 # ── SBFCRM — новые регистрации платформы как лиды (27.08.2026) ───────────────

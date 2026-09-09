@@ -212,7 +212,44 @@ def tag_recent(con, verbose=False) -> int:
     con.commit()
     if verbose:
         print(f"тегировано новых (uid,symbol) пар: {tagged} (просканировано {len(rows)} новостей)")
+    _retention(con, verbose)
     return tagged
+
+
+# Сколько держим новости. Самое длинное окно, которое их читает, — 14 дней
+# (лента ватчлиста), базовая линия упоминаний — 7 дней. Полгода это запас
+# в десять раз, оставленный сознательно: по этой же таблице считается история
+# реакций на события, и укорачивать её ради места незачем.
+SIGNALS_RETENTION_DAYS = 180
+
+
+def _retention(con, verbose: bool = False) -> None:
+    """Удалить новости старше полугода вместе с их тегами.
+
+    🔴 Чистки не было вообще. На 09.09.2026 в signals.db 122 914 записей и
+    111 МБ, и это при сборе ~1500 в сутки. Сегодня объём сбора вырос: сняты
+    два ограничителя — гейт econ_relevance больше не выбрасывает новости про
+    инструменты витрины, и добавлены запросы по самим инструментам. Без
+    чистки база пошла бы в гигабайты за год, а заметили бы это тогда, когда
+    диск кончится.
+
+    Теги удаляем первой командой: строки в news_instrument_tags ссылаются на
+    uid новости, внешнего ключа нет, и обратный порядок оставил бы висячие
+    ссылки, по которым потом джойнится доска обсуждаемости.
+    """
+    cutoff = f"-{SIGNALS_RETENTION_DAYS} days"
+    try:
+        con.execute(
+            "DELETE FROM news_instrument_tags WHERE news_uid IN "
+            "(SELECT uid FROM signals WHERE last_seen < datetime('now', ?))", (cutoff,))
+        cur = con.execute("DELETE FROM signals WHERE last_seen < datetime('now', ?)", (cutoff,))
+        con.commit()
+        if verbose and cur.rowcount:
+            print(f"чистка: удалено {cur.rowcount} новостей старше {SIGNALS_RETENTION_DAYS} дней")
+    except sqlite3.OperationalError as e:
+        # Занятая база — не повод ронять тегирование: чистка повторится
+        # через пятнадцать минут следующим прогоном.
+        print(f"чистка пропущена ({e})", file=sys.stderr)
 
 
 def detect_bursts(con, verbose=False) -> int:

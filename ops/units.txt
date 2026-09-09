@@ -98,7 +98,7 @@ sbf-healthcheck.timer        timer   2400     # каждые 15 мин, этот
 sbf-live-strategy.timer      off     0        # остановлена 27.08 владельцем: форвард не различает состояний, см. Reports/mt5_drawdown_2026-08-27.md
 sbf-alpha-cycle.timer        off     0        # заменён на -h1/-h4/-d1 при разделении по горизонтам 14.08
 sbf-broker-sparklines.timer  timer   1800     # каждые 15 мин; 02.09 переписан на candle_cache, к мосту не ходит — причина отключения 25.08 отпала
-sbf-collectors.timer         off     0        # rss+stocktwits+twitter; StockTwits и Reddit мертвы (Layer3), ленту закрывают news-digest/news-burst
+sbf-collectors.timer         timer   1500     # каждые 20 мин: rss+twitter. Включён 09.09: с 26.08 сбор шёл ГОЛЫМ процессом мимо супервизии (StockTwits и Reddit мертвы, но RSS и X живы и кормят всю ленту)
 sbf-mt5-calibration.timer    off     0        # SPEC_mt5_cost_calibration_2026-08-18: синтетические сделки на демо, включать осознанно
 sbf-strategy-review.timer    off     0        # static (нет [Install]) — спутник живой форвард-стратегии, запускается вручную
 sbf-newspipe.service         off     0        # News Pipeline v1 → @rostoklepestop, отключён
