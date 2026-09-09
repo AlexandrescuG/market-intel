@@ -305,6 +305,42 @@ def _ctrader_tail(our_key, tf):
     return bars or []
 
 
+_geo_places_cache: tuple = (0.0, {})
+
+
+def _geo_places() -> dict:
+    """{код страны: {lon, lat, city}} из data/geo_places.json.
+
+    Координаты держит платформа, а не сайт: у сайта был свой список из
+    двадцати четырёх столиц, и при расхождении одна и та же страна оказалась
+    бы в разных точках на карте и на глобусе.
+    """
+    global _geo_places_cache
+    path = Path(DIRECTORY).parent / "data" / "geo_places.json"
+    try:
+        mtime = path.stat().st_mtime
+    except OSError:
+        return _geo_places_cache[1]
+    if _geo_places_cache[0] == mtime and _geo_places_cache[1]:
+        return _geo_places_cache[1]
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return _geo_places_cache[1]
+    out = {}
+    for code, meta in raw.items():
+        if code.startswith("_") or not isinstance(meta, dict):
+            continue
+        try:
+            out[code] = {"lon": float(meta["lon"]), "lat": float(meta["lat"]),
+                         "city": meta.get("город", code)}
+        except (KeyError, ValueError):
+            continue
+    if out:
+        _geo_places_cache = (mtime, out)
+    return out
+
+
 _board_meta_cache: tuple = (0.0, {})
 _BOARD_META_TTL = 60
 
@@ -2085,6 +2121,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self._handle_chart_news_bursts()
         elif path_clean == "/api/chart/news":
             self._handle_chart_news()
+        elif path_clean == "/api/geo/feed":
+            self._handle_geo_feed()
         elif path_clean == "/api/pulse/board":
             self._handle_pulse_board()
         elif path_clean == "/api/pulse":
@@ -2601,6 +2639,112 @@ class Handler(http.server.SimpleHTTPRequestHandler):
     # десктопе (проверено замером радиусов, не на глаз).
     _BOARD_CAT_MIN = 10
     _BOARD_CAT_MAX = 60
+
+    # Сколько отдаём на карту. Больше полусотни точек на глобусе сливаются в
+    # кашу, а лента всё равно листается по одной.
+    _GEO_LIMIT = 60
+
+    def _handle_geo_feed(self) -> None:
+        """Лента для карты и глобуса sbfconsult.com: что и где происходит.
+
+        Два потока в одном формате:
+          event — макро-событие календаря. Страна есть в данных, координата
+                  берётся по стране, время — время публикации показателя.
+          news  — новость с гео-привязкой (news_geo_job). Ставится только
+                  когда для места есть основание; крипта и золото сюда не
+                  попадают, у них страны нет по природе.
+
+        🔴 Формат намеренно несёт `rule` — на каком основании поставлена точка.
+        Карта — это утверждение «здесь произошло вот что», и сайт должен иметь
+        возможность показывать только надёжное: до этой ручки тикеры на карте
+        расставлялись по первым свободным городам, и Amazon оказывался в
+        Гонконге, а Intel во Франкфурте.
+        """
+        params = parse_qs(urlparse(self.path).query)
+        try:
+            hours = max(1, min(72, int(params.get("hours", ["24"])[0])))
+        except ValueError:
+            hours = 24
+        kinds = (params.get("kind", ["all"])[0] or "all").lower()
+        try:
+            limit = max(1, min(self._GEO_LIMIT, int(params.get("limit", ["40"])[0])))
+        except ValueError:
+            limit = 40
+
+        places = _geo_places()
+        items = []
+        now = int(time.time())
+        since = now - hours * 3600
+        try:
+            if kinds in ("all", "event"):
+                con = sqlite3.connect(f"file:{_BOT_DB}?mode=ro", uri=True, timeout=10)
+                con.row_factory = sqlite3.Row
+                try:
+                    rows = con.execute(
+                        """SELECT id, country, title, indicator, impact, scheduled_ts,
+                                  actual, forecast, previous
+                           FROM econ_events
+                           WHERE scheduled_ts BETWEEN ? AND ?
+                             AND impact IN ('high','medium')
+                           ORDER BY scheduled_ts DESC LIMIT ?""",
+                        (since, now + 6 * 3600, limit)).fetchall()
+                finally:
+                    con.close()
+                for r in rows:
+                    p = places.get(r["country"])
+                    if not p:
+                        continue
+                    items.append({
+                        "kind": "event", "id": f"ev-{r['id']}",
+                        # Перевода может не быть — тогда честно отдаём оригинал,
+                        # а не выдуманный русский вариант.
+                        "title": (_econ_title_ru(r["indicator"], r["title"], r["country"])
+                                  or r["title"]),
+                        "title_en": r["title"], "country": r["country"],
+                        "place": p["city"], "lon": p["lon"], "lat": p["lat"],
+                        "ts": r["scheduled_ts"], "impact": r["impact"],
+                        "rule": "calendar",
+                        "actual": r["actual"], "forecast": r["forecast"],
+                        "previous": r["previous"],
+                    })
+
+            if kinds in ("all", "news"):
+                con = sqlite3.connect(f"file:{_SIGNALS_DB}?mode=ro", uri=True, timeout=10)
+                con.row_factory = sqlite3.Row
+                try:
+                    rows = con.execute(
+                        """SELECT g.country, g.lon, g.lat, g.rule,
+                                  s.title, s.url, s.topic_hint, s.last_seen
+                           FROM news_geo g JOIN signals s ON s.uid = g.news_uid
+                           WHERE s.last_seen >= datetime('now', ?)
+                             AND s.title <> ''
+                           ORDER BY s.last_seen DESC LIMIT ?""",
+                        (f"-{hours} hours", limit)).fetchall()
+                finally:
+                    con.close()
+                for r in rows:
+                    try:
+                        ts = int(datetime.fromisoformat(r["last_seen"]).timestamp())
+                    except (ValueError, TypeError):
+                        continue
+                    p = places.get(r["country"], {})
+                    items.append({
+                        "kind": "news", "id": f"nw-{abs(hash(r['url'] or r['title'])) % 10**9}",
+                        "title": r["title"], "country": r["country"],
+                        "place": p.get("city", r["country"]),
+                        "lon": r["lon"], "lat": r["lat"], "ts": ts,
+                        "source": r["topic_hint"], "url": r["url"],
+                        "rule": r["rule"],
+                    })
+
+            items.sort(key=lambda x: x["ts"], reverse=True)
+            self._send_json({
+                "updated": datetime.now(timezone.utc).isoformat(),
+                "window_hours": hours,
+                "items": items[:limit],
+            })
+        except Exception as e:
+            self._send_json({"error": str(e)}, 500)
 
     def _handle_pulse_board(self) -> None:
         """Доска обсуждаемости для главной.

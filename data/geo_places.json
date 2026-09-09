@@ -1,0 +1,287 @@
+{
+  "_описание": "Куда ставить точку на карте: страна → координаты финансового центра и выражения, по которым эта страна узнаётся в тексте новости.",
+  "_зачем": "На sbfconsult.com глобус и карта показывают ленту рынка. У события календаря страна есть в данных, у новости — нет. Этот файл даёт третий источник: место, названное в самой новости.",
+  "_правило": "Ложная точка хуже отсутствующей. Точка на карте — утверждение «это произошло здесь», и ошибка в ней видна каждому посетителю. Поэтому: ищем ТОЛЬКО в заголовке (в теле страна упоминается вскользь — «спрос из Китая» в статье про медь не делает новость китайской); никаких омонимов (Jordan — имя и кроссовки, Georgia — штат США, Turkey — птица, Chile — специя); институты и центробанки надёжнее названий стран, потому что однозначны.",
+  "_координаты": "Финансовый центр, а не политическая столица: рынок живёт в Нью-Йорке, Франкфурте и Цюрихе, а не в Вашингтоне, Берлине и Берне. Исключение — страны, где центр и столица совпадают.",
+  "US": {
+    "lon": -74.01,
+    "lat": 40.71,
+    "город": "Нью-Йорк",
+    "pattern": "\\bU\\.?S\\.?A?\\b|\\bunited states\\b|\\bamerica\\b|\\bfederal reserve\\b|\\bthe fed\\b|\\bfomc\\b|\\bwall street\\b|\\bwashington\\b|\\bwhite house\\b|\\btreasury\\b|\\bсша\\b|\\bамерик\\w*|\\bфрс\\b|\\bуолл-стрит",
+    "коммент": "«the Fed» с артиклем — иначе fed как глагол"
+  },
+  "EU": {
+    "lon": 8.68,
+    "lat": 50.11,
+    "город": "Франкфурт",
+    "pattern": "\\beurozone\\b|\\beuro area\\b|\\becb\\b|european central bank|\\beu\\b(?=\\s+(economy|inflation|gdp|rate|summit|commission))|\\bевропейск\\w* центральн\\w*|\\bецб\\b|\\bеврозон\\w*"
+  },
+  "DE": {
+    "lon": 8.68,
+    "lat": 50.11,
+    "город": "Франкфурт",
+    "pattern": "\\bgermany\\b|\\bgerman\\b|\\bbundesbank\\b|\\bfrankfurt\\b|\\bгерман\\w*|\\bнемецк\\w*"
+  },
+  "FR": {
+    "lon": 2.35,
+    "lat": 48.86,
+    "город": "Париж",
+    "pattern": "\\bfrance\\b|\\bfrench\\b(?!\\s+fries)|\\bparis\\b|\\bфранц\\w*|\\bфранцузск\\w*"
+  },
+  "GB": {
+    "lon": -0.13,
+    "lat": 51.51,
+    "город": "Лондон",
+    "pattern": "\\buk\\b|united kingdom|\\bbritain\\b|\\bbritish\\b|(?<!new )\\bengland\\b|bank of england|\\bboe\\b|\\blondon\\b|\\bвеликобритан\\w*|\\bбританск\\w*|\\bбанк англии\\b",
+    "коммент": "«New England» — регион США: без оговорки заголовок «Fed Beige Book: Costs Squeeze New England Budgets» ставил точку в Лондоне"
+  },
+  "CH": {
+    "lon": 8.54,
+    "lat": 47.37,
+    "город": "Цюрих",
+    "pattern": "\\bswitzerland\\b|\\bswiss\\b|\\bsnb\\b|\\bzurich\\b|\\bшвейцар\\w*"
+  },
+  "IT": {
+    "lon": 9.19,
+    "lat": 45.46,
+    "город": "Милан",
+    "pattern": "\\bitaly\\b|\\bitalian\\b|\\bmilan\\b|\\bитал\\w*"
+  },
+  "ES": {
+    "lon": -3.7,
+    "lat": 40.42,
+    "город": "Мадрид",
+    "pattern": "\\bspain\\b|\\bspanish\\b|\\bmadrid\\b|\\bиспан\\w*"
+  },
+  "NL": {
+    "lon": 4.9,
+    "lat": 52.37,
+    "город": "Амстердам",
+    "pattern": "\\bnetherlands\\b|\\bdutch\\b|\\bamsterdam\\b|\\bнидерланд\\w*|\\bголланд\\w*"
+  },
+  "SE": {
+    "lon": 18.07,
+    "lat": 59.33,
+    "город": "Стокгольм",
+    "pattern": "\\bsweden\\b|\\bswedish\\b|\\briksbank\\b|\\bstockholm\\b|\\bшвеци\\w*|\\bшведск\\w*"
+  },
+  "NO": {
+    "lon": 10.75,
+    "lat": 59.91,
+    "город": "Осло",
+    "pattern": "\\bnorway\\b|\\bnorwegian\\b|\\bnorges bank\\b|\\boslo\\b|\\bнорвег\\w*"
+  },
+  "PL": {
+    "lon": 21.01,
+    "lat": 52.23,
+    "город": "Варшава",
+    "pattern": "\\bpoland\\b|\\bpolish\\b|\\bwarsaw\\b|\\bпольш\\w*|\\bпольск\\w*"
+  },
+  "JP": {
+    "lon": 139.69,
+    "lat": 35.69,
+    "город": "Токио",
+    "pattern": "\\bjapan\\b|\\bjapanese\\b|bank of japan|\\bboj\\b|\\btokyo\\b|\\bяпони\\w*|\\bяпонск\\w*|\\bбанк японии"
+  },
+  "CN": {
+    "lon": 121.47,
+    "lat": 31.23,
+    "город": "Шанхай",
+    "pattern": "\\bchina\\b|\\bchinese\\b|\\bpboc\\b|people'?s bank of china|\\bbeijing\\b|\\bshanghai\\b|\\bкита[йея]\\w*|\\bкитайск\\w*"
+  },
+  "HK": {
+    "lon": 114.17,
+    "lat": 22.32,
+    "город": "Гонконг",
+    "pattern": "\\bhong kong\\b|\\bгонконг\\w*"
+  },
+  "SG": {
+    "lon": 103.82,
+    "lat": 1.35,
+    "город": "Сингапур",
+    "pattern": "\\bsingapore\\b|\\bсингапур\\w*"
+  },
+  "KR": {
+    "lon": 126.98,
+    "lat": 37.57,
+    "город": "Сеул",
+    "pattern": "\\bsouth korea\\b|\\bkorean\\b|bank of korea|\\bseoul\\b|\\bюжн\\w* коре\\w*|\\bкорейск\\w*",
+    "коммент": "только «South Korea»: одиночная «Korea» чаще про КНДР и политику"
+  },
+  "IN": {
+    "lon": 72.88,
+    "lat": 19.08,
+    "город": "Мумбаи",
+    "pattern": "\\bindia\\b|\\bindian\\b(?!\\s+ocean)|reserve bank of india|\\bmumbai\\b|\\bинди[йея]\\w*"
+  },
+  "AU": {
+    "lon": 151.21,
+    "lat": -33.87,
+    "город": "Сидней",
+    "pattern": "\\baustralia\\b|\\baustralian\\b|\\brba\\b|reserve bank of australia|\\bsydney\\b|\\bавстрал\\w*"
+  },
+  "NZ": {
+    "lon": 174.78,
+    "lat": -41.29,
+    "город": "Веллингтон",
+    "pattern": "\\bnew zealand\\b|\\brbnz\\b|\\bнов\\w* зеланди\\w*"
+  },
+  "CA": {
+    "lon": -79.38,
+    "lat": 43.65,
+    "город": "Торонто",
+    "pattern": "\\bcanada\\b|\\bcanadian\\b|bank of canada|\\btoronto\\b|\\bканад\\w*"
+  },
+  "BR": {
+    "lon": -46.63,
+    "lat": -23.55,
+    "город": "Сан-Паулу",
+    "pattern": "\\bbrazil\\b|\\bbrazilian\\b|\\bsao paulo\\b|\\bбразил\\w*"
+  },
+  "MX": {
+    "lon": -99.13,
+    "lat": 19.43,
+    "город": "Мехико",
+    "pattern": "\\bmexico\\b|\\bmexican\\b|\\bbanxico\\b|\\bмексик\\w*"
+  },
+  "AR": {
+    "lon": -58.38,
+    "lat": -34.6,
+    "город": "Буэнос-Айрес",
+    "pattern": "\\bargentina\\b|\\bargentine\\b|\\bаргентин\\w*"
+  },
+  "ZA": {
+    "lon": 28.05,
+    "lat": -26.2,
+    "город": "Йоханнесбург",
+    "pattern": "\\bsouth africa\\b|south african\\b|\\bjohannesburg\\b|\\bюжн\\w* африк\\w*|\\bюар\\b"
+  },
+  "TR": {
+    "lon": 28.98,
+    "lat": 41.01,
+    "город": "Стамбул",
+    "pattern": "\\bturkey'?s\\b|\\bturkish\\b|central bank of turkey|\\bistanbul\\b|\\bturkiye\\b|\\bтурци[ияю]\\w*|\\bтурецк\\w*",
+    "коммент": "«turkey» без 's не берём — в ноябре лента полна кулинарии"
+  },
+  "RU": {
+    "lon": 37.62,
+    "lat": 55.76,
+    "город": "Москва",
+    "pattern": "\\brussia\\b|\\brussian\\b|\\bmoscow\\b|\\bросси[йия]\\w*|\\bмоскв\\w*"
+  },
+  "UA": {
+    "lon": 30.52,
+    "lat": 50.45,
+    "город": "Киев",
+    "pattern": "\\bukraine\\b|\\bukrainian\\b|\\bkyiv\\b|\\bукраин\\w*"
+  },
+  "AE": {
+    "lon": 55.27,
+    "lat": 25.2,
+    "город": "Дубай",
+    "pattern": "\\buae\\b|united arab emirates|\\bdubai\\b|\\babu dhabi\\b|\\bоаэ\\b|\\bдубай\\w*|\\bэмират\\w*"
+  },
+  "SA": {
+    "lon": 46.72,
+    "lat": 24.71,
+    "город": "Эр-Рияд",
+    "pattern": "\\bsaudi\\b|\\baramco\\b|\\briyadh\\b|\\bсаудовск\\w*|\\bаравии\\b"
+  },
+  "IL": {
+    "lon": 34.78,
+    "lat": 32.09,
+    "город": "Тель-Авив",
+    "pattern": "\\bisrael\\b|\\bisraeli\\b|\\btel aviv\\b|\\bизраил\\w*|\\bизраильск\\w*"
+  },
+  "IR": {
+    "lon": 51.39,
+    "lat": 35.69,
+    "город": "Тегеран",
+    "pattern": "\\biran\\b|\\biranian\\b|\\btehran\\b|\\bhormuz\\b|\\bиран\\w*|\\bормуз\\w*"
+  },
+  "VE": {
+    "lon": -66.9,
+    "lat": 10.49,
+    "город": "Каракас",
+    "pattern": "\\bvenezuela\\b|\\bвенесуэл\\w*"
+  },
+  "NG": {
+    "lon": 3.38,
+    "lat": 6.52,
+    "город": "Лагос",
+    "pattern": "\\bnigeria\\b|\\bnigerian\\b|\\bнигери[йя]\\w*"
+  },
+  "EG": {
+    "lon": 31.24,
+    "lat": 30.04,
+    "город": "Каир",
+    "pattern": "\\begypt\\b|\\bsuez\\b|\\bегипт\\w*|\\bсуэц\\w*"
+  },
+  "CL": {
+    "lon": -70.65,
+    "lat": -33.45,
+    "город": "Сантьяго",
+    "pattern": "\\bchile\\b|\\bchilean\\b|\\bcodelco\\b|\\bчили\\b|\\bчилийск\\w*",
+    "коммент": "«chili» и «chilli» — специя, поэтому только точное chile/chilean"
+  },
+  "PE": {
+    "lon": -77.04,
+    "lat": -12.05,
+    "город": "Лима",
+    "pattern": "\\bperu\\b|\\bperuvian\\b|\\bперуанск\\w*"
+  },
+  "ID": {
+    "lon": 106.85,
+    "lat": -6.21,
+    "город": "Джакарта",
+    "pattern": "\\bindonesia\\b|\\bindonesian\\b|\\bjakarta\\b|\\bиндонези\\w*"
+  },
+  "TH": {
+    "lon": 100.5,
+    "lat": 13.76,
+    "город": "Бангкок",
+    "pattern": "\\bthailand\\b|\\bthai\\b(?!\\s+food)|\\bbangkok\\b|\\bтаиланд\\w*"
+  },
+  "VN": {
+    "lon": 105.83,
+    "lat": 21.03,
+    "город": "Ханой",
+    "pattern": "\\bvietnam\\b|\\bvietnamese\\b|\\bвьетнам\\w*"
+  },
+  "TW": {
+    "lon": 121.56,
+    "lat": 25.03,
+    "город": "Тайбэй",
+    "pattern": "\\btaiwan\\b|\\btsmc\\b|\\bтайван\\w*"
+  },
+  "CI": {
+    "lon": -4.02,
+    "lat": 5.35,
+    "город": "Абиджан",
+    "pattern": "ivory coast|c[oô]te d'?ivoire|\\bкот-д'?ивуар\\w*",
+    "коммент": "крупнейший производитель какао — новости про какао часто идут отсюда"
+  },
+  "GH": {
+    "lon": -0.19,
+    "lat": 5.6,
+    "город": "Аккра",
+    "pattern": "\\bghana\\b|\\bghanaian\\b|\\bгана\\b|\\bганск\\w*"
+  },
+  "AT": {
+    "lon": 16.37,
+    "lat": 48.21,
+    "город": "Вена",
+    "pattern": "\\bopec\\b|\\bopec\\+|\\bvienna\\b|\\bопек\\b|\\bвен\\w* саммит",
+    "коммент": "ОПЕК заседает в Вене — для новостей про квоты это честнее, чем ставить точку в Саудовской Аравии"
+  },
+  "MD": {
+    "lon": 28.86,
+    "lat": 47.01,
+    "город": "Кишинёв",
+    "pattern": "\\bmoldova\\b|\\bmoldovan\\b|\\bchisinau\\b|\\bмолдов\\w*|\\bмолдавск\\w*|\\bкишинёв\\w*"
+  },
+  "_исключения": {
+    "коммент": "Слова, которые выглядят как география, но ею не являются. Проверяются ДО поиска стран: если заголовок совпал с исключением, страна из него не берётся вовсе.",
+    "pattern": "\\bjordan(s)?\\b(?=\\s*(shoe|sneaker|air|brand|retro|\\d))|\\bgeorgia\\b(?=\\s*(tech|state|bulldogs|power))|\\bturkey\\b(?!'?s)|\\bchill?i\\b|\\bcolumbia\\b(?=\\s*(university|sportswear))|\\bindiana\\b|\\bnew mexico\\b|\\bnew jersey\\b"
+  }
+}
