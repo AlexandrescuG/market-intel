@@ -354,6 +354,10 @@ a:hover{text-decoration:underline;color:var(--glow)}
 .pulse-sym{font-family:'JetBrains Mono';font-weight:700;font-size:13px;min-width:52px;color:var(--ink)}
 .pulse-spark{flex:1;height:22px;display:block}
 .pulse-score{font-family:'JetBrains Mono';font-size:11.5px;font-weight:600;min-width:96px;text-align:right;color:var(--gold)}
+/* Строка без собственной нормы — приглушённая и без золота: это не всплеск,
+   а «ещё нечем мерить». Одинаковое золото на обеих подписях читалось бы как
+   одинаковая уверенность. */
+.pulse-score-nonorm{color:var(--muted);font-weight:500;min-width:132px}
 .pulse-chevron{color:var(--faint);font-size:13px;opacity:0;transition:opacity var(--dur) var(--ease);margin-left:2px}
 .pulse-row:hover .pulse-chevron{opacity:1;color:var(--gold)}
 .pulse-zero-row{font-size:11.5px;color:var(--muted);padding:7px 4px;font-style:italic}
@@ -733,9 +737,12 @@ a:hover{text-decoration:underline;color:var(--glow)}
           <span class="fresh" id="buzzFresh"></span></div>
         <div class="pulse-explainer" title="{{ t('home.pulse_norm_note', lang) }}">{{ t('home.pulse_explainer', lang) }}</div>
         <div class="tabs" id="pulseTabs">
-          <button class="tab chip active" data-cat="crypto">{{ t('home.pulse_tab_crypto', lang) }}</button>
-          <button class="tab chip" data-cat="stocks">{{ t('home.pulse_tab_stocks', lang) }}</button>
+          {# Порядок тот же, что у доски ниже (BOARD_ORDER): акции, индексы,
+             крипта. Два блока про одно и то же с разным порядком вкладок
+             заставляют искать нужную заново в каждом. #}
+          <button class="tab chip active" data-cat="stocks">{{ t('home.pulse_tab_stocks', lang) }}</button>
           <button class="tab chip" data-cat="indices">{{ t('home.pulse_tab_indices', lang) }}</button>
+          <button class="tab chip" data-cat="crypto">{{ t('home.pulse_tab_crypto', lang) }}</button>
         </div>
         <div class="pulse-calm" id="pulseCalm" hidden>{{ t('home.pulse_calm', lang) }}</div>
         <div class="pulse-list" id="pulseList"></div>
@@ -1583,6 +1590,7 @@ const I18N_PULSE = {
   locked: {{ t('home.pulse_feed_locked', lang) | tojson }},
   empty:  {{ t('home.pulse_feed_empty', lang) | tojson }},
   scoreTpl: {{ t('home.pulse_score_tpl', lang) | tojson }},
+  noNormTpl: {{ t('home.pulse_no_norm_tpl', lang) | tojson }},
   zeroCollapsed: {{ t('home.pulse_zero_collapsed', lang) | tojson }},
 };
 
@@ -1643,7 +1651,11 @@ function renderPulseList(data){
     return `<div class="pulse-row" data-symbol="${escapeHtmlIdx(it.symbol)}">
       <span class="pulse-sym">${escapeHtmlIdx(symName)}</span>
       ${sparklineSvg(it.sparkline, lo, hi)}
-      <span class="pulse-score">${fmt_(I18N_PULSE.scoreTpl,{score:it.score.toFixed(1)})}</span>
+      <span class="pulse-score${it.has_norm === false ? ' pulse-score-nonorm' : ''}">${
+        it.has_norm === false
+          ? fmt_(I18N_PULSE.noNormTpl, {n: it.mentions})
+          : fmt_(I18N_PULSE.scoreTpl, {score: it.score.toFixed(1)})
+      }</span>
       <span class="pulse-chevron" aria-hidden="true">›</span>
     </div>`;
   }).join('');
@@ -1676,7 +1688,7 @@ document.addEventListener('sbf:user-ready', showAnonValueBlock);
    блок всё равно появится — анониму он нужнее, чем аккуратность. */
 setTimeout(showAnonValueBlock, 3000);
 
-let _pulseCat='crypto';
+let _pulseCat='stocks';   // совпадает с первой вкладкой в разметке выше
 async function loadPulse(cat){
   _pulseCat=cat;
   try{
@@ -1788,16 +1800,20 @@ function packBubbles(items, W, H){
   return placed;
 }
 
-// Выбранное направление. null — общий срез по всем пяти.
-let _boardCat = null;
+// Порядок направлений на доске. Один и тот же везде: во вкладках, в колонках
+// общего среза и в заголовках — иначе человек каждый раз ищет заново, где тут
+// крипта.
+const BOARD_ORDER = ['stocks', 'indices', 'fx', 'commodity', 'crypto'];
+
+// Выбранное направление. Вкладки «Все» нет: общий срез показывал по четыре
+// инструмента на направление, и на первом экране это читалось как «вот и всё,
+// что мы отслеживаем». Открываем сразу на акциях — там больше всего движения.
+let _boardCat = BOARD_ORDER[0];
 
 function renderBoardTabs(){
   const el = document.getElementById('boardTabs');
   if (!el) return;
-  const t = (k, fb) => (window.sbfI18n ? window.sbfI18n.t(k, fb) : fb);
-  const tabs = [{cat: null, label: t('home.board_tab_all', 'Все')}]
-    .concat(['crypto','commodity','fx','indices','stocks'].map(c =>
-      ({cat: c, label: boardLabel(BOARD_CATS[c])})));
+  const tabs = BOARD_ORDER.map(c => ({cat: c, label: boardLabel(BOARD_CATS[c])}));
   el.innerHTML = tabs.map(x =>
     `<button class="tab chip${x.cat === _boardCat ? ' active' : ''}" data-bcat="${x.cat || ''}">${escapeHtmlIdx(x.label)}</button>`
   ).join('');
@@ -1806,7 +1822,7 @@ function renderBoardTabs(){
 document.addEventListener('click', e => {
   const b = e.target.closest && e.target.closest('#boardTabs [data-bcat]');
   if (!b) return;
-  _boardCat = b.dataset.bcat || null;
+  _boardCat = b.dataset.bcat || BOARD_ORDER[0];
   renderBoardTabs();
   loadBoard();
 });
@@ -1859,7 +1875,7 @@ async function loadBoard(){
   // одинаково при каждом заходе, иначе человек каждый раз ищет заново, где
   // тут крипта. Пустые направления всё равно показываем колонкой с подписью —
   // «сегодня про сырьё молчат» это тоже факт о рынке.
-  const ORDER = _boardCat ? [_boardCat] : ['crypto', 'commodity', 'fx', 'indices', 'stocks'];
+  const ORDER = _boardCat ? [_boardCat] : BOARD_ORDER;
   canvas.classList.toggle('single', !!_boardCat);
   const byCat = {};
   ORDER.forEach(c => { byCat[c] = []; });

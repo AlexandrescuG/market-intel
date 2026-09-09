@@ -1652,5 +1652,6 @@
   "home.board_cat_commodity": "commodities",
   "home.board_quiet": "quiet today",
   "home.board_tab_all": "All",
-  "home.pulse_norm_note": "For rarely covered instruments the baseline never drops below 0.5 mentions per hour. That is why a handful of posts produces a large multiplier — it is a spike of attention, not a tenfold stream."
+  "home.pulse_norm_note": "The multiplier is shown only for instruments with at least a week of history. For the rest we show the raw hourly count: there is nothing to compare against yet, and a multiplier would be made up.",
+  "home.pulse_no_norm_tpl": "{n} in the last hour · no baseline yet"
 }

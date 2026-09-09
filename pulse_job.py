@@ -193,7 +193,17 @@ def run(verbose: bool = False) -> int:
         m1 = m_1h.get(symbol, 0)
         m24 = m_24h.get(symbol, 0)
         m7 = m_7d.get(symbol, 0)
-        baseline = max(m7 / (BASELINE_DAYS * 24), MIN_BASELINE)
+        # 🔴 Текущий час из нормы вычитается.
+        #
+        # Норма считалась как «всё за 7 дней ÷ 168», а «всё за 7 дней»
+        # включает и тот самый час, который мы с ней сравниваем. Пока приток
+        # ровный, разница незаметна. 09.09.2026 расширенный сбор новостей за
+        # два часа принёс 2244 материала при обычных 30–130 в час — и этот
+        # пакет задал сам себе норму, а потом отчитался о рекорде
+        # относительно неё. Сравнивать час нужно с тем, что было ДО него.
+        prev = max(m7 - m1, 0)
+        hours = BASELINE_DAYS * 24 - BURST_LOOKBACK_HOURS
+        baseline = max(prev / hours, MIN_BASELINE)
         score = m1 / baseline
         con.execute(
             "INSERT OR REPLACE INTO pulse_scores"
