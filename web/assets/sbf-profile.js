@@ -138,7 +138,19 @@
     'background:var(--gold,#C9A227);color:#1E1B12;font-family:Montserrat,sans-serif;',
     'font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap;',
     'transition:background .12s;}',
-    '.sbf-cta-link:hover{background:var(--glow,#E6C257);}',
+    // 🔴 Цвет текста повторяем в :hover, хотя он и так задан выше.
+    //
+    // Кнопка — это ссылка, и на неё действует общее правило страницы
+    // `a:hover{color:var(--glow)}` (index.html). Фон при наведении становится
+    // тем же --glow, и надпись «30 дней PRO» исчезала целиком: замер
+    // computed style — текст rgb(230,194,87) на фоне rgb(230,194,87),
+    // разница яркости ноль. На экране это выглядело как пустой золотой
+    // прямоугольник на главной кнопке сайта.
+    //
+    // Компонент, у которого есть собственный фон, обязан задавать и свой цвет
+    // текста в каждом состоянии — иначе он зависит от того, какие правила для
+    // ссылок написаны на конкретной странице.
+    '.sbf-cta-link:hover{background:var(--glow,#E6C257);color:#1E1B12;text-decoration:none;}',
     // На узком экране кнопки не должны выталкивать логотип: вторичная
     // сжимается, главная остаётся целой.
     '@media (max-width:520px){.sbf-login-link{padding:7px 10px;margin-left:6px;}',

@@ -116,7 +116,8 @@
     "pattern": "\\bsilver\\b(?!\\s*(medal|lake))|серебр|\\bxag\\b"
   },
   "CrudeOIL": {
-    "pattern": "\\bwti\\b|crude oil|west texas|нефт[ьияю]\\b"
+    "pattern": "\\bwti\\b|crude oil|west texas|нефт[ьияю]\\b|\\boil\\b(?=\\s+(price|prices|market|markets|futures|rally|selloff|slump|near|above|below|at)\\b)|\\boil\\s+(tops|slides|slid|surges|jumps|falls|climbs|rises|steadies|hovers|settles)\\b",
+  "коммент": "Голое «oil» не берём: бывают oil facilities, oil company, olive oil. Берём только там, где рядом стоит цена или движение — «oil prices», «oil tops $100». До 09.09.2026 заголовок «Oil Near $100 Threatens U.S. Stocks» не получал ни одного инструмента и на витрине выглядел нерыночным."
   },
   "BRENT_OIL": {
     "pattern": "\\bbrent\\b|брент"

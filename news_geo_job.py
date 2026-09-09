@@ -13,16 +13,27 @@ Amazon оказывался в Гонконге, Intel во Франкфурте
 привязка ставится только когда для неё есть основание, а «не знаю» —
 нормальный и частый ответ.
 
-ЧЕТЫРЕ ИСТОЧНИКА, В ПОРЯДКЕ УБЫВАНИЯ ДОСТОВЕРНОСТИ:
+ПЯТЬ ИСТОЧНИКОВ, В ПОРЯДКЕ УБЫВАНИЯ ДОСТОВЕРНОСТИ:
 
   event    — новость привязана к событию макро-календаря, у события есть
              страна. Это факт из данных, а не догадка.
-  headline — страна названа в ЗАГОЛОВКЕ. Заголовок говорит, о чём новость;
-             в теле страна попадается вскользь («спрос из Китая» в статье про
-             медь не делает новость китайской), поэтому тело не смотрим.
+  headline — ТОПОНИМ или учреждение названы в ЗАГОЛОВКЕ. Заголовок говорит,
+             о чём новость; в теле страна попадается вскользь («спрос из
+             Китая» в статье про медь не делает новость китайской), поэтому
+             тело не смотрим.
+  demonym  — в заголовке только прилагательное национальности («Russian
+             assets», «Post-Saudi future»). Прилагательное говорит о
+             принадлежности, а не о месте: «Hungary loses court fight over
+             frozen Russian asset profits» — это решение суда ЕС, а не
+             московская новость. Ярус отдаётся наружу отдельным именем,
+             чтобы витрина могла его не брать; выкидывать данные незачем.
   symbol   — страна инструмента: валютная пара, индекс, акция с известной
              биржей. Слабее заголовка, но защитимо.
   —        — не ставим ничего. У крипты и золота страны нет по природе.
+
+В базу вместе с ярусом кладётся `evidence` — та подстрока заголовка, из-за
+которой точка встала именно сюда. Без неё ярус нельзя проверить: «почему
+эта новость в Нью-Йорке» отвечалось перечитыванием регулярных выражений.
 
 Запуск:  python3 news_geo_job.py [--verbose] [--hours 48]
 """
@@ -63,10 +74,12 @@ def load_places() -> tuple[dict, re.Pattern | None]:
         if code.startswith("_") or not isinstance(meta, dict):
             continue
         try:
+            weak = meta.get("pattern_weak") or ""
             places[code] = {
                 "lon": float(meta["lon"]), "lat": float(meta["lat"]),
                 "city": meta.get("город", code),
                 "re": re.compile(meta["pattern"], re.I),
+                "re_weak": re.compile(weak, re.I) if weak else None,
             }
         except (KeyError, ValueError, re.error) as e:
             print(f"место {code} пропущено: {e}", file=sys.stderr)
@@ -108,6 +121,11 @@ def ensure_schema(con) -> None:
         );
         CREATE INDEX IF NOT EXISTS idx_news_geo_ts ON news_geo(ts DESC);
     """)
+    # Колонка добавлена позже таблицы: у уже развёрнутой базы её нет, а
+    # пересоздавать таблицу ради неё — терять привязки, которые считались час.
+    cols = {r[1] for r in con.execute("PRAGMA table_info(news_geo)")}
+    if "evidence" not in cols:
+        con.execute("ALTER TABLE news_geo ADD COLUMN evidence TEXT")
     con.commit()
 
 
@@ -156,34 +174,48 @@ def run(hours: int = DEFAULT_HOURS, verbose: bool = False) -> int:
         tags.setdefault(uid, []).append(sym)
 
     now = int(time.time())
-    stats = {"event": 0, "headline": 0, "symbol": 0, "нет": 0}
+    stats = {"event": 0, "headline": 0, "demonym": 0, "symbol": 0, "нет": 0}
     written = 0
     for uid, title, text in rows:
         title = (title or "").strip()
         country = rule = None
+        evidence = None
 
         # 1. Событие календаря, названное в заголовке дословно.
         low = title.lower()
         for indicator, c in events.items():
             if indicator in low:
-                country, rule = c, "event"
+                country, rule, evidence = c, "event", indicator
                 break
 
-        # 2. Место, названное в заголовке.
+        # 2. Топоним в заголовке, и только потом — прилагательное.
+        #
+        # 🔴 Порядок между этими двумя проходами важнее, чем кажется. Если
+        # искать вперемешку, «Hungary loses court fight over frozen Russian
+        # asset profits» встанет в Москву по слову Russian — так и было до
+        # 09.09.2026. Сначала весь заголовок проверяется на топонимы, и лишь
+        # когда ни одного нет, разрешается слабое совпадение.
         if not country:
             clean = news_patterns.searchable(title, None)
             if not (excl and excl.search(clean)):
                 for code, p in places.items():
-                    if p["re"].search(clean):
-                        country, rule = code, "headline"
+                    m = p["re"].search(clean)
+                    if m:
+                        country, rule, evidence = code, "headline", m.group(0)
                         break
+                if not country:
+                    for code, p in places.items():
+                        m = p["re_weak"].search(clean) if p["re_weak"] else None
+                        if m:
+                            country, rule, evidence = code, "demonym", m.group(0)
+                            break
 
         # 3. Страна инструмента.
         if not country:
             for sym in tags.get(uid, []):
                 cs = sym_countries.get(sym)
                 if cs:
-                    country, rule = cs[0], "symbol"
+                    country, rule, evidence = cs[0], "symbol", sym
                     break
 
         if not country or country not in places:
@@ -191,8 +223,9 @@ def run(hours: int = DEFAULT_HOURS, verbose: bool = False) -> int:
             continue
         p = places[country]
         con.execute(
-            "INSERT OR REPLACE INTO news_geo(news_uid, country, lon, lat, rule, ts) "
-            "VALUES(?,?,?,?,?,?)", (uid, country, p["lon"], p["lat"], rule, now))
+            "INSERT OR REPLACE INTO news_geo"
+            "(news_uid, country, lon, lat, rule, ts, evidence) VALUES(?,?,?,?,?,?,?)",
+            (uid, country, p["lon"], p["lat"], rule, now, (evidence or "")[:80]))
         stats[rule] += 1
         written += 1
 
@@ -205,7 +238,7 @@ def run(hours: int = DEFAULT_HOURS, verbose: bool = False) -> int:
     if verbose:
         total = sum(stats.values())
         print(f"новостей за {hours} ч: {total}")
-        for k in ("event", "headline", "symbol", "нет"):
+        for k in ("event", "headline", "demonym", "symbol", "нет"):
             share = stats[k] / total * 100 if total else 0
             print(f"  {k:9s} {stats[k]:5d}  {share:4.0f}%")
     return written

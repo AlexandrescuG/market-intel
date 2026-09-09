@@ -333,12 +333,38 @@ def _geo_places() -> dict:
             continue
         try:
             out[code] = {"lon": float(meta["lon"]), "lat": float(meta["lat"]),
-                         "city": meta.get("город", code)}
+                         "city": meta.get("город", code),
+                         # Сайт трёхъязычный, и до 09.09.2026 на английской
+                         # версии под заголовком стояло «ФРАНКФУРТ»
+                         # кириллицей. Заводить второй справочник имён у
+                         # сайта нельзя по той же причине, по которой у него
+                         # убрали справочник координат: два списка на проект
+                         # разъедутся. Поэтому имена едут отсюда.
+                         "city_en": meta.get("город_en") or meta.get("город", code),
+                         "city_ro": meta.get("город_ro") or meta.get("город", code)}
         except (KeyError, ValueError):
             continue
     if out:
         _geo_places_cache = (mtime, out)
     return out
+
+
+def _title_lang(title: str) -> str:
+    """На каком языке пришёл заголовок: "ru", "en" или "" если не понять.
+
+    Не перевод и не претензия на него. Заголовки новостей мы не переводим —
+    выдумывать чужой текст нельзя, — но витрине нужно решать, показывать ли
+    русский заголовок на английской версии. Определяем по письменности: это
+    честные 100% на кириллице против латиницы и осознанно бесполезно для
+    румынского, который тоже латиница.
+    """
+    cyr = sum(1 for c in title if "Ѐ" <= c <= "ӿ")
+    lat = sum(1 for c in title if ("a" <= c <= "z") or ("A" <= c <= "Z"))
+    if cyr > lat:
+        return "ru"
+    if lat > cyr:
+        return "en"
+    return ""
 
 
 _board_meta_cache: tuple = (0.0, {})
@@ -1480,7 +1506,7 @@ def _build_edu_page(ch: int, lang: str) -> bytes:
     # главе независимо от lang (баг, существовавший и до английской версии --
     # главы никогда не грузили /assets/i18n.js, только сам sbf-header.js).
     css_tags = (
-        '<link rel="stylesheet" href="/assets/design.css?v=20260903b">\n'
+        '<link rel="stylesheet" href="/assets/design.css?v=20260909">\n'
         '<link rel="stylesheet" href="/edu/edu.css?v=20260903b">\n'
         '<link rel="stylesheet" href="/assets/sbf-nav.css?v=20260903b">\n'
         '<script src="/assets/i18n.js?v=2" defer></script>\n'
@@ -2270,7 +2296,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         html = f"""<!doctype html><html lang="{lang}"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{i18n.t('eduindex.paywall.title', lang)}</title>
-<link rel="stylesheet" href="/assets/design.css?v=20260903b">
+<link rel="stylesheet" href="/assets/design.css?v=20260909">
 <link rel="stylesheet" href="/edu/edu.css?v=20260903b">
 <link rel="stylesheet" href="/assets/sbf-nav.css?v=20260903b">
 <script src="/assets/i18n.js?v=2" defer></script>
@@ -2644,6 +2670,70 @@ class Handler(http.server.SimpleHTTPRequestHandler):
     # кашу, а лента всё равно листается по одной.
     _GEO_LIMIT = 60
 
+    # Инструмент, на котором показываем реакцию рынка на событие страны.
+    # Событие в календаре страновое, а «двинулось» бывает у чего-то одного:
+    # для показателя США это доллар, для Японии — USDJPY. Статистика
+    # (event_reaction_stats) считается по event_type без учёта страны, поэтому
+    # берём тот инструмент, который к стране относится напрямую, — иначе
+    # реакция немецкого ИПЦ показывалась бы на австралийце.
+    _GEO_REACTION_SYMBOL = {
+        "US": "DXY", "EU": "EURUSD", "DE": "EURUSD", "FR": "EURUSD",
+        "IT": "EURUSD", "ES": "EURUSD", "NL": "EURUSD", "BE": "EURUSD",
+        "AT": "EURUSD", "PT": "EURUSD", "GR": "EURUSD", "IE": "EURUSD",
+        "FI": "EURUSD", "GB": "GBPUSD", "JP": "USDJPY", "CN": "USDCNY",
+        "AU": "AUDUSD", "NZ": "NZDUSD", "CA": "USDCAD", "CH": "USDCHF",
+        "RU": "USDRUB", "TR": "USDTRY", "MX": "USDMXN", "ZA": "USDZAR",
+        "PL": "USDPLN", "KR": "USDKRW", "HU": "USDHUF",
+    }
+
+    # Валютная пара двигается в пунктах (pips), индекс и сырьё — в пунктах
+    # цены. Без этой пометки «10.4» на витрине означало бы что угодно.
+    @staticmethod
+    def _reaction_unit(symbol: str) -> str:
+        return "pips" if len(symbol) == 6 and symbol.isalpha() else "points"
+
+    def _geo_reaction(self, con, country: str, indicator: str, title: str) -> dict | None:
+        """Как рынок обычно ходит на этом показателе.
+
+        🔴 Это ТИПИЧНАЯ реакция по прошлым выпускам, а не то, что было в
+        последний раз, и поле называется так, чтобы это было видно снаружи:
+        `kind: "typical"` плюс `n` и `period`. Сайт до этого доставал реакцию
+        сам из brief_today.json по паре (страна, время) — чужой формат по
+        неявному ключу, ломается при первой правке брифа.
+
+        Почему не «прошлый раз»: event_key хешируется по точному заголовку,
+        а он содержит месяц, поэтому у каждого выпуска ключ свой и историю по
+        нему не собрать. Агрегат event_reaction_stats для этого и считается.
+        """
+        symbol = self._GEO_REACTION_SYMBOL.get(country)
+        if not symbol:
+            return None
+        event_type = normalize_event_type(indicator or title or "")
+        if not event_type:
+            return None
+        row = con.execute(
+            """SELECT n, avg_move_30m, median_move_30m, baseline_ratio_30m,
+                      period_from, period_to
+               FROM event_reaction_stats
+               WHERE event_type=? AND symbol=? ORDER BY n DESC LIMIT 1""",
+            (event_type, symbol)).fetchone()
+        if not row or not row["n"] or row["avg_move_30m"] is None:
+            return None
+        return {
+            "kind": "typical", "symbol": symbol,
+            "unit": self._reaction_unit(symbol),
+            "event_type": event_type,
+            "avg_move_30m": round(row["avg_move_30m"], 4),
+            "median_move_30m": (round(row["median_move_30m"], 4)
+                                if row["median_move_30m"] is not None else None),
+            # Во сколько раз получасовой ход больше обычного получаса. Больше
+            # единицы — событие рынок действительно двигает.
+            "vs_normal": (round(row["baseline_ratio_30m"], 2)
+                          if row["baseline_ratio_30m"] is not None else None),
+            "n": row["n"],
+            "period": [row["period_from"], row["period_to"]],
+        }
+
     def _handle_geo_feed(self) -> None:
         """Лента для карты и глобуса sbfconsult.com: что и где происходит.
 
@@ -2670,6 +2760,11 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             limit = max(1, min(self._GEO_LIMIT, int(params.get("limit", ["40"])[0])))
         except ValueError:
             limit = 40
+        # ?market=1 — отдавать только новости, в которых разметка опознала хотя
+        # бы один инструмент. Фильтруем на нашей стороне, а не на витрине,
+        # потому что иначе limit срезает выборку ДО фильтра и на карту приходит
+        # десять точек вместо сорока.
+        market_only = params.get("market", ["0"])[0] in ("1", "true", "yes")
 
         places = _geo_places()
         items = []
@@ -2688,38 +2783,57 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                              AND impact IN ('high','medium')
                            ORDER BY scheduled_ts DESC LIMIT ?""",
                         (since, now + 6 * 3600, limit)).fetchall()
+                    for r in rows:
+                        p = places.get(r["country"])
+                        if not p:
+                            continue
+                        items.append({
+                            "kind": "event", "id": f"ev-{r['id']}",
+                            # Перевода может не быть — тогда честно отдаём
+                            # оригинал, а не выдуманный русский вариант.
+                            "title": (_econ_title_ru(r["indicator"], r["title"],
+                                                     r["country"]) or r["title"]),
+                            "title_en": r["title"], "country": r["country"],
+                            "place": p["city"], "place_en": p["city_en"],
+                            "place_ro": p["city_ro"],
+                            "lon": p["lon"], "lat": p["lat"],
+                            "ts": r["scheduled_ts"], "impact": r["impact"],
+                            "rule": "calendar", "market": True,
+                            "actual": r["actual"], "forecast": r["forecast"],
+                            "previous": r["previous"],
+                            "reaction": self._geo_reaction(
+                                con, r["country"], r["indicator"], r["title"]),
+                        })
                 finally:
                     con.close()
-                for r in rows:
-                    p = places.get(r["country"])
-                    if not p:
-                        continue
-                    items.append({
-                        "kind": "event", "id": f"ev-{r['id']}",
-                        # Перевода может не быть — тогда честно отдаём оригинал,
-                        # а не выдуманный русский вариант.
-                        "title": (_econ_title_ru(r["indicator"], r["title"], r["country"])
-                                  or r["title"]),
-                        "title_en": r["title"], "country": r["country"],
-                        "place": p["city"], "lon": p["lon"], "lat": p["lat"],
-                        "ts": r["scheduled_ts"], "impact": r["impact"],
-                        "rule": "calendar",
-                        "actual": r["actual"], "forecast": r["forecast"],
-                        "previous": r["previous"],
-                    })
 
             if kinds in ("all", "news"):
                 con = sqlite3.connect(f"file:{_SIGNALS_DB}?mode=ro", uri=True, timeout=10)
                 con.row_factory = sqlite3.Row
                 try:
                     rows = con.execute(
-                        """SELECT g.country, g.lon, g.lat, g.rule,
-                                  s.title, s.url, s.topic_hint, s.last_seen
+                        """SELECT g.news_uid, g.country, g.lon, g.lat, g.rule,
+                                  g.evidence, s.title, s.url, s.topic_hint,
+                                  s.last_seen
                            FROM news_geo g JOIN signals s ON s.uid = g.news_uid
                            WHERE s.last_seen >= datetime('now', ?)
                              AND s.title <> ''
                            ORDER BY s.last_seen DESC LIMIT ?""",
-                        (f"-{hours} hours", limit)).fetchall()
+                        (f"-{hours} hours", limit * 3 if market_only else limit)
+                    ).fetchall()
+                    # Инструменты, опознанные в новости разметкой. Это ответ на
+                    # вопрос «а она вообще про рынок» — фактом, а не догадкой:
+                    # сайт до этого угадывал сам («нужно рыночное слово И
+                    # число»), и через ленту к нему проезжали «обед в честь
+                    # ФРС» и подпись к фотографии здания.
+                    uids = [r["news_uid"] for r in rows]
+                    tags: dict[str, list[str]] = {}
+                    if uids:
+                        q = ",".join("?" * len(uids))
+                        for uid, sym in con.execute(
+                                f"SELECT news_uid, symbol FROM news_instrument_tags "
+                                f"WHERE news_uid IN ({q})", uids):
+                            tags.setdefault(uid, []).append(sym)
                 finally:
                     con.close()
                 for r in rows:
@@ -2728,13 +2842,36 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                     except (ValueError, TypeError):
                         continue
                     p = places.get(r["country"], {})
+                    syms = sorted(set(tags.get(r["news_uid"], [])))[:8]
+                    if market_only and not syms:
+                        continue
                     items.append({
                         "kind": "news", "id": f"nw-{abs(hash(r['url'] or r['title'])) % 10**9}",
                         "title": r["title"], "country": r["country"],
+                        # Заголовок новости не переводится: выдумывать чужой
+                        # текст нельзя. Вместо перевода отдаём, на каком языке
+                        # он пришёл, — витрине этого хватает, чтобы решить,
+                        # показывать его на /en/ и /ro/ или нет.
+                        #
+                        # 🔴 title_en у новости есть ТОЛЬКО когда заголовок и
+                        # так английский. В задании было написано «есть
+                        # всегда» — это неправда, и сайт на неё рассчитывал:
+                        # на румынской версии в итоге стоял оригинал. Пустое
+                        # поле честнее, чем машинный перевод новости.
+                        "lang": _title_lang(r["title"]),
+                        "title_en": (r["title"] if _title_lang(r["title"]) == "en"
+                                     else None),
                         "place": p.get("city", r["country"]),
+                        "place_en": p.get("city_en", r["country"]),
+                        "place_ro": p.get("city_ro", r["country"]),
                         "lon": r["lon"], "lat": r["lat"], "ts": ts,
                         "source": r["topic_hint"], "url": r["url"],
                         "rule": r["rule"],
+                        # Подстрока заголовка, из-за которой точка встала сюда.
+                        # Делает ярус проверяемым: «почему это в Москве» теперь
+                        # отвечается полем, а не чтением регулярных выражений.
+                        "place_evidence": r["evidence"] or None,
+                        "symbols": syms, "market": bool(syms),
                     })
 
             items.sort(key=lambda x: x["ts"], reverse=True)

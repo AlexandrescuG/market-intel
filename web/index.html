@@ -64,14 +64,14 @@ if (new URLSearchParams(location.search).get("embed") === "1") {
 <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Merriweather:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/design.css?v=20260903b">
+<link rel="stylesheet" href="/assets/design.css?v=20260909">
 <link rel="stylesheet" href="/assets/tokens.css?v=1">
 <script src="/assets/i18n.js?v=2" defer></script>
 <script src="/assets/sbf-symbols.js?v=2"></script>
 <script src="/edu/assets/calendar-terms.js?v=1" defer></script>
 <script src="/assets/sbf-header.js?v=23" defer></script>
 <script src="/assets/sbf-auth.js?v=1" defer></script>
-<script src="/assets/sbf-profile.js?v=3" defer></script>
+<script src="/assets/sbf-profile.js?v=4" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.0/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
 <script src="/assets/grafik-engine.js?v=20260908"></script>
@@ -487,7 +487,10 @@ a:hover{text-decoration:underline;color:var(--glow)}
 .anon-value-cta{display:inline-flex;align-items:center;min-height:48px;padding:0 22px;
   border-radius:9px;background:var(--gold);color:#1E1B12;font-size:15px;font-weight:700;
   text-decoration:none;transition:background .15s}
-.anon-value-cta:hover{background:var(--glow,#E6C257)}
+/* Цвет текста повторяем в :hover — см. ту же правку у .sbf-cta-link.
+   Общее правило a:hover ниже красит текст в --glow, а фон кнопки при
+   наведении становится тем же --glow: надпись исчезала целиком. */
+.anon-value-cta:hover{background:var(--glow,#E6C257);color:#1E1B12;text-decoration:none}
 .anon-value-note{font-size:12.5px;color:var(--muted);margin:10px 0 0}
 @media (max-width:760px){.anon-value-cta{width:100%;justify-content:center}}
 

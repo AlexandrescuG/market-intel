@@ -55,7 +55,11 @@
   line-height: 1;
   transition: background var(--dur) var(--ease), transform var(--dur) var(--ease);
 }
-.btn-primary:hover  { background: var(--gold-hover); text-decoration: none; }
+/* color повторяется намеренно: кнопка бывает ссылкой, а страницы задают своё
+   `a:hover{color:...}`. Без явного цвета текст кнопки перекрашивается вместе
+   с обычными ссылками — на главной это сделало надпись «30 дней PRO»
+   невидимой (текст и фон совпали в один цвет). */
+.btn-primary:hover  { background: var(--gold-hover); color: var(--bg); text-decoration: none; }
 .btn-primary:active { transform: scale(.98); }
 .btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 2px rgba(201,162,39,.35); }
 
