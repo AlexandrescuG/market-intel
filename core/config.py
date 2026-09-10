@@ -4,6 +4,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import re
 import time
 from pathlib import Path
 
@@ -216,7 +217,69 @@ def rotating_news_feeds(cycle: int | None = None) -> dict:
         cycle = int(time.time() // max(60, NEWS_ROTATION_STEP_SEC))
     start = (cycle * n) % len(names)
     picked = [names[(start + i) % len(names)] for i in range(min(n, len(names)))]
-    return {name: _google_news(INSTRUMENT_NEWS_QUERIES[name]) for name in picked}
+    out = {name: _google_news(INSTRUMENT_NEWS_QUERIES[name]) for name in picked}
+    out.update(_ticker_feeds(picked))
+    return out
+
+
+# ── Тикерные ленты Yahoo ────────────────────────────────────────────────────
+#
+# 🔴 ЗАЧЕМ, если поиск Google News по инструменту уже есть.
+#
+# Замер 10.09.2026 по ленте #APPLE: 22 из 30 новостей пришли ссылками
+# news.google.com. У такой ссылки фотографии не будет НИКОГДА — адрес статьи
+# в ней не лежит (внутри base64 идентификатор, а не URL), страница рисуется
+# скриптом и og-тегов не содержит. То есть новостная сетка по популярной
+# акции была обречена состоять из логотипов.
+#
+# Тикерная лента Yahoo отдаёт то же самое прямыми ссылками на издания:
+# проверено на AAPL — 20 записей, из шести проверенных превью нашлось у пяти.
+# Клик при этом ведёт на статью, а не через редирект.
+#
+# Google-поиск не убираем: он ловит то, чего у Yahoo нет (русскоязычные
+# издания, нишевые сайты). Две ленты на инструмент дают дубли, но дубли
+# склеиваются на выдаче, и из копий выбирается та, что с фотографией и
+# прямой ссылкой (serve.py::_dedupe_feed).
+_YAHOO_TICKER_FEED = ("https://feeds.finance.yahoo.com/rss/2.0/headline"
+                      "?s={t}&region=US&lang=en-US")
+_TICKER_RE = re.compile(r"^[A-Z][A-Z.\-]{0,6}$")
+
+
+def _catalog_tickers() -> dict:
+    """{имя инструмента в наших запросах: биржевой тикер}.
+
+    У акций в каталоге поле name и есть тикер (#APPLE → AAPL). Берём только
+    их: для сырья и валют тикерной ленты у Yahoo в этом виде нет, а
+    подставлять туда GC=F значит получать ленту не про то.
+    """
+    try:
+        raw = json.loads((BASE_DIR / "web" / "data" / "broker_catalog.json")
+                         .read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+    items = raw.get("items", raw) if isinstance(raw, dict) else raw
+    out = {}
+    for it in items:
+        if it.get("category") != "stock":
+            continue
+        t = (it.get("name") or "").strip().upper()
+        if _TICKER_RE.match(t):
+            out[it["symbol"]] = t
+    return out
+
+
+def _ticker_feeds(picked: list[str]) -> dict:
+    """Ключи запросов выглядят как «Google News: #APPLE» — символ после
+    двоеточия. Без этого разбора совпадений с каталогом не будет ни одного,
+    и функция молча вернёт пустоту (проверено: 0 из 12 в первой версии)."""
+    тикеры = _catalog_tickers()
+    out = {}
+    for name in picked:
+        символ = name.split(":", 1)[-1].strip() if ":" in name else name.strip()
+        t = тикеры.get(символ)
+        if t:
+            out[f"Yahoo {t}"] = _YAHOO_TICKER_FEED.format(t=t)
+    return out
 RSS_TREND_WINDOW_HOURS = int(os.getenv("RSS_TREND_WINDOW_HOURS", "24"))
 
 # ── SBFCRM — новые регистрации платформы как лиды (27.08.2026) ───────────────

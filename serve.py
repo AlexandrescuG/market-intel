@@ -3053,6 +3053,54 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 
     _FEED_LIMIT = 30
 
+    @staticmethod
+    def _dedupe_feed(con, items: list[dict]) -> list[dict]:
+        """Один материал — одна карточка, и берём ту копию, что лучше.
+
+        🔴 Одна и та же статья приезжает несколькими путями: прямой лентой
+        издания и двумя-тремя поисковыми лентами Google News под разные
+        инструменты. Ссылки при этом разные, поэтому дедупликация по url не
+        срабатывала: замер по #APPLE показал по четыре копии одного заголовка.
+
+        Копии не равноценны. У прямой ссылки на издание есть og:image и
+        человек попадает на статью; у ссылки news.google.com картинки нет
+        никогда (страница рисуется скриптом, адрес статьи в ней не лежит), и
+        клик ведёт через редирект. Поэтому из группы берётся копия с
+        картинкой, а при прочих равных — с прямой ссылкой.
+
+        Побочный и приятный эффект: доля карточек с фотографией растёт без
+        единого нового похода наружу — просто перестаём показывать худшую
+        копию там, где есть лучшая.
+        """
+        if not items:
+            return items
+        media = {}
+        try:
+            media = news_media.media_for(con, [i["uid"] for i in items])
+        except Exception:
+            pass
+
+        def вес(it: dict) -> tuple:
+            есть_фото = 1 if media.get(it["uid"]) else 0
+            прямая = 0 if news_media.domain_of(it.get("url") or "") in (
+                "news.google.com", "") else 1
+            return (есть_фото, прямая, it["ts"])
+
+        лучшие: dict[str, dict] = {}
+        порядок: list[str] = []
+        for it in items:
+            ключ = re.sub(r"\W+", " ", (it.get("title") or "").lower()).strip()[:110]
+            if not ключ:
+                ключ = "uid:" + it["uid"]      # у постов заголовка нет, не склеиваем
+            if ключ not in лучшие:
+                лучшие[ключ] = it
+                порядок.append(ключ)
+            elif вес(it) > вес(лучшие[ключ]):
+                лучшие[ключ] = it
+        out = [лучшие[k] for k in порядок]
+        out.sort(key=lambda x: x["ts"], reverse=True)
+        return out
+
     def _decorate_feed(self, con, items: list[dict], lang: str) -> None:
         """Дописать в пункты ленты картинку, логотип и перевод заголовка.
 
@@ -3178,7 +3226,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             con.row_factory = sqlite3.Row
             cutoff_iso = (datetime.now(timezone.utc) - timedelta(days=14)).isoformat()
             rows = con.execute(
-                """SELECT uid, source, title, text, url, topic_hint, cashtags,
+                """SELECT uid, source, title, text, url, topic_hint, author, cashtags,
                           raw, last_seen
                    FROM signals WHERE last_seen >= ? ORDER BY last_seen DESC LIMIT 800""",
                 (cutoff_iso,),
@@ -3197,10 +3245,19 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 except (ValueError, TypeError):
                     continue
                 seen_uids.add(r["uid"])
+                # 🔴 У поста из X и Telegram нет заголовка — есть текст и
+                # автор. Раньше в подпись шёл topic_hint, а у сборщика твитов
+                # это ПОИСКОВЫЙ ЗАПРОС: в ленте появлялись карточки с
+                # подписью «(CPI OR inflation OR "rate hike") min_faves:500».
+                # Выглядит как поломка сайта, потому что это она и есть.
+                соцсеть = (r["source"] or "") in ("twitter", "telegram")
+                подпись = (("@" + r["author"]) if соцсеть and r["author"]
+                           else (r["topic_hint"] if not соцсеть else r["source"]))
                 items.append({
                     "uid": r["uid"],
                     "title": r["title"] or (r["text"] or "")[:140],
-                    "url": r["url"], "source": r["source"] or r["topic_hint"],
+                    "url": r["url"], "source": подпись,
+                    "kind": "post" if соцсеть else "news",
                     "domain": _raw_domain(r["raw"]), "ts": ts,
                 })
             # + RSS-заголовки с тегом инструмента (Фаза 3), релевантно для индексов
@@ -3224,13 +3281,13 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                         continue
                     seen_uids.add(r["uid"])
                     items.append({"uid": r["uid"], "title": r["title"], "url": r["url"],
-                                  "source": r["source"], "domain": _raw_domain(r["raw"]),
-                                  "ts": int(ts)})
+                                  "source": r["source"], "kind": "news",
+                                  "domain": _raw_domain(r["raw"]), "ts": int(ts)})
             except sqlite3.OperationalError:
                 pass
 
             items.sort(key=lambda x: x["ts"], reverse=True)
-            items = items[:self._FEED_LIMIT]
+            items = self._dedupe_feed(con, items)[:self._FEED_LIMIT]
             self._decorate_feed(con, items, lang)
             con.close()
             self._send_json(items)
