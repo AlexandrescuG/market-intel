@@ -2303,7 +2303,13 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         # горячий посетитель на сайте; отправлять его в форму без обещания
         # было прямой потерей.
         lang_pref = "" if lang == "ru" else f"/{lang}"
-        cta_href = f"/edu/{'' if lang == 'ru' else lang + '/'}b/4" if logged_in else f"{lang_pref}/survey"
+        # 🔴 Якорь #survey обязателен, а не украшение. Подпись кнопки обещает
+        # опросник, а он лежит в самом низу длинной главы 4, свёрнутый за
+        # кнопкой «Заполнить». Без якоря человек попадал на верх главы и не
+        # находил того, за чем пришёл. Обработчик якоря — в edu_book_4.html:
+        # разворачивает форму, прокручивает к ней и подсвечивает блок.
+        cta_href = (f"/edu/{'' if lang == 'ru' else lang + '/'}b/4#survey"
+                    if logged_in else f"{lang_pref}/survey")
         cta_label = i18n.t("eduindex.paywall.cta_survey" if logged_in else "eduindex.paywall.cta_register", lang)
         toc_href = "/edu" if lang == "ru" else f"/edu/{lang}/b"
         html = f"""<!doctype html><html lang="{lang}"><head>
