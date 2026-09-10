@@ -61,9 +61,9 @@
   "home.pulse_tab_stocks": "Stocks",
   "home.pulse_tab_indices": "Indices",
   "home.pulse_calm": "Calm background — top by mentions",
-  "home.pulse_explainer": "How many times more often than usual the instrument is mentioned in the last hour. Usual is the average hour over the last 7 days. This is attention, not price.",
-  "home.pulse_score_tpl": "×{score} vs its own norm",
-  "home.pulse_zero_collapsed": "{n} more instruments with no notable mentions",
+  "home.pulse_explainer": "Where attention is concentrating: how many news items mentioned the instrument in the last hour. Where we have enough history, we also show how many times that is above a normal hour. This is attention, not price.",
+  "home.pulse_score_tpl": "{n} in the hour · ×{score} vs normal",
+  "home.pulse_zero_collapsed": "{n} more instruments with no mentions this hour",
   "home.pulse_feed_locked": "Available after registration",
   "home.pulse_feed_empty": "No mentions found.",
   "home.no_cards": "No cards.",
@@ -1653,5 +1653,5 @@
   "home.board_quiet": "quiet today",
   "home.board_tab_all": "All",
   "home.pulse_norm_note": "The multiplier is shown only for instruments with at least a week of history. For the rest we show the raw hourly count: there is nothing to compare against yet, and a multiplier would be made up.",
-  "home.pulse_no_norm_tpl": "{n} in the last hour · no baseline yet"
+  "home.pulse_no_norm_tpl": "{n} in the hour · no baseline yet"
 }

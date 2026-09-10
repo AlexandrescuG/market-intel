@@ -1642,8 +1642,10 @@ function renderPulseList(data){
   // Внимание, не цена -- нули (без заметных упоминаний) не рисуются построчно,
   // сворачиваются в одну строку. Если активных нет вовсе, это и есть "спокойно"
   // -- уже показано через #pulseCalm выше, вторая строка тут была бы дублем.
-  const active = data.items.filter(it=>it.score>0);
-  const zero = data.items.filter(it=>it.score<=0);
+  // Порог по упоминаниям, а не по кратности: у инструмента без собственной
+  // нормы кратности нет, и фильтр по score прятал бы именно их.
+  const active = data.items.filter(it=>it.mentions>0);
+  const zero = data.items.filter(it=>it.mentions<=0);
   if(!active.length){ listEl.innerHTML=''; return; }
   const [lo,hi] = pulseGlobalRange(active);
   let html = active.map(it=>{
@@ -1654,7 +1656,7 @@ function renderPulseList(data){
       <span class="pulse-score${it.has_norm === false ? ' pulse-score-nonorm' : ''}">${
         it.has_norm === false
           ? fmt_(I18N_PULSE.noNormTpl, {n: it.mentions})
-          : fmt_(I18N_PULSE.scoreTpl, {score: it.score.toFixed(1)})
+          : fmt_(I18N_PULSE.scoreTpl, {n: it.mentions, score: it.score.toFixed(1)})
       }</span>
       <span class="pulse-chevron" aria-hidden="true">›</span>
     </div>`;

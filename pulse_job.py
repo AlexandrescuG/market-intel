@@ -112,16 +112,33 @@ def _classify(symbol: str, cats: dict) -> str:
 def _tag_counts(con, since_iso: str) -> dict:
     """{символ: сколько упоминаний} по news_instrument_tags за окно.
 
-    Считаем по last_seen сигнала, а не по дате публикации: вопрос «о чём
-    говорят сейчас» — это про момент, когда материал попал в поток, а не про
-    то, когда он был написан.
+    Считаем по first_seen — по моменту, когда материал ВПЕРВЫЕ попал в поток,
+    а не по дате публикации и не по last_seen.
+
+    🔴 Здесь стоял last_seen, и это ломало метрику скрытно.
+
+    last_seen обновляется каждый раз, когда коллектор снова видит ту же
+    статью в ленте, — а ленты он перечитывает раз в 20 минут, и статья висит
+    в них сутками. Замер 10.09.2026: за час 1119 новостей появились впервые
+    и 3177 старых были перечитаны, и все 4296 считались упоминаниями «за
+    последний час».
+
+    Хуже всего то, что числитель и знаменатель мерились разными линейками. За
+    час одна и та же статья попадала в счёт при каждом перечитывании; за 7
+    дней она же попадала один раз, потому что в окно влезает почти всё. По
+    #NVIDIA это давало 84 упоминания за час против 26 реальных — отсюда
+    «×66 к своей норме» у инструмента, о котором пишут пару десятков раз в
+    день.
+
+    Перечитывание статьи — это не новое упоминание. Один материал — один раз,
+    в тот час, когда он пришёл.
     """
     counts = {}
     try:
         rows = con.execute(
             """SELECT t.symbol, COUNT(*) FROM news_instrument_tags t
                JOIN signals s ON s.uid = t.news_uid
-               WHERE s.last_seen >= ? GROUP BY t.symbol""",
+               WHERE s.first_seen >= ? GROUP BY t.symbol""",
             (since_iso,),
         ).fetchall()
     except sqlite3.OperationalError:
@@ -132,9 +149,13 @@ def _tag_counts(con, since_iso: str) -> dict:
 
 
 def _cashtag_counts(con, since_iso: str) -> dict:
-    """Кештеги ($BTC) — как дополнение, а не как единственный источник."""
+    """Кештеги ($BTC) — как дополнение, а не как единственный источник.
+
+    Окно по first_seen, по той же причине, что и в _tag_counts: считаем
+    материалы, а не то, сколько раз коллектор их перечитал.
+    """
     counts = {}
-    for (raw,) in con.execute("SELECT cashtags FROM signals WHERE last_seen >= ?", (since_iso,)):
+    for (raw,) in con.execute("SELECT cashtags FROM signals WHERE first_seen >= ?", (since_iso,)):
         try:
             for t in json.loads(raw or "[]"):
                 counts[t] = counts.get(t, 0) + 1
@@ -157,6 +178,11 @@ def run(verbose: bool = False) -> int:
     con = sqlite3.connect(str(DB_PATH), timeout=60)
     con.execute("PRAGMA busy_timeout=60000")
     con.execute("PRAGMA journal_mode=WAL")
+    # Окна упоминаний считаются по first_seen (см. _tag_counts). Индекс был
+    # только по last_seen — по полю, которое мы перестали использовать, — и без
+    # этого каждый прогон уходил бы в полный перебор signals.
+    con.execute("CREATE INDEX IF NOT EXISTS idx_signals_first_seen "
+                "ON signals(first_seen)")
     con.executescript("""
         CREATE TABLE IF NOT EXISTS pulse_scores(
             symbol TEXT NOT NULL, category TEXT NOT NULL, ts INT NOT NULL,

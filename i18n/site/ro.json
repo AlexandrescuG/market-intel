@@ -61,9 +61,9 @@
   "home.pulse_tab_stocks": "Acțiuni",
   "home.pulse_tab_indices": "Indici",
   "home.pulse_calm": "Fundal calm — top după mențiuni",
-  "home.pulse_explainer": "De câte ori mai des decât de obicei este menționat instrumentul în ultima oră. Obișnuitul este ora medie din ultimele 7 zile. Este atenție, nu preț.",
-  "home.pulse_score_tpl": "×{score} față de norma proprie",
-  "home.pulse_zero_collapsed": "Încă {n} instrumente fără mențiuni notabile",
+  "home.pulse_explainer": "Unde se concentrează atenția: câte știri au menționat instrumentul în ultima oră. Acolo unde avem destul istoric, arătăm și de câte ori este mai mult decât într-o oră obișnuită. Este atenție, nu preț.",
+  "home.pulse_score_tpl": "{n} într-o oră · ×{score} față de normal",
+  "home.pulse_zero_collapsed": "Încă {n} instrumente fără mențiuni în această oră",
   "home.pulse_feed_locked": "Disponibil după înregistrare",
   "home.pulse_feed_empty": "Nu s-au găsit mențiuni.",
   "home.no_cards": "Niciun card.",
@@ -1653,5 +1653,5 @@
   "home.board_quiet": "astăzi e liniște",
   "home.board_tab_all": "Toate",
   "home.pulse_norm_note": "Multiplicatorul este afișat doar pentru instrumentele cu cel puțin o săptămână de istoric. Pentru celelalte arătăm numărul de mențiuni pe oră: încă nu avem cu ce compara, iar un multiplicator ar fi inventat.",
-  "home.pulse_no_norm_tpl": "{n} în ultima oră · încă fără normă"
+  "home.pulse_no_norm_tpl": "{n} într-o oră · încă fără normă"
 }

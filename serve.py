@@ -2622,9 +2622,23 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 "SELECT symbol, mentions, baseline, score FROM pulse_scores WHERE category=? AND ts=?",
                 (category, latest_ts),
             ).fetchall()
-            top_by_score = sorted(snapshot, key=lambda r: r["score"], reverse=True)[:8]
-            calm = not top_by_score or top_by_score[0]["score"] <= 0
-            chosen = top_by_score if not calm else sorted(snapshot, key=lambda r: r["mentions"], reverse=True)[:8]
+            # 🔴 Порядок — по числу упоминаний за час, а не по кратности.
+            #
+            # По кратности сортировать нельзя, пока она есть не у всех: 314
+            # инструментов из 343 пока без собственной нормы, у них множителя
+            # нет вовсе. Сортировка по нему ставила рядом отношение и счётчик
+            # («×6.1» у четырёх упоминаний выше, чем «3 за час») и поднимала
+            # наверх ×0.6 и ×0.7 — то есть «тише обычного» в блоке под
+            # названием «Эпицентр».
+            #
+            # Абсолютное число упоминаний сравнимо для всех и отвечает на
+            # вопрос блока — где сейчас концентрируется внимание. Кратность
+            # осталась в строке как уточнение: много это для инструмента или
+            # для него обычно.
+            chosen = sorted(snapshot,
+                            key=lambda r: (r["mentions"], r["score"]),
+                            reverse=True)[:8]
+            calm = not chosen or chosen[0]["mentions"] <= 0
 
             since = latest_ts - 24 * 3600
             items = []
