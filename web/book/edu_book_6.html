@@ -106,7 +106,7 @@ const STRINGS = {
   },
 };
 
-const {C, Mono, Chip, Rule, AskAnalystBtn, getChUrl, QuizBlock, ImpactMatrix, ComplianceFootnote, ColdStart} = window.AcademyShared;
+const {C, Mono, Chip, Rule, AntiMythBlock, AskAnalystBtn, getChUrl, QuizBlock, ImpactMatrix, ComplianceFootnote, ColdStart} = window.AcademyShared;
 
 const SectionTitle = ({children,sub,align="left",id}) => (
   <div id={id} style={{textAlign:align,marginBottom:36,scrollMarginTop:130}}>
@@ -263,13 +263,8 @@ function IntroBlock({ vars }) {
   const T6 = window.Ch6Content[INITIAL_LANG] || window.Ch6Content.ru;
   return (
     <div style={{marginBottom:48}}>
-      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T6.antiMyth.tag}</Mono>
-      <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px",marginBottom:28}}>
-        <p style={{fontWeight:600,fontSize:14.5,color:C.black,marginBottom:10}}>{T6.antiMyth.title}</p>
-        <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,marginBottom:12}}>{vars ? fillTemplate(T6.antiMyth.body1, vars) : "—"}</p>
-        <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,marginBottom:12}}>{vars ? fillTemplate(T6.antiMyth.body2, vars) : "—"}</p>
-        <p style={{fontSize:13.5,color:C.black,lineHeight:1.7,margin:0,fontWeight:600}}>{T6.antiMyth.body3}</p>
-      </div>
+      <AntiMythBlock lang={INITIAL_LANG} style={{marginBottom:28}}
+        data={{tag: T6.antiMyth.tag, title: T6.antiMyth.title, bodies: [vars ? fillTemplate(T6.antiMyth.body1, vars) : "—", vars ? fillTemplate(T6.antiMyth.body2, vars) : "—", T6.antiMyth.body3]}}/>
 
       <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T6.voiceSbf.tag}</Mono>
       <div style={{borderLeft:`4px solid ${C.gold}`,paddingLeft:24,marginBottom:28}}>

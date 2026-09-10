@@ -670,7 +670,94 @@
     );
   }
 
+  /* ── АНТИ-МИФ: слои снимаются по одному ────────────────────────────────
+   *
+   * ЗАЧЕМ. Замер 10.09.2026 по всем пятнадцати главам: в главах 6-15 вдвое
+   * меньше интерактивных элементов при том же объёме текста, а медиана куска
+   * текста между двумя действиями — 1064 знака против 401 в главах 2-5. Причём
+   * рубрика «АНТИ-МИФ» стоит в начале самого длинного куска в ШЕСТИ главах из
+   * десяти: 6, 7, 8, 9, 10, 12.
+   *
+   * В главе 5 та же рубрика — компонент с двумя кнопками. В главах 6-14 её
+   * скопировали как три-четыре подряд идущих <p> на 900-1300 знаков. Один
+   * шаблон испортил статистику половине курса.
+   *
+   * ПОЧЕМУ ИМЕННО «ПО ОДНОМУ СЛОЮ», а не вкладки и не аккордеон. Так устроен
+   * сам текст рубрики: «миф здесь слоёный, и снимать надо по одному» (гл. 7),
+   * «у этой главы миф двусторонний» (гл. 5). Первый абзац — ходовое
+   * заблуждение, последний — что остаётся после разбора. Порядок в этой
+   * рубрике несёт смысл, поэтому и раскрытие последовательное.
+   *
+   * 🔴 Уже раскрытое НЕ прячется обратно. Соблазн сделать «одна карточка за
+   * раз» велик — так метрика была бы ещё лучше, — но читателю нужно вернуться
+   * глазами к предыдущему слою, когда он читает следующий: они спорят друг с
+   * другом. Прятать прочитанное ради красивого числа значит чинить замер, а
+   * не главу.
+   */
+  var ANTIMYTH_COPY = {
+    ru: {next:"Снять следующий слой →", last:"Что остаётся →", of:"слой %1 из %2",
+         done:"слои сняты"},
+    ro: {next:"Înlătură stratul următor →", last:"Ce rămâne →",
+         of:"stratul %1 din %2", done:"straturi înlăturate"},
+    en: {next:"Peel the next layer →", last:"What remains →",
+         of:"layer %1 of %2", done:"layers peeled"}
+  };
+
+  function antiMythBodies(data) {
+    // В главах структура разная: где-то body, где-то body1..body4.
+    if (!data) return [];
+    if (data.bodies && data.bodies.length) return data.bodies;
+    var out = [];
+    if (data.body) out.push(data.body);
+    for (var i = 1; i <= 8; i++) {
+      if (data["body" + i]) out.push(data["body" + i]);
+    }
+    return out;
+  }
+
+  function AntiMythBlock(props) {
+    var e = React.createElement;
+    var data = props.data || {};
+    var lang = props.lang || "ru";
+    var copy = ANTIMYTH_COPY[lang] || ANTIMYTH_COPY.ru;
+    var bodies = antiMythBodies(data);
+    var st = React.useState(1), shown = st[0], setShown = st[1];
+    var всего = bodies.length;
+    var последний = shown >= всего;
+
+    // Внешний отступ приходит из главы: в разных главах блок стоит в разном
+    // окружении (28 у одних, 48 у других), и зашитое здесь число ломало бы
+    // вертикальный ритм страницы.
+    return e('div', {style: props.style || {marginBottom:28}},
+      data.tag ? e(Mono, {size:11, color:C.gold, spacing:3,
+                          style:{display:"block", marginBottom:10}}, data.tag) : null,
+      e('div', {style:{background:C.surface, border:"1px solid " + C.border,
+                       borderRadius:8, padding:"22px 26px"}},
+        data.title ? e('p', {style:{fontWeight:600, fontSize:14.5, color:C.black,
+                                    marginBottom:16}}, data.title) : null,
+        bodies.slice(0, shown).map(function (b, i) {
+          return e('p', {key:i, style:{fontSize:13.5, color: i === всего - 1 ? C.black : C.inkMid,
+                                       lineHeight:1.7, marginBottom:12,
+                                       fontWeight: i === всего - 1 && всего > 1 ? 600 : 400}}, b);
+        }),
+        всего > 1 ? e('div', {style:{display:"flex", alignItems:"center", gap:12,
+                                     marginTop:6, flexWrap:"wrap"}},
+          !последний ? e('button', {
+            onClick: function () { setShown(shown + 1); },
+            style:{fontFamily:"monospace", fontSize:11.5, padding:"9px 16px", cursor:"pointer",
+                   background:C.gold, color:"#18181a", border:"none", borderRadius:4,
+                   fontWeight:700}
+          }, shown === всего - 1 ? copy.last : copy.next) : null,
+          e(Mono, {size:10.5, color:C.inkFaint},
+            последний ? copy.done
+                      : copy.of.replace("%1", String(shown)).replace("%2", String(всего)))
+        ) : null
+      )
+    );
+  }
+
   window.AcademyShared = {
+    AntiMythBlock: AntiMythBlock,
     C: C, Mono: Mono, Chip: Chip, Rule: Rule,
     GlossWord: GlossWord, withGlossTerms: withGlossTerms,
     AskAnalystPopup: AskAnalystPopup, AskAnalystBtn: AskAnalystBtn,
