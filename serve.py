@@ -2168,6 +2168,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self._handle_pulse()
         elif path_clean == "/api/pulse/feed":
             self._handle_pulse_feed()
+        elif path_clean == "/api/pulse/translate":
+            self._handle_pulse_translate()
         elif path_clean == "/api/chart/levels":
             self._handle_chart_levels()
         elif path_clean == "/api/chart/confluence":
@@ -3076,15 +3078,17 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 
         try:
             news_i18n.ensure_schema(con)
+            # 🔴 Только кэш. Перевод наружу отсюда УБРАН.
+            #
+            # Замер 10.09.2026 по ленте #APPLE: выборка новостей 5 мс, теги
+            # 3 мс, картинки и логотипы по 0 мс — и 6297 мс на перевод. Лента
+            # открывалась шесть секунд и всё это время показывала «…». Человек
+            # ждал не новости, а переводчик.
+            #
+            # Непереведённое добирает /api/pulse/translate отдельным запросом,
+            # уже после того, как список показан. Оригиналы читаются сразу,
+            # переводы подставляются, когда приедут.
             cached = news_i18n.cached(con, uids, lang)
-            # Переводим только то, чего ещё нет в кэше И что не на языке
-            # читателя. Заголовок на его языке переводить незачем, а
-            # переводчик на такой вход отвечает тем же текстом.
-            todo = [(it["uid"], it["title"]) for it in items
-                    if it["uid"] not in cached and it["title"]
-                    and news_i18n.detect(it["title"]) != lang]
-            if todo:
-                cached.update(news_i18n.translate_missing(con, todo, lang))
         except Exception as e:
             print(f"[лента] перевод: {str(e)[:140]}", file=sys.stderr)
             cached = {}
@@ -3099,7 +3103,48 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             tr = cached.get(it["uid"])
             if tr:
                 it["title_local"] = tr
-            it.pop("uid", None)
+            # uid остаётся в ответе: витрина по нему просит перевод вторым
+            # запросом. Это внутренний хеш новости, не персональные данные.
+
+    def _handle_pulse_translate(self) -> None:
+        """Перевод заголовков вторым запросом, уже после показа ленты.
+
+        Почему отдельная ручка, а не часть /api/pulse/feed: поход к
+        переводчику занимает около шести секунд на дюжину заголовков, и пока
+        он шёл внутри основного запроса, человек смотрел на «…» вместо
+        новостей. Теперь список приходит за десятки миллисекунд, а переводы
+        подставляются в него, когда приедут.
+
+        Переведённое складывается в кэш, поэтому второй заход по тому же
+        активу наружу уже не ходит.
+        """
+        if not self._lp_require_auth():
+            return
+        params = parse_qs(urlparse(self.path).query)
+        lang = (params.get("lang", ["ru"])[0] or "ru").lower()
+        uids = [u for u in (params.get("uids", [""])[0] or "").split(",") if u][:40]
+        if lang not in news_i18n.SUPPORTED or not uids:
+            self._send_json({})
+            return
+        try:
+            con = sqlite3.connect(str(_SIGNALS_DB), timeout=30)
+            con.execute("PRAGMA busy_timeout=30000")
+            try:
+                news_i18n.ensure_schema(con)
+                готовые = news_i18n.cached(con, uids, lang)
+                q = ",".join("?" * len(uids))
+                строки = con.execute(
+                    f"SELECT uid, title FROM signals WHERE uid IN ({q})", uids).fetchall()
+                todo = [(u, t) for u, t in строки
+                        if u not in готовые and t and news_i18n.detect(t) != lang]
+                if todo:
+                    готовые.update(news_i18n.translate_missing(con, todo, lang))
+            finally:
+                con.close()
+            self._send_json(готовые)
+        except Exception as e:
+            print(f"[перевод] {str(e)[:140]}", file=sys.stderr)
+            self._send_json({})
 
     def _handle_pulse_feed(self) -> None:
         """Лента упоминаний по тикеру (тап на карточку в Эпицентре).

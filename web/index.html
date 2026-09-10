@@ -381,30 +381,57 @@ a:hover{text-decoration:underline;color:var(--glow)}
 .pulse-feed-card .pf-meta{font-size:10px;color:var(--muted);margin-top:3px}
 .pulse-feed-lock{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px;padding:8px 0}
 
-/* Карточка новости: картинка слева, текст справа. Окно шире прежнего —
-   в 340px картинка и заголовок вместе не помещаются, а перенос картинки
-   наверх превратил бы список из тридцати новостей в бесконечную ленту. */
-.pulse-feed-card{width:420px}
-.pulse-feed-card .pf-card{display:flex;gap:10px;align-items:flex-start;padding:10px 0;
-  border-top:1px solid var(--line);text-decoration:none;color:inherit}
-.pulse-feed-card .pf-card:first-child{border-top:none}
+/* ── Новостная сетка по активу ─────────────────────────────────────────────
+   Тридцать новостей узкой колонкой в 420px читались как лог. Сетка карточек
+   в две-три колонки даёт то, ради чего её и заводят: заголовки видно
+   параллельно, картинка работает как метка источника, а не как украшение.
+   Ширина от вьюпорта, но не во весь экран — это всё-таки окно поверх доски. */
+.pulse-feed-card{width:min(1040px, calc(100vw - 48px));max-height:82vh;padding:20px 22px}
+/* align-items:start — карточка не растягивается по высоте самой высокой в
+   ряду. Без этого новость без картинки получала пустую дыру в полэкрана:
+   текст сверху, подпись прижата к низу чужой высотой. */
+.pf-grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(228px, 1fr));
+  gap:14px;align-items:start}
+.pulse-feed-card .pf-card{display:flex;flex-direction:column;text-decoration:none;
+  color:inherit;border:1px solid var(--line);border-radius:10px;overflow:hidden;
+  background:var(--paper);transition:border-color .15s, transform .15s}
+.pulse-feed-card .pf-card:hover{border-color:var(--gold);transform:translateY(-1px)}
 .pulse-feed-card .pf-card:hover .pf-title{color:var(--gold)}
-.pf-shot{flex:0 0 72px;width:72px;height:56px;border-radius:8px;overflow:hidden;
-  background:var(--surface);border:1px solid var(--line)}
+/* Картинка сверху во всю ширину карточки: 16:9 держит ряды ровными даже
+   когда издания отдают превью разных пропорций. */
+.pf-shot{width:100%;aspect-ratio:16/9;overflow:hidden;background:var(--surface);
+  border-bottom:1px solid var(--line)}
 .pf-img{width:100%;height:100%;object-fit:cover;display:block}
-.pf-text{min-width:0;flex:1}
-.pf-title{font-family:var(--font-sans);font-size:12.5px;line-height:1.35;color:var(--ink)}
+/* Фотографии у новости может не быть никогда — например у всего, что пришло
+   ссылкой Google News. Тогда шапку карточки занимает логотип издания на
+   приглушённой подложке: он не притворяется иллюстрацией к событию, он
+   говорит, кто это написал. Полоса ниже фотографической, чтобы разница
+   читалась сразу. */
+.pf-shot-logo{aspect-ratio:auto;height:56px;display:flex;align-items:center;
+  justify-content:center;gap:8px;background:var(--surface)}
+.pf-shot-logo img{width:20px;height:20px;object-fit:contain;border-radius:4px}
+.pf-shot-logo span{font-family:'JetBrains Mono',monospace;font-size:10.5px;
+  color:var(--muted);letter-spacing:.5px;max-width:60%;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+.pf-text{padding:11px 13px 12px;display:flex;flex-direction:column;flex:1}
+.pf-title{font-family:var(--font-sans);font-size:13px;line-height:1.4;color:var(--ink);
+  font-weight:500}
 /* Оригинал под переводом: тише, но читаемо. Это не подпись к картинке,
    а проверяемость — что именно написало издание. */
-.pf-orig{font-family:var(--font-sans);font-size:10.5px;line-height:1.3;color:var(--faint);
-  margin-top:3px}
+.pf-orig{font-family:var(--font-sans);font-size:10.5px;line-height:1.35;color:var(--faint);
+  margin-top:4px}
 .pulse-feed-card .pf-meta{display:flex;align-items:center;gap:5px;font-size:10px;
-  color:var(--muted);margin-top:5px}
-.pf-logo{width:13px;height:13px;border-radius:3px;object-fit:contain;flex:0 0 13px}
+  color:var(--muted);margin-top:auto;padding-top:9px}
+.pf-logo{width:14px;height:14px;border-radius:3px;object-fit:contain;flex:0 0 14px}
 .pf-dot{opacity:.6}
+.pf-src{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Пока не приехали переводы — заголовки чуть приглушены, чтобы подмена
+   текста через секунду не выглядела как скачок вёрстки. */
+.pf-grid.pf-translating .pf-title{opacity:.72;transition:opacity .2s}
 @media(max-width:760px){
-  .pulse-feed-card{width:100%}
-  .pf-shot{flex-basis:64px;width:64px;height:50px}
+  .pulse-feed-card{width:100%;padding:16px 14px}
+  .pf-grid{grid-template-columns:1fr;gap:10px}
+  .pf-shot{aspect-ratio:2/1}
 }
 
 .sidebar .panel{margin-bottom:18px}
@@ -1757,15 +1784,62 @@ function openPulseFeed(symbol){
     .then(items=>{
       const body=document.getElementById('pfBody'); if(!body)return;
       if(!Array.isArray(items) || !items.length){ body.innerHTML=`<div class="pf-item">${escapeHtmlIdx(I18N_PULSE.empty)}</div>`; return; }
-      body.innerHTML=items.map(renderFeedCard).join('');
+      body.innerHTML=`<div class="pf-grid">${items.map(renderFeedCard).join('')}</div>`;
       // Битая ссылка на чужой картинке — обычное дело: издание переложило
       // файл, отдало 404, закрыло горячие ссылки. Тогда прячем картинку и
       // оставляем карточку с логотипом источника, а не рамку с крестиком.
       body.querySelectorAll('.pf-img').forEach(img=>{
-        img.addEventListener('error', ()=>{ img.closest('.pf-shot').remove(); }, {once:true});
+        img.addEventListener('error', ()=>{ const s=img.closest('.pf-shot'); if(s) s.remove(); }, {once:true});
       });
+      fillTranslations(items, lang, body);
     })
     .catch(()=>{});
+}
+
+/* Переводы приезжают ВТОРЫМ запросом, уже поверх показанного списка.
+   🔴 Раньше перевод шёл внутри /api/pulse/feed, и замер показал почему это
+   плохо: выборка новостей 5 мс, теги 3 мс, картинки 0 мс — и 6297 мс на
+   поход к переводчику. Лента открывалась шесть секунд и всё это время
+   показывала «…». Человек ждал не новости, а переводчик.
+   Теперь список виден сразу на языке оригинала, а заголовки подменяются,
+   когда переводы приедут. Переведённое кэшируется, поэтому повторный заход
+   по тому же активу наружу уже не ходит. */
+function fillTranslations(items, lang, body){
+  const надо = items.filter(n => n.uid && !n.title_local && n.lang && n.lang !== lang);
+  if(!надо.length) return;
+  const grid = body.querySelector('.pf-grid');
+  if(grid) grid.classList.add('pf-translating');
+  const uids = надо.map(n=>n.uid).join(',');
+  window.sbfAuth.fetch('/api/pulse/translate?lang='+encodeURIComponent(lang)
+                       +'&uids='+encodeURIComponent(uids))
+    .then(r=>r.ok?r.json():{})
+    .then(map=>{
+      if(grid) grid.classList.remove('pf-translating');
+      if(!map || !Object.keys(map).length) return;
+      items.forEach(n=>{
+        const tr = map[n.uid];
+        if(!tr || tr === n.title) return;
+        const card = body.querySelector(`.pf-card[data-uid="${cssEscapeIdx(n.uid)}"]`);
+        if(!card) return;
+        const t = card.querySelector('.pf-title');
+        if(t) t.textContent = tr;
+        // Оригинал появляется только сейчас: до перевода он и был заголовком,
+        // и дублировать его самим под собой было бы бессмысленно.
+        if(!card.querySelector('.pf-orig')){
+          const o = document.createElement('div');
+          o.className = 'pf-orig';
+          o.textContent = n.title;
+          t.insertAdjacentElement('afterend', o);
+        }
+      });
+    })
+    .catch(()=>{ if(grid) grid.classList.remove('pf-translating'); });
+}
+
+/* uid — наш внутренний хеш, но в селектор он попадает как есть.
+   CSS.escape есть не везде, поэтому запасной вариант на регулярке. */
+function cssEscapeIdx(s){
+  return (window.CSS && CSS.escape) ? CSS.escape(s) : String(s).replace(/[^\w-]/g, '\\$&');
 }
 
 /* Карточка новости в ленте по активу.
@@ -1777,22 +1851,31 @@ function renderFeedCard(n){
   const dt=new Date(n.ts*1000);
   const timeStr=dt.toLocaleString(undefined,{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
   const url=escapeHtmlIdx(n.url||'#');
+  const источник = escapeHtmlIdx(n.source || n.domain || '');
+  // Шапка карточки: фотография статьи, если издание её отдаёт; иначе полоса
+  // с логотипом издания; если нет и его — карточка просто без шапки.
   const shot = n.image
     ? `<div class="pf-shot"><img class="pf-img" loading="lazy" referrerpolicy="no-referrer"
          src="${escapeHtmlIdx(n.image)}" alt=""></div>`
-    : '';
-  const logo = n.logo
+    : (n.logo
+        ? `<div class="pf-shot pf-shot-logo"><img loading="lazy"
+             src="${escapeHtmlIdx(n.logo)}" alt=""><span>${источник}</span></div>`
+        : '');
+  // В подписи логотип нужен только там, где его нет в шапке — иначе он
+  // показывался бы дважды на одной карточке.
+  const logo = (n.logo && n.image)
     ? `<img class="pf-logo" loading="lazy" src="${escapeHtmlIdx(n.logo)}" alt="">`
     : '';
   const headline = n.title_local || n.title || '';
   const original = (n.title_local && n.title && n.title_local !== n.title)
     ? `<div class="pf-orig">${escapeHtmlIdx(n.title)}</div>` : '';
-  return `<a class="pf-card" href="${url}" target="_blank" rel="noopener noreferrer">
+  return `<a class="pf-card" href="${url}" target="_blank" rel="noopener noreferrer"
+             data-uid="${escapeHtmlIdx(n.uid||'')}">
     ${shot}
     <div class="pf-text">
       <div class="pf-title">${escapeHtmlIdx(headline)}</div>
       ${original}
-      <div class="pf-meta">${logo}<span>${escapeHtmlIdx(n.source||n.domain||'')}</span>
+      <div class="pf-meta">${logo}<span class="pf-src">${источник}</span>
         <span class="pf-dot">·</span><span>${timeStr}</span></div>
     </div>
   </a>`;
