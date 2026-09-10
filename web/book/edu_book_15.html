@@ -73,7 +73,7 @@ const STRINGS = {
   },
 };
 
-const {C, Mono, Chip, Rule, getChUrl, ComplianceFootnote, ColdStart} = window.AcademyShared;
+const {C, Mono, Chip, Rule, getChUrl, ComplianceFootnote, ColdStart, CheckList, SortTwoBins} = window.AcademyShared;
 
 function fillTemplate(str, vars) {
   if (!str) return str;
@@ -207,12 +207,9 @@ function PropChecklist() {
       <div style={{background:C.goldPale,border:`1px solid ${C.borderGold}`,borderRadius:8,padding:"16px 22px",marginBottom:20}}>
         <p style={{fontSize:13,color:C.black,lineHeight:1.65,margin:0}}>{c.frame}</p>
       </div>
-      {c.items.map((it,i) => (
-        <div key={i} style={{display:"flex",gap:12,marginBottom:12,alignItems:"flex-start"}}>
-          <Mono size={11} color={C.gold} spacing={0}>{i+1}</Mono>
-          <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.65,margin:0}}>{it}</p>
-        </div>
-      ))}
+      {/* Рубрика называется «ЧТО ПРОВЕРИТЬ» — пусть проверять и получается.
+          Пять вопросов, на которые читатель отмечает, что уже выяснил. */}
+      <CheckList items={c.items} lang={INITIAL_LANG} mode="all"/>
     </div>
   );
 }
@@ -235,25 +232,27 @@ function NineRules() {
   const r = T.nineRules;
   return (
     <div style={{marginBottom:48}}>
-      <Mono size={10} color={C.inkFaint} spacing={1} style={{display:"block",marginBottom:10,textTransform:"uppercase"}}>{r.group1Label}</Mono>
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:24}} className="g2">
-        {r.group1.map((it,i) => (
-          <div key={i} style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:6,padding:"12px 16px",display:"flex",gap:10,alignItems:"flex-start"}}>
-            <Mono size={10} color={C.gold} spacing={0}>{i+1}</Mono>
-            <span style={{fontSize:12.5,color:C.black,lineHeight:1.5}}>{it}</span>
-          </div>
-        ))}
-      </div>
+      {/* 🔴 Девятое правило звучит «отличай правило процесса от параметра
+          метода» — и до правки восемь предыдущих правил были просто списком,
+          уже разложенным по двум подписанным группам. То есть навык, который
+          глава объявляет главным, читателю предлагалось получить чтением
+          готового ответа.
 
-      <Mono size={10} color={C.inkFaint} spacing={1} style={{display:"block",marginBottom:10,textTransform:"uppercase"}}>{r.group2Label}</Mono>
-      <div style={{marginBottom:24}}>
-        {r.group2.map((it,i) => (
-          <div key={i} style={{display:"flex",gap:10,marginBottom:10,alignItems:"flex-start"}}>
-            <Mono size={10} color={C.inkFaint} spacing={0}>{6+i}</Mono>
-            <p style={{fontSize:12.5,color:C.inkSoft,lineHeight:1.6,margin:0,fontStyle:"italic"}}>{it}</p>
-          </div>
-        ))}
-      </div>
+          Теперь он его применяет: восемь утверждений вперемешку, две корзины,
+          разбор после того, как разложено всё. Подписи корзин — те же
+          group1Label/group2Label, только укороченные до сути: полная подпись
+          («правила процесса (верны всегда)») сама по себе подсказка. */}
+      <SortTwoBins lang={INITIAL_LANG} style={{marginBottom:24}}
+        labels={[r.group1Label.replace(/^Группа \d+ — /, "").replace(/ \(.*\)$/, ""),
+                 r.group2Label.replace(/^Группа \d+ — /, "").replace(/ \(.*\)$/, "")]}
+        items={[
+          ...r.group1.map(t => ({text: t, bin: 0})),
+          ...r.group2.map(t => ({text: t, bin: 1})),
+        ].map((it, i) => ({...it, _k: i}))
+         /* Перемешивание фиксированное, а не случайное: при случайном порядке
+            два читателя видят разные задания, и обсуждать «а у тебя как» уже
+            нельзя. Достаточно того, что порядок не совпадает с группами. */
+         .sort((a, b) => ((a._k * 5) % 8) - ((b._k * 5) % 8))}/>
 
       <div style={{background:C.black,borderRadius:8,padding:"26px 30px",color:"#fff"}}>
         <Mono size={11} color={C.gold} spacing={2} style={{display:"block",marginBottom:12}}>{r.ninthLabel}</Mono>
@@ -383,13 +382,15 @@ function StopList() {
       <div style={{background:"rgba(242,54,69,0.06)",border:"1px solid rgba(242,54,69,0.25)",borderRadius:8,padding:"26px 30px"}}>
         <Mono size={11} color="#c0392b" spacing={2} style={{display:"block",marginBottom:6}}>{s.tag}</Mono>
         <p style={{fontSize:13,color:C.inkSoft,marginBottom:18}}>{s.subtitle}</p>
-        {s.items.map((it,i) => (
-          <div key={i} style={{display:"flex",gap:10,marginBottom:10,alignItems:"flex-start"}}>
-            <span style={{color:"#c0392b",fontSize:13}}>·</span>
-            <p style={{fontSize:13,color:C.inkMid,lineHeight:1.6,margin:0}}>{it}</p>
-          </div>
-        ))}
-        <p style={{fontSize:13.5,color:C.black,fontWeight:600,lineHeight:1.7,marginTop:16,marginBottom:0}}>{s.outro}</p>
+        {/* 🔴 Самый важный чек-лист курса, и он был списком точек.
+            Семь причин не открывать реальный счёт человек пролистывал как
+            текст — а это ровно те вопросы, на которые он должен ответить
+            себе до, а не после. Отмеченная галочка это ответ; точка — нет.
+            Вывод («ответ — путь первый») показывается, как только отмечен
+            хотя бы один пункт: любого из них достаточно.
+            Ответы никуда не уходят и нигде не сохраняются. */}
+        <CheckList items={s.items} lang={INITIAL_LANG} mode="any"
+                   accent="#c0392b" verdict={s.outro}/>
       </div>
     </div>
   );

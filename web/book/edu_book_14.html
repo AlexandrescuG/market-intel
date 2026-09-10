@@ -94,7 +94,7 @@ const STRINGS = {
   },
 };
 
-const {C, Mono, Chip, Rule, AntiMythBlock, AskAnalystBtn, getChUrl, QuizBlock, ComplianceFootnote, ColdStart} = window.AcademyShared;
+const {C, Mono, Chip, Rule, AntiMythBlock, AskAnalystBtn, getChUrl, QuizBlock, ComplianceFootnote, ColdStart, CheckList} = window.AcademyShared;
 
 function fillTemplate(str, vars) {
   if (!str) return str;
@@ -516,12 +516,27 @@ function ChapterSummary() {
   const T = window.Ch14Content[INITIAL_LANG] || window.Ch14Content.ru;
   return (
     <div style={{marginBottom:48}}>
-      {T.summary.items.map((it,i) => (
-        <div key={i} style={{display:"flex",gap:14,marginBottom:14,alignItems:"flex-start"}}>
-          <Mono size={13} color={C.gold} spacing={0}>{String(i+1).padStart(2,"0")}</Mono>
-          <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.65,margin:0}}>{it}</p>
-        </div>
-      ))}
+      {/* 🔴 Итоги главы читались как пять пронумерованных абзацев — то есть
+          пролистывались. Замер 10.09.2026: от конца тренажёра с целью до
+          ворот в главе 14 шло 5 154 знака подряд без единого действия,
+          самый длинный кусок главы, и итоги стояли в его конце.
+
+          Отметить «могу объяснить своими словами» — не украшение: это
+          припоминание, а оно работает лучше перечитывания. И это ответ
+          читателя себе, а не нам: галочки никуда не отправляются. */}
+      <p style={{fontSize:13,color:C.inkSoft,lineHeight:1.6,marginBottom:14}}>
+        {INITIAL_LANG === "ru"
+          ? "Отметь то, что можешь объяснить своими словами прямо сейчас — не подглядывая вверх."
+          : INITIAL_LANG === "ro"
+          ? "Bifează ce poți explica cu propriile cuvinte chiar acum — fără să te uiți mai sus."
+          : "Tick what you can explain in your own words right now — without looking back up."}
+      </p>
+      <CheckList items={T.summary.items} lang={INITIAL_LANG} mode="all"
+        verdict={INITIAL_LANG === "ru"
+          ? "Пять из пяти. Ниже — ворота: там считается не то, что ты понял, а то, что ты сделал."
+          : INITIAL_LANG === "ro"
+          ? "Cinci din cinci. Mai jos e poarta: acolo contează ce ai făcut, nu ce ai înțeles."
+          : "Five out of five. The gate below counts what you did, not what you understood."}/>
     </div>
   );
 }

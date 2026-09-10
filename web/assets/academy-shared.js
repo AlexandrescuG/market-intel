@@ -756,8 +756,170 @@
     );
   }
 
+  /* ── Чек-лист, который правда отмечается ───────────────────────────────
+   *
+   * ЗАЧЕМ. В главе 15 рубрика буквально называется «ЧТО ПРОВЕРИТЬ» и «КОГДА
+   * НЕ НАДО ОТКРЫВАТЬ РЕАЛЬНЫЙ СЧЁТ» — и оба списка отрисованы точками. Список
+   * вопросов, который нельзя отметить, читается как текст и пролистывается как
+   * текст; отмеченный — это уже ответ читателя самому себе.
+   *
+   * 🔴 Ответы никуда не отправляются и нигде не сохраняются. Это разговор
+   * человека с самим собой: «деньги заёмные», «недавно был крупный проигрыш»,
+   * «есть желание отыграться». Такие галочки не наше дело — ни на сервере, ни
+   * в localStorage. Состояние живёт в памяти вкладки и умирает с ней.
+   *
+   * mode:
+   *   "any" — вывод показывается, как только отмечен ХОТЬ ОДИН пункт
+   *           (стоп-лист: любой пункт означает «не сейчас»);
+   *   "all" — счётчик прогресса, вывод в конце.
+   */
+  var CHECKLIST_COPY = {
+    ru: {of:"отмечено %1 из %2", none:"ничего не отмечено"},
+    ro: {of:"bifate %1 din %2", none:"nimic bifat"},
+    en: {of:"%1 of %2 ticked", none:"nothing ticked"}
+  };
+
+  function CheckList(props) {
+    var e = React.createElement;
+    var items = props.items || [];
+    var lang = props.lang || "ru";
+    var copy = CHECKLIST_COPY[lang] || CHECKLIST_COPY.ru;
+    var mode = props.mode || "all";
+    var accent = props.accent || C.gold;
+    var st = React.useState({}), отмечено = st[0], setОтмечено = st[1];
+    var сколько = Object.keys(отмечено).filter(function (k) { return отмечено[k]; }).length;
+    var показать = mode === "any" ? сколько > 0 : сколько === items.length && items.length > 0;
+
+    function переключить(i) {
+      var копия = {};
+      for (var k in отмечено) копия[k] = отмечено[k];
+      копия[i] = !копия[i];
+      setОтмечено(копия);
+    }
+
+    return e('div', {style: props.style || null},
+      items.map(function (it, i) {
+        var on = !!отмечено[i];
+        return e('label', {key:i, style:{display:"flex", gap:11, marginBottom:11,
+                  alignItems:"flex-start", cursor:"pointer"}},
+          e('input', {type:"checkbox", checked:on,
+                      onChange: function () { переключить(i); },
+                      style:{marginTop:3, width:16, height:16, accentColor:accent,
+                             flex:"0 0 16px", cursor:"pointer"}}),
+          e('span', {style:{fontSize:13, lineHeight:1.6,
+                            color: on ? C.black : C.inkMid,
+                            fontWeight: on ? 600 : 400}}, it)
+        );
+      }),
+      e('div', {style:{display:"flex", alignItems:"center", gap:12, marginTop:14,
+                       flexWrap:"wrap"}},
+        e(Mono, {size:10.5, color: сколько ? accent : C.inkFaint},
+          сколько ? copy.of.replace("%1", String(сколько)).replace("%2", String(items.length))
+                  : copy.none)
+      ),
+      показать && props.verdict
+        ? e('p', {style:{fontSize:13.5, color:C.black, fontWeight:600, lineHeight:1.7,
+                         marginTop:14, marginBottom:0,
+                         borderTop:"1px solid " + C.border, paddingTop:14}}, props.verdict)
+        : null
+    );
+  }
+
+  /* ── Разложить по двум корзинам ────────────────────────────────────────
+   *
+   * ЗАЧЕМ ИМЕННО ЭТО. Девятое правило главы 15 звучит так: «отличай правило
+   * процесса от параметра метода». До правки девять правил были списком —
+   * то есть навык, который глава объявляет главным, читателю предлагалось
+   * получить чтением. Здесь он его применяет: восемь утверждений, две
+   * корзины, разбор после ответа.
+   *
+   * 🔴 Ответ показывается только после того, как человек разложил ВСЁ. Иначе
+   * первая же подсказка превращает упражнение в чтение с подсветкой.
+   */
+  var SORT_COPY = {
+    ru: {check:"Проверить →", again:"Ещё раз", left:"осталось %1",
+         score:"верно %1 из %2", allRight:"Все восемь на местах."},
+    ro: {check:"Verifică →", again:"Din nou", left:"au mai rămas %1",
+         score:"corect %1 din %2", allRight:"Toate la locul lor."},
+    en: {check:"Check →", again:"Again", left:"%1 left",
+         score:"%1 of %2 correct", allRight:"All in the right place."}
+  };
+
+  function SortTwoBins(props) {
+    var e = React.createElement;
+    var items = props.items || [];   // [{text, bin: 0|1}]
+    var labels = props.labels || ["", ""];
+    var lang = props.lang || "ru";
+    var copy = SORT_COPY[lang] || SORT_COPY.ru;
+    var st = React.useState({}), выбор = st[0], setВыбор = st[1];
+    var st2 = React.useState(false), проверено = st2[0], setПроверено = st2[1];
+
+    var разложено = items.filter(function (_, i) { return выбор[i] !== undefined; }).length;
+    var верно = items.filter(function (it, i) { return выбор[i] === it.bin; }).length;
+
+    function положить(i, bin) {
+      if (проверено) return;
+      var копия = {};
+      for (var k in выбор) копия[k] = выбор[k];
+      копия[i] = bin;
+      setВыбор(копия);
+    }
+
+    return e('div', {style: props.style || {marginBottom:32}},
+      items.map(function (it, i) {
+        var мой = выбор[i];
+        var правильно = проверено && мой === it.bin;
+        var неправильно = проверено && мой !== undefined && мой !== it.bin;
+        return e('div', {key:i, style:{border:"1px solid " +
+                    (правильно ? C.green : неправильно ? C.red : C.border),
+                    background: правильно ? C.greenPale : неправильно ? C.redPale : C.surface,
+                    borderRadius:6, padding:"12px 14px", marginBottom:10}},
+          e('p', {style:{fontSize:12.5, color:C.black, lineHeight:1.55, margin:"0 0 9px"}}, it.text),
+          e('div', {style:{display:"flex", gap:7, flexWrap:"wrap"}},
+            [0, 1].map(function (b) {
+              var активна = мой === b;
+              return e('button', {key:b, onClick: function () { положить(i, b); },
+                style:{fontFamily:"monospace", fontSize:10.5, padding:"6px 11px",
+                       cursor: проверено ? "default" : "pointer",
+                       background: активна ? C.gold : "#fff",
+                       color: активна ? "#18181a" : C.inkMid,
+                       border:"1px solid " + (активна ? C.gold : C.border),
+                       borderRadius:4, fontWeight:600}}, labels[b]);
+            }),
+            проверено && неправильно
+              ? e(Mono, {size:10, color:C.red, style:{alignSelf:"center"}}, labels[it.bin])
+              : null
+          )
+        );
+      }),
+      e('div', {style:{display:"flex", alignItems:"center", gap:12, marginTop:6,
+                       flexWrap:"wrap"}},
+        !проверено
+          ? e('button', {
+              onClick: function () { if (разложено === items.length) setПроверено(true); },
+              disabled: разложено !== items.length,
+              style:{fontFamily:"monospace", fontSize:11.5, padding:"9px 16px",
+                     cursor: разложено === items.length ? "pointer" : "default",
+                     background: разложено === items.length ? C.gold : C.surfaceMid,
+                     color: разложено === items.length ? "#18181a" : C.inkFaint,
+                     border:"none", borderRadius:4, fontWeight:700}}, copy.check)
+          : e('button', {onClick: function () { setВыбор({}); setПроверено(false); },
+              style:{fontFamily:"monospace", fontSize:11.5, padding:"9px 16px",
+                     cursor:"pointer", background:"#fff", color:C.inkMid,
+                     border:"1px solid " + C.border, borderRadius:4, fontWeight:600}}, copy.again),
+        e(Mono, {size:10.5, color: проверено ? C.gold : C.inkFaint},
+          проверено
+            ? (верно === items.length ? copy.allRight
+               : copy.score.replace("%1", String(верно)).replace("%2", String(items.length)))
+            : copy.left.replace("%1", String(items.length - разложено)))
+      )
+    );
+  }
+
   window.AcademyShared = {
     AntiMythBlock: AntiMythBlock,
+    CheckList: CheckList,
+    SortTwoBins: SortTwoBins,
     C: C, Mono: Mono, Chip: Chip, Rule: Rule,
     GlossWord: GlossWord, withGlossTerms: withGlossTerms,
     AskAnalystPopup: AskAnalystPopup, AskAnalystBtn: AskAnalystBtn,
