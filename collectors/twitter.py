@@ -13,17 +13,19 @@ from __future__ import annotations
 import asyncio
 import concurrent.futures
 import logging
+import pathlib
 import re
+import sqlite3
 from datetime import datetime, timedelta, timezone
 from urllib.parse import quote_plus
 
 import cloakbrowser
 
-from core import db, scoring
+from core import db, news_media, scoring
 from core.config import (ALERT_MIN_ENGAGEMENT, ALERT_MIN_GROWTH,
-                         ALERT_MIN_IMPORTANCE, STORE_MIN_ECON_RELEVANCE,
-                         TRANSLATE, TWITTER_PASSWORD, TWITTER_QUERIES,
-                         TWITTER_USERNAME)
+                         ALERT_MIN_IMPORTANCE, DB_PATH,
+                         STORE_MIN_ECON_RELEVANCE, TRANSLATE, TWITTER_PASSWORD,
+                         TWITTER_QUERIES, TWITTER_USERNAME)
 from core.telegram import send_photo, send_text
 
 log = logging.getLogger("twitter")
@@ -193,6 +195,30 @@ async def _screenshot(ctx, url: str) -> bytes | None:
         await page.close()
 
 
+_SHOT_DIR = pathlib.Path(__file__).resolve().parent.parent / "web" / "media" / "shots"
+
+
+def _store_shot(uid: str, png: bytes) -> None:
+    """Сохранить скриншот твита рядом с сайтом и записать путь в базу.
+
+    Ошибка здесь не должна ронять рассылку: картинка на витрине — приятное
+    дополнение, а отправка алерта в канал — основная работа этой функции.
+    Поэтому всё в try, и в худшем случае новость останется без картинки.
+    """
+    try:
+        _SHOT_DIR.mkdir(parents=True, exist_ok=True)
+        name = re.sub(r"[^A-Za-z0-9_-]", "", uid)[:64] + ".png"
+        (_SHOT_DIR / name).write_bytes(png)
+        con = sqlite3.connect(str(DB_PATH), timeout=30)
+        try:
+            con.execute("PRAGMA busy_timeout=30000")
+            news_media.save_shot(con, uid, f"/media/shots/{name}")
+        finally:
+            con.close()
+    except Exception as e:
+        log.warning("скриншот твита не сохранён: %s", str(e)[:120])
+
+
 def _fmt(n: int) -> str:
     return f"{n/1e6:.1f}M" if n >= 1e6 else f"{n/1e3:.1f}K" if n >= 1e3 else str(n)
 
@@ -272,6 +298,13 @@ async def collect_with_context(ctx) -> int:
                      tw["likes"] + tw["retweets"])
             cap = await _caption(tw, res["dimension"])
             photo = await _screenshot(ctx, tw["url"])
+            if photo:
+                # 🔴 Снимок уже сделан — не выбрасывать его после отправки.
+                # До 10.09.2026 байты уходили в Telegram и терялись, а лента
+                # упоминаний по активу на сайте оставалась без картинок. X не
+                # отдаёт превью никому без API, так что этот скриншот —
+                # единственная картинка, которая у нас по твиту вообще будет.
+                _store_shot(res["uid"], photo)
             await (send_photo(photo, cap) if photo else send_text(cap))
             await asyncio.sleep(1)
             alerts += 1

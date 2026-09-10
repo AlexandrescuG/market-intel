@@ -1,0 +1,12 @@
+[Unit]
+Description=SBF превью новостей — каждые 20 мин, следом за тегированием
+
+[Timer]
+# Со сдвигом от sbf-news-burst: сначала новость получает тег инструмента,
+# и только потом имеет смысл искать к ней картинку.
+OnBootSec=9min
+OnUnitActiveSec=20min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

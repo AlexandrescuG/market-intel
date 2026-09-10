@@ -42,6 +42,13 @@ sbf-chart-availability.timer timer   0        # зона Платформа/Бо
 sbf-day-thermo.timer         timer   1200     # каждые 5 мин, термометр дня
 sbf-pulse.timer              timer   2400     # каждые 15 мин, pulse scoring
 sbf-outliers.timer           timer   2400     # каждые 15 мин, скан выбросов
+# 09.09.2026: до этого единственным ТГ-источником был наш собственный канал,
+# то есть мы читали свою же переклейку markettwits. Теперь каналы-источники
+# перечислены в core/tg_sources.json и читаются напрямую.
+sbf-tg-sources.timer         timer   3000     # каждые 20 мин, сбор из ТГ-каналов
+# Агент-редактор канала. Включён 09.09 после восстановления авторизации
+# claude -p. Пишет в ТЕСТОВЫЙ канал (--target test), @SBFEconomics не трогает.
+sbf-channel-agent.timer      timer   7200     # раз в час, посты агента
 sbf-news-burst.timer         timer   2400     # каждые 15 мин, всплески новостей
 sbf-news-digest.timer        timer   7800     # ежечасно, сводка новостей
 sbf-watchlist-news.timer     timer   600      # каждые 10 мин, лента новостей по отмеченным инструментам (01.09)
@@ -54,6 +61,7 @@ sbf-morning.timer            timer   180000   # 06:00, утренний синт
 sbf-brief-email.timer        timer   90000    # 06:20, брифинг на почту; включено владельцем 02.09, отправитель contact@sbf.md
 sbf-focus-batch.timer        timer   180000   # 05:50, батч Focus Engine
 sbf-news-geo.timer           timer   900      # каждые 15 мин: где на карте место новости; питает /api/geo/feed для карты и глобуса sbfconsult.com
+sbf-news-media.timer         timer   1200     # каждые 20 мин: og:image статьи и логотип издания; питает карточки в ленте по активу (Эпицентр)
 sbf-event-map.timer          timer   180000   # 03:30, карта событий по инструментам (до уровней в 03:45)
 sbf-sr-levels.timer          timer   180000   # 03:45, уровни S/R
 sbf-confluence.timer         timer   180000   # 03:55, зоны слияния

@@ -381,6 +381,32 @@ a:hover{text-decoration:underline;color:var(--glow)}
 .pulse-feed-card .pf-meta{font-size:10px;color:var(--muted);margin-top:3px}
 .pulse-feed-lock{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px;padding:8px 0}
 
+/* Карточка новости: картинка слева, текст справа. Окно шире прежнего —
+   в 340px картинка и заголовок вместе не помещаются, а перенос картинки
+   наверх превратил бы список из тридцати новостей в бесконечную ленту. */
+.pulse-feed-card{width:420px}
+.pulse-feed-card .pf-card{display:flex;gap:10px;align-items:flex-start;padding:10px 0;
+  border-top:1px solid var(--line);text-decoration:none;color:inherit}
+.pulse-feed-card .pf-card:first-child{border-top:none}
+.pulse-feed-card .pf-card:hover .pf-title{color:var(--gold)}
+.pf-shot{flex:0 0 72px;width:72px;height:56px;border-radius:8px;overflow:hidden;
+  background:var(--surface);border:1px solid var(--line)}
+.pf-img{width:100%;height:100%;object-fit:cover;display:block}
+.pf-text{min-width:0;flex:1}
+.pf-title{font-family:var(--font-sans);font-size:12.5px;line-height:1.35;color:var(--ink)}
+/* Оригинал под переводом: тише, но читаемо. Это не подпись к картинке,
+   а проверяемость — что именно написало издание. */
+.pf-orig{font-family:var(--font-sans);font-size:10.5px;line-height:1.3;color:var(--faint);
+  margin-top:3px}
+.pulse-feed-card .pf-meta{display:flex;align-items:center;gap:5px;font-size:10px;
+  color:var(--muted);margin-top:5px}
+.pf-logo{width:13px;height:13px;border-radius:3px;object-fit:contain;flex:0 0 13px}
+.pf-dot{opacity:.6}
+@media(max-width:760px){
+  .pulse-feed-card{width:100%}
+  .pf-shot{flex-basis:64px;width:64px;height:50px}
+}
+
 .sidebar .panel{margin-bottom:18px}
 .empty{color:var(--faint);font-size:12px;padding:8px 0}
 
@@ -572,7 +598,10 @@ a:hover{text-decoration:underline;color:var(--glow)}
          Размер пузыря — упоминания за сутки, цвет — направление, подпись —
          движение цены. Клик ведёт на график этого актива: блок не самоцель, а
          вход в продукт. -->
-    <section class="panel buzz-board" id="buzzBoard" hidden>
+    <!-- Класс view-fund, а не перенос внутрь блока .view-fund ниже: доска
+         должна остаться выше «что даёт аккаунт» (порядок первого экрана из ТЗ
+         03.09), а показываться только в фундаментальном режиме. -->
+    <section class="panel buzz-board view-fund" id="buzzBoard" hidden>
       <div class="panel-h">
         <h2 data-i18n="home.board_title">{{ t('home.board_title', lang) }}</h2>
         <span class="fresh" id="boardFresh"></span>
@@ -1721,21 +1750,52 @@ function openPulseFeed(symbol){
   card.innerHTML=`<button class="pf-close" id="pfClose">✕</button><h4>${escapeHtmlIdx(symName)}</h4><div id="pfBody">…</div>`;
   document.getElementById('pfClose').addEventListener('click', closePulseFeed);
   card.classList.add('on'); backdrop.classList.add('on');
-  window.sbfAuth.fetch('/api/pulse/feed?symbol='+encodeURIComponent(symbol))
+  const lang = (window.sbfI18n && window.sbfI18n.lang) || document.documentElement.lang || 'ru';
+  window.sbfAuth.fetch('/api/pulse/feed?symbol='+encodeURIComponent(symbol)
+                       +'&lang='+encodeURIComponent(lang))
     .then(r=>r.ok?r.json():[])
     .then(items=>{
       const body=document.getElementById('pfBody'); if(!body)return;
       if(!Array.isArray(items) || !items.length){ body.innerHTML=`<div class="pf-item">${escapeHtmlIdx(I18N_PULSE.empty)}</div>`; return; }
-      body.innerHTML=items.map(n=>{
-        const dt=new Date(n.ts*1000);
-        const timeStr=dt.toLocaleString(undefined,{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
-        return `<div class="pf-item">
-          <a href="${escapeHtmlIdx(n.url||'#')}" target="_blank" rel="noopener noreferrer">${escapeHtmlIdx(n.title)}</a>
-          <div class="pf-meta">${escapeHtmlIdx(n.source||'')} · ${timeStr}</div>
-        </div>`;
-      }).join('');
+      body.innerHTML=items.map(renderFeedCard).join('');
+      // Битая ссылка на чужой картинке — обычное дело: издание переложило
+      // файл, отдало 404, закрыло горячие ссылки. Тогда прячем картинку и
+      // оставляем карточку с логотипом источника, а не рамку с крестиком.
+      body.querySelectorAll('.pf-img').forEach(img=>{
+        img.addEventListener('error', ()=>{ img.closest('.pf-shot').remove(); }, {once:true});
+      });
     })
     .catch(()=>{});
+}
+
+/* Карточка новости в ленте по активу.
+   Порядок в карточке отвечает на вопросы в том порядке, в каком их задают:
+   что случилось (заголовок на языке читателя), кто это написал (логотип и
+   имя издания), когда. Оригинальный заголовок — под переводом мелким
+   шрифтом: машинный перевод не заменяет чужой текст, он его сопровождает. */
+function renderFeedCard(n){
+  const dt=new Date(n.ts*1000);
+  const timeStr=dt.toLocaleString(undefined,{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+  const url=escapeHtmlIdx(n.url||'#');
+  const shot = n.image
+    ? `<div class="pf-shot"><img class="pf-img" loading="lazy" referrerpolicy="no-referrer"
+         src="${escapeHtmlIdx(n.image)}" alt=""></div>`
+    : '';
+  const logo = n.logo
+    ? `<img class="pf-logo" loading="lazy" src="${escapeHtmlIdx(n.logo)}" alt="">`
+    : '';
+  const headline = n.title_local || n.title || '';
+  const original = (n.title_local && n.title && n.title_local !== n.title)
+    ? `<div class="pf-orig">${escapeHtmlIdx(n.title)}</div>` : '';
+  return `<a class="pf-card" href="${url}" target="_blank" rel="noopener noreferrer">
+    ${shot}
+    <div class="pf-text">
+      <div class="pf-title">${escapeHtmlIdx(headline)}</div>
+      ${original}
+      <div class="pf-meta">${logo}<span>${escapeHtmlIdx(n.source||n.domain||'')}</span>
+        <span class="pf-dot">·</span><span>${timeStr}</span></div>
+    </div>
+  </a>`;
 }
 
 // ── Эпицентр: доска обсуждаемости ───────────────────────────────────────────

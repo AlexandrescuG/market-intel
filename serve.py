@@ -21,6 +21,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from core import journal_db, journal_crypto, journal_ocr, journal_csv, journal_meta, journal_discipline, journal_alerts, journal_brief, journal_setups, journal_tilt, journal_gamification, journal_goals, journal_account, journal_auth, journal_feedback, journal_import, journal_analytics, journal_review, journal_cooldown, journal_rules, journal_tradeplan, journal_gate, i18n
 from core import symbols as _symbols
 from core import candle_cache
+from core import news_media, news_i18n
 from core.symbols_registry import yahoo_ticker as _registry_yahoo_ticker
 from core.event_types import normalize_event_type
 from core.config import DB_PATH as _SIGNALS_DB
@@ -347,6 +348,18 @@ def _geo_places() -> dict:
     if out:
         _geo_places_cache = (mtime, out)
     return out
+
+
+def _raw_domain(raw: str | None) -> str:
+    """Домен издания из signals.raw — его туда кладёт collectors/rss.py.
+
+    Нужен для логотипа источника: у новостей, пришедших ссылкой Google News,
+    адреса статьи нет, а домен издания есть.
+    """
+    try:
+        return (json.loads(raw or "{}").get("domain") or "").lower()
+    except (ValueError, TypeError):
+        return ""
 
 
 def _title_lang(title: str) -> str:
@@ -3030,9 +3043,74 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         except Exception as e:
             self._send_json({"error": str(e)}, 500)
 
+    _FEED_LIMIT = 30
+
+    def _decorate_feed(self, con, items: list[dict], lang: str) -> None:
+        """Дописать в пункты ленты картинку, логотип и перевод заголовка.
+
+        Работает по месту, ничего не возвращает. Любая из трёх частей может
+        не сложиться — тогда поля просто нет, а карточка остаётся собой:
+        заголовок, источник, время. Ни одна из этих подпорок не стоит того,
+        чтобы из-за неё лента не открылась.
+        """
+        if not items:
+            return
+        uids = [it["uid"] for it in items]
+
+        try:
+            media = news_media.media_for(con, uids)
+            logos = news_media.logos_for(
+                con, sorted({it["domain"] for it in items if it["domain"]}))
+        except Exception as e:
+            # print, а не логгер: в serve.py логгера нет, а глотать молча
+            # нельзя — «у половины ленты пропали картинки» иначе выглядит как
+            # «данных нет», а не как поломка.
+            print(f"[лента] картинки: {str(e)[:140]}", file=sys.stderr)
+            media, logos = {}, {}
+
+        try:
+            news_i18n.ensure_schema(con)
+            cached = news_i18n.cached(con, uids, lang)
+            # Переводим только то, чего ещё нет в кэше И что не на языке
+            # читателя. Заголовок на его языке переводить незачем, а
+            # переводчик на такой вход отвечает тем же текстом.
+            todo = [(it["uid"], it["title"]) for it in items
+                    if it["uid"] not in cached and it["title"]
+                    and news_i18n.detect(it["title"]) != lang]
+            if todo:
+                cached.update(news_i18n.translate_missing(con, todo, lang))
+        except Exception as e:
+            print(f"[лента] перевод: {str(e)[:140]}", file=sys.stderr)
+            cached = {}
+
+        for it in items:
+            img = media.get(it["uid"])
+            if img:
+                it["image"] = img
+            logo = logos.get(it["domain"] or "")
+            if logo:
+                it["logo"] = logo
+            tr = cached.get(it["uid"])
+            if tr:
+                it["title_local"] = tr
+            it.pop("uid", None)
+
     def _handle_pulse_feed(self) -> None:
-        """Фаза 4: лента упоминаний по тикеру (тап на карточку) — за регистрацией,
-        консистентно с /api/chart/event-reaction (см. _lp_require_auth)."""
+        """Лента упоминаний по тикеру (тап на карточку в Эпицентре).
+
+        За регистрацией, консистентно с /api/chart/event-reaction.
+
+        Отдаёт не только заголовок и ссылку, но и то, из чего собирается
+        карточка: `image` (фото статьи или наш скриншот твита), `logo`
+        (логотип издания, когда фотографии нет и не будет) и `title_local` —
+        машинный перевод на язык интерфейса.
+
+        🔴 Перевод отдаётся ОТДЕЛЬНЫМ полем, оригинал остаётся в `title`.
+        Подменять чужой заголовок машинным переводом молча нельзя: читатель
+        должен видеть, что именно написало издание, — особенно когда речь
+        о цифрах и о том, кто что заявил. Витрина показывает перевод крупно,
+        оригинал под ним мелким шрифтом.
+        """
         if not self._lp_require_auth():
             return
         params = parse_qs(urlparse(self.path).query)
@@ -3040,16 +3118,22 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         if not symbol:
             self._send_json({"error": "symbol required"}, 400)
             return
+        lang = (params.get("lang", ["ru"])[0] or "ru").lower()
+        if lang not in news_i18n.SUPPORTED:
+            lang = "ru"
         try:
-            con = sqlite3.connect(str(_SIGNALS_DB))
+            con = sqlite3.connect(str(_SIGNALS_DB), timeout=30)
+            con.execute("PRAGMA busy_timeout=30000")
             con.row_factory = sqlite3.Row
             cutoff_iso = (datetime.now(timezone.utc) - timedelta(days=14)).isoformat()
             rows = con.execute(
-                """SELECT source, title, text, url, topic_hint, cashtags, last_seen
+                """SELECT uid, source, title, text, url, topic_hint, cashtags,
+                          raw, last_seen
                    FROM signals WHERE last_seen >= ? ORDER BY last_seen DESC LIMIT 800""",
                 (cutoff_iso,),
             ).fetchall()
             items = []
+            seen_uids = set()
             for r in rows:
                 try:
                     tags = json.loads(r["cashtags"] or "[]")
@@ -3061,30 +3145,44 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                     ts = int(datetime.fromisoformat(r["last_seen"]).timestamp())
                 except (ValueError, TypeError):
                     continue
+                seen_uids.add(r["uid"])
                 items.append({
+                    "uid": r["uid"],
                     "title": r["title"] or (r["text"] or "")[:140],
-                    "url": r["url"], "source": r["source"] or r["topic_hint"], "ts": ts,
+                    "url": r["url"], "source": r["source"] or r["topic_hint"],
+                    "domain": _raw_domain(r["raw"]), "ts": ts,
                 })
             # + RSS-заголовки с тегом инструмента (Фаза 3), релевантно для индексов
             try:
                 news_rows = con.execute(
-                    """SELECT s.title, s.url, s.topic_hint AS source, s.raw, s.first_seen
+                    """SELECT s.uid, s.title, s.url, s.topic_hint AS source, s.raw,
+                              s.first_seen
                        FROM news_instrument_tags t JOIN signals s ON s.uid = t.news_uid
                        WHERE t.symbol = ?""",
                     (symbol,),
                 ).fetchall()
                 for r in news_rows:
+                    # Один и тот же материал мог прийти и кештегом, и тегом
+                    # инструмента. Без этой проверки он вставал в ленту дважды.
+                    if r["uid"] in seen_uids:
+                        continue
                     try:
                         ts = float(json.loads(r["raw"] or "{}").get("published") or 0) \
                              or datetime.fromisoformat(r["first_seen"]).timestamp()
                     except (ValueError, TypeError):
                         continue
-                    items.append({"title": r["title"], "url": r["url"], "source": r["source"], "ts": int(ts)})
+                    seen_uids.add(r["uid"])
+                    items.append({"uid": r["uid"], "title": r["title"], "url": r["url"],
+                                  "source": r["source"], "domain": _raw_domain(r["raw"]),
+                                  "ts": int(ts)})
             except sqlite3.OperationalError:
                 pass
-            con.close()
+
             items.sort(key=lambda x: x["ts"], reverse=True)
-            self._send_json(items[:30])
+            items = items[:self._FEED_LIMIT]
+            self._decorate_feed(con, items, lang)
+            con.close()
+            self._send_json(items)
         except Exception as e:
             self._send_json({"error": str(e)}, 500)
 

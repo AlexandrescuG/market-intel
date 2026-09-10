@@ -1,0 +1,20 @@
+[Unit]
+# Картинки к новостям (10.09.2026). Питает /api/pulse/feed — ленту упоминаний
+# по активу, которая открывается тапом по строке в «Эпицентре» на главной.
+#
+# Задача ходит наружу, на сайты изданий: берёт og:image статьи и логотип
+# издания. Пауза между обращениями к одному домену и потолок на прогон — в
+# самом news_media_job.py.
+Description=SBF intel — превью и логотипы источников для ленты новостей
+After=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/mnt/sbfdata/sbf-platform/market_intel
+ExecStart=/mnt/sbfdata/sbf-platform/market_intel/.venv/bin/python news_media_job.py --verbose
+# Прогон упирается в сеть, а не в процессор: 400 кандидатов при паузе в
+# полторы секунды на домен — это минуты. Потолок вдвое выше ожидаемого.
+TimeoutStartSec=1800
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=sbf-news-media
