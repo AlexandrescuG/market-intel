@@ -83,12 +83,30 @@
     var open = React.useState(false), isOpen = open[0], setOpen = open[1];
     var d = glossary && glossary[lang] && glossary[lang][word];
     if (!d) {
-      return React.createElement('span', {style:{color:C.gold, fontWeight:600, borderBottom:"1px dashed " + C.gold, cursor:"pointer"}}, children);
+      // Термина в словаре нет — значит и нажимать нечего: рисуем выделенным
+      // словом, но без курсора-пальца. Палец на неработающем элементе — это
+      // обещание, которого страница не выполняет.
+      return React.createElement('span', {style:{color:C.gold, fontWeight:600,
+                                                 borderBottom:"1px dashed " + C.gold}}, children);
     }
     return React.createElement('span', {style:{position:"relative", display:"inline"}},
-      React.createElement('span', {
+      // 🔴 Термин словаря — это управление, и объявлен он должен быть как
+      // управление. До 10.09.2026 это был <span onClick>: мышью работает,
+      // с клавиатуры недостижим, экранный диктор читает как обычное слово.
+      // Замер по всем пятнадцати главам нашёл 150 таких элементов, и термины
+      // словаря — самая многочисленная их часть.
+      //
+      // button, а не span с role: кнопка приходит с фокусом, обработкой
+      // Enter/Space и правильной семантикой бесплатно. Стили сбрасываются
+      // явно, чтобы слово внутри абзаца осталось словом, а не кнопкой.
+      React.createElement('button', {
+        type: "button",
+        "aria-expanded": isOpen ? "true" : "false",
         onClick: function(e){ e.stopPropagation(); setOpen(function(o){ return !o; }); },
-        style:{color:C.gold, borderBottom:"1px dashed " + C.gold, cursor:"pointer", fontWeight:600}
+        style:{color:C.gold, borderBottom:"1px dashed " + C.gold, cursor:"pointer",
+               fontWeight:600, background:"none", border:"none", borderRadius:0,
+               padding:0, margin:0, font:"inherit", lineHeight:"inherit",
+               display:"inline", textAlign:"left"}
       }, children),
       isOpen && React.createElement(React.Fragment, {},
         React.createElement('div', {
@@ -234,9 +252,17 @@
     var tr = props.tr, chapterNum = props.chapterNum, lang = props.lang;
     var s = React.useState(false), open = s[0], setOpen = s[1];
     return React.createElement('span', {},
-      React.createElement('span', {
+      // «Остался вопрос? Напиши аналитику» — единственный способ связаться с
+      // человеком прямо из главы, и он стоит в тринадцати главах из
+      // пятнадцати. Как <span onClick> он был недостижим с клавиатуры и не
+      // попадал в список интерактивных элементов страницы вовсе.
+      React.createElement('button', {
+        type: "button",
         onClick: function(){ setOpen(true); },
-        style:{fontSize:15, color:C.inkSoft, fontFamily:"monospace", letterSpacing:1, borderBottom:"1px solid " + C.border, paddingBottom:2, cursor:"pointer", display:"inline-block"}
+        style:{fontSize:15, color:C.inkSoft, fontFamily:"monospace", letterSpacing:1,
+               borderBottom:"1px solid " + C.border, paddingBottom:2, cursor:"pointer",
+               display:"inline-block", background:"none", border:"none",
+               borderRadius:0, padding:0, margin:0}
       }, tr.askAnalyst),
       open && React.createElement(AskAnalystPopup, {chapterNum:chapterNum, lang:lang, onClose:function(){ setOpen(false); }})
     );
@@ -303,8 +329,18 @@
               var isSelected = quizSelected === i;
               var bg = showState ? (opt.correct ? C.goldPale : (isSelected ? C.redPale : C.white)) : C.white;
               var bd = showState ? (opt.correct ? C.gold : (isSelected ? C.red : C.border)) : C.border;
-              return e('div', {key:i, onClick:function(){ answerQuiz(i); },
-                       style:{padding:"14px 18px", border:"1px solid " + bd, background:bg, cursor:showState?"default":"pointer", transition:"all 0.2s", display:"flex", alignItems:"center", minHeight:24}},
+              // 🔴 Вариант ответа — кнопка, а не <div onClick>. Это главный
+              // элемент управления во всём курсе: тест есть в каждой главе, и
+              // до 10.09.2026 ответить на него с клавиатуры было нельзя.
+              // disabled после ответа заодно чинит вторую проблему: раньше по
+              // уже отвеченному вопросу клик проходил и подсвечивал другой
+              // вариант, хотя ответ был засчитан.
+              return e('button', {key:i, type:"button", disabled: showState,
+                       onClick:function(){ answerQuiz(i); },
+                       style:{width:"100%", padding:"14px 18px", border:"1px solid " + bd,
+                              background:bg, cursor:showState?"default":"pointer",
+                              transition:"all 0.2s", display:"flex", alignItems:"center",
+                              minHeight:24, textAlign:"left", font:"inherit"}},
                 e('span', {style:{fontSize:16, color:C.inkMid, textAlign:"left"}}, opt.text)
               );
             })

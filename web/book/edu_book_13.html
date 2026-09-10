@@ -683,7 +683,7 @@ function Chapter13() {
 
       <div style={{position:"sticky",top:106,background:"rgba(255,255,255,0.96)",backdropFilter:"blur(10px)",borderBottom:`1px solid ${C.border}`,padding:"15px 5vw",display:"flex",alignItems:"center",justifyContent:"space-between",zIndex:50,gap:12,flexWrap:"wrap"}}>
         <div style={{display:"flex",alignItems:"center",gap:20}}>
-          <span onClick={() => window.location.href = getChUrl(12, lang)} style={{color:C.gold,cursor:"pointer",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</span>
+          <a href={getChUrl(12, lang)} aria-label={lang==="ru"?"Предыдущая глава":lang==="ro"?"Capitolul anterior":"Previous chapter"} style={{color:C.gold,cursor:"pointer",textDecoration:"none",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</a>
           <Chip>{S.levelChip}</Chip>
           <Mono size={14} color={C.inkSoft} spacing={0} className="hide-mobile">{S.chapterNameShort}</Mono>
         </div>
