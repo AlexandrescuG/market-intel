@@ -92,7 +92,7 @@ const STRINGS = {
   },
 };
 
-const {C, Mono, Chip, Rule, AntiMythBlock, AskAnalystBtn, getChUrl, QuizBlock, ComplianceFootnote, ColdStart} = window.AcademyShared;
+const {C, Mono, Chip, Rule, AntiMythBlock, RevealSteps, AskAnalystBtn, getChUrl, QuizBlock, ComplianceFootnote, ColdStart} = window.AcademyShared;
 
 const SectionTitle = ({children,sub,align="left",id}) => (
   <div id={id} style={{textAlign:align,marginBottom:36,scrollMarginTop:130}}>
@@ -251,7 +251,11 @@ function IntroBlock({ vars }) {
       <div style={{background:C.black,borderRadius:8,padding:"26px 30px",color:C.white}}>
         <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T8.priceOfNotKnowing.tag}</Mono>
         <div style={{fontFamily:"'DM Serif Display',serif",fontSize:20,color:C.white,marginBottom:12}}>{T8.priceOfNotKnowing.title}</div>
-        {T8.priceOfNotKnowing.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:13.5,lineHeight:1.75,color:"rgba(255,255,255,0.7)",marginBottom:10}}>{vars ? fillTemplate(p, vars) : p}</p>)}
+        {/* Разбор открывается по шагам — см. комментарий в главе 9.
+            Живые числа подставляются до передачи в компонент. */}
+        <RevealSteps lang={INITIAL_LANG} preset="cost" dark
+          bodies={T8.priceOfNotKnowing.body.split("\n\n")
+                    .map(p => vars ? fillTemplate(p, vars) : p)}/>
       </div>
     </div>
   );

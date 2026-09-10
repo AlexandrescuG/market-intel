@@ -694,14 +694,29 @@
    * другом. Прятать прочитанное ради красивого числа значит чинить замер, а
    * не главу.
    */
-  var ANTIMYTH_COPY = {
-    ru: {next:"Снять следующий слой →", last:"Что остаётся →", of:"слой %1 из %2",
-         done:"слои сняты"},
-    ro: {next:"Înlătură stratul următor →", last:"Ce rămâne →",
-         of:"stratul %1 din %2", done:"straturi înlăturate"},
-    en: {next:"Peel the next layer →", last:"What remains →",
-         of:"layer %1 of %2", done:"layers peeled"}
+  /* Наборы подписей. Ключ — рубрика, а не «вариант 1/2»: подпись кнопки в
+   * этих блоках несёт смысл. У «ЦЕНЫ НЕЗНАНИЯ» последний абзац во всех пяти
+   * главах буквально начинается словами «Честная вторая половина» — это не
+   * выдуманная подпись, а фраза автора, вынесенная на кнопку. */
+  var REVEAL_COPY = {
+    layers: {
+      ru: {next:"Снять следующий слой →", last:"Что остаётся →", of:"слой %1 из %2",
+           done:"слои сняты"},
+      ro: {next:"Înlătură stratul următor →", last:"Ce rămâne →",
+           of:"stratul %1 din %2", done:"straturi înlăturate"},
+      en: {next:"Peel the next layer →", last:"What remains →",
+           of:"layer %1 of %2", done:"layers peeled"}
+    },
+    cost: {
+      ru: {next:"Считаем дальше →", last:"Честная вторая половина →",
+           of:"часть %1 из %2", done:"разобрано"},
+      ro: {next:"Continuăm calculul →", last:"Cealaltă jumătate, cinstit →",
+           of:"partea %1 din %2", done:"analizat"},
+      en: {next:"Keep counting →", last:"The honest other half →",
+           of:"part %1 of %2", done:"done"}
+    }
   };
+  var ANTIMYTH_COPY = REVEAL_COPY.layers;
 
   function antiMythBodies(data) {
     // В главах структура разная: где-то body, где-то body1..body4.
@@ -715,15 +730,54 @@
     return out;
   }
 
-  function AntiMythBlock(props) {
+  /* Абзацы, открывающиеся по одному. Общий движок для «АНТИ-МИФА» и «ЦЕНЫ
+   * НЕЗНАНИЯ»: обе рубрики устроены как последовательность, где порядок несёт
+   * смысл, и обе были скопированы по главам как стена подряд идущих <p>.
+   *
+   * dark — блок на чёрной подложке («ЦЕНА НЕЗНАНИЯ» стоит на ней во всех
+   * главах). Без этого флага светлый текст на светлом фоне.
+   * bare — рисовать только абзацы и кнопку, без карточки, подписи и заголовка:
+   * в «ЦЕНЕ НЕЗНАНИЯ» они уже нарисованы главой.
+   */
+  function RevealSteps(props) {
     var e = React.createElement;
-    var data = props.data || {};
+    var bodies = props.bodies || [];
     var lang = props.lang || "ru";
-    var copy = ANTIMYTH_COPY[lang] || ANTIMYTH_COPY.ru;
-    var bodies = antiMythBodies(data);
+    var набор = REVEAL_COPY[props.preset || "layers"] || REVEAL_COPY.layers;
+    var copy = набор[lang] || набор.ru;
+    var dark = !!props.dark;
     var st = React.useState(1), shown = st[0], setShown = st[1];
     var всего = bodies.length;
     var последний = shown >= всего;
+    var цвет = dark ? "rgba(255,255,255,0.7)" : C.inkMid;
+    var цветИтога = dark ? "#fff" : C.black;
+
+    return e(React.Fragment, null,
+      bodies.slice(0, shown).map(function (b, i) {
+        var итог = i === всего - 1 && всего > 1;
+        return e('p', {key:i, style:{fontSize:13.5, color: итог ? цветИтога : цвет,
+                                     lineHeight: dark ? 1.75 : 1.7, marginBottom:12,
+                                     fontWeight: итог ? 600 : 400}}, b);
+      }),
+      всего > 1 ? e('div', {style:{display:"flex", alignItems:"center", gap:12,
+                                   marginTop:6, flexWrap:"wrap"}},
+        !последний ? e('button', {
+          onClick: function () { setShown(shown + 1); },
+          style:{fontFamily:"monospace", fontSize:11.5, padding:"9px 16px", cursor:"pointer",
+                 background:C.gold, color:"#18181a", border:"none", borderRadius:4,
+                 fontWeight:700}
+        }, shown === всего - 1 ? copy.last : copy.next) : null,
+        e(Mono, {size:10.5, color: dark ? "rgba(255,255,255,0.4)" : C.inkFaint},
+          последний ? copy.done
+                    : copy.of.replace("%1", String(shown)).replace("%2", String(всего)))
+      ) : null
+    );
+  }
+
+  function AntiMythBlock(props) {
+    var e = React.createElement;
+    var data = props.data || {};
+    var bodies = antiMythBodies(data);
 
     // Внешний отступ приходит из главы: в разных главах блок стоит в разном
     // окружении (28 у одних, 48 у других), и зашитое здесь число ломало бы
@@ -735,23 +789,7 @@
                        borderRadius:8, padding:"22px 26px"}},
         data.title ? e('p', {style:{fontWeight:600, fontSize:14.5, color:C.black,
                                     marginBottom:16}}, data.title) : null,
-        bodies.slice(0, shown).map(function (b, i) {
-          return e('p', {key:i, style:{fontSize:13.5, color: i === всего - 1 ? C.black : C.inkMid,
-                                       lineHeight:1.7, marginBottom:12,
-                                       fontWeight: i === всего - 1 && всего > 1 ? 600 : 400}}, b);
-        }),
-        всего > 1 ? e('div', {style:{display:"flex", alignItems:"center", gap:12,
-                                     marginTop:6, flexWrap:"wrap"}},
-          !последний ? e('button', {
-            onClick: function () { setShown(shown + 1); },
-            style:{fontFamily:"monospace", fontSize:11.5, padding:"9px 16px", cursor:"pointer",
-                   background:C.gold, color:"#18181a", border:"none", borderRadius:4,
-                   fontWeight:700}
-          }, shown === всего - 1 ? copy.last : copy.next) : null,
-          e(Mono, {size:10.5, color:C.inkFaint},
-            последний ? copy.done
-                      : copy.of.replace("%1", String(shown)).replace("%2", String(всего)))
-        ) : null
+        e(RevealSteps, {bodies: bodies, lang: props.lang, preset: "layers"})
       )
     );
   }
@@ -918,6 +956,7 @@
 
   window.AcademyShared = {
     AntiMythBlock: AntiMythBlock,
+    RevealSteps: RevealSteps,
     CheckList: CheckList,
     SortTwoBins: SortTwoBins,
     C: C, Mono: Mono, Chip: Chip, Rule: Rule,

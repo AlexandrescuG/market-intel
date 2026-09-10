@@ -95,7 +95,7 @@ const STRINGS = {
   },
 };
 
-const {C, Mono, Chip, Rule, AntiMythBlock, AskAnalystBtn, getChUrl, QuizBlock, ComplianceFootnote, ColdStart} = window.AcademyShared;
+const {C, Mono, Chip, Rule, AntiMythBlock, RevealSteps, AskAnalystBtn, getChUrl, QuizBlock, ComplianceFootnote, ColdStart} = window.AcademyShared;
 
 const SectionTitle = ({children,sub,align="left",id}) => (
   <div id={id} style={{textAlign:align,marginBottom:36,scrollMarginTop:130}}>
@@ -290,7 +290,9 @@ function IntroBlock() {
       <div id="secPriceOfNotKnowing10" style={{background:C.black,borderRadius:8,padding:"26px 30px",color:C.white,scrollMarginTop:130}}>
         <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T10.priceOfNotKnowing.tag}</Mono>
         <div style={{fontFamily:"'DM Serif Display',serif",fontSize:20,color:C.white,marginBottom:12}}>{T10.priceOfNotKnowing.title}</div>
-        {T10.priceOfNotKnowing.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:13.5,lineHeight:1.75,color:"rgba(255,255,255,0.7)",marginBottom:10}}>{p}</p>)}
+        {/* Разбор открывается по шагам — см. комментарий в главе 9. */}
+        <RevealSteps bodies={T10.priceOfNotKnowing.body.split("\n\n")}
+                     lang={INITIAL_LANG} preset="cost" dark/>
       </div>
     </div>
   );
