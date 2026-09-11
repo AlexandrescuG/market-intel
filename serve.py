@@ -21,7 +21,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from core import journal_db, journal_crypto, journal_ocr, journal_csv, journal_meta, journal_discipline, journal_alerts, journal_brief, journal_setups, journal_tilt, journal_gamification, journal_goals, journal_account, journal_auth, journal_feedback, journal_import, journal_analytics, journal_review, journal_cooldown, journal_rules, journal_tradeplan, journal_gate, i18n
 from core import symbols as _symbols
 from core import candle_cache
-from core import news_media, news_i18n, news_junk
+from core import news_media, news_i18n, news_junk, symbol_alias
 from core.symbols_registry import yahoo_ticker as _registry_yahoo_ticker
 from core.event_types import normalize_event_type
 from core.config import DB_PATH as _SIGNALS_DB
@@ -2663,10 +2663,21 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             # вопрос блока — где сейчас концентрируется внимание. Кратность
             # осталась в строке как уточнение: много это для инструмента или
             # для него обычно.
-            chosen = sorted(snapshot,
+            # 🔴 Ноль упоминаний — это не строка блока «Эпицентр».
+            #
+            # Вкладка добирала до восьми всегда, даже когда за час упомянули
+            # четыре актива: остальные четыре вставали в список с «0 за час»
+            # и «×0.0». Блок обещает показать, где сейчас концентрируется
+            # внимание, — и дописывал туда активы, о которых не было ни
+            # одной новости. Лучше короткий список, чем длинный с выдумкой.
+            #
+            # Если за час не упомянули никого — блок честно говорит «тихо»
+            # (флаг calm), и витрина показывает это состояние, а не таблицу
+            # нулей.
+            chosen = sorted((r for r in snapshot if r["mentions"] > 0),
                             key=lambda r: (r["mentions"], r["score"]),
                             reverse=True)[:8]
-            calm = not chosen or chosen[0]["mentions"] <= 0
+            calm = not chosen
 
             since = latest_ts - 24 * 3600
             items = []
@@ -3243,6 +3254,12 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         lang = (params.get("lang", ["ru"])[0] or "ru").lower()
         if lang not in news_i18n.SUPPORTED:
             lang = "ru"
+        # 🔴 Один актив, два имени. Разметка по словарю пишет имя каталога
+        # («#NVIDIA»), кештеги из X приходят тикером («NVDA»). Собираем оба,
+        # иначе по нажатию на «#NVIDIA» лента теряет все посты из соцсетей, а
+        # по нажатию на «NVDA» — все новости из разметки.
+        имена = symbol_alias.names_for(symbol)
+        канон = symbol_alias.canon(symbol)
         try:
             con = sqlite3.connect(str(_SIGNALS_DB), timeout=30)
             con.execute("PRAGMA busy_timeout=30000")
@@ -3261,7 +3278,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                     tags = json.loads(r["cashtags"] or "[]")
                 except (ValueError, TypeError):
                     tags = []
-                if symbol not in tags:
+                if канон not in {symbol_alias.canon(t) for t in tags}:
                     continue
                 try:
                     ts = int(datetime.fromisoformat(r["last_seen"]).timestamp())
@@ -3286,11 +3303,11 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             # + RSS-заголовки с тегом инструмента (Фаза 3), релевантно для индексов
             try:
                 news_rows = con.execute(
-                    """SELECT s.uid, s.title, s.text, s.url, s.source AS kind_src,
+                    f"""SELECT s.uid, s.title, s.text, s.url, s.source AS kind_src,
                               s.topic_hint, s.author, s.raw, s.first_seen
                        FROM news_instrument_tags t JOIN signals s ON s.uid = t.news_uid
-                       WHERE t.symbol = ?""",
-                    (symbol,),
+                       WHERE t.symbol IN ({','.join('?' * len(имена))})""",
+                    имена,
                 ).fetchall()
                 for r in news_rows:
                     # Один и тот же материал мог прийти и кештегом, и тегом

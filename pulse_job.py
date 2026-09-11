@@ -36,6 +36,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
+from core import symbol_alias  # noqa: E402
 from core.config import DB_PATH  # noqa: E402
 
 CATALOG = ROOT / "web" / "data" / "broker_catalog.json"
@@ -65,6 +66,11 @@ REGISTRY_CATEGORY = {
 }
 
 _FX_RE = re.compile(r"^[A-Z]{3}[A-Z]{3}$")
+# Брокерское имя индекса: страна и число пунктов — US_500, JAPAN_225,
+# GERMANY_40, UK_100. Нужно для тех, кого в каталоге нет вовсе: INDIA_50
+# висел во вкладке «Акции», потому что неизвестное имя по умолчанию
+# считалось акцией.
+_INDEX_RE = re.compile(r"^[A-Z]{2,10}_\d{2,4}$")
 
 
 def _catalog_categories() -> dict:
@@ -104,6 +110,8 @@ def _classify(symbol: str, cats: dict) -> str:
         return cats[symbol]
     if _FX_RE.match(symbol):
         return "fx"
+    if _INDEX_RE.match(symbol):
+        return "indices"
     if symbol.startswith(("#", "_")):
         return "stocks"
     return "stocks"
@@ -132,19 +140,23 @@ def _tag_counts(con, since_iso: str) -> dict:
 
     Перечитывание статьи — это не новое упоминание. Один материал — один раз,
     в тот час, когда он пришёл.
+
+    Возвращает {символ: {uid, uid, …}} — множества, а не числа. Так суммы с
+    кештегами складываются без двойного счёта: статья, помеченная и словарём,
+    и кештегом, остаётся одним упоминанием.
     """
-    counts = {}
+    counts: dict[str, set] = {}
     try:
         rows = con.execute(
-            """SELECT t.symbol, COUNT(*) FROM news_instrument_tags t
+            """SELECT t.symbol, t.news_uid FROM news_instrument_tags t
                JOIN signals s ON s.uid = t.news_uid
-               WHERE s.first_seen >= ? GROUP BY t.symbol""",
+               WHERE s.first_seen >= ?""",
             (since_iso,),
         ).fetchall()
     except sqlite3.OperationalError:
         return counts
-    for sym, n in rows:
-        counts[sym] = n
+    for sym, uid in rows:
+        counts.setdefault(symbol_alias.canon(sym), set()).add(uid)
     return counts
 
 
@@ -153,21 +165,34 @@ def _cashtag_counts(con, since_iso: str) -> dict:
 
     Окно по first_seen, по той же причине, что и в _tag_counts: считаем
     материалы, а не то, сколько раз коллектор их перечитал.
+
+    🔴 Кештег приводится к каноническому имени. Он приходит биржевым тикером
+    ($NVDA), а разметка по словарю называет тот же актив именем из каталога
+    брокера (#NVIDIA). Без приведения это два разных ключа — и на доске
+    Эпицентра стояли две строки про одну компанию, причём младшая, без
+    истории и без нормы, обгоняла старшую по множителю.
     """
-    counts = {}
-    for (raw,) in con.execute("SELECT cashtags FROM signals WHERE first_seen >= ?", (since_iso,)):
+    counts: dict[str, set] = {}
+    for uid, raw in con.execute(
+            "SELECT uid, cashtags FROM signals WHERE first_seen >= ?", (since_iso,)):
         try:
             for t in json.loads(raw or "[]"):
-                counts[t] = counts.get(t, 0) + 1
+                counts.setdefault(symbol_alias.canon(t), set()).add(uid)
         except (ValueError, TypeError):
             continue
     return counts
 
 
 def _merge(a: dict, b: dict) -> dict:
-    out = dict(a)
+    """Объединение множеств новостей, а не сложение счётчиков.
+
+    🔴 Раньше здесь складывались числа. Одна и та же статья, помеченная и
+    словарём, и кештегом, давала два упоминания вместо одного — и ровно у
+    самых обсуждаемых активов, где оба источника срабатывают чаще всего.
+    """
+    out = {k: set(v) for k, v in a.items()}
     for k, v in b.items():
-        out[k] = out.get(k, 0) + v
+        out.setdefault(k, set()).update(v)
     return out
 
 
@@ -216,9 +241,9 @@ def run(verbose: bool = False) -> int:
         if symbol in blocked:
             continue
         category = _classify(symbol, cats)
-        m1 = m_1h.get(symbol, 0)
-        m24 = m_24h.get(symbol, 0)
-        m7 = m_7d.get(symbol, 0)
+        m1 = len(m_1h.get(symbol, ()))
+        m24 = len(m_24h.get(symbol, ()))
+        m7 = len(m_7d.get(symbol, ()))
         # 🔴 Текущий час из нормы вычитается.
         #
         # Норма считалась как «всё за 7 дней ÷ 168», а «всё за 7 дней»
