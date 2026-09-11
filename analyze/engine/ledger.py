@@ -245,11 +245,65 @@ def apply_result(con: sqlite3.Connection, strategy: str, r: float) -> dict:
     return st
 
 
-def halt(con: sqlite3.Connection, strategy: str, reason: str) -> None:
+def halt(con: sqlite3.Connection, strategy: str, reason: str,
+         threshold: float | None = None) -> None:
+    """Остановить стратегию, запомнив ПОРОГ, по которому это сделано.
+
+    🔴 Порог сохраняется не для истории, а чтобы остановку можно было
+    отменить осмысленно. См. `resume_stale_halts`."""
+    _ensure_threshold_column(con)
+    now = int(time.time())
     con.execute("UPDATE engine_strategy_state SET status=?, halted_ts=?, halt_reason=?, "
-                "updated_ts=? WHERE strategy=?",
-                (ST_HALTED, int(time.time()), reason, int(time.time()), strategy))
+                "halt_threshold=?, updated_ts=? WHERE strategy=?",
+                (ST_HALTED, now, reason, threshold, now, strategy))
     con.commit()
+
+
+def _ensure_threshold_column(con: sqlite3.Connection) -> None:
+    cols = {r[1] for r in con.execute("PRAGMA table_info(engine_strategy_state)")}
+    if "halt_threshold" not in cols:
+        con.execute("ALTER TABLE engine_strategy_state ADD COLUMN halt_threshold REAL")
+        con.commit()
+
+
+def resume_stale_halts(con: sqlite3.Connection, current_threshold: float) -> list[tuple]:
+    """Снять остановки, сделанные по УЖЕ НЕ ДЕЙСТВУЮЩЕМУ порогу.
+
+    🔴 Найдено 11.09 на живом счёте. 07.09 порог подняли с 8 до 20 R —
+    посчитали из распределения, потому что восьмёрка лежала внутри медианы
+    нормальной просадки. Но стратегии, остановленные ДО правки, так и
+    остались остановленными: правило изменилось, а его последствия нет.
+
+    Цена ошибки: `pattern_break_retest` стоял шесть дней с просадкой -8.09R
+    при новом пределе 20, будучи при этом в плюсе (+11.03 R за 60 сделок).
+    За это время движок отверг **851 сигнал** с причиной «стратегия
+    остановлена». Молчаливо: в журнале всё аккуратно записано, алерта нет,
+    снаружи выглядит как «сигналов мало».
+
+    Возобновляем ТОЛЬКО если просадка укладывается в нынешний порог — то
+    есть по сегодняшнему правилу стратегия и не должна была быть
+    остановлена. Если она пробила и новый порог, остановка остаётся:
+    смягчение правила не должно воскрешать действительно сломанное."""
+    _ensure_threshold_column(con)
+    resumed = []
+    rows = con.execute(
+        "SELECT strategy, cum_r, peak_r, halt_threshold, halt_reason "
+        "FROM engine_strategy_state WHERE status=?", (ST_HALTED,)).fetchall()
+    for strategy, cum_r, peak_r, old_thr, reason in rows:
+        dd = (cum_r or 0.0) - (peak_r or 0.0)
+        if dd <= -current_threshold:
+            continue                      # пробила и нынешний порог — пусть стоит
+        # Порог мог не сохраниться (остановка до этой правки) — тогда
+        # ориентируемся на сам факт: просадка внутри нынешнего предела.
+        if old_thr is not None and old_thr >= current_threshold:
+            continue                      # остановлена по такому же или более мягкому
+        con.execute("UPDATE engine_strategy_state SET status=?, halted_ts=NULL, "
+                    "halt_reason=NULL, halt_threshold=NULL, updated_ts=? WHERE strategy=?",
+                    (ST_LIVE, int(time.time()), strategy))
+        resumed.append((strategy, dd, old_thr, current_threshold))
+    if resumed:
+        con.commit()
+    return resumed
 
 
 def set_status(con: sqlite3.Connection, strategy: str, status: str) -> None:

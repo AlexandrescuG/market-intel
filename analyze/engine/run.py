@@ -29,13 +29,20 @@ import time
 
 sys.path.insert(0, "/mnt/sbfdata/sbf-platform/market_intel")
 
-from analyze.engine import execution, ledger, risk, sources          # noqa: E402
+from analyze.engine import execution, explain, ledger, notify, risk, sources          # noqa: E402
 from analyze.engine.contracts import Decision, ST_HALTED, ST_LIVE, ST_SHADOW  # noqa: E402
 from analyze.mt5_safety import SafetyRefusal                          # noqa: E402
 
 logging.basicConfig(level=logging.INFO,
                     format="%(asctime)s | [engine] %(message)s")
 log = logging.getLogger("engine")
+
+
+def market_price_of(s, tick):
+    """Цена, по которой реально входим: ask на покупку, bid на продажу."""
+    if tick is None:
+        return None
+    return float(tick.ask if s.is_long else tick.bid)
 
 
 def decide(con, s, equity, symbol_info, tick, default_status: str, *,
@@ -78,6 +85,16 @@ def run(*, dry: bool, live: bool, enabled: list[str] | None, verbose: bool) -> i
     try:
         with execution.Bridge() as (mt5, conn):
             execution.preflight_account(mt5)
+
+            # 🔴 Снятие остановок, сделанных по уже не действующему порогу.
+            # 07.09 порог подняли с 8 до 20 R, а стратегии, остановленные до
+            # правки, остались стоять: правило изменилось, последствия нет.
+            # pattern_break_retest простоял шесть дней в плюсе (+11 R), и за
+            # это время движок отверг 851 сигнал с «стратегия остановлена».
+            for name, dd, old, new in ledger.resume_stale_halts(con, risk.MAX_DRAWDOWN_R):
+                log.warning("ВОЗОБНОВЛЕНА %s: просадка %.2fR укладывается в нынешний "
+                            "предел %.0fR (была остановлена по порогу %s)",
+                            name, dd, new, f"{old:.0f}R" if old else "неизвестному")
 
             st = execution.settle(con, mt5, conn)
             log.info("сведение: закрыто=%d по горизонту=%d потеряшек=%d",
@@ -151,6 +168,21 @@ def run(*, dry: bool, live: bool, enabled: list[str] | None, verbose: bool) -> i
                 log.info("  исполнение (%s): %s", "live" if strat_live else "shadow", msg)
                 if ok:
                     taken += 1
+                    if strat_live:
+                        # Разбор решения уходит отдельным сообщением сразу за
+                        # фактом входа. Содержательная часть — не «сработал
+                        # паттерн», а с каким запасом сделка прошла восемь
+                        # проверок: движок отвергает 94 сигнала из 100.
+                        try:
+                            spread = (abs(float(tick.ask) - float(tick.bid))
+                                      if tick else 0.0)
+                            notify.send(con, explain.explain(
+                                con, s, volume=d.volume, risk_money=d.risk_money,
+                                equity=equity, spread=spread,
+                                market_price=market_price_of(s, tick)), "разбор")
+                        except Exception as e:            # noqa: BLE001
+                            # Разбор — не повод ронять торговый цикл.
+                            log.warning("разбор не собрался: %s", e)
                 else:
                     exit_code = 1
 

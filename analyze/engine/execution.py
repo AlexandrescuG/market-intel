@@ -343,10 +343,14 @@ def settle(con: sqlite3.Connection, mt5, conn) -> dict:
 
 
 def _maybe_halt(con: sqlite3.Connection, state: dict, stats: dict) -> None:
-    from analyze.engine.risk import drawdown_halt
+    from analyze.engine.risk import MAX_DRAWDOWN_R, drawdown_halt
     reason = drawdown_halt(state)
     if reason:
-        ledger.halt(con, state["strategy"], reason)
+        # Порог сохраняется вместе с остановкой: без него нельзя отличить
+        # «остановлена по действующему правилу» от «по правилу, которое с тех
+        # пор изменили». Ровно это и стоило нам шести дней простоя
+        # pattern_break_retest — см. ledger.resume_stale_halts.
+        ledger.halt(con, state["strategy"], reason, MAX_DRAWDOWN_R)
         stats["halted"].append((state["strategy"], reason))
         log.error("СТРАТЕГИЯ ОСТАНОВЛЕНА %s: %s", state["strategy"], reason)
 

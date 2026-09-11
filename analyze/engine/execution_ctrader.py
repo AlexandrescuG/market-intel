@@ -212,9 +212,9 @@ class CTraderTransport:
 
     @staticmethod
     def _maybe_halt(con, state: dict, stats: dict) -> None:
-        from analyze.engine.risk import drawdown_halt
+        from analyze.engine.risk import MAX_DRAWDOWN_R, drawdown_halt
         reason = drawdown_halt(state)
         if reason:
-            ledger.halt(con, state["strategy"], reason)
+            ledger.halt(con, state["strategy"], reason, MAX_DRAWDOWN_R)
             stats["halted"].append((state["strategy"], reason))
             log.error("СТРАТЕГИЯ ОСТАНОВЛЕНА %s: %s", state["strategy"], reason)
