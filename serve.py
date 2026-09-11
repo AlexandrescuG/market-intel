@@ -3286,8 +3286,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             # + RSS-заголовки с тегом инструмента (Фаза 3), релевантно для индексов
             try:
                 news_rows = con.execute(
-                    """SELECT s.uid, s.title, s.url, s.topic_hint AS source, s.raw,
-                              s.first_seen
+                    """SELECT s.uid, s.title, s.text, s.url, s.source AS kind_src,
+                              s.topic_hint, s.author, s.raw, s.first_seen
                        FROM news_instrument_tags t JOIN signals s ON s.uid = t.news_uid
                        WHERE t.symbol = ?""",
                     (symbol,),
@@ -3303,8 +3303,18 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                     except (ValueError, TypeError):
                         continue
                     seen_uids.add(r["uid"])
-                    items.append({"uid": r["uid"], "title": r["title"], "url": r["url"],
-                                  "source": r["source"], "kind": "news",
+                    # 🔴 Та же подмена подписи, что и в ветке кештегов выше.
+                    # Тут я её вчера не поправил: ветки писались в разные дни,
+                    # и карточки с подписью «(NATO OR Kremlin OR Pentagon…)»
+                    # остались на экране. Правка в одной ветке из двух — это
+                    # не правка.
+                    соц = (r["kind_src"] or "") in ("twitter", "telegram")
+                    подпись = (("@" + r["author"]) if соц and r["author"]
+                               else (r["kind_src"] if соц else r["topic_hint"]))
+                    items.append({"uid": r["uid"],
+                                  "title": r["title"] or (r["text"] or "")[:140],
+                                  "url": r["url"],
+                                  "source": подпись, "kind": "post" if соц else "news",
                                   "domain": _raw_domain(r["raw"]), "ts": int(ts)})
             except sqlite3.OperationalError:
                 pass
