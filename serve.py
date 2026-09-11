@@ -2119,7 +2119,14 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         elif path_clean == "/journal":
             self._serve_static(WEB_DIR / "journal.html")
         # ── Legacy /m/* routes → redirect to unified index ──
-        elif path_clean.startswith("/m"):
+        #
+        # 🔴 Условие проверяет ПУТЬ, а не префикс строки. Было
+        # startswith("/m") — и под него попадало всё, что начинается с буквы
+        # «m»: /media/logos/marketbeat.com.ico отдавал 301 на главную.
+        # Логотипы изданий лежали на диске, путь в базе был правильный, в
+        # разметке тоже — а браузер получал редирект и рисовал значок битой
+        # картинки. Снаружи это выглядело как «картинки не грузятся».
+        elif path_clean == "/m" or path_clean.startswith("/m/"):
             self.send_response(301)
             self.send_header("Location", "/")
             self.end_headers()
@@ -3151,6 +3158,13 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             cached = {}
 
         for it in items:
+            # 🔴 Язык заголовка. Без него витрина не запрашивает перевод
+            # ВООБЩЕ: fillTranslations отбирает пункты условием
+            # `n.lang && n.lang !== lang`, и при отсутствующем поле условие
+            # ложно для всех. Ручка перевода была написана, кэш заполнялся,
+            # запрос не уходил ни разу — заголовки оставались английскими, и
+            # выглядело это как «перевод не работает».
+            it["lang"] = _title_lang(it.get("title") or "")
             img = media.get(it["uid"])
             if img:
                 it["image"] = img
