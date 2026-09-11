@@ -1804,36 +1804,65 @@ function openPulseFeed(symbol){
    Теперь список виден сразу на языке оригинала, а заголовки подменяются,
    когда переводы приедут. Переведённое кэшируется, поэтому повторный заход
    по тому же активу наружу уже не ходит. */
+/* 🔴 ЗАПРАШИВАТЬ НАДО ПОРЦИЯМИ, А НЕ ОДНИМ СПИСКОМ.
+   Сервер переводит максимум 12 заголовков за запрос (MAX_PER_REQUEST в
+   core/news_i18n.py) — лимит осознанный, перевод идёт к бесплатной службе.
+   А здесь уходил ОДИН запрос со всеми тридцатью uid: первые двенадцать
+   переводились, остальные восемнадцать молча оставались на английском, и
+   второго запроса за ними никто не посылал.
+   Ровно это выглядело как «перевода то есть, то нет»: в ленте с длинным
+   хвостом переводилась только верхушка. Ошибка не в переводчике — он
+   отвечал, — а в том, что клиент и сервер знали про лимит по-разному. */
+const TR_ПОРЦИЯ = 12;
+
 function fillTranslations(items, lang, body){
   const надо = items.filter(n => n.uid && !n.title_local && n.lang && n.lang !== lang);
   if(!надо.length) return;
   const grid = body.querySelector('.pf-grid');
+  const поИндексу = {};
+  надо.forEach(n => { поИндексу[n.uid] = n; });
+
+  const порции = [];
+  for(let i = 0; i < надо.length; i += TR_ПОРЦИЯ)
+    порции.push(надо.slice(i, i + TR_ПОРЦИЯ));
+
   if(grid) grid.classList.add('pf-translating');
-  const uids = надо.map(n=>n.uid).join(',');
-  window.sbfAuth.fetch('/api/pulse/translate?lang='+encodeURIComponent(lang)
-                       +'&uids='+encodeURIComponent(uids))
-    .then(r=>r.ok?r.json():{})
-    .then(map=>{
-      if(grid) grid.classList.remove('pf-translating');
-      if(!map || !Object.keys(map).length) return;
-      items.forEach(n=>{
-        const tr = map[n.uid];
-        if(!tr || tr === n.title) return;
-        const card = body.querySelector(`.pf-card[data-uid="${cssEscapeIdx(n.uid)}"]`);
-        if(!card) return;
-        const t = card.querySelector('.pf-title');
-        if(t) t.textContent = tr;
-        // Оригинал появляется только сейчас: до перевода он и был заголовком,
-        // и дублировать его самим под собой было бы бессмысленно.
-        if(!card.querySelector('.pf-orig')){
-          const o = document.createElement('div');
-          o.className = 'pf-orig';
-          o.textContent = n.title;
-          t.insertAdjacentElement('afterend', o);
-        }
-      });
-    })
-    .catch(()=>{ if(grid) grid.classList.remove('pf-translating'); });
+
+  // Порции идут по очереди, а не разом: три параллельных запроса к бесплатной
+  // службе — верный способ получить отказ по адресу. Каждая приехавшая порция
+  // подставляется сразу, поэтому заголовки переводятся на глазах, сверху вниз.
+  const следующая = (i) => {
+    // Окно закрыли — дальше не ходим. Иначе за уже ненужной лентой уходило бы
+    // ещё два запроса к переводчику, и следующий человек ждал бы дольше.
+    if(i >= порции.length || !body.isConnected){
+      if(grid) grid.classList.remove('pf-translating'); return;
+    }
+    const uids = порции[i].map(n=>n.uid).join(',');
+    window.sbfAuth.fetch('/api/pulse/translate?lang='+encodeURIComponent(lang)
+                         +'&uids='+encodeURIComponent(uids))
+      .then(r=>r.ok?r.json():{})
+      .then(map=>{
+        Object.keys(map || {}).forEach(uid=>{
+          const n = поИндексу[uid], tr = map[uid];
+          if(!n || !tr || tr === n.title) return;
+          const card = body.querySelector(`.pf-card[data-uid="${cssEscapeIdx(uid)}"]`);
+          if(!card) return;
+          const t = card.querySelector('.pf-title');
+          if(t) t.textContent = tr;
+          // Оригинал появляется только сейчас: до перевода он и был заголовком,
+          // и дублировать его самим под собой было бы бессмысленно.
+          if(!card.querySelector('.pf-orig')){
+            const o = document.createElement('div');
+            o.className = 'pf-orig';
+            o.textContent = n.title;
+            t.insertAdjacentElement('afterend', o);
+          }
+        });
+        следующая(i + 1);
+      })
+      .catch(()=>{ if(grid) grid.classList.remove('pf-translating'); });
+  };
+  следующая(0);
 }
 
 /* uid — наш внутренний хеш, но в селектор он попадает как есть.
