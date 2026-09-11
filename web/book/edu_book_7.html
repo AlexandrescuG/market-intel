@@ -490,9 +490,44 @@ function PatternRealityTable({ patterns }) {
   const [instrument, setInstrument] = useState("GOLD");
   const cells = (patterns && patterns.cells) || [];
   const symbols = useMemo(() => Array.from(new Set(cells.map(c=>c.symbol))).sort(), [cells]);
-  const rows = useMemo(() => cells.filter(c => c.symbol === instrument).sort((a,b) => b.n - a.n), [cells, instrument]);
   const nameKey = "display_name_" + INITIAL_LANG;
   const naData = INITIAL_LANG==="ru"?"мало данных":INITIAL_LANG==="ro"?"date insuficiente":"not enough data";
+  // 🔴 Таблица отвечала на один вопрос — «у какого паттерна больше
+  // наблюдений». А читатель приходит сюда с другим: «какой дальше всех от
+  // опорных 50%». Сортировка по колонке превращает выкладку в инструмент, а
+  // не в картинку: 2685 знаков подряд читались как абзац.
+  //
+  // Шапка сделана так же, как в главах 8 и 9: aria-sort сообщает направление,
+  // кнопка внутри даёт фокус и Enter/Space без своей обработки клавиш.
+  const [sortKey, setSortKey] = useState("n");
+  const [sortDir, setSortDir] = useState(1);          // 1 = по убыванию
+  const onSort = (k) => {
+    if (k === sortKey) { setSortDir(-sortDir); return; }
+    setSortKey(k); setSortDir(1);
+  };
+  const rows = useMemo(() => {
+    const взять = (c) => {
+      if (sortKey === "pattern") return (c[nameKey] || c.pattern_key || "").toLowerCase();
+      if (sortKey === "tf") return c.tf || "";
+      // Отклонение от случайности, а не сам процент: 42% и 58% одинаково
+      // далеки от опорной линии, и в таблице про «есть ли сигнал» важно
+      // именно расстояние.
+      if (sortKey === "agree") return c.shown ? Math.abs(c.agree_5 * 100 - 50) : -1;
+      return c.n || 0;
+    };
+    const свои = cells.filter(c => c.symbol === instrument);
+    return свои.slice().sort((a, b) => {
+      const x = взять(a), y = взять(b);
+      if (typeof x === "string") return sortDir * y.localeCompare(x);
+      return sortDir * (y - x);
+    });
+  }, [cells, instrument, sortKey, sortDir, nameKey]);
+  const колонки = [
+    {key:"pattern", label: cm.patternLabel, align:"left"},
+    {key:"tf", label:"TF", align:"center"},
+    {key:"agree", label:"agree_5", align:"center"},
+    {key:"n", label:"n", align:"center"},
+  ];
 
   return (
     <div>
@@ -505,11 +540,25 @@ function PatternRealityTable({ patterns }) {
         <table style={{borderCollapse:"collapse",width:"100%",minWidth:560}}>
           <thead>
             <tr>
-              <th style={{textAlign:"left",padding:"8px 10px",fontSize:10.5,fontFamily:"monospace",color:C.inkFaint,textTransform:"uppercase",borderBottom:`1px solid ${C.border}`}}>{cm.patternLabel}</th>
-              <th style={{textAlign:"center",padding:"8px 10px",fontSize:10.5,fontFamily:"monospace",color:C.inkFaint,borderBottom:`1px solid ${C.border}`}}>TF</th>
-              <th style={{textAlign:"center",padding:"8px 10px",fontSize:10.5,fontFamily:"monospace",color:C.inkFaint,borderBottom:`1px solid ${C.border}`}}>agree_5</th>
-              <th style={{textAlign:"center",padding:"8px 10px",fontSize:10.5,fontFamily:"monospace",color:C.inkFaint,borderBottom:`1px solid ${C.border}`}}>CI95</th>
-              <th style={{textAlign:"center",padding:"8px 10px",fontSize:10.5,fontFamily:"monospace",color:C.inkFaint,borderBottom:`1px solid ${C.border}`}}>n</th>
+              {колонки.slice(0,3).map(col => (
+                <th key={col.key} scope="col"
+                    aria-sort={sortKey===col.key ? (sortDir>0?"descending":"ascending") : "none"}
+                    style={{textAlign:col.align,padding:0,borderBottom:`1px solid ${C.border}`,whiteSpace:"nowrap"}}>
+                  <button type="button" onClick={()=>onSort(col.key)}
+                    style={{width:"100%",textAlign:col.align,padding:"8px 10px",fontSize:10.5,fontFamily:"monospace",color:sortKey===col.key?C.gold:C.inkFaint,textTransform:"uppercase",cursor:"pointer",userSelect:"none",background:"none",border:"none",fontWeight:600}}>
+                    {col.label}{sortKey===col.key ? (sortDir>0?" ▾":" ▴") : ""}
+                  </button>
+                </th>
+              ))}
+              <th scope="col" style={{textAlign:"center",padding:"8px 10px",fontSize:10.5,fontFamily:"monospace",color:C.inkFaint,borderBottom:`1px solid ${C.border}`}}>CI95</th>
+              <th scope="col"
+                  aria-sort={sortKey==="n" ? (sortDir>0?"descending":"ascending") : "none"}
+                  style={{textAlign:"center",padding:0,borderBottom:`1px solid ${C.border}`}}>
+                <button type="button" onClick={()=>onSort("n")}
+                  style={{width:"100%",textAlign:"center",padding:"8px 10px",fontSize:10.5,fontFamily:"monospace",color:sortKey==="n"?C.gold:C.inkFaint,cursor:"pointer",userSelect:"none",background:"none",border:"none",fontWeight:600}}>
+                  n{sortKey==="n" ? (sortDir>0?" ▾":" ▴") : ""}
+                </button>
+              </th>
             </tr>
           </thead>
           <tbody>

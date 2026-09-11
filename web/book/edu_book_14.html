@@ -94,7 +94,7 @@ const STRINGS = {
   },
 };
 
-const {C, Mono, Chip, Rule, AntiMythBlock, AskAnalystBtn, getChUrl, QuizBlock, ComplianceFootnote, ColdStart, CheckList} = window.AcademyShared;
+const {C, Mono, Chip, Rule, AntiMythBlock, AskAnalystBtn, getChUrl, QuizBlock, ComplianceFootnote, ColdStart, CheckList, RevealSteps} = window.AcademyShared;
 
 function fillTemplate(str, vars) {
   if (!str) return str;
@@ -462,9 +462,13 @@ function TargetFeasibility() {
         </div>
       )}
 
-      <p style={{fontSize:13,color:C.inkMid,lineHeight:1.7,marginBottom:10}}>{tf.point1}</p>
-      <p style={{fontSize:13,color:C.inkMid,lineHeight:1.7,marginBottom:10}}>{tf.point2}</p>
-      <p style={{fontSize:13,color:C.inkMid,lineHeight:1.7,marginBottom:16}}>{tf.point3}</p>
+      {/* Три вывода из карты часов, где третий объясняет первые два. Выложенные
+          разом, они дочитываются до конца и вывод теряется; по одному — каждый
+          успевает сработать. Это был самый длинный кусок главы (2125 знаков). */}
+      <div style={{marginBottom:16}}>
+        <RevealSteps bodies={[tf.point1, tf.point2, tf.point3].filter(Boolean)}
+                     lang={INITIAL_LANG} preset="layers"/>
+      </div>
 
       <div style={{background:C.goldPale,border:`1px solid ${C.borderGold}`,borderRadius:6,padding:"14px 18px",marginBottom:8}}>
         <p style={{fontSize:12,color:C.black,lineHeight:1.6,margin:0}}>{tf.honestPlate}</p>
