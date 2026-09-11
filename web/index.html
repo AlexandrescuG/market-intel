@@ -1884,7 +1884,17 @@ function cssEscapeIdx(s){
    что случилось (заголовок на языке читателя), кто это написал (логотип и
    имя издания), когда. Оригинальный заголовок — под переводом мелким
    шрифтом: машинный перевод не заменяет чужой текст, он его сопровождает. */
-function renderFeedCard(n){
+/* 🔴 ПЕРВЫЙ ЭКРАН ГРУЗИТСЯ СРАЗУ, ОСТАЛЬНОЕ — ЛЕНИВО.
+   loading="lazy" стояло на всех тридцати картинках подряд. Внутри окна с
+   прокруткой браузер считает «видимым» немногое, и верхние карточки тоже
+   ждали своей очереди: на экране это выглядело как «картинки есть, но не
+   грузятся» — ровно та жалоба, с которой всё началось. Замер на живой
+   ленте: 20 карточек с фотографией, ни одной битой, четыре всё ещё в
+   процессе загрузки через двадцать секунд после открытия. */
+const FEED_EAGER = 8;
+
+function renderFeedCard(n, i){
+  const грузить = (i !== undefined && i < FEED_EAGER) ? 'eager' : 'lazy';
   const dt=new Date(n.ts*1000);
   const timeStr=dt.toLocaleString(undefined,{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
   const url=escapeHtmlIdx(n.url||'#');
@@ -1892,16 +1902,16 @@ function renderFeedCard(n){
   // Шапка карточки: фотография статьи, если издание её отдаёт; иначе полоса
   // с логотипом издания; если нет и его — карточка просто без шапки.
   const shot = n.image
-    ? `<div class="pf-shot"><img class="pf-img" loading="lazy" referrerpolicy="no-referrer"
+    ? `<div class="pf-shot"><img class="pf-img" loading="${грузить}" referrerpolicy="no-referrer"
          src="${escapeHtmlIdx(n.image)}" alt=""></div>`
     : (n.logo
-        ? `<div class="pf-shot pf-shot-logo"><img loading="lazy"
+        ? `<div class="pf-shot pf-shot-logo"><img loading="${грузить}"
              src="${escapeHtmlIdx(n.logo)}" alt=""><span>${источник}</span></div>`
         : '');
   // В подписи логотип нужен только там, где его нет в шапке — иначе он
   // показывался бы дважды на одной карточке.
   const logo = (n.logo && n.image)
-    ? `<img class="pf-logo" loading="lazy" src="${escapeHtmlIdx(n.logo)}" alt="">`
+    ? `<img class="pf-logo" loading="${грузить}" src="${escapeHtmlIdx(n.logo)}" alt="">`
     : '';
   const headline = n.title_local || n.title || '';
   const original = (n.title_local && n.title && n.title_local !== n.title)
