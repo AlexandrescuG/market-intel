@@ -22,6 +22,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
+from core import news_junk
 from core.config import DB_PATH
 
 # Словарь ключевых слов на символ (RU+EN, регистронезависимо). Прогоняется по
@@ -198,8 +199,22 @@ def tag_recent(con, verbose=False) -> int:
     patterns = dict(_SYMBOL_PATTERNS)
     patterns.update(_load_catalog_patterns())
     patterns.update(_load_core_patterns())
-    tagged = 0
+    tagged = пропущено_мусора = 0
     for uid, title, text in rows:
+        # 🔴 Поточные заметки об отчётности фондов не тегируем вовсе.
+        #
+        # «Rational Advisors Inc. Sells 2,473 Shares of Tesla, Inc. $TSLA» —
+        # это не упоминание Tesla в новостном смысле, а автоматическая
+        # заметка о подаче формы. Замер 11.09.2026: 10 карточек из 30 в ленте
+        # по Tesla. Отсекаем здесь, а не на выдаче, чтобы они не попадали
+        # ЗАОДНО и в счётчик упоминаний Эпицентра: иначе десяток подач формы
+        # выглядел бы всплеском внимания к компании.
+        #
+        # Сама новость остаётся в signals — мы её не удаляем, только не
+        # связываем с инструментом.
+        if news_junk.is_filing_note(title):
+            пропущено_мусора += 1
+            continue
         blob = _searchable(title, text)
         for symbol, pat in patterns.items():
             if pat.search(blob):
@@ -211,7 +226,9 @@ def tag_recent(con, verbose=False) -> int:
                     tagged += 1
     con.commit()
     if verbose:
-        print(f"тегировано новых (uid,symbol) пар: {tagged} (просканировано {len(rows)} новостей)")
+        print(f"тегировано новых (uid,symbol) пар: {tagged} "
+              f"(просканировано {len(rows)} новостей, "
+              f"пропущено заметок об отчётности: {пропущено_мусора})")
     _retention(con, verbose)
     return tagged
 

@@ -21,7 +21,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from core import journal_db, journal_crypto, journal_ocr, journal_csv, journal_meta, journal_discipline, journal_alerts, journal_brief, journal_setups, journal_tilt, journal_gamification, journal_goals, journal_account, journal_auth, journal_feedback, journal_import, journal_analytics, journal_review, journal_cooldown, journal_rules, journal_tradeplan, journal_gate, i18n
 from core import symbols as _symbols
 from core import candle_cache
-from core import news_media, news_i18n
+from core import news_media, news_i18n, news_junk
 from core.symbols_registry import yahoo_ticker as _registry_yahoo_ticker
 from core.event_types import normalize_event_type
 from core.config import DB_PATH as _SIGNALS_DB
@@ -3309,6 +3309,11 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             except sqlite3.OperationalError:
                 pass
 
+            # Поточные заметки об отчётности фондов не показываем. Сборщик их
+            # уже не тегирует (news_burst_job), но в базе остались помеченные
+            # раньше — и за них цепляется лента, пока они не истекут по сроку
+            # хранения. Проверка на выдаче дешёвая и снимает вопрос сразу.
+            items = [i for i in items if not news_junk.is_filing_note(i.get("title"))]
             items.sort(key=lambda x: x["ts"], reverse=True)
             items = self._dedupe_feed(con, items)[:self._FEED_LIMIT]
             self._decorate_feed(con, items, lang)
