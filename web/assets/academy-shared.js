@@ -384,15 +384,44 @@
     var e = React.createElement;
     var hatch = "repeating-linear-gradient(45deg, rgba(24,24,26,0.055), rgba(24,24,26,0.055) 4px, transparent 4px, transparent 9px)";
 
-    var sorted = rows.slice().sort(function (a, b) {
-      var strength = function (row) {
+    /* 🔴 Матрица отвечала на один вопрос — «какое событие вообще сильнее
+     * всех»: строки сортировались по максимуму по всей строке, и порядок
+     * был намертво зашит. А читатель приходит с вопросом про СВОЙ
+     * инструмент: «что сильнее всего двигает золото». Ответ в таблице был,
+     * но искать его надо было глазами по столбцу.
+     *
+     * Нажатие на заголовок столбца сортирует строки по нему. Заголовок —
+     * кнопка с aria-sort, как в таблицах глав 7, 8 и 9: одинаковый приём в
+     * одинаковых местах, доступно с клавиатуры.
+     */
+    var st = React.useState({key: null, dir: 1}), порядок = st[0], setПорядок = st[1];
+    var МЕТКИ = {
+      ru: {byStrength: "по силе", sortBy: "сортировать по столбцу"},
+      ro: {byStrength: "după forță", sortBy: "sortează după coloană"},
+      en: {byStrength: "by strength", sortBy: "sort by this column"}
+    };
+    var м = МЕТКИ[props.lang] || МЕТКИ.ru;
+
+    function значение(row, key) {
+      if (key === null) {
+        // По умолчанию — максимум по строке, как было.
         return columns.reduce(function (m, c) {
           var cell = row.cells[c.key];
           return (cell && cell.norm != null) ? Math.max(m, cell.norm) : m;
         }, -1);
-      };
-      return strength(b) - strength(a);
+      }
+      var cell = row.cells[key];
+      return (cell && cell.norm != null) ? cell.norm : -1;
+    }
+
+    var sorted = rows.slice().sort(function (a, b) {
+      return порядок.dir * (значение(b, порядок.key) - значение(a, порядок.key));
     });
+
+    function щёлк(key) {
+      if (порядок.key === key) { setПорядок({key: key, dir: -порядок.dir}); return; }
+      setПорядок({key: key, dir: 1});
+    }
 
     function cellBody(cell) {
       if (!cell || cell.n === 0 || cell.norm == null) {
@@ -414,9 +443,26 @@
         e('table', { style: { width: "100%", borderCollapse: "collapse", fontSize: 13, minWidth: 480 } },
           e('thead', {},
             e('tr', {},
-              e('th', { style: { textAlign: "left", padding: "8px 10px", fontSize: 10.5, fontFamily: "monospace", color: C.inkFaint, textTransform: "uppercase", borderBottom: "1px solid " + C.border } }, copy.rowHead),
+              e('th', { scope: "col",
+                        'aria-sort': порядок.key === null ? (порядок.dir > 0 ? "descending" : "ascending") : "none",
+                        style: { textAlign: "left", padding: 0, borderBottom: "1px solid " + C.border } },
+                e('button', { type: "button", onClick: function () { щёлк(null); },
+                  style: { width: "100%", textAlign: "left", padding: "8px 10px", fontSize: 10.5,
+                           fontFamily: "monospace", color: порядок.key === null ? C.gold : C.inkFaint,
+                           textTransform: "uppercase", cursor: "pointer", background: "none",
+                           border: "none", fontWeight: 600 } },
+                  copy.rowHead + " · " + м.byStrength + (порядок.key === null ? (порядок.dir > 0 ? " ▾" : " ▴") : ""))),
               columns.map(function (c) {
-                return e('th', { key: c.key, style: { textAlign: "center", padding: "8px 10px", fontSize: 10.5, fontFamily: "monospace", color: C.inkFaint, textTransform: "uppercase", borderBottom: "1px solid " + C.border, whiteSpace: "nowrap" } }, c.label);
+                var свой = порядок.key === c.key;
+                return e('th', { key: c.key, scope: "col",
+                                 'aria-sort': свой ? (порядок.dir > 0 ? "descending" : "ascending") : "none",
+                                 style: { textAlign: "center", padding: 0, borderBottom: "1px solid " + C.border, whiteSpace: "nowrap" } },
+                  e('button', { type: "button", onClick: function () { щёлк(c.key); }, title: м.sortBy,
+                    style: { width: "100%", textAlign: "center", padding: "8px 10px", fontSize: 10.5,
+                             fontFamily: "monospace", color: свой ? C.gold : C.inkFaint,
+                             textTransform: "uppercase", cursor: "pointer", background: "none",
+                             border: "none", fontWeight: 600 } },
+                    c.label + (свой ? (порядок.dir > 0 ? " ▾" : " ▴") : "")));
               })
             )
           ),

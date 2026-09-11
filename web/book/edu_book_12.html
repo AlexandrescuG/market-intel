@@ -104,7 +104,7 @@ const STRINGS = {
   },
 };
 
-const {C, Mono, Chip, Rule, AntiMythBlock, AskAnalystBtn, getChUrl, QuizBlock, ComplianceFootnote, ColdStart} = window.AcademyShared;
+const {C, Mono, Chip, Rule, AntiMythBlock, AskAnalystBtn, getChUrl, QuizBlock, ComplianceFootnote, ColdStart, RevealSteps} = window.AcademyShared;
 
 function fillTemplate(str, vars) {
   if (!str) return str;
@@ -465,7 +465,15 @@ function CloudShiftExplainer() {
   const [shifted, setShifted] = React.useState(false);
   return (
     <div style={{marginBottom:48}}>
-      {cs.body.map((p,i) => <p key={i} style={{fontSize:14,color: i===3?C.black:C.inkMid,fontWeight:i===3?600:400,lineHeight:1.78,marginBottom:14,maxWidth:820}}>{p}</p>)}
+      {/* Ключевое объяснение главы — четыре абзаца, где каждый следующий
+          отменяет вывод предыдущего: «показывает будущее» → «нет, это
+          сегодняшние цены» → «но уровень известен заранее» → «и поэтому
+          прошлую редакцию мы переписали». Выложенные разом, они
+          дочитываются как один длинный абзац, и разворот в середине
+          теряется. */}
+      <div style={{maxWidth:820}}>
+        <RevealSteps bodies={cs.body} lang={INITIAL_LANG} preset="layers"/>
+      </div>
 
       <div style={{background:C.black,borderRadius:8,padding:"26px 30px",marginTop:20}}>
         <div style={{display:"flex",justifyContent:"center",marginBottom:18}}>

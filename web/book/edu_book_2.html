@@ -783,7 +783,7 @@ function CalendarMatrixTable() {
 
   return (
     <div>
-      <ImpactMatrix rows={rows} columns={cols} minCases={data.meta.min_cases} copy={{
+      <ImpactMatrix rows={rows} columns={cols} minCases={data.meta.min_cases} lang={INITIAL_LANG} copy={{
         rowHead: cm.colEvent, naLabel: cm.naLabel, lowSampleLegend: cm.lowSampleLegend,
       }}/>
       <button onClick={() => setShowMethod(v => !v)} style={{background:"none",border:"none",padding:0,fontFamily:"monospace",fontSize:11,color:C.gold,cursor:"pointer",textDecoration:"underline",marginTop:6}}>

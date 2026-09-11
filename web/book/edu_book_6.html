@@ -106,7 +106,7 @@ const STRINGS = {
   },
 };
 
-const {C, Mono, Chip, Rule, AntiMythBlock, RevealSteps, AskAnalystBtn, getChUrl, QuizBlock, ImpactMatrix, ComplianceFootnote, ColdStart} = window.AcademyShared;
+const {C, Mono, Chip, Rule, AntiMythBlock, RevealSteps, AskAnalystBtn, getChUrl, QuizBlock, ImpactMatrix, ComplianceFootnote, ColdStart, CardTabs} = window.AcademyShared;
 
 const SectionTitle = ({children,sub,align="left",id}) => (
   <div id={id} style={{textAlign:align,marginBottom:36,scrollMarginTop:130}}>
@@ -301,16 +301,14 @@ function CalendarExplainer() {
       <div style={{background:C.goldPale,border:`1px solid ${C.borderGold}`,borderRadius:6,padding:"18px 22px",marginBottom:20,textAlign:"center"}}>
         <p style={{fontSize:14,color:C.black,lineHeight:1.65,margin:0,fontWeight:600}}>{cal.surprisePlate}</p>
       </div>
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}} className="g2">
-        <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:6,padding:"18px 22px"}}>
-          <div style={{fontWeight:600,fontSize:13,color:C.black,marginBottom:8}}>{cal.importanceTitle}</div>
-          <p style={{fontSize:12.5,color:C.inkMid,lineHeight:1.65,margin:0}}>{cal.importanceText}</p>
-        </div>
-        <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:6,padding:"18px 22px"}}>
-          <div style={{fontWeight:600,fontSize:13,color:C.black,marginBottom:8}}>{cal.revisionsTitle}</div>
-          <p style={{fontSize:12.5,color:C.inkMid,lineHeight:1.65,margin:0}}>{cal.revisionsText}</p>
-        </div>
-      </div>
+      {/* «Важность» и «Ревизии» — две оговорки к календарю, каждая со своим
+          сюжетом. Стояли двумя столбцами и дочитывались как продолжение
+          предыдущего абзаца; названия обеих теперь видны в подписях кнопок
+          сразу, а читаются по одной. */}
+      <CardTabs items={[
+        {title: cal.importanceTitle, body: cal.importanceText},
+        {title: cal.revisionsTitle, body: cal.revisionsText},
+      ]} style={{marginBottom:0}}/>
     </div>
   );
 }
@@ -433,7 +431,7 @@ function StrengthMatrix({ stats }) {
   }));
   const minCases = (stats && stats._meta && stats._meta.min_cell_n) || 4;
   return (
-    <ImpactMatrix rows={rows} columns={columns} minCases={minCases} copy={{
+    <ImpactMatrix rows={rows} columns={columns} minCases={minCases} lang={INITIAL_LANG} copy={{
       rowHead: cm.eventTypeLabel, naLabel: cm.matrixNaLabel, lowSampleLegend: cm.matrixLowSampleLegend,
     }}/>
   );
@@ -453,15 +451,15 @@ function CoreMeasureBlock({ stats, vars }) {
         <SurpriseScatter stats={stats}/>
       </div>
 
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:20,marginBottom:32}} className="g2">
-        <div>
-          <div style={{fontWeight:600,fontSize:14.5,color:C.black,marginBottom:8}}>{cm.finding2Title}</div>
-          <p style={{fontSize:13,color:C.inkMid,lineHeight:1.7,margin:0}}>{vars ? fillTemplate(cm.finding2Text, vars) : "—"}</p>
-        </div>
-        <div>
-          <div style={{fontWeight:600,fontSize:14.5,color:C.black,marginBottom:8}}>{cm.finding3Title}</div>
-          <p style={{fontSize:13,color:C.inkMid,lineHeight:1.7,margin:0}}>{vars ? fillTemplate(cm.finding3Text, vars) : "—"}</p>
-        </div>
+      {/* Две находки, выложенные в два столбца, читаются как один абзац на
+          два экрана — и это был самый длинный кусок главы. Переключатель
+          заодно называет обе сразу, в подписях кнопок: читатель видит, что
+          находок две и про что каждая, ещё до того, как начал читать. */}
+      <div style={{marginBottom:32}}>
+        <CardTabs items={[
+          {title: cm.finding2Title, body: vars ? fillTemplate(cm.finding2Text, vars) : "—"},
+          {title: cm.finding3Title, body: vars ? fillTemplate(cm.finding3Text, vars) : "—"},
+        ]} style={{marginBottom:0}}/>
       </div>
 
       <div style={{marginBottom:8}}>
