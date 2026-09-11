@@ -323,6 +323,12 @@ def settle(con: sqlite3.Connection, mt5, conn) -> dict:
                 reason=str(getattr(last, "comment", "") or "closed"))
             st = ledger.apply_result(con, t["strategy"], r)
             stats["closed"] += 1
+            # 🔴 11.09: notify.closed был написан 02.09 и НИ РАЗУ не вызывался
+            # — подключён оказался только stop_moved. Девять дней бот сообщал
+            # о переносах стопа и молчал о самих сделках. Тот же класс, что мы
+            # ловим у других: код есть, тесты зелёные, вызова нет, и снаружи
+            # это неотличимо от «сделок не было».
+            _notify_closed(con, t, r, st)
             _maybe_halt(con, st, stats)
 
     # 2. горизонт: позиция жива, но её время вышло
@@ -340,6 +346,26 @@ def settle(con: sqlite3.Connection, mt5, conn) -> dict:
             # не принадлежит.
             log.error("НЕ закрыт по горизонту %s: %s", t["ticket"], err)
     return stats
+
+
+def _notify_closed(con: sqlite3.Connection, trade: dict, r: float,
+                   state: dict) -> None:
+    """Итог сделки в бот. Теневые молчат: они ничего не стоили и не платили
+    спред, а смешивать их с живыми в одной ленте значит запутать читателя."""
+    if trade.get("mode") != "live":
+        return
+    from analyze.engine import notify
+    row = con.execute(
+        "SELECT entry_price, exit_price, close_reason FROM engine_trades WHERE id=?",
+        (trade["id"],)).fetchone()
+    if not row:
+        return
+    t = dict(trade)
+    t["entry_price"], t["exit_price"], t["close_reason"] = row
+    try:
+        notify.send(con, notify.closed(t, r, state), "итог сделки")
+    except Exception as e:                                  # noqa: BLE001
+        log.warning("уведомление о закрытии не ушло: %s", e)
 
 
 def _maybe_halt(con: sqlite3.Connection, state: dict, stats: dict) -> None:

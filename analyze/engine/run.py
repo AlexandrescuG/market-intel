@@ -169,20 +169,22 @@ def run(*, dry: bool, live: bool, enabled: list[str] | None, verbose: bool) -> i
                 if ok:
                     taken += 1
                     if strat_live:
-                        # Разбор решения уходит отдельным сообщением сразу за
-                        # фактом входа. Содержательная часть — не «сработал
-                        # паттерн», а с каким запасом сделка прошла восемь
-                        # проверок: движок отвергает 94 сигнала из 100.
+                        # Чек-лист входа — ЕДИНСТВЕННОЕ сообщение по открытию.
+                        # Сознательно без цен входа, стопа и цели: с ними это
+                        # была бы инструкция «войди сюда, стоп туда», то есть
+                        # сигнал. Нужно обратное — показать устройство решения.
                         try:
                             spread = (abs(float(tick.ask) - float(tick.bid))
                                       if tick else 0.0)
-                            notify.send(con, explain.explain(
+                            notify.send(con, explain.checklist(
                                 con, s, volume=d.volume, risk_money=d.risk_money,
                                 equity=equity, spread=spread,
-                                market_price=market_price_of(s, tick)), "разбор")
+                                market_price=market_price_of(s, tick)),
+                                "чек-лист входа")
                         except Exception as e:            # noqa: BLE001
-                            # Разбор — не повод ронять торговый цикл.
-                            log.warning("разбор не собрался: %s", e)
+                            # Чек-лист — не повод ронять торговый цикл:
+                            # сделка важнее письма.
+                            log.warning("чек-лист не собрался: %s", e)
                 else:
                     exit_code = 1
 

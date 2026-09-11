@@ -115,6 +115,33 @@ def mark_failed(con: sqlite3.Connection, oid: str, error: str) -> None:
     con.commit()
 
 
+# Пределы Telegram: 4096 символов на sendMessage, 1024 на подпись к фото.
+TG_TEXT_LIMIT = 4096
+TG_CAPTION_LIMIT = 1024
+
+
+def _fit(payload: str | None, has_photo) -> str:
+    """Подрезать сообщение под предел Telegram.
+
+    🔴 11.09: три операционных алерта от 05.09 длиной 4835 символов висели в
+    очереди неделю и падали на КАЖДОМ прогоне с «400 Bad Request». Отправить
+    их нельзя в принципе — предел 4096, — но очередь этого не знала и честно
+    пробовала снова. Постоянный отказ, притворяющийся временным: счётчик
+    `failed` рос, никто не смотрел, ошибка была вечной.
+
+    Резать, а не отбрасывать: длинный алерт всё ещё несёт причину в начале,
+    и лучше доставить его усечённым, чем не доставить вовсе. Причина самой
+    длины устранена отдельно — `run_cycle._why` больше не вываливает сырой
+    конверт CLI, — но подрезка нужна как последний рубеж: следующий
+    многословный алерт придёт откуда-нибудь ещё."""
+    text = payload or ""
+    limit = TG_CAPTION_LIMIT if has_photo else TG_TEXT_LIMIT
+    if len(text) <= limit:
+        return text
+    tail = f"\n… обрезано, было {len(text)} симв."
+    return text[: limit - len(tail)] + tail
+
+
 def send_pending(con: sqlite3.Connection) -> dict:
     """Тихо не отправляет ничего без токена (симметрично core.telegram.send_text
     и старой notify_gdenigi.send_forecast) -- НЕ ошибка, ожидаемое состояние,
@@ -128,6 +155,8 @@ def send_pending(con: sqlite3.Connection) -> dict:
     sent = failed = 0
     for item in pending(con):
         try:
+            item = dict(item)
+            item["payload"] = _fit(item["payload"], item["attachment_path"])
             if item["attachment_path"]:
                 with open(item["attachment_path"], "rb") as f:
                     resp = httpx.post(
@@ -139,9 +168,24 @@ def send_pending(con: sqlite3.Connection) -> dict:
             else:
                 resp = httpx.post(
                     f"https://api.telegram.org/bot{GDENIGI_BOT_TOKEN}/sendMessage",
-                    json={"chat_id": GDENIGI_CHAT_ID, "text": item["payload"], "parse_mode": "HTML"},
+                    json={"chat_id": GDENIGI_CHAT_ID, "text": item["payload"],
+                          "parse_mode": "HTML"},
                     timeout=15,
                 )
+                if resp.status_code == 400:
+                    # 🔴 11.09: три алерта от 05.09 падали неделю с «400 Bad
+                    # Request». Причина — `<` внутри текста: с parse_mode=HTML
+                    # Telegram читает его как открывающий тег и отвергает всё
+                    # сообщение. В операционных алертах и чек-листах разметки
+                    # нет вовсе, зато сырые куски ответов с `<` попадаются.
+                    # Поэтому повтор простым текстом: формат — не повод
+                    # потерять сообщение, а угадывать наличие разметки в
+                    # чужом payload мы не беремся.
+                    resp = httpx.post(
+                        f"https://api.telegram.org/bot{GDENIGI_BOT_TOKEN}/sendMessage",
+                        json={"chat_id": GDENIGI_CHAT_ID, "text": item["payload"]},
+                        timeout=15,
+                    )
             resp.raise_for_status()
             mark_sent(con, item["id"])
             sent += 1
