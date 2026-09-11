@@ -75,8 +75,27 @@
       el.innerHTML = '<div class="sbf-fig-schema-tag">' + schemaLabel + '</div><div class="sbf-fig-chart"></div><div class="sbf-cap">' + cap + '</div>';
       function render() { el.querySelector('.sbf-fig-chart').innerHTML = it.build(); }
       render(); el._sbf = true;
-      el.title = t('eduindex.embed.click_to_replay', 'нажми, чтобы проиграть заново');
+      // 🔴 Схема — настоящее управление: по нажатию она проигрывается заново.
+      // Но была обычным <div> с курсором-пальцем: мышью работает, с
+      // клавиатуры недоступна, диктор её управлением не называет. Замер нашёл
+      // 17 таких схем по главам — все из этой одной строки.
+      //
+      // role + tabindex + обработка Enter/Space — минимум, который делает
+      // элемент управлением по-настоящему. Тег не меняем: внутри разметка
+      // схемы, а <button> с произвольным содержимым ведёт себя по-разному в
+      // разных браузерах.
+      var подпись = t('eduindex.embed.click_to_replay', 'нажми, чтобы проиграть заново');
+      el.title = подпись;
+      el.setAttribute('role', 'button');
+      el.setAttribute('tabindex', '0');
+      el.setAttribute('aria-label', cap + ' — ' + подпись);
       el.addEventListener('click', render);
+      el.addEventListener('keydown', function (ev) {
+        if (ev.key === 'Enter' || ev.key === ' ' || ev.key === 'Spacebar') {
+          ev.preventDefault();
+          render();
+        }
+      });
     });
   }
 

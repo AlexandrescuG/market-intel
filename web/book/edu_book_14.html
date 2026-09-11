@@ -141,9 +141,11 @@ function SeriesCounter({ progress, loading, lang }) {
   else if (progress.status === "blocked") label = lang==="ru" ? "бумага" : lang==="ro" ? "hârtie" : "paper";
   else label = lang==="ru" ? "не начата" : lang==="ro" ? "neîncepută" : "not started";
   return (
-    <div onClick={goBack} style={{cursor:"pointer",fontFamily:"monospace",fontSize:11.5,color:C.gold,border:`1px solid ${C.borderGold}`,borderRadius:20,padding:"5px 14px",letterSpacing:0.5,whiteSpace:"nowrap"}}>
+    /* Счётчик серии — переход к разделу, то есть управление. Был <div>
+       с курсором: мышью работает, с клавиатуры нет. */
+    <button type="button" onClick={goBack} style={{cursor:"pointer",background:"none",fontFamily:"monospace",fontSize:11.5,color:C.gold,border:`1px solid ${C.borderGold}`,borderRadius:20,padding:"5px 14px",letterSpacing:0.5,whiteSpace:"nowrap"}}>
     {label}
-    </div>
+    </button>
   );
 }
 

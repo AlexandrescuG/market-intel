@@ -619,10 +619,18 @@ function DisclosureItem({ item, idx, colKey, open, onToggle, accent }) {
   const isOpen = open === colKey + idx;
   return (
     <div style={{marginBottom:10}}>
-      <div onClick={()=>onToggle(isOpen ? null : colKey + idx)} style={{cursor:"pointer",display:"flex",gap:8,alignItems:"flex-start"}}>
+      {/* 🔴 Это раскрывающаяся карточка, то есть управление. Была обычным
+          <div> с курсором-пальцем: мышью работает, с клавиатуры нет, диктор
+          управлением не называет. Тринадцать таких в главе — больше, чем в
+          любой другой. Кнопка с aria-expanded говорит и о роли, и о
+          состоянии. */}
+      <button type="button" onClick={()=>onToggle(isOpen ? null : colKey + idx)}
+        aria-expanded={isOpen ? "true" : "false"}
+        style={{cursor:"pointer",display:"flex",gap:8,alignItems:"flex-start",
+                width:"100%",textAlign:"left",background:"none",border:"none",padding:0,font:"inherit"}}>
         <span style={{color:accent,fontFamily:"monospace",fontSize:11,marginTop:1}}>{isOpen ? "−" : "+"}</span>
         <p style={{fontSize:12.5,color:C.inkMid,lineHeight:1.65,margin:0}}>{item.claim}</p>
-      </div>
+      </button>
       {isOpen && (
         <p style={{fontSize:11.5,color:C.inkSoft,lineHeight:1.6,margin:"6px 0 0 19px",paddingLeft:10,borderLeft:`2px solid ${accent}`,fontStyle:"italic"}}>{item.disclosure}</p>
       )}

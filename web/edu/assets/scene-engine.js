@@ -582,10 +582,28 @@ window.SceneEngine = (function () {
         chart.timeScale().fitContent();
         charts.push({ chart: chart, el: chartEl });
 
-        pane.onclick = function () {
+        // 🔴 Панель графика — это вариант ответа: её выбирают и потом
+        // проверяют. Была обычным <div> с курсором-пальцем: мышью
+        // работает, с клавиатуры нет, диктор не назовёт ни роли, ни того,
+        // выбран ли актив. Внутри панели живёт canvas-график, поэтому
+        // менять тег на <button> рискованно — ставим роль, фокус и
+        // обработку Enter/Space, а aria-pressed сообщает выбор.
+        pane.setAttribute("role", "button");
+        pane.setAttribute("tabindex", "0");
+        pane.setAttribute("aria-pressed", "false");
+        pane.setAttribute("aria-label", key);
+        function переключить() {
           if (answered) return;
           selected[key] = !selected[key];
           pane.classList.toggle("picked", !!selected[key]);
+          pane.setAttribute("aria-pressed", selected[key] ? "true" : "false");
+        }
+        pane.onclick = переключить;
+        pane.onkeydown = function (ev) {
+          if (ev.key === "Enter" || ev.key === " " || ev.key === "Spacebar") {
+            ev.preventDefault();
+            переключить();
+          }
         };
       });
 

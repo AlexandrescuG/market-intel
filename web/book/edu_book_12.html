@@ -828,9 +828,12 @@ function SeriesCounter({ progress, loading, lang }) {
   else if (progress.status === "blocked") label = S.seriesCounterBlocked;
   else label = S.seriesCounterNotYet;
   return (
-    <div onClick={scrollToStep7} title={S.seriesCounterGoto} style={{cursor:"pointer",fontFamily:"monospace",fontSize:11.5,color:C.gold,border:`1px solid ${C.borderGold}`,borderRadius:20,padding:"5px 14px",letterSpacing:0.5,whiteSpace:"nowrap"}}>
+    /* Счётчик серии — это переход к нужному разделу, то есть управление.
+       Был <div> с курсором: мышью работает, с клавиатуры нет. */
+    <button type="button" onClick={scrollToStep7} title={S.seriesCounterGoto}
+      style={{cursor:"pointer",fontFamily:"monospace",fontSize:11.5,color:C.gold,background:"none",border:`1px solid ${C.borderGold}`,borderRadius:20,padding:"5px 14px",letterSpacing:0.5,whiteSpace:"nowrap"}}>
     {label}
-    </div>
+    </button>
   );
 }
 

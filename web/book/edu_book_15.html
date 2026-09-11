@@ -121,12 +121,20 @@ function ColdStart15Entry({ lang }) {
           {claims.map((c, i) => {
             const isPicked = answer === i;
             return (
-              <div key={i} onClick={() => csCommit(i)} style={{
+              /* 🔴 Вариант ответа — управление, а не абзац. Был <div> с
+                 курсором: с клавиатуры не выбрать, диктор не назовёт ни
+                 роли, ни того, что выбрано. Кнопка с aria-pressed говорит
+                 и то, и другое; disabled после ответа снимает её из
+                 обхода табом, как и положено уже нерабочему выбору. */
+              <button key={i} type="button" onClick={() => csCommit(i)}
+                disabled={committed} aria-pressed={isPicked ? "true" : "false"}
+                style={{
+                display:"block", width:"100%", textAlign:"left", font:"inherit", border:"none",
                 padding:"14px 18px", borderBottom: i < claims.length - 1 ? "1px solid rgba(255,255,255,0.1)" : "none",
                 cursor: committed ? "default" : "pointer", background: isPicked ? "rgba(201,151,58,0.12)" : "transparent",
               }}>
                 <p style={{fontSize:13, color:"#fff", lineHeight:1.55, margin:0}}>{c[claimField] || c.claim_ru}</p>
-              </div>
+              </button>
             );
           })}
         </div>
@@ -342,7 +350,10 @@ function ThreePaths({ lang }) {
                   </p>
                 </div>
               )}
-              <span onClick={()=>window.location.href=getChUrl(14,lang)} style={{fontSize:11,color:C.gold,cursor:"pointer",fontFamily:"monospace"}}>{tp.path2.gotoGate}</span>
+              {/* Переход в главу 14 — это ссылка, и должна быть ссылкой:
+                  открывается в новой вкладке средним кликом, работает с
+                  клавиатуры, видна диктору. */}
+              <a href={getChUrl(14,lang)} style={{fontSize:11,color:C.gold,cursor:"pointer",fontFamily:"monospace",textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>{tp.path2.gotoGate}</a>
             </div>
           )}
           {selected === "live" && !gateLoading && gate && gate.all_ok && (

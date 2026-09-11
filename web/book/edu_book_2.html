@@ -1708,11 +1708,14 @@ function Chapter2() {
 
         {/* Footer navigation */}
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:20,paddingTop:48,marginTop:48,borderTop:`1px solid ${C.border}`}}>
-          <span
-            onClick={() => window.location.href = getChUrl(1, lang)}
-            style={{fontSize:14,color:C.inkSoft,fontFamily:"monospace",borderBottom:`1px solid ${C.border}`,cursor:"pointer"}}>
+          {/* Переход в предыдущую главу — ссылка, и должна быть ссылкой:
+              средний клик открывает в новой вкладке, Tab доводит до неё,
+              диктор называет ссылкой. Был <span> с курсором-пальцем. */}
+          <a
+            href={getChUrl(1, lang)}
+            style={{fontSize:14,color:C.inkSoft,fontFamily:"monospace",borderBottom:`1px solid ${C.border}`,cursor:"pointer",textDecoration:"none"}}>
             {S.navPrev}
-          </span>
+          </a>
           <AskAnalystBtn tr={{askAnalyst:S.askAnalyst}} chapterNum={2} lang={lang} />
           <button
             onClick={() => window.location.href = getChUrl(3, lang)}

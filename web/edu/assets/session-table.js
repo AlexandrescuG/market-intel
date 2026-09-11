@@ -206,13 +206,27 @@
       var badges = "";
       if (ev.risk) badges += '<span style="font-size:10px;font-family:monospace;color:#c0392b;background:' + C.redPale + ';padding:2px 6px;border-radius:2px;margin-left:6px">⚠ ' + t.risk + '</span>';
       if (ev.conditional) badges += '<span style="font-size:10px;font-family:monospace;color:' + C.inkSoft + ';background:' + C.surface + ';padding:2px 6px;border-radius:2px;margin-left:6px">' + t.conditional + '</span>';
-      h.push('<tr data-ev-row="' + ev.id + '" style="cursor:pointer;border-bottom:1px solid ' + C.border + (r.moved ? ';background:' + C.goldPale : "") + (open ? ';background:' + C.surface : "") + '">' +
+      // 🔴 Строка раскрывается по нажатию — то есть это управление. Раньше
+      // им был сам <tr> с курсором-пальцем: мышью работает, с клавиатуры
+      // недоступна, диктор не назовёт ни роли, ни того, раскрыта ли строка.
+      // Восемь таких строк в главе 5.
+      //
+      // Управлением сделана кнопка внутри ячейки с названием (она же занимает
+      // всю её ширину, так что попасть мышью по-прежнему легко), а не сама
+      // строка: role="button" на <tr> отобрал бы у таблицы её собственную
+      // разметку — читатель с диктором перестал бы понимать, что это строка
+      // таблицы и в каком она столбце.
+      h.push('<tr data-ev-row="' + ev.id + '" style="border-bottom:1px solid ' + C.border + (r.moved ? ';background:' + C.goldPale : "") + (open ? ';background:' + C.surface : "") + '">' +
         '<td style="padding:13px 14px;font-family:monospace;white-space:nowrap;font-weight:' + (ev.highlight ? 700 : 400) + '">' +
           (ev.weekday === "sun" ? '<span style="color:' + C.inkFaint + '">' + t.sunday + ' </span>' : "") + r.time +
           '<div style="font-size:10px;color:' + C.inkFaint + '">' + r.utc + ' ' + t.utc + '</div></td>' +
-        '<td style="padding:13px 14px;font-weight:600;color:' + col + '">' +
-          '<span style="display:inline-block;width:12px;color:' + C.inkFaint + ';font-family:monospace">' + (open ? "▾" : "▸") + '</span> ' +
-          (ev["label_" + lang] || ev.label_en) + badges + '</td>' +
+        '<td style="padding:0;font-weight:600;color:' + col + '">' +
+          '<button type="button" data-ev-toggle="' + ev.id + '" aria-expanded="' + (open ? "true" : "false") + '"' +
+            ' style="display:block;width:100%;text-align:left;padding:13px 14px;background:none;border:none;' +
+            'font:inherit;color:inherit;cursor:pointer">' +
+            '<span style="display:inline-block;width:12px;color:' + C.inkFaint + ';font-family:monospace">' + (open ? "▾" : "▸") + '</span> ' +
+            (ev["label_" + lang] || ev.label_en) + badges +
+          '</button></td>' +
         '<td style="padding:13px 14px;font-family:monospace;color:' + col + ';white-space:nowrap">' + weightDots(ev.weight) + '</td>' +
       '</tr>');
       if (open) {
@@ -253,9 +267,9 @@
         render(el, cfg, state);
       };
     }
-    el.querySelectorAll("tr[data-ev-row]").forEach(function (tr) {
-      tr.onclick = function () {
-        var id = tr.getAttribute("data-ev-row");
+    el.querySelectorAll("button[data-ev-toggle]").forEach(function (b) {
+      b.onclick = function () {
+        var id = b.getAttribute("data-ev-toggle");
         state.expanded[id] = !state.expanded[id];
         render(el, cfg, state);
       };
