@@ -107,6 +107,20 @@ window.Ch11Content = {
       aboutUsTitle: "Про нас",
       aboutUsBody: "Мы в этой цепочке тоже стоим. SBF получает вознаграждение от площадок — процент от их комиссии, пока клиент торгует. Ноль, если он не торгует; ноль, если он потерял счёт и ушёл. Мы говорим это здесь, а не в конце: в главе про посредников умолчать о собственной роли — значит сделать ровно то, чему глава учит не доверять.",
       esmaNote: "Требование публиковать долю теряющих клиентов CFD ввёл европейский регулятор ESMA как часть мер по защите розничных инвесторов — цифра пересчитывается ежеквартально за предыдущие 12 месяцев и должна стоять в стандартном предупреждении о риске у каждого провайдера.",
+      // Разбор двух моделей. Отличать A от B на слух бесполезно; отличать их
+      // по последствию — «чей это доход» — ровно то, ради чего эта рубрика
+      // в главе и стоит.
+      sortTitle: "Разложи по моделям",
+      sortHint: "Шесть утверждений. В какой модели каждое из них верно?",
+      sortA: "A-BOOK", sortB: "B-BOOK",
+      sortItems: [
+        {text: "Заявка ушла внешнему поставщику ликвидности.", bin: 0},
+        {text: "Твой убыток становится доходом площадки.", bin: 1},
+        {text: "Площадка зарабатывает на комиссии и наценке к спреду, и ей всё равно, выиграл ты или нет.", bin: 0},
+        {text: "Площадка неттингует твою сделку со сделкой другого клиента у себя внутри.", bin: 1},
+        {text: "Площадка — вторая сторона твоей сделки.", bin: 1},
+        {text: "Доход площадки не зависит от твоего результата.", bin: 0},
+      ],
     },
     measureYourBroker: {
       tag: "ЧТО ИЗМЕРИТЬ САМОМУ",
@@ -243,6 +257,17 @@ window.Ch11Content = {
       aboutUsTitle: "Despre noi",
       aboutUsBody: "Stăm și noi în acest lanț. SBF primește o recompensă de la platforme — un procent din comisionul lor, cât timp clientul tranzacționează. Zero, dacă nu tranzacționează; zero, dacă și-a pierdut contul și a plecat. Spunem asta aici, nu la final: într-un capitol despre intermediari, a tăcea despre propriul rol ar însemna exact ceea ce capitolul te învață să nu ai încredere.",
       esmaNote: "Cerința de a publica ponderea clienților CFD care pierd bani a fost introdusă de reglementatorul european ESMA ca parte a măsurilor de protecție a investitorilor retail — cifra se recalculează trimestrial pentru ultimele 12 luni și trebuie să apară în avertismentul standard de risc al fiecărui furnizor.",
+      sortTitle: "Repartizează pe modele",
+      sortHint: "Șase afirmații. În care model este adevărată fiecare?",
+      sortA: "A-BOOK", sortB: "B-BOOK",
+      sortItems: [
+        {text: "Ordinul a plecat către un furnizor extern de lichiditate.", bin: 0},
+        {text: "Pierderea ta devine venitul platformei.", bin: 1},
+        {text: "Platforma câștigă din comision și din adaosul la spread, iar rezultatul tău nu o afectează.", bin: 0},
+        {text: "Platforma compensează intern tranzacția ta cu cea a altui client.", bin: 1},
+        {text: "Platforma este contrapartea tranzacției tale.", bin: 1},
+        {text: "Venitul platformei nu depinde de rezultatul tău.", bin: 0},
+      ],
     },
     measureYourBroker: {
       tag: "CE SĂ MĂSORI SINGUR",
@@ -381,6 +406,17 @@ window.Ch11Content = {
       aboutUsTitle: "About us",
       aboutUsBody: "We stand in this chain too. SBF gets paid by platforms — a percentage of their commission, for as long as the client keeps trading. Zero if they don't trade; zero if they blow the account and leave. We're saying this here, not at the end: staying silent about our own role in a chapter about intermediaries would be doing exactly what this chapter teaches you not to trust.",
       esmaNote: "The requirement to publish the share of losing CFD clients was introduced by the European regulator ESMA as part of its retail-investor protection measures — the figure gets recalculated every quarter over the trailing 12 months and has to appear in every provider's standard risk warning.",
+      sortTitle: "Sort them into models",
+      sortHint: "Six statements. Which model is each one true in?",
+      sortA: "A-BOOK", sortB: "B-BOOK",
+      sortItems: [
+        {text: "The order went out to an external liquidity provider.", bin: 0},
+        {text: "Your loss becomes the venue's revenue.", bin: 1},
+        {text: "The venue earns on commission and spread markup, and your result makes no difference to it.", bin: 0},
+        {text: "The venue nets your trade against another client's internally.", bin: 1},
+        {text: "The venue is the other side of your trade.", bin: 1},
+        {text: "The venue's revenue does not depend on your result.", bin: 0},
+      ],
     },
     measureYourBroker: {
       tag: "WHAT TO MEASURE YOURSELF",

@@ -91,7 +91,7 @@ const STRINGS = {
   },
 };
 
-const {C, Mono, Chip, Rule, AntiMythBlock, AskAnalystBtn, getChUrl, QuizBlock, ComplianceFootnote, ColdStart} = window.AcademyShared;
+const {C, Mono, Chip, Rule, AntiMythBlock, AskAnalystBtn, getChUrl, QuizBlock, ComplianceFootnote, ColdStart, SortTwoBins, RevealSteps} = window.AcademyShared;
 
 function fillTemplate(str, vars) {
   if (!str) return str;
@@ -264,17 +264,41 @@ function WhyOffExchange() {
 
 // ─── HFT: три разных явления ────────────────────────────────────────────────
 function HftThreeThings() {
+  const { useState } = React;
   const T11 = window.Ch11Content[INITIAL_LANG] || window.Ch11Content.ru;
   const h = T11.hftThreeThings;
+  // 🔴 Рубрика обещает «разделяем то, что обычно слито в один пугающий
+  // абзац» — и сама была тремя карточками, выложенными разом. Три явления,
+  // показанные одновременно, снова сливаются в один абзац; открытые по
+  // одному — остаются тремя. Выполняем обещание рубрики буквально.
+  const карточки = [[h.c1Title,h.c1Text],[h.c2Title,h.c2Text],[h.c3Title,h.c3Text]]
+    .filter(([t]) => t);
+  const [открыто, setОткрыто] = useState(1);
+  const ещё = карточки.length - открыто;
+  const СЛЕД = {ru:"СЛЕДУЮЩЕЕ ЯВЛЕНИЕ", ro:"URMĂTORUL FENOMEN", en:"NEXT PHENOMENON"};
+  const ИЗ = {ru:"%1 из %2", ro:"%1 din %2", en:"%1 of %2"};
   return (
     <div style={{marginBottom:48}}>
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:14,marginBottom:20}} className="g3">
-        {[[h.c1Title,h.c1Text],[h.c2Title,h.c2Text],[h.c3Title,h.c3Text]].map(([t,x],i) => (
-          <div key={i} style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:6,padding:"18px 20px",borderTop:`3px solid ${i===2?C.red:C.gold}`}}>
-            <div style={{fontWeight:600,fontSize:13,color:C.black,marginBottom:8}}>{t}</div>
-            <p style={{fontSize:12,color:C.inkMid,lineHeight:1.65,margin:0}}>{x}</p>
+      <div style={{display:"grid",gridTemplateColumns:`repeat(${карточки.length},1fr)`,gap:14,marginBottom:14}} className="g3">
+        {карточки.map(([t,x],i) => (
+          <div key={i} style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:6,padding:"18px 20px",borderTop:`3px solid ${i===2?C.red:C.gold}`,
+                               opacity: i < открыто ? 1 : 0.22}}>
+            <div style={{fontWeight:600,fontSize:13,color:C.black,marginBottom:8}}>{i < открыто ? t : "···"}</div>
+            {i < открыто && <p style={{fontSize:12,color:C.inkMid,lineHeight:1.65,margin:0}}>{x}</p>}
           </div>
         ))}
+      </div>
+      <div style={{display:"flex",alignItems:"center",gap:12,flexWrap:"wrap",marginBottom:20}}>
+        {ещё > 0 && (
+          <button onClick={()=>setОткрыто(открыто+1)}
+                  style={{fontFamily:"monospace",fontSize:11.5,padding:"9px 16px",cursor:"pointer",
+                          background:C.gold,color:"#18181a",border:"none",borderRadius:4,fontWeight:700}}>
+            {СЛЕД[INITIAL_LANG] || СЛЕД.ru}
+          </button>
+        )}
+        <Mono size={10.5} color={C.inkFaint}>
+          {(ИЗ[INITIAL_LANG] || ИЗ.ru).replace("%1", String(открыто)).replace("%2", String(карточки.length))}
+        </Mono>
       </div>
       <div style={{background:C.black,borderRadius:8,padding:"20px 24px",color:"#fff",marginBottom:16}}>
         <p style={{fontSize:13,color:"rgba(255,255,255,0.8)",lineHeight:1.7,margin:0}}>{h.warningNote}</p>
@@ -292,11 +316,12 @@ function WhereAreYou() {
   const T11 = window.Ch11Content[INITIAL_LANG] || window.Ch11Content.ru;
   const w = T11.whereAreYou;
   return (
+    /* Разворот главы — четыре абзаца, где третий это вывод. Выложенные
+       разом, они дочитываются глазами до конца и вывод теряется в середине;
+       по одному — каждый успевает сработать. */
     <div style={{background:C.goldPale,border:`1px solid ${C.borderGold}`,borderRadius:8,padding:"28px 32px",marginBottom:48}}>
-      <p style={{fontSize:14.5,color:C.inkMid,lineHeight:1.8,marginBottom:14}}>{w.body1}</p>
-      <p style={{fontSize:14.5,color:C.inkMid,lineHeight:1.8,marginBottom:14}}>{w.body2}</p>
-      <p style={{fontSize:14.5,color:C.black,lineHeight:1.8,marginBottom:14,fontWeight:600}}>{w.body3}</p>
-      <p style={{fontSize:14.5,color:C.inkMid,lineHeight:1.8,margin:0}}>{w.body4}</p>
+      <RevealSteps bodies={[w.body1, w.body2, w.body3, w.body4].filter(Boolean)}
+                   lang={INITIAL_LANG} preset="layers"/>
     </div>
   );
 }
@@ -403,10 +428,26 @@ function BookModels() {
           <p style={{fontSize:12.5,color:C.inkMid,lineHeight:1.6,margin:0}}>{b.bText}</p>
         </div>
       </div>
+      {/* Отличать A от B на слух бесполезно — отличать по последствию «чей
+          это доход» и есть смысл рубрики. До правки здесь шли 2644 знака
+          подряд без единого управления: две карточки, абзац «это не обман»,
+          список следствий и блок «про нас». */}
+      {b.sortItems && (
+        <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"20px 24px",marginBottom:20}}>
+          <div style={{fontWeight:600,fontSize:13,color:C.black,marginBottom:6}}>{b.sortTitle}</div>
+          <p style={{fontSize:12.5,color:C.inkFaint,lineHeight:1.6,marginBottom:14}}>{b.sortHint}</p>
+          <SortTwoBins items={b.sortItems} labels={[b.sortA, b.sortB]}
+                       lang={INITIAL_LANG} style={{marginBottom:0}}/>
+        </div>
+      )}
       <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.75,marginBottom:20,maxWidth:820}}>{b.notScam}</p>
+      {/* Три следствия, выложенные списком, читаются как один абзац: порядок
+          в них несёт смысл («узнать нельзя → но проверить можно → и вот
+          цифра»), а точки его прячут. Раскрытие по одному возвращает порядку
+          вес. */}
       <div style={{background:C.goldPale,border:`1px solid ${C.borderGold}`,borderRadius:6,padding:"18px 22px",marginBottom:20}}>
         <div style={{fontWeight:600,fontSize:12.5,color:C.black,marginBottom:10}}>{b.practicalTitle}</div>
-        {b.practical.map((t,i) => <p key={i} style={{fontSize:12.5,color:C.inkMid,lineHeight:1.6,marginBottom:8}}>· {t}</p>)}
+        <RevealSteps bodies={b.practical} lang={INITIAL_LANG} preset="layers"/>
       </div>
       <div style={{background:C.black,borderRadius:8,padding:"24px 28px",color:"#fff",marginBottom:16}}>
         <Mono size={11} color={C.gold} spacing={2} style={{display:"block",marginBottom:10}}>{b.aboutUsTitle}</Mono>

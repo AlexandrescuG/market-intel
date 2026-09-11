@@ -910,6 +910,50 @@
    * 🔴 Ответ показывается только после того, как человек разложил ВСЁ. Иначе
    * первая же подсказка превращает упражнение в чтение с подсветкой.
    */
+  /* ── Справочник из N карточек → переключатель ──────────────────────────
+   *
+   * ЗАЧЕМ. «КАК ЧИТАТЬ ОТЧЁТНОСТЬ» в главе 9 — пять определений подряд:
+   * выручка, EPS, маржа, сегментация, guidance. Замер: 2505 знаков одним
+   * куском без единого управления. Выложенные разом, пять справочных статей
+   * читаются как один абзац и пролистываются как один абзац.
+   *
+   * 🔴 ЭТО НЕ «СПРЯТАТЬ ТЕКСТ РАДИ МЕТРИКИ». Справочником пользуются
+   * выборочно: человек смотрит один термин, а не читает все пять подряд.
+   * Переключатель отвечает тому, как рубрику используют на самом деле, —
+   * и заодно называет все пять терминов сразу, в подписях кнопок, чего
+   * стена карточек не делала.
+   *
+   * items = [{title, body}]
+   */
+  function CardTabs(props) {
+    var e = React.createElement;
+    var items = (props.items || []).filter(function (it) { return it && it.title; });
+    var st = React.useState(0), выбран = st[0], setВыбран = st[1];
+    if (!items.length) return null;
+    var текущий = items[Math.min(выбран, items.length - 1)];
+
+    return e('div', {style: props.style || {marginBottom:20}},
+      e('div', {style:{display:"flex", gap:7, flexWrap:"wrap", marginBottom:14}},
+        items.map(function (it, i) {
+          var активна = i === выбран;
+          return e('button', {key:i, onClick: function () { setВыбран(i); },
+            'aria-pressed': активна ? "true" : "false",
+            style:{fontFamily:"monospace", fontSize:10.5, padding:"7px 13px",
+                   cursor:"pointer", fontWeight:600, borderRadius:4,
+                   background: активна ? C.gold : "#fff",
+                   color: активна ? "#18181a" : C.inkMid,
+                   border:"1px solid " + (активна ? C.gold : C.border)}}, it.title);
+        })),
+      e('div', {style:{background:C.surface, border:"1px solid " + C.border,
+                       borderTop:"3px solid " + C.gold, borderRadius:6,
+                       padding:"18px 22px", minHeight:96}},
+        e('div', {style:{fontWeight:600, fontSize:13, color:C.black,
+                         marginBottom:8}}, текущий.title),
+        e('p', {style:{fontSize:12.5, color:C.inkMid, lineHeight:1.7, margin:0}},
+          текущий.body))
+    );
+  }
+
   var SORT_COPY = {
     ru: {check:"Проверить →", again:"Ещё раз", left:"осталось %1",
          score:"верно %1 из %2", allRight:"Все восемь на местах."},
@@ -995,6 +1039,7 @@
     RevealSteps: RevealSteps,
     CheckList: CheckList,
     SortTwoBins: SortTwoBins,
+    CardTabs: CardTabs,
     C: C, Mono: Mono, Chip: Chip, Rule: Rule,
     GlossWord: GlossWord, withGlossTerms: withGlossTerms,
     AskAnalystPopup: AskAnalystPopup, AskAnalystBtn: AskAnalystBtn,

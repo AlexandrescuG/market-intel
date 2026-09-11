@@ -94,7 +94,7 @@ const STRINGS = {
   },
 };
 
-const {C, Mono, Chip, Rule, AntiMythBlock, RevealSteps, AskAnalystBtn, getChUrl, QuizBlock, ComplianceFootnote, ColdStart} = window.AcademyShared;
+const {C, Mono, Chip, Rule, AntiMythBlock, RevealSteps, AskAnalystBtn, getChUrl, QuizBlock, ComplianceFootnote, ColdStart, CardTabs} = window.AcademyShared;
 
 const SectionTitle = ({children,sub,align="left",id}) => (
   <div id={id} style={{textAlign:align,marginBottom:36,scrollMarginTop:130}}>
@@ -282,14 +282,17 @@ function EarningsAnatomy() {
   const ea = T9.earningsAnatomy;
   return (
     <div style={{marginBottom:48}}>
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:14,marginBottom:20}} className="g3">
-        {[[ea.c1Title,ea.c1Text],[ea.c2Title,ea.c2Text],[ea.c3Title,ea.c3Text],[ea.c4Title,ea.c4Text],[ea.c5Title,ea.c5Text]].map(([t,x],i) => (
-          <div key={i} style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:6,padding:"18px 20px",borderTop:`3px solid ${C.gold}`}}>
-            <div style={{fontWeight:600,fontSize:13,color:C.black,marginBottom:8}}>{t}</div>
-            <p style={{fontSize:12,color:C.inkMid,lineHeight:1.65,margin:0}}>{x}</p>
-          </div>
-        ))}
-      </div>
+      {/* Пять строк отчёта — справочник, и пользуются им выборочно: смотрят
+          один термин, а не читают все пять подряд. Выложенные разом, они
+          давали 2505 знаков одним куском. Переключатель заодно называет все
+          пять сразу — в подписях кнопок, чего стена карточек не делала. */}
+      <CardTabs items={[
+        {title: ea.c1Title, body: ea.c1Text},
+        {title: ea.c2Title, body: ea.c2Text},
+        {title: ea.c3Title, body: ea.c3Text},
+        {title: ea.c4Title, body: ea.c4Text},
+        {title: ea.c5Title, body: ea.c5Text},
+      ]}/>
       <div style={{background:C.goldPale,border:`1px solid ${C.borderGold}`,borderRadius:6,padding:"18px 22px"}}>
         <div style={{fontWeight:600,fontSize:13,color:C.black,marginBottom:8}}>{ea.knownTitle}</div>
         <p style={{fontSize:12.5,color:C.inkMid,lineHeight:1.7,margin:0}}>{ea.knownBody}</p>
