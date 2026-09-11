@@ -37,15 +37,20 @@ log = logging.getLogger("news_media")
 MAX_ATTEMPTS = 3
 # Домены, по которым ходить бессмысленно: превью там нет или оно за логином.
 #
-# 🔴 news.google.com отсекается сразу, а не после трёх попыток. Замер
-# 10.09.2026: 19 ссылок из 20 отдали 200 OK и HTML без единого og-тега —
-# страница рисуется скриптом. Адрес издания из ссылки тоже не достать: внутри
-# base64 лежит не URL, а идентификатор `AU_yqL…`, и в RSS-записи Google отдаёт
-# только домашнюю страницу издания. Это 43% ленты; без этой строки задача
-# тратила бы на них три захода каждую, то есть больше половины всех походов
-# наружу — на заведомо пустой результат. Таким новостям показываем логотип
-# издания, домен которого сборщик уже сохранил в raw.domain.
-SKIP_DOMAINS = {"x.com", "twitter.com", "t.me", "telegram.me", "news.google.com"}
+# 🔴 news.google.com ОТСЮДА УБРАН 11.09.2026, и это стоит объяснить.
+#
+# 10.09 я записал здесь «адрес издания из ссылки не достать» и отсёк домен
+# целиком. Вывод был сделан из двух проверок: страница отдаёт 200 без
+# og-тегов, а внутри base64 не URL, а идентификатор. Обе проверки верны — и
+# вывод из них неверен. Я искал адрес там, где его нет, и не посмотрел, что
+# делает сама страница: она забирает адрес отдельным запросом, имея подпись и
+# метку времени из своей же разметки. То же самое умеет делать и сервер —
+# см. core/gnews_resolve.py.
+#
+# Урок не про Google. «Я проверил два места и не нашёл» — это не то же самое,
+# что «этого нет»: браузер-то ссылку открывал, и это было видно с самого
+# начала.
+SKIP_DOMAINS = {"x.com", "twitter.com", "t.me", "telegram.me"}
 
 _META_RE = re.compile(
     r"<meta[^>]+(?:property|name)\s*=\s*[\"'](og:image(?::url)?|twitter:image(?::src)?)[\"']"
@@ -70,6 +75,12 @@ def ensure_schema(con: sqlite3.Connection) -> None:
         );
         CREATE INDEX IF NOT EXISTS idx_news_media_ts ON news_media(ts DESC);
     """)
+    # Настоящий адрес статьи, если исходная ссылка вела через Google News.
+    # Колонка добавлена позже таблицы: у развёрнутой базы её нет, а
+    # пересоздавать таблицу ради неё — терять уже найденные превью.
+    cols = {r[1] for r in con.execute("PRAGMA table_info(news_media)")}
+    if "final_url" not in cols:
+        con.execute("ALTER TABLE news_media ADD COLUMN final_url TEXT")
     con.commit()
 
 
@@ -106,11 +117,32 @@ def save_shot(con: sqlite3.Connection, news_uid: str, rel_path: str) -> None:
 
 
 def save_og(con: sqlite3.Connection, news_uid: str, url: str | None,
-            attempts: int) -> None:
-    """Записать найденное превью — или неудачу, чтобы не ходить сюда вечно."""
+            attempts: int, final_url: str | None = None) -> None:
+    """Записать найденное превью — или неудачу, чтобы не ходить сюда вечно.
+
+    final_url — настоящий адрес статьи, если исходная ссылка вела через
+    Google News. Сохраняется даже когда превью не нашлось: сама по себе
+    прямая ссылка ценна, по ней человек попадает на статью, а не на
+    промежуточную страницу.
+    """
     con.execute(
-        "INSERT OR REPLACE INTO news_media(news_uid, kind, url, path, attempts, ts) "
-        "VALUES(?,'og',?,NULL,?,?)", (news_uid, url, attempts, int(time.time())))
+        "INSERT OR REPLACE INTO news_media"
+        "(news_uid, kind, url, path, attempts, ts, final_url) VALUES(?,'og',?,NULL,?,?,?)",
+        (news_uid, url, attempts, int(time.time()), final_url))
+
+
+def links_for(con: sqlite3.Connection, uids: list[str]) -> dict[str, str]:
+    """{uid: настоящий адрес} — для тех новостей, чью ссылку удалось развернуть."""
+    if not uids:
+        return {}
+    try:
+        q = ",".join("?" * len(uids))
+        rows = con.execute(
+            f"SELECT news_uid, final_url FROM news_media "
+            f"WHERE final_url IS NOT NULL AND news_uid IN ({q})", uids).fetchall()
+    except sqlite3.OperationalError:
+        return {}
+    return dict(rows)
 
 
 # ── логотип издания ─────────────────────────────────────────────────────────

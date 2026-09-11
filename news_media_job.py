@@ -35,7 +35,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
 
-from core import news_media  # noqa: E402
+from core import gnews_resolve, news_media  # noqa: E402
 from core.config import DB_PATH  # noqa: E402
 
 log = logging.getLogger("news_media_job")
@@ -48,6 +48,10 @@ DEFAULT_LIMIT = 400
 READ_BYTES = 300_000        # начала страницы хватает на og-теги
 REQUEST_TIMEOUT = 12
 DOMAIN_DELAY = 1.5          # секунд между двумя обращениями к одному домену
+# Сколько ссылок Google News разворачиваем за прогон. Каждая — два запроса к
+# Google, поэтому потолок отдельный и небольшой: при таймере в 20 минут это
+# 240 ссылок в час, а свежие обрабатываются первыми (сортировка по дате).
+GNEWS_BUDGET = 80
 UA = ("Mozilla/5.0 (compatible; SBFPreviewBot/1.0; "
       "+https://lp.sbfconsult.com/ - preview images only)")
 
@@ -163,6 +167,8 @@ def run(limit: int = DEFAULT_LIMIT, verbose: bool = False) -> int:
     last_hit: dict[str, float] = defaultdict(float)
     found = skipped = failed = 0
 
+    resolved = 0
+    budget = GNEWS_BUDGET
     for uid, url in pairs:
         domain = news_media.domain_of(url)
         if _skip_domain(domain):
@@ -174,6 +180,31 @@ def run(limit: int = DEFAULT_LIMIT, verbose: bool = False) -> int:
         if wait > 0:
             time.sleep(wait)
         last_hit[domain] = time.time()
+
+        # Ссылка Google News сначала разворачивается в адрес издания: og-теги
+        # лежат на странице издания, а не на промежуточной. Бюджет на прогон
+        # отдельный — это два запроса к Google на ссылку, и дешевле оставить
+        # хвост следующему прогону, чем долбить их пачкой.
+        final_url = None
+        if gnews_resolve.is_google_link(url):
+            if budget <= 0:
+                continue
+            budget -= 1
+            final_url = gnews_resolve.resolve(url, session)
+            if not final_url:
+                news_media.save_og(con, uid, None, _attempts_so_far(con, uid) + 1)
+                failed += 1
+                con.commit()
+                continue
+            resolved += 1
+            # Дальше работаем с настоящим адресом, и паузу держим по его
+            # домену: иначе десять статей одного издания уйдут очередью.
+            url = final_url
+            domain = news_media.domain_of(url)
+            wait = DOMAIN_DELAY - (time.time() - last_hit[domain])
+            if wait > 0:
+                time.sleep(wait)
+            last_hit[domain] = time.time()
 
         image = None
         try:
@@ -189,10 +220,12 @@ def run(limit: int = DEFAULT_LIMIT, verbose: bool = False) -> int:
             log.debug("%s: %s", domain, str(e)[:120])
 
         if image:
-            news_media.save_og(con, uid, image, 0)
+            news_media.save_og(con, uid, image, 0, final_url)
             found += 1
         else:
-            news_media.save_og(con, uid, None, _attempts_so_far(con, uid) + 1)
+            # Превью не нашлось, но развёрнутый адрес сохраняем: по нему
+            # человек попадёт на статью, а не на промежуточную страницу.
+            news_media.save_og(con, uid, None, _attempts_so_far(con, uid) + 1, final_url)
             failed += 1
         con.commit()
 
@@ -200,7 +233,8 @@ def run(limit: int = DEFAULT_LIMIT, verbose: bool = False) -> int:
     con.close()
     if verbose:
         print(f"проверено {len(pairs)}: превью найдено {found}, "
-              f"без превью {failed}, домен пропущен {skipped}")
+              f"без превью {failed}, домен пропущен {skipped}, "
+              f"ссылок Google развёрнуто {resolved}")
     return found
 
 

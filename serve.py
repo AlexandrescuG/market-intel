@@ -3115,6 +3115,15 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 
         try:
             media = news_media.media_for(con, uids)
+            # Развёрнутый адрес: клик ведёт на статью, а не на промежуточную
+            # страницу Google. Домен пересчитывается по нему же, иначе в
+            # подписи остался бы домен из raw, а логотип подбирался по нему.
+            ссылки = news_media.links_for(con, uids)
+            for it in items:
+                настоящая = ссылки.get(it["uid"])
+                if настоящая:
+                    it["url"] = настоящая
+                    it["domain"] = news_media.domain_of(настоящая) or it["domain"]
             logos = news_media.logos_for(
                 con, sorted({it["domain"] for it in items if it["domain"]}))
         except Exception as e:
