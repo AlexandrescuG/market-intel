@@ -94,12 +94,23 @@ _ДОЛЖНОСТЬ = re.compile(
     r"Insider|Founder|Treasurer|Secretary)\b", re.I)
 
 
+# «NVIDIA Corporation $NVDA is Hidden Cove Wealth Management LLC's 9th Largest
+# Position». Ни действия с долей, ни суммы: глагол тут «is», а доля названа
+# порядковым номером. Три такие карточки висели в ленте NVIDIA уже после того,
+# как я отчитался о вычищенном мусоре — правило проверялось на выборке
+# прошлых суток, а на экране была свежая.
+_ПО_ВЕЛИЧИНЕ = re.compile(
+    r"\b\d+(st|nd|rd|th)\s+(largest|biggest)\s+(position|holding|stake)\b", re.I)
+
+
 def is_filing_note(title: str | None) -> bool:
     """Заголовок — поточная заметка о движении в отчётности фонда."""
     if not title:
         return False
     if _ВЫКУП.search(title):
         return False
+    if _ПО_ВЕЛИЧИНЕ.search(title):
+        return True
     if _СУММА_ПОЗИЦИИ.search(title):
         return True
     if _ЧИСЛО_АКЦИЙ.search(title) and _ДОЛЖНОСТЬ.search(title):

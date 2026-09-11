@@ -1791,6 +1791,14 @@ function openPulseFeed(symbol){
       body.querySelectorAll('.pf-img').forEach(img=>{
         img.addEventListener('error', ()=>{ const s=img.closest('.pf-shot'); if(s) s.remove(); }, {once:true});
       });
+      // 🔴 Логотип тоже бывает битым, и обработчик выше его не покрывал:
+      // он ищет .pf-img, а в полосе с логотипом картинка без этого класса.
+      // На живой ленте это выглядело как значок «изображение не загрузилось»
+      // рядом с именем издания — хуже, чем просто имя издания.
+      // Прячем саму картинку, полосу с названием оставляем.
+      body.querySelectorAll('.pf-shot-logo img, .pf-logo').forEach(img=>{
+        img.addEventListener('error', ()=>{ img.style.display='none'; }, {once:true});
+      });
       fillTranslations(items, lang, body);
     })
     .catch(()=>{});
