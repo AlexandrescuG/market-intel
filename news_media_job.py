@@ -20,6 +20,24 @@
 бы в одни и те же мёртвые ссылки вместо новых новостей — тихая деградация,
 при которой процесс работает, а результат не растёт.
 
+🔴 ПРОПУСКНАЯ СПОСОБНОСТЬ ДОЛЖНА БЫТЬ ВЫШЕ ПРИТОКА, ИНАЧЕ ЗАДАЧА БЕСПОЛЕЗНА.
+Замер 11.09.2026: приток — 807 тегированных новостей со ссылкой Google в час,
+обрабатывалось 240 (80 за прогон × 3 прогона). Очередь росла на 570 в час, а
+на витрине картинка была у 3–7 карточек из 30. При этом прогон длился 14 из
+20 минут и тратил 2,75 секунды процессорного времени: задача не считала, а
+ждала — по очереди, в один поток.
+
+Отсюда два решения ниже:
+  • ожидание распараллелено. Вежливость измеряется паузой между обращениями к
+    ОДНОМУ домену — это не повод ждать чужой сайт, пока отвечает другой;
+  • в базу пишет только главный поток. Рабочие ходят наружу и возвращают
+    результат; sqlite при этом не видит конкуренции внутри задачи.
+
+🔴 «ПРОВЕРЕНО 400» БЫЛО НЕПРАВДОЙ. Старая строка отчёта печатала размер
+выборки, а не число обработанных: из 400 кандидатов реально трогалось 106, а
+294 молча пропускались по исчерпанию бюджета. Метрика показывала работу,
+которой не было. Теперь печатается обработано / осталось в очереди.
+
 Запуск:  python3 news_media_job.py [--limit 150] [--verbose]
 """
 from __future__ import annotations
@@ -28,8 +46,10 @@ import argparse
 import logging
 import sqlite3
 import sys
+import threading
 import time
 from collections import defaultdict
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
@@ -41,17 +61,30 @@ from core.config import DB_PATH  # noqa: E402
 log = logging.getLogger("news_media_job")
 
 FRESH_HOURS = 72
-# Потолок на прогон. Держится высоким сознательно: 43% кандидатов отсеиваются
-# по домену БЕЗ похода наружу (см. SKIP_DOMAINS), так что реальных запросов
-# выходит впятеро меньше числа в лимите.
-DEFAULT_LIMIT = 400
+# Потолок на прогон. Считается от притока, а не от ощущения: 807 ссылок в час
+# приходит, три прогона в час — значит за прогон нужно закрывать 270, и запас
+# сверху, чтобы разбирать накопленное, а не идти вровень.
+DEFAULT_LIMIT = 700
+# Прогон обязан закончиться раньше следующего запуска по таймеру (20 минут),
+# иначе задачи наслаиваются и ходят наружу вдвоём. Замер 11.09.2026: 300
+# новостей за 339 с, то есть 1,1 с на штуку — семьсот укладываются в 13 минут,
+# а потолок ниже страхует от медленного дня.
+MAX_RUNTIME = 900
 READ_BYTES = 300_000        # начала страницы хватает на og-теги
 REQUEST_TIMEOUT = 12
 DOMAIN_DELAY = 1.5          # секунд между двумя обращениями к одному домену
-# Сколько ссылок Google News разворачиваем за прогон. Каждая — два запроса к
-# Google, поэтому потолок отдельный и небольшой: при таймере в 20 минут это
-# 240 ссылок в час, а свежие обрабатываются первыми (сортировка по дате).
-GNEWS_BUDGET = 80
+# Пауза у самого Google отдельная и короче. Она нужна не чтобы поберечь
+# Google — тут наши сотни запросов в час теряются в его миллиардах, — а чтобы
+# не выглядеть всплеском с одного адреса. Для издания на своём хостинге
+# полторы секунды остаются.
+GNEWS_DELAY = 0.4
+# Сколько ссылок Google News разворачиваем за прогон. Потолок остаётся: это
+# два запроса на ссылку, и падать в Google всем объёмом очереди незачем.
+GNEWS_BUDGET = 700
+# Одновременных походов наружу. Ограничение не в процессоре (прогон тратил
+# 2,75 с CPU за 14 минут), а в приличиях: это число разных сайтов, которые мы
+# держим открытыми разом.
+WORKERS = 8
 UA = ("Mozilla/5.0 (compatible; SBFPreviewBot/1.0; "
       "+https://lp.sbfconsult.com/ - preview images only)")
 
@@ -73,9 +106,47 @@ def _candidates(con, limit: int) -> list[tuple[str, str]]:
         (f"-{FRESH_HOURS} hours", news_media.MAX_ATTEMPTS, limit)).fetchall()
 
 
-def _attempts_so_far(con, uid: str) -> int:
-    row = con.execute("SELECT attempts FROM news_media WHERE news_uid=?", (uid,)).fetchone()
-    return row[0] if row else 0
+def _attempts_map(con, uids: list[str]) -> dict[str, int]:
+    """Сколько раз уже пробовали — одним запросом на всю выборку.
+
+    Раньше это был отдельный SELECT на каждую новость внутри цикла. При
+    выборке в девятьсот штук это девятьсот обращений к базе, по которой
+    одновременно пишут коллекторы, — лишний повод получить «database is
+    locked» на ровном месте.
+    """
+    out: dict[str, int] = {}
+    for i in range(0, len(uids), 400):
+        порция = uids[i:i + 400]
+        q = ",".join("?" * len(порция))
+        rows = con.execute(
+            f"SELECT news_uid, attempts FROM news_media WHERE news_uid IN ({q})",
+            порция).fetchall()
+        out.update(dict(rows))
+    return out
+
+
+class _Вежливость:
+    """Пауза между обращениями к одному домену — но не между разными.
+
+    🔴 Старый код держал одну общую очередь: пока мы ждали полторы секунды
+    перед вторым обращением к reuters.com, простаивали и все остальные
+    издания. Вежливость — свойство пары «мы ↔ этот сайт», и считать её надо
+    по домену, иначе она превращается в глобальный тормоз.
+    """
+
+    def __init__(self) -> None:
+        self._последний: dict[str, float] = defaultdict(float)
+        self._замки: dict[str, threading.Lock] = defaultdict(threading.Lock)
+        self._общий = threading.Lock()
+
+    def ждать(self, domain: str, delay: float) -> None:
+        with self._общий:
+            замок = self._замки[domain]
+        with замок:
+            пауза = delay - (time.time() - self._последний[domain])
+            if пауза > 0:
+                time.sleep(пауза)
+            self._последний[domain] = time.time()
 
 
 def _skip_domain(domain: str) -> bool:
@@ -146,6 +217,80 @@ def _fetch_logos(con, session, verbose: bool) -> int:
     return got
 
 
+def _добыть(uid: str, url: str, session, вежливость: _Вежливость,
+           бюджет: "_Бюджет", дедлайн: float) -> tuple | None:
+    """Один поход наружу. Возвращает (uid, image, final_url, развернули) или None.
+
+    В базу отсюда не пишем: это рабочий поток. Всё, что он узнал, уезжает в
+    главный поток одной записью.
+    """
+    if time.time() > дедлайн:
+        return None                # хвост достанется следующему прогону
+    domain = news_media.domain_of(url)
+    final_url = None
+    развернули = False
+
+    if gnews_resolve.is_google_link(url):
+        if not бюджет.взять():
+            return None            # хвост достанется следующему прогону
+        вежливость.ждать(domain, GNEWS_DELAY)
+        final_url = gnews_resolve.resolve(url, session)
+        if not final_url:
+            return (uid, None, None, False)
+        развернули = True
+        url = final_url
+        domain = news_media.domain_of(url)
+
+    вежливость.ждать(domain, DOMAIN_DELAY)
+    image = None
+    try:
+        # stream=True + чтение куска: без него requests тянет статью целиком.
+        with session.get(url, timeout=REQUEST_TIMEOUT, stream=True,
+                         allow_redirects=True) as r:
+            ctype = (r.headers.get("Content-Type") or "").lower()
+            if r.status_code == 200 and "html" in ctype:
+                chunk = r.raw.read(READ_BYTES, decode_content=True) or b""
+                html = chunk.decode(r.encoding or "utf-8", errors="replace")
+                image = news_media.extract(html, r.url)
+    except Exception as e:
+        log.debug("%s: %s", domain, str(e)[:120])
+    return (uid, image, final_url, развернули)
+
+
+class _Бюджет:
+    """Потолок на походы к Google, общий на все потоки."""
+
+    def __init__(self, сколько: int) -> None:
+        self._осталось = сколько
+        self._замок = threading.Lock()
+
+    def взять(self) -> bool:
+        with self._замок:
+            if self._осталось <= 0:
+                return False
+            self._осталось -= 1
+            return True
+
+
+def _записать(con, партия: list[tuple]) -> None:
+    """🔴 Неудачная запись не должна ронять прогон.
+
+    11.09.2026 прогон упал с «database is locked» на save_og и потерял всё,
+    что успел собрать за четырнадцать минут походов наружу. По этой базе
+    одновременно пишут коллекторы, и блокировка тут — рабочий режим, а не
+    исключительная ситуация. Тот же класс ошибки, что и в кэше переводов.
+    """
+    try:
+        con.executemany(
+            "INSERT OR REPLACE INTO news_media"
+            "(news_uid, kind, url, path, attempts, ts, final_url) "
+            "VALUES(?,'og',?,NULL,?,?,?)", партия)
+        con.commit()
+    except Exception as e:
+        log.warning("превью собраны, но не записаны (%d шт.): %s",
+                    len(партия), str(e)[:120])
+
+
 def run(limit: int = DEFAULT_LIMIT, verbose: bool = False) -> int:
     import requests
 
@@ -155,6 +300,12 @@ def run(limit: int = DEFAULT_LIMIT, verbose: bool = False) -> int:
 
     session = requests.Session()
     session.headers.update({"User-Agent": UA, "Accept": "text/html,*/*"})
+    # Пул под число рабочих: иначе requests закрывает и переоткрывает
+    # соединения, и выигрыш от потоков съедается рукопожатиями TLS.
+    адаптер = requests.adapters.HTTPAdapter(pool_connections=WORKERS * 2,
+                                            pool_maxsize=WORKERS * 4)
+    session.mount("https://", адаптер)
+    session.mount("http://", адаптер)
 
     pairs = _candidates(con, limit)
     if not pairs:
@@ -164,77 +315,64 @@ def run(limit: int = DEFAULT_LIMIT, verbose: bool = False) -> int:
         con.close()
         return 0
 
-    last_hit: dict[str, float] = defaultdict(float)
-    found = skipped = failed = 0
-
-    resolved = 0
-    budget = GNEWS_BUDGET
+    # Домены, куда ходить незачем, закрываем сразу и без сети.
+    к_работе, пропущено = [], []
     for uid, url in pairs:
-        domain = news_media.domain_of(url)
-        if _skip_domain(domain):
-            news_media.save_og(con, uid, None, news_media.MAX_ATTEMPTS)
-            skipped += 1
-            continue
+        if _skip_domain(news_media.domain_of(url)):
+            пропущено.append((uid, None, news_media.MAX_ATTEMPTS,
+                              int(time.time()), None))
+        else:
+            к_работе.append((uid, url))
+    if пропущено:
+        _записать(con, пропущено)
 
-        wait = DOMAIN_DELAY - (time.time() - last_hit[domain])
-        if wait > 0:
-            time.sleep(wait)
-        last_hit[domain] = time.time()
+    попытки = _attempts_map(con, [uid for uid, _ in к_работе])
+    вежливость, бюджет = _Вежливость(), _Бюджет(GNEWS_BUDGET)
+    начало = time.time()
+    дедлайн = начало + MAX_RUNTIME
 
-        # Ссылка Google News сначала разворачивается в адрес издания: og-теги
-        # лежат на странице издания, а не на промежуточной. Бюджет на прогон
-        # отдельный — это два запроса к Google на ссылку, и дешевле оставить
-        # хвост следующему прогону, чем долбить их пачкой.
-        final_url = None
-        if gnews_resolve.is_google_link(url):
-            if budget <= 0:
-                continue
-            budget -= 1
-            final_url = gnews_resolve.resolve(url, session)
-            if not final_url:
-                news_media.save_og(con, uid, None, _attempts_so_far(con, uid) + 1)
-                failed += 1
-                con.commit()
-                continue
-            resolved += 1
-            # Дальше работаем с настоящим адресом, и паузу держим по его
-            # домену: иначе десять статей одного издания уйдут очередью.
-            url = final_url
-            domain = news_media.domain_of(url)
-            wait = DOMAIN_DELAY - (time.time() - last_hit[domain])
-            if wait > 0:
-                time.sleep(wait)
-            last_hit[domain] = time.time()
+    with ThreadPoolExecutor(max_workers=WORKERS) as pool:
+        результаты = list(pool.map(
+            lambda p: _добыть(p[0], p[1], session, вежливость, бюджет, дедлайн),
+            к_работе))
 
-        image = None
-        try:
-            # stream=True + чтение куска: без него requests тянет статью целиком.
-            with session.get(url, timeout=REQUEST_TIMEOUT, stream=True,
-                             allow_redirects=True) as r:
-                ctype = (r.headers.get("Content-Type") or "").lower()
-                if r.status_code == 200 and "html" in ctype:
-                    chunk = r.raw.read(READ_BYTES, decode_content=True) or b""
-                    html = chunk.decode(r.encoding or "utf-8", errors="replace")
-                    image = news_media.extract(html, r.url)
-        except Exception as e:
-            log.debug("%s: %s", domain, str(e)[:120])
-
+    found = failed = resolved = 0
+    партия = []
+    now = int(time.time())
+    for r in результаты:
+        if r is None:
+            continue               # бюджет исчерпан, вернёмся через 20 минут
+        uid, image, final_url, развернули = r
+        resolved += 1 if развернули else 0
         if image:
-            news_media.save_og(con, uid, image, 0, final_url)
+            партия.append((uid, image, 0, now, final_url))
             found += 1
         else:
             # Превью не нашлось, но развёрнутый адрес сохраняем: по нему
             # человек попадёт на статью, а не на промежуточную страницу.
-            news_media.save_og(con, uid, None, _attempts_so_far(con, uid) + 1, final_url)
+            партия.append((uid, None, попытки.get(uid, 0) + 1, now, final_url))
             failed += 1
-        con.commit()
+    if партия:
+        _записать(con, партия)
 
     _fetch_logos(con, session, verbose)
+    # 🔴 Отчёт по обработанному и по остатку, а не по размеру выборки: старая
+    # строка печатала «проверено 400», когда реально трогалось 106.
+    очередь = con.execute(
+        """SELECT COUNT(DISTINCT s.uid) FROM news_instrument_tags t
+           JOIN signals s ON s.uid = t.news_uid
+           LEFT JOIN news_media m ON m.news_uid = s.uid
+           WHERE s.first_seen >= datetime('now', ?) AND s.url <> ''
+             AND (m.news_uid IS NULL
+                  OR (m.url IS NULL AND m.path IS NULL AND m.attempts < ?))""",
+        (f"-{FRESH_HOURS} hours", news_media.MAX_ATTEMPTS)).fetchone()[0]
     con.close()
     if verbose:
-        print(f"проверено {len(pairs)}: превью найдено {found}, "
-              f"без превью {failed}, домен пропущен {skipped}, "
-              f"ссылок Google развёрнуто {resolved}")
+        print(f"обработано {found + failed} за {time.time() - начало:.0f} с: "
+              f"превью найдено {found}, без превью {failed}, "
+              f"домен пропущен {len(пропущено)}, "
+              f"ссылок Google развёрнуто {resolved}; "
+              f"в очереди осталось {очередь}")
     return found
 
 

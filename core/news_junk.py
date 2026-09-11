@@ -34,8 +34,17 @@ import re
 _ЮРЛИЦО = re.compile(
     r"\b(LLC|L\.L\.C|LP|LLP|Inc\.?|Ltd\.?|Corp\.?|N\.A\.|"
     r"Advisors?|Advisers?|Capital|Management|Managers?|Partners?|Holdings|"
-    r"Investments?|Wealth|Trust|Bancorp|Retirement System|Pension|"
+    r"Investments|Wealth|Trust|Bancorp|Retirement System|Pension|"
     r"Fund Management|Asset Management)\b")
+# 🔴 «Investments» только во множественном. В единственном это обычное слово, и
+# «This ETF Would Have Increased Your Investment by 6x» уходило в мусор —
+# поймано просмотром выдачи, а не процентом отсева.
+
+# Выкуп своих акций — настоящая корпоративная новость той же формы: «Coca-Cola
+# Europacific Partners buys back 258,500 shares». Юрлицо есть, действие с
+# долей есть, и правило срабатывало. Разница в том, КТО покупает: компания
+# свои, а не фонд чужие.
+_ВЫКУП = re.compile(r"\b(buy(s|ing)?[- ]back|buyback|repurchas(e|es|ed|ing))\b", re.I)
 
 # Действие с долей: глагол плюс существительное про долю, не дальше сорока
 # пяти знаков друг от друга — чтобы «sells» из одного предложения не
@@ -57,11 +66,44 @@ _ДЕЙСТВИЕ = re.compile(
 _ДЕРЖАТЕЛЬ = re.compile(
     r"\b(shares?|stake|position|holdings?)\b(?:[^.]|\.(?=\d)){0,30}\bby\b", re.I)
 
+# «Romano Brothers AND Company Has $11.52 Million Stock Position in NVIDIA».
+# Названия управляющих компаний бесконечны, и гнаться за ними списком — путь в
+# никуда: «AND Company» мимо _ЮРЛИЦО прошло. Но сама форма «имеет позицию на
+# столько-то миллионов» встречается ТОЛЬКО в заметках об отчётности — обычная
+# новость так не пишется. Поэтому здесь юрлицо не требуется.
+_СУММА_ПОЗИЦИИ = re.compile(
+    r"\b(has|holds|takes|makes)\b(?:[^.]|\.(?=\d)){0,40}\$[\d.,]+\s*"
+    r"(million|billion|thousand)\b(?:[^.]|\.(?=\d)){0,40}"
+    r"\b(stock\s+)?(position|holdings?|stake|investment)\b", re.I)
+
+# Форма 4: продажа инсайдером. «NIKE (NYSE:NKE) COO Venkatesh Alagirisamy
+# Sells 3,671 Shares of Stock» — тот же поток от того же генератора.
+#
+# 🔴 ОДНОГО «продал N акций» НЕДОСТАТОЧНО, и это не придирка. «Musk Sells
+# 5,000,000 Shares of Tesla» — настоящая новость ровно той же формы. Поэтому
+# рядом требуется должность: у заметки о форме 4 она есть всегда (director,
+# COO, EVP), а у новости про известного человека её обычно нет. Случай
+# «Mark Stevens Sells 622,239 Shares of NVIDIA» остаётся в ленте — при
+# сомнении пропускаем, а не режем.
+_ЧИСЛО_АКЦИЙ = re.compile(
+    r"\b(sells?|sold|buys?|bought|purchase[sd]?|acquire[sd]?|boost[sd]?|"
+    r"trim[s]?|cut[s]?|raise[sd]?|lower[sd]?|grow[s]?|reduce[sd]?)\b\s+"
+    r"[\d,]{3,}\s+shares\s+of\b", re.I)
+_ДОЛЖНОСТЬ = re.compile(
+    r"\b(CEO|CFO|COO|CTO|CMO|EVP|SVP|VP|President|Chairman|Director|Officer|"
+    r"Insider|Founder|Treasurer|Secretary)\b", re.I)
+
 
 def is_filing_note(title: str | None) -> bool:
     """Заголовок — поточная заметка о движении в отчётности фонда."""
     if not title:
         return False
+    if _ВЫКУП.search(title):
+        return False
+    if _СУММА_ПОЗИЦИИ.search(title):
+        return True
+    if _ЧИСЛО_АКЦИЙ.search(title) and _ДОЛЖНОСТЬ.search(title):
+        return True
     if not _ЮРЛИЦО.search(title):
         return False
     return bool(_ДЕЙСТВИЕ.search(title) or _ДЕРЖАТЕЛЬ.search(title))
