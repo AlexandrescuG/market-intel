@@ -215,6 +215,21 @@ a:hover{text-decoration:underline;color:var(--glow)}
 .board-cell.empty::after{content:attr(data-empty);position:absolute;inset:0;
   display:flex;align-items:center;justify-content:center;text-align:center;
   font-size:11px;color:var(--faint);padding:0 6px}
+/* Список вместо карты на узком экране — см. комментарий в loadBoard().
+   Строки те же данные: актив, изменение, число упоминаний. Шрифт 12-13px,
+   а не 7-8, как выходило у подписей в кружках. */
+.board-groups.as-list{display:block}
+.board-groups.as-list .board-group{margin-bottom:18px}
+.board-groups.as-list .board-cell{display:none}
+.board-row{display:flex;align-items:center;gap:10px;padding:9px 2px;
+  border-bottom:1px solid var(--line);text-decoration:none;color:inherit}
+.board-row:last-child{border-bottom:none}
+.board-row .br-sym{flex:1;min-width:0;font-size:13px;font-weight:600;color:var(--ink);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.board-row .br-chg{font-family:'JetBrains Mono',monospace;font-size:12px;flex-shrink:0}
+.board-row .br-chg.up{color:var(--up)} .board-row .br-chg.down{color:var(--down)}
+.board-row .br-n{font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:700;
+  color:var(--gold);min-width:34px;text-align:right;flex-shrink:0}
 .board-bubble{position:absolute;border-radius:50%;display:flex;flex-direction:column;
   align-items:center;justify-content:center;text-align:center;cursor:pointer;
   border:1.5px solid;text-decoration:none;overflow:hidden;
@@ -538,6 +553,19 @@ a:hover{text-decoration:underline;color:var(--glow)}
   .top .g-nav{display:none}
   .wrap{padding:12px 12px 0;gap:16px}
   .panel{padding:13px 14px}
+  /* 🔴 ЭЛЕМЕНТ ГРИДА НЕ СЖИМАЕТСЯ НИЖЕ СВОЕГО СОДЕРЖИМОГО, ПОКА ЕМУ НЕ
+     СКАЗАТЬ. У grid-элемента `min-width` по умолчанию `auto`, то есть
+     «не меньше min-content». Колонка `1fr` из-за этого перестаёт быть
+     резиновой: что-то широкое внутри распирает её, а с ней и всю страницу.
+
+     Замер 14.09.2026 на 360 px: <main> шириной 378 при левом крае 12 —
+     тридцать пикселей за экраном. И всё, что лежит внутри, наследовало
+     это: доска обсуждаемости, Crypto Fear & Greed, блок «Брокеры» —
+     замер винил их по очереди, а виноват был контейнер.
+     Сетка `.wrap` при этом СВОРАЧИВАЕТСЯ правильно (правило есть, 980px):
+     дело было не в колонках, а в том, что единственная колонка не умела
+     ужиматься. */
+  .wrap > *{min-width:0}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 
@@ -2057,6 +2085,16 @@ async function loadBoard(){
   const canvas = document.getElementById('boardCanvas');
   if (!sec || !canvas) return;
   renderBoardTabs();
+  // 🔴 Подписка ЗДЕСЬ, до всех веток и возвратов. Сначала я поставил её в
+  // конце функции — то есть после `return` для узкого экрана, и на телефоне
+  // она не регистрировалась вообще: ровно там, где поворот экрана и
+  // случается. Обработчик, живущий ниже раннего выхода, не существует для
+  // того, кто по этому выходу ушёл.
+  if (!loadBoard._следит) {
+    loadBoard._следит = true;
+    window.matchMedia('(max-width:768px)')
+      .addEventListener('change', () => loadBoard());
+  }
   // Не через get(): тот ходит за статическими файлами в /data, а доска
   // считается на лету из счётчика упоминаний.
   let d = null;
@@ -2084,6 +2122,46 @@ async function loadBoard(){
   // тут крипта. Пустые направления всё равно показываем колонкой с подписью —
   // «сегодня про сырьё молчат» это тоже факт о рынке.
   const ORDER = _boardCat ? [_boardCat] : BOARD_ORDER;
+
+  // 🔴 НА УЗКОМ ЭКРАНЕ — СПИСОК, А НЕ КАРТА ПУЗЫРЕЙ.
+  //
+  // Замер 14.09.2026 на 360 px: доска фиксирована на 378 px (вылезает на 30,
+  // на экране 320 — на 70), и главное — 67 подписей из 80 мельче 9 px, самая
+  // мелкая 7 px. В коде ниже об этом даже написано: «при радиусе меньше 18px
+  // тикер уходит в 6px и превращается в серую точку». На телефоне пять
+  // колонок по 75 px именно туда и приводят.
+  //
+  // Смысл карты — сравнение ПЛОЩАДЕЙ: видно, что про биткоин говорят вдвое
+  // больше, чем про золото. Когда площади размером с ноготь, сравнивать
+  // нечего, и остаётся набор нечитаемых точек. Список отвечает на тот же
+  // вопрос честно: актив и число рядом, отсортировано по убыванию.
+  if (window.matchMedia('(max-width:768px)').matches) {
+    canvas.classList.add('as-list');
+    canvas.innerHTML = ORDER.map(cat => {
+      const m = BOARD_CATS[cat];
+      const list = items.filter(x => x.category === cat)
+                        .sort((a, b) => b.mentions - a.mentions)
+                        .slice(0, 6);          // шесть строк — экран телефона
+      if (!list.length) return '';
+      return `<div class="board-group">
+        <div class="board-group-h"><i class="${m.cls}"></i>${escapeHtmlIdx(boardLabel(m))}</div>
+        ${list.map(it => {
+          const имя = window.SBFSymbols
+            ? window.SBFSymbols.symbolName(it.symbol, {mode:'name'}) : it.symbol;
+          const ch = it.change_pct;
+          const cls = ch > 0 ? 'up' : ch < 0 ? 'down' : '';
+          return `<a class="board-row" href="/chart.html?s=${encodeURIComponent(it.symbol)}"
+                     data-sym="${escapeHtmlIdx(it.symbol)}">
+            <span class="br-sym">${escapeHtmlIdx(имя)}</span>
+            <span class="br-chg ${cls}">${ch != null ? (ch > 0 ? '+' : '') + ch.toFixed(2) + '%' : ''}</span>
+            <span class="br-n">${it.mentions}</span>
+          </a>`;
+        }).join('')}
+      </div>`;
+    }).join('');
+    return;
+  }
+  canvas.classList.remove('as-list');
   canvas.classList.toggle('single', !!_boardCat);
   const byCat = {};
   ORDER.forEach(c => { byCat[c] = []; });
