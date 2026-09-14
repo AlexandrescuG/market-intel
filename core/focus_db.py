@@ -15,7 +15,8 @@ import sqlite3
 from datetime import date, datetime, timezone
 from pathlib import Path
 
-from core.focus import DEFAULT_UNIVERSE, NO_LIVE_FEED, FocusState, anomaly, running_tr
+from core.focus import (DEFAULT_UNIVERSE, MIN_SANE_SHARE, NO_LIVE_FEED, FocusState,
+                        anomaly, running_tr, sane_share)
 from core.sessions import us_dst_active
 from core import journal_brief
 from core.journal_symbols import to_chart_symbol
@@ -61,10 +62,13 @@ _INSTRUMENT_SEED = [
     ("DXY",    "US Dollar Index",  "fx",        "points", 2, 1),
     ("USDJPY", "USD/JPY",          "fx",        "usd",    3, 0),
     ("USDRUB", "USD/RUB",          "fx",        "usd",    2, 0),
-    ("USDKZT", "USD/KZT",          "fx",        "usd",    2, 0),
 ]
+# USDKZT выведен из вселенной 14.09.2026 (см. причину в core/focus.py), но
+# остаётся в NO_LIVE_FEED: это справочник свойств инструмента, а не список
+# показываемого, и запись «у тенге нет живого фида» от вывода из витрины не
+# перестала быть правдой.
 assert {r[0] for r in _INSTRUMENT_SEED} == set(DEFAULT_UNIVERSE)
-assert {r[0] for r in _INSTRUMENT_SEED if r[5] == 0} == NO_LIVE_FEED
+assert {r[0] for r in _INSTRUMENT_SEED if r[5] == 0} <= NO_LIVE_FEED
 
 # (asset_class, tz, open_min, close_min, days_mask) -- часы в СТАНДАРТНОМ
 # (зимнем, не-DST) времени для index; DST-сдвиг применяется в рантайме
@@ -238,6 +242,43 @@ def today_str(now_utc: datetime | None = None) -> str:
     return (now_utc or datetime.now(timezone.utc)).strftime("%Y-%m-%d")
 
 
+_негодные: dict[str, float] = {}      # символ → доля целых баров, для отчёта
+
+
+def _ряд_годен(con, symbol: str, today: str, дней: int = 120) -> bool:
+    """Достаточно ли целых баров в ряду, чтобы ему верить.
+
+    Смотрим последние ~120 дневных баров: более старая история на отбор
+    сегодняшнего фокуса не влияет, а гонять весь ряд каждый цикл незачем.
+    Если таблицы/баров нет — не мешаем работать: отсутствие данных это не
+    порча данных, и такой инструмент отсеется выше по ATR.
+    """
+    try:
+        rows = con.execute(
+            "SELECT o, h, l, c FROM price_bars WHERE symbol=? AND tf='1d' "
+            "ORDER BY ts DESC LIMIT ?", (symbol, дней)).fetchall()
+    except sqlite3.Error:
+        return True
+    if len(rows) < 20:
+        return True
+    доля = sane_share([{"o": r["o"], "h": r["h"], "l": r["l"], "c": r["c"]} for r in rows])
+    if доля < MIN_SANE_SHARE:
+        _негодные[symbol] = доля
+        return False
+    _негодные.pop(symbol, None)
+    return True
+
+
+def rejected_series() -> dict[str, float]:
+    """{символ: доля целых баров} — кого отсеяли по порче ряда в этом прогоне.
+
+    🔴 Отсев обязан быть видимым. Молчаливый фильтр по качеству данных — это
+    способ годами не замечать, что половина вселенной инструментов
+    развалилась: витрина просто показывает то, что осталось.
+    """
+    return dict(_негодные)
+
+
 def build_candidates(symbols: list[str], today: str) -> list[tuple[str, float | None]]:
     """§10: "live = load_live(w.symbol); atr = load_atr_today(w.symbol); if
     not live or live.session_state != 'open': continue; if atr is None:
@@ -258,6 +299,20 @@ def build_candidates(symbols: list[str], today: str) -> list[tuple[str, float | 
                 "SELECT * FROM atr_cache WHERE symbol=? AND date=?", (symbol, today)
             ).fetchone()
             if atr_row is None or atr_row["atr"] is None:
+                continue
+            # 🔴 Инструмент с гнилым рядом в отбор не допускается.
+            #
+            # Фокус ранжирует по runningTR/ATR — по размаху относительно
+            # нормы. Значит любая порча, раздувающая размах, выигрывает
+            # автоматически: отбор «самого аномального» молча превращается
+            # в отбор «самого испорченного». 14.09.2026 так и было: 12 из
+            # 19 подборов — USDKZT, у которого 59% дневных баров имеют
+            # закрытие ВНЕ диапазона [low, high].
+            #
+            # Проверка стоит здесь, а не в select_focus(): та функция
+            # намеренно без обращения к БД, а судить о годности ряда можно
+            # только по самому ряду.
+            if not _ряд_годен(con, symbol, today):
                 continue
             tr = running_tr(live["day_high"], live["day_low"], atr_row["prev_close"])
             out.append((symbol, anomaly(tr, atr_row["atr"])))
