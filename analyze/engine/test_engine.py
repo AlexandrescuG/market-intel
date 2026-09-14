@@ -95,6 +95,43 @@ class Sizing(unittest.TestCase):
         self.assertGreaterEqual(vol, 0.01)
 
 
+class Maintenance(unittest.TestCase):
+    """🔴 14.09. sbf-engine.service запускает код прямо из рабочего дерева,
+    и дерево общее для нескольких чатов. Правка риск-модуля уехала в бой на
+    полпути: прогон в 15:03 подхватил снятый запрет раньше, чем были
+    дописаны тесты."""
+
+    def test_смотрим_только_на_файлы_движка(self):
+        """Правка в вёрстке сайта не должна останавливать торговлю — иначе
+        предохранитель начнёт мешать и его отключат целиком."""
+        from analyze.engine import run as engine_run
+        self.assertEqual(engine_run.ENGINE_DIR, "analyze/engine")
+
+    def test_отказ_git_не_блокирует_торговлю(self):
+        """Предохранитель полезный, но не критичный: падать из-за него хуже,
+        чем не сработать."""
+        import subprocess
+        from analyze.engine import run as engine_run
+        real = subprocess.run
+        try:
+            subprocess.run = lambda *a, **k: (_ for _ in ()).throw(OSError("нет git"))
+            self.assertEqual(engine_run.dirty_engine_files(), [])
+        finally:
+            subprocess.run = real
+
+    def test_грязное_дерево_видно(self):
+        """Замер на себе: этот файл сейчас изменён и не закоммичен, значит
+        функция обязана его вернуть. Тест самоподтверждающийся — если
+        механизм сломается, он это покажет на любом живом изменении."""
+        import subprocess
+        from analyze.engine import run as engine_run
+        out = subprocess.run(["git", "-C", "/mnt/sbfdata/sbf-platform/market_intel",
+                              "status", "--porcelain", "--", "analyze/engine"],
+                             capture_output=True, text=True)
+        expect = [ln[3:].strip() for ln in out.stdout.splitlines() if ln.strip()]
+        self.assertEqual(engine_run.dirty_engine_files(), expect)
+
+
 class StopClamp(unittest.TestCase):
     """🔴 14.09. Барьер брокера проверялся только на ВХОДЕ. Сопровождение
     просило стоп ближе минимальной дистанции, получало «Invalid stops» и

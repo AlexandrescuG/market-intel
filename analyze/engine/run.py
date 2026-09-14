@@ -38,6 +38,40 @@ logging.basicConfig(level=logging.INFO,
 log = logging.getLogger("engine")
 
 
+ENGINE_DIR = "analyze/engine"
+
+
+def dirty_engine_files() -> list[str]:
+    """Файлы движка, изменённые в рабочем дереве и не закоммиченные.
+
+    🔴 14.09. sbf-engine.service запускает код ПРЯМО ИЗ рабочего дерева, и
+    /home/sbf/market_intel — симлинк на него же. В тот день правка риск-модуля
+    уехала в бой на полпути: прогон в 15:03 подхватил снятый запрет на
+    встречные входы раньше, чем были дописаны тесты. Обошлось, но повезло.
+
+    Дерево общее для нескольких чатов сразу — в момент находки в нём было 39
+    незакоммиченных файлов от параллельной работы. То есть это не разовая
+    неосторожность, а устройство: любая правка здесь через час торгует.
+
+    Смотрим ТОЛЬКО на файлы движка. Остальное дерево живёт своей жизнью, и
+    останавливать торговлю из-за правки в вёрстке сайта — это тот самый
+    ложный отказ, который потом отключают целиком.
+
+    Отказ git'а не блокирует торговлю: предохранитель полезный, но не
+    критичный, и падать из-за него хуже, чем не сработать."""
+    import subprocess
+    try:
+        out = subprocess.run(
+            ["git", "-C", "/mnt/sbfdata/sbf-platform/market_intel",
+             "status", "--porcelain", "--", ENGINE_DIR],
+            capture_output=True, text=True, timeout=20)
+        if out.returncode != 0:
+            return []
+        return [ln[3:].strip() for ln in out.stdout.splitlines() if ln.strip()]
+    except Exception:                                           # noqa: BLE001
+        return []
+
+
 def market_price_of(s, tick):
     """Цена, по которой реально входим: ask на покупку, bid на продажу."""
     if tick is None:
@@ -85,6 +119,23 @@ def run(*, dry: bool, live: bool, enabled: list[str] | None, verbose: bool) -> i
 
     default_status = ST_LIVE if live else ST_SHADOW
     exit_code = 0
+
+    # Правка в дереве приостанавливает НОВЫЕ входы, но не сведение и не
+    # сопровождение: незакрытые позиции нельзя бросать из-за того, что
+    # кто-то правит код. Останавливаем ровно то, что можно отложить.
+    dirty = dirty_engine_files() if not dry else []
+    if dirty:
+        log.warning("ПРАВКА В ДЕРЕВЕ: %s — новые входы приостановлены, "
+                    "сведение и сопровождение работают", ", ".join(dirty))
+        try:
+            from analyze.outbox import enqueue_ops
+            enqueue_ops(f"⏸ Движок: новые входы приостановлены — в дереве "
+                        f"незакоммиченные правки движка:\n" +
+                        "\n".join(f"· {f}" for f in dirty) +
+                        "\n\nСведение и сопровождение работают как обычно. "
+                        "Закоммитьте или откатите правку, чтобы вернуть входы.")
+        except Exception as e:                                  # noqa: BLE001
+            log.warning("алерт о правке не ушёл: %s", e)
 
     try:
         with execution.Bridge() as (mt5, conn):
@@ -146,6 +197,10 @@ def run(*, dry: bool, live: bool, enabled: list[str] | None, verbose: bool) -> i
 
                 d = decide(con, s, equity, si, tick, default_status,
                            mt5=mt5, bsym=bsym, free_margin=free_margin)
+                if dirty and d.accepted:
+                    d.accepted = False
+                    d.reason = ("maintenance: правка движка в дереве, "
+                                "новые входы приостановлены")
                 if verbose or d.accepted:
                     log.info("%s %s/%s %s -> %s", s.strategy, s.symbol, s.tf,
                              s.direction, d.reason)
