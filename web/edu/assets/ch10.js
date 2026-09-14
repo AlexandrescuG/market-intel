@@ -69,6 +69,23 @@ window.Ch10Content = {
     selfStats: {
       tag: "ТВОЯ ПЕРСОНАЛЬНАЯ СТАТИСТИКА",
       loadingLabel: "Проверяем твой журнал…",
+      stateA: {
+        title: "Твои часы: когда входишь и когда зарабатываешь",
+        intro: "Считано по твоему журналу: час входа для каждой сделки и результат в R. Часы, где сделок меньше трёх, показаны бледнее — по ним рано делать выводы.",
+        colHour: "ЧАС", colTrades: "СДЕЛОК", colR: "ИТОГ, R", colWin: "В ПЛЮС",
+        mostTpl: "Чаще всего входишь в {h}:00 — сделок {n}, итог {r} R.",
+        bestTpl: "Больше всего приносит {h}:00 — сделок {n}, итог {r} R.",
+        differ: "Это разные часы. Ровно то, о чём предупреждала глава 5: привычка садиться за терминал и способность в этот момент зарабатывать — не одно и то же.",
+        same: "Это один и тот же час — редкий и хороший случай: ты торгуешь тогда, когда у тебя получается.",
+        few: "Часов с достаточным числом сделок пока нет — журнал ещё слишком редкий, чтобы говорить о часах.",
+      },
+      stateB: {
+        title: "И то же самое по всем, кто ведёт журнал",
+        introTpl: "Считано по {u} журналам и {n} сделкам. Имён и отдельных журналов здесь нет — только суммы.",
+        mostTpl: "Чаще всего входят в {h}:00.",
+        bestTpl: "Больше всего приносит {h}:00.",
+        note: "Это не рекомендация «торгуй в этот час»: чужие часы — чужие рынки, инструменты и часовые пояса. Это фон, с которым можно сравнить свой.",
+      },
       stateC: {
         title: "Персональная версия этого блока строится из записей журнала",
         body: "Если решишь его завести — он в разделе «Журнал», это бесплатно и не связано ни с каким счётом. Мы не будем возвращаться к этому предложению.",
@@ -225,6 +242,23 @@ window.Ch10Content = {
     selfStats: {
       tag: "STATISTICA TA PERSONALĂ",
       loadingLabel: "Verificăm jurnalul tău…",
+      stateA: {
+        title: "Orele tale: când intri și când câștigi",
+        intro: "Calculat din jurnalul tău: ora intrării pentru fiecare tranzacție și rezultatul în R. Orele cu mai puțin de trei tranzacții sunt estompate — e prea devreme pentru concluzii.",
+        colHour: "ORA", colTrades: "TRANZACȚII", colR: "TOTAL, R", colWin: "PE PLUS",
+        mostTpl: "Cel mai des intri la {h}:00 — {n} tranzacții, total {r} R.",
+        bestTpl: "Cel mai mult aduce {h}:00 — {n} tranzacții, total {r} R.",
+        differ: "Sunt ore diferite. Exact despre asta avertiza capitolul 5: obiceiul de a sta la terminal și capacitatea de a câștiga în acel moment nu sunt același lucru.",
+        same: "Este aceeași oră — un caz rar și bun: tranzacționezi atunci când îți iese.",
+        few: "Încă nu există ore cu destule tranzacții — jurnalul e prea rar ca să vorbim despre ore.",
+      },
+      stateB: {
+        title: "Și același lucru la toți cei care țin jurnal",
+        introTpl: "Calculat din {u} jurnale și {n} tranzacții. Aici nu sunt nume și nici jurnale individuale — doar sume.",
+        mostTpl: "Cel mai des se intră la {h}:00.",
+        bestTpl: "Cel mai mult aduce {h}:00.",
+        note: "Nu este o recomandare «tranzacționează la ora asta»: orele altora înseamnă alte piețe, instrumente și fusuri orare. Este un fundal cu care îți poți compara propriile ore.",
+      },
       stateC: {
         title: "Versiunea personală a acestui bloc se construiește din înregistrările jurnalului",
         body: "Dacă te hotărăști să-l ții — e în secțiunea „Jurnal”, e gratuit și nu ține de niciun cont. Nu ne vom mai întoarce la această propunere.",
@@ -381,6 +415,23 @@ window.Ch10Content = {
     selfStats: {
       tag: "YOUR OWN PERSONAL STATISTICS",
       loadingLabel: "Checking your journal…",
+      stateA: {
+        title: "Your hours: when you enter and when you earn",
+        intro: "Computed from your journal: entry hour of every trade and the result in R. Hours with fewer than three trades are dimmed — too early to draw conclusions.",
+        colHour: "HOUR", colTrades: "TRADES", colR: "TOTAL, R", colWin: "WINS",
+        mostTpl: "You enter most often at {h}:00 — {n} trades, total {r} R.",
+        bestTpl: "The most profitable hour is {h}:00 — {n} trades, total {r} R.",
+        differ: "These are different hours. Exactly what chapter 5 warned about: the habit of sitting down at the terminal and the ability to earn at that moment are not the same thing.",
+        same: "Same hour — a rare and good case: you trade when it actually works for you.",
+        few: "No hour has enough trades yet — the journal is still too sparse to talk about hours.",
+      },
+      stateB: {
+        title: "And the same across everyone who keeps a journal",
+        introTpl: "Computed from {u} journals and {n} trades. No names and no individual journals here — only totals.",
+        mostTpl: "Most entries happen at {h}:00.",
+        bestTpl: "The most profitable hour is {h}:00.",
+        note: "This is not a «trade at this hour» recommendation: other people's hours mean other markets, instruments and time zones. It is a backdrop to compare your own against.",
+      },
       stateC: {
         title: "The personal version of this block is built from journal entries",
         body: "If you decide to start one, it's in the «Journal» section — it's free and isn't tied to any account. We won't bring up this offer again.",

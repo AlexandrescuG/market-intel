@@ -327,6 +327,9 @@ function SelfStats() {
   const T10 = window.Ch10Content[INITIAL_LANG] || window.Ch10Content.ru;
   const ss = T10.selfStats;
   const [state, setState] = useState("loading"); // loading | A | B | C
+  // Сам ответ, а не только буква состояния: рисовать разбор по часам не из
+  // чего, если сохранить одно слово «A».
+  const [данные, setДанные] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -335,12 +338,13 @@ function SelfStats() {
       fetch("/api/journal/aggregate-stats").then(r => r.ok ? r.json() : null).catch(() => null),
     ]).then(([self, agg]) => {
       if (cancelled) return;
-      // Оба эндпоинта пока не построены (см. докстринг ch10.js) -- живой fetch
-      // остаётся форвард-совместимым, но честно откатывается в состояние C,
-      // которое сейчас технически единственно верное: у всех пользователей
-      // платформы 0 записанных сделок в data/journal.db.
-      if (self && self.trade_count >= 20) setState("A");
-      else if (agg && agg.n_users >= 50 && agg.n_trades >= 1000) setState("B");
+      /* 🔴 Порог теперь один и живёт на сервере (core/journal_hours.py), а
+         здесь читается готовый `available`. Раньше клиент сравнивал
+         trade_count >= 20 сам — то есть порог был записан в двух местах, и
+         разойтись им было вопросом времени: сервер отдал бы «мало данных»,
+         а глава показала бы разбор по трём сделкам, или наоборот. */
+      if (self && self.available) { setДанные(self); setState("A"); }
+      else if (agg && agg.available) { setДанные(agg); setState("B"); }
       else setState("C");
     }).catch(() => setState("C"));
     return () => { cancelled = true; };
@@ -350,8 +354,99 @@ function SelfStats() {
     return <p style={{fontFamily:"monospace",fontSize:12,color:C.inkFaint}}>{ss.loadingLabel}</p>;
   }
 
-  // Состояния A и B реализуются тем же контейнером, когда эндпоинты появятся
-  // и данные накопятся -- сейчас в проде достижимо только состояние C.
+  /* 🔴 СОСТОЯНИЯ A И B ТЕПЕРЬ НАРИСОВАНЫ, А НЕ ОПИСАНЫ В КОММЕНТАРИИ.
+     Здесь стояло «реализуются тем же контейнером, когда эндпоинты появятся»
+     — то есть глава обещала читателю разбор по часам (обещание дано ещё в
+     главе 5: «через тридцать сделок дневник покажет, в какие часы ты
+     входишь и в какие зарабатываешь»), а показать его было нечем даже при
+     готовых данных. Обещание, у которого нет исполняющего кода, не
+     отличается от невыполненного.
+     Таблица одна на оба состояния: свои часы и часы платформы считаются
+     одинаково (core/journal_hours.py), значит и рисоваться должны
+     одинаково — иначе два вида одной величины начнут расходиться. */
+  if ((state === "A" || state === "B") && данные && данные["часы"]) {
+    const это_своё = state === "A";
+    const s = это_своё ? ss.stateA : ss.stateB;
+    const часы = данные["часы"];
+    const макс = Math.max(1, ...часы.map(ч => ч["сделок"]));
+    const подставить = (шаблон, п) =>
+      String(шаблон || "").replace(/\{(\w)\}/g, (_, k) => п[k]);
+    return (
+      <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"26px 30px"}}>
+        <p style={{fontSize:14,color:C.black,fontWeight:600,marginBottom:10}}>{s.title}</p>
+        <p style={{fontSize:13,color:C.inkMid,lineHeight:1.7,marginBottom:18}}>
+          {это_своё ? s.intro
+            : подставить(s.introTpl, {u: данные["n_users"], n: данные["n_trades"]})}
+        </p>
+
+        {данные["час_входов"] == null ? (
+          <p style={{fontSize:13,color:C.inkMid}}>{это_своё ? s.few : s.note}</p>
+        ) : (
+          <>
+            <div style={{overflowX:"auto",marginBottom:16}}>
+              <table style={{borderCollapse:"collapse",width:"100%",fontSize:12,
+                             fontFamily:"monospace"}}>
+                <thead>
+                  <tr style={{textAlign:"left",color:C.inkFaint}}>
+                    <th style={{padding:"4px 8px"}}>{s.colHour || "ЧАС"}</th>
+                    <th style={{padding:"4px 8px"}}>{s.colTrades || ""}</th>
+                    <th style={{padding:"4px 8px"}}>{s.colR || "R"}</th>
+                    <th style={{padding:"4px 8px"}}>{s.colWin || ""}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {часы.map(ч => (
+                    /* Час с малым числом сделок показываем, но глушим цветом:
+                       спрятать его значило бы сделать картину глаже, чем она
+                       есть, а выделить наравне — позвать на вывод из двух
+                       наблюдений. */
+                    <tr key={ч["час"]} style={{opacity: ч["мало_данных"] ? 0.45 : 1,
+                                               borderTop:`1px solid ${C.border}`}}>
+                      <td style={{padding:"4px 8px",color:C.black}}>
+                        {String(ч["час"]).padStart(2,"0")}:00
+                      </td>
+                      <td style={{padding:"4px 8px",color:C.inkMid}}>
+                        <span style={{display:"inline-block",height:8,borderRadius:2,
+                          width: Math.max(4, Math.round(60 * ч["сделок"] / макс)),
+                          background: C.gold, marginRight:6, verticalAlign:"middle"}}/>
+                        {ч["сделок"]}
+                      </td>
+                      <td style={{padding:"4px 8px",
+                                  color: ч["сумма_r"] > 0 ? "#2E7D5B"
+                                       : ч["сумма_r"] < 0 ? "#8a2f2f" : C.inkMid}}>
+                        {ч["сумма_r"] > 0 ? "+" : ""}{ч["сумма_r"]}
+                      </td>
+                      <td style={{padding:"4px 8px",color:C.inkMid}}>
+                        {Math.round(100 * ч["доля_плюсовых"])}%
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <p style={{fontSize:13,color:C.inkMid,lineHeight:1.7,marginBottom:6}}>
+              {подставить(s.mostTpl, {h: данные["час_входов"],
+                                      n: данные["сделок_в_нём"],
+                                      r: данные["r_в_нём"]})}
+            </p>
+            <p style={{fontSize:13,color:C.inkMid,lineHeight:1.7,marginBottom:16}}>
+              {подставить(s.bestTpl, {h: данные["час_заработка"],
+                                      n: данные["сделок_в_лучшем"],
+                                      r: данные["r_в_лучшем"]})}
+            </p>
+            <div style={{background:C.goldPale,border:`1px solid ${C.borderGold}`,
+                         borderRadius:6,padding:"14px 18px"}}>
+              <p style={{fontSize:12.5,color:C.inkMid,lineHeight:1.65,margin:0}}>
+                {это_своё ? (данные["совпадают"] ? s.same : s.differ) : s.note}
+              </p>
+            </div>
+          </>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"26px 30px"}}>
       <p style={{fontSize:14,color:C.black,fontWeight:600,marginBottom:10}}>{ss.stateC.title}</p>
