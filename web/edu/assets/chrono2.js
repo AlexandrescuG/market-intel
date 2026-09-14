@@ -515,7 +515,18 @@
     if (window.ChronoStationArtHTML && window.ChronoStationArt && window.ChronoStationArt[key]) {
       return window.ChronoStationArtHTML(key); // переиспользуем ассет главы 1 (фото или SVG)
     }
-    return ART[key] ? ART[key]() : '';
+    if (ART[key]) return ART[key]();
+    // 🔴 Отсутствие ассета обязано быть слышно. Раньше здесь стоял молчаливый
+    // return '': когда chrono.js не подключили на странице, четыре станции из
+    // шестнадцати показывали пустую рамку, и узнать об этом можно было только
+    // глазами, пролистав хронику до конца. Пустой экран сам о себе не
+    // сообщает — сообщать должен код.
+    if (window.console && console.warn) {
+      console.warn('[chrono2] нет иллюстрации для станции "' + key +
+        '". Ключи 1929_crowd/1987_blackmonday/2008_lehman/2020_covid живут в ' +
+        'chrono.js — он должен грузиться на странице ДО chrono2.js.');
+    }
+    return '';
   }
 
   window.Chrono2StationArt = ART;

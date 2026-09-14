@@ -23,6 +23,14 @@
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"></script>
+<!-- 🔴 chrono.js ОБЯЗАН идти перед chrono2.js, а не «желательно».
+     Четыре станции хроники главы 2 (1929, 1987, 2008, 2020) переиспользуют
+     ассеты главы 1 — тот же эпизод, та же фотография. chrono2.js это прямо
+     заявляет в своей шапке, но подключения не было, и art2HTML для этих
+     четырёх ключей возвращал пустую строку: ни ошибки, ни следа в консоли,
+     просто четыре пустых рамки из шестнадцати. Замер 14.09.2026 обходом
+     всех станций: «нет ассета» ровно на этих четырёх. -->
+<script src="/edu/assets/chrono.js"></script>
 <script src="/edu/assets/chrono2.js"></script>
 <script src="/edu/assets/scene-engine.js"></script>
 <script src="/edu/assets/calendar-terms.js"></script>
