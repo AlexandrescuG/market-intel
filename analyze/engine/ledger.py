@@ -56,6 +56,7 @@ CREATE TABLE IF NOT EXISTS engine_trades (
   volume REAL,
   risk_money REAL,                  -- риск НА МОМЕНТ ВХОДА, дальше не меняется
   risk_per_price REAL,              -- сколько денег стоит единица движения цены
+  crosses_id INTEGER,               -- встречная позиция, с которой пересеклись
   atr REAL,
   req_price REAL, req_ts INTEGER,
   stop REAL, target REAL,
@@ -176,13 +177,18 @@ def open_trade(con: sqlite3.Connection, signal_id: int, d: Decision, *,
     # риск на входе: стоп переносится (manage_open), и остаток риска считается
     # уже от нового стопа. Без этого числа пересчитать его не из чего.
     rpp = (d.risk_money / s.stop_distance) if s.stop_distance else None
+    # С чем эта сделка пересеклась. Встречный вход больше не запрещён, но
+    # обязан быть виден: без пометки выборку не разделить задним числом, и
+    # вопрос «а не портят ли пересечения статистику» останется без ответа.
+    from analyze.engine import risk as _risk
+    crosses = _risk.crossing_trade(con, s.symbol, s.is_long) if mode == "live" else None
     cur = con.execute(
         "INSERT INTO engine_trades (signal_id, strategy, symbol, broker_symbol, tf, "
-        "direction, mode, volume, risk_money, risk_per_price, atr, req_price, req_ts, "
-        "stop, target, horizon_until, status, note) "
-        "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        "direction, mode, volume, risk_money, risk_per_price, crosses_id, atr, "
+        "req_price, req_ts, stop, target, horizon_until, status, note) "
+        "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
         (signal_id, s.strategy, s.symbol, broker_symbol, s.tf, s.direction, mode,
-         d.volume, d.risk_money, rpp, s.atr, req_price, now,
+         d.volume, d.risk_money, rpp, crosses, s.atr, req_price, now,
          s.stop if stop is None else stop,
          s.target if target is None else target,
          now + s.horizon_sec, status, note))

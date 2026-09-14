@@ -64,7 +64,11 @@ def decide(con, s, equity, symbol_info, tick, default_status: str, *,
         risk.cost_gate(s, tick)
         risk.broker_barrier_gate(s, symbol_info, tick)
         volume, risk_money = risk.position_volume(s, equity, symbol_info)
-        risk.opposite_open(con, s)
+        # 🔴 14.09: здесь стоял запрет `opposite_open` — встречный вход по тому
+        # же инструменту отклонялся ради чистоты измерения. Снят: R считается
+        # по ценам самой сделки и от чужой позиции не зависит (см.
+        # risk.crossing_trade). Вместо запрета — нетто-учёт в portfolio_gate
+        # и пометка пересечения в журнале.
         risk.portfolio_gate(con, s, equity, risk_money)
         if market_price is not None:
             risk.drift_gate(s, market_price)

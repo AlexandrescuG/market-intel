@@ -36,7 +36,24 @@ from analyze.engine.contracts import LONG, Signal, ST_HALTED
 # зазор. Обратная сторона: по FX объём вырастет с привычных 0.01 до
 # десятых лота — это и есть паритет риска, а не ошибка.
 RISK_PER_TRADE = 0.005       # 0.5% капитала на сделку
-MAX_PORTFOLIO_RISK = 0.03    # 3% капитала под риском одновременно -> ~6 позиций
+
+# Два потолка вместо одного — 14.09, вместе с переходом на нетто.
+#
+# НЕТТО — направленный риск: по каждому инструменту лонги и шорты
+# складываются со знаком и гасят друг друга. Это то, чем мы рискуем при
+# одном движении рынка, и это основной потолок.
+#
+# ВАЛОВОЙ — сумма по модулю, без учёта знака. Нужен ровно против одного
+# сценария, и его стоит назвать прямо, потому что нетто его НЕ ловит:
+# лонг со стопом снизу и шорт со стопом сверху при одном движении гасят
+# друг друга, но при ПИЛЕ — цена сходила вверх и выбила стоп шорта, потом
+# вернулась вниз и выбила стоп лонга — теряются оба, и худший случай равен
+# СУММЕ, а не разности. Нетто в этот момент показывал бы ноль.
+#
+# Поэтому нетто разрешает хеджу не съедать лимит, а валовой не даёт
+# набрать бесконечно много встречных пар.
+MAX_PORTFOLIO_RISK = 0.03    # нетто: 3% капитала -> ~6 однонаправленных позиций
+MAX_GROSS_RISK = 0.05        # валовой: 5%, потолок на случай пилы
 MAX_OPEN_TOTAL = 12
 MAX_OPEN_PER_SYMBOL = 3      # было «10 по золоту разом» — главный урок 26-27.08
 MAX_OPEN_PER_SYMBOL_SIDE = 2 # и не более двух в одну сторону по одному символу
@@ -338,6 +355,55 @@ def open_risk_rows(con: sqlite3.Connection) -> list[tuple]:
              live_risk(r[1], r[4], r[5], r[6], r[3]), r[7]) for r in rows]
 
 
+def exposure(rows, add: tuple | None = None) -> tuple[float, float]:
+    """(нетто, валовой) риск портфеля в деньгах.
+
+    rows — из open_risk_rows(); add — сделка, которую только собираемся взять,
+    в виде (символ, лонг ли, риск).
+
+    Нетто считается ПО ИНСТРУМЕНТАМ и только потом складывается: гасить друг
+    друга имеют право лонг и шорт одного EURUSD, а не лонг EURUSD против
+    шорта золота. Разные инструменты здесь считаются независимыми — это
+    упрощение, и его снимает отдельная работа по валютным ногам (лонг EURUSD,
+    лонг GBPUSD и шорт USDJPY — это три раза шорт доллара, а не три
+    независимые ставки)."""
+    signed: dict[str, float] = {}
+    gross = 0.0
+    for sym, direction, _strategy, r, _tid in rows:
+        r = r or 0.0
+        signed[sym] = signed.get(sym, 0.0) + (r if direction == "long" else -r)
+        gross += r
+    if add:
+        sym, is_long, r = add
+        signed[sym] = signed.get(sym, 0.0) + (r if is_long else -r)
+        gross += r
+    return sum(abs(v) for v in signed.values()), gross
+
+
+def crossing_trade(con: sqlite3.Connection, symbol: str, is_long: bool) -> int | None:
+    """id открытой ВСТРЕЧНОЙ позиции по тому же инструменту, если она есть.
+
+    Раньше здесь стоял запрет (`opposite_open`): встречный вход отклонялся,
+    чтобы не путать измерение. 627 отклонённых сигналов за 14 дней —
+    четвёртая по величине причина отказа, и единственная, которая не
+    защищала счёт.
+
+    🔴 Обоснование запрета к тому же не выдержало проверки. В докстринге
+    было написано, что встречная позиция гасит часть движения и «R перестаёт
+    значить то, что написано». Но R считается в ledger.close_trade по ЦЕНАМ
+    самой сделки — её вход, её стоп, её выход, — и чужая позиция в эту
+    арифметику не входит вовсе. Портилось не R, а подсчёт портфельного
+    риска, и это чинится подсчётом, а не запретом.
+
+    Вместо запрета — пометка: сделка запоминает, с чем она пересеклась, и
+    выборку можно разделить задним числом."""
+    row = con.execute(
+        "SELECT id FROM engine_trades WHERE status='open' AND mode='live' "
+        "AND symbol=? AND direction=? ORDER BY id DESC LIMIT 1",
+        (symbol, "short" if is_long else "long")).fetchone()
+    return int(row[0]) if row else None
+
+
 def portfolio_gate(con: sqlite3.Connection, signal: Signal, equity: float,
                    risk_money: float) -> None:
     """Лимиты кучности и суммарного риска.
@@ -370,29 +436,19 @@ def portfolio_gate(con: sqlite3.Connection, signal: Signal, equity: float,
                           f"у стратегии {signal.strategy} открыто {len(same_strat)} "
                           f"при потолке {MAX_OPEN_PER_STRATEGY}")
 
-    # Живой риск, а не риск на момент входа: позиции с выкупленным стопом
-    # больше ничего не занимают (см. live_risk).
-    used = sum(r[3] or 0.0 for r in rows)
-    if equity > 0 and (used + risk_money) / equity > MAX_PORTFOLIO_RISK:
+    if equity <= 0:
+        return
+    net, gross = exposure(rows, add=(signal.symbol, signal.is_long, risk_money))
+    if net / equity > MAX_PORTFOLIO_RISK:
         raise RiskRefusal(
             "cap_portfolio_risk",
-            f"суммарный риск {(used + risk_money) / equity * 100:.2f}% превысит предел "
+            f"направленный риск {net / equity * 100:.2f}% превысит предел "
             f"{MAX_PORTFOLIO_RISK * 100:.2f}%")
-
-
-def opposite_open(con: sqlite3.Connection, signal: Signal) -> None:
-    """Не набирать встречную позицию по тому же символу.
-
-    Хедж на демо технически возможен (счёт Hedge), но встречные позиции
-    делают результат стратегии неинтерпретируемым: часть движения гасится
-    собственной же сделкой, и R перестаёт значить то, что написано."""
-    other = "short" if signal.is_long else "long"
-    row = con.execute(
-        "SELECT count(*) FROM engine_trades WHERE status='open' AND mode='live' "
-        "AND symbol=? AND direction=?", (signal.symbol, other)).fetchone()
-    if row and row[0]:
-        raise RiskRefusal("opposite_open",
-                          f"по {signal.symbol} уже открыто {row[0]} в сторону {other}")
+    if gross / equity > MAX_GROSS_RISK:
+        raise RiskRefusal(
+            "cap_gross_risk",
+            f"валовой риск {gross / equity * 100:.2f}% превысит предел "
+            f"{MAX_GROSS_RISK * 100:.2f}% (пила выбивает встречные стопы оба)")
 
 
 # ─── стоп-кран стратегии ────────────────────────────────────────────────────

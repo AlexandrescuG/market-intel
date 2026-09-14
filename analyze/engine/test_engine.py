@@ -136,11 +136,52 @@ class Portfolio(unittest.TestCase):
             risk.portfolio_gate(self.con, sig(symbol="ZZZ", strategy="new"), equity, rm)
         self.assertEqual(c.exception.status, "cap_portfolio_risk")
 
-    def test_встречная_позиция_запрещена(self):
-        self._open(direction=SHORT)
+    def test_встречная_позиция_гасит_нетто(self):
+        """🔴 14.09. Запрет opposite_open снят: R считается по ценам самой
+        сделки и от чужой позиции не зависит. Встречный риск обязан
+        вычитаться, а не складываться."""
+        equity = 10_000.0
+        # Размер берём такой, чтобы ПАРА укладывалась в валовой потолок:
+        # по нетто она даёт ноль, и упереться должна только в валовой.
+        rm = equity * risk.MAX_GROSS_RISK / 2 * 0.9
+        self.assertGreater(rm, equity * risk.MAX_PORTFOLIO_RISK / 2,
+                           "размер должен быть таким, чтобы СУММА перебрала "
+                           "направленный лимит — иначе тест ничего не проверяет")
+        self._open(symbol="EURUSD", direction=SHORT, rm=rm, strategy="a")
+        # Встречный лонг: нетто становится нулём, а не удвоением.
+        risk.portfolio_gate(self.con, sig(symbol="EURUSD", direction=LONG,
+                                          strategy="b"), equity, rm)
+
+    def test_пила_ловится_валовым_потолком(self):
+        """Нетто этот случай НЕ ловит, и в этом весь смысл второго потолка:
+        цена сходила вверх и выбила стоп шорта, вернулась вниз и выбила стоп
+        лонга — потеряны оба, худший случай равен СУММЕ. Нетто в этот момент
+        показывал бы ноль."""
+        equity = 10_000.0
+        rm = equity * risk.MAX_GROSS_RISK / 2 + 1.0     # пара переберёт валовой
+        self._open(symbol="EURUSD", direction=SHORT, rm=rm, strategy="a")
         with self.assertRaises(risk.RiskRefusal) as c:
-            risk.opposite_open(self.con, sig(direction=LONG))
-        self.assertEqual(c.exception.status, "opposite_open")
+            risk.portfolio_gate(self.con, sig(symbol="EURUSD", direction=LONG,
+                                              strategy="b"), equity, rm)
+        self.assertEqual(c.exception.status, "cap_gross_risk")
+
+    def test_разные_инструменты_не_гасят_друг_друга(self):
+        """Гасить имеют право лонг и шорт ОДНОГО инструмента. Лонг EURUSD
+        против шорта золота — две разные ставки, а не ноль."""
+        equity = 10_000.0
+        half = equity * risk.MAX_PORTFOLIO_RISK * 0.7
+        self._open(symbol="EURUSD", direction=SHORT, rm=half, strategy="a")
+        with self.assertRaises(risk.RiskRefusal) as c:
+            risk.portfolio_gate(self.con, sig(symbol="XAUUSD", direction=LONG,
+                                              strategy="b"), equity, half)
+        self.assertEqual(c.exception.status, "cap_portfolio_risk")
+
+    def test_пересечение_помечается(self):
+        self._open(symbol="EURUSD", direction=SHORT, strategy="a")
+        tid = risk.crossing_trade(self.con, "EURUSD", is_long=True)
+        self.assertIsNotNone(tid)
+        self.assertIsNone(risk.crossing_trade(self.con, "EURUSD", is_long=False))
+        self.assertIsNone(risk.crossing_trade(self.con, "GBPUSD", is_long=True))
 
     def _open_live(self, symbol, direction, entry, stop, rpp, rm, strategy="t"):
         """Позиция с полной геометрией — по ней считается ЖИВОЙ риск."""
