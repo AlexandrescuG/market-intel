@@ -1329,6 +1329,15 @@ function Chrono2Section() {
   };
   const [idx, setIdx] = useState(initialIdx);
   const [done, setDone] = useState(() => stations.map((_,i) => i===initialIdx()));
+  // Ряды станций (chrono2_frames.json) приходят после первой отрисовки —
+  // без этой подписки станция, показанная до их загрузки, так и осталась бы
+  // иллюстрацией, и картина зависела бы от скорости сети.
+  const [, setFramesTick] = useState(0);
+  useEffect(() => {
+    const onFrames = () => setFramesTick(t => t + 1);
+    window.addEventListener("chrono2-frames", onFrames);
+    return () => window.removeEventListener("chrono2-frames", onFrames);
+  }, []);
   const station = stations[idx];
   const doneCount = done.filter(Boolean).length;
 
