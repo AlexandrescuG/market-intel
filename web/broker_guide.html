@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/design.css?v=20260903b">
+<link rel="stylesheet" href="/assets/design.css?v=20260909">
 <link rel="stylesheet" href="/assets/tokens.css?v=1">
 <script src="/assets/i18n.js?v=2" defer></script>
 <script src="/assets/sbf-symbols.js?v=2" defer></script>
@@ -60,6 +60,47 @@ body{
 .guide-table th,.guide-table td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
 .guide-table th{font-weight:700;background:var(--cream,#f3f2ef)}
 .guide-table-caption{font-size:12px;color:var(--muted);margin-top:-6px;margin-bottom:16px}
+
+/* 🔴 ТАБЛИЦА НА ТЕЛЕФОНЕ РАЗВОРАЧИВАЕТСЯ В КАРТОЧКИ, А НЕ УЕЗЖАЕТ ЗА КРАЙ.
+   Замер 14.09.2026: на /brokers/xm таблица выходила за экран на 16 px, на
+   /brokers/avatrade на 25. Виноваты не колонки как таковые, а длинные
+   значения в одной ячейке — «5 USD в месяц после 90 дней без сделок»
+   и «CFD — MT5 (выбирается на шаге 2 регистрации…)»: три колонки при
+   360 px дают каждой около сотни пикселей, и такая строка растягивает
+   таблицу шире экрана независимо от вёрстки.
+
+   Горизонтальную прокрутку здесь брать нельзя: у таблицы «Параметр ·
+   Значение · Источник» именно последняя колонка и уезжает из виду, то
+   есть прячется ровно то, ради чего страница существует — откуда взята
+   цифра. Поэтому строка становится карточкой: название параметра
+   заголовком, значение под ним, источник — мелкой подписью снизу.
+   Подпись колонки берётся из data-col, который guide.js кладёт в каждую
+   ячейку: шапка скрыта, и без неё «100 USD» повисает без объяснения. */
+@media (max-width: 768px){
+  .guide-table, .guide-table tbody, .guide-table tr, .guide-table td{display:block;width:auto}
+  /* 🔴 display:none, а не «визуально скрыть» через clip. Обычно шапку прячут
+     off-screen, чтобы её дочитал скринридер, — но здесь подпись колонки уже
+     стоит внутри каждой ячейки, и off-screen шапка озвучивала бы названия
+     колонок дважды. Плюс она остаётся в раскладке: ячейки сохраняют полную
+     ширину, и замер честно рапортовал «th вылезает на 217 px» там, где
+     страница за край не выходит. */
+  .guide-table thead{display:none}
+  .guide-table{border-collapse:separate;margin:14px 0}
+  .guide-table tr{border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-bottom:10px;background:var(--paper)}
+  .guide-table td{border-bottom:0;padding:3px 0;font-size:14px;line-height:1.5;word-break:break-word}
+  .guide-table td:first-child{font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.02em;color:var(--muted);padding-bottom:5px}
+  /* Подпись колонки — только со второй ячейки: у первой роль подписи
+     играет она сама, дублировать «Параметр» над «Плечо» незачем.
+     🔴 И не в таблице из двух колонок. Первый вариант ставил подпись
+     всюду, и на скриншоте вышло «ПЛЕЧО · ЗНАЧЕНИЕ · 1:1000» — лишняя
+     строка, которая не сообщает ничего: когда колонки две, «значение»
+     это единственное, чем вторая ячейка вообще может быть. В таблице из
+     трёх колонок подпись, наоборот, нужна — она отделяет цифру от того,
+     откуда цифра взята. Условие структурное (число колонок), а не по
+     слову «Значение»: проверка по тексту развалилась бы на ro/en. */
+  .guide-table:not([data-cols="2"]) td:not(:first-child)::before{content:attr(data-col);display:block;font-size:11px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);margin-bottom:1px}
+  .guide-table td:last-child:not(:nth-child(2)){font-size:12.5px;color:var(--muted);margin-top:4px}
+}
 
 .guide-needed{margin:0 0 26px;padding:14px 16px;background:var(--paper);border:1px solid var(--line);border-radius:8px}
 .guide-needed div{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);margin-bottom:8px}

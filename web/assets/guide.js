@@ -113,12 +113,22 @@
   }
 
   // ── Блок: произвольная таблица (условия торговли, факты) ───────────────────
+  // 🔴 Название колонки уезжает в data-col КАЖДОЙ ячейки, а не только в шапку.
+  // На телефоне таблица разворачивается в карточки (CSS в broker_guide.html):
+  // шапка скрыта, и без подписи внутри ячейки «5 USD в месяц после 90 дней»
+  // повисает без объяснения, что это. Подпись рисуется из ::before по
+  // data-col — поэтому она обязана быть в разметке, а не только в <th>.
   function renderTable(b) {
-    var thead = '<tr>' + b.columns.map(function (c) { return '<th>' + escapeHtml(c) + '</th>'; }).join('') + '</tr>';
+    var cols = b.columns || [];
+    var thead = '<tr>' + cols.map(function (c) { return '<th>' + escapeHtml(c) + '</th>'; }).join('') + '</tr>';
     var tbody = b.rows.map(function (row) {
-      return '<tr>' + row.map(function (cell) { return '<td>' + escapeHtml(cell) + '</td>'; }).join('') + '</tr>';
+      return '<tr>' + row.map(function (cell, i) {
+        return '<td data-col="' + escapeHtml(cols[i] || '') + '">' + escapeHtml(cell) + '</td>';
+      }).join('') + '</tr>';
     }).join('');
-    return '<table class="guide-table"><thead>' + thead + '</thead><tbody>' + tbody + '</tbody></table>' +
+    // data-cols нужен мобильной вёрстке: в таблице ровно из двух колонок
+    // подпись «Значение» над значением — шум (см. CSS в broker_guide.html).
+    return '<table class="guide-table" data-cols="' + cols.length + '"><thead>' + thead + '</thead><tbody>' + tbody + '</tbody></table>' +
       (b.caption ? '<p class="guide-table-caption">' + linkify(b.caption) + '</p>' : '');
   }
 
