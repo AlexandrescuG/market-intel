@@ -73,7 +73,18 @@ from playwright.sync_api import sync_playwright
   const кандидаты = [];
   for (const el of document.querySelectorAll('body *')) {
     const s = getComputedStyle(el);
-    if (s.display === 'none' || s.visibility === 'hidden' || s.position === 'fixed') continue;
+    if (s.display === 'none' || s.visibility === 'hidden') continue;
+    // 🔴 Закреплённый предок, а не только сам элемент. Нижний нав и круглая
+    // кнопка отзыва закреплены и тянутся по ширине ДОКУМЕНТА, поэтому
+    // показываются переполненными всякий раз, когда документ раздул кто-то
+    // другой. Проверка только на самом элементе их пропускала, но ловила их
+    // детей: в отчёте «Брокеры +47» и «svg +15» стояли выше настоящего
+    // виновника — ряда таймфреймов. Дважды за день я шёл чинить следствие.
+    let закреплён = false;
+    for (let n = el; n && n !== document.body; n = n.parentElement) {
+      if (getComputedStyle(n).position === 'fixed') { закреплён = true; break; }
+    }
+    if (закреплён) continue;
     const r = el.getBoundingClientRect();
     if (r.width === 0 || r.height === 0) continue;
     const перелёт = Math.round(r.right - ш);

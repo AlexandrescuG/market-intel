@@ -355,7 +355,10 @@ a:hover{text-decoration:underline;color:var(--glow)}
 .tcard .obs{margin-top:6px;font-size:10px;color:var(--faint)}
 
 /* signals */
-.tabs{display:flex;gap:6px;margin-bottom:14px}
+/* flex-wrap, а не медиазапрос: три вкладки «Экономика · Геополитика ·
+   Соцсети» не влезали в 320 px и вылезали на 16. Перенос срабатывает
+   только когда места нет, поэтому на широком экране строка прежняя. */
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
 .sig{padding:10px 0;border-bottom:1px solid var(--line)}
 .sig:last-child{border:none}
 .sig .m{display:flex;gap:8px;font-size:10px;color:var(--muted);
@@ -519,7 +522,18 @@ a:hover{text-decoration:underline;color:var(--glow)}
 
 /* live chart controls */
 .ctrl-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:8px 0 12px}
-.ctrl-tf,.ctrl-mode,.ctrl-tog{display:flex;gap:3px}
+/* 🔴 Восемь таймфреймов «M1…W1» занимают 339 px и не влезали ни в 360, ни
+   в 320: ряд выезжал за край (+6 и +46), а следом за ним — нижний нав,
+   который тянется по ширине документа.
+   Чинил я сперва НЕ ЭТОТ элемент: такой же с виду ряд `.tf-grp` лежит в
+   chart.html, и правка ушла туда. /chart.html при этом и до, и после
+   показывал ноль — то есть я поправил здоровое место и ничего не сломал
+   только по случайности. Виновника зовут `#techTf.ctrl-tf`, и живёт он
+   здесь. Замер называл его имя с самого начала; я прочитал текст кнопок
+   и пошёл искать по тексту.
+   Перенос, а не прокрутка: таймфрейм, уехавший из виду, человек не
+   найдёт, а тут каждый из восьми — равноправный вход в график. */
+.ctrl-tf,.ctrl-mode,.ctrl-tog{display:flex;flex-wrap:wrap;gap:3px}
 
 /* pattern library */
 .gpills-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
