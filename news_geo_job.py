@@ -51,7 +51,7 @@ ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tools"))
 
-from core import news_patterns  # noqa: E402
+from core import news_patterns, sqlite_write  # noqa: E402
 
 SIGNALS_DB = ROOT / "data" / "signals.db"
 BOT_DB = Path("/mnt/sbfdata/sbf-platform/SBFAcademy_bot/bot.db")
@@ -176,6 +176,7 @@ def run(hours: int = DEFAULT_HOURS, verbose: bool = False) -> int:
     now = int(time.time())
     stats = {"event": 0, "headline": 0, "demonym": 0, "symbol": 0, "нет": 0}
     written = 0
+    привязки: list[tuple] = []
     for uid, title, text in rows:
         title = (title or "").strip()
         country = rule = None
@@ -222,17 +223,29 @@ def run(hours: int = DEFAULT_HOURS, verbose: bool = False) -> int:
             stats["нет"] += 1
             continue
         p = places[country]
-        con.execute(
-            "INSERT OR REPLACE INTO news_geo"
-            "(news_uid, country, lon, lat, rule, ts, evidence) VALUES(?,?,?,?,?,?,?)",
+        привязки.append(
             (uid, country, p["lon"], p["lat"], rule, now, (evidence or "")[:80]))
         stats[rule] += 1
         written += 1
 
-    # Чистим привязки к новостям, которых уже нет: news_geo ссылается на uid, а
-    # сами новости удаляются по сроку хранения (news_burst_job._retention).
-    con.execute("DELETE FROM news_geo WHERE news_uid NOT IN (SELECT uid FROM signals)")
-    con.commit()
+    # 🔴 Запись — отдельной короткой транзакцией в конце, а не по строке внутри
+    # цикла. Раньше sqlite открывал транзакцию на первом INSERT и закрывал
+    # единственным commit() после всего разбора, поэтому задача и падала от
+    # чужой блокировки («database is locked» 14.09.2026), и сама держала
+    # signals.db закрытым весь прогон. Почему при этом не спасал уже стоящий
+    # busy_timeout=60000 — в core/sqlite_write.py.
+    def пишем(c: sqlite3.Connection) -> None:
+        c.executemany(
+            "INSERT OR REPLACE INTO news_geo"
+            "(news_uid, country, lon, lat, rule, ts, evidence) VALUES(?,?,?,?,?,?,?)",
+            привязки)
+        # Чистим привязки к новостям, которых уже нет: news_geo ссылается на
+        # uid, а сами новости удаляются по сроку хранения
+        # (news_burst_job._retention).
+        c.execute("DELETE FROM news_geo "
+                  "WHERE news_uid NOT IN (SELECT uid FROM signals)")
+
+    sqlite_write.записать(con, пишем, verbose=verbose)
     con.close()
 
     if verbose:
