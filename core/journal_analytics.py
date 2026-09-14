@@ -86,8 +86,16 @@ def get_discipline_cost(user_id: str = "default", period: str = "90d") -> dict:
         [user_id] + args,
     ).fetchall()
 
+    # 🔴 Псевдоним t обязателен: _period_where отдаёт «AND t.close_ts >= ?».
+    # Без него запрос падал с «no such column: t.close_ts», исключение
+    # уходило из обработчика наружу и рвало соединение — снаружи это 502.
+    # Найдено обходом сайта на живом телефоне 14.09.2026: /journal стабильно
+    # получал 502 на discipline-cost и setups. В браузере разработчика этого
+    # не видно, пока в дневнике нет ни одной сделки: при user_id без записей
+    # до этого запроса дело доходит всё равно, а вот заметить 502 в консоли
+    # на десктопе было некому — страница молча показывала пустой блок.
     all_trades_q = c.execute(
-        f"SELECT id, pnl_r FROM trades WHERE user_id=? {where}",
+        f"SELECT t.id, t.pnl_r FROM trades t WHERE t.user_id=? {where}",
         [user_id] + args,
     ).fetchall()
 
@@ -100,7 +108,8 @@ def get_discipline_cost(user_id: str = "default", period: str = "90d") -> dict:
         f"""SELECT rule_key, COUNT(*) AS cnt, SUM(t.pnl_r) AS sum_r
             FROM trade_violations tv
             JOIN trades t ON t.id = tv.trade_id AND t.user_id = ?
-            {where.replace('t.close_ts', 't.close_ts')}
+            WHERE 1=1
+            {where}
             GROUP BY rule_key ORDER BY cnt DESC LIMIT 5""",
         [user_id] + args,
     ).fetchall()
@@ -158,15 +167,17 @@ def get_setup_analytics(user_id: str = "default", period: str = "90d") -> list[d
     c = _conn()
 
     rows = c.execute(
-        f"""SELECT setup_tag,
-                   CAST(strftime('%w', close_ts) AS INTEGER) AS dow,
-                   CAST(strftime('%H', close_ts) AS INTEGER) AS hour,
-                   pnl_r,
-                   CASE WHEN pnl_r > 0 THEN 1 ELSE 0 END AS win
-            FROM trades
-            WHERE user_id=? AND setup_tag IS NOT NULL AND setup_tag != ''
+        # Псевдоним t — по той же причине, что и выше: фрагмент периода
+        # приходит из _period_where уже с «t.».
+        f"""SELECT t.setup_tag,
+                   CAST(strftime('%w', t.close_ts) AS INTEGER) AS dow,
+                   CAST(strftime('%H', t.close_ts) AS INTEGER) AS hour,
+                   t.pnl_r,
+                   CASE WHEN t.pnl_r > 0 THEN 1 ELSE 0 END AS win
+            FROM trades t
+            WHERE t.user_id=? AND t.setup_tag IS NOT NULL AND t.setup_tag != ''
             {where}
-            ORDER BY setup_tag, close_ts""",
+            ORDER BY t.setup_tag, t.close_ts""",
         [user_id] + args,
     ).fetchall()
     c.close()

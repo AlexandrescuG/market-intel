@@ -1408,12 +1408,32 @@ def _edu_inject(ch: int, lang: str = i18n.DEFAULT_LANG) -> str:
 <script src="/edu/edu-live.js"></script>
 <div id="sbf-pro-toast" style="position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#2B2B33;color:#fff;font-family:'JetBrains Mono',monospace;font-size:12px;padding:10px 20px;border-radius:8px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:9999">{i18n.t("edu.pro_available_later", lang)}</div>
 <script>
+/* Плашка поднимается НАД закреплёнными полосами — и сразу при загрузке, а не
+   только в момент показа. Она невидима (opacity:0), но в раскладке стоит, и
+   проверка перекрытий честно находила её на панели главы: «невидимо, значит
+   не считается» — плохое оправдание, потому что показывается она ровно туда,
+   где лежала. Высоту стека считает sbf-feedback.js: один расчёт на всех. */
+function sbfПоднятьПлашку() {{
+  var t=document.getElementById('sbf-pro-toast');
+  if(t && window.SbfНизСтека) t.style.bottom=(window.SbfНизСтека(t)+12)+'px';
+}}
+window.addEventListener('load', function(){{ setTimeout(sbfПоднятьПлашку, 1200); }});
+
 function sbfNavigate(tool) {{
   var routes = {{grafik:'/grafik',chart:'/grafik','risk-calc':'/grafik'}};
   var href = routes[tool];
   if(href){{ window.location.href=href; return; }}
   var t=document.getElementById('sbf-pro-toast');
-  if(t){{t.style.opacity='1';setTimeout(function(){{t.style.opacity='0';}},2800);}}
+  // 🔴 Плашка стоит НАД закреплёнными полосами, а не поверх них. В разметке
+  // у неё bottom:80px — число из времён, когда снизу была одна полоса. Потом
+  // добавился нижний нав, панель главы уехала вверх, и плашка стала всплывать
+  // ровно на ней: замер на живом телефоне 14.09.2026 — перекрытие 184×26 px.
+  // Высоту стека считает sbf-feedback.js (window.SbfНизСтека) — один расчёт
+  // на всех, иначе следующая полоса снова разойдётся с числом в разметке.
+  if(t){{
+    sbfПоднятьПлашку();
+    t.style.opacity='1';setTimeout(function(){{t.style.opacity='0';}},2800);
+  }}
 }}
 (function(){{
   var K='sbf_edu_done', C={ch}, TICK='{ticker}';
