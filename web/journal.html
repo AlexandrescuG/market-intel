@@ -499,6 +499,27 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
 .thermo-chip .tc-value.tc-cold{color:var(--muted)}
 .thermo-chip .tc-bar{height:3px;border-radius:2px;background:var(--line);margin-top:5px;overflow:hidden}
 .thermo-chip .tc-bar i{display:block;height:100%;background:var(--gold)}
+
+/* 🔴 ЧЕТЫРЕ КОЛОНКИ НА ТЕЛЕФОНЕ РЕЖУТ ПОДПИСИ ДО НЕУЗНАВАЕМОСТИ.
+   Сетка стояла repeat(4, ...) при любой ширине: на 393 px это по 80 px на
+   чип, и подписи уходили в многоточие. Замер 14.09.2026
+   (tools/audit_truncated.py) — семь обрезанных подписей на одной странице,
+   худшая показывала 15% текста: «Занятость ADP, за неделю · США · через
+   22ч 8м» превращалось в «Занятость…». Ширина при этом была идеальна, в
+   консоли пусто — ни одна прежняя проверка этого не видела, нашлось на
+   снимке с живого телефона.
+   Две колонки вместо четырёх и перенос вместо обрезки: подпись, которую
+   нельзя дочитать, не сообщает ничего, а ради экономии высоты её и
+   резали. Клампы оставляем — они держат карточку от разрастания, если
+   текст окажется совсем длинным, но на двух-трёх строках он умещается. */
+@media (max-width: 640px){
+  .thermo-chips{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .thermo-chip .tc-label,
+  .thermo-chip .tc-value{white-space:normal;overflow-wrap:anywhere;
+    display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden}
+  .thermo-chip .tc-label{-webkit-line-clamp:2;line-height:1.25}
+  .thermo-chip .tc-value{-webkit-line-clamp:3;line-height:1.3}
+}
 .j-open-item{font-size:12px;color:var(--ink);background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:6px 10px}
 .j-retro-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px}
 .j-retro-card{background:var(--soft);border:1px solid var(--line);
