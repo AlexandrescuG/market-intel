@@ -95,6 +95,55 @@ class Sizing(unittest.TestCase):
         self.assertGreaterEqual(vol, 0.01)
 
 
+class StopClamp(unittest.TestCase):
+    """🔴 14.09. Барьер брокера проверялся только на ВХОДЕ. Сопровождение
+    просило стоп ближе минимальной дистанции, получало «Invalid stops» и
+    повторяло это каждый час: 15 прогонов подряд 13.09 с «перенесено=0
+    ошибок=2», потом ещё трижды по три ошибки 14.09."""
+
+    ZAR = SimpleNamespace(point=0.00001, trade_stops_level=2000, digits=5)
+    GBP = SimpleNamespace(point=0.00001, trade_stops_level=20, digits=5)
+
+    @staticmethod
+    def tick(bid, ask):
+        return SimpleNamespace(bid=bid, ask=ask)
+
+    def test_слишком_близкий_стоп_прижимается_а_не_падает(self):
+        """Числа из живого замера: хотели 16.28914 при цене 16.28640, то есть
+        0.00274 при нужных 0.02200."""
+        got = risk.clamp_stop(16.28914, is_long=True, price=16.28640,
+                              cur_stop=16.13596, symbol_info=self.ZAR,
+                              tick=self.tick(16.28640, 16.28840))
+        self.assertIsNotNone(got, "перенос не должен отменяться целиком")
+        need = risk.min_barrier(self.ZAR, self.tick(16.28640, 16.28840))
+        self.assertLessEqual(got, 16.28640 - need + 1e-9,
+                             "прижали недостаточно — брокер снова откажет")
+        self.assertGreater(got, 16.13596, "стоп обязан уйти вперёд")
+
+    def test_шорт_прижимается_вверх(self):
+        got = risk.clamp_stop(1.34768, is_long=False, price=1.34799,
+                              cur_stop=1.35179, symbol_info=self.GBP,
+                              tick=self.tick(1.34779, 1.34799))
+        need = risk.min_barrier(self.GBP, self.tick(1.34779, 1.34799))
+        self.assertGreaterEqual(got, 1.34799 + need - 1e-9)
+        self.assertLess(got, 1.35179)
+
+    def test_назад_стоп_не_едет(self):
+        """Если даже разрешённый уровень хуже нынешнего стопа — не двигаем
+        вовсе. Иначе прижатие превратилось бы в ослабление защиты."""
+        self.assertIsNone(
+            risk.clamp_stop(16.30, is_long=True, price=16.10,
+                            cur_stop=16.09, symbol_info=self.ZAR,
+                            tick=self.tick(16.10, 16.11)))
+
+    def test_свободный_стоп_не_трогается(self):
+        """Когда до цены места хватает, прижимать нечего."""
+        t = self.tick(1.35000, 1.35002)
+        got = risk.clamp_stop(1.34500, is_long=True, price=1.35000,
+                              cur_stop=1.34000, symbol_info=self.GBP, tick=t)
+        self.assertAlmostEqual(got, 1.34500)
+
+
 class Portfolio(unittest.TestCase):
     def setUp(self):
         self.con = sqlite3.connect(":memory:")

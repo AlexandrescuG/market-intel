@@ -322,6 +322,51 @@ def cost_gate(signal: Signal, tick) -> None:
             f"{MAX_SPREAD_SHARE_OF_RISK * 100:.0f}%: сделка стартует с пути к стопу")
 
 
+def min_barrier(symbol_info, tick) -> float:
+    """Минимальная дистанция от цены до стопа, которую примет брокер.
+
+    Одна формула на вход и на сопровождение. Раньше жила только внутри
+    broker_barrier_gate, и перенос стопа её не знал — см. clamp_stop."""
+    ready = getattr(symbol_info, "stops_level", None)
+    if ready is not None:
+        need = float(ready)
+    else:
+        point = float(getattr(symbol_info, "point", 0.0) or 0.0)
+        if point <= 0:
+            return 0.0
+        need = float(getattr(symbol_info, "trade_stops_level", 0) or 0) * point
+    if tick is not None:
+        need += abs(float(tick.ask) - float(tick.bid))
+    return max(0.0, need)
+
+
+def clamp_stop(new_stop: float, *, is_long: bool, price: float, cur_stop: float,
+               symbol_info, tick) -> float | None:
+    """Подвинуть стоп настолько, насколько разрешает брокер. None — не двигать.
+
+    🔴 14.09. Сопровождение просило стоп ближе к цене, чем позволяет
+    `trade_stops_level`, брокер отвечал `retcode=10016 Invalid stops`, и
+    движок пробовал снова КАЖДЫЙ ЧАС с тем же результатом. Замер на живых
+    позициях в момент находки:
+
+        USDZAR long   хотели 16.28914 при цене 16.28640 -> 0.00274 при нужных 0.02200
+        GBPUSD short  хотели  1.34768 при цене  1.34799 -> 0.00031 при нужных 0.00037
+        GBPUSD short  хотели  1.34763 при цене  1.34799 -> 0.00036 при нужных 0.00037
+
+    Постоянный отказ, притворяющийся временным: счётчик ошибок рос, стопы не
+    двигались, и сопровождение — ЕДИНСТВЕННОЕ, что у нас измеренно даёт
+    преимущество (+0.0765 R на сделку), — молча не работало на этих позициях.
+
+    Не пропускаем перенос, а прижимаем к ближайшему разрешённому уровню:
+    запереть меньше прибыли лучше, чем не запереть ничего. Но только вперёд —
+    если даже разрешённый уровень хуже нынешнего стопа, не двигаем вовсе."""
+    need = min_barrier(symbol_info, tick)
+    limit = price - need if is_long else price + need
+    allowed = min(new_stop, limit) if is_long else max(new_stop, limit)
+    forward = allowed > cur_stop if is_long else allowed < cur_stop
+    return allowed if forward else None
+
+
 def broker_barrier_gate(signal: Signal, symbol_info, tick) -> None:
     """Барьеры должны быть дальше минимума, который требует брокер.
 

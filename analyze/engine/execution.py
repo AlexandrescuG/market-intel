@@ -21,7 +21,7 @@ import logging
 import sqlite3
 import time
 
-from analyze.engine import ledger, manage
+from analyze.engine import ledger, manage, risk
 from analyze.engine.contracts import ENGINE_MAGIC, Decision
 from analyze.mt5_calibration import Bridge
 from analyze.mt5_safety import SafetyRefusal, assert_autotrading, assert_demo
@@ -241,7 +241,7 @@ def manage_open(con: sqlite3.Connection, mt5, conn) -> dict:
     import core.price_bars as _pb
     from analyze.engine import notify
 
-    stats = {"moved": 0, "errors": 0}
+    stats = {"moved": 0, "errors": 0, "held": 0}
     if not ACTIVE_RULES.enabled:
         return stats
     live = {int(p.ticket): p for p in engine_positions(mt5.positions_get())}
@@ -262,6 +262,19 @@ def manage_open(con: sqlite3.Connection, mt5, conn) -> dict:
         if new is None:
             continue
         si = mt5.symbol_info(pos.symbol)
+        tick = mt5.symbol_info_tick(pos.symbol)
+        # 🔴 14.09: барьер брокера проверялся только на ВХОДЕ. Сопровождение
+        # просило стоп ближе минимальной дистанции, получало «Invalid stops»
+        # и повторяло это каждый час с тем же исходом. Прижимаем к ближайшему
+        # разрешённому уровню; если и он не лучше нынешнего — не двигаем и
+        # ошибкой не считаем, двигать было нечего.
+        px = float(tick.bid if is_long else tick.ask) if tick else None
+        if px is not None:
+            new = risk.clamp_stop(new, is_long=is_long, price=px,
+                                  cur_stop=cur_stop, symbol_info=si, tick=tick)
+            if new is None:
+                stats["held"] = stats.get("held", 0) + 1
+                continue
         digits = int(getattr(si, "digits", 5))
         ok, err = modify_stop(conn, mt5, pos, new, digits)
         if not ok:
