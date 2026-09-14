@@ -100,6 +100,18 @@ class Portfolio(unittest.TestCase):
         self.con = sqlite3.connect(":memory:")
         self.con.executescript(ledger.SCHEMA)
 
+    @staticmethod
+    def _lonely(i: int) -> str:
+        """Пара с НЕПЕРЕСЕКАЮЩИМИСЯ ногами: AAABBB, CCCDDD, …
+
+        Нужна там, где проверяется портфельный потолок и только он. С
+        настоящими инструментами так не выйдет: у любых двух пар из нашего
+        списка есть общая нога (обычно доллар), и тест упрётся в потолок по
+        ноге, не дойдя до проверяемого."""
+        a = chr(ord("A") + (i * 2) % 26) * 3
+        b = chr(ord("A") + (i * 2 + 1) % 26) * 3
+        return a + b
+
     def _open(self, symbol="XAUUSD", direction=LONG, strategy="t", rm=25.0):
         self.con.execute(
             "INSERT INTO engine_trades (strategy, symbol, direction, mode, status, "
@@ -146,7 +158,7 @@ class Portfolio(unittest.TestCase):
         иначе тест упрётся в неё и перестанет проверять то, что называет."""
         equity = 10_000.0
         rm = equity * risk.RISK_PER_TRADE
-        self.assertLessEqual(3 * rm / equity, risk.MAX_USD_LEG_RISK,
+        self.assertLessEqual(3 * rm / equity, risk.leg_cap(),
                              "три ставки в одну сторону уже не влезают в "
                              "долларовую ногу — подбери размеры заново")
         for _ in range(2):
@@ -163,9 +175,9 @@ class Portfolio(unittest.TestCase):
         n = int(budget // rm)                     # столько ещё помещается
         self.assertLess(n + 1, risk.MAX_OPEN_TOTAL, "тест упрётся не в тот лимит")
         for i in range(n):
-            self._open(symbol=f"S{i}", strategy=f"st{i}", rm=rm)
+            self._open(symbol=self._lonely(i), strategy=f"st{i}", rm=rm)
         with self.assertRaises(risk.RiskRefusal) as c:
-            risk.portfolio_gate(self.con, sig(symbol="ZZZ", strategy="new"), equity, rm)
+            risk.portfolio_gate(self.con, sig(symbol=self._lonely(20), strategy="new"), equity, rm)
         self.assertEqual(c.exception.status, "cap_portfolio_risk")
 
     def test_встречная_позиция_гасит_нетто(self):
@@ -207,9 +219,9 @@ class Portfolio(unittest.TestCase):
         rm = equity * risk.RISK_PER_TRADE
         n = int(risk.MAX_PORTFOLIO_RISK / risk.RISK_PER_TRADE)
         for i in range(n):
-            self._open(symbol=f"S{i}", direction=SHORT, rm=rm, strategy=f"st{i}")
+            self._open(symbol=self._lonely(i), direction=SHORT, rm=rm, strategy=f"st{i}")
         with self.assertRaises(risk.RiskRefusal) as c:
-            risk.portfolio_gate(self.con, sig(symbol="ZZZ", direction=LONG,
+            risk.portfolio_gate(self.con, sig(symbol=self._lonely(20), direction=LONG,
                                               strategy="new"), equity, rm)
         self.assertEqual(c.exception.status, "cap_portfolio_risk")
 
@@ -220,15 +232,20 @@ class Portfolio(unittest.TestCase):
         одна ставка, а не три независимые."""
         equity = 10_000.0
         rm = equity * risk.RISK_PER_TRADE
-        n = int(risk.MAX_USD_LEG_RISK / risk.RISK_PER_TRADE)
-        self._open(symbol="EURUSD", direction=LONG, rm=rm, strategy="a")
-        self._open(symbol="GBPUSD", direction=LONG, rm=rm, strategy="b")
-        self._open(symbol="USDJPY", direction=SHORT, rm=rm, strategy="c")
-        self.assertEqual(n, 3, "потолок и размер сделки разошлись — поправь тест")
+        # Сколько одинаковых ставок влезает в ногу — выводим из потолка,
+        # а не зашиваем: потолок считается из корреляции и будет меняться.
+        n = int(risk.leg_cap() * equity // rm)
+        self.assertGreaterEqual(n, 1)
+        pool = [("EURUSD", LONG), ("GBPUSD", LONG), ("USDJPY", SHORT),
+                ("USDZAR", SHORT), ("USDCNY", SHORT)]
+        for i in range(n):
+            s, d = pool[i]
+            self._open(symbol=s, direction=d, rm=rm, strategy=f"st{i}")
+        s, d = pool[n]
         with self.assertRaises(risk.RiskRefusal) as c:
-            risk.portfolio_gate(self.con, sig(symbol="USDZAR", direction=SHORT,
-                                              strategy="d"), equity, rm)
-        self.assertEqual(c.exception.status, "cap_usd_leg")
+            risk.portfolio_gate(self.con, sig(symbol=s, direction=d,
+                                              strategy="new"), equity, rm)
+        self.assertEqual(c.exception.status, "cap_leg_risk")
 
     def test_встречные_ноги_доллара_гасятся(self):
         """Лонг EURUSD и лонг USDJPY — ставки в РАЗНЫЕ стороны по доллару.
@@ -241,11 +258,49 @@ class Portfolio(unittest.TestCase):
         risk.portfolio_gate(self.con, sig(symbol="USDJPY", direction=LONG,
                                           strategy="b"), equity, rm)
 
-    def test_инструмент_без_доллара_в_ногу_не_попадает(self):
-        self.assertEqual(risk.usd_sign("EURUSD"), -1)
-        self.assertEqual(risk.usd_sign("XAUUSD"), -1)
-        self.assertEqual(risk.usd_sign("USDJPY"), 1)
-        self.assertEqual(risk.usd_sign("EURGBP"), 0)
+    def test_ноги_раскладываются(self):
+        self.assertEqual(risk.legs("EURUSD"), ("EUR", "USD"))
+        self.assertEqual(risk.legs("USDJPY"), ("USD", "JPY"))
+        # Золото — своя нога, а не «валюта против доллара с полным весом».
+        self.assertEqual(risk.legs("XAUUSD"), ("XAU", "USD"))
+        # Кросс без доллара тоже раскладывается: раньше он молча получал ноль.
+        self.assertEqual(risk.legs("EURGBP"), ("EUR", "GBP"))
+
+    def test_нераскладываемый_инструмент_это_отказ_а_не_ноль(self):
+        """🔴 Доделка 14.09. Первая версия возвращала 0 для всего, в чём нет
+        доллара, — инструмент выпадал из расчёта риска целиком и молча.
+        Неизвестный риск это не нулевой риск."""
+        with self.assertRaises(risk.RiskRefusal) as c:
+            risk.legs("BTC")
+        self.assertEqual(c.exception.status, "unknown_legs")
+
+    def test_кросс_пара_попадает_в_обе_ноги(self):
+        """Лонг EURGBP — ставка за евро и против фунта. При открытом лонге
+        EURUSD ставка по евро удваивается, и лимит обязан это видеть."""
+        e = risk.leg_exposure([("EURUSD", "long", "a", 100.0, 1)],
+                              add=("EURGBP", True, 100.0))
+        self.assertAlmostEqual(e["EUR"], 200.0)
+        self.assertAlmostEqual(e["USD"], -100.0)
+        self.assertAlmostEqual(e["GBP"], -100.0)
+
+    def test_потолок_ноги_выводится_из_корреляции(self):
+        """Потолок обязан ужесточаться при росте корреляции, а не быть
+        назначенным числом."""
+        soft = risk.leg_cap.__wrapped__ if hasattr(risk.leg_cap, "__wrapped__") else None
+        self.assertIsNone(soft)
+        cap = risk.leg_cap()
+        self.assertLess(cap, risk.MAX_PORTFOLIO_RISK,
+                        "при положительной корреляции нога обязана быть строже "
+                        "портфельного потолка")
+        self.assertGreater(cap, risk.RISK_PER_TRADE,
+                           "иначе не пройдёт даже одна сделка полного размера")
+
+    def test_протухший_замер_не_ослабляет_лимит(self):
+        """Незнание не повод ослаблять: без свежего файла берётся запасное
+        значение, и оно СТРОЖЕ последнего замера."""
+        rho, src = risk._corr_now()
+        self.assertGreaterEqual(risk.CORR_FALLBACK, rho - 1e-9,
+                                "запасная корреляция должна быть не мягче замера")
 
     def test_пересечение_помечается(self):
         self._open(symbol="EURUSD", direction=SHORT, strategy="a")
@@ -273,10 +328,10 @@ class Portfolio(unittest.TestCase):
         n = int(risk.MAX_PORTFOLIO_RISK / risk.RISK_PER_TRADE)
         for i in range(n):
             # Лонг со стопом ВЫШЕ входа: терять нечего, прибыль заперта.
-            self._open_live(f"S{i}", LONG, entry=1.1000, stop=1.1020,
+            self._open_live(self._lonely(i), LONG, entry=1.1000, stop=1.1020,
                             rpp=10_000.0, rm=rm, strategy=f"st{i}")
         # По записи лимит выбран целиком, живого риска в нём нет — проходим.
-        risk.portfolio_gate(self.con, sig(symbol="ZZZ", strategy="new"),
+        risk.portfolio_gate(self.con, sig(symbol=self._lonely(20), strategy="new"),
                             equity, rm)
 
     def test_живой_риск_считается_и_вверх(self):

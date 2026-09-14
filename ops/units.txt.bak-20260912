@@ -31,8 +31,6 @@ sbf-vorovka2.service         daemon  0        # зона Платформа/Бо
 sbf-academy-bot.service      daemon  0        # зона Платформа/Боты: Telegram-бот SBFAcademy (31.08: был голым процессом, лиды в CRM молчали)
 sbf-academy-api.service      daemon  0        # зона Платформа/Боты: API мини-приложения на :8000 (31.08: был голым процессом)
 sbf-site.service             daemon  0        # зона Сайт/Контент: лендинг lp.sbf.md и воронка /edu (31.08: был голым процессом)
-sbf-chat-tg.service          daemon  0        # зона CRM/Телефония: Telethon-воркер переписки @SBF_Support (autocall/chat) — единственный владелец сессии, второй экземпляр рвёт соединение обоим
-sbf-chat-brain.service       daemon  0        # зона CRM/Телефония: мозг переписки — агент + guard + эскалация, провайдер claude_cli
 
 # ── источники баров ─────────────────────────────────────────────────────────
 sbf-mt5-pull.timer           timer   7200     # *:05, доливка price_bars из MT5 (28 символов)
@@ -70,13 +68,6 @@ sbf-morning.timer            timer   180000   # 06:00, утренний синт
 sbf-brief-email.timer        timer   90000    # 06:20, брифинг на почту; включено владельцем 02.09, отправитель contact@sbf.md
 sbf-focus-batch.timer        timer   180000   # 05:50, батч Focus Engine
 sbf-news-geo.timer           timer   900      # каждые 15 мин: где на карте место новости; питает /api/geo/feed для карты и глобуса sbfconsult.com
-# 12.09.2026: переехало из crontab. Cron перезагрузку переживает, но
-# ~/sbf-start-all.sh про него не знает и healthcheck тоже: единая точка
-# запуска поднимала сайт sbfconsult.com и не поднимала его данные, и «сервер
-# отвечает» опять означало бы не то же, что «данные идут». Идёт следом за
-# sbf-news-geo (:05/:20/:35/:50): без сдвига лента собиралась по ещё не
-# пересчитанной географии.
-sbf-hero-feed.timer          timer   1800     # зона Сайт/Контент: лента первого экрана sbfconsult.com (hero-feed.json)
 sbf-news-media.timer         timer   1200     # каждые 20 мин: og:image статьи и логотип издания; питает карточки в ленте по активу (Эпицентр)
 sbf-event-map.timer          timer   180000   # 03:30, карта событий по инструментам (до уровней в 03:45)
 sbf-sr-levels.timer          timer   180000   # 03:45, уровни S/R
@@ -85,10 +76,6 @@ sbf-event-reactions.timer    timer   180000   # 04:30, реакции на со�
 sbf-factor-repack.timer      timer   180000   # 05:35, перепаковка factor_store
 sbf-pattern-stats.timer      timer   1300000  # Вс 05:00, бэктест паттернов (недельный)
 sbf-hourly-vol.timer         timer   1300000  # Вс 05:15, профиль волатильности (недельный)
-# 14.09: потолок риска на валютную ногу считается ИЗ корреляции, а не назначен
-# числом. Корреляция неустойчива (0.33 в первой половине окна против 0.58 во
-# второй), поэтому её пересчёт — часть работы движка, а не разовый замер.
-sbf-leg-corr.timer           timer   1300000  # Вс 05:30, корреляция валютных ног
 
 # ── alpha engine ────────────────────────────────────────────────────────────
 sbf-alpha-cycle-h1.timer     timer   7800     # ежечасно :44 UTC

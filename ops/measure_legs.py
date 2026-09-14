@@ -25,7 +25,10 @@
 from __future__ import annotations
 
 import argparse
+import datetime as dt
+import json
 import sys
+import time
 from itertools import combinations
 
 sys.path.insert(0, "/mnt/sbfdata/sbf-platform/market_intel")
@@ -111,12 +114,42 @@ def main() -> None:
         if c == c:
             vals.append(c)
 
-    if vals:
-        vals.sort()
-        med = vals[len(vals) // 2]
-        print(f"\nмедианная корреляция по доллару: {med:.2f}")
-        print("Вес для сложения ног — это она и есть: при 1.0 ноги складываются")
-        print("целиком, при 0.0 инструменты независимы и складывать нечего.")
+    if not vals:
+        raise SystemExit("корреляций не посчиталось")
+
+    vals.sort()
+    med = vals[len(vals) // 2]
+    p75 = vals[min(len(vals) - 1, int(len(vals) * 0.75))]
+    print(f"\nмедиана {med:.2f}, консервативный край (p75) {p75:.2f}, "
+          f"разброс {vals[0]:.2f}…{vals[-1]:.2f}")
+
+    # Устойчивость. Первая версия замера её не проверяла, и число 0.48 уехало
+    # в код константой — при том что по половинам окна оно 0.33 и 0.58.
+    keys = sorted(set.intersection(*[set(d) for d in usd.values()]))
+    half = len(keys) // 2
+    flips = 0
+    for x, y in combinations(sorted(usd), 2):
+        c1, _ = corr({k: usd[x][k] for k in keys[:half] if k in usd[x]},
+                     {k: usd[y][k] for k in keys[:half] if k in usd[y]})
+        c2, _ = corr({k: usd[x][k] for k in keys[half:] if k in usd[x]},
+                     {k: usd[y][k] for k in keys[half:] if k in usd[y]})
+        if c1 == c1 and c2 == c2 and (c1 > 0) != (c2 > 0):
+            flips += 1
+    print(f"пар, сменивших ЗНАК между половинами окна: {flips} из {len(vals)}")
+    if flips:
+        print("⚠ знак неустойчив — складывать ноги как общую ставку нельзя")
+
+    from analyze.engine import risk
+    out = {"ts": time.time(), "date": dt.date.today().isoformat(),
+           "tf": a.tf, "bars": a.bars, "pairs": len(vals),
+           "median": round(med, 4), "p75": round(p75, 4),
+           "min": round(vals[0], 4), "max": round(vals[-1], 4),
+           "sign_flips": flips}
+    risk.CORR_FILE.write_text(json.dumps(out, ensure_ascii=False, indent=2),
+                              encoding="utf-8")
+    print(f"\nзаписано в {risk.CORR_FILE.name}")
+    print(f"потолок на ногу при p75 {p75:.2f}: {risk.leg_cap() * 100:.2f}% капитала")
+    print("Берём p75, а не медиану: незнание не повод ослаблять лимит.")
 
 
 if __name__ == "__main__":
