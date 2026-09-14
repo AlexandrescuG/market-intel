@@ -939,7 +939,7 @@ function CrashLabV2() {
             <div style={{background:"rgba(255,255,255,0.04)",borderRadius:6,padding:12,marginBottom:16}}>
               <EquitySpark equity={result.equity} height={140}/>
             </div>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}} className="g2">
               <div style={{background:"rgba(255,255,255,0.05)",borderRadius:4,padding:14,textAlign:"center"}}>
                 <div style={{fontSize:10,color:"rgba(255,255,255,0.35)",marginBottom:5}}>{L.resultDrawdown}</div>
                 <div style={{fontSize:18,fontWeight:700,color:"#e74c3c",fontFamily:"monospace"}}>{result.maxDrawdownPct.toFixed(1)}%</div>
@@ -1327,7 +1327,7 @@ function PositionCalculator() {
           {/* Result panel */}
           <div style={{background:C.black,borderRadius:6,padding:"20px 24px",marginTop:8}}>
             <Mono size={10} color={C.gold} spacing={2} style={{display:"block",marginBottom:14}}>{S.calcResultTag}</Mono>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}} className="g2">
               {[
                 {label:S.calcMetricMaxVolume, val:`${maxUnits} ${inst.unit}`, big:true, color:C.gold},
                 {label:S.calcMetricPosValue,   val:`~$${positionValue.toLocaleString()}`, color:"#fff"},
@@ -1608,7 +1608,7 @@ function Chapter3() {
             <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:12}}>{S.conclTag}</Mono>
             <h3 style={{fontFamily:"'DM Serif Display',serif",fontSize:28,color:C.white,fontWeight:400}}>{S.conclTitle}</h3>
           </div>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}} className="g2">
             {conclusions.map((c,i) => (
               <div key={i} style={{display:"flex",gap:14,alignItems:"flex-start",padding:"14px 16px",background:"rgba(255,255,255,0.04)",borderRadius:4,border:"1px solid rgba(255,255,255,0.06)"}}>
                 <span style={{color:C.gold,fontFamily:"monospace",fontSize:11,marginTop:2,flexShrink:0}}>0{i+1}</span>
