@@ -149,6 +149,20 @@
     '.strip{overflow:hidden;border-bottom:1px solid var(--line);',
     'background:var(--paper);position:sticky;top:65px;z-index:40;}',
     '.strip-i{display:flex;flex-wrap:nowrap;width:max-content;will-change:transform;}',
+    // 🔴 То же правило, что и в web/index.html, и оно обязано быть ЗДЕСЬ.
+    //
+    // Стили шапки вставляются скриптом в рантайме, то есть попадают в
+    // документ ПОЗЖЕ страничного <style> — и при равной специфичности
+    // побеждают. Первый прогон правки это и показал: на 360 лента осталась
+    // overflow:hidden, хотя медиа-правило в index.html было написано
+    // правильно. Правило, живущее в одном из двух источников, — это
+    // правило, которое работает через раз.
+    '@media(max-width:768px){',
+    '.strip{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;',
+    'scrollbar-width:none;}',
+    '.strip::-webkit-scrollbar{display:none;}',
+    '.strip-i,.strip-inner{transform:none!important;will-change:auto;}',
+    '}',
     '.tick{padding:9px 16px;border-right:1px solid var(--line);min-width:112px;flex:0 0 auto;cursor:default;}',
     '.tick .k{font-size:10px;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;font-weight:600;}',
     '.tick .v{font-family:"JetBrains Mono",monospace;font-weight:600;font-size:14px;margin-top:3px;color:var(--ink);}',
@@ -579,7 +593,24 @@
     requestAnimationFrame(_stripFrame);
   }
 
+  // 🔴 ЭТОТ MARQUEE МЁРТВ, И ЗАПУСКАТЬ ЕГО НЕЛЬЗЯ.
+  //
+  // _stripFrame ищет элемент #stripI. На страницах его нет: живая дорожка
+  // называется #stripInner и живёт в web/index.html со своим собственным
+  // циклом. Проверено 14.09.2026 — getElementById('stripI') возвращает null
+  // на главной и в главах.
+  //
+  // То есть requestAnimationFrame крутился вечно, шестьдесят раз в секунду
+  // спрашивал у документа несуществующий элемент и ничего не двигал. На
+  // мониторе это незаметно, на телефоне это расход батареи за нарисованное
+  // никому.
+  //
+  // Сам код оставлен, а не удалён: если шапка когда-нибудь начнёт рисовать
+  // свою ленту (buildStrip выше — её строитель), запуск вернётся одной
+  // строкой. Молча удалять работающий строитель вместе с его двигателем —
+  // способ через полгода обнаружить, что ленту негде взять.
   (function initStripMarquee() {
+    if (!document.getElementById('stripI')) return;   // ленты шапки на странице нет
     var strip = document.getElementById('strip');
     if (strip) {
       strip.addEventListener('mouseenter', function () { _stripPaused = true; });
@@ -787,7 +818,7 @@ function _sbfLoadUserContext() {
 // Автозагрузка модуля профиля
 (function () {
   var s = document.createElement('script');
-  s.src = '/assets/sbf-profile.js?v=3';
+  s.src = '/assets/sbf-profile.js?v=4';
   s.async = false;
   document.head.appendChild(s);
 })();

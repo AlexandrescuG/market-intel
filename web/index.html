@@ -115,6 +115,22 @@ a:hover{text-decoration:underline;color:var(--glow)}
 .strip{overflow:hidden;border-bottom:1px solid var(--line);
   background:var(--paper);position:sticky;top:63px;z-index:20}
 .strip-inner{display:flex;flex-wrap:nowrap;width:max-content;will-change:transform}
+/* 🔴 НА ТЕЛЕФОНЕ ЛЕНТА НЕ ЕДЕТ, А ЛИСТАЕТСЯ ПАЛЬЦЕМ.
+   Замер 14.09.2026: дорожка 3597 px в окне 360, скорость 30 px/с — полный
+   круг ровно минута. При overflow:hidden пролистать нельзя, а пауза висела
+   на mouseenter, которого на телефоне не бывает. То есть читатель не мог
+   ни догнать уехавшее, ни остановить бегущее: оставалось ждать минуту.
+   Бегущая строка осмысленна там, где она боковым зрением, — на мониторе.
+   На узком экране она занимает всю ширину и требует внимания, поэтому
+   здесь это обычный список с прокруткой. */
+@media(max-width:768px){
+  .strip{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;
+    scrollbar-width:none}
+  .strip::-webkit-scrollbar{display:none}
+  /* Сбрасываем сдвиг, оставленный бегущей строкой до срабатывания медиа-
+     правила: иначе лента открылась бы прокрученной на случайное место. */
+  .strip-inner{transform:none!important;will-change:auto}
+}
 .tick{padding:9px 16px;border-right:1px solid var(--line);min-width:112px;flex:0 0 auto;cursor:default}
 .tick .k{font-size:10px;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;font-weight:600}
 .tick .v{font-family:'JetBrains Mono';font-weight:600;font-size:14px;margin-top:3px;color:var(--ink)}
@@ -2276,9 +2292,21 @@ var _tickerHalfW = 0;
 var _tickerPaused = false;
 var _tickerRAF = null;
 
+// 🔴 Бегущая строка — только на широком экране.
+//
+// На узком она превращается в обычный список с прокруткой пальцем (см. CSS
+// выше). Причина замерена: 3597 px дорожки в окне 360 при скорости 30 px/с
+// — это минута до последнего инструмента, без возможности ни догнать, ни
+// остановить. Проверяем ту же границу, что и media-правило: если развести
+// их, поедет лента, которую человек в этот момент листает пальцем.
+var _tickerNarrow = window.matchMedia('(max-width:768px)');
+
 function _tickerFrame() {
   var inner = document.getElementById('stripInner');
-  if (inner && !_tickerPaused) {
+  // 🔴 Не тратим кадры впустую. Раньше цикл крутился всегда: и когда лента
+  // уехала за верх страницы, и когда вкладка скрыта. На телефоне это
+  // расход батареи за нарисованное никому.
+  if (inner && !_tickerPaused && !_tickerNarrow.matches && !document.hidden) {
     if (!_tickerHalfW && inner.scrollWidth > 0) _tickerHalfW = inner.scrollWidth / 2;
     if (_tickerHalfW) {
       _tickerPos += 0.5;
@@ -2293,7 +2321,17 @@ var _stripEl = document.getElementById('strip');
 if (_stripEl) {
   _stripEl.addEventListener('mouseenter', function(){ _tickerPaused = true; });
   _stripEl.addEventListener('mouseleave', function(){ _tickerPaused = false; });
+  // Пауза по касанию — для планшетов и гибридов, где лента ещё едет, но
+  // мыши нет. Без этого «наведи, чтобы прочитать» там недоступно вовсе.
+  _stripEl.addEventListener('touchstart', function(){ _tickerPaused = true; }, {passive:true});
+  _stripEl.addEventListener('touchend', function(){ _tickerPaused = false; }, {passive:true});
 }
+// При переходе через границу сбрасываем сдвиг: иначе лента, ставшая
+// списком, откроется прокрученной на случайное место.
+_tickerNarrow.addEventListener('change', function(e){
+  var inner = document.getElementById('stripInner');
+  if (e.matches && inner) { inner.style.transform = ''; _tickerPos = 0; }
+});
 _tickerRAF = requestAnimationFrame(_tickerFrame);
 
 // ── Tech View: живой LW-график + библиотека паттернов ───────────────────────
