@@ -141,10 +141,18 @@ class Portfolio(unittest.TestCase):
                             equity, rm)
 
     def test_другой_символ_не_блокируется(self):
-        for _ in range(int(risk.MAX_SYMBOL_RISK / risk.RISK_PER_TRADE)):
-            self._open(symbol="XAUUSD", rm=10_000.0 * risk.RISK_PER_TRADE)
-        risk.portfolio_gate(self.con, sig(symbol="EURUSD", strategy="other"),
-                            10000.0, 25.0)
+        """Потолок на инструмент не должен мешать входу по ДРУГОМУ
+        инструменту. Размеры подобраны так, чтобы не задеть долларовую ногу:
+        иначе тест упрётся в неё и перестанет проверять то, что называет."""
+        equity = 10_000.0
+        rm = equity * risk.RISK_PER_TRADE
+        self.assertLessEqual(3 * rm / equity, risk.MAX_USD_LEG_RISK,
+                             "три ставки в одну сторону уже не влезают в "
+                             "долларовую ногу — подбери размеры заново")
+        for _ in range(2):
+            self._open(symbol="XAUUSD", direction=LONG, rm=rm)
+        risk.portfolio_gate(self.con, sig(symbol="EURUSD", direction=LONG,
+                                          strategy="other"), equity, rm)
 
     def test_суммарный_риск_портфеля_ограничен(self):
         """Число позиций выводится из константы, а не зашито: иначе тест
@@ -204,6 +212,40 @@ class Portfolio(unittest.TestCase):
             risk.portfolio_gate(self.con, sig(symbol="ZZZ", direction=LONG,
                                               strategy="new"), equity, rm)
         self.assertEqual(c.exception.status, "cap_portfolio_risk")
+
+    def test_три_ставки_против_доллара_считаются_одной(self):
+        """🔴 14.09, по замеру ops/measure_legs.py: если развернуть ряды так,
+        чтобы «+» означал сильный доллар, все 15 пар инструментов
+        положительны, медиана 0.48. Лонг EURUSD, лонг GBPUSD и шорт USDJPY —
+        одна ставка, а не три независимые."""
+        equity = 10_000.0
+        rm = equity * risk.RISK_PER_TRADE
+        n = int(risk.MAX_USD_LEG_RISK / risk.RISK_PER_TRADE)
+        self._open(symbol="EURUSD", direction=LONG, rm=rm, strategy="a")
+        self._open(symbol="GBPUSD", direction=LONG, rm=rm, strategy="b")
+        self._open(symbol="USDJPY", direction=SHORT, rm=rm, strategy="c")
+        self.assertEqual(n, 3, "потолок и размер сделки разошлись — поправь тест")
+        with self.assertRaises(risk.RiskRefusal) as c:
+            risk.portfolio_gate(self.con, sig(symbol="USDZAR", direction=SHORT,
+                                              strategy="d"), equity, rm)
+        self.assertEqual(c.exception.status, "cap_usd_leg")
+
+    def test_встречные_ноги_доллара_гасятся(self):
+        """Лонг EURUSD и лонг USDJPY — ставки в РАЗНЫЕ стороны по доллару.
+        Они обязаны вычитаться, иначе потолок ловил бы диверсификацию."""
+        equity = 10_000.0
+        rm = equity * risk.RISK_PER_TRADE
+        for i in range(3):
+            self._open(symbol="EURUSD", direction=LONG, rm=rm, strategy=f"a{i}")
+        # USD-нога здесь −3 сделки; встречная по доллару возвращает её к −2.
+        risk.portfolio_gate(self.con, sig(symbol="USDJPY", direction=LONG,
+                                          strategy="b"), equity, rm)
+
+    def test_инструмент_без_доллара_в_ногу_не_попадает(self):
+        self.assertEqual(risk.usd_sign("EURUSD"), -1)
+        self.assertEqual(risk.usd_sign("XAUUSD"), -1)
+        self.assertEqual(risk.usd_sign("USDJPY"), 1)
+        self.assertEqual(risk.usd_sign("EURGBP"), 0)
 
     def test_пересечение_помечается(self):
         self._open(symbol="EURUSD", direction=SHORT, strategy="a")
