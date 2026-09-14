@@ -2997,14 +2997,38 @@ document.addEventListener('sbf:user-ready', async ev => {
       + '</button></div>';
   }
 
+  /* 🔴 КТО ИМЕННО ПРОКРУЧИВАЕТСЯ — СПИСОК ИЛИ СТРАНИЦА.
+     Оконный рендер спрашивал listEl.scrollTop и listEl.clientHeight, и на
+     мониторе это верно: список прокручивается сам. На телефоне же (медиазапрос
+     ≤900px выше) у него сознательно сняты и потолок высоты, и прокрутка —
+     список там и есть страница. После этого scrollTop всегда 0, а
+     clientHeight равен полной высоте содержимого, то есть «видимая область»
+     охватывает весь каталог — и в DOM попадали все 778 строк.
+     Замер 14.09.2026: /chart.html на iPhone SE — 61 экран, 34 639 px, из них
+     34 232 это строки инструментов. Комментарий ниже обещал, что тысячи строк
+     в DOM не будет «иначе телефон ляжет», — и описывал ровно то, что на
+     телефоне и происходило. Условие сломалось не при написании, а позже,
+     когда для мобильного сняли внутреннюю прокрутку: правка была в CSS, а
+     развалилась логика в JS, и в консоли при этом тихо.
+     Теперь источник координат выбирается по факту: если у списка своя
+     прокрутка — берём её, если нет — берём прокрутку страницы. */
+  function видимое(){
+    const пр = getComputedStyle(listEl).overflowY;
+    if (пр === 'auto' || пр === 'scroll') {
+      return {верх: listEl.scrollTop, высота: listEl.clientHeight || 480};
+    }
+    const r = listEl.getBoundingClientRect();
+    return {верх: Math.max(0, -r.top), высота: window.innerHeight || 480};
+  }
+
   /* Оконный рендер: тысяча строк в DOM уронила бы телефон, а готовую
      библиотеку тащить незачем — рисуем только то, что попадает в видимую
      область, а место остальных занимают отступы контейнера. */
   function render(){
     const total = view.length;
-    const h = listEl.clientHeight || 480;
-    const start = Math.max(0, Math.floor(listEl.scrollTop / ROW_H) - OVERSCAN);
-    const end = Math.min(total, Math.ceil((listEl.scrollTop + h) / ROW_H) + OVERSCAN);
+    const {верх, высота: h} = видимое();
+    const start = Math.max(0, Math.floor(верх / ROW_H) - OVERSCAN);
+    const end = Math.min(total, Math.ceil((верх + h) / ROW_H) + OVERSCAN);
     rowsEl.style.paddingTop = (start * ROW_H) + 'px';
     rowsEl.style.paddingBottom = Math.max(0, (total - end) * ROW_H) + 'px';
     rowsEl.innerHTML = total
@@ -3064,6 +3088,15 @@ document.addEventListener('sbf:user-ready', async ev => {
   });
 
   listEl.addEventListener('scroll', () => render(), {passive: true});
+  // Когда прокручивается страница, а не список (телефон), событие приходит на
+  // window — без этой подписки список дорисовывался бы только при поиске и
+  // смене категории. Через rAF, чтобы не считать на каждый кадр прокрутки.
+  let ждёмКадр = false;
+  window.addEventListener('scroll', () => {
+    if (ждёмКадр) return;
+    ждёмКадр = true;
+    requestAnimationFrame(() => { ждёмКадр = false; render(); });
+  }, {passive: true});
 
   // 🔴 Высота панели считается от её реального положения на экране, а не от
   // одной только высоты окна.
