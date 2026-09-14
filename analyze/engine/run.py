@@ -62,7 +62,10 @@ def dirty_engine_files() -> list[str]:
     import subprocess
     try:
         out = subprocess.run(
+            # quotepath=false: иначе git экранирует кириллицу в именах
+            # восьмеричными кодами, и алерт в боте приходит нечитаемым.
             ["git", "-C", "/mnt/sbfdata/sbf-platform/market_intel",
+             "-c", "core.quotepath=false",
              "status", "--porcelain", "--", ENGINE_DIR],
             capture_output=True, text=True, timeout=20)
         if out.returncode != 0:

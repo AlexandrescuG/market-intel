@@ -126,6 +126,7 @@ class Maintenance(unittest.TestCase):
         import subprocess
         from analyze.engine import run as engine_run
         out = subprocess.run(["git", "-C", "/mnt/sbfdata/sbf-platform/market_intel",
+                              "-c", "core.quotepath=false",
                               "status", "--porcelain", "--", "analyze/engine"],
                              capture_output=True, text=True)
         expect = [ln[3:].strip() for ln in out.stdout.splitlines() if ln.strip()]
