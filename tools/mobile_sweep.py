@@ -76,8 +76,18 @@ from playwright.sync_api import sync_playwright
     if (s.display === 'none' || s.visibility === 'hidden' || s.position === 'fixed') continue;
     const r = el.getBoundingClientRect();
     if (r.width === 0 || r.height === 0) continue;
-    if (Math.round(r.right - ш) <= 1) continue;
+    const перелёт = Math.round(r.right - ш);
+    if (перелёт <= 1) continue;
     if (прокрутки.some(p => p !== el && p.contains(el))) continue;
+    // 🔴 ТА ЖЕ ЛИНЕЙКА, ЧТО В audit_edu_mobile.py: симметричный вынос — не
+    // поломка. Приём «во всю ширину» (margin: 0 -5vw + padding: 0 5vw)
+    // растягивает плашку за оба края поровну. Без этого отсева свод
+    // рапортовал по /edu/b/5 перелёт 16–22 px на всех пяти устройствах,
+    // хотя страница по горизонтали не прокручивается вовсе (шире_на=0), и
+    // ширина «виновника» ровно равна экрану плюс 10vw. Два инструмента
+    // меряли одно и то же разными линейками, и свод девять строк подряд
+    // показывал дефект там, где второй инструмент показывал чистоту.
+    if (Math.abs(Math.round(r.left) + перелёт) <= 2) continue;
     кандидаты.push(el);
   }
   const набор = new Set(кандидаты);

@@ -196,6 +196,61 @@ def _merge(a: dict, b: dict) -> dict:
     return out
 
 
+ПОПЫТОК_ЗАПИСИ = 6
+
+
+def _записать(con: sqlite3.Connection, строки: list[tuple], порог: int,
+              verbose: bool = False) -> None:
+    """Одна короткая транзакция на всю запись, с повторами.
+
+    🔴 ПОЧЕМУ НЕ ХВАТИЛО busy_timeout=60000, КОТОРЫЙ УЖЕ СТОИТ ВЫШЕ.
+
+    Замер 14.09.2026: за семь суток юнит sbf-pulse стартовал 126 раз и упал
+    88 — 70% прогонов. Щуп по signals.db в это же время показал, что запись
+    занята 22% времени, максимум 33 секунды подряд. Тридцать три меньше
+    шестидесяти, то есть ожидание должно было спасти — и не спасало.
+
+    Потому что ожидание применяется не ко всякому отказу. Пока соединение
+    держит снимок для чтения, а база под ним ушла вперёд, попытка писать
+    получает SQLITE_BUSY_SNAPSHOT — отказ по невозможности, а не по
+    занятости. Его SQLite не повторяет вовсе, сколько таймаут ни ставь: он
+    возвращается мгновенно. В логе это неотличимо от обычной занятости,
+    текст один и тот же — «database is locked», — поэтому предыдущая
+    починка (комментарий у connect выше) и лечила не ту болезнь.
+
+    Лечится порядком работы, а не числом в настройке. Сначала считаем всё
+    в память — к этому месту m_1h/m_24h/m_7d уже посчитаны, и читать
+    больше нечего. Потом одним явным BEGIN IMMEDIATE берём запись сразу,
+    без стадии чтения, и отдаём её через доли секунды. Если в этот миг
+    пишет коллектор — откатываемся и пробуем снова, с растущей паузой:
+    отказ по снимку живёт до следующей попытки, а не до конца таймаута.
+    """
+    задержка = 0.5
+    for попытка in range(1, ПОПЫТОК_ЗАПИСИ + 1):
+        try:
+            con.execute("BEGIN IMMEDIATE")
+            con.executemany(
+                "INSERT OR REPLACE INTO pulse_scores"
+                "(symbol, category, ts, mentions, baseline, score, mentions_24h) "
+                "VALUES(?,?,?,?,?,?,?)", строки)
+            con.execute("DELETE FROM pulse_scores WHERE ts < ?", (порог,))
+            con.commit()
+            if verbose and попытка > 1:
+                print(f"  запись удалась с попытки {попытка}")
+            return
+        except sqlite3.OperationalError as e:
+            try:
+                con.rollback()
+            except sqlite3.Error:
+                pass
+            if попытка == ПОПЫТОК_ЗАПИСИ:
+                raise
+            if verbose:
+                print(f"  попытка {попытка}: {e}; жду {задержка:.1f} с")
+            time.sleep(задержка)
+            задержка *= 2
+
+
 def run(verbose: bool = False) -> int:
     # 🔴 Ожидание 10 секунд не хватало: юнит падал с «database is locked» через
     # раз. Причина — signals.db в это же время пишут коллекторы. WAL важнее
@@ -236,6 +291,7 @@ def run(verbose: bool = False) -> int:
     cats = _catalog_categories()
     blocked = _blocked()
     written = 0
+    строки: list[tuple] = []
     ts_now = int(now)
     for symbol in set(m_7d) | set(m_24h):
         if symbol in blocked:
@@ -256,20 +312,13 @@ def run(verbose: bool = False) -> int:
         hours = BASELINE_DAYS * 24 - BURST_LOOKBACK_HOURS
         baseline = max(prev / hours, MIN_BASELINE)
         score = m1 / baseline
-        con.execute(
-            "INSERT OR REPLACE INTO pulse_scores"
-            "(symbol, category, ts, mentions, baseline, score, mentions_24h) "
-            "VALUES(?,?,?,?,?,?,?)",
-            (symbol, category, ts_now, m1, baseline, score, m24),
-        )
+        строки.append((symbol, category, ts_now, m1, baseline, score, m24))
         written += 1
         if verbose and m24:
             print(f"  {category:9s}/{symbol:12s} за сутки={m24:4d} за час={m1:3d} "
                   f"фон={baseline:.2f} всплеск={score:.2f}")
 
-    con.execute("DELETE FROM pulse_scores WHERE ts < ?",
-                (int(now - HISTORY_KEEP_DAYS * 86400),))
-    con.commit()
+    _записать(con, строки, int(now - HISTORY_KEEP_DAYS * 86400), verbose)
     con.close()
     if verbose:
         print(f"готово: {written} инструментов записано")
