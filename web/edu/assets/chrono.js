@@ -771,6 +771,16 @@
 
   function stationArtHTML(key){
     var img = STATION_IMAGE[key];
+    // 🔴 Нет фотографии — показываем настоящий ряд, если он есть, и только
+    // потом рисунок. Станция 1987 («чёрный понедельник») — единственная из
+    // пятнадцати без архивного снимка, и до сих пор она рисовалась ломаной,
+    // набранной координатами вручную, под настоящей подписью «−22.6% за
+    // день». Ряд под неё собран (S&P 500, ^GSPC) и лежит в
+    // chrono2_frames.json; рисовальщик общий с главой 2 — chrono-frames.js.
+    if (!img && window.SbfChronoFrames) {
+      var кадр = window.SbfChronoFrames.кадр(key);
+      if (кадр) return кадр;
+    }
     if (img){
       return '<picture>'
         + '<source type="image/webp" srcset="'+img.webp+'">'

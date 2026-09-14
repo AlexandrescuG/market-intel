@@ -397,15 +397,9 @@
      Объявляем оба здесь же, внутри каждого кадра: так SVG остаётся
      самодостаточным и не зависит от того, что ещё есть на странице, — а
      зависимость от «где-то определено» и была причиной поломки. */
+  // Паттерны объявлены в общем модуле — одно объявление на обе главы.
   function defs(){
-    return '<defs>'
-      + '<pattern id="hatch" width="8" height="8" patternUnits="userSpaceOnUse">'
-      +   '<rect width="8" height="8" fill="#F6EFE2"/>'
-      +   '<path d="M0 8 L8 0" stroke="#E7DFCF" stroke-width="1"/></pattern>'
-      + '<pattern id="hatch2" width="6" height="6" patternUnits="userSpaceOnUse">'
-      +   '<rect width="6" height="6" fill="#EDE3D1"/>'
-      +   '<path d="M0 6 L6 0" stroke="#DCCFB4" stroke-width="1.2"/></pattern>'
-      + '</defs>';
+    return window.SbfChronoFrames ? window.SbfChronoFrames.defs() : '';
   }
   function hatchBg(h){ h = h || 400; return defs() + '<rect width="720" height="'+h+'" fill="url(#hatch)"/>'; }
   function person(cx, cy, s){ s = s || 1; return '<ellipse cx="'+cx+'" cy="'+(cy+26*s)+'" rx="'+(12*s)+'" ry="'+(26*s)+'"/><circle cx="'+cx+'" cy="'+cy+'" r="'+(9*s)+'"/>'; }
@@ -539,102 +533,11 @@
     }
   };
 
-  /* ── Кадр станции по настоящему ряду ──────────────────────────────────
-     🔴 ЧЕМ ЭТО ОТЛИЧАЕТСЯ ОТ ТОГО, ЧТО БЫЛО. Раньше линия станции была
-     набором координат, набранных руками: `points="220,140 300,150 340,145
-     380,160 420,290 ..."`. Подпись под ней при этом стояла настоящая —
-     «Nikkei −12.4% за день, 05.08.2024». Придуманная линия с настоящей
-     подписью читается как график события, и отличить её от графика нельзя
-     никак: она не подписана как схема и выглядит ровно так же.
-     Теперь ряд приходит из web/data/edu_capsules/chrono2_frames.json, а
-     подпись там посчитана из самого ряда сборщиком
-     tools/edu_build/build_chrono2_frames.py. Если данные изменятся, цифра в
-     подписи изменится следом — расходиться им больше негде. */
-  function эск(s){
-    return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
-      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];
-    });
-  }
-
-  function кадрПоДанным(frame){
-    var ряд = frame['ряд'] || [];
-    if (ряд.length < 2) return '';
-    var L = 58, R = 24, T = 34, B = 64;         // поля кадра
-    var W = 720 - L - R, H = 400 - T - B;
-    var мин = frame['мин'], макс = frame['макс'];
-    var зазор = (макс - мин) * 0.08 || 1;       // чтобы линия не липла к краям
-    мин -= зазор; макс += зазор;
-    var x = function(i){ return L + W * i / (ряд.length - 1); };
-    var y = function(v){ return T + H * (1 - (v - мин) / (макс - мин)); };
-
-    var шаги = frame['ступенька'];
-    var d = '';
-    for (var i = 0; i < ряд.length; i++) {
-      var X = x(i), Y = y(ряд[i].c);
-      if (i === 0) { d += 'M' + X.toFixed(1) + ' ' + Y.toFixed(1); }
-      else if (шаги) {
-        // Ставка живёт ступенями: между заседаниями она не ползёт, а стоит.
-        // Рисовать её наклонной линией значит показывать движение, которого
-        // не было.
-        d += ' H' + X.toFixed(1) + ' V' + Y.toFixed(1);
-      } else {
-        d += ' L' + X.toFixed(1) + ' ' + Y.toFixed(1);
-      }
-    }
-
-    // Отметка события: вертикаль на дате из данных, а не «примерно тут».
-    var метка = '';
-    if (frame['отметка']) {
-      for (var j = 0; j < ряд.length; j++) {
-        if (ряд[j].t === frame['отметка']) {
-          var mx = x(j).toFixed(1);
-          метка = '<line x1="' + mx + '" y1="' + T + '" x2="' + mx + '" y2="' + (T + H) + '"'
-            + ' stroke="#8a2f2f" stroke-width="1.4" stroke-dasharray="5 4"/>'
-            + '<circle cx="' + mx + '" cy="' + y(ряд[j].c).toFixed(1) + '" r="4.5"'
-            + ' fill="#8a2f2f"/>';
-          break;
-        }
-      }
-    }
-
-    var знаков = макс < 10 ? 4 : (макс < 1000 ? 2 : 0);
-    return '<svg class="h-art" viewBox="0 0 720 400" xmlns="http://www.w3.org/2000/svg"'
-      + ' role="img" aria-label="' + эск(frame['подпись']) + '">'
-      + hatchBg()
-      + '<rect x="' + L + '" y="' + T + '" width="' + W + '" height="' + H + '"'
-      + ' fill="#FBF6EF" stroke="#E7DFCF" stroke-width="1"/>'
-      + метка
-      + '<path d="' + d + '" fill="none" stroke="#2B2B33" stroke-width="2.6"'
-      + ' stroke-linejoin="round" stroke-linecap="round"/>'
-      // Ось подписана крайними значениями самого ряда: без них линия — это
-      // просто форма, по которой нельзя сказать, велик ли ход.
-      + '<text x="' + (L - 8) + '" y="' + (T + 6) + '" text-anchor="end"'
-      + ' font-family="monospace" font-size="11" fill="#8A8275">'
-      + эск(frame['макс'].toFixed(знаков)) + '</text>'
-      + '<text x="' + (L - 8) + '" y="' + (T + H) + '" text-anchor="end"'
-      + ' font-family="monospace" font-size="11" fill="#8A8275">'
-      + эск(frame['мин'].toFixed(знаков)) + '</text>'
-      + '<text x="' + L + '" y="' + (T + H + 18) + '"'
-      + ' font-family="monospace" font-size="10" fill="#8A8275">'
-      + эск(frame['первая']) + '</text>'
-      + '<text x="' + (720 - R) + '" y="' + (T + H + 18) + '" text-anchor="end"'
-      + ' font-family="monospace" font-size="10" fill="#8A8275">'
-      + эск(frame['последняя']) + '</text>'
-      + '<text x="360" y="' + (T + H + 38) + '" text-anchor="middle"'
-      + ' font-family="monospace" font-size="12" fill="#2B2B33">'
-      + эск(frame['подпись']) + '</text>'
-      + '<text x="360" y="' + (T + H + 54) + '" text-anchor="middle"'
-      + ' font-family="monospace" font-size="9.5" fill="#8A8275">'
-      + эск(frame['источник']) + '</text>'
-      + '</svg>';
-  }
-
   function art2HTML(key){
     // Данные важнее рисунка: если под станцию есть настоящий ряд, показываем
-    // его, а не иллюстрацию.
-    var кадры = window.Chrono2Frames;
-    if (кадры && кадры[key]) {
-      var svg = кадрПоДанным(кадры[key]);
+    // его, а не иллюстрацию. Рисовальщик общий с главой 1 — chrono-frames.js.
+    if (window.SbfChronoFrames) {
+      var svg = window.SbfChronoFrames.кадр(key);
       if (svg) return svg;
     }
     if (window.ChronoStationArtHTML && window.ChronoStationArt && window.ChronoStationArt[key]) {
@@ -657,31 +560,6 @@
   window.Chrono2StationArt = ART;
   window.Chrono2StationArtHTML = art2HTML;
 
-  /* Ряды подгружаются отдельным файлом и приходят позже первой отрисовки.
-     🔴 Событие обязательно: без него станция, нарисованная до загрузки,
-     так и осталась бы иллюстрацией, и результат зависел бы от того, успела
-     ли сеть, — то есть на быстрой машине «всё хорошо», а у читателя как
-     повезёт. Глава подписывается на это событие и перерисовывается.
-     Отказ загрузки не заметается: пишем в консоль и оставляем иллюстрацию,
-     но НЕ подставляем нарисованную от руки «котировку» — подменять данные
-     похожей на них картинкой и есть то, что здесь чинится. */
-  fetch('/data/edu_capsules/chrono2_frames.json', {cache: 'no-cache'})
-    .then(function(r){
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      return r.json();
-    })
-    .then(function(j){
-      window.Chrono2Frames = j && j['кадры'] ? j['кадры'] : null;
-      if (!window.Chrono2Frames) throw new Error('в файле нет ключа "кадры"');
-      window.dispatchEvent(new Event('chrono2-frames'));
-    })
-    .catch(function(e){
-      if (window.console && console.warn) {
-        console.warn('[chrono2] ряды станций не загрузились (' + e.message +
-          '): станции остаются иллюстрациями. Файл собирается командой ' +
-          'tools/edu_build/build_chrono2_frames.py');
-      }
-    });
 })();
 
 /* Четыре крупнейших ЦБ — карточки (SPEC §3.2). window.Chrono2Organizations = {ru:[4],ro:[4],en:[4]}. */
