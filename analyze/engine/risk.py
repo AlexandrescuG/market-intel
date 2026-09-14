@@ -54,9 +54,15 @@ RISK_PER_TRADE = 0.005       # 0.5% капитала на сделку
 # набрать бесконечно много встречных пар.
 MAX_PORTFOLIO_RISK = 0.03    # нетто: 3% капитала -> ~6 однонаправленных позиций
 MAX_GROSS_RISK = 0.05        # валовой: 5%, потолок на случай пилы
+MAX_SYMBOL_RISK = 0.015      # нетто на один инструмент -> 3 сделки полного размера
+
+# Счётные потолки остаются ГРУБЫМ ПРЕДОХРАНИТЕЛЕМ, а не рабочим ограничением.
+# Связывать поток сделок должен риск в деньгах; штуки нужны на случай, когда
+# расчёт риска сам окажется неверным, — тогда лимит в процентах не сработает,
+# и что-то должно остановить набор позиций просто по количеству. Поэтому
+# числа заведомо с запасом: упираться в них в нормальной работе нельзя.
 MAX_OPEN_TOTAL = 12
-MAX_OPEN_PER_SYMBOL = 3      # было «10 по золоту разом» — главный урок 26-27.08
-MAX_OPEN_PER_SYMBOL_SIDE = 2 # и не более двух в одну сторону по одному символу
+MAX_OPEN_PER_SYMBOL = 6      # было 3, и было рабочим ограничением; см. выше
 MAX_OPEN_PER_STRATEGY = 4
 
 # Стоп-кран: просадка ОТ ПИКА кривой стратегии, в R.
@@ -424,12 +430,6 @@ def portfolio_gate(con: sqlite3.Connection, signal: Signal, equity: float,
                           f"по {signal.symbol} открыто {len(same_symbol)} при потолке "
                           f"{MAX_OPEN_PER_SYMBOL}")
 
-    same_side = [r for r in same_symbol if r[1] == signal.direction]
-    if len(same_side) >= MAX_OPEN_PER_SYMBOL_SIDE:
-        raise RiskRefusal("cap_symbol_side",
-                          f"по {signal.symbol} в сторону {signal.direction} открыто "
-                          f"{len(same_side)} при потолке {MAX_OPEN_PER_SYMBOL_SIDE}")
-
     same_strat = [r for r in rows if r[2] == signal.strategy]
     if len(same_strat) >= MAX_OPEN_PER_STRATEGY:
         raise RiskRefusal("cap_strategy",
@@ -438,6 +438,25 @@ def portfolio_gate(con: sqlite3.Connection, signal: Signal, equity: float,
 
     if equity <= 0:
         return
+
+    # Потолок на инструмент — в деньгах, а не в штуках.
+    #
+    # 🔴 14.09. Раньше здесь стояло «не больше двух в одну сторону» —
+    # 416 отказов за 14 дней, 207 из них по EURUSD. Штуки не различают
+    # позицию с полным риском и позицию с выкупленным стопом: третий вход
+    # блокировался, даже когда двум предыдущим уже нечего было терять.
+    #
+    # Урок 26-27.08 при этом сохраняется и даже усиливается: десять лонгов
+    # по золоту упрутся в потолок на третьем (0.5% на сделку против 1.5% на
+    # инструмент), а не на десятом.
+    sym_rows = [r for r in rows if r[0] == signal.symbol]
+    sym_net, _ = exposure(sym_rows, add=(signal.symbol, signal.is_long, risk_money))
+    if sym_net / equity > MAX_SYMBOL_RISK:
+        raise RiskRefusal(
+            "cap_symbol_risk",
+            f"направленный риск по {signal.symbol} {sym_net / equity * 100:.2f}% "
+            f"превысит предел {MAX_SYMBOL_RISK * 100:.2f}%")
+
     net, gross = exposure(rows, add=(signal.symbol, signal.is_long, risk_money))
     if net / equity > MAX_PORTFOLIO_RISK:
         raise RiskRefusal(

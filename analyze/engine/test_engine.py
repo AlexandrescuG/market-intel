@@ -106,19 +106,43 @@ class Portfolio(unittest.TestCase):
             "risk_money) VALUES (?,?,?,'live','open',?)", (strategy, symbol, direction, rm))
         self.con.commit()
 
-    def test_потолок_по_символу_и_стороне(self):
+    def test_десять_лонгов_по_золоту_упрутся_в_риск(self):
         """🔴 26-27.08: старый потолок «10 наших позиций» не различал символ
         и сторону, набралось десять лонгов по золоту и вынесло одним
-        движением — шесть стопов за 13 минут."""
-        for _ in range(risk.MAX_OPEN_PER_SYMBOL_SIDE):
-            self._open()
+        движением — шесть стопов за 13 минут.
+
+        Теперь потолок в деньгах, и он срабатывает РАНЬШЕ счётного: при 0.5%
+        на сделку и 1.5% на инструмент четвёртый лонг уже не пройдёт."""
+        equity = 10_000.0
+        rm = equity * risk.RISK_PER_TRADE
+        n = int(risk.MAX_SYMBOL_RISK / risk.RISK_PER_TRADE)
+        self.assertLess(n, risk.MAX_OPEN_PER_SYMBOL,
+                        "счётный потолок обязан остаться ПОЗАДИ денежного — "
+                        "иначе он снова станет рабочим ограничением")
+        for _ in range(n):
+            self._open(symbol="XAUUSD", direction=LONG, rm=rm)
         with self.assertRaises(risk.RiskRefusal) as c:
-            risk.portfolio_gate(self.con, sig(), 10000.0, 25.0)
-        self.assertIn(c.exception.status, ("cap_symbol", "cap_symbol_side"))
+            risk.portfolio_gate(self.con, sig(symbol="XAUUSD", direction=LONG),
+                                equity, rm)
+        self.assertEqual(c.exception.status, "cap_symbol_risk")
+
+    def test_выкупленный_стоп_освобождает_инструмент(self):
+        """Штуки не различали позицию с полным риском и позицию, которой
+        нечего терять: третий вход блокировался, даже когда двум предыдущим
+        стоп уже подтянули за точку входа. 416 отказов за 14 дней, 207 по
+        EURUSD."""
+        equity = 10_000.0
+        rm = equity * risk.RISK_PER_TRADE
+        for _ in range(int(risk.MAX_SYMBOL_RISK / risk.RISK_PER_TRADE)):
+            # стоп ВЫШЕ входа у лонга: риска не осталось
+            self._open_live("EURUSD", LONG, entry=1.1000, stop=1.1020,
+                            rpp=10_000.0, rm=rm)
+        risk.portfolio_gate(self.con, sig(symbol="EURUSD", direction=LONG),
+                            equity, rm)
 
     def test_другой_символ_не_блокируется(self):
-        for _ in range(risk.MAX_OPEN_PER_SYMBOL):
-            self._open(symbol="XAUUSD")
+        for _ in range(int(risk.MAX_SYMBOL_RISK / risk.RISK_PER_TRADE)):
+            self._open(symbol="XAUUSD", rm=10_000.0 * risk.RISK_PER_TRADE)
         risk.portfolio_gate(self.con, sig(symbol="EURUSD", strategy="other"),
                             10000.0, 25.0)
 
@@ -167,13 +191,18 @@ class Portfolio(unittest.TestCase):
 
     def test_разные_инструменты_не_гасят_друг_друга(self):
         """Гасить имеют право лонг и шорт ОДНОГО инструмента. Лонг EURUSD
-        против шорта золота — две разные ставки, а не ноль."""
+        против шорта золота — две разные ставки, а не ноль.
+
+        Размер каждой позиции держим НИЖЕ потолка на инструмент, иначе тест
+        упрётся в него и перестанет проверять то, ради чего написан."""
         equity = 10_000.0
-        half = equity * risk.MAX_PORTFOLIO_RISK * 0.7
-        self._open(symbol="EURUSD", direction=SHORT, rm=half, strategy="a")
+        rm = equity * risk.RISK_PER_TRADE
+        n = int(risk.MAX_PORTFOLIO_RISK / risk.RISK_PER_TRADE)
+        for i in range(n):
+            self._open(symbol=f"S{i}", direction=SHORT, rm=rm, strategy=f"st{i}")
         with self.assertRaises(risk.RiskRefusal) as c:
-            risk.portfolio_gate(self.con, sig(symbol="XAUUSD", direction=LONG,
-                                              strategy="b"), equity, half)
+            risk.portfolio_gate(self.con, sig(symbol="ZZZ", direction=LONG,
+                                              strategy="new"), equity, rm)
         self.assertEqual(c.exception.status, "cap_portfolio_risk")
 
     def test_пересечение_помечается(self):
@@ -198,13 +227,15 @@ class Portfolio(unittest.TestCase):
         потолке 324, то есть лимит был выбран целиком, — при реальном остатке
         риска 187 USD: у трёх стоп стоял ЗА точкой входа."""
         equity = 10_000.0
-        budget = equity * risk.MAX_PORTFOLIO_RISK
-        # Лонг со стопом ВЫШЕ входа: терять нечего, прибыль заперта.
-        self._open_live("EURUSD", LONG, entry=1.1000, stop=1.1020,
-                        rpp=10_000.0, rm=budget, strategy="a")
-        # Лимит занят «по записи» целиком, но живого риска в нём нет.
-        risk.portfolio_gate(self.con, sig(symbol="GBPUSD", strategy="b"),
-                            equity, budget * 0.9)
+        rm = equity * risk.RISK_PER_TRADE
+        n = int(risk.MAX_PORTFOLIO_RISK / risk.RISK_PER_TRADE)
+        for i in range(n):
+            # Лонг со стопом ВЫШЕ входа: терять нечего, прибыль заперта.
+            self._open_live(f"S{i}", LONG, entry=1.1000, stop=1.1020,
+                            rpp=10_000.0, rm=rm, strategy=f"st{i}")
+        # По записи лимит выбран целиком, живого риска в нём нет — проходим.
+        risk.portfolio_gate(self.con, sig(symbol="ZZZ", strategy="new"),
+                            equity, rm)
 
     def test_живой_риск_считается_и_вверх(self):
         """Если брокер налил хуже расчётного и дистанция до стопа шире

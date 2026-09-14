@@ -125,23 +125,33 @@ def checklist(con: sqlite3.Connection, s: Signal, *, volume: float,
     # Тот же источник, что у портфельного лимита: чек-лист обязан показывать
     # числа, по которым движок реально принимал решение, а не их копию.
     open_rows = risk.open_risk_rows(con)
-    same_side = sum(1 for r in open_rows if r[0] == s.symbol and r[1] == s.direction)
-    n_side = same_side + 1
-    share = n_side / risk.MAX_OPEN_PER_SYMBOL_SIDE
-    rows.append(_row(_mark(share), "лимит по инструменту",
-                     f"{n_side} из {risk.MAX_OPEN_PER_SYMBOL_SIDE} в эту сторону"))
-    if n_side >= risk.MAX_OPEN_PER_SYMBOL_SIDE:
-        notes.append(f"Лимит по {s.symbol} в сторону «{side}» исчерпан — следующий "
-                     f"такой сигнал будет отклонён.")
+    add = (s.symbol, s.is_long, risk_money)
 
-    used = sum(r[3] or 0 for r in open_rows) + risk_money
-    pf = used / equity if equity else 0
+    sym_net, _ = risk.exposure([r for r in open_rows if r[0] == s.symbol], add=add)
+    sym_share = (sym_net / equity / risk.MAX_SYMBOL_RISK) if equity else 0
+    rows.append(_row(_mark(sym_share), "риск по инструменту",
+                     f"{sym_net / equity * 100:.2f}% из "
+                     f"{risk.MAX_SYMBOL_RISK * 100:.1f}% (встречные вычтены)"))
+    if sym_share >= TIGHT:
+        notes.append(f"По {s.symbol} набрано почти всё, что разрешено на один "
+                     f"инструмент — следующий сигнал в ту же сторону отклонится.")
+
+    net, gross = risk.exposure(open_rows, add=add)
+    pf = net / equity if equity else 0
     share = pf / risk.MAX_PORTFOLIO_RISK
     rows.append(_row(_mark(share), "риск портфеля",
-                     f"{pf * 100:.2f}% из {risk.MAX_PORTFOLIO_RISK * 100:.0f}%"))
+                     f"{pf * 100:.2f}% из {risk.MAX_PORTFOLIO_RISK * 100:.0f}% "
+                     f"направленного, {gross / equity * 100:.2f}% из "
+                     f"{risk.MAX_GROSS_RISK * 100:.0f}% валового"))
     if share >= 1.0:
         notes.append("Портфельный лимит риска выбран полностью — новые входы "
                      "закрыты до закрытия текущих.")
+
+    crossed = risk.crossing_trade(con, s.symbol, s.is_long)
+    if crossed:
+        notes.append(f"По {s.symbol} одновременно открыта встречная позиция. "
+                     f"Это разрешено: риск считается нетто, а результат каждой "
+                     f"сделки — по её собственным ценам.")
 
     # 7. состояние стратегии
     st = con.execute(
