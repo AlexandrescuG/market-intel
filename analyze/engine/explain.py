@@ -122,9 +122,9 @@ def checklist(con: sqlite3.Connection, s: Signal, *, volume: float,
                      f"{risk.RISK_PER_TRADE * 100:.2f}%), {volume} лота"))
 
     # 5-6. портфельные лимиты
-    open_rows = con.execute(
-        "SELECT symbol, direction, risk_money FROM engine_trades "
-        "WHERE status='open' AND mode='live'").fetchall()
+    # Тот же источник, что у портфельного лимита: чек-лист обязан показывать
+    # числа, по которым движок реально принимал решение, а не их копию.
+    open_rows = risk.open_risk_rows(con)
     same_side = sum(1 for r in open_rows if r[0] == s.symbol and r[1] == s.direction)
     n_side = same_side + 1
     share = n_side / risk.MAX_OPEN_PER_SYMBOL_SIDE
@@ -134,7 +134,7 @@ def checklist(con: sqlite3.Connection, s: Signal, *, volume: float,
         notes.append(f"Лимит по {s.symbol} в сторону «{side}» исчерпан — следующий "
                      f"такой сигнал будет отклонён.")
 
-    used = sum(r[2] or 0 for r in open_rows) + risk_money
+    used = sum(r[3] or 0 for r in open_rows) + risk_money
     pf = used / equity if equity else 0
     share = pf / risk.MAX_PORTFOLIO_RISK
     rows.append(_row(_mark(share), "риск портфеля",

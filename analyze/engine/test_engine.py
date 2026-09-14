@@ -142,6 +142,44 @@ class Portfolio(unittest.TestCase):
             risk.opposite_open(self.con, sig(direction=LONG))
         self.assertEqual(c.exception.status, "opposite_open")
 
+    def _open_live(self, symbol, direction, entry, stop, rpp, rm, strategy="t"):
+        """Позиция с полной геометрией — по ней считается ЖИВОЙ риск."""
+        self.con.execute(
+            "INSERT INTO engine_trades (strategy, symbol, direction, mode, status, "
+            "risk_money, risk_per_price, entry_price, stop) "
+            "VALUES (?,?,?,'live','open',?,?,?,?)",
+            (strategy, symbol, direction, rm, rpp, entry, stop))
+        self.con.commit()
+
+    def test_стоп_за_безубытком_освобождает_лимит(self):
+        """🔴 14.09. risk_money пишется на входе и не меняется, а manage_open
+        двигает стоп. На живом счёте шесть позиций занимали 328 USD при
+        потолке 324, то есть лимит был выбран целиком, — при реальном остатке
+        риска 187 USD: у трёх стоп стоял ЗА точкой входа."""
+        equity = 10_000.0
+        budget = equity * risk.MAX_PORTFOLIO_RISK
+        # Лонг со стопом ВЫШЕ входа: терять нечего, прибыль заперта.
+        self._open_live("EURUSD", LONG, entry=1.1000, stop=1.1020,
+                        rpp=10_000.0, rm=budget, strategy="a")
+        # Лимит занят «по записи» целиком, но живого риска в нём нет.
+        risk.portfolio_gate(self.con, sig(symbol="GBPUSD", strategy="b"),
+                            equity, budget * 0.9)
+
+    def test_живой_риск_считается_и_вверх(self):
+        """Если брокер налил хуже расчётного и дистанция до стопа шире
+        задуманной, живой риск обязан выйти БОЛЬШЕ записанного — иначе это
+        не честный пересчёт, а поблажка в одну сторону."""
+        r = risk.live_risk(LONG, entry=1.1000, stop=1.0950,
+                           risk_per_price=10_000.0, risk_money=40.0)
+        self.assertAlmostEqual(r, 50.0, places=6)
+
+    def test_без_геометрии_остаётся_старое_число(self):
+        """Строки, заведённые до появления risk_per_price, не должны молча
+        обнулиться: нет данных для пересчёта — берём то, что записано."""
+        self.assertEqual(
+            risk.live_risk(LONG, entry=None, stop=None,
+                           risk_per_price=None, risk_money=33.0), 33.0)
+
 
 class BrokerConstraints(unittest.TestCase):
     """🔴 Первый боевой прогон 28.08: 4 из 9 принятых сигналов отбились

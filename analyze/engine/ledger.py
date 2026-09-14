@@ -54,7 +54,8 @@ CREATE TABLE IF NOT EXISTS engine_trades (
   direction TEXT NOT NULL,
   mode TEXT NOT NULL,               -- live | shadow
   volume REAL,
-  risk_money REAL,
+  risk_money REAL,                  -- риск НА МОМЕНТ ВХОДА, дальше не меняется
+  risk_per_price REAL,              -- сколько денег стоит единица движения цены
   atr REAL,
   req_price REAL, req_ts INTEGER,
   stop REAL, target REAL,
@@ -93,7 +94,30 @@ def connect(timeout: float = 120.0) -> sqlite3.Connection:
 
 def init(con: sqlite3.Connection) -> None:
     con.executescript(SCHEMA)
+    _migrate(con)
     con.commit()
+
+
+def _migrate(con: sqlite3.Connection) -> None:
+    """Добавить колонки, которых нет в уже созданной таблице.
+
+    CREATE TABLE IF NOT EXISTS молча пропускает существующую таблицу со
+    старым набором колонок — схема в коде и схема в базе расходятся, а
+    ошибки нет до первого запроса к новой колонке."""
+    have = {r[1] for r in con.execute("PRAGMA table_info(engine_trades)")}
+    if "risk_per_price" not in have:
+        con.execute("ALTER TABLE engine_trades ADD COLUMN risk_per_price REAL")
+        # Задним числом: у старых сделок цена движения выводится из риска на
+        # входе и ИСХОДНОГО стопа сигнала — текущий стоп уже подтянут, по нему
+        # получилось бы не то число.
+        con.execute("""
+            UPDATE engine_trades SET risk_per_price = (
+              SELECT engine_trades.risk_money / abs(engine_trades.req_price - s.stop)
+              FROM engine_signals s WHERE s.id = engine_trades.signal_id
+                AND abs(engine_trades.req_price - s.stop) > 1e-12)
+            WHERE risk_per_price IS NULL""")
+    if "crosses_id" not in have:
+        con.execute("ALTER TABLE engine_trades ADD COLUMN crosses_id INTEGER")
 
 
 # ─── сигналы ────────────────────────────────────────────────────────────────
@@ -148,12 +172,17 @@ def open_trade(con: sqlite3.Connection, signal_id: int, d: Decision, *,
     не подтверждённая записью, хуже пропущенного входа."""
     s = d.signal
     now = int(time.time())
+    # Цена единицы движения = объём × стоимость пункта. Храним её, а не только
+    # риск на входе: стоп переносится (manage_open), и остаток риска считается
+    # уже от нового стопа. Без этого числа пересчитать его не из чего.
+    rpp = (d.risk_money / s.stop_distance) if s.stop_distance else None
     cur = con.execute(
         "INSERT INTO engine_trades (signal_id, strategy, symbol, broker_symbol, tf, "
-        "direction, mode, volume, risk_money, atr, req_price, req_ts, stop, target, "
-        "horizon_until, status, note) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        "direction, mode, volume, risk_money, risk_per_price, atr, req_price, req_ts, "
+        "stop, target, horizon_until, status, note) "
+        "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
         (signal_id, s.strategy, s.symbol, broker_symbol, s.tf, s.direction, mode,
-         d.volume, d.risk_money, s.atr, req_price, now,
+         d.volume, d.risk_money, rpp, s.atr, req_price, now,
          s.stop if stop is None else stop,
          s.target if target is None else target,
          now + s.horizon_sec, status, note))

@@ -303,6 +303,41 @@ def margin_gate(mt5, broker_sym: str, volume: float, is_buy: bool, price: float,
             f"это больше предела {MAX_MARGIN_SHARE * 100:.0f}%")
 
 
+def live_risk(direction: str, entry: float | None, stop: float | None,
+              risk_per_price: float | None, risk_money: float | None) -> float:
+    """Сколько позиция может ещё потерять ПРЯМО СЕЙЧАС, а не сколько могла на входе.
+
+    🔴 14.09. `risk_money` пишется при открытии и больше не меняется, а
+    `manage_open` переносит стопы — в безубыток и дальше в прибыль. Позиция с
+    выкупленным стопом продолжала занимать полный риск в портфельном лимите.
+
+    Замер на живом счёте в момент находки: шесть открытых сделок занимали
+    328.17 USD при потолке 3% ≈ 324 USD, то есть лимит был выбран целиком и
+    движок отказывал всем. Реальный остаток риска — 187.51 USD (1.74%): у
+    трёх сделок стоп стоял ЗА точкой входа, и терять им было нечего.
+
+    Считается честно в обе стороны: если брокер налил хуже расчётного и
+    фактическая дистанция до стопа шире задуманной, живой риск выйдет БОЛЬШЕ
+    записанного — так и должно быть.
+
+    За безубытком возвращается 0, а не отрицательное число: запертая прибыль
+    — это не «свободный лимит», её нельзя выдать другой сделке."""
+    if not risk_per_price or entry is None or stop is None:
+        return float(risk_money or 0.0)          # старая строка без пересчёта
+    dist = (entry - stop) if direction == "long" else (stop - entry)
+    return max(0.0, dist * risk_per_price)
+
+
+def open_risk_rows(con: sqlite3.Connection) -> list[tuple]:
+    """Открытые живые позиции с уже посчитанным живым риском."""
+    rows = con.execute(
+        "SELECT symbol, direction, strategy, risk_money, entry_price, stop, "
+        "risk_per_price, id FROM engine_trades "
+        "WHERE status='open' AND mode='live'").fetchall()
+    return [(r[0], r[1], r[2],
+             live_risk(r[1], r[4], r[5], r[6], r[3]), r[7]) for r in rows]
+
+
 def portfolio_gate(con: sqlite3.Connection, signal: Signal, equity: float,
                    risk_money: float) -> None:
     """Лимиты кучности и суммарного риска.
@@ -312,9 +347,7 @@ def portfolio_gate(con: sqlite3.Connection, signal: Signal, equity: float,
     развернувшийся рынок вынес их одним движением (шесть стопов за 13 минут,
     три за одну минуту). Десять одинаковых ставок — это одна ставка размером
     в десять, и потолок обязан это понимать."""
-    rows = con.execute(
-        "SELECT symbol, direction, strategy, risk_money FROM engine_trades "
-        "WHERE status='open' AND mode='live'").fetchall()
+    rows = open_risk_rows(con)
     total = len(rows)
     if total >= MAX_OPEN_TOTAL:
         raise RiskRefusal("cap_total", f"открыто {total} при потолке {MAX_OPEN_TOTAL}")
@@ -337,6 +370,8 @@ def portfolio_gate(con: sqlite3.Connection, signal: Signal, equity: float,
                           f"у стратегии {signal.strategy} открыто {len(same_strat)} "
                           f"при потолке {MAX_OPEN_PER_STRATEGY}")
 
+    # Живой риск, а не риск на момент входа: позиции с выкупленным стопом
+    # больше ничего не занимают (см. live_risk).
     used = sum(r[3] or 0.0 for r in rows)
     if equity > 0 and (used + risk_money) / equity > MAX_PORTFOLIO_RISK:
         raise RiskRefusal(
