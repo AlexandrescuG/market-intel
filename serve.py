@@ -18,7 +18,7 @@ from urllib.parse import urlparse, parse_qs, unquote
 
 # Journal modules (добавляем core/ в path)
 sys.path.insert(0, str(Path(__file__).parent))
-from core import journal_db, journal_crypto, journal_ocr, journal_csv, journal_meta, journal_discipline, journal_alerts, journal_brief, journal_setups, journal_tilt, journal_gamification, journal_goals, journal_account, journal_auth, journal_feedback, journal_import, journal_analytics, journal_review, journal_cooldown, journal_rules, journal_tradeplan, journal_gate, i18n
+from core import journal_db, journal_crypto, journal_ocr, journal_csv, journal_meta, journal_discipline, journal_alerts, journal_brief, journal_setups, journal_tilt, journal_gamification, journal_goals, journal_account, journal_auth, journal_feedback, journal_import, journal_analytics, journal_hours, journal_review, journal_cooldown, journal_rules, journal_tradeplan, journal_gate, i18n
 from core import symbols as _symbols
 from core import candle_cache
 from core import news_media, news_i18n, news_junk, symbol_alias
@@ -2100,27 +2100,18 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self._handle_analytics_discipline_cost()
         elif path_clean == "/api/journal/analytics/setups":
             self._handle_analytics_setups()
-        # ── Статистика для главы 10: ручки объявлены, данных пока нет ──
+        # ── Статистика для главы 10: часы входа против часов заработка ──
         #
-        # 🔴 ОТВЕТ «ДАННЫХ НЕТ» — ЭТО НЕ ТО ЖЕ, ЧТО 404.
-        # Глава 10 спрашивает эти два адреса на каждом открытии: fetch сделан
-        # на вырост, и убирать его незачем — когда статистика появится, глава
-        # покажет её без правок. Но маршрутов не существовало, и каждое
-        # открытие давало два 404 в консоли. Предсказуемый шум опаснее своей
-        # безобидности: в нём тонет отказ, который что-то значит, — ровно это
-        # уже случилось с графиком, где настоящие ошибки искались среди
-        # гарантированных 404 по акциям брокера.
-        # Маршрут теперь есть и честно говорит, что данных нет и почему.
-        # Условия из спеки (20 сделок у человека, 50 пользователей и 1000
-        # сделок в сумме) не выполнены: в data/journal.db ноль сделок.
-        elif path_clean in ("/api/journal/self-stats", "/api/journal/aggregate-stats"):
-            self._send_json({
-                "available": False,
-                "why": "статистика не набрана: в журнале нет записанных сделок",
-                "порог": ("20 сделок у пользователя"
-                          if path_clean.endswith("self-stats")
-                          else "50 пользователей и 1000 сделок"),
-            })
+        # 🔴 ОТВЕТ «ДАННЫХ НЕТ» — ЭТО НЕ ТО ЖЕ, ЧТО 404, И НЕ ТО ЖЕ, ЧТО НОЛЬ.
+        # Глава спрашивает оба адреса на каждом открытии. Пока маршрутов не
+        # было, каждое открытие давало два 404 — предсказуемый шум, в котором
+        # тонет отказ, что-то значащий. Теперь считаем по-настоящему
+        # (core/journal_hours.py), а когда данных не хватает — говорим, чего
+        # именно и сколько ещё нужно, вместо пустого ответа.
+        elif path_clean == "/api/journal/self-stats":
+            self._send_json(journal_hours.свои_часы(self._current_user_id()))
+        elif path_clean == "/api/journal/aggregate-stats":
+            self._send_json(journal_hours.часы_платформы())
         # ── Weekly review ──
         elif path_clean == "/api/journal/review/current":
             self._handle_review_current()
@@ -4274,6 +4265,11 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 except Exception:
                     pass
             self._send_json(result, 201 if not result.get("duplicate") else 200)
+        except ValueError as e:
+            # Данные клиента не прошли ограничение таблицы — это его ошибка,
+            # а не сбой сервера. 500 здесь врал бы дважды: и про виновника, и
+            # про то, поможет ли повтор запроса.
+            self._send_json({"error": str(e)}, 400)
         except Exception as e:
             self._send_json({"error": str(e)}, 500)
 
