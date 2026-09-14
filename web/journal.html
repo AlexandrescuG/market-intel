@@ -12,7 +12,7 @@
 <link rel="apple-touch-icon" href="/assets/icons/icon-192.png">
 <link rel="manifest" href="/manifest.json">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/design.css?v=20260903b">
+<link rel="stylesheet" href="/assets/design.css?v=20260909">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="/assets/sbf-thermo-widget.js"></script>
 <script src="/assets/i18n.js?v=2" defer></script>
@@ -917,6 +917,42 @@ tbody td{padding:10px 12px;font-size:13px;vertical-align:middle}
   .j-del-btn,.j-alert-del,.j-setup-action,.j-sf-btn,.j-inv-tip-btn{min-height:44px;
     display:inline-flex;align-items:center;justify-content:center}
   .j-alert-toggle{min-height:32px}
+}
+
+/* 🔴 ШАПКИ БЛОКОВ ПЕРЕНОСЯТСЯ. ВСЕ, А НЕ ТА ОДНА, ЧТО ПОПАЛА В ЗАМЕР.
+   Замер 14.09.2026 на 320 px: за край вылезли «⚙ Настроить правила»
+   (+18) и ряд «🔕 Включить пуши · + Создать правило» (+11). Это шапка
+   блока — заголовок слева, кнопки справа, justify-content:space-between
+   и никакого переноса: когда ширины не хватает, кнопке просто некуда
+   деться.
+   Таких шапок в дневнике девятнадцать, и flex-wrap стоял ровно у одной,
+   .j-goals-hd, — значит на эти грабли уже наступали и починили тот
+   экземпляр, который увидели. Это тот же класс ошибки, что и сетки
+   в главах курса: адаптив необязателен, поэтому его забывают, а
+   замечает это не тот, кто пишет, а тот, кто читает с телефона. Чинится
+   списком всех шапок разом, а не двумя именами из отчёта.
+   Перенос сам по себе ничего не двигает: flex-wrap срабатывает только
+   когда места действительно нет, поэтому на планшете и мониторе
+   раскладка прежняя. */
+@media(max-width:640px){
+  .j-modal-hd,.j-disc-hd,.j-disc-crit-row,.j-title-row,.j-notif-panel-hd,
+  .j-alerts-hd,.j-setups-hd,.j-setup-card-hd,.j-setup-footer,.j-brief-hd,
+  .j-checklist-hd,.j-game-hd,.j-goals-hd,.j-season-bar,.j-acct-hd,
+  .j-broker-card-hd,.j-broker-account-row,.j-analytics-hd,
+  .j-review-card-hd{flex-wrap:wrap;gap:8px}
+  .j-macro-figures{flex-wrap:wrap;gap:4px 10px}
+  /* Перенос сам по себе спасает от вылета, но на 320 получилось криво:
+     «Включить пуши» ужалось в узкую кнопку с текстом в две строки,
+     а «+ Создать правило» рядом осталось широким. Поэтому ряд кнопок
+     уходит на всю ширину, а кнопки в нём тянутся поровну и не рвут
+     подпись; когда двум не хватает места — каждая занимает свою строку. */
+  .j-alerts-hd > div:last-child{flex:1 1 100%;flex-wrap:wrap}
+  .j-alerts-hd > div:last-child > .j-btn{flex:1 1 140px;white-space:nowrap;
+    justify-content:center}
+  /* Поле ввода во flex-строке не сжимается ниже своего содержимого,
+     пока min-width равен auto, — из-за этого «+» рядом с ним вылезал
+     на 2 px. */
+  .j-cl-add-row input,.j-cl-add-row{min-width:0}
 }
 </style>
 </head>
