@@ -147,7 +147,8 @@ window.Ch7Content = {
     },
     ladderLimit: {
       body: "Всё, что ты прочитал в этой главе, ты пока принял на слово — кроме одного блока, где мы выложили свои измерения и CSV.\n\nИ это неправильно. Шесть глав мы учили тебя проверять за нами. А эту главу проверить не на чем, и дело не в нашей лени: поведение книги заявок не рисуется на макете. Плотность, которая восстанавливается за две секунды после того, как её съели; заявки, исчезающие за минуту до релиза; серия сделок одинакового размера, идущая двадцать минут подряд — всё это существует только в моменте. Запись показывает результат, а результат мы тебе уже показали — это свеча, и по ней ничего не видно.\n\nЗначит, нужен терминал. Не счёт с деньгами — терминал.",
-      pendingNote: "Карточка демо-счёта для этой ступени готовится отдельно вместе с остальной партнёрской инфраструктурой курса — эта глава выложена без неё, чтобы контент не ждал коммерческий слой.",
+      demoNote: "Демо открывается без верификации у {{noVerif}} площадок из {{total}} — проверено {{checked}}, условия и цитаты в partners.json. Денег не нужно: демо-терминал показывает ту же книгу заявок, что и реальный счёт.",
+      loadError: "Список площадок не загрузился — он же лежит в /brokers.",
     },
     quiz: [
       { id: "q1", section: "secBigOrder", prompt: "Фонду нужно купить объём, который в десять раз больше видимой плотности в книге. Что он сделает?",
@@ -320,7 +321,8 @@ window.Ch7Content = {
     },
     ladderLimit: {
       body: "Tot ce ai citit în acest capitol, l-ai acceptat deocamdată pe cuvânt — cu excepția unui bloc unde am publicat propriile măsurători și CSV-ul.\n\nȘi asta nu e corect. Șase capitole te-am învățat să ne verifici. Iar acest capitol n-are pe ce fi verificat, și nu din lene: comportamentul cărții de ordine nu se desenează într-un mockup. Densitatea care se reface în două secunde după ce a fost consumată; ordinele care dispar cu un minut înainte de publicație; o serie de tranzacții de mărime egală, care ține douăzeci de minute la rând — toate acestea există doar în moment. O înregistrare arată rezultatul, iar rezultatul ți l-am arătat deja — e o lumânare, și din ea nu se vede nimic.\n\nDeci ai nevoie de un terminal. Nu de un cont cu bani — de un terminal.",
-      pendingNote: "Cardul contului demo pentru această treaptă se pregătește separat, împreună cu restul infrastructurii de parteneriat a cursului — acest capitol e publicat fără el, ca să nu aștepte conținutul stratul comercial.",
+      demoNote: "Contul demo se deschide fără verificare la {{noVerif}} din {{total}} platforme — verificat {{checked}}, condițiile și citatele sunt în partners.json. Nu sunt necesari bani: terminalul demo arată același carnet de ordine ca un cont real.",
+      loadError: "Lista platformelor nu s-a încărcat — o găsești la /brokers.",
     },
     quiz: [
       { id: "q1", section: "secBigOrder", prompt: "Un fond trebuie să cumpere un volum de zece ori mai mare decât densitatea vizibilă din carte. Ce va face?",
@@ -493,7 +495,8 @@ window.Ch7Content = {
     },
     ladderLimit: {
       body: "Everything you read in this chapter, you took on trust — except for one block where we published our own measurements and the CSV.\n\nAnd that's not right. For six chapters we taught you to check our work. This chapter has nothing to check it against, and that's not laziness on our part: order-book behavior doesn't draw onto a mockup. Density recovering in two seconds after being eaten; orders vanishing a minute before a release; a series of matching-size trades running for twenty minutes straight — all of that only exists in the moment. A recording shows the outcome, and we've already shown you the outcome — it's a candle, and nothing shows through it.\n\nSo you need a terminal. Not a funded account — a terminal.",
-      pendingNote: "The demo-account card for this rung is being prepared separately, alongside the rest of the course's partner infrastructure — this chapter is published without it so the content doesn't wait on the commercial layer.",
+      demoNote: "A demo account opens without verification at {{noVerif}} of {{total}} platforms — checked {{checked}}, terms and quotes are in partners.json. No money required: the demo terminal shows the same order book as a live account.",
+      loadError: "The platform list failed to load — it also lives at /brokers.",
     },
     quiz: [
       { id: "q1", section: "secBigOrder", prompt: "A fund needs to buy a size ten times larger than the visible depth in the book. What will it do?",

@@ -31,6 +31,8 @@
 <script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
 <script src="/edu/assets/ch7.js"></script>
+<link rel="stylesheet" href="/assets/brokers.css?v=1">
+<script src="/assets/brokers.js?v=16" defer></script>
 
 <script type="text/babel" data-presets="react">
 const INITIAL_LANG = "{{ lang }}";
@@ -102,7 +104,7 @@ const STRINGS = {
   },
 };
 
-const {C, Mono, Chip, Rule, AntiMythBlock, RevealSteps, AskAnalystBtn, getChUrl, QuizBlock, ComplianceFootnote, ColdStart} = window.AcademyShared;
+const {C, Mono, Chip, Rule, AntiMythBlock, RevealSteps, AskAnalystBtn, getChUrl, QuizBlock, ComplianceFootnote, ColdStart, PartnerPicker} = window.AcademyShared;
 
 const SectionTitle = ({children,sub,align="left",id}) => (
   <div id={id} style={{textAlign:align,marginBottom:36,scrollMarginTop:130}}>
@@ -857,16 +859,52 @@ function XrayReversed({ xray }) {
   );
 }
 
-// ─── Ступень 2: предел макета (ladder pending) ─────────────────────────────────
-function LadderLimitBlock() {
+// ─── Ступень 2: демо-терминал ───────────────────────────────────────────────
+/* 🔴 ЗАГЛУШКА СНЯТА. Здесь стояло «карточка демо-счёта готовится отдельно
+   вместе с остальной партнёрской инфраструктурой курса». Инфраструктура
+   готова: в partners.json у всех пяти площадок проверено, что демо
+   открывается БЕЗ верификации — с цитатами из условий, датами проверки, а
+   у NAGA подтверждено собственным доступом (счёт #3402015).
+
+   Сноска ниже считает эти факты из файла, а не пересказывает их: если
+   завтра у кого-то появится требование верификации, число «5 из 5»
+   изменится само, а не останется висеть неправдой. */
+function LadderDemoBlock() {
+  const { useEffect, useState } = React;
   const T7 = window.Ch7Content[INITIAL_LANG] || window.Ch7Content.ru;
   const ll = T7.ladderLimit;
+  const [демо, setДемо] = useState(null);
+
+  useEffect(() => {
+    fetch("/data/partners.json", {cache: "no-cache"})
+      .then(r => r.ok ? r.json() : null)
+      .then(j => {
+        const все = (j && j.partners || []).filter(p => p.enabled);
+        if (!все.length) return;
+        const без = все.filter(p => p.demo_requires_verification === false);
+        const даты = все.map(p => p.demo_checked || p.loss_pct_checked)
+                        .filter(Boolean).sort();
+        setДемо({всего: все.length, без: без.length,
+                 проверено: даты.length ? даты[даты.length - 1] : null});
+      })
+      .catch(() => {});
+  }, []);
+
   return (
     <div style={{marginBottom:48}}>
       {ll.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:14,color:C.inkMid,lineHeight:1.75,marginBottom:14,maxWidth:800}}>{p}</p>)}
-      <div style={{border:`1px dashed ${C.borderGold}`,borderRadius:8,padding:"18px 22px",background:C.surface}}>
-        <p style={{fontSize:12,color:C.inkFaint,fontStyle:"italic",margin:0}}>{ll.pendingNote}</p>
-      </div>
+      <PartnerPicker limit={3} place="ch7_ladder2" errorText={ll.loadError}/>
+      {демо && (
+        <p style={{fontSize:11.5,color:C.inkFaint,fontFamily:"monospace",lineHeight:1.6,marginTop:12}}>
+          {/* Ключи шаблона — латиницей, и это не вкусовщина: fillTemplate
+              ищет {{\w+}}, а \w в JavaScript не включает кириллицу. С
+              русскими ключами подстановка молча не срабатывает, и на экран
+              уходит «{{без}} площадок из {{всего}}» — ровно это и показал
+              первый прогон. */}
+          {fillTemplate(ll.demoNote, {noVerif: демо.без, total: демо.всего,
+                                      checked: демо.проверено || "—"})}
+        </p>
+      )}
     </div>
   );
 }
@@ -971,7 +1009,7 @@ function Chapter7() {
 
         <Rule/>
 
-        <LadderLimitBlock/>
+        <LadderDemoBlock/>
 
         <QuizBlock questions={T7.quiz} levelId="level_7" lang={lang} copy={{
           kicker: S.quizKicker, title: S.quizTitle, next: S.quizNext,
