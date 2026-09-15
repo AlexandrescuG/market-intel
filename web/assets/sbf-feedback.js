@@ -312,7 +312,13 @@
         '</div>' +
         '<div class="sbf-fw-screenshot-wrap">' +
           '<div class="sbf-fw-screenshot-progress" id="sbf-fw-scprog" data-i18n="feedback.screenshot_capturing">' + t('feedback.screenshot_capturing', 'Захватываем скриншот…') + '</div>' +
-          '<img class="sbf-fw-screenshot-preview" id="sbf-fw-preview" alt="">' +
+          // 🔴 <img> без src — это запрос к самой странице: браузер
+          // считает адресом текущий URL и тянет её целиком второй раз.
+          // Пустышка висела на каждой из 31 страницы и в любом обходе
+          // выглядела битой картинкой — я сам однажды принял её за поломку
+          // вёрстки. Прозрачный пиксель до захвата снимает и то и другое.
+          '<img class="sbf-fw-screenshot-preview" id="sbf-fw-preview" alt="" ' +
+          'src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">' +
           '<label class="sbf-fw-file-label">' +
             '<input type="file" accept="image/*" class="sbf-fw-file-input" id="sbf-fw-file">' +
             '<span data-i18n="feedback.attach_screenshot">' + t('feedback.attach_screenshot', '📎 Прикрепить свой скриншот') + '</span>' +
