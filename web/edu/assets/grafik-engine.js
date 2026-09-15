@@ -115,7 +115,7 @@
     var aft=n*45+120,s='<svg viewBox="0 0 '+W+' '+(Hp+subH)+'" style="display:block;width:100%;height:auto" xmlns="http://www.w3.org/2000/svg">';
     (it.layers||[]).forEach(function(L2){
       if(L2.t==='fill'){var top=[],bot=[];for(var i=0;i<n;i++){if(L2.up[i]==null||L2.dn[i]==null)continue;top.push([X(i),Y(Math.max(L2.up[i],L2.dn[i]))]);bot.push([X(i),Y(Math.min(L2.up[i],L2.dn[i]))]);}var pts=top.concat(bot.reverse()).map(function(p){return p[0].toFixed(1)+','+p[1].toFixed(1);}).join(' ');s+='<polygon class="zn" style="--zop:'+(L2.op||0.1)+';animation-delay:'+aft+'ms" points="'+pts+'" fill="'+L2.color+'"/>';}
-      if(L2.t==='rect'){var x0=X(L2.i0),x1=L2.i1==null?(W-padR):X(L2.i1);s+='<rect class="zn" style="--zop:'+(L2.op||0.13)+';animation-delay:'+aft+'ms" x="'+x0.toFixed(1)+'" y="'+Y(L2.yTop).toFixed(1)+'" width="'+(x1-x0).toFixed(1)+'" height="'+(Y(L2.yBot)-Y(L2.yTop)).toFixed(1)+'" fill="'+L2.color+'" rx="2"/>'+(L2.label?'<text x="'+(x0+4).toFixed(1)+'" y="'+((Y(L2.yTop)+Y(L2.yBot))/2+3).toFixed(1)+'" font-family="JetBrains Mono,monospace" font-size="11" fill="'+L2.color+'">'+trLbl(L2.label)+'</text>':'');}
+      if(L2.t==='rect'){var x0=X(L2.i0),x1=L2.i1==null?(W-padR):X(L2.i1);s+='<rect class="zn" style="--zop:'+(L2.op||0.13)+';animation-delay:'+aft+'ms" x="'+x0.toFixed(1)+'" y="'+Y(L2.yTop).toFixed(1)+'" width="'+(x1-x0).toFixed(1)+'" height="'+(Y(L2.yBot)-Y(L2.yTop)).toFixed(1)+'" fill="'+L2.color+'" rx="2"'+(L2.stroke?' stroke="'+L2.color+'" stroke-width="1.2" stroke-opacity="0.85"':'')+'/>'+(L2.label?'<text x="'+(x0+4).toFixed(1)+'" y="'+((Y(L2.yTop)+Y(L2.yBot))/2+3).toFixed(1)+'" font-family="JetBrains Mono,monospace" font-size="11" fill="'+L2.color+'">'+trLbl(L2.label)+'</text>':'');}
     });
     for(var i=0;i<n;i++){var c=it.candles[i],xx=X(i),bull=c.c>=c.o,col=bull?P.up:P.down;var nh=Math.abs(Y(c.c)-Y(c.o));var bh=Math.max(nh,Math.min(cw*0.4,4));var by=Math.min(Y(c.o),Y(c.c))-(bh-nh)/2;s+='<g class="cn" style="animation-delay:'+(i*45)+'ms"><line x1="'+xx.toFixed(1)+'" y1="'+Y(c.h).toFixed(1)+'" x2="'+xx.toFixed(1)+'" y2="'+Y(c.l).toFixed(1)+'" stroke="'+col+'" stroke-width="1.1"/><rect x="'+(xx-cw/2).toFixed(1)+'" y="'+by.toFixed(1)+'" width="'+cw.toFixed(1)+'" height="'+bh.toFixed(1)+'" rx="0.7" fill="'+col+'"/></g>';}
     (it.layers||[]).forEach(function(L2,li){
@@ -194,6 +194,11 @@
           });
           пересчитать({closes: свечи.map(function(б){return б.c;}), candles: свечи});
           ЖИВОЙ_РЯД = {показ:о['показ'], tf:о['tf'], от:о['от'], до:о['до']};
+          var дл = j['отрезки']['поиск'];
+          if (дл && дл['бары']) {
+            ДЛИННЫЙ = дл['бары'].map(function(б){return {o:б.o,h:б.h,l:б.l,c:б.c};});
+            ЖИВОЙ_РЯД.поиск = {показ:дл['показ'], tf:дл['tf'], от:дл['от'], до:дл['до']};
+          }
           window.dispatchEvent(new Event('sbf-fig-series'));
         } catch (e) {}
       };
@@ -202,6 +207,37 @@
   })();
 
   root.SBFFigSeries = function(){ return ЖИВОЙ_РЯД; };
+
+  /* ── SMC-фигуры на настоящем рынке ─────────────────────────────────────
+     Ордер-блок, FVG, снятие ликвидности и слом структуры рисовались
+     вручную собранными свечами: «вот тут импульс, вот тут разрыв». На
+     таком примере концепция всегда выглядит очевидной — её для того и
+     нарисовали. Но detectSMC() у нас уже есть и работает на живом
+     графике; значит те же вхождения можно найти в реальной истории.
+     Ищем по длинному отрезку (400 баров), показываем окно вокруг события. */
+  var ДЛИННЫЙ = null;
+  var ОКНО_SMC = 15;
+  function поSMC(тип){
+    if (!ДЛИННЫЙ || !ДЛИННЫЙ.length) return null;
+    var события;
+    try { события = detectSMC(ДЛИННЫЙ, 5) || []; } catch (e) { return null; }
+    var подходят = события.filter(function(с){
+      if (тип === 'structure') return с.type === 'hh' || с.type === 'hl';
+      return с.type === тип;
+    });
+    if (!подходят.length) return null;
+    // Последнее вхождение: свежий рынок ближе читателю, чем давний.
+    var с = подходят[подходят.length - 1];
+    var i = с.i != null ? с.i : (с.i0 != null ? с.i0 : null);
+    if (i == null) return null;
+    var от = Math.max(0, i - Math.floor(ОКНО_SMC * 0.6));
+    var до = Math.min(ДЛИННЫЙ.length, от + ОКНО_SMC);
+    if (до - от < 12) return null;
+    var окно = ДЛИННЫЙ.slice(от, до);
+    var сдвиг = i - от;
+    return {candles: окно, событие: с, i: сдвиг};
+  }
+  root.SBFFigSMC = поSMC;
 
   /* Настоящие вхождения свечных паттернов — тот же файл, что питает
      галерею главы 10 (tools/build_pattern_examples.py, детектор
@@ -265,11 +301,11 @@
       ['flag','Флаг','bull',[48,50,62,60,61,59.5,60.5,58.5,64],3,[{t:'line',from:{i:6,y:62},to:{i:21,y:59}},{t:'line',from:{i:8,y:59.5},to:{i:21,y:57}}],'Резкий импульс, затем наклонный канал против него.','Передышка в тренде — часто продолжение.']
     ].map(function(a){return {key:a[0],n:a[1],f:a[6],w:a[7],note:'Стоп — за структурой, цель — измеренное движение фигуры.',build:function(){var пр=поПримеру(a[0]);if(пр){var в=Math.max.apply(null,пр.candles.map(function(c){return c.h;})),н=Math.min.apply(null,пр.candles.map(function(c){return c.l;}));return renderItem({candles:пр.candles,layers:[{t:'rect',i0:пр.zone[0]-0.5,i1:пр.zone[1]+0.5,yTop:в,yBot:н,color:P.gold,op:0.18}],levels:plevels(пр.candles,a[2],пр.zone)});}var c=chartP(a[3],a[4],a[1].length,0.42);return renderItem({candles:c,layers:a[5],levels:plevels(c,a[2])});}};}),
     smc:[
-      {key:'structure',n:'Структура рынка (HH/HL)',f:'Последовательность всё более высоких максимумов (HH) и минимумов (HL).',w:'Пока есть HH/HL — тренд вверх; появление LH/LL — сигнал слома.',note:'Базовая разметка тренда. Контекст, не точка входа.',build:function(){return renderItem(structItem());}},
-      {key:'bos',n:'Слом структуры (BOS)',f:'Цена пробивает последний значимый минимум восходящей структуры.',w:'Break of Structure — первое подтверждение возможной смены тренда.',note:'Сигнал смены контекста, а не готовая сделка.',build:function(){return renderItem(bosItem());}},
-      {key:'sweep',n:'Снятие ликвидности',f:'Цена прокалывает уровень равных хаёв (где стоят стопы) и разворачивается.',w:'Ликвидность собрана — часто резкий разворот после снятия.',note:'Манипуляция перед движением. Контекст направления.',build:function(){return renderItem(sweepItem());}},
-      {key:'fvg',n:'FVG / имбаланс',f:'Три свечи сильного импульса оставляют незаполненный разрыв.',w:'Цену часто тянет назад «закрыть» имбаланс перед продолжением.',note:'Зона интереса, куда может вернуться цена.',build:function(){return renderItem(fvgItem());}},
-      {key:'ob',n:'Ордер-блок',f:'Последняя противоположная свеча перед сильным импульсом.',w:'Зона, откуда заходил крупный объём — часто реакция при возврате.',note:'Зона интереса, не самостоятельный сигнал.',build:function(){return renderItem(obItem());}}
+      {key:'structure',n:'Структура рынка (HH/HL)',f:'Последовательность всё более высоких максимумов (HH) и минимумов (HL).',w:'Пока есть HH/HL — тренд вверх; появление LH/LL — сигнал слома.',note:'Базовая разметка тренда. Контекст, не точка входа.',build:function(){var м=поSMC('hh');if(м){var в=Math.max.apply(null,м.candles.map(function(c){return c.h;})),н=Math.min.apply(null,м.candles.map(function(c){return c.l;}));var сл=(м['событие'].yTop!=null&&м['событие'].yBot!=null)?{t:'rect',i0:м.i-0.5,i1:м.i+2.5,yTop:м['событие'].yTop,yBot:м['событие'].yBot,color:P.gold,op:0.20,stroke:true,label:м['событие'].label}:{t:'rect',i0:м.i-0.5,i1:м.i+0.5,yTop:в,yBot:н,color:P.gold,op:0.18,label:м['событие'].label};return renderItem({candles:м.candles,layers:[сл]});}return renderItem(structItem());}},
+      {key:'bos',n:'Слом структуры (BOS)',f:'Цена пробивает последний значимый минимум восходящей структуры.',w:'Break of Structure — первое подтверждение возможной смены тренда.',note:'Сигнал смены контекста, а не готовая сделка.',build:function(){var м=поSMC('bos');if(м){var в=Math.max.apply(null,м.candles.map(function(c){return c.h;})),н=Math.min.apply(null,м.candles.map(function(c){return c.l;}));var сл=(м['событие'].yTop!=null&&м['событие'].yBot!=null)?{t:'rect',i0:м.i-0.5,i1:м.i+2.5,yTop:м['событие'].yTop,yBot:м['событие'].yBot,color:P.gold,op:0.20,stroke:true,label:м['событие'].label}:{t:'rect',i0:м.i-0.5,i1:м.i+0.5,yTop:в,yBot:н,color:P.gold,op:0.18,label:м['событие'].label};return renderItem({candles:м.candles,layers:[сл]});}return renderItem(bosItem());}},
+      {key:'sweep',n:'Снятие ликвидности',f:'Цена прокалывает уровень равных хаёв (где стоят стопы) и разворачивается.',w:'Ликвидность собрана — часто резкий разворот после снятия.',note:'Манипуляция перед движением. Контекст направления.',build:function(){var м=поSMC('sweep');if(м){var в=Math.max.apply(null,м.candles.map(function(c){return c.h;})),н=Math.min.apply(null,м.candles.map(function(c){return c.l;}));var сл=(м['событие'].yTop!=null&&м['событие'].yBot!=null)?{t:'rect',i0:м.i-0.5,i1:м.i+2.5,yTop:м['событие'].yTop,yBot:м['событие'].yBot,color:P.gold,op:0.20,stroke:true,label:м['событие'].label}:{t:'rect',i0:м.i-0.5,i1:м.i+0.5,yTop:в,yBot:н,color:P.gold,op:0.18,label:м['событие'].label};return renderItem({candles:м.candles,layers:[сл]});}return renderItem(sweepItem());}},
+      {key:'fvg',n:'FVG / имбаланс',f:'Три свечи сильного импульса оставляют незаполненный разрыв.',w:'Цену часто тянет назад «закрыть» имбаланс перед продолжением.',note:'Зона интереса, куда может вернуться цена.',build:function(){var м=поSMC('fvg');if(м){var в=Math.max.apply(null,м.candles.map(function(c){return c.h;})),н=Math.min.apply(null,м.candles.map(function(c){return c.l;}));var сл=(м['событие'].yTop!=null&&м['событие'].yBot!=null)?{t:'rect',i0:м.i-0.5,i1:м.i+2.5,yTop:м['событие'].yTop,yBot:м['событие'].yBot,color:P.gold,op:0.20,stroke:true,label:м['событие'].label}:{t:'rect',i0:м.i-0.5,i1:м.i+0.5,yTop:в,yBot:н,color:P.gold,op:0.18,label:м['событие'].label};return renderItem({candles:м.candles,layers:[сл]});}return renderItem(fvgItem());}},
+      {key:'ob',n:'Ордер-блок',f:'Последняя противоположная свеча перед сильным импульсом.',w:'Зона, откуда заходил крупный объём — часто реакция при возврате.',note:'Зона интереса, не самостоятельный сигнал.',build:function(){var м=поSMC('ob');if(м){var в=Math.max.apply(null,м.candles.map(function(c){return c.h;})),н=Math.min.apply(null,м.candles.map(function(c){return c.l;}));var сл=(м['событие'].yTop!=null&&м['событие'].yBot!=null)?{t:'rect',i0:м.i-0.5,i1:м.i+2.5,yTop:м['событие'].yTop,yBot:м['событие'].yBot,color:P.gold,op:0.20,stroke:true,label:м['событие'].label}:{t:'rect',i0:м.i-0.5,i1:м.i+0.5,yTop:в,yBot:н,color:P.gold,op:0.18,label:м['событие'].label};return renderItem({candles:м.candles,layers:[сл]});}return renderItem(obItem());}}
     ],
     ind:[
       {key:'ma',n:'Скользящие средние',f:'Среднее цены за N баров; линия скользит по каждому бару.',w:'Сглаживает шум; пересечение быстрой и медленной MA — смена тренда.',note:'Контекст направления, не точка входа.',build:function(){return renderItem({candles:CN,layers:[{t:'poly',data:ma20,color:P.blue},{t:'poly',data:ma50,color:P.violet}]});}},

@@ -90,6 +90,12 @@
           шапка.textContent = пример['пример']['имя'] + ' · ' + пример['пример']['tf'] + ' · ' +
             ('0'+д.getUTCDate()).slice(-2)+'.'+('0'+(д.getUTCMonth()+1)).slice(-2)+'.'+д.getUTCFullYear();
           шапка.classList.add('sbf-fig-real-tag');
+        } else if (el.dataset.cat === 'smc' && ряд && ряд['поиск'] &&
+                   window.SBFFigSMC && window.SBFFigSMC(
+                     el.dataset.key === 'structure' ? 'hh' : el.dataset.key)) {
+          шапка.textContent = ряд['поиск']['показ'] + ' · ' + ряд['поиск']['tf'] +
+                              ' · ' + ряд['поиск']['от'] + '…' + ряд['поиск']['до'];
+          шапка.classList.add('sbf-fig-real-tag');
         } else if (el.dataset.cat === 'ind' && ряд) {
           шапка.textContent = ряд['показ'] + ' · ' + ряд['tf'] + ' · ' +
                               ряд['от'] + '…' + ряд['до'];
