@@ -695,6 +695,51 @@ function EmaUsageModes({ candles }) {
 }
 
 // ─── Ступень 3: домашнее задание, без CTA лестницы ─────────────────────────
+/* ── Ступень 3: привязка журнала ─────────────────────────────────────────────
+   🔴 ЗДЕСЬ БЫЛА ЗАГЛУШКА «привязка журнала готовится отдельно вместе с
+   остальной инфраструктурой лестницы». Журнал при этом работает и открыт
+   по /journal: в нём заводят сделки, он считает дисциплину и часы. То есть
+   ступень ждала не инструмента, а того, чтобы её связали с уже готовым.
+
+   Шаг показывает состояние журнала читателя — сколько сделок в нём уже
+   есть, — и ведёт туда. Число берётся из той же ручки, по которой глава 14
+   проверяет свои ворота: один источник правды на обе главы, иначе они
+   однажды разойдутся в том, что считают «заведённым журналом». */
+function JournalStep({ ll }) {
+  const { useEffect, useState } = React;
+  const [сделок, setСделок] = useState(null);
+
+  useEffect(() => {
+    let живо = true;
+    fetch("/api/journal/gate-status", {cache: "no-store"})
+      .then(r => r.ok ? r.json() : null)
+      .then(j => {
+        if (!живо || !j || !j.conditions) return;
+        setСделок(j.conditions.trades ? j.conditions.trades.have : 0);
+      })
+      .catch(() => {});
+    return () => { живо = false; };
+  }, []);
+
+  const пусто = сделок === 0 || сделок === null;
+  return (
+    <div style={{background:"#fff",border:`1px solid ${C.borderGold}`,borderRadius:8,padding:"20px 24px"}}>
+      <div style={{fontWeight:600,fontSize:13,color:C.black,marginBottom:8}}>{ll.journalTitle}</div>
+      <p style={{fontSize:13,color:C.inkMid,lineHeight:1.7,marginBottom:14}}>
+        {пусто ? ll.journalEmpty : fillTemplate(ll.journalHas, {n: сделок})}
+      </p>
+      {/* Ссылка, а не кнопка: открывается средним кликом в новой вкладке,
+          работает с клавиатуры, видна диктору. */}
+      <a href="/journal" style={{display:"inline-block",padding:"11px 22px",background:C.gold,
+           color:"#18181a",borderRadius:4,textDecoration:"none",fontFamily:"monospace",
+           fontSize:12,letterSpacing:1}}>{ll.journalCta}</a>
+      <p style={{fontSize:11.5,color:C.inkFaint,lineHeight:1.6,marginTop:12,marginBottom:0}}>
+        {ll.journalNote}
+      </p>
+    </div>
+  );
+}
+
 function LadderLimitBlock() {
   const T8 = window.Ch8Content[INITIAL_LANG] || window.Ch8Content.ru;
   const ll = T8.ladderLimit;
@@ -705,9 +750,7 @@ function LadderLimitBlock() {
         <div style={{fontWeight:600,fontSize:13,color:C.black,marginBottom:10}}>{ll.homeworkTitle}</div>
         {ll.homeworkBody.split("\n\n").map((p,i) => <p key={i} style={{fontSize:13,color:C.inkMid,lineHeight:1.7,marginBottom:10}}>{p}</p>)}
       </div>
-      <div style={{border:`1px dashed ${C.borderGold}`,borderRadius:8,padding:"18px 22px",background:C.surface}}>
-        <p style={{fontSize:12,color:C.inkFaint,fontStyle:"italic",margin:0}}>{ll.pendingNote}</p>
-      </div>
+      <JournalStep ll={ll}/>
     </div>
   );
 }
