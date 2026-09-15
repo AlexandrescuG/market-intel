@@ -352,6 +352,13 @@ body {
 .sbf-pat-card svg { width: 100%; height: auto; border-radius: 6px; }
 .sbf-pat-name { font-size: 12px; font-weight: 700; color: var(--ink); }
 .sbf-pat-desc { font-size: 11px; color: var(--muted); line-height: 1.4; }
+/* Строка с нашим измерением под карточкой паттерна. Контраст выше, чем у
+   описания: это единственное на карточке, что посчитано, а не нарисовано. */
+.sbf-pat-stat {
+  margin-top: 7px; padding-top: 6px; border-top: 1px solid rgba(0,0,0,0.08);
+  font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+  font-size: 10.5px; letter-spacing: 0.2px; color: #8a2f2f;
+}
 
 /* CTA */
 .sbf-cta {

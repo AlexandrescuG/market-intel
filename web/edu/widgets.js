@@ -84,28 +84,77 @@ var candleDefs=[
   ['harami','bull',t('eduindex.widgets.candle.harami.name','Харами (Harami)'),t('eduindex.widgets.candle.harami.desc','Малая свеча внутри тела предыдущей большой — затухание импульса.'),9]
 ];
 var chartDefs=[
-  [t('eduindex.widgets.chart.triangleAsc.name','Восходящий треугольник'),t('eduindex.widgets.chart.triangleAsc.desc','Горизонтальное сопротивление, восходящая поддержка.'),[50,61,54,61,57,61,59,61.5,64],3,55,[{type:'hline',y:61,label:t('eduindex.widgets.lbl_resistance','сопр.')},{type:'line',from:{i:0,y:50},to:{i:18,y:59}}]],
-  [t('eduindex.widgets.chart.triangleDesc.name','Нисходящий треугольник'),t('eduindex.widgets.chart.triangleDesc.desc','Горизонтальная поддержка, нисходящее сопротивление.'),[60,50,57,50,54,50,52,50,47],3,12,[{type:'hline',y:50,label:t('eduindex.widgets.lbl_support','подд.')},{type:'line',from:{i:0,y:60},to:{i:18,y:52}}]],
-  [t('eduindex.widgets.chart.pennant.name','Вымпел'),t('eduindex.widgets.chart.pennant.desc','Импульс (флагшток), затем сжатие в сходящемся треугольнике.'),[48,50,52,63,60,62,60.5,61.5,65],3,3,[{type:'line',from:{i:9,y:63},to:{i:24,y:61.7}},{type:'line',from:{i:11,y:59.6},to:{i:24,y:61.1}}]],
-  [t('eduindex.widgets.chart.hns.name','Голова и плечи'),t('eduindex.widgets.chart.hns.desc','Три пика, средний выше — разворот тренда.'),[48,57,51,63,51,57,49],3,8,[{type:'hline',y:51,label:t('eduindex.widgets.lbl_neckline','линия шеи')}]],
-  [t('eduindex.widgets.chart.doubleTop.name','Двойная вершина'),t('eduindex.widgets.chart.doubleTop.desc','Два пика на одном уровне — фигура «M».'),[48,60,53,59.5,49],4,21,[{type:'hline',y:53,label:t('eduindex.widgets.lbl_neckline','линия шеи')}]],
-  [t('eduindex.widgets.chart.doubleBottom.name','Двойное дно'),t('eduindex.widgets.chart.doubleBottom.desc','Два минимума на одном уровне — фигура «W».'),[60,50,57,50,62],4,2,[{type:'hline',y:57,label:t('eduindex.widgets.lbl_neckline','линия шеи')}]],
-  [t('eduindex.widgets.chart.wedge.name','Клин (Wedge)'),t('eduindex.widgets.chart.wedge.desc','Сходящиеся наклонные линии — ослабление тренда.'),[50,55,52.5,57,54.5,58.5,56.5,59,54],3,14,[{type:'line',from:{i:3,y:55},to:{i:21,y:59}},{type:'line',from:{i:0,y:50},to:{i:18,y:56.5}}]],
-  [t('eduindex.widgets.chart.flag.name','Флаг'),t('eduindex.widgets.chart.flag.desc','Импульс, затем наклонный канал против движения.'),[48,50,62,60,61,59.5,60.5,58.5,64],3,6,[{type:'line',from:{i:6,y:62},to:{i:21,y:59}},{type:'line',from:{i:8,y:59.5},to:{i:21,y:57}}]]
+  [t('eduindex.widgets.chart.triangleAsc.name','Восходящий треугольник'),t('eduindex.widgets.chart.triangleAsc.desc','Горизонтальное сопротивление, восходящая поддержка.'),[50,61,54,61,57,61,59,61.5,64],3,55,[{type:'hline',y:61,label:t('eduindex.widgets.lbl_resistance','сопр.')},{type:'line',from:{i:0,y:50},to:{i:18,y:59}}],'triangleAsc'],
+  [t('eduindex.widgets.chart.triangleDesc.name','Нисходящий треугольник'),t('eduindex.widgets.chart.triangleDesc.desc','Горизонтальная поддержка, нисходящее сопротивление.'),[60,50,57,50,54,50,52,50,47],3,12,[{type:'hline',y:50,label:t('eduindex.widgets.lbl_support','подд.')},{type:'line',from:{i:0,y:60},to:{i:18,y:52}}],'triangleDesc'],
+  [t('eduindex.widgets.chart.pennant.name','Вымпел'),t('eduindex.widgets.chart.pennant.desc','Импульс (флагшток), затем сжатие в сходящемся треугольнике.'),[48,50,52,63,60,62,60.5,61.5,65],3,3,[{type:'line',from:{i:9,y:63},to:{i:24,y:61.7}},{type:'line',from:{i:11,y:59.6},to:{i:24,y:61.1}}],'pennant'],
+  [t('eduindex.widgets.chart.hns.name','Голова и плечи'),t('eduindex.widgets.chart.hns.desc','Три пика, средний выше — разворот тренда.'),[48,57,51,63,51,57,49],3,8,[{type:'hline',y:51,label:t('eduindex.widgets.lbl_neckline','линия шеи')}],'hns'],
+  [t('eduindex.widgets.chart.doubleTop.name','Двойная вершина'),t('eduindex.widgets.chart.doubleTop.desc','Два пика на одном уровне — фигура «M».'),[48,60,53,59.5,49],4,21,[{type:'hline',y:53,label:t('eduindex.widgets.lbl_neckline','линия шеи')}],'doubleTop'],
+  [t('eduindex.widgets.chart.doubleBottom.name','Двойное дно'),t('eduindex.widgets.chart.doubleBottom.desc','Два минимума на одном уровне — фигура «W».'),[60,50,57,50,62],4,2,[{type:'hline',y:57,label:t('eduindex.widgets.lbl_neckline','линия шеи')}],'doubleBottom'],
+  [t('eduindex.widgets.chart.wedge.name','Клин (Wedge)'),t('eduindex.widgets.chart.wedge.desc','Сходящиеся наклонные линии — ослабление тренда.'),[50,55,52.5,57,54.5,58.5,56.5,59,54],3,14,[{type:'line',from:{i:3,y:55},to:{i:21,y:59}},{type:'line',from:{i:0,y:50},to:{i:18,y:56.5}}],'wedge'],
+  [t('eduindex.widgets.chart.flag.name','Флаг'),t('eduindex.widgets.chart.flag.desc','Импульс, затем наклонный канал против движения.'),[48,50,62,60,61,59.5,60.5,58.5,64],3,6,[{type:'line',from:{i:6,y:62},to:{i:21,y:59}},{type:'line',from:{i:8,y:59.5},to:{i:21,y:57}}],'flag']
 ];
 
-/* ── Pattern gallery ───────────────────────────────────────────────────────── */
+/* ── Pattern gallery ─────────────────────────────────────────────────────────
+   🔴 ДВЕ ПРАВКИ ЧЕСТНОСТИ. Первая: галерея была единственным из
+   инжектируемых блоков БЕЗ метки «СХЕМА · ИЛЛЮСТРАЦИЯ» — пятнадцать форм
+   рисуются генератором со случайным зерном, а заголовок «Паттерны рынка»
+   ничем не отличал их от наблюдений.
+
+   Вторая, и она важнее. По шести из этих паттернов у нас есть настоящие
+   измерения: pattern_stats_job считает их еженедельно по 80+ инструментам,
+   суммарно 117 тысяч наблюдений на эти шесть. И измерения говорят ровно
+   то, ради чего написана глава: доля случаев, когда цена через пять баров
+   пошла в обещанную сторону, лежит между 0.481 и 0.518. Монетка.
+   Показывать красивую форму и молчать о том, что мы её уже проверили, —
+   значит оставлять читателя при впечатлении, которое сами же опровергли. */
+var GALLERY_STATS = null;
+(function(){
+  try {
+    var q = new XMLHttpRequest();
+    q.open('GET', '/data/edu_capsules/pattern_gallery_stats.json', true);
+    q.onload = function(){
+      if (q.status !== 200) return;
+      try {
+        GALLERY_STATS = JSON.parse(q.responseText);
+        // Карточки уже нарисованы — дорисовываем строку с измерением.
+        document.querySelectorAll('[data-sbf-pat]').forEach(function(узел){
+          var с = статистикаПаттерна(узел.getAttribute('data-sbf-pat'));
+          if (с) узел.insertAdjacentHTML('beforeend', с);
+        });
+      } catch (e) {}
+    };
+    q.send();
+  } catch (e) {}
+})();
+
+function статистикаПаттерна(ключ){
+  if (!GALLERY_STATS || !GALLERY_STATS['паттерны']) return '';
+  var з = GALLERY_STATS['паттерны'][ключ];
+  if (!з) return '';
+  var доля = Math.round(з['доля_5'] * 1000) / 10;
+  var набл = з['наблюдений'].toLocaleString('ru-RU');
+  return '<div class="sbf-pat-stat">' +
+         t('eduindex.widgets.pat_stat_prefix', 'наша проверка:') + ' ' +
+         доля.toFixed(1) + '% · ' + набл + ' ' +
+         t('eduindex.widgets.pat_stat_obs', 'наблюдений') + '</div>';
+}
+
 function mountPatternGallery(el, opts) {
   var filter=(opts&&opts.filter)||'all';
   var html='';
   if(filter==='all'||filter==='candle') html+='<div class="sbf-sect-label">'+t('eduindex.widgets.section_candle','Свечные паттерны')+' <span class="sbf-sect-n">7</span></div><div class="sbf-card-grid" id="sbfw-cg"></div>';
   if(filter==='all'||filter==='chart')  html+='<div class="sbf-sect-label">'+t('eduindex.widgets.section_chart','Графические паттерны')+' <span class="sbf-sect-n">8</span></div><div class="sbf-card-grid" id="sbfw-hg"></div>';
-  el.innerHTML='<div class="sbf-widget"><div class="sbf-widget-head">'+t('eduindex.widgets.gallery_head','Паттерны рынка')+'</div>'+html+'</div>';
-  function card(name,desc,svg){return'<div class="sbf-pat-card">'+svg+'<div class="sbf-pat-name">'+name+'</div><div class="sbf-pat-desc">'+desc+'</div></div>';}
+  el.innerHTML='<div class="sbf-widget">'+
+    '<div class="sbf-fig-schema-tag">'+t('eduindex.embed.schema_label','СХЕМА · ИЛЛЮСТРАЦИЯ, НЕ РЕАЛЬНЫЕ ДАННЫЕ')+'</div>'+
+    '<div class="sbf-widget-head">'+t('eduindex.widgets.gallery_head','Паттерны рынка')+'</div>'+html+'</div>';
+  function card(name,desc,svg,ключ){
+    return'<div class="sbf-pat-card" data-sbf-pat="'+(ключ||'')+'">'+svg+
+      '<div class="sbf-pat-name">'+name+'</div><div class="sbf-pat-desc">'+desc+'</div>'+
+      статистикаПаттерна(ключ)+'</div>';}
   var cg=el.querySelector('#sbfw-cg');
-  if(cg) candleDefs.forEach(function(p){var d=buildReversal(p[1],PAT[p[0]],p[4]);cg.innerHTML+=card(p[2],p[3],buildSVG(d.candles,[],{zone:d.zone,trend:d.trend}));});
+  if(cg) candleDefs.forEach(function(p){var d=buildReversal(p[1],PAT[p[0]],p[4]);cg.innerHTML+=card(p[2],p[3],buildSVG(d.candles,[],{zone:d.zone,trend:d.trend}),p[0]);});
   var hg=el.querySelector('#sbfw-hg');
-  if(hg) chartDefs.forEach(function(p){var d=buildChart(p[2],p[3],p[4],p[5]);hg.innerHTML+=card(p[0],p[1],buildSVG(d.candles,p[5],{}));});
+  if(hg) chartDefs.forEach(function(p){var d=buildChart(p[2],p[3],p[4],p[5]);hg.innerHTML+=card(p[0],p[1],buildSVG(d.candles,p[5],{}),p[6]);});
 }
 
 /* ── Risk calculator ───────────────────────────────────────────────────────── */
