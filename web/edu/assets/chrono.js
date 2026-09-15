@@ -766,7 +766,46 @@
     "2022_ukraine":   { webp:"/edu/assets/history/2022_ukraine.webp",   jpg:"/edu/assets/history/2022_ukraine_web.jpg",   w:600, h:900,
       alt:"Здание Московской биржи (MOEX)" },
     "today_terminal": { webp:"/edu/assets/history/today_terminal.webp", jpg:"/edu/assets/history/today_terminal_web.jpg", w:900, h:675,
-      alt:"Терминал Bloomberg, рабочее место аналитика" }
+      alt:"Терминал Bloomberg, рабочее место аналитика" },
+    // Станции главы 2 (центральные банки). Отобраны на Wikimedia Commons
+    // 15.09.2026, лицензии и ссылки — в history/manifest.json. Файлы качает
+    // владелец; пока их нет, картинка не загрузится и станция сама вернётся
+    // к ряду данных — см. ЗАПАСНОЙ ПУТЬ ниже.
+    "1907_morgan":    { webp:"/edu/assets/history/1907_morgan.webp",    jpg:"/edu/assets/history/1907_morgan_web.jpg",    w:900, h:1119,
+      alt:"Толпа на Уолл-стрит во время банковской паники, октябрь 1907" },
+    "1913_fed":       { webp:"/edu/assets/history/1913_fed.webp",       jpg:"/edu/assets/history/1913_fed_web.jpg",       w:900, h:1295,
+      alt:"Газетная полоса: Вильсон подписывает закон о Федеральном резерве, 24 декабря 1913" },
+    "1944_bretton":   { webp:"/edu/assets/history/1944_bretton.webp",   jpg:"/edu/assets/history/1944_bretton_web.jpg",   w:706, h:572,
+      alt:"Моргентау открывает Бреттон-Вудскую конференцию, июль 1944" },
+    "1971_nixon":     { webp:"/edu/assets/history/1971_nixon.webp",     jpg:"/edu/assets/history/1971_nixon_web.jpg",     w:900, h:1127,
+      alt:"Ричард Никсон, официальный портрет, 8 июля 1971" }
+  };
+
+  /* ── ЗАПАСНОЙ ПУТЬ, КОГДА ФАЙЛА НЕТ ───────────────────────────────────────
+     🔴 ЗАЧЕМ. Запись в STATION_IMAGE — это обещание, что файл лежит на диске.
+     Обещание можно дать раньше, чем файл появится (картинки скачивает
+     владелец), и тогда читатель увидит не станцию, а значок битой картинки:
+     это хуже схемы, которая была там раньше. Поэтому запись проверяется
+     браузером, а не нами: не загрузилось — станция молча возвращается к
+     ряду данных или к рисунку, ровно как до появления записи.
+     Тот же путь защищает и четырнадцать работающих станций от случайно
+     удалённого файла. */
+  // Глава 2 спрашивает, есть ли под станцию снимок, чтобы не показать ряд
+  // данных поверх фотографии (см. art2HTML в chrono2.js).
+  window.ChronoStationImageHas = function(key){ return !!STATION_IMAGE[key]; };
+
+  window.SbfChronoImgFail = function(el, key){
+    var блок = el.closest ? el.closest('picture') : null;
+    var запас = '';
+    // Глава может подставить свой запасной рисунок: у главы 2 половина
+    // станций (1907, 1913, 1944, 1971) рисуется в chrono2.js, и chrono.js
+    // про эти ключи ничего не знает. Замер это и поймал — без хука станция
+    // оставалась пустой рамкой.
+    if (window.SbfChronoFallbackHTML) запас = window.SbfChronoFallbackHTML(key) || '';
+    if (!запас && window.SbfChronoFrames) запас = window.SbfChronoFrames.кадр(key) || '';
+    if (!запас && STATION_ART[key]) запас = STATION_ART[key]();
+    if (блок && запас) блок.outerHTML = запас;
+    else if (блок) блок.remove();
   };
 
   function stationArtHTML(key){
@@ -784,7 +823,8 @@
     if (img){
       return '<picture>'
         + '<source type="image/webp" srcset="'+img.webp+'">'
-        + '<img src="'+img.jpg+'" alt="'+img.alt+'" loading="lazy" width="'+img.w+'" height="'+img.h+'">'
+        + '<img src="'+img.jpg+'" alt="'+img.alt+'" loading="lazy" width="'+img.w+'" height="'+img.h+'"'
+        + ' onerror="window.SbfChronoImgFail&amp;&amp;window.SbfChronoImgFail(this,\''+key+'\')">'
         + '</picture>';
     }
     return STATION_ART[key] ? STATION_ART[key]() : '';

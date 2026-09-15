@@ -532,8 +532,17 @@
   };
 
   function art2HTML(key){
-    // Данные важнее рисунка: если под станцию есть настоящий ряд, показываем
-    // его, а не иллюстрацию. Рисовальщик общий с главой 1 — chrono-frames.js.
+    // 🔴 ПОРЯДОК. Сначала архивный снимок, потом ряд данных, потом рисунок —
+    // тот же порядок, что в главе 1. Раньше ряд стоял первым, и это было
+    // верно ровно до тех пор, пока фотографий у этих станций не было: как
+    // только к 1907/1913/1944/1971 нашлись снимки, прежний порядок стал бы
+    // молча их прятать — код продолжал бы «работать», а правка не дошла бы
+    // до экрана. Ряд остаётся для станций без снимка (1980, 1987, 1998,
+    // 2012, 2015, 2016, 2024) и как запасной путь, если файл не загрузился.
+    if (window.ChronoStationImageHas && window.ChronoStationImageHas(key)
+        && window.ChronoStationArtHTML) {
+      return window.ChronoStationArtHTML(key);
+    }
     if (window.SbfChronoFrames) {
       var svg = window.SbfChronoFrames.кадр(key);
       if (svg) return svg;
@@ -557,6 +566,14 @@
 
   window.Chrono2StationArt = ART;
   window.Chrono2StationArtHTML = art2HTML;
+  // Что показать, если снимок станции не загрузился (см. SbfChronoImgFail).
+  window.SbfChronoFallbackHTML = function(key){
+    if (window.SbfChronoFrames) {
+      var svg = window.SbfChronoFrames.кадр(key);
+      if (svg) return svg;
+    }
+    return ART[key] ? ART[key]() : '';
+  };
 
 })();
 
