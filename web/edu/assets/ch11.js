@@ -134,8 +134,8 @@ window.Ch11Content = {
       openOnChart: "Открыть Золото на графике →",
     },
     ladderLimit: {
-      body: "Ты только что видел, что твой реальный контрагент — не абстрактный рынок, а конкретная компания с конкретной моделью дохода. Дальше логично спросить: а какая именно, и чем они отличаются между собой.\n\nВ этой главе мы не покажем сравнение площадок с цифрой процента теряющих клиентов крупно — не потому что не хотим, а потому что готовим её честно: с реальными данными по каждому партнёру, датой снятия и ссылкой на источник, без единого захардкоженного числа. Собираем это отдельно вместе с остальной инфраструктурой лестницы.",
-      pendingNote: "Инструмент сравнения площадок с процентом теряющих клиентов готовится отдельно вместе с остальной инфраструктурой лестницы — эта глава выложена без него, чтобы контент не ждал коммерческий слой.",
+      body: "Ты только что видел, что твой реальный контрагент — не абстрактный рынок, а конкретная компания с конкретной моделью дохода. Дальше логично спросить: а какая именно, и чем они отличаются между собой.\n\nНиже — три площадки из тех, с кем мы работаем, отсортированные по проценту теряющих счетов: меньше — выше. Число не наше, его публикует сам брокер по требованию регулятора; у карточки видно дату снятия и ссылку на источник. Юрлицо и плечо зависят от твоей страны — потолок задаёт юрисдикция, а не брокер.",
+      loadError: "Сравнение площадок не загрузилось — данные лежат в /brokers, там же полная таблица.",
     },
     quiz: [
       { id: "q1", section: "secWhereAreYou", prompt: "Высокочастотный алгоритм на бирже в США может перехватить твою заявку по CFD?",
@@ -284,8 +284,8 @@ window.Ch11Content = {
       multiplierResultLabel: "ori mai larg decât normal",
     },
     ladderLimit: {
-      body: "Tocmai ai văzut că adevărata ta contraparte nu e o piață abstractă, ci o companie concretă cu un model de venit concret. Următoarea întrebare logică e: care anume, și prin ce diferă între ele.\n\nÎn acest capitol nu arătăm o comparație a platformelor cu cifra procentului de clienți care pierd afișată mare — nu pentru că nu vrem, ci pentru că o pregătim cinstit: cu date reale pentru fiecare partener, dată de preluare și link către sursă, fără nicio cifră fixată în cod. O strângem separat, împreună cu restul infrastructurii de parteneriat.",
-      pendingNote: "Instrumentul de comparare a platformelor cu procentul de clienți care pierd se pregătește separat, împreună cu restul infrastructurii de parteneriat — acest capitol e publicat fără el, ca conținutul să nu aștepte stratul comercial.",
+      body: "Tocmai ai văzut că adevărata ta contraparte nu e o piață abstractă, ci o companie concretă cu un model de venit concret. Următoarea întrebare logică e: care anume, și prin ce diferă între ele.\n\nMai jos — trei platforme dintre cele cu care lucrăm, sortate după procentul de conturi care pierd: mai puțin înseamnă mai sus. Cifra nu e a noastră, o publică brokerul însuși la cererea reglementatorului; pe card se vede data preluării și linkul spre sursă. Entitatea juridică și levierul depind de țara ta — plafonul îl dă jurisdicția, nu brokerul.",
+      loadError: "Comparația platformelor nu s-a încărcat — datele sunt în /brokers, unde e și tabelul complet.",
     },
     quiz: [
       { id: "q1", section: "secWhereAreYou", prompt: "Un algoritm de mare frecvență de pe o bursă din SUA îți poate intercepta ordinul CFD?",
@@ -434,8 +434,8 @@ window.Ch11Content = {
       multiplierResultLabel: "x wider than normal",
     },
     ladderLimit: {
-      body: "You just saw that your real counterparty isn't an abstract market — it's a specific company with a specific revenue model. The logical next question is: which one, exactly, and how do they differ from each other.\n\nThis chapter doesn't show a platform comparison with a big, prominent losing-client percentage — not because we don't want to, but because we're preparing it honestly: with real data per partner, a capture date, and a source link, without a single hardcoded number. We're building that separately, alongside the rest of the ladder infrastructure.",
-      pendingNote: "The platform-comparison tool with the losing-client percentage is being prepared separately, alongside the rest of the partner infrastructure — this chapter is published without it so the content doesn't wait on the commercial layer.",
+      body: "You just saw that your real counterparty isn't an abstract market — it's a specific company with a specific revenue model. The logical next question is: which one, exactly, and how do they differ from each other.\n\nBelow are three of the platforms we work with, sorted by the percentage of losing accounts: lower is higher up. The number isn't ours — the broker publishes it because the regulator requires it; the card shows the date it was taken and a link to the source. The legal entity and the leverage cap depend on your country: the cap is set by the jurisdiction, not by the broker.",
+      loadError: "The platform comparison failed to load — the data lives at /brokers, along with the full table.",
     },
     quiz: [
       { id: "q1", section: "secWhereAreYou", prompt: "Can a high-frequency algorithm on a US exchange intercept your CFD order?",

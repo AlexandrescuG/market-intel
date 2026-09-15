@@ -30,6 +30,8 @@
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"></script>
 <script src="/edu/assets/ch11.js"></script>
+<link rel="stylesheet" href="/assets/brokers.css?v=1">
+<script src="/assets/brokers.js?v=16" defer></script>
 
 <script type="text/babel" data-presets="react">
 const INITIAL_LANG = "{{ lang }}";
@@ -519,16 +521,50 @@ function MeasureYourBroker() {
   );
 }
 
-// ─── Ступень 6: pending заглушка ─────────────────────────────────────────────
-function LadderLimitBlock() {
+// ─── Ступень 6: сравнение площадок ──────────────────────────────────────────
+/* 🔴 ЗДЕСЬ БЫЛА ЗАГЛУШКА, И ЕЁ ПРИЧИНА УСТАРЕЛА. Текст гласил: «инструмент
+   сравнения площадок готовится отдельно вместе с остальной инфраструктурой
+   лестницы», комментарий рядом — «требует partners.json, которого не
+   существует». Файл существует: web/data/partners.json, пять партнёров,
+   юрлица с регуляторами и номерами лицензий, плечо по юрисдикциям, процент
+   теряющих счетов с датой и ссылкой на источник. Он уже питает страницу
+   /brokers. Сам виджет тоже был написан — BrokerPicker в brokers.js, — и
+   всё это время не был ни к чему подключён.
+
+   Собственная спека проекта состояние «блок есть, но вместо него обещание»
+   запрещает прямо: либо рабочий блок, либо ничего. Теперь рабочий. */
+function LadderBrokerPicker() {
+  const { useEffect, useRef, useState } = React;
   const T11 = window.Ch11Content[INITIAL_LANG] || window.Ch11Content.ru;
   const ll = T11.ladderLimit;
+  const узел = useRef(null);
+  const [сбой, setСбой] = useState(false);
+
+  useEffect(() => {
+    let живо = true;
+    const пуск = () => {
+      if (!живо || !узел.current) return;
+      if (!window.BrokerPicker) { setСбой(true); return; }
+      window.BrokerPicker.mount(узел.current, { limit: 3, place: "ch11_ladder6" });
+    };
+    // brokers.js грузится с defer и может быть ещё не выполнен к моменту
+    // первого рендера главы. Ждём его, а не надеемся на порядок тегов.
+    if (window.BrokerPicker) пуск();
+    else {
+      const т = setInterval(() => { if (window.BrokerPicker) { clearInterval(т); пуск(); } }, 120);
+      setTimeout(() => { clearInterval(т); if (живо && !window.BrokerPicker) setСбой(true); }, 6000);
+    }
+    return () => { живо = false; };
+  }, []);
+
   return (
     <div style={{marginBottom:48}}>
       {ll.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:14,color:C.inkMid,lineHeight:1.75,marginBottom:14,maxWidth:800}}>{p}</p>)}
-      <div style={{border:`1px dashed ${C.borderGold}`,borderRadius:8,padding:"18px 22px",background:C.surface}}>
-        <p style={{fontSize:12,color:C.inkFaint,fontStyle:"italic",margin:0}}>{ll.pendingNote}</p>
-      </div>
+      {/* Сбой загрузки обязан быть виден: молча пустое место читается как
+          «здесь ничего и не было», и починить его никто не придёт. */}
+      {сбой
+        ? <p style={{fontSize:12,color:C.inkFaint,fontStyle:"italic"}}>{ll.loadError}</p>
+        : <div ref={узел}/>}
     </div>
   );
 }
@@ -634,7 +670,7 @@ function Chapter11() {
 
         <Rule/>
 
-        <LadderLimitBlock/>
+        <LadderBrokerPicker/>
 
         <QuizBlock questions={T11.quiz} levelId="level_11" lang={lang} copy={{
           kicker: S.quizKicker, title: S.quizTitle, next: S.quizNext,

@@ -1401,18 +1401,85 @@
   // здесь строгое правило "нет числа -- нет строки", без исключений.
   function mountPicker(el, opts) {
     opts = opts || {};
-    var country = opts.country || DEFAULT_COUNTRY;
+    var country = opts.country || restoreCountry() || DEFAULT_COUNTRY;
+    var предел = opts.limit || 3;
     Promise.all([loadData(), loadLicences()]).then(function (results) {
       var data = results[0];
       _licencesData = _licencesData || results[1];
-      var rows = buildRows(data, country).filter(function (r) { return r.loss.kind === 'value'; });
-      var sorted = sortRows(rows, 'loss', 'asc');
-      var thead = '<tr>' + COMPACT_COLS.map(function (c) { return '<th>' + colLabel(c) + '</th>'; }).join('') + '</tr>';
-      var tbody = sorted.length
-        ? sorted.map(function (r) { return renderRow(r, { compact: true }); }).join('')
-        : '<tr><td colspan="' + COMPACT_COLS.length + '" class="empty-row">' + t('brokers.empty_state', 'Пока ни один партнёр не показывает актуальный процент теряющих счетов.') + '</td></tr>';
-      el.innerHTML = '<div class="broker-picker"><table class="brokers-table compact"><thead>' + thead + '</thead><tbody>' + tbody + '</tbody></table>' +
-        '<a class="broker-picker-more" href="' + langPrefix() + '/brokers">' + t('brokers.full_compare_link', 'Полное сравнение →') + '</a></div>';
+      indexEntities(data);
+      /* 🔴 ПОЧЕМУ НЕ ЖЁСТКИЙ ФИЛЬТР «НЕТ ЧИСЛА — НЕТ СТРОКИ». Он тут был, и
+         виджет оказывался пуст: процент теряющих счетов обязаны публиковать
+         только европейские юрлица, а для страны по умолчанию резолвится
+         офшорное. Замер: при пустой стране и при MD числа нет ни у одного из
+         пяти, при DE — у трёх. То есть читатель из Молдовы видел бы пустую
+         рамку с текстом «нет проверенных данных» и уходил с мыслью, что мы
+         что-то скрываем.
+
+         Карточка умеет показать «не публикуется» с объяснением, почему —
+         ровно так это и сделано на /brokers. Объяснение честнее пустоты, а
+         выбор страны рядом показывает, отчего число появляется и исчезает:
+         это и есть урок ступени — юрисдикция решает больше, чем бренд. */
+      var rows = buildRows(data, country);
+      var sorted = sortRows(rows, 'loss', 'asc').slice(0, предел);
+      var выбор = '<label class="broker-picker-country">' +
+        t('brokers.country_label', 'Страна') +
+        ' <select>' + COUNTRIES.map(function (c) {
+          return '<option value="' + escapeHtml(c.code) + '"' +
+                 (c.code === country ? ' selected' : '') + '>' +
+                 escapeHtml(c[_i18n.lang] || c.ru) + '</option>';
+        }).join('') + '</select></label>';
+      el.innerHTML = '<div class="broker-picker">' + выбор +
+        (sorted.length
+          ? '<div class="brokers-grid">' + sorted.map(renderCard).join('') + '</div>'
+          : '<div class="broker-picker-empty">' +
+            t('brokers.empty_state', 'Для этой страны показывать нечего.') + '</div>') +
+        '<a class="broker-picker-more" href="' + langPrefix() + '/brokers">' +
+        t('brokers.full_compare_link', 'Полное сравнение →') + '</a></div>';
+      var сел = el.querySelector('.broker-picker-country select');
+      if (сел) сел.addEventListener('change', function (e) {
+        persistCountry(e.target.value);
+        mountPicker(el, Object.assign({}, opts, { country: e.target.value }));
+      });
+      /* Карточка содержит рабочие элементы: раскрытие списка юрлиц и
+         модалку с лицензиями. Без обработчиков это была бы картинка
+         кнопки — читатель жмёт, ничего не происходит.
+
+         Модалка одна на документ и живёт в разметке brokers.html. Внутри
+         главы этой разметки нет, поэтому создаём её на лету: openModal
+         молча выходит, если контейнера нет, и кнопка «лицензия» тихо
+         перестала бы работать. */
+      if (!document.getElementById('brokerModal')) {
+        var окно = document.createElement('div');
+        окно.className = 'bm';
+        окно.id = 'brokerModal';
+        окно.setAttribute('role', 'dialog');
+        окно.setAttribute('aria-modal', 'true');
+        окно.hidden = true;
+        окно.innerHTML =
+          '<div class="bm-backdrop"></div><div class="bm-panel">' +
+          '<div class="bm-head"><h2 class="bm-title" id="bmTitle"></h2>' +
+          '<button type="button" class="bm-close" aria-label="' +
+          t('brokers.m_close', 'Закрыть') + '">&times;</button></div>' +
+          '<div class="bm-body"></div></div>';
+        document.body.appendChild(окно);
+      }
+      var резолв = {};
+      sorted.forEach(function (r) { if (r.entity) резолв[r.partner.id] = r.entity.id; });
+      bindModal();
+      bindModalTriggers(el, резолв);
+      // Партнёрский клик из главы курса — такая же конверсия, как со
+      // страницы сравнения, и считаться должен так же. place говорит,
+      // откуда пришёл человек.
+      el.querySelectorAll('a[data-aff]').forEach(function (a) {
+        a.addEventListener('click', function () {
+          track('broker_affiliate_click', {
+            partner: a.getAttribute('data-aff'),
+            place: opts.place || 'ladder',
+            country: country,
+            lang: _i18n.lang,
+          });
+        });
+      });
     }).catch(function (err) { console.error('[BrokerPicker]', err); });
   }
 
