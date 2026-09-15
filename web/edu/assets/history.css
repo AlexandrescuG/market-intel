@@ -20,6 +20,15 @@
 .h-caption{display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap;
   font-family:var(--h-serif);font-style:italic;font-size:13.5px;color:var(--h-ink-soft);padding:10px 4px 0}
 .h-caption .h-src{font-family:var(--h-mono);font-style:normal;font-size:10px;letter-spacing:.08em;color:var(--h-ink-faint);white-space:nowrap}
+/* Автор и лицензия снимка. Отдельной строкой во всю ширину, а не третьим
+   элементом в ряду: у подписи уже есть левая и правая части, и втискивание
+   третьей превратило бы её в мешанину на узком экране. Строка тихая по
+   цвету, но не тише «источника» рядом — атрибуция обязана читаться, иначе
+   она формально есть и фактически нет. */
+.h-caption .h-credit{flex:1 1 100%;order:2;font-family:var(--h-mono);font-style:normal;
+  font-size:10px;letter-spacing:.04em;color:var(--h-ink-faint);text-decoration:none;
+  padding-top:2px;overflow-wrap:anywhere}
+.h-caption a.h-credit:hover{color:var(--h-gold);text-decoration:underline}
 
 /* ---- Хроно-степпер ---- */
 .h-chrono{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:6px}

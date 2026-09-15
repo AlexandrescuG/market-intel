@@ -444,7 +444,12 @@ function Level1({onBack, onNext, path}) {
   useEffect(() => {
     const onFrames = () => setChronoFramesTick(t => t + 1);
     window.addEventListener("chrono2-frames", onFrames);
-    return () => window.removeEventListener("chrono2-frames", onFrames);
+    // Подписи авторов приходят своим файлом и тоже позже первой отрисовки.
+    window.addEventListener("chrono-credits", onFrames);
+    return () => {
+      window.removeEventListener("chrono2-frames", onFrames);
+      window.removeEventListener("chrono-credits", onFrames);
+    };
   }, []);
   const chronoStation = chronoStations[chronoIdx];
   const chronoArt = (key) => (window.ChronoStationArtHTML ? window.ChronoStationArtHTML(key) : '') + (window.ChronoArchiveStamp || '');
@@ -607,7 +612,19 @@ function Level1({onBack, onNext, path}) {
           <div className="h-station" style={{marginBottom:60}}>
             <div className="h-passepartout">
               <div className="h-artwork" dangerouslySetInnerHTML={{__html: chronoArt(chronoStation.illustration)}} />
-              <div className="h-caption"><span>{chronoStation.year} · {chronoStation.place}</span><span className="h-src">{chronoStation.source}</span></div>
+              {/* Автор и лицензия снимка — условие CC-BY, см. chrono.js.
+                  Приходят отдельным файлом и позже первой отрисовки, поэтому
+                  компонент подписан на событие chrono-credits ниже. */}
+              <div className="h-caption"
+                   dangerouslySetInnerHTML={{__html:
+                     '<span>' + chronoStation.year + ' · ' + chronoStation.place + '</span>'
+                     + '<span class="h-src">' + (chronoStation.source || '') + '</span>'
+                     /* Ключ картинки — illustration («1602_beurs»), а не id
+                        («1602»). Первый вариант звал по id и молча не
+                        показывал ни одной подписи: функция ничего не находит
+                        и честно возвращает пустую строку. */
+                     + (window.ChronoPhotoCredit
+                        ? window.ChronoPhotoCredit(chronoStation.illustration) : '')}}/>
             </div>
             <div>
               <div className="h-station-head"><span className="h-station-year">{chronoStation.year}</span><span className="h-station-place">{chronoStation.place}</span></div>

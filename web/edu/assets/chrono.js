@@ -790,7 +790,50 @@
     return STATION_ART[key] ? STATION_ART[key]() : '';
   }
 
+  /* ── Атрибуция под фотографией ──────────────────────────────────────────
+     🔴 УСЛОВИЕ ЛИЦЕНЗИИ, А НЕ УКРАШЕНИЕ. Семь снимков хроники лежат под
+     CC-BY / CC-BY-SA: они разрешены к показу ровно при условии, что имя
+     автора и название лицензии видны читателю. У нас всё это было собрано
+     и записано — в history/manifest.json, файле, который читатель никогда
+     не откроет. Информация есть, условие не выполняется: со стороны
+     выглядит как соблюдение, по сути — нет.
+     Строки готовит tools/build_photo_credits.py из того же манифеста, чтобы
+     фамилию и версию лицензии не переписывали руками: ошибка в атрибуции
+     хуже её отсутствия — она называет неверного автора. */
+  var КРЕДИТЫ = null;
+  fetch('/edu/assets/history/credits.json', {cache: 'no-cache'})
+    .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(function (j) {
+      КРЕДИТЫ = (j && j['кредиты']) || null;
+      if (!КРЕДИТЫ) throw new Error('в файле нет ключа "кредиты"');
+      window.dispatchEvent(new Event('chrono-credits'));
+    })
+    .catch(function (e) {
+      if (window.console && console.warn) {
+        console.warn('[chrono] подписи авторов не загрузились (' + e.message +
+          '). Для снимков CC-BY это нарушение условия лицензии. Файл ' +
+          'собирается командой python3 tools/build_photo_credits.py');
+      }
+    });
+
+  function creditHTML(key) {
+    if (!КРЕДИТЫ || !КРЕДИТЫ[key] || !STATION_IMAGE[key]) return '';
+    var c = КРЕДИТЫ[key];
+    var автор = (c['автор'] || '').replace(/^Object:\s*/, '');
+    if (автор.length > 44) автор = автор.slice(0, 43).replace(/[ ,(]+$/, '') + '…';
+    var части = [];
+    if (автор) части.push(автор);
+    if (c['лицензия']) части.push(c['лицензия']);
+    if (!части.length) return '';
+    var текст = части.join(' · ');
+    return c['ссылка']
+      ? '<a class="h-credit" href="' + c['ссылка'] + '" target="_blank" ' +
+        'rel="noopener noreferrer">' + текст + '</a>'
+      : '<span class="h-credit">' + текст + '</span>';
+  }
+
   window.ChronoStationArt = STATION_ART;
+  window.ChronoPhotoCredit = creditHTML;
   window.ChronoStationArtHTML = stationArtHTML;
   window.ChronoArchiveStamp = STAMP;
 })();

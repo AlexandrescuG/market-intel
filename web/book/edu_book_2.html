@@ -1337,7 +1337,11 @@ function Chrono2Section() {
   useEffect(() => {
     const onFrames = () => setFramesTick(t => t + 1);
     window.addEventListener("chrono2-frames", onFrames);
-    return () => window.removeEventListener("chrono2-frames", onFrames);
+    window.addEventListener("chrono-credits", onFrames);
+    return () => {
+      window.removeEventListener("chrono2-frames", onFrames);
+      window.removeEventListener("chrono-credits", onFrames);
+    };
   }, []);
   const station = stations[idx];
   const doneCount = done.filter(Boolean).length;
@@ -1387,7 +1391,13 @@ function Chrono2Section() {
         <div className="h-station" style={{marginBottom:40}}>
           <div className="h-passepartout">
             <div className="h-artwork" dangerouslySetInnerHTML={{__html: window.Chrono2StationArtHTML(station.illustration)}}/>
-            <div className="h-caption"><span>{station.year} · {station.place}</span><span className="h-src">{station.source}</span></div>
+            {/* Автор и лицензия снимка — условие CC-BY, см. chrono.js. */}
+            <div className="h-caption"
+                 dangerouslySetInnerHTML={{__html:
+                   '<span>' + station.year + ' · ' + station.place + '</span>'
+                   + '<span class="h-src">' + (station.source || '') + '</span>'
+                   + (window.ChronoPhotoCredit
+                      ? window.ChronoPhotoCredit(station.illustration) : '')}}/>
           </div>
           <div>
             <div className="h-station-head"><span className="h-station-year">{station.year}</span><span className="h-station-place">{station.place}</span></div>
