@@ -326,12 +326,14 @@ const QUIZ = {
   ],
 };
 
-const MARKET=[
-  {s:"S&P 500",v:"5,842",c:"+0.43%",up:true},{s:"GOLD",v:"$3,124",c:"+0.71%",up:true},
-  {s:"OIL",v:"$68.42",c:"−0.28%",up:false},{s:"EUR/USD",v:"1.0832",c:"+0.15%",up:true},
-  {s:"USD/MDL",v:"17.84",c:"−0.12%",up:false},{s:"BTC",v:"$83,421",c:"+1.24%",up:true},
-  {s:"NASDAQ",v:"18,261",c:"+0.52%",up:true},
-];
+/* 🔴 Здесь лежал const MARKET из семи котировок: «S&P 500 5,842 +0.43%»,
+   «GOLD $3,124», «BTC $83,421» и так далее — все выдуманные и все
+   застывшие в дне, когда их набрали. Grep по файлу: объявлено и ни разу
+   не использовано. Удалено, а не поправлено: живые котировки на странице
+   и так есть — их отдаёт /api/quotes в ленте наверху. Мёртвый блок с
+   правдоподобными числами опаснее пустого места: рано или поздно кто-то
+   «оживит» его, не проверив, откуда числа. */
+
 const GLOSSARY={
   ru:{
     "биржа":{s:"Место встречи покупателей и продавцов ценных бумаг",a:"Организованный рынок стандартизированных финансовых инструментов",e:"NYSE — $31.7T капитализации"},
@@ -915,80 +917,6 @@ function Level1({onBack, onNext, path}) {
   );
 }
 
-function ComingSoon({ onTree, onBack }) {
-  const tr = TR[INITIAL_LANG] || TR.ru;
-  const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
-  return (
-    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: C.white, padding: "30px 5vw", textAlign: "center" }}>
-      <div style={{ fontSize: 81, marginBottom: 30 }}>🚧</div>
-      <h1 style={{ fontSize: "clamp(30px, 6vw, 46px)", fontFamily: "'DM Serif Display', serif", color: C.black, marginBottom: 20 }}>{tr.soonTitle}</h1>
-      <p style={{ fontSize: 20, color: C.inkMid, maxWidth: 500, lineHeight: 1.6, marginBottom: 50 }}>{tr.soonDesc}</p>
-      
-      <button onClick={onTree} style={{ background: C.gold, color: C.white, border: "none", padding: "20px 40px", fontSize: 16, fontFamily: "monospace", fontWeight: 700, cursor: "pointer", letterSpacing: 1, marginBottom: 20 }}>
-        {tr.treeBtn}
-      </button>
-      <button onClick={onBack} style={{ background: "transparent", color: C.inkSoft, border: "none", textDecoration: "underline", cursor: "pointer", fontFamily: "monospace", fontSize: 16 }}>
-        {S.comingSoonBack}
-      </button>
-    </div>
-  );
-}
-
-function SkillTree({ path, onBack }) {
-  const tr = TR[INITIAL_LANG] || TR.ru;
-  const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
-  const pathName = path === "investor" ? (INITIAL_LANG==="ru"?"Инвестор":INITIAL_LANG==="en"?"Investor":"Investitor") : path === "trader" ? "Trader" : (INITIAL_LANG==="ru"?"Исследователь":INITIAL_LANG==="en"?"Explorer":"Explorator");
-  
-  return (
-    <div style={{ minHeight: "100vh", background: C.dark, color: C.white, padding: "75px 5vw", fontFamily: "'DM Sans', sans-serif" }}>
-      <div style={{ maxWidth: 1000, margin: "0 auto" }}>
-        <span onClick={onBack} style={{ color: C.gold, cursor: "pointer", fontFamily: "monospace", fontSize: 15, letterSpacing: 2, display: "inline-block", marginBottom: 38 }}>{S.treeBack}</span>
-        
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 20, borderBottom: `1px solid #333`, paddingBottom: 25, marginBottom: 50 }}>
-          <div>
-            <h1 style={{ fontSize: "clamp(32px, 5vw, 40px)", fontFamily: "'DM Serif Display', serif", color: C.gold, margin: "0 0 10px" }}>{tr.treeTitle}</h1>
-            <div style={{ fontSize: 18, color: "#aaa", fontFamily: "monospace" }}>{tr.treeClass} <span style={{ color: C.white, fontWeight: 700 }}>{pathName}</span></div>
-          </div>
-          <div style={{ textAlign: "right" }}>
-            <div style={{ fontSize: 30, color: C.white, fontWeight: 700, fontFamily: "monospace" }}>1250 <span style={{ fontSize: 18, color: C.gold }}>XP</span></div>
-            <div style={{ fontSize: 14, color: "#666" }}>{S.treeLevelDone}</div>
-          </div>
-        </div>
-
-        <div style={{ position: "relative", padding: "50px 0", textAlign: "center", overflowX: "hidden" }}>
-          
-          <div style={{ width: 177, margin: "0 auto", background: C.gold, color: C.black, padding: "20px", borderRadius: "50%", aspectRatio: "1/1", display: "flex", flexDirection: "column", justifyContent: "center", border: `5px solid ${C.goldLight}`, boxShadow: "0 0 38px rgba(201,151,58,0.4)", zIndex: 2, position: "relative" }}>
-            <span style={{ fontSize: 30 }}>🏛️</span>
-            <span style={{ fontSize: 13, fontWeight: 700, fontFamily: "monospace", marginTop: 5 }}>{S.treeMarketBase}</span>
-          </div>
-
-          <div style={{ display: "flex", justifyContent: "center", gap: "clamp(20px, 5vw, 76px)", marginTop: 50, position: "relative", flexWrap: "wrap" }}>
-
-            <div style={{ width: 127, background: path==="trader"?C.goldPale:"#222", color: path==="trader"?C.black:"#888", padding: "15px", borderRadius: "10px", border: `1px solid ${path==="trader"?C.gold:"#444"}`, zIndex: 1 }}>
-              <div style={{ fontSize: 23, marginBottom: 5 }}><img class='mi-icon' style={{verticalAlign:'middle'}} src='/assets/icons/icon-trend-up.png' alt='' width='20' height='20' /></div>
-              <div style={{ fontSize: 13, fontFamily: "monospace", fontWeight: 700 }}>{S.treeTechAnalysis}</div>
-              <div style={{ fontSize: 11, marginTop: 5 }}>{S.treeUnlocked}</div>
-            </div>
-
-            <div style={{ width: 127, background: path==="investor"?C.goldPale:"#222", color: path==="investor"?C.black:"#888", padding: "15px", borderRadius: "10px", border: `1px solid ${path==="investor"?C.gold:"#444"}`, zIndex: 1 }}>
-              <div style={{ fontSize: 23, marginBottom: 5 }}>🏢</div>
-              <div style={{ fontSize: 13, fontFamily: "monospace", fontWeight: 700 }}>{S.treeFundamentals}</div>
-              <div style={{ fontSize: 11, marginTop: 5 }}>{S.treeInProgress}</div>
-            </div>
-
-            <div style={{ width: 127, background: "#222", color: "#888", padding: "15px", borderRadius: "10px", border: "1px solid #444", zIndex: 1 }}>
-              <div style={{ fontSize: 23, marginBottom: 5 }}><img class='mi-icon' style={{verticalAlign:'middle'}} src='/assets/icons/icon-mindset.png' alt='' width='20' height='20' /></div>
-              <div style={{ fontSize: 13, fontFamily: "monospace", fontWeight: 700 }}>{S.treePsychology}</div>
-              <div style={{ fontSize: 11, marginTop: 5 }}>{S.treeLocked}</div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  );
-}
-
 function App() {
   const [screen, setScreen] = React.useState("start");
   const [path, setPath] = React.useState("explorer");
@@ -1009,14 +937,11 @@ function App() {
     );
   }
   
-  if (screen === "soon") {
-    return <ComingSoon onBack={() => setScreen("level1")} onTree={() => setScreen("tree")} />;
-  }
-  
-  if (screen === "tree") {
-    return <SkillTree onBack={() => setScreen("soon")} path={path} />;
-  }
-  
+  /* Экраны "soon" и "tree" отсюда были недостижимы: из level1 переход
+     идёт на /edu/b/2 (строка выше), а setScreen("soon") не вызывается
+     нигде. Внутри ComingSoon стояла плашка «Глава 2 в разработке» —
+     неверная с тех пор, как глава 2 написана, — а в SkillTree жёстко
+     вбитые «1250 XP». Ветки убраны вместе с компонентами. */
   return <StartScreen onStart={(p) => { setPath(p); setScreen("level1"); }} />;
 }
 

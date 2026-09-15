@@ -42,7 +42,7 @@
         fact: "0.25% комиссии тогда — 0.00% у брокеров сегодня. Кто теперь платит за твою сделку? Ответ — в главе 11 (PFOF/HFT).",
         hook: "Биржа НЕ строилась государством — это картель уличных брокеров, договорившихся торговать друг с другом.",
         legend: null,
-        source: "Wikimedia Commons · NYPL Digital Collections",
+        source: "Library of Congress (PD)",
         illustration: "1792_buttonwood"
       },
       {
@@ -62,7 +62,7 @@
         fact: "Байка о чистильщике обуви, который давал советы по акциям самому Джозефу Кеннеди, — символ пика толпы: когда рынок обсуждают все, покупать поздно.",
         hook: "−12.8% 28 октября, −11.7% 29 октября, дно −198.69 13 ноября.",
         legend: "чистильщик обуви — байка эпохи, но индикатор реальный",
-        source: "Library of Congress (PD)",
+        source: "Wikimedia Commons · Associated Press (PD)",
         illustration: "1929_crowd"
       },
       {
@@ -196,7 +196,7 @@
         fact: "0.25% comision atunci — 0.00% la brokerii de azi. Cine plătește acum pentru tranzacția ta? Răspunsul — în capitolul 11 (PFOF/HFT).",
         hook: "Bursa NU a fost construită de stat — e un cartel de brokeri stradali care au decis să tranzacționeze între ei.",
         legend: null,
-        source: "Wikimedia Commons · NYPL Digital Collections",
+        source: "Library of Congress (PD)",
         illustration: "1792_buttonwood"
       },
       {
@@ -216,7 +216,7 @@
         fact: "Povestea despre lustragiul care i-ar fi dat sfaturi bursiere lui Joseph Kennedy este simbolul vârfului mulțimii: când toți vorbesc despre piață, e prea târziu să cumperi.",
         hook: "−12.8% pe 28 octombrie, −11.7% pe 29 octombrie, minim −198.69 pe 13 noiembrie.",
         legend: "lustragiul — o poveste de epocă, dar indicatorul e real",
-        source: "Library of Congress (domeniu public)",
+        source: "Wikimedia Commons · Associated Press (domeniu public)",
         illustration: "1929_crowd"
       },
       {
@@ -350,7 +350,7 @@
         fact: "The agreement fit in a single paragraph and needed neither a building nor a license.",
         hook: "0.25% commission then — 0.00% at today's brokers. Who pays for your trade now? The answer is in chapter 11 (PFOF/HFT).",
         legend: null,
-        source: "Wikimedia Commons · NYPL Digital Collections",
+        source: "Library of Congress (PD)",
         illustration: "1792_buttonwood"
       },
       {
@@ -370,7 +370,7 @@
         fact: "The tale of the shoeshine boy giving Joseph Kennedy stock tips is the symbol of a crowd at its peak: when everyone's talking about the market, it's too late to buy.",
         hook: "−12.8% on October 28, −11.7% on October 29, bottom at −198.69 on November 13.",
         legend: "the shoeshine boy — a period tale, but the indicator is real",
-        source: "Library of Congress (public domain)",
+        source: "Wikimedia Commons · Associated Press (public domain)",
         illustration: "1929_crowd"
       },
       {
@@ -585,7 +585,7 @@
       + '<rect x="40" y="96" width="640" height="26"/></g>'
       + '<g stroke="#6d6350" stroke-width="3" fill="#efe8d8"><rect x="330" y="34" width="60" height="64"/><path d="M325 34 L360 6 L395 34 Z"/></g>'
       + '<g fill="#5c5342">' + person(150,296) + person(196,304) + person(420,296) + person(462,302) + person(560,299) + '</g>'
-      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#8A8275">скан 1653 г., Wikimedia Commons</text></svg>';
+      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#8A8275">рисунок по мотивам гравюр XVII века</text></svg>';
     },
     "1720_tafereel": function(){
       return '<svg class="h-art" viewBox="0 0 720 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Крах 1720 года">'
@@ -637,7 +637,7 @@
       + '<g stroke="#6d6350" stroke-width="3" fill="#efe8d8"><rect x="30" y="60" width="660" height="180"/>'
       + '<path d="M70 240 V90 M150 240 V90 M230 240 V90 M310 240 V90 M390 240 V90 M470 240 V90 M550 240 V90 M630 240 V90"/></g>'
       + '<g fill="#5c5342">' + ppl + '</g>'
-      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#8A8275">толпа у NYSE, Library of Congress</text></svg>';
+      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#8A8275">рисунок: толпа у здания биржи</text></svg>';
     },
     "1971_nasdaq": function(){
       return '<svg class="h-art" viewBox="0 0 720 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="NASDAQ, биржа без зала">'
@@ -719,7 +719,7 @@
       + '<polyline points="290,150 320,165 350,120 380,140 410,100 440,125" fill="none" stroke="#8a2f2f" stroke-width="3"/>'
       + '<polyline points="500,160 530,130 560,150 590,105 620,135 645,90" fill="none" stroke="#6d6350" stroke-width="3"/>'
       + '<g fill="#5c5342">' + person(150,240) + person(360,246) + person(570,240) + '</g>'
-      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#8A8275">торговый зал 1980-х</text></svg>';
+      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#8A8275">рисунок: рабочее место трейдера</text></svg>';
     }
   };
 
