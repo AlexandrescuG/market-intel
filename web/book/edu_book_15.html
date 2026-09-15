@@ -30,6 +30,8 @@
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"></script>
 <script src="/edu/assets/ch15.js"></script>
+<link rel="stylesheet" href="/assets/brokers.css?v=1">
+<script src="/assets/brokers.js?v=16" defer></script>
 
 <script type="text/babel" data-presets="react">
 const INITIAL_LANG = "{{ lang }}";
@@ -80,7 +82,7 @@ const STRINGS = {
   },
 };
 
-const {C, Mono, Chip, Rule, getChUrl, ComplianceFootnote, ColdStart, CheckList, SortTwoBins} = window.AcademyShared;
+const {C, Mono, Chip, Rule, getChUrl, ComplianceFootnote, ColdStart, CheckList, SortTwoBins, PartnerPicker} = window.AcademyShared;
 
 function fillTemplate(str, vars) {
   if (!str) return str;
@@ -365,7 +367,11 @@ function ThreePaths({ lang }) {
           )}
           {selected === "live" && !gateLoading && gate && gate.all_ok && (
             <div style={{background:"#fff",border:`1px dashed ${C.borderGold}`,borderRadius:6,padding:"10px 12px",marginBottom:12}}>
-              <p style={{fontSize:11.5,color:C.inkFaint,fontStyle:"italic",margin:0}}>{tp.path2.pendingNote}</p>
+              {/* Список площадок с проверенными юрлицами и лицензиями —
+                  тот же, что в главах 11 и 14 и на /brokers. Пока он был
+                  «готовится отдельно», читатель на последней странице курса
+                  упирался в пустую рамку. */}
+              <PartnerPicker limit={3} place="ch15_path2" errorText={tp.path2.loadError}/>
             </div>
           )}
           <button onClick={()=>setSelected("live")} style={btnStyle(selected==="live")}>{tp.path2.cta}</button>

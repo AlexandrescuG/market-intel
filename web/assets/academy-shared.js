@@ -1080,6 +1080,46 @@
     );
   }
 
+
+  /* ── Выбор площадки: одна ступень, три главы ──────────────────────────────
+     🔴 ПОЧЕМУ ОБЩИЙ КОМПОНЕНТ. Ступени 6 (гл. 11), 9 (гл. 14) и 10 (гл. 15)
+     показывают читателю один и тот же список площадок с одними и теми же
+     правилами: юрлицо резолвится по стране, плечо задаёт юрисдикция, процент
+     теряющих счетов берётся у брокера с датой и ссылкой. Написать это трижды
+     значило бы завести три источника правды для одного экрана — и однажды
+     они разойдутся, как уже разошлись подписи статусов лида в CRM.
+
+     Данные и разметка — из brokers.js (BrokerPicker), тот же код, что и на
+     странице /brokers. Здесь только React-обёртка и ожидание скрипта:
+     brokers.js подключён с defer и к первому рендеру главы может быть ещё
+     не выполнен. */
+  function PartnerPicker({ limit, place, errorText }) {
+    const { useEffect, useRef, useState } = React;
+    const узел = useRef(null);
+    const [сбой, setСбой] = useState(false);
+
+    useEffect(() => {
+      let живо = true;
+      const пуск = () => {
+        if (!живо || !узел.current || !window.BrokerPicker) return;
+        window.BrokerPicker.mount(узел.current, { limit: limit || 3, place: place || 'ladder' });
+      };
+      if (window.BrokerPicker) { пуск(); return; }
+      const т = setInterval(() => { if (window.BrokerPicker) { clearInterval(т); пуск(); } }, 120);
+      // Молча пустое место читается как «здесь ничего и не было», и чинить
+      // его никто не придёт. Шесть секунд — с запасом на медленную сеть.
+      const с = setTimeout(() => { clearInterval(т); if (живо && !window.BrokerPicker) setСбой(true); }, 6000);
+      return () => { живо = false; clearInterval(т); clearTimeout(с); };
+    }, [limit, place]);
+
+    if (сбой) {
+      return React.createElement('p',
+        { style: { fontSize: 12, color: 'rgba(43,43,51,0.55)', fontStyle: 'italic' } },
+        errorText || 'Сравнение площадок не загрузилось — данные лежат в /brokers.');
+    }
+    return React.createElement('div', { ref: узел });
+  }
+
   window.AcademyShared = {
     AntiMythBlock: AntiMythBlock,
     RevealSteps: RevealSteps,
@@ -1099,5 +1139,6 @@
     declineRo: declineRo,
     declineEn: declineEn,
     ColdStart: ColdStart,
+    PartnerPicker: PartnerPicker,
   };
 })();

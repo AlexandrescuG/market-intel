@@ -30,6 +30,8 @@
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"></script>
 <script src="/edu/assets/ch14.js"></script>
+<link rel="stylesheet" href="/assets/brokers.css?v=1">
+<script src="/assets/brokers.js?v=16" defer></script>
 
 <script type="text/babel" data-presets="react">
 const INITIAL_LANG = "{{ lang }}";
@@ -101,7 +103,7 @@ const STRINGS = {
   },
 };
 
-const {C, Mono, Chip, Rule, AntiMythBlock, AskAnalystBtn, getChUrl, QuizBlock, ComplianceFootnote, ColdStart, CheckList, RevealSteps} = window.AcademyShared;
+const {C, Mono, Chip, Rule, AntiMythBlock, AskAnalystBtn, getChUrl, QuizBlock, ComplianceFootnote, ColdStart, CheckList, RevealSteps, PartnerPicker} = window.AcademyShared;
 
 function fillTemplate(str, vars) {
   if (!str) return str;
@@ -607,9 +609,12 @@ function LiveAccountGate({ gate, loading, mathCompletedJustNow }) {
             </label>
             {checked && <p style={{fontSize:12,color:C.gold,marginBottom:14}}>{g.confirmedNote}</p>}
 
-            <div style={{background:"#fff",border:`1px dashed ${C.borderGold}`,borderRadius:6,padding:"14px 18px"}}>
-              <p style={{fontSize:12,color:C.inkFaint,fontStyle:"italic",margin:0}}>{g.pendingNote}</p>
-            </div>
+            {/* 🔴 Здесь была пунктирная рамка с текстом «раздел выбора
+                площадки ещё не открыт — список с проверенными данными
+                готовится отдельно». Данные проверены и лежат в
+                partners.json; тот же список показывает глава 11 и страница
+                /brokers. Обещание заменено тем, что оно обещало. */}
+            <PartnerPicker limit={3} place="ch14_ladder9" errorText={g.loadError}/>
           </div>
         )}
       </div>
