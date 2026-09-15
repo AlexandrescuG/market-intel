@@ -43,7 +43,7 @@ window.Ch4Content = {
       taskCpi: "Исполни BUY 10 лотов до и после нажатия — сравни среднюю цену.",
       taskAsia: "Тот же ордер — почему дороже, чем днём?",
       afterNote: "Спред — это термометр ликвидности. Запомни три состояния — днём, в новость, ночью. В главе 5 узнаешь их расписание.",
-      calibrationNote: "Пресеты калиброваны по нашим реальным M30-диапазонам по часам (день выхода NFP: ~24 пт против ~12 пт в обычный час — ровно 2×, отсюда множитель CPI-режима). Сам спред в истории не хранится — расширение спреда показано типовым значением, не измеренным.",
+      calibrationNote: "Пресеты калиброваны по нашим реальным M30-диапазонам по часам (день выхода NFP: ~24 пт против ~12 пт в обычный час — ровно 2×, отсюда множитель CPI-режима). Всё остальное на панели — не измерение: биржевой стакан мы не храним вовсе, поэтому глубина, объёмы по уровням и лента сделок со временем до секунды собраны как учебный пример. Они показывают, КАК устроен стакан в трёх режимах, а не то, что стояло в стакане в названный час.",
     },
     otherSide: {
       mmHumanLine: "Маркет-мейкер — не враг и не благодетель: это магазин, который всегда открыт и зарабатывает на наценке (спреде). В грозу магазин поднимает цены или закрывается — имеет право.",
@@ -179,7 +179,7 @@ window.Ch4Content = {
       taskCpi: "Fill a BUY 10 lots before and after the trigger — compare the average price.",
       taskAsia: "Same order — why is it more expensive than during the day?",
       afterNote: "Spread is a liquidity thermometer. Remember the three states — daytime, on news, at night. In chapter 5 you'll learn their schedule.",
-      calibrationNote: "The presets are calibrated on our real M30 ranges by hour of day (an NFP release day: ~24 points vs ~12 points in a normal hour — exactly 2×, hence the CPI-mode multiplier). Spread itself isn't stored historically — the widening shown is a typical value, not a measured one.",
+      calibrationNote: "The presets are calibrated on our real M30 ranges by hour of day (an NFP release day: ~24 points vs ~12 points in a normal hour — exactly 2×, hence the CPI-mode multiplier). Everything else on the panel is not a measurement: we do not store the exchange order book at all, so the depth, the per-level volumes and the time-and-sales down to the second are a teaching example. They show HOW the book behaves in three regimes, not what stood in the book at the hour named.",
     },
     otherSide: {
       mmHumanLine: "A market maker isn't your enemy or your benefactor: it's a shop that's always open and earns on markup (the spread). During a storm, the shop raises prices or closes — it's entitled to.",
@@ -315,7 +315,7 @@ window.Ch4Content = {
       taskCpi: "Execută un BUY de 10 loturi înainte și după declanșare — compară prețul mediu.",
       taskAsia: "Același ordin — de ce e mai scump decât ziua?",
       afterNote: "Spread-ul este un termometru al lichidității. Reține cele trei stări — ziua, la știri, noaptea. În capitolul 5 vei afla programul lor.",
-      calibrationNote: "Regimurile sunt calibrate pe intervalele reale M30 pe ore (o zi de NFP: ~24 puncte față de ~12 puncte într-o oră obișnuită — exact 2×, de aici multiplicatorul regimului CPI). Spread-ul în sine nu e stocat istoric — lărgirea arătată este o valoare tipică, nu una măsurată.",
+      calibrationNote: "Regimurile sunt calibrate pe intervalele reale M30 pe ore (o zi de NFP: ~24 puncte față de ~12 puncte într-o oră obișnuită — exact 2×, de aici multiplicatorul regimului CPI). Tot restul de pe panou nu e o măsurătoare: carnetul de ordine al bursei nu e stocat la noi deloc, deci adâncimea, volumele pe niveluri și banda tranzacțiilor cu timp la secundă sunt un exemplu didactic. Ele arată CUM se comportă carnetul în trei regimuri, nu ce se afla în el la ora numită.",
     },
     otherSide: {
       mmHumanLine: "Un formator de piață nu e nici dușman, nici binefăcător: e un magazin mereu deschis, care câștigă din marjă (spread). Pe furtună, magazinul scumpește sau se închide — are acest drept.",
