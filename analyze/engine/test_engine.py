@@ -272,12 +272,9 @@ class Portfolio(unittest.TestCase):
         сделки и от чужой позиции не зависит. Встречный риск обязан
         вычитаться, а не складываться."""
         equity = 10_000.0
-        # Размер берём такой, чтобы ПАРА укладывалась в валовой потолок:
-        # по нетто она даёт ноль, и упереться должна только в валовой.
-        rm = equity * risk.MAX_GROSS_RISK / 2 * 0.9
-        self.assertGreater(rm, equity * risk.MAX_PORTFOLIO_RISK / 2,
-                           "размер должен быть таким, чтобы СУММА перебрала "
-                           "направленный лимит — иначе тест ничего не проверяет")
+        # Размер — под потолок инструмента: пара даёт нетто ноль, и если бы
+        # встречные складывались, а не вычитались, вышло бы вдвое больше.
+        rm = equity * risk.MAX_SYMBOL_RISK
         self._open(symbol="EURUSD", direction=SHORT, rm=rm, strategy="a")
         # Встречный лонг: нетто становится нулём, а не удвоением.
         risk.portfolio_gate(self.con, sig(symbol="EURUSD", direction=LONG,
@@ -289,11 +286,16 @@ class Portfolio(unittest.TestCase):
         лонга — потеряны оба, худший случай равен СУММЕ. Нетто в этот момент
         показывал бы ноль."""
         equity = 10_000.0
-        rm = equity * risk.MAX_GROSS_RISK / 2 + 1.0     # пара переберёт валовой
-        self._open(symbol="EURUSD", direction=SHORT, rm=rm, strategy="a")
+        # Две встречные пары на разных инструментах: нетто по каждому нулевое,
+        # ноги в нуле, риск каждой стратегии в пределах — связать может ТОЛЬКО
+        # валовой потолок. Так тест проверяет именно его, а не соседний лимит.
+        rm = equity * risk.MAX_SYMBOL_RISK
+        self._open(symbol="EURUSD", direction=LONG, rm=rm, strategy="s1")
+        self._open(symbol="EURUSD", direction=SHORT, rm=rm, strategy="s2")
+        self._open(symbol="GBPUSD", direction=LONG, rm=rm, strategy="s3")
         with self.assertRaises(risk.RiskRefusal) as c:
-            risk.portfolio_gate(self.con, sig(symbol="EURUSD", direction=LONG,
-                                              strategy="b"), equity, rm)
+            risk.portfolio_gate(self.con, sig(symbol="GBPUSD", direction=SHORT,
+                                              strategy="s4"), equity, rm)
         self.assertEqual(c.exception.status, "cap_gross_risk")
 
     def test_разные_инструменты_не_гасят_друг_друга(self):
@@ -388,6 +390,46 @@ class Portfolio(unittest.TestCase):
         rho, src = risk._corr_now()
         self.assertGreaterEqual(risk.CORR_FALLBACK, rho - 1e-9,
                                 "запасная корреляция должна быть не мягче замера")
+
+    def test_потолок_стратегии_в_деньгах(self):
+        """🔴 15.09. Счётный потолок 4 позиции стал рабочим ограничением:
+        79 отказов у pattern_break_retest за сутки после того, как прочие
+        счётные лимиты сняли. Считались позиции, а не риск.
+
+        Число переведено, а не назначено: 4 позиции × 0.5% = 2.0%."""
+        equity = 10_000.0
+        rm = equity * risk.RISK_PER_TRADE
+        n = int(risk.MAX_STRATEGY_RISK / risk.RISK_PER_TRADE)
+        self.assertLess(n, risk.MAX_OPEN_PER_STRATEGY,
+                        "счётный потолок обязан остаться ПОЗАДИ денежного")
+        for i in range(n):
+            self._open(symbol=self._lonely(i), direction=LONG, rm=rm, strategy="одна")
+        with self.assertRaises(risk.RiskRefusal) as c:
+            risk.portfolio_gate(self.con, sig(symbol=self._lonely(20),
+                                              direction=LONG, strategy="одна"),
+                                equity, rm)
+        self.assertEqual(c.exception.status, "cap_strategy_risk")
+
+    def test_выкупленный_стоп_освобождает_стратегию(self):
+        """То же, ради чего правка: позиция без живого риска не должна
+        занимать место в лимите стратегии."""
+        equity = 10_000.0
+        rm = equity * risk.RISK_PER_TRADE
+        for i in range(int(risk.MAX_STRATEGY_RISK / risk.RISK_PER_TRADE)):
+            self._open_live(self._lonely(i), LONG, entry=1.1000, stop=1.1020,
+                            rpp=10_000.0, rm=rm, strategy="одна")
+        risk.portfolio_gate(self.con, sig(symbol=self._lonely(20),
+                                          direction=LONG, strategy="одна"),
+                            equity, rm)
+
+    def test_другая_стратегия_не_блокируется(self):
+        equity = 10_000.0
+        rm = equity * risk.RISK_PER_TRADE
+        for i in range(int(risk.MAX_STRATEGY_RISK / risk.RISK_PER_TRADE)):
+            self._open(symbol=self._lonely(i), direction=LONG, rm=rm, strategy="одна")
+        risk.portfolio_gate(self.con, sig(symbol=self._lonely(20),
+                                          direction=LONG, strategy="другая"),
+                            equity, rm)
 
     def test_пересечение_помечается(self):
         self._open(symbol="EURUSD", direction=SHORT, strategy="a")

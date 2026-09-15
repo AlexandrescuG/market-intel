@@ -58,6 +58,18 @@ MAX_PORTFOLIO_RISK = 0.03    # нетто: 3% капитала -> ~6 однон�
 MAX_GROSS_RISK = 0.05        # валовой: 5%, потолок на случай пилы
 MAX_SYMBOL_RISK = 0.015      # нетто на один инструмент -> 3 сделки полного размера
 
+# 🔴 15.09. Потолок на стратегию был счётным (MAX_OPEN_PER_STRATEGY = 4) и за
+# сутки после снятия прочих счётных лимитов стал РАБОЧИМ ограничением: 79
+# отказов у pattern_break_retest. Та же беда, что была с инструментом —
+# считаются позиции, а не риск, поэтому позиция с выкупленным стопом
+# продолжает занимать место.
+#
+# Число не назначено, а переведено: прежний потолок 4 позиции при 0.5% риска
+# на сделку давал ровно 2.0%. Тот же эффективный предел, но измеренный тем,
+# чем надо. Замер в момент правки: pattern_break_retest держал 236.05 USD =
+# 2.12% в четырёх позициях, то есть упирался в старый лимит вплотную.
+MAX_STRATEGY_RISK = 0.02
+
 # ─── общий множитель: доллар ────────────────────────────────────────────────
 #
 # 🔴 14.09, ЗАМЕРЕНО, а не предположено (ops/measure_legs.py, 399 дневных
@@ -135,7 +147,7 @@ def leg_cap(equity_share: float = None) -> float:
 # числа заведомо с запасом: упираться в них в нормальной работе нельзя.
 MAX_OPEN_TOTAL = 12
 MAX_OPEN_PER_SYMBOL = 6      # было 3, и было рабочим ограничением; см. выше
-MAX_OPEN_PER_STRATEGY = 4
+MAX_OPEN_PER_STRATEGY = 8    # было 4, и тоже стало рабочим — 15.09, см. MAX_STRATEGY_RISK
 
 # Стоп-кран: просадка ОТ ПИКА кривой стратегии, в R.
 # 🔴 Именно от пика, а не «накопленная сумма ниже -15», как было в
@@ -614,6 +626,14 @@ def portfolio_gate(con: sqlite3.Connection, signal: Signal, equity: float,
         raise RiskRefusal("cap_strategy",
                           f"у стратегии {signal.strategy} открыто {len(same_strat)} "
                           f"при потолке {MAX_OPEN_PER_STRATEGY}")
+
+    strat_net, _ = exposure(same_strat,
+                            add=(signal.symbol, signal.is_long, risk_money))
+    if equity > 0 and strat_net / equity > MAX_STRATEGY_RISK:
+        raise RiskRefusal(
+            "cap_strategy_risk",
+            f"риск стратегии {signal.strategy} {strat_net / equity * 100:.2f}% "
+            f"превысит предел {MAX_STRATEGY_RISK * 100:.1f}%")
 
     if equity <= 0:
         return
