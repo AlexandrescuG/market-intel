@@ -30,7 +30,12 @@ import httpx
 
 log = logging.getLogger("journal_auth")
 
-_DB = Path(__file__).parent.parent / "data" / "journal.db"
+# Путь к базе можно увести в сторону переменной SBF_JOURNAL_DB.
+# Нужно для стенда: платные главы 6-15 не посмотреть без PRO, а
+# выдавать себе право в боевой базе — значит пачкать прод. Со
+# стендом права выдаются в КОПИИ, прод не трогаем вовсе.
+_DB = Path(os.getenv("SBF_JOURNAL_DB")
+          or Path(__file__).parent.parent / "data" / "journal.db")
 
 # ── Мост к SBFAcademy_bot (канонический источник identity) ────────────────────
 _SBF_BOT_DB   = Path("/mnt/sbfdata/sbf-platform/SBFAcademy_bot/bot.db")

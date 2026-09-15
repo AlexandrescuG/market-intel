@@ -40,7 +40,11 @@ from sentiment_job import STARTER_SYMBOLS as _SENTIMENT_SYMBOLS
 from jinja2 import Environment, FileSystemLoader
 from markupsafe import Markup
 
-PORT = 8085
+# Порт можно увести переменной — нужно стенду tools/edu_preview.py, который
+# поднимает второй экземпляр на копии базы, чтобы смотреть платные главы,
+# не выдавая себе право в боевой journal.db. В проде переменной нет и порт
+# остаётся тем же 8085.
+PORT = int(os.getenv("SBF_PORT") or 8085)
 DIRECTORY = os.path.join(os.path.dirname(os.path.abspath(__file__)), "web")
 BOOK_DIR = Path(__file__).parent / "web" / "book"
 EDU_DIR  = Path(__file__).parent / "web" / "edu"

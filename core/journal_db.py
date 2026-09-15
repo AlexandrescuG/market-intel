@@ -9,10 +9,16 @@ from __future__ import annotations
 
 import hashlib
 import sqlite3
+import os
 from pathlib import Path
 from typing import Any
 
-_DB = Path(__file__).parent.parent / "data" / "journal.db"
+# Путь к базе можно увести в сторону переменной SBF_JOURNAL_DB.
+# Нужно для стенда: платные главы 6-15 не посмотреть без PRO, а
+# выдавать себе право в боевой базе — значит пачкать прод. Со
+# стендом права выдаются в КОПИИ, прод не трогаем вовсе.
+_DB = Path(os.getenv("SBF_JOURNAL_DB")
+          or Path(__file__).parent.parent / "data" / "journal.db")
 
 
 # ── Инициализация схемы ───────────────────────────────────────────────────────
