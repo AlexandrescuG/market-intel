@@ -391,6 +391,11 @@ function OrderPath() {
                 <div style={{textAlign:"center"}}><Mono size={15} color="#fff" spacing={0}>{metrics.spread}</Mono><Mono size={9} color="rgba(255,255,255,0.4)" spacing={0.5} style={{display:"block"}}>{op.metricSpread}</Mono></div>
                 <div style={{textAlign:"center"}}><Mono size={15} color="#fff" spacing={0}>{metrics.requote}</Mono><Mono size={9} color="rgba(255,255,255,0.4)" spacing={0.5} style={{display:"block"}}>{op.metricRequote}</Mono></div>
               </div>
+              {/* Три числа выше выглядят как метрики, поэтому рядом обязана
+                  стоять строка о том, чьи они. Контраст не ниже inkMid —
+                  дисклеймер, который не читается, хуже отсутствующего. */}
+              <p style={{fontSize:10.5,color:"rgba(255,255,255,0.62)",fontFamily:"monospace",
+                         letterSpacing:0.3,lineHeight:1.5,textAlign:"center",marginTop:0,marginBottom:12}}>{op.metricsNote}</p>
               <p style={{fontSize:11.5,color:"rgba(255,255,255,0.4)",fontStyle:"italic",textAlign:"center",margin:0}}>{op.releaseNote}</p>
               <div style={{textAlign:"center",marginTop:14}}>
                 <a href="/chart.html?s=GOLD" target="_blank" rel="noopener" style={{fontFamily:"monospace",fontSize:11,color:C.gold,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>{op.openOnChart}</a>

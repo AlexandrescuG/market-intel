@@ -110,8 +110,27 @@ def подготовить_копию() -> tuple[Path, str]:
 def main() -> int:
     p = argparse.ArgumentParser()
     p.add_argument("--port", type=int, default=0)
+    # Останавливать стенд руками оказалось граблями: `pkill -f SBF_PORT=...`
+    # не работает (переменная в окружении, не в argv), и дважды подряд я
+    # на этом попался сам — старый экземпляр продолжал держать порт и
+    # отдавать СТАРЫЙ код. Команда остановки должна быть в самом стенде.
+    p.add_argument("--stop", action="store_true",
+                   help="снять стенд, занимающий порт, и выйти")
     a = p.parse_args()
     порт = a.port or свободный_порт()
+    if a.stop:
+        кого = владельцы(порт)
+        if not кого:
+            print(f"на порту {порт} стенда нет")
+            return 0
+        for pid in кого:
+            try:
+                os.kill(pid, signal.SIGTERM)
+                print(f"остановлен pid {pid}")
+            except ProcessLookupError:
+                pass
+        return 0
+
     # 🔴 Занятый порт обязан быть слышен. Первый прогон на этом и попался:
     # прошлый стенд оставил осиротевший serve.py на 8099, новый молча не
     # смог подняться — а Playwright продолжал ходить на старый экземпляр со
