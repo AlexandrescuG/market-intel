@@ -152,10 +152,89 @@
     sp.series.forEach(function(se,si){if(se.hist){se.data.forEach(function(v,i){if(v==null)return;var y0=Y(0),y1=Y(v);s+='<rect class="cn" style="animation-delay:'+(i*34)+'ms" x="'+(X(i)-2.2).toFixed(1)+'" y="'+Math.min(y0,y1).toFixed(1)+'" width="4.4" height="'+Math.abs(y1-y0).toFixed(1)+'" fill="'+(v>=0?P.up:P.down)+'" opacity="0.55"/>';});}else if(se.bars){se.data.forEach(function(v,i){if(v==null)return;s+='<rect class="cn" style="animation-delay:'+(i*34)+'ms" x="'+(X(i)-2.2).toFixed(1)+'" y="'+Y(v).toFixed(1)+'" width="4.4" height="'+(Y(0)-Y(v)).toFixed(1)+'" fill="'+se.color+'" opacity="0.5"/>';});}else{var d=se.data.map(function(v,i){return v==null?null:X(i).toFixed(1)+','+Y(v).toFixed(1);}).filter(Boolean).join(' ');s+='<polyline class="ln" style="stroke-dasharray:5000;stroke-dashoffset:5000;animation-delay:'+(delay+si*110)+'ms" points="'+d+'" fill="none" stroke="'+se.color+'" stroke-width="1.6"/>';}});
     return s+'</svg>';}
 
-  // ---- предрасчёт учебных серий ----
-  var IS=indSeries(),CL=IS.closes,CN=IS.candles;
-  var ma20=sma(CL,20),ma50=sma(CL,50),sdv=stdF(CL,20),bbU=ma20.map(function(v,i){return v==null||sdv[i]==null?null:v+2*sdv[i];}),bbD=ma20.map(function(v,i){return v==null||sdv[i]==null?null:v-2*sdv[i];});
-  var RS=rsiF(CL,14),MC=macdF(CL),ST=stochF(CN,14),AT=atrF(CN,14);
+  /* ---- ряд под индикаторные фигуры ----------------------------------------
+     🔴 ФОРМУЛА БЫЛА ЧЕСТНОЙ, ЦЕНА — НЕТ. ATR, полосы Боллинджера, RSI,
+     MACD, стохастик и Ишимоку считались правильно, но по ряду из
+     indSeries() — случайному блужданию из mul(seed). Индикатор это функция
+     от цены; посчитанный по выдуманной цене, он показывает свойства
+     генератора, а не рынка: у случайного блуждания не бывает ни настоящих
+     сжатий волатильности, ни разворотов у уровня — ровно того, ради чего
+     индикатор смотрят. Читатель видел правильную формулу на неправильном
+     мире.
+
+     Теперь под фигуры подкладывается реальный отрезок (fig_series.json,
+     собирает tools/build_fig_series.py из price_bars). Пока файл не
+     пришёл, работает прежний генератор: страница не должна ждать сети,
+     чтобы что-то показать. Как пришёл — ряды пересчитываются и фигуры
+     перерисовываются событием sbf-fig-series. */
+  var ЖИВОЙ_РЯД = null;   // {показ, tf, от, до} — для подписи под фигурой
+  var IS,CL,CN,ma20,ma50,sdv,bbU,bbD,RS,MC,ST,AT;
+
+  function пересчитать(ряд){
+    IS = ряд || indSeries(); CL = IS.closes; CN = IS.candles;
+    ma20=sma(CL,20);ma50=sma(CL,50);sdv=stdF(CL,20);
+    bbU=ma20.map(function(v,i){return v==null||sdv[i]==null?null:v+2*sdv[i];});
+    bbD=ma20.map(function(v,i){return v==null||sdv[i]==null?null:v-2*sdv[i];});
+    RS=rsiF(CL,14);MC=macdF(CL);ST=stochF(CN,14);AT=atrF(CN,14);
+  }
+  пересчитать(null);
+
+  (function(){
+    try {
+      var q = new XMLHttpRequest();
+      q.open('GET', '/data/edu_capsules/fig_series.json', true);
+      q.onload = function(){
+        if (q.status !== 200) return;
+        try {
+          var j = JSON.parse(q.responseText);
+          var о = j && j['отрезки'] && j['отрезки']['основной'];
+          if (!о || !о['бары'] || о['бары'].length < 30) return;
+          var свечи = о['бары'].map(function(б){
+            return {o:б.o, h:б.h, l:б.l, c:б.c};
+          });
+          пересчитать({closes: свечи.map(function(б){return б.c;}), candles: свечи});
+          ЖИВОЙ_РЯД = {показ:о['показ'], tf:о['tf'], от:о['от'], до:о['до']};
+          window.dispatchEvent(new Event('sbf-fig-series'));
+        } catch (e) {}
+      };
+      q.send();
+    } catch (e) {}
+  })();
+
+  root.SBFFigSeries = function(){ return ЖИВОЙ_РЯД; };
+
+  /* Настоящие вхождения свечных паттернов — тот же файл, что питает
+     галерею главы 10 (tools/build_pattern_examples.py, детектор
+     core/patterns.py по price_bars). Нарисованная фигура идеальна по
+     построению: на ней паттерн виден всегда, потому что его так нарисовали.
+     На реальном баре он выглядит скромнее — и узнавать надо именно такой. */
+  var ПРИМЕРЫ = null;
+  var СИНОНИМЫ = {dtop:'doubleTop', dbot:'doubleBottom'};
+  function поПримеру(ключ){
+    ключ = СИНОНИМЫ[ключ] || ключ;
+    if (!ПРИМЕРЫ || !ПРИМЕРЫ['примеры']) return null;
+    var п = ПРИМЕРЫ['примеры'][ключ];
+    if (!п || !п['бары']) return null;
+    var i = п['индекс_паттерна'];
+    return {candles: п['бары'].map(function(б){return {o:б.o,h:б.h,l:б.l,c:б.c};}),
+            zone: [i, i], пример: п};
+  }
+  root.SBFFigExample = поПримеру;
+
+  (function(){
+    try {
+      var q = new XMLHttpRequest();
+      q.open('GET', '/data/edu_capsules/pattern_examples.json', true);
+      q.onload = function(){
+        if (q.status !== 200) return;
+        try {
+          ПРИМЕРЫ = JSON.parse(q.responseText);
+          window.dispatchEvent(new Event('sbf-fig-series'));
+        } catch (e) {}
+      };
+      q.send();
+    } catch (e) {}
+  })();
   function ichi(){var c=indSeries(33,[[16,0.4,0.7],[14,-0.5,0.8],[18,0.5,0.7]]).candles;var tk=c.map(function(_,i){return donch(c,9,i);}),kj=c.map(function(_,i){return donch(c,26,i);}),sa=c.map(function(_,i){return (tk[i]+kj[i])/2;}),sb=c.map(function(_,i){return donch(c,52,i);});return{candles:c,layers:[{t:'fill',up:sa,dn:sb,color:P.teal,op:0.12},{t:'poly',data:sa,color:P.teal,w:1},{t:'poly',data:sb,color:P.down,w:1},{t:'poly',data:tk,color:P.blue,w:1.3},{t:'poly',data:kj,color:P.gold,w:1.3}]};}
   function fibItem(){var r=mul(7),c=[],p=48;for(var i=0;i<11;i++){var o=p,cc=p+0.95+(r()*2-1)*0.4;c.push({o:o,c:cc,h:Math.max(o,cc)+0.3,l:Math.min(o,cc)-0.3});p=cc;}var hi=p;for(var i=0;i<10;i++){var o=p,cc=p-0.55+(r()*2-1)*0.4;c.push({o:o,c:cc,h:Math.max(o,cc)+0.3,l:Math.min(o,cc)-0.3});p=cc;}var lo=48;var lays=[[0,'0'],[0.236,'.236'],[0.382,'.382'],[0.5,'.5'],[0.618,'.618'],[0.786,'.786'],[1,'1.0']].map(function(f){return {t:'hline',y:hi-(hi-lo)*f[0],color:P.gold,label:f[1],dash:'3 3'};});return{candles:c,layers:lays};}
   function fvgItem(){var r=mul(12),c=[],p=50;for(var i=0;i<6;i++){var o=p,cc=p+(r()*2-1)*0.4;c.push({o:o,c:cc,h:Math.max(o,cc)+0.35,l:Math.min(o,cc)-0.35});p=cc;}var a={o:p,c:p+2.2,h:p+2.4,l:p-0.15};var b={o:a.c,c:a.c+2.6,h:a.c+2.8,l:a.c-0.05};var d={o:b.c,c:b.c+2.0,h:b.c+2.2,l:b.c+0.1};c.push(a,b,d);p=d.c;for(var i=0;i<7;i++){var o=p,cc=p+(r()*2-1)*0.5-0.1;c.push({o:o,c:cc,h:Math.max(o,cc)+0.35,l:Math.min(o,cc)-0.35});p=cc;}return{candles:c,layers:[{t:'rect',i0:6,i1:null,yTop:d.l,yBot:a.h,color:P.violet,op:0.15,label:'FVG'}]};}
@@ -174,7 +253,7 @@
       ['morningStar','Утренняя звезда','bull',PAT.morningStar,31,'Большая медвежья → малая звезда с разрывом → большая бычья.','Снижение выдохлось, инициатива у покупателей.'],
       ['eveningStar','Вечерняя звезда','bear',PAT.eveningStar,5,'Большая бычья → малая звезда с разрывом → большая медвежья.','Рост выдохся, инициатива у продавцов.'],
       ['harami','Харами','bull',PAT.harami,9,'Большая свеча, затем малая внутри её тела.','Импульс резко сжался — возможна пауза или разворот.']
-    ].map(function(a){return {key:a[0],n:a[1],f:a[5],w:a[6],note:'Стоп — за фигурой, цель — измеренное движение (высота фигуры).',build:function(){var d=reversal(a[2],a[3],a[4]);return renderItem({candles:d.candles,layers:[{t:'rect',i0:d.zone[0],i1:d.zone[1],yTop:Math.max.apply(null,d.candles.slice(d.zone[0],d.zone[1]+1).map(function(c){return c.h;})),yBot:Math.min.apply(null,d.candles.slice(d.zone[0],d.zone[1]+1).map(function(c){return c.l;})),color:P.gold,op:0.10}],levels:plevels(d.candles,a[2],d.zone)});}};}),
+    ].map(function(a){return {key:a[0],n:a[1],f:a[5],w:a[6],note:'Стоп — за фигурой, цель — измеренное движение (высота фигуры).',build:function(){var d=поПримеру(a[0])||reversal(a[2],a[3],a[4]);var вш=Math.max.apply(null,d.candles.map(function(c){return c.h;})),нз=Math.min.apply(null,d.candles.map(function(c){return c.l;}));var верх=d['пример']?вш:Math.max.apply(null,d.candles.slice(d.zone[0],d.zone[1]+1).map(function(c){return c.h;})),низ=d['пример']?нз:Math.min.apply(null,d.candles.slice(d.zone[0],d.zone[1]+1).map(function(c){return c.l;}));var шир=d['пример']?0.5:0;return renderItem({candles:d.candles,layers:[{t:'rect',i0:d.zone[0]-шир,i1:d.zone[1]+шир,yTop:верх,yBot:низ,color:P.gold,op:d['пример']?0.18:0.10}],levels:plevels(d.candles,a[2],d.zone)});}};}),
     chart:[
       ['ascTri','Восходящий треугольник','bull',[50,61,54,61,57,61,59,61.5,64],3,[{t:'hline',y:61,label:'сопротивление'},{t:'line',from:{i:0,y:50},to:{i:18,y:59}}],'Горизонтальное сопротивление, минимумы растут.','Покупатели поджимают — прорыв чаще вверх.'],
       ['descTri','Нисходящий треугольник','bear',[60,50,57,50,54,50,52,50,47],3,[{t:'hline',y:50,label:'поддержка'},{t:'line',from:{i:0,y:60},to:{i:18,y:52}}],'Горизонтальная поддержка, максимумы снижаются.','Продавцы поджимают — прорыв чаще вниз.'],
@@ -184,7 +263,7 @@
       ['dbot','Двойное дно','bull',[60,50,57,50,63],4,[{t:'hline',y:57,label:'линия шеи'}],'Два минимума на одном уровне, между ними отскок.','Поддержка дважды устояла — разворот вверх.'],
       ['wedge','Клин','bear',[50,55,52.5,57,54.5,58.5,56.5,59,54],3,[{t:'line',from:{i:3,y:55},to:{i:21,y:59}},{t:'line',from:{i:0,y:50},to:{i:18,y:56.5}}],'Две сходящиеся наклонные линии в одну сторону.','Импульс затухает — разворот против наклона.'],
       ['flag','Флаг','bull',[48,50,62,60,61,59.5,60.5,58.5,64],3,[{t:'line',from:{i:6,y:62},to:{i:21,y:59}},{t:'line',from:{i:8,y:59.5},to:{i:21,y:57}}],'Резкий импульс, затем наклонный канал против него.','Передышка в тренде — часто продолжение.']
-    ].map(function(a){return {key:a[0],n:a[1],f:a[6],w:a[7],note:'Стоп — за структурой, цель — измеренное движение фигуры.',build:function(){var c=chartP(a[3],a[4],a[1].length,0.42);return renderItem({candles:c,layers:a[5],levels:plevels(c,a[2])});}};}),
+    ].map(function(a){return {key:a[0],n:a[1],f:a[6],w:a[7],note:'Стоп — за структурой, цель — измеренное движение фигуры.',build:function(){var пр=поПримеру(a[0]);if(пр){var в=Math.max.apply(null,пр.candles.map(function(c){return c.h;})),н=Math.min.apply(null,пр.candles.map(function(c){return c.l;}));return renderItem({candles:пр.candles,layers:[{t:'rect',i0:пр.zone[0]-0.5,i1:пр.zone[1]+0.5,yTop:в,yBot:н,color:P.gold,op:0.18}],levels:plevels(пр.candles,a[2],пр.zone)});}var c=chartP(a[3],a[4],a[1].length,0.42);return renderItem({candles:c,layers:a[5],levels:plevels(c,a[2])});}};}),
     smc:[
       {key:'structure',n:'Структура рынка (HH/HL)',f:'Последовательность всё более высоких максимумов (HH) и минимумов (HL).',w:'Пока есть HH/HL — тренд вверх; появление LH/LL — сигнал слома.',note:'Базовая разметка тренда. Контекст, не точка входа.',build:function(){return renderItem(structItem());}},
       {key:'bos',n:'Слом структуры (BOS)',f:'Цена пробивает последний значимый минимум восходящей структуры.',w:'Break of Structure — первое подтверждение возможной смены тренда.',note:'Сигнал смены контекста, а не готовая сделка.',build:function(){return renderItem(bosItem());}},

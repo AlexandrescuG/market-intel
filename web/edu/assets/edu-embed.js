@@ -73,8 +73,35 @@
       // resolves and the figure is re-mounted.
       var schemaLabel = el.dataset.schemaLabel || t('eduindex.embed.schema_label', 'СХЕМА · ИЛЛЮСТРАЦИЯ, НЕ РЕАЛЬНЫЕ ДАННЫЕ');
       el.innerHTML = '<div class="sbf-fig-schema-tag">' + schemaLabel + '</div><div class="sbf-fig-chart"></div><div class="sbf-cap">' + cap + '</div>';
-      function render() { el.querySelector('.sbf-fig-chart').innerHTML = it.build(); }
+      function render() { el.querySelector('.sbf-fig-chart').innerHTML = it.build(); метка(); }
+      /* 🔴 Метка обязана следовать за тем, что показано. Индикаторные фигуры
+         (cat='ind') с приходом fig_series.json считаются по РЕАЛЬНОМУ
+         отрезку рынка — называть их «не реальные данные» после этого
+         неверно ровно так же, как называть схему настоящей. Остальные
+         семейства (candle/chart/smc) по-прежнему рисуются генератором, и
+         метка у них остаётся. */
+      function метка() {
+        var шапка = el.querySelector('.sbf-fig-schema-tag');
+        if (!шапка) return;
+        var ряд = window.SBFFigSeries && window.SBFFigSeries();
+        var пример = window.SBFFigExample && window.SBFFigExample(el.dataset.key);
+        if ((el.dataset.cat === 'candle' || el.dataset.cat === 'chart') && пример) {
+          var д = new Date(пример['пример']['ts'] * 1000);
+          шапка.textContent = пример['пример']['имя'] + ' · ' + пример['пример']['tf'] + ' · ' +
+            ('0'+д.getUTCDate()).slice(-2)+'.'+('0'+(д.getUTCMonth()+1)).slice(-2)+'.'+д.getUTCFullYear();
+          шапка.classList.add('sbf-fig-real-tag');
+        } else if (el.dataset.cat === 'ind' && ряд) {
+          шапка.textContent = ряд['показ'] + ' · ' + ряд['tf'] + ' · ' +
+                              ряд['от'] + '…' + ряд['до'];
+          шапка.classList.add('sbf-fig-real-tag');
+        } else {
+          шапка.textContent = schemaLabel;
+          шапка.classList.remove('sbf-fig-real-tag');
+        }
+      }
       render(); el._sbf = true;
+      // Ряд приходит по сети уже после первой отрисовки — перерисовываемся.
+      window.addEventListener('sbf-fig-series', render);
       // 🔴 Схема — настоящее управление: по нажатию она проигрывается заново.
       // Но была обычным <div> с курсором-пальцем: мышью работает, с
       // клавиатуры недоступна, диктор её управлением не называет. Замер нашёл

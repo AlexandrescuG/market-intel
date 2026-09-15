@@ -401,3 +401,7 @@ body {
   transition: opacity .15s;
 }
 .sbf-cta a:hover { opacity: .88; }
+
+/* Подпись реального отрезка под индикаторной фигурой: это не
+   предупреждение, а источник — поэтому спокойный цвет, не тревожный. */
+.sbf-fig-real-tag { color: var(--muted) !important; letter-spacing: 0.4px; }
