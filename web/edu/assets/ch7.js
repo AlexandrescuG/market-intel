@@ -3,6 +3,11 @@
  * RU is the master text; RO/EN are translations in the same register as ch1-6.
  * window.Ch7Content = {ru, ro, en}.
  *
+ * [ОБНОВЛЕНО 15.09.2026] Эта пометка устарела: partners.json существует
+ * (web/data/partners.json, пять партнёров с юрлицами, лицензиями и
+ * процентом теряющих счетов), ступень построена и работает —
+ * AcademyShared.PartnerPicker. Текст ниже оставлен как след решения,
+ * но читать его как описание текущего состояния нельзя.
  * [ДОПУЩЕНИЕ] Ступень 2 партнёрской лестницы (демо-счёт, §3.8) требует
  * <PartnerBridge>/<PartnerFacts>/<RiskWarning>/<DisclosureLine> и
  * partners.json из SPEC_partner_ladder_ch6_15.md — эта инфраструктура ещё

@@ -1286,6 +1286,13 @@ def _edu_inject(ch: int, lang: str = i18n.DEFAULT_LANG) -> str:
         8:  [("smc","structure",i18n.t("edu.fig.8.1", lang)),
              ("smc","bos",i18n.t("edu.fig.8.2", lang)),
              ("ind","ma",i18n.t("edu.fig.8.3", lang))],
+        # 🔴 Глава 9 была единственной из пятнадцати вообще без графики: в
+        # _FIG_MAP не было ключа 9, а виджета ей, в отличие от главы 10, не
+        # полагалось. Глава при этом ровно про осцилляторы — RSI, MACD,
+        # дивергенции, — и объясняла их словами, ни разу не показав.
+        9:  [("ind","rsi",i18n.t("edu.fig.9.1", lang)),
+             ("ind","macd",i18n.t("edu.fig.9.2", lang)),
+             ("ind","stoch",i18n.t("edu.fig.9.3", lang))],
         11: [("ind","volume",i18n.t("edu.fig.11.1", lang))],
         12: [("ind","ichimoku",i18n.t("edu.fig.12.1", lang))],
         13: [("chart","hns",i18n.t("edu.fig.13.1", lang)),
