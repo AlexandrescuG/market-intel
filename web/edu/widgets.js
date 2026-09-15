@@ -107,25 +107,67 @@ var chartDefs=[
    пошла в обещанную сторону, лежит между 0.481 и 0.518. Монетка.
    Показывать красивую форму и молчать о том, что мы её уже проверили, —
    значит оставлять читателя при впечатлении, которое сами же опровергли. */
-var GALLERY_STATS = null;
-(function(){
+var GALLERY_STATS = null;     // наши измерения по паттерну
+var GALLERY_EXAMPLES = null;  // настоящие вхождения в истории
+
+function _грузи(путь, дальше){
   try {
     var q = new XMLHttpRequest();
-    q.open('GET', '/data/edu_capsules/pattern_gallery_stats.json', true);
+    q.open('GET', путь, true);
     q.onload = function(){
-      if (q.status !== 200) return;
-      try {
-        GALLERY_STATS = JSON.parse(q.responseText);
-        // Карточки уже нарисованы — дорисовываем строку с измерением.
-        document.querySelectorAll('[data-sbf-pat]').forEach(function(узел){
-          var с = статистикаПаттерна(узел.getAttribute('data-sbf-pat'));
-          if (с) узел.insertAdjacentHTML('beforeend', с);
-        });
-      } catch (e) {}
+      if (q.status !== 200) { дальше(null); return; }
+      try { дальше(JSON.parse(q.responseText)); } catch (e) { дальше(null); }
     };
+    q.onerror = function(){ дальше(null); };
     q.send();
-  } catch (e) {}
-})();
+  } catch (e) { дальше(null); }
+}
+
+/* Оба файла приходят асинхронно, а карточки уже нарисованы схемами.
+   Поэтому после каждой загрузки карточки переcобираются заново — так они
+   не зависят от того, какой ответ пришёл первым. */
+function обновитьКарточки(){
+  document.querySelectorAll('[data-sbf-pat]').forEach(function(узел){
+    var ключ = узел.getAttribute('data-sbf-pat');
+    if (!ключ) return;
+    var пример = GALLERY_EXAMPLES && GALLERY_EXAMPLES['примеры'] && GALLERY_EXAMPLES['примеры'][ключ];
+    var было = узел.querySelector('.sbf-pat-stat');
+    if (было) было.remove();
+    var подпись = узел.querySelector('.sbf-pat-real');
+    if (подпись) подпись.remove();
+    if (пример){
+      var svg = узел.querySelector('svg');
+      if (svg) svg.outerHTML = реальныйГрафик(пример);
+      var метка = узел.querySelector('.sbf-pat-tag');
+      if (метка) метка.remove();   // это уже не схема
+      узел.setAttribute('data-sbf-real', '1');
+      узел.insertAdjacentHTML('beforeend', подписьПримера(пример));
+    }
+    узел.insertAdjacentHTML('beforeend', статистикаПаттерна(ключ));
+  });
+}
+
+function реальныйГрафик(пример){
+  var i = пример['индекс_паттерна'];
+  return buildSVG(пример['бары'], [], {zone:[i, i]});
+}
+
+function подписьПримера(пример){
+  var д = new Date(пример['ts'] * 1000);
+  var дата = ('0'+д.getUTCDate()).slice(-2)+'.'+('0'+(д.getUTCMonth()+1)).slice(-2)+'.'+д.getUTCFullYear();
+  var итог = пример['итог_процентов'];
+  var знак = итог >= 0 ? '+' : '';
+  // Цвет по тому, оправдался ли паттерн, а не по знаку движения: у
+  // медвежьего паттерна рост — это промах, и он обязан читаться как промах.
+  var напр = пример['направление'];
+  var верно = напр === 'bullish' ? итог > 0 : напр === 'bearish' ? итог < 0 : null;
+  var цвет = верно === null ? 'sbf-pat-neutral' : (верно ? 'sbf-pat-hit' : 'sbf-pat-miss');
+  return '<div class="sbf-pat-real">' + пример['имя'] + ' · ' + пример['tf'] + ' · ' + дата +
+    '<span class="' + цвет + '"> → через ' + (пример['бары'].length - 1 - i_пример(пример)) +
+    ' баров ' + знак + итог + '%</span></div>';
+}
+
+function i_пример(пример){ return пример['индекс_паттерна']; }
 
 function статистикаПаттерна(ключ){
   if (!GALLERY_STATS || !GALLERY_STATS['паттерны']) return '';
@@ -139,22 +181,38 @@ function статистикаПаттерна(ключ){
          t('eduindex.widgets.pat_stat_obs', 'наблюдений') + '</div>';
 }
 
+_грузи('/data/edu_capsules/pattern_gallery_stats.json', function(j){
+  GALLERY_STATS = j; обновитьКарточки();
+});
+_грузи('/data/edu_capsules/pattern_examples.json', function(j){
+  GALLERY_EXAMPLES = j; обновитьКарточки();
+});
+
 function mountPatternGallery(el, opts) {
   var filter=(opts&&opts.filter)||'all';
   var html='';
   if(filter==='all'||filter==='candle') html+='<div class="sbf-sect-label">'+t('eduindex.widgets.section_candle','Свечные паттерны')+' <span class="sbf-sect-n">7</span></div><div class="sbf-card-grid" id="sbfw-cg"></div>';
   if(filter==='all'||filter==='chart')  html+='<div class="sbf-sect-label">'+t('eduindex.widgets.section_chart','Графические паттерны')+' <span class="sbf-sect-n">8</span></div><div class="sbf-card-grid" id="sbfw-hg"></div>';
   el.innerHTML='<div class="sbf-widget">'+
-    '<div class="sbf-fig-schema-tag">'+t('eduindex.embed.schema_label','СХЕМА · ИЛЛЮСТРАЦИЯ, НЕ РЕАЛЬНЫЕ ДАННЫЕ')+'</div>'+
     '<div class="sbf-widget-head">'+t('eduindex.widgets.gallery_head','Паттерны рынка')+'</div>'+html+'</div>';
   function card(name,desc,svg,ключ){
-    return'<div class="sbf-pat-card" data-sbf-pat="'+(ключ||'')+'">'+svg+
-      '<div class="sbf-pat-name">'+name+'</div><div class="sbf-pat-desc">'+desc+'</div>'+
+    // Пока не пришёл файл с примерами, честно считаем карточку схемой:
+    // она ею и является. Метку снимет обновитьКарточки(), когда окажется,
+    // что под этот паттерн есть настоящее вхождение.
+    return'<div class="sbf-pat-card" data-sbf-pat="'+(ключ||'')+'">'+
+      '<div class="sbf-pat-tag">'+t('eduindex.widgets.pat_tag_schema','схема')+'</div>'+
+      svg+'<div class="sbf-pat-name">'+name+'</div><div class="sbf-pat-desc">'+desc+'</div>'+
       статистикаПаттерна(ключ)+'</div>';}
   var cg=el.querySelector('#sbfw-cg');
   if(cg) candleDefs.forEach(function(p){var d=buildReversal(p[1],PAT[p[0]],p[4]);cg.innerHTML+=card(p[2],p[3],buildSVG(d.candles,[],{zone:d.zone,trend:d.trend}),p[0]);});
   var hg=el.querySelector('#sbfw-hg');
   if(hg) chartDefs.forEach(function(p){var d=buildChart(p[2],p[3],p[4],p[5]);hg.innerHTML+=card(p[0],p[1],buildSVG(d.candles,p[5],{}),p[6]);});
+  var виджет=el.querySelector('.sbf-widget');
+  if(виджет) виджет.insertAdjacentHTML('beforeend',
+    '<div class="sbf-pat-foot">'+t('eduindex.widgets.pat_foot',
+     'Каждый пример — одно настоящее вхождение из тысяч, выбранное как типичное по размаху, '+
+     'а не как удачное: что случилось после, не отбиралось. Один случай ничего не доказывает — '+
+     'смотри строку «наша проверка»: там доля по всем вхождениям сразу.')+'</div>');
 }
 
 /* ── Risk calculator ───────────────────────────────────────────────────────── */

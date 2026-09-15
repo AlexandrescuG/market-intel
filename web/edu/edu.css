@@ -354,6 +354,26 @@ body {
 .sbf-pat-desc { font-size: 11px; color: var(--muted); line-height: 1.4; }
 /* Строка с нашим измерением под карточкой паттерна. Контраст выше, чем у
    описания: это единственное на карточке, что посчитано, а не нарисовано. */
+.sbf-pat-foot {
+  margin-top: 14px; padding-top: 10px; border-top: 1px solid rgba(0,0,0,0.08);
+  font-size: 11.5px; line-height: 1.6; color: var(--muted);
+}
+.sbf-pat-card { position: relative; }
+/* «схема» — только на тех карточках, где форма нарисована. Там, где под
+   паттерн нашлось настоящее вхождение в истории, метки нет. */
+.sbf-pat-tag {
+  position: absolute; top: 8px; right: 10px; z-index: 1;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+  font-size: 9px; letter-spacing: 0.8px; text-transform: uppercase;
+  color: var(--muted); opacity: 0.85;
+}
+.sbf-pat-real {
+  margin-top: 7px; font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+  font-size: 10.5px; letter-spacing: 0.2px; color: var(--muted);
+}
+.sbf-pat-hit  { color: #2E7D5B; }   /* паттерн оправдался */
+.sbf-pat-miss { color: #8a2f2f; }   /* не оправдался — и это видно */
+.sbf-pat-neutral { color: var(--muted); }
 .sbf-pat-stat {
   margin-top: 7px; padding-top: 6px; border-top: 1px solid rgba(0,0,0,0.08);
   font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
