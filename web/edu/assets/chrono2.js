@@ -128,7 +128,7 @@
         title: "Три центробанка тянут в разные стороны",
         body: "Июль 2026-го: ФРС — в цикле снижения (эффективная ставка ~3.6%); ЕЦБ 11 июня 2026-го впервые за три года поднял ставку (+25 бп, депозитная 2.25%) — война на Ближнем Востоке разогнала энергию и инфляцию; Банк Японии 16 июня поднял до 1.00% — максимум с 1995 года. Впервые за десятилетия три великих ЦБ движутся в трёх разных направлениях. Что делает золото, когда центробанки спорят между собой? Открой терминал — этот график живёт прямо сейчас.",
         fact: "Технологии и десятилетия менялись. Ставка как гравитация, действующая на всё сразу, — нет.",
-        legend: null, source: "Federal Reserve H.15 · ECB · Bank of Japan (на 23.07.2026)", illustration: "today_ch2",
+        legend: null, source: "Federal Reserve · ECB · Bank of Japan (через FRED)", illustration: "today_ch2",
         scene: "ch2_now", bridge: true
       }
     ],
@@ -249,7 +249,7 @@
         title: "Trei bănci centrale trag în direcții diferite",
         body: "Iulie 2026: Fed — în ciclu de reducere (dobânda efectivă ~3.6%); BCE, pe 11 iunie 2026, a majorat dobânda pentru prima dată în trei ani (+25 pb, dobânda de depozit 2.25%) — războiul din Orientul Mijlociu a accelerat energia și inflația; Banca Japoniei, pe 16 iunie, a urcat la 1.00% — maximul din 1995 încoace. Pentru prima dată în decenii, trei mari bănci centrale se mișcă în trei direcții diferite. Ce face aurul când băncile centrale se contrazic? Deschide terminalul — acest grafic trăiește chiar acum.",
         fact: "Tehnologiile și deceniile s-au schimbat. Dobânda, ca o gravitație care acționează asupra tuturor simultan — niciodată.",
-        legend: null, source: "Federal Reserve H.15 · BCE · Bank of Japan (la 23.07.2026)", illustration: "today_ch2",
+        legend: null, source: "Federal Reserve · BCE · Bank of Japan (prin FRED)", illustration: "today_ch2",
         scene: "ch2_now", bridge: true
       }
     ],
@@ -370,7 +370,7 @@
         title: "Three central banks pulling in different directions",
         body: "July 2026: the Fed is in a cutting cycle (effective rate ~3.6%); the ECB, on June 11, 2026, raised its rate for the first time in three years (+25bp, deposit rate 2.25%) as Middle East conflict drove up energy and inflation; the Bank of Japan, on June 16, hiked to 1.00% — the highest since 1995. For the first time in decades, the three great central banks are moving in three different directions. What does gold do when the central banks disagree with each other? Open the terminal — this chart is live right now.",
         fact: "The technology changed, the decades changed. Interest rates, as a gravity acting on everything at once — never.",
-        legend: null, source: "Federal Reserve H.15 · ECB · Bank of Japan (as of 07/23/2026)", illustration: "today_ch2",
+        legend: null, source: "Federal Reserve · ECB · Bank of Japan (via FRED)", illustration: "today_ch2",
         scene: "ch2_now", bridge: true
       }
     ]
@@ -511,25 +511,79 @@
       + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#8A8275">Nikkei −12.4% за день, 05.08.2024</text></svg>';
     },
     "today_ch2": function(){
-      // Реальные значения из web/data/edu_capsules/cb_rates_now.json (обновлено 23.07.2026):
-      // Fed 3.63% (as_of 21.07.2026, снижение с пика 5.25-5.50% цикла 2022-23 -- ст.11 этой же хроники);
-      // ECB 2.25% (as_of 11.06.2026, "first hike in 3 years"); BoJ 1.00% (as_of 16.06.2026, "highest since 1995").
-      // Направления стрелок выведены из этих же реальных данных, не нарисованы на глаз.
-      return '<svg class="h-art" viewBox="0 0 720 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Три центробанка, сегодня: ФРС 3.63% вниз, ЕЦБ 2.25% вверх, BoJ 1.00% вверх">'
-      + hatchBg() + '<rect y="300" width="720" height="100" fill="url(#hatch2)"/>'
-      + '<circle cx="360" cy="190" r="14" fill="#C9A227" stroke="#2B2B33" stroke-width="2"/>'
-      + '<g stroke="#2E7D5B" stroke-width="4" fill="none"><path d="M360 190 L200 110"/><path d="M200 110 l24 6 M200 110 l-2 -26"/></g>'
-      + '<g stroke="#8a2f2f" stroke-width="4" fill="none"><path d="M360 190 L490 250"/><path d="M490 250 l-26 -2 M490 250 l2 -26"/></g>'
-      + '<g stroke="#6d6350" stroke-width="4" fill="none"><path d="M360 190 L560 130"/><path d="M560 130 l-24 8 M560 130 l-10 -24"/></g>'
-      + '<text x="200" y="94" text-anchor="middle" font-family="monospace" font-size="13" font-weight="700" fill="#2E7D5B">BoJ 1.00% ↑</text>'
-      + '<text x="200" y="110" text-anchor="middle" font-family="monospace" font-size="9" fill="#8A8275">макс. с 1995 · 16.06.2026</text>'
-      + '<text x="560" y="112" text-anchor="middle" font-family="monospace" font-size="13" font-weight="700" fill="#6d6350">ЕЦБ 2.25% ↑</text>'
-      + '<text x="560" y="128" text-anchor="middle" font-family="monospace" font-size="9" fill="#8A8275">первое повышение за 3 года · 11.06.2026</text>'
-      + '<text x="490" y="268" text-anchor="middle" font-family="monospace" font-size="13" font-weight="700" fill="#8a2f2f">ФРС 3.63% ↓</text>'
-      + '<text x="490" y="284" text-anchor="middle" font-family="monospace" font-size="9" fill="#8A8275">пик цикла 5.25-5.50% (2023) · 21.07.2026</text>'
-      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#8A8275">три ЦБ, три направления, июль 2026</text></svg>';
+      /* 🔴 ЕДИНСТВЕННАЯ СТАНЦИЯ, КОТОРАЯ УСТАРЕВАЕТ САМА. Здесь стояли три
+         ставки строковыми литералами, а комментарий над ними ссылался на
+         web/data/edu_capsules/cb_rates_now.json «обновлено 23.07.2026» —
+         файла с таким именем в проекте не было вовсе. Числа были верны в
+         день, когда их вписали; беда в том, что перестать быть верными они
+         могли только молча. Теперь файл существует и его раз в сутки
+         пишет cb_rates_job.py из FRED, а рисует станцию СТАВКИ() ниже.
+         Если данных нет — станция говорит об этом, а не показывает
+         вчерашние числа с уверенной датой. */
+      return СТАВКИ();
     }
   };
+
+  /* ── Станция «Сейчас»: три ставки из cb_rates_now.json ────────────────── */
+  var СТАВКИ_ДАННЫЕ = null;
+  fetch('/data/edu_capsules/cb_rates_now.json', {cache:'no-cache'})
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(j){
+      if (!j || !j['банки']) return;
+      СТАВКИ_ДАННЫЕ = j;
+      window.dispatchEvent(new Event('chrono2-frames'));  // перерисовать станцию
+    })
+    .catch(function(){ /* сеть отвалилась — станция покажет «нет данных» */ });
+
+  var МЕСЯЦЫ = ['январь','февраль','март','апрель','май','июнь',
+                'июль','август','сентябрь','октябрь','ноябрь','декабрь'];
+  function _месяц(строка){
+    if (!строка) return '';
+    var ч = строка.split('-');
+    return ч.length >= 2 ? МЕСЯЦЫ[+ч[1] - 1] + ' ' + ч[0] : строка;
+  }
+
+  function _дата(строка){
+    if (!строка) return '';
+    var ч = строка.split('-');
+    return ч.length === 3 ? ч[2] + '.' + ч[1] + '.' + ч[0] : строка;
+  }
+
+  function СТАВКИ(){
+    var шапка = '<svg class="h-art" viewBox="0 0 720 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ставки трёх центробанков">'
+      + hatchBg() + '<rect y="300" width="720" height="100" fill="url(#hatch2)"/>';
+    if (!СТАВКИ_ДАННЫЕ){
+      // Честное «не знаю» вместо трёх чисел неизвестной свежести.
+      return шапка
+        + '<text x="360" y="185" text-anchor="middle" font-family="Georgia,serif" font-size="19" fill="#6d6350">Ставки центробанков</text>'
+        + '<text x="360" y="215" text-anchor="middle" font-family="monospace" font-size="12" fill="#8A8275">данные не загрузились</text>'
+        + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="11" fill="#8A8275">источник: FRED · cb_rates_job.py</text></svg>';
+    }
+    var б = СТАВКИ_ДАННЫЕ['банки'];
+    // Три луча из одной точки: цвет по направлению последнего шага,
+    // а не по тому, кто где стоял на картинке в июле.
+    var места = [
+      {x:200, y:110, tx:200, ty:94},
+      {x:560, y:130, tx:560, ty:112},
+      {x:490, y:250, tx:490, ty:268}
+    ];
+    var цвета = {'↑':'#2E7D5B', '↓':'#8a2f2f', '=':'#6d6350'};
+    var тело = '<circle cx="360" cy="190" r="14" fill="#C9A227" stroke="#2B2B33" stroke-width="2"/>';
+    for (var i = 0; i < б.length && i < 3; i++){
+      var м = места[i], з = б[i], ц = цвета[з['направление']] || '#6d6350';
+      тело += '<g stroke="' + ц + '" stroke-width="4" fill="none"><path d="M360 190 L' + м.x + ' ' + м.y + '"/></g>'
+        + '<text x="' + м.tx + '" y="' + м.ty + '" text-anchor="middle" font-family="monospace" font-size="13" font-weight="700" fill="' + ц + '">'
+        + з['банк'] + ' ' + з['подпись_ставки'] + ' ' + з['направление'] + '</text>';
+      // Вторая строка: чем именно является это число и когда оно такое.
+      var низ = з['это_факт_а_не_цель']
+        ? 'фактическая овернайт, ' + _месяц(з['месяц_наблюдения'])
+        : 'изменена ' + _дата(з['изменена']);
+      тело += '<text x="' + м.tx + '" y="' + (м.ty + 16) + '" text-anchor="middle" font-family="monospace" font-size="9" fill="#8A8275">' + низ + '</text>';
+    }
+    var собрано = (СТАВКИ_ДАННЫЕ['собрано'] || '').slice(0, 10);
+    return шапка + тело
+      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="11" fill="#8A8275">FRED, данные на ' + _дата(собрано) + '</text></svg>';
+  }
 
   function art2HTML(key){
     // 🔴 ПОРЯДОК. Сначала архивный снимок, потом ряд данных, потом рисунок —

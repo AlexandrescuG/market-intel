@@ -923,6 +923,33 @@ function FedSimulator() {
   const [preset, setPreset] = useState(null); // null | "2020" | "2023" | "today"
   const [todayLive, setTodayLive] = useState(null);
 
+  // Ставка ФРС для пресета «сегодня» — из того же файла, что и станция
+  // «Сейчас» (cb_rates_job.py, FRED). Раньше здесь стояло число 3.63,
+  // вписанное руками в двух местах: оно было верным в июле и осталось бы
+  // на экране после любого следующего заседания.
+  const [fedRate, setFedRate] = useState(null);
+  useEffect(() => {
+    fetch("/data/edu_capsules/cb_rates_now.json", {cache: "no-cache"})
+      .then(r => r.ok ? r.json() : null)
+      .then(j => {
+        const фрс = j && j["банки"] && j["банки"].find(b => b["код"] === "DFEDTARU");
+        if (!фрс) return;
+        // У ФРС не ставка, а диапазон, и ползунок ходит шагом 0.25 — шагом
+        // самой ФРС. Середина диапазона (3.625) на эту сетку не ложится:
+        // замер показал, что браузер молча округлял её до 3.75, то есть на
+        // экране появлялось третье число, которого нет ни в файле, ни у
+        // ФРС. Берём верхнюю границу — именно её называют «ставкой ФРС» в
+        // заголовках, — а полный диапазон показываем подписью.
+        const д = фрс["диапазон"];
+        setFedRate({
+          значение: Array.isArray(д) ? д[1] : фрс["ставка"],
+          подпись: фрс["подпись_ставки"],
+          изменена: фрс["изменена"]
+        });
+      })
+      .catch(() => {});
+  }, []);
+
   useEffect(() => {
     fetch("/api/quotes").then(r => r.json()).then(data => {
       const rows = data && Array.isArray(data.quotes) ? data.quotes : [];
@@ -938,13 +965,15 @@ function FedSimulator() {
     setPreset(key);
     if (key === "2020") setRate(FED_PRESETS["2020"].rate);
     else if (key === "2023") setRate(FED_PRESETS["2023"].rate);
-    else if (key === "today") setRate(3.63);
+    else if (key === "today" && fedRate) setRate(fedRate.значение);
   };
   const clearPreset = (val) => { setPreset(null); setRate(val); };
 
   const snapshot = preset === "2020" ? FED_PRESETS["2020"]
     : preset === "2023" ? FED_PRESETS["2023"]
-    : preset === "today" && todayLive ? { rate: 3.63, date: S.fedPresetToday, ...todayLive }
+    : preset === "today" && todayLive && fedRate
+      ? { rate: fedRate.значение, rateLabel: fedRate.подпись,
+          date: S.fedPresetToday, ...todayLive }
     : null;
 
   // Correlations (simplified model)
