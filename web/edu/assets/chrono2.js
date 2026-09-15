@@ -18,7 +18,7 @@
         title: "Один человек вместо центробанка",
         body: "Паника 1907 года: банки падают домино, биржа теряет половину стоимости, а центрального банка в США просто нет. Частный банкир Дж. П. Морган запирает крупнейших финансистов Нью-Йорка в своей библиотеке и не выпускает, пока те не скидываются на спасение системы. Работает. Но у всех остаётся один вопрос: а если в следующий раз Моргана не будет?",
         fact: "Заперты они были в буквальном смысле — Морган забрал ключ от двери библиотеки.",
-        legend: null, source: "SPEC_edu_level2_central_banks.md", illustration: "1907_morgan"
+        legend: null, source: "Federal Reserve History · Panic of 1907", illustration: "1907_morgan"
       },
       {
         id: "1913", year: "1913", place: "Вашингтон",
@@ -139,7 +139,7 @@
         title: "Un singur om în locul unei bănci centrale",
         body: "Panica din 1907: băncile cad ca dominourile, bursa pierde jumătate din valoare, iar în SUA pur și simplu nu există bancă centrală. Bancherul privat J.P. Morgan îi încuie pe cei mai mari financiari din New York în biblioteca sa și nu-i lasă să plece până nu strâng bani pentru a salva sistemul. Funcționează. Dar tuturor le rămâne o singură întrebare: dacă data viitoare nu va exista un Morgan?",
         fact: "Au fost încuiați la propriu — Morgan a luat cheia ușii bibliotecii.",
-        legend: null, source: "SPEC_edu_level2_central_banks.md", illustration: "1907_morgan"
+        legend: null, source: "Federal Reserve History · Panic of 1907", illustration: "1907_morgan"
       },
       {
         id: "1913", year: "1913", place: "Washington",
@@ -260,7 +260,7 @@
         title: "One man instead of a central bank",
         body: "The Panic of 1907: banks fall like dominoes, the market loses half its value, and the US simply has no central bank. Private banker J.P. Morgan locks New York's biggest financiers in his library and won't let them out until they pool money to save the system. It works. But everyone's left with one question: what if next time there's no Morgan?",
         fact: "They were locked in literally — Morgan took the key to the library door.",
-        legend: null, source: "SPEC_edu_level2_central_banks.md", illustration: "1907_morgan"
+        legend: null, source: "Federal Reserve History · Panic of 1907", illustration: "1907_morgan"
       },
       {
         id: "1913", year: "1913", place: "Washington",

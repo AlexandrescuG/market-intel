@@ -771,13 +771,13 @@
     // 15.09.2026, лицензии и ссылки — в history/manifest.json. Файлы качает
     // владелец; пока их нет, картинка не загрузится и станция сама вернётся
     // к ряду данных — см. ЗАПАСНОЙ ПУТЬ ниже.
-    "1907_morgan":    { webp:"/edu/assets/history/1907_morgan.webp",    jpg:"/edu/assets/history/1907_morgan_web.jpg",    w:900, h:1119,
+    "1907_morgan":    { webp:"/edu/assets/history/1907_morgan.webp",    jpg:"/edu/assets/history/1907_morgan_web.jpg",    w:500, h:622,
       alt:"Толпа на Уолл-стрит во время банковской паники, октябрь 1907" },
-    "1913_fed":       { webp:"/edu/assets/history/1913_fed.webp",       jpg:"/edu/assets/history/1913_fed_web.jpg",       w:900, h:1295,
+    "1913_fed":       { webp:"/edu/assets/history/1913_fed.webp",       jpg:"/edu/assets/history/1913_fed_web.jpg",       w:500, h:720,
       alt:"Газетная полоса: Вильсон подписывает закон о Федеральном резерве, 24 декабря 1913" },
     "1944_bretton":   { webp:"/edu/assets/history/1944_bretton.webp",   jpg:"/edu/assets/history/1944_bretton_web.jpg",   w:706, h:572,
       alt:"Моргентау открывает Бреттон-Вудскую конференцию, июль 1944" },
-    "1971_nixon":     { webp:"/edu/assets/history/1971_nixon.webp",     jpg:"/edu/assets/history/1971_nixon_web.jpg",     w:900, h:1127,
+    "1971_nixon":     { webp:"/edu/assets/history/1971_nixon.webp",     jpg:"/edu/assets/history/1971_nixon_web.jpg",     w:500, h:626,
       alt:"Ричард Никсон, официальный портрет, 8 июля 1971" }
   };
 
