@@ -71,6 +71,7 @@ sbf-brief-email.timer        timer   90000    # 06:20, брифинг на по�
 sbf-focus-batch.timer        timer   180000   # 05:50, батч Focus Engine
 sbf-news-geo.timer           timer   900      # каждые 15 мин: где на карте место новости; питает /api/geo/feed для карты и глобуса sbfconsult.com
 sbf-cb-rates.timer           timer   90000    # 13:40 UTC, ставки ФРС/ЕЦБ/BoJ из FRED в cb_rates_now.json; станция «Сейчас» главы 2 без него скажет «данные не загрузились», а не покажет старое
+sbf-fed-history.timer        timer   2592000  # 3-го числа, медианы активов по корзинам ставки ФРС в fed_history.json; без него симулятор главы 2 покажет «такой ставки не было» вместо чисел
 # 12.09.2026: переехало из crontab. Cron перезагрузку переживает, но
 # ~/sbf-start-all.sh про него не знает и healthcheck тоже: единая точка
 # запуска поднимала сайт sbfconsult.com и не поднимала его данные, и «сервер

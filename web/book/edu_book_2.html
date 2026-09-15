@@ -107,7 +107,8 @@ const STRINGS = {
     fedAssetGoldLabel: "Gold (XAU/USD)", fedAssetGoldDesc: "Тройская унция",
     fedAssetBTCLabel: "Bitcoin", fedAssetBTCDesc: "Крипто = риск-актив",
     fedAssetBondLabel: "US 10Y Bond", fedAssetBondDesc: "Доходность гособлигаций",
-    fedFootnote: "* Упрощённая модель корреляций на основе исторических данных 1990–2024",
+    fedNoData: "В доступной истории (с 2016 года) такой ставки не было — показывать нечего.",
+    fedFootnote: "* Не прогноз и не модель: медианы месячных значений в те месяцы, когда ставка ФРС стояла на этом уровне. Источники — FRED и Yahoo Finance, история с 2016 года. Совпадение во времени ещё не значит причину.",
     fedPresetsLabel: "Реальные эпизоды:",
     fedPresetModel: "Модель (слайдер)",
     fedPreset2020: "Апрель 2020 — экстренный ноль",
@@ -264,7 +265,8 @@ const STRINGS = {
     fedAssetGoldLabel: "Gold (XAU/USD)", fedAssetGoldDesc: "Troy ounce",
     fedAssetBTCLabel: "Bitcoin", fedAssetBTCDesc: "Crypto = risk asset",
     fedAssetBondLabel: "US 10Y Bond", fedAssetBondDesc: "Government bond yield",
-    fedFootnote: "* Simplified correlation model based on historical data 1990–2024",
+    fedNoData: "In the available history (since 2016) this rate never occurred — there is nothing to show.",
+    fedFootnote: "* Not a forecast and not a model: medians of monthly values across the months when the Fed funds rate actually stood at this level. Sources — FRED and Yahoo Finance, history since 2016. Coinciding in time is not the same as causing.",
     fedPresetsLabel: "Real episodes:",
     fedPresetModel: "Model (slider)",
     fedPreset2020: "April 2020 — emergency zero",
@@ -421,7 +423,8 @@ const STRINGS = {
     fedAssetGoldLabel: "Gold (XAU/USD)", fedAssetGoldDesc: "Uncie troy",
     fedAssetBTCLabel: "Bitcoin", fedAssetBTCDesc: "Cripto = activ de risc",
     fedAssetBondLabel: "US 10Y Bond", fedAssetBondDesc: "Randamentul obligațiunilor de stat",
-    fedFootnote: "* Model simplificat de corelații bazat pe date istorice 1990–2024",
+    fedNoData: "În istoricul disponibil (din 2016) această dobândă nu a existat — nu avem ce arăta.",
+    fedFootnote: "* Nu e o prognoză și nici un model: mediane ale valorilor lunare din lunile în care dobânda Fed a stat efectiv la acest nivel. Surse — FRED și Yahoo Finance, istoric din 2016. Coincidența în timp nu înseamnă cauză.",
     fedPresetsLabel: "Episoade reale:",
     fedPresetModel: "Model (cursor)",
     fedPreset2020: "Aprilie 2020 — zero de urgență",
@@ -976,13 +979,43 @@ function FedSimulator() {
           date: S.fedPresetToday, ...todayLive }
     : null;
 
-  // Correlations (simplified model)
-  // Rate ↑ → DXY ↑, S&P ↓, Gold ↓, BTC ↓, Bonds ↑
-  const dxy   = useMemo(() => +(96 + rate * 1.55).toFixed(1), [rate]);
-  const sp500 = useMemo(() => Math.round(5800 - rate * 160), [rate]);
-  const gold  = useMemo(() => Math.round(2450 - rate * 28), [rate]);
-  const btc   = useMemo(() => Math.round(68000 - rate * 4200), [rate]);
-  const bonds = useMemo(() => +(3.5 + rate * 0.45).toFixed(2), [rate]);
+  /* 🔴 НЕ МОДЕЛЬ, А НАБЛЮДЕНИЯ. Здесь стояли пять формул вида
+     sp500 = 5800 - rate * 160, а подпись под ними сообщала «упрощённая
+     модель корреляций на основе исторических данных 1990–2024». Никакой
+     регрессии за этими коэффициентами не было: ни файла, ни расчёта.
+     Прямую линию называли выводом из тридцати лет истории — и это на
+     том же экране, где пресеты «2020» и «2023» честно помечены как
+     реальные котировки на дату.
+
+     Теперь берутся медианы месяцев, когда ставка ФРС действительно
+     стояла на выбранном уровне (tools/build_fed_history.py, FRED +
+     Yahoo Finance, история с 2016). Данные сразу показали, что прежняя
+     модель была неверна не только по происхождению, но и по сути: при
+     3.5% S&P стоял выше (7421), чем при 5.5% (5056) — монотонной связи
+     «ставка вверх → акции вниз», которую рисовала формула, в наблюдениях
+     нет. */
+  const [история, setИстория] = useState(null);
+  useEffect(() => {
+    fetch("/data/edu_capsules/fed_history.json", {cache: "no-cache"})
+      .then(r => r.ok ? r.json() : null)
+      .then(j => { if (j && j["корзины"]) setИстория(j); })
+      .catch(() => {});
+  }, []);
+
+  // Ближайшая корзина к положению ползунка и соседняя снизу — для стрелки.
+  const срез = useMemo(() => {
+    if (!история) return null;
+    const к = история["корзины"];
+    let лучшая = null, разница = Infinity;
+    for (const з of к) {
+      const d = Math.abs(з["ставка"] - rate);
+      if (d < разница) { разница = d; лучшая = з; }
+    }
+    // Дальше 0.75% от ближайшего наблюдения — это уже не «так бывало».
+    if (!лучшая || разница > 0.75) return null;
+    const ниже = к.filter(з => з["ставка"] < лучшая["ставка"]).pop() || null;
+    return {текущий: лучшая, ниже};
+  }, [история, rate]);
 
   const riskMode = rate < 3.5;
   const neutral  = rate >= 3.5 && rate <= 5.5;
@@ -995,12 +1028,25 @@ function FedSimulator() {
     ? S.fedDescRiskOff
     : S.fedDescNeutral;
 
+  // Стрелка — свойство данных, а не правило из учебника: сравниваем медиану
+  // этой корзины с медианой корзины на ступень ниже по ставке.
+  const стрелка = (ключ) => {
+    if (!срез || !срез.ниже) return {знак:"→", цвет:C.inkMid};
+    const a = срез.текущий[ключ], b = срез.ниже[ключ];
+    if (a === b) return {знак:"→", цвет:C.inkMid};
+    return a > b ? {знак:"↑", цвет:C.green} : {знак:"↓", цвет:C.red};
+  };
+  const карточка = (ключ, label, формат, desc) => {
+    const с = стрелка(ключ);
+    return { label, val: срез ? формат(срез.текущий[ключ]) : "—",
+             dir: с.знак, color: с.цвет, desc };
+  };
   const assets = [
-    { label:S.fedAssetDXYLabel,  val:`${dxy}`, dir: rate>5.5 ? "↑" : rate<3.5 ? "↓" : "→", color: rate>5.5 ? C.green : rate<3.5 ? C.red : C.inkMid, desc:S.fedAssetDXYDesc },
-    { label:S.fedAssetSPXLabel,  val:`${sp500.toLocaleString()}`, dir: rate>5.5 ? "↓" : rate<3.5 ? "↑" : "→", color: rate>5.5 ? C.red : rate<3.5 ? C.green : C.inkMid, desc:S.fedAssetSPXDesc },
-    { label:S.fedAssetGoldLabel, val:`$${gold.toLocaleString()}`, dir: rate>5.5 ? "↓" : rate<3.5 ? "↑" : "→", color: rate>5.5 ? C.red : rate<3.5 ? C.green : C.inkMid, desc:S.fedAssetGoldDesc },
-    { label:S.fedAssetBTCLabel,  val:`$${btc.toLocaleString()}`, dir: rate>5.5 ? "↓" : rate<3.5 ? "↑" : "→", color: rate>5.5 ? C.red : rate<3.5 ? C.green : C.inkMid, desc:S.fedAssetBTCDesc },
-    { label:S.fedAssetBondLabel, val:`${bonds}%`, dir: rate>5.5 ? "↑" : "↓", color: rate>5.5 ? C.green : C.red, desc:S.fedAssetBondDesc },
+    карточка("dxy",   S.fedAssetDXYLabel,  v => `${v}`,                     S.fedAssetDXYDesc),
+    карточка("spx",   S.fedAssetSPXLabel,  v => v.toLocaleString(),         S.fedAssetSPXDesc),
+    карточка("gold",  S.fedAssetGoldLabel, v => `$${v.toLocaleString()}`,   S.fedAssetGoldDesc),
+    карточка("btc",   S.fedAssetBTCLabel,  v => `$${v.toLocaleString()}`,   S.fedAssetBTCDesc),
+    карточка("bonds", S.fedAssetBondLabel, v => `${v}%`,                    S.fedAssetBondDesc),
   ];
 
   // Visual scale: rate 0..10 maps to position
@@ -1103,7 +1149,20 @@ function FedSimulator() {
         </React.Fragment>
       )}
 
-      <p style={{fontSize:11,color:"rgba(255,255,255,0.18)",marginTop:16,textAlign:"center"}}>
+      {срез && (
+        <p style={{fontSize:11.5,color:"rgba(255,255,255,0.55)",marginTop:16,
+                   textAlign:"center",fontFamily:"monospace"}}>
+          {`ставка ${срез.текущий["ставка"].toFixed(2)}% — ${срез.текущий["месяцев"]} мес., ${срез.текущий["от"]}…${срез.текущий["до"]}`}
+        </p>
+      )}
+      {!срез && (
+        // Честное «не наблюдалось» вместо числа, посчитанного по формуле.
+        <p style={{fontSize:11.5,color:"rgba(255,255,255,0.55)",marginTop:16,
+                   textAlign:"center",fontFamily:"monospace"}}>
+          {S.fedNoData}
+        </p>
+      )}
+      <p style={{fontSize:11,color:"rgba(255,255,255,0.35)",marginTop:10,textAlign:"center",lineHeight:1.5}}>
         {S.fedFootnote}
       </p>
     </div>
