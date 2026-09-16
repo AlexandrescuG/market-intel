@@ -234,7 +234,8 @@ def _round_volume(volume: float, symbol_info) -> float:
     return min(v, vmax)
 
 
-def position_volume(signal: Signal, equity: float, symbol_info) -> tuple[float, float]:
+def position_volume(signal: Signal, equity: float, symbol_info,
+                    risk_share: float | None = None) -> tuple[float, float]:
     """Объём под фиксированную долю капитала. Возвращает (volume, risk_money).
 
     🔴 Заменяет фиксированный `volume_min` старого контура. Там стоп в 2 ATR
@@ -249,7 +250,9 @@ def position_volume(signal: Signal, equity: float, symbol_info) -> tuple[float, 
     if dist <= 0:
         raise RiskRefusal("bad_geometry", "нулевое расстояние до стопа")
     per_unit = money_per_price_unit(symbol_info)
-    risk_money = equity * RISK_PER_TRADE
+    # Доля риска приходит из профиля счёта: у демо 0.5%, у реального 1%.
+    # RISK_PER_TRADE остаётся значением по умолчанию для вызовов без профиля.
+    risk_money = equity * (RISK_PER_TRADE if risk_share is None else risk_share)
     raw = risk_money / (dist * per_unit)
     vol = _round_volume(raw, symbol_info)
     if vol <= 0:
@@ -515,12 +518,16 @@ def live_risk(direction: str, entry: float | None, stop: float | None,
     return max(0.0, dist * risk_per_price)
 
 
-def open_risk_rows(con: sqlite3.Connection) -> list[tuple]:
-    """Открытые живые позиции с уже посчитанным живым риском."""
+def open_risk_rows(con: sqlite3.Connection, account: str = "demo") -> list[tuple]:
+    """Открытые живые позиции ЭТОГО СЧЁТА с уже посчитанным живым риском.
+
+    🔴 Фильтр по счёту обязателен: без него позиции демо занимали бы лимиты
+    реального счёта и наоборот, а лимиты — это то немногое, что у нас точно
+    работает."""
     rows = con.execute(
         "SELECT symbol, direction, strategy, risk_money, entry_price, stop, "
         "risk_per_price, id FROM engine_trades "
-        "WHERE status='open' AND mode='live'").fetchall()
+        "WHERE status='open' AND mode='live' AND account=?", (account,)).fetchall()
     return [(r[0], r[1], r[2],
              live_risk(r[1], r[4], r[5], r[6], r[3]), r[7]) for r in rows]
 
@@ -628,7 +635,8 @@ def usd_exposure(rows, add: tuple | None = None) -> float:
     return abs(leg_exposure(rows, add).get("USD", 0.0))
 
 
-def crossing_trade(con: sqlite3.Connection, symbol: str, is_long: bool) -> int | None:
+def crossing_trade(con: sqlite3.Connection, symbol: str, is_long: bool,
+                   account: str = "demo") -> int | None:
     """id открытой ВСТРЕЧНОЙ позиции по тому же инструменту, если она есть.
 
     Раньше здесь стоял запрет (`opposite_open`): встречный вход отклонялся,
@@ -647,13 +655,13 @@ def crossing_trade(con: sqlite3.Connection, symbol: str, is_long: bool) -> int |
     выборку можно разделить задним числом."""
     row = con.execute(
         "SELECT id FROM engine_trades WHERE status='open' AND mode='live' "
-        "AND symbol=? AND direction=? ORDER BY id DESC LIMIT 1",
-        (symbol, "short" if is_long else "long")).fetchone()
+        "AND account=? AND symbol=? AND direction=? ORDER BY id DESC LIMIT 1",
+        (account, symbol, "short" if is_long else "long")).fetchone()
     return int(row[0]) if row else None
 
 
 def portfolio_gate(con: sqlite3.Connection, signal: Signal, equity: float,
-                   risk_money: float) -> None:
+                   risk_money: float, account: str = "demo") -> None:
     """Лимиты кучности и суммарного риска.
 
     🔴 Причина существования — 26-27.08: старый потолок «10 наших позиций»
@@ -661,7 +669,7 @@ def portfolio_gate(con: sqlite3.Connection, signal: Signal, equity: float,
     развернувшийся рынок вынес их одним движением (шесть стопов за 13 минут,
     три за одну минуту). Десять одинаковых ставок — это одна ставка размером
     в десять, и потолок обязан это понимать."""
-    rows = open_risk_rows(con)
+    rows = open_risk_rows(con, account)
     total = len(rows)
     if total >= MAX_OPEN_TOTAL:
         raise RiskRefusal("cap_total", f"открыто {total} при потолке {MAX_OPEN_TOTAL}")

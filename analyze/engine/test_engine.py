@@ -133,6 +133,83 @@ class Maintenance(unittest.TestCase):
         self.assertEqual(engine_run.dirty_engine_files(), expect)
 
 
+class TwoAccounts(unittest.TestCase):
+    """🔴 16.09. Второй счёт (реальный Daoti) торгует тем же движком из того
+    же журнала. Всё, что читает открытые позиции, обязано видеть ТОЛЬКО свой
+    счёт — иначе позиции демо занимают лимиты реальных денег и наоборот."""
+
+    def setUp(self):
+        self.con = sqlite3.connect(":memory:")
+        self.con.executescript(ledger.SCHEMA)
+
+    def _open(self, account, symbol="EURUSD", direction=LONG, rm=50.0, strategy="s"):
+        self.con.execute(
+            "INSERT INTO engine_trades (account, strategy, symbol, direction, mode, "
+            "status, risk_money) VALUES (?,?,?,?,'live','open',?)",
+            (account, strategy, symbol, direction, rm))
+        self.con.commit()
+
+    def test_позиции_чужого_счёта_не_видны(self):
+        equity = 10_000.0
+        # Демо забивает весь портфельный лимит.
+        for i in range(int(risk.MAX_PORTFOLIO_RISK / risk.RISK_PER_TRADE)):
+            self._open("demo", symbol=Portfolio._lonely(i),
+                       rm=equity * risk.RISK_PER_TRADE, strategy=f"st{i}")
+        self.assertEqual(len(risk.open_risk_rows(self.con, "demo")),
+                         int(risk.MAX_PORTFOLIO_RISK / risk.RISK_PER_TRADE))
+        self.assertEqual(risk.open_risk_rows(self.con, "real"), [])
+        # Реальный счёт при этом свободен и вход проходит.
+        risk.portfolio_gate(self.con, sig(symbol="EURUSD", strategy="новая"),
+                            equity, equity * risk.RISK_PER_TRADE, "real")
+
+    def test_дедуп_у_каждого_счёта_свой(self):
+        """Один и тот же сигнал обязан торговаться на обоих счетах: это два
+        независимых опыта, а не один в двух копиях."""
+        from analyze.engine.contracts import Decision
+        d = Decision(sig(dedup_key="общий"), True, "принят", volume=0.1, risk_money=50.0)
+        sid = ledger.record_decision(self.con, d, "demo")
+        ledger.open_trade(self.con, sid, d, mode="live", broker_symbol="EURUSD",
+                          req_price=1.1, status="open", account="demo")
+        self.assertTrue(ledger.already_taken(self.con, "общий", "demo"))
+        self.assertFalse(ledger.already_taken(self.con, "общий", "real"))
+
+    def test_стоп_кран_не_перекидывается_на_другой_счёт(self):
+        ledger.ensure_strategy(self.con, "s", ST_LIVE, "demo")
+        ledger.ensure_strategy(self.con, "s", ST_LIVE, "real")
+        ledger.halt(self.con, "s", "просадка", 20.0, "demo")
+        self.assertEqual(ledger.ensure_strategy(self.con, "s", ST_LIVE, "demo")["status"],
+                         ST_HALTED)
+        self.assertEqual(ledger.ensure_strategy(self.con, "s", ST_LIVE, "real")["status"],
+                         ST_LIVE, "остановка демо не смеет глушить реальный счёт")
+
+    def test_кривые_R_не_складываются(self):
+        ledger.apply_result(self.con, "s", 1.5, "demo")
+        ledger.apply_result(self.con, "s", -0.5, "real")
+        self.assertAlmostEqual(
+            ledger.ensure_strategy(self.con, "s", ST_LIVE, "demo")["cum_r"], 1.5)
+        self.assertAlmostEqual(
+            ledger.ensure_strategy(self.con, "s", ST_LIVE, "real")["cum_r"], -0.5)
+
+    def test_реальный_счёт_без_номера_торговать_не_может(self):
+        """Незнание обязано запрещать: пока номер счёта в профиле не заполнен,
+        движок не должен слать ордера на реальные деньги вслепую."""
+        from analyze.engine import accounts
+        real = accounts.get("real")
+        if real.login:
+            self.skipTest("номер уже заполнен — проверка пройдена в своё время")
+        fake = SimpleNamespace(login=999, trade_mode=0)
+        mt5 = SimpleNamespace(account_info=lambda: fake,
+                              terminal_info=lambda: SimpleNamespace(trade_allowed=True))
+        with self.assertRaises(Exception) as c:
+            execution_preflight(mt5, real)
+        self.assertIn("real_login_unset", str(getattr(c.exception, "status", "")))
+
+
+def execution_preflight(mt5, acc):
+    from analyze.engine import execution
+    return execution.preflight_account(mt5, acc)
+
+
 class StopClamp(unittest.TestCase):
     """🔴 14.09. Барьер брокера проверялся только на ВХОДЕ. Сопровождение
     просило стоп ближе минимальной дистанции, получало «Invalid stops» и

@@ -27,6 +27,7 @@ BOT_DB = Path("/mnt/sbfdata/sbf-platform/SBFAcademy_bot/bot.db")
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS engine_signals (
   id INTEGER PRIMARY KEY,
+  account TEXT NOT NULL DEFAULT 'demo',   -- какой счёт принимал это решение
   ts INTEGER NOT NULL,
   strategy TEXT NOT NULL,
   symbol TEXT NOT NULL,
@@ -46,6 +47,7 @@ CREATE INDEX IF NOT EXISTS idx_eng_sig_strat ON engine_signals(strategy, ts);
 
 CREATE TABLE IF NOT EXISTS engine_trades (
   id INTEGER PRIMARY KEY,
+  account TEXT NOT NULL DEFAULT 'demo',   -- на каком счёте стоит позиция
   signal_id INTEGER,
   strategy TEXT NOT NULL,
   symbol TEXT NOT NULL,
@@ -74,14 +76,20 @@ CREATE INDEX IF NOT EXISTS idx_eng_tr_open ON engine_trades(status, ticket);
 CREATE INDEX IF NOT EXISTS idx_eng_tr_strat ON engine_trades(strategy, status);
 
 CREATE TABLE IF NOT EXISTS engine_strategy_state (
-  strategy TEXT PRIMARY KEY,
+  -- 🔴 Ключ СОСТАВНОЙ: у каждого счёта своя кривая и свой стоп-кран. Общее
+  -- состояние означало бы, что остановка на демо глушит стратегию и на
+  -- реальных деньгах, а кривые R двух счетов складываются в одну.
+  account TEXT NOT NULL DEFAULT 'demo',
+  strategy TEXT NOT NULL,
   status TEXT NOT NULL,             -- live | shadow | halted
   cum_r REAL DEFAULT 0,             -- накопленный результат в R
   peak_r REAL DEFAULT 0,            -- максимум cum_r за всю историю
   n_closed INTEGER DEFAULT 0,
   halted_ts INTEGER,
   halt_reason TEXT,
-  updated_ts INTEGER
+  halt_threshold REAL,
+  updated_ts INTEGER,
+  PRIMARY KEY (account, strategy)
 );
 """
 
@@ -105,6 +113,46 @@ def _migrate(con: sqlite3.Connection) -> None:
     CREATE TABLE IF NOT EXISTS молча пропускает существующую таблицу со
     старым набором колонок — схема в коде и схема в базе расходятся, а
     ошибки нет до первого запроса к новой колонке."""
+    for table in ("engine_trades", "engine_signals"):
+        cols = {r[1] for r in con.execute(f"PRAGMA table_info({table})")}
+        if "account" not in cols:
+            # DEFAULT 'demo': всё, что было до 16.09, торговалось на демо, и
+            # приписывать старым строкам «неизвестный счёт» было бы неправдой.
+            con.execute(f"ALTER TABLE {table} ADD COLUMN account TEXT "
+                        f"NOT NULL DEFAULT 'demo'")
+
+    # 🔴 Состояние стратегий — составной ключ (счёт, стратегия).
+    #
+    # Было PRIMARY KEY (strategy). С двумя счетами это значит: стоп-кран,
+    # сработавший на демо, останавливает стратегию и на реальном счёте, а
+    # кривые R двух счетов складываются в одну. То есть сравнение счетов,
+    # ради которого второй счёт и заводится, становится невозможным.
+    #
+    # SQLite не меняет первичный ключ на месте — только перестройкой таблицы.
+    # Делать при остановленном движке: между DROP и переименованием журнал
+    # состояния не существует.
+    st_cols = {r[1] for r in con.execute("PRAGMA table_info(engine_strategy_state)")}
+    if st_cols and "account" not in st_cols:
+        con.executescript("""
+            CREATE TABLE engine_strategy_state_new (
+              account TEXT NOT NULL DEFAULT 'demo',
+              strategy TEXT NOT NULL,
+              status TEXT NOT NULL,
+              cum_r REAL DEFAULT 0, peak_r REAL DEFAULT 0,
+              n_closed INTEGER DEFAULT 0,
+              halted_ts INTEGER, halt_reason TEXT, halt_threshold REAL,
+              updated_ts INTEGER,
+              PRIMARY KEY (account, strategy)
+            );
+        """)
+        old = ", ".join(sorted(st_cols))
+        con.execute(f"INSERT INTO engine_strategy_state_new (account, {old}) "
+                    f"SELECT 'demo', {old} FROM engine_strategy_state")
+        con.executescript("""
+            DROP TABLE engine_strategy_state;
+            ALTER TABLE engine_strategy_state_new RENAME TO engine_strategy_state;
+        """)
+
     have = {r[1] for r in con.execute("PRAGMA table_info(engine_trades)")}
     if "risk_per_price" not in have:
         con.execute("ALTER TABLE engine_trades ADD COLUMN risk_per_price REAL")
@@ -123,7 +171,8 @@ def _migrate(con: sqlite3.Connection) -> None:
 
 # ─── сигналы ────────────────────────────────────────────────────────────────
 
-def already_taken(con: sqlite3.Connection, dedup_key: str) -> bool:
+def already_taken(con: sqlite3.Connection, dedup_key: str,
+                  account: str = "demo") -> bool:
     """Брали ли уже сделку по этому основанию.
 
     Отклонённый риск-модулем сигнал обязан получить второй шанс на следующем
@@ -140,18 +189,20 @@ def already_taken(con: sqlite3.Connection, dedup_key: str) -> bool:
     зато «решили войти» и «вошли» перестали быть одним и тем же."""
     row = con.execute(
         "SELECT 1 FROM engine_signals s JOIN engine_trades t ON t.signal_id = s.id "
-        "WHERE s.dedup_key=? AND t.status IN ('pending','open','closed') LIMIT 1",
-        (dedup_key,)).fetchone()
+        "WHERE s.dedup_key=? AND t.account=? "
+        "AND t.status IN ('pending','open','closed') LIMIT 1",
+        (dedup_key, account)).fetchone()
     return row is not None
 
 
-def record_decision(con: sqlite3.Connection, d: Decision) -> int:
+def record_decision(con: sqlite3.Connection, d: Decision,
+                    account: str = "demo") -> int:
     s = d.signal
     cur = con.execute(
-        "INSERT INTO engine_signals (ts, strategy, symbol, tf, direction, bar_ts, "
+        "INSERT INTO engine_signals (account, ts, strategy, symbol, tf, direction, bar_ts, "
         "dedup_key, ref_price, stop, target, atr, rr, horizon_sec, accepted, reason, "
-        "volume, risk_money, features) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-        (int(time.time()), s.strategy, s.symbol, s.tf, s.direction, s.bar_ts,
+        "volume, risk_money, features) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        (account, int(time.time()), s.strategy, s.symbol, s.tf, s.direction, s.bar_ts,
          s.dedup_key, s.ref_price, s.stop, s.target, s.atr, round(s.rr, 4),
          s.horizon_sec, int(d.accepted), d.reason, d.volume, d.risk_money,
          s.features_json()))
@@ -164,7 +215,8 @@ def record_decision(con: sqlite3.Connection, d: Decision) -> int:
 def open_trade(con: sqlite3.Connection, signal_id: int, d: Decision, *,
                mode: str, broker_symbol: str, req_price: float,
                status: str = "pending", note: str = "",
-               stop: float | None = None, target: float | None = None) -> int:
+               stop: float | None = None, target: float | None = None,
+               account: str = "demo") -> int:
     """Строка заводится ДО отправки ордера.
 
     🔴 Порядок принципиален, это урок live_strategy от 19.08: ордер ушёл,
@@ -181,13 +233,14 @@ def open_trade(con: sqlite3.Connection, signal_id: int, d: Decision, *,
     # обязан быть виден: без пометки выборку не разделить задним числом, и
     # вопрос «а не портят ли пересечения статистику» останется без ответа.
     from analyze.engine import risk as _risk
-    crosses = _risk.crossing_trade(con, s.symbol, s.is_long) if mode == "live" else None
+    crosses = (_risk.crossing_trade(con, s.symbol, s.is_long, account)
+               if mode == "live" else None)
     cur = con.execute(
-        "INSERT INTO engine_trades (signal_id, strategy, symbol, broker_symbol, tf, "
+        "INSERT INTO engine_trades (account, signal_id, strategy, symbol, broker_symbol, tf, "
         "direction, mode, volume, risk_money, risk_per_price, crosses_id, atr, "
         "req_price, req_ts, stop, target, horizon_until, status, note) "
-        "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-        (signal_id, s.strategy, s.symbol, broker_symbol, s.tf, s.direction, mode,
+        "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        (account, signal_id, s.strategy, s.symbol, broker_symbol, s.tf, s.direction, mode,
          d.volume, d.risk_money, rpp, crosses, s.atr, req_price, now,
          s.stop if stop is None else stop,
          s.target if target is None else target,
@@ -234,14 +287,15 @@ def close_trade(con: sqlite3.Connection, trade_id: int, *, exit_price: float,
     return r if r is not None else 0.0
 
 
-def open_trades(con: sqlite3.Connection, strategy: str | None = None) -> list[dict]:
+def open_trades(con: sqlite3.Connection, strategy: str | None = None,
+                account: str = "demo") -> list[dict]:
     q = ("SELECT id, strategy, symbol, broker_symbol, tf, direction, mode, volume, "
          "ticket, entry_price, stop, target, horizon_until, atr, req_ts "
-         "FROM engine_trades WHERE status='open'")
-    args: tuple = ()
+         "FROM engine_trades WHERE status='open' AND account=?")
+    args: tuple = (account,)
     if strategy:
         q += " AND strategy=?"
-        args = (strategy,)
+        args = args + (strategy,)
     cols = ["id", "strategy", "symbol", "broker_symbol", "tf", "direction", "mode",
             "volume", "ticket", "entry_price", "stop", "target", "horizon_until",
             "atr", "req_ts"]
@@ -250,38 +304,47 @@ def open_trades(con: sqlite3.Connection, strategy: str | None = None) -> list[di
 
 # ─── состояние стратегий ────────────────────────────────────────────────────
 
-def ensure_strategy(con: sqlite3.Connection, strategy: str, status: str) -> dict:
+def ensure_strategy(con: sqlite3.Connection, strategy: str, status: str,
+                    account: str = "demo") -> dict:
+    """Состояние стратегии НА ЭТОМ СЧЁТЕ.
+
+    🔴 Ключ составной с 16.09. Пока счёт был один, стратегия и её состояние
+    совпадали; с двумя счетами общее состояние означало бы, что стоп-кран,
+    сработавший на демо, глушит стратегию и на реальных деньгах, а кривые R
+    двух счетов складываются в одну."""
     row = con.execute("SELECT strategy, status, cum_r, peak_r, n_closed, halt_reason "
-                      "FROM engine_strategy_state WHERE strategy=?",
-                      (strategy,)).fetchone()
+                      "FROM engine_strategy_state WHERE account=? AND strategy=?",
+                      (account, strategy)).fetchone()
     if row is None:
-        con.execute("INSERT INTO engine_strategy_state (strategy, status, updated_ts) "
-                    "VALUES (?,?,?)", (strategy, status, int(time.time())))
+        con.execute("INSERT INTO engine_strategy_state (account, strategy, status, "
+                    "updated_ts) VALUES (?,?,?,?)",
+                    (account, strategy, status, int(time.time())))
         con.commit()
         return {"strategy": strategy, "status": status, "cum_r": 0.0, "peak_r": 0.0,
                 "n_closed": 0, "halt_reason": None}
     return dict(zip(["strategy", "status", "cum_r", "peak_r", "n_closed", "halt_reason"], row))
 
 
-def apply_result(con: sqlite3.Connection, strategy: str, r: float) -> dict:
+def apply_result(con: sqlite3.Connection, strategy: str, r: float,
+                 account: str = "demo") -> dict:
     """Добавляет исход к кривой стратегии и двигает пик.
 
     Пик нужен именно здесь, а не в отчёте: стоп-кран меряет просадку ОТ ПИКА,
     и если пик считать на лету по журналу, он поедет каждый раз, когда часть
     сделок ещё не сведена."""
-    st = ensure_strategy(con, strategy, ST_SHADOW)
+    st = ensure_strategy(con, strategy, ST_SHADOW, account)
     cum = (st["cum_r"] or 0.0) + r
     peak = max(st["peak_r"] or 0.0, cum)
     con.execute("UPDATE engine_strategy_state SET cum_r=?, peak_r=?, n_closed=n_closed+1, "
-                "updated_ts=? WHERE strategy=?",
-                (cum, peak, int(time.time()), strategy))
+                "updated_ts=? WHERE account=? AND strategy=?",
+                (cum, peak, int(time.time()), account, strategy))
     con.commit()
     st.update({"cum_r": cum, "peak_r": peak, "n_closed": st["n_closed"] + 1})
     return st
 
 
 def halt(con: sqlite3.Connection, strategy: str, reason: str,
-         threshold: float | None = None) -> None:
+         threshold: float | None = None, account: str = "demo") -> None:
     """Остановить стратегию, запомнив ПОРОГ, по которому это сделано.
 
     🔴 Порог сохраняется не для истории, а чтобы остановку можно было
@@ -289,8 +352,8 @@ def halt(con: sqlite3.Connection, strategy: str, reason: str,
     _ensure_threshold_column(con)
     now = int(time.time())
     con.execute("UPDATE engine_strategy_state SET status=?, halted_ts=?, halt_reason=?, "
-                "halt_threshold=?, updated_ts=? WHERE strategy=?",
-                (ST_HALTED, now, reason, threshold, now, strategy))
+                "halt_threshold=?, updated_ts=? WHERE account=? AND strategy=?",
+                (ST_HALTED, now, reason, threshold, now, account, strategy))
     con.commit()
 
 
@@ -301,7 +364,8 @@ def _ensure_threshold_column(con: sqlite3.Connection) -> None:
         con.commit()
 
 
-def resume_stale_halts(con: sqlite3.Connection, current_threshold: float) -> list[tuple]:
+def resume_stale_halts(con: sqlite3.Connection, current_threshold: float,
+                       account: str = "demo") -> list[tuple]:
     """Снять остановки, сделанные по УЖЕ НЕ ДЕЙСТВУЮЩЕМУ порогу.
 
     🔴 Найдено 11.09 на живом счёте. 07.09 порог подняли с 8 до 20 R —
@@ -323,7 +387,8 @@ def resume_stale_halts(con: sqlite3.Connection, current_threshold: float) -> lis
     resumed = []
     rows = con.execute(
         "SELECT strategy, cum_r, peak_r, halt_threshold, halt_reason "
-        "FROM engine_strategy_state WHERE status=?", (ST_HALTED,)).fetchall()
+        "FROM engine_strategy_state WHERE status=? AND account=?",
+        (ST_HALTED, account)).fetchall()
     for strategy, cum_r, peak_r, old_thr, reason in rows:
         dd = (cum_r or 0.0) - (peak_r or 0.0)
         if dd <= -current_threshold:
@@ -333,17 +398,20 @@ def resume_stale_halts(con: sqlite3.Connection, current_threshold: float) -> lis
         if old_thr is not None and old_thr >= current_threshold:
             continue                      # остановлена по такому же или более мягкому
         con.execute("UPDATE engine_strategy_state SET status=?, halted_ts=NULL, "
-                    "halt_reason=NULL, halt_threshold=NULL, updated_ts=? WHERE strategy=?",
-                    (ST_LIVE, int(time.time()), strategy))
+                    "halt_reason=NULL, halt_threshold=NULL, updated_ts=? "
+                    "WHERE account=? AND strategy=?",
+                    (ST_LIVE, int(time.time()), account, strategy))
         resumed.append((strategy, dd, old_thr, current_threshold))
     if resumed:
         con.commit()
     return resumed
 
 
-def set_status(con: sqlite3.Connection, strategy: str, status: str) -> None:
-    con.execute("UPDATE engine_strategy_state SET status=?, updated_ts=? WHERE strategy=?",
-                (status, int(time.time()), strategy))
+def set_status(con: sqlite3.Connection, strategy: str, status: str,
+               account: str = "demo") -> None:
+    con.execute("UPDATE engine_strategy_state SET status=?, updated_ts=? "
+                "WHERE account=? AND strategy=?",
+                (status, int(time.time()), account, strategy))
     con.commit()
 
 

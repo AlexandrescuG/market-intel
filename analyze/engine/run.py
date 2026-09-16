@@ -29,7 +29,7 @@ import time
 
 sys.path.insert(0, "/mnt/sbfdata/sbf-platform/market_intel")
 
-from analyze.engine import execution, explain, ledger, notify, risk, sources          # noqa: E402
+from analyze.engine import accounts, execution, explain, ledger, notify, risk, sources          # noqa: E402
 from analyze.engine.contracts import Decision, ST_HALTED, ST_LIVE, ST_SHADOW  # noqa: E402
 from analyze.mt5_safety import SafetyRefusal                          # noqa: E402
 
@@ -83,15 +83,17 @@ def market_price_of(s, tick):
 
 
 def decide(con, s, equity, symbol_info, tick, default_status: str, *,
-           mt5=None, bsym: str = "", free_margin: float = 0.0) -> Decision:
+           mt5=None, bsym: str = "", free_margin: float = 0.0,
+           acc=None) -> Decision:
     """Все запреты по одному сигналу. Возвращает Decision всегда — отказ
     это тоже решение, и он обязан попасть в журнал с причиной.
 
     Порядок дешёвых проверок перед дорогими: дедуп и геометрия считаются
     у нас, `margin_gate` ходит в терминал."""
-    if ledger.already_taken(con, s.dedup_key):
+    name = acc.name if acc else "demo"
+    if ledger.already_taken(con, s.dedup_key, name):
         return Decision(s, False, "dedup: по этому основанию уже входили")
-    state = ledger.ensure_strategy(con, s.strategy, default_status)
+    state = ledger.ensure_strategy(con, s.strategy, default_status, name)
     market_price = None
     if tick is not None:
         market_price = float(tick.ask if s.is_long else tick.bid)
@@ -100,13 +102,14 @@ def decide(con, s, equity, symbol_info, tick, default_status: str, *,
         risk.geometry_gate(s)
         risk.cost_gate(s, tick)
         risk.broker_barrier_gate(s, symbol_info, tick)
-        volume, risk_money = risk.position_volume(s, equity, symbol_info)
+        volume, risk_money = risk.position_volume(
+            s, equity, symbol_info, acc.risk_per_trade if acc else None)
         # 🔴 14.09: здесь стоял запрет `opposite_open` — встречный вход по тому
         # же инструменту отклонялся ради чистоты измерения. Снят: R считается
         # по ценам самой сделки и от чужой позиции не зависит (см.
         # risk.crossing_trade). Вместо запрета — нетто-учёт в portfolio_gate
         # и пометка пересечения в журнале.
-        risk.portfolio_gate(con, s, equity, risk_money)
+        risk.portfolio_gate(con, s, equity, risk_money, name)
         if market_price is not None:
             risk.drift_gate(s, market_price)
         if mt5 is not None and market_price is not None:
@@ -116,9 +119,13 @@ def decide(con, s, equity, symbol_info, tick, default_status: str, *,
     return Decision(s, True, "принят", volume=volume, risk_money=risk_money)
 
 
-def run(*, dry: bool, live: bool, enabled: list[str] | None, verbose: bool) -> int:
+def run(*, dry: bool, live: bool, enabled: list[str] | None, verbose: bool,
+        account: str = "demo") -> int:
+    acc = accounts.get(account)
     con = ledger.connect()
     ledger.init(con)
+    log.info("счёт %s: риск %.2f%% на сделку, инструменты %s",
+             acc.name, acc.risk_per_trade * 100, ", ".join(acc.symbols))
 
     default_status = ST_LIVE if live else ST_SHADOW
     exit_code = 0
@@ -141,30 +148,31 @@ def run(*, dry: bool, live: bool, enabled: list[str] | None, verbose: bool) -> i
             log.warning("алерт о правке не ушёл: %s", e)
 
     try:
-        with execution.Bridge() as (mt5, conn):
-            execution.preflight_account(mt5)
+        with execution.Bridge(acc.port, acc.lock) as (mt5, conn):
+            execution.preflight_account(mt5, acc)
 
             # 🔴 Снятие остановок, сделанных по уже не действующему порогу.
             # 07.09 порог подняли с 8 до 20 R, а стратегии, остановленные до
             # правки, остались стоять: правило изменилось, последствия нет.
             # pattern_break_retest простоял шесть дней в плюсе (+11 R), и за
             # это время движок отверг 851 сигнал с «стратегия остановлена».
-            for name, dd, old, new in ledger.resume_stale_halts(con, risk.MAX_DRAWDOWN_R):
+            for name, dd, old, new in ledger.resume_stale_halts(
+                    con, risk.MAX_DRAWDOWN_R, acc.name):
                 log.warning("ВОЗОБНОВЛЕНА %s: просадка %.2fR укладывается в нынешний "
                             "предел %.0fR (была остановлена по порогу %s)",
                             name, dd, new, f"{old:.0f}R" if old else "неизвестному")
 
-            st = execution.settle(con, mt5, conn)
+            st = execution.settle(con, mt5, conn, acc.name)
             log.info("сведение: закрыто=%d по горизонту=%d потеряшек=%d",
                      st["closed"], st["by_horizon"], st["orphans"])
             for name, why in st["halted"]:
                 log.error("остановлена %s: %s", name, why)
 
-            sh = execution.settle_shadow(con)
+            sh = execution.settle_shadow(con, acc.name)
             if sh["closed"]:
                 log.info("теневых разрешено: %d", sh["closed"])
 
-            mg = execution.manage_open(con, mt5, conn)
+            mg = execution.manage_open(con, mt5, conn, acc.name)
             if mg["moved"] or mg["errors"]:
                 log.info("сопровождение: стопов перенесено=%d ошибок=%d",
                          mg["moved"], mg["errors"])
@@ -178,6 +186,12 @@ def run(*, dry: bool, live: bool, enabled: list[str] | None, verbose: bool) -> i
                 return 2
 
             signals = sources.collect(con, enabled)
+            before = len(signals)
+            # Набор инструментов — свойство счёта: на реальном нет золота
+            # (не влезает в минимальный лот) и пока нет газа.
+            signals = [s for s in signals if s.symbol in acc.symbols]
+            if before != len(signals):
+                log.info("отсеяно не по профилю счёта: %d", before - len(signals))
             log.info("сигналов собрано: %d (источники: %s)", len(signals),
                      ", ".join(sorted({s.strategy for s in signals})) or "нет")
 
@@ -186,7 +200,7 @@ def run(*, dry: bool, live: bool, enabled: list[str] | None, verbose: bool) -> i
                 try:
                     bsym = execution.broker_symbol(con, s.symbol, server)
                 except SafetyRefusal as e:
-                    ledger.record_decision(con, Decision(s, False, f"{e.status}: {e}"))
+                    ledger.record_decision(con, Decision(s, False, f"{e.status}: {e}"), acc.name)
                     exit_code = 1
                     continue
                 mt5.symbol_select(bsym, True)
@@ -194,12 +208,12 @@ def run(*, dry: bool, live: bool, enabled: list[str] | None, verbose: bool) -> i
                 tick = mt5.symbol_info_tick(bsym)
                 if si is None:
                     ledger.record_decision(
-                        con, Decision(s, False, f"bad_symbol: {bsym} нет у брокера"))
+                        con, Decision(s, False, f"bad_symbol: {bsym} нет у брокера"), acc.name)
                     exit_code = 1
                     continue
 
                 d = decide(con, s, equity, si, tick, default_status,
-                           mt5=mt5, bsym=bsym, free_margin=free_margin)
+                           mt5=mt5, bsym=bsym, free_margin=free_margin, acc=acc)
                 if dirty and d.accepted:
                     d.accepted = False
                     d.reason = ("maintenance: правка движка в дереве, "
@@ -216,7 +230,7 @@ def run(*, dry: bool, live: bool, enabled: list[str] | None, verbose: bool) -> i
                     d.accepted = False
                     d.reason = (f"dry_run: вошли бы объёмом {d.volume:.2f} "
                                 f"при риске {d.risk_money:.2f}")
-                sid = ledger.record_decision(con, d)
+                sid = ledger.record_decision(con, d, acc.name)
                 if not d.accepted:
                     if dry:
                         log.info("  dry-run: объём %.2f, риск %.2f, стоп %.5f цель %.5f",
@@ -224,9 +238,10 @@ def run(*, dry: bool, live: bool, enabled: list[str] | None, verbose: bool) -> i
                     continue
 
                 strat_live = ledger.ensure_strategy(
-                    con, s.strategy, default_status)["status"] == ST_LIVE
+                    con, s.strategy, default_status, acc.name)["status"] == ST_LIVE
                 ok, msg = execution.execute(con, mt5, conn, sid, d,
-                                            live=strat_live, bsym=bsym)
+                                            live=strat_live, bsym=bsym,
+                                            account=acc.name)
                 log.info("  исполнение (%s): %s", "live" if strat_live else "shadow", msg)
                 if ok:
                     taken += 1
@@ -299,11 +314,14 @@ def main() -> None:
                    help="через запятую: alpha_forecast,patterns,macro,gate")
     p.add_argument("--report", action="store_true", help="показать сводку и выйти")
     p.add_argument("-v", "--verbose", action="store_true")
+    p.add_argument("--account", default="demo",
+                   help="профиль счёта: demo | real (analyze/engine/accounts.py)")
     a = p.parse_args()
     if a.report:
         sys.exit(report())
     enabled = [x.strip() for x in a.sources.split(",") if x.strip()] or None
-    sys.exit(run(dry=a.dry_run, live=a.live, enabled=enabled, verbose=a.verbose))
+    sys.exit(run(dry=a.dry_run, live=a.live, enabled=enabled, verbose=a.verbose,
+                 account=a.account))
 
 
 if __name__ == "__main__":

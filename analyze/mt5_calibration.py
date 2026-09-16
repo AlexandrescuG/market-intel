@@ -118,8 +118,18 @@ class Bridge:
     процессы под разными юнитами; внутрипроцессный замок их не увидел бы.
     Ожидание длинное: очередь на мост лучше, чем обрыв у соседа."""
 
+    def __init__(self, port: int = PORT, lock: str = BRIDGE_LOCK):
+        """🔴 16.09: порт и блокировка стали параметрами.
+
+        У каждого терминала свой rpyc-сервер и СВОЯ очередь на мост. Общая
+        блокировка заставила бы клиентов реального счёта ждать демовских и
+        наоборот — оба замедлились бы без всякой причины, а очередь ведь и
+        заводилась против обрывов, а не против скорости."""
+        self._port = int(port)
+        self._lockpath = lock
+
     def __enter__(self):
-        self._lock = open(BRIDGE_LOCK, "a+")
+        self._lock = open(self._lockpath, "a+")
         deadline = time.time() + BRIDGE_LOCK_WAIT_SEC
         while True:
             try:
@@ -133,7 +143,7 @@ class Bridge:
                         f"мост занят другим процессом дольше {BRIDGE_LOCK_WAIT_SEC} с")
                 time.sleep(0.5)
         try:
-            self.conn = rpyc.classic.connect(HOST, PORT)
+            self.conn = rpyc.classic.connect(HOST, self._port)
             self.mt5 = self.conn.modules.MetaTrader5
             if not self.mt5.initialize(path=TERMINAL_PATH, timeout=60000):
                 raise SafetyRefusal("bridge_down", f"initialize(): {self.mt5.last_error()}")

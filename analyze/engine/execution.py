@@ -67,14 +67,41 @@ def engine_positions(positions) -> list:
     return [p for p in (positions or []) if getattr(p, "magic", None) == ENGINE_MAGIC]
 
 
-def preflight_account(mt5) -> None:
+def preflight_account(mt5, account=None) -> None:
     """Предохранители СЧЁТА перед каждой отправкой.
 
     Демо проверяется состоянием, которое возвращает сам терминал, а не
     конфигом: конфиг можно перепутать, trade_mode врать не будет.
     `account_info()=None` — тоже отказ: «не смог проверить» и «проверил,
-    всё хорошо» не должны быть одним исходом."""
-    assert_demo(mt5.account_info())
+    всё хорошо» не должны быть одним исходом.
+
+    🔴 16.09, РЕАЛЬНЫЙ СЧЁТ. Раньше здесь стояло безусловное `assert_demo`:
+    движок физически не мог торговать ничем, кроме демо. Просто снять эту
+    проверку нельзя — она защищает от самого дорогого промаха, когда мост
+    случайно указывает на чужой или не тот счёт.
+
+    Поэтому проверка не снимается, а МЕНЯЕТ ФОРМУ: для профиля demo
+    по-прежнему требуется демо-режим терминала, а для реального профиля —
+    точное совпадение номера счёта с тем, что записан в профиле. Пока номер
+    в профиле не заполнен, реальный счёт торговать не может вовсе: незнание
+    здесь обязано запрещать, а не разрешать."""
+    info = mt5.account_info()
+    if account is None or not account.is_real:
+        assert_demo(info)
+    else:
+        if info is None:
+            raise SafetyRefusal("no_account_info",
+                                "терминал не отдал сведения о счёте")
+        if not account.login:
+            raise SafetyRefusal(
+                "real_login_unset",
+                f"профиль {account.name}: номер счёта не заполнен — "
+                f"торговать вслепую на реальных деньгах запрещено")
+        if int(getattr(info, "login", 0) or 0) != int(account.login):
+            raise SafetyRefusal(
+                "wrong_account",
+                f"мост показывает счёт {getattr(info, 'login', None)}, "
+                f"а профиль {account.name} ожидает {account.login}")
     assert_autotrading(mt5.terminal_info())
 
 
@@ -129,7 +156,7 @@ def close(conn, mt5, position) -> tuple[bool, str]:
 
 
 def execute(con: sqlite3.Connection, mt5, conn, signal_id: int, d: Decision,
-            *, live: bool, bsym: str) -> tuple[bool, str]:
+            *, live: bool, bsym: str, account: str = "demo") -> tuple[bool, str]:
     """Открыть позицию по принятому решению.
 
     Барьеры ставятся В ЗАЯВКЕ, а не «закроем потом сами». Без них позиция
@@ -140,6 +167,7 @@ def execute(con: sqlite3.Connection, mt5, conn, signal_id: int, d: Decision,
 
     if not live:
         tid = ledger.open_trade(con, signal_id, d, mode=mode, broker_symbol=bsym,
+                                account=account,
                                 req_price=s.ref_price, status="open",
                                 note="теневой режим: ордер не отправлялся")
         ledger.mark_sent(con, tid, ticket=0, entry_price=s.ref_price)
@@ -184,6 +212,7 @@ def execute(con: sqlite3.Connection, mt5, conn, signal_id: int, d: Decision,
     # был обратный: ордер ушёл, позиция открылась, INSERT упал с
     # "database is locked" — сделка не попала ни в журнал, ни под горизонт.
     tid = ledger.open_trade(con, signal_id, d, mode=mode, broker_symbol=bsym,
+                                account=account,
                             req_price=price, status="pending",
                             note=f"atr={s.atr:.5f} rr={rr:.2f} "
                                  f"снос={abs(price - s.ref_price) / dist:.3f}R",
@@ -231,7 +260,7 @@ def modify_stop(conn, mt5, position, new_sl: float, digits: int) -> tuple[bool, 
     return True, ""
 
 
-def manage_open(con: sqlite3.Connection, mt5, conn) -> dict:
+def manage_open(con: sqlite3.Connection, mt5, conn, account: str = "demo") -> dict:
     """Подтянуть стопы по открытым живым позициям.
 
     Лучшая цена берётся из price_bars с момента входа, а не из текущего
@@ -245,7 +274,7 @@ def manage_open(con: sqlite3.Connection, mt5, conn) -> dict:
     if not ACTIVE_RULES.enabled:
         return stats
     live = {int(p.ticket): p for p in engine_positions(mt5.positions_get())}
-    for t in ledger.open_trades(con):
+    for t in ledger.open_trades(con, account=account):
         if t["mode"] != "live" or not t["ticket"] or int(t["ticket"]) not in live:
             continue
         pos = live[int(t["ticket"])]
@@ -293,7 +322,7 @@ def manage_open(con: sqlite3.Connection, mt5, conn) -> dict:
 
 # ─── сведение ───────────────────────────────────────────────────────────────
 
-def settle(con: sqlite3.Connection, mt5, conn) -> dict:
+def settle(con: sqlite3.Connection, mt5, conn, account: str = "demo") -> dict:
     """Свести закрытые позиции и закрыть просроченные по горизонту.
 
     🔴 Причина, по которой это отдельный обязательный шаг: 27.08 в старом
@@ -308,7 +337,7 @@ def settle(con: sqlite3.Connection, mt5, conn) -> dict:
     now = int(time.time())
 
     live_positions = {int(p.ticket): p for p in engine_positions(mt5.positions_get())}
-    open_rows = [t for t in ledger.open_trades(con) if t["mode"] == "live"]
+    open_rows = [t for t in ledger.open_trades(con, account=account) if t["mode"] == "live"]
 
     # 1. сведение: наших записей нет среди позиций -> позиция закрыта
     gone = [t for t in open_rows if t["ticket"] and int(t["ticket"]) not in live_positions]
@@ -334,7 +363,7 @@ def settle(con: sqlite3.Connection, mt5, conn) -> dict:
                 commission=sum(float(d.commission) for d in legs),
                 swap=sum(float(d.swap) for d in legs),
                 reason=str(getattr(last, "comment", "") or "closed"))
-            st = ledger.apply_result(con, t["strategy"], r)
+            st = ledger.apply_result(con, t["strategy"], r, account)
             stats["closed"] += 1
             # 🔴 11.09: notify.closed был написан 02.09 и НИ РАЗУ не вызывался
             # — подключён оказался только stop_moved. Девять дней бот сообщал
@@ -342,7 +371,7 @@ def settle(con: sqlite3.Connection, mt5, conn) -> dict:
             # ловим у других: код есть, тесты зелёные, вызова нет, и снаружи
             # это неотличимо от «сделок не было».
             _notify_closed(con, t, r, st)
-            _maybe_halt(con, st, stats)
+            _maybe_halt(con, st, stats, account)
 
     # 2. горизонт: позиция жива, но её время вышло
     for t in open_rows:
@@ -381,7 +410,8 @@ def _notify_closed(con: sqlite3.Connection, trade: dict, r: float,
         log.warning("уведомление о закрытии не ушло: %s", e)
 
 
-def _maybe_halt(con: sqlite3.Connection, state: dict, stats: dict) -> None:
+def _maybe_halt(con: sqlite3.Connection, state: dict, stats: dict,
+                account: str = "demo") -> None:
     from analyze.engine.risk import MAX_DRAWDOWN_R, drawdown_halt
     reason = drawdown_halt(state)
     if reason:
@@ -389,12 +419,12 @@ def _maybe_halt(con: sqlite3.Connection, state: dict, stats: dict) -> None:
         # «остановлена по действующему правилу» от «по правилу, которое с тех
         # пор изменили». Ровно это и стоило нам шести дней простоя
         # pattern_break_retest — см. ledger.resume_stale_halts.
-        ledger.halt(con, state["strategy"], reason, MAX_DRAWDOWN_R)
+        ledger.halt(con, state["strategy"], reason, MAX_DRAWDOWN_R, account)
         stats["halted"].append((state["strategy"], reason))
         log.error("СТРАТЕГИЯ ОСТАНОВЛЕНА %s: %s", state["strategy"], reason)
 
 
-def settle_shadow(con: sqlite3.Connection) -> dict:
+def settle_shadow(con: sqlite3.Connection, account: str = "demo") -> dict:
     """Теневые сделки разрешаются по реальным барам: касание стопа или цели
     внутри бара, иначе — закрытие по горизонту.
 
@@ -405,7 +435,7 @@ def settle_shadow(con: sqlite3.Connection) -> dict:
     import core.price_bars as _pb
     stats = {"closed": 0, "halted": []}
     now = int(time.time())
-    for t in [x for x in ledger.open_trades(con) if x["mode"] == "shadow"]:
+    for t in [x for x in ledger.open_trades(con, account=account) if x["mode"] == "shadow"]:
         candles = _pb.load_candles(t["symbol"], t["tf"] or "1h") or []
         bars = [c for c in candles if c["ts"] >= (t["req_ts"] or 0)]
         exit_price, reason = None, None
@@ -425,7 +455,7 @@ def settle_shadow(con: sqlite3.Connection) -> dict:
             continue
         r = ledger.close_trade(con, t["id"], exit_price=exit_price, profit=0.0,
                                commission=0.0, swap=0.0, reason=reason)
-        st = ledger.apply_result(con, t["strategy"], r)
+        st = ledger.apply_result(con, t["strategy"], r, account)
         stats["closed"] += 1
-        _maybe_halt(con, st, stats)
+        _maybe_halt(con, st, stats, account)
     return stats
