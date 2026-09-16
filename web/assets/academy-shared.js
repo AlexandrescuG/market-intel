@@ -83,6 +83,14 @@
        оставлен литерал. */
     inkSoft:"var(--ch-ink-soft, rgba(24,24,26,0.68))",
     inkFaint:"var(--ch-ink-faint, rgba(24,24,26,0.61))",
+    /* Те же два яруса в готовом «тёмном» виде — для мест, где ветка
+       по фону написана руками (props.dark) и переменная не подходит.
+       Числа держатся ЗДЕСЬ, а не внутри подсветитьТёмныеБлоки: пока они
+       были вписаны в механизм литералами, ручная ветка жила своей жизнью
+       и ставила rgba(255,255,255,0.4) — 3.82:1 на #18181a, ниже AA.
+       Замер поймал это пять раз, в главах 6-10, на подписи «часть 1 из 4». */
+    inkSoftOnDark:"rgba(255,255,255,0.72)",   /* 10.4:1 на #18181a */
+    inkFaintOnDark:"rgba(255,255,255,0.62)",  /*  7.7:1 на #18181a */
     white:"#ffffff", surface:"#faf8f5", surfaceMid:"#f0ebe0",
     border:"rgba(24,24,26,0.1)", borderGold:"rgba(201,151,58,0.25)",
     dark:"#18181a",
@@ -151,8 +159,8 @@
       э.style.setProperty('--ch-gold', СВЕТЛОЕ_ЗОЛОТО);
       э.style.setProperty('--ch-up', C.greenOnDark);
       э.style.setProperty('--ch-down', C.redOnDark);
-      э.style.setProperty('--ch-ink-soft', 'rgba(255,255,255,0.72)');
-      э.style.setProperty('--ch-ink-faint', 'rgba(255,255,255,0.62)');
+      э.style.setProperty('--ch-ink-soft', C.inkSoftOnDark);
+      э.style.setProperty('--ch-ink-faint', C.inkFaintOnDark);
       поставлено++;
     }
     return поставлено;
@@ -994,7 +1002,7 @@
                  background:C.gold, color:"#18181a", border:"none", borderRadius:4,
                  fontWeight:700}
         }, shown === всего - 1 ? copy.last : copy.next) : null,
-        e(Mono, {size:10.5, color: dark ? "rgba(255,255,255,0.4)" : C.inkFaint},
+        e(Mono, {size:10.5, color: dark ? C.inkFaintOnDark : C.inkFaint},
           последний ? copy.done
                     : copy.of.replace("%1", String(shown)).replace("%2", String(всего)))
       ) : null

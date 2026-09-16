@@ -211,9 +211,9 @@ from playwright.sync_api import sync_playwright
 }"""
 
 
-def прогон(стр, путь: str, ширина: int) -> dict:
+def прогон(стр, путь: str, ширина: int, база: str = БАЗА) -> dict:
     стр.set_viewport_size({"width": ширина, "height": 900})
-    стр.goto(БАЗА + путь, wait_until="domcontentloaded", timeout=45000)
+    стр.goto(база + путь, wait_until="domcontentloaded", timeout=45000)
     стр.wait_for_timeout(2500)
     # Ленивые блоки ниже сгиба: без прокрутки половина страницы не
     # отрисована, и замер покажет благополучие там, где его нет.
@@ -224,27 +224,66 @@ def прогон(стр, путь: str, ширина: int) -> dict:
     return стр.evaluate(ЗАМЕР)
 
 
+def прогон_с_ошибками(стр, путь: str, ширина: int, база: str) -> dict:
+    """То же, но с уловленными pageerror.
+
+    🔴 Замер «сколько плохого» на упавшей странице всегда идеален: главу 5
+    я уронил своим же aria-label, и щуп отрапортовал «0 контролов без
+    имени» — потому что контролов не осталось. Ошибки страницы собираются
+    в тот же результат, чтобы ноль никогда не проходил молча.
+    """
+    ошибки: list[str] = []
+    приёмник = lambda e: ошибки.append(str(e)[:160])  # noqa: E731
+    стр.on("pageerror", приёмник)
+    try:
+        итог = прогон(стр, путь, ширина, база)
+    finally:
+        стр.remove_listener("pageerror", приёмник)
+    итог["ошибки_страницы"] = ошибки
+    return итог
+
+
 def main() -> int:
     р = argparse.ArgumentParser()
     р.add_argument("--url", action="append", help="конкретная страница")
     р.add_argument("--json", help="сохранить замер в файл")
     р.add_argument("--diff", help="сравнить с сохранённым замером")
     р.add_argument("--подробно", action="store_true")
+    р.add_argument("--база", default=БАЗА,
+                   help="адрес сервера; для платных глав — стенд edu_preview.py")
+    р.add_argument("--токен",
+                   help="сессия из edu_preview.py: кладётся в localStorage "
+                        "ключом sbf_token ДО перехода, иначе отдаётся пейволл")
     а = р.parse_args()
 
     страницы = а.url or СТРАНИЦЫ
     итог: dict[str, dict] = {}
     пусто: list[str] = []
+    сломано: list[str] = []
 
     with sync_playwright() as pw:
         бр = pw.chromium.launch()
         ctx = бр.new_context()
+        if а.токен:
+            # 🔴 Кука обязательна, localStorage одного мало. Гейт платных
+            # глав живёт на СЕРВЕРЕ (_handle_edu → is_pro), а обычная
+            # навигация не может приложить заголовок — serve.py читает
+            # куку sbf_session. Токен только в localStorage дал бы 200 и
+            # заглушку пейволла: страница открылась, мерить нечего.
+            ctx.add_cookies([{"name": "sbf_session", "value": а.токен,
+                              "url": а.база}])
+            # А это — для клиентского кода главы (fetch прогресса и т.п.),
+            # add_init_script, а не evaluate после goto: страница читает
+            # токен при загрузке, выставленный позже он уже не поможет.
+            ctx.add_init_script(
+                f"try {{ localStorage.setItem('sbf_token', {json.dumps(а.токен)}); }}"
+                " catch (e) {}")
         стр = ctx.new_page()
         for путь in страницы:
             строка = {}
             for имя, ширина in (("desktop", 1366), ("mobile", 390)):
                 try:
-                    строка[имя] = прогон(стр, путь, ширина)
+                    строка[имя] = прогон_с_ошибками(стр, путь, ширина, а.база)
                 except Exception as e:  # страница может не открыться — это тоже результат
                     строка[имя] = {"ошибка": str(e)[:200]}
             итог[путь] = строка

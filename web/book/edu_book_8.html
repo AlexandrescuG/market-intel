@@ -610,7 +610,12 @@ function EmaUsageModes({ candles }) {
       crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
     });
     const closeSeries = chart.addLineSeries({ color: "rgba(255,255,255,0.4)", lineWidth: 1, priceLineVisible: false, lastValueVisible: false });
-    const emaASeries = chart.addLineSeries({ color: C.goldText, lineWidth: 2, priceLineVisible: false, lastValueVisible: false, title: "EMA" });
+    // 🔴 goldOnDark, а НЕ goldText. goldText — это var(--ch-gold, …), а
+    // lightweight-charts рисует на canvas и CSS-переменную не разворачивает:
+    // получал строку «var(--ch-gold, #876525)» и падал с «Cannot parse
+    // color», унося весь виджет. Фон графика здесь C.black, поэтому линии
+    // нужен светлый золотой литерал.
+    const emaASeries = chart.addLineSeries({ color: C.goldOnDark, lineWidth: 2, priceLineVisible: false, lastValueVisible: false, title: "EMA" });
     const emaBSeries = chart.addLineSeries({ color: "#6ea8fe", lineWidth: 2, priceLineVisible: false, lastValueVisible: false, title: "EMA" });
     chartRef.current = chart;
     seriesRef.current = { closeSeries, emaASeries, emaBSeries };

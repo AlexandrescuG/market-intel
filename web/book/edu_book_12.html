@@ -270,6 +270,11 @@ function OriginStory12() {
 }
 
 // ─── Пять линий ──────────────────────────────────────────────────────────────
+// Цвет линии → тот же оттенок, пригодный для ТЕКСТА на светлом фоне
+// (#faf8f5). Пары подобраны так, чтобы тон сохранился, а контраст дошёл до
+// 4.5:1 — см. tools/pick_accessible_color.py. Чикоу (#805ad5) проходит сам.
+const ТЕКСТОМ = {"#e53e3e":"#E01E1E", "#3182ce":"#2C75B9", "#38a169":"#2D8154"};
+
 function IchimokuAnatomy() {
   const T = window.Ch12Content[INITIAL_LANG] || window.Ch12Content.ru;
   const a = T.anatomy;
@@ -284,7 +289,13 @@ function IchimokuAnatomy() {
               <div style={{fontWeight:600,fontSize:14.5,color:C.black}}>{ln.name}</div>
               <Mono size={9} color={C.inkFaint} spacing={0.5}>{ln.badge}</Mono>
             </div>
-            <Mono size={11.5} color={ln.color} spacing={0} style={{display:"block",marginBottom:10}}>{ln.formula}</Mono>
+            {/* 🔴 Формула — ТЕКСТ, и порог у неё 4.5:1, а не 3:1. Цвет линии
+                на графике и цвет подписи под неё — разные задачи: ln.color
+                узнаётся на полоске сверху (нетекстовая графика, 3:1 хватает),
+                а те же #e53e3e/#3182ce/#38a169 как текст 11.5px на #faf8f5
+                дают 3.89/3.80/3.06. ПОДПИСЬ — затемнённый близнец того же
+                оттенка, поэтому связь «линия ↔ формула» на глаз не рвётся. */}
+            <Mono size={11.5} color={ТЕКСТОМ[ln.color] || ln.color} spacing={0} style={{display:"block",marginBottom:10}}>{ln.formula}</Mono>
             <p style={{fontSize:12.5,color:C.inkMid,lineHeight:1.65,margin:0}}>{ln.beg}</p>
             {open[ln.key] && <p style={{fontSize:12,color:C.inkSoft,lineHeight:1.65,marginTop:10,paddingTop:10,borderTop:`1px dashed ${C.border}`}}>{ln.pro}</p>}
             <button onClick={()=>setOpen(o=>({...o,[ln.key]:!o[ln.key]}))} style={{marginTop:10,background:"none",border:"none",color:C.goldText,fontFamily:"monospace",fontSize:10.5,cursor:"pointer",padding:0,letterSpacing:0.5}}>

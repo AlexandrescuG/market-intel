@@ -242,6 +242,11 @@ body {
 }
 .sbf-sect-n {
   background: var(--line);
+  /* Номер секции сидит на плашке --line (#e7dfcf), а цвет наследовал
+     --muted (#716A5A) от родителя на кремовом фоне: 4.05:1 при 9px.
+     Цвет правильный только относительно СВОЕГО фона — у плашки он свой,
+     поэтому и тушь своя. */
+  color: #696354;              /* 4.51:1 на #e7dfcf */
   border-radius: 10px;
   padding: 1px 7px;
   font-size: 9px;
@@ -397,7 +402,10 @@ body {
   display: block;
   padding: 14px 20px;
   background: var(--gold);
-  color: #fff;
+  /* 🔴 Тёмная тушь, а не белый. Белый на золоте — 2.42:1, вдвое ниже AA;
+     ровно тот же случай уже чинился в .btn-primary на основном сайте.
+     Золото — светлый фон, и читаемый текст на нём тёмный. */
+  color: var(--ink, #18181a);
   font-family: 'JetBrains Mono', monospace;
   font-size: 13px;
   font-weight: 700;

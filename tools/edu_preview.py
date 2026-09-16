@@ -163,7 +163,13 @@ def main() -> int:
     print(f"порт       : {порт}")
     print(f"токен      : {токен}")
     print(f"адрес      : http://127.0.0.1:{порт}/edu/b/7")
-    print("localStorage.setItem('sbf_token', '<токен>') — и главы 6-15 открыты")
+    # 🔴 Кука, а не localStorage. Гейт платных глав серверный (_handle_edu →
+    # is_pro), а обычная навигация не прикладывает заголовков — serve.py
+    # берёт токен из куки sbf_session. Токен, положенный только в
+    # localStorage, даёт 200 и заглушку пейволла: страница открылась,
+    # смотреть в ней нечего.
+    print(f"document.cookie = 'sbf_session={токен}; path=/'  — и главы 6-15 открыты")
+    print("  (localStorage.sbf_token — дополнительно, для fetch'ей внутри главы)")
     print("Ctrl+C — остановить и удалить копию")
     try:
         while процесс.poll() is None:

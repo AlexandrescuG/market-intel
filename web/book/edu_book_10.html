@@ -589,7 +589,9 @@ function PatternMiniChart({ example, patternKey }) {
         <div style={{display:"flex",alignItems:"center",gap:12,flexWrap:"wrap",padding:"0 2px"}}>
           <Mono size={9.5} color={C.inkFaint} spacing={0.5}>{ps.holdLabel}</Mono>
           <input type="range" min={1} max={maxHold} value={Math.min(holdN,maxHold)} onChange={e=>setHoldN(+e.target.value)} style={{flex:1,minWidth:100}}/>
-          {holdPct !== null && <Mono size={11} color={holdPct >= 0 ? "#1c8a4a" : "#c0392b"} spacing={0}>{ps.holdResult(Math.min(holdN,maxHold), holdPct)}</Mono>}
+          {/* Палитра, а не свои литералы: #1c8a4a давал 4.14:1 на #faf8f5,
+              C.green/C.red — те же зелёный и красный, уже сведённые к AA. */}
+          {holdPct !== null && <Mono size={11} color={holdPct >= 0 ? C.green : C.red} spacing={0}>{ps.holdResult(Math.min(holdN,maxHold), holdPct)}</Mono>}
         </div>
       )}
     </div>

@@ -461,7 +461,10 @@ function BigOrderBridge() {
           <div style={{display:"flex",justifyContent:"center",gap:28,flexWrap:"wrap",marginBottom:14,fontFamily:"monospace",fontSize:13}}>
             <span>{bo.topOfBook}: <b>{filled.topOfBook.toFixed(2)}</b></span>
             <span>{bo.avgFill}: <b style={{color:C.goldText}}>{filled.avg.toFixed(2)}</b></span>
-            <span>{bo.slippage}: <b style={{color: filled.slippage>0 ? C.red : "rgba(255,255,255,0.4)"}}>+{filled.slippage.toFixed(2)}</b></span>
+            {/* Панель исполнения ордера тёмная, и код это знает — значит и
+                цвета берутся из тёмного яруса палитры. C.red (#c0392b) на
+                #18181a даёт 3.26:1, rgba(255,255,255,0.4) — 3.82:1. */}
+            <span>{bo.slippage}: <b style={{color: filled.slippage>0 ? C.redOnDark : C.inkFaintOnDark}}>+{filled.slippage.toFixed(2)}</b></span>
           </div>
           {filled.remaining > 0 && (
             <p style={{fontSize:12,color:"#e74c3c",fontFamily:"monospace",marginBottom:8}}>{fillTemplate(bo.beyondBookNote, {remaining: filled.remaining})}</p>
@@ -606,8 +609,11 @@ function PatternRealityTable({ patterns }) {
               <th scope="col"
                   aria-sort={sortKey==="n" ? (sortDir>0?"descending":"ascending") : "none"}
                   style={{textAlign:"center",padding:0,borderBottom:`1px solid ${C.border}`}}>
+                {/* C.gold как ТЕКСТ — 2.63:1: это цвет плашек и рамок, не
+                    подписей. Активная колонка помечается goldText (он же
+                    светлеет сам, если заголовок окажется на тёмном). */}
                 <button type="button" onClick={()=>onSort("n")}
-                  style={{width:"100%",textAlign:"center",padding:"8px 10px",fontSize:10.5,fontFamily:"monospace",color:sortKey==="n"?C.gold:C.inkFaint,cursor:"pointer",userSelect:"none",background:"none",border:"none",fontWeight:600}}>
+                  style={{width:"100%",textAlign:"center",padding:"8px 10px",fontSize:10.5,fontFamily:"monospace",color:sortKey==="n"?C.goldText:C.inkFaint,cursor:"pointer",userSelect:"none",background:"none",border:"none",fontWeight:600}}>
                   n{sortKey==="n" ? (sortDir>0?" ▾":" ▴") : ""}
                 </button>
               </th>

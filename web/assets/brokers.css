@@ -147,7 +147,7 @@ html,body{margin:0;padding:0}
 
 .bstat-v.text{font-family:inherit;font-size:14px;font-weight:600}
 
-.bstat-v .no-data{color:var(--ink-3,#A8A29A);font-style:italic;font-weight:500;font-family:inherit;font-size:14px}
+.bstat-v .no-data{color:var(--ink-3,#736D63);font-style:italic;font-weight:500;font-family:inherit;font-size:14px}
 
 .bstat-note{font-size:12px;color:var(--ink-2,#6E6A63);margin-top:3px;line-height:1.35}
 
@@ -312,7 +312,7 @@ html,body{margin:0;padding:0}
 
 .loss-disclose{font-size:13px;color:var(--ink-2,#6E6A63);margin-top:5px;line-height:1.5}
 
-.no-data{color:var(--ink-3,#A8A29A);font-style:italic}
+.no-data{color:var(--ink-3,#736D63);font-style:italic}
 
 /* Конверсия */
 .bcard-cta{margin-top:auto;display:flex;flex-direction:column;gap:8px}
@@ -337,7 +337,7 @@ html,body{margin:0;padding:0}
 
 .guide-link:hover{color:var(--gold-text,#866A19);border-color:rgba(201,162,39,.5)}
 
-.aff-note{font-size:12px;color:var(--ink-3,#A8A29A);text-align:center;margin:2px 0 0}
+.aff-note{font-size:12px;color:var(--ink-3,#736D63);text-align:center;margin:2px 0 0}
 
 .empty-row{text-align:center;padding:34px;color:var(--ink-2,#6E6A63);font-size:14px}
 
@@ -421,6 +421,9 @@ html,body{margin:0;padding:0}
 }
 .broker-picker-more {
   display: inline-block; margin-top: 14px; font-family: ui-monospace, Menlo, monospace;
-  font-size: 12px; color: #A8851F; text-decoration: none;
+  /* Текст — затемнённое золото (4.56:1 на белом), подчёркивание может
+     остаться фирменным: для нетекстовой графики порог 3:1. #A8851F как
+     ТЕКСТ давал 3.48:1. */
+  font-size: 12px; color: #8B6E1A; text-decoration: none;
   border-bottom: 1px dotted #A8851F;
 }
