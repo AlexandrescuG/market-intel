@@ -16,7 +16,7 @@ function _locale() {
    16.09.2026: затемнены до порога AA — тем же цветом рисуется и линия,
    и подпись к ней, см. разбор в edu/assets/grafik-engine.js. */
 var C={
-  up:'#287A62',down:'#BC4643',gold:'#866A19',
+  up:'#2C784E',down:'#C0392B',gold:'#866A19',
   surf:'#FCFAF5',border:'#E7DFCF',ink:'#2B2B33',muted:'#716A5A'
 };
 

@@ -18,7 +18,7 @@
 
   // ---- 1. инжект CSS (tcard с lp + анимация движка + обёртка фигуры) ----
   var CSS = `
-  :root{--sbf-up:#287A62;--sbf-down:#BC4643;--sbf-gold:#C9A227;--sbf-gold-text:#866A19;--sbf-line:#E7DFCF;--sbf-ink:#2B2B33;--sbf-muted:#716A5A;--sbf-paper:#FFFFFF;--sbf-cream:#FBF6EF;}
+  :root{--sbf-up:#2C784E;--sbf-down:#C0392B;--sbf-gold:#C9A227;--sbf-gold-text:#866A19;--sbf-line:#E7DFCF;--sbf-ink:#2B2B33;--sbf-muted:#716A5A;--sbf-paper:#FFFFFF;--sbf-cream:#FBF6EF;}
   .sbf-fig{background:var(--sbf-paper);border:1px solid var(--sbf-line);border-radius:12px;padding:10px;margin:20px 0;cursor:pointer}
   .sbf-fig .sbf-fig-schema-tag{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--sbf-gold-text);border:1px solid var(--sbf-gold);border-radius:3px;display:inline-block;padding:2px 6px;margin:2px 4px 8px}
   .sbf-fig .sbf-cap{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--sbf-muted);margin:8px 4px 2px}

@@ -34,7 +34,7 @@
 
   function rsiZone(v) {
     if (v >= 70) return { label: t('eduindex.live.rsi_overbought', 'перекупленность'), color: '#C0392B' };
-    if (v <= 30) return { label: t('eduindex.live.rsi_oversold', 'перепроданность'), color: '#1A7D4F' };
+    if (v <= 30) return { label: t('eduindex.live.rsi_oversold', 'перепроданность'), color: '#2C784E' };
     return { label: t('eduindex.live.rsi_neutral', 'нейтральная зона'), color: '#716A5A' };
   }
 
@@ -67,7 +67,7 @@
       if (price != null) {
         const chg  = changePct != null ? changePct : 0;
         const sign = chg > 0 ? '+' : '';
-        const cCol = chg > 0 ? '#1A7D4F' : chg < 0 ? '#C0392B' : '#716A5A';
+        const cCol = chg > 0 ? '#2C784E' : chg < 0 ? '#C0392B' : '#716A5A';
         html += '<span>' + price.toLocaleString(_locale(), {maximumFractionDigits: 4}) + '</span>';
         html += '<span style="color:' + cCol + '">' + sign + chg.toFixed(2) + '%</span>';
       }

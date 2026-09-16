@@ -12,7 +12,7 @@
      поэтому порог берётся текстовый (4.5:1), а не графический (3:1).
      Полный разбор — в edu/assets/grafik-engine.js. */
   var P = {
-    up:'#287A62', down:'#BC4643', gold:'#866A19', blue:'#3B6EA5',
+    up:'#2C784E', down:'#C0392B', gold:'#866A19', blue:'#3B6EA5',
     violet:'#9855B5', teal:'#17805F', muted:'#716A5A'
   };
 

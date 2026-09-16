@@ -81,7 +81,6 @@ window.Ch5Content = {
       // Подпись только для скринридера: у ползунка часа видимой подписи нет,
       // её роль играет сама шкала под ним. Ключ в каждом языке, иначе
       // англичанин и румын услышали бы русское слово.
-      hourSliderLabel: "Час (UTC)",
       tradesLabel: "Сделок в месяц", overpayLabel: "Переплата спреда, пунктов за сделку", targetLabel: "Цель по сделке, пунктов",
       resultLabel: "Пунктов в месяц отдано только за право торговать в неудачный час",
       resultOfLabel: (expected) => `из ожидаемых ${expected}`,
@@ -95,6 +94,9 @@ window.Ch5Content = {
       tableCaption: "Часы бирж и фиксингов проверены по первоисточникам (JPX, LBMA/ICE, NBER); часы CME по золоту сверять перед торговлей на cmegroup.com/trading-hours.",
     },
     globe: {
+      // Подпись только для скринридера: у ползунка часа видимой
+      // подписи нет, её роль играет шкала под ним.
+      hourSliderLabel: "Час (UTC)",
       tag: "ГЛОБУС ЛИКВИДНОСТИ",
       title: "Сколько рынок реально проходит по часам",
       step1Legend: "Это карта суток. Верхняя полоса — двадцать четыре часа по UTC. Три цветные ленты — часы, в которые за столом сидят Азия, Европа и Америка. Столбики внизу — НЕ выдуманная кривая «активности», а измеренный нами средний размер получасового бара в этот час: сколько рынок реально проходит. Данные — наш бэкфилл MT5, {{n_days_label}} по золоту. Двигай ползунок — увидишь, кто за столом и сколько в этот час стоит движение.",
@@ -394,7 +396,6 @@ window.Ch5Content = {
       title: "Aritmetica orei nepotrivite",
       bodyIntro: "Un trader lucrează ziua și tranzacționează seara târziu și noaptea — singurul timp liber, totul cinstit. Instrumentul — aurul.\n\nNoaptea, doi factori lucrează simultan împotriva lui, ambii măsurabili. Primul — spread-ul: într-un registru subțire e mai larg decât ziua (capitolul 4, regimul „Noaptea asiatică”); să zicem că plătește 1.2 în loc de 0.3 — o supraplată de 0.9 puncte pe tranzacție. Al doilea, și e mai greu: intervalul. Conform măsurătorilor noastre, bara medie de 30 de minute a aurului în orele asiatice e {{night_share}}% din intervalul zilnic — ținta nu se atinge într-o oră, ci în jumătate de noapte, sau deloc.",
       calcIntro: "Introdu propriile cifre și vezi cifra ta.",
-      hourSliderLabel: "Ora (UTC)",
       tradesLabel: "Tranzacții pe lună", overpayLabel: "Supraplată spread, puncte pe tranzacție", targetLabel: "Țintă pe tranzacție, puncte",
       resultLabel: "Puncte pe lună date doar pentru dreptul de a tranzacționa la o oră nepotrivită",
       resultOfLabel: (expected) => `din ${expected} așteptate`,
@@ -408,6 +409,7 @@ window.Ch5Content = {
       tableCaption: "Orele burselor și fixing-urilor sunt verificate la sursele primare (JPX, LBMA/ICE, NBER); orele CME pentru aur se verifică înainte de tranzacționare pe cmegroup.com/trading-hours.",
     },
     globe: {
+      hourSliderLabel: "Ora (UTC)",
       tag: "GLOBUL LICHIDITĂȚII",
       title: "Cât parcurge piața cu adevărat, oră de oră",
       step1Legend: "Aceasta e harta zilei. Banda de sus — douăzeci și patru de ore UTC. Trei benzi colorate — orele în care Asia, Europa și America sunt la masă. Barele de jos NU sunt o curbă „de activitate” inventată, ci dimensiunea medie măsurată de noi a barei de 30 de minute în ora respectivă. Date — bekfill-ul nostru MT5, {{n_days_label}} pe aur. Mișcă cursorul — vezi cine e la masă și cât valorează mișcarea în ora respectivă.",
@@ -697,7 +699,6 @@ window.Ch5Content = {
       title: "The arithmetic of a bad hour",
       bodyIntro: "A trader works days and trades late evening and at night — the only free time he has, entirely honest. Instrument: gold.\n\nAt night two factors work against him at once, both measurable. First — spread: in a thin book it's wider than during the day (chapter 4, \"Asian night\" regime); say he pays 1.2 instead of 0.3 — an overpay of 0.9 points per trade. Second, and heavier: range. By our own measurements, gold's average 30-minute bar during Asian hours is {{night_share}}% of the daily range — a target isn't reached in an hour, but over half the night, or not at all.",
       calcIntro: "Plug in your own numbers and see your own figure.",
-      hourSliderLabel: "Hour (UTC)",
       tradesLabel: "Trades per month", overpayLabel: "Spread overpay, points per trade", targetLabel: "Target per trade, points",
       resultLabel: "Points a month handed over just for the right to trade at a bad hour",
       resultOfLabel: (expected) => `out of an expected ${expected}`,
@@ -711,6 +712,7 @@ window.Ch5Content = {
       tableCaption: "Exchange and fixing hours verified against primary sources (JPX, LBMA/ICE, NBER); CME gold hours should be re-checked before trading at cmegroup.com/trading-hours.",
     },
     globe: {
+      hourSliderLabel: "Hour (UTC)",
       tag: "LIQUIDITY GLOBE",
       title: "How far the market actually moves, hour by hour",
       step1Legend: "This is a map of the day. The top bar is 24 hours in UTC. The three coloured bands mark the hours Asia, Europe and America are at the table. The bars below are NOT a made-up \"activity\" curve — they're our own measured median 30-minute bar size for that hour: how far the market actually moves. Data — our MT5 backfill, {{n_days_label}} of gold. Drag the slider — see who's at the table and how much movement that hour is worth.",

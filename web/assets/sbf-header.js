@@ -89,7 +89,7 @@
   var CSS = [
     ':root{--cream:#FBF6EF;--paper:#FFFFFF;--line:#E7DFCF;',
     '--ink:#2B2B33;--muted:#716A5A;--faint:#7B6B52;',
-    '--gold:#C9A227;--glow:#E6C257;--up:#1A7D4F;--down:#c0392b;}',
+    '--gold:#C9A227;--glow:#E6C257;--up:#2C784E;--down:#c0392b;}',
 
     '.sbf-hd{display:flex;align-items:center;gap:18px;padding:10px 24px;',
     'border-bottom:1px solid var(--line);background:var(--paper);',

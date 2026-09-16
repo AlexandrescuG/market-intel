@@ -696,7 +696,7 @@ function LiquidityGlobe({ hp }) {
             );
           })}
         </div>
-        <input type="range" min="0" max="23" value={hour} aria-label={p.hourSliderLabel || "Час (UTC)"} onChange={e => { setHour(+e.target.value); setTouring(false); }} style={{width:"100%",marginBottom:16}}/>
+        <input type="range" min="0" max="23" value={hour} aria-label={gl.hourSliderLabel} onChange={e => { setHour(+e.target.value); setTouring(false); }} style={{width:"100%",marginBottom:16}}/>
 
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:12,background:"rgba(255,255,255,0.05)",borderRadius:6,padding:"14px 18px",marginBottom:20}}>
           <div>
