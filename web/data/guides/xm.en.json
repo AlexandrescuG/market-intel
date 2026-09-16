@@ -13,16 +13,44 @@
       "label": "Registration",
       "platform": "xm.com, web",
       "captured": "2026-08-05",
-      "needed": ["Email", "A couple of minutes — the form is a single screen"],
+      "needed": [
+        "Email",
+        "A couple of minutes — the form is a single screen"
+      ],
       "blocks": [
-        { "type": "steps", "items": [
-          { "img": "/assets/guides/xm/registration/01_start.png", "caption": "Open xm.com and click \"Get Started\"." },
-          { "img": "/assets/guides/xm/registration/02_country.png", "caption": "Choose your country of residence — detected automatically by IP. This field decides which group company you'll sign the contract with." },
-          { "img": "/assets/guides/xm/registration/04_form.png", "caption": "Enter your email and password. Account type and leverage aren't asked here — that's decided after registration." },
-          { "img": null, "caption": "Tick the data-processing consent and click \"Register\".",
-            "note": "We couldn't capture this screen technically (the capture tool kept timing out), but the consent text is recorded verbatim: \"By registering, I state that I have carefully read, understood, and accept the full text of the company's adopted legal documents and Privacy Policy. I also understand that I will receive letters, company news, and information on new products from the company.\" A separate checkbox covers marketing emails — it can be withdrawn at any time and doesn't affect account opening." }
-        ] },
-        { "type": "entity",
+        {
+          "type": "steps",
+          "items": [
+            {
+              "img": "/assets/guides/xm/registration/01_start.png",
+              "caption": "Open xm.com and click \"Get Started\".",
+              "img_webp": "/assets/guides/xm/registration/01_start.webp",
+              "img_w": 1408,
+              "img_h": 681
+            },
+            {
+              "img": "/assets/guides/xm/registration/02_country.png",
+              "caption": "Choose your country of residence — detected automatically by IP. This field decides which group company you'll sign the contract with.",
+              "img_webp": "/assets/guides/xm/registration/02_country.webp",
+              "img_w": 1408,
+              "img_h": 681
+            },
+            {
+              "img": "/assets/guides/xm/registration/04_form.png",
+              "caption": "Enter your email and password. Account type and leverage aren't asked here — that's decided after registration.",
+              "img_webp": "/assets/guides/xm/registration/04_form.webp",
+              "img_w": 1408,
+              "img_h": 681
+            },
+            {
+              "img": null,
+              "caption": "Tick the data-processing consent and click \"Register\".",
+              "note": "We couldn't capture this screen technically (the capture tool kept timing out), but the consent text is recorded verbatim: \"By registering, I state that I have carefully read, understood, and accept the full text of the company's adopted legal documents and Privacy Policy. I also understand that I will receive letters, company news, and information on new products from the company.\" A separate checkbox covers marketing emails — it can be withdrawn at any time and doesn't affect account opening."
+            }
+          ]
+        },
+        {
+          "type": "entity",
           "img": "/assets/guides/xm/registration/03_entity.png",
           "legal_name": "XM Global Limited",
           "jurisdiction": "Belize",
@@ -36,7 +64,10 @@
           "missing": [
             "a compensation fund (the Cyprus XM entity has one — €20,000; the Belize one doesn't)",
             "a published percentage of losing accounts"
-          ]
+          ],
+          "img_webp": "/assets/guides/xm/registration/03_entity.webp",
+          "img_w": 1408,
+          "img_h": 681
         }
       ]
     },
@@ -44,19 +75,53 @@
       "key": "activation",
       "label": "Account activation",
       "blocks": [
-        { "type": "steps", "items": [
-          { "img": "/assets/guides/xm/activation/01_cabinet_overview.png",
-            "caption": "The dashboard's main screen: an account card with \"Actions\" and \"Deposit\" buttons, and an account summary on the right that shows the 1000:1 leverage right away.",
-            "note": "A yellow banner at the top — \"Verify your account and get a 100% deposit bonus\" with a \"Verify account\" button — is the entry point to verification. We've blacked out account details and amounts." }
-        ] },
-        { "type": "callout", "style": "note", "title": "What to notice on this screen",
-          "body": ["1:1000 leverage isn't \"broker generosity\" — it's a sign of an offshore entity: the European company under the same brand caps out at 1:30. Worth seeing right away, not later.", "Separately: verification is offered here bundled with a bonus. The bonus isn't a reason to rush uploading documents — verification is needed in its own right, to be able to withdraw money."] },
-        { "type": "table", "columns": ["Parameter", "Value"], "rows": [
-          ["Account type", "MT5 Standard"],
-          ["Leverage", "1:1000"],
-          ["Contract size", "standard: 100,000 units of the base currency"],
-          ["Platforms", "MT4, MT5, MT5 web version, XM app"]
-        ] }
+        {
+          "type": "steps",
+          "items": [
+            {
+              "img": "/assets/guides/xm/activation/01_cabinet_overview.png",
+              "caption": "The dashboard's main screen: an account card with \"Actions\" and \"Deposit\" buttons, and an account summary on the right that shows the 1000:1 leverage right away.",
+              "note": "A yellow banner at the top — \"Verify your account and get a 100% deposit bonus\" with a \"Verify account\" button — is the entry point to verification. We've blacked out account details and amounts.",
+              "img_webp": "/assets/guides/xm/activation/01_cabinet_overview.webp",
+              "img_w": 1288,
+              "img_h": 930
+            }
+          ]
+        },
+        {
+          "type": "callout",
+          "style": "note",
+          "title": "What to notice on this screen",
+          "body": [
+            "1:1000 leverage isn't \"broker generosity\" — it's a sign of an offshore entity: the European company under the same brand caps out at 1:30. Worth seeing right away, not later.",
+            "Separately: verification is offered here bundled with a bonus. The bonus isn't a reason to rush uploading documents — verification is needed in its own right, to be able to withdraw money."
+          ]
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Parameter",
+            "Value"
+          ],
+          "rows": [
+            [
+              "Account type",
+              "MT5 Standard"
+            ],
+            [
+              "Leverage",
+              "1:1000"
+            ],
+            [
+              "Contract size",
+              "standard: 100,000 units of the base currency"
+            ],
+            [
+              "Platforms",
+              "MT4, MT5, MT5 web version, XM app"
+            ]
+          ]
+        }
       ]
     },
     {
@@ -66,19 +131,51 @@
       "captured": "2026-08-13",
       "intro": "The funding section was captured again — last time the \"Deposit\" button wouldn't open (the SPA wasn't responding). This time the payment-methods panel opened, and it revealed why that matters: on an unverified account, there's nothing to fund with at all.",
       "blocks": [
-        { "type": "steps", "items": [
-          { "img": "/assets/guides/xm/funding/01_deposit_locked.png",
-            "caption": "The \"Deposit methods\" panel: all five methods — Credit/Debit Cards, Neteller, Skrill, Binance Pay, Cryptocurrencies — show a lock icon under \"Disabled methods\".",
-            "note": "Account number in the screenshot redacted by us." }
-        ] },
-        { "type": "callout", "style": "gap", "title": "You can't fund the account before verifying",
-          "body": "The caption under the locks, verbatim: \"These payment methods are unavailable because they're only available to verified clients.\" Not some of the methods, not a lower limit — all five are locked at once. At XM, verification isn't a formality for withdrawing profit — it's a condition for the very first deposit." },
-        { "type": "table", "columns": ["Parameter", "Value", "Source"], "rows": [
-          ["Minimum deposit", "5 USD", "broker's website"],
-          ["Inactivity fee", "5 USD/month after 90 days without trades", "XM costs document"]
-        ] },
-        { "type": "callout", "style": "note", "title": "What to watch for when funding",
-          "body": "The inactivity fee isn't trivial: an account forgotten for a year loses 60 USD against a minimum deposit of just 5 USD. If you're opening an account \"just to look\" and don't plan to trade, it's smarter to withdraw the balance than leave it sitting there." }
+        {
+          "type": "steps",
+          "items": [
+            {
+              "img": "/assets/guides/xm/funding/01_deposit_locked.png",
+              "caption": "The \"Deposit methods\" panel: all five methods — Credit/Debit Cards, Neteller, Skrill, Binance Pay, Cryptocurrencies — show a lock icon under \"Disabled methods\".",
+              "note": "Account number in the screenshot redacted by us.",
+              "img_webp": "/assets/guides/xm/funding/01_deposit_locked.webp",
+              "img_w": 1280,
+              "img_h": 1222
+            }
+          ]
+        },
+        {
+          "type": "callout",
+          "style": "gap",
+          "title": "You can't fund the account before verifying",
+          "body": "The caption under the locks, verbatim: \"These payment methods are unavailable because they're only available to verified clients.\" Not some of the methods, not a lower limit — all five are locked at once. At XM, verification isn't a formality for withdrawing profit — it's a condition for the very first deposit."
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Parameter",
+            "Value",
+            "Source"
+          ],
+          "rows": [
+            [
+              "Minimum deposit",
+              "5 USD",
+              "broker's website"
+            ],
+            [
+              "Inactivity fee",
+              "5 USD/month after 90 days without trades",
+              "XM costs document"
+            ]
+          ]
+        },
+        {
+          "type": "callout",
+          "style": "note",
+          "title": "What to watch for when funding",
+          "body": "The inactivity fee isn't trivial: an account forgotten for a year loses 60 USD against a minimum deposit of just 5 USD. If you're opening an account \"just to look\" and don't plan to trade, it's smarter to withdraw the balance than leave it sitting there."
+        }
       ]
     },
     {
@@ -88,26 +185,68 @@
       "captured": "2026-08-13",
       "intro": "The capture tool no longer breaks on this page — last time it failed here and on registration too, this time the whole path was captured properly. The \"Verify account\" button from the yellow banner leads through five screens in a row: phone, personal details, address, an investor questionnaire, and only then documents via Sumsub (the same verification provider NAGA uses).",
       "blocks": [
-        { "type": "steps", "items": [
-          { "img": "/assets/guides/xm/verification/01_phone_verify.png",
-            "caption": "Step 1 — \"Phone number verification\": the country code fills in automatically, then a \"Get code\" button.",
-            "note": "We deliberately didn't click \"Get code\": that sends an SMS to a real phone number, which is an action, not just viewing." },
-          { "img": "/assets/guides/xm/verification/02_personal_details.png",
-            "caption": "\"Enter your details\": first name, middle name (optional), last name, and date of birth — exactly as they appear on your ID document." },
-          { "img": "/assets/guides/xm/verification/03_investor_profile.png",
-            "caption": "\"Enter your investor details\" — a yes/no question: have you completed forex trading education, and made at least 15 trades in derivative instruments (forex, CFDs)? This is a genuine investor-experience test, not a box-ticking form — the answer decides what risk warnings this specific account sees." },
-          { "img": "/assets/guides/xm/verification/04_confirm_identity.png",
-            "caption": "\"Confirm your identity\": you'll need copies of an ID document and proof of address, and optionally a selfie." },
-          { "img": "/assets/guides/xm/verification/05_doc_type.png",
-            "caption": "Next — Sumsub: the document's country of issue and type (ID card, passport, residence permit, driving licence)." },
-          { "img": "/assets/guides/xm/verification/06_upload.png",
-            "caption": "Document upload — front and back separately, JPG/PNG/HEIC/WEBP/PDF up to 50 MB.",
-            "note": "We didn't upload or photograph a real document — these fields are shown empty." },
-          { "img": "/assets/guides/xm/verification/07_phone_qr.png",
-            "caption": "Every Sumsub step has a \"Continue on phone\" button — the QR code opens the same process on your phone's camera, if that's easier than shooting the document from a computer." }
-        ] },
-        { "type": "callout", "style": "note", "title": "The difficulty ramps up as you go",
-          "body": "Phone and name are a formality. The investor questionnaire is already a substantive question about trading experience. Uploading a two-sided document plus a liveness check (Sumsub, the same provider NAGA uses) is where a chunk of users actually drop off. Until every step is complete, funding is unavailable through any method (see the Funding section)." }
+        {
+          "type": "steps",
+          "items": [
+            {
+              "img": "/assets/guides/xm/verification/01_phone_verify.png",
+              "caption": "Step 1 — \"Phone number verification\": the country code fills in automatically, then a \"Get code\" button.",
+              "note": "We deliberately didn't click \"Get code\": that sends an SMS to a real phone number, which is an action, not just viewing.",
+              "img_webp": "/assets/guides/xm/verification/01_phone_verify.webp",
+              "img_w": 1280,
+              "img_h": 1220
+            },
+            {
+              "img": "/assets/guides/xm/verification/02_personal_details.png",
+              "caption": "\"Enter your details\": first name, middle name (optional), last name, and date of birth — exactly as they appear on your ID document.",
+              "img_webp": "/assets/guides/xm/verification/02_personal_details.webp",
+              "img_w": 1280,
+              "img_h": 1220
+            },
+            {
+              "img": "/assets/guides/xm/verification/03_investor_profile.png",
+              "caption": "\"Enter your investor details\" — a yes/no question: have you completed forex trading education, and made at least 15 trades in derivative instruments (forex, CFDs)? This is a genuine investor-experience test, not a box-ticking form — the answer decides what risk warnings this specific account sees.",
+              "img_webp": "/assets/guides/xm/verification/03_investor_profile.webp",
+              "img_w": 1280,
+              "img_h": 1220
+            },
+            {
+              "img": "/assets/guides/xm/verification/04_confirm_identity.png",
+              "caption": "\"Confirm your identity\": you'll need copies of an ID document and proof of address, and optionally a selfie.",
+              "img_webp": "/assets/guides/xm/verification/04_confirm_identity.webp",
+              "img_w": 1280,
+              "img_h": 1220
+            },
+            {
+              "img": "/assets/guides/xm/verification/05_doc_type.png",
+              "caption": "Next — Sumsub: the document's country of issue and type (ID card, passport, residence permit, driving licence).",
+              "img_webp": "/assets/guides/xm/verification/05_doc_type.webp",
+              "img_w": 1280,
+              "img_h": 1220
+            },
+            {
+              "img": "/assets/guides/xm/verification/06_upload.png",
+              "caption": "Document upload — front and back separately, JPG/PNG/HEIC/WEBP/PDF up to 50 MB.",
+              "note": "We didn't upload or photograph a real document — these fields are shown empty.",
+              "img_webp": "/assets/guides/xm/verification/06_upload.webp",
+              "img_w": 1280,
+              "img_h": 1220
+            },
+            {
+              "img": "/assets/guides/xm/verification/07_phone_qr.png",
+              "caption": "Every Sumsub step has a \"Continue on phone\" button — the QR code opens the same process on your phone's camera, if that's easier than shooting the document from a computer.",
+              "img_webp": "/assets/guides/xm/verification/07_phone_qr.webp",
+              "img_w": 1280,
+              "img_h": 1220
+            }
+          ]
+        },
+        {
+          "type": "callout",
+          "style": "note",
+          "title": "The difficulty ramps up as you go",
+          "body": "Phone and name are a formality. The investor questionnaire is already a substantive question about trading experience. Uploading a two-sided document plus a liveness check (Sumsub, the same provider NAGA uses) is where a chunk of users actually drop off. Until every step is complete, funding is unavailable through any method (see the Funding section)."
+        }
       ]
     },
     {
@@ -116,28 +255,91 @@
       "platform": "my.xm.com/markets, web terminal",
       "captured": "2026-08-13",
       "blocks": [
-        { "type": "steps", "items": [
-          { "img": "/assets/guides/xm/trading/01_terminal_order.png",
-            "caption": "The \"Markets\" section: an instrument list on the left with live quotes, a gold chart, and a one-click order panel on the right.",
-            "note": "The account balance is 0 USD, so under the order button it says \"Insufficient margin to place this order\" — that's an honest message from the terminal itself, not something we staged." },
-          { "img": "/assets/guides/xm/trading/02_copytrading.png",
-            "caption": "A separate \"Copy trading\" tab — a strategy marketplace with real numbers: monthly profit, the manager's own funds, amount invested, minimum investment, commission, number of investors, drawdown." }
-        ] },
-        { "type": "callout", "style": "note", "title": "Copy trading isn't just a NAGA thing",
-          "body": "XM has the same kind of feature we already showed at NAGA (\"Find Leaders\"): subscribing to a specific trader's trades for a cut of the profit (10% to 30% here, depending on the strategy). A leader's past return isn't a guarantee of future return, and the profit shown is the leader's profit, not the subscriber's — commission and copy delay both eat into it." },
-        { "type": "text", "body": "What we measured ourselves in the XM terminal (a snapshot outside the methodology windows, 2026-08-05, around 10:00 UTC) versus what the broker publishes about itself:" },
-        { "type": "table", "columns": ["Instrument", "Broker's average spread", "Our terminal snapshot"], "rows": [
-          ["EUR/USD", "2.0 pips", "1.9"],
-          ["GBP/USD", "2.4", "2.4"],
-          ["USD/JPY", "2.5", "2.3"],
-          ["Gold", "5.5", "$0.55"],
-          ["WTI Oil", "0.05", "$0.05"],
-          ["Bitcoin", "50.00", "$50.00"]
-        ] },
-        { "type": "callout", "style": "fact", "title": "XM publishes an average spread, and it matches our measurement",
-          "body": ["That's rare: most platforms in our comparison either show \"spread from...\" or nothing at all. XM publishes average and minimum spreads for every instrument class, and for Bitcoin and Ether the figures matched our terminal snapshot exactly.", "Sources: XM's condition pages by instrument class, checked 2026-08-06. Our own snapshot is from a real account's terminal, taken outside the methodology windows, shown here as a reference point."] },
-        { "type": "callout", "style": "note", "title": "Watch the unit of measurement",
-          "body": "XM's \"pip\" is ten quote points, not the last digit. For gold, 5.5 pips means $0.55. If you treat a pip as the last digit, the error on gold becomes tenfold." }
+        {
+          "type": "steps",
+          "items": [
+            {
+              "img": "/assets/guides/xm/trading/01_terminal_order.png",
+              "caption": "The \"Markets\" section: an instrument list on the left with live quotes, a gold chart, and a one-click order panel on the right.",
+              "note": "The account balance is 0 USD, so under the order button it says \"Insufficient margin to place this order\" — that's an honest message from the terminal itself, not something we staged.",
+              "img_webp": "/assets/guides/xm/trading/01_terminal_order.webp",
+              "img_w": 1280,
+              "img_h": 1222
+            },
+            {
+              "img": "/assets/guides/xm/trading/02_copytrading.png",
+              "caption": "A separate \"Copy trading\" tab — a strategy marketplace with real numbers: monthly profit, the manager's own funds, amount invested, minimum investment, commission, number of investors, drawdown.",
+              "img_webp": "/assets/guides/xm/trading/02_copytrading.webp",
+              "img_w": 1280,
+              "img_h": 1222
+            }
+          ]
+        },
+        {
+          "type": "callout",
+          "style": "note",
+          "title": "Copy trading isn't just a NAGA thing",
+          "body": "XM has the same kind of feature we already showed at NAGA (\"Find Leaders\"): subscribing to a specific trader's trades for a cut of the profit (10% to 30% here, depending on the strategy). A leader's past return isn't a guarantee of future return, and the profit shown is the leader's profit, not the subscriber's — commission and copy delay both eat into it."
+        },
+        {
+          "type": "text",
+          "body": "What we measured ourselves in the XM terminal (a snapshot outside the methodology windows, 2026-08-05, around 10:00 UTC) versus what the broker publishes about itself:"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Instrument",
+            "Broker's average spread",
+            "Our terminal snapshot"
+          ],
+          "rows": [
+            [
+              "EUR/USD",
+              "2.0 pips",
+              "1.9"
+            ],
+            [
+              "GBP/USD",
+              "2.4",
+              "2.4"
+            ],
+            [
+              "USD/JPY",
+              "2.5",
+              "2.3"
+            ],
+            [
+              "Gold",
+              "5.5",
+              "$0.55"
+            ],
+            [
+              "WTI Oil",
+              "0.05",
+              "$0.05"
+            ],
+            [
+              "Bitcoin",
+              "50.00",
+              "$50.00"
+            ]
+          ]
+        },
+        {
+          "type": "callout",
+          "style": "fact",
+          "title": "XM publishes an average spread, and it matches our measurement",
+          "body": [
+            "That's rare: most platforms in our comparison either show \"spread from...\" or nothing at all. XM publishes average and minimum spreads for every instrument class, and for Bitcoin and Ether the figures matched our terminal snapshot exactly.",
+            "Sources: XM's condition pages by instrument class, checked 2026-08-06. Our own snapshot is from a real account's terminal, taken outside the methodology windows, shown here as a reference point."
+          ]
+        },
+        {
+          "type": "callout",
+          "style": "note",
+          "title": "Watch the unit of measurement",
+          "body": "XM's \"pip\" is ten quote points, not the last digit. For gold, 5.5 pips means $0.55. If you treat a pip as the last digit, the error on gold becomes tenfold."
+        }
       ]
     }
   ]

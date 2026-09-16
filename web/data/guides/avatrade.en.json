@@ -13,31 +13,68 @@
       "label": "Registration",
       "platform": "avatrade.com, web",
       "captured": "2026-08-07",
-      "needed": ["Email", "Your ID details (you'll need them later, for verification — enter them exactly as on the document)"],
+      "needed": [
+        "Email",
+        "Your ID details (you'll need them later, for verification — enter them exactly as on the document)"
+      ],
       "blocks": [
-        { "type": "steps", "items": [
-          { "img": "/assets/guides/avatrade/registration/01_start.png",
-            "caption": "[Open avatrade.com](https://www.avatrade.com/?tag=184200) and click \"Register Now\". Your country is detected automatically by IP." },
-          { "img": "/assets/guides/avatrade/registration/02_country.png",
-            "caption": "Enter your email and password.",
-            "note": "The password must be at least 8 characters and include an uppercase letter, a digit, and a special character — for example, Aa12345$." },
-          { "img": "/assets/guides/avatrade/registration/06_personal_details.png",
-            "caption": "Fill in your personal details (2/4): name, date of birth, address.",
-            "note": "Enter it exactly as on your passport — this data is checked against your document during verification (step 4 below)." },
-          { "img": "/assets/guides/avatrade/registration/07_financial_details.png",
-            "caption": "Answer the financial questionnaire (3/4): occupation, employment, source of funds, income, savings, risk tolerance.",
-            "note": "This is a standard KYC (\"know your customer\") check — a mandatory part of registration at any regulated broker, not something specific to AvaTrade. The order of the answers doesn't matter, and the answers themselves don't affect trading conditions." },
-          { "img": "/assets/guides/avatrade/registration/08_terms_conditions.png",
-            "caption": "Tick the relevant boxes in Terms & Conditions (4/4)." }
-        ] },
-        { "type": "callout", "style": "note", "title": "What each toggle means",
+        {
+          "type": "steps",
+          "items": [
+            {
+              "img": "/assets/guides/avatrade/registration/01_start.png",
+              "caption": "[Open avatrade.com](https://www.avatrade.com/?tag=184200) and click \"Register Now\". Your country is detected automatically by IP.",
+              "img_webp": "/assets/guides/avatrade/registration/01_start.webp",
+              "img_w": 1342,
+              "img_h": 916
+            },
+            {
+              "img": "/assets/guides/avatrade/registration/02_country.png",
+              "caption": "Enter your email and password.",
+              "note": "The password must be at least 8 characters and include an uppercase letter, a digit, and a special character — for example, Aa12345$.",
+              "img_webp": "/assets/guides/avatrade/registration/02_country.webp",
+              "img_w": 1342,
+              "img_h": 916
+            },
+            {
+              "img": "/assets/guides/avatrade/registration/06_personal_details.png",
+              "caption": "Fill in your personal details (2/4): name, date of birth, address.",
+              "note": "Enter it exactly as on your passport — this data is checked against your document during verification (step 4 below).",
+              "img_webp": "/assets/guides/avatrade/registration/06_personal_details.webp",
+              "img_w": 1280,
+              "img_h": 1111
+            },
+            {
+              "img": "/assets/guides/avatrade/registration/07_financial_details.png",
+              "caption": "Answer the financial questionnaire (3/4): occupation, employment, source of funds, income, savings, risk tolerance.",
+              "note": "This is a standard KYC (\"know your customer\") check — a mandatory part of registration at any regulated broker, not something specific to AvaTrade. The order of the answers doesn't matter, and the answers themselves don't affect trading conditions.",
+              "img_webp": "/assets/guides/avatrade/registration/07_financial_details.webp",
+              "img_w": 1280,
+              "img_h": 1111
+            },
+            {
+              "img": "/assets/guides/avatrade/registration/08_terms_conditions.png",
+              "caption": "Tick the relevant boxes in Terms & Conditions (4/4).",
+              "img_webp": "/assets/guides/avatrade/registration/08_terms_conditions.webp",
+              "img_w": 1280,
+              "img_h": 1111
+            }
+          ]
+        },
+        {
+          "type": "callout",
+          "style": "note",
+          "title": "What each toggle means",
           "body": [
             "\"I confirm that I am not a U.S. citizen...\" — mandatory: AvaTrade doesn't serve US residents, and you can't continue without ticking this.",
             "\"I have read, understood and accepted the Terms and Conditions\" — mandatory, agreement to the contract.",
             "\"I consent to receive account updates via WhatsApp\" — optional, only about the notification channel.",
             "The affiliate-payout notice is just a disclosure: AvaTrade is entitled to pay a commission to platforms like ours for referring a client. It doesn't require consent — it's not a toggle, just information."
-          ] },
-        { "type": "entity", "unresolved": true,
+          ]
+        },
+        {
+          "type": "entity",
+          "unresolved": true,
           "title": "Who signs the contract — not established",
           "body": [
             "The legal entity isn't named on the registration form. The site's footer lists ten regulators in a row — Japan (FFAJ and FSA), Cyprus (CySEC), Israel (ISA), Canada (CIRO), Abu Dhabi (ADGM/FSRA), Ireland (Central Bank of Ireland), the British Virgin Islands (BVI FSC), South Africa (FSCA), Australia (ASIC), Colombia. Which one applies to a client outside these jurisdictions (for example, from the CIS or the rest of Europe) is never stated.",
@@ -52,16 +89,42 @@
       "label": "Account activation",
       "captured": "2026-08-07",
       "blocks": [
-        { "type": "steps", "items": [
-          { "img": "/assets/guides/avatrade/activation/02_cabinet_overview.png",
-            "caption": "Right after registration you land in the trading dashboard. The account is already open — but not yet funded or verified." },
-          { "img": "/assets/guides/avatrade/activation/01_account_management.png",
-            "caption": "The list of your accounts is under \"Account Management\" (the ☰ icon in the top left) → \"Accounts\". The \"Add A New Account\" button lets you open another account for a separate strategy; the filters above are by type (CFD/Webtrader/MetaTrader 4) and currency." }
-        ] },
-        { "type": "table", "columns": ["Parameter", "Value"], "rows": [
-          ["Platform at registration", "CFD — MT5 (chosen in step 2 of registration, can be changed later in account settings)"],
-          ["Base currency", "USD (also chosen at registration)"]
-        ] }
+        {
+          "type": "steps",
+          "items": [
+            {
+              "img": "/assets/guides/avatrade/activation/02_cabinet_overview.png",
+              "caption": "Right after registration you land in the trading dashboard. The account is already open — but not yet funded or verified.",
+              "img_webp": "/assets/guides/avatrade/activation/02_cabinet_overview.webp",
+              "img_w": 1280,
+              "img_h": 1111
+            },
+            {
+              "img": "/assets/guides/avatrade/activation/01_account_management.png",
+              "caption": "The list of your accounts is under \"Account Management\" (the ☰ icon in the top left) → \"Accounts\". The \"Add A New Account\" button lets you open another account for a separate strategy; the filters above are by type (CFD/Webtrader/MetaTrader 4) and currency.",
+              "img_webp": "/assets/guides/avatrade/activation/01_account_management.webp",
+              "img_w": 1342,
+              "img_h": 916
+            }
+          ]
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Parameter",
+            "Value"
+          ],
+          "rows": [
+            [
+              "Platform at registration",
+              "CFD — MT5 (chosen in step 2 of registration, can be changed later in account settings)"
+            ],
+            [
+              "Base currency",
+              "USD (also chosen at registration)"
+            ]
+          ]
+        }
       ]
     },
     {
@@ -69,21 +132,55 @@
       "label": "Funding",
       "captured": "2026-08-06",
       "blocks": [
-        { "type": "steps", "items": [
-          { "img": "/assets/guides/avatrade/funding/01_methods.png",
-            "caption": "In the left menu open \"Finance\" → \"Online Payments\" and pick a method: card (MasterCard, Maestro, Visa, Electron), Google Pay, Skrill, Neteller. A separate tab covers bank transfer.",
-            "note": "Skrill and Neteller require an account with those systems; Google Pay requires a linked card." },
-          { "img": "/assets/guides/avatrade/funding/02_amount_form.png",
-            "caption": "Enter the amount and currency.",
-            "note": "Next comes entering the card's payment details — we deliberately don't show that screen." },
-          { "img": "/assets/guides/avatrade/funding/03_wire_transfer.png",
-            "caption": "For a bank transfer there's a separate tab with ready-made details: bank, recipient, account number, SWIFT, IBAN.",
-            "note": "The payment recipient listed is Ava Trade Markets Ltd — the same name as in the site's footer (see the entity note in the Registration section). This confirms which company actually receives your money, but it doesn't change the fact that no regulator is named anywhere specifically for clients from the CIS and Europe." }
-        ] },
-        { "type": "table", "columns": ["Parameter", "Value", "Source"], "rows": [
-          ["Minimum card deposit", "100 USD", "broker's website, checked 2026-08-06"],
-          ["Minimum bank transfer", "$100 / €100 / £100", "transfer form, 2026-08-07"]
-        ] }
+        {
+          "type": "steps",
+          "items": [
+            {
+              "img": "/assets/guides/avatrade/funding/01_methods.png",
+              "caption": "In the left menu open \"Finance\" → \"Online Payments\" and pick a method: card (MasterCard, Maestro, Visa, Electron), Google Pay, Skrill, Neteller. A separate tab covers bank transfer.",
+              "note": "Skrill and Neteller require an account with those systems; Google Pay requires a linked card.",
+              "img_webp": "/assets/guides/avatrade/funding/01_methods.webp",
+              "img_w": 1342,
+              "img_h": 916
+            },
+            {
+              "img": "/assets/guides/avatrade/funding/02_amount_form.png",
+              "caption": "Enter the amount and currency.",
+              "note": "Next comes entering the card's payment details — we deliberately don't show that screen.",
+              "img_webp": "/assets/guides/avatrade/funding/02_amount_form.webp",
+              "img_w": 1342,
+              "img_h": 916
+            },
+            {
+              "img": "/assets/guides/avatrade/funding/03_wire_transfer.png",
+              "caption": "For a bank transfer there's a separate tab with ready-made details: bank, recipient, account number, SWIFT, IBAN.",
+              "note": "The payment recipient listed is Ava Trade Markets Ltd — the same name as in the site's footer (see the entity note in the Registration section). This confirms which company actually receives your money, but it doesn't change the fact that no regulator is named anywhere specifically for clients from the CIS and Europe.",
+              "img_webp": "/assets/guides/avatrade/funding/03_wire_transfer.webp",
+              "img_w": 1280,
+              "img_h": 473
+            }
+          ]
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Parameter",
+            "Value",
+            "Source"
+          ],
+          "rows": [
+            [
+              "Minimum card deposit",
+              "100 USD",
+              "broker's website, checked 2026-08-06"
+            ],
+            [
+              "Minimum bank transfer",
+              "$100 / €100 / £100",
+              "transfer form, 2026-08-07"
+            ]
+          ]
+        }
       ]
     },
     {
@@ -93,65 +190,152 @@
       "captured": "2026-08-07",
       "intro": "Without verification, some features are unavailable — in particular, full withdrawal of funds. Confirmation takes one screen with two document uploads.",
       "blocks": [
-        { "type": "steps", "items": [
-          { "img": "/assets/guides/avatrade/verification/01_menu_confirm_account.png",
-            "caption": "Click the three lines (☰) in the top left corner → \"Account Management\" → \"Verify account\".",
-            "note": "\"Verify account\" isn't on the main screen — only in this dropdown menu. If you're looking for it under \"Account\" in the side panel, you won't find it: those are different menu items." },
-          { "img": "/assets/guides/avatrade/verification/02_upload_empty.png",
-            "caption": "\"Document upload\" opens with the status \"Account not verified\" — there are two blocks here: ID card and proof of address." },
-          { "img": "/assets/guides/avatrade/verification/03_doctype_dropdown.png",
-            "caption": "In the \"ID card\" block, pick the document type and attach the front and back." },
-          { "img": "/assets/guides/avatrade/verification/04_citizenship_submit.png",
-            "caption": "Below, confirm your citizenship and tax residency, then click \"Submit\"." }
-        ] },
-        { "type": "callout", "style": "note", "title": "Requirements for the \"ID card\" document",
+        {
+          "type": "steps",
+          "items": [
+            {
+              "img": "/assets/guides/avatrade/verification/01_menu_confirm_account.png",
+              "caption": "Click the three lines (☰) in the top left corner → \"Account Management\" → \"Verify account\".",
+              "note": "\"Verify account\" isn't on the main screen — only in this dropdown menu. If you're looking for it under \"Account\" in the side panel, you won't find it: those are different menu items.",
+              "img_webp": "/assets/guides/avatrade/verification/01_menu_confirm_account.webp",
+              "img_w": 1280,
+              "img_h": 1108
+            },
+            {
+              "img": "/assets/guides/avatrade/verification/02_upload_empty.png",
+              "caption": "\"Document upload\" opens with the status \"Account not verified\" — there are two blocks here: ID card and proof of address.",
+              "img_webp": "/assets/guides/avatrade/verification/02_upload_empty.webp",
+              "img_w": 1280,
+              "img_h": 1108
+            },
+            {
+              "img": "/assets/guides/avatrade/verification/03_doctype_dropdown.png",
+              "caption": "In the \"ID card\" block, pick the document type and attach the front and back.",
+              "img_webp": "/assets/guides/avatrade/verification/03_doctype_dropdown.webp",
+              "img_w": 1280,
+              "img_h": 1108
+            },
+            {
+              "img": "/assets/guides/avatrade/verification/04_citizenship_submit.png",
+              "caption": "Below, confirm your citizenship and tax residency, then click \"Submit\".",
+              "img_webp": "/assets/guides/avatrade/verification/04_citizenship_submit.webp",
+              "img_w": 1280,
+              "img_h": 1108
+            }
+          ]
+        },
+        {
+          "type": "callout",
+          "style": "note",
+          "title": "Requirements for the \"ID card\" document",
           "body": [
             "Accepted documents: national passport, ID card, international passport, driving licence.",
             "You need to submit the front and back of the document.",
             "The document must clearly show: full name, date of birth, issue date, and expiry date (if applicable)."
-          ] },
-        { "type": "callout", "style": "note", "title": "Requirements for the \"proof of address\" document",
+          ]
+        },
+        {
+          "type": "callout",
+          "style": "note",
+          "title": "Requirements for the \"proof of address\" document",
           "body": [
             "Accepted documents: gas/electricity bills, bank statements, home or auto insurance policies, tax documents.",
             "The document must be dated no more than 6 months before the current date.",
             "The document must show your residential address."
-          ] },
-        { "type": "callout", "style": "note", "title": "If the account is opened for a legal entity",
-          "body": "You'll additionally need: articles of association with all amendments, a board resolution, a certificate of incorporation, shareholder registration, a notarised power of attorney for trading, a power of attorney for each director, for each shareholder, and for the authorised trader, plus the Ava account opening form." }
+          ]
+        },
+        {
+          "type": "callout",
+          "style": "note",
+          "title": "If the account is opened for a legal entity",
+          "body": "You'll additionally need: articles of association with all amendments, a board resolution, a certificate of incorporation, shareholder registration, a notarised power of attorney for trading, a power of attorney for each director, for each shareholder, and for the authorised trader, plus the Ava account opening form."
+        }
       ]
     },
     {
       "key": "trading",
       "label": "Trading",
       "blocks": [
-        { "type": "text", "body": "How to find the spread and swap for an instrument. These two numbers determine what your trade costs: you pay the spread right when you open it, and the swap every night you hold the position." },
-        { "type": "steps", "items": [
-          { "caption": "Open the instrument's page. For the euro-dollar that's [EUR/USD](https://www.avatrade.com/trading-info/financial-instruments-index/forex/eur-usd?i_key=EUR%2FUSD)." },
-          { "caption": "Find the Instrument Details block — it's below the chart. There are five numbers there: Spread, Leverage, Margin, Minimum Nominal Trade Size, and two Overnight Interest lines — separately for buying and selling." }
-        ] },
-        { "type": "callout", "style": "note", "title": "What to notice",
-          "body": "Overnight rates differ for buying and selling, and one of them is usually negative: for the euro-dollar, buying costs −0.0084% a day, while selling earns +0.0009%. If you hold a position for weeks, this matters more than the spread. (Checked 2026-08-06 on the instrument page.)" },
-        { "type": "callout", "style": "gap", "title": "If you want to compare several instruments at once — you can't",
+        {
+          "type": "text",
+          "body": "How to find the spread and swap for an instrument. These two numbers determine what your trade costs: you pay the spread right when you open it, and the swap every night you hold the position."
+        },
+        {
+          "type": "steps",
+          "items": [
+            {
+              "caption": "Open the instrument's page. For the euro-dollar that's [EUR/USD](https://www.avatrade.com/trading-info/financial-instruments-index/forex/eur-usd?i_key=EUR%2FUSD)."
+            },
+            {
+              "caption": "Find the Instrument Details block — it's below the chart. There are five numbers there: Spread, Leverage, Margin, Minimum Nominal Trade Size, and two Overnight Interest lines — separately for buying and selling."
+            }
+          ]
+        },
+        {
+          "type": "callout",
+          "style": "note",
+          "title": "What to notice",
+          "body": "Overnight rates differ for buying and selling, and one of them is usually negative: for the euro-dollar, buying costs −0.0084% a day, while selling earns +0.0009%. If you hold a position for weeks, this matters more than the spread. (Checked 2026-08-06 on the instrument page.)"
+        },
+        {
+          "type": "callout",
+          "style": "gap",
+          "title": "If you want to compare several instruments at once — you can't",
           "body": "AvaTrade's overall condition list [doesn't load](https://www.avatrade.com/trading-info/financial-instruments-index): the table headers are there, the rows aren't — not on the \"Most Popular\" tab, not on Forex, not after searching for an instrument. You'll have to open instruments one at a time, or use [our comparison table](/brokers).",
-          "img": "/assets/guides/avatrade/99_instruments_spinner.png" },
-        { "type": "text", "body": "The terminal itself is a separate tool from the website, and opens right after you log in to the dashboard. Conditions look different there: not one instrument at a time, but as a list, with a live spread in its own column." },
-        { "type": "steps", "items": [
-          { "img": "/assets/guides/avatrade/trading_terminal_01_overview.png",
-            "caption": "The instrument list is on the left (the \"Spread\" column is live, updating along with the price), the chart is on the right, and Sell/Buy buttons are in every row of the list." },
-          { "img": "/assets/guides/avatrade/trading_terminal_02_order_ticket.png",
-            "caption": "Clicking an instrument opens a ticket on the right: sell/buy price, volume in lots, amount in dollars, leverage, and Stop-Loss and Take-Profit checkboxes.",
-            "note": "The leverage in the ticket is specific to that instrument — it can differ from the account's overall leverage." }
-        ] },
-        { "type": "callout", "style": "note", "title": "What to notice in the ticket",
-          "body": "Stop-Loss and Take-Profit are separate checkboxes, both off by default. Without a Stop-Loss, a position has no limit on losses beyond the account balance." },
-        { "type": "callout", "style": "fact", "title": "Ready-made trading signals — right in the terminal",
+          "img": "/assets/guides/avatrade/99_instruments_spinner.png",
+          "img_webp": "/assets/guides/avatrade/99_instruments_spinner.webp",
+          "img_w": 1408,
+          "img_h": 681
+        },
+        {
+          "type": "text",
+          "body": "The terminal itself is a separate tool from the website, and opens right after you log in to the dashboard. Conditions look different there: not one instrument at a time, but as a list, with a live spread in its own column."
+        },
+        {
+          "type": "steps",
+          "items": [
+            {
+              "img": "/assets/guides/avatrade/trading_terminal_01_overview.png",
+              "caption": "The instrument list is on the left (the \"Spread\" column is live, updating along with the price), the chart is on the right, and Sell/Buy buttons are in every row of the list.",
+              "img_webp": "/assets/guides/avatrade/trading_terminal_01_overview.webp",
+              "img_w": 1280,
+              "img_h": 473
+            },
+            {
+              "img": "/assets/guides/avatrade/trading_terminal_02_order_ticket.png",
+              "caption": "Clicking an instrument opens a ticket on the right: sell/buy price, volume in lots, amount in dollars, leverage, and Stop-Loss and Take-Profit checkboxes.",
+              "note": "The leverage in the ticket is specific to that instrument — it can differ from the account's overall leverage.",
+              "img_webp": "/assets/guides/avatrade/trading_terminal_02_order_ticket.webp",
+              "img_w": 1280,
+              "img_h": 473
+            }
+          ]
+        },
+        {
+          "type": "callout",
+          "style": "note",
+          "title": "What to notice in the ticket",
+          "body": "Stop-Loss and Take-Profit are separate checkboxes, both off by default. Without a Stop-Loss, a position has no limit on losses beyond the account balance."
+        },
+        {
+          "type": "callout",
+          "style": "fact",
+          "title": "Ready-made trading signals — right in the terminal",
           "body": [
             "The \"Signals\" section shows ready-made ideas from Trading Central: instrument, direction, entry price, stop loss, take profit, and a plain-language scenario — \"Sell scenario\", \"Buy scenario\", key support and resistance levels.",
             "This isn't our recommendation or personal advice: Trading Central is AvaTrade's marketing partner, the signals are generated automatically by their methodology, and are equally available to any client."
           ],
-          "img": "/assets/guides/avatrade/trading_terminal_03_signals.png" },
-        { "type": "callout", "style": "note", "title": "What else is in the dashboard",
-          "body": "The \"Overview\" tab collects: analyst opinions (expected movement in pips and reversal points for currency pairs), Market Buzz (which stocks are being talked about right now), a curated selection of Forex ideas, and an economic calendar — all from the same Trading Central partner, at no extra charge." }
+          "img": "/assets/guides/avatrade/trading_terminal_03_signals.png",
+          "img_webp": "/assets/guides/avatrade/trading_terminal_03_signals.webp",
+          "img_w": 1280,
+          "img_h": 476
+        },
+        {
+          "type": "callout",
+          "style": "note",
+          "title": "What else is in the dashboard",
+          "body": "The \"Overview\" tab collects: analyst opinions (expected movement in pips and reversal points for currency pairs), Market Buzz (which stocks are being talked about right now), a curated selection of Forex ideas, and an economic calendar — all from the same Trading Central partner, at no extra charge."
+        }
       ]
     }
   ]

@@ -44,6 +44,35 @@
     return arr.map(function (p) { return '<p>' + linkify(p) + '</p>'; }).join('');
   }
 
+  // ── Снимок экрана: один сборщик на все три места ───────────────────────────
+  //
+  // 🔴 Раньше <img> собирался в трёх местах (врезка про юрлицо, шаг, колбаут)
+  // тремя одинаковыми строками. Пока к нему добавлялись только alt и lazy,
+  // это была терпимая копипаста; с приходом webp и размеров расхождение стало
+  // вопросом времени, поэтому сборка одна.
+  //
+  // width/height — не украшение. Без них браузер не знает пропорций до
+  // загрузки, отводит картинке нулевую высоту и двигает страницу, когда она
+  // приходит. На гайде таких кадров до 25.
+  //
+  // <picture> строится ТОЛЬКО когда в данных есть img_webp. Это не
+  // перестраховка: <source>, который не загрузился, НЕ откатывается на <img>
+  // внутри того же <picture> — на месте картинки остаётся пустая рамка.
+  // Поэтому наличие webp подтверждается данными (их проставляет
+  // tools/prepare_guide_images.py по факту сборки файла), а не предполагается
+  // по имени: нет поля — отдаём обычный PNG, как и раньше.
+  function снимок(о, alt, кл) {
+    if (!о || !о.img) return '';
+    var разм = (о.img_w && о.img_h)
+      ? ' width="' + о.img_w + '" height="' + о.img_h + '"' : '';
+    var img = '<img src="' + escapeHtml(о.img) + '" alt="' + escapeHtml(alt || '') + '"'
+      + разм + (кл ? ' class="' + кл + '"' : '')
+      + ' loading="lazy" decoding="async">';
+    if (!о.img_webp) return img;
+    return '<picture><source type="image/webp" srcset="'
+      + escapeHtml(о.img_webp) + '">' + img + '</picture>';
+  }
+
   // ── Блок: врезка про юрлицо (только регистрация) ───────────────────────────
   function renderEntity(e) {
     if (!e) return '';
@@ -77,7 +106,7 @@
 
     return '<div class="entity-box">' +
       '<div class="entity-box-title">' + t('guide.entity_box_title', 'С кем на самом деле заключается договор') + '</div>' +
-      (e.img ? '<img src="' + escapeHtml(e.img) + '" alt="' + escapeHtml(t('guide.entity_box_title', 'С кем на самом деле заключается договор')) + '" loading="lazy" decoding="async">' : '') +
+      снимок(e, t('guide.entity_box_title', 'С кем на самом деле заключается договор')) +
       rows + register +
       (e.quote ? '<p class="entity-quote">' + escapeHtml(e.quote) + '</p>' : '') +
       confirmNote + missing +
@@ -94,7 +123,7 @@
     // (какое юрлицо названо на экране), а не декорация. loading="lazy" —
     // на странице до 23 таких кадров, все грузились сразу (аудит 14.08.2026).
     var media = s.img
-      ? '<img src="' + escapeHtml(s.img) + '" alt="' + escapeHtml(String(s.caption || '').replace(/<[^>]*>/g, '')).slice(0, 120) + '" loading="lazy" decoding="async">'
+      ? снимок(s, String(s.caption || '').replace(/<[^>]*>/g, '').slice(0, 120))
       : ('img' in s ? '<div class="guide-step-nomedia">' + t('guide.step_no_image', 'Скриншот этого шага недоступен') + '</div>' : '');
     return '<div class="guide-step">' +
       '<div class="guide-step-cap"><span class="guide-step-num">' + (i + 1) + '</span>' + linkify(s.caption) + '</div>' +
@@ -108,7 +137,7 @@
     return '<div class="callout ' + escapeHtml(b.style || 'note') + '">' +
       (b.title ? '<div class="callout-title">' + linkify(b.title) + '</div>' : '') +
       paragraphs(b.body) +
-      (b.img ? '<img src="' + escapeHtml(b.img) + '" alt="' + escapeHtml(String(b.title || '').replace(/<[^>]*>/g, '')).slice(0, 120) + '" loading="lazy" decoding="async">' : '') +
+      снимок(b, String(b.title || '').replace(/<[^>]*>/g, '').slice(0, 120)) +
       '</div>';
   }
 

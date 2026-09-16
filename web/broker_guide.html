@@ -116,6 +116,11 @@ body{
 .guide-step{margin-bottom:28px}
 .guide-step-num{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;
   border-radius:50%;background:var(--ink);color:var(--paper);font-size:12px;font-weight:700;margin-right:8px}
+/* <picture> — инлайновый элемент. Внутри него <img> уже display:block,
+   но сам picture остаётся строчным и ловит line-height родителя: под
+   картинкой появляется лишняя щель в несколько пикселей. Проще сделать
+   блоком его самого, чем гоняться за font-size у всех предков. */
+.guide-step picture,.callout picture,.entity-box picture{display:block}
 .guide-step img{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:8px;margin-top:10px}
 .guide-step-cap{font-size:14px;line-height:1.6;color:var(--ink)}
 .guide-step-note{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.5}
