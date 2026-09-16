@@ -463,7 +463,15 @@
     '  <div class="mob-time"><span class="mob-dot" id="mobLiveDot"></span><span id="mobClock">—</span></div>',
     '  <div class="sbf-lang-sw" id="sbfLangSwMob"></div>',
     '</div>',
-    '<div class="strip" id="strip"><div class="strip-i" id="stripI"></div></div>'
+    // 🔴 tabindex + role + aria-label. Лента котировок прокручивается, но
+    // попасть в неё с клавиатуры было нельзя (axe scrollable-region-focusable):
+    // внутри нет ни одного фокусируемого элемента, значит Tab туда не
+    // заходит, и содержимое недостижимо без мыши или пальца.
+    // role="region" + имя — чтобы в списке ориентиров она называлась, а не
+    // была безымянной группой: «лента котировок» говорит больше, чем «регион».
+    '<div class="strip" id="strip" tabindex="0" role="region" aria-label="'
+      + t('a11y.strip_label', 'Лента котировок').replace(/"/g, '&quot;')
+      + '"><div class="strip-i" id="stripI"></div></div>'
   ].join('\n');
 
   // Bottom nav built separately so position:fixed is never trapped inside a stacking parent

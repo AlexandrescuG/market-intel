@@ -290,6 +290,41 @@ def check_data_files(exceptions: list[str], glob_exceptions: list[str]) -> dict:
 
 # ── main ───────────────────────────────────────────────────────────────────────
 
+def check_glossary_related() -> list[str]:
+    """Ссылки «по теме» между статьями глоссария, которые ведут в никуда.
+
+    🔴 16.09.2026: шесть таких ссылок жили на /glossary незамеченными.
+    Пять вели на термины, которых в словаре нет вовсе (atr, margin,
+    oscillator, risk — на последний ссылались три статьи), шестая была
+    опечаткой: `stoplos` вместо `stoploss`. Клик по ним прокручивал
+    в никуда — навигация внутри глоссария частично не работала.
+
+    Молча это не ловилось ничем: JSON валиден, страница рендерится,
+    в консоли чисто. Ошибка видна, только если сверить related со списком
+    slug'ов, — то есть ровно то, за чем существует этот скрипт.
+    """
+    итог = []
+    for имя in ("glossary.json", "glossary.ro.json", "glossary.en.json"):
+        путь = ROOT / "web" / "assets" / имя
+        if not путь.exists():
+            continue
+        try:
+            данные = json.loads(путь.read_text(encoding="utf-8"))
+        except Exception as e:
+            итог.append(f"{имя}: не читается — {e}")
+            continue
+        статьи = данные if isinstance(данные, list) else (
+            данные.get("terms") or данные.get("items") or [])
+        слаги = {с.get("slug") for с in статьи if isinstance(с, dict)}
+        for с in статьи:
+            if not isinstance(с, dict):
+                continue
+            for r in (с.get("related") or []):
+                if r not in слаги:
+                    итог.append(f"{имя}: «{с.get('slug')}» → related «{r}» — такого термина нет")
+    return итог
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--json", action="store_true", help="машиночитаемый вывод")
@@ -306,6 +341,7 @@ def main():
             exc.get("unreferenced_data_files_ok", []),
             exc.get("unreferenced_data_files_glob_ok", []),
         ),
+        "glossary_related": check_glossary_related(),
     }
 
     has_findings = (
@@ -315,6 +351,7 @@ def main():
         or bool(report["hardcoded_symbol_tickers"])
         or bool(report["undeclared_endpoints"])
         or bool(report["data_files"]["referenced_but_missing"])
+        or bool(report["glossary_related"])
     )
 
     if args.json:

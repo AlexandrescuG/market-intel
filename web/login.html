@@ -40,7 +40,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);
   color:var(--text);outline:none;transition:border-color .15s}
 .field input:focus{border-color:var(--gold)}
 .nav-row{display:flex;gap:10px;margin-top:20px}
-.btn{flex:1;padding:12px 20px;border-radius:8px;font-size:14px;font-weight:600;
+.btn{flex:1;padding:12px 20px;min-height:44px;border-radius:8px;font-size:14px;font-weight:600;
   cursor:pointer;transition:all .15s;border:none}
 .btn-primary{background:var(--gold);color:var(--ink,#2B2B33)}
 .btn-primary:hover{opacity:.9}
@@ -48,7 +48,13 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);
 .err{background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;
   padding:10px 12px;font-size:13px;color:var(--dn);margin-bottom:14px;display:none}
 .login-note{text-align:center;font-size:12px;color:var(--muted);margin-top:16px}
-.login-note a{color:var(--gold-text,#866A19)}
+/* Цель касания: ссылка была 119×17 (на /register и /survey — 35×17).
+   Это последний шаг воронки — «нет аккаунта? зарегистрироваться». Строчная
+   ссылка внутри абзаца не может стать выше без отрыва от текста, поэтому
+   inline-block + вертикальные отступы: строка остаётся строкой, а область
+   нажатия дорастает до 44 px. */
+.login-note a{color:var(--gold-text,#866A19);display:inline-block;
+  padding:13px 4px;margin:-13px 0}
 .divider{display:flex;align-items:center;gap:10px;margin:20px 0;color:var(--muted);font-size:12px}
 .divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--line)}
 .providers{display:flex;flex-direction:column;align-items:center;gap:10px}
@@ -165,7 +171,33 @@ function _renderTelegramWidget(host, callbackName, tries) {
   s.setAttribute('data-radius', '8');
   s.setAttribute('data-onauth', callbackName + '(user)');
   s.setAttribute('data-request-access', 'write');
+
+  // 🔴 <iframe> без title (axe frame-title, serious). Виджет вставляет фрейм
+  // сам, поэтому проставить атрибут при создании нельзя — только после
+  // появления. Контейнер наш, значит наблюдаем за ним.
+  // Наблюдатель ставится ДО appendChild: скрипт async, но вставка фрейма
+  // всё равно может случиться раньше, чем мы подпишемся, — проверяем и
+  // текущее состояние тоже, одной функцией.
+  var подписьФрейма = (window.sbfI18n && window.sbfI18n.t
+    ? window.sbfI18n.t('a11y.telegram_login', 'Вход через Telegram')
+    : 'Вход через Telegram');
+  function подписатьФреймы() {
+    var есть = false;
+    host.querySelectorAll('iframe').forEach(function (f) {
+      есть = true;
+      if (!(f.getAttribute('title') || '').trim()) f.setAttribute('title', подписьФрейма);
+    });
+    return есть;
+  }
+  var наблюдатель = new MutationObserver(function () {
+    if (подписатьФреймы()) наблюдатель.disconnect();
+  });
+  наблюдатель.observe(host, { childList: true, subtree: true });
   host.appendChild(s);
+  подписатьФреймы();
+  // Страховка на случай, если фрейм вставят без мутации в host (перенос
+  // узла, замена innerHTML родителя): один отложенный проход, потом всё.
+  setTimeout(function () { if (подписатьФреймы()) наблюдатель.disconnect(); }, 4000);
 }
 
 function _renderGoogleButton(host, callbackName, tries) {

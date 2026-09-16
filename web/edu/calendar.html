@@ -52,8 +52,11 @@ body{background:var(--cream);color:var(--ink);font-family:Montserrat,sans-serif;
 .drng-presets{display:flex;gap:4px;flex-wrap:wrap}
 /* ── Calendar popup ───────────────────────────────────────────── */
 .drng-cal-wrap{position:relative;margin-left:auto}
+/* Цель касания: кнопка выбора даты была 79×30 при норме 44 и с зазором 8 px
+   до соседних кнопок диапазона — поправка на пустое пространство не
+   вытягивает. Добираем вертикальным padding'ом. */
 .drng-cal-toggle{font-family:'JetBrains Mono',monospace;font-size:12px;
-  padding:6px 12px;border:1px solid var(--line);border-radius:8px;
+  padding:13px 12px;min-height:44px;border:1px solid var(--line);border-radius:8px;
   cursor:pointer;background:var(--paper);color:var(--ink);
   white-space:nowrap;transition:.12s;display:flex;align-items:center;gap:5px}
 .drng-cal-toggle:hover,.drng-cal-toggle.open{border-color:var(--gold)}

@@ -111,10 +111,17 @@ body {
    то же объявление с тем же значением. */
 
 @media (max-width: 560px) {
-  .edu-nav .nav-prev, .edu-nav .nav-next { font-size: 0; padding: 0 10px; }
+  /* 🔴 Цель касания. На узком экране подпись убирается (font-size:0) и от
+     кнопки остаётся одна стрелка: 29 px в ширину при норме 44. Кнопки
+     «предыдущая/следующая глава» стоят вплотную к «Содержанию», зазора нет,
+     так что промах уводит не туда, куда целился читатель. Ширину добираем
+     padding'ом — стрелка остаётся по центру. */
+  .edu-nav .nav-prev, .edu-nav .nav-next { font-size: 0; padding: 0 17px; min-width: 44px; }
   .edu-nav .nav-prev::before, .edu-nav .nav-next::after { font-size: 15px; }
   .edu-nav .nav-toc { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-  .edu-nav .nav-live { flex-shrink: 0; margin-left: auto; }
+  /* Котировка в панели главы — ссылка на терминал, высота была 30 px. */
+  .edu-nav .nav-live { flex-shrink: 0; margin-left: auto;
+    min-height: 44px; display: inline-flex; align-items: center; }
 }
 
 /* 🔴 Две фиксированные панели на одном месте. `.edu-nav` (z-index 999) лежит

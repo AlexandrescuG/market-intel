@@ -75,7 +75,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);
 
 /* Buttons */
 .nav-row{display:flex;gap:10px;margin-top:20px}
-.btn{flex:1;padding:12px 20px;border-radius:8px;font-size:14px;font-weight:600;
+.btn{flex:1;padding:12px 20px;min-height:44px;border-radius:8px;font-size:14px;font-weight:600;
   cursor:pointer;transition:all .15s;border:none}
 .btn-primary{background:var(--gold);color:var(--ink,#2B2B33)}
 .btn-primary:hover{opacity:.9}
@@ -89,7 +89,13 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);
 
 /* Login link */
 .login-note{text-align:center;font-size:12px;color:var(--muted);margin-top:16px}
-.login-note a{color:var(--gold-text,#866A19)}
+/* Цель касания: ссылка была 119×17 (на /register и /survey — 35×17).
+   Это последний шаг воронки — «нет аккаунта? зарегистрироваться». Строчная
+   ссылка внутри абзаца не может стать выше без отрыва от текста, поэтому
+   inline-block + вертикальные отступы: строка остаётся строкой, а область
+   нажатия дорастает до 44 px. */
+.login-note a{color:var(--gold-text,#866A19);display:inline-block;
+  padding:13px 4px;margin:-13px 0}
 .top-row{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:420px;margin-bottom:32px}
 .top-row .logo{margin-bottom:0}
 </style>

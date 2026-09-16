@@ -163,7 +163,16 @@ a:hover{text-decoration:underline;color:var(--glow)}
 
 /* report */
 .report{font-family:Montserrat}
-.rep-instrument-link{color:var(--gold-text,#866A19);font-weight:600;text-decoration:none;border-bottom:1.5px dotted var(--gold)}
+/* 🔴 Цель касания. Это ссылки на график актива прямо внутри текста
+   сводки («нефть подорожала…»), высота строки 19 px при норме 44.
+   Сделать их блоками нельзя — они часть предложения и разорвут абзац.
+   Поэтому вертикальные отступы с компенсирующим отрицательным margin:
+   область нажатия растёт вверх и вниз, а строка остаётся на месте.
+   Соседние ссылки стоят вплотную (зазор 0-3 px), так что поправка на
+   пустое пространство из WCAG 2.5.8 здесь не помогает. */
+.rep-instrument-link{color:var(--gold-text,#866A19);font-weight:600;text-decoration:none;
+  border-bottom:1.5px dotted var(--gold);
+  display:inline-block;padding:12px 0;margin:-12px 0}
 .rep-instrument-link:hover{background:rgba(201,162,39,.12)}
 .personal-block{margin-bottom:14px;padding:10px 14px;border-radius:10px;background:rgba(201,162,39,.07);border:1px solid rgba(201,162,39,.18);font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.8;display:none}
 .personal-block b{color:var(--ink)}
@@ -236,7 +245,12 @@ a:hover{text-decoration:underline;color:var(--glow)}
 .board-groups.as-list{display:block}
 .board-groups.as-list .board-group{margin-bottom:18px}
 .board-groups.as-list .board-cell{display:none}
-.board-row{display:flex;align-items:center;gap:10px;padding:9px 2px;
+/* 🔴 Цель касания. Строка доски — ссылка на график актива, то есть вход
+   в продукт, и на телефоне она была 40 px высотой при норме 44. Строки идут
+   вплотную (зазор 0), поэтому поправка на пустое пространство из WCAG 2.5.8
+   тут не спасает: промахнуться можно в соседний актив. Добираем padding,
+   а не height — иначе съедет выравнивание содержимого. */
+.board-row{display:flex;align-items:center;gap:10px;padding:11px 2px;min-height:44px;
   border-bottom:1px solid var(--line);text-decoration:none;color:inherit}
 .board-row:last-child{border-bottom:none}
 .board-row .br-sym{flex:1;min-width:0;font-size:13px;font-weight:600;color:var(--ink);
@@ -425,7 +439,12 @@ a:hover{text-decoration:underline;color:var(--glow)}
 .pulse-feed-card h4{margin:0 0 10px;font-family:var(--font-sans);font-size:14px;padding-right:20px}
 .pulse-feed-card .pf-item{padding:9px 0;border-top:1px solid var(--line)}
 .pulse-feed-card .pf-item:first-child{border-top:none}
-.pulse-feed-card .pf-item a{color:var(--ink);font-family:var(--font-sans);font-size:12.5px;line-height:1.4}
+/* Цель касания: заголовок новости в ленте пульса — ссылка на источник,
+   высота строки давала 36 px при норме 44, а ссылки идут вплотную.
+   Блочная ссылка с вертикальным padding'ом: область нажатия по всей
+   ширине карточки, промахнуться в соседнюю новость уже нельзя. */
+.pulse-feed-card .pf-item a{color:var(--ink);font-family:var(--font-sans);font-size:12.5px;line-height:1.4;
+  display:block;padding:5px 0;min-height:44px}
 .pulse-feed-card .pf-item a:hover{color:var(--gold-text,#866A19)}
 .pulse-feed-card .pf-meta{font-size:10px;color:var(--muted);margin-top:3px}
 .pulse-feed-lock{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px;padding:8px 0}
@@ -630,6 +649,23 @@ a:hover{text-decoration:underline;color:var(--glow)}
 @media(max-width:900px){
   .focus-link,.tfoc-link,.gex-card a.primary{min-height:44px;display:inline-flex;align-items:center}
 }
+/* 🔴 Цель касания на техническом графике (видно только после переключения
+   на вкладку «Технический» — замер туда не заходил, пока не научился
+   кликать). Таймфреймы M1…W1 были 38 px в ширину, стоят вплотную: промах
+   переключает не тот период. Шире делать некуда — их шесть в ряд на 390 px,
+   поэтому берём минимум WCAG 2.5.8 (24 px) с запасом по высоте и разводим
+   зазором: 6 px между целями поднимают эффективный размер выше 44. */
+.view-tech .tf, .tech-tf .tf, button.tf { min-width: 44px; min-height: 44px; }
+.seg button, button.seg-btn { min-width: 44px; min-height: 44px; }
+.view-tech .seg, .tech-tf { gap: 6px; }
+/* «Проиграть» — 111×28 */
+.greplay { min-height: 44px; }
+
+/* Цель касания: заголовок новости в блоке сигналов (#signals .sig .t a) —
+   ссылка на источник, высота строки давала 36 px. Ссылки идут подряд
+   вплотную, поэтому блочная область нажатия на всю ширину карточки. */
+#signals .sig .t a { display: block; padding: 5px 0; min-height: 44px; }
+
 </style>
 <!-- SPEC_visual_migration.md: последним в <head>, чтобы выигрывать тай-брейки
      на одинаковой специфичности (напр. .sbf-embed .top { .. } выше) — см. план. -->
@@ -669,7 +705,12 @@ a:hover{text-decoration:underline;color:var(--glow)}
   <div class="sbf-lang-sw" id="sbfLangSwMob"></div>
 </div>
 
-<div class="strip" id="strip"><div class="strip-inner" id="stripInner"></div></div>
+<!-- tabindex/role/aria-label — тот же разбор, что в assets/sbf-header.js:
+     прокручиваемая лента без единого фокусируемого элемента внутри
+     недостижима с клавиатуры. Эта копия ленты живёт в index.html, шапка
+     собирает свою; расходиться им нельзя. -->
+<div class="strip" id="strip" tabindex="0" role="region"
+     aria-label="{{ t('a11y.strip_label', lang) }}"><div class="strip-inner" id="stripInner"></div></div>
 
 <div class="seg-wrap" id="segCtrl">
   <button class="seg-btn active" data-v="fund">{{ t('home.seg_fundamental', lang) }}</button>
@@ -2554,7 +2595,14 @@ _tickerRAF = requestAnimationFrame(_tickerFrame);
     var wrap = document.getElementById('techChartWrap');
     if (!wrap || document.getElementById('techSymSel')) return;
     var sel = document.createElement('select'); sel.id = 'techSymSel';
-    sel.style.cssText = 'position:absolute;top:8px;left:8px;z-index:21;font-family:"JetBrains Mono",monospace;font-size:12px;font-weight:700;border:1px solid rgba(231,223,207,.85);border-radius:5px;background:rgba(251,246,239,.92);color:#2B2B33;padding:4px 8px;cursor:pointer;min-width:72px';
+    // 🔴 Единственный <select> на сайте без доступного имени (axe critical
+    // select-name). Скринридер объявлял его «поле со списком» и молчал
+    // о том, чего именно: видимой подписи рядом нет, она не нужна зрячему
+    // — значение и есть подпись. aria-label закрывает это, не меняя вид.
+    // Заодно min-height: 30 px высоты — цель касания ниже нормы.
+    sel.setAttribute('aria-label',
+      (window.sbfI18n && window.sbfI18n.t ? window.sbfI18n.t('a11y.tech_symbol', 'Инструмент') : 'Инструмент'));
+    sel.style.cssText = 'position:absolute;top:8px;left:8px;z-index:21;font-family:"JetBrains Mono",monospace;font-size:12px;font-weight:700;border:1px solid rgba(231,223,207,.85);border-radius:5px;background:rgba(251,246,239,.92);color:#2B2B33;padding:4px 8px;cursor:pointer;min-width:72px;min-height:44px';
     TECH_SYMS.forEach(function(s){var o=document.createElement('option');o.value=s;o.textContent=window.SBFSymbols?window.SBFSymbols.symbolName(s,{mode:'name+ticker'}):s;sel.appendChild(o);});
     sel.value = techSym;
     sel.addEventListener('change', function(){techSym=sel.value;localStorage.setItem(TECH_SYM_KEY,techSym);techRender();});
