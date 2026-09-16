@@ -696,7 +696,7 @@ function LiquidityGlobe({ hp }) {
             );
           })}
         </div>
-        <input type="range" min="0" max="23" value={hour} onChange={e => { setHour(+e.target.value); setTouring(false); }} style={{width:"100%",marginBottom:16}}/>
+        <input type="range" min="0" max="23" value={hour} aria-label={p.hourSliderLabel || "Час (UTC)"} onChange={e => { setHour(+e.target.value); setTouring(false); }} style={{width:"100%",marginBottom:16}}/>
 
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:12,background:"rgba(255,255,255,0.05)",borderRadius:6,padding:"14px 18px",marginBottom:20}}>
           <div>
@@ -1250,15 +1250,15 @@ function VoiceAndPriceBlock({ vars }) {
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:12,marginBottom:16}} className="g3">
             <div>
               <Mono size={9.5} color="rgba(255,255,255,0.55)" spacing={0.5} style={{display:"block",marginBottom:5}}>{p.tradesLabel}</Mono>
-              <input type="number" value={trades} min="1" onChange={e=>setTrades(+e.target.value)} style={{width:"100%",padding:"8px 10px",background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.2)",borderRadius:4,color:"#fff",fontFamily:"monospace",fontSize:13}}/>
+              <input type="number" value={trades} min="1" aria-label={p.tradesLabel} onChange={e=>setTrades(+e.target.value)} style={{width:"100%",padding:"8px 10px",background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.2)",borderRadius:4,color:"#fff",fontFamily:"monospace",fontSize:13}}/>
             </div>
             <div>
               <Mono size={9.5} color="rgba(255,255,255,0.55)" spacing={0.5} style={{display:"block",marginBottom:5}}>{p.overpayLabel}</Mono>
-              <input type="number" value={overpay} step="0.1" min="0" onChange={e=>setOverpay(+e.target.value)} style={{width:"100%",padding:"8px 10px",background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.2)",borderRadius:4,color:"#fff",fontFamily:"monospace",fontSize:13}}/>
+              <input type="number" value={overpay} step="0.1" min="0" aria-label={p.overpayLabel} onChange={e=>setOverpay(+e.target.value)} style={{width:"100%",padding:"8px 10px",background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.2)",borderRadius:4,color:"#fff",fontFamily:"monospace",fontSize:13}}/>
             </div>
             <div>
               <Mono size={9.5} color="rgba(255,255,255,0.55)" spacing={0.5} style={{display:"block",marginBottom:5}}>{p.targetLabel}</Mono>
-              <input type="number" value={target} min="1" onChange={e=>setTarget(+e.target.value)} style={{width:"100%",padding:"8px 10px",background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.2)",borderRadius:4,color:"#fff",fontFamily:"monospace",fontSize:13}}/>
+              <input type="number" value={target} min="1" aria-label={p.targetLabel} onChange={e=>setTarget(+e.target.value)} style={{width:"100%",padding:"8px 10px",background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.2)",borderRadius:4,color:"#fff",fontFamily:"monospace",fontSize:13}}/>
             </div>
           </div>
           <div style={{textAlign:"center"}}>

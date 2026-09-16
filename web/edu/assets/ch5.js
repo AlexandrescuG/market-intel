@@ -78,6 +78,10 @@ window.Ch5Content = {
       title: "Арифметика неудачного часа",
       bodyIntro: "Трейдер работает днём и торгует поздно вечером и ночью — единственное свободное время, всё честно. Инструмент — золото.\n\nНочью два фактора работают против него одновременно, и оба измеримы. Первый — спред: в тонкой книге он шире дневного (глава 4, режим «Азиатская ночь»); допустим, вместо 0.3 он платит 1.2 — переплата 0.9 пункта на сделку. Второй, и он тяжелее: диапазон. По нашим измерениям средний получасовой бар золота в азиатские часы — это {{night_share}}% от суточного диапазона, а не полноценный час движения — цель набирается не за час, а за половину ночи, либо не набирается вовсе.",
       calcIntro: "Подставь свои числа и увидь свою цифру.",
+      // Подпись только для скринридера: у ползунка часа видимой подписи нет,
+      // её роль играет сама шкала под ним. Ключ в каждом языке, иначе
+      // англичанин и румын услышали бы русское слово.
+      hourSliderLabel: "Час (UTC)",
       tradesLabel: "Сделок в месяц", overpayLabel: "Переплата спреда, пунктов за сделку", targetLabel: "Цель по сделке, пунктов",
       resultLabel: "Пунктов в месяц отдано только за право торговать в неудачный час",
       resultOfLabel: (expected) => `из ожидаемых ${expected}`,
@@ -390,6 +394,7 @@ window.Ch5Content = {
       title: "Aritmetica orei nepotrivite",
       bodyIntro: "Un trader lucrează ziua și tranzacționează seara târziu și noaptea — singurul timp liber, totul cinstit. Instrumentul — aurul.\n\nNoaptea, doi factori lucrează simultan împotriva lui, ambii măsurabili. Primul — spread-ul: într-un registru subțire e mai larg decât ziua (capitolul 4, regimul „Noaptea asiatică”); să zicem că plătește 1.2 în loc de 0.3 — o supraplată de 0.9 puncte pe tranzacție. Al doilea, și e mai greu: intervalul. Conform măsurătorilor noastre, bara medie de 30 de minute a aurului în orele asiatice e {{night_share}}% din intervalul zilnic — ținta nu se atinge într-o oră, ci în jumătate de noapte, sau deloc.",
       calcIntro: "Introdu propriile cifre și vezi cifra ta.",
+      hourSliderLabel: "Ora (UTC)",
       tradesLabel: "Tranzacții pe lună", overpayLabel: "Supraplată spread, puncte pe tranzacție", targetLabel: "Țintă pe tranzacție, puncte",
       resultLabel: "Puncte pe lună date doar pentru dreptul de a tranzacționa la o oră nepotrivită",
       resultOfLabel: (expected) => `din ${expected} așteptate`,
@@ -692,6 +697,7 @@ window.Ch5Content = {
       title: "The arithmetic of a bad hour",
       bodyIntro: "A trader works days and trades late evening and at night — the only free time he has, entirely honest. Instrument: gold.\n\nAt night two factors work against him at once, both measurable. First — spread: in a thin book it's wider than during the day (chapter 4, \"Asian night\" regime); say he pays 1.2 instead of 0.3 — an overpay of 0.9 points per trade. Second, and heavier: range. By our own measurements, gold's average 30-minute bar during Asian hours is {{night_share}}% of the daily range — a target isn't reached in an hour, but over half the night, or not at all.",
       calcIntro: "Plug in your own numbers and see your own figure.",
+      hourSliderLabel: "Hour (UTC)",
       tradesLabel: "Trades per month", overpayLabel: "Spread overpay, points per trade", targetLabel: "Target per trade, points",
       resultLabel: "Points a month handed over just for the right to trade at a bad hour",
       resultOfLabel: (expected) => `out of an expected ${expected}`,

@@ -227,23 +227,23 @@ function mountRiskCalc(el) {
     '<div class="sbf-panel">'+
       '<div class="sbf-panel-title">'+t('eduindex.widgets.risk.panel1_title','Позиция и риск')+'</div>'+
       '<div class="sbf-panel-sub">'+t('eduindex.widgets.risk.panel1_sub','Размер сделки от принятого риска')+'</div>'+
-      '<div class="sbf-field"><label>'+t('eduindex.widgets.risk.label_capital','Капитал ($)')+'</label><input id="sbfw-cap" type="number" value="10000" step="100"></div>'+
-      '<div class="sbf-field"><label>'+t('eduindex.widgets.risk.label_risk_pct','Риск на сделку (%)')+'</label><input id="sbfw-rsk" type="number" value="1" step="0.1"></div>'+
+      '<div class="sbf-field"><label for="sbfw-cap">'+t('eduindex.widgets.risk.label_capital','Капитал ($)')+'</label><input id="sbfw-cap" type="number" value="10000" step="100"></div>'+
+      '<div class="sbf-field"><label for="sbfw-rsk">'+t('eduindex.widgets.risk.label_risk_pct','Риск на сделку (%)')+'</label><input id="sbfw-rsk" type="number" value="1" step="0.1"></div>'+
       '<div class="sbf-row2">'+
-        '<div class="sbf-field"><label>'+t('eduindex.widgets.risk.label_entry','Вход')+'</label><input id="sbfw-entry" type="number" value="100" step="0.01"></div>'+
-        '<div class="sbf-field"><label>'+t('eduindex.widgets.risk.label_stop','Стоп-лосс')+'</label><input id="sbfw-stop" type="number" value="96" step="0.01"></div>'+
+        '<div class="sbf-field"><label for="sbfw-entry">'+t('eduindex.widgets.risk.label_entry','Вход')+'</label><input id="sbfw-entry" type="number" value="100" step="0.01"></div>'+
+        '<div class="sbf-field"><label for="sbfw-stop">'+t('eduindex.widgets.risk.label_stop','Стоп-лосс')+'</label><input id="sbfw-stop" type="number" value="96" step="0.01"></div>'+
       '</div>'+
-      '<div class="sbf-field"><label>'+t('eduindex.widgets.risk.label_target','Тейк-профит')+'</label><input id="sbfw-target" type="number" value="112" step="0.01"></div>'+
+      '<div class="sbf-field"><label for="sbfw-target">'+t('eduindex.widgets.risk.label_target','Тейк-профит')+'</label><input id="sbfw-target" type="number" value="112" step="0.01"></div>'+
       '<div class="sbf-out" id="sbfw-posOut"></div>'+
     '</div>'+
     /* Panel 2 */
     '<div class="sbf-panel">'+
       '<div class="sbf-panel-title">'+t('eduindex.widgets.risk.panel2_title','Ожидание системы')+'</div>'+
       '<div class="sbf-panel-sub">'+t('eduindex.widgets.risk.panel2_sub','Средний результат на сделку, в R')+'</div>'+
-      '<div class="sbf-field"><label>'+t('eduindex.widgets.risk.label_winrate','Винрейт (%)')+'</label><input id="sbfw-wr" type="number" value="45" step="1"></div>'+
+      '<div class="sbf-field"><label for="sbfw-wr">'+t('eduindex.widgets.risk.label_winrate','Винрейт (%)')+'</label><input id="sbfw-wr" type="number" value="45" step="1"></div>'+
       '<div class="sbf-row2">'+
-        '<div class="sbf-field"><label>'+t('eduindex.widgets.risk.label_avg_win','Сред. выигрыш (R)')+'</label><input id="sbfw-aw" type="number" value="2" step="0.1"></div>'+
-        '<div class="sbf-field"><label>'+t('eduindex.widgets.risk.label_avg_loss','Сред. проигрыш (R)')+'</label><input id="sbfw-al" type="number" value="1" step="0.1"></div>'+
+        '<div class="sbf-field"><label for="sbfw-aw">'+t('eduindex.widgets.risk.label_avg_win','Сред. выигрыш (R)')+'</label><input id="sbfw-aw" type="number" value="2" step="0.1"></div>'+
+        '<div class="sbf-field"><label for="sbfw-al">'+t('eduindex.widgets.risk.label_avg_loss','Сред. проигрыш (R)')+'</label><input id="sbfw-al" type="number" value="1" step="0.1"></div>'+
       '</div>'+
       '<div class="sbf-out" id="sbfw-expOut"></div>'+
       '<div class="sbf-verdict" id="sbfw-verdict"></div>'+
@@ -257,12 +257,12 @@ function mountRiskCalc(el) {
         '<button id="sbfw-ddB" class="sbf-seg-btn" type="button">'+t('eduindex.widgets.risk.seg_streak','Серия убытков')+'</button>'+
       '</div>'+
       '<div id="sbfw-panA"><div class="sbf-row2">'+
-        '<div class="sbf-field"><label>'+t('eduindex.widgets.risk.label_peak','Пик капитала')+'</label><input id="sbfw-peak" type="number" value="12000" step="100"></div>'+
-        '<div class="sbf-field"><label>'+t('eduindex.widgets.risk.label_current','Текущий')+'</label><input id="sbfw-cur" type="number" value="9600" step="100"></div>'+
+        '<div class="sbf-field"><label for="sbfw-peak">'+t('eduindex.widgets.risk.label_peak','Пик капитала')+'</label><input id="sbfw-peak" type="number" value="12000" step="100"></div>'+
+        '<div class="sbf-field"><label for="sbfw-cur">'+t('eduindex.widgets.risk.label_current','Текущий')+'</label><input id="sbfw-cur" type="number" value="9600" step="100"></div>'+
       '</div></div>'+
       '<div id="sbfw-panB" style="display:none"><div class="sbf-row2">'+
-        '<div class="sbf-field"><label>'+t('eduindex.widgets.risk.label_risk_per_trade','Риск/сделку (%)')+'</label><input id="sbfw-ddR" type="number" value="2" step="0.1"></div>'+
-        '<div class="sbf-field"><label>'+t('eduindex.widgets.risk.label_losses_streak','Убытков подряд')+'</label><input id="sbfw-ddN" type="number" value="8" step="1"></div>'+
+        '<div class="sbf-field"><label for="sbfw-ddR">'+t('eduindex.widgets.risk.label_risk_per_trade','Риск/сделку (%)')+'</label><input id="sbfw-ddR" type="number" value="2" step="0.1"></div>'+
+        '<div class="sbf-field"><label for="sbfw-ddN">'+t('eduindex.widgets.risk.label_losses_streak','Убытков подряд')+'</label><input id="sbfw-ddN" type="number" value="8" step="1"></div>'+
       '</div></div>'+
       '<div class="sbf-out" id="sbfw-ddOut"></div>'+
     '</div>'+

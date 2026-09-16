@@ -929,6 +929,7 @@ function CrashLabV2() {
                   <span style={{fontSize:12,fontWeight:600,color:CRASH_ASSET_COLOR[key],fontFamily:"monospace"}}>{alloc[key]}%</span>
                 </div>
                 <input type="range" min="0" max="100" value={alloc[key]} disabled={disabled}
+                  aria-label={card.title}
                   onChange={e => setAsset(key, +e.target.value)}
                   style={{width:"100%",accentColor:CRASH_ASSET_COLOR[key],cursor:disabled?"not-allowed":"pointer"}}/>
               </div>
@@ -1000,7 +1001,7 @@ function AsymmetryArc() {
           return <div key={b} style={{flex:1,height:`${h}%`,background:b<=dd?"#B14848":C.goldPale}}/>;
         })}
       </div>
-      <input type="range" min="1" max="99" value={dd} onChange={e => setDd(+e.target.value)} style={{width:"100%",accentColor:"#B14848",cursor:"pointer"}}/>
+      <input type="range" min="1" max="99" value={dd} aria-label={a.sliderLabel} onChange={e => setDd(+e.target.value)} style={{width:"100%",accentColor:"#B14848",cursor:"pointer"}}/>
       <div style={{fontFamily:"monospace",fontSize:19,marginTop:10,color:C.black}}>
         {a.sliderLabel}: <strong style={{color:"#B14848"}}>-{dd}%</strong> → {a.neededLabel}: <strong style={{color:"#B14848"}}>+{needed}%</strong>
       </div>
@@ -1139,7 +1140,7 @@ function SurviveStreak() {
             <span style={{fontSize:12,color:C.inkMid,fontWeight:500}}>{s.riskSliderLabel}</span>
             <span style={{fontSize:13,fontWeight:700,color:C.inkMid,fontFamily:"monospace"}}>{setupRisk}%</span>
           </div>
-          <input type="range" min={0.5} max={10} step={0.5} value={setupRisk}
+          <input type="range" min={0.5} max={10} step={0.5} value={setupRisk} aria-label={s.riskSliderLabel}
             onChange={e => setSetupRisk(+e.target.value)}
             style={{width:"100%",accentColor:C.inkMid,cursor:"pointer",marginBottom:14}}/>
           <p style={{fontSize:12.5,color:C.inkSoft,lineHeight:1.6,marginBottom:16}}>
@@ -1325,7 +1326,7 @@ function PositionCalculator() {
                 <span style={{fontSize:12,color:C.inkMid,fontWeight:500}}>{s.label}</span>
                 <span style={{fontSize:13,fontWeight:700,color:s.color,fontFamily:"monospace"}}>{s.val}</span>
               </div>
-              <input type="range" min={s.min} max={s.max} step={s.step} value={s.state}
+              <input type="range" min={s.min} max={s.max} step={s.step} value={s.state} aria-label={s.label}
                 onChange={e => s.set(+e.target.value)}
                 style={{width:"100%",accentColor:s.color,cursor:"pointer"}}/>
             </div>
