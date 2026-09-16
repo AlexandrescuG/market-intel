@@ -282,10 +282,11 @@ def run(*, dry: bool, live: bool, enabled: list[str] | None, verbose: bool,
     return exit_code
 
 
-def report() -> int:
+def report(account: str = "demo") -> int:
     con = ledger.connect()
     ledger.init(con)
-    rows = ledger.strategy_report(con)
+    rows = ledger.strategy_report(con, account)
+    print(f"счёт: {account}\n")
     if not rows:
         print("журнал движка пуст")
         return 0
@@ -298,12 +299,14 @@ def report() -> int:
               f"{dd:>10.2f}{r['open']:>6}")
         if r["halt_reason"]:
             print(f"    остановлена: {r['halt_reason']}")
-    n, acc = con.execute("SELECT count(*), sum(accepted) FROM engine_signals").fetchone()
+    n, acc = con.execute("SELECT count(*), sum(accepted) FROM engine_signals "
+                         "WHERE account=?", (account,)).fetchone()
     print(f"\nсигналов всего {n}, принято {acc or 0}")
     print("причины отказов:")
     for reason, k in con.execute(
             "SELECT substr(reason,1,instr(reason||':',':')-1) rr, count(*) FROM engine_signals "
-            "WHERE accepted=0 GROUP BY rr ORDER BY count(*) DESC LIMIT 12"):
+            "WHERE accepted=0 AND account=? GROUP BY rr ORDER BY count(*) DESC LIMIT 12",
+            (account,)):
         print(f"   {reason or '?':24} {k}")
     con.close()
     return 0
@@ -323,7 +326,7 @@ def main() -> None:
                    help="профиль счёта: demo | real (analyze/engine/accounts.py)")
     a = p.parse_args()
     if a.report:
-        sys.exit(report())
+        sys.exit(report(a.account))
     enabled = [x.strip() for x in a.sources.split(",") if x.strip()] or None
     sys.exit(run(dry=a.dry_run, live=a.live, enabled=enabled, verbose=a.verbose,
                  account=a.account))

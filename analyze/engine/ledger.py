@@ -424,13 +424,24 @@ def set_status(con: sqlite3.Connection, strategy: str, status: str,
     con.commit()
 
 
-def strategy_report(con: sqlite3.Connection) -> list[dict]:
+def strategy_report(con: sqlite3.Connection, account: str = "demo") -> list[dict]:
+    """Сводка по стратегиям ОДНОГО счёта.
+
+    🔴 16.09: подзапросы считали сделки по одной только стратегии, без счёта.
+    После разделения на два счёта это дало строки-двойники: одна с реальными
+    числами, вторая с нулями, и обе подписаны live. Отчёт, который показывает
+    одну стратегию дважды с разными итогами, хуже отсутствующего отчёта —
+    по нему принимают решения."""
     rows = con.execute("""
         SELECT s.strategy, s.status, s.cum_r, s.peak_r, s.n_closed, s.halt_reason,
-               (SELECT count(*) FROM engine_trades t WHERE t.strategy=s.strategy AND t.status='open'),
-               (SELECT count(*) FROM engine_trades t WHERE t.strategy=s.strategy AND t.status='closed' AND t.r_realized>0),
-               (SELECT count(*) FROM engine_trades t WHERE t.strategy=s.strategy AND t.status='closed' AND t.r_realized<=0)
-        FROM engine_strategy_state s ORDER BY s.strategy""").fetchall()
+               (SELECT count(*) FROM engine_trades t WHERE t.strategy=s.strategy
+                  AND t.account=s.account AND t.status='open'),
+               (SELECT count(*) FROM engine_trades t WHERE t.strategy=s.strategy
+                  AND t.account=s.account AND t.status='closed' AND t.r_realized>0),
+               (SELECT count(*) FROM engine_trades t WHERE t.strategy=s.strategy
+                  AND t.account=s.account AND t.status='closed' AND t.r_realized<=0)
+        FROM engine_strategy_state s WHERE s.account=? ORDER BY s.strategy""",
+        (account,)).fetchall()
     cols = ["strategy", "status", "cum_r", "peak_r", "n_closed", "halt_reason",
             "open", "wins", "losses"]
     return [dict(zip(cols, r)) for r in rows]
