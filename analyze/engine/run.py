@@ -157,18 +157,18 @@ def run(*, dry: bool, live: bool, enabled: list[str] | None, verbose: bool,
             # pattern_break_retest простоял шесть дней в плюсе (+11 R), и за
             # это время движок отверг 851 сигнал с «стратегия остановлена».
             for name, dd, old, new in ledger.resume_stale_halts(
-                    con, risk.MAX_DRAWDOWN_R, acc.name):
+                    con, acc.max_drawdown_r, acc.name):
                 log.warning("ВОЗОБНОВЛЕНА %s: просадка %.2fR укладывается в нынешний "
                             "предел %.0fR (была остановлена по порогу %s)",
                             name, dd, new, f"{old:.0f}R" if old else "неизвестному")
 
-            st = execution.settle(con, mt5, conn, acc.name)
+            st = execution.settle(con, mt5, conn, acc.name, acc.max_drawdown_r)
             log.info("сведение: закрыто=%d по горизонту=%d потеряшек=%d",
                      st["closed"], st["by_horizon"], st["orphans"])
             for name, why in st["halted"]:
                 log.error("остановлена %s: %s", name, why)
 
-            sh = execution.settle_shadow(con, acc.name)
+            sh = execution.settle_shadow(con, acc.name, acc.max_drawdown_r)
             if sh["closed"]:
                 log.info("теневых разрешено: %d", sh["closed"])
 

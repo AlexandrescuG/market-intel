@@ -744,7 +744,7 @@ def portfolio_gate(con: sqlite3.Connection, signal: Signal, equity: float,
 
 # ─── стоп-кран стратегии ────────────────────────────────────────────────────
 
-def drawdown_halt(state: dict) -> str | None:
+def drawdown_halt(state: dict, threshold: float | None = None) -> str | None:
     """Причина остановки стратегии, либо None.
 
     Меряет просадку ОТ ПИКА кривой в R. Порог не зависит от того, сколько
@@ -754,8 +754,9 @@ def drawdown_halt(state: dict) -> str | None:
     if (state.get("n_closed") or 0) < MIN_TRADES_BEFORE_HALT:
         return None
     dd = (state.get("cum_r") or 0.0) - (state.get("peak_r") or 0.0)
-    if dd <= -MAX_DRAWDOWN_R:
-        return (f"просадка от пика {dd:.2f}R достигла предела -{MAX_DRAWDOWN_R}R "
+    thr = MAX_DRAWDOWN_R if threshold is None else threshold
+    if dd <= -thr:
+        return (f"просадка от пика {dd:.2f}R достигла предела -{thr}R "
                 f"(пик {state.get('peak_r'):.2f}R, сейчас {state.get('cum_r'):.2f}R, "
                 f"сделок {state.get('n_closed')})")
     return None

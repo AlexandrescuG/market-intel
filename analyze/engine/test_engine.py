@@ -190,6 +190,24 @@ class TwoAccounts(unittest.TestCase):
         self.assertAlmostEqual(
             ledger.ensure_strategy(self.con, "s", ST_LIVE, "real")["cum_r"], -0.5)
 
+    def test_у_реального_счёта_свой_стоп_кран(self):
+        """🔴 16.09. Порог 20 R считался для демо с риском 0.5% и означал там
+        ~10% капитала. На реальном счёте риск 1%, и те же 20 R означали бы
+        20% — 280 USD от 1400. Решение владельца: 10 R."""
+        from analyze.engine import accounts
+        demo, real = accounts.get("demo"), accounts.get("real")
+        self.assertEqual(real.max_drawdown_r, 10.0)
+        self.assertEqual(demo.max_drawdown_r, 20.0)
+        # В ДОЛЯХ КАПИТАЛА пороги совпадают — это и было целью.
+        self.assertAlmostEqual(real.max_drawdown_r * real.risk_per_trade,
+                               demo.max_drawdown_r * demo.risk_per_trade,
+                               places=6)
+
+    def test_порог_просадки_применяется_переданный(self):
+        state = {"n_closed": 30, "cum_r": -12.0, "peak_r": 0.0}
+        self.assertIsNone(risk.drawdown_halt(state, 20.0), "при 20 R ещё рано")
+        self.assertIsNotNone(risk.drawdown_halt(state, 10.0), "при 10 R уже пора")
+
     def test_реальный_счёт_без_номера_торговать_не_может(self):
         """Незнание обязано запрещать: пока номер счёта в профиле не заполнен,
         движок не должен слать ордера на реальные деньги вслепую."""

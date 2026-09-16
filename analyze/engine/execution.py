@@ -322,7 +322,8 @@ def manage_open(con: sqlite3.Connection, mt5, conn, account: str = "demo") -> di
 
 # ─── сведение ───────────────────────────────────────────────────────────────
 
-def settle(con: sqlite3.Connection, mt5, conn, account: str = "demo") -> dict:
+def settle(con: sqlite3.Connection, mt5, conn, account: str = "demo",
+           threshold: float | None = None) -> dict:
     """Свести закрытые позиции и закрыть просроченные по горизонту.
 
     🔴 Причина, по которой это отдельный обязательный шаг: 27.08 в старом
@@ -371,7 +372,7 @@ def settle(con: sqlite3.Connection, mt5, conn, account: str = "demo") -> dict:
             # ловим у других: код есть, тесты зелёные, вызова нет, и снаружи
             # это неотличимо от «сделок не было».
             _notify_closed(con, t, r, st)
-            _maybe_halt(con, st, stats, account)
+            _maybe_halt(con, st, stats, account, threshold)
 
     # 2. горизонт: позиция жива, но её время вышло
     for t in open_rows:
@@ -411,20 +412,25 @@ def _notify_closed(con: sqlite3.Connection, trade: dict, r: float,
 
 
 def _maybe_halt(con: sqlite3.Connection, state: dict, stats: dict,
-                account: str = "demo") -> None:
+                account: str = "demo", threshold: float | None = None) -> None:
+    """🔴 Порог приходит из профиля счёта: у демо 20 R, у реального 10 R.
+    При риске 1% против 0.5% одинаковый порог в R означал бы вдвое большую
+    долю капитала — см. accounts.Account.max_drawdown_r."""
     from analyze.engine.risk import MAX_DRAWDOWN_R, drawdown_halt
-    reason = drawdown_halt(state)
+    thr = MAX_DRAWDOWN_R if threshold is None else threshold
+    reason = drawdown_halt(state, thr)
     if reason:
         # Порог сохраняется вместе с остановкой: без него нельзя отличить
         # «остановлена по действующему правилу» от «по правилу, которое с тех
         # пор изменили». Ровно это и стоило нам шести дней простоя
         # pattern_break_retest — см. ledger.resume_stale_halts.
-        ledger.halt(con, state["strategy"], reason, MAX_DRAWDOWN_R, account)
+        ledger.halt(con, state["strategy"], reason, thr, account)
         stats["halted"].append((state["strategy"], reason))
         log.error("СТРАТЕГИЯ ОСТАНОВЛЕНА %s: %s", state["strategy"], reason)
 
 
-def settle_shadow(con: sqlite3.Connection, account: str = "demo") -> dict:
+def settle_shadow(con: sqlite3.Connection, account: str = "demo",
+                  threshold: float | None = None) -> dict:
     """Теневые сделки разрешаются по реальным барам: касание стопа или цели
     внутри бара, иначе — закрытие по горизонту.
 
@@ -457,5 +463,5 @@ def settle_shadow(con: sqlite3.Connection, account: str = "demo") -> dict:
                                commission=0.0, swap=0.0, reason=reason)
         st = ledger.apply_result(con, t["strategy"], r, account)
         stats["closed"] += 1
-        _maybe_halt(con, st, stats, account)
+        _maybe_halt(con, st, stats, account, threshold)
     return stats
