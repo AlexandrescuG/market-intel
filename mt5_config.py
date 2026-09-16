@@ -57,6 +57,13 @@ SYMBOL_MAP_BY_SERVER = {
         "USDZAR": "USDZAR",
         "USDKZT": "USDKZT",   # недоступен у Ava — останется пустым
         "USDAED": "USDAED",   # недоступен у Ava — останется пустым
+        # 🔴 16.09: природный газ. Имя у брокера — NATURAL_GAS; перебор
+        # очевидных вариантов (NG, NGAS, NATGAS, XNGUSD) не находит НИЧЕГО,
+        # имя снято с каталога брокера (843 инструмента). В price_bars ключ
+        # исторически NG, и соответствие уже было в CHART_BROKER_MAP для
+        # графиков — но карта движка отдельная, и без этой строки
+        # broker_symbol честно отказал бы с unmapped_symbol.
+        "NG": "NATURAL_GAS",
     },
 }
 

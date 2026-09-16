@@ -355,6 +355,28 @@ class Portfolio(unittest.TestCase):
         # Кросс без доллара тоже раскладывается: раньше он молча получал ноль.
         self.assertEqual(risk.legs("EURGBP"), ("EUR", "GBP"))
 
+    def test_товарный_инструмент_имеет_свою_ногу(self):
+        """🔴 16.09, найдено сухим прогоном при подключении газа: NG упёрся
+        в unknown_legs. Предохранитель сработал верно, но газ известен —
+        он котируется в долларах, как золото."""
+        self.assertEqual(risk.legs("NG"), ("NG", "USD"))
+        self.assertEqual(risk.usd_sign("NG"), -1, "рост газа — это слабый доллар")
+        e = risk.leg_exposure([("NG", "long", "s", 100.0, 1)])
+        self.assertAlmostEqual(e["NG"], 100.0)
+        self.assertAlmostEqual(e["USD"], -100.0)
+
+    def test_у_газа_свой_предел_издержек(self):
+        """Замер 16.09: спред газа 41.1% риска при общем пороге 12%. Без
+        своего предела инструмент был бы включён и молча отвергал каждый
+        сигнал — то, ради чего послабление и делалось."""
+        self.assertGreater(risk.spread_limit_for("NG"),
+                           risk.MAX_SPREAD_SHARE_OF_RISK)
+        self.assertGreaterEqual(risk.spread_limit_for("NG"), 0.42,
+                                "предел должен покрывать замеренные 41.1%")
+        # Послабление ТОЛЬКО газу: общий порог не тронут.
+        for s in ("EURUSD", "USDZAR", "XAUUSD"):
+            self.assertEqual(risk.spread_limit_for(s), risk.MAX_SPREAD_SHARE_OF_RISK)
+
     def test_нераскладываемый_инструмент_это_отказ_а_не_ноль(self):
         """🔴 Доделка 14.09. Первая версия возвращала 0 для всего, в чём нет
         доллара, — инструмент выпадал из расчёта риска целиком и молча.

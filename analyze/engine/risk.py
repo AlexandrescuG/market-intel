@@ -305,6 +305,37 @@ MAX_SPREAD_SHARE_OF_TARGET = 0.10
 # Поэтому порог от риска жёстче.
 MAX_SPREAD_SHARE_OF_RISK = 0.12
 
+# 🔴 16.09, ПОПРЕДМЕТНОЕ ПОСЛАБЛЕНИЕ, и его надо читать как исключение.
+#
+# Природный газ у брокера идёт со спредом 0.0070 при ATR(14,1h) 0.0114 — то
+# есть 41% риска при стопе 1.5 ATR. С общим порогом инструмент был бы включён
+# и молча отвергал КАЖДЫЙ сигнал: ровно та тихая деградация, которую мы уже
+# ловили дважды.
+#
+# Послабление именно попредметное, а не общее. Порог по издержкам —
+# единственный фильтр, про который мы точно знаем, что он работает: весь
+# измеренный минус системы равен спреду (0.052 R на сделку), а USDZAR при
+# 23% риска дал 1 выигрыш из 8 и -5.87 R живьём. Ослабить его для всех
+# значило бы выключить единственное, что доказано.
+#
+# 🔴 И честно про цену решения: при 45% риска, съеденных спредом, сделка
+# стартует почти с половины пути к стопу. Чтобы газ окупался, его сигналы
+# должны быть ЗАМЕТНО лучше монетки — а мы знаем, что наши сигналы монетку не
+# бьют. Поэтому газ идёт как отдельный опыт с отдельной кривой, и решение по
+# нему принимается по его собственному R, а не по общему счёту.
+#
+# Правильный выход отсюда — не этот порог, а другая геометрия: на 4h ATR
+# больше, и та же доля спреда получается сама собой. Проверить это — задача
+# после первых 30 сделок.
+SPREAD_RISK_OVERRIDE = {
+    "NG": 0.45,      # замер 16.09: 41.1% при ATR 0.0114 и спреде 0.0070
+}
+
+
+def spread_limit_for(symbol: str) -> float:
+    """Предел доли спреда от риска для инструмента."""
+    return SPREAD_RISK_OVERRIDE.get((symbol or "").upper(), MAX_SPREAD_SHARE_OF_RISK)
+
 
 def cost_gate(signal: Signal, tick) -> None:
     """Спред не должен съедать заметную долю ни награды, ни риска.
@@ -320,18 +351,22 @@ def cost_gate(signal: Signal, tick) -> None:
     risk = signal.stop_distance
     if reward <= 0 or risk <= 0:
         return
+    limit_risk = spread_limit_for(signal.symbol)
+    # Порог по награде масштабируется вместе с порогом по риску: у них одна
+    # природа, и послабление только в одном месте создало бы дыру во втором.
+    limit_reward = MAX_SPREAD_SHARE_OF_TARGET * (limit_risk / MAX_SPREAD_SHARE_OF_RISK)
     share_reward = spread / reward
-    if share_reward > MAX_SPREAD_SHARE_OF_TARGET:
+    if share_reward > limit_reward:
         raise RiskRefusal(
             "spread_too_wide",
             f"спред {spread:.5f} съедает {share_reward * 100:.1f}% награды при пределе "
-            f"{MAX_SPREAD_SHARE_OF_TARGET * 100:.0f}%")
+            f"{limit_reward * 100:.0f}%")
     share_risk = spread / risk
-    if share_risk > MAX_SPREAD_SHARE_OF_RISK:
+    if share_risk > limit_risk:
         raise RiskRefusal(
             "spread_too_wide",
             f"спред {spread:.5f} — это {share_risk * 100:.1f}% риска при пределе "
-            f"{MAX_SPREAD_SHARE_OF_RISK * 100:.0f}%: сделка стартует с пути к стопу")
+            f"{limit_risk * 100:.0f}%: сделка стартует с пути к стопу")
 
 
 def min_barrier(symbol_info, tick) -> float:
@@ -526,6 +561,20 @@ def usd_sign(symbol: str) -> int:
     return 1 if base == "USD" else (-1 if quote == "USD" else 0)
 
 
+# Инструменты, чьё имя не разбирается правилом «шесть букв — две ноги».
+#
+# 🔴 16.09, найдено сухим прогоном при подключении газа. NG упёрся в отказ
+# unknown_legs — предохранитель сработал ровно как задуман: неизвестный
+# инструмент отказывает, а не считается нулевым риском. Но газ известен, и
+# нога у него есть: он котируется в долларах, как и золото. XAUUSD даёт
+# (XAU, USD) по общему правилу, NG — только по этой карте.
+LEGS_EXPLICIT = {
+    "NG": ("NG", "USD"),        # природный газ, котируется в USD
+    "WTI": ("WTI", "USD"),
+    "BRENT": ("BRENT", "USD"),
+}
+
+
 def legs(symbol: str) -> tuple[str, str]:
     """Разложение инструмента на базовую и котируемую ногу.
 
@@ -545,6 +594,8 @@ def legs(symbol: str) -> tuple[str, str]:
     есть в заметной части живёт своей жизнью. Со своей ногой XAU эта часть
     больше никому не приписывается."""
     s = (symbol or "").upper().replace("#", "").replace("/", "")
+    if s in LEGS_EXPLICIT:
+        return LEGS_EXPLICIT[s]
     if len(s) == 6 and s.isalpha():
         return s[:3], s[3:]
     raise RiskRefusal("unknown_legs",
