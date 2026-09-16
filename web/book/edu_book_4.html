@@ -666,7 +666,7 @@ function MarketDepthSimulator() {
             {[...asks].reverse().map((a,i) => (
               <div key={i} style={{padding:"5px 14px",display:"grid",gridTemplateColumns:"70px 1fr 40px",gap:8,alignItems:"center",position:"relative"}}>
                 <div style={{position:"absolute",right:0,top:0,bottom:0,background:`rgba(242,54,69,${a.v/maxVol*0.25})`,transition:"all .4s"}}/>
-                <Mono size={12} color={C.chartRed} spacing={0} style={{position:"relative"}}>{a.p.toFixed(2)}</Mono>
+                <Mono size={12} color={C.chartRedText} spacing={0} style={{position:"relative"}}>{a.p.toFixed(2)}</Mono>
                 <div style={{height:6,background:"rgba(255,255,255,0.06)",borderRadius:2,position:"relative",overflow:"hidden"}}>
                   <div style={{position:"absolute",right:0,top:0,height:"100%",width:`${a.v/maxVol*100}%`,background:"rgba(242,54,69,0.5)",transition:"width .5s"}}/>
                 </div>
@@ -675,12 +675,12 @@ function MarketDepthSimulator() {
             ))}
             <div style={{padding:"8px 14px",background:"rgba(201,151,58,0.1)",borderTop:"1px solid rgba(201,151,58,0.2)",borderBottom:"1px solid rgba(201,151,58,0.2)",textAlign:"center"}}>
               <Mono size={10} color={C.goldText} spacing={1}>{S.spreadLabel}{spread}</Mono>
-              <div style={{fontFamily:"'DM Serif Display',serif",fontSize:20,color:flash==='up'?C.chartGreen:flash==='down'?C.chartRed:C.white,transition:"color .2s",marginTop:2}}>{marketPrice.toFixed(2)}</div>
+              <div style={{fontFamily:"'DM Serif Display',serif",fontSize:20,color:flash==='up'?C.chartGreenText:flash==='down'?C.chartRedText:C.white,transition:"color .2s",marginTop:2}}>{marketPrice.toFixed(2)}</div>
             </div>
             {bids.map((b,i) => (
               <div key={i} style={{padding:"5px 14px",display:"grid",gridTemplateColumns:"70px 1fr 40px",gap:8,alignItems:"center",position:"relative"}}>
                 <div style={{position:"absolute",left:0,top:0,bottom:0,background:`rgba(8,153,129,${b.v/maxVol*0.2})`,transition:"all .4s"}}/>
-                <Mono size={12} color={C.chartGreen} spacing={0} style={{position:"relative"}}>{b.p.toFixed(2)}</Mono>
+                <Mono size={12} color={C.chartGreenText} spacing={0} style={{position:"relative"}}>{b.p.toFixed(2)}</Mono>
                 <div style={{height:6,background:"rgba(255,255,255,0.06)",borderRadius:2,position:"relative",overflow:"hidden"}}>
                   <div style={{position:"absolute",left:0,top:0,height:"100%",width:`${b.v/maxVol*100}%`,background:"rgba(8,153,129,0.5)",transition:"width .5s"}}/>
                 </div>
@@ -706,13 +706,13 @@ function MarketDepthSimulator() {
               <div style={{position:"relative",height:40}}>
                 <div style={{position:"absolute",left:0,right:0,top:"50%",height:2,background:"rgba(255,255,255,0.1)"}}/>
                 <div style={{position:"absolute",left:0,top:0,bottom:0,width:`${spreadPct}%`,background:"rgba(8,153,129,0.3)",border:"1px solid rgba(8,153,129,0.5)",borderRadius:"4px 0 0 4px",display:"flex",alignItems:"center",justifyContent:"center",transition:"width .5s"}}>
-                  <Mono size={10} color={C.chartGreen} spacing={0}>BID {bids[0].p.toFixed(2)}</Mono>
+                  <Mono size={10} color={C.chartGreenText} spacing={0}>BID {bids[0].p.toFixed(2)}</Mono>
                 </div>
                 <div style={{position:"absolute",left:`${spreadPct}%`,width:`${100-spreadPct*2}%`,top:0,bottom:0,display:"flex",alignItems:"center",justifyContent:"center",transition:"all .5s"}}>
                   <Mono size={9} color={mode!=="normal"?"#e74c3c":C.gold} spacing={0} style={{fontWeight:700}}>{S.spreadWordLower}</Mono>
                 </div>
                 <div style={{position:"absolute",right:0,top:0,bottom:0,width:`${spreadPct}%`,background:"rgba(242,54,69,0.3)",border:"1px solid rgba(242,54,69,0.5)",borderRadius:"0 4px 4px 0",display:"flex",alignItems:"center",justifyContent:"center",transition:"width .5s"}}>
-                  <Mono size={10} color={C.chartRed} spacing={0}>ASK {asks[asks.length-1].p.toFixed(2)}</Mono>
+                  <Mono size={10} color={C.chartRedText} spacing={0}>ASK {asks[asks.length-1].p.toFixed(2)}</Mono>
                 </div>
               </div>
             </div>
@@ -723,14 +723,14 @@ function MarketDepthSimulator() {
             <Mono size={9} color="rgba(255,255,255,0.55)" spacing={1} style={{display:"block",marginBottom:10}}>{S.tapeLabel}</Mono>
             {book.tape.map((t,i) => (
               <div key={i} style={{display:"flex",justifyContent:"space-between",padding:"5px 0",borderBottom:"1px solid rgba(255,255,255,0.05)",fontSize:11,fontFamily:"monospace"}}>
-                <span style={{color:t.side==="buy"?C.chartGreen:C.chartRed}}>{t.p}</span>
+                <span style={{color:t.side==="buy"?C.chartGreenText:C.chartRedText}}>{t.p}</span>
                 <span style={{color:"rgba(255,255,255,0.55)"}}>{t.v}</span>
                 <span style={{color:"rgba(255,255,255,0.55)"}}>{t.t}</span>
               </div>
             ))}
             <div style={{marginTop:12,fontSize:11,color:"rgba(255,255,255,0.55)",lineHeight:1.6}}>
-              <span style={{color:C.chartGreen}}>█</span> buy market<br/>
-              <span style={{color:C.chartRed}}>█</span> sell market
+              <span style={{color:C.chartGreenText}}>█</span> buy market<br/>
+              <span style={{color:C.chartRedText}}>█</span> sell market
             </div>
           </div>
         </div>
@@ -1026,8 +1026,8 @@ function LimitCatcher() {
   };
 
   const orderTypes = [
-    {key:"limit_buy",   label:"BUY LIMIT",    color:C.chartGreen, desc:S.descBuyLimit},
-    {key:"limit_sell",  label:"SELL LIMIT",   color:C.chartRed,   desc:S.descSellLimit},
+    {key:"limit_buy",   label:"BUY LIMIT",    color:C.chartGreenText, desc:S.descBuyLimit},
+    {key:"limit_sell",  label:"SELL LIMIT",   color:C.chartRedText,   desc:S.descSellLimit},
     {key:"stop_buy",    label:"BUY STOP",     color:"#0ea5e9",    desc:S.descBuyStop},
     {key:"stop_sell",   label:"SELL STOP",    color:"#f59e0b",    desc:S.descSellStop},
     {key:"stop_limit",  label:"STOP LIMIT",   color:"#8b5cf6",    desc:S.descStopLimit},

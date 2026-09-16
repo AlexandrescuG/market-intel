@@ -400,7 +400,7 @@ function SurpriseScatter({ stats }) {
               <title>{p.event_type} · {p.date} · {p.surprise_sigma}σ · {p.move_30m_norm}</title>
             </circle>
           ))}
-          <text x={W/2} y={H-8} textAnchor="middle" fontSize="9" fontFamily="monospace" fill={C.inkFaint}>surprise, σ</text>
+          <text x={W/2} y={H-8} textAnchor="middle" fontSize="9" fontFamily="monospace" fill="rgba(24,24,26,0.61)">surprise, σ</text>
         </svg>
       </div>
       <p style={{fontSize:11,color:C.inkFaint,marginTop:8,fontStyle:"italic"}}>{window.SBFSymbols ? window.SBFSymbols.symbolName(instrument, {lang: INITIAL_LANG, mode:"name+ticker"}) : instrument} · {points.length} {INITIAL_LANG==="ru"?"точек":INITIAL_LANG==="ro"?"puncte":"points"} · {INITIAL_LANG==="ru"?"красная линия — медиана по бину":INITIAL_LANG==="ro"?"linia roșie — mediana pe bin":"red line — bin median"}</p>
