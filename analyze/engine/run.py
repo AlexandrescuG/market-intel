@@ -84,7 +84,7 @@ def market_price_of(s, tick):
 
 def decide(con, s, equity, symbol_info, tick, default_status: str, *,
            mt5=None, bsym: str = "", free_margin: float = 0.0,
-           acc=None) -> Decision:
+           acc=None, dry: bool = False) -> Decision:
     """Все запреты по одному сигналу. Возвращает Decision всегда — отказ
     это тоже решение, и он обязан попасть в журнал с причиной.
 
@@ -93,7 +93,8 @@ def decide(con, s, equity, symbol_info, tick, default_status: str, *,
     name = acc.name if acc else "demo"
     if ledger.already_taken(con, s.dedup_key, name):
         return Decision(s, False, "dedup: по этому основанию уже входили")
-    state = ledger.ensure_strategy(con, s.strategy, default_status, name)
+    state = ledger.ensure_strategy(con, s.strategy, default_status, name,
+                                   create=not dry)
     market_price = None
     if tick is not None:
         market_price = float(tick.ask if s.is_long else tick.bid)
@@ -216,7 +217,8 @@ def run(*, dry: bool, live: bool, enabled: list[str] | None, verbose: bool,
                     continue
 
                 d = decide(con, s, equity, si, tick, default_status,
-                           mt5=mt5, bsym=bsym, free_margin=free_margin, acc=acc)
+                           mt5=mt5, bsym=bsym, free_margin=free_margin, acc=acc,
+                           dry=dry)
                 if dirty and d.accepted:
                     d.accepted = False
                     d.reason = ("maintenance: правка движка в дереве, "

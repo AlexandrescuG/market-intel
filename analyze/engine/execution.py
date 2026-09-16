@@ -105,9 +105,30 @@ def preflight_account(mt5, account=None) -> None:
     assert_autotrading(mt5.terminal_info())
 
 
+def filling_mode(mt5, symbol: str):
+    """Какой режим исполнения примет ЭТОТ брокер по ЭТОМУ инструменту.
+
+    🔴 16.09, первый боевой ордер на реальном счёте Daoti отбился с
+    `retcode=10030 Unsupported filling mode`. Причина: мы не задавали
+    type_filling вовсе, и MT5 подставлял FOK. У Ava на демо FOK разрешён,
+    поэтому дефект не проявлялся полтора месяца; у Daoti разрешён ТОЛЬКО IOC
+    (filling_mode=2 по всем четырём проверенным парам).
+
+    Режим спрашиваем у инструмента, а не задаём константой: он у разных
+    брокеров и даже у разных символов одного брокера разный, и угадывание
+    здесь выглядит как «брокер отверг ордер», а не как наша ошибка."""
+    mask = int(getattr(mt5.symbol_info(symbol), "filling_mode", 0) or 0)
+    if mask & 2:
+        return mt5.ORDER_FILLING_IOC
+    if mask & 1:
+        return mt5.ORDER_FILLING_FOK
+    return mt5.ORDER_FILLING_RETURN
+
+
 def send(conn, mt5, symbol: str, volume: float, is_buy: bool, price: float,
          sl: float, tp: float, digits: int):
     conn.execute("import MetaTrader5 as _m")
+    fill = int(filling_mode(mt5, symbol))
     conn.execute(
         "_req = {"
         "'action': _m.TRADE_ACTION_DEAL,"
@@ -120,7 +141,8 @@ def send(conn, mt5, symbol: str, volume: float, is_buy: bool, price: float,
         f"'comment': {COMMENT_OPEN!r},"
         f"'sl': {round(float(sl), digits)!r},"
         f"'tp': {round(float(tp), digits)!r},"
-        "'type_time': _m.ORDER_TIME_GTC}")
+        "'type_time': _m.ORDER_TIME_GTC,"
+        f"'type_filling': {fill}}}")
     check = conn.eval("_m.order_check(_req)")
     rc = getattr(check, "retcode", None)
     if rc != 0:
@@ -136,6 +158,7 @@ def close(conn, mt5, position) -> tuple[bool, str]:
     tick = mt5.symbol_info_tick(sym)
     price = float(tick.bid if is_long else tick.ask)
     conn.execute("import MetaTrader5 as _m")
+    fill = int(filling_mode(mt5, sym))
     conn.execute(
         "_creq = {"
         "'action': _m.TRADE_ACTION_DEAL,"
@@ -147,7 +170,8 @@ def close(conn, mt5, position) -> tuple[bool, str]:
         "'deviation': 20,"
         f"'magic': {ENGINE_MAGIC},"
         f"'comment': {COMMENT_CLOSE!r},"
-        "'type_time': _m.ORDER_TIME_GTC}")
+        "'type_time': _m.ORDER_TIME_GTC,"
+        f"'type_filling': {fill}}}")
     res = conn.eval("_m.order_send(_creq)")
     rc = getattr(res, "retcode", None)
     if rc != mt5.TRADE_RETCODE_DONE:

@@ -305,7 +305,7 @@ def open_trades(con: sqlite3.Connection, strategy: str | None = None,
 # ─── состояние стратегий ────────────────────────────────────────────────────
 
 def ensure_strategy(con: sqlite3.Connection, strategy: str, status: str,
-                    account: str = "demo") -> dict:
+                    account: str = "demo", create: bool = True) -> dict:
     """Состояние стратегии НА ЭТОМ СЧЁТЕ.
 
     🔴 Ключ составной с 16.09. Пока счёт был один, стратегия и её состояние
@@ -316,6 +316,15 @@ def ensure_strategy(con: sqlite3.Connection, strategy: str, status: str,
                       "FROM engine_strategy_state WHERE account=? AND strategy=?",
                       (account, strategy)).fetchone()
     if row is None:
+        # 🔴 16.09: create=False для сухого прогона. `--dry-run --account real`
+        # завёл стратегии реального счёта со статусом shadow (у сухого прогона
+        # default_status = shadow), и следующий БОЕВОЙ прогон с --live отправил
+        # 8 сделок из 9 в тень: строки уже были, а --live существующие не
+        # трогает. Тот же класс, что дедуп, отравленный dry-run 28.08:
+        # репетиция не должна оставлять следов, по которым потом судят.
+        if not create:
+            return {"strategy": strategy, "status": status, "cum_r": 0.0,
+                    "peak_r": 0.0, "n_closed": 0, "halt_reason": None}
         con.execute("INSERT INTO engine_strategy_state (account, strategy, status, "
                     "updated_ts) VALUES (?,?,?,?)",
                     (account, strategy, status, int(time.time())))
