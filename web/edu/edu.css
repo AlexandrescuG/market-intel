@@ -342,7 +342,9 @@ body {
 }
 .sbf-seg-btn.active {
   background: var(--gold);
-  color: #fff;
+  /* Третий случай «белым по золоту» (2.42:1) после .btn-primary и .sbf-cta.
+     Активная кнопка и так выделена заливкой — текст на ней тёмный. */
+  color: var(--ink, #2B2B33);
   border-color: var(--gold);
 }
 
@@ -405,7 +407,7 @@ body {
   /* 🔴 Тёмная тушь, а не белый. Белый на золоте — 2.42:1, вдвое ниже AA;
      ровно тот же случай уже чинился в .btn-primary на основном сайте.
      Золото — светлый фон, и читаемый текст на нём тёмный. */
-  color: var(--ink, #18181a);
+  color: var(--ink, #2B2B33);
   font-family: 'JetBrains Mono', monospace;
   font-size: 13px;
   font-weight: 700;

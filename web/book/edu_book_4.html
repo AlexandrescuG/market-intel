@@ -26,7 +26,7 @@
     .ch4-flow-line{position:absolute;left:9%;right:9%;top:24px;height:1px;background:rgba(255,255,255,0.15);z-index:0}
     .ch4-flow-step{flex:1 1 0;min-width:0;text-align:center;position:relative;z-index:1;padding:0 4px}
     .ch4-flow-badge{width:48px;height:48px;border-radius:50%;background:#18181a;border:1px solid rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;margin:0 auto 8px;font-size:22px}
-    .ch4-flow-num{display:none;font-family:monospace;font-weight:700;font-size:11px;color:#876525;margin-right:3px}
+    .ch4-flow-num{display:none;font-family:monospace;font-weight:700;font-size:11px;color:var(--ch-gold,#876525);margin-right:3px}
     @media(max-width:768px){
       .ch4-flow{flex-direction:column;align-items:flex-start;gap:22px;padding-left:4px}
       .ch4-flow-line{left:28px;right:auto;top:14px;bottom:14px;width:1px;height:auto}
@@ -1030,10 +1030,15 @@ function LimitCatcher() {
     {key:"limit_sell",  label:"SELL LIMIT",   color:C.chartRedText,   desc:S.descSellLimit},
     {key:"stop_buy",    label:"BUY STOP",     color:"#0ea5e9",    desc:S.descBuyStop},
     {key:"stop_sell",   label:"SELL STOP",    color:"#f59e0b",    desc:S.descSellStop},
-    {key:"stop_limit",  label:"STOP LIMIT",   color:"#8b5cf6",    desc:S.descStopLimit},
+    {key:"stop_limit",  label:"STOP LIMIT",   color:"#A78BFA",    desc:S.descStopLimit},
     {key:"trailing_stop",label:"TRAILING STOP",color:"#14b8a6",   desc:S.descTrailingStop},
   ];
-  const ORDER_COLOR_RGBA = {"#089981":"8,153,129","#f23645":"242,54,69","#0ea5e9":"14,165,233","#f59e0b":"245,158,11","#8b5cf6":"139,92,246","#14b8a6":"20,184,166"};
+  // 🔴 Плашки уровня рисуются цветом ордера и подписываются ТЁМНЫМ, а не
+  // белым: цвета здесь светлые (на тёмном фоне графика иначе не видно
+  // линию), и белым по ним — 2.29:1. Фиолетовый пришлось сдвинуть к
+  // #A78BFA: при #8b5cf6 не проходила ни одна из двух подписей — ни
+  // белая (4.2), ни тёмная (3.9).
+  const ORDER_COLOR_RGBA = {"#089981":"8,153,129","#f23645":"242,54,69","#0ea5e9":"14,165,233","#f59e0b":"245,158,11","#A78BFA":"167,139,250","#14b8a6":"20,184,166"};
   const curOrder = orderTypes.find(o => o.key === orderType);
   const limitY = toY(limitPrice);
   const currentPrice = candles[candles.length - 1]?.close || 2510;
@@ -1119,7 +1124,10 @@ function LimitCatcher() {
           {[2495,2500,2505,2510,2515,2520,2525].map(p => (
             <g key={p}>
               <line x1="0" y1={toY(p)} x2={W} y2={toY(p)} stroke="rgba(255,255,255,0.04)" strokeWidth="1"/>
-              <text x="4" y={toY(p)-3} fontSize="9" fill="rgba(255,255,255,0.2)" fontFamily="monospace">{p}</text>
+              {/* Подпись шкалы — текст, а не фоновая штриховка: при альфе 0.2
+                  на #131722 это 1.88:1, цифру цены не прочитать. Тот же ярус
+                  палитры, что у осей lightweight-charts на этом же фоне. */}
+              <text x="4" y={toY(p)-3} fontSize="9" fill={C.inkFaintOnDark} fontFamily="monospace">{p}</text>
             </g>
           ))}
 
@@ -1150,12 +1158,12 @@ function LimitCatcher() {
             <React.Fragment>
               <line x1="0" y1={limitY} x2={W} y2={limitY} stroke={curOrder.color} strokeWidth="1.5" strokeDasharray="6 3" opacity={stopLimitTriggered?0.35:1}/>
               <rect x={W-105} y={limitY-12} width={103} height={20} fill={curOrder.color} opacity={stopLimitTriggered?0.4:0.9} rx="2"/>
-              <text x={W-54} y={limitY+3} fontSize="10" fill="#fff" textAnchor="middle" fontFamily="monospace" fontWeight="700">
+              <text x={W-54} y={limitY+3} fontSize="10" fill={C.black} textAnchor="middle" fontFamily="monospace" fontWeight="700">
                 STOP {limitPrice.toFixed(1)}
               </text>
               <line x1="0" y1={toY(stopLimitFillPrice)} x2={W} y2={toY(stopLimitFillPrice)} stroke={curOrder.color} strokeWidth="1.5" strokeDasharray="2 2"/>
               <rect x={W-105} y={toY(stopLimitFillPrice)-12} width={103} height={20} fill={curOrder.color} opacity={stopLimitTriggered?0.9:0.4} rx="2"/>
-              <text x={W-54} y={toY(stopLimitFillPrice)+3} fontSize="10" fill="#fff" textAnchor="middle" fontFamily="monospace" fontWeight="700">
+              <text x={W-54} y={toY(stopLimitFillPrice)+3} fontSize="10" fill={C.black} textAnchor="middle" fontFamily="monospace" fontWeight="700">
                 LIMIT {stopLimitFillPrice.toFixed(1)}
               </text>
             </React.Fragment>
@@ -1166,7 +1174,7 @@ function LimitCatcher() {
               )}
               <line x1="0" y1={toY(trailDisplayLevel)} x2={W} y2={toY(trailDisplayLevel)} stroke={curOrder.color} strokeWidth="1.5"/>
               <rect x={W-115} y={toY(trailDisplayLevel)-12} width={113} height={20} fill={curOrder.color} opacity="0.9" rx="2"/>
-              <text x={W-59} y={toY(trailDisplayLevel)+3} fontSize="10" fill="#fff" textAnchor="middle" fontFamily="monospace" fontWeight="700">
+              <text x={W-59} y={toY(trailDisplayLevel)+3} fontSize="10" fill={C.black} textAnchor="middle" fontFamily="monospace" fontWeight="700">
                 TRAIL {trailDisplayLevel.toFixed(1)} (−{trailDistance})
               </text>
             </React.Fragment>
@@ -1174,7 +1182,7 @@ function LimitCatcher() {
             <React.Fragment>
               <line x1="0" y1={limitY} x2={W} y2={limitY} stroke={curOrder.color} strokeWidth="1.5" strokeDasharray="6 3"/>
               <rect x={W-105} y={limitY-12} width={103} height={20} fill={curOrder.color} opacity="0.9" rx="2"/>
-              <text x={W-54} y={limitY+3} fontSize="10" fill="#fff" textAnchor="middle" fontFamily="monospace" fontWeight="700">
+              <text x={W-54} y={limitY+3} fontSize="10" fill={C.black} textAnchor="middle" fontFamily="monospace" fontWeight="700">
                 {curOrder.label} {limitPrice.toFixed(1)}
               </text>
             </React.Fragment>
@@ -1258,7 +1266,13 @@ function Chapter4() {
   const T4 = window.Ch4Content[lang] || window.Ch4Content.ru;
 
   const orderTypeAccents = [C.gold, C.chartGreen, C.chartRed, C.blue, "#14b8a6", "#8b5cf6"];
-  const orderTypes = S.orderTypes.map((o,i) => ({...o, accent:orderTypeAccents[i]}));
+  // 🔴 accent остаётся прежним — по нему ниже идут СРАВНЕНИЯ (o.accent ===
+  // C.chartGreen выбирает rgba-подложку), и подменить его значило бы тихо
+  // сломать подложки. Для текста — отдельный ряд: подписи рисуются на
+  // тинте своего же цвета (8% на кремовом), и там акцент даёт 2.19-3.63.
+  const orderTypeText = ["#876525", "#067764", "#D00D1D", "#1E5EEA", "#0D786C", "#7740F4"];
+  const orderTypes = S.orderTypes.map((o,i) => ({...o, accent:orderTypeAccents[i],
+                                                 accentText:orderTypeText[i]}));
 
   const mmFacts = S.mmFacts.map((f,i) => {
     if (i === 1) {
@@ -1278,7 +1292,11 @@ function Chapter4() {
     return it;
   });
 
-  const slippageColors = [C.chartRed, C.gold, C.chartRed, C.chartGreen];
+  // Колонка «проскальзывание» — это текст в ячейке, а не свеча на графике:
+  // биржевые цвета терминала (#f23645/#089981) и золото подбирались под
+  // тёмный фон и на кремовом дают 3.68, 3.37 и 2.49. Берём текстовые
+  // близнецы из палитры.
+  const slippageColors = [C.chartRedText, C.goldText, C.chartRedText, C.chartGreenText];
   const slippageExamples = S.slippageExamples.map((row,i) => ({...row, color:slippageColors[i]}));
 
   const conclusions = S.conclusions;
@@ -1498,7 +1516,7 @@ function Chapter4() {
                 <div style={{fontFamily:"'DM Serif Display',serif",fontSize:17,color:C.black}}>{o.title}</div>
               </div>
               <p style={{fontSize:13,color:C.inkMid,lineHeight:1.65,marginBottom:12}}>{o.text}</p>
-              <div style={{fontSize:11,color:o.accent,fontFamily:"monospace",letterSpacing:0.5,padding:"8px 12px",background:`rgba(${o.accent===C.chartGreen?'8,153,129':o.accent===C.chartRed?'242,54,69':o.accent===C.blue?'37,99,235':o.accent==="#14b8a6"?'20,184,166':o.accent==="#8b5cf6"?'139,92,246':'201,151,58'},0.08)`,borderRadius:3}}>
+              <div style={{fontSize:11,color:o.accentText,fontFamily:"monospace",letterSpacing:0.5,padding:"8px 12px",background:`rgba(${o.accent===C.chartGreen?'8,153,129':o.accent===C.chartRed?'242,54,69':o.accent===C.blue?'37,99,235':o.accent==="#14b8a6"?'20,184,166':o.accent==="#8b5cf6"?'139,92,246':'201,151,58'},0.08)`,borderRadius:3}}>
                 → {o.use}
               </div>
             </div>

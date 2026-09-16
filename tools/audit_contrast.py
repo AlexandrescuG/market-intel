@@ -126,7 +126,35 @@ from playwright.sync_api import sync_playwright
   // Возвращает null, если дошли до верха, так и не встретив непрозрачного
   // фона, ИЛИ если по пути попалась фоновая картинка — цвет фона в этом
   // случае неизвестен, и число было бы выдумкой.
+  // 🔴 Внутри SVG фон рисуется НЕ background'ом, а фигурой под текстом.
+  // Подпись «ENTRY 4344.59» лежит на золотой плашке <rect fill={C.gold}>,
+  // а замер, не зная про неё, брал background контейнера (#18181a) и
+  // выдавал 1.00:1 — «невидимый текст», которого нет. Ищем среди соседей
+  // по SVG последнюю непрозрачную фигуру, накрывающую текст целиком:
+  // порядок рисования в SVG — порядок в документе, поэтому последняя
+  // подходящая и лежит непосредственно под ним.
+  function фигураПод(эл) {
+    const корень = эл.ownerSVGElement;
+    if (!корень) return null;
+    const т = эл.getBoundingClientRect();
+    let найдена = null;
+    for (const ф of корень.querySelectorAll('rect, circle, ellipse, path, polygon')) {
+      if (ф.compareDocumentPosition(эл) & Node.DOCUMENT_POSITION_PRECEDING) continue;  // нарисована ПОСЛЕ текста
+      const s = getComputedStyle(ф);
+      const ц = разбор(s.fill) || разбор(ф.getAttribute('fill') || '');
+      if (!ц) continue;
+      const прозрачность = ц.a * (parseFloat(s.opacity) || 1) * (parseFloat(s.fillOpacity) || 1);
+      if (прозрачность < 0.85) continue;      // сквозь полупрозрачную видно фон под ней
+      const п = ф.getBoundingClientRect();
+      if (п.left <= т.left && п.right >= т.right &&
+          п.top <= т.top && п.bottom >= т.bottom) найдена = { ...ц, a: 1 };
+    }
+    return найдена;
+  }
+
   function фонПод(эл) {
+    const свг = фигураПод(эл);
+    if (свг) return { цвет: свг };
     let слои = [], у = эл;
     while (у) {
       const s = getComputedStyle(у);
@@ -204,6 +232,28 @@ from playwright.sync_api import sync_playwright
         цвет: hex(цт), фон: hex(фон.цвет),
         k: Math.round(к * 100) / 100, порог: порог,
         размер: размер, текст: свой.slice(0, 50),
+        // 🔴 Адрес находки, а не только её цвет. Без него отчёт говорит
+        // «#2c784e на #18181a, 3 штуки» — и дальше начинается гадание по
+        // грепу: тот же цвет живёт в ленте котировок (там он на белом и
+        // проходит) и в тёмной панели главы. Дорога от корня и есть
+        // ответ на вопрос «где это».
+        путь: (function () {
+          var ч = [], у = эл, шагов = 0;
+          while (у && у.tagName && шагов++ < 6) {
+            var имя = у.tagName.toLowerCase();
+            if (у.id) { ч.unshift(имя + '#' + у.id); break; }
+            var кл = (у.className && у.className.baseVal !== undefined
+                      ? у.className.baseVal : String(у.className || '')).trim();
+            if (кл) имя += '.' + кл.split(/\s+/).slice(0, 2).join('.');
+            ч.unshift(имя);
+            у = у.parentElement;
+          }
+          return ч.join(' > ');
+        })(),
+        // Соседний текст: по нему место в главе узнаётся глазами быстрее,
+        // чем по любому селектору.
+        рядом: ((эл.parentElement && эл.parentElement.innerText) || '')
+               .trim().replace(/\s+/g, ' ').slice(0, 80),
       });
   }
   return { плохие, пары, пропущено, проверено,

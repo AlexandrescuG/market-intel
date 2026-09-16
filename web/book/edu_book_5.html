@@ -704,7 +704,7 @@ function LiquidityGlobe({ hp }) {
             <div style={{fontSize:12,color:"rgba(255,255,255,0.55)",marginTop:4}}>
               {[sessionBand(hour)==="asia"||sessionBand(hour)==="" ? null : null].filter(Boolean)}
               {gl.sessionAsia}{(hour<7||hour>=21) ? " ●" : " ○"} · {gl.sessionLondon}{(hour>=7&&hour<16) ? " ●" : " ○"} · {gl.sessionNy}{(hour>=13&&hour<22) ? " ●" : " ○"}
-              {(hour>=13&&hour<16) && <span style={{color:C.red,marginLeft:8}}>⚡ {gl.overlapBadge}</span>}
+              {(hour>=13&&hour<16) && <span style={{color:C.redOnDark,marginLeft:8}}>⚡ {gl.overlapBadge}</span>}
             </div>
           </div>
           <div style={{textAlign:"right"}}>

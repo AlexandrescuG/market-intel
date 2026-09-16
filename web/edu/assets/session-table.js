@@ -39,7 +39,14 @@
     inkSoft: "rgba(24,24,26,0.68)", inkFaint: "rgba(24,24,26,0.61)",
     border: "rgba(24,24,26,0.1)", surface: "#faf8f5",
     red: "#f23645", redPale: "#fdecea", green: "#089981", greenPale: "#eaf5ee",
-    violet: "#8b5cf6"
+    violet: "#8b5cf6",
+    /* 🔴 Те же четыре цвета, пригодные для ТЕКСТА на светлом (#faf8f5).
+       Биржевые красный и зелёный подобраны под тёмный фон терминала и на
+       светлом дают 3.68 и 3.37, золото — 2.49. В таблице ими красится
+       название события и колонка значимости, то есть именно текст. Линии,
+       заливки и рамки продолжают брать C.red/C.green/C.gold: для
+       нетекстовой графики довольно 3:1, и узнаваемость цвета сохраняется. */
+    redText: "#D90E1E", greenText: "#067B68", violetText: "#7B46F5"
   };
 
   var T = {
@@ -144,11 +151,13 @@
     return "●".repeat(n) + "○".repeat(5 - n);
   }
 
+  /* Цвет вида события для ТЕКСТА. Отдельной функции для заливок пока не
+     нужно: в этой таблице вид события нигде не рисуется плашкой. */
   function kindColor(ev) {
-    if (ev.kind === "fix") return C.gold;
-    if (ev.kind === "release") return C.red;
-    if (ev.kind === "overlap") return C.green;
-    if (ev.kind === "broker") return C.violet;
+    if (ev.kind === "fix") return C.goldText;
+    if (ev.kind === "release") return C.redText;
+    if (ev.kind === "overlap") return C.greenText;
+    if (ev.kind === "broker") return C.violetText;
     return C.inkSoft;
   }
 

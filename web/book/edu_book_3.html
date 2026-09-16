@@ -795,6 +795,12 @@ function saveSetup(payload) {
 }
 
 const CRASH_ASSET_COLOR = { sp500:"#2563eb", bonds:"#7c3aed", gold:"#c9973a", oil:"#92400e", btc:"#f59e0b", cash:"#6b7280" };
+// 🔴 Та же шестёрка, пригодная для ПОДПИСЕЙ на тёмной панели портфеля
+// (#18181a). Цвета выше выбирались для полосок диаграммы — нетекстовой
+// графики с порогом 3:1, — а подписи «Акции 60%», «Нефть 5%» ими же
+// рисовались как текст и давали 3.43, 3.11, 2.50, 3.67. Оттенок тот же,
+// связь «полоска ↔ подпись» на глаз сохраняется.
+const CRASH_ASSET_TEXT = { sp500:"#4C7FEF", bonds:"#9A67F1", gold:"#c9973a", oil:"#D85F15", btc:"#f59e0b", cash:"#7D8492" };
 
 function EquitySpark({ equity, height }) {
   if (!equity || !equity.length) return null;
@@ -916,7 +922,7 @@ function CrashLabV2() {
 
         <div style={{display:"flex",justifyContent:"space-between",marginBottom:10}}>
           <span style={{fontSize:12,color:"rgba(255,255,255,0.6)"}}>{S.crashCompLabel}</span>
-          <span style={{fontSize:12,color:total===100?C.green:C.red,fontFamily:"monospace"}}>{total}% / 100%</span>
+          <span style={{fontSize:12,color:total===100?C.greenOnDark:C.redOnDark,fontFamily:"monospace"}}>{total}% / 100%</span>
         </div>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"4px 24px",marginBottom:6}} className="grid-2">
           {arsenalCards.map(card => {
@@ -926,7 +932,7 @@ function CrashLabV2() {
               <div key={key} style={{marginBottom:10,opacity:disabled?0.35:1}}>
                 <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
                   <span style={{display:"flex",alignItems:"center",gap:5,fontSize:12,color:"rgba(255,255,255,0.65)"}}><Icon name={card.icon} size={14}/>{card.title}</span>
-                  <span style={{fontSize:12,fontWeight:600,color:CRASH_ASSET_COLOR[key],fontFamily:"monospace"}}>{alloc[key]}%</span>
+                  <span style={{fontSize:12,fontWeight:600,color:CRASH_ASSET_TEXT[key],fontFamily:"monospace"}}>{alloc[key]}%</span>
                 </div>
                 <input type="range" min="0" max="100" value={alloc[key]} disabled={disabled}
                   aria-label={card.title}
@@ -950,11 +956,11 @@ function CrashLabV2() {
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}} className="g2">
               <div style={{background:"rgba(255,255,255,0.05)",borderRadius:4,padding:14,textAlign:"center"}}>
                 <div style={{fontSize:10,color:"rgba(255,255,255,0.55)",marginBottom:5}}>{L.resultDrawdown}</div>
-                <div style={{fontSize:18,fontWeight:700,color:"#e74c3c",fontFamily:"monospace"}}>{result.maxDrawdownPct.toFixed(1)}%</div>
+                <div style={{fontSize:18,fontWeight:700,color:C.redOnDark,fontFamily:"monospace"}}>{result.maxDrawdownPct.toFixed(1)}%</div>
               </div>
               <div style={{background:"rgba(255,255,255,0.05)",borderRadius:4,padding:14,textAlign:"center"}}>
                 <div style={{fontSize:10,color:"rgba(255,255,255,0.55)",marginBottom:5}}>{L.resultFinal}</div>
-                <div style={{fontSize:18,fontWeight:700,color:result.finalPct>=0?"#2ecc71":"#e74c3c",fontFamily:"monospace"}}>{result.finalPct>=0?"+":""}{result.finalPct.toFixed(1)}%</div>
+                <div style={{fontSize:18,fontWeight:700,color:result.finalPct>=0?C.greenOnDark:C.redOnDark,fontFamily:"monospace"}}>{result.finalPct>=0?"+":""}{result.finalPct.toFixed(1)}%</div>
               </div>
             </div>
           </React.Fragment>
@@ -1339,10 +1345,10 @@ function PositionCalculator() {
               {[
                 {label:S.calcMetricMaxVolume, val:`${maxUnits} ${inst.unit}`, big:true, color:C.goldText},
                 {label:S.calcMetricPosValue,   val:`~$${positionValue.toLocaleString()}`, color:"#fff"},
-                {label:S.calcMetricSLPrice,      val:Math.round(stopPrice), color:"#e74c3c"},
-                {label:S.calcMetricTPPrice,      val:Math.round(tpPrice), color:"#2ecc71"},
-                {label:S.calcMetricMaxLoss,        val:`-$${Math.round(riskAmount)}`, color:"#e74c3c"},
-                {label:S.calcMetricPotentialProfit,val:`+$${potentialProfit}`, color:"#2ecc71"},
+                {label:S.calcMetricSLPrice,      val:Math.round(stopPrice), color:C.redOnDark},
+                {label:S.calcMetricTPPrice,      val:Math.round(tpPrice), color:C.greenOnDark},
+                {label:S.calcMetricMaxLoss,        val:`-$${Math.round(riskAmount)}`, color:C.redOnDark},
+                {label:S.calcMetricPotentialProfit,val:`+$${potentialProfit}`, color:C.greenOnDark},
               ].map((m,i) => (
                 <div key={i} style={{background:"rgba(255,255,255,0.05)",borderRadius:3,padding:"10px 12px"}}>
                   <div style={{fontSize:10,color:"rgba(255,255,255,0.55)",marginBottom:4}}>{m.label}</div>
@@ -1431,12 +1437,15 @@ function Chapter3() {
   const S = STRINGS[lang] || STRINGS.ru;
   const T = window.Ch3Content[lang] || window.Ch3Content.ru;
 
+  // color — заливка полоски (нетекстовая графика, порог 3:1),
+  // text — тот же оттенок для подписи на тёмной панели (#18181a, 4.5:1).
+  // Раньше подпись брала color и давала 3.67 у серого и 2.50 у коричневого.
   const rrData = [
-    {rr:"1:1", wr:51, monthly:100, color:"#6b7280"},
-    {rr:"1:1.5",wr:41,monthly:150,color:"#92400e"},
-    {rr:"1:2", wr:34, monthly:300, color:C.goldText},
-    {rr:"1:3", wr:26, monthly:700, color:C.green},
-    {rr:"1:4", wr:21, monthly:1400,color:"#0ea5e9"},
+    {rr:"1:1", wr:51, monthly:100, color:"#6b7280",  text:"#7D8492"},
+    {rr:"1:1.5",wr:41,monthly:150,color:"#92400e",   text:"#D85F15"},
+    {rr:"1:2", wr:34, monthly:300, color:C.goldText, text:C.goldText},
+    {rr:"1:3", wr:26, monthly:700, color:C.green,    text:C.greenOnDark},
+    {rr:"1:4", wr:21, monthly:1400,color:"#0ea5e9",  text:"#0ea5e9"},
   ];
 
   const conclusions = [
@@ -1566,9 +1575,9 @@ function Chapter3() {
             {rrData.map((r,i) => (
               <div key={i} style={{marginBottom:12}}>
                 <div style={{display:"flex",justifyContent:"space-between",marginBottom:4,fontSize:13}}>
-                  <span style={{fontFamily:"monospace",color:r.color,fontWeight:700}}>RR {r.rr}</span>
+                  <span style={{fontFamily:"monospace",color:r.text,fontWeight:700}}>RR {r.rr}</span>
                   <span style={{color:"rgba(255,255,255,0.5)"}}>{S.rrNeededWR} {r.wr}%</span>
-                  <span style={{fontFamily:"monospace",color:r.color}}>+${r.monthly}</span>
+                  <span style={{fontFamily:"monospace",color:r.text}}>+${r.monthly}</span>
                 </div>
                 <div style={{background:"rgba(255,255,255,0.06)",borderRadius:2,height:5,overflow:"hidden"}}>
                   <div style={{height:"100%",background:r.color,width:`${100-r.wr}%`,borderRadius:2}}/>
