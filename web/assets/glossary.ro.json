@@ -344,8 +344,7 @@
     "aliases": [
       "levier",
       "leverage",
-      "efect de levier",
-      "margin"
+      "efect de levier"
     ],
     "short": "Folosirea fondurilor împrumutate de la broker pentru a mări dimensiunea poziției.",
     "full": "Efectul de levier (leverage) permite tranzacționarea unei poziții care depășește capitalul propriu. Un levier de 1:10 înseamnă că un depozit de 1000$ controlează o poziție de 10.000$. Profitul și pierderea se multiplică proporțional. Margin call-ul este închiderea forțată a pozițiilor la epuizarea marjei. Un levier ridicat crește riscul de lichidare la o mișcare mică împotriva poziției. Traderii profesioniști folosesc de regulă un levier de până la 1:3–1:5.",
@@ -762,5 +761,83 @@
       "trend",
       "dno"
     ]
+  },
+  {
+    "slug": "risk",
+    "term": "Risc",
+    "aliases": [
+      "risc",
+      "risk",
+      "risc pe tranzacție",
+      "managementul riscului",
+      "risk management"
+    ],
+    "short": "Partea din depozit pe care traderul este dispus conștient să o piardă într-o singură tranzacție.",
+    "full": "Riscul se stabilește ÎNAINTE de intrare și se calculează în procente din depozit, nu în monedă: 1% din 10 000 $ și 1% din 1 000 $ sunt sume diferite, dar aceeași decizie. Din risc rezultă mărimea poziției, nu invers: mai întâi „cât sunt dispus să pierd”, apoi „câte loturi înseamnă asta la stopul meu”. Reperul obișnuit este 1–2% pe tranzacție: la 1%, o serie de zece pierderi consecutive costă circa 10% din depozit; la 5% — jumătate din cont. Pierderea nu este simetrică: pentru a recupera −50% este nevoie de +100%. Riscul care nu este limitat de un stop-loss este limitat de mărimea depozitului.",
+    "related": [
+      "stoploss",
+      "r-ratio",
+      "leverage",
+      "slit"
+    ],
+    "etym": "Prin it. rischio. Originea mai veche este disputată: se invocă cel mai des gr. ῥίζα „stâncă” — pericolul pe care nava trebuie să-l ocolească — și ar. rizq „parte, ceea ce este dat”."
+  },
+  {
+    "slug": "margin",
+    "term": "Marjă",
+    "aliases": [
+      "marjă",
+      "margin",
+      "garanție",
+      "marjă liberă",
+      "free margin",
+      "nivelul marjei",
+      "margin level"
+    ],
+    "short": "Partea din depozit pe care brokerul o blochează drept garanție pentru o poziție deschisă.",
+    "full": "Marja nu este comision și nici cheltuială: sunt bani înghețați, care se întorc la închiderea poziției. Marja necesară = volumul poziției / levier: la un levier de 1:100, o poziție de 10 000 $ blochează 100 $. Marja liberă este ce rămâne și poate susține poziții noi sau pierderea celor curente. Nivelul marjei = fonduri / marjă utilizată × 100%: cât timp este ridicat, contul trăiește. Când nivelul scade sub prag, brokerul mai întâi avertizează (margin call), apoi închide pozițiile forțat (stop out). Pragurile concrete le stabilește brokerul și diferă de la unul la altul — merită citite în specificația contului înainte de prima tranzacție, nu după.",
+    "related": [
+      "leverage",
+      "stoploss",
+      "risk",
+      "spread"
+    ],
+    "etym": "Din lat. margo — „margine”. Garanția stă la marginea contului și separă banii liberi de cei blocați."
+  },
+  {
+    "slug": "atr",
+    "term": "ATR",
+    "aliases": [
+      "atr",
+      "average true range",
+      "interval real mediu"
+    ],
+    "short": "Amplitudinea medie a lumânării pe o perioadă — o măsură a volatilității în puncte, fără direcție.",
+    "full": "True Range al unei lumânări este maximul dintre trei valori: (high − low), |high − close-ul lumânării precedente| și |low − close-ul precedent|. Ultimele două există pentru gap-uri: dacă piața s-a deschis cu un decalaj, simpla amplitudine a lumânării subestimează mișcarea. ATR este media mobilă a True Range, de regulă pe 14 perioade. ATR nu arată direcția deloc: și căderea, și creșterea dau valori la fel de mari. Utilizare practică — stop după volatilitate (ATR × un multiplicator, în loc de un număr rotund de puncte), normalizarea țintelor și compararea instrumentelor între ele: 50 de puncte la aur și 50 la EUR/USD sunt mișcări complet diferite, dar în ATR devin comparabile.",
+    "related": [
+      "volatility",
+      "stoploss",
+      "timeframe",
+      "vix"
+    ],
+    "etym": "Average True Range — „interval real mediu”. Introdus de Welles Wilder în „New Concepts in Technical Trading Systems” (1978), aceeași carte în care apare și RSI."
+  },
+  {
+    "slug": "oscillator",
+    "term": "Oscilator",
+    "aliases": [
+      "oscilator",
+      "oscillator",
+      "oscilatoare"
+    ],
+    "short": "Indicator ale cărui valori oscilează într-un interval limitat — de obicei între 0 și 100.",
+    "full": "Un indicator de trend urmează prețul; un oscilator măsoară viteza și „supraîncălzirea” mișcării. De aici scala limitată: valoarea se oprește la margini și se întoarce, ca un pendul. Dintre oscilatoare fac parte RSI, stocasticul, histograma MACD. Zonele de supracumpărare și supravânzare nu sunt prin ele însele un semnal de inversare: într-un trend puternic oscilatorul poate sta săptămâni întregi peste 70, iar „vânzarea supracumpărării” este modul tipic de a te pune împotriva pieței. Oscilatoarele funcționează mai bine în lateral decât în trend. Cel mai informativ eveniment este divergența: prețul face un nou extrem, oscilatorul nu.",
+    "related": [
+      "rsi",
+      "divergence",
+      "volatility",
+      "flat"
+    ],
+    "etym": "Din lat. oscillare — „a se legăna”. Valoarea se leagănă între două limite și nu iese din ele."
   }
 ]
