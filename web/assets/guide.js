@@ -197,8 +197,17 @@
       '</div></div>';
     var lead = broker.lead ? '<p class="guide-lead">' + escapeHtml(broker.lead) + '</p>' : '';
     var processes = (broker.processes || []).map(function (p, i) { return renderProcess(p, i + 1); }).join('');
+    // Языковой вариант партнёрской ссылки, если он задан в данных гайда.
+    // Сейчас во всех трёх файлах (ru/en/ro) стоит одна и та же ссылка с
+    // зашитым языком партнёра — у XM это `l=ru`, у FxPro и InstaForex
+    // сегмент `/en/`. Правильные коды локалей знает только сам партнёр,
+    // проверяются они живым переходом (а он засчитывается как клик), поэтому
+    // подставлять их наугад нельзя: вместо чужого языка легко получить 404.
+    // Механизм готов — как только в guides/<id>.<lang>.json появится
+    // `affiliate` со своим языком, он сработает сам, это уже отдельный файл.
+    var affiliate = broker['affiliate_' + (window.sbfI18n && window.sbfI18n.lang)] || broker.affiliate;
     var cta = '<div class="guide-cta">' +
-      '<a class="primary" href="' + escapeHtml(broker.affiliate) + '" target="_blank" rel="noopener sponsored">' + t('guide.cta_open', 'Открыть счёт у') + ' ' + escapeHtml(broker.name) + '</a>' +
+      '<a class="primary" href="' + escapeHtml(affiliate) + '" target="_blank" rel="noopener sponsored">' + t('guide.cta_open', 'Открыть счёт у') + ' ' + escapeHtml(broker.name) + '</a>' +
       '<a class="secondary" href="' + escapeHtml(langPrefix() + (broker.table_link || '/brokers')) + '">' + t('guide.cta_compare', 'Сравнить всех брокеров') + '</a>' +
       '</div>';
     var risk = '<aside class="rwarn" role="note"><p>' + t('brokers.risk_warning_full', '') + '</p></aside>';

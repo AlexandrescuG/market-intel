@@ -96,6 +96,30 @@
     return x ? (x[_i18n.lang] || x.ru) : (m || '');
   }
 
+  // ── Партнёрская ссылка с учётом языка ──────────────────────────────────────
+  //
+  // 🔴 У трёх партнёров из пяти язык ЗАШИТ прямо в партнёрской ссылке:
+  //   XM         …/c?c=1258918&l=ru&p=1     — параметр l
+  //   FxPro      …/en/register/md/cri/…     — сегмент пути
+  //   InstaForex …/en/fast_open_live_account — сегмент пути
+  // То есть румын с /ro/brokers и англичанин с /en/brokers уходили на русскую
+  // (соответственно английскую) страницу партнёра. Это не косметика: человек
+  // дошёл до конца воронки и упёрся в форму на чужом языке.
+  //
+  // Подставлять язык В КОД я не стал, и это осознанно: коды локалей у каждого
+  // партнёра свои, и `l=ro` у XM или `/ro/` у FxPro могут просто не
+  // существовать — тогда вместо чужого языка человек получит 404, что хуже.
+  // Проверить можно только живым переходом по ссылке, а каждый такой переход
+  // засчитывается партнёрке как клик, поэтому это шаг владельца, не мой.
+  //
+  // Здесь готов МЕХАНИЗМ: если в partners.json у ссылки появится вариант
+  // `affiliate_ro` / `affiliate_en`, он будет использован автоматически.
+  // До тех пор работает единственная `affiliate` — ровно как раньше.
+  function affiliateFor(p) {
+    var l = (p && p.links) || {};
+    return l['affiliate_' + _i18n.lang] || l.affiliate || '#';
+  }
+
   // Свободный текст в самих данных (leverage_retail, published_specs.commission
   // и т.п.) -- в отличие от единиц, это не закрытый список из пары слов,
   // поэтому перевод живёт РЯДОМ с фактом в самом JSON, как <field>_en/<field>_ro,
@@ -698,7 +722,7 @@
     }
     if (groupBadge) f.entity += groupBadge;
 
-    var affLink = escapeHtml((p.links && p.links.affiliate) || '#');
+    var affLink = escapeHtml(affiliateFor(p));
     var tds = order.map(function (c) { return '<td class="col-' + c + '">' + f[c] + '</td>'; });
 
     return '<tr data-partner="' + escapeHtml(p.id) + '">' +
@@ -796,7 +820,7 @@
   function renderCard(row) {
     var p = row.partner;
     var f = buildFieldHtml(row);
-    var affLink = escapeHtml((p.links && p.links.affiliate) || '#');
+    var affLink = escapeHtml(affiliateFor(p));
     var lics = licencesOf(p);
     var lead = lics[0];
 
@@ -1227,7 +1251,7 @@
   function compareCta(row) {
     if (!row) return '';
     var p = row.partner;
-    return '<a class="btn-open cmp-cta" href="' + escapeHtml((p.links && p.links.affiliate) || '#') + '"' +
+    return '<a class="btn-open cmp-cta" href="' + escapeHtml(affiliateFor(p)) + '"' +
       ' target="_blank" rel="noopener sponsored" data-aff="' + escapeHtml(p.id) + '" data-place="compare">' +
       t('brokers.cta_open', 'Открыть счёт') + ' ' + escapeHtml(p.name) + ' →</a>';
   }
