@@ -56,10 +56,15 @@ from playwright.sync_api import sync_playwright
 #      отдаётся статикой, Jinja его не трогает, и в браузере падает Babel на
 #      «{% raw %}». Ноль элементов при 73 КБ ответа.
 # Главы рендерятся только через маршрут _EDU_RE: /edu/b/N.
+# Список сверен с постраничной картой аудита (AUDIT_lp_pages_2026-09-16):
+# все анонимные страницы + по одной языковой версии там, где румынские
+# подписи длиннее русских. За логином (/journal, /admin) меряется отдельно.
 СТРАНИЦЫ = [
     "/",
     "/brokers",
+    "/brokers/xm",
     "/glossary",
+    "/privacy",
     "/grafik?s=EURUSD",
     "/edu",
     "/edu/calendar",
@@ -68,6 +73,9 @@ from playwright.sync_api import sync_playwright
     "/edu/b/10",
     "/login",
     "/register",
+    "/survey",
+    "/ro/",
+    "/ro/brokers",
 ]
 
 # Порог «страница не отрисовалась». Считается по длине видимого текста, а не

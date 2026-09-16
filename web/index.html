@@ -196,8 +196,23 @@ a:hover{text-decoration:underline;color:var(--glow)}
 /* Пять направлений — пять колонок. Раньше всё лежало одним облаком с
    легендой по цветам: сравнить крипту с сырьём было можно, а понять, что
    именно относится к сырью, — только сверяясь с легендой. */
-.board-tabs{flex-wrap:wrap;margin-bottom:12px}
-.board-groups{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+/* Резерв под переключатель направлений: renderBoardTabs() наполняет его уже
+   после загрузки, а до этого он занимает ноль. На мобильном пять чипов
+   переносятся в три строки — это 94 px, которые в момент отрисовки уезжали
+   вниз вместе со всей страницей. Резерв по измеренной высоте. */
+.board-tabs{flex-wrap:wrap;margin-bottom:12px;min-height:28px}
+@media(max-width:768px){.board-tabs{min-height:94px}}
+.board-groups{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;
+  /* 🔴 РЕЗЕРВ ВЫСОТЫ ДО ПРИХОДА ДАННЫХ — 16.09.2026.
+     Доска приезжает из /api/pulse/board примерно на 570-й мс и до этого
+     занимает ноль. В момент отрисовки она выталкивала вниз всё, что под
+     ней, на 540 px: самый крупный сдвиг на сайте (CLS 2.11 на мобильном,
+     1.40 на desktop — при норме 0.1). Резерв равен ИЗМЕРЕННОЙ высоте
+     заполненной доски, а не выбран на глаз: на desktop это ровно высота
+     ячейки из строки ниже, на мобильном — высота списка из пяти групп.
+     Замер: python3 tools/audit_cls.py */
+  min-height:540px}
+@media(max-width:768px){.board-groups{min-height:240px}}
 /* Одно направление на всю ширину: сетка из одной колонки, ячейка выше —
    в ней десять с лишним кругов вместо четырёх. */
 .board-groups.single{grid-template-columns:1fr}
@@ -686,7 +701,14 @@ a:hover{text-decoration:underline;color:var(--glow)}
     <!-- Класс view-fund, а не перенос внутрь блока .view-fund ниже: доска
          должна остаться выше «что даёт аккаунт» (порядок первого экрана из ТЗ
          03.09), а показываться только в фундаментальном режиме. -->
-    <section class="panel buzz-board view-fund" id="buzzBoard" hidden>
+    <!-- 🔴 Без `hidden`: пока секция скрыта, места она не занимает, и в момент
+         появления толкает страницу на 540 px. Теперь место зарезервировано
+         с первой отрисовки (min-height у .board-groups), а прячется секция
+         только в том случае, ради которого `hidden` и ставили — когда доска
+         пришла ПУСТОЙ (loadBoard: `sec.hidden = true` при items.length === 0).
+         Размен осознанный: гарантированный прыжок на каждой загрузке заменён
+         одним сдвигом в редком случае «сегодня не обсуждают вообще ничего». -->
+    <section class="panel buzz-board view-fund" id="buzzBoard">
       <div class="panel-h">
         <h2 data-i18n="home.board_title">{{ t('home.board_title', lang) }}</h2>
         <span class="fresh" id="boardFresh"></span>
@@ -696,7 +718,17 @@ a:hover{text-decoration:underline;color:var(--glow)}
       <div class="board-groups" id="boardCanvas"></div>
     </section>
 
-    <section class="panel anon-value" id="anonValue" hidden>
+    <!-- 🔴 Показ решает СЕРВЕР (`anon` из _render_site_page), а не клиент.
+         Было: блок стоял `hidden`, а JS снимал скрытие по событию
+         sbf:user-ready, то есть после ответа /api/auth/me — и появление
+         толкало страницу вниз на пол-экрана (вклад в CLS 0.46 на мобильном).
+         Резерв высоты тут не подходит: залогиненному блок не показывается
+         вовсе, и резерв остался бы пустой дырой. Поэтому у гостя блок
+         приходит в HTML сразу и не двигается, а у своих его просто нет.
+         showAnonValueBlock() ниже оставлен: он корректно делает `if(!el)
+         return`, а гостю правит язык в ссылке CTA. -->
+    {% if anon %}
+    <section class="panel anon-value" id="anonValue">
       <div class="anon-value-head">
         <h2 class="anon-value-h">{{ t('home.anon_value_title', lang) }}</h2>
         <p class="anon-value-sub">{{ t('home.anon_value_sub', lang) }}</p>
@@ -710,6 +742,7 @@ a:hover{text-decoration:underline;color:var(--glow)}
       <a class="anon-value-cta" id="anonValueCta" href="/survey">{{ t('home.anon_value_cta', lang) }}</a>
       <p class="anon-value-note">{{ t('home.anon_value_note', lang) }}</p>
     </section>
+    {% endif %}
 
     <!-- ── ФУНДАМЕНТАЛЬНЫЙ ──────────────────────────────────── -->
     <div class="view-fund">

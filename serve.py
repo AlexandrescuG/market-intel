@@ -2413,10 +2413,29 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         """Рендерит web/<template_name> через _site_jinja с {{ t(key) }}
         доступным внутри. lang прокидывается в шаблон явно (а не только
         через глобальный t, у которого свой параметр по умолчанию) -- сами
-        шаблоны используют `{{ t('key', lang) }}`."""
+        шаблоны используют `{{ t('key', lang) }}`.
+
+        🔴 `anon` — знает ли сервер, что посетитель не залогинен.
+        16.09.2026: блок «что даёт аккаунт» на главной показывался только
+        анониму, и решение принимал КЛИЕНТ — по событию sbf:user-ready,
+        то есть после ответа /api/auth/me. До этого момента блок стоял
+        `hidden`, места не занимал, а появившись — толкал страницу вниз
+        на пол-экрана (вклад в CLS 0.46 на мобильном).
+        Резерв высоты тут не годится: залогиненному блок не показывается
+        никогда, и зарезервированное место осталось бы дырой. Сервер сессию
+        читает и так (тот же validate_session, что и /api/auth/me), поэтому
+        решение переехало на сервер: нет блока — нет и сдвига.
+        Страница отдаётся с Cache-Control: no-store, так что персональный
+        рендер ничего не ломает в кэше."""
+        try:
+            anon = self._current_user_id() == "default"
+        except Exception:
+            # Сессию не прочитали — считаем гостем: показать блок лишний раз
+            # безобиднее, чем спрятать его от того, кому он адресован.
+            anon = True
         try:
             tpl = _site_jinja.get_template(template_name)
-            html = _normalize_favicon(tpl.render(lang=lang))
+            html = _normalize_favicon(tpl.render(lang=lang, anon=anon))
         except Exception as e:
             self.send_response(500)
             self.send_header("Content-Type", "text/plain; charset=utf-8")
