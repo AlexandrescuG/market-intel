@@ -177,10 +177,13 @@ def run(*, dry: bool, live: bool, enabled: list[str] | None, verbose: bool,
                 log.info("сопровождение: стопов перенесено=%d ошибок=%d",
                          mg["moved"], mg["errors"])
 
-            acc = mt5.account_info()
-            equity = float(getattr(acc, "equity", 0.0) or 0.0)
-            free_margin = float(getattr(acc, "margin_free", 0.0) or 0.0)
-            server = getattr(acc, "server", None)
+            # 🔴 Имя ДРУГОЕ, чем у профиля счёта: 16.09 профиль назывался
+            # `acc`, и эта строка его затирала — сухой прогон реального счёта
+            # упал с «AccountInfo object has no attribute symbols».
+            ainfo = mt5.account_info()
+            equity = float(getattr(ainfo, "equity", 0.0) or 0.0)
+            free_margin = float(getattr(ainfo, "margin_free", 0.0) or 0.0)
+            server = getattr(ainfo, "server", None)
             if equity <= 0:
                 log.error("equity не получена — решения не принимаются")
                 return 2
