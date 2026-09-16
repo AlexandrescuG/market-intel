@@ -178,7 +178,7 @@ function SeriesCounter({ progress, loading, lang }) {
   return (
     /* Счётчик серии — переход к разделу, то есть управление. Был <div>
        с курсором: мышью работает, с клавиатуры нет. */
-    <button type="button" onClick={goBack} title={S.seriesCounterGoto} style={{cursor:"pointer",background:"none",fontFamily:"monospace",fontSize:11.5,color:C.gold,border:`1px solid ${C.borderGold}`,borderRadius:20,padding:"5px 14px",letterSpacing:0.5,whiteSpace:"nowrap"}}>
+    <button type="button" onClick={goBack} title={S.seriesCounterGoto} style={{cursor:"pointer",background:"none",fontFamily:"monospace",fontSize:11.5,color:C.goldText,border:`1px solid ${C.borderGold}`,borderRadius:20,padding:"5px 14px",letterSpacing:0.5,whiteSpace:"nowrap"}}>
     {label}
     </button>
   );
@@ -210,7 +210,7 @@ function IntroBlock() {
       <AntiMythBlock lang={INITIAL_LANG} style={{marginBottom:28}}
         data={{tag: T.antiMyth.tag, title: T.antiMyth.title, bodies: [T.antiMyth.body1, T.antiMyth.body2, T.antiMyth.body3]}}/>
 
-      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T.voiceSbf.tag}</Mono>
+      <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{T.voiceSbf.tag}</Mono>
       <div style={{borderLeft:`4px solid ${C.gold}`,paddingLeft:24}}>
         {T.voiceSbf.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:16,fontStyle:"italic",color:C.inkMid,lineHeight:1.7,fontFamily:"'DM Serif Display',serif",marginBottom:12}}>{p}</p>)}
       </div>
@@ -232,12 +232,12 @@ function PriceOfNotKnowing13() {
   const live = useMemo(() => pyramidCompute(1, stepPts, 1, 3, "equal"), [stepPts]);
   return (
     <div id="secPriceOfNotKnowing" style={{marginBottom:48,scrollMarginTop:130}}>
-      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{p.tag}</Mono>
+      <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{p.tag}</Mono>
       <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.black,marginBottom:14}}>{p.title}</div>
       <p style={{fontSize:14,color:C.inkMid,lineHeight:1.75,marginBottom:12,maxWidth:800}}>{p.intro}</p>
       <p style={{fontSize:14,color:C.inkMid,lineHeight:1.75,marginBottom:20,maxWidth:800}}>{p.body2}</p>
       <div style={{background:C.black,borderRadius:8,padding:"22px 28px",color:"#fff",marginBottom:16}}>
-        <Mono size={10} color={C.gold} spacing={1} style={{display:"block",marginBottom:8,textTransform:"uppercase"}}>{p.keyLabel}</Mono>
+        <Mono size={10} color={C.goldText} spacing={1} style={{display:"block",marginBottom:8,textTransform:"uppercase"}}>{p.keyLabel}</Mono>
         <p style={{fontSize:14,color:"rgba(255,255,255,0.85)",lineHeight:1.7,margin:0}}>{p.keyBody}</p>
       </div>
       <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"20px 24px",marginBottom:16}}>
@@ -253,7 +253,7 @@ function PriceOfNotKnowing13() {
           </div>
           <div>
             <Mono size={9} color={C.inkFaint} spacing={0.5}>{INITIAL_LANG==="ru"?"ОТКАТ ДО УБЫТКА":INITIAL_LANG==="ro"?"RETRAGERE PÂNĂ LA PIERDERE":"PULLBACK TO LOSS"}</Mono>
-            <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.gold}}>{live.pnrPts.toFixed(0)} {INITIAL_LANG==="ru"?"пт":INITIAL_LANG==="ro"?"pct":"pt"}</div>
+            <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.goldText}}>{live.pnrPts.toFixed(0)} {INITIAL_LANG==="ru"?"пт":INITIAL_LANG==="ro"?"pct":"pt"}</div>
           </div>
         </div>
       </div>
@@ -275,7 +275,7 @@ function WhySwing() {
       <p style={{fontSize:14,color:C.black,fontWeight:600,lineHeight:1.78,marginBottom:14,maxWidth:820}}>{w.body2(scalp, swing)}</p>
       <p style={{fontSize:14,color:C.inkMid,lineHeight:1.78,marginBottom:14,maxWidth:820}}>{w.body3}</p>
       <p style={{fontSize:13.5,color:C.inkSoft,lineHeight:1.78,fontStyle:"italic",maxWidth:820,marginBottom:14}}>{w.body4}</p>
-      <a href="/chart.html?s=GOLD" target="_blank" rel="noopener" style={{fontFamily:"monospace",fontSize:12,color:C.gold,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>{w.openOnChart}</a>
+      <a href="/chart.html?s=GOLD" target="_blank" rel="noopener" style={{fontFamily:"monospace",fontSize:12,color:C.goldText,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>{w.openOnChart}</a>
     </div>
   );
 }
@@ -299,7 +299,7 @@ function TradeAnatomy() {
         <Mono size={10} color={C.inkFaint} spacing={1} style={{display:"block",marginBottom:10,textTransform:"uppercase"}}>{a.questionsLabel}</Mono>
         {a.questions.map((q,i) => (
           <div key={i} style={{display:"flex",gap:10,marginBottom:10,alignItems:"flex-start"}}>
-            <Mono size={11} color={C.gold} spacing={0}>{i+1}</Mono>
+            <Mono size={11} color={C.goldText} spacing={0}>{i+1}</Mono>
             <p style={{fontSize:13,color:C.inkMid,lineHeight:1.65,margin:0}}>{q}</p>
           </div>
         ))}
@@ -325,7 +325,7 @@ function TradeAnatomy() {
       </div>
 
       <div style={{background:C.black,borderRadius:8,padding:"18px 22px"}}>
-        <Mono size={10} color={C.gold} spacing={1} style={{display:"block",marginBottom:8,textTransform:"uppercase"}}>{a.lessonLabel}</Mono>
+        <Mono size={10} color={C.goldText} spacing={1} style={{display:"block",marginBottom:8,textTransform:"uppercase"}}>{a.lessonLabel}</Mono>
         <p style={{fontSize:13.5,color:"rgba(255,255,255,0.85)",lineHeight:1.7,margin:0}}>{a.lessonText}</p>
       </div>
     </div>
@@ -385,7 +385,7 @@ function PyramidCalculator() {
           <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,marginBottom:16}}>{py.step2Intro}</p>
           <div style={{display:"flex",gap:24,flexWrap:"wrap",justifyContent:"center",background:C.black,borderRadius:6,padding:"20px 24px",marginBottom:14}}>
             <div style={{textAlign:"center"}}>
-              <div style={{fontFamily:"'DM Serif Display',serif",fontSize:24,color:C.gold}}>+{example.after3.avgPrice.toFixed(0)}</div>
+              <div style={{fontFamily:"'DM Serif Display',serif",fontSize:24,color:C.goldText}}>+{example.after3.avgPrice.toFixed(0)}</div>
               <Mono size={9} color="rgba(255,255,255,0.5)" spacing={0.5}>{py.avgLabel}</Mono>
             </div>
             <div style={{textAlign:"center"}}>
@@ -433,7 +433,7 @@ function PyramidCalculator() {
 
           <div style={{display:"flex",gap:20,flexWrap:"wrap",justifyContent:"center"}}>
             <div style={{textAlign:"center",minWidth:130}}>
-              <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.gold}}>+{custom.avgPrice.toFixed(1)}</div>
+              <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.goldText}}>+{custom.avgPrice.toFixed(1)}</div>
               <Mono size={9} color="rgba(255,255,255,0.5)" spacing={0.5}>{py.resultAvgLabel}</Mono>
             </div>
             <div style={{textAlign:"center",minWidth:130}}>
@@ -466,7 +466,7 @@ function PyramidCalculator() {
         <p style={{fontSize:11.5,color:C.inkFaint,fontStyle:"italic",marginBottom:8}}>{py.compliance}</p>
       )}
       {step >= 3 && (
-        <a href="/chart.html?s=GOLD" target="_blank" rel="noopener" style={{fontFamily:"monospace",fontSize:12,color:C.gold,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>{py.openOnChart}</a>
+        <a href="/chart.html?s=GOLD" target="_blank" rel="noopener" style={{fontFamily:"monospace",fontSize:12,color:C.goldText,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>{py.openOnChart}</a>
       )}
     </div>
   );
@@ -507,13 +507,13 @@ function BreakevenCostTable({ be, loading, error }) {
       </div>
 
       <div style={{marginBottom:16}}>
-        <Mono size={10} color={C.gold} spacing={1} style={{display:"block",marginBottom:8,textTransform:"uppercase"}}>{b.secondLabel}</Mono>
+        <Mono size={10} color={C.goldText} spacing={1} style={{display:"block",marginBottom:8,textTransform:"uppercase"}}>{b.secondLabel}</Mono>
         <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,marginBottom:16}}>{b.secondText}</p>
       </div>
 
       {highlight && (
         <div style={{background:C.black,borderRadius:8,padding:"24px 28px",color:"#fff",marginBottom:16,textAlign:"center"}}>
-          <div style={{fontFamily:"'DM Serif Display',serif",fontSize:40,color:C.gold,marginBottom:10}}>{highlight.zero_pct}%</div>
+          <div style={{fontFamily:"'DM Serif Display',serif",fontSize:40,color:C.goldText,marginBottom:10}}>{highlight.zero_pct}%</div>
           <p style={{fontSize:13,color:"rgba(255,255,255,0.8)",lineHeight:1.65,maxWidth:600,margin:"0 auto"}}>{b.verdictLabel(xLabel, highlight.zero_pct, highlight.n)}</p>
         </div>
       )}
@@ -568,8 +568,8 @@ function BreakevenCostTable({ be, loading, error }) {
         <p style={{fontSize:12,color:C.black,lineHeight:1.6,margin:0}}>{b.honestPlate}</p>
       </div>
 
-      <a href="/data/edu_stats/breakeven_cost.csv" download style={{fontFamily:"monospace",fontSize:12,color:C.gold,textDecoration:"none",border:`1px solid ${C.gold}`,padding:"9px 16px",borderRadius:4,display:"inline-block",marginRight:14}}>{b.csvBtn}</a>
-      <a href="/chart.html?s=GOLD" target="_blank" rel="noopener" style={{fontFamily:"monospace",fontSize:12,color:C.gold,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>{b.openOnChart}</a>
+      <a href="/data/edu_stats/breakeven_cost.csv" download style={{fontFamily:"monospace",fontSize:12,color:C.goldText,textDecoration:"none",border:`1px solid ${C.gold}`,padding:"9px 16px",borderRadius:4,display:"inline-block",marginRight:14}}>{b.csvBtn}</a>
+      <a href="/chart.html?s=GOLD" target="_blank" rel="noopener" style={{fontFamily:"monospace",fontSize:12,color:C.goldText,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>{b.openOnChart}</a>
     </div>
   );
 }
@@ -609,7 +609,7 @@ function TradePlan() {
           </div>
         ))}
         <button onClick={save} disabled={!ready || busy} style={{padding:"11px 24px",background: ready ? C.black : C.inkFaint,color:"#fff",border:"none",borderRadius:4,cursor: ready ? "pointer" : "not-allowed",fontFamily:"monospace",fontSize:12,letterSpacing:0.5}}>{tp.saveBtn}</button>
-        {saved && <p style={{fontSize:12,color:C.gold,marginTop:10}}>{tp.savedNote}</p>}
+        {saved && <p style={{fontSize:12,color:C.goldText,marginTop:10}}>{tp.savedNote}</p>}
       </div>
     </div>
   );
@@ -621,7 +621,7 @@ function LadderStep8() {
   const l8 = T.ladderStep8;
   return (
     <div id="secLadderStep8" style={{marginBottom:48,scrollMarginTop:130}}>
-      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:14}}>{l8.tag}</Mono>
+      <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:14}}>{l8.tag}</Mono>
       <p style={{fontSize:14,color:C.inkMid,lineHeight:1.78,marginBottom:12,maxWidth:800}}>{l8.limitParagraph1}</p>
       <p style={{fontSize:14,color:C.inkMid,lineHeight:1.78,marginBottom:24,maxWidth:800}}>{l8.limitParagraph2}</p>
 
@@ -660,7 +660,7 @@ function PredictBreakeven({ be }) {
   const correctIdx = highlight ? bucketIdxBreakeven(highlight.zero_pct) : null;
   return (
     <div style={{border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px",marginTop:8,marginBottom:24}}>
-      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{p.tag}</Mono>
+      <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{p.tag}</Mono>
       <p style={{fontSize:14.5,color:C.black,lineHeight:1.65,marginBottom:14}}>{p.question}</p>
       <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:14}}>
         {p.options.map((o,i) => (
@@ -692,7 +692,7 @@ function Chapter13() {
 
       <div style={{position:"sticky",top:106,background:"rgba(255,255,255,0.96)",backdropFilter:"blur(10px)",borderBottom:`1px solid ${C.border}`,padding:"15px 5vw",display:"flex",alignItems:"center",justifyContent:"space-between",zIndex:50,gap:12,flexWrap:"wrap"}}>
         <div style={{display:"flex",alignItems:"center",gap:20}}>
-          <a href={getChUrl(12, lang)} aria-label={lang==="ru"?"Предыдущая глава":lang==="ro"?"Capitolul anterior":"Previous chapter"} style={{color:C.gold,cursor:"pointer",textDecoration:"none",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</a>
+          <a href={getChUrl(12, lang)} aria-label={lang==="ru"?"Предыдущая глава":lang==="ro"?"Capitolul anterior":"Previous chapter"} style={{color:C.goldText,cursor:"pointer",textDecoration:"none",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</a>
           <Chip>{S.levelChip}</Chip>
           <Mono size={14} color={C.inkSoft} spacing={0} className="hide-mobile">{S.chapterNameShort}</Mono>
         </div>
@@ -706,15 +706,15 @@ function Chapter13() {
       <div style={{background:C.black,padding:"80px 5vw 70px",textAlign:"center",position:"relative",overflow:"hidden"}}>
         <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 100%, rgba(201,151,58,0.1) 0%, transparent 60%)"}}/>
         <div style={{position:"relative"}}>
-          <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:20}}>{S.heroEyebrow}</Mono>
+          <Mono size={11} color={C.goldText} spacing={4} style={{display:"block",marginBottom:20}}>{S.heroEyebrow}</Mono>
           <h1 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(32px,5.4vw,60px)",fontWeight:400,color:C.white,lineHeight:1.1,marginBottom:20}}>
-            {S.heroTitleLine1}<br/><span style={{color:C.gold}}>{S.heroTitleLine2}</span>
+            {S.heroTitleLine1}<br/><span style={{color:C.goldText}}>{S.heroTitleLine2}</span>
           </h1>
           <p style={{fontSize:"clamp(16px,2vw,20px)",color:"rgba(255,255,255,0.55)",maxWidth:640,margin:"0 auto 32px",lineHeight:1.65}}>{S.heroSubtitle}</p>
           <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
-            <Chip color={C.gold}>{S.fundamentalChip}</Chip>
-            <Chip color="rgba(255,255,255,0.3)">{S.technicalChip}</Chip>
-            <Chip color="rgba(255,255,255,0.3)">{S.interactiveChip}</Chip>
+            <Chip color={C.goldText}>{S.fundamentalChip}</Chip>
+            <Chip color="rgba(255,255,255,0.55)">{S.technicalChip}</Chip>
+            <Chip color="rgba(255,255,255,0.55)">{S.interactiveChip}</Chip>
           </div>
         </div>
       </div>
@@ -756,7 +756,7 @@ function Chapter13() {
         <PredictBreakeven be={be}/>
 
         <div style={{border:`1px dashed ${C.borderGold}`,borderRadius:8,padding:"20px 24px",marginBottom:32,background:C.surface}}>
-          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T.cliffhanger.tag}</Mono>
+          <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{T.cliffhanger.tag}</Mono>
           {T.cliffhanger.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:14,color:C.inkMid,lineHeight:1.7,marginBottom:10}}>{p}</p>)}
         </div>
 
@@ -773,7 +773,7 @@ function Chapter13() {
               return (
                 <li>
                   {text}{" "}
-                  <a href="/data/edu_stats/breakeven_cost.csv" download style={{color:C.gold}}>{T.sources.csvLabel}</a>
+                  <a href="/data/edu_stats/breakeven_cost.csv" download style={{color:C.goldText}}>{T.sources.csvLabel}</a>
                 </li>
               );
             })()}

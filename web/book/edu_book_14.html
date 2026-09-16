@@ -152,7 +152,7 @@ function SeriesCounter({ progress, loading, lang }) {
   return (
     /* Счётчик серии — переход к разделу, то есть управление. Был <div>
        с курсором: мышью работает, с клавиатуры нет. */
-    <button type="button" onClick={goBack} style={{cursor:"pointer",background:"none",fontFamily:"monospace",fontSize:11.5,color:C.gold,border:`1px solid ${C.borderGold}`,borderRadius:20,padding:"5px 14px",letterSpacing:0.5,whiteSpace:"nowrap"}}>
+    <button type="button" onClick={goBack} style={{cursor:"pointer",background:"none",fontFamily:"monospace",fontSize:11.5,color:C.goldText,border:`1px solid ${C.borderGold}`,borderRadius:20,padding:"5px 14px",letterSpacing:0.5,whiteSpace:"nowrap"}}>
     {label}
     </button>
   );
@@ -207,7 +207,7 @@ function IntroBlock() {
       <AntiMythBlock lang={INITIAL_LANG} style={{marginBottom:28}}
         data={{tag: T.antiMyth.tag, title: T.antiMyth.title, bodies: [T.antiMyth.body1, T.antiMyth.body2, T.antiMyth.body3]}}/>
 
-      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T.voiceSbf.tag}</Mono>
+      <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{T.voiceSbf.tag}</Mono>
       <div style={{borderLeft:`4px solid ${C.gold}`,paddingLeft:24}}>
         {T.voiceSbf.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:16,fontStyle:"italic",color:C.inkMid,lineHeight:1.7,fontFamily:"'DM Serif Display',serif",marginBottom:12}}>{p}</p>)}
       </div>
@@ -221,11 +221,11 @@ function PriceOfNotKnowing14() {
   const p = T.priceOfNotKnowing;
   return (
     <div id="secPriceOfNotKnowing" style={{marginBottom:48,scrollMarginTop:130}}>
-      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{p.tag}</Mono>
+      <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{p.tag}</Mono>
       <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.black,marginBottom:14}}>{p.title}</div>
       <p style={{fontSize:14,color:C.inkMid,lineHeight:1.75,marginBottom:20,maxWidth:800}}>{p.intro}</p>
       <div style={{background:C.black,borderRadius:8,padding:"22px 28px",color:"#fff",display:"flex",alignItems:"center",gap:24,flexWrap:"wrap",marginBottom:16}}>
-        <div style={{fontFamily:"'DM Serif Display',serif",fontSize:44,color:C.gold}}>75%</div>
+        <div style={{fontFamily:"'DM Serif Display',serif",fontSize:44,color:C.goldText}}>75%</div>
         <div style={{fontSize:13,color:"rgba(255,255,255,0.75)",lineHeight:1.6,maxWidth:520}}>{p.beLabel}</div>
       </div>
       <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.75,marginBottom:14,maxWidth:800}}>{p.beforeCostsNote}</p>
@@ -303,7 +303,7 @@ function CostArithmetic({ onCompleted }) {
               <Mono size={9} color="rgba(255,255,255,0.5)" spacing={0.5}>{ca.step2BeforeLabel}</Mono>
             </div>
             <div style={{textAlign:"center"}}>
-              <div style={{fontFamily:"'DM Serif Display',serif",fontSize:26,color:C.gold}}>{example.after.toFixed(1)}%</div>
+              <div style={{fontFamily:"'DM Serif Display',serif",fontSize:26,color:C.goldText}}>{example.after.toFixed(1)}%</div>
               <Mono size={9} color="rgba(255,255,255,0.5)" spacing={0.5}>{ca.step2AfterLabel}</Mono>
             </div>
           </div>
@@ -335,7 +335,7 @@ function CostArithmetic({ onCompleted }) {
               <Mono size={9} color="rgba(255,255,255,0.5)" spacing={0.5}>{ca.resultBeBeforeLabel}</Mono>
             </div>
             <div style={{textAlign:"center",minWidth:130}}>
-              <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.gold}}>{custom.beAfter.toFixed(1)}%</div>
+              <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.goldText}}>{custom.beAfter.toFixed(1)}%</div>
               <Mono size={9} color="rgba(255,255,255,0.5)" spacing={0.5}>{ca.resultBeAfterLabel}</Mono>
             </div>
             <div style={{textAlign:"center",minWidth:130}}>
@@ -349,7 +349,7 @@ function CostArithmetic({ onCompleted }) {
           </div>
 
           <div style={{background:"rgba(255,255,255,0.04)",borderRadius:6,padding:"16px 20px"}}>
-            <Mono size={10} color={C.gold} spacing={1} style={{display:"block",marginBottom:10,textTransform:"uppercase"}}>{ca.leversTitle}</Mono>
+            <Mono size={10} color={C.goldText} spacing={1} style={{display:"block",marginBottom:10,textTransform:"uppercase"}}>{ca.leversTitle}</Mono>
             <p style={{fontSize:12.5,color:"rgba(255,255,255,0.8)",lineHeight:1.7,marginBottom:8}}>{ca.leverTarget(custom.leverTarget.toFixed(0))}</p>
             <p style={{fontSize:12.5,color:"rgba(255,255,255,0.8)",lineHeight:1.7,marginBottom:8}}>{ca.leverStop(custom.leverStop.toFixed(0))}</p>
             <p style={{fontSize:12.5,color:"rgba(255,255,255,0.8)",lineHeight:1.7,marginBottom:8}}>{ca.leverCost(custom.leverCost.toFixed(0))}</p>
@@ -373,7 +373,7 @@ function CostArithmetic({ onCompleted }) {
       )}
       {step >= 2 && <p style={{fontSize:11.5,color:C.inkFaint,fontStyle:"italic",marginBottom:8}}>{ca.compliance}</p>}
       {step >= 3 && (
-        <a href="/chart.html?s=GOLD" target="_blank" rel="noopener" style={{fontFamily:"monospace",fontSize:12,color:C.gold,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>{ca.openOnChart}</a>
+        <a href="/chart.html?s=GOLD" target="_blank" rel="noopener" style={{fontFamily:"monospace",fontSize:12,color:C.goldText,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>{ca.openOnChart}</a>
       )}
     </div>
   );
@@ -436,7 +436,7 @@ function TargetFeasibility() {
           <div style={{display:"flex",alignItems:"center",gap:16,marginBottom:16,flexWrap:"wrap"}}>
             <Mono size={10} color={C.inkFaint} spacing={0.5}>{tf.sliderLabel}</Mono>
             <input type="range" min={1} max={20} step={0.5} value={target} onChange={e=>setTarget(+e.target.value)} style={{flex:1,minWidth:140}}/>
-            <Mono size={13} color={C.gold} spacing={0}>{target}</Mono>
+            <Mono size={13} color={C.goldText} spacing={0}>{target}</Mono>
           </div>
 
           {/* SPEC_charts_and_interactivity_standard.md (29.07): real class-B
@@ -454,7 +454,7 @@ function TargetFeasibility() {
             </div>
           ) : (
             <React.Fragment>
-              <p style={{fontSize:12.5,color:C.gold,fontFamily:"monospace",marginBottom:14}}>{tf.predictResult(guess, hoursOk)}</p>
+              <p style={{fontSize:12.5,color:C.goldText,fontFamily:"monospace",marginBottom:14}}>{tf.predictResult(guess, hoursOk)}</p>
               <div style={{display:"grid",gridTemplateColumns:"repeat(24,1fr)",gap:3,marginBottom:12}}>
                 {cells.map(c => (
                   <div key={c.h} title={`${c.h}:00 UTC${c.median!=null?` — ${c.median.toFixed(1)}pt`:""}`} style={{height:36,borderRadius:3,background: c.state==="ok" ? C.gold : c.state==="notok" ? "rgba(0,0,0,0.12)" : "rgba(0,0,0,0.04)",display:"flex",alignItems:"flex-end",justifyContent:"center",paddingBottom:2}}>
@@ -486,7 +486,7 @@ function TargetFeasibility() {
       </div>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:10}}>
         <Mono size={9.5} color={C.inkFaint} spacing={0}>{tf.symbolNote}</Mono>
-        <a href="/chart.html?s=GOLD" target="_blank" rel="noopener" style={{fontFamily:"monospace",fontSize:11,color:C.gold,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>{tf.openOnChart}</a>
+        <a href="/chart.html?s=GOLD" target="_blank" rel="noopener" style={{fontFamily:"monospace",fontSize:11,color:C.goldText,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>{tf.openOnChart}</a>
       </div>
     </div>
   );
@@ -521,7 +521,7 @@ function SetupNoWinrates() {
           </div>
         ))}
       </div>
-      <a href="/chart.html?s=GOLD" target="_blank" rel="noopener" style={{display:"inline-block",marginTop:14,fontFamily:"monospace",fontSize:12,color:C.gold,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>{s.openOnChart}</a>
+      <a href="/chart.html?s=GOLD" target="_blank" rel="noopener" style={{display:"inline-block",marginTop:14,fontFamily:"monospace",fontSize:12,color:C.goldText,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>{s.openOnChart}</a>
     </div>
   );
 }
@@ -574,7 +574,7 @@ function LiveAccountGate({ gate, loading, mathCompletedJustNow }) {
 
   return (
     <div id="secGate" style={{marginBottom:48,scrollMarginTop:130}}>
-      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:14}}>{g.tag}</Mono>
+      <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:14}}>{g.tag}</Mono>
       <p style={{fontSize:14,color:C.inkMid,lineHeight:1.78,marginBottom:24,maxWidth:800}}>{g.limitParagraph}</p>
 
       <div style={{background:C.goldPale,border:`1px solid ${C.borderGold}`,borderRadius:8,padding:"28px 32px"}}>
@@ -607,7 +607,7 @@ function LiveAccountGate({ gate, loading, mathCompletedJustNow }) {
               <input type="checkbox" checked={checked} onChange={e=>setChecked(e.target.checked)} style={{marginTop:3}}/>
               <span style={{fontSize:12.5,color:C.inkMid,lineHeight:1.6}}>{g.checkboxLabel}</span>
             </label>
-            {checked && <p style={{fontSize:12,color:C.gold,marginBottom:14}}>{g.confirmedNote}</p>}
+            {checked && <p style={{fontSize:12,color:C.goldText,marginBottom:14}}>{g.confirmedNote}</p>}
 
             {/* 🔴 Здесь была пунктирная рамка с текстом «раздел выбора
                 площадки ещё не открыт — список с проверенными данными
@@ -643,7 +643,7 @@ function Chapter14() {
 
       <div style={{position:"sticky",top:106,background:"rgba(255,255,255,0.96)",backdropFilter:"blur(10px)",borderBottom:`1px solid ${C.border}`,padding:"15px 5vw",display:"flex",alignItems:"center",justifyContent:"space-between",zIndex:50,gap:12,flexWrap:"wrap"}}>
         <div style={{display:"flex",alignItems:"center",gap:20}}>
-          <a href={getChUrl(13, lang)} aria-label={lang==="ru"?"Предыдущая глава":lang==="ro"?"Capitolul anterior":"Previous chapter"} style={{color:C.gold,cursor:"pointer",textDecoration:"none",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</a>
+          <a href={getChUrl(13, lang)} aria-label={lang==="ru"?"Предыдущая глава":lang==="ro"?"Capitolul anterior":"Previous chapter"} style={{color:C.goldText,cursor:"pointer",textDecoration:"none",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</a>
           <Chip>{S.levelChip}</Chip>
           <Mono size={14} color={C.inkSoft} spacing={0} className="hide-mobile">{S.chapterNameShort}</Mono>
         </div>
@@ -657,15 +657,15 @@ function Chapter14() {
       <div style={{background:C.black,padding:"80px 5vw 70px",textAlign:"center",position:"relative",overflow:"hidden"}}>
         <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 100%, rgba(201,151,58,0.1) 0%, transparent 60%)"}}/>
         <div style={{position:"relative"}}>
-          <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:20}}>{S.heroEyebrow}</Mono>
+          <Mono size={11} color={C.goldText} spacing={4} style={{display:"block",marginBottom:20}}>{S.heroEyebrow}</Mono>
           <h1 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(36px,6vw,66px)",fontWeight:400,color:C.white,lineHeight:1.05,marginBottom:20}}>
-            {S.heroTitleLine1}<br/><span style={{color:C.gold}}>{S.heroTitleLine2}</span>
+            {S.heroTitleLine1}<br/><span style={{color:C.goldText}}>{S.heroTitleLine2}</span>
           </h1>
           <p style={{fontSize:"clamp(16px,2vw,20px)",color:"rgba(255,255,255,0.55)",maxWidth:640,margin:"0 auto 32px",lineHeight:1.65}}>{S.heroSubtitle}</p>
           <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
-            <Chip color={C.gold}>{S.fundamentalChip}</Chip>
-            <Chip color="rgba(255,255,255,0.3)">{S.technicalChip}</Chip>
-            <Chip color="rgba(255,255,255,0.3)">{S.interactiveChip}</Chip>
+            <Chip color={C.goldText}>{S.fundamentalChip}</Chip>
+            <Chip color="rgba(255,255,255,0.55)">{S.technicalChip}</Chip>
+            <Chip color="rgba(255,255,255,0.55)">{S.interactiveChip}</Chip>
           </div>
         </div>
       </div>
@@ -703,7 +703,7 @@ function Chapter14() {
         }} />
 
         <div style={{border:`1px dashed ${C.borderGold}`,borderRadius:8,padding:"20px 24px",marginBottom:32,background:C.surface}}>
-          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T.cliffhanger.tag}</Mono>
+          <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{T.cliffhanger.tag}</Mono>
           {T.cliffhanger.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:14,color:C.inkMid,lineHeight:1.7,marginBottom:10}}>{p}</p>)}
         </div>
 
@@ -718,7 +718,7 @@ function Chapter14() {
               return (
                 <li>
                   {text}{" "}
-                  <a href="/data/edu_stats/hourly_profile.csv" download style={{color:C.gold}}>{T.sources.csvLabel}</a>
+                  <a href="/data/edu_stats/hourly_profile.csv" download style={{color:C.goldText}}>{T.sources.csvLabel}</a>
                 </li>
               );
             })()}

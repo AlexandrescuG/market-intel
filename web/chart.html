@@ -41,14 +41,14 @@
 <style>
 :root{
   --cream:#FBF6EF; --paper:#FFFFFF; --line:#E7DFCF; --grid:#F0E9DA;
-  --ink:#2B2B33; --muted:#7C7563; --gold:#C9A227; --glow:#E6C257;
-  --up:#1e8e5a; --down:#c0392b;
+  --ink:#2B2B33; --muted:#716A5A; --gold:#C9A227; --glow:#E6C257;
+  --up:#1A7D4F; --down:#c0392b;
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--cream);color:var(--ink);font-family:Montserrat,sans-serif;padding:0}
 .chart-top{display:flex;align-items:center;gap:12px;padding:10px 18px;background:var(--paper);border-bottom:1px solid var(--line);font-family:'JetBrains Mono',monospace}
 .chart-top a{font-size:11px;color:var(--muted);text-decoration:none;letter-spacing:.3px}
-.chart-top a:hover{color:var(--gold)}
+.chart-top a:hover{color:var(--gold-text,#866A19)}
 .chart-body{padding:18px}
 /* ── Панель инструментов (SPEC_chart_all_instruments §6) ──────────────────
    Список слева, детальный график справа. Токены — из :root этой же страницы
@@ -121,7 +121,7 @@ body{margin:0;background:var(--cream);color:var(--ink);font-family:Montserrat,sa
    добавить инструмент в избранное с телефона было нельзя вовсе:
    кнопка становилась видимой только после того, как уже включена. */
 @media(hover:none){.inst-fav{opacity:.55}}
-.inst-fav.on{color:var(--gold)}
+.inst-fav.on{color:var(--gold-text,#866A19)}
 .inst-foot{padding:8px 10px;font-size:11px;color:var(--muted);text-align:center;
   border-top:1px solid var(--line);flex:none}
 /* Кнопка «показать весь каталог» в подвале списка. Высота 44 px — тот же
@@ -129,7 +129,7 @@ body{margin:0;background:var(--cream);color:var(--ink);font-family:Montserrat,sa
 .inst-all{width:100%;min-height:44px;padding:0 14px;background:none;cursor:pointer;
   border:1px solid var(--line);border-radius:8px;font:inherit;font-size:13px;
   color:var(--ink);transition:border-color .15s,color .15s}
-.inst-all:hover{border-color:var(--gold);color:var(--gold)}
+.inst-all:hover{border-color:var(--gold);color:var(--gold-text,#866A19)}
 .inst-back{display:none}
 @media(max-width:900px){
   /* §6: список и график рядом не помещаются. Список — отдельный экран,
@@ -145,7 +145,7 @@ body{margin:0;background:var(--cream);color:var(--ink);font-family:Montserrat,sa
   body.has-symbol .inst-panel{display:none}
   body.has-symbol .inst-back{display:inline-block;font-size:12px;color:var(--muted);
     text-decoration:none;padding:0 0 10px}
-  body.has-symbol .inst-back:hover{color:var(--gold)}
+  body.has-symbol .inst-back:hover{color:var(--gold-text,#866A19)}
   body:not(.has-symbol) .chart-layout > .card{display:none}
 }
 @media(prefers-reduced-motion:reduce){.inst-fav{transition:none}}
@@ -206,7 +206,7 @@ body.embed{overflow:hidden}
 body.embed .chart-body{padding:0}
 body.embed .card{border-radius:0;box-shadow:none;border:none;max-width:100%}
 .beginner{padding:12px 18px;border-top:1px solid var(--line);background:rgba(201,162,39,.06);font-size:13px;line-height:1.55;display:flex;gap:10px}
-.beginner .ic{color:var(--gold);font-weight:700} .beginner b{color:var(--gold)}
+.beginner .ic{color:var(--gold-text,#866A19);font-weight:700} .beginner b{color:var(--gold-text,#866A19)}
 .foot{padding:8px 18px;font-size:11px;color:var(--muted);border-top:1px solid var(--line)}
 .tog-label{font-size:10px;font-family:'JetBrains Mono';color:var(--muted);padding:0 4px;letter-spacing:.3px;text-transform:uppercase}
 .tog-hints{display:flex;flex-direction:column;gap:0;background:rgba(248,245,238,.7);border-bottom:1px solid var(--line)}
@@ -254,7 +254,7 @@ body.embed .card{border-radius:0;box-shadow:none;border:none;max-width:100%}
 .sess-band::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
   background:currentColor;opacity:.85}
 .sess-asia{color:#5b7fbd;background:rgba(91,127,189,.09)}
-.sess-london{color:#c9a227;background:rgba(201,162,39,.10)}
+.sess-london{color:var(--gold-text,#866A19);background:rgba(201,162,39,.10)}
 .sess-ny{color:#1e8e5a;background:rgba(30,142,90,.09)}
 /* Перекрытие Лондона и Нью-Йорка — самый ликвидный час дня, ему и заметнее. */
 .sess-overlap{color:#b8541f;background:rgba(184,84,31,.16)}
@@ -269,22 +269,22 @@ body.embed .card{border-radius:0;box-shadow:none;border:none;max-width:100%}
 .hs-bar{position:absolute;bottom:0;background:var(--gold);opacity:.45;border-radius:1px 1px 0 0;cursor:pointer;pointer-events:auto}
 .hs-bar:hover{opacity:.75}
 .hs-bar.hs-peak{opacity:.85}
-.hs-peak-label{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);margin-bottom:2px;font-size:8px;font-family:'JetBrains Mono',monospace;color:var(--gold);text-transform:uppercase;letter-spacing:.3px;white-space:nowrap}
+.hs-peak-label{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);margin-bottom:2px;font-size:8px;font-family:'JetBrains Mono',monospace;color:var(--gold-text,#866A19);text-transform:uppercase;letter-spacing:.3px;white-space:nowrap}
 .hs-title{position:absolute;left:6px;bottom:100%;margin-bottom:3px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:.03em;text-transform:uppercase;pointer-events:none;white-space:nowrap}
-.hs-edu-link{color:var(--gold);font-weight:600;text-decoration:none}
+.hs-edu-link{color:var(--gold-text,#866A19);font-weight:600;text-decoration:none}
 .hs-edu-link:hover{text-decoration:underline}
 
 /* Сентимент толпы (Layer 3, Фаза 3) */
 .sentiment-panel{border-top:1px solid var(--line);padding:8px 18px 0}
 .sentiment-hd{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;padding-bottom:6px;cursor:pointer;letter-spacing:.2px}
-.sentiment-badge{margin-left:auto;color:var(--gold);font-weight:700;cursor:pointer;font-size:11px}
+.sentiment-badge{margin-left:auto;color:var(--gold-text,#866A19);font-weight:700;cursor:pointer;font-size:11px}
 .sentiment-body{height:0;overflow:hidden;transition:height .15s ease}
 .sentiment-body.on{height:64px;margin-bottom:8px}
 .sentiment-lock{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px;padding:14px 0}
 
 /* Мои сделки (Layer 4, Фаза 2) */
 .trades-teaser{display:flex;align-items:center;gap:10px;padding:8px 18px;background:rgba(201,162,39,.08);border-bottom:1px solid var(--line);font-size:12px;color:var(--ink)}
-.trades-teaser a{color:var(--gold);font-weight:600;text-decoration:none}
+.trades-teaser a{color:var(--gold-text,#866A19);font-weight:600;text-decoration:none}
 .trades-teaser a:hover{text-decoration:underline}
 .trades-teaser button{margin-left:auto;border:none;background:none;color:var(--muted);cursor:pointer;font-size:12px;padding:2px 4px}
 .evt-card .trade-context{margin-top:10px;padding:10px 12px;border-radius:10px;background:rgba(201,162,39,.07);border:1px solid rgba(201,162,39,.18);font-size:12px;line-height:1.6}
@@ -308,7 +308,7 @@ body.embed .card{border-radius:0;box-shadow:none;border:none;max-width:100%}
 .evt-card .zone-factor-row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-size:12.5px}
 .evt-card h4{margin:0 0 6px;font-family:Montserrat,sans-serif;font-size:14px;line-height:1.35;padding-right:20px}
 .evt-card .evt-meta{font-size:11px;color:var(--muted);margin-bottom:8px}
-.evt-card .evt-countdown{font-size:12px;color:var(--gold);font-weight:600;margin-bottom:8px}
+.evt-card .evt-countdown{font-size:12px;color:var(--gold-text,#866A19);font-weight:600;margin-bottom:8px}
 .evt-card .evt-nums{display:flex;gap:18px;margin-bottom:6px}
 .evt-card .evt-nums div{font-size:11px;color:var(--muted)}
 .evt-card .evt-nums b{display:block;font-size:14px;color:var(--ink);font-weight:600}
@@ -334,7 +334,7 @@ body.embed .card{border-radius:0;box-shadow:none;border:none;max-width:100%}
 .thermo-chip .tc-label{font-size:9.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:'JetBrains Mono',monospace;letter-spacing:.2px}
 .thermo-chip .tc-value{font-size:12.5px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:'JetBrains Mono',monospace;margin-top:1px}
 .thermo-chip .tc-value.tc-hot{color:var(--up)}
-.thermo-chip .tc-value.tc-warm{color:var(--gold)}
+.thermo-chip .tc-value.tc-warm{color:var(--gold-text,#866A19)}
 .thermo-chip .tc-value.tc-cold{color:var(--muted)}
 .thermo-chip .tc-bar{height:3px;border-radius:2px;background:var(--line);margin-top:5px;overflow:hidden}
 .thermo-chip .tc-bar i{display:block;height:100%;background:var(--gold)}
@@ -863,7 +863,7 @@ function applySMCLines(evts) {
 // секции i18n выше про порядок исполнения синхронного/defer-скриптов).
 function getTogHints() {
   return {
-    piv: t('chart.hint_pivots', '<b>Пивоты</b> — уровни поддержки/сопротивления, рассчитанные по хаям и лоям предыдущих периодов. <span style="color:#1e8e5a">Зелёные</span> — поддержка (S1, S2), <span style="color:#c0392b">красные</span> — сопротивление (R1, R2), <span style="color:#C9A227">золотая</span> — точка разворота PP.'),
+    piv: t('chart.hint_pivots', '<b>Пивоты</b> — уровни поддержки/сопротивления, рассчитанные по хаям и лоям предыдущих периодов. <span style="color:#1e8e5a">Зелёные</span> — поддержка (S1, S2), <span style="color:#c0392b">красные</span> — сопротивление (R1, R2), <span style="color:var(--gold-text,#866A19)">золотая</span> — точка разворота PP.'),
     cndl: t('chart.hint_patterns', '<b>Паттерны</b> — значимые свечные формации на последних 40 барах. ↑ зелёная стрелка — бычий сигнал (молот, бычье поглощение и др.), ↓ красная — медвежий (харами, медвежье поглощение и др.), ● жёлтый — нейтральный (доджи). Не сигнал к сделке, контекст.'),
     smc: t('chart.hint_smc', '<b>SMC — структура рынка:</b> <b>HH</b> (Higher High) — новый максимум выше предыдущего, тренд вверх; <b>HL</b> (Higher Low) — откат не пробивает предыдущий лой, тренд вверх; <b>LH</b> (Lower High) — максимум ниже предыдущего, слабость; <b>LL</b> (Lower Low) — новый минимум, тренд вниз. <b>BOS</b> — пробой структуры (подтверждение); <b>OB</b> — Order Block, зона крупных ордеров; <b>FVG</b> — разрыв ликвидности, цена часто его закрывает.'),
     lvl: t('chart.hint_levels', '<b>Уровни</b> — исторические зоны поддержки/сопротивления по прошлым разворотам цены (не текущие пивоты). Число вида <b>×30</b> — сколько раз цена разворачивалась у этого уровня: больше касаний — сильнее уровень. Показаны только 6 самых сильных, чтобы не перегружать график — остальные видны при клике на близкий уровень. Нажмите на линию для деталей.'),

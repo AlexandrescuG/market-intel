@@ -15,11 +15,11 @@
 <style>
 :root{
   --bg:#f5f4f0;--paper:#fff;--text:#1a1a1a;--muted:#6b7280;
-  --line:#e5e2db;--accent:#2563eb;--gold:#c9a227;--up:#16a34a;
+  --line:#e5e2db;--accent:#2563eb;--gold:#c9a227;--gold-text:#866A19;--up:#16a34a;
   --dn:#dc2626;--radius:12px;--cream:#faf9f5;--soft:#f0ede4;
 }
 @media(prefers-color-scheme:dark){
-  :root{--bg:#0f0e0c;--paper:#1a1917;--text:#f0ede4;--muted:#9ca3af;
+  :root{--bg:#0f0e0c;--paper:#1a1917;--gold-text:#E6C257;--text:#f0ede4;--muted:#9ca3af;
     --line:#2c2a26;--cream:#1e1c18;--soft:#252320}
 }
 *{box-sizing:border-box;margin:0;padding:0}
@@ -27,7 +27,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);
   color:var(--text);min-height:100dvh;display:flex;flex-direction:column;
   align-items:center;justify-content:flex-start;padding:24px 16px 60px}
 .logo{font-size:20px;font-weight:800;letter-spacing:-.5px;margin-bottom:32px;
-  color:var(--gold);text-decoration:none}
+  color:var(--gold-text,#866A19);text-decoration:none}
 .card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);
   padding:28px 28px 24px;width:100%;max-width:420px}
 
@@ -71,13 +71,13 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);
   border-radius:8px;margin-bottom:18px}
 .pro-teaser-ico{font-size:22px;flex-shrink:0}
 .pro-teaser-text{font-size:12px;color:var(--text);line-height:1.45}
-.pro-teaser-text b{color:var(--gold)}
+.pro-teaser-text b{color:var(--gold-text,#866A19)}
 
 /* Buttons */
 .nav-row{display:flex;gap:10px;margin-top:20px}
 .btn{flex:1;padding:12px 20px;border-radius:8px;font-size:14px;font-weight:600;
   cursor:pointer;transition:all .15s;border:none}
-.btn-primary{background:var(--gold);color:#fff}
+.btn-primary{background:var(--gold);color:var(--ink,#2B2B33)}
 .btn-primary:hover{opacity:.9}
 .btn-primary:disabled{opacity:.45;cursor:not-allowed}
 .btn-secondary{background:transparent;border:1.5px solid var(--line);color:var(--text)}
@@ -89,7 +89,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);
 
 /* Login link */
 .login-note{text-align:center;font-size:12px;color:var(--muted);margin-top:16px}
-.login-note a{color:var(--gold)}
+.login-note a{color:var(--gold-text,#866A19)}
 .top-row{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:420px;margin-bottom:32px}
 .top-row .logo{margin-bottom:0}
 </style>

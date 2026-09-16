@@ -1399,12 +1399,12 @@ def _edu_inject(ch: int, lang: str = i18n.DEFAULT_LANG) -> str:
 
 <div style="max-width:780px;margin:24px auto 0;padding:0 24px">
   <div style="border:1px solid #E7DFCF;border-radius:10px;padding:16px 20px;background:rgba(201,162,39,.04)">
-    <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#C9A227;margin-bottom:10px">{i18n.t("edu.live_concept_title", lang)}</div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#866A19;margin-bottom:10px">{i18n.t("edu.live_concept_title", lang)}</div>
     <div id="edu-live-widget" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-family:'JetBrains Mono',monospace;font-size:12px">
-      <span style="color:#8A8275">{i18n.t("edu.loading", lang)}</span>
+      <span style="color:#716A5A">{i18n.t("edu.loading", lang)}</span>
     </div>
     <a href="/chart.html?s={chart_key}" target="_blank"
-       style="display:inline-flex;align-items:center;gap:6px;margin-top:12px;padding:7px 16px;background:#C9A227;color:#fff;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.5px;text-decoration:none;border-radius:6px">
+       style="display:inline-flex;align-items:center;gap:6px;margin-top:12px;padding:7px 16px;background:#C9A227;color:#2B2B33;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.5px;text-decoration:none;border-radius:6px">
       {i18n.t("edu.open_in_terminal", lang, live_label=live_label)}
     </a>
   </div>
@@ -1468,7 +1468,7 @@ function sbfNavigate(tool) {{
     if(!q) return;
     var p = q.price, chg = q.change_pct||0;
     var sign = chg > 0 ? '+' : '';
-    var col  = chg > 0 ? '#1e8e5a' : chg < 0 ? '#c0392b' : '#8A8275';
+    var col  = chg > 0 ? '#1A7D4F' : chg < 0 ? '#C0392B' : '#716A5A';
     var priceStr = p.toLocaleString('ru-RU',{{maximumFractionDigits:4}});
     var chgHtml  = '<span style="color:' + col + '">' + sign + chg.toFixed(2) + '%</span>';
 
@@ -1481,7 +1481,7 @@ function sbfNavigate(tool) {{
         '<span style="font-weight:700;color:#2B2B33">' + TICK + '</span>'
         + '<span style="color:#2B2B33">' + priceStr + '</span>'
         + chgHtml
-        + '<span style="color:#E7DFCF">│</span>';
+        + '<span style="color:#716A5A">│</span>';
     }}
   }}).then(function(){{
     // Добавить RSI из OHLC
@@ -1494,7 +1494,7 @@ function sbfNavigate(tool) {{
       var rsi = o && o.rsi;
       if(rsi == null) return;
       var zone = rsi>=70?'{i18n.t("edu.rsi_overbought", lang)}':rsi<=30?'{i18n.t("edu.rsi_oversold", lang)}':'{i18n.t("edu.rsi_neutral", lang)}';
-      var zCol = rsi>=70?'#c0392b':rsi<=30?'#1e8e5a':'#8A8275';
+      var zCol = rsi>=70?'#C0392B':rsi<=30?'#1A7D4F':'#716A5A';
       var wEl = document.getElementById('edu-live-widget');
       if(wEl){{
         wEl.innerHTML += '<span>RSI(14): <b style="color:'+zCol+'">'+rsi.toFixed(1)+'</b></span>'
@@ -4856,7 +4856,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 "background:#FBF6EF;color:#2B2B33;display:flex;min-height:90vh;"
                 "align-items:center;justify-content:center;text-align:center\">"
                 f"<div style='max-width:420px;padding:20px'>{body}"
-                "<p><a href='/' style='color:#C9A227'>На платформу →</a></p></div></body>")
+                "<p><a href='/' style='color:#866A19'>На платформу →</a></p></div></body>")
         self.send_response(200)
         self.send_header("Content-Type", "text/html; charset=utf-8")
         self.end_headers()

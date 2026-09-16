@@ -4,12 +4,12 @@
   --paper: #FFFFFF;
   --line:  #E7DFCF;
   --ink:   #2B2B33;
-  --muted: #8A8275;
+  --muted:#716A5A;
   --gold:  #C9A227;
   --glow:  #E6C257;
-  --up:    #1e8e5a;
+  --up:#1A7D4F;
   --down:  #c0392b;
-  --signal:#b07d18;
+  --signal:#906614;
 }
 
 /* ── Шрифты (override DM Sans / DM Serif где применимо) ── */
@@ -132,7 +132,7 @@ body {
 .edu-nav .nav-prev::before { content: '←  '; }
 .edu-nav .nav-next::after  { content: '  →'; }
 .edu-nav .nav-toc {
-  color: var(--gold);
+  color: var(--gold-text,#866A19);
   font-weight: 700;
   letter-spacing: .3px;
   border-left: 1px solid var(--line);
@@ -162,7 +162,7 @@ body {
   margin-right: 4px;
   transition: background .15s;
 }
-.edu-nav .nav-live:hover { background: rgba(201,162,39,.22); color: var(--gold); }
+.edu-nav .nav-live:hover { background: rgba(201,162,39,.22); color: var(--gold-text,#866A19); }
 .edu-nav .nav-live::before { content: '⬤ '; font-size: 7px; color: var(--up); }
 
 /* ── Прогресс-бар вверху страницы ── */
@@ -193,7 +193,7 @@ body {
 
 /* ── lang-bar: заменяем старое золото на бренд ── */
 .lang-links a.active {
-  color: var(--gold) !important;
+  color: var(--gold-text,#866A19) !important;
   border-bottom-color: var(--gold) !important;
 }
 
@@ -218,7 +218,7 @@ body {
   font-weight: 700;
   letter-spacing: 2px;
   text-transform: uppercase;
-  color: var(--gold);
+  color: var(--gold-text,#866A19);
   margin-bottom: 16px;
 }
 .sbf-sect-label {
@@ -304,7 +304,7 @@ body {
 .sbf-o-v { font-weight: 700; color: var(--ink); }
 .sbf-o-v.pos { color: var(--up); }
 .sbf-o-v.neg { color: var(--down); }
-.sbf-o-v.gold { color: var(--gold); }
+.sbf-o-v.gold { color: var(--gold-text,#866A19); }
 .sbf-verdict {
   margin-top: 10px;
   font-size: 11px;

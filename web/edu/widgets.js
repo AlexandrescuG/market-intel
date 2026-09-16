@@ -12,10 +12,12 @@ function _locale() {
   return (window.sbfI18n && window.sbfI18n.lang === 'ro') ? 'ro-RO' : 'ru-RU';
 }
 
-/* Цвета в raw hex (CSS vars не работают в SVG-атрибутах) */
+/* Цвета в raw hex (CSS vars не работают в SVG-атрибутах).
+   16.09.2026: затемнены до порога AA — тем же цветом рисуется и линия,
+   и подпись к ней, см. разбор в edu/assets/grafik-engine.js. */
 var C={
-  up:'#2E8B6F',down:'#C0504D',gold:'#C9A227',
-  surf:'#FCFAF5',border:'#E7DFCF',ink:'#2B2B33',muted:'#7C7563'
+  up:'#287A62',down:'#BC4643',gold:'#866A19',
+  surf:'#FCFAF5',border:'#E7DFCF',ink:'#2B2B33',muted:'#716A5A'
 };
 
 /* ── Seeded RNG ────────────────────────────────────────────────────────────── */

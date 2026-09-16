@@ -102,22 +102,22 @@
       // Ось подписана крайними значениями самого ряда: без них линия — просто
       // форма, по которой нельзя сказать, велик ли ход.
       + '<text x="' + (L - 8) + '" y="' + (T + 6) + '" text-anchor="end"'
-      + ' font-family="monospace" font-size="11" fill="#8A8275">'
+      + ' font-family="monospace" font-size="11" fill="#716A5A">'
       + эск(frame['макс'].toFixed(знаков)) + '</text>'
       + '<text x="' + (L - 8) + '" y="' + (T + H) + '" text-anchor="end"'
-      + ' font-family="monospace" font-size="11" fill="#8A8275">'
+      + ' font-family="monospace" font-size="11" fill="#716A5A">'
       + эск(frame['мин'].toFixed(знаков)) + '</text>'
       + '<text x="' + L + '" y="' + (T + H + 18) + '"'
-      + ' font-family="monospace" font-size="10" fill="#8A8275">'
+      + ' font-family="monospace" font-size="10" fill="#716A5A">'
       + эск(frame['первая']) + '</text>'
       + '<text x="' + (720 - R) + '" y="' + (T + H + 18) + '" text-anchor="end"'
-      + ' font-family="monospace" font-size="10" fill="#8A8275">'
+      + ' font-family="monospace" font-size="10" fill="#716A5A">'
       + эск(frame['последняя']) + '</text>'
       + '<text x="360" y="' + (T + H + 38) + '" text-anchor="middle"'
       + ' font-family="monospace" font-size="12" fill="#2B2B33">'
       + эск(frame['подпись']) + '</text>'
       + '<text x="360" y="' + (T + H + 54) + '" text-anchor="middle"'
-      + ' font-family="monospace" font-size="9.5" fill="#8A8275">'
+      + ' font-family="monospace" font-size="9.5" fill="#716A5A">'
       + эск(frame['источник']) + '</text>'
       + '</svg>';
   }

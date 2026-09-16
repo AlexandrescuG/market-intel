@@ -386,9 +386,9 @@ function StartScreen({onStart}) {
   return React.createElement('div',{style:{minHeight:"100vh",background:C.white,color:C.ink,display:"flex",flexDirection:"column",fontFamily:"'DM Sans',sans-serif"}},
     React.createElement('div',{style:{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"75px 5vw 50px"}},
       React.createElement('div',{style:{textAlign:"center",marginBottom:60}},
-        React.createElement(Mono,{size:15,color:C.gold,spacing:8,style:{display:"block",marginBottom:25}},"SBF COMPANY"),
+        React.createElement(Mono,{size:15,color:C.goldText,spacing:8,style:{display:"block",marginBottom:25}},"SBF COMPANY"),
         React.createElement('h1',{style:{fontSize:"clamp(46px,7.5vw,91px)",fontWeight:700,margin:0,letterSpacing:-2,lineHeight:1,color:C.black,fontFamily:"'DM Serif Display',serif"}},tr.bookTitle),
-        React.createElement(Mono,{size:16,color:C.gold,spacing:5,style:{display:"block",marginTop:13}},tr.bookSubtitle),
+        React.createElement(Mono,{size:16,color:C.goldText,spacing:5,style:{display:"block",marginTop:13}},tr.bookSubtitle),
         React.createElement(Rule,{w:"250px",my:35})
       ),
       React.createElement('div',{style:{maxWidth:1040,width:"100%",textAlign:"center"}},
@@ -400,7 +400,7 @@ function StartScreen({onStart}) {
             padding:"30px 25px",cursor:"pointer",textAlign:"left",fontFamily:"'DM Sans',sans-serif",
             color:C.ink,transition:"all 0.25s",boxShadow:path===p.id?"0 3px 15px rgba(201,151,58,0.15)":"none",
           }},
-            React.createElement('div',{style:{fontSize:38,color:C.gold,marginBottom:15}},p.icon),
+            React.createElement('div',{style:{fontSize:38,color:C.goldText,marginBottom:15}},p.icon),
             React.createElement('div',{style:{fontSize:21,fontWeight:700,marginBottom:10,color:C.black,fontFamily:"'DM Serif Display',serif"}},p.title),
             React.createElement('div',{style:{fontSize:15,color:C.inkSoft,lineHeight:1.7}},p.desc)
           ))
@@ -556,7 +556,7 @@ function Level1({onBack, onNext, path}) {
       padding:"15px 5vw",display:"flex",alignItems:"center",justifyContent:"space-between",zIndex:50,
     }},
       React.createElement('div',{style:{display:"flex",alignItems:"center",gap:20}},
-        React.createElement('span',{onClick:onBack,style:{color:C.gold,cursor:"pointer",fontFamily:"monospace",fontSize:14,letterSpacing:2}},"←"),
+        React.createElement('span',{onClick:onBack,style:{color:C.goldText,cursor:"pointer",fontFamily:"monospace",fontSize:14,letterSpacing:2}},"←"),
         React.createElement(Chip,{},tr.levelTag),
         React.createElement(Mono,{size:15,color:C.inkSoft,spacing:0,style:{fontFamily:"inherit"}, className:"hide-mobile"},lang==="ru"?"Фондовые биржи":lang==="en"?"Stock Exchanges":"Burse de Valori")
       ),
@@ -574,7 +574,7 @@ function Level1({onBack, onNext, path}) {
     React.createElement('div',{style:{maxWidth:1060,margin:"0 auto",padding:"60px 5vw 120px"}},
       React.createElement('div',{style:{background:C.dark,color:C.white,padding:"45px 5vw",marginBottom:60,position:"relative",overflow:"hidden"}},
         React.createElement('div',{style:{position:"absolute",top:-12,right:30,fontSize:127,opacity:0.05,fontFamily:"monospace"}},"⚡"),
-        React.createElement(Chip,{color:C.gold},tr.antiMythTag),
+        React.createElement(Chip,{color:C.goldText},tr.antiMythTag),
         React.createElement('h2',{style:{fontSize:"clamp(25px,3.5vw,38px)",fontWeight:700,margin:"18px 0 12px",color:C.white,lineHeight:1.25,fontFamily:"'DM Serif Display',serif"}},tr.antiMythTitle),
         React.createElement('p',{style:{fontSize:19,color:"#cccccc",lineHeight:1.8,margin:0}},tr.antiMythBody)
       ),
@@ -585,7 +585,7 @@ function Level1({onBack, onNext, path}) {
       ),
 
       React.createElement('div',{style:{background:C.surface,border:`1px solid ${C.border}`,padding:"30px 5vw",marginBottom:60,display:"flex",gap:25,alignItems:"flex-start"}},
-        React.createElement('div',{style:{fontSize:40,color:C.gold,lineHeight:1,flexShrink:0}},"◈"),
+        React.createElement('div',{style:{fontSize:40,color:C.goldText,lineHeight:1,flexShrink:0}},"◈"),
         React.createElement('div',{},
           React.createElement(Chip,{},tr.priceTag),
           React.createElement('p',{style:{fontSize:19,color:C.ink,margin:"12px 0 5px",lineHeight:1.8}},tr.priceBody),
@@ -596,9 +596,9 @@ function Level1({onBack, onNext, path}) {
       React.createElement(Rule,{}),
 
       React.createElement('div',{style:{background:C.goldPale,border:`1px solid ${C.borderGold}`,padding:"12px 5vw",marginBottom:30,display:"flex",alignItems:"center",gap:15, flexWrap:"wrap"}},
-        React.createElement(Mono,{size:11,color:C.gold,spacing:2},mode==="beginner"?( lang==="ru"?"РЕЖИМ НОВИЧКА":lang==="en"?"BEGINNER MODE":"MOD ÎNCEPĂTOR"):( lang==="ru"?"РЕЖИМ ПРОФИ":lang==="en"?"PRO MODE":"MOD PRO")),
+        React.createElement(Mono,{size:11,color:C.goldText,spacing:2},mode==="beginner"?( lang==="ru"?"РЕЖИМ НОВИЧКА":lang==="en"?"BEGINNER MODE":"MOD ÎNCEPĂTOR"):( lang==="ru"?"РЕЖИМ ПРОФИ":lang==="en"?"PRO MODE":"MOD PRO")),
         React.createElement('span',{style:{fontSize:15,color:C.inkMid}},mode==="beginner"?(lang==="ru"?"Метафоры и примеры из жизни":lang==="en"?"Metaphors and real-life examples":"Metafore și exemple din viață"):(lang==="ru"?"Математика, формулы, нюансы":lang==="en"?"Math, formulas, nuances":"Matematică, formule, nuanțe")),
-        React.createElement('button',{onClick:()=>setMode(mode==="beginner"?"pro":"beginner"),style:{marginLeft:"auto",background:"none",border:`1px solid ${C.gold}`,color:C.gold,fontSize:13,fontFamily:"monospace",cursor:"pointer",padding:"5px 15px",letterSpacing:2}},
+        React.createElement('button',{onClick:()=>setMode(mode==="beginner"?"pro":"beginner"),style:{marginLeft:"auto",background:"none",border:`1px solid ${C.gold}`,color:C.goldText,fontSize:13,fontFamily:"monospace",cursor:"pointer",padding:"5px 15px",letterSpacing:2}},
           mode==="beginner"?(lang==="ru"?"→ ПРОФИ":lang==="en"?"→ PRO":"→ PRO"):(lang==="ru"?"→ НОВИЧОК":lang==="en"?"→ BEGINNER":"→ ÎNCEPĂTOR")
         )
       ),
@@ -865,7 +865,7 @@ function Level1({onBack, onNext, path}) {
           ? React.createElement('div',{style:{fontSize:12.5,color:C.inkFaint,fontFamily:"monospace",marginTop:20}},tr.calcLoading)
           : calcResult && React.createElement('div',{style:{marginTop:30}},
               React.createElement('div',{style:{padding:"25px 5vw",background:C.white,border:`1px solid ${C.borderGold}`,marginBottom:15}},
-                React.createElement('div',{style:{fontSize:33,fontFamily:"monospace",fontWeight:700,color:C.gold}},
+                React.createElement('div',{style:{fontSize:33,fontFamily:"monospace",fontWeight:700,color:C.goldText}},
                   "$"+Math.round(calcResult.amount).toLocaleString()+" → $"+Math.round(calcResult.final).toLocaleString()
                 ),
                 React.createElement('div',{style:{fontSize:13,color:C.inkFaint,marginTop:6,fontFamily:"monospace"}},
@@ -879,7 +879,7 @@ function Level1({onBack, onNext, path}) {
       ),
 
       (lang==="ru"||lang==="ro")&&React.createElement('div',{style:{border:`1px solid ${C.border}`,padding:"35px 5vw",marginBottom:60,background:C.surface}},
-        React.createElement('div',{style:{marginBottom:15}},React.createElement(Chip,{color:C.gold},tr.moldovaTag)),
+        React.createElement('div',{style:{marginBottom:15}},React.createElement(Chip,{color:C.goldText},tr.moldovaTag)),
         React.createElement('p',{style:{fontSize:20,fontWeight:700,margin:"0 0 10px",color:C.black,fontFamily:"'DM Serif Display',serif"}},tr.moldovaTitle),
         React.createElement('p',{style:{fontSize:18,color:C.inkMid,lineHeight:1.8,margin:0}},tr.moldovaBody)
       ),

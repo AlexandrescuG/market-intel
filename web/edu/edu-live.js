@@ -33,9 +33,9 @@
   };
 
   function rsiZone(v) {
-    if (v >= 70) return { label: t('eduindex.live.rsi_overbought', 'перекупленность'), color: '#c0392b' };
-    if (v <= 30) return { label: t('eduindex.live.rsi_oversold', 'перепроданность'), color: '#1e8e5a' };
-    return { label: t('eduindex.live.rsi_neutral', 'нейтральная зона'), color: '#8A8275' };
+    if (v >= 70) return { label: t('eduindex.live.rsi_overbought', 'перекупленность'), color: '#C0392B' };
+    if (v <= 30) return { label: t('eduindex.live.rsi_oversold', 'перепроданность'), color: '#1A7D4F' };
+    return { label: t('eduindex.live.rsi_neutral', 'нейтральная зона'), color: '#716A5A' };
   }
 
   function createWidget(ticker) {
@@ -47,7 +47,7 @@
       'font-family:"JetBrains Mono",monospace', 'font-size:12px', 'color:#2B2B33',
       'flex-wrap:wrap',
     ].join(';');
-    el.innerHTML = '<span style="color:#C9A227;font-weight:700">⬤ LIVE</span><span style="color:#8A8275">' + t('eduindex.live.loading', 'загрузка…') + '</span>';
+    el.innerHTML = '<span style="color:var(--gold-text,#866A19);font-weight:700">⬤ LIVE</span><span style="color:#716A5A">' + t('eduindex.live.loading', 'загрузка…') + '</span>';
 
     const ohlcFile = RSI_MAP[ticker];
     const label    = RSI_LABEL[ticker] || ticker;
@@ -61,27 +61,27 @@
       const changePct = q ? q.change_pct : null;
       const rsiVal   = ohlcData ? ohlcData.rsi : null;
 
-      let html = '<span style="color:#C9A227;font-size:9px;letter-spacing:1px">⬤ LIVE</span>';
+      let html = '<span style="color:var(--gold-text,#866A19);font-size:9px;letter-spacing:1px">⬤ LIVE</span>';
       html += '<span style="font-weight:700;color:#2B2B33">' + label + '</span>';
 
       if (price != null) {
         const chg  = changePct != null ? changePct : 0;
         const sign = chg > 0 ? '+' : '';
-        const cCol = chg > 0 ? '#1e8e5a' : chg < 0 ? '#c0392b' : '#8A8275';
+        const cCol = chg > 0 ? '#1A7D4F' : chg < 0 ? '#C0392B' : '#716A5A';
         html += '<span>' + price.toLocaleString(_locale(), {maximumFractionDigits: 4}) + '</span>';
         html += '<span style="color:' + cCol + '">' + sign + chg.toFixed(2) + '%</span>';
       }
 
       if (rsiVal != null) {
         const zone = rsiZone(rsiVal);
-        html += '<span style="color:#8A8275">│</span>';
+        html += '<span style="color:#716A5A">│</span>';
         html += '<span>RSI(14): <b style="color:' + zone.color + '">' + rsiVal.toFixed(1) + '</b></span>';
         html += '<span style="color:' + zone.color + ';font-size:10px">' + zone.label + '</span>';
       }
 
       el.innerHTML = html;
     }).catch(() => {
-      el.innerHTML = '<span style="color:#8A8275;font-size:11px">⬤ ' + t('eduindex.live.data_unavailable', 'данные недоступны') + '</span>';
+      el.innerHTML = '<span style="color:#716A5A;font-size:11px">⬤ ' + t('eduindex.live.data_unavailable', 'данные недоступны') + '</span>';
     });
 
     return el;

@@ -28,9 +28,15 @@
   var CONFIG_URL = "/data/edu_stats/market_hours.json";
   var _cache = null;
 
+  /* Своя копия палитры — не из window.AcademyShared: таблица сессий
+     подключается и на страницах без него. Значения держать согласованными
+     с assets/academy-shared.js, там же разобрано, почему пороги считаны
+     по #f0ebe0, а не по белому. gold остаётся заливкой и рамкой, для
+     текста goldText. */
   var C = {
-    gold: "#c9973a", goldPale: "#f7f0e3", black: "#18181a", inkMid: "#555555",
-    inkSoft: "rgba(24,24,26,0.58)", inkFaint: "rgba(24,24,26,0.28)",
+    gold: "#c9973a", goldPale: "#f7f0e3", goldText: "#876525",
+    black: "#18181a", inkMid: "#555555",
+    inkSoft: "rgba(24,24,26,0.68)", inkFaint: "rgba(24,24,26,0.61)",
     border: "rgba(24,24,26,0.1)", surface: "#faf8f5",
     red: "#f23645", redPale: "#fdecea", green: "#089981", greenPale: "#eaf5ee",
     violet: "#8b5cf6"
@@ -168,7 +174,7 @@
     cfg.zones.forEach(function (z) {
       var on = z.id === state.zone;
       h.push('<button data-zone="' + z.id + '" style="font-family:monospace;font-size:11px;letter-spacing:1px;padding:4px 10px;margin:2px;cursor:pointer;border:1px solid ' +
-        (on ? C.gold : C.border) + ';background:' + (on ? C.goldPale : "#fff") + ';color:' + (on ? C.gold : C.inkMid) + '">' +
+        (on ? C.gold : C.border) + ';background:' + (on ? C.goldPale : "#fff") + ';color:' + (on ? C.goldText : C.inkMid) + '">' +
         (z["label_" + lang] || z.label_en) + '</button>');
     });
     h.push('</div>');
@@ -176,7 +182,7 @@
     ["summer", "winter", "desync"].forEach(function (m) {
       var on = m === state.mode;
       h.push('<button data-mode="' + m + '" style="font-family:monospace;font-size:11px;letter-spacing:1px;padding:4px 10px;margin:2px;cursor:pointer;border:1px solid ' +
-        (on ? C.gold : C.border) + ';background:' + (on ? C.goldPale : "#fff") + ';color:' + (on ? C.gold : C.inkMid) + '">' + t[m] + '</button>');
+        (on ? C.gold : C.border) + ';background:' + (on ? C.goldPale : "#fff") + ';color:' + (on ? C.goldText : C.inkMid) + '">' + t[m] + '</button>');
     });
     h.push('</div></div>');
 

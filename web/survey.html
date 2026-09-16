@@ -15,11 +15,11 @@
 <style>
 :root{
   --bg:#f5f4f0;--paper:#fff;--text:#1a1a1a;--muted:#6b7280;
-  --line:#e5e2db;--gold:#c9a227;--up:#16a34a;--dn:#dc2626;
+  --line:#e5e2db;--gold:#c9a227;--gold-text:#866A19;--up:#16a34a;--dn:#dc2626;
   --radius:12px;--cream:#faf9f5;--soft:#f0ede4;
 }
 @media(prefers-color-scheme:dark){
-  :root{--bg:#0f0e0c;--paper:#1a1917;--text:#f0ede4;--muted:#9ca3af;
+  :root{--bg:#0f0e0c;--paper:#1a1917;--gold-text:#E6C257;--text:#f0ede4;--muted:#9ca3af;
     --line:#2c2a26;--cream:#1e1c18;--soft:#252320}
 }
 *{box-sizing:border-box;margin:0;padding:0}
@@ -27,9 +27,9 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);
   color:var(--text);min-height:100dvh;display:flex;flex-direction:column;
   align-items:center;padding:24px 16px 60px}
 .logo{font-size:20px;font-weight:800;letter-spacing:-.5px;margin-bottom:8px;
-  color:var(--gold);text-decoration:none}
+  color:var(--gold-text,#866A19);text-decoration:none}
 .hero-badge{font-size:12px;color:var(--muted);margin-bottom:24px;text-align:center}
-.hero-badge b{color:var(--gold)}
+.hero-badge b{color:var(--gold-text,#866A19)}
 .card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);
   padding:26px 26px 22px;width:100%;max-width:480px}
 
@@ -65,7 +65,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);
 .nav-row{display:flex;gap:10px;margin-top:20px}
 .btn{flex:1;padding:11px 18px;border-radius:8px;font-size:14px;font-weight:600;
   cursor:pointer;transition:all .15s;border:none}
-.btn-primary{background:var(--gold);color:#fff}
+.btn-primary{background:var(--gold);color:var(--ink,#2B2B33)}
 .btn-primary:hover{opacity:.9}
 .btn-secondary{background:transparent;border:1.5px solid var(--line);color:var(--text)}
 .btn-secondary:hover{border-color:var(--gold)}
@@ -81,7 +81,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);
   border:1.5px solid rgba(201,162,39,.4);border-radius:10px;
   padding:14px 16px;margin-bottom:16px}
 .pro-award-ico{font-size:28px;flex-shrink:0}
-.pro-award-title{font-size:15px;font-weight:700;color:var(--gold)}
+.pro-award-title{font-size:15px;font-weight:700;color:var(--gold-text,#866A19)}
 .pro-award-sub{font-size:11px;color:var(--muted);margin-top:2px}
 .path-goal{background:linear-gradient(135deg,var(--gold),#f59e0b);
   border-radius:10px;padding:14px;margin-bottom:14px;text-align:center}
@@ -109,7 +109,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);
 .auth-gate-btns{display:flex;gap:10px;justify-content:center}
 .auth-gate-btn{padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;
   text-decoration:none;cursor:pointer}
-.auth-gate-btn.primary{background:var(--gold);color:#fff}
+.auth-gate-btn.primary{background:var(--gold);color:var(--ink,#2B2B33)}
 .auth-gate-btn.secondary{border:1.5px solid var(--line);color:var(--text)}
 
 /* Error */
@@ -183,7 +183,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);
       </label>
       <label style="display:flex;gap:10px;align-items:flex-start;font-size:13px;cursor:pointer">
         <input type="checkbox" id="regData" style="margin-top:2px;accent-color:var(--gold);flex-shrink:0">
-        <span>{{ t('survey.consent_data_pre', lang) }} <a href="/privacy" style="color:var(--gold)">{{ t('survey.consent_data_link', lang) }}</a></span>
+        <span>{{ t('survey.consent_data_pre', lang) }} <a href="/privacy" style="color:var(--gold-text,#866A19)">{{ t('survey.consent_data_link', lang) }}</a></span>
       </label>
       <label style="display:flex;gap:10px;align-items:flex-start;font-size:13px;cursor:pointer">
         <input type="checkbox" id="regDisc" style="margin-top:2px;accent-color:var(--gold);flex-shrink:0">
@@ -202,7 +202,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);
       <button class="btn btn-primary" id="regSubmitBtn" onclick="submitViaRegister()">{{ t('survey.create_account_button', lang) }}</button>
     </div>
     <div style="text-align:center;margin-top:12px;font-size:12px;color:var(--muted)">
-      {{ t('register.have_account', lang) }} <a href="#" id="regLoginLink" style="color:var(--gold)">{{ t('login.submit_button', lang) }}</a>
+      {{ t('register.have_account', lang) }} <a href="#" id="regLoginLink" style="color:var(--gold-text,#866A19)">{{ t('login.submit_button', lang) }}</a>
     </div>
   </div>
 

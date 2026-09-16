@@ -119,7 +119,7 @@ function ColdStart15Entry({ lang }) {
   const cs = T.coldStart;
   const claims = useClaims();
   const claimField = "claim_" + lang;
-  if (!claims) return <div style={{background:C.black,padding:"60px 5vw",textAlign:"center"}}><Mono size={11} color={C.gold} spacing={4}>{cs.tag}</Mono></div>;
+  if (!claims) return <div style={{background:C.black,padding:"60px 5vw",textAlign:"center"}}><Mono size={11} color={C.goldText} spacing={4}>{cs.tag}</Mono></div>;
 
   return (
     <ColdStart
@@ -156,7 +156,7 @@ function ColdStart15Entry({ lang }) {
         return (
           <div>
             <div>{method} · {date}</div>
-            {dl && <a href={dl} download style={{display:"inline-block", marginTop:10, fontFamily:"monospace", fontSize:12, color:C.gold, textDecoration:"none", border:`1px solid ${C.gold}`, padding:"8px 14px", borderRadius:4}}>{cs.downloadLabel}</a>}
+            {dl && <a href={dl} download style={{display:"inline-block", marginTop:10, fontFamily:"monospace", fontSize:12, color:C.goldText, textDecoration:"none", border:`1px solid ${C.gold}`, padding:"8px 14px", borderRadius:4}}>{cs.downloadLabel}</a>}
           </div>
         );
       }}
@@ -184,12 +184,12 @@ function PropMechanics() {
       </div>
 
       <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"18px 22px",marginBottom:28}}>
-        <Mono size={10} color={C.gold} spacing={1} style={{display:"block",marginBottom:8,textTransform:"uppercase"}}>{p.compareLabel}</Mono>
+        <Mono size={10} color={C.goldText} spacing={1} style={{display:"block",marginBottom:8,textTransform:"uppercase"}}>{p.compareLabel}</Mono>
         <p style={{fontSize:13,color:C.inkMid,lineHeight:1.65,margin:0}}>{p.compareText}</p>
       </div>
 
       <div style={{background:C.black,borderRadius:8,padding:"26px 30px",color:"#fff",marginBottom:16}}>
-        <Mono size={11} color={C.gold} spacing={2} style={{display:"block",marginBottom:12}}>{p.caseTitle}</Mono>
+        <Mono size={11} color={C.goldText} spacing={2} style={{display:"block",marginBottom:12}}>{p.caseTitle}</Mono>
         <p style={{fontSize:13.5,color:"rgba(255,255,255,0.85)",lineHeight:1.75,marginBottom:14}}>{p.caseText}</p>
         <p style={{fontSize:13.5,color:"rgba(255,255,255,0.7)",lineHeight:1.75,margin:0,fontStyle:"italic"}}>{p.caseNeutral}</p>
       </div>
@@ -202,7 +202,7 @@ function PropMechanics() {
             <div key={i} style={{padding:"12px 18px",borderBottom: i<p.regItems.length-1 ? `1px solid ${C.border}` : "none"}}>
               <div style={{display:"flex",gap:10,alignItems:"baseline",marginBottom:4,flexWrap:"wrap"}}>
                 <span style={{fontSize:13,fontWeight:600,color:C.black}}>{row[0]}</span>
-                <Mono size={10} color={C.gold} spacing={0}>{row[1]}</Mono>
+                <Mono size={10} color={C.goldText} spacing={0}>{row[1]}</Mono>
               </div>
               <p style={{fontSize:12.5,color:C.inkMid,lineHeight:1.6,margin:0}}>{row[2]}</p>
             </div>
@@ -272,7 +272,7 @@ function NineRules() {
          .sort((a, b) => ((a._k * 5) % 8) - ((b._k * 5) % 8))}/>
 
       <div style={{background:C.black,borderRadius:8,padding:"26px 30px",color:"#fff"}}>
-        <Mono size={11} color={C.gold} spacing={2} style={{display:"block",marginBottom:12}}>{r.ninthLabel}</Mono>
+        <Mono size={11} color={C.goldText} spacing={2} style={{display:"block",marginBottom:12}}>{r.ninthLabel}</Mono>
         <p style={{fontSize:14.5,color:"#fff",lineHeight:1.75,margin:0,fontFamily:"'DM Serif Display',serif"}}>{r.ninthText}</p>
       </div>
     </div>
@@ -340,8 +340,8 @@ function ThreePaths({ lang }) {
                   const cond = gate.conditions[key];
                   return (
                     <div key={key} style={{display:"flex",justifyContent:"space-between",fontSize:11,fontFamily:"monospace"}}>
-                      <span style={{color:cond.ok?C.gold:C.inkMid}}>{cond.ok ? "✓" : "·"} {label}</span>
-                      <span style={{color:cond.ok?C.gold:C.inkFaint}}>{cond.have}/{cond.need}</span>
+                      <span style={{color:cond.ok?C.goldText:C.inkMid}}>{cond.ok ? "✓" : "·"} {label}</span>
+                      <span style={{color:cond.ok?C.goldText:C.inkFaint}}>{cond.have}/{cond.need}</span>
                     </div>
                   );
                 })}
@@ -354,7 +354,7 @@ function ThreePaths({ lang }) {
                 <div style={{marginBottom:10}}>
                   <label style={{fontSize:10.5,color:C.inkFaint,fontFamily:"monospace",display:"block",marginBottom:4}}>{tp.path2.projLabel}: {pace}</label>
                   <input type="range" min="1" max="20" value={pace} onChange={e=>setPace(Number(e.target.value))} style={{width:"100%"}}/>
-                  <p style={{fontSize:11,color:C.gold,fontFamily:"monospace",margin:"4px 0 0"}}>
+                  <p style={{fontSize:11,color:C.goldText,fontFamily:"monospace",margin:"4px 0 0"}}>
                     {tp.path2.projResult(Math.ceil((gate.conditions.trades.need - gate.conditions.trades.have) / pace))}
                   </p>
                 </div>
@@ -362,7 +362,7 @@ function ThreePaths({ lang }) {
               {/* Переход в главу 14 — это ссылка, и должна быть ссылкой:
                   открывается в новой вкладке средним кликом, работает с
                   клавиатуры, видна диктору. */}
-              <a href={getChUrl(14,lang)} style={{fontSize:11,color:C.gold,cursor:"pointer",fontFamily:"monospace",textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>{tp.path2.gotoGate}</a>
+              <a href={getChUrl(14,lang)} style={{fontSize:11,color:C.goldText,cursor:"pointer",fontFamily:"monospace",textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>{tp.path2.gotoGate}</a>
             </div>
           )}
           {selected === "live" && !gateLoading && gate && gate.all_ok && (
@@ -387,7 +387,7 @@ function ThreePaths({ lang }) {
         </div>
       </div>
 
-      {selected && <p style={{fontSize:13,color:C.gold,textAlign:"center",marginBottom:24}}>{tp.selectedNote}</p>}
+      {selected && <p style={{fontSize:13,color:C.goldText,textAlign:"center",marginBottom:24}}>{tp.selectedNote}</p>}
 
       <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"20px 24px"}}>
         <div style={{fontWeight:600,fontSize:12.5,color:C.black,marginBottom:8}}>{tp.whatWeDontDoTitle}</div>
@@ -453,7 +453,7 @@ function Chapter15() {
 
       <div style={{position:"sticky",top:106,background:"rgba(255,255,255,0.96)",backdropFilter:"blur(10px)",borderBottom:`1px solid ${C.border}`,padding:"15px 5vw",display:"flex",alignItems:"center",justifyContent:"space-between",zIndex:50,gap:12,flexWrap:"wrap"}}>
         <div style={{display:"flex",alignItems:"center",gap:20}}>
-          <a href={getChUrl(14, lang)} aria-label={lang==="ru"?"Предыдущая глава":lang==="ro"?"Capitolul anterior":"Previous chapter"} style={{color:C.gold,cursor:"pointer",textDecoration:"none",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</a>
+          <a href={getChUrl(14, lang)} aria-label={lang==="ru"?"Предыдущая глава":lang==="ro"?"Capitolul anterior":"Previous chapter"} style={{color:C.goldText,cursor:"pointer",textDecoration:"none",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</a>
           <Chip>{S.levelChip}</Chip>
           <Mono size={14} color={C.inkSoft} spacing={0} className="hide-mobile">{S.chapterNameShort}</Mono>
         </div>
@@ -462,9 +462,9 @@ function Chapter15() {
       <div style={{background:C.black,padding:"80px 5vw 70px",textAlign:"center",position:"relative",overflow:"hidden"}}>
         <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 100%, rgba(201,151,58,0.1) 0%, transparent 60%)"}}/>
         <div style={{position:"relative"}}>
-          <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:20}}>{S.heroEyebrow}</Mono>
+          <Mono size={11} color={C.goldText} spacing={4} style={{display:"block",marginBottom:20}}>{S.heroEyebrow}</Mono>
           <h1 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(36px,6vw,66px)",fontWeight:400,color:C.white,lineHeight:1.05,marginBottom:20}}>
-            {S.heroTitleLine1}<br/><span style={{color:C.gold}}>{S.heroTitleLine2}</span>
+            {S.heroTitleLine1}<br/><span style={{color:C.goldText}}>{S.heroTitleLine2}</span>
           </h1>
           <p style={{fontSize:"clamp(16px,2vw,20px)",color:"rgba(255,255,255,0.55)",maxWidth:640,margin:"0 auto",lineHeight:1.65}}>{S.heroSubtitle}</p>
         </div>

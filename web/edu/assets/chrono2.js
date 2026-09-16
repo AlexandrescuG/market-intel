@@ -414,7 +414,7 @@
       + '<circle cx="360" cy="180" r="22" fill="none" stroke="#C9A227" stroke-width="3"/>'
       + '<circle cx="360" cy="180" r="6" fill="#C9A227"/><rect x="356" y="180" width="8" height="20" fill="#C9A227"/>'
       + '<g fill="#5c5342">' + person(590,300,0.9) + person(630,306,0.85) + '</g>'
-      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#8A8275">библиотека Моргана, Нью-Йорк 1907</text></svg>';
+      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#716A5A">библиотека Моргана, Нью-Йорк 1907</text></svg>';
     },
     "1913_fed": function(){
       return '<svg class="h-art" viewBox="0 0 720 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Федеральный резервный акт, 1913">'
@@ -423,7 +423,7 @@
       + '<path d="M190 300 v-120 a20 24 0 0 1 40 0 v120 Z M270 300 v-120 a20 24 0 0 1 40 0 v120 Z M350 300 v-120 a20 24 0 0 1 40 0 v120 Z M430 300 v-120 a20 24 0 0 1 40 0 v120 Z M490 300 v-120 a20 24 0 0 1 40 0 v120 Z"/>'
       + '<path d="M130 140 L360 80 L590 140 Z"/></g>'
       + '<circle cx="360" cy="110" r="16" fill="none" stroke="#C9A227" stroke-width="2.5"/>'
-      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#8A8275">Federal Reserve Act, 23.12.1913</text></svg>';
+      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#716A5A">Federal Reserve Act, 23.12.1913</text></svg>';
     },
     "1944_bretton": function(){
       return '<svg class="h-art" viewBox="0 0 720 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Бреттон-Вудская конференция, 1944">'
@@ -432,7 +432,7 @@
       + '<g stroke="#6d6350" stroke-width="3" fill="#efe8d8"><rect x="270" y="220" width="180" height="90"/><path d="M260 220 L360 170 L460 220 Z"/></g>'
       + '<circle cx="600" cy="150" r="34" fill="none" stroke="#6d6350" stroke-width="2.5"/>'
       + '<path d="M566 150 h68 M600 116 v68 M578 128 q22 22 44 0 M578 172 q22 -22 44 0" fill="none" stroke="#6d6350" stroke-width="1.6"/>'
-      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#8A8275">Бреттон-Вудская конференция, 1944</text></svg>';
+      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#716A5A">Бреттон-Вудская конференция, 1944</text></svg>';
     },
     "1971_nixon": function(){
       return '<svg class="h-art" viewBox="0 0 720 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Никсон-шок, 1971">'
@@ -443,7 +443,7 @@
       + '<rect x="270" y="150" width="180" height="100" fill="#efe6d6" stroke="#6d6350" stroke-width="1.6"/>'
       + '<g fill="none" stroke="#8a2f2f" stroke-width="3"><rect x="120" y="230" width="70" height="34" rx="4"/><line x1="130" y1="247" x2="180" y2="247"/></g>'
       + '<g fill="none" stroke="#6d6350" stroke-width="2"><path d="M520 220 h90"/><path d="M600 220 l-14 -10 M600 220 l-14 10"/></g>'
-      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#8A8275">телеобращение Никсона, 15.08.1971</text></svg>';
+      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#716A5A">телеобращение Никсона, 15.08.1971</text></svg>';
     },
     "1980_volcker": function(){
       return '<svg class="h-art" viewBox="0 0 720 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Волкер и ставка 20%, 1980">'
@@ -456,7 +456,7 @@
       // по-прежнему нет, и подпись кадра это прямо оговаривает: показана
       // рыночная ставка, а не ставка ФРС. Сюда попадём, только если файл с
       // рядами не загрузится.
-      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#8A8275">Волкер, ставка 20%, фермеры-тракторы у ФРС</text></svg>';
+      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#716A5A">Волкер, ставка 20%, фермеры-тракторы у ФРС</text></svg>';
     },
     "1998_ltcm": function(){
       return '<svg class="h-art" viewBox="0 0 720 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="LTCM, 1998">'
@@ -466,7 +466,7 @@
       + '<text x="150" y="140" font-family="Georgia,serif" font-size="46" fill="#6d6350" font-style="italic">Σ</text>'
       + '<text x="260" y="150" font-family="Georgia,serif" font-size="46" fill="#6d6350" font-style="italic">σ</text>'
       + '<text x="540" y="150" font-family="monospace" font-size="26" fill="#8a2f2f">25:1</text>'
-      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#8A8275">крах LTCM, 1998</text></svg>';
+      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#716A5A">крах LTCM, 1998</text></svg>';
     },
     "2012_draghi": function(){
       return '<svg class="h-art" viewBox="0 0 720 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Три слова Драги, 2012">'
@@ -476,7 +476,7 @@
       + '<text x="200" y="180" text-anchor="middle" font-family="Georgia,serif" font-style="italic" font-size="20" fill="#2B2B33">whatever it takes</text>'
       + '<g fill="none" stroke="#C9A227" stroke-width="1.6">'
       + '<circle cx="600" cy="200" r="3"/><circle cx="618" cy="192" r="3"/><circle cx="632" cy="204" r="3"/><circle cx="628" cy="222" r="3"/><circle cx="610" cy="228" r="3"/></g>'
-      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#8A8275">Марио Драги, ЕЦБ, 26.07.2012</text></svg>';
+      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#716A5A">Марио Драги, ЕЦБ, 26.07.2012</text></svg>';
     },
     "2015_snb": function(){
       return '<svg class="h-art" viewBox="0 0 720 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="SNB, 2015">'
@@ -484,16 +484,16 @@
       + '<rect x="120" y="130" width="70" height="70" fill="#8a2f2f"/><rect x="142" y="108" width="26" height="114" fill="#efe8d8"/><rect x="98" y="152" width="114" height="26" fill="#efe8d8"/>'
       + '<line x1="240" y1="160" x2="640" y2="160" stroke="#6d6350" stroke-width="1.6" stroke-dasharray="6 5"/>'
       + '<polyline points="240,160 320,158 340,160 360,300 420,120 480,150 560,145 640,140" fill="none" stroke="#8a2f2f" stroke-width="4"/>'
-      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#8A8275">SNB отменяет пол EURCHF, 15.01.2015</text></svg>';
+      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#716A5A">SNB отменяет пол EURCHF, 15.01.2015</text></svg>';
     },
     "2016_boj": function(){
       return '<svg class="h-art" viewBox="0 0 720 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Отрицательные ставки Японии, 2016">'
       + hatchBg() + '<rect y="300" width="720" height="100" fill="url(#hatch2)"/>'
       + '<g stroke="#8a2f2f" stroke-width="8" fill="none"><path d="M480 90 h140 M550 90 v190 M500 150 h100 M510 150 l-30 130 M590 150 l30 130"/></g>'
       + '<line x1="60" y1="200" x2="420" y2="200" stroke="#6d6350" stroke-width="1.6"/>'
-      + '<text x="40" y="205" font-family="monospace" font-size="12" fill="#8A8275">0</text>'
+      + '<text x="40" y="205" font-family="monospace" font-size="12" fill="#716A5A">0</text>'
       + '<polyline points="60,190 120,195 180,210 240,230 300,225 360,250 420,245" fill="none" stroke="#8a2f2f" stroke-width="4"/>'
-      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#8A8275">BoJ вводит отрицательную ставку, 2016</text></svg>';
+      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#716A5A">BoJ вводит отрицательную ставку, 2016</text></svg>';
     },
     "2022_cycle": function(){
       return '<svg class="h-art" viewBox="0 0 720 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Цикл повышения ставки, 2022">'
@@ -501,14 +501,14 @@
       + '<g fill="none" stroke="#8a2f2f" stroke-width="4">'
       + '<path d="M60 270 h60 v-30 h60 v-40 h60 v-40 h60 v-40 h60 v-30 h60 v-20 h60 v-10 h60"/></g>'
       + '<g fill="#5c5342">' + person(640,250,0.85) + '</g>'
-      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#8A8275">цикл ФРС 2022-23, 0 → 5.25-5.50%</text></svg>';
+      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#716A5A">цикл ФРС 2022-23, 0 → 5.25-5.50%</text></svg>';
     },
     "2024_boj": function(){
       return '<svg class="h-art" viewBox="0 0 720 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Иена и разворот кэрри-трейда, 2024">'
       + hatchBg() + '<rect y="300" width="720" height="100" fill="url(#hatch2)"/>'
       + '<text x="120" y="200" font-family="Georgia,serif" font-size="70" fill="#6d6350">¥</text>'
       + '<polyline points="220,140 300,150 340,145 380,160 420,290 460,260 500,270 560,255 640,150" fill="none" stroke="#8a2f2f" stroke-width="4.5"/>'
-      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#8A8275">Nikkei −12.4% за день, 05.08.2024</text></svg>';
+      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#716A5A">Nikkei −12.4% за день, 05.08.2024</text></svg>';
     },
     "today_ch2": function(){
       /* 🔴 ЕДИНСТВЕННАЯ СТАНЦИЯ, КОТОРАЯ УСТАРЕВАЕТ САМА. Здесь стояли три
@@ -556,8 +556,8 @@
       // Честное «не знаю» вместо трёх чисел неизвестной свежести.
       return шапка
         + '<text x="360" y="185" text-anchor="middle" font-family="Georgia,serif" font-size="19" fill="#6d6350">Ставки центробанков</text>'
-        + '<text x="360" y="215" text-anchor="middle" font-family="monospace" font-size="12" fill="#8A8275">данные не загрузились</text>'
-        + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="11" fill="#8A8275">источник: FRED · cb_rates_job.py</text></svg>';
+        + '<text x="360" y="215" text-anchor="middle" font-family="monospace" font-size="12" fill="#716A5A">данные не загрузились</text>'
+        + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="11" fill="#716A5A">источник: FRED · cb_rates_job.py</text></svg>';
     }
     var б = СТАВКИ_ДАННЫЕ['банки'];
     // Три луча из одной точки: цвет по направлению последнего шага,
@@ -578,11 +578,11 @@
       var низ = з['это_факт_а_не_цель']
         ? 'фактическая овернайт, ' + _месяц(з['месяц_наблюдения'])
         : 'изменена ' + _дата(з['изменена']);
-      тело += '<text x="' + м.tx + '" y="' + (м.ty + 16) + '" text-anchor="middle" font-family="monospace" font-size="9" fill="#8A8275">' + низ + '</text>';
+      тело += '<text x="' + м.tx + '" y="' + (м.ty + 16) + '" text-anchor="middle" font-family="monospace" font-size="9" fill="#716A5A">' + низ + '</text>';
     }
     var собрано = (СТАВКИ_ДАННЫЕ['собрано'] || '').slice(0, 10);
     return шапка + тело
-      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="11" fill="#8A8275">FRED, данные на ' + _дата(собрано) + '</text></svg>';
+      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="11" fill="#716A5A">FRED, данные на ' + _дата(собрано) + '</text></svg>';
   }
 
   function art2HTML(key){

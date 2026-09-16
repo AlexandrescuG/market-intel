@@ -88,8 +88,8 @@
   // ── CSS ──────────────────────────────────────────────────────────────────
   var CSS = [
     ':root{--cream:#FBF6EF;--paper:#FFFFFF;--line:#E7DFCF;',
-    '--ink:#2B2B33;--muted:#7C7563;--faint:#C5BAA8;',
-    '--gold:#C9A227;--glow:#E6C257;--up:#1e8e5a;--down:#c0392b;}',
+    '--ink:#2B2B33;--muted:#716A5A;--faint:#7B6B52;',
+    '--gold:#C9A227;--glow:#E6C257;--up:#1A7D4F;--down:#c0392b;}',
 
     '.sbf-hd{display:flex;align-items:center;gap:18px;padding:10px 24px;',
     'border-bottom:1px solid var(--line);background:var(--paper);',
@@ -106,7 +106,7 @@
     'font-weight:600;color:var(--muted);text-decoration:none;padding:6px 11px;',
     'border-radius:7px;transition:color .12s,background .12s;white-space:nowrap;}',
     '.sbf-hd .g-nav-item:hover{color:var(--ink);background:rgba(201,162,39,.08);text-decoration:none;}',
-    '.sbf-hd .g-nav-item.active{color:var(--gold);font-weight:700;}',
+    '.sbf-hd .g-nav-item.active{color:var(--gold-text,#866A19);font-weight:700;}',
 
     '.sbf-right{margin-left:auto;display:flex;align-items:center;gap:18px;',
     'font-size:12px;font-family:"JetBrains Mono",monospace;}',
@@ -139,8 +139,8 @@
     'text-decoration:none;color:var(--muted);padding:6px 9px;border-radius:5px;}',
     '.sbf-lang-list a:hover,.sbf-lang-list a:focus{color:var(--ink);background:rgba(201,162,39,.08);',
     'outline:none;text-decoration:none;}',
-    '.sbf-lang-list a[aria-selected="true"]{color:var(--gold);}',
-    '.sbf-lang-check{color:var(--gold);font-size:10px;}',
+    '.sbf-lang-list a[aria-selected="true"]{color:var(--gold-text,#866A19);}',
+    '.sbf-lang-check{color:var(--gold-text,#866A19);font-size:10px;}',
     '.sbf-win{display:flex;align-items:center;gap:6px;color:var(--muted);}',
     '.dot{width:7px;height:7px;border-radius:50%;background:var(--faint);}',
     '.dot.on{background:var(--up);box-shadow:0 0 7px var(--up);}',
@@ -231,7 +231,7 @@
     '.g-bn-item{flex:1;display:flex;flex-direction:column;align-items:center;',
     'justify-content:center;gap:3px;text-decoration:none;color:var(--muted);',
     'padding:6px 0 8px;transition:color .12s;-webkit-tap-highlight-color:transparent;}',
-    '.g-bn-item.active{color:var(--gold);}',
+    '.g-bn-item.active{color:var(--gold-text,#866A19);}',
     '.g-bn-item:hover{color:var(--ink);text-decoration:none;}',
     '.g-bn-ico{font-size:20px;line-height:1;}',
     '.g-bn-lbl{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.4px;',

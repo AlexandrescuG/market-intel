@@ -2,19 +2,34 @@
    Tokens + 8 button variants. Load first on every page.
    ────────────────────────────────────────────────────────────────────── */
 
+/* 🔴 ЦВЕТА ТЕКСТА ПОДОБРАНЫ ПОД САМЫЙ ТЁМНЫЙ СВЕТЛЫЙ ФОН САЙТА, А НЕ ПОД БЕЛЫЙ.
+   Аудит 03.09 записал --muted как 4.58:1 и закрыл вопрос — это отношение
+   к #FFFFFF. Фоны у нас разные: #FBF6EF (страница), #FCFAF5, #F5F4F0,
+   #F0F0F1 (серая плашка чипа). На последнем тот же цвет давал 4.03:1.
+   Порог WCAG AA для текста мельче 24px — 4.5:1, так что «проходит на белом»
+   не значит ничего: считать надо по худшему фону, на котором цвет реально
+   встречается. Проверка: python3 tools/audit_contrast.py
+   Подбор нового значения: python3 tools/pick_accessible_color.py '#XXX' --fon '#F0F0F1'
+
+   --gold остаётся брендовым: он заливка и рамка, а не текст. Для текста
+   есть --gold-text; на золотой заливке текст тёмный (--ink), не белый:
+   белое на #C9A227 — 2.42:1. */
 :root {
   /* colours */
   --bg:         #FBF6EF;
   --surface:    #FCFAF5;
   --paper:      #FFFFFF;
   --ink:        #2B2B33;
-  --muted:      #7C7563;
+  --muted:      #716A5A;  /* было #7C7563 — 4.03:1 на #F0F0F1 */
   --line:       #E7DFCF;
-  --gold:       #C9A227;
+  --gold:       #C9A227;  /* только заливка и рамка: как текст 2.42:1 */
   --gold-hover: #B8931F;
-  --gold-text:  #A8851F;
-  --up:         #2E8B6F;
-  --down:       #C0504D;
+  --gold-text:  #866A19;  /* было #A8851F — 3.23:1 на кремовом */
+  --up:         #287A62;  /* было #2E8B6F — 3.66:1 на #F0F0F1 */
+  --down:       #BC4643;  /* было #C0504D — 3.66:1 на #F0F0F1 */
+  /* Цвета свечей на графике — НЕ эти: там свои значения в lightweight-charts.
+     Графика под 4.5:1 не подпадает (WCAG 1.4.11 — 3:1), и затемнять её
+     ради замера значило бы испортить то, на что правило не распространяется. */
 
   /* radii */
   --r-sm:      6px;
@@ -44,7 +59,10 @@
   justify-content: center;
   padding: var(--pad-btn);
   background: var(--gold);
-  color: var(--bg);
+  /* 16.09.2026: было var(--bg) — кремовый на золоте даёт 2.25:1, а это
+     главная кнопка сайта. Тёмный текст на золоте — 5.80:1. Заливка
+     осталась брендовой, поменялся только текст на ней. */
+  color: var(--ink);
   border: none;
   border-radius: var(--r-control);
   font-family: var(--font-sans);
@@ -59,7 +77,7 @@
    `a:hover{color:...}`. Без явного цвета текст кнопки перекрашивается вместе
    с обычными ссылками — на главной это сделало надпись «30 дней PRO»
    невидимой (текст и фон совпали в один цвет). */
-.btn-primary:hover  { background: var(--gold-hover); color: var(--bg); text-decoration: none; }
+.btn-primary:hover  { background: var(--gold-hover); color: var(--ink); text-decoration: none; }
 .btn-primary:active { transform: scale(.98); }
 .btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 2px rgba(201,162,39,.35); }
 

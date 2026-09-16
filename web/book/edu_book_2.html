@@ -805,7 +805,7 @@ function CalendarMatrixTable() {
       <ImpactMatrix rows={rows} columns={cols} minCases={data.meta.min_cases} lang={INITIAL_LANG} copy={{
         rowHead: cm.colEvent, naLabel: cm.naLabel, lowSampleLegend: cm.lowSampleLegend,
       }}/>
-      <button onClick={() => setShowMethod(v => !v)} style={{background:"none",border:"none",padding:0,fontFamily:"monospace",fontSize:11,color:C.gold,cursor:"pointer",textDecoration:"underline",marginTop:6}}>
+      <button onClick={() => setShowMethod(v => !v)} style={{background:"none",border:"none",padding:0,fontFamily:"monospace",fontSize:11,color:C.goldText,cursor:"pointer",textDecoration:"underline",marginTop:6}}>
         {cm.methodologyTitle} {showMethod ? "▲" : "▼"}
       </button>
       {showMethod && <p style={{fontSize:11.5,color:C.inkFaint,lineHeight:1.65,marginTop:10,maxWidth:760}}>{cm.methodologyBody}</p>}
@@ -861,7 +861,7 @@ function NextReleaseWidget() {
         <div style={{fontWeight:700,fontSize:14,color:C.black}}>{window.translatedEventName ? window.translatedEventName(ev) : ev.title}</div>
         <div style={{fontSize:11,color:C.inkFaint,fontFamily:"monospace",marginTop:2}}>{dateStr}</div>
       </div>
-      <Mono size={18} color={C.gold} spacing={1}>
+      <Mono size={18} color={C.goldText} spacing={1}>
         {d > 0 ? `${d}${cm.countdownDay} ` : ""}{String(h).padStart(2,"0")}{cm.countdownHour} {String(m).padStart(2,"0")}{cm.countdownMin}
       </Mono>
     </div>
@@ -873,7 +873,7 @@ function CpiCalendarScene() {
   const cm = (window.Chrono2Content[INITIAL_LANG] || window.Chrono2Content.ru).calendarMatrix;
   return (
     <div style={{marginBottom:32}}>
-      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{cm.cpiSceneTag}</Mono>
+      <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{cm.cpiSceneTag}</Mono>
       <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,marginBottom:14,maxWidth:760}}>{cm.cpiSceneLegend}</p>
       <SceneMount url="/data/edu_scenes/ch2_cpi_2022.json" mode="event" symbol="GOLD" copy={{
         question: cm.cpiSceneQuestion, options: cm.cpiSceneOptions, revealText: cm.cpiSceneReveal, nextMarker: null,
@@ -887,7 +887,7 @@ function CalendarMatrixSection() {
   const cm = (window.Chrono2Content[INITIAL_LANG] || window.Chrono2Content.ru).calendarMatrix;
   return (
     <div style={{marginBottom:56}}>
-      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{cm.tag}</Mono>
+      <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{cm.tag}</Mono>
       <div style={{fontFamily:"'DM Serif Display',serif",fontSize:24,color:C.black,marginBottom:12}}>{cm.title}</div>
       <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.75,marginBottom:24,maxWidth:800}}>{cm.preamble}</p>
 
@@ -1041,7 +1041,8 @@ function FedSimulator() {
     if (!срез || !срез.ниже) return {знак:"→", цвет:C.inkMid};
     const a = срез.текущий[ключ], b = срез.ниже[ключ];
     if (a === b) return {знак:"→", цвет:C.inkMid};
-    return a > b ? {знак:"↑", цвет:C.green} : {знак:"↓", цвет:C.red};
+    // Панель симулятора тёмная (#242425): C.green/C.red там дают 2.9-3.3:1.
+    return a > b ? {знак:"↑", цвет:C.greenOnDark} : {знак:"↓", цвет:C.redOnDark};
   };
   const карточка = (ключ, label, формат, desc) => {
     const с = стрелка(ключ);
@@ -1064,14 +1065,14 @@ function FedSimulator() {
       <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:28}}>
         <span style={{fontSize:28}}>🎛️</span>
         <div>
-          <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.gold}}>{S.fedTitle}</div>
-          <Mono size={11} color="rgba(255,255,255,0.4)" spacing={2}>{S.fedKicker}</Mono>
+          <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.goldOnDark}}>{S.fedTitle}</div>
+          <Mono size={11} color="rgba(255,255,255,0.55)" spacing={2}>{S.fedKicker}</Mono>
         </div>
       </div>
 
       {/* Real-episode presets */}
       <div style={{marginBottom:24}}>
-        <div style={{fontSize:11,color:"rgba(255,255,255,0.4)",marginBottom:10,letterSpacing:0.5}}>{S.fedPresetsLabel}</div>
+        <div style={{fontSize:11,color:"rgba(255,255,255,0.55)",marginBottom:10,letterSpacing:0.5}}>{S.fedPresetsLabel}</div>
         <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
           {[
             {key:null, label:S.fedPresetModel},
@@ -1083,7 +1084,7 @@ function FedSimulator() {
               style={{padding:"8px 14px",borderRadius:16,cursor:"pointer",fontSize:11.5,fontFamily:"monospace",
                 background:preset===p.key?"rgba(201,151,58,0.18)":"rgba(255,255,255,0.04)",
                 border:preset===p.key?`1px solid ${C.gold}`:"1px solid rgba(255,255,255,0.1)",
-                color:preset===p.key?C.gold:"rgba(255,255,255,0.6)"}}>
+                color:preset===p.key?C.goldOnDark:"rgba(255,255,255,0.6)"}}>
               {p.label}
             </button>
           ))}
@@ -1094,7 +1095,7 @@ function FedSimulator() {
       <div style={{marginBottom:32}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:10}}>
           <span style={{fontSize:14,color:"rgba(255,255,255,0.6)"}}>{S.fedRateLabel}</span>
-          <span style={{fontFamily:"'DM Serif Display',serif",fontSize:40,color:C.gold,lineHeight:1}}>{rate.toFixed(2)}<span style={{fontSize:22}}>%</span></span>
+          <span style={{fontFamily:"'DM Serif Display',serif",fontSize:40,color:C.goldOnDark,lineHeight:1}}>{rate.toFixed(2)}<span style={{fontSize:22}}>%</span></span>
         </div>
         <div style={{position:"relative",marginBottom:8}}>
           {/* Colored track */}
@@ -1105,7 +1106,7 @@ function FedSimulator() {
             onChange={e => clearPreset(+e.target.value)}
             style={{position:"absolute",top:0,left:0,width:"100%",height:"100%",opacity:0,cursor:"pointer",margin:0}}/>
         </div>
-        <div style={{display:"flex",justifyContent:"space-between",fontSize:11,color:"rgba(255,255,255,0.3)"}}>
+        <div style={{display:"flex",justifyContent:"space-between",fontSize:11,color:"rgba(255,255,255,0.55)"}}>
           <span>{S.fedRangeSoft}</span>
           <span>{S.fedRangeNeutral}</span>
           <span>{S.fedRangeTight}</span>
@@ -1115,7 +1116,7 @@ function FedSimulator() {
       {snapshot ? (
         <React.Fragment>
           <div style={{background:"rgba(201,151,58,0.08)",border:`1px solid ${C.gold}`,borderRadius:6,padding:"16px 20px",marginBottom:24}}>
-            <Mono size={10} color={C.gold} spacing={1} style={{display:"block",marginBottom:6}}>{S.fedSnapshotTag} · {snapshot.date}</Mono>
+            <Mono size={10} color={C.goldOnDark} spacing={1} style={{display:"block",marginBottom:6}}>{S.fedSnapshotTag} · {snapshot.date}</Mono>
             <div style={{fontSize:12,color:"rgba(255,255,255,0.6)"}}>{S.fedSnapshotNote}</div>
           </div>
           <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10}} className="grid-2">
@@ -1126,8 +1127,8 @@ function FedSimulator() {
               {label:S.fedAssetBTCLabel, val:"$"+Math.round(snapshot.btc).toLocaleString()},
             ].map((m,i) => (
               <div key={i} style={{background:"rgba(255,255,255,0.05)",borderRadius:4,padding:"14px 12px",textAlign:"center",border:`1px solid rgba(255,255,255,0.07)`}}>
-                <div style={{fontSize:10,color:"rgba(255,255,255,0.3)",marginBottom:6,letterSpacing:0.5}}>{m.label}</div>
-                <div style={{fontSize:16,fontWeight:700,color:C.gold,fontFamily:"monospace"}}>{m.val}</div>
+                <div style={{fontSize:10,color:"rgba(255,255,255,0.55)",marginBottom:6,letterSpacing:0.5}}>{m.label}</div>
+                <div style={{fontSize:16,fontWeight:700,color:C.goldOnDark,fontFamily:"monospace"}}>{m.val}</div>
               </div>
             ))}
           </div>
@@ -1147,9 +1148,9 @@ function FedSimulator() {
           <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(96px,1fr))",gap:10}}>
             {assets.map((a,i) => (
               <div key={i} style={{background:"rgba(255,255,255,0.05)",borderRadius:4,padding:"14px 12px",textAlign:"center",border:`1px solid rgba(255,255,255,0.07)`}}>
-                <div style={{fontSize:10,color:"rgba(255,255,255,0.3)",marginBottom:6,letterSpacing:0.5}}>{a.label}</div>
+                <div style={{fontSize:10,color:"rgba(255,255,255,0.55)",marginBottom:6,letterSpacing:0.5}}>{a.label}</div>
                 <div style={{fontSize:16,fontWeight:700,color:a.color,fontFamily:"monospace"}}>{a.dir} {a.val}</div>
-                <div style={{fontSize:10,color:"rgba(255,255,255,0.2)",marginTop:4}}>{a.desc}</div>
+                <div style={{fontSize:10,color:"rgba(255,255,255,0.55)",marginTop:4}}>{a.desc}</div>
               </div>
             ))}
           </div>
@@ -1169,7 +1170,7 @@ function FedSimulator() {
           {S.fedNoData}
         </p>
       )}
-      <p style={{fontSize:11,color:"rgba(255,255,255,0.35)",marginTop:10,textAlign:"center",lineHeight:1.5}}>
+      <p style={{fontSize:11,color:"rgba(255,255,255,0.55)",marginTop:10,textAlign:"center",lineHeight:1.5}}>
         {S.fedFootnote}
       </p>
     </div>
@@ -1290,7 +1291,7 @@ function SRTrainer() {
           {!checked
             ? <button onClick={checkAnswers} disabled={lines.length===0} style={{background:lines.length===0?C.surfaceMid:C.black,color:C.white,border:"none",padding:"10px 20px",cursor:lines.length===0?"not-allowed":"pointer",fontFamily:"monospace",fontSize:12,letterSpacing:1,borderRadius:3}}>{S.srCheck}</button>
             : <React.Fragment>
-                <button onClick={saveToJournal} disabled={saved} style={{background:"transparent",border:`1px solid ${C.gold}`,color:C.gold,padding:"10px 16px",cursor:saved?"default":"pointer",fontFamily:"monospace",fontSize:12,letterSpacing:0.5,borderRadius:3,opacity:saved?0.6:1}}>{saved?S.srSavedMsg:S.srSaveBtn}</button>
+                <button onClick={saveToJournal} disabled={saved} style={{background:"transparent",border:`1px solid ${C.gold}`,color:C.goldText,padding:"10px 16px",cursor:saved?"default":"pointer",fontFamily:"monospace",fontSize:12,letterSpacing:0.5,borderRadius:3,opacity:saved?0.6:1}}>{saved?S.srSavedMsg:S.srSaveBtn}</button>
                 <button onClick={reset} style={{background:C.gold,color:C.black,border:"none",padding:"10px 20px",cursor:"pointer",fontFamily:"monospace",fontSize:12,letterSpacing:1,fontWeight:700,borderRadius:3}}>{S.srRetry}</button>
               </React.Fragment>
           }
@@ -1309,7 +1310,7 @@ function SRTrainer() {
         <div style={{background: score>=67?C.greenPale:score>=33?"#fff8e1":C.redPale, border:`1px solid ${score>=67?"#2d7a4f":score>=33?C.gold:C.red}`, borderRadius:4,padding:"14px 20px",marginBottom:16,display:"flex",gap:12,alignItems:"center"}}>
           <img className="mi-icon" width="28" height="28" alt="" src={`/assets/icons/icon-${score>=67?"trophy":score>=33?"target":"books"}.png`}/>
           <div>
-            <div style={{fontWeight:700,fontSize:16,color:score>=67?C.green:score>=33?C.gold:C.red}}>
+            <div style={{fontWeight:700,fontSize:16,color:score>=67?C.green:score>=33?C.goldText:C.red}}>
               {score}% {S.srAccuracyLabel} {score>=67?S.srScoreGreat:score>=33?S.srScoreOk:S.srScoreLow}
             </div>
             <div style={{fontSize:13,color:C.inkMid,marginTop:3}}>
@@ -1334,7 +1335,7 @@ function SRTrainer() {
           {[0,0.25,0.5,0.75,1].map(f => Math.round(priceMin + f*priceRange)).map(p => (
             <g key={p}>
               <line x1={PAD.l} y1={toY(p)} x2={W-PAD.r} y2={toY(p)} stroke="rgba(255,255,255,0.05)" strokeWidth="1"/>
-              <text x={PAD.l-4} y={toY(p)+4} fontSize="9" fill="rgba(255,255,255,0.25)" textAnchor="end">{p}</text>
+              <text x={PAD.l-4} y={toY(p)+4} fontSize="9" fill="rgba(255,255,255,0.62)" textAnchor="end">{p}</text>
             </g>
           ))}
 
@@ -1469,7 +1470,7 @@ function Chrono2Section() {
   return (
     <div className="history-ep">
       <SectionTitle id="secChrono" sub={S.chronoSub}>{S.chronoTitle}</SectionTitle>
-      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:16,marginTop:-24}}>{S.chronoTag}</Mono>
+      <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:16,marginTop:-24}}>{S.chronoTag}</Mono>
       <div className="h-chrono">
         {stations.map((s,i) => (
           <React.Fragment key={s.id}>
@@ -1607,7 +1608,7 @@ function Chapter2() {
       {/* Sticky header */}
       <div style={{position:"sticky",top:106,background:"rgba(255,255,255,0.96)",backdropFilter:"blur(10px)",borderBottom:`1px solid ${C.border}`,padding:"15px 5vw",display:"flex",alignItems:"center",justifyContent:"space-between",zIndex:50}}>
         <div style={{display:"flex",alignItems:"center",gap:20}}>
-          <a href={getChUrl(1, lang)} aria-label={lang==="ru"?"Предыдущая глава":lang==="ro"?"Capitolul anterior":"Previous chapter"} style={{color:C.gold,cursor:"pointer",textDecoration:"none",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</a>
+          <a href={getChUrl(1, lang)} aria-label={lang==="ru"?"Предыдущая глава":lang==="ro"?"Capitolul anterior":"Previous chapter"} style={{color:C.goldText,cursor:"pointer",textDecoration:"none",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</a>
           <Chip>{S.stickyLevel}</Chip>
           <Mono size={14} color={C.inkSoft} spacing={0} className="hide-mobile">{S.stickyTitle}</Mono>
         </div>
@@ -1622,17 +1623,17 @@ function Chapter2() {
       <div style={{background:C.black,padding:"80px 5vw 70px",textAlign:"center",position:"relative",overflow:"hidden"}}>
         <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 20% 50%, rgba(37,99,235,0.08) 0%, transparent 50%), radial-gradient(ellipse at 80% 50%, rgba(201,151,58,0.1) 0%, transparent 50%)"}}/>
         <div style={{position:"relative"}}>
-          <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:20}}>{S.heroKicker}</Mono>
+          <Mono size={11} color={C.goldOnDark} spacing={4} style={{display:"block",marginBottom:20}}>{S.heroKicker}</Mono>
           <h1 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(36px,6vw,66px)",fontWeight:400,color:C.white,lineHeight:1.05,marginBottom:20}}>
-            {S.heroTitleLine1}<br/><span style={{color:C.gold}}>{S.heroTitleLine2}</span>
+            {S.heroTitleLine1}<br/><span style={{color:C.goldOnDark}}>{S.heroTitleLine2}</span>
           </h1>
           <p style={{fontSize:"clamp(16px,2vw,20px)",color:"rgba(255,255,255,0.55)",maxWidth:620,margin:"0 auto 32px",lineHeight:1.65}}>
             {S.heroBody}
           </p>
           <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
-            <Chip color={C.gold}>{S.heroChipFA}</Chip>
-            <Chip color="rgba(255,255,255,0.3)">{S.heroChipTA}</Chip>
-            <Chip color="rgba(255,255,255,0.3)">{S.heroChipInteractive}</Chip>
+            <Chip color={C.goldOnDark}>{S.heroChipFA}</Chip>
+            <Chip color="rgba(255,255,255,0.55)">{S.heroChipTA}</Chip>
+            <Chip color="rgba(255,255,255,0.55)">{S.heroChipInteractive}</Chip>
           </div>
         </div>
       </div>
@@ -1647,19 +1648,19 @@ function Chapter2() {
 
         {/* ── АНТИ-МИФ → ГОЛОС SBF → ЦЕНА НЕЗНАНИЯ ── */}
         <div style={{marginBottom:48}}>
-          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{ch2t.antiMyth.tag}</Mono>
+          <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{ch2t.antiMyth.tag}</Mono>
           <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px",marginBottom:28}}>
             <p style={{fontWeight:600,fontSize:14.5,color:C.red,marginBottom:10}}>{ch2t.antiMyth.no}</p>
             <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,margin:0}}>{ch2t.antiMyth.body}</p>
           </div>
 
-          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{ch2t.voice.tag}</Mono>
+          <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{ch2t.voice.tag}</Mono>
           <div style={{borderLeft:`4px solid ${C.gold}`,paddingLeft:24,marginBottom:28}}>
             <p style={{fontSize:16,fontStyle:"italic",color:C.inkMid,lineHeight:1.7,fontFamily:"'DM Serif Display',serif",margin:0}}>{ch2t.voice.body}</p>
           </div>
 
           <div style={{background:C.black,borderRadius:8,padding:"26px 30px",color:C.white}}>
-            <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{ch2t.cost.tag}</Mono>
+            <Mono size={11} color={C.goldOnDark} spacing={3} style={{display:"block",marginBottom:10}}>{ch2t.cost.tag}</Mono>
             <p style={{fontSize:13.5,lineHeight:1.75,color:"rgba(255,255,255,0.7)",margin:0}}>{ch2t.cost.body}</p>
           </div>
         </div>
@@ -1691,7 +1692,7 @@ function Chapter2() {
 
         {/* Rate mechanism explainer */}
         <div style={{background:C.black,borderRadius:6,padding:"32px 36px",marginBottom:48}}>
-          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:20}}>{S.rateMechKicker}</Mono>
+          <Mono size={11} color={C.goldOnDark} spacing={3} style={{display:"block",marginBottom:20}}>{S.rateMechKicker}</Mono>
           <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:0}} className="grid-3">
             {[
               {step:"01", title:S.rateStep1Title, text:S.rateStep1Text, icon:"trend-up"},
@@ -1700,7 +1701,7 @@ function Chapter2() {
             ].map((s,i) => (
               <div key={i} style={{padding:"20px 24px",borderLeft:i>0?"1px solid rgba(255,255,255,0.08)":"none"}}>
                 <div style={{display:"flex",gap:10,alignItems:"center",marginBottom:12}}>
-                  <Mono size={11} color={C.gold} spacing={1}>{s.step}</Mono>
+                  <Mono size={11} color={C.goldOnDark} spacing={1}>{s.step}</Mono>
                   <img className="mi-icon" src={`/assets/icons/icon-${s.icon}.png`} alt="" width="20" height="20" style={{filter:"invert(1)"}}/>
                 </div>
                 <div style={{fontWeight:600,fontSize:13,color:C.white,marginBottom:8}}>{s.title}</div>
@@ -1750,7 +1751,7 @@ function Chapter2() {
 
         {/* Visual SR diagram */}
         <div style={{background:C.black,borderRadius:6,padding:"28px 24px",marginBottom:56,overflow:"hidden"}}>
-          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:16,textAlign:"center"}}>{S.diagKicker}</Mono>
+          <Mono size={11} color={C.goldOnDark} spacing={3} style={{display:"block",marginBottom:16,textAlign:"center"}}>{S.diagKicker}</Mono>
           <svg viewBox="0 0 660 180" style={{width:"100%",display:"block"}}>
             {/* Background */}
             <rect width="660" height="180" fill="#18181a"/>
@@ -1758,27 +1759,27 @@ function Chapter2() {
             {/* Resistance zone (top) */}
             <rect x="0" y="30" width="660" height="20" fill="rgba(192,57,43,0.15)"/>
             <line x1="0" y1="40" x2="660" y2="40" stroke="#c0392b" strokeWidth="1.5" strokeDasharray="8 4"/>
-            <text x="10" y="35" fontSize="10" fill="#c0392b" fontFamily="monospace">{S.diagResistanceLabel}</text>
+            <text x="10" y="35" fontSize="10" fill="#F2776B" fontFamily="monospace">{S.diagResistanceLabel}</text>
 
             {/* Support zone (bottom) */}
             <rect x="0" y="130" width="660" height="20" fill="rgba(45,122,79,0.15)"/>
             <line x1="0" y1="140" x2="660" y2="140" stroke="#2d7a4f" strokeWidth="1.5" strokeDasharray="8 4"/>
-            <text x="10" y="135" fontSize="10" fill="#2d7a4f" fontFamily="monospace">{S.diagSupportLabel}</text>
+            <text x="10" y="135" fontSize="10" fill="#4FBF8B" fontFamily="monospace">{S.diagSupportLabel}</text>
 
             {/* Price path */}
             <polyline points="20,140 80,140 100,80 140,80 160,140 200,140 230,90 270,40 310,40 340,40 370,80 400,80 430,40 470,40 490,80 530,140 560,140 600,80 640,80"
               fill="none" stroke="#c9973a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
 
             {/* Bounce arrows */}
-            <text x="85" y="75" fontSize="11" fill="#2d7a4f">{S.diagBounceUp}</text>
-            <text x="195" y="155" fontSize="11" fill="#2d7a4f">{S.diagBounceUp}</text>
-            <text x="270" y="35" fontSize="11" fill="#c0392b">{S.diagBounceDown}</text>
-            <text x="430" y="35" fontSize="11" fill="#c0392b">{S.diagBounceDown}</text>
-            <text x="520" y="155" fontSize="11" fill="#c9973a">{S.diagBreakout}</text>
+            <text x="85" y="75" fontSize="11" fill="#4FBF8B">{S.diagBounceUp}</text>
+            <text x="195" y="155" fontSize="11" fill="#4FBF8B">{S.diagBounceUp}</text>
+            <text x="270" y="35" fontSize="11" fill="#F2776B">{S.diagBounceDown}</text>
+            <text x="430" y="35" fontSize="11" fill="#F2776B">{S.diagBounceDown}</text>
+            <text x="520" y="155" fontSize="11" fill="#E6C257">{S.diagBreakout}</text>
 
             {/* Breakout annotation */}
             <line x1="550" y1="100" x2="550" y2="140" stroke="#c9973a" strokeWidth="1" strokeDasharray="3 3"/>
-            <text x="555" y="125" fontSize="9" fill="#c9973a" fontFamily="monospace">{S.diagNowSupport}</text>
+            <text x="555" y="125" fontSize="9" fill="#E6C257" fontFamily="monospace">{S.diagNowSupport}</text>
           </svg>
         </div>
 
@@ -1792,13 +1793,13 @@ function Chapter2() {
         {/* ── CONCLUSIONS ── */}
         <div style={{background:C.black,borderRadius:8,padding:"44px 48px"}}>
           <div style={{textAlign:"center",marginBottom:32}}>
-            <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:12}}>{S.concKicker}</Mono>
+            <Mono size={11} color={C.goldOnDark} spacing={4} style={{display:"block",marginBottom:12}}>{S.concKicker}</Mono>
             <h3 style={{fontFamily:"'DM Serif Display',serif",fontSize:28,color:C.white,fontWeight:400}}>{S.concTitle}</h3>
           </div>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}} className="g2">
             {conclusions.map((c,i) => (
               <div key={i} style={{display:"flex",gap:14,alignItems:"flex-start",padding:"14px 16px",background:"rgba(255,255,255,0.04)",borderRadius:4,border:"1px solid rgba(255,255,255,0.06)"}}>
-                <span style={{color:C.gold,fontFamily:"monospace",fontSize:11,marginTop:2,flexShrink:0}}>0{i+1}</span>
+                <span style={{color:C.goldOnDark,fontFamily:"monospace",fontSize:11,marginTop:2,flexShrink:0}}>0{i+1}</span>
                 <span style={{fontSize:13,color:"rgba(255,255,255,0.7)",lineHeight:1.65}}>{c}</span>
               </div>
             ))}
@@ -1814,7 +1815,7 @@ function Chapter2() {
 
         {/* ── Предикт недели → клиффхэнгер гл.3 ── */}
         <div style={{border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px",marginTop:32,marginBottom:24}}>
-          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{S.predictTag}</Mono>
+          <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{S.predictTag}</Mono>
           <p style={{fontSize:14.5,color:C.black,lineHeight:1.65,marginBottom:14}}>{predict.fallbackQ}</p>
           <div style={{display:"flex",gap:10}}>
             <button className="h-btn">{predict.yes}</button>
@@ -1823,7 +1824,7 @@ function Chapter2() {
         </div>
 
         <div style={{border:`1px dashed ${C.borderGold}`,borderRadius:8,padding:"20px 24px",marginBottom:32,background:C.surface}}>
-          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{S.cliffTag}</Mono>
+          <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{S.cliffTag}</Mono>
           <p style={{fontSize:14,color:C.inkMid,lineHeight:1.7,margin:0}}>{cliffhanger.body}</p>
         </div>
 

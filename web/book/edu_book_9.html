@@ -185,7 +185,7 @@ function ColdStart9Entry({ scene, vars }) {
   const chartRef = useRef(null);
   const s = React.useState(false), committed = s[0], setCommitted = s[1];
 
-  if (!scene || !vars) return <div style={{background:C.black,padding:"60px 5vw",textAlign:"center"}}><Mono size={11} color={C.gold} spacing={4}>{cs.tag}</Mono></div>;
+  if (!scene || !vars) return <div style={{background:C.black,padding:"60px 5vw",textAlign:"center"}}><Mono size={11} color={C.goldText} spacing={4}>{cs.tag}</Mono></div>;
 
   const HIDE_FROM = 36; // idx 35 -- первое RSI>70 пересечение, оно же последний видимый бар
   const candles = scene.ohlc.map((c, i) => ({ time: Math.floor(Date.parse(c.time) / 1000), open: +c.open, high: +c.high, low: +c.low, close: +c.close, rsi: scene.rsi[i] }));
@@ -264,13 +264,13 @@ function IntroBlock() {
       <AntiMythBlock lang={INITIAL_LANG} style={{marginBottom:28}}
         data={{tag: T9.antiMyth.tag, title: T9.antiMyth.title, bodies: [T9.antiMyth.body1, T9.antiMyth.body2]}}/>
 
-      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T9.voiceSbf.tag}</Mono>
+      <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{T9.voiceSbf.tag}</Mono>
       <div style={{borderLeft:`4px solid ${C.gold}`,paddingLeft:24,marginBottom:28}}>
         {T9.voiceSbf.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:16,fontStyle:"italic",color:C.inkMid,lineHeight:1.7,fontFamily:"'DM Serif Display',serif",marginBottom:12}}>{p}</p>)}
       </div>
 
       <div style={{background:C.black,borderRadius:8,padding:"26px 30px",color:C.white}}>
-        <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T9.priceOfNotKnowing.tag}</Mono>
+        <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{T9.priceOfNotKnowing.tag}</Mono>
         <div style={{fontFamily:"'DM Serif Display',serif",fontSize:20,color:C.white,marginBottom:12}}>{T9.priceOfNotKnowing.title}</div>
         {/* Рубрика устроена как разбор: сценарий → счёт → итог → «честная
             вторая половина». Порядок несёт смысл, поэтому абзацы открываются
@@ -411,13 +411,13 @@ function HindsightTest({ cases }) {
         <div style={{background:C.black,borderRadius:8,padding:"28px 32px",color:"#fff"}}>
           <p style={{fontSize:12.5,color:"rgba(255,255,255,0.6)",marginBottom:16}}>{h.step3Intro}</p>
           <div style={{background:"rgba(255,255,255,0.05)",borderRadius:6,padding:"18px 22px",marginBottom:20}}>
-            <Chip color={C.gold}>{revealedCase[nameKey]} · {revealedCase.report_date}</Chip>
+            <Chip color={C.goldText}>{revealedCase[nameKey]} · {revealedCase.report_date}</Chip>
             <p style={{fontSize:12.5,color:"rgba(255,255,255,0.75)",marginTop:12,marginBottom:8}}>{revealedCase.actual_ru}</p>
             <p style={{fontSize:12.5,color:"rgba(255,255,255,0.75)",marginBottom:8}}>{revealedCase.guidance_ru}</p>
             <Mono size={20} color={revealedCase.reaction_1d_pct>=0?"#6ec99a":C.red} spacing={0}>{revealedCase.reaction_1d_pct>0?"+":""}{revealedCase.reaction_1d_pct}%</Mono>
           </div>
           <p style={{fontSize:14,color:"#fff",fontWeight:600,marginBottom:16}}>{h.step3Question}</p>
-          <div style={{display:"flex",justifyContent:"space-between",fontSize:10.5,color:"rgba(255,255,255,0.4)",fontFamily:"monospace",marginBottom:6}}>
+          <div style={{display:"flex",justifyContent:"space-between",fontSize:10.5,color:"rgba(255,255,255,0.55)",fontFamily:"monospace",marginBottom:6}}>
             <span>{h.certaintyNo}</span><span>{h.certaintyYes}</span>
           </div>
           <input type="range" min="0" max="100" value={hindsightConfidence} onChange={e=>setHindsightConfidence(+e.target.value)} style={{width:"100%",marginBottom:22}}/>
@@ -537,7 +537,7 @@ function OscillatorRealityTable({ cells }) {
                     aria-sort={sortKey===col.key ? (sortDir>0?"descending":"ascending") : "none"}
                     style={{textAlign:col.align,padding:0,borderBottom:`1px solid ${C.border}`,whiteSpace:"nowrap"}}>
                   <button type="button" onClick={()=>onSort(col.key)}
-                    style={{width:"100%",textAlign:col.align,padding:"7px 9px",fontSize:10,fontFamily:"monospace",color:sortKey===col.key?C.gold:C.inkFaint,textTransform:"uppercase",cursor:"pointer",userSelect:"none",background:"none",border:"none",fontWeight:600,letterSpacing:0.5}}>
+                    style={{width:"100%",textAlign:col.align,padding:"7px 9px",fontSize:10,fontFamily:"monospace",color:sortKey===col.key?C.goldText:C.inkFaint,textTransform:"uppercase",cursor:"pointer",userSelect:"none",background:"none",border:"none",fontWeight:600,letterSpacing:0.5}}>
                     {col.label}{sortKey===col.key ? (sortDir>0?" ▾":" ▴") : ""}
                   </button>
                 </th>
@@ -591,7 +591,7 @@ function CoreMeasureBlock({ vars, cells }) {
         <div style={{fontWeight:600,fontSize:12.5,color:C.black,marginBottom:6}}>{cm.honestTitle}</div>
         <p style={{fontSize:12,color:C.inkMid,lineHeight:1.65,margin:0}}>{cm.honestBody}</p>
       </div>
-      <a href="/data/edu_stats/oscillator_reality.csv" download style={{fontFamily:"monospace",fontSize:12,color:C.gold,textDecoration:"none",border:`1px solid ${C.gold}`,padding:"9px 16px",borderRadius:4,display:"inline-block"}}>{cm.downloadCsv}</a>
+      <a href="/data/edu_stats/oscillator_reality.csv" download style={{fontFamily:"monospace",fontSize:12,color:C.goldText,textDecoration:"none",border:`1px solid ${C.gold}`,padding:"9px 16px",borderRadius:4,display:"inline-block"}}>{cm.downloadCsv}</a>
     </div>
   );
 }
@@ -622,7 +622,7 @@ function ThreeCases({ cases }) {
         })}
       </div>
       <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px",borderLeft:`3px solid ${C.gold}`,marginBottom:20}}>
-        <Mono size={10.5} color={C.gold} spacing={1} style={{display:"block",marginBottom:6}}>{tcase.mechanism}</Mono>
+        <Mono size={10.5} color={C.goldText} spacing={1} style={{display:"block",marginBottom:6}}>{tcase.mechanism}</Mono>
         <div style={{fontWeight:600,fontSize:15,color:C.black,marginBottom:10,display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
           <span>{real ? real[nameKey] : tcase.id}</span>
           {real && <span style={{color:C.inkFaint,fontWeight:400,fontSize:12}}>· {real.report_date}</span>}
@@ -679,7 +679,7 @@ function PredictDiv({ vars }) {
   const [picked, setPicked] = useState(null);
   return (
     <div style={{border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px",marginTop:8,marginBottom:24}}>
-      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{p.tag}</Mono>
+      <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{p.tag}</Mono>
       <p style={{fontSize:14.5,color:C.black,lineHeight:1.65,marginBottom:14}}>{p.question}</p>
       <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:14}}>
         {p.options.map((o,i) => (
@@ -711,7 +711,7 @@ function Chapter9() {
 
       <div style={{position:"sticky",top:106,background:"rgba(255,255,255,0.96)",backdropFilter:"blur(10px)",borderBottom:`1px solid ${C.border}`,padding:"15px 5vw",display:"flex",alignItems:"center",justifyContent:"space-between",zIndex:50}}>
         <div style={{display:"flex",alignItems:"center",gap:20}}>
-          <a href={getChUrl(8, lang)} aria-label={lang==="ru"?"Предыдущая глава":lang==="ro"?"Capitolul anterior":"Previous chapter"} style={{color:C.gold,cursor:"pointer",textDecoration:"none",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</a>
+          <a href={getChUrl(8, lang)} aria-label={lang==="ru"?"Предыдущая глава":lang==="ro"?"Capitolul anterior":"Previous chapter"} style={{color:C.goldText,cursor:"pointer",textDecoration:"none",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</a>
           <Chip>{S.levelChip}</Chip>
           <Mono size={14} color={C.inkSoft} spacing={0} className="hide-mobile">{S.chapterNameShort}</Mono>
         </div>
@@ -724,15 +724,15 @@ function Chapter9() {
       <div style={{background:C.black,padding:"80px 5vw 70px",textAlign:"center",position:"relative",overflow:"hidden"}}>
         <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 100%, rgba(201,151,58,0.1) 0%, transparent 60%)"}}/>
         <div style={{position:"relative"}}>
-          <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:20}}>{S.heroEyebrow}</Mono>
+          <Mono size={11} color={C.goldText} spacing={4} style={{display:"block",marginBottom:20}}>{S.heroEyebrow}</Mono>
           <h1 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(36px,6vw,66px)",fontWeight:400,color:C.white,lineHeight:1.05,marginBottom:20}}>
-            {S.heroTitleLine1}<br/><span style={{color:C.gold}}>{S.heroTitleLine2}</span>
+            {S.heroTitleLine1}<br/><span style={{color:C.goldText}}>{S.heroTitleLine2}</span>
           </h1>
           <p style={{fontSize:"clamp(16px,2vw,20px)",color:"rgba(255,255,255,0.55)",maxWidth:640,margin:"0 auto 32px",lineHeight:1.65}}>{S.heroSubtitle}</p>
           <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
-            <Chip color={C.gold}>{S.fundamentalChip}</Chip>
-            <Chip color="rgba(255,255,255,0.3)">{S.technicalChip}</Chip>
-            <Chip color="rgba(255,255,255,0.3)">{S.interactiveChip}</Chip>
+            <Chip color={C.goldText}>{S.fundamentalChip}</Chip>
+            <Chip color="rgba(255,255,255,0.55)">{S.technicalChip}</Chip>
+            <Chip color="rgba(255,255,255,0.55)">{S.interactiveChip}</Chip>
           </div>
         </div>
       </div>
@@ -779,7 +779,7 @@ function Chapter9() {
         <PredictDiv vars={vars}/>
 
         <div style={{border:`1px dashed ${C.borderGold}`,borderRadius:8,padding:"20px 24px",marginBottom:32,background:C.surface}}>
-          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T9.cliffhanger.tag}</Mono>
+          <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{T9.cliffhanger.tag}</Mono>
           {T9.cliffhanger.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:14,color:C.inkMid,lineHeight:1.7,marginBottom:10}}>{p}</p>)}
         </div>
 
@@ -795,7 +795,7 @@ function Chapter9() {
               return (
                 <li>
                   {text}{" "}
-                  <a href="/data/edu_stats/oscillator_reality.csv" download style={{color:C.gold}}>{T9.sources.csvLabel}</a>
+                  <a href="/data/edu_stats/oscillator_reality.csv" download style={{color:C.goldText}}>{T9.sources.csvLabel}</a>
                 </li>
               );
             })()}

@@ -259,7 +259,7 @@
   border-bottom: 1px solid #c9a227;
 }
 .sbf-fw-admin-bar.visible { display: flex; }
-.sbf-fw-admin-bar a { color: #c9a227; text-decoration: none; margin-right: 8px; }
+.sbf-fw-admin-bar a { color: var(--gold-text,#866A19); text-decoration: none; margin-right: 8px; }
 .sbf-fw-admin-bar a:hover { text-decoration: underline; }
 .sbf-fw-admin-toggle {
   margin-left: auto;

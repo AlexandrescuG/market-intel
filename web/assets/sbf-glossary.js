@@ -160,17 +160,17 @@
     _popup.id = 'glPopup';
     _popup.innerHTML =
       '<button id="glClose" style="position:absolute;top:10px;right:12px;' +
-        'border:none;background:none;font-size:20px;cursor:pointer;color:var(--muted,#8A8275);' +
+        'border:none;background:none;font-size:20px;cursor:pointer;color:var(--muted,#716A5A);' +
         'line-height:1;padding:0">✕</button>' +
       '<div id="glTerm" style="font-weight:700;font-size:15px;margin-bottom:6px"></div>' +
       '<div id="glShort" style="font-size:13px;line-height:1.6;color:var(--ink,#2B2B33)"></div>' +
       '<div id="glEtymWrap" style="margin-top:10px">' +
         '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;' +
-          'color:var(--gold,#C9A227);margin-bottom:3px">' + t('etymology') + '</div>' +
-        '<div id="glEtym" style="font-size:12px;line-height:1.5;color:var(--muted,#8A8275);font-style:italic"></div>' +
+          'color:var(--gold-text,#866A19);margin-bottom:3px">' + t('etymology') + '</div>' +
+        '<div id="glEtym" style="font-size:12px;line-height:1.5;color:var(--muted,#716A5A);font-style:italic"></div>' +
       '</div>' +
       '<a id="glMore" href="#" style="display:inline-block;margin-top:10px;font-size:12px;' +
-        'color:var(--gold,#C9A227);font-weight:600;text-decoration:none">' + t('more_in_glossary') + '</a>';
+        'color:var(--gold-text,#866A19);font-weight:600;text-decoration:none">' + t('more_in_glossary') + '</a>';
     _popup.style.cssText =
       'display:none;position:fixed;z-index:1001;' +
       'background:var(--paper,#fff);border:1px solid var(--line,#E7DFCF);' +
@@ -285,24 +285,24 @@
               'padding:13px 14px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;' +
               'font-family:Montserrat,sans-serif;font-size:13px;font-weight:600;color:var(--ink,#2B2B33)">' +
               '<span>' + esc(entry.term) + '</span>' +
-              '<span class="gl-card-arrow" style="font-size:10px;color:var(--muted,#8A8275);' +
+              '<span class="gl-card-arrow" style="font-size:10px;color:var(--muted,#716A5A);' +
                 'transform:rotate(' + (open ? '180' : '0') + 'deg);transition:transform .2s">' +
                 '▼</span>' +
             '</button>' +
             '<div class="gl-card-body" style="display:' + (open ? 'block' : 'none') + ';' +
               'padding:0 14px 14px;font-size:13px;line-height:1.65;color:var(--ink,#2B2B33)">' +
-              '<p style="color:var(--muted,#8A8275);font-size:12px;margin:0 0 8px">' + esc(entry.short) + '</p>' +
+              '<p style="color:var(--muted,#716A5A);font-size:12px;margin:0 0 8px">' + esc(entry.short) + '</p>' +
               '<p style="margin:0 0 10px">' + esc(entry.full) + '</p>' +
               (entry.etym
                 ? '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;' +
-                    'color:var(--gold,#C9A227);margin-bottom:3px">' + t('etymology') + '</div>' +
-                  '<p style="margin:0 0 10px;font-size:12px;font-style:italic;color:var(--muted,#8A8275)">' +
+                    'color:var(--gold-text,#866A19);margin-bottom:3px">' + t('etymology') + '</div>' +
+                  '<p style="margin:0 0 10px;font-size:12px;font-style:italic;color:var(--muted,#716A5A)">' +
                     esc(entry.etym) + '</p>'
                 : '') +
               (entry.related && entry.related.length
-                ? '<div style="font-size:11px;color:var(--muted,#8A8275)">' + esc(t('related_prefix')) + ' ' +
+                ? '<div style="font-size:11px;color:var(--muted,#716A5A)">' + esc(t('related_prefix')) + ' ' +
                   entry.related.map(function (slug) {
-                    return '<a href="#gl-' + slug + '" class="gl-rel" style="color:var(--gold,#C9A227);' +
+                    return '<a href="#gl-' + slug + '" class="gl-rel" style="color:var(--gold-text,#866A19);' +
                       'text-decoration:none;margin-right:6px">' + slug + '</a>';
                   }).join('') + '</div>'
                 : '') +
@@ -312,7 +312,7 @@
         }).join('');
         return (
           '<div class="gl-section" data-letter="' + letter + '">' +
-          '<div style="font-size:11px;font-weight:700;color:var(--muted,#8A8275);letter-spacing:.05em;' +
+          '<div style="font-size:11px;font-weight:700;color:var(--muted,#716A5A);letter-spacing:.05em;' +
             'text-transform:uppercase;padding:10px 2px 6px">' + letter + '</div>' +
           entries +
           '</div>'

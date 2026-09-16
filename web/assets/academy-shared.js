@@ -21,15 +21,51 @@
  * глобальную переменную.
  */
 (function () {
+  /* 🔴 КОНТРАСТ (16.09.2026). Эта палитра красит все 15 глав, и четыре её
+     значения не проходили WCAG AA как цвет текста. Замер
+     tools/audit_contrast.py нашёл в главах 1 и 2 больше нарушений, чем на
+     всём остальном сайте вместе.
+
+     Пороги считаны по САМОМУ ТЁМНОМУ фону, на котором цвет реально лежит
+     (#f0ebe0 = surfaceMid), а не по белому: на белом почти всё проходило,
+     и именно поэтому проблему не видели.
+
+     Ярусы серого — это альфа, а не отдельные hex, поэтому правка одного
+     числа чинит сразу 148 мест (inkFaint) и 75 (inkSoft). Лесенка после
+     правки на #f0ebe0: ink 14.9 → inkMid 6.3 → inkSoft 5.7 → inkFaint 4.5.
+     Разница между ярусами стала меньше, чем была, и иначе быть не может:
+     AA требует 4.5:1 для текста мельче 24px, так что «совсем бледный»
+     ярус читаемым не бывает — различать ярусы приходится размером и
+     насыщенностью, а не светлотой.
+
+     ⚠ inkFaint в 4 местах из 152 стоит не текстом (2 фона, рамка, заливка).
+     Там он станет заметно темнее — это осознанная плата за 148 исправленных
+     подписей; если какая-то из четырёх рамок начнёт бить в глаза, ей нужен
+     свой токен, а не откат альфы.
+
+     gold НЕ трогаем: он в 166 местах фон и рамка (графика, порог 3:1), и
+     затемнение перекрасило бы бренд. Для текста заведён goldText. */
   var C = {
     gold:"#c9973a", goldDark:"#b8832a", goldLight:"#f4d49f", goldPale:"#f7f0e3",
+    goldText:"#876525",   /* только color:. Сам gold как текст — 2.22:1 */
+    /* 🔴 ТЁМНЫЕ БЛОКИ — ОТДЕЛЬНЫЙ ЯРУС, И ЭТО НЕ ПЕДАНТИЗМ.
+       Затемнив золото под кремовый фон, я тем же движением сделал его
+       нечитаемым на тёмных панелях главы 2 (шапка, симулятор ФРС):
+       #876525 на #18181a — 3.31:1, а на #212123 и вовсе 2.99:1. Замер
+       поймал 20 таких элементов, которых до правки не было.
+       Урок общий: цвет текста не бывает «правильным» сам по себе, он
+       правильный ОТНОСИТЕЛЬНО фона. Раз фонов у нас два семейства —
+       светлое и тёмное, — токенов тоже должно быть два. */
+    goldOnDark:"#E6C257",   /* 10.2:1 на #18181a */
+    greenOnDark:"#4FBF8B",  /* 7.5:1  — C.green на тёмном даёт 2.90:1 */
+    redOnDark:"#F2776B",    /* 6.8:1  — C.red на тёмном даёт 3.26:1 */
     black:"#18181a", ink:"#18181a", inkMid:"#555555",
-    inkSoft:"rgba(24,24,26,0.58)", inkFaint:"rgba(24,24,26,0.28)",
+    inkSoft:"rgba(24,24,26,0.68)", inkFaint:"rgba(24,24,26,0.61)",
     white:"#ffffff", surface:"#faf8f5", surfaceMid:"#f0ebe0",
     border:"rgba(24,24,26,0.1)", borderGold:"rgba(201,151,58,0.25)",
     dark:"#18181a",
-    green:"#2d7a4f", greenPale:"#eaf5ee", red:"#c0392b", redPale:"#fdecea",
-    blue:"#2563eb", bluePale:"#eff6ff", orange:"#d97706",
+    green:"#2C784E", greenPale:"#eaf5ee", red:"#c0392b", redPale:"#fdecea",
+    blue:"#1F5FEA", bluePale:"#eff6ff", orange:"#A05804",
     // Яркие "биржевые" (TradingView-подобные) цвета для графиков/лент сделок
     // -- Глава 4 -- намеренно отдельные от green/red выше: те используются
     // как приглушённый индикатор "хорошо/плохо" в обычном UI, эти -- для
@@ -61,7 +97,9 @@
   }
 
   function Chip(props) {
-    var color = props.color || C.gold;
+    // По умолчанию значок стоит на светлом: C.gold как текст — 2.63:1.
+    // Для тёмных секций цвет передаётся явно (C.goldOnDark).
+    var color = props.color || C.goldText;
     return React.createElement('span', {style:{
       fontFamily:"'Courier New',monospace", fontSize:11, letterSpacing:3, color:color,
       border:"1px solid " + color, padding:"4px 11px", display:"inline-block", textTransform:"uppercase"
@@ -86,7 +124,7 @@
       // Термина в словаре нет — значит и нажимать нечего: рисуем выделенным
       // словом, но без курсора-пальца. Палец на неработающем элементе — это
       // обещание, которого страница не выполняет.
-      return React.createElement('span', {style:{color:C.gold, fontWeight:600,
+      return React.createElement('span', {style:{color:C.goldText, fontWeight:600,
                                                  borderBottom:"1px dashed " + C.gold}}, children);
     }
     return React.createElement('span', {style:{position:"relative", display:"inline"}},
@@ -103,7 +141,7 @@
         type: "button",
         "aria-expanded": isOpen ? "true" : "false",
         onClick: function(e){ e.stopPropagation(); setOpen(function(o){ return !o; }); },
-        style:{color:C.gold, borderBottom:"1px dashed " + C.gold, cursor:"pointer",
+        style:{color:C.goldText, borderBottom:"1px dashed " + C.gold, cursor:"pointer",
                fontWeight:600, background:"none", border:"none", borderRadius:0,
                padding:0, margin:0, font:"inherit", lineHeight:"inherit",
                display:"inline", textAlign:"left"}
@@ -119,10 +157,10 @@
                  width:360, background:C.white, border:"1px solid " + C.border,
                  boxShadow:"0 10px 40px rgba(0,0,0,0.15)", padding:"20px 23px", zIndex:200, display:"block"}
         },
-          React.createElement(Mono, {size:13, color:C.gold, spacing:2, style:{display:"block", marginBottom:8}}, word.toUpperCase()),
+          React.createElement(Mono, {size:13, color:C.goldText, spacing:2, style:{display:"block", marginBottom:8}}, word.toUpperCase()),
           React.createElement('span', {style:{display:"block", fontSize:16, color:C.ink, marginBottom:10, lineHeight:1.6, fontWeight:600}}, d.s),
           React.createElement('span', {style:{display:"block", fontSize:15, color:C.inkSoft, marginBottom:10, lineHeight:1.5, fontStyle:"italic"}}, d.a),
-          React.createElement('span', {style:{display:"block", fontSize:15, color:C.gold, lineHeight:1.5}}, "→ " + d.e),
+          React.createElement('span', {style:{display:"block", fontSize:15, color:C.goldText, lineHeight:1.5}}, "→ " + d.e),
           React.createElement('span', {
             onClick: function(e){ e.stopPropagation(); setOpen(false); },
             style:{position:"absolute", top:10, right:12, cursor:"pointer", color:C.inkFaint, fontSize:20, lineHeight:1}
@@ -182,7 +220,7 @@
       e('div', {onClick:function(ev){ ev.stopPropagation(); }, style:{position:"relative", width:"100%", maxWidth:900, zIndex:1, margin:"auto", padding:"40px 0"}},
         e('button', {onClick:onClose, style:{position:"absolute", top:0, right:10, background:"none", border:"none", fontSize:35, cursor:"pointer", color:C.inkFaint, lineHeight:1}}, "×"),
         e('div', {style:{marginBottom:40, padding:"0 10px"}},
-          e(Mono, {size:13, color:C.gold, spacing:3, style:{display:"block", marginBottom:15}}, "— " + tr.tag),
+          e(Mono, {size:13, color:C.goldText, spacing:3, style:{display:"block", marginBottom:15}}, "— " + tr.tag),
           e('h2', {style:{fontSize:"clamp(30px,5vw,42px)", fontWeight:700, color:C.black, marginBottom:15, fontFamily:"'DM Serif Display',serif"}}, tr.title),
           e('p', {style:{fontSize:18, color:C.inkMid, lineHeight:1.6}}, tr.sub)
         ),
@@ -313,7 +351,7 @@
     }
 
     var header = [
-      e(Mono, {key:"k", size:11, color:C.gold, spacing:4, style:{display:"block", textAlign:"center", marginBottom:12}}, copy.kicker),
+      e(Mono, {key:"k", size:11, color:C.goldText, spacing:4, style:{display:"block", textAlign:"center", marginBottom:12}}, copy.kicker),
       e('h3', {key:"t", style:{fontFamily:"'DM Serif Display',serif", fontSize:26, color:C.black, fontWeight:400, textAlign:"center", marginBottom:28}}, copy.title),
     ];
 
@@ -448,7 +486,7 @@
                         style: { textAlign: "left", padding: 0, borderBottom: "1px solid " + C.border } },
                 e('button', { type: "button", onClick: function () { щёлк(null); },
                   style: { width: "100%", textAlign: "left", padding: "8px 10px", fontSize: 10.5,
-                           fontFamily: "monospace", color: порядок.key === null ? C.gold : C.inkFaint,
+                           fontFamily: "monospace", color: порядок.key === null ? C.goldText : C.inkFaint,
                            textTransform: "uppercase", cursor: "pointer", background: "none",
                            border: "none", fontWeight: 600 } },
                   copy.rowHead + " · " + м.byStrength + (порядок.key === null ? (порядок.dir > 0 ? " ▾" : " ▴") : ""))),
@@ -459,7 +497,7 @@
                                  style: { textAlign: "center", padding: 0, borderBottom: "1px solid " + C.border, whiteSpace: "nowrap" } },
                   e('button', { type: "button", onClick: function () { щёлк(c.key); }, title: м.sortBy,
                     style: { width: "100%", textAlign: "center", padding: "8px 10px", fontSize: 10.5,
-                             fontFamily: "monospace", color: свой ? C.gold : C.inkFaint,
+                             fontFamily: "monospace", color: свой ? C.goldText : C.inkFaint,
                              textTransform: "uppercase", cursor: "pointer", background: "none",
                              border: "none", fontWeight: 600 } },
                     c.label + (свой ? (порядок.dir > 0 ? " ▾" : " ▴") : "")));
@@ -593,7 +631,7 @@
     var revealContent = committed ? (typeof reveal === "function" ? reveal(answer) : reveal) : null;
 
     return e('div', {style:{background:C.black, padding:"64px 5vw 52px", color:"#fff"}},
-      tag ? e(Mono, {size:11, color:C.gold, spacing:4, style:{display:"block", marginBottom:22, textAlign:"center"}}, tag) : null,
+      tag ? e(Mono, {size:11, color:C.goldText, spacing:4, style:{display:"block", marginBottom:22, textAlign:"center"}}, tag) : null,
       e('p', {style:{fontFamily:"'DM Serif Display',serif", fontSize:"clamp(21px,3.2vw,28px)", color:"#fff",
                      textAlign:"center", maxWidth:680, margin:"0 auto 30px", lineHeight:1.42}}, ask),
       e('div', {style:{maxWidth:660, margin:"0 auto"}},
@@ -604,7 +642,7 @@
         e('div', {style:{fontSize:16, lineHeight:1.62, color:"#fff"}}, revealContent)
       ) : null,
       committed && bridge ? e('p', {style:{textAlign:"center", fontFamily:"monospace", fontSize:12,
-                    color:C.gold, letterSpacing:0.5, marginTop:22, marginBottom:0}}, bridge) : null
+                    color:C.goldText, letterSpacing:0.5, marginTop:22, marginBottom:0}}, bridge) : null
     );
   }
 
@@ -649,7 +687,7 @@
     var fmt = cfg.format || function (v) { return String(v); };
     function release() { if (!committed) commit(val); }
     return e('div', {style:{textAlign:"center"}},
-      e('div', {style:{fontFamily:"monospace", fontSize:28, fontWeight:700, color:C.gold, marginBottom:14}}, fmt(val)),
+      e('div', {style:{fontFamily:"monospace", fontSize:28, fontWeight:700, color:C.goldText, marginBottom:14}}, fmt(val)),
       e('input', {
         type:"range", min:cfg.min, max:cfg.max, step:cfg.step || 1, value:val, disabled:committed,
         onChange: function (ev) { setVal(+ev.target.value); },
@@ -735,7 +773,7 @@
         return { time: c.time, open: +c.open, high: +c.high, low: +c.low, close: +c.close };
       }));
       if (committed && cfg.markerTime != null) {
-        series.setMarkers([{ time: cfg.markerTime, position:"aboveBar", color:C.gold, shape:"arrowDown", text: cfg.markerText || "" }]);
+        series.setMarkers([{ time: cfg.markerTime, position:"aboveBar", color:C.goldText, shape:"arrowDown", text: cfg.markerText || "" }]);
       } else {
         series.setMarkers([]);
       }
@@ -865,7 +903,7 @@
     // окружении (28 у одних, 48 у других), и зашитое здесь число ломало бы
     // вертикальный ритм страницы.
     return e('div', {style: props.style || {marginBottom:28}},
-      data.tag ? e(Mono, {size:11, color:C.gold, spacing:3,
+      data.tag ? e(Mono, {size:11, color:C.goldText, spacing:3,
                           style:{display:"block", marginBottom:10}}, data.tag) : null,
       e('div', {style:{background:C.surface, border:"1px solid " + C.border,
                        borderRadius:8, padding:"22px 26px"}},
@@ -1071,7 +1109,7 @@
               style:{fontFamily:"monospace", fontSize:11.5, padding:"9px 16px",
                      cursor:"pointer", background:"#fff", color:C.inkMid,
                      border:"1px solid " + C.border, borderRadius:4, fontWeight:600}}, copy.again),
-        e(Mono, {size:10.5, color: проверено ? C.gold : C.inkFaint},
+        e(Mono, {size:10.5, color: проверено ? C.goldText : C.inkFaint},
           проверено
             ? (верно === items.length ? copy.allRight
                : copy.score.replace("%1", String(верно)).replace("%2", String(items.length)))

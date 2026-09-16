@@ -79,10 +79,10 @@ if (new URLSearchParams(location.search).get("embed") === "1") {
 <style>
 :root{
   --cream:#FBF6EF; --paper:#FFFFFF; --line:#E7DFCF; --grid:#F0E9DA;
-  --ink:#2B2B33;   --muted:#7C7563; --faint:#C5BAA8;
+  --ink:#2B2B33;   --muted:#716A5A; --faint:#7B6B52;
   --gold:#C9A227;  --glow:#E6C257;
-  --up:#1e8e5a;    --down:#c0392b;
-  --signal:#b07d18;
+  --up:#1A7D4F;    --down:#c0392b;
+  --signal:#906614;
 }
 *{box-sizing:border-box}
 html{overflow-x:hidden}
@@ -91,7 +91,7 @@ body{margin:0;background:var(--cream);color:var(--ink);
   -webkit-font-smoothing:antialiased}
 .mono{font-family:'JetBrains Mono',monospace}
 h1,h2,h3{font-family:Montserrat,sans-serif;font-weight:700;margin:0}
-a{color:var(--gold);text-decoration:none}
+a{color:var(--gold-text,#866A19);text-decoration:none}
 a:hover{text-decoration:underline;color:var(--glow)}
 :focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 
@@ -163,7 +163,7 @@ a:hover{text-decoration:underline;color:var(--glow)}
 
 /* report */
 .report{font-family:Montserrat}
-.rep-instrument-link{color:var(--gold);font-weight:600;text-decoration:none;border-bottom:1.5px dotted var(--gold)}
+.rep-instrument-link{color:var(--gold-text,#866A19);font-weight:600;text-decoration:none;border-bottom:1.5px dotted var(--gold)}
 .rep-instrument-link:hover{background:rgba(201,162,39,.12)}
 .personal-block{margin-bottom:14px;padding:10px 14px;border-radius:10px;background:rgba(201,162,39,.07);border:1px solid rgba(201,162,39,.18);font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.8;display:none}
 .personal-block b{color:var(--ink)}
@@ -185,7 +185,7 @@ a:hover{text-decoration:underline;color:var(--glow)}
 .focus-item__move.down{color:var(--down)}
 .focus-item__body{font-family:'Merriweather',Georgia,serif;font-weight:300;font-size:17px;line-height:1.65;letter-spacing:-.005em;color:var(--ink)}
 .focus-item__more{margin-top:2px}
-.focus-item__more summary{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--gold);cursor:pointer;list-style:none;margin-top:8px}
+.focus-item__more summary{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--gold-text,#866A19);cursor:pointer;list-style:none;margin-top:8px}
 .focus-item__more summary::-webkit-details-marker{display:none}
 .focus-item__more summary::before{content:"+ ";}
 .focus-item__more[open] summary::before{content:"− ";}
@@ -229,7 +229,7 @@ a:hover{text-decoration:underline;color:var(--glow)}
 .board-row .br-chg{font-family:'JetBrains Mono',monospace;font-size:12px;flex-shrink:0}
 .board-row .br-chg.up{color:var(--up)} .board-row .br-chg.down{color:var(--down)}
 .board-row .br-n{font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:700;
-  color:var(--gold);min-width:34px;text-align:right;flex-shrink:0}
+  color:var(--gold-text,#866A19);min-width:34px;text-align:right;flex-shrink:0}
 .board-bubble{position:absolute;border-radius:50%;display:flex;flex-direction:column;
   align-items:center;justify-content:center;text-align:center;cursor:pointer;
   border:1.5px solid;text-decoration:none;overflow:hidden;
@@ -285,7 +285,7 @@ a:hover{text-decoration:underline;color:var(--glow)}
 .personal-block a:hover{text-decoration:underline}
 .personal-block .pb-sep{color:var(--muted);margin:0 8px}
 .report h1{font-size:19px;margin:4px 0 14px;color:var(--ink)}
-.report h3{font-size:13px;margin:10px 0 5px;color:var(--gold);font-weight:700}
+.report h3{font-size:13px;margin:10px 0 5px;color:var(--gold-text,#866A19);font-weight:700}
 .report table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13px}
 .report th,.report td{border:1px solid var(--line);padding:6px 9px;text-align:left}
 .report th{background:var(--cream);font-weight:700}
@@ -312,7 +312,7 @@ a:hover{text-decoration:underline;color:var(--glow)}
    раскрытие только у Блока 5 (см. #briefContext, переиспользует .rep-sec). */
 .brief-v2{margin-bottom:8px}
 .brief-headline{font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.6;color:var(--ink);padding:8px 2px 14px;border-bottom:1px solid var(--line);margin-bottom:10px}
-.brief-headline b{color:var(--gold)}
+.brief-headline b{color:var(--gold-text,#866A19)}
 .brief-block{margin-bottom:16px}
 .brief-block h3{font-size:12px;font-weight:700;letter-spacing:.04em;color:var(--muted);text-transform:uppercase;margin:0 0 8px}
 .brief-table{width:100%;max-width:100%;table-layout:fixed;border-collapse:collapse;font-size:12.5px}
@@ -321,7 +321,7 @@ a:hover{text-decoration:underline;color:var(--glow)}
 .brief-table td:first-child{width:52px;white-space:nowrap;overflow-wrap:normal}
 .brief-more{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);margin-top:6px}
 .brief-more a{color:var(--muted);text-decoration:none;border-bottom:1px dotted var(--muted)}
-.brief-more a:hover{color:var(--gold);border-bottom-color:var(--gold)}
+.brief-more a:hover{color:var(--gold-text,#866A19);border-bottom-color:var(--gold)}
 .brief-movers-cols{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}
 .brief-movers-cols h4{font-size:11px;font-weight:700;margin:0 0 6px;letter-spacing:.03em}
 .brief-movers-cols h4.up{color:var(--up)}
@@ -366,10 +366,10 @@ a:hover{text-decoration:underline;color:var(--glow)}
 .sig .src{color:var(--signal);text-transform:uppercase;font-weight:700}
 .sig .outlet-domain{color:var(--muted)}
 .sig .imp{color:var(--up)}
-.sig .ct{color:var(--gold);font-weight:700}
+.sig .ct{color:var(--gold-text,#866A19);font-weight:700}
 .sig .t{font-size:13px;line-height:1.5}
 .sig .t a{color:var(--ink)}
-.sig .t a:hover{color:var(--gold);text-decoration:underline}
+.sig .t a:hover{color:var(--gold-text,#866A19);text-decoration:underline}
 .sig .conf{padding:1px 6px;border-radius:8px;letter-spacing:.2px}
 .sig .conf-media{color:var(--up);background:rgba(30,142,90,.08)}
 .sig .conf-social_unverified{color:var(--muted);background:rgba(138,130,117,.1)}
@@ -387,13 +387,13 @@ a:hover{text-decoration:underline;color:var(--glow)}
 .pulse-row:hover{background:var(--surface)}
 .pulse-sym{font-family:'JetBrains Mono';font-weight:700;font-size:13px;min-width:52px;color:var(--ink)}
 .pulse-spark{flex:1;height:22px;display:block}
-.pulse-score{font-family:'JetBrains Mono';font-size:11.5px;font-weight:600;min-width:96px;text-align:right;color:var(--gold)}
+.pulse-score{font-family:'JetBrains Mono';font-size:11.5px;font-weight:600;min-width:96px;text-align:right;color:var(--gold-text,#866A19)}
 /* Строка без собственной нормы — приглушённая и без золота: это не всплеск,
    а «ещё нечем мерить». Одинаковое золото на обеих подписях читалось бы как
    одинаковая уверенность. */
 .pulse-score-nonorm{color:var(--muted);font-weight:500;min-width:132px}
 .pulse-chevron{color:var(--faint);font-size:13px;opacity:0;transition:opacity var(--dur) var(--ease);margin-left:2px}
-.pulse-row:hover .pulse-chevron{opacity:1;color:var(--gold)}
+.pulse-row:hover .pulse-chevron{opacity:1;color:var(--gold-text,#866A19)}
 .pulse-zero-row{font-size:11.5px;color:var(--muted);padding:7px 4px;font-style:italic}
 .pulse-calm{font-size:11px;color:var(--muted);padding:0 4px 8px;font-style:italic}
 .pulse-line{stroke:var(--gold);opacity:.85}
@@ -411,7 +411,7 @@ a:hover{text-decoration:underline;color:var(--glow)}
 .pulse-feed-card .pf-item{padding:9px 0;border-top:1px solid var(--line)}
 .pulse-feed-card .pf-item:first-child{border-top:none}
 .pulse-feed-card .pf-item a{color:var(--ink);font-family:var(--font-sans);font-size:12.5px;line-height:1.4}
-.pulse-feed-card .pf-item a:hover{color:var(--gold)}
+.pulse-feed-card .pf-item a:hover{color:var(--gold-text,#866A19)}
 .pulse-feed-card .pf-meta{font-size:10px;color:var(--muted);margin-top:3px}
 .pulse-feed-lock{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px;padding:8px 0}
 
@@ -430,7 +430,7 @@ a:hover{text-decoration:underline;color:var(--glow)}
   color:inherit;border:1px solid var(--line);border-radius:10px;overflow:hidden;
   background:var(--paper);transition:border-color .15s, transform .15s}
 .pulse-feed-card .pf-card:hover{border-color:var(--gold);transform:translateY(-1px)}
-.pulse-feed-card .pf-card:hover .pf-title{color:var(--gold)}
+.pulse-feed-card .pf-card:hover .pf-title{color:var(--gold-text,#866A19)}
 /* Картинка сверху во всю ширину карточки: 16:9 держит ряды ровными даже
    когда издания отдают превью разных пропорций. */
 .pf-shot{width:100%;aspect-ratio:16/9;overflow:hidden;background:var(--surface);
@@ -550,7 +550,7 @@ a:hover{text-decoration:underline;color:var(--glow)}
 .gex-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:8px}
 .gex-card{background:var(--cream);border:1px solid var(--line);border-radius:12px;padding:13px 15px}
 .gex-lbl{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;
-  text-transform:uppercase;color:var(--gold);margin-bottom:5px}
+  text-transform:uppercase;color:var(--gold-text,#866A19);margin-bottom:5px}
 .gex-card p{margin:0;font-size:13px;line-height:1.55;color:var(--ink)}
 .gfoot-note{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);
   margin-top:14px;line-height:1.6}
@@ -1014,7 +1014,9 @@ function renderFng(m){
   const b=document.getElementById('fngBox'); if(!m||!m.fear_greed){b.innerHTML='<div class="empty">—</div>';return;}
   _fng=m.fear_greed;
   const v=m.fear_greed.value;
-  const col=v<30?'var(--down)':v>70?'var(--up)':'var(--gold)';
+  // --gold здесь был цветом ЧИСЛА (36px), а не подложки: 2.42:1. Даже
+  // послабление для крупного текста (3:1) не спасало.
+  const col=v<30?'var(--down)':v>70?'var(--up)':'var(--gold-text,#866A19)';
   b.innerHTML=`<div class="fng-num" style="color:${col}">${v}</div>
     <div class="fng-label">${m.fear_greed.label}</div>
     <div class="fng" style="padding:0"><div class="bar"></div><div class="mark" style="margin-left:${v}%"></div></div>`;
@@ -1580,7 +1582,7 @@ function renderTech(t){
         <span style="margin-left:8px">RSI</span><b>${c.rsi}</b></div>
       <div style="border-top:1px solid var(--line);padding-top:8px;margin-bottom:8px">
         <div style="font-size:10px;color:var(--muted);margin-bottom:5px;letter-spacing:.5px;text-transform:uppercase;font-weight:700">${I18N_CARD.keyLevels}</div>
-        <div class="lv"><span>${I18N_CARD.pivotPoint}</span><b style="color:var(--gold)">${pp}</b></div>
+        <div class="lv"><span>${I18N_CARD.pivotPoint}</span><b style="color:var(--gold-text,#866A19)">${pp}</b></div>
         <div class="lv"><span>${I18N_CARD.resistance1}</span><b style="color:var(--down)">${r1}</b></div>
         <div class="lv"><span>${I18N_CARD.resistance2}</span><b style="color:var(--down)">${r2}</b></div>
         <div class="lv"><span>${I18N_CARD.support1}</span><b style="color:var(--up)">${s1}</b></div>
@@ -2679,7 +2681,7 @@ _tickerRAF = requestAnimationFrame(_tickerFrame);
           +'<div class="tfoc-sec-lbl">'+I18N_TECH.keyLevels+'</div>'
           +'<div class="tfoc-lv"><span>'+I18N_TECH.resistance2+'</span><b style="color:var(--down)">'+r2+'</b></div>'
           +'<div class="tfoc-lv"><span>'+I18N_TECH.resistance1+'</span><b style="color:var(--down)">'+r1+'</b></div>'
-          +'<div class="tfoc-lv"><span>'+I18N_TECH.pivotPoint+'</span><b style="color:var(--gold)">'+pp+'</b></div>'
+          +'<div class="tfoc-lv"><span>'+I18N_TECH.pivotPoint+'</span><b style="color:var(--gold-text,#866A19)">'+pp+'</b></div>'
           +'<div class="tfoc-lv"><span>'+I18N_TECH.support1+'</span><b style="color:var(--up)">'+s1+'</b></div>'
           +'<div class="tfoc-lv"><span>'+I18N_TECH.support2+'</span><b style="color:var(--up)">'+s2+'</b></div>'
           +(moveStr?'<div class="tfoc-lv"><span>'+I18N_TECH.expectedMove+'</span><b>'+moveStr+'</b></div>':'')

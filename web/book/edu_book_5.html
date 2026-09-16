@@ -329,7 +329,7 @@ function ColdOpen5({ coldOpen }) {
   if (!coldOpen) {
     return (
       <div style={{background:C.black,padding:"60px 5vw",textAlign:"center"}}>
-        <Mono size={11} color={C.gold} spacing={4}>{co.tag}</Mono>
+        <Mono size={11} color={C.goldText} spacing={4}>{co.tag}</Mono>
       </div>
     );
   }
@@ -344,7 +344,7 @@ function ColdOpen5({ coldOpen }) {
   const lines = co.lines.map((line, i) => i === 3 ? fillTemplate(climax, {day_range: meta.day_range}) : line);
   return (
     <div style={{background:C.black,padding:"70px 5vw 56px",color:"#fff"}}>
-      <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:24,textAlign:"center"}}>{co.tag}</Mono>
+      <Mono size={11} color={C.goldText} spacing={4} style={{display:"block",marginBottom:24,textAlign:"center"}}>{co.tag}</Mono>
       <div style={{maxWidth:840,margin:"0 auto 28px"}}>
         {lines.map((line,i) => (
           <p key={i} style={{fontSize: i<2 ? 15 : i===co.lines.length-1 ? 17 : 15.5, color: i>=4?"#fff":"rgba(255,255,255,0.72)", fontWeight: i>=4?600:400, lineHeight:1.75, marginBottom:14, fontFamily: i===co.lines.length-1 ? "'DM Serif Display',serif" : "inherit"}}>{line}</p>
@@ -361,19 +361,19 @@ function ColdOpen5({ coldOpen }) {
           );
         })}
       </div>
-      <div style={{display:"flex",justifyContent:"space-between",maxWidth:900,margin:"0 auto 30px",fontSize:10,fontFamily:"monospace",color:"rgba(255,255,255,0.35)",padding:"0 4px"}}>
+      <div style={{display:"flex",justifyContent:"space-between",maxWidth:900,margin:"0 auto 30px",fontSize:10,fontFamily:"monospace",color:"rgba(255,255,255,0.55)",padding:"0 4px"}}>
         <span>00:00 UTC</span><span>12:00 UTC</span><span>23:30 UTC</span>
       </div>
       <div style={{display:"flex",gap:24,justifyContent:"center",flexWrap:"wrap",maxWidth:900,margin:"0 auto 22px",fontFamily:"monospace",fontSize:11,color:"rgba(255,255,255,0.55)"}}>
         <span>{co.dayRangeLabel}: <b style={{color:"#fff"}}>{meta.day_range}</b></span>
         <span>{co.quietLabel}: <b style={{color:"#fff"}}>{meta.quiet_third_range}</b></span>
-        <span>{co.peakLabel}: <b style={{color:C.gold}}>{meta.peak_bar_range}</b></span>
-        <span>{co.ratioLabel}: <b style={{color:C.gold}}>×{meta.peak_vs_quiet}</b></span>
+        <span>{co.peakLabel}: <b style={{color:C.goldText}}>{meta.peak_bar_range}</b></span>
+        <span>{co.ratioLabel}: <b style={{color:C.goldText}}>×{meta.peak_vs_quiet}</b></span>
       </div>
-      <p style={{textAlign:"center",fontSize:11,color:"rgba(255,255,255,0.4)",fontStyle:"italic",marginBottom:20}}>
+      <p style={{textAlign:"center",fontSize:11,color:"rgba(255,255,255,0.55)",fontStyle:"italic",marginBottom:20}}>
         {meta["selection_note_" + INITIAL_LANG] || meta.selection_note_ru} · {meta.date} · {meta.days_considered && (INITIAL_LANG==="ru"?"из "+meta.days_considered+" полных суток":INITIAL_LANG==="ro"?"din "+meta.days_considered+" zile complete":"of "+meta.days_considered+" full days")}
       </p>
-      <p style={{textAlign:"center",fontFamily:"monospace",fontSize:12,color:C.gold}}>{co.cta}</p>
+      <p style={{textAlign:"center",fontFamily:"monospace",fontSize:12,color:C.goldText}}>{co.cta}</p>
     </div>
   );
 }
@@ -560,7 +560,7 @@ function HourStatsBlock({ hp, vars }) {
         )}
 
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:10}}>
-          <a href="/data/edu_stats/hourly_profile.csv" download style={{fontFamily:"monospace",fontSize:12,color:C.gold,textDecoration:"none",border:`1px solid ${C.gold}`,padding:"9px 16px",borderRadius:4}}>{hs.downloadCsv}</a>
+          <a href="/data/edu_stats/hourly_profile.csv" download style={{fontFamily:"monospace",fontSize:12,color:C.goldText,textDecoration:"none",border:`1px solid ${C.gold}`,padding:"9px 16px",borderRadius:4}}>{hs.downloadCsv}</a>
           <span style={{fontSize:10.5,color:C.inkFaint,fontFamily:"monospace"}}>{hs.buildNote}</span>
         </div>
       </>
@@ -660,7 +660,7 @@ function LiquidityGlobe({ hp }) {
   return (
     <div style={{background:C.black,borderRadius:8,padding:"32px 5vw",color:"#fff"}}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:10,marginBottom:20}}>
-        <Mono size={11} color={C.gold} spacing={3}>{gl.tag}</Mono>
+        <Mono size={11} color={C.goldText} spacing={3}>{gl.tag}</Mono>
         <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
           {ASSET_ORDER.filter(a => hp && hp[a]).map(a => (
             <button key={a} onClick={() => { setAsset(a); setTouring(false); }} style={{
@@ -682,7 +682,7 @@ function LiquidityGlobe({ hp }) {
             <div key={h} style={{flex:1,background:bandColor[sessionBand(h)],borderRight: h===hour ? "none" : "1px solid rgba(255,255,255,0.04)",position:"relative"}}/>
           ))}
         </div>
-        <div style={{display:"flex",justifyContent:"space-between",fontSize:9,fontFamily:"monospace",color:"rgba(255,255,255,0.3)",marginBottom:14}}>
+        <div style={{display:"flex",justifyContent:"space-between",fontSize:9,fontFamily:"monospace",color:"rgba(255,255,255,0.55)",marginBottom:14}}>
           <span>00</span><span>06</span><span>12</span><span>18</span><span>23</span>
         </div>
 
@@ -700,7 +700,7 @@ function LiquidityGlobe({ hp }) {
 
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:12,background:"rgba(255,255,255,0.05)",borderRadius:6,padding:"14px 18px",marginBottom:20}}>
           <div>
-            <Mono size={20} color={C.gold} spacing={0}>{String(hour).padStart(2,"0")}:00 UTC</Mono>
+            <Mono size={20} color={C.goldText} spacing={0}>{String(hour).padStart(2,"0")}:00 UTC</Mono>
             <div style={{fontSize:12,color:"rgba(255,255,255,0.55)",marginTop:4}}>
               {[sessionBand(hour)==="asia"||sessionBand(hour)==="" ? null : null].filter(Boolean)}
               {gl.sessionAsia}{(hour<7||hour>=21) ? " ●" : " ○"} · {gl.sessionLondon}{(hour>=7&&hour<16) ? " ●" : " ○"} · {gl.sessionNy}{(hour>=13&&hour<22) ? " ●" : " ○"}
@@ -709,7 +709,7 @@ function LiquidityGlobe({ hp }) {
           </div>
           <div style={{textAlign:"right"}}>
             <Mono size={20} color="#fff" spacing={0}>{avg[hour]!=null ? (avg[hour]*100).toFixed(1) : "—"}%</Mono>
-            <div style={{fontSize:10,color:"rgba(255,255,255,0.4)",fontFamily:"monospace"}}>{gl.barLabel}</div>
+            <div style={{fontSize:10,color:"rgba(255,255,255,0.55)",fontFamily:"monospace"}}>{gl.barLabel}</div>
           </div>
         </div>
 
@@ -718,14 +718,14 @@ function LiquidityGlobe({ hp }) {
         </button>
 
         <div style={{background:"rgba(255,255,255,0.04)",borderRadius:6,padding:"16px 20px",marginBottom:6}}>
-          <Mono size={10} color="rgba(255,255,255,0.4)" spacing={1} style={{display:"block",marginBottom:8,textTransform:"uppercase"}}>{gl.step2Intro}</Mono>
+          <Mono size={10} color="rgba(255,255,255,0.55)" spacing={1} style={{display:"block",marginBottom:8,textTransform:"uppercase"}}>{gl.step2Intro}</Mono>
           <p style={{fontSize:12.5,color:"rgba(255,255,255,0.65)",lineHeight:1.7,marginBottom:6}}>{fillTemplate(gl.step2Trough, {trough_hour:data.trough_hour, trough_share:data.trough_share})}</p>
           <p style={{fontSize:12.5,color:"rgba(255,255,255,0.65)",lineHeight:1.7,marginBottom:6}}>{fillTemplate(gl.step2Mid, {midHour: midHourLocal, midShare: midShareLocal})}</p>
           <p style={{fontSize:12.5,color:"rgba(255,255,255,0.65)",lineHeight:1.7}}>{fillTemplate(gl.step2Peak, {peak_hour:data.peak_hour, peak_share:data.peak_share, peak_ratio:data.peak_ratio})}</p>
         </div>
 
         <p style={{fontSize:12.5,color:"rgba(255,255,255,0.6)",lineHeight:1.7,marginTop:16,marginBottom:6}}>{gl.step3Task}</p>
-        <p style={{fontSize:12.5,color:C.gold,lineHeight:1.7,marginBottom:16,fontStyle:"italic"}}>{gl.step3Reveal}</p>
+        <p style={{fontSize:12.5,color:C.goldText,lineHeight:1.7,marginBottom:16,fontStyle:"italic"}}>{gl.step3Reveal}</p>
         <div style={{textAlign:"center",fontFamily:"'DM Serif Display',serif",fontStyle:"italic",fontSize:16,color:"#fff",paddingTop:16,borderTop:"1px solid rgba(255,255,255,0.1)"}}>{gl.finalPlate}</div>
       </>
       )}
@@ -760,7 +760,7 @@ function ThreeEngines({ vars }) {
         ))}
       </div>
       <div style={{background:C.black,borderRadius:8,padding:"28px 32px",color:"#fff"}}>
-        <Mono size={11} color={C.gold} spacing={2} style={{display:"block",marginBottom:12}}>{te.manipulation.tag}</Mono>
+        <Mono size={11} color={C.goldText} spacing={2} style={{display:"block",marginBottom:12}}>{te.manipulation.tag}</Mono>
         {te.manipulation.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:13,lineHeight:1.75,color:"rgba(255,255,255,0.75)",marginBottom:12}}>{p}</p>)}
       </div>
     </div>
@@ -786,7 +786,7 @@ function StopsSection() {
       <div style={{display:"flex",flexDirection:"column",gap:8,marginBottom:20}}>
         {st.conclusions.map((c,i) => (
           <div key={i} style={{display:"flex",gap:12,alignItems:"flex-start"}}>
-            <span style={{color:C.gold,fontFamily:"monospace",fontSize:11,marginTop:2}}>0{i+1}</span>
+            <span style={{color:C.goldText,fontFamily:"monospace",fontSize:11,marginTop:2}}>0{i+1}</span>
             <span style={{fontSize:13,color:C.inkMid,lineHeight:1.65}}>{c}</span>
           </div>
         ))}
@@ -831,7 +831,7 @@ function AmdHonestBlock({ as, vars }) {
           <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.75,marginBottom:10}}>{as ? fillTemplate(amd.checkResultIntro, vars) : "—"}</p>
           <p style={{fontSize:13.5,color:C.black,lineHeight:1.75,marginBottom:14,fontWeight:600}}>{as ? fillTemplate(amd.checkResultStats, vars) : "—"}</p>
           <div style={{background:"#fff",border:`1px solid ${C.borderGold}`,borderRadius:6,padding:"14px 18px",marginBottom:14}}>
-            <p style={{fontSize:13,color:C.gold,lineHeight:1.7,margin:0,fontWeight:600}}>{verdictText}</p>
+            <p style={{fontSize:13,color:C.goldText,lineHeight:1.7,margin:0,fontWeight:600}}>{verdictText}</p>
           </div>
           <p style={{fontSize:12.5,color:C.inkSoft,lineHeight:1.7,margin:0}}>{amd.checkResultOutro}</p>
         </div>
@@ -849,7 +849,7 @@ function SweepScene({ vars }) {
   const revealText = vars ? fillTemplate(sc.revealTemplate, vars) : "—";
   return (
     <div style={{marginBottom:56}}>
-      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{sc.tag}</Mono>
+      <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{sc.tag}</Mono>
       <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,marginBottom:14,maxWidth:760}}>{sc.legend}</p>
       <SceneMount url="/data/edu_scenes/ch5_london_sweep.json" mode="event" symbol="GOLD" copy={{
         question: sc.question, options: sc.options, revealText, nextMarker: null,
@@ -925,7 +925,7 @@ function AsiaBoxTrainer({ as }) {
     <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"32px 36px"}}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16,flexWrap:"wrap",gap:10}}>
         <div>
-          <Mono size={11} color={C.gold} spacing={2}>{tr.tag}</Mono>
+          <Mono size={11} color={C.goldText} spacing={2}>{tr.tag}</Mono>
           <div style={{fontFamily:"monospace",fontSize:12,color:C.inkSoft,marginTop:4}}>{fillTemplate(tr.dayCounter, {cur:idx+1, total:days.length})} · {tr.dateLabel}: {day.date}</div>
           {/* P2.2: "День 1 из 5" видно с первого экрана тренажёра, а честное
               объяснение "почему 5, а не 6 из спеки" раньше показывалось
@@ -1034,7 +1034,7 @@ function DstTrapBlock({ vars }) {
         if (!table) return;
         table.scrollIntoView({behavior:"smooth", block:"center"});
         if (window.SBFSessionTable) window.SBFSessionTable.setMode(table, "desync");
-      }} style={{display:"block",fontFamily:"monospace",fontSize:12.5,color:C.gold,background:"transparent",border:`1px solid ${C.gold}`,borderRadius:4,padding:"10px 16px",cursor:"pointer",marginBottom:16}}>
+      }} style={{display:"block",fontFamily:"monospace",fontSize:12.5,color:C.goldText,background:"transparent",border:`1px solid ${C.gold}`,borderRadius:4,padding:"10px 16px",cursor:"pointer",marginBottom:16}}>
         {d.seeTableLink}
       </button>
       <p style={{fontSize:11,color:C.inkFaint,fontStyle:"italic",marginTop:10,maxWidth:820}}>{d.calendarFootnote}</p>
@@ -1078,7 +1078,7 @@ function MyWindowBlock({ cfg, hp, vars }) {
   return (
     <div style={{marginBottom:48}}>
       <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"28px 32px"}}>
-        <Mono size={11} color={C.gold} spacing={2} style={{display:"block",marginBottom:14}}>{mw.askQuestion}</Mono>
+        <Mono size={11} color={C.goldText} spacing={2} style={{display:"block",marginBottom:14}}>{mw.askQuestion}</Mono>
         <div style={{display:"flex",gap:10,flexWrap:"wrap",marginBottom:24}}>
           {[["morning",mw.morningBtn],["evening",mw.eveningBtn],["night",mw.nightBtn]].map(([k,label]) => (
             <button key={k} onClick={() => { setArchetype(k); setSaved(false); }} style={{padding:"12px 20px",background:archetype===k?C.gold:"#fff",color:archetype===k?"#18181a":C.black,border:`1px solid ${archetype===k?C.gold:C.border}`,borderRadius:6,cursor:"pointer",fontSize:13,fontWeight:600}}>{label}</button>
@@ -1162,7 +1162,7 @@ function PredictHour({ vars }) {
   };
   return (
     <div id="secPredict" style={{border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px",marginTop:32,marginBottom:24}}>
-      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{p.tag}</Mono>
+      <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{p.tag}</Mono>
       <p style={{fontSize:14.5,color:C.black,lineHeight:1.65,marginBottom:4}}>{p.question}</p>
       <p style={{fontSize:11,color:C.inkFaint,marginBottom:14}}>{p.utcNote}</p>
       <div style={{display:"grid",gridTemplateColumns:"repeat(12,1fr)",gap:5,marginBottom:14,maxWidth:520}}>
@@ -1184,7 +1184,7 @@ function PredictHour({ vars }) {
         const template = close ? p.afterPickClose : p.afterPickFar;
         return (
           <p style={{fontSize:12.5,color:C.inkMid,lineHeight:1.7,marginBottom:10,background:C.goldPale,padding:"12px 16px",borderRadius:4}}>
-            {fillTemplate(template, {...vars, picked_hour: String(picked).padStart(2,"0"), hour_diff: dist})} <a href="#secHourStats" onClick={jumpToMap} style={{color:C.gold,fontWeight:700,whiteSpace:"nowrap"}}>{p.jumpToMapLink}</a>
+            {fillTemplate(template, {...vars, picked_hour: String(picked).padStart(2,"0"), hour_diff: dist})} <a href="#secHourStats" onClick={jumpToMap} style={{color:C.goldText,fontWeight:700,whiteSpace:"nowrap"}}>{p.jumpToMapLink}</a>
           </p>
         );
       })()}
@@ -1201,7 +1201,7 @@ function AntiMythBlock() {
   const [edge, setEdge] = useState(1);
   return (
     <div style={{marginBottom:48}}>
-      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{am.tag}</Mono>
+      <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{am.tag}</Mono>
       <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px"}}>
         <p style={{fontWeight:600,fontSize:14.5,color:C.black,marginBottom:16}}>{am.title}</p>
         <div style={{display:"flex",gap:6,marginBottom:16}}>
@@ -1229,19 +1229,19 @@ function VoiceAndPriceBlock({ vars }) {
 
   return (
     <div style={{marginBottom:48}}>
-      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{vs.tag}</Mono>
+      <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{vs.tag}</Mono>
       <div style={{borderLeft:`4px solid ${C.gold}`,paddingLeft:24,marginBottom:28}}>
         <p style={{fontSize:16,fontStyle:"italic",color:C.inkMid,lineHeight:1.7,fontFamily:"'DM Serif Display',serif",marginBottom:12}}>{paras[0]}</p>
         {expanded && paras.slice(1).map((pp,i) => <p key={i} style={{fontSize:16,fontStyle:"italic",color:C.inkMid,lineHeight:1.7,fontFamily:"'DM Serif Display',serif",marginBottom:12}}>{pp}</p>)}
         {paras.length > 1 && (
-          <button onClick={()=>setExpanded(e=>!e)} style={{background:"none",border:"none",color:C.gold,fontFamily:"monospace",fontSize:11,cursor:"pointer",padding:0,letterSpacing:0.5}}>
+          <button onClick={()=>setExpanded(e=>!e)} style={{background:"none",border:"none",color:C.goldText,fontFamily:"monospace",fontSize:11,cursor:"pointer",padding:0,letterSpacing:0.5}}>
             {expanded ? vs.readLessLabel : vs.readMoreLabel}
           </button>
         )}
       </div>
 
       <div style={{background:C.black,borderRadius:8,padding:"26px 30px",color:C.white}}>
-        <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{p.tag}</Mono>
+        <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{p.tag}</Mono>
         <div style={{fontFamily:"'DM Serif Display',serif",fontSize:20,color:C.white,marginBottom:12}}>{p.title}</div>
         {p.bodyIntro.split("\n\n").map((pp,i) => <p key={i} style={{fontSize:13.5,lineHeight:1.75,color:"rgba(255,255,255,0.7)",marginBottom:10}}>{vars ? fillTemplate(pp, vars) : pp}</p>)}
 
@@ -1249,22 +1249,22 @@ function VoiceAndPriceBlock({ vars }) {
           <p style={{fontSize:11.5,color:"rgba(255,255,255,0.5)",marginBottom:14}}>{p.calcIntro}</p>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:12,marginBottom:16}} className="g3">
             <div>
-              <Mono size={9.5} color="rgba(255,255,255,0.4)" spacing={0.5} style={{display:"block",marginBottom:5}}>{p.tradesLabel}</Mono>
+              <Mono size={9.5} color="rgba(255,255,255,0.55)" spacing={0.5} style={{display:"block",marginBottom:5}}>{p.tradesLabel}</Mono>
               <input type="number" value={trades} min="1" onChange={e=>setTrades(+e.target.value)} style={{width:"100%",padding:"8px 10px",background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.2)",borderRadius:4,color:"#fff",fontFamily:"monospace",fontSize:13}}/>
             </div>
             <div>
-              <Mono size={9.5} color="rgba(255,255,255,0.4)" spacing={0.5} style={{display:"block",marginBottom:5}}>{p.overpayLabel}</Mono>
+              <Mono size={9.5} color="rgba(255,255,255,0.55)" spacing={0.5} style={{display:"block",marginBottom:5}}>{p.overpayLabel}</Mono>
               <input type="number" value={overpay} step="0.1" min="0" onChange={e=>setOverpay(+e.target.value)} style={{width:"100%",padding:"8px 10px",background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.2)",borderRadius:4,color:"#fff",fontFamily:"monospace",fontSize:13}}/>
             </div>
             <div>
-              <Mono size={9.5} color="rgba(255,255,255,0.4)" spacing={0.5} style={{display:"block",marginBottom:5}}>{p.targetLabel}</Mono>
+              <Mono size={9.5} color="rgba(255,255,255,0.55)" spacing={0.5} style={{display:"block",marginBottom:5}}>{p.targetLabel}</Mono>
               <input type="number" value={target} min="1" onChange={e=>setTarget(+e.target.value)} style={{width:"100%",padding:"8px 10px",background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.2)",borderRadius:4,color:"#fff",fontFamily:"monospace",fontSize:13}}/>
             </div>
           </div>
           <div style={{textAlign:"center"}}>
-            <div style={{fontFamily:"'DM Serif Display',serif",fontSize:30,color:C.gold}}>{result.toFixed(1)}</div>
+            <div style={{fontFamily:"'DM Serif Display',serif",fontSize:30,color:C.goldText}}>{result.toFixed(1)}</div>
             <p style={{fontSize:12,color:"rgba(255,255,255,0.65)",marginTop:4,marginBottom:2}}>{p.resultLabel}</p>
-            <Mono size={10} color="rgba(255,255,255,0.4)" spacing={0}>{p.resultOfLabel(expected)}</Mono>
+            <Mono size={10} color="rgba(255,255,255,0.55)" spacing={0}>{p.resultOfLabel(expected)}</Mono>
           </div>
         </div>
 
@@ -1295,7 +1295,7 @@ function Chapter5() {
       {/* Sticky header */}
       <div style={{position:"sticky",top:106,background:"rgba(255,255,255,0.96)",backdropFilter:"blur(10px)",borderBottom:`1px solid ${C.border}`,padding:"15px 5vw",display:"flex",alignItems:"center",justifyContent:"space-between",zIndex:50}}>
         <div style={{display:"flex",alignItems:"center",gap:20}}>
-          <a href={getChUrl(4, lang)} aria-label={lang==="ru"?"Предыдущая глава":lang==="ro"?"Capitolul anterior":"Previous chapter"} style={{color:C.gold,cursor:"pointer",textDecoration:"none",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</a>
+          <a href={getChUrl(4, lang)} aria-label={lang==="ru"?"Предыдущая глава":lang==="ro"?"Capitolul anterior":"Previous chapter"} style={{color:C.goldText,cursor:"pointer",textDecoration:"none",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</a>
           <Chip>{S.levelChip}</Chip>
           <Mono size={14} color={C.inkSoft} spacing={0} className="hide-mobile">{S.chapterNameShort}</Mono>
         </div>
@@ -1309,17 +1309,17 @@ function Chapter5() {
       <div style={{background:C.black,padding:"80px 5vw 70px",textAlign:"center",position:"relative",overflow:"hidden"}}>
         <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 100%, rgba(201,151,58,0.1) 0%, transparent 60%)"}}/>
         <div style={{position:"relative"}}>
-          <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:20}}>{S.heroEyebrow}</Mono>
+          <Mono size={11} color={C.goldText} spacing={4} style={{display:"block",marginBottom:20}}>{S.heroEyebrow}</Mono>
           <h1 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(36px,6vw,66px)",fontWeight:400,color:C.white,lineHeight:1.05,marginBottom:20}}>
-            {S.heroTitleLine1}<br/><span style={{color:C.gold}}>{S.heroTitleLine2}</span>
+            {S.heroTitleLine1}<br/><span style={{color:C.goldText}}>{S.heroTitleLine2}</span>
           </h1>
           <p style={{fontSize:"clamp(16px,2vw,20px)",color:"rgba(255,255,255,0.55)",maxWidth:640,margin:"0 auto 32px",lineHeight:1.65}}>
             {S.heroSubtitle}
           </p>
           <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
-            <Chip color={C.gold}>{S.fundamentalChip}</Chip>
-            <Chip color="rgba(255,255,255,0.3)">{S.technicalChip}</Chip>
-            <Chip color="rgba(255,255,255,0.3)">{S.interactiveChip}</Chip>
+            <Chip color={C.goldText}>{S.fundamentalChip}</Chip>
+            <Chip color="rgba(255,255,255,0.55)">{S.technicalChip}</Chip>
+            <Chip color="rgba(255,255,255,0.55)">{S.interactiveChip}</Chip>
           </div>
         </div>
       </div>
@@ -1387,7 +1387,7 @@ function Chapter5() {
 
         {/* ── Контекст локали ── */}
         <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px",marginBottom:48}}>
-          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T5.localeContext.tag}</Mono>
+          <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{T5.localeContext.tag}</Mono>
           <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,margin:0,maxWidth:780}}>{(() => {
             const zoneGroup = cfg && window.SBFSessionTable ? localeZoneGroup(window.SBFSessionTable.guessZone(cfg)) : "moldova";
             const body = T5.localeContext.byZone[zoneGroup] || T5.localeContext.byZone.moldova;
@@ -1405,7 +1405,7 @@ function Chapter5() {
         <PredictHour vars={vars}/>
 
         <div style={{border:`1px dashed ${C.borderGold}`,borderRadius:8,padding:"20px 24px",marginBottom:32,background:C.surface}}>
-          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T5.cliffhanger.tag}</Mono>
+          <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{T5.cliffhanger.tag}</Mono>
           {T5.cliffhanger.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:14,color:C.inkMid,lineHeight:1.7,marginBottom:10}}>{p}</p>)}
         </div>
 
@@ -1434,7 +1434,7 @@ function Chapter5() {
               return (
                 <li>
                   {text}{" "}
-                  <a href="/data/edu_stats/hourly_profile.csv" download style={{color:C.gold}}>{T5.sources.csvLabel}</a>
+                  <a href="/data/edu_stats/hourly_profile.csv" download style={{color:C.goldText}}>{T5.sources.csvLabel}</a>
                 </li>
               );
             })()}

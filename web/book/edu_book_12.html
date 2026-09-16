@@ -226,7 +226,7 @@ function IntroBlock() {
       <AntiMythBlock lang={INITIAL_LANG} style={{marginBottom:28}}
         data={{tag: T.antiMyth.tag, title: T.antiMyth.title, bodies: [T.antiMyth.body1, T.antiMyth.body2, T.antiMyth.body3]}}/>
 
-      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T.voiceSbf.tag}</Mono>
+      <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{T.voiceSbf.tag}</Mono>
       <div style={{borderLeft:`4px solid ${C.gold}`,paddingLeft:24}}>
         {T.voiceSbf.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:16,fontStyle:"italic",color:C.inkMid,lineHeight:1.7,fontFamily:"'DM Serif Display',serif",marginBottom:12}}>{p}</p>)}
       </div>
@@ -241,11 +241,11 @@ function PriceOfNotKnowing12() {
   const pct = React.useMemo(() => binomAtLeast(10, 6, 0.5), []);
   return (
     <div id="secPriceOfNotKnowing" style={{marginBottom:48,scrollMarginTop:130}}>
-      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{p.tag}</Mono>
+      <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{p.tag}</Mono>
       <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.black,marginBottom:14}}>{p.title}</div>
       <p style={{fontSize:14,color:C.inkMid,lineHeight:1.75,marginBottom:20,maxWidth:800}}>{p.intro}</p>
       <div style={{background:C.black,borderRadius:8,padding:"22px 28px",color:"#fff",display:"flex",alignItems:"center",gap:24,flexWrap:"wrap",marginBottom:16}}>
-        <div style={{fontFamily:"'DM Serif Display',serif",fontSize:38,color:C.gold}}>{pct.toFixed(1)}%</div>
+        <div style={{fontFamily:"'DM Serif Display',serif",fontSize:38,color:C.goldText}}>{pct.toFixed(1)}%</div>
         <div style={{fontSize:13,color:"rgba(255,255,255,0.75)",lineHeight:1.6,maxWidth:520}}>{p.resultLabel}</div>
       </div>
       <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.75,marginBottom:14,maxWidth:800}}>{p.afterNumber}</p>
@@ -287,7 +287,7 @@ function IchimokuAnatomy() {
             <Mono size={11.5} color={ln.color} spacing={0} style={{display:"block",marginBottom:10}}>{ln.formula}</Mono>
             <p style={{fontSize:12.5,color:C.inkMid,lineHeight:1.65,margin:0}}>{ln.beg}</p>
             {open[ln.key] && <p style={{fontSize:12,color:C.inkSoft,lineHeight:1.65,marginTop:10,paddingTop:10,borderTop:`1px dashed ${C.border}`}}>{ln.pro}</p>}
-            <button onClick={()=>setOpen(o=>({...o,[ln.key]:!o[ln.key]}))} style={{marginTop:10,background:"none",border:"none",color:C.gold,fontFamily:"monospace",fontSize:10.5,cursor:"pointer",padding:0,letterSpacing:0.5}}>
+            <button onClick={()=>setOpen(o=>({...o,[ln.key]:!o[ln.key]}))} style={{marginTop:10,background:"none",border:"none",color:C.goldText,fontFamily:"monospace",fontSize:10.5,cursor:"pointer",padding:0,letterSpacing:0.5}}>
               {open[ln.key] ? "− PRO" : "+ PRO"}
             </button>
           </div>
@@ -434,7 +434,7 @@ function IchimokuLiveChart() {
   return (
     <div style={{background:C.black,borderRadius:6,padding:"24px 5vw 28px",marginBottom:32,overflow:"hidden"}}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:10,marginBottom:14}}>
-        <Mono size={11} color={C.gold} spacing={2}>{lc.tag}</Mono>
+        <Mono size={11} color={C.goldText} spacing={2}>{lc.tag}</Mono>
         <div style={{display:"flex",gap:6}}>
           {ICHIMOKU_SYMBOLS.map(s => (
             <button key={s} onClick={()=>setSymbol(s)} style={{fontFamily:"monospace",fontSize:10.5,padding:"5px 10px",cursor:"pointer",background:s===symbol?C.gold:"transparent",color:s===symbol?"#18181a":"rgba(255,255,255,0.6)",border:`1px solid ${s===symbol?C.gold:"rgba(255,255,255,0.2)"}`,borderRadius:3}}>{window.SBFSymbols ? window.SBFSymbols.symbolName(s, {lang: INITIAL_LANG, mode:"name+ticker"}) : s}</button>
@@ -445,7 +445,7 @@ function IchimokuLiveChart() {
         <div ref={containerRef} data-source={"/data/ohlc_" + symbol + "_D1.json"}/>
         {!full && (
           <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",pointerEvents:"none"}}>
-            <Mono size={11} color="rgba(255,255,255,0.4)" spacing={1}>{lc.loadingLabel}</Mono>
+            <Mono size={11} color="rgba(255,255,255,0.55)" spacing={1}>{lc.loadingLabel}</Mono>
           </div>
         )}
       </div>
@@ -458,7 +458,7 @@ function IchimokuLiveChart() {
         ))}
       </div>
       <p style={{fontSize:12,color:"rgba(255,255,255,0.5)",lineHeight:1.65,margin:0,maxWidth:680}}>{lc.caption}</p>
-      <a href={"/chart.html?s=" + symbol} target="_blank" rel="noopener" style={{fontFamily:"monospace",fontSize:11.5,color:C.gold,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`,marginTop:10,display:"inline-block"}}>
+      <a href={"/chart.html?s=" + symbol} target="_blank" rel="noopener" style={{fontFamily:"monospace",fontSize:11.5,color:C.goldText,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`,marginTop:10,display:"inline-block"}}>
         {(() => { const symLabel = window.SBFSymbols ? window.SBFSymbols.symbolName(symbol, {lang: INITIAL_LANG, mode:"name+ticker"}) : symbol; return INITIAL_LANG==="ru"?`Открыть ${symLabel} на графике →`:INITIAL_LANG==="ro"?`Deschide ${symLabel} pe grafic →`:`Open ${symLabel} on the chart →`; })()}
       </a>
     </div>
@@ -520,12 +520,12 @@ function ChikouTautology() {
           </div>
         </div>
         <div style={{textAlign:"center",marginBottom: reveal ? 12 : 0}}>
-          <button onClick={()=>setReveal(r=>!r)} style={{background:"none",border:`1px dashed ${C.borderGold}`,borderRadius:4,padding:"8px 18px",cursor:"pointer",fontFamily:"monospace",fontSize:10.5,color:C.gold,letterSpacing:0.5}}>{ct.demoChikouLabel}</button>
+          <button onClick={()=>setReveal(r=>!r)} style={{background:"none",border:`1px dashed ${C.borderGold}`,borderRadius:4,padding:"8px 18px",cursor:"pointer",fontFamily:"monospace",fontSize:10.5,color:C.goldText,letterSpacing:0.5}}>{ct.demoChikouLabel}</button>
         </div>
         {reveal && (
           <div style={{textAlign:"center",background:C.goldPale,border:`1px solid ${C.borderGold}`,borderRadius:6,padding:"12px 16px"}}>
             <div style={{fontFamily:"monospace",fontSize:20,color:C.black,marginBottom:4}}>4 079.50</div>
-            <Mono size={10} color={C.gold} spacing={0.5}>{ct.demoSame}</Mono>
+            <Mono size={10} color={C.goldText} spacing={0.5}>{ct.demoSame}</Mono>
           </div>
         )}
       </div>
@@ -592,7 +592,7 @@ function SampleSizeCalculator() {
           <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,marginBottom:16}}>{ss.step2Intro}</p>
           <div style={{display:"flex",gap:24,flexWrap:"wrap",justifyContent:"center",background:C.black,borderRadius:6,padding:"20px 24px",marginBottom:14}}>
             <div style={{textAlign:"center"}}>
-              <div style={{fontFamily:"'DM Serif Display',serif",fontSize:28,color:C.gold}}>{example.n}</div>
+              <div style={{fontFamily:"'DM Serif Display',serif",fontSize:28,color:C.goldText}}>{example.n}</div>
               <Mono size={9.5} color="rgba(255,255,255,0.5)" spacing={0.5}>{ss.step2NeededLabel}</Mono>
             </div>
             <div style={{textAlign:"center"}}>
@@ -633,7 +633,7 @@ function SampleSizeCalculator() {
             <React.Fragment>
               <div style={{display:"flex",gap:20,flexWrap:"wrap",justifyContent:"center",marginBottom:14}}>
                 <div style={{textAlign:"center",minWidth:140}}>
-                  <div style={{fontFamily:"'DM Serif Display',serif",fontSize:24,color:C.gold}}>{custom.n}</div>
+                  <div style={{fontFamily:"'DM Serif Display',serif",fontSize:24,color:C.goldText}}>{custom.n}</div>
                   <Mono size={9} color="rgba(255,255,255,0.5)" spacing={0.5}>{ss.resultNeededLabel}</Mono>
                 </div>
                 <div style={{textAlign:"center",minWidth:140}}>
@@ -682,7 +682,7 @@ function WhatFiftyShows({ progress, loading }) {
       <div style={{marginBottom:16}}>
         {w.items.map((it,i) => (
           <div key={i} style={{display:"flex",gap:10,marginBottom:10,alignItems:"flex-start"}}>
-            <Mono size={11} color={C.gold} spacing={0}>{i+1}</Mono>
+            <Mono size={11} color={C.goldText} spacing={0}>{i+1}</Mono>
             <p style={{fontSize:13,color:C.inkMid,lineHeight:1.65,margin:0}}>{it}</p>
           </div>
         ))}
@@ -747,7 +747,7 @@ function LadderStep7({ progress, loading, onChanged }) {
 
   return (
     <div id="secLadderStep7" style={{marginBottom:48,scrollMarginTop:130}}>
-      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:14}}>{l7.tag}</Mono>
+      <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:14}}>{l7.tag}</Mono>
       <p style={{fontSize:14,color:C.inkMid,lineHeight:1.78,marginBottom:12,maxWidth:800}}>{l7.limitParagraph1}</p>
       <p style={{fontSize:14,color:C.black,fontWeight:600,lineHeight:1.78,marginBottom:24,maxWidth:800}}>{l7.limitParagraph2}</p>
 
@@ -846,7 +846,7 @@ function SeriesCounter({ progress, loading, lang }) {
     /* Счётчик серии — это переход к нужному разделу, то есть управление.
        Был <div> с курсором: мышью работает, с клавиатуры нет. */
     <button type="button" onClick={scrollToStep7} title={S.seriesCounterGoto}
-      style={{cursor:"pointer",fontFamily:"monospace",fontSize:11.5,color:C.gold,background:"none",border:`1px solid ${C.borderGold}`,borderRadius:20,padding:"5px 14px",letterSpacing:0.5,whiteSpace:"nowrap"}}>
+      style={{cursor:"pointer",fontFamily:"monospace",fontSize:11.5,color:C.goldText,background:"none",border:`1px solid ${C.borderGold}`,borderRadius:20,padding:"5px 14px",letterSpacing:0.5,whiteSpace:"nowrap"}}>
     {label}
     </button>
   );
@@ -872,7 +872,7 @@ function Chapter12() {
 
       <div style={{position:"sticky",top:106,background:"rgba(255,255,255,0.96)",backdropFilter:"blur(10px)",borderBottom:`1px solid ${C.border}`,padding:"15px 5vw",display:"flex",alignItems:"center",justifyContent:"space-between",zIndex:50,gap:12,flexWrap:"wrap"}}>
         <div style={{display:"flex",alignItems:"center",gap:20}}>
-          <a href={getChUrl(11, lang)} aria-label={lang==="ru"?"Предыдущая глава":lang==="ro"?"Capitolul anterior":"Previous chapter"} style={{color:C.gold,cursor:"pointer",textDecoration:"none",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</a>
+          <a href={getChUrl(11, lang)} aria-label={lang==="ru"?"Предыдущая глава":lang==="ro"?"Capitolul anterior":"Previous chapter"} style={{color:C.goldText,cursor:"pointer",textDecoration:"none",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</a>
           <Chip>{S.levelChip}</Chip>
           <Mono size={14} color={C.inkSoft} spacing={0} className="hide-mobile">{S.chapterNameShort}</Mono>
         </div>
@@ -886,15 +886,15 @@ function Chapter12() {
       <div style={{background:C.black,padding:"80px 5vw 70px",textAlign:"center",position:"relative",overflow:"hidden"}}>
         <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 100%, rgba(201,151,58,0.1) 0%, transparent 60%)"}}/>
         <div style={{position:"relative"}}>
-          <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:20}}>{S.heroEyebrow}</Mono>
+          <Mono size={11} color={C.goldText} spacing={4} style={{display:"block",marginBottom:20}}>{S.heroEyebrow}</Mono>
           <h1 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(36px,6vw,66px)",fontWeight:400,color:C.white,lineHeight:1.05,marginBottom:20}}>
-            {S.heroTitleLine1}<br/><span style={{color:C.gold}}>{S.heroTitleLine2}</span>
+            {S.heroTitleLine1}<br/><span style={{color:C.goldText}}>{S.heroTitleLine2}</span>
           </h1>
           <p style={{fontSize:"clamp(16px,2vw,20px)",color:"rgba(255,255,255,0.55)",maxWidth:640,margin:"0 auto 32px",lineHeight:1.65}}>{S.heroSubtitle}</p>
           <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
-            <Chip color={C.gold}>{S.fundamentalChip}</Chip>
-            <Chip color="rgba(255,255,255,0.3)">{S.technicalChip}</Chip>
-            <Chip color="rgba(255,255,255,0.3)">{S.interactiveChip}</Chip>
+            <Chip color={C.goldText}>{S.fundamentalChip}</Chip>
+            <Chip color="rgba(255,255,255,0.55)">{S.technicalChip}</Chip>
+            <Chip color="rgba(255,255,255,0.55)">{S.interactiveChip}</Chip>
           </div>
         </div>
       </div>
@@ -941,12 +941,12 @@ function Chapter12() {
         }} />
 
         <div style={{border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px",marginTop:8,marginBottom:24}}>
-          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T.predict.tag}</Mono>
+          <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{T.predict.tag}</Mono>
           <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,margin:0}}>{T.predict.question}</p>
         </div>
 
         <div style={{border:`1px dashed ${C.borderGold}`,borderRadius:8,padding:"20px 24px",marginBottom:32,background:C.surface}}>
-          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T.cliffhanger.tag}</Mono>
+          <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{T.cliffhanger.tag}</Mono>
           {T.cliffhanger.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:14,color:C.inkMid,lineHeight:1.7,marginBottom:10}}>{p}</p>)}
         </div>
 

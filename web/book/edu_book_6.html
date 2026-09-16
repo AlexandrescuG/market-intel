@@ -211,7 +211,7 @@ function buildVars(stats, scene, lang) {
 function ColdStart6Entry({ scene }) {
   const T6 = window.Ch6Content[INITIAL_LANG] || window.Ch6Content.ru;
   const cs = T6.coldStart;
-  if (!scene) return <div style={{background:C.black,padding:"60px 5vw",textAlign:"center"}}><Mono size={11} color={C.gold} spacing={4}>{cs.tag}</Mono></div>;
+  if (!scene) return <div style={{background:C.black,padding:"60px 5vw",textAlign:"center"}}><Mono size={11} color={C.goldText} spacing={4}>{cs.tag}</Mono></div>;
   const meta = scene.meta;
   const candles = (scene.candles || []).map(c => ({ ...c, time: Math.floor(Date.parse(c.time) / 1000) }));
   const markerTime = Math.floor(Date.parse(meta.marker_time) / 1000);
@@ -273,13 +273,13 @@ function IntroBlock({ vars }) {
       <AntiMythBlock lang={INITIAL_LANG} style={{marginBottom:28}}
         data={{tag: T6.antiMyth.tag, title: T6.antiMyth.title, bodies: [vars ? fillTemplate(T6.antiMyth.body1, vars) : "—", vars ? fillTemplate(T6.antiMyth.body2, vars) : "—", T6.antiMyth.body3]}}/>
 
-      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T6.voiceSbf.tag}</Mono>
+      <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{T6.voiceSbf.tag}</Mono>
       <div style={{borderLeft:`4px solid ${C.gold}`,paddingLeft:24,marginBottom:28}}>
         {T6.voiceSbf.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:16,fontStyle:"italic",color:C.inkMid,lineHeight:1.7,fontFamily:"'DM Serif Display',serif",marginBottom:12}}>{p}</p>)}
       </div>
 
       <div style={{background:C.black,borderRadius:8,padding:"26px 30px",color:C.white}}>
-        <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T6.priceOfNotKnowing.tag}</Mono>
+        <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{T6.priceOfNotKnowing.tag}</Mono>
         <div style={{fontFamily:"'DM Serif Display',serif",fontSize:20,color:C.white,marginBottom:12}}>{T6.priceOfNotKnowing.title}</div>
         {/* Разбор открывается по шагам — см. комментарий в главе 9.
             Живые числа подставляются до передачи в компонент: fillTemplate
@@ -352,7 +352,7 @@ function SurpriseCalc({ stats, vars }) {
             </div>
             <div style={{display:"flex",justifyContent:"center",alignItems:"baseline",gap:14,marginBottom:10}}>
               <Mono size={13} color={C.inkSoft} spacing={1}>{sc.sliderLabel}: {b.from}σ{b.to?`–${b.to}σ`:"+"}</Mono>
-              <span style={{fontFamily:"'DM Serif Display',serif",fontSize:34,color:C.gold}}>{b.median_move != null ? b.median_move : "—"}</span>
+              <span style={{fontFamily:"'DM Serif Display',serif",fontSize:34,color:C.goldText}}>{b.median_move != null ? b.median_move : "—"}</span>
               <Mono size={11} color={C.inkFaint} spacing={0}>n={b.n}</Mono>
             </div>
             <p style={{fontSize:11.5,color:C.inkFaint,textAlign:"center",fontStyle:"italic",margin:0}}>{sc.step3Note}</p>
@@ -480,7 +480,7 @@ function CoreMeasureBlock({ stats, vars }) {
         <p style={{fontSize:12,color:C.inkMid,lineHeight:1.65,margin:0}}>{vars ? fillTemplate(cm.honestBody, vars) : "—"}</p>
       </div>
 
-      <a href="/data/edu_stats/surprise_reaction.json" download style={{fontFamily:"monospace",fontSize:12,color:C.gold,textDecoration:"none",border:`1px solid ${C.gold}`,padding:"9px 16px",borderRadius:4,display:"inline-block"}}>{cm.downloadCsv}</a>
+      <a href="/data/edu_stats/surprise_reaction.json" download style={{fontFamily:"monospace",fontSize:12,color:C.goldText,textDecoration:"none",border:`1px solid ${C.gold}`,padding:"9px 16px",borderRadius:4,display:"inline-block"}}>{cm.downloadCsv}</a>
     </div>
   );
 }
@@ -517,7 +517,7 @@ function ZeroSurpriseBlock() {
       <div style={{display:"flex",flexDirection:"column",gap:10,marginBottom:20}}>
         {[z.r1,z.r2,z.r3].map((r,i) => (
           <div key={i} style={{display:"flex",gap:12,alignItems:"flex-start"}}>
-            <span style={{color:C.gold,fontFamily:"monospace",fontSize:11,marginTop:2}}>0{i+1}</span>
+            <span style={{color:C.goldText,fontFamily:"monospace",fontSize:11,marginTop:2}}>0{i+1}</span>
             <span style={{fontSize:13,color:C.inkMid,lineHeight:1.65}}>{r}</span>
           </div>
         ))}
@@ -585,7 +585,7 @@ function ReleaseSimulatorV2({ stats }) {
       <div style={{background:"#fff",border:`1px solid ${C.border}`,borderRadius:6,padding:"14px 18px",marginBottom:20,display:"flex",gap:24,flexWrap:"wrap",fontFamily:"monospace",fontSize:12.5}}>
         <span>forecast: <b>{r.forecast}</b></span>
         <span>actual: <b>{r.actual}</b></span>
-        <span title={sim.sigmaTooltip}>σ: <b style={{color:C.gold}}>{r.surprise_sigma}</b></span>
+        <span title={sim.sigmaTooltip}>σ: <b style={{color:C.goldText}}>{r.surprise_sigma}</b></span>
       </div>
 
       {!revealed ? (
@@ -607,7 +607,7 @@ function ReleaseSimulatorV2({ stats }) {
       ) : (
         <>
           <div style={{background:C.goldPale,border:`1px solid ${C.borderGold}`,borderRadius:6,padding:"16px 20px",marginBottom:14}}>
-            <Mono size={20} color={C.gold} spacing={0}>{r.actual_move_30m}</Mono>
+            <Mono size={20} color={C.goldText} spacing={0}>{r.actual_move_30m}</Mono>
             <p style={{fontSize:12,color:C.inkMid,marginTop:8,marginBottom:0}}>{sim.revealPrefix}</p>
           </div>
           <button onClick={next} style={{padding:"12px 26px",background:C.black,color:"#fff",border:"none",borderRadius:4,cursor:"pointer",fontFamily:"monospace",fontSize:12,letterSpacing:1}}>{sim.nextBtn}</button>
@@ -649,7 +649,7 @@ function LiveCalendarStage() {
 
   return (
     <div style={{border:`1px solid ${C.borderGold}`,borderRadius:8,padding:"26px 30px",marginBottom:56,background:C.goldPale}}>
-      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:14}}>{ls.tag}</Mono>
+      <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:14}}>{ls.tag}</Mono>
       <p style={{fontWeight:600,fontSize:15,color:C.black,marginBottom:14}}>{ls.title}</p>
       {ls.body.map((p,i) => (
         <p key={i} style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,marginBottom:12}}>{fillTemplate(p, {next_nfp_date: dateLabel})}</p>
@@ -794,7 +794,7 @@ function SqueezeTrainer() {
     upperSeries.setData(bandSlice.map((b,i) => b ? { time: visible[i].time, value: b.upper } : null).filter(Boolean));
     lowerSeries.setData(bandSlice.map((b,i) => b ? { time: visible[i].time, value: b.lower } : null).filter(Boolean));
     if (revealed && candles) {
-      candleSeries.setMarkers([{ time: candles[squeezeIdx - 7].time, position: "aboveBar", color: C.gold, shape: "arrowDown", text: "SQUEEZE" }]);
+      candleSeries.setMarkers([{ time: candles[squeezeIdx - 7].time, position: "aboveBar", color: C.goldText, shape: "arrowDown", text: "SQUEEZE" }]);
     } else {
       candleSeries.setMarkers([]);
     }
@@ -829,7 +829,7 @@ function SqueezeTrainer() {
           <div ref={containerRef} data-source="/data/ohlc_GOLD_M30.json"/>
           {!revealed && (
             <div style={{position:"absolute",top:0,right:0,bottom:0,width:"22%",background:"rgba(19,23,34,0.92)",display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(2px)",pointerEvents:"none"}}>
-              <span style={{color:"rgba(255,255,255,0.4)",fontSize:12,fontFamily:"monospace",letterSpacing:1.5,textAlign:"center",padding:"0 8px"}}>{sq.futureHidden}</span>
+              <span style={{color:"rgba(255,255,255,0.55)",fontSize:12,fontFamily:"monospace",letterSpacing:1.5,textAlign:"center",padding:"0 8px"}}>{sq.futureHidden}</span>
             </div>
           )}
         </div>
@@ -842,7 +842,7 @@ function SqueezeTrainer() {
         )}
       </div>
       <p style={{fontSize:12,color:C.inkSoft,lineHeight:1.65,marginTop:14,fontStyle:"italic",maxWidth:780}}>{sq.calendarLink}</p>
-      <a href="/chart.html?s=GOLD" target="_blank" rel="noopener" style={{fontFamily:"monospace",fontSize:12,color:C.gold,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>
+      <a href="/chart.html?s=GOLD" target="_blank" rel="noopener" style={{fontFamily:"monospace",fontSize:12,color:C.goldText,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>
         {(() => { const symLabel = window.SBFSymbols ? window.SBFSymbols.symbolName("GOLD", {lang: INITIAL_LANG, mode:"name+ticker"}) : "GOLD"; return INITIAL_LANG==="ru"?`Открыть ${symLabel} на графике →`:INITIAL_LANG==="ro"?`Deschide ${symLabel} pe grafic →`:`Open ${symLabel} on the chart →`; })()}
       </a>
 
@@ -875,7 +875,7 @@ function Chapter6() {
 
       <div style={{position:"sticky",top:106,background:"rgba(255,255,255,0.96)",backdropFilter:"blur(10px)",borderBottom:`1px solid ${C.border}`,padding:"15px 5vw",display:"flex",alignItems:"center",justifyContent:"space-between",zIndex:50}}>
         <div style={{display:"flex",alignItems:"center",gap:20}}>
-          <a href={getChUrl(5, lang)} aria-label={lang==="ru"?"Предыдущая глава":lang==="ro"?"Capitolul anterior":"Previous chapter"} style={{color:C.gold,cursor:"pointer",textDecoration:"none",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</a>
+          <a href={getChUrl(5, lang)} aria-label={lang==="ru"?"Предыдущая глава":lang==="ro"?"Capitolul anterior":"Previous chapter"} style={{color:C.goldText,cursor:"pointer",textDecoration:"none",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</a>
           <Chip>{S.levelChip}</Chip>
           <Mono size={14} color={C.inkSoft} spacing={0} className="hide-mobile">{S.chapterNameShort}</Mono>
         </div>
@@ -888,15 +888,15 @@ function Chapter6() {
       <div style={{background:C.black,padding:"80px 5vw 70px",textAlign:"center",position:"relative",overflow:"hidden"}}>
         <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 100%, rgba(201,151,58,0.1) 0%, transparent 60%)"}}/>
         <div style={{position:"relative"}}>
-          <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:20}}>{S.heroEyebrow}</Mono>
+          <Mono size={11} color={C.goldText} spacing={4} style={{display:"block",marginBottom:20}}>{S.heroEyebrow}</Mono>
           <h1 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(36px,6vw,66px)",fontWeight:400,color:C.white,lineHeight:1.05,marginBottom:20}}>
-            {S.heroTitleLine1}<br/><span style={{color:C.gold}}>{S.heroTitleLine2}</span>
+            {S.heroTitleLine1}<br/><span style={{color:C.goldText}}>{S.heroTitleLine2}</span>
           </h1>
           <p style={{fontSize:"clamp(16px,2vw,20px)",color:"rgba(255,255,255,0.55)",maxWidth:640,margin:"0 auto 32px",lineHeight:1.65}}>{S.heroSubtitle}</p>
           <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
-            <Chip color={C.gold}>{S.fundamentalChip}</Chip>
-            <Chip color="rgba(255,255,255,0.3)">{S.technicalChip}</Chip>
-            <Chip color="rgba(255,255,255,0.3)">{S.interactiveChip}</Chip>
+            <Chip color={C.goldText}>{S.fundamentalChip}</Chip>
+            <Chip color="rgba(255,255,255,0.55)">{S.technicalChip}</Chip>
+            <Chip color="rgba(255,255,255,0.55)">{S.interactiveChip}</Chip>
           </div>
         </div>
       </div>
@@ -952,12 +952,12 @@ function Chapter6() {
         <Rule/>
 
         <div style={{marginBottom:40}}>
-          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:16,textAlign:"center"}}>{T6.takeaways.tag}</Mono>
+          <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:16,textAlign:"center"}}>{T6.takeaways.tag}</Mono>
           <h3 style={{fontFamily:"'DM Serif Display',serif",fontSize:22,fontWeight:400,color:C.black,textAlign:"center",marginBottom:24}}>{T6.takeaways.title}</h3>
           <div style={{display:"flex",flexDirection:"column",gap:10,maxWidth:820,margin:"0 auto"}}>
             {T6.takeaways.items.map((it,i) => (
               <div key={i} style={{display:"flex",gap:12,alignItems:"flex-start",background:C.surface,border:`1px solid ${C.border}`,borderRadius:6,padding:"12px 16px"}}>
-                <span style={{color:C.gold,fontFamily:"monospace",fontSize:11,marginTop:2}}>0{i+1}</span>
+                <span style={{color:C.goldText,fontFamily:"monospace",fontSize:11,marginTop:2}}>0{i+1}</span>
                 <span style={{fontSize:13,color:C.inkMid,lineHeight:1.6}}>{it}</span>
               </div>
             ))}
@@ -972,7 +972,7 @@ function Chapter6() {
         <PredictMagnitude/>
 
         <div style={{border:`1px dashed ${C.borderGold}`,borderRadius:8,padding:"20px 24px",marginBottom:32,background:C.surface}}>
-          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T6.cliffhanger.tag}</Mono>
+          <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{T6.cliffhanger.tag}</Mono>
           {T6.cliffhanger.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:14,color:C.inkMid,lineHeight:1.7,marginBottom:10}}>{p}</p>)}
         </div>
 
@@ -995,7 +995,7 @@ function Chapter6() {
               return (
                 <li>
                   {text}{" "}
-                  <a href="/data/edu_stats/surprise_reaction.csv" download style={{color:C.gold}}>{T6.sources.csvLabel}</a>
+                  <a href="/data/edu_stats/surprise_reaction.csv" download style={{color:C.goldText}}>{T6.sources.csvLabel}</a>
                 </li>
               );
             })()}
@@ -1031,7 +1031,7 @@ function PredictMagnitude() {
   const [picked, setPicked] = useState(null);
   return (
     <div style={{border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px",marginTop:8,marginBottom:24}}>
-      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{p.tag}</Mono>
+      <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{p.tag}</Mono>
       <p style={{fontSize:14.5,color:C.black,lineHeight:1.65,marginBottom:14}}>{p.question}</p>
       <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:14}}>
         {p.options.map((o,i) => (
