@@ -1,0 +1,101 @@
+<h2>CURSA</h2>
+<p>Ecranul așteaptă. Într-un moment aleatoriu, cifra va tresări — apasă butonul cât poți de repede.</p>
+<p>Reacția ta: {{ms}} ms. Reacția unui algoritm co-locat la bursă: circa 0.2 ms (200 microsecunde). Ești mai lent de {{ratio}} ori.</p>
+<p>A concura la viteză cu asta n-are sens — în continuare, unde viteza nu contează deloc.</p>
+<h2>ANTI-MIT</h2>
+<h2>Mitul de aici e cu două fețe, și ambele extreme deranjează diferit</h2>
+<p>Prima extremă: «roboții iau bani de la traderii privați». Fals mecanic pentru clientul retail de CFD, și mai jos explicăm de ce. Răul acestui mit nu stă în inexactitate, ci în faptul că elimină responsabilitatea: dacă pierderea e explicată printr-o forță invizibilă, n-ai ce calcula și n-ai ce schimba.</p>
+<p>A doua extremă: «tranzacționarea de mare frecvență e pur rău, trebuie interzisă». Tot o simplificare. O parte semnificativă dintre acești participanți îndeplinesc funcția de market maker: mențin cotații bilaterale și câștigă din diferență. Există studii care arată îngustarea spread-urilor odată cu apariția lor, și există lucrări despre costuri — precum arbitrajul de latență, unde câștigul unui participant e plătit de pierderea altuia. E un subiect controversat, cu literatură de ambele părți, și a-l prezenta ca rezolvat ar fi incorect.</p>
+<p>Adevărul, util cititorului: viteza contează acolo unde există o coadă publică de ordine. Clientul retail de CFD n-are o astfel de coadă. Costurile lui trăiesc în altă parte — în spread, comision, swap și calitatea execuției platformei sale. E mai plictisitor decât o conspirație și, spre deosebire de ea, poate fi măsurat.</p>
+<h2>VOCEA SBF</h2>
+<p>Roboții nu mănâncă tranzacțiile — se verifică prin aritmetică: spread-ul și comisionul pe tranzacții reale cântăresc aproape mereu mai mult decât orice influență imaginabilă a algoritmilor de microsecunde. La o platformă merită verificate trei lucruri: ce entitate juridică semnează contractul, spread-ul chiar în orele tale, nu cel din reclamă, și ce se întâmplă cu execuția la o publicație. Alegerea platformei e o chestiune de aritmetică, nu de confort: diferența de costuri pe o serie lungă e comparabilă cu diferența dintre o strategie profitabilă și una neprofitabilă.</p>
+<h2>PREȚUL NEȘTIINȚEI</h2>
+<h2>Singura mărime cunoscută dinainte</h2>
+<p>Introdu propriile cifre din terminal — nu sunt ale noastre, ci ale tale: nu putem încă compara platformele într-un singur loc (explicăm mai jos de ce), dar diferența o poți calcula singur chiar aici.</p>
+<p>Cost intrare+ieșire la platforma A (puncte)</p>
+<p>Cost intrare+ieșire la platforma B (puncte)</p>
+<p>Cea mai ieftină platformă nu e neapărat cea mai bună. Un spread mic poate veni la pachet cu execuție mai proastă la volatilitate, lipsa protecției la faliment sau o entitate juridică în afara unei jurisdicții cu fond de compensare. Tocmai de aceea comparația trebuie făcută pe mai multe coloane simultan.</p>
+<h2>DE CE EXISTĂ TRANZACȚIONAREA ÎN AFARA BURSEI</h2>
+<p>Continuare directă a capitolului 7. Un participant mare trebuie să execute un volum care va mișca prețul împotriva lui. Există două soluții: fragmentarea (capitolul 7) sau căutarea unei contrapărți în afara cărții deschise.</p>
+<p>Așa apar platformele unde ordinele nu sunt vizibile înainte de execuție. Sensul nu e ascunderea de dragul ascunderii, ci faptul că vizibilitatea unui ordin mare îi înrăutățește singură prețul.</p>
+<h2>Oferă</h2>
+<p>execuția unui volum mare fără impact imediat asupra prețului.</p>
+<h2>Costă</h2>
+<p>o parte din informația despre cerere și ofertă nu ajunge în prețul public, deci prețul public reflectă mai prost realitatea.</p>
+<p>E un compromis, nu o infracțiune. Reglementatorii limitează ponderea unei astfel de tranzacționări tocmai pentru că văd ambele fețe.</p>
+<h2>O cifră reală, cu sursă</h2>
+<p>Tranzacționarea în afara bursei a reprezentat circa 44–48% din volumul total de acțiuni din SUA în 2024–2025, conform datelor de transparență FINRA ATS; dacă numărăm strict doar „dark pools” (fără internalizarea fluxului retail de către market makeri) — circa 36–39%. Diferența dintre aceste două cifre e mai mare decât intervalul „35–40%” citat des, și nu e o greșeală de tipar, ci o consecință a faptului că termenii înseamnă lucruri diferite.</p>
+<p>Sursă: datele de transparență FINRA ATS, 2024–2025.</p>
+<h2>TRANZACȚIONAREA DE MARE FRECVENȚĂ: TREI FENOMENE DIFERITE</h2>
+<h2>⚡ Market making pe viteză</h2>
+<p>Menține cotații bilaterale, câștigă din diferență, le actualizează mai repede decât oamenii. Legal, e o meserie. Consecința practică pentru toți — spread-uri mai înguste în perioadele liniștite și dispariția lor în momente de incertitudine (capitolul 4 și capitolul 6: ordinele se retrag înaintea unei publicații).</p>
+<h2>🏁 Arbitrajul de latență</h2>
+<p>Folosirea faptului că aceeași informație ajunge la platforme diferite nu simultan. Legal, dar controversat: câștigul de aici e plătit de pierderea participantului mai lent. Exact despre asta e disputa din literatură, și exact pentru asta se construiesc cabluri și se instalează servere lângă bursă.</p>
+<h2>🚫 Front-running</h2>
+<p>Executarea propriei tranzacții înaintea unui ordin de client, cunoscut datorită poziției de serviciu. O infracțiune. N-are legătură cu tranzacționarea de mare frecvență ca atare: e vorba despre abuz de acces, nu despre viteză.</p>
+<p>Primele două sunt moduri de lucru, al treilea e o încălcare. Amestecarea lor sub un singur cuvânt e comod pentru dramatism și dăunător pentru înțelegere. În ediția anterioară a acestui capitol, propriul nostru interactiv se numea „Simulatorul de front-running” și arăta interceptarea ordinului cititorului. L-am rescris: în primul rând, pentru că e o afirmație despre acțiuni ilegale pe care nu le-am dovedit; în al doilea rând, pentru că acest mecanism nu se aplică unui ordin retail — de ce, explicăm chiar acum.</p>
+<p>Estimările ponderii tranzacționării de mare frecvență în volumul pieței de acțiuni din SUA diferă între cercetători, dar converg în jurul a 50% la mijlocul anilor 2020 — o creștere de la circa 26% în 2006 și circa 61% în 2009 (vârf post-criză, de atunci estimările oscilează). Dispersia reflectă definiții diferite ale unui participant „de mare frecvență”, nu o eroare de măsurare.</p>
+<h2>UNDE EȘTI TU ÎN ACEASTĂ IMAGINE</h2>
+<p>Tot ce e descris mai sus se întâmplă acolo unde există o coadă publică de ordine: la bursele de acțiuni, futures, opțiuni. Viteza contează pentru că există o coadă în care poți intra mai devreme.</p>
+<p>Acum uită-te la propria ta tranzacție. Tranzacționezi CFD sau forex spot la o platformă. Ordinul tău nu ajunge în nicio coadă bursieră: se execută intern — împotriva cărții platformei înseși sau la furnizorul ei de lichiditate. Nu există o coadă publică pe niciun segment al acestui traseu.</p>
+<p>De aici rezultă un lucru simplu: un participant de mare frecvență din New Jersey nu-ți vede fizic ordinul și nu poate face nimic cu el. Nu pentru că ești prea mic, ci pentru că vă aflați în sisteme diferite.</p>
+<p>E o veste proastă pentru mitologie și una bună pentru tine. Proastă — pentru că dispare explicația comodă a pierderilor. Bună — pentru că adevăratul intermediar din lanțul tău e unul singur, e cunoscut pe nume, condițiile lui sunt publicate, și poate fi ales. Cu algoritmii din New Jersey n-aveai ce face.</p>
+<h2>TRASEUL ORDINULUI TĂU</h2>
+<p>Acum urmărim traseul unei tranzacții de la apăsarea butonului până la contraparte. O precizare din start: traseul exact depinde de platformă și de tipul de cont, și nimeni nu publică imaginea completă. Arătăm o schemă tipică și marcăm cinstit segmentele despre care nu se știe nimic din exterior.</p>
+<p>Nu se publică — despre acest nod nu se știe nimic din exterior</p>
+<p>Valorile sunt tipice, nu o măsurătoare de-a noastră: întârzierea până la serverul platformei o măsoară doar platforma, iar aceste cifre nu sunt publicate de nimeni. Propria întârziere o vezi în raportul de execuție al brokerului — cu ea compară aceste ordine de mărime.</p>
+<p>Legătură cu capitolul 6: ordinele se retrag înaintea unei publicații, și nu e o conspirație împotriva clientului, ci comportamentul furnizorului de lichiditate.</p>
+<p>Niciun algoritm de microsecunde nu apare în această schemă. În schimb, există două segmente unde costul tău e real și măsurabil — și ambele țin de platformă, nu de piață.</p>
+<h2>A-BOOK, B-BOOK ȘI CONFLICTUL DE INTERESE</h2>
+<p>O platformă poate trata tranzacția ta în două moduri.</p>
+<h2>S-o trimită la un furnizor extern de lichiditate (A-book)</h2>
+<p>Atunci câștigă din comision și adaosul la spread, iar venitul ei nu depinde de faptul că ai câștigat sau ai pierdut.</p>
+<h2>S-o păstreze la ea (B-book)</h2>
+<p>Atunci ea e cealaltă parte a tranzacției tale. Pierderea ta devine venitul ei, iar profitul tău — cheltuiala ei.</p>
+<p>A doua variantă e adesea descrisă ca înșelăciune. Nu e așa: o parte semnificativă a fluxului retail e procesată intern la majoritatea platformelor din lume, pentru că a trimite în afară fiecare tranzacție mică e mai scump decât nettingul lor între ele. Modelul e legal și e dezvăluit în documente. Problema nu stă în existența lui, ci în conflictul de interese pe care-l creează și pe care clientul ar trebui să-l înțeleagă.</p>
+<h2>Ce rezultă practic din asta</h2>
+<h2>Despre noi</h2>
+<p>Stăm și noi în acest lanț. SBF primește o recompensă de la platforme — un procent din comisionul lor, cât timp clientul tranzacționează. Zero, dacă nu tranzacționează; zero, dacă și-a pierdut contul și a plecat. Spunem asta aici, nu la final: într-un capitol despre intermediari, a tăcea despre propriul rol ar însemna exact ceea ce capitolul te învață să nu ai încredere.</p>
+<p>Cerința de a publica ponderea clienților CFD care pierd bani a fost introdusă de reglementatorul european ESMA ca parte a măsurilor de protecție a investitorilor retail — cifra se recalculează trimestrial pentru ultimele 12 luni și trebuie să apară în avertismentul standard de risc al fiecărui furnizor.</p>
+<h2>Repartizează pe modele</h2>
+<p>Șase afirmații. În care model este adevărată fiecare?</p>
+<p>Ordinul a plecat către un furnizor extern de lichiditate.</p>
+<p>Platforma câștigă din comision și din adaosul la spread, iar rezultatul tău nu o afectează.</p>
+<p>Platforma compensează intern tranzacția ta cu cea a altui client.</p>
+<p>Platforma este contrapartea tranzacției tale.</p>
+<p>Venitul platformei nu depinde de rezultatul tău.</p>
+<h2>CE SĂ MĂSORI SINGUR</h2>
+<p>Cincisprezece minute în terminal, și vei ști despre platforma ta mai mult decât oferă orice recenzie.</p>
+<h2>1 · Spread-ul în orele tale</h2>
+<p>Nu cel din reclamă și nici cel din suprapunerea sesiunilor, ci cel din momentul în care tranzacționezi tu (capitolul 5, fereastra ta). Notează trei măsurători în zile diferite.</p>
+<h2>2 · Spread-ul la o publicație</h2>
+<p>Cu un minut înainte de publicarea din calendar și la un minut după (capitolul 6). Diferența e ce plătești pentru a intra în acel moment.</p>
+<h2>3 · Slippage</h2>
+<p>Compară prețul din ordin cu prețul de execuție la câteva ordine de piață. Se vede și pe demo.</p>
+<h2>4 · Swap</h2>
+<p>Cât costă transferul unei poziții peste noapte și peste miercuri. Adesea se dovedește costul principal la cei care țin pozițiile mult timp.</p>
+<p>Notează în jurnal. În capitolul 14 vom calcula cât costă asta pe o serie de tranzacții, și acolo va fi nevoie de cifrele tale, nu de ale noastre.</p>
+<p>De câte ori e mai larg spread-ul la publicare</p>
+<p>Tocmai ai văzut că adevărata ta contraparte nu e o piață abstractă, ci o companie concretă cu un model de venit concret. Următoarea întrebare logică e: care anume, și prin ce diferă între ele.</p><p>Mai jos — trei platforme dintre cele cu care lucrăm, sortate după procentul de conturi care pierd: mai puțin înseamnă mai sus. Cifra nu e a noastră, o publică brokerul însuși la cererea reglementatorului; pe card se vede data preluării și linkul spre sursă. Entitatea juridică și levierul depind de țara ta — plafonul îl dă jurisdicția, nu brokerul.</p>
+<p>Comparația platformelor nu s-a încărcat — datele sunt în /brokers, unde e și tabelul complet.</p>
+<p>Un algoritm de mare frecvență de pe o bursă din SUA îți poate intercepta ordinul CFD?</p>
+<p>Nu — ordinul tău nu ajunge într-o coadă bursieră, se execută intern la platformă</p>
+<p>Corect. Tu și participantul de mare frecvență vă aflați în sisteme diferite.</p>
+<p>Nu chiar. Un ordin retail de CFD n-are deloc drum spre coada bursieră — n-are ce fi interceptat acolo.</p>
+<p>Prin ce diferă front-running-ul de arbitrajul de latență?</p>
+<p>Primul e o încălcare (folosirea cunoașterii unui ordin de client), al doilea e folosirea legală a vitezei diferite de livrare a informației</p>
+<p>Corect. Amestecarea lor sub un cuvânt e dăunătoare pentru înțelegere.</p>
+<p>Nu chiar. Front-running-ul e abuz de acces la ordinul altcuiva; arbitrajul de latență e viteză legală.</p>
+<p>De ce se execută un participant mare în afara cărții deschise?</p>
+<p>Vizibilitatea unui ordin mare îi înrăutățește singură prețul</p>
+<p>Corect — capitolul 7, dus până la capăt aici.</p>
+<p>Nu chiar. Capitolul 7: vizibilitatea unui volum mare înainte de execuție îi înrăutățește propriul preț — asta e tot motivul.</p>
+<p>De ce se lărgește spread-ul în momentul publicării datelor?</p>
+<p>Furnizorul de lichiditate își retrage ordinele, necunoscând cifra care urmează</p>
+<p>Nu chiar. Furnizorul de lichiditate nu cunoaște valoarea viitoare și se protejează lărgind spread-ul (capitolul 6).</p>
+<h2>PREDICȚIA SĂPTĂMÂNII</h2>
+<p>Cât de mult crezi că poate diferi procentul de clienți care pierd bani între platforme diferite, la același tip de produs?</p>
+<p>+15 XP pentru participare. Despre un fapt, nu despre preț.</p>
+<h2>CLIFFHANGER → CAPITOLUL 12</h2>
+<p>Ai ales unde să stai. A rămas să înțelegi ce să faci, și aici cursul trece de la structura pieței la structura deciziei.</p><p>Episodul următor — despre școala japoneză și un indicator care arată ca un haos de cinci linii și un nor. Vom analiza de ce e construit exact așa, și în același timp vom închide o întrebare rămasă deschisă din capitolul 8: dacă parametrii aleși pe istoric nu se transferă în viitor, atunci de unde vin cifrele din indicatori și ce faci cu ele.</p><p>Și tot acolo va fi o aritmetică neplăcută. Ca să vorbești concret despre propria ta tranzacționare, ai nevoie de o serie. Nu trei tranzacții, nici zece — la un asemenea eșantion nu poți distinge priceperea de noroc nici măcar teoretic. Vom calcula de câte ai nevoie, și cifra nu-ți va plăcea.</p>
+<h2>SURSELE CAPITOLULUI</h2>

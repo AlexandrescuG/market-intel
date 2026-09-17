@@ -1,0 +1,91 @@
+<h2>CARE MEDIE MOBILĂ E MAI BUNĂ</h2>
+<p>Trei perioade de medie mobilă. Alege care, după tine, e mai des profitabilă în afara eșantionului — înainte să vezi vreun grafic.</p>
+<p>În afara eșantionului, pe {{n_total}} combinații la 15 instrumente: perioada 20 — profitabilă în {{p20}}% din cazuri (n={{n20}}), 50 — în {{p50}}% (n={{n50}}), 200 — în {{p200}}% (n={{n200}}). Diferența dintre perioadele „corecte” e mai mică decât pare.</p>
+<p>În continuare — de unde vine siguranța privind perioada „ideală”, și ce se întâmplă cu ea pe date pe care indicatorul nu le-a văzut.</p>
+<h2>ANTI-MIT</h2>
+<h2>„Există setări corecte, iar profesioniștii le cunosc”</h2>
+<p>Din el cresc combinațiile „de aur”: 9/21 pentru scalping, 50/200 pentru investitor, 20 pentru orice altceva. Cifrele sunt transmise ca o cunoaștere, deși niciuna nu e dedusă — s-au fixat istoric, pentru că se potriveau comod cu calendarul: 20 de zile de tranzacționare într-o lună, 50 — un trimestru, 200 — un an.</p>
+<p>Se verifică într-un singur ecran, și te lăsăm să verifici singur (mai jos). Rezultatul e cunoscut dinainte și nu e în favoarea noastră ca vânzător: cea mai bună perioadă pe orice porțiune de istoric se găsește întotdeauna, iar pe porțiunea următoare nu mai e cea mai bună. Nu „uneori” — sistematic, și mai jos arătăm cât de mult.</p>
+<p>Extrema opusă a mitului e la fel de dăunătoare: „indicatorii nu funcționează, e doar desen”. Nici asta nu e adevărat. Media mobilă face cinstit exact ce promite: mediază. Problema nu e în instrument, ci în faptul că se așteaptă de la el o predicție pe care formula lui n-o conține.</p>
+<h2>VOCEA SBF</h2>
+<p>Ținem pe grafic o singură medie mobilă. Răspunde la o singură întrebare: prețul e peste sau sub media lui pe orizontul ales. Perioada nu se alege prin optimizare, ci după durata tipică a unei tranzacții. Parametrii aleși pe istoric încetează să funcționeze cam atunci când începi să ai încredere în ei.</p>
+<h2>PREȚUL NEȘTIINȚEI</h2>
+<h2>Aritmetica unei setări străine</h2>
+<p>Cineva ia o combinație gata făcută dintr-un clip — să zicem, EMA 8 și 20 — și tranzacționează după intersecții pe graficul orar. Într-o lună se adună câteva zeci de intersecții: mediile rapide pe orar se intersectează des, e o proprietate a setării, nu a pieței.</p><p>Calculăm costul, fără să ghicim rezultatul. Spread-ul și comisionul la aur dau împreună {{cost_per_trade}} puncte pe tranzacție — e măsurabil, cifra există în terminal. La {{crosses_per_month}} intersecții pe lună (măsurătoarea noastră pentru această pereche de perioade pe acest timeframe), plătește {{monthly_cost}} puncte pe lună doar pentru dreptul de a urma semnalele, înainte de orice discuție despre dacă sunt profitabile sau nu.</p><p>Mai departe se întâmplă previzibilul: o serie de intersecții false într-o piață laterală, omul decide că setările sunt „prea rapide”, trece la 21/50, nimerește într-un alt regim de piață, revine. Fiecare schimbare e o potrivire pe ultima lună, adică aceeași greșeală ca în laboratorul de mai jos, doar întinsă în timp și plătită în bani.</p><p>A doua jumătate, onestă: nu e vorba că 8/20 e o combinație proastă. E vorba că e străină. Numărul de intersecții, costul pe tranzacție și dacă apuci întoarcerea mediei depind de instrument și de orizontul tău — și toate astea se calculează în cincisprezece minute pe propriul tău grafic. Exact asta te vom ruga să faci la finalul capitolului.</p>
+<h2>CE ESTE MEDIA MOBILĂ</h2>
+<p>k = 2 / (perioadă + 1) — coeficientul cu care o bară nouă intră în medie. Cu cât perioada e mai mică, cu atât k e mai mare, cu atât EMA reacționează mai repede la prețul proaspăt.</p>
+<h2>Media nu conține informație care nu e deja în preț</h2>
+<p>E o transformare a unor cifre deja cunoscute: adunate, ponderate, împărțite. Nu apare nicio informație nouă în rezultat — apare confortul citirii. Tot ce „arată” indicatorul era deja pe grafic; el doar a eliminat o parte din detalii, ca restul să devină mai vizibil.</p>
+<h2>O regulă valabilă pentru toate capitolele următoare</h2>
+<p>Un indicator nu poate ști mai mult decât prețul din care e calculat. Dacă cineva afirmă contrariul, nu vorbește despre aritmetică.</p>
+<h2>ÎNTÂRZIEREA NU E UN DEFECT, E UN PREȚ</h2>
+<p>Orice netezire plătește printr-o întârziere. Cu cât perioada e mai lungă, cu atât mai puține oscilații false și cu atât mai târziu reacționează media la o întoarcere reală. Nu e „un neajuns al EMA, corectat în alți indicatori” — e o proprietate a operației de mediere în sine, și nu poate fi ocolită, poți doar alege un punct pe scală.</p>
+<p>Alegerea punctului pe această scală depinde de cât timp ții poziția — și de nimic altceva.</p>
+<h2>LABORATORUL DE SUPRAOPTIMIZARE</h2>
+<p>ECRANUL 1 · GĂSEȘTE CELE MAI BUNE SETĂRI</p>
+<p>Mișcă glisoarele EMA rapidă și lentă. Trei cifre se actualizează: ponderea barelor unde mișcarea a coincis cu direcția poziției, mișcarea totală în puncte după scăderea costurilor (în fracțiuni de ATR), drawdown-ul maxim.</p>
+<p>Ponderea mișcărilor în direcția semnalului</p>
+<p>ECRANUL 2 · SĂ VERIFICĂM PE DATE PE CARE NU LE-AI VĂZUT</p>
+<h2>Ce s-a întâmplat acum se numește supraoptimizare, și e cea mai frecventă greșeală în analiza piețelor</h2>
+<p>Ai ales parametri pentru o bucată concretă din trecut. Nu pentru piață — pentru acel interval. Pe el, combinația ta a fost într-adevăr cea mai bună: {{is_result}}. Pe intervalul următor, a ocupat locul {{oos_rank}} din {{grid_size}} posibile, rezultat — {{oos_result}}.</p><p>Nu ai greșit în alegere. Alegerea a fost făcută corect. Greșeala e în însăși formularea problemei: ai căutat o cifră care descrie trecutul și intenționai s-o aplici viitorului.</p><p>Și iată ce merită să reții din acest ecran. Tot ce ai văzut pe internet — „cifrele ideale de EMA pentru aur”, „parametri infailibili pentru scalping” — a fost obținut exact prin aceeași metodă prin care tocmai le-ai obținut pe ale tale. Diferența e una: ție ți-am arătat al doilea ecran, iar acolo de obicei nu există.</p><p>Dacă vrei, încearcă din nou cu alte setări — rezultatul va fi în esență același. Nu e eșantionul nostru și nici trucul nostru: încearcă pe alt instrument, pe alt timeframe, pe altă jumătate de istoric.</p>
+<p>Acesta e un model educațional pentru a demonstra supraoptimizarea, nu un sistem de tranzacționare. Nu publicăm strategii și nu recomandăm parametri.</p>
+<p>Pe jumătatea de verificare (out-of-sample)</p>
+<h2>«MĂSURĂTORILE NOASTRE» — CE S-A ÎNTÂMPLAT CU CEI MAI BUNI PARAMETRI</h2>
+<p>Tu ai verificat pe un instrument. Noi am verificat pe toate câte le avem — {{n_cells}} combinații instrument×timeframe, o grilă de {{grid_size}} perechi de perioade. Rezultatul mai jos, codul și exportul — tot acolo.</p>
+<h2>Metodă fixată înainte de calcul</h2>
+<p>Istoricul fiecărui instrument e împărțit în jumătate. Pe prima jumătate se parcurge întreaga grilă de perechi de perioade și se alege cea mai bună după mișcarea totală după scăderea costurilor. Apoi aceeași pereche — și numai ea — e rulată pe a doua jumătate. Se înregistrează locul ei în clasamentul tuturor perechilor pe a doua jumătate.</p>
+<h2>1 · Cea mai bună pereche pe prima jumătate sistematic nu e cea mai bună pe a doua</h2>
+<p>Locul median — {{median_oos_rank}} din {{grid_size}} (percentila {{median_percentile}}). {{verdict_line}} Dacă parametrii ar purta informație despre viitor, locurile ar rămâne aproape de vârful clasamentului.</p>
+<h2>2 · Rezultatul e împrăștiat pe tot intervalul — de la aproape cel mai bun la aproape cel mai rău</h2>
+<p>Percentila locului perechii „ideale” de pe prima jumătate, pe a doua jumătate: minim {{pct_min}}, mediana {{pct_median}}, maxim {{pct_max}}. Jumătate din toate cazurile (percentila 25 – 75) se încadrează în intervalul {{pct_p25}}–{{pct_p75}}. Aceeași procedură de alegere a dat uneori un rezultat aproape cel mai bun, alteori aproape cel mai rău — nu se poate distinge dinainte care va ieși.</p>
+<h2>3 · Perioadele lungi sunt mai stabile decât cele scurte? Nu clar</h2>
+<p>Ne așteptam aici la o concluzie practică clară, iar datele n-au confirmat-o fără echivoc. După ponderea perechilor rămase pe plus pe jumătatea de verificare, perioadele lungi (EMA lentă ≥ 100) sunt puțin mai bune decât cele scurte: {{net_positive_long}}% față de {{net_positive_short}}%. Dar după locul în clasamentul general — e invers: mediana {{rank_long}} față de {{rank_short}} din {{grid_size}} (mai mic — mai bine). N-am potrivit aceste două cifre pe aceeași poveste — chiar diverg. Concluzia practică nu e „alege o perioadă mai lungă”, ci aceeași de la începutul capitolului: lungimea perioadei în sine nu salvează de supraoptimizare, salvează doar verificarea pe date pe care nu le-ai văzut.</p>
+<p>Practic nu există stabilitate — corespunde unei distribuții aleatorii a locurilor în clasament.</p>
+<p>Există o stabilitate slabă, dar insuficientă pentru o setare gata făcută.</p>
+<p>Stabilitatea e mai vizibilă decât ne așteptam — dar tot verifică pe datele tale, nu lua o cifră gata făcută.</p>
+<h2>Placa onestă</h2>
+<p>Ce e măsurat aici: regula mecanică a intersecției a două medii, cu un cost fix pe tranzacție ({{cost_per_trade_atr}} din ATR pe schimbare de poziție). Ce nu e aici: contextul — știri, sesiune, regimul pieței, managementul poziției. Am verificat regula de una singură, pentru că exact așa se vinde. Un sistem de tranzacționare adevărat nu constă din parametri. Grila noastră — {{grid_size}} perechi pe {{n_cells}} combinații instrument×timeframe, și nu e infinit: pe un istoric mai lung cifrele se vor schimba, și le vom recalcula.</p>
+<p>cea mai bună pe prima jumătate (rapidă/lentă)</p>
+<h2>PENTRU CE E CU ADEVĂRAT BUNĂ MEDIA MOBILĂ</h2>
+<h2>📐 O definiție, nu o prognoză</h2>
+<p>„Trend ascendent” e vag și se schimbă în funcție de dispoziție. „Prețul e peste media pe N perioade” e aritmetică, identică ieri și azi. Valoarea mediei stă în faptul că fixează o definiție și nu te lasă să te contrazici retroactiv. E disciplină, nu predicție.</p>
+<h2>🔍 Descrierea regimului</h2>
+<p>Distanța prețului față de medie și panta mediei descriu în ce stare se află instrumentul acum: s-a îndepărtat mult sau oscilează în jur. E context pentru tot restul — inclusiv pentru ce predau capitolele următoare. O descriere a prezentului, nu a viitorului.</p>
+<h2>🗣 Un limbaj comun</h2>
+<p>Când doi oameni spun „prețul e sub două sute”, se înțeleg fără echivoc. E singurul motiv pentru care merită să știi despre 50 și 200: nu pentru că cifrele sunt speciale, ci pentru că mulți se uită la ele, iar conversația devine posibilă.</p>
+<h2>Ce NU face media mobilă</h2>
+<h2>TREAPTA 3 — PROPRIUL INDICATOR ȘI LEGAREA JURNALULUI</h2>
+<p>Tocmai ai ales parametri și ai văzut ce s-a întâmplat cu ei pe date pe care nu le-ai văzut. A rămas o întrebare la care acest laborator nu poate răspunde, și e singura care contează: ce se va întâmpla cu setările tale pe instrumentul tău, înainte.</p><p>Verificarea pe trecut e mereu o verificare pe ceva ce s-a întâmplat deja; tocmai am arătat cât valorează. Singura verificare onestă e înainte, și necesită două lucruri: un grafic configurat de tine și o notă a ceea ce ai decis, făcută înainte să se afle cum s-a terminat totul.</p><p>Primul îl ai deja — demo-ul din capitolul 7. Al doilea — jurnalul.</p>
+<h2>Tema capitolului</h2>
+<p>Deschide-ți demo-ul. Alege un instrument care te interesează cu adevărat — nu aurul din exemplele noastre. Pune pe el două medii cu perioadele care corespund orizontului tău: dacă ții o poziție o zi-două, uită-te la cele scurte; dacă săptămâni — la cele lungi.</p><p>Uită-te la ultimele trei luni și răspunde-ți la o singură întrebare: de câte ori prețul s-a apropiat de medie și a ricoșat, și de câte ori a trecut prin ea? Cifra va fi diferită pentru instrumente diferite, și în asta e tot sensul — e a ta, nu a noastră. Notează-o în jurnal: în capitolul 13 vom construi o discuție pe baza ei, și acolo va fi nevoie de cifra ta.</p>
+<h2>Jurnalul — a doua jumătate a verificării</h2>
+<p>Acum în jurnalul tău sunt zero tranzacții. E normal la începutul capitolului 8 — și înseamnă că deocamdată nu ai pe ce să-ți verifici setările înainte. Prima înregistrare se face înainte să se afle rezultatul: instrumentul, perioadele, ce ai decis și de ce.</p>
+<p>În jurnalul tău sunt deja {{n}} tranzacții. E suficient ca în capitolul 13 discuția să meargă pe cifrele tale, nu pe ale noastre.</p>
+<p>Jurnalul e deschis fără plată și trăiește în același cont ca și cursul. Pragurile treptei 9 (50 de tranzacții în 4 săptămâni) se numără tot după el — prin aceeași rută care arată cifra de mai sus.</p>
+<p>Ai ales pe istoric o pereche de perioade cu un rezultat excelent. Ce spune asta despre viitor?</p>
+<p>Practic nimic — cea mai bună pereche există pe orice interval prin definiție</p>
+<p>Că trebuie verificat din nou pe același istoric</p>
+<p>Corect. Cea mai bună combinație se găsește mereu — întrebarea e dacă rămâne cea mai bună pe date noi.</p>
+<p>Nu chiar. Cea mai bună pereche există pe orice interval fix prin definiție — asta nu spune nimic despre viitor.</p>
+<p>De ce o perioadă lungă nu e mereu mai stabilă decât una scurtă, pe datele noastre?</p>
+<p>Criterii diferite de stabilitate dau răspunsuri diferite — nu există o concluzie clară</p>
+<p>Pentru că tranzacționează mai mulți oameni pe ea</p>
+<p>Corect. După un criteriu perioadele lungi sunt mai bune, după altul — cele scurte. Nu lungimea salvează, ci verificarea înainte.</p>
+<p>Nu chiar. Am măsurat ambele criterii onest, și au divergut — datele nu dau un răspuns unic „mai lung e mai bine”.</p>
+<p>Fondurile mari cumpără suplimentar de la EMA 50 — asta e…</p>
+<p>O afirmație despre intenții pe care nu le-am observat; execuția merge prin algoritmi pe volum, nu pe medie</p>
+<p>Corect — capitolul 7. Un participant mare se execută prin VWAP/TWAP pe volum, nu „cumpără suplimentar de la medie”.</p>
+<p>Nu chiar. Capitolul 7: execuția merge prin algoritmi pe volum (VWAP/TWAP), nu la atingerea mediei mobile.</p>
+<p>Tranzacționezi după intersecții pe graficul orar. Ce crește odată cu numărul de semnale?</p>
+<p>Costul total — spread și comision la fiecare schimbare de poziție</p>
+<p>Corect — capitolul 4. Fiecare schimbare de poziție costă bani, indiferent dacă are dreptate sau nu.</p>
+<p>Nu chiar. Fiecare intersecție e o schimbare de poziție, deci un nou spread și comision.</p>
+<h2>PREDICȚIA SĂPTĂMÂNII</h2>
+<p>Pe ce timeframe crezi că parametrii aleși pe istoric se transferă cel mai prost în viitor?</p>
+<p>Corect — pe datele noastre {{picked_tf}} ține cel mai prost locul în clasament: mediana {{picked_rank}} din {{tf_of}} (comparativ, celelalte două timeframe-uri au un rang mai bun). Diferența nu e uriașă — stabilitatea e scăzută pe toate timeframe-urile —, dar exact {{picked_tf}} e măsurabil mai slab.</p>
+<p>Pe datele noastre, cel mai prost se transferă nu {{picked_tf}} (mediana {{picked_rank}} din {{tf_of}}), ci {{worst_tf}} — mediana {{worst_rank}} din {{tf_of}}. Diferența dintre timeframe-uri nu e uriașă — stabilitatea e scăzută pe toate —, dar după măsurătorile noastre exact {{worst_tf}} e măsurabil mai slab decât celelalte.</p>
+<p>+15 XP pentru participare. Despre o mărime măsurabilă, nu despre preț.</p>
+<h2>CLIFFHANGER → CAPITOLUL 9</h2>
+<p>Ai învățat să nu ai încredere în setările alese pe trecut. A mai rămas să înveți să nu ai încredere în tine însuți.</p><p>În episodul următor — raportările companiilor și oscilatorii. Și acolo e o capcană care funcționează chiar și pentru cei care au parcurs acest capitol integral.</p><p>Deschide graficul oricărei companii după publicarea unui raport, și imaginea ți se va părea evidentă: aici se așteptau cifre slabe, aici au ieșit puternice, aici a mers prețul. Te vei uita și vei decide că ai înțeles. Problema e că, odată ce rezultatul e deja cunoscut, memoria reconstruiește amintirea de parcă exact la asta te-ai fi așteptat. Nu e o slăbiciune de caracter, e felul în care funcționează memoria, și distruge majoritatea încercărilor independente de a învăța din istorie.</p><p>Te poți prinde pe tine însuți exact printr-o singură metodă, și e neplăcută: notează la ce te aștepți, înainte să se afle. Capitolul următor se ocupă exact de asta — și, în plus, explică de ce o acțiune scade la un raport care a ieșit mai bun decât prognoza.</p>
+<h2>SURSELE CAPITOLULUI</h2>
+<p>SBF Company SRL. Testarea stabilității parametrilor mediei mobile în afara eșantionului (out-of-sample). Date: 15 instrumente, timeframe-uri H1/H4/D1, grilă de {{grid_size}} perechi de perioade, {{n_cells}} combinații instrument×timeframe. Metodă: cea mai bună pereche pe prima jumătate a istoricului e rulată pe a doua, se înregistrează locul ei în clasamentul general; cost {{cost}} din ATR pe schimbare de poziție. Recalculat la {{built}}.</p>

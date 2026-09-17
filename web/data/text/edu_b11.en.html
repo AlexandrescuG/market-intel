@@ -1,0 +1,99 @@
+<h2>THE RACE</h2>
+<p>The screen is waiting. At a random moment the number will twitch — hit the button as fast as you can.</p>
+<p>Your reaction: {{ms}} ms. A co-located exchange algorithm's reaction: about 0.2 ms (200 microseconds). You're slower by {{ratio}}×.</p>
+<p>Racing it on speed is pointless — next, where speed doesn't matter at all.</p>
+<h2>ANTI-MYTH</h2>
+<h2>The myth here has two edges, and each one gets in the way differently</h2>
+<p>First edge: «robots are stealing money from retail traders». Mechanically false for a retail CFD client, and below we explain why. The harm in this myth isn't its inaccuracy — it's that it removes accountability: if a loss is explained by an invisible force, there's nothing to calculate and nothing to change.</p>
+<p>Second edge: «high-frequency trading is pure evil and should be banned». Also an oversimplification. A significant share of these participants act as market makers: holding two-sided quotes and earning the spread. There's research showing spreads tighten with their arrival, and there's work on the costs — things like latency arbitrage, where one participant's gain is paid for by a slower one's loss. It's a genuinely contested topic with literature on both sides, and presenting it as settled would be dishonest.</p>
+<p>The truth that's actually useful to you: speed matters where there's a public order queue. A retail CFD client doesn't have one. Their costs live somewhere else — in the spread, the commission, the swap, and the execution quality of their own platform. That's more boring than a conspiracy and, unlike one, it can be measured.</p>
+<h2>SBF VOICE</h2>
+<p>Robots don't eat your trades — that checks out with arithmetic: spread and commission on real trades almost always outweigh any conceivable effect of microsecond algorithms. Three things are worth checking on a platform: which legal entity actually signs the contract, the spread during your own hours rather than the advertised one, and what happens to execution during a release. Choosing a platform is a matter of arithmetic, not comfort: the cost difference over a long series of trades is comparable to the difference between a profitable strategy and an unprofitable one.</p>
+<h2>THE PRICE OF NOT KNOWING</h2>
+<h2>The one quantity known in advance</h2>
+<p>Enter your own numbers from your terminal — these aren't our figures, they're yours: we can't yet compare platforms in one place (we explain why below), but you can work out the difference right here yourself.</p>
+<p>The cheapest platform isn't necessarily the best one. A low spread can come with worse execution during volatility, no protection in case of bankruptcy, or a legal entity outside a jurisdiction with a compensation fund. That's exactly why you need to compare across several columns at once.</p>
+<h2>WHY OFF-EXCHANGE TRADING EXISTS</h2>
+<p>A direct continuation of chapter 7. A large participant needs to fill a size that will move the price against them. There are two solutions: slice it up (chapter 7), or find a counterparty outside the open book.</p>
+<p>That's how venues emerge where orders aren't visible before execution. The point isn't secrecy for its own sake — it's that the mere visibility of a large order worsens its own price.</p>
+<h2>What it gives you</h2>
+<p>filling a large size without an immediate price impact.</p>
+<h2>What it costs</h2>
+<p>some information about supply and demand never makes it into the public price, so the public price reflects reality worse.</p>
+<p>It's a tradeoff, not a crime. Regulators cap the share of this kind of trading precisely because they see both sides of it.</p>
+<h2>A real number, with a source</h2>
+<p>Off-exchange trading made up roughly 44–48% of total US equity volume in 2024–2025 per FINRA ATS transparency data; counted narrowly as just «dark pools» (excluding market-maker internalization of retail flow), it's roughly 36–39%. The gap between those two figures is wider than the often-cited «35–40%» range, and that's not a typo — it's a consequence of the terms meaning different things.</p>
+<p>Source: FINRA ATS transparency data, 2024–2025.</p>
+<h2>HIGH-FREQUENCY TRADING: THREE DIFFERENT THINGS</h2>
+<h2>⚡ Market-making at speed</h2>
+<p>Holds two-sided quotes, earns the spread, updates faster than humans can. Legal — it's a job. The practical consequence for everyone: tighter spreads in calm times, and those spreads vanishing at moments of uncertainty (chapter 4 and chapter 6: orders pull back ahead of a release).</p>
+<h2>🏁 Latency arbitrage</h2>
+<p>Exploiting the fact that the same piece of information doesn't reach different venues at the same instant. Legal, but contested: the gain here is paid for by a slower participant's loss. This is exactly what the literature argues about, and exactly why cables get built and servers get placed next to exchanges.</p>
+<h2>🚫 Front-running</h2>
+<p>Executing your own trade ahead of a client order you know about because of your position. A violation. It has nothing to do with high-frequency trading as such — it's about abusing access, not about speed.</p>
+<p>The first two are ways of doing business; the third is a violation. Lumping them under one word is convenient for drama and harmful for understanding. The previous edition of this chapter had its own interactive called the «Front-Running Simulator», showing the reader's own order getting intercepted. We rewrote it: first, because that's a claim about unlawful conduct we never proved; second, because this mechanism doesn't apply to a retail order at all — we explain why right now.</p>
+<p>Estimates of high-frequency trading's share of US equity market volume vary between researchers, but converge around 50% in the mid-2020s — up from about 26% in 2006 and about 61% in 2009 (a post-crisis peak; estimates have fluctuated since). The spread reflects different definitions of a «high-frequency» participant, not a measurement error.</p>
+<h2>WHERE YOU ARE IN THIS PICTURE</h2>
+<p>Everything described above happens where there's a public order queue: stock, futures, and options exchanges. Speed matters because there's a queue you can get ahead of.</p>
+<p>Now look at your own trade. You trade CFDs or spot forex at a platform. Your order never enters any exchange queue at all: it's filled internally — against the platform's own book, or at its liquidity provider. There's no public queue anywhere along that path.</p>
+<p>A simple thing follows from this: a high-frequency participant in New Jersey physically cannot see your order and can't do anything with it. Not because you're too small — because the two of you are in different systems entirely.</p>
+<p>That's bad news for the mythology and good news for you. Bad, because it removes a convenient explanation for losses. Good, because the real intermediary in your chain is exactly one, it's known by name, its terms are published, and it can be chosen. There was nothing you could do about the algorithms in New Jersey.</p>
+<h2>THE PATH OF YOUR ORDER</h2>
+<p>Let's trace the path of one trade from the button press to the counterparty. One thing upfront: the exact route depends on the platform and the account type, and no one publishes the full picture. We're showing a typical scheme and honestly marking the segments nobody outside can actually see into.</p>
+<p>Not published — nothing about this node is known from outside</p>
+<p>These are typical magnitudes, not our measurement: only the venue itself measures the delay to its server, and nobody publishes those numbers. Your own delay shows up in your broker's execution report — compare that against these orders of magnitude.</p>
+<p>Ties back to chapter 6: orders pull back ahead of a release, and that isn't a conspiracy against the client — it's how a liquidity provider behaves.</p>
+<p>There isn't a single microsecond algorithm anywhere on this diagram. What there is: two spots where your cost is real and measurable — and both belong to the platform, not the market.</p>
+<h2>A-BOOK, B-BOOK, AND THE CONFLICT OF INTEREST</h2>
+<p>A platform can handle your trade in one of two ways.</p>
+<h2>Route it to an external liquidity provider (A-book)</h2>
+<p>Then it earns from commission and a markup on the spread, and its income doesn't depend on whether you won or lost.</p>
+<h2>Keep it internally (B-book)</h2>
+<p>Then it's the other side of your trade. Your loss becomes its income; your profit becomes its expense.</p>
+<p>The second option is often described as a scam. It isn't: a significant share of retail flow is processed internally at most platforms worldwide, because routing every small trade externally costs more than netting them against each other. The model is legal and disclosed in the documents. The problem isn't that it exists — it's the conflict of interest it creates, which is worth the client understanding.</p>
+<h2>What this means in practice</h2>
+<h2>About us</h2>
+<p>We stand in this chain too. SBF gets paid by platforms — a percentage of their commission, for as long as the client keeps trading. Zero if they don't trade; zero if they blow the account and leave. We're saying this here, not at the end: staying silent about our own role in a chapter about intermediaries would be doing exactly what this chapter teaches you not to trust.</p>
+<p>The requirement to publish the share of losing CFD clients was introduced by the European regulator ESMA as part of its retail-investor protection measures — the figure gets recalculated every quarter over the trailing 12 months and has to appear in every provider's standard risk warning.</p>
+<h2>Sort them into models</h2>
+<p>Six statements. Which model is each one true in?</p>
+<p>The order went out to an external liquidity provider.</p>
+<p>The venue earns on commission and spread markup, and your result makes no difference to it.</p>
+<p>The venue nets your trade against another client's internally.</p>
+<p>The venue is the other side of your trade.</p>
+<p>The venue's revenue does not depend on your result.</p>
+<h2>WHAT TO MEASURE YOURSELF</h2>
+<p>Fifteen minutes in your terminal, and you'll know more about your own platform than any review can tell you.</p>
+<h2>1 · The spread during your hours</h2>
+<p>Not the advertised one, not the session-overlap one — the one during the hours you actually trade (chapter 5, your window). Write down three readings on different days.</p>
+<h2>2 · The spread at a release</h2>
+<p>A minute before a calendar publication and a minute after (chapter 6). The difference is what you're paying to enter at that moment.</p>
+<h2>3 · Slippage</h2>
+<p>Compare the price in your order to the fill price across a few market orders. You can see this on a demo too.</p>
+<h2>4 · Swap</h2>
+<p>What it costs to carry a position overnight, and over a Wednesday rollover. Often turns out to be the main cost for anyone holding positions for a while.</p>
+<p>Write it in your journal. In chapter 14 we'll work out what this costs across a series of trades, and we'll need your numbers there, not ours.</p>
+<p>How many times wider the spread gets on release</p>
+<p>You just saw that your real counterparty isn't an abstract market — it's a specific company with a specific revenue model. The logical next question is: which one, exactly, and how do they differ from each other.</p><p>Below are three of the platforms we work with, sorted by the percentage of losing accounts: lower is higher up. The number isn't ours — the broker publishes it because the regulator requires it; the card shows the date it was taken and a link to the source. The legal entity and the leverage cap depend on your country: the cap is set by the jurisdiction, not by the broker.</p>
+<p>The platform comparison failed to load — the data lives at /brokers, along with the full table.</p>
+<p>Can a high-frequency algorithm on a US exchange intercept your CFD order?</p>
+<p>No — your order never enters an exchange queue, it's filled internally at the platform</p>
+<p>Correct. You and the high-frequency participant are in different systems entirely.</p>
+<p>Not quite. A retail CFD order has no path into an exchange queue at all — there's nothing there to intercept.</p>
+<p>How does front-running differ from latency arbitrage?</p>
+<p>The first is a violation (using knowledge of a client order), the second is legally exploiting how fast information travels</p>
+<p>Correct. Lumping them together under one word hurts understanding.</p>
+<p>Not quite. Front-running is abusing access to someone else's order; latency arbitrage is legal speed.</p>
+<p>Why does a large participant execute outside the open book?</p>
+<p>The mere visibility of a large order worsens its own price</p>
+<p>Correct — chapter 7, followed through to the end here.</p>
+<p>Not quite. Chapter 7: visibility of large size ahead of execution worsens its own price — that's the whole motive.</p>
+<p>Why does the spread widen at the moment data gets published?</p>
+<p>The liquidity provider pulls its orders, not knowing the number that's about to come out</p>
+<p>Not quite. The liquidity provider doesn't know the future value and protects itself by widening the spread (chapter 6).</p>
+<h2>PREDICTION OF THE WEEK</h2>
+<p>How much do you think the losing-client percentage can differ between platforms, for the same type of product?</p>
+<p>+15 XP for participating. About a fact, not price.</p>
+<h2>CLIFFHANGER → CHAPTER 12</h2>
+<p>You've chosen where to stand. What's left is figuring out what to do — and here the course shifts from how the market is built to how a decision is built.</p><p>The next episode is about the Japanese school of charting and one indicator that looks like chaos made of five lines and a cloud. We'll unpack why it's built exactly that way, and along the way close out a question left open since chapter 8: if parameters fitted on history don't transfer to the future, where do the numbers in indicators even come from, and what do you do with them.</p><p>And there's some unpleasant arithmetic waiting there too. To talk about your own trading in concrete terms, you need a series. Not three trades, not ten — at that sample size, you can't distinguish skill from luck even in theory. We'll work out how many you actually need, and you won't like the number.</p>
+<h2>CHAPTER SOURCES</h2>

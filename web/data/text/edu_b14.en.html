@@ -1,0 +1,78 @@
+<h2>HOW MUCH YOU PAY</h2>
+<p>How many trades a day do you make (or plan to)?</p>
+<p>At a real 0.3-point spread and {{n}} trades a day: {{annual}} points of cost a year. At a 5-point target per trade, that's {{equivWins}} fully-eaten winning trades a year — on spread alone.</p>
+<p>Costs aren't a rounding error. Next: how much profit you need to bank before you even see them.</p>
+<h2>ANTI-MYTH</h2>
+<h2>&quot;Short moves are more predictable than long ones&quot;</h2>
+<p>Wrong, and the opposite is true: at minute scales, the share of noise in price is at its maximum, and the share of structure is at its minimum. That's exactly why a short horizon doesn't make forecasting easier — it makes it harder.</p>
+<p>Scalping does give you something else, and it's valuable: many attempts. What a swing trader learns about themselves in a year, a scalper learns in a month — chapter 12 explained why the number of trades matters more than their quality when the question is self-knowledge.</p>
+<p>The flip side of the myth: &quot;scalping is a casino, only beginners do it.&quot; Also wrong. It's a demanding style with unforgiving arithmetic; the problem isn't the style, it's that it's sold as the most accessible entry point when, by cost and discipline requirements, it's the hardest.</p>
+<h2>SBF VOICE</h2>
+<p>Scalping doesn't forgive arithmetic: at a five-point target, spread isn't overhead — it's your main opponent. What works is three steps: measure your own spread in your own hours (chapter 11), compute the breakeven threshold before your first trade, compare it to the real percentage from your fifty demo trades (chapter 12). If the second number is smaller than the first, no amount of discipline fixes that.</p>
+<h2>THE PRICE OF NOT KNOWING</h2>
+<h2>The arithmetic, taken all the way through</h2>
+<p>This chapter's configuration: target +5 points, stop −15. A 1:3 ratio against you: three winning trades cover exactly one loser, no more.</p>
+<p>The breakeven threshold before costs. Not profit — zero.</p>
+<p>Now the costs. At your spread, that's a share of the target given up before the trade has even started working — we'll compute it on your own numbers in the calculator below.</p>
+<p>75% winners is achievable over a run of twenty trades and very rare over a run of a thousand. That's exactly why chapter 12 asked for fifty trades on one system, not five: at fifty, your real percentage becomes visible, not the percentage of a lucky week.</p>
+<p>The honest other half: the threshold can be moved, but not by discipline — by configuration. A bigger target, a tighter stop, a lower cost via broker choice or time of day. Every lever is computable, and they're in the calculator below.</p>
+<h2>THE ARITHMETIC OF COSTS — THE CHAPTER'S CORE</h2>
+<p>Everything this calculation needs, you already have: you measured spread in chapter 11, and your actual win rate on the fifty trades from chapter 12. Let's plug them in and see if it works.</p>
+<p>A worked example: target 5 points, stop 15, spread 0.3 points round trip.</p>
+<p>Commission round trip, points (0 if none)</p>
+<p>Points per month on costs (×21 trading days)</p>
+<h2>Four levers</h2>
+<p>If you only trade during the London-New York overlap: the formula's threshold doesn't move — what moves is the probability of reaching target before stop, and we don't measure that (see the honest note below).</p>
+<h2>This chapter's key number isn't your win rate — it's the gap between it and the threshold</h2>
+<p>If your actual rate is above the required one, the arithmetic works, and it's a discipline question from there. If it's below, no amount of discipline helps: you'll execute the rules flawlessly and lose money slowly and predictably.</p>
+<p>This is the only calculation in the course that gives an unambiguous answer. Everything else is probabilistic; this is arithmetic.</p>
+<p>Completing this calculator counts as one of the conditions for step 9 below. This isn't gamification: before a real account, a person has to see their own arithmetic in full at least once.</p>
+<p>This calculator computes thresholds, not a forecast of results. We don't publish win rates, ours or anyone else's.</p>
+<h2>WHAT HOURS THE TARGET IS EVEN REACHABLE — OUR MEASUREMENT</h2>
+<p>A five-point target only makes sense where the market actually covers five points within the trade's expected life. We measured this — not specifically for scalping, but in chapter 5, when we built the hourly range map.</p>
+<p>Here's that same profile, reframed as a practical question: in which hours does the median half-hour bar exceed your target, and in which does it not.</p>
+<p>The window is narrower than it looks. Suitable hours cluster in the London-New York overlap (chapter 5).</p>
+<p>Outside the window, the target isn't reached, but the cost is still paid in full. The trade closes on time or on the stop, spread fully paid either way.</p>
+<p>This is also why scalping is tied to sessions more strictly than any other style. Not &quot;that's how it's done&quot; — a direct consequence of the target-to-range ratio.</p>
+<p>Measured on our M30 backfill — see coverage in chapter 5. We didn't measure movement within a half-hour bar, so we can't say how often the target is hit within two minutes: our data is too coarse for that. We're only saying whether the market is capable of covering that distance in that hour at all.</p>
+<p>Data: Gold, latest available month, UTC hours.</p>
+<h2>A SETUP WITHOUT WIN RATES</h2>
+<h2>EMA 9/21 on M5 and RSI zones — how to read them, not a promise</h2>
+<p>A short-term momentum indicator, not a system. A system is entry, stop, target, and position size together; a pair of moving averages doesn't become a system no matter what you call it.</p>
+<p>Narrower zones trigger more often. More triggers isn't the same as better triggers — it's checked only against your own statistics, the same discipline chapter 8 applied to EMA periods.</p>
+<p>Not &quot;that's how it's done&quot; — a direct consequence of §3.3: outside the hours where the bar's range outruns the target, the setup technically can't work as intended, regardless of what the indicators show.</p>
+<p>Widening the stop after entry turns a computed ratio into an uncomputed one — the calculator's arithmetic above stops applying. Not because &quot;you don't do that,&quot; but because the number you saw on screen was for a different stop.</p>
+<h2>Instead of a win rate — three honest lines</h2>
+<h2>UPDATED CHAPTER TAKEAWAYS</h2>
+<h2>STEP 9 — THE GATE, AND A REAL ACCOUNT</h2>
+<p>We've reached the point courses like this are written for, and there's no persuasion here. You just computed the arithmetic of your own configuration. All we can add are four conditions, checked against your journal, not your feelings.</p>
+<h2>A first real account isn't opened when you feel like it — it's opened when the arithmetic works</h2>
+<p>We won't ask if you're ready. Everyone answers yes to that question. Instead — four conditions.</p>
+<p>System rules written down before the trades, not after</p>
+<p>Cost arithmetic computed (calculator above)</p>
+<p>Not everything is met yet. This isn't a ban — an account can be opened without us. This is our position: we won't help with that until it works out.</p>
+<h2>It works. Three things you need to know before, not after</h2>
+<p>First. The starting amount. Not &quot;how much do I need to trade properly,&quot; but how much you won't miss. Most platforms have a minimum of a hundred to two hundred euros, and that's enough: the first real account's job isn't to earn — it's to find out how you behave when the money is real. That's just as clearly established on a hundred euros as on ten thousand, and it costs a hundred times less.</p>
+<p>Second. The difference from demo is only in you. Same quotes, same execution, same spread. One thing changes: on demo you kept the plan because it didn't matter. On real money, you'll break it on day three. This happens to almost everyone, and the journal will show it.</p>
+<p>Third. A platform gets chosen by the same rules as chapter 11: legal entity, regulator, real share of losing accounts, compensation fund — compared across several columns at once, not one number.</p>
+<p>The platform list failed to load — it also lives at /brokers.</p>
+<p>The amount I'm about to deposit is one whose loss won't change anything in my life over the next six months. If the answer takes more than five seconds to think about, the answer is no.</p>
+<p>Target 5 points, stop 15. What win rate is needed to break even before costs?</p>
+<p>Correct. Threshold = stop / (target + stop) = 15/20 = 75%.</p>
+<p>Not quite. The threshold is stop divided by the sum of target and stop: 15/20 = 75%.</p>
+<p>Ten trades at +5 versus one at +50. What's missing from that comparison?</p>
+<p>The cost is paid ten times instead of once</p>
+<p>Correct. The same round-trip cost, multiplied by ten trades instead of one.</p>
+<p>Not quite. It's about how many times the round-trip cost gets paid — ten times versus once.</p>
+<p>Why is scalping tied to session-overlap hours?</p>
+<p>Outside those hours, the median range is smaller than the target, and it isn't reached</p>
+<p>Correct. It's a direct consequence of the target-to-range ratio, not tradition.</p>
+<p>Not quite. It comes down to a measurable ratio: outside the overlap window, the median bar range is often smaller than the target.</p>
+<p>Your win rate on 20 trades is 80%. What does that prove?</p>
+<p>Almost nothing — at that sample size, the spread is wider than the gap between a working and non-working configuration</p>
+<p>Correct. Twenty trades is far too short a run — chapter 12 already computed this.</p>
+<p>Not quite. At twenty trades the spread of outcomes is wider than the gap between a good and bad configuration (chapter 12).</p>
+<h2>NEXT → CHAPTER 15</h2>
+<p>One chapter remains, and it isn't about technique.</p><p>It's about what comes next — and there are three honest paths, not one. First: stay on demo and keep learning for as long as it takes. Second: a small real account and slowly building your own statistics. Third: not trading yourself at all — that path exists too, and we'll describe it without irony.</p><p>And in the same chapter — a list of what not to do, with names. We'll cover why one of the firms this course advertised for a year and a half had, by that point, effectively stopped accepting clients, and what that implies for any list you're shown — including ours.</p>
+<h2>CHAPTER SOURCES</h2>
+<p>SBF Company SRL. Median 30-minute bar range (M30) by instrument, normalized to the median daily range. Data: Gold, period {{first}} to {{last}}, {{tf}} timeframe. Method: median instead of mean — resistant to release-driven outliers. Recomputed as of {{built}}.</p>

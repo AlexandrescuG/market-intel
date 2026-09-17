@@ -1,0 +1,126 @@
+<h2>THE PRICE OF HASTE</h2>
+<p>You need to buy 500 lots of gold — same size either way. Fill it with one order right now, or spread it over an hour?</p>
+<p>Now: average price {{avgNow}}, slippage +{{slipNow}} on the whole size. Over an hour, with no pressure on the book: {{avgSlow}} — close to the best quote. The difference — {{diffPts}} points on {{size}} lots.</p>
+<p>Next: what that caution looks like in the order flow, not in the shape of a candle.</p>
+<h2>WHERE THE ACTIVITY WAS</h2>
+<p>The tick-volume histogram is hidden. Pick the third of the day where you think trading was busiest.</p>
+<p>Matched — that's exactly where the real activity peak was.</p>
+<p>Didn't match — the real peak was in a different third.</p>
+<p>The most price changes happened in {{topLabel}} UTC ({{topVol}}). {{matchText}}</p>
+<p>That's the number of price changes in the period, not lots traded.</p>
+<p>Zones show where orders should be. Volume shows where the activity actually was. A match or a mismatch is visible at a glance.</p>
+<h2>ANTI-MYTH</h2>
+<h2>The myth here comes in layers, and they need peeling one at a time</h2>
+<p>First layer: «institutions don't exist, the market is everyone against everyone». Obviously wrong: the overwhelming share of turnover is banks, funds, treasuries and algorithms, not individuals.</p>
+<p>Second layer, the main one in this chapter: «institutions hunt retail stops». That's disproved by arithmetic, not opinion. Retail volume is statistically invisible against interbank flow: coming specifically for it would be like robbing a bank for the coins in the tip jar by the door. Cascades on order clusters are real, though — Osler measured them across nine and a half thousand orders — but the clusters aren't made of retail stops, and they don't fire because of anyone's decision; they fire because orders are bunched together (chapter 5, §3.6).</p>
+<p>Third layer, the stickiest one: «smart money leaves readable footprints on the candlestick chart, you just need to know the patterns». That's a testable claim. We tested it — below.</p>
+<p>The truth, once all three layers are peeled back, is more useful than any of them: a large participant doesn't hide. They try not to move the price — and that very caution leaves a trace, visible in a few specific places, none of which is a shape on a chart.</p>
+<h2>SBF VOICE · Oleg, analyst</h2>
+<p>«Colleague, in twelve years I haven't met a single person who got rich «reading the smart money footprint», and I've met plenty who settled for that explanation. It's a comfortable story: if the market's against me, it means I got spotted. The victim position is comfortable because it removes the need to do math.</p><p>What I actually look at when I want to understand who's in the market. First — the order book, not the picture, but the behavior: how fast density comes back after it's been eaten. Second — how my own order fills: if slippage has grown, the book is thinner, and it's worth knowing that before entering, not after. Third — futures positioning reports: they come out once a week, lag by three days, and look like a table, not a chart. Boring, but they're real numbers, not my fantasies about other people's intentions.</p><p>And honestly, a fourth option. Sometimes the market goes against me simply because I was wrong. No institution was involved. Being able to consider that explanation first is roughly half the profession.»</p>
+<h2>THE PRICE OF NOT KNOWING</h2>
+<h2>A rule you can't get out of</h2>
+<p>A trader learned that after liquidity gets swept and a gap stays unfilled, price gets «pulled» back. They see the setup on the chart, enter against the move, place a stop past the extreme.</p><p>What happens next comes in two versions. In the first, the setup works, and they lock in the rule. In the second, it doesn't, and they explain it as «I marked the zone wrong». Both versions confirm the original belief: the rule is right, the execution was wrong. That's a structure you can't get out of, because it isn't falsifiable.</p><p>The cost isn't in any single loss. It's that the person stops measuring: they have an explanation for every outcome, so there's no reason to run the statistics. We ran them instead — below — and the number isn't catastrophic, it's exactly the worst kind: close to random. A rule that works half the time doesn't blow up an account fast. It just slowly eats it through commissions and spread, leaving the feeling that «just a bit more and it'll click».</p><p>The honest second half: this doesn't mean patterns are useless. It means a pattern isn't a signal — it's a way to describe context, and the decision gets made by position size and risk management (chapter 3), not by the presence of a shape.</p>
+<h2>THE LARGE PARTICIPANT'S PROBLEM — A MIRROR OF CHAPTER 4</h2>
+<p>To understand the footprint, you have to understand the problem. It's the exact opposite of what usually gets told.</p>
+<h2>A large participant doesn't want to move the price</h2>
+<p>Movement is their cost, not their tool. Everything they do at execution is aimed at making the movement smaller.</p>
+<h2>They can't be invisible</h2>
+<p>Any execution leaves a fingerprint in the flow: orders disappear, come back slower, trades run in series of matching size. That's the footprint — but it's in the flow, not in the shape of a candle.</p>
+<h2>They don't need your stop</h2>
+<p>They need volume. A cluster of orders behind a round level is a place where volume exists; everything else is interpretation.</p>
+<p>The same order-book panel from chapter 4 — with one new slider.</p>
+<p>Drag the slider and watch the average fill price move away from the best quote.</p>
+<p>{{remaining}} lots found no price in the visible book at all — a real fill would have gone even further.</p>
+<p>You just felt an institution's problem. Now everything that follows makes sense.</p>
+<p>SYNTHETIC DEPTH — the mid price is real, the per-level volumes are not: we do not store the exchange order book. This panel computes execution mechanics, not today's market depth.</p>
+<h2>HOW EXECUTION ACTUALLY WORKS</h2>
+<p>Four cards. All documented and verifiable — no claims about intent.</p>
+<h2>🔪 Slicing</h2>
+<p>An order gets cut into dozens or hundreds of smaller pieces and stretched over time. The academic framework is the optimal-execution problem: a balance between the cost of immediacy and the risk that price drifts away while you're filling. It isn't a stealth tactic — it's the solution to an optimization problem.</p>
+<h2>🤖 Execution algorithms</h2>
+<p>VWAP — fill proportionally to the typical volume profile so the average fill matches the market's volume-weighted average. TWAP — evenly over time. POV — a fixed share of current volume. These algorithms are standard, sold by terminal vendors, and they're exactly why large moves often look like a series of matching steps rather than one lunge. Direct link to chapter 5: VWAP execution is tied to the hourly volume profile — a profile we measured ourselves.</p>
+<h2>🧊 Icebergs</h2>
+<p>An order where only part is visible; as it fills, the visible part replenishes. These exist as a standard order type on exchanges. Hence the observed effect: depth at a level «never runs out», no matter how much of it you eat.</p>
+<h2>📞 Off the book</h2>
+<p>A significant share of large size never executes in the open book at all: requests for quote from several dealers, internal netting, dark pools (chapter 11). The practical takeaway, unwelcome for the mythology: the largest trades are never visible in the book.</p>
+<h2>WHERE THE FOOTPRINT IS ACTUALLY VISIBLE</h2>
+<p>Four places. The most practical block in the chapter.</p>
+<p>how density recovers after being eaten; icebergs; orders pulling before a release (chapter 6)</p>
+<p>series of matching size — an execution algorithm's handwriting</p>
+<p>real exchange volume — unlike spot forex, where a single unified volume doesn't exist</p>
+<p>how participant-category positions in futures changed, weekly</p>
+<h2>A separate note on COT</h2>
+<p>The only source where «institutional positions» aren't a metaphor — they're a published number. The CFTC publishes a weekly breakdown of open interest by participant category. The caveats have to sit right next to it: this is futures, not spot; the data is as of Tuesday, published Friday — so it lags; the «commercial» category isn't a synonym for «smart money», it's hedgers, and by construction their position is often against the trend. Caveats and all, this is an order of magnitude closer to reality than any candlestick pattern.</p>
+<h2>An honest caveat about spot forex</h2>
+<p>The market depth you see in your terminal for a currency pair is your liquidity provider's book, not the whole market's. Forex has no single order book: it's an OTC market, and every broker has its own flow. That doesn't invalidate the observation — book behavior, how fast density recovers, the reaction to a release are all visible in it too — but it matters to understand you're looking at a slice, not the whole. For futures and equities, the book is exchange-based and unified.</p>
+<h2>&quot;OUR OWN MEASUREMENTS&quot; — HOW THE PATTERNS SOLD AS A FOOTPRINT ACTUALLY PERFORM</h2>
+<p>The claim «smart money leaves readable footprints on the chart» is testable. We tested it on our own history, across seven directional patterns, across instruments and timeframes. The code is in the repo, the export is below.</p>
+<p>What we counted. For each pattern: the share of cases where price, 3, 5 and 10 candles later, moved in the direction the pattern declares. Plus the average move and the average maximum move against the position.</p>
+<h2>A methodological caveat that can't be left out</h2>
+<p>On the first run, double tops and bottoms showed noticeably higher agreement than every other pattern — around 70-77% instead of an honest 45-54%. The cause wasn't the pattern — it was us: fractal extremes only confirm a few candles after the peak, and the measurement started from the peak itself — a point that, in real time, wasn't known yet. A textbook lookahead bias. After the fix (the pattern is reported at the moment of confirmation, not the moment of the peak), every pattern fell into the same range. We tell this story in the chapter because the chapter is about telling measurement apart from self-deception, and because this is the best example we have.</p>
+<p>The agreement range across patterns is {{agree_min}}%–{{agree_max}}%, over {{n_total}} observations. The random baseline is 50%. {{verdict_line}}</p>
+<p>break_retest is the closest mechanical relative of what gets called a liquidity sweep. Its result: {{break_retest_agree}}% at n = {{break_retest_n}}. This is exactly the line that explains why the old trading signal tied to this pattern was removed from the chapter.</p>
+<p>The average maximum move against the position is comparable to the average move in its favor — a ratio of {{adverse_ratio}}. The practical consequence matters more than the first two findings: even for a pattern with above-half agreement, the outcome is decided not by the pattern but by position size and whether you survive the move against you (chapter 3).</p>
+<p>That's a tight band around chance, not a regularity.</p>
+<p>There's a small tilt, but it's far from a reliable rule.</p>
+<p>The spread between patterns is noticeable — averaging them is an easy way to fool yourself.</p>
+<h2>The honest plate</h2>
+<p>Measured: direction agreement and move size on our D1/H4/H1 history. Not measured: context — the higher-timeframe trend, a calendar event, the session phase. We tested the pattern on its own, because that's exactly how it's sold: «saw it, entered». It may behave differently in context; that's separate work, and when we've done it, we'll publish the result, whatever it turns out to be.</p>
+<h2>WHAT'S CONFIRMED, AND WHAT'S NARRATIVE</h2>
+<h2>Confirmed by measurement or document</h2>
+<p>Large size moves price against whoever's executing.</p>
+<p>A direct consequence of book mechanics (chapter 4), measured by anyone who's tried.</p>
+<p>Large orders get sliced and run through algorithms.</p>
+<p>Standard practice, the algorithms are documented and sold.</p>
+<p>Iceberg orders exist as a standard order type.</p>
+<p>Defined in exchange and platform documentation — not a hypothesis, an order type you can place yourself.</p>
+<p>Orders cluster behind round levels, and a cluster firing causes a cascade.</p>
+<p>Osler (2003) — a real book of conditional orders, not a guess about crowd behavior.</p>
+<p>A share of volume executes outside the open book.</p>
+<p>Dark pools, RFQ, internal netting — documented mechanisms, covered in chapter 11.</p>
+<p>Participant-category futures positions are published weekly.</p>
+<p>CFTC, Commitment of Traders — a public government report, not our estimate.</p>
+<h2>This is narrative, not fact</h2>
+<p>Stop clusters are observable on the candlestick chart.</p>
+<p>No one sees them except whoever holds the order book — what gets drawn on the chart is a model, not an observation.</p>
+<p>A move toward a cluster is someone's decision, aimed against retail.</p>
+<p>The cascade fires because of crowding, not intent; retail volume is too small for that.</p>
+<p>Gaps fill often, but «magnet» is a metaphor, not a mechanism; the testable version of this claim is above, in the cluster block.</p>
+<p>«Smart money» exists as a single group with shared interests.</p>
+<p>Behind large flows sit pension funds, treasuries, hedgers and algorithms with opposing goals — they aren't one side.</p>
+<p>The Smart Money model is a decent vocabulary for describing what you see, and a poor predictor of what comes next. Use it as language: «there was an order cluster here, it got eaten here, the book recovered slowly here». Don't use it as an entry rule — we showed above what that gets you.</p>
+<h2>THE &quot;X-RAY&quot;, FLIPPED</h2>
+<p>You're about to see a chart with the «x-ray» turned on: zones where, by the popular model, order clusters should sit. Before you press it, remember one thing: this is the model's drawing, not data. We calculated these zones by the model's rules — behind round numbers and the edges of the previous session's range. We have no information about real orders, and we can't have any.</p>
+<p>The x-ray is on, the zones are highlighted.</p>
+<p>Tick volume — how many times the price changed within a bar. Not the number of lots traded: there's no single volume in spot forex. As a measure of activity it works; as a measure of money, it doesn't.</p>
+<h2>What just happened</h2>
+<p>You saw {{n_days}} days. On {{xray_hit}} of {{n_days}}, price did what the model predicted. If we'd shown you only a single day that matched — which is exactly how most educational material on this topic is built — you'd have walked away convinced the model works.</p><p>We can't tell you where other people's orders sit. No one can, except the dealer holding that book. The one time a researcher got access to it was Osler's work on nine and a half thousand orders, and it's still the primary source on the topic today, because no one else can repeat it.</p><p>What you genuinely can observe yourself, and this isn't a model, it's data: how the order book behaves in real time. How fast density recovers after being eaten. How orders vanish a minute before a release. That's visible — but only in the moment, and only in a terminal.</p>
+<p>XP is awarded for completing this regardless of how many matched.</p>
+<p>the model missed — price broke through the zone</p>
+<p>Before you see the candles: do you think price will reverse off the zone or break through it?</p>
+<p>Actually inconclusive — no clean reversal, no clean break.</p>
+<p>Everything you read in this chapter, you took on trust — except for one block where we published our own measurements and the CSV.</p><p>And that's not right. For six chapters we taught you to check our work. This chapter has nothing to check it against, and that's not laziness on our part: order-book behavior doesn't draw onto a mockup. Density recovering in two seconds after being eaten; orders vanishing a minute before a release; a series of matching-size trades running for twenty minutes straight — all of that only exists in the moment. A recording shows the outcome, and we've already shown you the outcome — it's a candle, and nothing shows through it.</p><p>So you need a terminal. Not a funded account — a terminal.</p>
+<p>A demo account opens without verification at {{noVerif}} of {{total}} platforms — checked {{checked}}, terms and quotes are in partners.json. No money required: the demo terminal shows the same order book as a live account.</p>
+<p>The platform list failed to load — it also lives at /brokers.</p>
+<p>A fund needs to buy a size ten times larger than the visible depth in the book. What will it do?</p>
+<p>Buy it with a single market order to make sure it gets filled</p>
+<p>Slice it and stretch it over time so it doesn't move the price against itself</p>
+<p>Wait until the book shows the size it needs</p>
+<p>Correct. Price movement is its cost, not its tool.</p>
+<p>Not quite. Price movement is a cost for a large participant, not a tool — which is why they slice execution.</p>
+<p>Per Osler's measurements, where do stop orders cluster most?</p>
+<p>Just past a round number and past a range edge</p>
+<p>Not quite. Osler measured clustering just PAST the round number and the range edge, not right on the level (chapter 5).</p>
+<p>You see a zone on the chart where the model says order clusters should sit. What do you actually know for sure?</p>
+<p>Nothing — it's the model's drawing, not data</p>
+<p>Correct. No one but the dealer sees the real orders in that zone.</p>
+<p>Not quite. The zone is a drawing from fixed model rules, not an observation of real orders.</p>
+<p>Not quite. The calendar tells you when and roughly how much — never which way (chapter 6).</p>
+<h2>PREDICTION OF THE WEEK</h2>
+<p>On which timeframe do you think pattern agreement with its own direction is highest?</p>
+<p>Per our data, the agreement range barely depends on timeframe — {{agree_min}}%–{{agree_max}}% across all three, over {{n_total}} observations. If you picked one timeframe as «clearly better» — our data shows no such thing.</p>
+<p>+15 XP for participating. About a measurable quantity, not price — fully within compliance.</p>
+<h2>CLIFFHANGER → CHAPTER 8</h2>
+<p>Now you know the footprint exists and where it's visible. And you know the price of that: almost everything interesting happens in the flow, and the flow is exactly what you can't see in a recording.</p><p>But there's another side to this, and it's about you. For six chapters we've shown you gold charts. Our instruments, our periods, our settings. You were looking at someone else's market.</p><p>The next episode is about a tool you'll configure yourself: moving averages, and what they actually measure. Fair warning up front: the chapter's central question — «so what's the right period?» — has no universal answer, and we'll explain why anyone who gives you a number is selling you someone else's setting. An answer only exists for a specific instrument and a specific horizon. That is, for yours.</p>
+<h2>CHAPTER SOURCES</h2>
+<p>SBF Company SRL. Testing the claim that &quot;candlestick patterns predict direction&quot; against our own history. Data: 15 instruments, H1/H4/D1 timeframes, 7 pattern types, {{n}} observations. Method: share of cases where price moved in the pattern's declared direction 5 candles later; double tops/bottoms are measured from the fractal's confirmation, not the reversal's peak — otherwise lookahead bias inflates the result. Recomputed as of {{built}}.</p>

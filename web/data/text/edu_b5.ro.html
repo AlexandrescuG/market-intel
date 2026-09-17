@@ -1,0 +1,157 @@
+<h2>CAPITOLUL 5 — MAREEA ARE UN ORAR</h2>
+<h2>ANTI-MIT</h2>
+<h2>Acest capitol are un mit cu două laturi, la fel de dăunătoare</h2>
+<p>Latura întâi: „piața e aleatorie, nu există tipare, orice oră e la fel”. Se infirmă în cinci minute pe date proprii — sezonalitatea intraday a volatilității e unul dintre cele mai solide fapte din empirica financiară. Andersen și Bollerslev au măsurat-o pe DM/USD încă din 1998: scădere la pauza de prânz de la Tokyo, creștere odată cu deschiderea Europei, platou de activitate maximă, salt la datele americane. Am recalculat același lucru pe aur cu datele noastre — forma curbei se reproduce.</p>
+<p>Latura a doua, unde cad cei care au auzit deja de sesiuni: „piața e o conspirație programată, instituțiile s-au înțeles la ora 10:00 să-mi ia stop-ul”. Și asta e greșit, și mai rău — e neputință învățată în ambalaj esoteric. Adevărul e la mijloc și e mai util decât ambele extreme: lichiditatea are un orar, direcția nu. Ceasul îți spune cât de mult poate parcurge piața și la ce preț te execută. Încotro merge — ceasul nu spune niciodată.</p>
+<h2>VOCEA SBF · Oleg, analist</h2>
+<p>„Coleg, cel mai des sunt întrebat: «la ce oră e mai bine să tranzacționez?» Răspund altceva decât se așteaptă. Cea mai bună oră e cea în care poți sta liniștit în fața ecranului, fără să furi timp de la muncă și familie. Restul e secundar, pentru că un om obosit la ora perfectă pierde mai mult decât unul odihnit la o oră imperfectă.</p><p>Apoi începe meseria: fiecare oră are caracteristici, și trebuie să le cunoști pentru PROPRIA ta oră. Spread-ul e larg? Mișcarea ajunge să acopere costurile? Nu cad peste o știre neașteptată? La ora trei noaptea se poate tranzacționa — doar că e o altă piață, cu alte reguli, și trebuie să-ți spui cinstit că exact pe aceea o tranzacționezi.</p><p>Separat despre „vânătoarea de stop-uri”. De doisprezece ani aud asta ca explicație pentru orice pierdere. Nimeni nu vânează personal stop-ul tău. Pur și simplu stop-ul tău stă exact acolo unde stau alte zece mii de stop-uri străine — după un număr rotund, după marginea intervalului de noapte. Și acesta e singurul loc pe grafic unde un participant mare poate cumpăra sau vinde mult și repede. Nu vine după tine. Vine după lichiditate. Tu stai pur și simplu la coadă cu o pancartă „aici se poate lua volum”. A te supăra pe asta e la fel de rezonabil ca a te supăra pe maree.”</p>
+<h2>PREȚUL NEȘTIINȚEI</h2>
+<h2>Aritmetica orei nepotrivite</h2>
+<p>Un trader lucrează ziua și tranzacționează seara târziu și noaptea — singurul timp liber, totul cinstit. Instrumentul — aurul.</p><p>Noaptea, doi factori lucrează simultan împotriva lui, ambii măsurabili. Primul — spread-ul: într-un registru subțire e mai larg decât ziua (capitolul 4, regimul „Noaptea asiatică”); să zicem că plătește 1.2 în loc de 0.3 — o supraplată de 0.9 puncte pe tranzacție. Al doilea, și e mai greu: intervalul. Conform măsurătorilor noastre, bara medie de 30 de minute a aurului în orele asiatice e {{night_share}}% din intervalul zilnic — ținta nu se atinge într-o oră, ci în jumătate de noapte, sau deloc.</p>
+<p>Introdu propriile cifre și vezi cifra ta.</p>
+<p>Puncte pe lună date doar pentru dreptul de a tranzacționa la o oră nepotrivită</p>
+<p>Suportabil în sine. Dar se adaugă faptul că țintele nu se ating la timp, iar omul începe să le reducă — costul rămâne fix. După trei luni concluzionează „strategia mea nu funcționează”. Strategia funcționa. Orarul nu.</p>
+<p>Și jumătatea cinstită, fără de care prima e manipulare: asta nu înseamnă că noaptea nu se poate tranzacționa. Înseamnă că noaptea trebuie tranzacționat altfel: alte ținte, alte instrumente (în orele asiatice trăiește yenul, nu euro), alte stop-uri, și obligatoriu — ordine limită în loc de ordine de piață.</p>
+<h2>CEASURILE PLANETEI</h2>
+<h2>Ce se deschide de fapt</h2>
+<p>Înainte de a vorbi despre „sesiuni”, trebuie separate două lucruri care se confundă mereu în manuale. Bursa e o platformă concretă cu program: bursa din Tokyo funcționează 09:00–11:30 și 12:30–15:30 ora Tokyo, iar în pauză chiar nu se întâmplă nimic acolo. Sesiunea valutară nu e o platformă, ci un nume convențional pentru orele când într-o regiune e zi lucrătoare. Forexul nu se deschide și nu se închide — funcționează continuu de duminică seara până vineri seara. Se schimbă doar cine e la masă. De aceea tabelul de mai jos e construit nu din „sesiuni” în general, ci din evenimente, fiecare cu un proprietar și o oră exactă.</p>
+<p>Orele burselor și fixing-urilor sunt verificate la sursele primare (JPX, LBMA/ICE, NBER); orele CME pentru aur se verifică înainte de tranzacționare pe cmegroup.com/trading-hours.</p>
+<h2>GLOBUL LICHIDITĂȚII</h2>
+<h2>Cât parcurge piața cu adevărat, oră de oră</h2>
+<p>Aceasta e harta zilei. Banda de sus — douăzeci și patru de ore UTC. Trei benzi colorate — orele în care Asia, Europa și America sunt la masă. Barele de jos NU sunt o curbă „de activitate” inventată, ci dimensiunea medie măsurată de noi a barei de 30 de minute în ora respectivă. Date — bekfill-ul nostru MT5, {{n_days_label}} pe aur. Mișcă cursorul — vezi cine e la masă și cât valorează mișcarea în ora respectivă.</p>
+<p>Ora {{trough_hour}}:00 UTC — minimul zilei: {{trough_share}}% din intervalul zilnic. Nicio oră mai liniștită.</p>
+<p>Ora {{midHour}}:00 UTC — Londra e deja la masă: {{midShare}}%. Se trezește vizibil, dar încă nu e vârful.</p>
+<p>Ora {{peak_hour}}:00 UTC — maximul zilei: {{peak_share}}%, de {{peak_ratio}} ori mai mult decât în ora liniștită.</p>
+<p>Găsește cu cursorul ora în care bara medie a aurului e CEA MAI MICĂ. Apoi comută instrumentul pe USD/JPY — și găsește același minim acolo. S-au potrivit?</p>
+<p>Nu s-au potrivit — și aceasta e lecția principală: fiecare instrument are propriile ore, pentru că fiecare are propria regiune în spate. Yenul trăiește dimineața, aurul — la datele americane.</p>
+<p>„Zona moartă” nu există de sine stătător. Există doar pentru un instrument concret.</p>
+<p>bara mediană (cotă din intervalul zilnic)</p>
+<h2>DE CE EXISTĂ SESIUNILE</h2>
+<h2>De ce yenul e activ noaptea</h2>
+<p>La Tokyo, în acele ore e pur și simplu zi lucrătoare. Banca Japoniei, exportatori precum Toyota, fonduri regionale — toți își decontează nevoile valutare în orele lor de lucru, ca orice contabilitate. USD/JPY și AUD/USD sunt mișcate de plăți reale, nu de speculație.</p>
+<h2>De ce aurul explodează la 12:30 UTC</h2>
+<p>În versiunea veche a capitolului scria „deschiderea NYSE” — e o greșeală. 12:30 UTC e ora 8:30 dimineața la Washington: ora publicării datelor Biroului de Statistică a Muncii. NFP, inflație, retail. Aurul reacționează mai puternic pentru că evaluează două lucruri deodată: rata așteptată a Fed și forța dolarului. Deschiderea NYSE e cu o oră mai târziu și se vede și ea în date, dar mai slab.</p>
+<h2>Ce fac participanții mari noaptea</h2>
+<p>Un participant mare nu are interes să execute volum mare într-un registru subțire — mișcă prețul împotriva sa (capitolul 4). Deci a acumula volum în orele nelichide e incomod, nu comod — versiunea „instituțiile acumulează liniștit noaptea” contrazice mecanica. Ce se întâmplă de fapt: se decontează plăți regionale, funcționează algoritmi cu apetit redus la risc, stă o coadă de ordine până la volumul de dimineață.</p>
+<h2>Rollover și spread-ul de la miezul nopții</h2>
+<p>La ora 17:00 New York, la majoritatea brokerilor începe o nouă zi de tranzacționare: se închide lumânarea zilnică, se calculează swap-urile, furnizorii de lichiditate rearanjează cotațiile pentru un minut. Un ordin de piață trimis exact atunci e cel mai scump ordin al zilei. De miercuri spre joi swap-ul e triplu.</p>
+<h2>„ZIUA NOASTRĂ” — HARTA PE ORE</h2>
+<h2>Nucleul capitolului: exclusivitatea noastră</h2>
+<p>Tot ce ai citit mai sus e cunoscut și se găsește în orice manual. De aici începe ce nu găsești în manual: am calculat pe datele noastre. {{total_bars}} bare de 30 de minute pe aur, {{n_trading_days_label}} ({{coverage_first}} → {{coverage_last}}). Poți comuta instrumentul și verifica dacă tiparul se menține.</p>
+<p>Ora cea mai activă: {{peak_hour}} UTC — {{peak_share}}% din intervalul zilnic în medie.</p>
+<p>Ora cea mai liniștită: {{trough_hour}} UTC — {{trough_share}}%.</p>
+<p>Raportul: de {{peak_ratio}} ori. Tiparul se menține {{years_consistent}} din {{years_total}} perioade observate.</p>
+<p>Deocamdată se confirmă pe tot eșantionul disponibil ({{n_label}})</p>
+<p>{{label}}: nu se vede o diferență semnificativă, n = {{n}}</p>
+<p>{{label}}: date insuficiente încă, n = {{n}}</p>
+<h2>Forma curbei se reproduce</h2>
+<p>Nu „așa a fost luna trecută”, ci un tipar care se menține {{years_consistent}} din {{years_total}} perioade măsurate. Coincidența cu măsurătorile academice din 1998 pe alte instrumente e un argument suplimentar: tiparul e mai vechi decât noi.</p>
+<h2>Fiecare instrument are propria curbă</h2>
+<p>Comută pe BTC — vei vedea ce nu au ceilalți: criptomoneda nu are nici fixing-uri, nici burse cu program, iar profilul ei zilnic e vizibil mai plat. Unde nu există program instituțional, nu există nici cocoașe pe curbă.</p>
+<h2>Vinerea nu e ca celelalte zile</h2>
+<p>Compară segmentul „Vineri” cu „Zi obișnuită” din comutatorul de mai sus — cifrele sunt cinstite, din aceleași măsurători. Dacă diferența e nesemnificativă pe eșantionul curent — și asta e un rezultat.</p>
+<h2>În zilele NFP curba e diferită</h2>
+<p>Comparația profilului median al primelor vineri cu zilele obișnuite e cel mai clar argument că nu „sesiunile” fac cocoașele, ci evenimentele din interiorul lor. Punte spre capitolul 6, unde analizăm calendarul integral.</p>
+<h2>Ce e măsurat aici și ce nu</h2>
+<p>Măsurat: intervalul barei (High−Low) — cât s-a mișcat prețul cu adevărat. Nemăsurat: volumul (pe forexul spot nu există un volum unic) și spread-ul (istoricul spread-ului nu se păstrează în OHLC, vezi capitolul 4). De aceea spunem „cât a parcurs piața”, nu „cât a fost lichiditatea”. Mediană, nu medie: o singură panică nu trebuie să recoloreze toată harta.</p>
+<p>Istoricul e mai scurt de doi ani — axa hărții e construită pe luni, nu pe ani. E o adaptare cinstită la volumul real al bekfill-ului, nu o eroare.</p>
+<p>Puține perioade observate — stabilitatea tiparului e verificată deocamdată pe un eșantion limitat.</p>
+<p>Mai puțin de un an de date — efectele sezoniere (decembrie, vara) încă nu sunt verificate.</p>
+<p>Construit de scriptul hourly_profile.py din web/data/ohlc_{ASSET}_M30.json.</p>
+<p>Date insuficiente pentru această oră în segmentul ales</p>
+<p>Coloanele hașurate — date insuficiente pentru acea oră în segmentul ales, nu zero.</p>
+<h2>TREI MOTOARE ALE ZILEI</h2>
+<p>Harta a arătat cocoașele. Acum — cine le face. Exact trei motoare, fiecare cu un proprietar, o oră exactă și, în două din trei cazuri, un dosar juridic.</p>
+<h2>Motorul 1 · Suprapunerea sesiunilor</h2>
+<p>Cel mai simplu și cel mai plictisitor: când două continente sunt la masă simultan, participanții sunt dublu, registrul e mai dens, iar orice știre primește dublu interpretori. Fereastra Londra + New York — {{overlap_local}} la Chișinău. Concluzia practică: în această fereastră, ordinul tău de piață costă cel mai puțin. Nu „aici trebuie tranzacționat”, ci „aici e mai ieftin de executat” — diferența e esențială.</p>
+<h2>Motorul 2 · Publicații programate</h2>
+<p>Ora 8:30 dimineața la Washington. Nu „cândva apare o știre”, ci un minut concret, cunoscut cu o lună înainte, în care mii de algoritmi primesc simultan un singur număr. Andersen și Bollerslev au măsurat pe DM/USD: publicarea raportului de angajare produce un salt instantaneu de volatilitate de circa 576%, reevaluarea principală are loc în 10–20 de minute, fondul rămâne ridicat câteva ore. De aceea în capitolul 4 butonul „Publică CPI” golea registrul. Programul complet al publicațiilor — în capitolul 6.</p>
+<h2>Motorul 3 · Fixing-uri</h2>
+<p>Cel mai subestimat și mai interesant. Fixing-ul e momentul în care piața trebuie să producă UN singur număr oficial, după care se decontează contracte în toată lumea. Patru fixing-uri care ne privesc:</p>
+<p>Fixing-ul de la Tokyo, 09:55 JST (00:55 UTC). Cursul la care băncile japoneze decontează plățile clienților. Ito și Yamada (NBER) au măsurat: strategia „ține dolarul contra yenului cinci minute înainte de fixing și vinde cinci minute după” dădea în medie 1.8 puncte de bază — vizibil peste costurile de tranzacție.</p>
+<p>„Zilele gotobi”. În Japonia plățile cad tradițional în zile multiplu de cinci: 5, 10, 15, 20, 25, 30. În aceste zile cererea de dolari la fixing e mai mare, efectul din date e vizibil mai puternic — nu ezoterism, ci calendarul contabil al unei țări întregi, ajuns în cotații.</p>
+<p>Licitațiile LBMA Gold, 10:30 și 15:00 ora Londrei. Prețul oficial al aurului, administrat din 2015 de ICE Benchmark Administration (înainte — celebrul „fixing de aur” în biroul N M Rothschild &amp; Sons, unde reprezentanții a cinci case negociau prețul de două ori pe zi din 1919). Contractele bijutierilor, băncilor centrale și ETF-urilor se decontează după aceste două numere.</p>
+<p>Fixing-ul WM/Reuters, 16:00 ora Londrei. Principalul benchmark valutar al planetei: fondurile indexate își reevaluează portofoliile după el — la acest minut se strâng ordine de zeci de miliarde de dolari.</p>
+<h2>🔍 MOMENT INTERESANT · Cum a fost prinsă manipularea și ce s-a făcut</h2>
+<p>Până în 2013, fixing-ul WM/Reuters se calcula pe tranzacții dintr-o fereastră de un minut: 15:59:30–16:00:30. Dealerii marilor bănci — în chat-uri numite „The Cartel” sau „The Bandits' Club” — schimbau informații despre ordinele clienților înainte de fixing și coordonau execuția pentru a muta acel minut în direcția dorită. Ancheta a început în iunie 2013. La 12 noiembrie 2014, FCA britanic a amendat cinci bănci cu £1.1 miliarde ($1.7 miliarde); în total, pe toate jurisdicțiile, amenzile au depășit $10 miliarde pentru șapte bănci, iar unii dealeri au primit acuzații penale.</p><p>Din 15 februarie 2015, fereastra de calcul a fost extinsă de la un minut la cinci — 15:57:30–16:02:30. Logica e simplă: o fereastră de cinci minute e mai scumpă de mutat decât una de un minut.</p><p>Cercetătorii (NBER) au verificat dacă reforma a ajutat: parțial. Volumul s-a distribuit mai uniform în interiorul ferestrei, dar revenirea caracteristică de preț imediat după fixing și volatilitatea crescută din jurul lui nu au dispărut.</p><p>Manipularea pe piață există — e un fapt dovedit, cu condamnări și amenzi. Doar că nu arată ca „am fost scos din poziție”, ci ca o înțelegere între dealeri într-un chat, în jurul unui minut concret al unui benchmark concret. Dacă cineva îți explică pierderea prin „manipulare” — cere-i un nume, o dată și un minut. Cea reală le are.</p>
+<h2>UNDE TRĂIESC STOP-URILE</h2>
+<h2>Mecanica reală a „vânătorii”</h2>
+<p>Acum cel mai mitologizat subiect al cursului. Îl analizăm pe date, nu pe senzații — din fericire avem date.</p>
+<p>Carol Osler (pe atunci la Federal Reserve Bank of New York) a avut acces la registrul intern de ordine condiționate al unei bănci mari: circa 9 700 de ordine între 1 septembrie 1999 și 11 aprilie 2000, trei perechi — dolar/yen, euro/dolar, dolar/liră, mărime medie $5.8 milioane. Niciun trader retail nu vede asemenea date; majoritatea discuțiilor despre „unde stau stop-urile” sunt presupuneri. Aici — o măsurătoare.</p>
+<h2>Descoperirea 1 — stop-urile stau DUPĂ numerele rotunde</h2>
+<p>Ordinele stop se aglomerează nu pe numere rotunde, ci imediat după ele — și asimetric. Stop-urile de cumpărare se adună puțin peste nivelul rotund: 14.4% se termină în 01–10 față de doar 7.4% în 90–99. Logică umană: „pun cu rezervă peste nivel, ca să nu fiu scos întâmplător” — și așa gândesc toți.</p>
+<h2>Descoperirea 2 — take-profit-urile stau PE numerele rotunde</h2>
+<p>9.3% dintre take-profit-uri stau pe niveluri terminate în 00, față de 4.4% la stop-uri. Tot logic: „ies la două mii cinci sute”, nu „la 2497.30”.</p>
+<h2>Descoperirea 3 — cascadă, nu întoarcere</h2>
+<p>Când prețul ajunge la un asemenea cluster, stop-urile se declanșează în masă, fiecare intră pe piață cu un ordin de piață (capitolul 4!) — și consumă registrul mai departe, declanșând stop-urile următoare. Osler numește asta cascadă de preț. De aici consecința directă: mișcarea nu se întoarce după spargerea unui nivel, ci accelerează — exact accelerarea post-spargere pe care analiza tehnică o descrie de o sută de ani, fără să cunoască mecanica.</p>
+<p>Observă cum trei capitole s-au unit într-o singură imagine. Capitolul 3 a spus CU CE să riști. Capitolul 4 — că stop-ul se execută la coadă. Capitolul 5 — că toată lumea stă la aceeași coadă, în același loc. Nu sunt trei teme. E o singură temă din trei unghiuri.</p>
+<h2>AMD CA HARTĂ</h2>
+<h2>Acumulare → Manipulare → Distribuție: ce e adevărat aici și ce e o poveste convenabilă</h2>
+<p>AMD e un model popular al zilei de tranzacționare: Asia acumulează, Londra manipulează, New York distribuie. Vine din școala ICT și apare azi în fiecare al doilea curs, inclusiv, până la această ediție, al nostru. O analizăm ca pe tot restul — pe bucăți, indicând ce e măsurat și ce e povestit.</p>
+<h2>Confirmat prin măsurătoare</h2>
+<h2>E o poveste, nu un fapt</h2>
+<p>Am luat toate zilele de tranzacționare cu aur din bekfill — {{sweep_total_days}} zile. Am găsit zilele în care prețul a depășit, în primele două ore ale sesiunii londoneze, granița intervalului asiatic: {{sweep_days}} astfel de zile ({{sweep_pct}}% din total). Apoi am urmărit cum s-a încheiat până la închiderea sesiunii americane:</p>
+<p>întoarcere (prețul a revenit în interval și a închis de cealaltă parte) — {{reversal_pct}}%; continuare (spargerea a fost reală) — {{continuation_pct}}%; neutru — {{neutral_pct}}%.</p>
+<p>Eșantionul e încă mic: {{sweep_days}} zile cu spargere. La acest volum, diferența dintre {{reversal_pct}}% și {{continuation_pct}}% e statistic indistinctibilă de întâmplare. Publicăm ce avem și recalculăm când bekfill-ul crește.</p>
+<p>Nu există avantaj: intervalele de încredere ale celor două rezultate se suprapun. Spargerea în sine nu oferă niciun avantaj — trebuie decis altceva.</p>
+<p>Există o înclinație spre întoarcere, dar departe de „întotdeauna” și tot necesită verificare pe propria serie de tranzacții.</p>
+<p>Înclinație spre CONTINUARE — adică exact opusul afirmației populare că spargerea londoneză e de obicei falsă.</p>
+<p>Ce faci cu asta: dacă numărul ar fi fost în jur de 50/50, ar însemna că spargerea în sine nu oferă niciun avantaj și trebuie decis altceva — context, tendința timeframe-ului superior, un eveniment din calendar. Dacă s-ar observa o înclinație clară — e un avantaj care tot trebuie verificat pe propria serie de tranzacții (capitolul 3: chiar și un avantaj cinstit pierde pe o serie scurtă). Publicăm exact numărul obținut, și codul cu care a fost obținut.</p>
+<p>AMD e o hartă bună a zilei și un predictor slab. Folosește-o ca listă de verificare a contextului: „în ce fază sunt, ce s-a întâmplat deja azi” — și nu ca semnal. Harta ajută să nu te rătăcești. Nu spune încotro să mergi.</p>
+<h2>SCENĂ — SPARGEREA LONDONEZĂ ÎN DIRECT</h2>
+<p>Acum vei vedea o zi reală de aur. Fundalul scenei sunt bare M30 reale; e marcat momentul în care prețul a depășit granița intervalului asiatic (00:00–07:00 UTC). Data zilei e în eticheta marcajului — o poți verifica în terminal.</p>
+<p>Nu există un răspuns corect aici — și acesta e cel mai important ecran al capitolului. Am calculat pe {{sweep_days}} astfel de zile: {{reversal_pct}}% s-au încheiat cu întoarcere, {{continuation_pct}}% — cu continuare. Cel care intră mereu „în direcția spargerii” și cel care intră mereu „împotrivă” obțin pe termen lung cam același lucru — adică nimic. Diferența o face ce nu apare pe acest ecran: tendința timeframe-ului superior, un eveniment din calendar, mărimea poziției. Dacă ai ales a treia sau a patra variantă — deja gândești ca un profesionist.</p>
+<p>+25 XP pentru orice răspuns — plătim pentru participare și prudență, nu pentru ghicit.</p>
+<h2>ANTRENOR „CUTIA ASIEI” v2</h2>
+<p>Intervalul asiatic e pur și simplu maximul și minimul prețului în orele asiatice (00:00–07:00 UTC). Nicio magie: partea de sus și de jos a cutiei de noapte. Contează nu în sine, ci pentru că îl vede toată lumea și toți pun ordine peste marginile lui (vezi blocul de mai sus despre clusterele de stop-uri). Sarcina ta e să înveți să-l delimitezi rapid și la fel ca restul pieței.</p>
+<p>În prima zi cutia se desenează singură, cu eticheta: orele asiatice — iată aceste bare. Maximul lor e vârful cutiei, minimul e baza. Atât.</p>
+<p>Acum desenează singur cutia, apoi răspunde: ce s-a întâmplat mai departe?</p>
+<p>{{score}}/{{total}}. Observă: e imposibil să ghicești toate zilele — rezultatele sunt distribuite la fel ca în datele reale. Sensul exercițiului nu e procentul de nimeriri, ci faptul că acum vezi cutia în două secunde și știi ce e în spatele ei.</p>
+<p>În bekfill-ul real, zilele cu întoarcere sunt puține (vezi blocul AMD mai sus) — rotația e limitată cinstit la {{total}} zile în loc de șase din spec, fără sintetic adăugat.</p>
+<p>Toleranța verificării — ±15% din înălțimea intervalului real, în preț, nu în pixeli.</p>
+<h2>CAPCANA SCHIMBĂRII OREI</h2>
+<h2>De ce „la 15:30” e o formulare proastă, iar „la 12:30 UTC” e una bună</h2>
+<p>Tot ce ai învățat în acest capitol se mută de două ori pe an — și nu simultan. SUA schimbă ora în a doua duminică din martie și prima duminică din noiembrie. Uniunea Europeană — în ultima duminică din martie și ultima duminică din octombrie. Japonia nu schimbă deloc ora. Rusia nu schimbă din 2014.</p>
+<p>Întâi: iarna, tot programul american se mută cu o oră mai târziu față de fusele fixe. Jumătate din manualele de pe internet sunt scrise cu cifrele „de vară” și induc cititorul în eroare jumătate de an — inclusiv, până la această ediție, capitolul nostru.</p>
+<p>Al doilea: pentru Chișinău aproape nimic nu se schimbă — și e o veste bună. Moldova trece la ora de vară odată cu UE, SUA trec aproape simultan, deci evenimentele americane rămân la aceeași oră locală tot anul. Fereastra de suprapunere e {{overlap_md}} la Chișinău, vara și iarna.</p>
+<p>Al treilea, cel mai important: trei săptămâni pe an totul se dă peste cap. În 2026 sunt 8–29 martie și 25 octombrie – 1 noiembrie. În aceste zile diferența dintre Londra și New York se schimbă cu o oră, iar obișnuitul „știri la trei și jumătate” minte. În fiecare an, cineva ratează NFP pentru că alarma era pusă pe ora de anul trecut.</p>
+<p>Ora unui eveniment trăiește în calendar, nu în capul tău. Un profesionist nu memorează „NFP la 15:30”. Se uită în calendar, unde evenimentul stă în UTC și se afișează în ora sa locală.</p>
+<p>Datele schimbării orei în 2026: SUA — 8 martie și 1 noiembrie; UE și Moldova — 29 martie și 25 octombrie. În 2027: SUA — 14 martie și 7 noiembrie; UE — 28 martie și 31 octombrie.</p>
+<p>Vezi în tabelul de mai sus, în regimul „săptămâna de decalaj” ↑</p>
+<h2>FEREASTRA TA</h2>
+<h2>Carte personală</h2>
+<h2>Fereastra ta</h2>
+<p>Conform datelor noastre, bara medie a aurului în aceste ore e {{user_window_share}}% din intervalul zilnic (vârful zilei — {{peak_share}}%, minimul — {{trough_share}}%).</p>
+<p>Cazi pe finalul orelor asiatice și deschiderea Londrei — cea mai interesantă tranziție a zilei. Plus: lichiditatea e deja decentă, spread-ul îngust. Minus: evenimentele americane majore vin după ce închizi laptopul, deci poziția rămâne nesupravegheată exact în ora în care se poate mișca cel mai puternic. Practic: fie închide înainte de plecare, fie verifică din timp calendarul.</p>
+<p>Ce poate fi mai bun din punct de vedere al mecanicii: cazi în suprapunere sau imediat după. Cel mai dens registru, cel mai îngust spread, reacția la datele americane deja s-a produs și se vede integral. Un singur minus, și e psihologic: ajungi la grafic obosit, după o zi de muncă, adesea cu intenția de „a recupera ziua”. Jurnalul și regula zilei-stop (capitolul 3) nu sunt pentru tine o formalitate.</p>
+<p>Cea mai cinstită discuție — cu tine. Conform măsurătorilor noastre, în orele tale bara medie a aurului e {{night_share}}% din cea zilnică: prețul se mișcă vizibil mai puțin, iar tu plătești vizibil mai mult — spread-ul într-un registru subțire e mai larg (capitolul 4). Asta nu înseamnă „interzis”. Înseamnă trei corecții. Întâi: schimbă instrumentul — în orele tale lucrează Japonia, deci yenul, nu euro; și criptomoneda, care aproape nu are program zilnic. Al doilea: doar ordine limită. Al treilea: țintele ca mărime trebuie să corespundă mișcării reale din orele tale, nu celei zilnice.</p>
+<p>Iar acum ce nu face niciun curs. Tot ce ai citit e statistică despre piață în general. După treizeci de tranzacții înregistrate, jurnalul va arăta statistica despre TINE: în ce ore intri cel mai des, în care câștigi, în care pierzi. Foarte des sunt ore diferite. Câmpul „sesiune” din jurnal se completează automat după ora intrării.</p>
+<p>Salvat. Briefing-ul de dimineață va veni acum cu 30 de minute înainte de începutul ferestrei tale.</p>
+<h2>CONTEXT LOCAL</h2>
+<p>Moldova trece la ora de vară odată cu UE, la fel ca Statele Unite — cu doar trei săptămâni de decalaj pe an. De aceea, spre deosebire de Moscova, evenimentele americane rămân la aceeași oră locală tot anul: suprapunerea Londra–New York e {{overlap_md}}, iar datele macro din SUA apar la {{us_data_md}}. Vara, Chișinăul coincide cu ora Moscovei; iarna rămâne cu o oră în urmă. Cele trei săptămâni de decalaj în 2026: 8–29 martie și 25 octombrie – 1 noiembrie — în aceste zile verifică orele în calendar, nu din memorie.</p>
+<p>Kazahstanul trăiește din 1 martie 2024 într-un singur fus orar, UTC+5. Pentru Astana, asta înseamnă că suprapunerea Londra–New York cade la {{overlap_kz}} — adică spre seară târziu. Concluzia practică: fereastra cea mai lichidă a zilei coincide cu seara, ceea ce e, probabil, mai avantajos decât pentru majoritatea.</p>
+<p>Moscova nu mai schimbă ora din 2014, așa că întregul program american se mută cu o oră de două ori pe an — ține minte asta sau, mai bine, nu ține minte, ci verifică în calendar.</p>
+<p>De ce aurul se mișcă adesea brusc la 12:30 UTC?</p>
+<p>Se publică datele macro din SUA (8:30 New York)</p>
+<p>Corect. NYSE se deschide cu o oră mai târziu, la 13:30 UTC. Saltul e făcut de date, nu de clopoțelul bursei.</p>
+<p>Nu chiar. NYSE se deschide cu o oră mai târziu — saltul de la 12:30 e făcut de publicarea datelor macro din SUA.</p>
+<p>Noaptea, în orele asiatice, ordinul tău de piață pe aur se va executa…</p>
+<p>Mai scump — registrul e mai subțire, spread-ul mai larg</p>
+<p>Corect — regimul „Noaptea asiatică” din simulatorul de registru al capitolului 4. De aici regula: în orele subțiri — ordine limită.</p>
+<p>Nu chiar. Într-un registru subțire spread-ul e mai larg — același ordin costă mai mult, nu mai puțin.</p>
+<p>Unde se aglomerează cel mai des, conform măsurătorilor, ordinele stop?</p>
+<p>Puțin DUPĂ numărul rotund și după marginea intervalului</p>
+<p>Corect — Osler, circa 9 700 de ordine reale: 14.4% dintre stop-urile de cumpărare se termină în 01–10 față de 7.4% în 90–99.</p>
+<p>Nu chiar. Pe numere rotunde stau take-profit-urile; stop-urile — puțin după margine, asimetric.</p>
+<p>Ședința Fed. Vara decizia se publică la 18:00 UTC. La ce oră e asta la Moscova iarna?</p>
+<p>Corect. Moscova nu schimbă ora din 2014, SUA schimbă — deci iarna tot ce e american se mută cu o oră mai târziu.</p>
+<p>Nu chiar. SUA iarna revin cu o oră față de vară, iar Moscova nu se mișcă — rezultatul e 22:00.</p>
+<h2>PREDICȚIA SĂPTĂMÂNII</h2>
+<p>În ce oră mâine aurul va parcurge cel mai mare interval? Alege o oră din grila de mai jos.</p>
+<p>Ai ales ora {{picked_hour}}:00 UTC — aproape exact: vârful istoric conform măsurătorilor noastre e {{peak_hour}}:00 UTC ({{peak_share}}% din interval), diferență doar {{hour_diff}} h. Minimul — {{trough_hour}}:00 UTC ({{trough_share}}%). Revino mâine — se confirmă tiparul și în această săptămână?</p>
+<p>Ai ales ora {{picked_hour}}:00 UTC — conform măsurătorilor noastre vârful istoric e în altă oră: {{peak_hour}}:00 UTC ({{peak_share}}% din interval), diferență {{hour_diff}} h. Minimul — {{trough_hour}}:00 UTC ({{trough_share}}%). Revino mâine — se confirmă tiparul și în această săptămână?</p>
+<p>+15 XP pentru participare. Nu e despre direcția prețului — predicția respectă integral regulile de conformitate.</p>
+<h2>CLIFFHANGER → CAPITOLUL 6</h2>
+<p>Acum știi în ce ore piața poate să se miște — și de ce exact atunci. Dar privește din nou harta noastră, la vârful zilei. Nu cade pe deschiderea vreunei burse. Cade la ora 8:30 dimineața la Washington — minutul în care o agenție guvernamentală publică un singur număr.</p><p>Un număr cunoscut dinainte: data — cu un an înainte, ora — cu o lună înainte, prognoza analiștilor — cu o săptămână înainte. Nu se cunoaște doar valoarea însăși. Iar în momentul publicării, aceasta ridică instantaneu volatilitatea de câteva ori — măsurat, circa 576 la sută la raportul de angajare.</p><p>Gândește-te ce înseamnă asta. Cea mai puternică mișcare a zilei nu e făcută de un jucător secret sau o schemă abilă, ci de un comunicat de presă aflat într-un calendar public, pe care îl poți vedea chiar acum. Toți știu când. Nimeni nu știe cât. Și exact pe acest decalaj e construită întreaga industrie.</p><p>Episodul următor e despre cum se citește acest calendar: de ce piața uneori scade la știri bune, ce înseamnă „cumpără zvonul, vinde faptul” și de ce o cifră ieșită exact conform prognozei mișcă și ea piața.</p>
+<h2>SURSELE CAPITOLULUI</h2>
+<p>SBF Company SRL. Măsurători proprii ale profilului intraday de volatilitate. Backfill MT5, timeframe M30, perioada {{first}} — {{last}}, {{n}} bare pe {{assets}} instrumente. Calcul: mediana intervalului barei, normalizată la intervalul zilnic median al perioadei. Recalculat la {{built}}.</p>

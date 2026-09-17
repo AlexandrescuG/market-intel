@@ -1,0 +1,158 @@
+<h2>CHAPTER 5 — THE TIDE HAS A SCHEDULE</h2>
+<p>First third of the day (00:00–08:00 UTC)</p>
+<h2>ANTI-MYTH</h2>
+<h2>This chapter has a myth with two edges, equally harmful</h2>
+<p>Edge one: &quot;the market is random, there are no patterns, any hour is the same as any other.&quot; This is disproved in five minutes on our own data — intraday volatility seasonality is one of the most robust facts in financial empirics. Andersen and Bollerslev measured it on DM/USD back in 1998: a dip during the Tokyo lunch break, a rise with the European open, a plateau of peak activity, a spike on US data. We recalculated the same thing on gold with our own data — the curve's shape reproduces.</p>
+<p>Edge two, where people who've already heard about sessions tend to fall: &quot;the market is a scheduled conspiracy, institutions agreed at 10:00 to take out my stop.&quot; That's also wrong, and worse — it's learned helplessness dressed up as esoterica. The truth sits in the middle and is more useful than either extreme: liquidity has a schedule; direction doesn't. The clock tells you how far the market can move and at what price you'll be filled. Which way it goes — the clock never says.</p>
+<h2>SBF VOICE · Oleg, Analyst</h2>
+<p>&quot;Colleague, the question I get most is: 'what's the best time to trade?' My answer isn't what people expect. The best time is whenever you can sit calmly in front of the screen without stealing hours from work or family. Everything else is secondary — a tired person at the perfect hour loses more than a rested one at an imperfect hour.</p><p>Then the craft begins: every hour has characteristics, and you need to know them for YOUR hour. Is the spread wide? Is there enough movement for your target to cover costs? Am I about to walk into a release I wasn't expecting? You can trade at 3am — it's just a different market, with different rules, and you need to honestly admit that's the one you're trading.</p><p>Separately, about 'stop hunting.' I've heard this explanation for every loss for twelve years. Nobody is hunting your stop personally. Your stop simply sits in exactly the same place as ten thousand other people's stops — past a round number, past the edge of the overnight range. And that's the only place on the chart where a large participant can buy or sell a lot, fast. They're not coming after you. They're coming after liquidity. You're just standing in line holding a sign that says 'volume available here.' Being offended by that makes about as much sense as being offended by the tide.&quot;</p>
+<h2>THE PRICE OF NOT KNOWING</h2>
+<h2>The arithmetic of a bad hour</h2>
+<p>A trader works days and trades late evening and at night — the only free time he has, entirely honest. Instrument: gold.</p><p>At night two factors work against him at once, both measurable. First — spread: in a thin book it's wider than during the day (chapter 4, &quot;Asian night&quot; regime); say he pays 1.2 instead of 0.3 — an overpay of 0.9 points per trade. Second, and heavier: range. By our own measurements, gold's average 30-minute bar during Asian hours is {{night_share}}% of the daily range — a target isn't reached in an hour, but over half the night, or not at all.</p>
+<p>Plug in your own numbers and see your own figure.</p>
+<p>Points a month handed over just for the right to trade at a bad hour</p>
+<p>Tolerable on its own. But add that targets stop being reached in time, and the trader starts shrinking them — while costs stay fixed. Three months in, he concludes &quot;my strategy stopped working.&quot; The strategy worked. The schedule didn't.</p>
+<p>And the honest other half, without which the first is manipulation: this doesn't mean you can't trade at night. It means trading differently at night: different targets, different instruments (Asian hours belong to the yen, not the euro), different stops, and always — limit orders instead of market orders.</p>
+<h2>THE PLANET'S CLOCKS</h2>
+<h2>What actually opens</h2>
+<p>Before talking about &quot;sessions,&quot; two things that textbooks constantly blur need separating. An exchange is a specific venue with a schedule: the Tokyo Stock Exchange runs 09:00–11:30 and 12:30–15:30 Tokyo time, and during the break literally nothing happens there. A currency session isn't a venue — it's a shorthand for the hours when a region's business day is open. Forex doesn't open or close; it runs continuously from Sunday evening to Friday evening. Only who's at the table changes. So the table below is built not from &quot;sessions&quot; in general, but from events, each with an owner and an exact time.</p>
+<p>Exchange and fixing hours verified against primary sources (JPX, LBMA/ICE, NBER); CME gold hours should be re-checked before trading at cmegroup.com/trading-hours.</p>
+<h2>LIQUIDITY GLOBE</h2>
+<h2>How far the market actually moves, hour by hour</h2>
+<p>This is a map of the day. The top bar is 24 hours in UTC. The three coloured bands mark the hours Asia, Europe and America are at the table. The bars below are NOT a made-up &quot;activity&quot; curve — they're our own measured median 30-minute bar size for that hour: how far the market actually moves. Data — our MT5 backfill, {{n_days_label}} of gold. Drag the slider — see who's at the table and how much movement that hour is worth.</p>
+<p>{{trough_hour}}:00 UTC — the daily minimum: {{trough_share}}% of the daily range. No quieter hour exists.</p>
+<p>{{midHour}}:00 UTC — London is already at the table: {{midShare}}%. Visibly waking up, but not the peak yet.</p>
+<p>{{peak_hour}}:00 UTC — the daily maximum: {{peak_share}}%, {{peak_ratio}}× the quiet hour.</p>
+<p>Use the slider to find the hour when gold's average bar is SMALLEST. Then switch the instrument to USD/JPY — find the same minimum there. Did they match?</p>
+<p>They didn't — and that's the block's main lesson: every instrument has its own hours, because each has a different region behind it. The yen lives in the morning; gold lives on US data.</p>
+<p>A &quot;dead zone&quot; doesn't exist on its own. It only exists for a specific instrument.</p>
+<h2>WHY SESSIONS EXIST AT ALL</h2>
+<h2>Why the yen is active at night</h2>
+<p>In Tokyo, that's simply the working day. The Bank of Japan, exporters like Toyota, regional funds — they all settle their currency needs during their own business hours, like any accounting department. USD/JPY and AUD/USD are moved by real payments in these hours, not speculation.</p>
+<h2>Why gold explodes at 12:30 UTC</h2>
+<p>The old version of this chapter said &quot;NYSE opens&quot; here — that's wrong. 12:30 UTC is 8:30am in Washington: when the Bureau of Labor Statistics and other agencies publish data. NFP, inflation, retail sales. Gold reacts harder than most because it's pricing two things at once: the expected Fed rate and dollar strength. NYSE opens an hour later, and it shows up in the data too — just weaker.</p>
+<h2>What large participants do at night</h2>
+<p>It's disadvantageous for a large participant to execute big volume in a thin book — it moves price against them (chapter 4). So accumulating volume in illiquid hours is inconvenient, not convenient — the &quot;institutions quietly accumulate at night&quot; story contradicts the mechanics. What actually happens: regional payments settle, low-risk-appetite market-making algos run, and a queue of orders waits for the morning's volume.</p>
+<h2>Rollover and the midnight spread jump</h2>
+<p>At 5pm New York time, most brokers begin a new trading day: the daily candle closes, swaps are charged, liquidity providers briefly re-quote. A market order sent at that exact minute is the most expensive order of the day. Wednesday-to-Thursday, the swap is tripled.</p>
+<h2>&quot;OUR DAY&quot; — THE HOURLY MAP</h2>
+<h2>The chapter's core: our own exclusive</h2>
+<p>Everything you've read above is common knowledge, in any textbook. What follows isn't: we calculated it on our own data. {{total_bars}} 30-minute gold bars, {{n_trading_days_label}} ({{coverage_first}} → {{coverage_last}}). You can switch instruments and check whether the pattern holds.</p>
+<p>Most active hour: {{peak_hour}} UTC — {{peak_share}}% of the daily range on average.</p>
+<p>Quietest hour: {{trough_hour}} UTC — {{trough_share}}%.</p>
+<p>Ratio: {{peak_ratio}}×. The pattern holds {{years_consistent}} of {{years_total}} observed periods.</p>
+<p>NFP day (proxied by month's first Friday)</p>
+<p>Still holding across the full available sample ({{n_label}})</p>
+<p>{{label}}: no significant difference visible, n = {{n}}</p>
+<p>{{label}}: not enough data yet, n = {{n}}</p>
+<h2>The curve's shape reproduces</h2>
+<p>Not &quot;that's how it was last month,&quot; but a pattern that holds {{years_consistent}} of {{years_total}} measured periods. Matching the 1998 academic measurements on different instruments is a further argument: the pattern is older than us.</p>
+<h2>Every instrument has its own curve</h2>
+<p>Switch to BTC — you'll see what the others don't have: crypto has no fixings, no exchanges with a schedule, and its daily profile is noticeably flatter. Where there's no institutional schedule, there are no humps in the curve.</p>
+<h2>Friday isn't like other days</h2>
+<p>Compare the &quot;Friday&quot; slice against &quot;Regular day&quot; in the switcher above — honest numbers, from the same measurements. If the difference turns out insignificant on the current sample, that's a result too.</p>
+<h2>NFP days have a different curve</h2>
+<p>Comparing the median profile of first-Fridays against regular days is the clearest evidence that it's events inside sessions, not sessions themselves, that make the humps. A bridge into chapter 6, where we break down the calendar in full.</p>
+<h2>What's measured here and what isn't</h2>
+<p>Measured: bar range (High−Low) — how far price actually moved. Not measured: volume (spot forex has no single unified volume) and spread (spread history isn't stored in OHLC, see chapter 4). So we say &quot;how far the market travelled,&quot; not &quot;how much liquidity there was.&quot; Median, not mean: a single panic shouldn't recolour the whole map.</p>
+<p>History is shorter than two years — the map's axis is built by month, not by year. That's an honest adaptation to the real backfill size, not a bug.</p>
+<p>Few observed periods — the pattern's stability is still being checked on a limited sample.</p>
+<p>Less than a year of data — seasonal effects (December, summer) haven't been checked yet.</p>
+<p>Built by hourly_profile.py from web/data/ohlc_{ASSET}_M30.json.</p>
+<p>Not enough data for this hour in the selected slice</p>
+<p>Hatched columns — not enough data for that hour in the selected slice, not zero.</p>
+<h2>THREE ENGINES OF THE DAY</h2>
+<p>The map showed the humps. Now — who makes them. Exactly three engines, each with an owner, an exact time, and, in two cases out of three, a court case.</p>
+<h2>Engine 1 · Session overlap</h2>
+<p>The simplest and most boring one: when two continents are at the table at once, there are twice as many participants, the book is denser, and any news gets twice as many interpreters. The London + New York window is {{overlap_local}} Chisinau time. Practical takeaway: in this window your market order costs the least. Not &quot;you should trade here,&quot; but &quot;filling here is cheaper&quot; — a crucial difference.</p>
+<h2>Engine 2 · Scheduled releases</h2>
+<p>8:30am in Washington. Not &quot;some news will come out eventually,&quot; but a specific minute, known a month in advance, at which thousands of algorithms receive one number simultaneously. Andersen and Bollerslev measured this on DM/USD: the employment report release produces an instant volatility spike of roughly 576%, most repricing happens within 10–20 minutes, elevated background persists for hours. That's exactly why the &quot;Release CPI&quot; button in chapter 4 emptied the order book. The full release calendar is in chapter 6.</p>
+<h2>Engine 3 · Fixings</h2>
+<p>The most underrated and most interesting. A fixing is the moment the market is required to produce ONE official number, against which contracts worldwide are settled. Four fixings that matter to us:</p>
+<p>The Tokyo fix, 09:55 JST (00:55 UTC). The rate Japanese banks settle client payments at. Ito and Yamada (NBER) measured: a strategy of &quot;hold dollars against yen for five minutes before the fix, sell five minutes after&quot; returned 1.8 basis points on average — noticeably above transaction costs.</p>
+<p>&quot;Gotobi days.&quot; In Japan, payments traditionally fall on days divisible by five: the 5th, 10th, 15th, 20th, 25th, 30th. On these days demand for dollars into the fix is higher, and the effect in the data is noticeably stronger — not esoterica, but an entire country's accounting calendar showing up in quotes.</p>
+<p>The LBMA Gold auctions, 10:30 and 15:00 London time. The official gold price the world's contracts settle against, administered since 2015 by ICE Benchmark Administration (before that — the famous &quot;gold fix&quot; in the offices of N M Rothschild &amp; Sons, where representatives of five houses agreed a price twice a day since 1919). Jewellers, central banks and ETFs settle contracts against these two numbers.</p>
+<p>The WM/Reuters fix, 16:00 London time. The planet's main FX benchmark — index funds revalue portfolios against it, pulling in tens of billions of dollars of orders at that minute.</p>
+<h2>🔍 INTERESTING MOMENT · How the manipulation was caught, and what was done about it</h2>
+<p>Before 2013, the WM/Reuters fix was calculated from trades in a one-minute window: 15:59:30–16:00:30. Dealers at major banks — in chat rooms named things like &quot;The Cartel&quot; and &quot;The Bandits' Club&quot; — traded information about client orders ahead of the fix and coordinated execution to push that minute in a chosen direction. The investigation began with reporting in June 2013. On 12 November 2014, the UK's FCA fined five banks £1.1 billion ($1.7 billion); across all jurisdictions, fines in this case exceeded $10 billion across seven banks, and several dealers faced criminal charges.</p><p>Starting 15 February 2015, the calculation window was widened from one minute to five — 15:57:30–16:02:30. The logic is simple: a five-minute window is more expensive to move than a one-minute one.</p><p>Researchers (NBER) checked whether the reform worked: partially. Volume distributed more evenly within the window, but the characteristic price reversal right after the fix, and elevated volatility around it, didn't go away.</p><p>Market manipulation is real — a proven fact with convictions and fines. It just doesn't look like &quot;I got stopped out&quot;; it looks like dealers colluding in a chat room around one specific minute of one specific benchmark. If someone explains your loss as &quot;manipulation,&quot; ask for a name, a date, and a minute. A real one has them.</p>
+<h2>WHERE STOPS LIVE</h2>
+<h2>The real mechanics of &quot;hunting&quot;</h2>
+<p>Now the most mythologised topic in the course. Let's take it on data, not on feeling — we happen to have the data.</p>
+<p>Carol Osler (then at the Federal Reserve Bank of New York) got access to a large dealing bank's internal book of contingent orders: about 9,700 orders between 1 September 1999 and 11 April 2000, three pairs — dollar/yen, euro/dollar, dollar/pound, average order size $5.8 million. No retail trader ever sees data like this; most talk of &quot;where the stops are&quot; is guesswork. Here — a measurement.</p>
+<h2>Finding 1 — stops cluster PAST round numbers</h2>
+<p>Stop orders cluster not on round numbers but just past them — and asymmetrically. Buy stops pile up just above a round level: 14.4% end in 01–10 versus only 7.4% in 90–99. Human logic: &quot;I'll put it with some room past the level so it doesn't get hit by accident&quot; — and everyone thinks that.</p>
+<h2>Finding 2 — take-profits sit ON round numbers</h2>
+<p>9.3% of take-profits sit on levels ending in 00, versus 4.4% of stops. Also logical: &quot;I'll exit at two thousand five hundred,&quot; not &quot;at 2497.30.&quot;</p>
+<h2>Finding 3 — a cascade, not a reversal</h2>
+<p>When price reaches such a cluster, stops fire en masse, each entering the market as a market order (chapter 4!) — and they eat further into the book, triggering the next stops. Osler calls this a price cascade. The direct consequence: the move doesn't reverse after a level breaks — it accelerates. The exact post-breakout acceleration technical analysis has described for a century without knowing the mechanics.</p>
+<p>Notice how three chapters folded into one picture. Chapter 3 told you WHAT to risk. Chapter 4 — that a stop fills in a queue. Chapter 5 — that everyone shares the same queue, in the same place. That's not three topics. It's one topic from three angles.</p>
+<h2>AMD AS A MAP</h2>
+<h2>Accumulation → Manipulation → Distribution: what's true here and what's a convenient story</h2>
+<p>AMD is a popular model of the trading day: Asia accumulates, London manipulates, New York distributes. It comes from the ICT school and shows up today in every other trading course, including, until this edition, ours. Let's break it down the same way we've broken down everything else — piece by piece, marking what's measured and what's narrated.</p>
+<h2>Confirmed by measurement</h2>
+<h2>Narrative, not fact</h2>
+<p>We took every gold trading day in the backfill — {{sweep_total_days}} days. We found the days where price broke the Asia range boundary within the first two hours of the London session: {{sweep_days}} of them ({{sweep_pct}}% of all days). We then tracked how each one ended by the close of the US session:</p>
+<p>reversal (price returned into the range and closed on the other side) — {{reversal_pct}}%; continuation (the break was genuine) — {{continuation_pct}}%; neutral — {{neutral_pct}}%.</p>
+<p>The sample is still small: {{sweep_days}} days with a sweep. At this size, the gap between {{reversal_pct}}% and {{continuation_pct}}% is statistically indistinguishable from chance. We're publishing what we have, and will recompute as the backfill grows.</p>
+<p>No edge: the confidence intervals of the two outcomes overlap. A sweep on its own gives no advantage — something else has to decide.</p>
+<p>There's a tilt toward reversal, but it's far from &quot;always&quot; and still needs testing on your own trade series.</p>
+<p>A tilt toward CONTINUATION — the exact opposite of the popular claim that a London sweep is usually a fakeout.</p>
+<p>What to do with this: if the number came out around 50/50, it would mean a sweep on its own gives no edge, and something else has to decide — context, the higher-timeframe trend, an event on the calendar. If a clear tilt showed up, that's an edge that still needs testing on your own trade series (chapter 3: even a genuine edge loses over a short series). We're publishing the exact number we got, and the code that produced it.</p>
+<p>AMD is a good map of the day and a poor predictor. Use it as a context checklist — &quot;what phase am I in, what's already happened today&quot; — not as a signal. The map helps you not get lost. It doesn't tell you where to go.</p>
+<h2>SCENE — THE LONDON SWEEP, LIVE</h2>
+<p>You're about to see one real day of gold. The scene runs on real M30 bars; the moment price broke the Asia range boundary (00:00–07:00 UTC) is marked. The day's date is in the marker's caption — you can open it in the terminal and check it yourself.</p>
+<p>There's no correct answer here — and that's the most important screen in the chapter. We calculated across {{sweep_days}} such days: {{reversal_pct}}% ended in reversal, {{continuation_pct}}% in continuation. Someone who always enters &quot;with the break&quot; and someone who always enters &quot;against it&quot; end up, over the long run, with roughly the same thing — nothing. The difference comes from what isn't on this screen: the higher-timeframe trend, a calendar event, position size. If you picked option three or four, you're already thinking like a professional.</p>
+<p>+25 XP for any answer — we pay for participation and caution, not for guessing right.</p>
+<h2>&quot;ASIA BOX&quot; TRAINER v2</h2>
+<p>The Asia range is simply the high and low of price during Asian hours (00:00–07:00 UTC). No magic: the top and bottom of the overnight box. It matters not on its own but because everyone sees it and everyone places orders past its edges (see the stop-cluster block above). Your job is to learn to mark it fast, and the same way the rest of the market does.</p>
+<p>On the first day the box draws itself, labelled: Asian hours — these bars right here. Their high is the top of the box, their low is the bottom. That's it.</p>
+<p>Now draw the box yourself, then answer: what happened next?</p>
+<p>{{score}}/{{total}}. Note: getting every day right is impossible — outcomes are distributed the same way they are in the real data. The point isn't your hit rate; it's that you now spot the box in two seconds and know what's behind it.</p>
+<p>The real backfill has very few reversal days (see the AMD block above) — the rotation is honestly limited to {{total}} days instead of the six from the spec, with no synthetic days added.</p>
+<p>Check tolerance — ±15% of the true range's height, in price, not pixels.</p>
+<h2>THE CLOCK-CHANGE TRAP</h2>
+<h2>Why &quot;at 15:30&quot; is a bad way to say it, and &quot;at 12:30 UTC&quot; is a good one</h2>
+<p>Everything you learned in this chapter shifts twice a year — and not at the same time. The US changes clocks on the second Sunday of March and the first Sunday of November. The EU — the last Sunday of March and the last Sunday of October. Japan never changes clocks. Russia hasn't changed clocks since 2014.</p>
+<p>First: in winter, the entire US schedule slides an hour later relative to fixed time zones. Half the tutorials online are written with &quot;summer&quot; numbers and mislead readers for half the year — including, until this edition, our own chapter.</p>
+<p>Second: for Chisinau almost nothing changes — and that's good news. Moldova switches to DST with the EU, and the US switches almost in sync, so American events stay at the same local time year-round. The overlap window is {{overlap_md}} in Chisinau, summer and winter alike.</p>
+<p>Third, and most important: three weeks a year, everything shifts out of sync. In 2026 that's 8–29 March and 25 October – 1 November. During these days the gap between London and New York changes by an hour, and the usual &quot;news at half past three&quot; is wrong. Every year, someone misses NFP because their alarm was still set to last year's time.</p>
+<p>An event's time lives in a calendar, not in your head. A professional doesn't memorise &quot;NFP at 15:30.&quot; They check a calendar where the event sits in UTC and renders in their own locale.</p>
+<p>2026 clock-change dates: US — 8 March and 1 November; EU and Moldova — 29 March and 25 October. In 2027: US — 14 March and 7 November; EU — 28 March and 31 October.</p>
+<p>See it in the table above, in &quot;desync week&quot; mode ↑</p>
+<h2>YOUR WINDOW</h2>
+<h2>Personal card</h2>
+<h2>Your window</h2>
+<p>By our data, gold's average bar in these hours is {{user_window_share}}% of the daily range (the day's peak is {{peak_share}}%, the minimum is {{trough_share}}%).</p>
+<p>You catch the tail end of Asian hours and the London open — the day's most interesting transition. Plus: liquidity is already decent, spread is tight. Minus: the major US events land after you've closed the laptop, so your position sits unwatched exactly during the hour it can move hardest. Practice: either close before you leave, or know from the calendar what's due later that day.</p>
+<p>About as good as it gets mechanically: you land in the overlap or right after it. The densest book, the tightest spread, and the reaction to US data has already happened and is fully visible. There's exactly one downside, and it's psychological: you arrive at the chart tired after a workday, often intending to &quot;make up for the day.&quot; The journal and the stop-day rule (chapter 3) aren't a formality for you.</p>
+<p>The most honest conversation is with yourself. By our measurements, in your hours gold's average bar is {{night_share}}% of the daily one: price moves noticeably less, while you pay noticeably more — spread in a thin book is wider (chapter 4). That doesn't mean &quot;don't trade.&quot; It means three specific adjustments. First: switch instruments — Japan is at work during your hours, so trade yen, not euro; and crypto, which barely has a daily schedule at all. Second: limit orders only. Third: size your targets to your hours' real range, not the daily one.</p>
+<p>And now the thing no course does. Everything you've read is statistics about the market in general. After thirty logged trades, the journal will show statistics about YOU: which hours you enter most, which ones you make money in, which ones you lose in. Very often those are different hours. The journal's &quot;session&quot; field fills in automatically from your entry time.</p>
+<p>Saved. Your morning brief will now arrive 30 minutes before your window starts.</p>
+<h2>LOCALE CONTEXT</h2>
+<p>Moldova switches to daylight saving with the EU — same as the US, with only a three-week gap each year. So, unlike Moscow, US events stay at the same local time year-round: the London–New York overlap is {{overlap_md}}, and US macro data lands at {{us_data_md}}. In summer, Chisinau matches Moscow time; in winter it falls an hour behind. The three mismatched weeks in 2026: March 8–29 and October 25–November 1 — check the calendar on those days, not your memory.</p>
+<p>Kazakhstan has lived in a single UTC+5 time zone since March 1, 2024. For Astana, that means the London–New York overlap falls at {{overlap_kz}} — late evening. The practical takeaway: the day's most liquid window lands in the evening, which is arguably more convenient than for most.</p>
+<p>Moscow hasn't changed its clocks since 2014, so the entire US schedule slides by an hour twice a year — keep that in mind, or better, don't try to remember it and just check the calendar.</p>
+<p>Why does gold often move sharply at 12:30 UTC?</p>
+<p>US macro data is published then (8:30am New York)</p>
+<p>Correct. NYSE opens an hour later, at 13:30 UTC. Data releases cause the spike, not the opening bell.</p>
+<p>Not quite. NYSE opens an hour later — the 12:30 spike is caused by US macro data releases.</p>
+<p>At night, during Asian hours, your market order on gold will fill…</p>
+<p>More expensively — the book is thinner, the spread wider</p>
+<p>Correct — the &quot;Asian night&quot; regime in chapter 4's order-book simulator. Hence the rule: thin hours call for limit orders.</p>
+<p>Not quite. In a thin book the spread is wider — the same order costs more, not less.</p>
+<p>By measurement, where do stop orders cluster most?</p>
+<p>Just PAST a round number and past the range edge</p>
+<p>Correct — Osler, roughly 9,700 real orders: 14.4% of buy stops end in 01–10 versus 7.4% in 90–99.</p>
+<p>Not quite. Take-profits sit on round numbers; stops sit just past the edge, asymmetrically.</p>
+<p>FOMC meeting. In summer the decision is published at 18:00 UTC. What time is that in Moscow in winter?</p>
+<p>Correct. Moscow hasn't changed clocks since 2014, the US does — so in winter everything American slides an hour later.</p>
+<p>Not quite. The US falls back an hour relative to summer, while Moscow doesn't move — the result is 22:00.</p>
+<h2>PREDICTION OF THE WEEK</h2>
+<p>Which hour will gold post its largest range tomorrow? Pick an hour from the grid below.</p>
+<p>You picked {{picked_hour}}:00 UTC — almost exactly right: the historical peak by our measurements is {{peak_hour}}:00 UTC ({{peak_share}}% of range), only {{hour_diff}}h off. The minimum is {{trough_hour}}:00 UTC ({{trough_share}}%). Come back tomorrow to see whether the pattern held this week too.</p>
+<p>You picked {{picked_hour}}:00 UTC — by our measurements the historical peak is at a different hour: {{peak_hour}}:00 UTC ({{peak_share}}% of range), {{hour_diff}}h off. The minimum is {{trough_hour}}:00 UTC ({{trough_share}}%). Come back tomorrow to see whether the pattern held this week too.</p>
+<p>+15 XP for participating. This isn't about price direction — the prediction fits fully within compliance rules.</p>
+<h2>CLIFFHANGER → CHAPTER 6</h2>
+<p>Now you know which hours the market can move — and exactly why. But look at our map again, at the daily peak. It doesn't land on some exchange's opening bell. It lands at 8:30am in Washington — the minute a government agency publishes a single number.</p><p>A number that's known in advance: the date, a year ahead; the hour, a month ahead; analysts' forecasts, a week ahead. Only the value itself is unknown. And the moment it's published, it instantly multiplies volatility several times over — measured at roughly 576 percent on the employment report.</p><p>Think about what that means. The day's strongest move isn't made by a secret player or a clever scheme — it's made by a press release sitting in a public calendar you can look at right now. Everyone knows when. Nobody knows what. And an entire industry is built on exactly that gap.</p><p>The next episode is about how to read that calendar: why markets sometimes fall on good news, what &quot;buy the rumour, sell the fact&quot; actually means, and why a number that comes in exactly on forecast still moves the market.</p>
+<h2>CHAPTER SOURCES</h2>
+<p>SBF Company SRL. Our own measurements of the intraday volatility profile. MT5 backfill, M30 timeframe, period {{first}} — {{last}}, {{n}} bars across {{assets}} instruments. Method: median bar range, normalized to the period's median daily range. Recomputed as of {{built}}.</p>

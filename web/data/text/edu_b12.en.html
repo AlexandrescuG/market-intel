@@ -1,0 +1,121 @@
+<h2>HOW MANY TRADES ARE ENOUGH</h2>
+<p>A strategy with zero edge — a fair coin. How many trades do you need to tell it apart from a real one?</p>
+<p>At {{n}} trades with zero edge, {{pct}}% of random «traders» will show a win rate of 60% or higher by pure luck. At 200 trades, only {{pct200}}% get that lucky — the illusion doesn't fade on its own, sample size fades it.</p>
+<p>Next: how many trades you actually need to tell an edge apart from luck.</p>
+<h2>ANTI-MYTH</h2>
+<h2>&quot;I'll know if a system works from the first few trades&quot;</h2>
+<p>You won't, and it's not about paying closer attention. A short run tells you almost nothing but noise: the spread of outcomes over ten trades is so much wider than the gap between a good system and a bad one that they're indistinguishable even in principle. This isn't an opinion — it's computable, and we compute it below.</p>
+<p>The opposite edge of the myth is just as harmful: &quot;so testing is pointless, you just have to believe in the system.&quot; Also wrong. You can test — the object of the test is just different. Fifty trades can't prove an edge, but they can precisely establish whether you followed your own rules. And unlike an edge, that's entirely in your hands.</p>
+<p>The truth is in between: discipline gets tested first, an edge second. It doesn't work in reverse — measuring a system that was executed haphazardly measures nothing about the system itself.</p>
+<h2>SBF VOICE</h2>
+<p>Ichimoku isn't better or worse than other ways of describing the market — its strength is being one complete language for entries, exits, and context, instead of a pile of five different indicators. What works with any system, including this one, is the same thing: three rules written down before you start, and fifty trades without changing them. The value of the first fifty isn't the result — it's finding out how many of them actually broke a rule you thought you were following.</p>
+<h2>THE PRICE OF NOT KNOWING</h2>
+<h2>What ten trades actually prove</h2>
+<p>A trader tests a system on ten trades. Six wins, four losses. Conclusion: &quot;it works, 60%.&quot; Size goes up.</p>
+<p>Result &quot;6 of 10 or better&quot; for a system with NO edge (p=50%)</p>
+<p>In other words, this result doesn't distinguish a system with an edge from one without: it's equally likely for both.</p>
+<p>The cost of the mistake isn't in these ten trades — it's in what happens after: size was increased on a conclusion that showed nothing. A normal losing streak follows, and it arrives on the increased size.</p>
+<p>The honest other half: this doesn't mean testing is useless. It means a test result needs a sample-size figure attached, and sizing decisions shouldn't be made on the result of a short run. How many you actually need — we compute below, and it's also why the next chapter asks for a series rather than &quot;give it a try.&quot;</p>
+<h2>WHERE THE SYSTEM CAME FROM</h2>
+<h2>Almost a century old, and one question without a solid answer</h2>
+<p>The system was created by a Japanese journalist who published under the pseudonym Ichimoku Sanjin, and released in finished form in the mid-twentieth century after decades of testing. The name translates roughly as &quot;balance seen at a glance&quot; — an accurate description of the intent: not a set of signals, one picture.</p>
+<h2>FIVE LINES</h2>
+<h2>What each line actually measures</h2>
+<p>The formulas and the visual logic haven't changed from the previous edition — what changed is what we claim about each line.</p>
+<h2>Tenkan-Sen</h2>
+<p>Analogous to a fast moving average but computed differently: not the average of closes, but the midpoint between the high and low over 9 periods. Shows the midpoint of the last 9 bars' range, not the average price.</p>
+<p>A flat Tenkan means sideways movement; a steep one means strong momentum. The angle is more informative than the value itself. The difference from an MA is substantive: it averages the extremes of the range, not the closes.</p>
+<h2>Kijun-Sen</h2>
+<p>The system's main 'balance line': the midpoint of the range over 26 periods. Often acts as a dynamic level price returns to after impulsive moves.</p>
+<p>Kijun's angle is a rough indicator of trend quality: a flat Kijun inside the Cloud often coincides with a zone where price lingers longer. The formula reflects the range midpoint, not the average closing price — the same distinction as Tenkan.</p>
+<h2>Chikou Span</h2>
+<p>The most unusual element: today's closing price plotted 26 periods in the past. A convenient way to see at a glance where we are relative to a month ago.</p>
+<p>The common rule — 'Chikou above price 26 periods ago = signal confirmed' — is a tautology, unpacked separately below. As a standalone way to see how far price has moved over a period, it's useful. As independent confirmation, it isn't: it's the same observation stated a second time.</p>
+<h2>Senkou Span A</h2>
+<p>The fast edge of the Kumo Cloud: the average of Tenkan and Kijun, plotted 26 periods forward. Why the forward shift doesn't grant knowledge of the future — unpacked separately below, the chapter's key explanation.</p>
+<p>In a bull trend, pullbacks often stop at Senkou A. A thin Cloud (A≈B) means a weaker trend, a breakout is more likely. Thickness describes the spread of range-midpoint estimates across different periods, not the strength of a future move.</p>
+<h2>Senkou Span B</h2>
+<p>The slow Cloud edge: the range midpoint over 52 periods, also plotted 26 periods forward. Together with Senkou A it forms the Cloud.</p>
+<p>A flat Senkou B often coincides with a zone where price lingered for a long time in the past. A future crossover of Senkou A and B ('Kumo Twist') is a crossover of two averages computed today, not a forecast of a reversal moment.</p>
+<h2>THE SAME THING ON A LIVE INSTRUMENT</h2>
+<p>All five lines are computed from real daily bars, unsmoothed and unretouched. The area to the right of the last candle isn't a forecast — it's the Cloud, computed today and simply plotted 26 periods ahead.</p>
+<h2>THE CLOUD 'IN THE FUTURE' — THE CHAPTER'S KEY EXPLANATION</h2>
+<h2>Why shifting right adds no knowledge</h2>
+<p>Today: a point computed from the last N periods' prices</p>
+<p>26 periods later: the same point, just further along the X axis</p>
+<p>No information was added to the point. Only where it's drawn on the screen changed.</p>
+<h2>CHIKOU AND THE ILLUSION OF CONFIRMATION</h2>
+<h2>One observation, stated twice</h2>
+<p>Remember this pattern: it shows up everywhere. Two indicators computed from the same price cannot confirm each other independently, no matter how different their lines look.</p>
+<p>Chikou Span (= today's close, just plotted further left)</p>
+<h2>WHAT'S ACTUALLY VALUABLE IN ICHIMOKU</h2>
+<h2>Coherence</h2>
+<p>Every element is computed from the same data and speaks the same language. This protects against a common failure mode: stacking five indicators, getting five contradictory opinions, and picking the one that agrees with the position you already opened.</p>
+<h2>A single version of events</h2>
+<p>As long as the rules stay fixed, the system gives one answer to 'what state are we in.' It's harder to argue with after the fact than a pile of separate tools — and arguing with yourself after the fact is the main source of losses (chapter 10).</p>
+<h2>Cloud thickness as description</h2>
+<p>The distance between the edges describes how far the range-midpoint estimates diverged across different periods. As context for position size — useful. As a prediction — no.</p>
+<h2>HOW MANY TRADES YOU NEED — THE CHAPTER'S CORE</h2>
+<h2>A precise answer to a question people rarely ask</h2>
+<p>The question is: how many trades does it take to tell a system with an edge apart from one without? It has an exact answer, computed by a formula, and we'll compute it now — first for a worked example, then for your own numbers.</p>
+<p>A worked example: a system with a 55% win rate at a 1:1 reward-to-risk ratio.</p>
+<p>Trades needed to distinguish at 95% confidence</p>
+<p>Months at 5 trades/week (illustrative figure)</p>
+<p>The number came out large — in the hundreds. For most people that's years.</p>
+<p>Enter your own numbers: expected win rate and reward-to-risk ratio.</p>
+<p>Reward : risk ratio (e.g. 1.5 = 1.5 to 1)</p>
+<p>Trades needed to distinguish (95% conf.)</p>
+<p>Probability of 5 losses in a row over 150 trades</p>
+<p>The win rate you entered isn't above breakeven for this ratio — meaning by these numbers there's no edge to find, not 'you need more trades to find it.' That's not a calculator glitch: it's honestly telling you there's nothing to prove.</p>
+<h2>Three conclusions, all three unpleasant</h2>
+<p>First: proving an edge statistically takes hundreds of trades. For most people that's years. This doesn't mean you can't trade earlier — it means confidence in a system based on the first hundred trades rests on nothing, for anyone, including us.</p>
+<p>Second: over fifty trades, even a working system's result lands in a wide interval — inside it sit both an &quot;excellent result&quot; and &quot;the system doesn't work.&quot; Both conclusions would be equally baseless.</p>
+<p>Third: a streak of five losses in a row is a routine event for a working system. If you quit on it, you're not quitting a bad system — you'd quit any system.</p>
+<p>Which is the whole point of this arithmetic: the decision to continue or stop can't be made on the result. It's made on whether you followed the rules. The result will come later, and it will be trustworthy later.</p>
+<p>This is a sample-size calculator, not a result forecast. We don't publish win rates, ours or anyone else's. All parameters are entered by the user, every output is about sample size.</p>
+<p>Test power is set at 80% (the standard value in statistics — the spec doesn't name a number explicitly) — this is an assumption, not a measurement.</p>
+<h2>WHAT FIFTY TRADES ACTUALLY SHOW</h2>
+<h2>If fifty isn't enough to prove an edge — what's it for?</h2>
+<p>Because they measure something else, and that something is entirely in your hands:</p>
+<p>These four numbers don't need statistics: they're a direct tally, known exactly at fifty trades. And they answer a question that has to be asked before the question of edge: were you even trading the system you set out to.</p>
+<p>For most people, the first honest tally comes out to a quarter to a third of trades &quot;off the system.&quot; While that share is high, measuring an edge is pointless — you'd be measuring a mix of the system and your mood, not the system.</p>
+<h2>Your series</h2>
+<p>No series started yet — the numbers will appear once you lock in rules in the block below.</p>
+<p>No evaluated trades in the series yet — once the first ones are scored, this will show a breakdown by your configured discipline criteria (chapter 10).</p>
+<p>By your configured discipline criteria (not literally the 4 categories above — same idea, different tagging, see chapter 10)</p>
+<p>Honestly: this isn't course-wide statistics today — no real user has a completed series yet. The numbers below are personal and only appear once you start counting yourself.</p>
+<h2>STEP 7 — RULES AND COUNTER</h2>
+<p>Everything above was arithmetic. It's the same for everyone and says nothing about you.</p>
+<p>The one thing no formula can compute is whether you followed your own rules. That isn't derived, it's observed: it needs your trades, and it needs rules written down before them, not reconstructed after.</p>
+<h2>Write your system's rules in three lines</h2>
+<p>Prediction: what share of the next 50 trades do you think will be off the system, %</p>
+<h2>This will start a new series</h2>
+<p>The current counter resets to zero. Rules written down after the fact prove nothing — that's why they can't be changed mid-series without a reset.</p>
+<h2>Series not started yet</h2>
+<p>Once you lock in rules below, a counter opens in the chapter header, and from that moment only new trades will count.</p>
+<h2>No demo account connected — paper version</h2>
+<p>The automatic counter from terminal trades isn't available without a connected account. Instead, the same step on paper: write the same three lines of rules and keep count by hand, with the button below, after each closed trade you make by the system.</p>
+<h2>Fifty reached</h2>
+<p>The counter is closed. Step 8 is unlocked — a live analyst's review of your journal, described in the cliffhanger below.</p>
+<p>Neither here nor in the calculator above is it promised that fifty trades will bring a profit. This step measures discipline, not results.</p>
+<p>The Ichimoku Cloud is drawn 26 periods ahead. What does it contain?</p>
+<p>Today's and past prices, plotted further right</p>
+<p>The averaged opinion of market participants</p>
+<p>Correct. Shifting right added zero bits of new information.</p>
+<p>Not quite. Tomorrow's prices aren't in the Cloud — they don't exist yet when it's computed.</p>
+<p>You got six wins out of ten. What does that prove?</p>
+<p>Almost nothing — that result is just as likely for a system with no edge</p>
+<p>Correct. A '6 of 10' result doesn't distinguish a system with an edge from one without.</p>
+<p>Not quite. At p=50%, '6 of 10 or better' also comes up regularly.</p>
+<p>Where did the numbers 9, 26, 52 in Ichimoku come from?</p>
+<p>Fixed historically, like 14 in RSI and 200 in a moving average</p>
+<p>Correct. This is the exact same logic chapter 8 already covered for RSI and MACD.</p>
+<p>Not quite. We couldn't trace the original source of these numbers — the account is historical, not derived.</p>
+<p>What can you reliably learn from fifty trades?</p>
+<p>Correct. Fifty trades measure discipline, not edge.</p>
+<p>Not quite. An edge can't be proven statistically at fifty trades — that takes hundreds.</p>
+<h2>PREDICTION OF THE WEEK</h2>
+<p>The prediction is entered right in the step-7 form below, where you lock in your series rules. It's the best prediction in the course: it's about you specifically, it's checked unambiguously against fifty real trades, and it directly trains the chapter's main skill.</p>
+<h2>NEXT → CHAPTER 13</h2>
+<p>The counter is running. In a couple of weeks you'll have fifty trades and four numbers about how you ran them.</p><p>What follows is the reason all of this was written. The next episode is about swing trading: what a trade that lives for weeks rather than hours looks like, and what pyramiding is — adding to a position that's already working. A topic where a mistake costs more than anywhere else in the course, because adding increases both the profit and the loss, and the decision gets made exactly when the position is already green and you want more.</p><p>And in the same chapter — something we haven't done once yet: a live human reviewing your journal. Not an automated report, but an analyst who looks at your fifty trades and says what they see. Fair warning: they usually see something other than what the trades' author expects.</p>
+<h2>CHAPTER SOURCES</h2>

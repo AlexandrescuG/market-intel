@@ -1,0 +1,91 @@
+<h2>SĂ RECUPEREZI</h2>
+<p>Alege mărimea unei pierderi. Cât trebuie să câștigi ca să revii la suma inițială?</p>
+<p>−{{dd}}% → ai nevoie de +{{need}}% ca să revii la zero. Asimetria crește mai repede decât pare: nu liniar, ci după formula dd/(1−dd).</p>
+<p>În asta stă tot sensul acestui capitol: nu cât de departe mergi pe profit, ci cât costă să revii dintr-o pierdere.</p>
+<h2>ANTI-MIT</h2>
+<h2>Două mituri, și sunt opuse</h2>
+<p>Primul, deja cunoscut: „cu cât tranzacționezi mai des, cu atât câștigi mai mult”. Infirmat de aritmetica costurilor din capitolul 11: fiecare tranzacție costă bani ficși, indiferent de rezultat.</p>
+<p>Al doilea e subiectul acestui capitol: „a adăuga la o poziție profitabilă e sigur, doar risc bani deja câștigați”. Aceasta e cea mai costisitoare eroare de gândire din trading. Cât timp poziția e pe plus, banii se simt „nu chiar ai mei” — dar contul nu face diferența între bani câștigați și bani depuși: amândoi dispar la fel. Iar volumul după trei adăugări poate fi de patru ori mai mare decât cel inițial — adică exact atunci când pare că riscul a scăzut, el a crescut de mai multe ori.</p>
+<p>Adevărul: adăugarea înseamnă deschiderea unei poziții noi la un preț mai prost, nu continuarea gratuită a celei vechi. Trebuie dimensionată după regulile capitolului 3, ca orice altă poziție, nu după senzație.</p>
+<h2>VOCEA SBF</h2>
+<p>Riscul încetează să fie calculat exact în momentul în care o tranzacție intră pe plus: întrebarea „cât pierd dacă se întoarce” se pune la intrare și cumva nu se mai pune la adăugare. Funcționează un singur lucru — după fiecare adăugare, calculează prețul mediu al poziției și urmărește un singur număr: unde devine ea neprofitabilă. Dacă numărul ăsta s-a apropiat de prețul curent, nu mai sunt adăugări, oricât de frumos ar arăta trendul.</p>
+<h2>PREȚUL NEȘTIINȚEI</h2>
+<h2>Calculăm sub ochii tăi, fără procente inventate</h2>
+<p>Intrare cu un lot. Prețul a parcurs 40 de puncte în direcția dorită, adăugare cu încă un lot. Încă 40 — al treilea lot. Încă 40 — al patrulea.</p>
+<p>Prețul mediu de intrare e acum cu 60 de puncte peste prima intrare. Poziția e de patru ori mai mare decât cea inițială.</p>
+<p>Fără adăugări, aceeași situație ar arăta așa: preț cu 60 de puncte peste intrare, poziție pe plus 60 de puncte cu un singur lot. Aceeași piață, aceeași mișcare, rezultat opus.</p>
+<p>Partea cinstită: de aici nu rezultă că nu se poate adăuga. Rezultă că adăugarea are un preț, se calculează dinainte și trebuie știut înainte de a apăsa butonul, nu după. Exact asta calculează calculatorul de mai jos.</p>
+<h2>DE CE SWING — ARITMETICĂ, NU GUST</h2>
+<p>Costul pe tranzacție e fix și cunoscut: spread plus comision, l-ai măsurat în capitolul 11. Deci costul total e proporțional cu numărul de tranzacții, nu cu calitatea lor.</p>
+<p>Acesta e singurul argument cinstit în favoarea orizonturilor mai lungi, și nu ține de faptul că swing-ul e „mai bun”. Ține de faptul că la un orizont scurt cerințele de precizie sunt mai mari — același cost trebuie recuperat printr-o mișcare mai mică.</p>
+<p>Reversul se numește imediat: o poziție lungă trăiește prin evenimente de calendar (capitolul 6), prin rollover-uri și swap-uri (capitolul 5), iar riscul ei peste noapte nu e sub control. Alegerea orizontului e alegerea unui set de probleme, nu scăparea de ele.</p>
+<h2>ANATOMIA UNEI TRANZACȚII</h2>
+<h2>Analiza unei tranzacții reale ca succesiune de decizii</h2>
+<p>Aceasta e o analiză a unei tranzacții a unei persoane, pe un instrument, într-un context concret. Nu e șablon, nu e strategie, nu e recomandare. Valoarea nu stă în niveluri — nu se vor repeta — ci în ordinea întrebărilor puse înainte de a apăsa butonul. Ordinea se repetă, nivelurile nu.</p>
+<p>Aur, grafic zilnic. Calendarul zilei — liniștit, fără publicații mari nici în sesiunea asiatică, nici în cea europeană. Ambele medii (capitolul 8) indicau aceeași direcție, prețul deasupra ambelor. Nimic neobișnuit — o zi obișnuită cu o imagine clară, dar nu rară.</p>
+<p>Stopul n-a stat la „cât nu-mi pare rău să pierd”, ci la un punct structural — acolo unde ideea de intrare însăși încetează să fie adevărată. Dacă prețul ar fi ajuns acolo, nu ar fi însemnat „ghinion”, ci „ipoteza de mișcare e greșită” — și motivul corect de a închide e exact acesta, nu că stopul s-a declanșat mecanic.</p>
+<p>Greșeala nu e tranzacția în sine, nici adăugarea în sine. Greșeala e că decizia ultimei adăugări a fost luată fără a reverifica calendarul pentru durata de viață rămasă a poziției. Calendarul chiar fusese gol la momentul intrării, dar nu și douăsprezece ore mai târziu — și nimeni n-a reverificat, pentru că poziția era deja mult pe plus și „de ce, oricum merge bine”. Exact această verificare omisă a fost condiția în care o mișcare obișnuită peste noapte împotriva poziției s-a transformat într-o problemă reală: până atunci volumul era de câteva ori mai mare decât cel inițial, și nimeni nu se uitase la date proaspete de risc pentru timpul rămas.</p>
+<p>Nu „nu adăuga”. Rezultă: lista de întrebări verificată înainte de prima intrare trebuie reverificată înainte de FIECARE adăugare, nu considerată închisă o singură dată. Poziția își schimbă mărimea pe parcursul vieții ei, iar lista de verificări — dacă nu se repetă — nu se schimbă odată cu ea.</p>
+<h2>ARITMETICA ADĂUGĂRII — NUCLEUL CAPITOLULUI</h2>
+<p>Adăugarea e o poziție nouă la un preț nou. Deci poziția combinată capătă un preț mediu de intrare, și e mai prost decât cel inițial. Acum calculăm exact cât de mult și ce rezultă din asta.</p>
+<p>Exemplu gata făcut: un lot la intrare, apoi trei adăugări de câte un lot, la pas de 40 de puncte.</p>
+<p>Preț mediu de intrare (puncte peste prima intrare)</p>
+<p>Punctul fără întoarcere (retragere de la vârf, puncte)</p>
+<p>Punctul fără întoarcere se retrage exact la jumătatea distanței parcurse — nu e o coincidență, e o consecință directă a aritmeticii mediei pentru pași egali. Numărul absolut de puncte sub risc crește totuși cu fiecare adăugare.</p>
+<p>Setează-ți propriii parametri de adăugare.</p>
+<p>Mărimea fiecărei adăugări (loturi, mod „egale”)</p>
+<p>Punct fără întoarcere, puncte de la vârf</p>
+<p>Risc total, de câte ori mai mare decât prima poziție</p>
+<h2>Trei lucruri vizibile în aceste cifre</h2>
+<p>Primul: distanța absolută în puncte până la punctul fără întoarcere crește cu fiecare adăugare — 20 de puncte după o adăugare, 60 după trei în exemplul de mai sus. Nu „riști bani deja câștigați” — îți reduci marja de siguranță în puncte și bani reali.</p>
+<p>Al doilea: riscul total crește mai repede decât pare la prima vedere. La adăugări egale volumul crește liniar — dar fiecare unitate de volum poartă propria pondere de risc, și se adună.</p>
+<p>Al treilea, și el decide: toate adăugările au fost făcute în stare de câștig. Acestea sunt singurele decizii din trading luate atunci când totul merge bine — și de aceea singurele unde prudența naturală nu se activează.</p>
+<p>Concluzia nu e „nu adăuga”. Concluzia e: calculează punctul fără întoarcere înainte de prima adăugare și decide după el, nu după cum arată trendul.</p>
+<p>Acesta e un calculator de consecințe, nu o metodă de tranzacționare. Nu recomandăm nici să adaugi, nici să te abții — arătăm aritmetica deciziei.</p>
+<h2>CÂT COSTĂ UN STOP LA BREAKEVEN — MĂSURĂTOAREA NOASTRĂ</h2>
+<p>Regula „am mutat stopul la intrare — riscul e zero” sună impecabil, și tocmai de aceea aproape că nu se verifică niciodată. Am verificat două lucruri.</p>
+<p>Primul — „risc zero” e greșit literalmente</p>
+<p>Rămân slippage-ul, gap-ul de la deschiderea săptămânii, gap-ul de la publicarea datelor (capitolul 6), lărgirea spread-ului. Pierderea planificată e zero; cea reală poate fi oricât. Nu e o măsurătoare, e mecanică deja analizată în capitolele 4 și 6.</p>
+<p>Cât de des mutarea la breakeven închide o tranzacție care ar fi funcționat. Metodă fixată înainte de calcul: luăm toate cazurile în care prețul a parcurs de la un punct ipotetic de intrare X puncte (în fracții de ATR) în direcția dorită; verificăm cât de des revine la intrare înainte de a atinge ținta Y. Parcurgere pe o grilă de X și Y, pe instrumente și intervale H4/D1 — swing-ul trăiește în zile, nu în ore.</p>
+<p>Cu cât muți mai devreme, cu atât costă mai mult. Relația e monotonă pe toate distanțele de țintă verificate — fără nicio excepție.</p>
+<p>Un compromis, nu o îmbunătățire. Mutarea la breakeven reduce pierderea medie și reduce ponderea tranzacțiilor care ating ținta, simultan. Ce contează mai mult depinde de raportul țintă/stop din sistemul concret; nu există un răspuns universal, și nu dăm unul.</p>
+<p>Măsurat: mișcarea prețului din istoricul nostru, fără spread și slippage — deci ponderea reală închisă la zero e MAI MARE decât estimarea noastră. Nemăsurat: contextul intrării. Am testat regula mecanică, pentru că exact așa e aplicată.</p>
+<h2>PLANUL TRANZACȚIEI — CE SE SCRIE ÎNAINTE</h2>
+<p>Cinci rânduri. Tot ce nu e scris înainte va fi inventat după — și va coincide cu ce s-a întâmplat. Mecanismul a fost analizat în capitolul 9.</p>
+<p>Condiția de intrare — verificabilă, nu „arată bine”</p>
+<p>Unde e stopul și de ce exact acolo — nivelul la care ideea inițială e infirmată</p>
+<p>Unde e ieșirea — și ce faci dacă prețul a ajuns la jumătatea drumului și s-a oprit</p>
+<p>Dacă adaugi, și dacă da — punctul fără întoarcere după fiecare adăugare, calculat dinainte</p>
+<p>Ce e în calendar pe durata de viață a poziției</p>
+<h2>TREAPTA 8 — ANALIZA JURNALULUI DE UN ANALIST REAL</h2>
+<p>Tocmai ai citit analiza tranzacției altcuiva — cu întrebări puse înainte de intrare și o greșeală descoperită după. E firesc să-ți dorești aceeași analiză pentru ale tale.</p>
+<p>Automat nu se poate face asta. Jurnalul îți calculează cifrele și le arată (capitolul 10), dar cifrele nu răspund la întrebarea „de ce ai decis așa” — la ea răspunde un om care citește la rând cincizeci dintre tranzacțiile tale și vede ce nu se vede din interior.</p>
+<h2>Cum sună concluzia analizei</h2>
+<p>Nu „ești prea devreme pentru bani reali” — aceasta e o recomandare personală despre o decizie financiară, pe care un proiect educațional n-are dreptul s-o facă. În loc de asta — o constatare de fapte: „Din înregistrările tale, cele patru condiții pe care capitolul 14 le pune înaintea unui cont real stau așa: tranzacții — 34 din 50; săptămâni de jurnal — 3 din 4; sistem scris — da; aritmetica riscului calculată — nu. Două din patru condiții nu sunt încă îndeplinite.” Un răspuns direct, fără convingere, fără sfat.</p>
+<p>Analiza e gratuită și nu obligă la nimic. De ce o oferim: cineva care trece printr-o analiză înainte de primul cont real termină cursul vizibil mai des. Ne e avantajos, și preferăm să spunem asta noi înșine.</p>
+<p>Formularul de cerere pentru analiză nu e încă deschis. Să-l arătăm înainte să existe o coadă reală și un termen real de răspuns ar fi mai rău decât să nu-l arătăm deloc — o promisiune pe care n-o poate onora nimeni costă mai mult decât un „încă nu” cinstit.</p>
+<p>Ai adăugat de trei ori pe măsură ce prețul creștea. Ce s-a întâmplat cu punctul în care poziția devine neprofitabilă?</p>
+<p>Corect. Fiecare adăugare mută punctul fără întoarcere mai aproape de prețul curent, în puncte absolute.</p>
+<p>Nu chiar. Prețul mediu de intrare crește cu fiecare adăugare, deci și pragul la care poziția devine neprofitabilă se apropie.</p>
+<p>Stopul e mutat la intrare. Riscul e zero?</p>
+<p>Nu — rămân slippage, gap-uri și lărgirea spread-ului; zero a devenit pierderea planificată</p>
+<p>Corect. Pierderea planificată e zero, cea reală poate fi oricât.</p>
+<p>Nu chiar. „Risc zero” descrie planul, nu o garanție de execuție la acel preț.</p>
+<p>De ce la o țintă scurtă cerințele de precizie sunt mai mari?</p>
+<p>Un cost fix mănâncă o pondere mai mare dintr-o mișcare mică</p>
+<p>Comisionul e mai mare la tranzacții scurte</p>
+<p>Corect. Același cost în puncte e o mușcătură mai mare dintr-o țintă mică.</p>
+<p>Nu chiar. Contează ce pondere din țintă mănâncă același cost fix.</p>
+<p>Regulile unei tranzacții, reconstituite după ce s-a închis, …</p>
+<p>Nu sunt mai proaste decât cele scrise înainte</p>
+<p>Vor coincide mereu cu ce s-a făcut de fapt — memoria se adaptează</p>
+<p>Sunt mai precise, pentru că rezultatul e cunoscut</p>
+<p>Corect. Exact de aceea planul tranzacției se scrie înainte, nu se reconstituie după.</p>
+<p>Nu chiar. Memoria retrospectivă adaptează explicația la ce s-a întâmplat deja (capitolul 9).</p>
+<h2>PROGNOZA SĂPTĂMÂNII</h2>
+<p>Ce pondere din tranzacții crezi că se închid la zero în loc să atingă ținta, când stopul e mutat la breakeven după jumătatea drumului spre țintă?</p>
+<p>Despre o mărime măsurabilă — nu există răspuns corect moral, există unul calculat.</p>
+<h2>URMEAZĂ → CAPITOLUL 14</h2>
+<p>A mai rămas o temă și o discuție.</p><p>Tema e scalping: tranzacții care trăiesc minute. O vom analiza cinstit, și concluzia principală nu va fi despre tehnică. Scalping-ul e un capitol despre costuri: la o țintă de zece puncte, spread-ul și comisionul se transformă din cheltuială secundară în cheltuiala principală, și totul se decide prin aritmetica pe care deja știi s-o faci din capitolul 11.</p><p>Iar discuția e despre contul real. Am ajuns în locul unde e logic s-o discutăm, și o discutăm direct: ce se schimbă când banii sunt reali, cât costă asta și de ce avem patru condiții în fața acestei uși, nu un buton. Probabil ai îndeplinit deja trei din patru.</p>
+<h2>SURSELE CAPITOLULUI</h2>
+<p>SBF Company SRL. Ponderea tranzacțiilor închise la zero în loc de țintă după mutarea stopului la breakeven. Date: 16 instrumente, timeframe-uri H4/D1, o grilă de {{x_n}}×{{y_n}} valori în fracțiuni de ATR (perioadă {{atr_period}}), orizont de {{lookahead}} bare. Metodă: stopul mutat la breakeven după ce prețul trece fracțiunea X din distanța până la ținta Y; fără spread și slippage — ponderea reală e mai mare decât aceasta. Recalculat la {{built}}.</p>

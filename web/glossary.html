@@ -42,7 +42,14 @@ body{margin:0;background:var(--cream);color:var(--ink);font-family:Montserrat,sa
        (Л-6). lang сюда уже приходит с сервера, префикс собираем здесь. #}
     <p>{{ t('glossary.subtitle', lang) }} · <a href="{{ ('/' + lang + '/') if lang != 'ru' else '/' }}" style="color:var(--gold-text,#866A19)">{{ t('glossary.back_home', lang) }}</a></p>
   </div>
+  {# 🔴 Текст глоссария приходит из сервера, а не только из JS. Список
+     строится sbf-glossary.js из JSON — и для того, кто JavaScript не
+     исполняет, страница была пустой: 63 знака из 1497. ИИ-краулеры именно
+     такие. Скрипт при старте заменяет содержимое контейнера целиком, так
+     что человек видит обычный раскрывающийся список.
+     Текст собирает tools/build_text_layer.js из того же glossary.json. #}
   <div id="glContainer"></div>
+  {{ text_layer('glossary', lang) | safe }}
 </div>
 <script src="/assets/sbf-glossary.js?v=2"></script>
 <script>

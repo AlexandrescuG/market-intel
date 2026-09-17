@@ -1,0 +1,86 @@
+<h2>WHICH MOVING AVERAGE IS BETTER</h2>
+<p>Three moving-average periods. Pick which one you think is profitable more often out of sample — before you see any chart.</p>
+<p>Out of sample, across {{n_total}} combinations on 15 instruments: period 20 — profitable in {{p20}}% of cases (n={{n20}}), 50 — {{p50}}% (n={{n50}}), 200 — {{p200}}% (n={{n200}}). The spread between «correct» periods is smaller than it looks.</p>
+<p>Next: where that confidence in the «ideal» period comes from, and what happens to it on data the indicator has never seen.</p>
+<h2>ANTI-MYTH</h2>
+<h2>«Correct settings exist, and professionals know them»</h2>
+<p>Out of this grow the «golden» combinations: 9/21 for scalping, 50/200 for an investor, 20 for everything else. The numbers get passed around as knowledge, even though none of them were derived — they stuck historically because they mapped conveniently onto the calendar: 20 trading days in a month, 50 a quarter, 200 a year.</p>
+<p>This gets tested in a single screen, and we let you test it yourself (below). The result is known in advance, and it isn't in our favor as a seller: the best period over any stretch of history always exists, and on the next stretch it turns out not to be the best one. Not «sometimes» — systematically, and further down we show by how much.</p>
+<p>The opposite edge of the myth is just as harmful: «indicators don't work, it's all drawing». That's wrong too. A moving average honestly does exactly what it claims: it averages. The problem isn't the tool — it's that people expect a prediction from it that its formula doesn't contain.</p>
+<h2>SBF VOICE</h2>
+<p>We keep a single moving average on the chart. It answers exactly one question: is price above or below its average over the chosen horizon. The period isn't picked by optimization — it's set by how long a typical trade lasts. Parameters fitted to history stop working right around when you start trusting them.</p>
+<h2>THE PRICE OF NOT KNOWING</h2>
+<h2>The arithmetic of someone else's setup</h2>
+<p>Someone takes a ready-made combination from a video — say, EMA 8 and 20 — and trades the crossovers on the hourly chart. Over a month, dozens of crossovers pile up: fast averages on the hourly cross often, and that's a property of the setting, not the market.</p><p>Let's calculate the cost without guessing at the outcome. Spread and commission on gold together run {{cost_per_trade}} points per trade — that's measurable, the number sits right there in the terminal. At {{crosses_per_month}} crossovers a month (our measurement for this pair of periods on this timeframe), they pay {{monthly_cost}} points a month just for the right to follow the signals, before any conversation about whether they're profitable at all.</p><p>What follows is predictable: a run of false crossovers in a range-bound market, the person decides the settings are «too fast», switches to 21/50, runs into a different market regime, switches back. Every switch is a fit to the last month — the same mistake as in the lab below, just stretched over time and paid for in real money.</p><p>The honest second half: the issue isn't that 8/20 is a bad combination. It's that it's someone else's. The number of crossovers, the cost per trade, and whether you live to see the average turn all depend on the instrument and your own horizon — and all of that can be worked out in fifteen minutes on your own chart. That's exactly what we'll ask you to do at the end of the chapter.</p>
+<h2>WHAT A MOVING AVERAGE ACTUALLY IS</h2>
+<p>k = 2 / (period + 1) — the weight with which a new bar enters the average. The shorter the period, the larger k, the faster the EMA reacts to a fresh price.</p>
+<h2>The average contains no information that isn't already in the price</h2>
+<p>It's a transformation of already-known numbers: added, weighted, divided. No new information appears in the result — what appears is ease of reading. Everything the indicator «shows» was already on the chart; it just removed some of the detail so the rest stands out.</p>
+<h2>A rule for every chapter that follows</h2>
+<p>An indicator can't know more than the price it's calculated from. If someone claims otherwise, they aren't talking about arithmetic.</p>
+<h2>LAG ISN'T A FLAW — IT'S A PRICE</h2>
+<p>Any smoothing pays for itself with a delay. The longer the period, the fewer false wiggles, and the later the average reacts to a genuine reversal. This isn't «a shortcoming of EMA, fixed by other indicators» — it's a property of the averaging operation itself, and it can't be worked around, only positioned on a scale.</p>
+<p>Where you land on this scale depends on how long you hold a position — and on nothing else.</p>
+<h2>THE OVERFITTING LAB</h2>
+<p>Drag the fast and slow EMA sliders. Three numbers update: the share of bars where the move matched the position's direction, the net move in points after costs (in ATR fractions), and the maximum drawdown.</p>
+<p>SCREEN 2 · LET'S CHECK IT ON DATA YOU HAVEN'T SEEN</p>
+<h2>What just happened is called overfitting, and it's the number-one mistake in market analysis</h2>
+<p>You picked parameters for a specific piece of the past. Not for the market — for that stretch. On it, your combination really was the best one: {{is_result}}. On the next stretch, it landed in {{oos_rank}} place out of {{grid_size}} possible, result — {{oos_result}}.</p><p>You didn't make a mistake in the fitting. The fit was done correctly. The mistake is in the framing of the problem itself: you were searching for a number that describes the past and planning to apply it to the future.</p><p>Here's what's worth taking away from this screen. Everything you've seen online — «the ideal EMA numbers for gold», «foolproof parameters for scalping» — was obtained by exactly the method you just used to get yours. There's one difference: you got shown the second screen, and it usually isn't there.</p><p>If you'd like, try again with different settings — the outcome will be the same in substance. This isn't our cherry-picked sample or our trickery: try a different instrument, a different timeframe, a different half of history.</p>
+<p>This is an educational model for demonstrating overfitting, not a trading system. We don't publish strategies and don't recommend parameters.</p>
+<h2>&quot;OUR OWN MEASUREMENTS&quot; — WHAT HAPPENED TO THE BEST PARAMETERS</h2>
+<p>You tested it on one instrument. We tested it on every one we have — {{n_cells}} instrument×timeframe combinations, a grid of {{grid_size}} period pairs. The result is below, the code and export are right there too.</p>
+<h2>A method fixed before the count</h2>
+<p>Each instrument's history is split in half. On the first half, the entire grid of period pairs is swept and the best one is picked by net move after costs. Then that same pair — and only that one — is run on the second half. Its rank among all pairs on the second half gets recorded.</p>
+<h2>1 · The best pair on the first half is systematically not the best one on the second</h2>
+<p>Median rank — {{median_oos_rank}} out of {{grid_size}} ({{median_percentile}}th percentile). {{verdict_line}} If the parameters carried information about the future, the ranks would cluster near the top.</p>
+<h2>2 · The outcome is scattered across the entire range — from nearly the best to nearly the worst</h2>
+<p>The percentile rank of the «ideal» first-half pair on the second half: minimum {{pct_min}}, median {{pct_median}}, maximum {{pct_max}}. Half of all cases (the 25th–75th percentile) fall within {{pct_p25}}–{{pct_p75}}. The exact same fitting procedure sometimes produced a near-best result, sometimes a near-worst one — there's no way to tell in advance which one you'll get.</p>
+<h2>3 · Are long periods more stable than short ones? Not clearly</h2>
+<p>We expected a clean, actionable finding here, and the data didn't confirm it unambiguously. By the share of pairs that stayed net-positive on the holdout half, long periods (slow EMA ≥ 100) do slightly better than short ones: {{net_positive_long}}% versus {{net_positive_short}}%. But by rank in the overall standings — it's the reverse: median {{rank_long}} versus {{rank_short}} out of {{grid_size}} (lower is better). We didn't force these two numbers to tell the same story — they genuinely diverge. The practical takeaway isn't «pick a longer period» — it's the same one from the start of the chapter: period length on its own doesn't protect you from overfitting. Only checking against data you haven't seen does.</p>
+<p>There's essentially no persistence — it matches a random distribution of ranks.</p>
+<p>There's weak persistence, but not enough to justify a ready-made setting.</p>
+<p>Persistence is more noticeable than we expected — but still check it on your own data, don't grab a ready-made number.</p>
+<h2>The honest plate</h2>
+<p>What's measured here: the mechanical rule of two moving averages crossing, with a fixed cost per trade ({{cost_per_trade_atr}} of ATR per position change). What isn't here: context — news, session, market regime, position management. We tested the rule on its own, because that's exactly how it gets sold. A real trading system isn't made of parameters. Our grid is {{grid_size}} pairs across {{n_cells}} instrument×timeframe combinations, and that's not infinite — on a longer history these numbers will shift, and we'll recompute them.</p>
+<h2>WHAT A MOVING AVERAGE IS ACTUALLY GOOD FOR</h2>
+<h2>📐 A definition, not a forecast</h2>
+<p>«Uptrend» is vague and shifts with mood. «Price above its N-period average» is arithmetic, the same yesterday and today. The average's value is that it fixes a definition and doesn't let you argue with yourself after the fact. That's discipline, not prediction.</p>
+<h2>🔍 Describing the regime</h2>
+<p>The price's distance from the average and the average's slope describe what state the instrument is in right now: has it drifted far, or is it oscillating around it. That's context for everything else — including what the following chapters teach. A description of the present, not the future.</p>
+<h2>🗣 A shared language</h2>
+<p>When two people say «price is below the two-hundred», they understand each other exactly. That's the only reason it's worth knowing about 50 and 200 — not because the numbers are special, but because plenty of people watch them, and that makes conversation possible.</p>
+<h2>What a moving average does NOT do</h2>
+<h2>RUNG 3 — YOUR OWN INDICATOR AND LINKING YOUR JOURNAL</h2>
+<p>You just picked parameters and saw what happened to them on data you hadn't seen. One question remains that this lab can't answer, and it's the only one that matters: what will happen to your settings on your instrument, going forward.</p><p>Testing against the past is always a test against something that already happened; we just showed you what that's worth. The only honest test is forward, and it requires two things: a chart you configured yourself, and a record of what you decided, made before you knew how it turned out.</p><p>You already have the first one — the demo from chapter 7. The second is a journal.</p>
+<h2>This chapter's homework</h2>
+<p>Open your demo. Pick an instrument you're genuinely interested in — not the gold from our examples. Put two averages on it with periods that match your horizon: if you hold for a day or two, look at short ones; if weeks, long ones.</p><p>Look at the last three months and answer yourself one question: how many times did price approach the average and bounce off it, and how many times did it pass straight through? That number will be different for different instruments, and that's the whole point — it's yours, not ours. Write it in your journal: in chapter 13 we'll build a conversation on top of it, and we'll need your number there.</p>
+<h2>The journal is the other half of the check</h2>
+<p>Your journal currently holds zero trades. That is normal at the start of chapter 8 — and it also means you have nothing to test your settings forward on yet. The first entry is made before the outcome is known: the instrument, the periods, what you decided and why.</p>
+<p>Your journal already holds {{n}} trades. That is enough for chapter 13 to work with your numbers instead of ours.</p>
+<p>The journal is free and lives in the same account as the course. The rung-9 thresholds (50 trades across 4 weeks) are counted from it too — by the very endpoint that shows the number above.</p>
+<p>You picked a pair of periods off history with a great result. What does that tell you about the future?</p>
+<p>Almost nothing — the best pair exists on any stretch by definition</p>
+<p>That it needs to be checked again on the same history</p>
+<p>Correct. The best combination always exists — the question is whether it stays the best on new data.</p>
+<p>Not quite. The best pair exists on any fixed stretch by definition — that tells you nothing about the future.</p>
+<p>Why isn't a long period always more stable than a short one, on our data?</p>
+<p>Different stability criteria give different answers — there's no single clear conclusion</p>
+<p>Correct. By one criterion long periods do better, by another, short ones do. What saves you isn't period length — it's checking forward.</p>
+<p>Not quite. We measured both criteria honestly, and they diverged — the data doesn't give a single «longer is better» answer.</p>
+<p>Large funds buy more whenever price touches EMA 50 — that's…</p>
+<p>A claim about intent we never observed; execution runs through volume-based algorithms, not off a moving average</p>
+<p>Correct — chapter 7. A large participant executes via VWAP/TWAP tied to volume, not by «buying off the average».</p>
+<p>Not quite. Chapter 7: execution runs through volume-based algorithms (VWAP/TWAP), not off touching a moving average.</p>
+<p>You trade the crossovers on the hourly chart. What grows along with the number of signals?</p>
+<p>Total cost — spread and commission on every position change</p>
+<p>Correct — chapter 4. Every position change costs money regardless of whether it's right.</p>
+<p>Not quite. Every crossover is a position change — and that means a new spread and commission.</p>
+<h2>PREDICTION OF THE WEEK</h2>
+<p>On which timeframe do you think parameters picked off history transfer worst to the future?</p>
+<p>Correct — in our data {{picked_tf}} holds the worst rank: median {{picked_rank}} out of {{tf_of}} (the other two timeframes rank better by comparison). The gap isn't huge — persistence is low across the board — but {{picked_tf}} is measurably worse.</p>
+<p>In our data, the worst-transferring timeframe isn't {{picked_tf}} (median {{picked_rank}} out of {{tf_of}}) — it's {{worst_tf}}, median {{worst_rank}} out of {{tf_of}}. The gap between timeframes isn't huge — persistence is low across the board — but by our measurements {{worst_tf}} is measurably worse than the rest.</p>
+<p>+15 XP for participating. About a measurable quantity, not price.</p>
+<h2>CLIFFHANGER → CHAPTER 9</h2>
+<p>You've learned not to trust settings picked off the past. What's left is learning not to trust yourself.</p><p>The next episode is about company earnings and oscillators. And there's a trap there that catches even people who've been through this chapter in full.</p><p>Open any company's chart after an earnings release, and the picture will look obvious: here they expected weak numbers, here strong ones came out, here's where price went. You'll look at it and decide you understood it. The problem is that once the outcome is already known, memory rebuilds itself as if you'd expected exactly that all along. That isn't a character flaw — it's how memory works, and it wrecks most people's independent attempts to learn from history.</p><p>There's exactly one way to catch yourself doing it, and it's an unpleasant one: write down what you expect before you find out. The next chapter is built around exactly that — and along the way, explains why a stock falls on an earnings report that beat forecast.</p>
+<h2>CHAPTER SOURCES</h2>
+<p>SBF Company SRL. Testing out-of-sample stability of moving-average parameters. Data: 15 instruments, H1/H4/D1 timeframes, a grid of {{grid_size}} period pairs, {{n_cells}} instrument×timeframe combinations. Method: the best pair on the first half of history is run on the second half, and its rank among all pairs is recorded; cost {{cost}} of ATR per position change. Recomputed as of {{built}}.</p>

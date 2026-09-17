@@ -1,0 +1,85 @@
+<h2>CLAW BACK</h2>
+<p>Set the size of a drawdown. How much do you need to earn back to return to the starting amount?</p>
+<p>−{{dd}}% → you need +{{need}}% to get back to even. The asymmetry grows faster than it looks: not linearly, but by dd/(1−dd).</p>
+<p>That asymmetry is what this whole chapter is about: not how far you ride a gain, but what it costs to come back from a loss.</p>
+<h2>ANTI-MYTH</h2>
+<h2>Two myths, and they're opposites</h2>
+<p>The first, already familiar: &quot;trade more often, earn more.&quot; Disproved by the cost arithmetic from chapter 11: every trade costs fixed money, regardless of outcome.</p>
+<p>The second is this chapter's subject: &quot;adding to a winning position is safe — I'm risking money I already made.&quot; This is the most expensive thinking error in trading. While a position is green, that money feels like &quot;not quite mine&quot; — but an account doesn't distinguish between money earned and money deposited: both disappear the same way. And size after three adds can be four times the original — meaning right when risk feels lower, it multiplied.</p>
+<p>The truth: adding is opening a new position at a worse price, not a free continuation of the old one. It should be sized by chapter 3's rules, like any other position, not by feel.</p>
+<h2>SBF VOICE</h2>
+<p>Risk stops being counted the exact moment a trade turns green: the question &quot;how much do I lose if this reverses&quot; gets asked on entry and somehow doesn't get asked on the add. What works is one thing — after every add, compute the position's average price and watch a single number: where it turns unprofitable. If that number has crept close to the current price, there are no more adds, no matter how good the trend looks.</p>
+<h2>THE PRICE OF NOT KNOWING</h2>
+<h2>Computed in front of you, no invented percentages</h2>
+<p>One lot on entry. Price moves 40 points the right way, add a second lot. Another 40 — a third lot. Another 40 — a fourth.</p>
+<p>The average entry price is now 60 points above the first entry. The position is four times the original size.</p>
+<p>Without the adds, the same situation would look like this: price 60 points above entry, position up 60 points on one lot. Same market, same move, opposite result.</p>
+<p>The honest other half: this doesn't mean you can't add. It means adding has a price, computed in advance, and you need to know it before pressing the button, not after. That's exactly what the calculator below computes.</p>
+<h2>WHY SWING — ARITHMETIC, NOT TASTE</h2>
+<p>The cost per trade is fixed and known: spread plus commission, which you measured in chapter 11. So total cost is proportional to the number of trades, not their quality.</p>
+<p>This is the only honest argument for longer horizons, and it isn't that swing is &quot;better.&quot; It's that a short horizon demands higher precision — the same cost has to be recovered by a smaller move.</p>
+<p>The flip side gets named right away: a long position lives through calendar events (chapter 6), through rollovers and swaps (chapter 5), and its overnight risk isn't under your control. Choosing a horizon is choosing a set of problems, not escaping them.</p>
+<h2>ANATOMY OF ONE TRADE</h2>
+<h2>One real trade broken down as a sequence of decisions</h2>
+<p>This is a breakdown of one trade by one person on one instrument in a specific setting. Not a template, not a strategy, not a recommendation. The value here isn't the levels — they won't repeat — it's the order of questions asked before pressing the button. The order repeats; the levels don't.</p>
+<p>Gold, daily chart. The day's calendar was quiet — no major releases in either the Asian or European session. Both moving averages (chapter 8) pointed the same way, price above both. Nothing unusual — an ordinary day with a clear, but not rare, picture.</p>
+<p>The stop wasn't placed at &quot;how much I don't mind losing&quot; — it sat at a structural point, where the entry thesis itself stops being true. If price had reached it, that wouldn't mean &quot;bad luck,&quot; it would mean &quot;the move hypothesis is wrong&quot; — and the correct reason to close is exactly that, not that a stop mechanically triggered.</p>
+<p>The mistake wasn't the trade or the add itself. The mistake was making the decision on the last add without re-checking the calendar for the position's remaining expected life. The calendar had indeed been empty at the moment of entry, but not twelve hours later — and nobody re-checked, because the position was already deeply green and &quot;why bother, it's all going fine.&quot; That one skipped check is exactly what turned an ordinary overnight move against the position into a real problem: by then size was several times the original, and nobody had looked at fresh risk data for the time still remaining.</p>
+<p>Not &quot;don't add.&quot; What follows: the checklist run before the first entry has to be re-run before EVERY add, not treated as settled once. A position changes size over its life, and a checklist — if it isn't repeated — doesn't change along with it.</p>
+<h2>THE ARITHMETIC OF ADDING — THE CHAPTER'S CORE</h2>
+<p>Adding is a new position at a new price. So the combined position gets an average entry price, and it's worse than the original. Let's compute exactly how much worse, and what follows from it.</p>
+<p>A worked example: one lot on entry, then three adds of one lot each, 40 points apart.</p>
+<p>Average entry price (points above first entry)</p>
+<p>Point of no return (pullback from peak, points)</p>
+<p>The point of no return pulls back exactly half of the distance traveled — not a coincidence, a direct consequence of averaging arithmetic for equal steps. The absolute number of points at risk still grows with every add.</p>
+<h2>Three things visible in these numbers</h2>
+<p>First: the absolute distance in points to the point of no return grows with every add — 20 points after one add, 60 after three in the example above. You're not &quot;risking money already made&quot; — you're shrinking your margin of safety in real points and money.</p>
+<p>Second: total risk grows faster than it looks. With equal adds, size grows linearly — but every unit of size carries its own share of risk, and they add up.</p>
+<p>Third, and this settles it: every add was made while winning. These are the only decisions in trading made when everything is going well — and so the only ones where natural caution doesn't kick in.</p>
+<p>The conclusion isn't &quot;don't add.&quot; It's: compute the point of no return before the first add, and decide by that, not by how good the trend looks.</p>
+<p>This is a consequences calculator, not a trading method. We don't recommend adding or holding off — we show the arithmetic of the decision.</p>
+<h2>WHAT A BREAKEVEN STOP ACTUALLY COSTS — OUR MEASUREMENT</h2>
+<p>The rule &quot;moved the stop to entry — risk is zero&quot; sounds flawless, and that's exactly why it almost never gets checked. We checked two things.</p>
+<p>Slippage remains, weekend gaps remain, data-release gaps remain (chapter 6), spread widening remains. The planned loss is zero; the actual one can be anything. This isn't a measurement, it's mechanics already covered in chapters 4 and 6.</p>
+<p>Second — measurable, and more interesting</p>
+<p>How often moving to breakeven closes a trade that would have worked. Method fixed before counting: take every case where price moved X points (in ATR fractions) from a hypothetical entry in the favorable direction; check how often it returns to entry before reaching target Y. Swept over a grid of X and Y, across instruments and H4/D1 timeframes — swing lives in days, not hours.</p>
+<p>The earlier you move it, the more it costs. The relationship is monotonic across every target distance checked — without a single exception.</p>
+<p>A trade-off, not an improvement. Moving to breakeven lowers the average loss and lowers the share of trades reaching target at the same time. Which matters more depends on the target-to-stop ratio in a specific system; there's no universal answer, and we don't give one.</p>
+<p>Measured: price movement in our history, without spread or slippage — meaning the real share closed at zero is HIGHER than our estimate. Not measured: entry context. We tested the mechanical rule because that's exactly how it's applied.</p>
+<h2>THE TRADE PLAN — WHAT GETS WRITTEN DOWN BEFORE</h2>
+<p>Five lines. Anything not written down before will be invented after — and it'll match what happened. The mechanism was covered in chapter 9.</p>
+<p>Entry condition — checkable, not &quot;looks good&quot;</p>
+<p>Where the stop is and why — the level at which the original idea is disproven</p>
+<p>Where the exit is — and what to do if price gets halfway and stalls</p>
+<p>Whether you'll add, and if so — the point of no return after each add, computed in advance</p>
+<p>What's on the calendar for the position's expected life</p>
+<h2>STEP 8 — A LIVE ANALYST'S JOURNAL REVIEW</h2>
+<p>You just read a breakdown of someone else's trade — with questions asked before entry, and a mistake found after. It's natural to want the same for your own.</p>
+<p>That can't happen automatically. The journal computes your numbers and shows them (chapter 10), but numbers don't answer &quot;why did you decide that&quot; — a person answers that, someone who reads fifty of your trades in a row and sees what isn't visible from the inside.</p>
+<h2>How the review's conclusion is worded</h2>
+<p>Not &quot;you're not ready to trade real money&quot; — that's a personal recommendation about a financial decision, which an educational project has no business making. Instead — a statement of fact: &quot;By your records, the four conditions chapter 14 sets before a real account stand as: trades — 34 of 50; journal weeks — 3 of 4; system written down — yes; risk arithmetic computed — no. Two of four conditions aren't met yet.&quot; A direct answer, no persuasion, no advice.</p>
+<p>The review is free and commits you to nothing. Why we offer it: someone who goes through a review before their first real account finishes the course noticeably more often. That benefits us, and we'd rather say so ourselves.</p>
+<p>The review request form isn't open yet. Showing it before a real queue and a real response time stand behind it would be worse than not showing it at all — a promise nobody can keep costs more than an honest &quot;not yet.&quot;</p>
+<p>You added three times as price rose. What happened to the point where the position turns unprofitable?</p>
+<p>Correct. Every add moves the point of no return closer to the current price, in absolute points.</p>
+<p>Not quite. Average entry price rises with every add, so the threshold where the position turns unprofitable moves closer too.</p>
+<p>The stop is moved to entry. Is risk zero?</p>
+<p>No — slippage, gaps, and spread widening remain; the planned loss became zero</p>
+<p>Correct. The planned loss is zero; the actual one can be anything.</p>
+<p>Not quite. &quot;Risk zero&quot; describes the plan, not a guarantee of execution at that price.</p>
+<p>Why does a short target demand higher precision?</p>
+<p>A fixed cost eats a larger share of a small move</p>
+<p>Correct. The same cost in points is a bigger bite out of a small target.</p>
+<p>Not quite. It's about what share of the target the same fixed cost eats.</p>
+<p>Trade rules reconstructed after a trade closes …</p>
+<p>Will always match what was actually done — memory adapts</p>
+<p>Are more accurate, since the outcome is known</p>
+<p>Correct. That's exactly why a trade plan is written before, not reconstructed after.</p>
+<p>Not quite. Hindsight memory adapts the explanation to fit what already happened (chapter 9).</p>
+<h2>PREDICTION OF THE WEEK</h2>
+<p>What share of trades do you think close at zero instead of reaching target, when the stop moves to breakeven after covering half the distance to target?</p>
+<p>About a measurable quantity — there's no morally correct answer, only a computed one.</p>
+<h2>NEXT → CHAPTER 14</h2>
+<p>One topic and one conversation remain.</p><p>The topic is scalping: trades that live for minutes. We'll cover it honestly, and the main takeaway won't be about technique. Scalping is a chapter about costs: at a ten-point target, spread and commission stop being overhead and become the main line item, and everything comes down to arithmetic you already know how to do from chapter 11.</p><p>The conversation is about a real account. We've reached the point where it makes sense to discuss it, and we will, directly: what changes when the money is real, what it costs, and why there are four conditions in front of that door instead of a button. You've probably already met three of the four.</p>
+<h2>CHAPTER SOURCES</h2>
+<p>SBF Company SRL. Share of trades that closed at zero instead of the target after moving the stop to breakeven. Data: 16 instruments, H4/D1 timeframes, a {{x_n}}×{{y_n}} grid of values in ATR fractions (period {{atr_period}}), a {{lookahead}}-bar horizon. Method: stop moved to breakeven once price crosses fraction X of the distance to a target Y; excludes spread and slippage — the real share is higher than this. Recomputed as of {{built}}.</p>
