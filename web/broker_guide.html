@@ -2,6 +2,11 @@
 <html lang="{{ lang }}">
 <head>
 <meta charset="UTF-8">
+{# canonical + hreflang. Путь приходит из сервера: один этот шаблон
+   обслуживает пять адресов (/brokers/xm … /brokers/avatrade), и
+   зашитый путь сделал бы канониклом одну и ту же страницу для всех
+   пяти — хуже, чем его отсутствие. См. serve.py:_render_site_page. #}
+{{ alt_links(page_path or '/brokers', lang) | safe }}
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>{{ t('guide.page_title', lang) }}</title>
 <meta property="og:type" content="website">

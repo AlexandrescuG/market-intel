@@ -1121,6 +1121,8 @@ _site_jinja.globals["symbol_name"] = _symbols.symbol_name
 # Определение ниже по файлу; здесь регистрируется ленивой обёрткой, чтобы не
 # зависеть от порядка объявлений в модуле.
 _site_jinja.globals["text_layer"] = lambda имя, lang: _text_layer(имя, lang)
+# canonical + hreflang: шаблоны зовут {{ alt_links('/brokers', lang) | safe }}
+_site_jinja.globals["alt_links"] = lambda путь, lang: _alt_links(путь, lang)
 
 
 def _tojson_filter(value) -> Markup:
@@ -1141,7 +1143,9 @@ def _tojson_filter(value) -> Markup:
 _site_jinja.filters["tojson"] = _tojson_filter
 
 _EDU_RE     = re.compile(r'^/edu(?:/(?P<lang>ro|en))?/b(?:/(?P<ch>\d+))?(?:\?.*)?$')
-_EDU_TOC_RE = re.compile(r'^/edu/?(?:\?.*)?$')
+# Оглавление курса разбирается по path_clean (см. do_GET), отдельное
+# выражение по self.path было слепо к префиксу локали: /ro/edu/ под него
+# не подходил и уезжал в статику.
 
 _EDU_LIVE = {
     1: "^GSPC", 2: "^GSPC", 3: "GC=F",      4: "^GSPC",    5: "EURUSD=X",
@@ -1233,6 +1237,47 @@ def _precompile_all() -> None:
         except Exception as e:
             print(f"  Глава {ch}: {e}")
     print(f"Готово: {len(_COMPILED)}/15 глав скомпилированы", flush=True)
+
+
+ДОМЕН_САЙТА = "https://lp.sbfconsult.com"
+_ЯЗЫКИ_САЙТА = ("ru", "ro", "en")
+
+
+def _локальный_адрес(путь: str, язык: str) -> str:
+    """Адрес страницы в нужной локали.
+
+    🔴 У курса локаль стоит ПОСЛЕ /edu (/edu/ro/b/3), у всего остального —
+    перед (/ro/brokers). Та же развилка уже дала 404 на /ro/edu/b (Л-2
+    языкового аудита), когда адрес собирали приклеиванием префикса.
+    """
+    if язык == "ru":
+        return путь
+    if путь.startswith("/edu/b"):
+        return путь.replace("/edu/b", f"/edu/{язык}/b", 1)
+    if путь.rstrip("/") == "/edu":
+        return f"/{язык}/edu/"
+    return f"/{язык}{путь}"
+
+
+def _alt_links(путь: str, lang: str) -> str:
+    """canonical + hreflang для страницы.
+
+    🔴 Без этого у трёхъязычного сайта три отдельные страницы вместо одной
+    с переводами: ни поисковик, ни ИИ-агент не знают, что /brokers,
+    /ro/brokers и /en/brokers — один материал, и выбирают между ними
+    наугад. Замер 17.09.2026: ни canonical, ни hreflang не было ни на
+    одной странице сайта.
+    x-default указывает на русскую версию — она полная и обновляется
+    первой.
+    """
+    свой = _локальный_адрес(путь, lang)
+    части = [f'<link rel="canonical" href="{ДОМЕН_САЙТА}{свой}">']
+    for я in _ЯЗЫКИ_САЙТА:
+        части.append(f'<link rel="alternate" hreflang="{я}" '
+                     f'href="{ДОМЕН_САЙТА}{_локальный_адрес(путь, я)}">')
+    части.append(f'<link rel="alternate" hreflang="x-default" '
+                 f'href="{ДОМЕН_САЙТА}{путь}">')
+    return "\n".join(части)
 
 
 _TEXT_LAYER_DIR = Path(__file__).parent / "web" / "data" / "text"
@@ -1680,6 +1725,13 @@ def _build_edu_page(ch: int, lang: str) -> bytes:
     if '<script src="/edu/assets/simple-lang.js' not in html:
         html = html.replace(
             "</head>", '<script src="/edu/assets/simple-lang.js?v=1"></script>\n</head>', 1)
+
+    # canonical + hreflang. Главы — единственные страницы сайта, которые
+    # рендерит не Jinja (у книги свой конвейер с Babel), поэтому теги
+    # вставляются здесь, а не в шаблоне: иначе пятнадцать материалов в трёх
+    # языках остались бы без связи между версиями.
+    if 'rel="canonical"' not in html:
+        html = html.replace("</head>", _alt_links(f"/edu/b/{ch}", lang) + "\n</head>", 1)
 
     # Хедер инжектирует sbf-header.js (добавлен через css_tags выше)
 
@@ -2238,7 +2290,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             # поэтому один и тот же шаблон обслуживает все маршруты без сервер-side
             # переменных. Список литеральный (не regex): маршрут добавляется только
             # когда для брокера реально есть данные в web/data/guides/.
-            self._render_site_page("broker_guide.html", req_lang)
+            self._render_site_page("broker_guide.html", req_lang,
+                                   page_path=path_clean)
         elif path_clean == "/journal":
             self._serve_static(WEB_DIR / "journal.html")
         # ── Legacy /m/* routes → redirect to unified index ──
@@ -2330,8 +2383,14 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self._handle_chart_my_trades()
         elif path_clean == "/api/chart/trade-context":
             self._handle_chart_trade_context()
-        elif _EDU_TOC_RE.match(self.path):
-            self._handle_edu_toc()
+        # 🔴 Оглавление курса, календарь и график раньше отдавались файлом
+        # как есть, мимо Jinja: три страницы из двадцати восьми, у которых
+        # нет ни одной серверной подстановки — и это не было видно, пока им
+        # не понадобился первый {{ }} (canonical/hreflang). Замер 17.09.2026:
+        # 9 адресов из 84 без canonical, причём файлы правку получили.
+        # Теперь они идут тем же путём, что и остальные страницы сайта.
+        elif path_clean in ("/edu", "/edu/"):
+            self._render_site_page("edu/index.html", req_lang)
         elif _EDU_RE.match(self.path):
             self._handle_edu()
         elif path_clean == "/grafik":
@@ -2341,7 +2400,9 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.send_header("Location", "/glossary")
             self.end_headers()
         elif path_clean in ("/edu/calendar", "/calendar"):
-            self._serve_static(EDU_DIR / "calendar.html")
+            self._render_site_page("edu/calendar.html", req_lang)
+        elif path_clean in ("/chart.html", "/chart"):
+            self._render_site_page("chart.html", req_lang)
         # ── Admin panel ──
         elif path_clean in ("/admin", "/admin.html"):
             self._serve_static(WEB_DIR / "admin.html")
@@ -2377,17 +2438,6 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 query = self.path.split("?", 1)
                 self.path = path_clean + ("?" + query[1] if len(query) > 1 else "")
             super().do_GET()
-
-    def _handle_edu_toc(self):
-        toc_path = EDU_DIR / "index.html"
-        try:
-            body = toc_path.read_bytes()
-            self.send_response(200)
-            self.send_header("Content-Type", "text/html; charset=utf-8")
-            self.end_headers()
-            self.wfile.write(body)
-        except Exception as e:
-            self._redirect("/edu/b/1")
 
     def _handle_edu(self):
         m = _EDU_RE.match(self.path)
@@ -2444,8 +2494,14 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                     if logged_in else f"{lang_pref}/survey")
         cta_label = i18n.t("eduindex.paywall.cta_survey" if logged_in else "eduindex.paywall.cta_register", lang)
         toc_href = "/edu" if lang == "ru" else f"/edu/{lang}/b"
+        # 🔴 Пейволл — это тот же адрес главы, а не отдельная страница, и
+        # анониму (в том числе краулеру) сайт отдаёт именно его. Без этих
+        # тегов тридцать адресов из восьмидесяти четырёх — десять платных
+        # глав в трёх языках — оставались без canonical и без связи между
+        # языками: ровно те страницы, ссылку на которые мы и продаём.
         html = f"""<!doctype html><html lang="{lang}"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+{_alt_links(f"/edu/b/{ch}", lang)}
 <title>{i18n.t('eduindex.paywall.title', lang)}</title>
 <link rel="stylesheet" href="/assets/design.css?v=20260909">
 <link rel="stylesheet" href="/edu/edu.css?v=20260903b">
@@ -2495,7 +2551,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(b"Not found")
 
-    def _render_site_page(self, template_name: str, lang: str = i18n.DEFAULT_LANG) -> None:
+    def _render_site_page(self, template_name: str, lang: str = i18n.DEFAULT_LANG,
+                          page_path: str | None = None) -> None:
         """Рендерит web/<template_name> через _site_jinja с {{ t(key) }}
         доступным внутри. lang прокидывается в шаблон явно (а не только
         через глобальный t, у которого свой параметр по умолчанию) -- сами
@@ -2521,7 +2578,12 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             anon = True
         try:
             tpl = _site_jinja.get_template(template_name)
-            html = _normalize_favicon(tpl.render(lang=lang, anon=anon))
+            # page_path — для шаблонов, которые обслуживают несколько
+            # адресов (broker_guide.html — один файл на пять брокеров).
+            # У остальных путь в шаблоне написан явно, и это честнее:
+            # canonical виден там же, где страница.
+            html = _normalize_favicon(tpl.render(lang=lang, anon=anon,
+                                                 page_path=page_path))
         except Exception as e:
             self.send_response(500)
             self.send_header("Content-Type", "text/plain; charset=utf-8")

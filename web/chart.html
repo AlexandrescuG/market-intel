@@ -2,6 +2,9 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
+{# canonical + hreflang: сервер знает, что у курса локаль идёт
+   после /edu, а у остальных — перед; см. serve.py:_alt_links #}
+{{ alt_links('/chart.html', lang) | safe }}
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script>
 // SPEC_visual_migration.md §1: ?design=v2 -- флаг рескина, persisted в

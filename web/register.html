@@ -2,6 +2,9 @@
 <html lang="{{ lang }}">
 <head>
 <meta charset="UTF-8">
+{# canonical + hreflang: сервер знает, что у курса локаль идёт
+   после /edu, а у остальных — перед; см. serve.py:_alt_links #}
+{{ alt_links('/register', lang) | safe }}
 <meta name="viewport" content="width=device-width,initial-scale=1, viewport-fit=cover">
 <title>{{ t('register.title', lang) }}</title>
 <meta property="og:type" content="website">
