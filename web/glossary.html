@@ -9,6 +9,14 @@
    Это то, чем ИИ-агент сошлётся на конкретную статью, а не на страницу
    целиком. Собирается из того же glossary*.json — core/schema_ld.py. #}
 {{ schema_ld('glossary', lang) | safe }}
+{# description и og — из первых фраз того же текстового слоя, а не
+   второй копией текста: копия разошлась бы, и никто бы не заметил. #}
+{# 🔴 Описание здесь задаётся явно, а не берётся из первых фраз слоя:
+   слой начинается с первого термина словаря, и описанием страницы
+   оказывалось определение «пивота» — рассказ про одну статью вместо
+   рассказа про справочник. #}
+{{ page_meta(t('glossary.page_title', lang), 'glossary', '/glossary', lang,
+             t('glossary.subtitle', lang)) | safe }}
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>{{ t('glossary.page_title', lang) }}</title>
 <meta property="og:type" content="website">

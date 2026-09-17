@@ -29,16 +29,16 @@ if (new URLSearchParams(location.search).get("embed") === "1") {
 })();
 </script>
 <title>{{ t('home.page_title', lang) }}</title>
-<meta name="description" content="SBF Consult: аналитика финансовых рынков в реальном времени. Сопровождение счёта, анализ рынка и подбор брокера. Офисы: Молдова, Казахстан, ЮАР, ОАЭ, Швейцария, Португалия.">
+{# 🔴 Описание и og-теги были жёстко вписаны по-русски: на /ro/ и /en/
+   карточка ссылки и сниппет в выдаче приходили на чужом языке, а
+   og:url у всех трёх локалей указывал на русскую главную. Теперь через
+   page_meta, из i18n и с адресом своей локали. #}
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
-<meta property="og:title" content="SBF Consult — Intelligence Terminal">
-<meta property="og:description" content="Аналитика финансовых рынков в реальном времени. Сопровождение счёта и анализ рынка, усиленный ИИ.">
-<meta property="og:url" content="https://lp.sbfconsult.com/">
+{{ page_meta(t('home.page_title', lang), '', '/', lang,
+             t('home.page_description', lang)) | safe }}
 <meta property="og:type" content="website">
 <meta property="og:image" content="https://lp.sbfconsult.com/assets/og-image.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="SBF Consult — Intelligence Terminal">
-<meta name="twitter:description" content="Аналитика финансовых рынков в реальном времени. Сопровождение счёта и анализ рынка, усиленный ИИ.">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",

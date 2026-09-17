@@ -7,6 +7,8 @@
 {{ alt_links('/brokers', lang) | safe }}
 {# Список инструкций. Ни рейтингов, ни отзывов: их у нас не собрано. #}
 {{ schema_ld('brokers', lang) | safe }}
+{{ page_meta(t('brokers.page_title', lang), 'brokers', '/brokers', lang,
+             t('brokers.page_description', lang)) | safe }}
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>{{ t('brokers.page_title', lang) }}</title>
 <meta property="og:type" content="website">
@@ -16,7 +18,9 @@
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://lp.sbfconsult.com/assets/og-image.png">
-<meta name="description" content="{{ t('brokers.page_description', lang) }}">
+{# description переехал в page_meta выше — там он выдаётся вместе с
+   og:description и twitter:description из одного источника. Два тега
+   description на странице — это спор, который решает краулер. #}
 <meta name="robots" content="index, follow">
 <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">

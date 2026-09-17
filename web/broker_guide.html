@@ -10,6 +10,9 @@
 {# HowTo по каждому процессу — шаги из того же guides/<id>.json, из
    которого guide.js рисует страницу, вместе со снятыми скриншотами. #}
 {{ schema_ld('guide', lang, page_path) | safe }}
+{# Заголовок и описание — про конкретную площадку: пять адресов с
+   одинаковым «Инструкция по брокеру» для машины неразличимы. #}
+{{ guide_meta(page_path, lang) | safe }}
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>{{ t('guide.page_title', lang) }}</title>
 <meta property="og:type" content="website">
@@ -19,7 +22,8 @@
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://lp.sbfconsult.com/assets/og-image.png">
-<meta name="description" content="{{ t('guide.page_description', lang) }}">
+{# description выдаёт guide_meta выше — из текста этой инструкции,
+   а не общей строкой, одинаковой для пяти площадок. #}
 <meta name="robots" content="index, follow">
 <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">

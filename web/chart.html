@@ -5,6 +5,8 @@
 {# canonical + hreflang: сервер знает, что у курса локаль идёт
    после /edu, а у остальных — перед; см. serve.py:_alt_links #}
 {{ alt_links('/chart.html', lang) | safe }}
+{{ page_meta(t('chart.page_title', lang), '', '/chart.html', lang,
+             t('chart.page_description', lang)) | safe }}
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script>
 // SPEC_visual_migration.md §1: ?design=v2 -- флаг рескина, persisted в
@@ -19,7 +21,9 @@
   if (v === 'v2') document.documentElement.setAttribute('data-design', 'v2');
 })();
 </script>
-<title>SBF Chart</title>
+{# Заголовок был «SBF Chart» на всех трёх языках и ничего не говорил о
+   содержимом страницы — ни человеку в списке вкладок, ни выдаче. #}
+<title>{{ t('chart.page_title', lang) }}</title>
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="SBF Intelligence">
 <meta property="og:image" content="https://lp.sbfconsult.com/assets/og-image.png">

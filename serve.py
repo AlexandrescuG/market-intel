@@ -1,6 +1,7 @@
 """Static server + /api/quotes proxy + /edu book renderer.
 JSX компилируется серверно при старте (Node.js + Babel). Браузер получает чистый JS."""
 import glob
+import html as html_lib          # экранирование значений meta-тегов
 import http.server
 import json
 import math
@@ -1131,6 +1132,36 @@ _site_jinja.globals["alt_links"] = lambda путь, lang: _alt_links(путь, l
 # schema.org: {{ schema_ld('glossary', lang) | safe }}. Сборка — в
 # core/schema_ld.py, чтобы её можно было позвать и проверить без сервера.
 _site_jinja.globals["schema_ld"] = lambda вид, lang, арг=None: _schema_ld(вид, lang, арг)
+# description + og/twitter: {{ page_meta(t('glossary.page_title', lang),
+#                                        'glossary', '/glossary', lang) | safe }}
+_site_jinja.globals["page_meta"] = lambda заголовок, слой, путь, lang, описание="": (
+    _page_meta(заголовок, слой, путь, lang, описание))
+_site_jinja.globals["guide_meta"] = lambda путь, lang: _guide_meta(путь, lang)
+
+
+def _guide_meta(путь: str, lang: str) -> str:
+    """Мета для инструкции: заголовок с именем площадки.
+
+    🔴 Ключ guide.page_title даёт «Инструкция по брокеру» — одинаково для
+    всех пяти страниц. Одинаковый заголовок на пяти адресах и в выдаче, и
+    в пересланной ссылке означает «это одно и то же»; имя площадки здесь
+    единственное, что их различает.
+    """
+    ид = (путь or "").rstrip("/").rsplit("/", 1)[-1]
+    if not ид:
+        return ""
+    имя, вводка = ид.upper(), ""
+    try:
+        д = schema_ld._гайд(ид, lang)
+        имя = д.get("name") or имя
+        # lead — вводка самой инструкции. Лучше, чем срезка текстового
+        # слоя: та начинается с имени площадки и склеивается с первой
+        # фразой («XM Инструкция по всем пяти процессам…»).
+        вводка = д.get("lead") or ""
+    except Exception:
+        pass
+    заголовок = f"{имя} — {i18n.t('guide.page_title', lang)}"
+    return _page_meta(заголовок, f"guide_{ид}", путь, lang, вводка)
 
 
 # 🔴 Одно место, где живёт граница платного. Правило «с шестой главы нужен
@@ -1147,6 +1178,57 @@ def _schema_ld_глава(ch: int, lang: str) -> str:
     except Exception as e:
         print(f"[schema.org] глава {ch}/{lang}: {e}", flush=True)
         return ""
+
+
+def _описание_из_слоя(имя: str, lang: str, предел: int = 200) -> str:
+    """Краткое описание страницы — из её же текстового слоя.
+
+    🔴 Не выдумываем и не пишем вторую копию: description — это первые
+    фразы того самого текста, который отдаётся краулеру. Так описание не
+    может разойтись со страницей, а разойтись ему было бы легко: его
+    никто не перечитывает.
+
+    Обрезаем по границе предложения, а не по счётчику знаков: обрубок на
+    полуслове в выдаче выглядит как ошибка сайта.
+    """
+    сырой = _text_layer(имя, lang)
+    if not сырой:
+        return ""
+    текст = re.sub(r"<[^>]+>", " ", сырой.split('<div class="sbf-text-layer">', 1)[-1])
+    текст = html_lib.unescape(текст)
+    текст = re.sub(r"\s+", " ", текст).strip()
+    if len(текст) <= предел:
+        return текст
+    кусок = текст[:предел]
+    точка = max(кусок.rfind("."), кусок.rfind("!"), кусок.rfind("?"))
+    if точка > предел // 2:
+        return кусок[:точка + 1]
+    пробел = кусок.rfind(" ")
+    return (кусок[:пробел] if пробел > 0 else кусок).rstrip(",;:—- ") + "…"
+
+
+def _page_meta(заголовок: str, слой: str, путь: str, lang: str,
+               описание: str = "") -> str:
+    """description + og/twitter для одной страницы.
+
+    🔴 Замер 17.09.2026: og:title, og:description и og:url не стояли ни на
+    одной странице, кроме главной, а meta description — на трёх из
+    одиннадцати. og:image при этом был везде. То есть ссылку на любую
+    нашу страницу можно было кинуть в Telegram или Slack и получить
+    карточку с картинкой, но без заголовка и текста — ровно там, где
+    начинаются упоминания на чужих площадках.
+    """
+    описание = (описание or "").strip() or _описание_из_слоя(слой, lang)
+    адрес = ДОМЕН_САЙТА + _локальный_адрес(путь, lang)
+    э = html_lib.escape
+    части = [f'<meta property="og:title" content="{э(заголовок)}">',
+             f'<meta property="og:url" content="{э(адрес)}">',
+             f'<meta name="twitter:title" content="{э(заголовок)}">']
+    if описание:
+        части.insert(0, f'<meta name="description" content="{э(описание)}">')
+        части.append(f'<meta property="og:description" content="{э(описание)}">')
+        части.append(f'<meta name="twitter:description" content="{э(описание)}">')
+    return "\n".join(части)
 
 
 def _schema_ld(вид: str, lang: str, арг=None) -> str:
@@ -1803,6 +1885,17 @@ def _build_edu_page(ch: int, lang: str) -> bytes:
         html = html.replace(
             "</head>",
             _schema_ld_глава(ch, lang) + "\n</head>", 1)
+
+    # description и og. Замер 17.09.2026: у всех пятнадцати глав не было
+    # ни того, ни другого — при том что og:image стоял. Ссылку на главу
+    # можно было переслать и получить карточку с картинкой без строчки
+    # текста. Заголовок берём из оглавления курса (i18n), описание —
+    # подзаголовок главы оттуда же.
+    if 'property="og:title"' not in html:
+        название = i18n.t(f"eduindex.chapters.{ch}.title", lang)
+        html = html.replace("</head>", _page_meta(
+            f"{ch}. {название} — SBF", f"edu_b{ch}", f"/edu/b/{ch}", lang,
+            i18n.t(f"eduindex.chapters.{ch}.sub", lang)) + "\n</head>", 1)
 
     # Хедер инжектирует sbf-header.js (добавлен через css_tags выше)
 
@@ -2597,6 +2690,9 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 {_alt_links(f"/edu/b/{ch}", lang)}
 {_schema_ld_глава(ch, lang)}
+{_page_meta(f"{ch}. " + i18n.t(f'eduindex.chapters.{ch}.title', lang) + " — SBF",
+            "", f"/edu/b/{ch}", lang,
+            i18n.t(f'eduindex.chapters.{ch}.sub', lang))}
 <title>{i18n.t('eduindex.paywall.title', lang)}</title>
 <link rel="stylesheet" href="/assets/design.css?v=20260909">
 <link rel="stylesheet" href="/edu/edu.css?v=20260903b">
