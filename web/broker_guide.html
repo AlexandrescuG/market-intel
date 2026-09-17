@@ -7,6 +7,9 @@
    зашитый путь сделал бы канониклом одну и ту же страницу для всех
    пяти — хуже, чем его отсутствие. См. serve.py:_render_site_page. #}
 {{ alt_links(page_path or '/brokers', lang) | safe }}
+{# HowTo по каждому процессу — шаги из того же guides/<id>.json, из
+   которого guide.js рисует страницу, вместе со снятыми скриншотами. #}
+{{ schema_ld('guide', lang, page_path) | safe }}
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>{{ t('guide.page_title', lang) }}</title>
 <meta property="og:type" content="website">

@@ -5,6 +5,9 @@
 {# canonical + hreflang: сервер знает, что у курса локаль идёт
    после /edu, а у остальных — перед; см. serve.py:_alt_links #}
 {{ alt_links('/edu/', lang) | safe }}
+{# Курс и пятнадцать глав списком: краулер видит структуру, не угадывая
+   её по ссылкам, которые рисует JS. Заголовки — из i18n, не из копии. #}
+{{ schema_ld('course', lang) | safe }}
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title data-i18n="eduindex.page_title">SBF — Биржевая торговля: руководство</title>
 <meta property="og:type" content="website">

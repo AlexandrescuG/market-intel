@@ -43,13 +43,21 @@ if (new URLSearchParams(location.search).get("embed") === "1") {
 {
   "@context": "https://schema.org",
   "@type": "FinancialService",
+  {# @id — якорь организации на весь сайт. На него ссылаются разметки
+     курса, глав, глоссария и брокеров (provider/publisher), вместо того
+     чтобы переписывать этот блок на каждой странице пятью копиями,
+     которые разъедутся. См. core/schema_ld.py:ОРГ. #}
+  "@id": "https://lp.sbfconsult.com/#org",
   "name": "SBF Consult",
   "legalName": "SBF Company SRL",
   "url": "https://lp.sbfconsult.com/",
   "logo": "https://lp.sbfconsult.com/assets/logo.svg",
   "description": "SBF Consult — сопровождение счёта, анализ рынка и подбор брокера для частных инвесторов. Экспертная аналитика, усиленная ИИ.",
   "areaServed": ["MD", "KZ", "ZA", "AE", "CH", "PT"],
-  "availableLanguage": ["ru", "en"],
+  {# Румынский тут забыли: сайт трёхъязычный с самого начала, а в разметке
+     его не было — и /ro/ для машины выглядел как страница на неизвестно
+     каком языке. #}
+  "availableLanguage": ["ru", "ro", "en"],
   "identifier": {
     "@type": "PropertyValue",
     "propertyID": "LEI",

@@ -5,6 +5,10 @@
 {# canonical + hreflang: сервер знает, что у курса локаль идёт
    после /edu, а у остальных — перед; см. serve.py:_alt_links #}
 {{ alt_links('/glossary', lang) | safe }}
+{# 46 терминов в машинном виде: у каждого имя, определение и свой якорь.
+   Это то, чем ИИ-агент сошлётся на конкретную статью, а не на страницу
+   целиком. Собирается из того же glossary*.json — core/schema_ld.py. #}
+{{ schema_ld('glossary', lang) | safe }}
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>{{ t('glossary.page_title', lang) }}</title>
 <meta property="og:type" content="website">

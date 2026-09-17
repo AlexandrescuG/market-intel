@@ -32,6 +32,7 @@ from day_thermo_job import _load_d1 as _thermo_load_d1, _range_series as _thermo
 from core.sessions import session_bounds_utc, session_at
 from core.journal_symbols import to_chart_symbol, chart_symbol_aliases
 from core import focus_db
+from core import schema_ld
 from core.focus import DEFAULT_UNIVERSE, select_focus
 from core.sentiment_lexicon import detect_divergence
 from sr_levels_job import _atr14, _load_d1_candles
@@ -1123,6 +1124,44 @@ _site_jinja.globals["symbol_name"] = _symbols.symbol_name
 _site_jinja.globals["text_layer"] = lambda имя, lang: _text_layer(имя, lang)
 # canonical + hreflang: шаблоны зовут {{ alt_links('/brokers', lang) | safe }}
 _site_jinja.globals["alt_links"] = lambda путь, lang: _alt_links(путь, lang)
+# schema.org: {{ schema_ld('glossary', lang) | safe }}. Сборка — в
+# core/schema_ld.py, чтобы её можно было позвать и проверить без сервера.
+_site_jinja.globals["schema_ld"] = lambda вид, lang, арг=None: _schema_ld(вид, lang, арг)
+
+
+# 🔴 Одно место, где живёт граница платного. Правило «с шестой главы нужен
+# PRO» проверяется в _handle_edu и объявляется в разметке
+# (isAccessibleForFree). Пока чисел было два, они молча разъезжались —
+# ровно так подписи статусов лида в CRM разошлись по шести файлам.
+ПЕРВАЯ_ПЛАТНАЯ_ГЛАВА = 6
+
+
+def _schema_ld_глава(ch: int, lang: str) -> str:
+    try:
+        return schema_ld.глава(ch, lang,
+                               бесплатная=ch < ПЕРВАЯ_ПЛАТНАЯ_ГЛАВА)
+    except Exception as e:
+        print(f"[schema.org] глава {ch}/{lang}: {e}", flush=True)
+        return ""
+
+
+def _schema_ld(вид: str, lang: str, арг=None) -> str:
+    """Разметка страницы. Молчит, а не падает: пустой <script> хуже, чем
+    его отсутствие, но белая страница хуже их обоих."""
+    try:
+        if вид == "course":
+            return schema_ld.курс(lang)
+        if вид == "glossary":
+            return schema_ld.глоссарий(lang)
+        if вид == "brokers":
+            return schema_ld.брокеры(lang)
+        if вид == "guide":
+            # арг — путь вида /brokers/xm, брокер берём последним сегментом.
+            брокер = (арг or "").rstrip("/").rsplit("/", 1)[-1]
+            return schema_ld.инструкция(брокер, lang) if брокер else ""
+    except Exception as e:
+        print(f"[schema.org] {вид}/{lang}: {e}", flush=True)
+    return ""
 
 
 def _tojson_filter(value) -> Markup:
@@ -1732,6 +1771,14 @@ def _build_edu_page(ch: int, lang: str) -> bytes:
     # языках остались бы без связи между версиями.
     if 'rel="canonical"' not in html:
         html = html.replace("</head>", _alt_links(f"/edu/b/{ch}", lang) + "\n</head>", 1)
+
+    # Разметка главы. Сюда попадают только те, кого сервер реально пустил:
+    # анониму главы 6-15 отдаёт _send_edu_paywall, и разметку он ставит
+    # свою, с isAccessibleForFree:false.
+    if "application/ld+json" not in html:
+        html = html.replace(
+            "</head>",
+            _schema_ld_глава(ch, lang) + "\n</head>", 1)
 
     # Хедер инжектирует sbf-header.js (добавлен через css_tags выше)
 
@@ -2454,7 +2501,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         # ссылке, значки "PRO" на 6-15 чисто косметические. Теперь настоящий
         # серверный гейт (не клиентский, который легко обойти прямой ссылкой).
         # Главы 1-5 остаются бесплатными без проверки.
-        if ch >= 6:
+        if ch >= ПЕРВАЯ_ПЛАТНАЯ_ГЛАВА:
             user_id = self._current_user_id()
             if not journal_auth.is_pro(user_id):
                 self._send_edu_paywall(ch, lang, logged_in=(user_id != "default"))
@@ -2502,6 +2549,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         html = f"""<!doctype html><html lang="{lang}"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 {_alt_links(f"/edu/b/{ch}", lang)}
+{_schema_ld_глава(ch, lang)}
 <title>{i18n.t('eduindex.paywall.title', lang)}</title>
 <link rel="stylesheet" href="/assets/design.css?v=20260909">
 <link rel="stylesheet" href="/edu/edu.css?v=20260903b">
