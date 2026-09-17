@@ -95,6 +95,59 @@ class Sizing(unittest.TestCase):
         self.assertGreaterEqual(vol, 0.01)
 
 
+class RUnit(unittest.TestCase):
+    """🔴 17.09. R делился на расстояние до ТЕКУЩЕГО стопа, а сопровождение
+    его двигает. Живой пример — сделка 448 реального счёта: стоп подтянут в
+    0.00023 от входа при исходных 0.00221, записано +20.03 R вместо +2.05.
+    Деньги при этом +27.24 при риске 13.6, то есть ровно 2 R.
+
+    Ошибка односторонняя: раздуваются только выигрыши, потому что стоп
+    подтягивают только у идущих в плюс."""
+
+    def setUp(self):
+        self.con = sqlite3.connect(":memory:")
+        self.con.executescript(ledger.SCHEMA)
+
+    def _trade(self, entry, sig_stop, cur_stop, direction=SHORT):
+        rm = 13.6
+        rpp = rm / abs(entry - sig_stop)
+        cur = self.con.execute(
+            "INSERT INTO engine_signals (ts,strategy,symbol,tf,direction,bar_ts,"
+            "dedup_key,stop,accepted) VALUES (0,'s','EURUSD','1h',?,0,'k',?,1)",
+            (direction, sig_stop))
+        sid = cur.lastrowid
+        cur = self.con.execute(
+            "INSERT INTO engine_trades (signal_id,strategy,symbol,direction,mode,"
+            "status,entry_price,stop,risk_money,risk_per_price) "
+            "VALUES (?,'s','EURUSD',?,'live','open',?,?,?,?)",
+            (sid, direction, entry, cur_stop, rm, rpp))
+        self.con.commit()
+        return cur.lastrowid
+
+    def test_подтянутый_стоп_не_раздувает_R(self):
+        tid = self._trade(entry=1.15352, sig_stop=1.15573, cur_stop=1.15329)
+        r = ledger.close_trade(self.con, tid, exit_price=1.14898, profit=27.24,
+                               commission=0, swap=0, reason="tp")
+        self.assertAlmostEqual(r, 2.05, places=2)
+        self.assertLess(r, 3.0, "R по подтянутому стопу дал бы двадцатку")
+
+    def test_убыток_считается_так_же(self):
+        tid = self._trade(entry=1.15362, sig_stop=1.15256, cur_stop=1.15256,
+                          direction=LONG)
+        r = ledger.close_trade(self.con, tid, exit_price=1.15255, profit=-13.91,
+                               commission=0, swap=0, reason="sl")
+        self.assertAlmostEqual(r, -1.01, places=2)
+
+    def test_единица_риска_совпадает_с_деньгами(self):
+        """Сквозная проверка: R, умноженный на риск в деньгах, обязан дать
+        прибыль. Расхождение между этими двумя способами счёта и было тем,
+        по чему дефект вообще заметили."""
+        tid = self._trade(entry=1.15352, sig_stop=1.15573, cur_stop=1.15329)
+        r = ledger.close_trade(self.con, tid, exit_price=1.14898, profit=27.24,
+                               commission=0, swap=0, reason="tp")
+        self.assertAlmostEqual(r * 13.6, 27.24, delta=1.5)
+
+
 class Maintenance(unittest.TestCase):
     """🔴 14.09. sbf-engine.service запускает код прямо из рабочего дерева,
     и дерево общее для нескольких чатов. Правка риск-модуля уехала в бой на

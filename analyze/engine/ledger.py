@@ -269,14 +269,37 @@ def close_trade(con: sqlite3.Connection, trade_id: int, *, exit_price: float,
 
     R считается по ЦЕНЕ, а не по деньгам: деньги зависят от объёма, который
     у нас плавает вместе с волатильностью, и сравнивать такие исходы между
-    собой нельзя. Единица риска — расстояние вход-стоп."""
-    row = con.execute("SELECT entry_price, stop, direction FROM engine_trades "
-                      "WHERE id=?", (trade_id,)).fetchone()
+    собой нельзя. Единица риска — расстояние вход-стоп.
+
+    🔴 17.09, ДЕФЕКТ ИЗМЕРЕНИЯ. Здесь бралось расстояние до ТЕКУЩЕГО стопа, а
+    сопровождение его двигает. У сделки 448 стоп к моменту закрытия стоял в
+    0.00023 от входа при исходных 0.00221 — и вместо +2.05 R записалось
+    +20.03 R. Деньги при этом были +27.24 при риске 13.6, то есть ровно 2 R.
+
+    Ошибка ОДНОСТОРОННЯЯ и льстивая: раздуваются только выигрыши, потому что
+    подтягивается стоп только у идущих в плюс. Портится всё, что считается по
+    R: кривые стратегий, пик, просадка от пика и стоп-кран, который по этой
+    просадке срабатывает.
+
+    Единица риска фиксируется НА ВХОДЕ и потом не меняется — иначе «результат
+    в единицах риска» перестаёт значить то, что написано. Берём её из
+    risk_money / risk_per_price (обе величины записаны при открытии), с
+    откатом на исходный стоп сигнала для старых строк."""
+    row = con.execute(
+        "SELECT t.entry_price, t.stop, t.direction, t.risk_money, t.risk_per_price, "
+        "s.stop FROM engine_trades t LEFT JOIN engine_signals s ON s.id = t.signal_id "
+        "WHERE t.id=?", (trade_id,)).fetchone()
     r = None
-    if row and row[0] is not None and row[1] is not None:
-        entry, stop, direction = row
-        risk = abs(entry - stop)
-        if risk > 0:
+    if row and row[0] is not None:
+        entry, cur_stop, direction, rm, rpp, sig_stop = row
+        risk = None
+        if rm and rpp:
+            risk = abs(rm / rpp)                    # дистанция, заложенная на входе
+        elif sig_stop is not None:
+            risk = abs(entry - sig_stop)
+        elif cur_stop is not None:
+            risk = abs(entry - cur_stop)            # последнее средство
+        if risk and risk > 0:
             move = (exit_price - entry) if direction == "long" else (entry - exit_price)
             r = move / risk
     con.execute(
