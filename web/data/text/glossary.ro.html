@@ -2,183 +2,229 @@
 <p>Nivel calculat de răsturnare, derivat din maximele/minimele perioadei anterioare.</p>
 <p>Punctul pivot (PP) este un nivel de bază calculat cu formula: PP = (Maxim + Minim + Închidere) / 3 pentru perioada anterioară (zi, săptămână, lună). În jurul lui se construiesc niveluri de rezistență (R1, R2, R3) și de suport (S1, S2, S3). Nivelurile sunt folosite pe scară largă de traderii intraday: prețul se răstoarnă adesea în apropierea acestor puncte sau accelerează la spargerea lor. Pivoții sunt publici, se calculează automat și nu reprezintă recomandări de tranzacționare.</p>
 <p>Din engleză pivot — „punct de rotație, ax”: nivelul în jurul căruia se răstoarnă prețul.</p>
+<p><a href="#gl-support">Suport</a>, <a href="#gl-resistance">Rezistență</a>, <a href="#gl-timeframe">Timeframe</a></p>
 <h2 id="gl-support">Suport</h2>
 <p>Nivel de preț unde cererea a depășit istoric oferta, oprind scăderea.</p>
 <p>Nivelul de suport este o zonă orizontală în care, în trecut, prețul și-a oprit repetat scăderea și s-a răsturnat în sus. Psihologic, cumpărătorii devin mai activi în apropierea acestor zone. Cu cât prețul a testat de mai multe ori nivelul fără să-l spargă, cu atât suportul este mai semnificativ. La spargere, suportul se transformă adesea în rezistență (fenomenul flip). Nivelurile de suport sunt folosite pentru plasarea stop-loss-urilor și ca puncte potențiale de intrare la retest.</p>
 <p>Calc din engleză support — „sprijin”: zona care ține prețul de jos.</p>
+<p><a href="#gl-resistance">Rezistență</a>, <a href="#gl-pivot">Pivot (PP)</a>, <a href="#gl-stoploss">Stop-Loss</a></p>
 <h2 id="gl-resistance">Rezistență</h2>
 <p>Nivel de preț unde oferta a depășit istoric cererea, oprind creșterea.</p>
 <p>Nivelul de rezistență este o zonă de preț în care vânzătorii au depășit sistematic cumpărătorii. Prețul se apropie de nivel, „se lovește” și scade. La spargere, fosta rezistență devine adesea suport. Traderii se orientează după nivelurile de rezistență pentru a lua profit și a estima potențialul mișcării. Numerele rotunde (1000, 1500, 2000) acționează adesea ca rezistență psihologică.</p>
 <p>Calc din engleză resistance — „rezistență”: zona care frânează creșterea prețului.</p>
+<p><a href="#gl-support">Suport</a>, <a href="#gl-pivot">Pivot (PP)</a>, <a href="#gl-resistance">Rezistență</a></p>
 <h2 id="gl-rsi">RSI</h2>
 <p>Oscilator 0–100 care măsoară viteza și amploarea variațiilor de preț.</p>
 <p>RSI (Relative Strength Index) este un indicator tehnic dezvoltat de Wells Wilder. O valoare peste 70 este considerată în mod tradițional zonă de supracumpărare, sub 30 — de supravânzare. Important: supracumpărarea nu înseamnă semnal de vânzare; într-un trend puternic, RSI poate rămâne mult timp peste 70. Divergența RSI (prețul crește, RSI scade) este un semnal popular de slăbire a trendului. RSI se calculează ca 100 − 100/(1 + RS), unde RS este raportul dintre media închiderilor în creștere și media închiderilor în scădere pe perioada analizată.</p>
 <p>Indicatorul a fost propus de J. Welles Wilder în 1978, în cartea „New Concepts in Technical Trading Systems”.</p>
+<p><a href="#gl-divergence">Divergență</a>, <a href="#gl-timeframe">Timeframe</a>, <a href="#gl-trend">Trend</a></p>
 <h2 id="gl-smc">SMC</h2>
 <p>Abordare de analiză a pieței prin prisma acțiunilor marilor participanți (bănci, fonduri speculative).</p>
 <p>SMC (Smart Money Concepts) este o metodologie de analiză tehnică ce pornește de la ideea că marii participanți instituționali (bănci, fonduri speculative, market makeri) formează intenționat structuri de preț pentru a „captura lichiditate” înaintea unei răsturnări. Concepte-cheie SMC: Order Block (zona ordinului mare), Fair Value Gap (gol de valoare corectă), Break of Structure (spargerea structurii), Inducement (capcană pentru retail). SMC este o concepție educațională; rezultatele tranzacțiilor rămân imprevizibile.</p>
 <p>Termenul s-a impus în comunitățile de traderi din anii 2010 ca alternativă la analiza tehnică clasică.</p>
+<p><a href="#gl-fvg">Fair Value Gap</a>, <a href="#gl-liquidity-sweep">Liquidity Sweep</a>, <a href="#gl-orderblock">Order Block</a>, <a href="#gl-marketmaker">Market Maker</a></p>
 <h2 id="gl-fvg">Fair Value Gap</h2>
 <p>Zonă de gol de preț apărută la o mișcare impulsivă bruscă.</p>
 <p>Fair Value Gap (FVG) este o structură de trei lumânări consecutive în care prima și a treia nu se suprapun prin umbre: prețul a „sărit” atât de repede încât tranzacțiile nu au apucat să acopere întregul interval. Se consideră că piața tinde să „umple” FVG, revenind în această zonă. FVG poate fi bullish (prețul a urcat) sau bearish (prețul a coborât). În cadrul SMC, FVG este folosit ca punct potențial de retest.</p>
 <p>„Golul de valoare corectă” — un interval de preț rămas netestat în timpul unei mișcări bruște.</p>
+<p><a href="#gl-smc">SMC</a>, <a href="#gl-orderblock">Order Block</a>, <a href="#gl-liquidity-sweep">Liquidity Sweep</a></p>
 <h2 id="gl-liquidity-sweep">Liquidity Sweep</h2>
 <p>Spargere scurtă a unui nivel-cheie pentru executarea stop-ordinelor acumulate.</p>
 <p>Liquidity Sweep este situația în care prețul sparge scurt un nivel important (maxim, minim, linie de suport), „mătură” stop-loss-urile participanților de pe piață și apoi se răstoarnă. În concepția SMC, aceasta este interpretată ca o manevră intenționată a jucătorilor mari pentru a obține lichiditate înaintea mișcării reale. Traderii SMC caută combinația sweep + structură de răsturnare drept semnal.</p>
 <p>„Curățarea lichidității” — prețul scoate pentru scurt timp stopurile de dincolo de nivel, înainte de a se răsturna.</p>
+<p><a href="#gl-smc">SMC</a>, <a href="#gl-fvg">Fair Value Gap</a>, <a href="#gl-support">Suport</a>, <a href="#gl-resistance">Rezistență</a></p>
 <h2 id="gl-orderblock">Order Block</h2>
 <p>Zona ultimei consolidări înainte de o mișcare impulsivă puternică.</p>
 <p>Order Block este ultima lumânare (sau grup de lumânări) înainte de o mișcare impulsivă bruscă, în care se presupune că sunt concentrate ordine instituționale mari. Un OB bullish este o lumânare bearish înaintea unui impuls bullish; un OB bearish este o lumânare bullish înaintea unui impuls bearish. La retestarea zonei OB se așteaptă o reacție a prețului. OB este o concepție educațională, nu o garanție a rezultatului.</p>
 <p>„Blocul de ordine” — zona în care, ipotetic, un jucător mare a plasat un ordin de volum mare.</p>
+<p><a href="#gl-smc">SMC</a>, <a href="#gl-fvg">Fair Value Gap</a>, <a href="#gl-liquidity-sweep">Liquidity Sweep</a></p>
 <h2 id="gl-marketmaker">Market Maker</h2>
 <p>Participant de piață care asigură lichiditatea prin afișarea permanentă de cotații pe ambele direcții.</p>
 <p>Market makerul este o companie sau un trader care afișează simultan ordine de cumpărare (bid) și de vânzare (ask), câștigând din diferența dintre ele (spread). Pe piețele futures și forex, market makerii asigură lichiditate chiar și în absența ordinelor de contrapartidă. Băncile, brokerii mari și firmele specializate (Citadel, Virtu) acționează ca market makeri. Prezența lor reduce spread-urile și îmbunătățește execuția ordinelor.</p>
 <p>Din engleză market maker — „cel care creează piața”: participantul care asigură lichiditate prin cotații de contrapartidă.</p>
+<p><a href="#gl-spread">Spread</a>, <a href="#gl-liquidity">Lichiditate</a>, <a href="#gl-orderbook">Order Book (Registrul de Ordine)</a></p>
 <h2 id="gl-pattern">Model (Pattern)</h2>
 <p>Configurație grafică repetitivă de lumânări sau de preț, căreia traderii îi atribuie valoare predictivă.</p>
 <p>Un pattern este o structură vizuală stabilă pe graficul de preț. Modele de lumânări: Engulfing (înghițire), Doji (cruce), Hammer (ciocan), Evening/Morning Star. Modele grafice: cap-umeri, dublu fund/vârf, steag, pană, triunghi. Important: fiabilitatea statistică a modelelor variază; niciun model nu funcționează în 100% din cazuri. Un pattern este unul dintre factorii de analiză, nu un semnal de tranzacționare.</p>
 <p>Din engleză pattern — „model, șablon”: o configurație de preț care se repetă.</p>
+<p><a href="#gl-engulfing">Engulfing (Înghițire)</a>, <a href="#gl-trend">Trend</a>, <a href="#gl-timeframe">Timeframe</a></p>
 <h2 id="gl-engulfing">Engulfing (Înghițire)</h2>
 <p>Model de răsturnare din două lumânări: a doua lumânare „înghite” complet corpul primei.</p>
 <p>Bullish Engulfing (înghițire bullish) apare după o tendință descendentă, când o lumânare bullish înghite una bearish: prețul deschide mai jos și închide mai sus decât lumânarea precedentă. Este interpretat ca o schimbare a sentimentului spre bullish. Bearish Engulfing (înghițire bearish) este situația inversă, într-un trend ascendent. Modelele sunt mai semnificative pe timeframe-uri mai mari și în apropierea nivelurilor cheie de suport/rezistență.</p>
 <p>Din engleză engulf — „a înghiți”: lumânarea care acoperă complet corpul celei precedente.</p>
+<p><a href="#gl-pattern">Model (Pattern)</a>, <a href="#gl-trend">Trend</a>, <a href="#gl-support">Suport</a></p>
 <h2 id="gl-fear-greed">Fear &amp; Greed</h2>
 <p>Indice compus 0–100 care reflectă starea emoțională curentă a pieței cripto.</p>
 <p>Crypto Fear &amp; Greed Index (de la 0 la 100): 0–25 — frică extremă, 26–45 — frică, 46–55 — neutru, 56–75 — lăcomie, 76–100 — lăcomie extremă. Ia în calcul volatilitatea, volumul de tranzacționare, sentimentul din social media, dominanța Bitcoin și tendințele de căutare. Buffett: „Fii temător când alții sunt lacomi și lacom când alții sunt temători.” Indicele este un indicator de sentiment, nu un semnal de tranzacționare.</p>
 <p>Indicele a fost creat de CNNMoney pentru a măsura sentimentul pieței pe baza a 7 factori.</p>
+<p><a href="#gl-vix">VIX</a>, <a href="#gl-volatility">Volatilitate</a>, <a href="#gl-trend">Trend</a></p>
 <h2 id="gl-nfp">Non-Farm Payrolls (NFP)</h2>
 <p>Raport macroeconomic-cheie din SUA privind numărul de locuri de muncă în afara agriculturii.</p>
 <p>NFP (Non-Farm Payrolls) este raportul lunar al Departamentului Muncii din SUA, publicat în prima vineri a lunii. Arată variația ocupării forței de muncă din luna anterioară. Datele solide (peste prognoză) întăresc de regulă dolarul; cele slabe îl slăbesc. NFP este unul dintre cele mai volatile evenimente de tranzacționare: în primele 30 de minute după publicare sunt posibile mișcări bruște pe toate piețele. Împreună cu rata șomajului și salariile, influențează deciziile Fed.</p>
 <p>Non-Farm Payrolls — agricultura este exclusă din raport din cauza fluctuațiilor sezoniere puternice ale angajărilor.</p>
+<p><a href="#gl-cpi">CPI</a>, <a href="#gl-fed">Fed (FRS)</a>, <a href="#gl-volatility">Volatilitate</a></p>
 <h2 id="gl-cpi">CPI</h2>
 <p>Indicele prețurilor de consum — principalul indicator al inflației.</p>
 <p>CPI (Consumer Price Index) măsoară variația costului unui coș de bunuri și servicii. Se publică lunar. Core CPI exclude alimentele și energia — cele mai volatile componente. Fed urmărește inflația PCE, dar CPI rămâne principalul reper pentru piață. Date peste prognoză → dolarul se întărește, acțiunile scad (anticiparea înăspririi politicii monetare). Sub prognoză → reacție inversă. Este important să te uiți la Core CPI și să compari cu prognoza, nu doar cu valoarea anterioară.</p>
 <p>Consumer Price Index este calculat de Biroul de Statistică a Muncii din SUA încă de la începutul secolului XX.</p>
+<p><a href="#gl-fed">Fed (FRS)</a>, <a href="#gl-nfp">Non-Farm Payrolls (NFP)</a>, <a href="#gl-volatility">Volatilitate</a></p>
 <h2 id="gl-fed">Fed (FRS)</h2>
 <p>Banca centrală a SUA, care administrează rata-cheie și influențează toate piețele globale.</p>
 <p>Fed (Sistemul Rezervelor Federale) este banca centrală a SUA, care stabilește politica monetară prin rata fondurilor federale (Fed Funds Rate). FOMC (Comitetul pentru Operațiuni de Piață Deschisă) se întrunește de 8 ori pe an. Creșterea ratei înseamnă înăsprire (hawkish): credit mai scump, dolar mai puternic, presiune asupra acțiunilor și cripto. Scăderea ratei înseamnă relaxare (dovish): bani ieftini, creșterea activelor riscante. Retorica președintelui Fed la conferințele de presă este adesea mai importantă decât decizia în sine.</p>
 <p>Sistemul Rezervelor Federale a fost înființat în 1913 ca bancă centrală a SUA.</p>
+<p><a href="#gl-cpi">CPI</a>, <a href="#gl-nfp">Non-Farm Payrolls (NFP)</a>, <a href="#gl-volatility">Volatilitate</a></p>
 <h2 id="gl-stoploss">Stop-Loss</h2>
 <p>Ordin de închidere automată a poziției la atingerea unei pierderi stabilite.</p>
 <p>Stop-loss-ul (SL) este un ordin de protecție care limitează pierderile. Se plasează la un nivel la atingerea căruia poziția se închide automat. Este un element-cheie al managementului riscului: fără stop-loss, o singură tranzacție pierzătoare poate distruge tot contul. Regula 1%: să nu riști mai mult de 1% din depozit într-o singură tranzacție. Stopul se plasează dincolo de un nivel de suport/rezistență, dincolo de extrema unei lumânări sau în funcție de volatilitate (ATR × multiplicator). „Vânarea stopurilor” este liquidity sweep-ul.</p>
 <p>Din engleză stop loss — literal „oprește pierderea”.</p>
+<p><a href="#gl-takeprofit">Take-Profit</a>, <a href="#gl-r-ratio">R-multiplu (R:R)</a>, <a href="#gl-leverage">Efect de Levier</a>, <a href="#gl-support">Suport</a></p>
 <h2 id="gl-takeprofit">Take-Profit</h2>
 <p>Ordin de închidere automată a poziției la atingerea profitului țintă.</p>
 <p>Take-profit-ul (TP) este un ordin pentru fixarea profitului la un nivel stabilit dinainte. Se folosește împreună cu stop-loss-ul. Raportul dintre TP și SL se numește Risk-to-Reward (R:R). Minimul recomandat este R:R 1:2 (profitul de două ori mai mare decât riscul), ceea ce permite să fii pe plus la doar 34% tranzacții câștigătoare. Închiderea parțială a poziției la primul TP, cu mutarea stopului la nivelul de intrare (break-even), este o tactică frecventă de gestionare a poziției.</p>
 <p>Din engleză take profit — literal „ia profitul”.</p>
+<p><a href="#gl-stoploss">Stop-Loss</a>, <a href="#gl-r-ratio">R-multiplu (R:R)</a>, <a href="#gl-risk">Risc</a></p>
 <h2 id="gl-r-ratio">R-multiplu (R:R)</h2>
 <p>Raportul dintre profitul potențial și riscul asumat într-o tranzacție.</p>
 <p>R (Risk Unit) este distanța de la intrare până la stop-loss, exprimată valoric. 1R este mărimea riscului pe tranzacție. Un take-profit la nivelul de 2R înseamnă un profit potențial de două ori mai mare decât riscul. Un jurnal de P&amp;L exprimat în unități R permite compararea tranzacțiilor pe instrumente și depozite diferite. R-ul mediu pe o perioadă este o metrică-cheie a calității unui sistem. „Prețul lipsei de disciplină” este diferența în R dintre tranzacțiile curate și cele cu abateri de la reguli.</p>
 <p>„R” vine din engleză risk: unitatea de risc pe tranzacție; rezultatul se măsoară în multipli de risc, nu în monedă.</p>
+<p><a href="#gl-stoploss">Stop-Loss</a>, <a href="#gl-takeprofit">Take-Profit</a>, <a href="#gl-risk">Risc</a>, <a href="#gl-leverage">Efect de Levier</a></p>
 <h2 id="gl-leverage">Efect de Levier</h2>
 <p>Folosirea fondurilor împrumutate de la broker pentru a mări dimensiunea poziției.</p>
 <p>Efectul de levier (leverage) permite tranzacționarea unei poziții care depășește capitalul propriu. Un levier de 1:10 înseamnă că un depozit de 1000$ controlează o poziție de 10.000$. Profitul și pierderea se multiplică proporțional. Margin call-ul este închiderea forțată a pozițiilor la epuizarea marjei. Un levier ridicat crește riscul de lichidare la o mișcare mică împotriva poziției. Traderii profesioniști folosesc de regulă un levier de până la 1:3–1:5.</p>
 <p>Calc din engleză leverage — „pârghie”: un capital mic mișcă o poziție mare.</p>
+<p><a href="#gl-stoploss">Stop-Loss</a>, <a href="#gl-risk">Risc</a>, <a href="#gl-spread">Spread</a>, <a href="#gl-margin">Marjă</a></p>
 <h2 id="gl-spread">Spread</h2>
 <p>Diferența dintre prețul de cumpărare (ask) și cel de vânzare (bid) al unui instrument.</p>
 <p>Spread-ul este un „comision” implicit al brokerului: la intrarea într-o poziție, traderul înregistrează imediat o pierdere egală cu spread-ul. Spread îngust (EUR/USD — ~0,2–0,5 pipși) la instrumentele lichide; spread larg (perechi exotice, acțiuni cu lichiditate redusă) — până la câteva procente. Spread-ul se lărgește în momentele de știri și de lichiditate redusă (noapte, sărbători). În scalping și tranzacționarea de înaltă frecvență, spread-ul este critic.</p>
 <p>Din engleză spread — „răspândire, diferență” între prețul de cumpărare și cel de vânzare.</p>
+<p><a href="#gl-liquidity">Lichiditate</a>, <a href="#gl-leverage">Efect de Levier</a>, <a href="#gl-marketmaker">Market Maker</a></p>
 <h2 id="gl-liquidity">Lichiditate</h2>
 <p>Ușurința cu care un activ poate fi cumpărat/vândut fără a influența semnificativ prețul.</p>
 <p>Lichiditatea este o caracteristică-cheie a pieței. Piețe cu lichiditate ridicată: EUR/USD, S&amp;P 500, BTC — spread-uri înguste, execuție rapidă, alunecare (slippage) redusă. Piețe cu lichiditate scăzută: penny stocks, cripto exotice — spread-uri largi, alunecare ridicată. Lichiditatea scade în afara orelor de tranzacționare. „Lichiditatea” în SMC reprezintă stop-ordinele acumulate deasupra/dedesubtul nivelurilor-cheie, „vânate” de market makeri.</p>
 <p>Din latină liquidus — „curgător, lichid”.</p>
+<p><a href="#gl-spread">Spread</a>, <a href="#gl-marketmaker">Market Maker</a>, <a href="#gl-orderbook">Order Book (Registrul de Ordine)</a>, <a href="#gl-slippage">Slippage (Alunecare de Preț)</a></p>
 <h2 id="gl-orderbook">Order Book (Registrul de Ordine)</h2>
 <p>Lista tuturor ordinelor deschise de cumpărare și vânzare, cu prețuri și volume.</p>
 <p>Order Book-ul este vizualizarea cererii și ofertei. Coloana din stânga (bids) conține ordinele de cumpărare: cumpărătorii dispuși să plătească. Coloana din dreapta (asks/offers) conține ordinele de vânzare. Cel mai bun bid și cel mai bun ask formează împreună spread-ul. Un „zid” format dintr-un ordin mare poate opri temporar mișcarea prețului. Un order book „adânc” (multe ordine pe niveluri diferite) înseamnă lichiditate ridicată. Pe futures și cripto spot, order book-ul se actualizează în timp real.</p>
 <p>Termen preluat direct din engleza de trading: lista ordinelor pe niveluri de preț.</p>
+<p><a href="#gl-liquidity">Lichiditate</a>, <a href="#gl-spread">Spread</a>, <a href="#gl-marketmaker">Market Maker</a></p>
 <h2 id="gl-slippage">Slippage (Alunecare de Preț)</h2>
 <p>Diferența dintre prețul așteptat și cel real de execuție a unui ordin.</p>
 <p>Slippage-ul apare atunci când un ordin se execută la un preț mai prost decât cel cerut. Cauze: lichiditate insuficientă, volatilitate ridicată (în timpul știrilor), procesare lentă a ordinului. Ordinele de piață sunt cele mai expuse la slippage. Ordinele limită elimină slippage-ul negativ, dar riscă să nu se execute. În scalping și tranzacționarea HFT, slippage-ul este un factor critic.</p>
 <p>Din engleză slippage — „alunecare, deplasare”: diferența dintre prețul așteptat și cel real de execuție.</p>
+<p><a href="#gl-liquidity">Lichiditate</a>, <a href="#gl-spread">Spread</a>, <a href="#gl-stoploss">Stop-Loss</a>, <a href="#gl-orderbook">Order Book (Registrul de Ordine)</a></p>
 <h2 id="gl-timeframe">Timeframe</h2>
 <p>Intervalul de timp reprezentat de fiecare lumânare de pe grafic (M30, H1, H4, D1, W1).</p>
 <p>Timeframe-ul este perioada pe care o reprezintă o singură lumânare pe grafic. M1/M5/M15 sunt folosite pentru scalping și intraday. M30/H1 pentru intraday și swing. H4/D1 pentru analiză pe termen mediu. W1/MN pentru termen lung. Principiul analizei multi-timeframe: trendul se determină pe TF-ul mare, punctul de intrare se caută pe cel mic. Nivelurile de pe TF-ul mare sunt mai semnificative decât cele de pe TF-ul mic.</p>
 <p>Din engleză timeframe — „interval de timp”.</p>
+<p><a href="#gl-trend">Trend</a>, <a href="#gl-pattern">Model (Pattern)</a>, <a href="#gl-support">Suport</a>, <a href="#gl-resistance">Rezistență</a></p>
 <h2 id="gl-trend">Trend</h2>
 <p>Mișcare direcțională susținută a prețului: în sus (bullish), în jos (bearish), orizontală (flat).</p>
 <p>Trendul se determină prin succesiunea extremelor: bullish — Higher High + Higher Low (maxime și minime tot mai ridicate), bearish — Lower High + Lower Low. Flat-ul este un interval orizontal fără direcție clară. Axioma lui Dow: „Trendul există până se dovedește contrariul.” Identificarea trendului este primul pas al analizei. Tranzacționarea „în direcția trendului” reduce probabilitatea tranzacțiilor greșite.</p>
 <p>Din engleză trend — „tendință, direcție”.</p>
+<p><a href="#gl-timeframe">Timeframe</a>, <a href="#gl-support">Suport</a>, <a href="#gl-resistance">Rezistență</a>, <a href="#gl-flat">Flat (Consolidare)</a></p>
 <h2 id="gl-flat">Flat (Consolidare)</h2>
 <p>Perioadă de tranzacționare într-un interval orizontal de preț, fără trend clar.</p>
 <p>Flat-ul (consolidarea) este situația în care prețul se mișcă între suport și rezistență, fără să formeze un trend stabil. Strategiile trend-following dau multe semnale false în flat. În flat funcționează mai eficient abordările contra-trend: cumpărare la marginea inferioară, vânzare la cea superioară. Volumul scade de regulă în flat. Spargerea unui flat cu volum ridicat este un semn de început de trend.</p>
 <p>Din engleză flat — „plat, uniform”.</p>
+<p><a href="#gl-trend">Trend</a>, <a href="#gl-support">Suport</a>, <a href="#gl-resistance">Rezistență</a>, <a href="#gl-volatility">Volatilitate</a></p>
 <h2 id="gl-volatility">Volatilitate</h2>
 <p>Măsura amplitudinii fluctuațiilor de preț într-o perioadă.</p>
 <p>Volatilitatea măsoară cât de puternic se abate prețul de la medie. Volatilitate ridicată — lumânări mari, spread-uri largi, mișcări puternice. Volatilitate scăzută — lumânări mici, piață liniștită. ATR (Average True Range) este un indicator popular pentru volatilitatea istorică. Implied Volatility (IV) este volatilitatea așteptată de piață, încorporată în prețurile opțiunilor. Pentru acțiuni se folosește VIX — „indicele fricii”. Înainte de publicarea știrilor, volatilitatea scade de regulă, iar după — crește brusc.</p>
 <p>Din latină volatilis — „zburător, schimbător”.</p>
+<p><a href="#gl-vix">VIX</a>, <a href="#gl-atr">ATR</a>, <a href="#gl-spread">Spread</a>, <a href="#gl-trend">Trend</a></p>
 <h2 id="gl-vix">VIX</h2>
 <p>Indicele volatilității așteptate a S&amp;P 500 pe 30 de zile înainte, „indicatorul fricii”.</p>
 <p>VIX (CBOE Volatility Index) se calculează pe baza prețurilor opțiunilor pe S&amp;P 500. VIX &lt; 15 — piață calmă, tensiune scăzută. VIX 20–30 — incertitudine moderată. VIX &gt; 30 — tensiune ridicată, adesea la minimul pieței. Corelație inversă cu S&amp;P 500: când piața scade, VIX crește. VIX nu prognozează direcția, doar amplitudinea. Un indice similar pentru cripto este DVOL (Deribit Volatility Index pentru BTC).</p>
 <p>Volatility Index a fost introdus de bursa CBOE în 1993; porecla „indicele fricii” s-a impus după crizele financiare.</p>
+<p><a href="#gl-fear-greed">Fear &amp; Greed</a>, <a href="#gl-volatility">Volatilitate</a>, <a href="#gl-trend">Trend</a></p>
 <h2 id="gl-divergence">Divergență</h2>
 <p>Discrepanță între mișcarea prețului și cea a oscilatorului, care indică o posibilă slăbire a trendului.</p>
 <p>Divergență bullish: prețul face un minim nou, oscilatorul (RSI, MACD) — nu. Indică o slăbire a presiunii bearish. Divergență bearish: prețul face un maxim nou, oscilatorul rămâne sub cel precedent. Indică o slăbire a presiunii bullish. Divergența ascunsă indică o continuare a trendului. Divergența nu oferă, prin ea însăși, un punct de intrare; este nevoie de confirmare prin structura prețului sau printr-un pattern. Este cea mai fiabilă pe timeframe-uri de H4 și mai mari.</p>
 <p>Din latină divergere — „a se îndepărta în direcții diferite”.</p>
+<p><a href="#gl-rsi">RSI</a>, <a href="#gl-trend">Trend</a>, <a href="#gl-pattern">Model (Pattern)</a>, <a href="#gl-oscillator">Oscilator</a></p>
 <h2 id="gl-volume">Volum</h2>
 <p>Numărul de loturi/contracte/monede tranzacționate într-o perioadă.</p>
 <p>Volumul este un indicator suplimentar important. O mișcare de preț cu volum ridicat este mai semnificativă. Creșterea prețului pe volum scăzut este un semnal potențial slab. Scăderea volumului într-un trend este un avertisment privind o posibilă răsturnare. Volume Profile arată la ce prețuri s-a tranzacționat cel mai mult. POC (Point of Control) este nivelul de preț cu volumul maxim — acționează adesea ca suport/rezistență.</p>
 <p>Traducere directă din engleză volume — cantitatea de contracte/loturi tranzacționate într-o perioadă.</p>
+<p><a href="#gl-liquidity">Lichiditate</a>, <a href="#gl-trend">Trend</a>, <a href="#gl-flat">Flat (Consolidare)</a>, <a href="#gl-orderbook">Order Book (Registrul de Ordine)</a></p>
 <h2 id="gl-long">Long</h2>
 <p>Cumpărarea unui activ mizând pe creșterea prețului.</p>
 <p>Long (poziție long) este poziția de bază pe piață: traderul cumpără un activ, mizând că îl va vinde mai scump în viitor. Profitul apare la creșterea prețului, pierderea — la scădere. Opusul short-ului.</p>
 <p>Din engleză long position — „poziție lungă”: traderul „ține” activul mult timp, așteptând creșterea.</p>
+<p><a href="#gl-short">Short</a></p>
 <h2 id="gl-short">Short</h2>
 <p>Vânzarea unui activ împrumutat de la broker, mizând pe scăderea prețului.</p>
 <p>Short (short sale) este atunci când traderul împrumută un activ de la broker, îl vinde la prețul curent și se angajează să-l returneze mai târziu. Dacă prețul scade, traderul răscumpără activul mai ieftin și returnează împrumutul, diferența fiind profitul. Dacă prețul crește, pierderea este teoretic nelimitată.</p>
 <p>Din engleză short sale — „vânzare scurtă”; termenul s-a impus pe burse încă din secolul al XIX-lea.</p>
+<p><a href="#gl-long">Long</a></p>
 <h2 id="gl-ath">ATH (Maxim Istoric)</h2>
 <p>All-Time High — maximul istoric al prețului unui activ.</p>
 <p>ATH (All-Time High) este cel mai ridicat preț pe care un activ l-a atins vreodată în istoria tranzacționării. Depășirea unui ATH este adesea însoțită de creșterea atenției traderilor retail și de un val de hype media, ceea ce nu garantează continuarea creșterii.</p>
 <p>Abrevierea s-a impus în rapoartele bursiere ca modalitate rapidă de a marca un record de preț.</p>
+<p><a href="#gl-bull-market">Piață Bullish (Bull Market)</a></p>
 <h2 id="gl-bull-market">Piață Bullish (Bull Market)</h2>
 <p>Creștere susținută a pieței, de regulă de 20% sau mai mult față de minimul recent.</p>
 <p>Piața bullish este perioada în care prețurile majorității activelor cresc, iar sentimentul participanților este optimist.</p>
 <p>Potrivit uneia dintre versiuni — taurul lovește cu coarnele de jos în sus, simbol al creșterii, spre deosebire de urs.</p>
+<p><a href="#gl-bear-market">Piață Bearish (Bear Market)</a>, <a href="#gl-ath">ATH (Maxim Istoric)</a></p>
 <h2 id="gl-bear-market">Piață Bearish (Bear Market)</h2>
 <p>Scădere susținută a pieței, de regulă de 20% sau mai mult față de maximul recent.</p>
 <p>Piața bearish este o perioadă de scădere prelungită a prețurilor și de sentiment pesimist al participanților.</p>
 <p>Potrivit uneia dintre versiuni — de la felul în care ursul atacă cu laba de sus în jos, simbol al pieței în cădere.</p>
+<p><a href="#gl-bull-market">Piață Bullish (Bull Market)</a>, <a href="#gl-dno">Fund (Minimul Pieței)</a></p>
 <h2 id="gl-hedge">Hedging (Acoperire)</h2>
 <p>Poziție care asigură portofoliul împotriva riscului altei poziții.</p>
 <p>Hedging-ul înseamnă deschiderea unei poziții care compensează pierderea unei alte poziții în cazul unei mișcări nefavorabile a prețului. Hedge-ul reduce nu doar riscul, ci și profitul potențial.</p>
 <p>Din engleză hedge — „gard viu”: în sensul de „îngrădire”, protecție dintr-o parte.</p>
+<p><a href="#gl-leverage">Efect de Levier</a></p>
 <h2 id="gl-khomyak">Hamsterul</h2>
 <p>Poreclă ironică pentru traderul retail neexperimentat, care pierde adesea bani din cauza emoțiilor.</p>
 <p>„Hamsterul” este o denumire argotică pentru traderul retail de masă, fără o abordare sistematică, care acționează sub influența emoțiilor, a hype-ului și a sfaturilor din social media.</p>
 <p>Calc din argoul rusesc de trading al anilor 2010 — asociere cu un animal agitat, atras ușor de câștiguri rapide; expresia a pătruns și în comunitățile românești de trading online.</p>
+<p><a href="#gl-kukl">Păpușarul</a>, <a href="#gl-slit">Cont Ars</a></p>
 <h2 id="gl-kukl">Păpușarul</h2>
 <p>Jucător mare sau market maker ale cărui acțiuni mișcă prețul împotriva traderilor retail.</p>
 <p>„Păpușarul” este o denumire argotică pentru un participant mare de piață, suspectat de traderii retail că mișcă intenționat prețul în avantajul propriu — de exemplu, pentru a „curăța” stopurile înainte de o răsturnare.</p>
 <p>De la expresia „a trage sforile” — cel care manipulează piața ca pe o marionetă.</p>
+<p><a href="#gl-marketmaker">Market Maker</a>, <a href="#gl-liquidity-sweep">Liquidity Sweep</a></p>
 <h2 id="gl-dno">Fund (Minimul Pieței)</h2>
 <p>Punctul minim al scăderii prețului, înainte de o răsturnare în sus.</p>
 <p>„Fundul” este punctul de pe grafic sub care prețul nu a mai coborât în cadrul mișcării curente, după care a început o răsturnare în sus. Faptul că fundul a fost atins se poate confirma doar ulterior, retrospectiv.</p>
 <p>Traducere directă a argoului de trading bottom.</p>
+<p><a href="#gl-bear-market">Piață Bearish (Bear Market)</a>, <a href="#gl-otskok">Recul (Bounce)</a></p>
 <h2 id="gl-otskok">Recul (Bounce)</h2>
 <p>Creștere de scurtă durată a prețului după o scădere bruscă — nu neapărat o răsturnare de trend.</p>
 <p>Reculul este o revenire rapidă și de scurtă durată a prețului după o scădere bruscă. Spre deosebire de o răsturnare completă, reculul de regulă nu schimbă trendul dominant și este adesea urmat de continuarea scăderii.</p>
 <p>Calc din engleză bounce: prețul „sare”, ca o minge de pe podea.</p>
+<p><a href="#gl-dno">Fund (Minimul Pieței)</a>, <a href="#gl-bear-market">Piață Bearish (Bear Market)</a></p>
 <h2 id="gl-slit">Cont Ars</h2>
 <p>Pierderea rapidă și dureroasă a depozitului, adesea din cauza riscului sau a levierului excesiv.</p>
 <p>„A arde contul” înseamnă a pierde tot capitalul de tranzacționare (sau o parte semnificativă din el), de regulă din lipsa managementului riscului, din cauza levierului excesiv sau a tranzacționării emoționale după o serie de pierderi.</p>
 <p>Argou online: metafora „a arde” — a scăpa de ceva iremediabil, ca focul care mistuie.</p>
+<p><a href="#gl-leverage">Efect de Levier</a>, <a href="#gl-khomyak">Hamsterul</a></p>
 <h2 id="gl-razvorot">Întoarcere de Trend (Reversal)</h2>
 <p>Schimbarea direcției trendului din ascendent în descendent sau invers.</p>
 <p>Întoarcerea este momentul în care trendul dominant își schimbă direcția în cea opusă. Întoarcerea se confirmă retrospectiv — prin spargerea structurii, nu printr-o singură lumânare.</p>
 <p>Calc din engleză reversal.</p>
+<p><a href="#gl-trend">Trend</a>, <a href="#gl-dno">Fund (Minimul Pieței)</a></p>
 <h2 id="gl-risk">Risc</h2>
 <p>Partea din depozit pe care traderul este dispus conștient să o piardă într-o singură tranzacție.</p>
 <p>Riscul se stabilește ÎNAINTE de intrare și se calculează în procente din depozit, nu în monedă: 1% din 10 000 $ și 1% din 1 000 $ sunt sume diferite, dar aceeași decizie. Din risc rezultă mărimea poziției, nu invers: mai întâi „cât sunt dispus să pierd”, apoi „câte loturi înseamnă asta la stopul meu”. Reperul obișnuit este 1–2% pe tranzacție: la 1%, o serie de zece pierderi consecutive costă circa 10% din depozit; la 5% — jumătate din cont. Pierderea nu este simetrică: pentru a recupera −50% este nevoie de +100%. Riscul care nu este limitat de un stop-loss este limitat de mărimea depozitului.</p>
 <p>Prin it. rischio. Originea mai veche este disputată: se invocă cel mai des gr. ῥίζα „stâncă” — pericolul pe care nava trebuie să-l ocolească — și ar. rizq „parte, ceea ce este dat”.</p>
+<p><a href="#gl-stoploss">Stop-Loss</a>, <a href="#gl-r-ratio">R-multiplu (R:R)</a>, <a href="#gl-leverage">Efect de Levier</a>, <a href="#gl-slit">Cont Ars</a></p>
 <h2 id="gl-margin">Marjă</h2>
 <p>Partea din depozit pe care brokerul o blochează drept garanție pentru o poziție deschisă.</p>
 <p>Marja nu este comision și nici cheltuială: sunt bani înghețați, care se întorc la închiderea poziției. Marja necesară = volumul poziției / levier: la un levier de 1:100, o poziție de 10 000 $ blochează 100 $. Marja liberă este ce rămâne și poate susține poziții noi sau pierderea celor curente. Nivelul marjei = fonduri / marjă utilizată × 100%: cât timp este ridicat, contul trăiește. Când nivelul scade sub prag, brokerul mai întâi avertizează (margin call), apoi închide pozițiile forțat (stop out). Pragurile concrete le stabilește brokerul și diferă de la unul la altul — merită citite în specificația contului înainte de prima tranzacție, nu după.</p>
 <p>Din lat. margo — „margine”. Garanția stă la marginea contului și separă banii liberi de cei blocați.</p>
+<p><a href="#gl-leverage">Efect de Levier</a>, <a href="#gl-stoploss">Stop-Loss</a>, <a href="#gl-risk">Risc</a>, <a href="#gl-spread">Spread</a></p>
 <h2 id="gl-atr">ATR</h2>
 <p>Amplitudinea medie a lumânării pe o perioadă — o măsură a volatilității în puncte, fără direcție.</p>
 <p>True Range al unei lumânări este maximul dintre trei valori: (high − low), |high − close-ul lumânării precedente| și |low − close-ul precedent|. Ultimele două există pentru gap-uri: dacă piața s-a deschis cu un decalaj, simpla amplitudine a lumânării subestimează mișcarea. ATR este media mobilă a True Range, de regulă pe 14 perioade. ATR nu arată direcția deloc: și căderea, și creșterea dau valori la fel de mari. Utilizare practică — stop după volatilitate (ATR × un multiplicator, în loc de un număr rotund de puncte), normalizarea țintelor și compararea instrumentelor între ele: 50 de puncte la aur și 50 la EUR/USD sunt mișcări complet diferite, dar în ATR devin comparabile.</p>
 <p>Average True Range — „interval real mediu”. Introdus de Welles Wilder în „New Concepts in Technical Trading Systems” (1978), aceeași carte în care apare și RSI.</p>
+<p><a href="#gl-volatility">Volatilitate</a>, <a href="#gl-stoploss">Stop-Loss</a>, <a href="#gl-timeframe">Timeframe</a>, <a href="#gl-vix">VIX</a></p>
 <h2 id="gl-oscillator">Oscilator</h2>
 <p>Indicator ale cărui valori oscilează într-un interval limitat — de obicei între 0 și 100.</p>
 <p>Un indicator de trend urmează prețul; un oscilator măsoară viteza și „supraîncălzirea” mișcării. De aici scala limitată: valoarea se oprește la margini și se întoarce, ca un pendul. Dintre oscilatoare fac parte RSI, stocasticul, histograma MACD. Zonele de supracumpărare și supravânzare nu sunt prin ele însele un semnal de inversare: într-un trend puternic oscilatorul poate sta săptămâni întregi peste 70, iar „vânzarea supracumpărării” este modul tipic de a te pune împotriva pieței. Oscilatoarele funcționează mai bine în lateral decât în trend. Cel mai informativ eveniment este divergența: prețul face un nou extrem, oscilatorul nu.</p>
 <p>Din lat. oscillare — „a se legăna”. Valoarea se leagănă între două limite și nu iese din ele.</p>
+<p><a href="#gl-rsi">RSI</a>, <a href="#gl-divergence">Divergență</a>, <a href="#gl-volatility">Volatilitate</a>, <a href="#gl-flat">Flat (Consolidare)</a></p>

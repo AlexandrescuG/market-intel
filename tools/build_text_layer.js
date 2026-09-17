@@ -141,12 +141,22 @@ function глоссарий() {
     const п = path.join(КОРЕНЬ, 'web', 'assets', имя);
     if (!fs.existsSync(п)) continue;
     const данные = JSON.parse(fs.readFileSync(п, 'utf8'));
-    const html = данные.map(т => [
-      `<h2 id="gl-${экран(т.slug)}">${экран(т.term)}</h2>`,
-      т.short ? `<p>${экран(т.short)}</p>` : '',
-      т.full ? `<p>${экран(т.full)}</p>` : '',
-      т.etym ? `<p>${экран(т.etym)}</p>` : '',
-    ].filter(Boolean).join('\n')).join('\n');
+    /* 🔴 Связи между терминами уже лежат в поле related, но существовали
+       только для JS-версии страницы. Без них словарь для обходчика —
+       46 абзацев подряд; с ними это связанный справочник, по которому
+       можно ходить, и каждая статья имеет свой адрес с якорем. */
+    const имена = Object.fromEntries(данные.map(т => [т.slug, т.term]));
+    const html = данные.map(т => {
+      const связи = (т.related || []).filter(с => имена[с]);
+      return [
+        `<h2 id="gl-${экран(т.slug)}">${экран(т.term)}</h2>`,
+        т.short ? `<p>${экран(т.short)}</p>` : '',
+        т.full ? `<p>${экран(т.full)}</p>` : '',
+        т.etym ? `<p>${экран(т.etym)}</p>` : '',
+        связи.length ? '<p>' + связи.map(с =>
+          `<a href="#gl-${экран(с)}">${экран(имена[с])}</a>`).join(', ') + '</p>' : '',
+      ].filter(Boolean).join('\n');
+    }).join('\n');
     fs.writeFileSync(path.join(ВЫХОД, `glossary.${яз}.html`), html, 'utf8');
     итог.push([яз, `${данные.length} терминов`, html.length]);
   }
@@ -198,7 +208,10 @@ function брокеры() {
     // самое, а дубль заголовка для краулера — шум.
     const части = [];
     for (const б of живые) {
-      части.push(`<h3>${экран(б.name)}</h3>`);
+      // Ссылка с карточки на инструкцию: страница сравнения — вход в
+      // пять подробных материалов, и без ссылок обходчик о них не узнает.
+      const адрес = (яз === 'ru' ? '' : '/' + яз) + '/brokers/' + б.id;
+      части.push(`<h3><a href="${экран(адрес)}">${экран(б.name)}</a></h3>`);
       const стр = [];
       for (const e of б.entities || []) {
         // Юрлицо, юрисдикция, регулятор и номер лицензии — самое
@@ -247,8 +260,14 @@ function инструкции() {
       const файл = path.join(каталог, яз === 'ru' ? `${ид}.json` : `${ид}.${яз}.json`);
       if (!fs.existsSync(файл)) continue;
       const д = JSON.parse(fs.readFileSync(файл, 'utf8'));
+      const пре = яз === 'ru' ? '' : '/' + яз;
       const части = [`<h2>${экран(д.name || ид)}</h2>`];
       if (д.lead) части.push(`<p>${экран(д.lead)}</p>`);
+      // Назад к сравнению и вбок — к остальным четырём инструкциям.
+      части.push('<p>' + [`<a href="${пре}/brokers">${экран(С.брокеры)}</a>`]
+        .concat(список.filter(и => и !== ид)
+          .map(и => `<a href="${пре}/brokers/${и}">${и.toUpperCase()}</a>`))
+        .join(', ') + '</p>');
 
       for (const пр of д.processes || []) {
         части.push(`<h3>${экран(пр.label || пр.key || '')}</h3>`);

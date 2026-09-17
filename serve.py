@@ -1180,6 +1180,75 @@ def _schema_ld_глава(ch: int, lang: str) -> str:
         return ""
 
 
+_РАЗДЕЛЫ_САЙТА = (
+    ("/",           "nav.today"),
+    ("/chart.html", "nav.charts"),
+    ("/edu/",       "nav.edu"),
+    ("/calendar",   "nav.calendar"),
+    ("/brokers",    "nav.brokers"),
+    ("/glossary",   "glossary.h1"),
+)
+
+
+def _прогрессивный_щит() -> str:
+    """Скрипт и стиль, прячущие серверные блоки, когда JavaScript работает.
+
+    Один и тот же механизм у текстового слоя и у навигации: класс
+    sbf-js ставится синхронно, до того как браузер дойдёт до самого
+    блока, поэтому человек не видит его ни мгновения. Повторная выдача
+    безвредна — класс идемпотентен, стиль тоже.
+    """
+    return ('<script>document.documentElement.classList.add("sbf-js")</script>'
+            '<style>html.sbf-js .sbf-text-layer{display:none}'
+            'html:not(.sbf-js) #sbf-book-root,'
+            'html:not(.sbf-js) #brokersTableRoot:empty,'
+            'html:not(.sbf-js) #glContainer{min-height:0}'
+            '.sbf-text-nav{font:14px/1.6 system-ui,sans-serif;padding:12px 16px;'
+            'border-bottom:1px solid #E7DFCF}'
+            '.sbf-text-nav a{color:#866A19;margin-right:14px}</style>')
+
+
+def _навигация(lang: str) -> str:
+    """Навигация по разделам в самой разметке, а не только в JavaScript.
+
+    🔴 ВСЮ навигацию сайта рисует sbf-header.js — шапку и нижнюю панель,
+    через innerHTML. Значит для того, кто JavaScript не исполняет, сайт
+    состоит из страниц, между которыми нет ни одного перехода. Замер
+    17.09.2026 без JS: /brokers и /calendar — ноль ссылок, /glossary —
+    одна на 24 289 знаков текста. Карта сайта перечисляет адреса, но вес
+    между страницами передаётся ссылками, и обходчик идёт по ним.
+
+    Это же чинит страницу для человека с выключенным JavaScript: до сих
+    пор он не мог уйти со страницы, на которую попал.
+    """
+    ссылки = []
+    for путь, ключ in _РАЗДЕЛЫ_САЙТА:
+        подпись = i18n.t(ключ, lang)
+        ссылки.append(f'<a href="{_локальный_адрес(путь, lang)}">'
+                      f'{html_lib.escape(подпись)}</a>')
+    return ('<nav class="sbf-text-layer sbf-text-nav" aria-label="SBF">'
+            + "".join(ссылки) + "</nav>")
+
+
+def _соседние_главы(ch: int, lang: str) -> str:
+    """Предыдущая и следующая глава плюс оглавление.
+
+    Курс — единственное место на сайте, где порядок материалов задан, и
+    именно его обходчику полезнее всего: пятнадцать страниц, связанных
+    в цепочку, читаются как один материал, а не как пятнадцать чужих
+    друг другу адресов.
+    """
+    звенья = []
+    for сосед in (ch - 1, ch + 1):
+        if 1 <= сосед <= 15:
+            подпись = i18n.t(f"eduindex.chapters.{сосед}.title", lang)
+            звенья.append(f'<a href="{_локальный_адрес(f"/edu/b/{сосед}", lang)}">'
+                          f'{сосед}. {html_lib.escape(подпись)}</a>')
+    звенья.append(f'<a href="{_локальный_адрес("/edu/", lang)}">'
+                  f'{html_lib.escape(i18n.t("nav.edu", lang))}</a>')
+    return ('<nav class="sbf-text-layer sbf-text-nav">' + "".join(звенья) + "</nav>")
+
+
 def _описание_из_слоя(имя: str, lang: str, предел: int = 200) -> str:
     """Краткое описание страницы — из её же текстового слоя.
 
@@ -1925,6 +1994,12 @@ def _build_edu_page(ch: int, lang: str) -> bytes:
     # его и снимает.
     html = html.replace('<div id="sbf-book-root"></div>',
                         f'<div id="sbf-book-root"></div>{_text_layer(f"edu_b{ch}", lang)}', 1)
+
+    # Навигация по разделам плюс переходы между главами. Без JavaScript
+    # глава была тупиком: из неё не вело ни одной ссылки, включая
+    # соседние главы того же курса.
+    html = html.replace("<body>", "<body>" + _прогрессивный_щит()
+                        + _навигация(lang) + _соседние_главы(ch, lang), 1)
 
     return html.encode("utf-8")
 
@@ -2715,7 +2790,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 .paywall-wrap .back{{display:inline-block;margin-top:14px;padding:12px 16px;
   color:var(--muted);text-decoration:underline;font-size:13px;line-height:20px}}
 </style>
-</head><body>
+</head><body>{_прогрессивный_щит()}{_навигация(lang)}{_соседние_главы(ch, lang)}
 <div class="paywall-wrap">
   <h1>{i18n.t('eduindex.paywall.title', lang)}</h1>
   <p>{i18n.t('eduindex.paywall.body', lang)}</p>
@@ -2775,6 +2850,11 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             # canonical виден там же, где страница.
             html = _normalize_favicon(tpl.render(lang=lang, anon=anon,
                                                  page_path=page_path))
+            # Навигация вставляется здесь, а не в девяти шаблонах: она
+            # нужна КАЖДОЙ странице, и забыть её в одном шаблоне было бы
+            # незаметно — отсутствие ссылок глазами не видно.
+            html = html.replace(
+                "<body>", "<body>" + _прогрессивный_щит() + _навигация(lang), 1)
         except Exception as e:
             self.send_response(500)
             self.send_header("Content-Type", "text/plain; charset=utf-8")

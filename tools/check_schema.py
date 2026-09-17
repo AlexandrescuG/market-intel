@@ -60,10 +60,15 @@ from build_sitemap import ДОМЕН, ЯЗЫКИ, адрес, собрать  # 
   const блоки = [...document.querySelectorAll('script[type="application/ld+json"]')]
       .map(э => э.textContent);
   const кан = document.querySelector('link[rel="canonical"]');
-  const слой = document.querySelector('.sbf-text-layer');
-  return {блоки, канонический: кан ? кан.getAttribute('href') : null,
-          слой: слой ? slojDlina(слой) : 0};
-  function slojDlina(э) { return (э.textContent || '').length; }
+  // 🔴 Серверных блоков на странице теперь несколько, и первым идёт
+  // навигация — она тоже .sbf-text-layer. querySelector брал её и
+  // мерил 47 знаков вместо шестнадцати тысяч текста главы: щуп
+  // отругался на исправный код (15 «находок» 17.09). Считаем сумму
+  // содержательных блоков, навигацию исключаем по .sbf-text-nav.
+  const слой = [...document.querySelectorAll('.sbf-text-layer')]
+      .filter(э => !э.classList.contains('sbf-text-nav'))
+      .reduce((с, э) => с + (э.textContent || '').length, 0);
+  return {блоки, канонический: кан ? кан.getAttribute('href') : null, слой};
 }"""
 
 
