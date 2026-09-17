@@ -2380,7 +2380,13 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 .paywall-wrap p{{color:var(--muted);line-height:1.6;margin-bottom:24px}}
 .paywall-wrap a.btn{{display:inline-block;background:var(--gold);color:#18181a;font-weight:700;padding:12px 28px;border-radius:8px;text-decoration:none}}
 .paywall-wrap a.btn:hover{{opacity:.9}}
-.paywall-wrap .back{{display:block;margin-top:20px;color:var(--muted);text-decoration:underline;font-size:13px}}
+/* 🔴 Цель касания. Ссылка была 334×16: по высоте вдвое ниже минимума
+   WCAG 2.5.8 (24) и втрое ниже рекомендованных 44. Это единственный
+   способ уйти с пейволла назад в оглавление, и он стоит на десяти
+   страницах — главы 6-15. Ширину растягивать не надо, добираем высоту
+   отступами, inline-block — чтобы они считались. */
+.paywall-wrap .back{{display:inline-block;margin-top:14px;padding:12px 16px;
+  color:var(--muted);text-decoration:underline;font-size:13px;line-height:20px}}
 </style>
 </head><body>
 <div class="paywall-wrap">

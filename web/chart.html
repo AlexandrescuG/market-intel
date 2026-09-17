@@ -90,11 +90,16 @@ body{margin:0;background:var(--cream);color:var(--ink);font-family:Montserrat,sa
 .inst-head{flex:none}
 .inst-group{font-size:10px;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);
   padding:7px 10px 4px;font-family:'JetBrains Mono',monospace}
-.inst-row{display:grid;grid-template-columns:1fr 52px 58px 16px;gap:6px;align-items:center;
-  padding:7px 10px;border-bottom:1px solid var(--grid);cursor:pointer;text-decoration:none;
-  color:inherit;height:44px}
+/* Строка — контейнер из двух соседних управлений: «открыть график» на всю
+   ширину и «в избранное» справа. Сетка живёт на .inst-go, чтобы звёздочка
+   осталась снаружи и не оказалась кнопкой внутри кнопки. */
+.inst-row{display:grid;grid-template-columns:1fr 32px;align-items:center;
+  border-bottom:1px solid var(--grid);color:inherit;height:44px}
+.inst-go{display:grid;grid-template-columns:1fr 52px 58px;gap:6px;align-items:center;
+  padding:7px 0 7px 10px;height:100%;width:100%;box-sizing:border-box;
+  background:none;border:0;font:inherit;color:inherit;text-align:left;cursor:pointer}
 .inst-row:hover{background:var(--cream)}
-.inst-row:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}
+.inst-go:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}
 .inst-row.on{background:rgba(201,162,39,.11)}
 .inst-row.on .inst-tick{color:#8a6c10}
 .inst-row.noq{opacity:.5;cursor:default}
@@ -114,8 +119,13 @@ body{margin:0;background:var(--cream);color:var(--ink);font-family:Montserrat,sa
 .inst-chg{font-size:11px}
 .inst-chg.up{color:var(--up)} .inst-chg.down{color:var(--down)}
 .inst-none{font-size:11px;color:var(--muted)}
+/* 🔴 Цель касания, а не 16×13. Кнопка занимает всю высоту строки и свою
+   колонку целиком — палец попадает в 32×44, а звёздочка рисуется того же
+   размера, что и была. WCAG 2.5.8 требует 24×24 минимум; 44 по высоте —
+   рекомендация Apple/Google, и она здесь достаётся даром. */
 .inst-fav{border:0;background:none;padding:0;cursor:pointer;color:var(--line);font-size:13px;
-  line-height:1;opacity:0;transition:opacity .12s}
+  line-height:1;opacity:0;transition:opacity .12s;
+  width:32px;height:100%;display:flex;align-items:center;justify-content:center}
 .inst-row:hover .inst-fav,.inst-fav.on,.inst-fav:focus-visible{opacity:1}
 /* 🔴 На устройстве без мыши :hover не наступает никогда, поэтому
    добавить инструмент в избранное с телефона было нельзя вовсе:
@@ -3018,13 +3028,28 @@ document.addEventListener('sbf:user-ready', async ev => {
       ? '<div class="inst-none">' + esc(t('chart.inst_noquote', 'нет котировки')) + '</div>'
       : '<div class="inst-last">' + esc(fmtPrice(q.bid, it.digits)) + '</div>'
         + '<div class="inst-chg ' + (up ? 'up' : 'down') + '">' + esc(fmtChg(q.chg)) + '</div>';
-    return '<div class="' + cls.join(' ') + '" data-s="' + esc(it.symbol) + '"'
+    // 🔴 ДВЕ КНОПКИ-СЕСТРЫ, А НЕ КНОПКА ВНУТРИ КНОПКИ.
+    // Раньше строка сама была role="button" tabindex="0", а «в избранное»
+    // лежала внутри неё: 24 нарушения nested-interactive на телефоне.
+    // Диктор в такой паре объявляет строку кнопкой и зачитывает её
+    // содержимое одним именем — «EURUSD Minors 1.0850 +0.1% В избранное»,
+    // — и назвать вложенную кнопку отдельно уже нечем. Палец промахивался
+    // по той же причине: цель в 16 px внутри цели во всю ширину.
+    // Теперь .inst-row — обычный контейнер, а внутри два соседних
+    // управления: «открыть график» (вся строка минус звёздочка) и
+    // «в избранное». Обработчики не меняются: делегирование ищет
+    // [data-fav] и .inst-go по closest.
+    const надпись = esc(it.symbol)
+      + (it.name && it.name !== it.symbol ? ', ' + esc(it.name) : '');
+    return '<div class="' + cls.join(' ') + '" data-s="' + esc(it.symbol) + '">'
       // data-go — то, что уйдёт в ссылку ?s=. Для инструментов реестра это
       // каноническое имя (GOLD), для каталожных — имя самого брокера
       // (#BOEING): каталог снят с терминала, переводить там нечего.
-      + (chartable ? ' data-go="' + esc(it.canonical || it.symbol) + '" role="button" tabindex="0"'
-                   : ' title="' + esc(t('chart.inst_no_bars', 'график пока недоступен')) + '"')
-      + '><div class="inst-id"><div class="inst-tick">' + esc(it.symbol) + '</div>'
+      + (chartable
+          ? '<button type="button" class="inst-go" data-go="' + esc(it.canonical || it.symbol) + '"'
+            + ' aria-label="' + esc(t('chart.inst_open', 'Открыть график')) + ': ' + надпись + '">'
+          : '<div class="inst-go" title="' + esc(t('chart.inst_no_bars', 'график пока недоступен')) + '">')
+      + '<div class="inst-id"><div class="inst-tick">' + esc(it.symbol) + '</div>'
       // Имя, совпадающее с тикером, — это не имя, а его отсутствие: у 800+
       // символов брокера своего названия у нас нет. Вместо «EURCHF / EURCHF»
       // показываем подгруппу каталога («Minors», «Germany») — она хотя бы
@@ -3032,8 +3057,13 @@ document.addEventListener('sbf:user-ready', async ev => {
       + '<div class="inst-name">' + esc(it.name && it.name !== it.symbol ? it.name : (it.subgroup || '')) + '</div></div>'
       + sparkSvg(sparks[it.symbol], up)
       + '<div class="inst-px">' + px + '</div>'
+      + (chartable ? '</button>' : '</div>')
       + '<button class="inst-fav' + (fav ? ' on' : '') + '" data-fav="' + esc(it.symbol) + '"'
-      + ' aria-label="' + esc(t('chart.inst_fav_add', 'В избранное')) + '">' + (fav ? '★' : '☆')
+      // Имя кнопки называет инструмент: в списке из 800 строк двадцать
+      // одинаковых «В избранное» подряд не говорят диктору ничего.
+      + ' aria-pressed="' + (fav ? 'true' : 'false') + '"'
+      + ' aria-label="' + esc(t('chart.inst_fav_add', 'В избранное')) + ': ' + надпись + '">'
+      + (fav ? '★' : '☆')
       + '</button></div>';
   }
 
@@ -3233,15 +3263,14 @@ document.addEventListener('sbf:user-ready', async ev => {
       favs.has(sym) ? favs.delete(sym) : favs.add(sym);
       saveFavs(); rebuild(); return;
     }
-    activate(e.target.closest('.inst-row'));
+    // Открывает график только кнопка .inst-go: клик мимо неё (по пустому
+    // месту строки или по её рамке) больше ничего не делает — раньше вся
+    // строка была кнопкой, и попасть «в никуда» было нельзя.
+    activate(e.target.closest('.inst-go'));
   });
-  rowsEl.addEventListener('keydown', e => {
-    if (e.key !== 'Enter' && e.key !== ' ') return;
-    const row = e.target.closest('.inst-row');
-    if (!row) return;
-    e.preventDefault();
-    activate(row);
-  });
+  // 🔴 Отдельный обработчик клавиатуры больше не нужен и вреден: <button>
+  // сам отвечает на Enter и Пробел и сам шлёт click. Оставить оба значило
+  // бы обрабатывать одно нажатие дважды.
 
   if (_SP.get('s')) document.body.classList.add('has-symbol');
 

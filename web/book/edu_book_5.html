@@ -21,6 +21,12 @@
     #sbf-book-root{min-height:100vh}
     .messenger-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:30px}
     @media(max-width:768px){.messenger-grid{grid-template-columns:1fr}.hide-mobile{display:none!important}.g2{grid-template-columns:1fr!important}.g3{grid-template-columns:1fr!important}.g4{grid-template-columns:1fr 1fr!important}}
+    /* 🔴 Сутки в 12 колонок дают на телефоне кнопку 20 px шириной — ниже
+       минимума WCAG 2.5.8 (24×24) даже с учётом зазора, и это 24 самых
+       мелких цели на сайте. На узком экране раскладываем те же 24 часа в
+       6 колонок: ширина становится ~55 px, число рядов растёт с 2 до 4. */
+    .hours-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:5px}
+    @media(max-width:560px){.hours-grid{grid-template-columns:repeat(6,1fr);gap:6px}}
   </style>
 </head>
 <body>
@@ -474,8 +480,10 @@ function HourStatsBlock({ hp, vars }) {
 
       {!data ? <p style={{fontSize:13,color:C.inkFaint}}>—</p> : (
       <>
+        {/* Полоса часов шире экрана (640 px) — tabIndex, чтобы до неё
+            добирались и с клавиатуры, а не только пальцем. */}
         {subset === "all" ? (
-          <div style={{overflowX:"auto",marginBottom:8}}>
+          <div style={{overflowX:"auto",marginBottom:8}} tabIndex={0} role="region" aria-label={hs.tag || "24h"}>
             <div style={{display:"inline-block",minWidth:640}}>
               <div style={{display:"flex",marginBottom:2}}>
                 <div style={{width:70,flexShrink:0}}/>
@@ -1165,7 +1173,7 @@ function PredictHour({ vars }) {
       <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{p.tag}</Mono>
       <p style={{fontSize:14.5,color:C.black,lineHeight:1.65,marginBottom:4}}>{p.question}</p>
       <p style={{fontSize:11,color:C.inkFaint,marginBottom:14}}>{p.utcNote}</p>
-      <div style={{display:"grid",gridTemplateColumns:"repeat(12,1fr)",gap:5,marginBottom:14,maxWidth:520}}>
+      <div className="hours-grid" style={{marginBottom:14,maxWidth:520}}>
         {hours.map(h => (
           <button key={h} onClick={() => setPicked(h)} style={{padding:"8px 0",fontFamily:"monospace",fontSize:11,cursor:"pointer",
             background: picked===h ? C.gold : "#fff", color: picked===h ? "#18181a" : C.inkMid,

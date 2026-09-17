@@ -166,6 +166,29 @@
     return поставлено;
   }
 
+  /* 🔴 ПЕРЕХОДЫ МЕЖДУ ГЛАВАМИ — ЦЕЛИ КАСАНИЯ, А НЕ СТРОЧКИ ТЕКСТА.
+     Внизу каждой главы стоят «← Глава N» (210×20) и стрелка «←» (10×19).
+     Вторая — вдвое ниже минимума WCAG 2.5.8 по обеим сторонам и вчетверо
+     уже; на телефоне попасть по ней можно только случайно. Разметка у
+     каждой из 15 глав своя, то есть правка руками — это 30 одинаковых
+     правок в 15 файлах, которые снова разойдутся.
+
+     Помечаем классом здесь и задаём размер в edu.css, где ему и место.
+     Условие «ссылка ведёт на главу или оглавление И не стоит внутри
+     абзаца»: ссылки в тексте («см. главу 7») трогать нельзя — inline-flex
+     и min-height разорвали бы строку. */
+  function пометитьНавигационныеСсылки(корень) {
+    var узлы = (корень || document).querySelectorAll(
+      'a[href*="/edu/b/"], a[href$="/edu/"], a[href$="/ro/edu/"], a[href$="/en/edu/"]');
+    for (var i = 0; i < узлы.length; i++) {
+      var с = узлы[i];
+      if (с.classList.contains('sbf-tap')) continue;
+      if (с.closest('p, li, td, th')) continue;          // ссылка в тексте
+      if (с.querySelector('img, svg')) continue;          // картинка сама держит размер
+      с.classList.add('sbf-tap');
+    }
+  }
+
   // Главы перерисовываются (переключение «Просто/Как есть», приход данных),
   // поэтому один проход после загрузки не годится: новые тёмные панели
   // появятся уже после него. Наблюдатель с дебаунсом — и разовый проход
@@ -174,10 +197,14 @@
     var _таймер = null;
     var _перепройти = function () {
       clearTimeout(_таймер);
-      _таймер = setTimeout(function () { подсветитьТёмныеБлоки(document); }, 120);
+      _таймер = setTimeout(function () {
+        подсветитьТёмныеБлоки(document);
+        пометитьНавигационныеСсылки(document);
+      }, 120);
     };
     var _старт = function () {
       подсветитьТёмныеБлоки(document);
+      пометитьНавигационныеСсылки(document);
       try {
         new MutationObserver(_перепройти).observe(document.body,
           { childList: true, subtree: true });
@@ -412,10 +439,14 @@
       React.createElement('button', {
         type: "button",
         onClick: function(){ setOpen(true); },
+        // Цель касания: высота была 20 px — ниже минимума 2.5.8 (24).
+        // Ширина уже во всю строку, добираем только высоту отступами,
+        // подчёркивание остаётся под текстом (border-bottom ушёл на
+        // внутренний span был бы лишним — хватает text-decoration).
         style:{fontSize:15, color:C.inkSoft, fontFamily:"monospace", letterSpacing:1,
-               borderBottom:"1px solid " + C.border, paddingBottom:2, cursor:"pointer",
+               textDecoration:"underline", textUnderlineOffset:3, cursor:"pointer",
                display:"inline-block", background:"none", border:"none",
-               borderRadius:0, padding:0, margin:0}
+               borderRadius:0, padding:"8px 0", margin:0, minHeight:36, textAlign:"left"}
       }, tr.askAnalyst),
       open && React.createElement(AskAnalystPopup, {chapterNum:chapterNum, lang:lang, onClose:function(){ setOpen(false); }})
     );

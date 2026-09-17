@@ -1464,7 +1464,8 @@ function Chapter4() {
           <SectionTitle sub={S.slippageSub}>
             {S.slippageTitle}
           </SectionTitle>
-          <div style={{overflowX:"auto"}}>
+          {/* Прокручиваемая таблица — с клавиатуры тоже. */}
+          <div style={{overflowX:"auto"}} tabIndex={0} role="region" aria-label={S.slippageTitle}>
             <table style={{width:"100%",borderCollapse:"collapse",fontSize:13}}>
               <thead>
                 <tr>

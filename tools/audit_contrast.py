@@ -65,7 +65,11 @@ from playwright.sync_api import sync_playwright
     "/brokers/xm",
     "/glossary",
     "/privacy",
+    # 🔴 /grafik — редирект-заглушка на 988 байт (уводит на /#tech/...).
+    # Полный терминал живёт по /chart.html, ссылка на него стоит в каждой
+    # главе, и до 17.09 он не мерился ни разу ни одним замером.
     "/grafik?s=EURUSD",
+    "/chart.html?s=EURUSD",
     "/edu",
     "/edu/calendar",
     # 🔴 ВСЕ 15 глав, а не выборка. Раньше здесь стояли 1, 2 и 10, и после

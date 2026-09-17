@@ -969,7 +969,10 @@ function CrashLabV2() {
 
       <div style={{marginTop:24,background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px"}}>
         <div style={{fontWeight:600,fontSize:14,color:C.black,marginBottom:14}}>{L.outcomeTable.title}</div>
-        <div style={{overflowX:"auto"}}>
+        {/* 🔴 Область с собственной прокруткой обязана быть достижима с
+            клавиатуры: без tabindex до правой части таблицы можно добраться
+            только мышью или пальцем (axe scrollable-region-focusable). */}
+        <div style={{overflowX:"auto"}} tabIndex={0} role="region" aria-label={L.outcomeTable.title}>
           <table style={{width:"100%",borderCollapse:"collapse",fontSize:12.5}}>
             <thead>
               <tr>{L.outcomeTable.headers.map((h,i) => <th key={i} style={{textAlign:"left",padding:"6px 10px",color:C.inkFaint,borderBottom:`1px solid ${C.border}`,fontSize:10.5,letterSpacing:0.5}}>{h}</th>)}</tr>
