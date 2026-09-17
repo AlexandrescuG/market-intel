@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>SBF | {% if lang == 'ru' %}Биржевая торговля — Руководство{% elif lang == 'ro' %}Trading la Bursă — Ghid{% else %}Exchange Trading — Guide{% endif %}</title>
+  {# Заголовок был названием всего курса, а не первой главы: в выдаче и
+   во вкладках /edu/b/1 выглядела как оглавление, а не как материал.
+   Остальные четырнадцать глав подписаны «Глава N. …» — приводим к ним. #}
+<title>SBF | {% if lang == 'ru' %}Глава 1. Биржевая торговля{% elif lang == 'ro' %}Capitolul 1. Trading la Bursă{% else %}Chapter 1. Exchange Trading{% endif %}</title>
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="SBF Intelligence">
 <meta property="og:image" content="https://lp.sbfconsult.com/assets/og-image.png">
