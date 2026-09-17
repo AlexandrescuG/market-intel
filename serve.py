@@ -1182,6 +1182,21 @@ def _tojson_filter(value) -> Markup:
 _site_jinja.filters["tojson"] = _tojson_filter
 
 _EDU_RE     = re.compile(r'^/edu(?:/(?P<lang>ro|en))?/b(?:/(?P<ch>\d+))?(?:\?.*)?$')
+
+# Куда вести с адреса-исходника. Ключ — путь файла в web/, значение —
+# канонический маршрут той же страницы. Пары, у которых .html-вариант уже
+# перехвачен маршрутом выше (/glossary.html, /brokers.html, /register.html,
+# /login.html, /survey.html, /privacy.html, /admin.html), сюда не нужны.
+_КАНОНИЧЕСКИЙ_АДРЕС = {
+    "/index.html":         "/",
+    "/edu/index.html":     "/edu/",
+    "/edu/calendar.html":  "/calendar",
+    "/edu/glossary.html":  "/glossary",
+    "/broker_guide.html":  "/brokers",
+    "/journal.html":       "/journal",
+    "/grafik.html":        "/chart.html",
+}
+_КНИГА_ФАЙЛ_RE = re.compile(r'^/book/edu_book_(\d{1,2})\.html$')
 # Оглавление курса разбирается по path_clean (см. do_GET), отдельное
 # выражение по self.path было слепо к префиксу локали: /ro/edu/ под него
 # не подходил и уезжал в статику.
@@ -2477,6 +2492,29 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 Path(__file__).parent / "data" / "screenshots" / fname,
                 content_type="image/jpeg",
             )
+        elif path_clean.endswith((".html", ".htm")):
+            # 🔴 ИСХОДНИК ШАБЛОНА С КОДОМ 200. web/ — одновременно корень
+            # статики и каталог Jinja-шаблонов, поэтому любой .html, не
+            # перехваченный маршрутом выше, уезжал в super().do_GET() и
+            # отдавался КАК ФАЙЛ. Замер 17.09.2026: /index.html — 36
+            # следов шаблона в тексте и заголовок «{{ t('home.page_title',
+            # lang) }}», /broker_guide.html — то же самое и при этом
+            # robots: index, follow. Снаружи это 200 и «страница есть»:
+            # ни лог, ни код ответа об этом не скажут.
+            # Ответ — редирект на канонический адрес, а не рендер: иначе у
+            # каждой страницы появился бы второй адрес с тем же
+            # содержимым, и canonical пришлось бы объяснять дважды.
+            цель = _КАНОНИЧЕСКИЙ_АДРЕС.get(path_clean)
+            if цель is None:
+                м = _КНИГА_ФАЙЛ_RE.match(path_clean)
+                цель = f"/edu/b/{м.group(1)}" if м else None
+            if цель:
+                self._redirect(_локальный_адрес(цель, req_lang), 301)
+            else:
+                self.send_response(404)
+                self.send_header("Content-Type", "text/plain; charset=utf-8")
+                self.end_headers()
+                self.wfile.write("Такой страницы нет".encode("utf-8"))
         else:
             if req_lang != i18n.DEFAULT_LANG:
                 # Страница ещё не переведена (нет явного Jinja-маршрута выше) --
@@ -4446,8 +4484,10 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         except Exception as e:
             self._send_json({"error": str(e)}, 500)
 
-    def _redirect(self, location):
-        self.send_response(302)
+    def _redirect(self, location, код: int = 302):
+        # 301 там, где адрес неправильный навсегда (исходники шаблонов по
+        # .html): временный редирект оставил бы дубль в индексе.
+        self.send_response(код)
         self.send_header("Location", location)
         self.end_headers()
 
