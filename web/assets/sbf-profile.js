@@ -8,6 +8,17 @@
 
   // ── i18n (см. assets/i18n.js, паттерн — sbf-header.js) ───────────────────
   var _i18n = window.sbfI18n || { lang: 'ru', t: function (k, fb) { return fb || k; }, ready: Promise.resolve() };
+  /* Адрес в текущей локали. Ссылки «Войти» и «Создать аккаунт» вели на
+     /login.html и /register.html без префикса: с румынской страницы
+     человек попадал в русскую форму входа (Л-6 языкового аудита).
+     Берём общий помощник из i18n.js, а пока его нет — язык из адреса. */
+  function ЛОК(путь) {
+    var i = window.sbfI18n;
+    if (i && i.url) return i.url(путь);
+    var л = (location.pathname.match(/^\/(ro|en)(\/|$)/) || [])[1];
+    return л ? '/' + л + путь : путь;
+  }
+
   function t(key, fallback) { return _i18n.t(key, fallback); }
 
   // Патч-пасс для узлов, отрисованных ДО того как словарь догрузился:
@@ -481,9 +492,9 @@
       '<div class="sbf-pp-guest-banner" id="sbfGuestBanner" style="display:none">',
       '  <span data-i18n="profile.guest_banner_text">' + t('profile.guest_banner_text', 'Это гостевой профиль — прогресс хранится только в этом браузере и пропадёт при очистке.') + '</span>',
       '  <span class="sbf-pp-gb-actions">',
-      '    <a href="/login.html" class="sbf-pp-gb-link" data-i18n="profile.guest_login_button">' + t('profile.guest_login_button', 'Войти') + '</a>',
+      '    <a href="' + ЛОК('/login.html') + '" class="sbf-pp-gb-link" data-i18n="profile.guest_login_button">' + t('profile.guest_login_button', 'Войти') + '</a>',
       '    <span class="sbf-pp-gb-sep">·</span>',
-      '    <a href="/register.html" class="sbf-pp-gb-link" data-i18n="profile.guest_register_button">' + t('profile.guest_register_button', 'Создать аккаунт') + '</a>',
+      '    <a href="' + ЛОК('/register.html') + '" class="sbf-pp-gb-link" data-i18n="profile.guest_register_button">' + t('profile.guest_register_button', 'Создать аккаунт') + '</a>',
       '  </span>',
       '</div>',
 
@@ -678,7 +689,7 @@
       '    <a href="/brokers" class="sbf-pp-jlink">',
       '      <span class="sbf-pp-jlink-ico">🏦</span>',
       '      <span class="sbf-pp-jlink-lbl" data-i18n="profile.link_brokers">' + t('profile.link_brokers', 'Брокеры') + '</span></a>',
-      '    <a href="/register.html?retake=1" class="sbf-pp-jlink">',
+      '    <a href="' + ЛОК('/register.html') + '?retake=1" class="sbf-pp-jlink">',
       '      <span class="sbf-pp-jlink-ico">📋</span>',
       '      <span class="sbf-pp-jlink-lbl" data-i18n="profile.link_survey">' + t('profile.link_survey', 'Опросник') + '</span></a>',
       '  </div>',
@@ -1148,7 +1159,7 @@
         // Анонимный: показываем ссылку «Войти» (была ошибочно /survey — единственный
         // путь входа с телефона вёл в опрос вместо формы логина, см. координацию 28.07)
         item = document.createElement('a');
-        item.href = '/login.html';
+        item.href = ЛОК('/login.html');
         item.className = 'sbf-bn-prof g-bn-item';
         item.setAttribute('data-i18n-aria', 'profile.login_label');
         item.setAttribute('aria-label', t('profile.login_label', 'Войти'));

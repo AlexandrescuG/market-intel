@@ -953,6 +953,22 @@ a:hover{text-decoration:underline;color:var(--glow)}
 const DATA = './data/';
 const _PAGE_LANG = {{ lang | tojson }};
 const _CLOCK_LOCALE = _PAGE_LANG === 'ro' ? 'ro-RO' : _PAGE_LANG === 'en' ? 'en-GB' : 'ru-RU';
+
+/* 🔴 Внутренняя ссылка — в текущей локали. С /ro/ все 77 кликов по
+   инструментам вели на «/chart.html», то есть выбрасывали румына на
+   русский терминал и обратно уже не возвращали (Л-6 языкового аудита).
+   Отдаём общий помощник из i18n.js; он же знает про исключение курса
+   (/edu/ro/b/N вместо /ro/edu/b/N). i18n.js подключён с defer, поэтому
+   до его готовности падаем на _PAGE_LANG, который сервер уже подставил
+   в эту же страницу, — а не на путь как есть: «как есть» здесь значит
+   «по-русски», то есть ровно та ошибка, которую чиним. */
+const ЛОК = (путь) => {
+  if (window.sbfI18n && window.sbfI18n.url) return window.sbfI18n.url(путь);
+  if (!путь || _PAGE_LANG === 'ru' || !/^\//.test(путь)) return путь;
+  if (/^\/(ro|en)(\/|$)/.test(путь) || /^\/(assets|data|api)\//.test(путь)) return путь;
+  const м = путь.match(/^\/edu\/b(\/.*)?$/);
+  return м ? '/edu/' + _PAGE_LANG + '/b' + (м[1] || '') : '/' + _PAGE_LANG + путь;
+};
 const fmt = n => n==null?'—':(Math.abs(n)>=1000?n.toLocaleString('en-US',{maximumFractionDigits:2}):n);
 function fmt_(tpl, vars) { return tpl.replace(/\{(\w+)\}/g, (_, k) => (vars[k] != null ? vars[k] : '')); }
 const I18N_TIME = {
@@ -1425,7 +1441,7 @@ async function renderPersonalBlock() {
     const parts = results.map((data, i) => {
       const sym = symbols[i];
       const symName = window.SBFSymbols ? window.SBFSymbols.symbolName(sym, {mode:'name'}) : sym;
-      const href = `/chart.html?s=${encodeURIComponent(sym)}&focus=today`;
+      const href = ЛОК(`/chart.html?s=${encodeURIComponent(sym)}&focus=today`);
       let txt;
       if (data && data.next_event_ts && data.next_event_ts <= endOfDay && data.next_event) {
         const time = new Date(data.next_event_ts * 1000).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
@@ -1522,7 +1538,7 @@ async function renderFocusCard() {
     let html = `<div class="focus-item__head">${tick}${move}</div>
       ${focusBodyHtml}
       <div class="focus-disclaimer">${I18N_REPORT.focusDisclaimer}</div>
-      <a class="focus-link" href="/chart.html?s=${encodeURIComponent(data.symbol)}&focus=today">${I18N_REPORT.focusViewChart} →</a>`;
+      <a class="focus-link" href="${ЛОК(`/chart.html?s=${encodeURIComponent(data.symbol)}&focus=today`)}">${I18N_REPORT.focusViewChart} →</a>`;
     body.innerHTML = html;
     card.style.display = 'block';
   } catch (e) {
@@ -1578,7 +1594,7 @@ function linkInstrumentsInReport(reportEl) {
       if (before) frag.appendChild(document.createTextNode(before));
       const a = document.createElement('a');
       a.className = 'rep-instrument-link';
-      a.href = '/chart.html?s=' + encodeURIComponent(matchSym) + '&focus=today';
+      a.href = ЛОК('/chart.html?s=' + encodeURIComponent(matchSym) + '&focus=today');
       a.textContent = matched;
       frag.appendChild(a);
       const parent = node.parentNode;
@@ -2240,7 +2256,7 @@ async function loadBoard(){
             ? window.SBFSymbols.symbolName(it.symbol, {mode:'name'}) : it.symbol;
           const ch = it.change_pct;
           const cls = ch > 0 ? 'up' : ch < 0 ? 'down' : '';
-          return `<a class="board-row" href="/chart.html?s=${encodeURIComponent(it.symbol)}"
+          return `<a class="board-row" href="${ЛОК(`/chart.html?s=${encodeURIComponent(it.symbol)}`)}"
                      data-sym="${escapeHtmlIdx(it.symbol)}">
             <span class="br-sym">${escapeHtmlIdx(имя)}</span>
             <span class="br-chg ${cls}">${ch != null ? (ch > 0 ? '+' : '') + ch.toFixed(2) + '%' : ''}</span>
@@ -2339,7 +2355,7 @@ async function loadBoard(){
       // шестидесяти кругах последний выезжал через 2 секунды — человек
       // успевал решить, что доска догрузилась, и увести взгляд.
       const delay = Math.round((idx++) * Math.min(34, 900 / Math.max(list.length, 1)));
-      return `<a class="board-bubble ${BOARD_CATS[cat].cls}" href="/chart.html?s=${encodeURIComponent(it.symbol)}"
+      return `<a class="board-bubble ${BOARD_CATS[cat].cls}" href="${ЛОК(`/chart.html?s=${encodeURIComponent(it.symbol)}`)}"
         data-sym="${escapeHtmlIdx(it.symbol)}"
         style="left:${Math.round(it.x - it.r)}px;top:${Math.round(it.y - it.r)}px;
                width:${it.r*2}px;height:${it.r*2}px;animation-delay:${delay}ms"

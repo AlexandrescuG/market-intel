@@ -5,7 +5,12 @@
   // Detect language directly (do NOT rely on window.sbfI18n — this script
   // runs without `defer` and can execute before i18n.js's deferred code,
   // so the shared client-side dictionary is not guaranteed to be ready yet).
-  var LANG = /^\/(ro)(\/|$)/.test(location.pathname) ? 'ro' : 'ru';
+  // 🔴 Языки перечисляются группой, а не «ro против всего остального».
+  // Регулярка знала ровно про ro, поэтому /en/glossary считался русским:
+  // английский заголовок, английская обвязка — и 35 русских терминов под
+  // ними. Пока язык определяется списком, забыть добавить его сюда при
+  // появлении четвёртой локали будет так же легко, как это вышло с en.
+  var LANG = (location.pathname.match(/^\/(ro|en)(\/|$)/) || [])[1] || 'ru';
 
   // Small self-contained dictionary for the handful of UI strings this file
   // owns directly (search placeholder, popup chrome) — no need to pull in
@@ -22,6 +27,14 @@
       more_in_glossary: 'Mai multe în glosar →',
       search_placeholder: 'Caută un termen…',
       related_prefix: 'Vezi și:'
+    },
+    // Английской ветки тут не было вовсе — отсюда «Поиск термина…»
+    // в поле над английским глоссарием.
+    en: {
+      etymology:      'Etymology',
+      more_in_glossary: 'More in the glossary →',
+      search_placeholder: 'Search a term…',
+      related_prefix: 'See also:'
     }
   };
   function t(key) {
@@ -32,7 +45,16 @@
   var _popup   = null;
   var _overlay = null;
 
-  var GLOSSARY_URL = LANG === 'ro' ? '/assets/glossary.ro.json' : '/assets/glossary.json';
+  // 🔴 Словарь выбирается ПО ЯЗЫКУ, а не «ro или всё остальное». Прежний
+  // тернарник отдавал английской локали русский файл: /en/glossary
+  // показывал «Бычий рынок», «Волатильность», «Хомяк» под английским
+  // заголовком Glossary — 35 из 46 терминов на русском (Л-1 языкового
+  // аудита 17.09). Теперь запись одна на язык, и добавить четвёртый
+  // язык — это добавить файл, а не переписать условие.
+  var СЛОВАРИ = { ru: '/assets/glossary.json',
+                  ro: '/assets/glossary.ro.json',
+                  en: '/assets/glossary.en.json' };
+  var GLOSSARY_URL = СЛОВАРИ[LANG] || СЛОВАРИ.ru;
 
   // ── Load glossary data ────────────────────────────────────────────────────
   function loadGlossary(cb) {

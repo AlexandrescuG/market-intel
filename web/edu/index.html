@@ -157,6 +157,36 @@ function t(key, fallback) {
   return i ? i.t(key, fallback) : (fallback || key);
 }
 
+/* Адрес во «своей» локали. По той же причине, что и t() выше, спрашиваем
+   window.sbfI18n при каждом вызове, а не при загрузке: на момент первого
+   render() его ещё нет. Пока нет — берём язык прямо из адресной строки,
+   а не отдаём русский путь молча. */
+function ЛОК(путь) {
+  var i = window.sbfI18n;
+  if (i && i.url) return i.url(путь);
+  var л = (location.pathname.match(/^\/(ro|en)(\/|$)/) || [])[1];
+  if (!л || !путь) return путь;
+  var м = путь.match(/^\/edu\/b(\/.*)?$/);
+  return м ? '/edu/' + л + '/b' + (м[1] || '') : '/' + л + путь;
+}
+
+/* Разметка страницы статическая (сервер её не рендерит), поэтому карточки
+   разделов и нижний нав держат русские адреса прямо в HTML: «/#tech»,
+   «/calendar», «/edu/glossary». На /ro/edu/ они уводили в русскую версию
+   (Л-6). Проходим по ним один раз после загрузки — список селекторов
+   намеренно узкий, чтобы не задеть переключатель языка, которому уводить
+   в другую локаль и положено. */
+function локализоватьСсылки() {
+  if (!/^\/(ro|en)(\/|$)/.test(location.pathname)) return;
+  document.querySelectorAll('.g-bottom-nav a[href^="/"], a.ch[href^="/"]')
+    .forEach(function (a) {
+      var б = a.getAttribute('href');
+      var н = ЛОК(б);
+      if (н !== б) a.setAttribute('href', н);
+    });
+}
+document.addEventListener('DOMContentLoaded', локализоватьСсылки);
+
 function _patchI18n(root) {
   if ((window.sbfI18n && window.sbfI18n.lang) === 'ru') return;
   var tt = window.sbfI18n ? window.sbfI18n.t : function (k, fb) { return fb || k; };
@@ -242,7 +272,10 @@ function render() {
       : '';
     const chapterTitle = t('eduindex.chapters.' + c.n + '.title', c.title);
     const chapterSub = t('eduindex.chapters.' + c.n + '.sub', c.sub);
-    return `<a class="ch${isDone ? ' done' : ''}" href="/edu/b/${c.n}">
+    // 🔴 Адрес главы в текущей локали: на /ro/edu/ карточки вели на
+    // «/edu/b/N» — русскую главу (Л-6), а локаль у курса ставится
+    // после /edu (/edu/ro/b/N), поэтому просто префикс не годится.
+    return `<a class="ch${isDone ? ' done' : ''}" href="${ЛОК(`/edu/b/${c.n}`)}">
       <span class="ico">${c.ico}</span>
       <div>
         <div class="num">${t('eduindex.chapter_label', 'Глава')} ${c.n.toString().padStart(2,'0')}${tierBadge}</div>

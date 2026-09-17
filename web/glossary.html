@@ -38,7 +38,9 @@ body{margin:0;background:var(--cream);color:var(--ink);font-family:Montserrat,sa
 <div class="gl-page">
   <div class="gl-hero">
     <h1>{{ t('glossary.h1', lang) }}</h1>
-    <p>{{ t('glossary.subtitle', lang) }} · <a href="/" style="color:var(--gold-text,#866A19)">{{ t('glossary.back_home', lang) }}</a></p>
+    {# Ссылка «домой» — в своей локали: «← Acasă» вела на русскую главную
+       (Л-6). lang сюда уже приходит с сервера, префикс собираем здесь. #}
+    <p>{{ t('glossary.subtitle', lang) }} · <a href="{{ ('/' + lang + '/') if lang != 'ru' else '/' }}" style="color:var(--gold-text,#866A19)">{{ t('glossary.back_home', lang) }}</a></p>
   </div>
   <div id="glContainer"></div>
 </div>
