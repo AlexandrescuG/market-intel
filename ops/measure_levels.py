@@ -39,42 +39,12 @@ FRACTAL = 2           # экстремум сильнее двух соседе�
 BUCKETS = ((0.0, 0.25), (0.25, 0.5), (0.5, 1.0), (1.0, 2.0), (2.0, 99.0))
 
 
-def levels_as_of(candles, i: int, atr: float, min_touch: int = 2,
-                 keep: int = 6) -> list[float]:
-    """Уровни, видимые НА МОМЕНТ бара i. Только закрытые бары до него.
-
-    🔴 Первая версия брала ВСЕ фракталы окна — и в ближнюю корзину попадало
-    84% сделок по газу, 80% по EURUSD. Такой «фильтр» не отделяет ничего:
-    при сотне уровней на недельном окне рядом с уровнем находится почти
-    любая точка. Вывод «уровни не работают» из такой разметки был бы
-    выводом о разметке, а не о рынке.
-
-    Практик описывал иначе: несколько уровней на недельном окне. Поэтому
-    фракталы схлопываются в кластеры по допуску 0.25 ATR, и остаются только
-    те, которых рынок касался не меньше min_touch раз, — сильнейшие keep
-    штук по числу касаний."""
-    lo = max(FRACTAL, i - WINDOW)
-    raw = []
-    for k in range(lo, i - FRACTAL):
-        hi = candles[k]["h"]
-        if all(candles[k + d]["h"] <= hi for d in range(-FRACTAL, FRACTAL + 1) if d):
-            raw.append(hi)
-        low = candles[k]["l"]
-        if all(candles[k + d]["l"] >= low for d in range(-FRACTAL, FRACTAL + 1) if d):
-            raw.append(low)
-    if not raw or not atr:
-        return []
-    tol = 0.25 * atr
-    clusters: list[list[float]] = []
-    for p in sorted(raw):
-        if clusters and p - clusters[-1][-1] <= tol:
-            clusters[-1].append(p)
-        else:
-            clusters.append([p])
-    strong = [(len(c), sum(c) / len(c)) for c in clusters if len(c) >= min_touch]
-    strong.sort(reverse=True)
-    return [p for _, p in strong[:keep]]
-
+# 🔴 Своей копии уровней здесь БОЛЬШЕ НЕТ. Она была, и в ней обнаружился
+# дефект: нестрогое сравнение соседей делало каждый бар ровного участка
+# одновременно максимумом и минимумом. Пока копий было две, замер и движок
+# могли разойтись незаметно — и первые опубликованные числа были посчитаны
+# сломанным детектором. Теперь берём ту же функцию, что торгует.
+from analyze.engine.sources import strong_levels as levels_as_of   # noqa: E402
 
 def main() -> None:
     ap = argparse.ArgumentParser()

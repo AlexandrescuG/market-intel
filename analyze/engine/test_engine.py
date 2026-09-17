@@ -95,6 +95,58 @@ class Sizing(unittest.TestCase):
         self.assertGreaterEqual(vol, 0.01)
 
 
+class LevelZone(unittest.TestCase):
+    """🔴 17.09, фильтр по расстоянию до уровня — по совету практика, но по
+    замеру. Зоны разные у разных инструментов: по EURUSD помогает близость,
+    по газу наоборот — входы между уровнями."""
+
+    @staticmethod
+    def _bars(prices):
+        return [{"ts": i * 3600, "o": p, "h": p + 0.5, "l": p - 0.5, "c": p}
+                for i, p in enumerate(prices)]
+
+    def test_уровень_требует_повторного_касания(self):
+        """Одиночный экстремум уровнем не считается: именно из-за «каждый
+        фрактал — уровень» первая разметка давала 84% сделок в ближней
+        корзине и не отделяла ничего."""
+        from analyze.engine import sources
+        # ровный ряд с ОДНИМ выбросом — касание одно
+        prices = [100.0] * 60
+        prices[30] = 110.0
+        lv = sources.strong_levels(self._bars(prices), 59, a=1.0)
+        self.assertEqual(lv, [], "одно касание не образует уровня")
+
+    def test_повторное_касание_даёт_уровень(self):
+        from analyze.engine import sources
+        prices = [100.0] * 60
+        for k in (20, 35, 48):
+            prices[k] = 110.0
+        lv = sources.strong_levels(self._bars(prices), 59, a=1.0)
+        self.assertTrue(lv, "три одинаковых экстремума обязаны дать уровень")
+        self.assertAlmostEqual(lv[0], 110.5, places=1)
+
+    def test_зоны_заданы_только_там_где_измерены(self):
+        """Зона включается для инструмента только если по нему есть замер.
+        Иначе это перенос вывода на данные, которых не видели."""
+        from analyze.engine import sources
+        self.assertEqual(sources.LEVEL_ZONE["EURUSD"], (0.0, 0.25))
+        self.assertEqual(sources.LEVEL_ZONE["NG"], (0.25, 2.0))
+        for s in ("XAUUSD", "GBPUSD", "USDJPY", "USDZAR", "USDCNY"):
+            self.assertNotIn(s, sources.LEVEL_ZONE)
+
+    def test_уровни_не_подглядывают_вперёд(self):
+        """Уровень считается по барам ДО сигнального. Если бы будущее
+        попадало в расчёт, любая проверка на истории была бы враньём."""
+        from analyze.engine import sources
+        prices = [100.0] * 60
+        lv_before = sources.strong_levels(self._bars(prices), 40, a=1.0)
+        prices[45] = 130.0                      # выброс ПОСЛЕ бара 40
+        prices[50] = 130.0
+        lv_after = sources.strong_levels(self._bars(prices), 40, a=1.0)
+        self.assertEqual(lv_before, lv_after,
+                         "будущие бары не имеют права менять уровни прошлого")
+
+
 class RUnit(unittest.TestCase):
     """🔴 17.09. R делился на расстояние до ТЕКУЩЕГО стопа, а сопровождение
     его двигает. Живой пример — сделка 448 реального счёта: стоп подтянут в
