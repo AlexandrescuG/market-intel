@@ -628,11 +628,11 @@ function SampleSizeCalculator() {
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,marginBottom:22}} className="g2">
             <div>
               <Mono size={10} color="rgba(255,255,255,0.5)" spacing={0.5} style={{display:"block",marginBottom:6}}>{ss.winRateLabel}</Mono>
-              <input type="number" value={winRate} min={1} max={99} onChange={e=>setWinRate(+e.target.value)} style={{width:"100%",padding:"9px 12px",background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.2)",borderRadius:4,color:"#fff",fontFamily:"monospace",fontSize:14}}/>
+              <input type="number" aria-label={ss.winRateLabel} value={winRate} min={1} max={99} onChange={e=>setWinRate(+e.target.value)} style={{width:"100%",padding:"9px 12px",background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.2)",borderRadius:4,color:"#fff",fontFamily:"monospace",fontSize:14}}/>
             </div>
             <div>
               <Mono size={10} color="rgba(255,255,255,0.5)" spacing={0.5} style={{display:"block",marginBottom:6}}>{ss.rrLabel}</Mono>
-              <input type="number" value={rr} min={0.1} step={0.1} onChange={e=>setRr(+e.target.value)} style={{width:"100%",padding:"9px 12px",background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.2)",borderRadius:4,color:"#fff",fontFamily:"monospace",fontSize:14}}/>
+              <input type="number" aria-label={ss.rrLabel} value={rr} min={0.1} step={0.1} onChange={e=>setRr(+e.target.value)} style={{width:"100%",padding:"9px 12px",background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.2)",borderRadius:4,color:"#fff",fontFamily:"monospace",fontSize:14}}/>
             </div>
           </div>
 
@@ -823,12 +823,12 @@ function LadderStep7({ progress, loading, onChanged }) {
             {[[l7.entryLabel,entry,setEntry],[l7.stopLabel,stop,setStop],[l7.exitLabel,exit,setExit]].map(([label,val,setter],i) => (
               <div key={i} style={{marginBottom:14}}>
                 <Mono size={10} color={C.inkFaint} spacing={0.5} style={{display:"block",marginBottom:6}}>{label}</Mono>
-                <input value={val} onChange={e=>setter(e.target.value)} style={{width:"100%",padding:"10px 12px",border:`1px solid ${C.border}`,borderRadius:4,fontFamily:"'DM Sans',sans-serif",fontSize:13}}/>
+                <input value={val} aria-label={label} onChange={e=>setter(e.target.value)} style={{width:"100%",padding:"10px 12px",border:`1px solid ${C.border}`,borderRadius:4,fontFamily:"'DM Sans',sans-serif",fontSize:13}}/>
               </div>
             ))}
             <div style={{marginBottom:20}}>
               <Mono size={10} color={C.inkFaint} spacing={0.5} style={{display:"block",marginBottom:6}}>{l7.predictLabel}</Mono>
-              <input type="number" min={0} max={100} value={predictPct} onChange={e=>setPredictPct(+e.target.value)} style={{width:120,padding:"10px 12px",border:`1px solid ${C.border}`,borderRadius:4,fontFamily:"monospace",fontSize:13}}/>
+              <input type="number" aria-label={l7.predictLabel} min={0} max={100} value={predictPct} onChange={e=>setPredictPct(+e.target.value)} style={{width:120,padding:"10px 12px",border:`1px solid ${C.border}`,borderRadius:4,fontFamily:"monospace",fontSize:13}}/>
             </div>
             <button onClick={submit} disabled={!readyToStart || busy} style={{padding:"12px 26px",background: readyToStart ? C.black : C.inkFaint,color:"#fff",border:"none",borderRadius:4,cursor: readyToStart ? "pointer" : "not-allowed",fontFamily:"monospace",fontSize:12,letterSpacing:0.5}}>{l7.startBtn}</button>
           </div>

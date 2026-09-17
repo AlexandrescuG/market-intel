@@ -341,7 +341,7 @@ function LagSlider({ candles }) {
       <p style={{fontSize:14,color:C.inkMid,lineHeight:1.75,marginBottom:24,maxWidth:820}}>{lg.preamble}</p>
       <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"26px 30px"}}>
         <Mono size={11} color={C.inkFaint} spacing={1} style={{display:"block",marginBottom:10,textTransform:"uppercase"}}>{lg.sliderLabel}: {period}</Mono>
-        <input type="range" min="5" max="200" step="1" value={period} onChange={e=>setPeriod(+e.target.value)} style={{width:"100%",marginBottom:24}}/>
+        <input type="range" aria-label={lg.sliderLabel} min="5" max="200" step="1" value={period} onChange={e=>setPeriod(+e.target.value)} style={{width:"100%",marginBottom:24}}/>
         <div style={{display:"flex",gap:32,flexWrap:"wrap",justifyContent:"center"}}>
           <div style={{textAlign:"center"}}>
             <div style={{fontFamily:"'DM Serif Display',serif",fontSize:34,color:C.goldText}}>{crossings != null ? crossings : "—"}</div>
@@ -417,9 +417,9 @@ function OverfitLab({ ema_ }) {
           <p style={{fontSize:13,color:C.inkMid,lineHeight:1.7,marginBottom:20,maxWidth:780}}>{lb.screen1Legend}</p>
 
           <Mono size={11} color={C.inkFaint} spacing={1} style={{display:"block",marginBottom:6}}>{lb.fastLabel}: {fast}</Mono>
-          <input type="range" min="0" max={FAST_PERIODS.length-1} value={fastIdx} onChange={e=>setFastIdx(+e.target.value)} style={{width:"100%",marginBottom:14}}/>
+          <input type="range" aria-label={lb.fastLabel} min="0" max={FAST_PERIODS.length-1} value={fastIdx} onChange={e=>setFastIdx(+e.target.value)} style={{width:"100%",marginBottom:14}}/>
           <Mono size={11} color={C.inkFaint} spacing={1} style={{display:"block",marginBottom:6}}>{lb.slowLabel}: {slow}</Mono>
-          <input type="range" min="0" max={SLOW_PERIODS.length-1} value={slowIdx} onChange={e=>setSlowIdx(+e.target.value)} style={{width:"100%",marginBottom:24}}/>
+          <input type="range" aria-label={lb.slowLabel} min="0" max={SLOW_PERIODS.length-1} value={slowIdx} onChange={e=>setSlowIdx(+e.target.value)} style={{width:"100%",marginBottom:24}}/>
 
           {slow <= fast ? (
             <p style={{color:C.red,fontSize:12.5}}>—</p>

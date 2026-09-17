@@ -346,7 +346,7 @@ function SurpriseCalc({ stats, vars }) {
         <p style={{fontSize:13,color:C.inkMid,marginBottom:14}}>{sc.step3Task}</p>
         {bins.length > 0 ? (
           <>
-            <input type="range" min="0" max={bins.length-1} value={binIdx} onChange={e=>setBinIdx(+e.target.value)} style={{width:"100%",marginBottom:14}}/>
+            <input type="range" aria-label={INITIAL_LANG==="ru"?"Диапазон отклонения, σ":INITIAL_LANG==="ro"?"Intervalul de abatere, σ":"Deviation range, σ"} min="0" max={bins.length-1} value={binIdx} onChange={e=>setBinIdx(+e.target.value)} style={{width:"100%",marginBottom:14}}/>
             <div style={{display:"flex",justifyContent:"space-between",fontSize:10,fontFamily:"monospace",color:C.inkFaint,marginBottom:18}}>
               {bins.map((bb,i) => <span key={i}>{bb.from}σ{bb.to?`–${bb.to}σ`:"+"}</span>)}
             </div>
@@ -385,7 +385,8 @@ function SurpriseScatter({ stats }) {
           <button key={s} onClick={()=>setInstrument(s)} style={{fontFamily:"monospace",fontSize:10.5,padding:"5px 10px",cursor:"pointer",background:s===instrument?C.gold:"#fff",color:s===instrument?"#18181a":C.inkMid,border:`1px solid ${s===instrument?C.gold:C.border}`,borderRadius:3}}>{window.SBFSymbols ? window.SBFSymbols.symbolName(s, {lang: INITIAL_LANG, mode:"name+ticker"}) : s}</button>
         ))}
       </div>
-      <div style={{overflowX:"auto"}}>
+      {/* Область с прокруткой — достижима и с клавиатуры (WCAG 2.1.1). */}
+      <div style={{overflowX:"auto"}} tabIndex={0} role="region" aria-label={INITIAL_LANG==="ru"?"Диаграмма рассеяния: сюрприз и движение":INITIAL_LANG==="ro"?"Diagramă de dispersie":"Scatter plot"}>
         <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",minWidth:520,background:C.surface,border:`1px solid ${C.border}`,borderRadius:6}}>
           <line x1={toX(0)} y1={PAD} x2={toX(0)} y2={H-PAD} stroke={C.border} strokeWidth="1"/>
           <line x1={PAD} y1={H-PAD} x2={W-PAD} y2={H-PAD} stroke={C.border} strokeWidth="1"/>

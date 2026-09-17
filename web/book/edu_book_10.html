@@ -258,14 +258,14 @@ function ColdStart10Middle() {
             <span style={{fontSize:11.5, color:"rgba(255,255,255,0.55)", fontFamily:"monospace"}}>{cm.winRateLabel}</span>
             <span style={{fontSize:13, fontWeight:700, color:C.goldText, fontFamily:"monospace"}}>{winRate}%</span>
           </div>
-          <input type="range" min="20" max="80" value={winRate} onChange={e=>{ setWinRate(+e.target.value); setStreak(null); }} style={{width:"100%", accentColor:C.gold}}/>
+          <input type="range" aria-label={cm.winRateLabel} min="20" max="80" value={winRate} onChange={e=>{ setWinRate(+e.target.value); setStreak(null); }} style={{width:"100%", accentColor:C.gold}}/>
         </div>
         <div style={{marginBottom:20}}>
           <div style={{display:"flex", justifyContent:"space-between", marginBottom:6}}>
             <span style={{fontSize:11.5, color:"rgba(255,255,255,0.55)", fontFamily:"monospace"}}>{cm.tradesLabel}</span>
             <span style={{fontSize:13, fontWeight:700, color:C.goldText, fontFamily:"monospace"}}>{nTrades}</span>
           </div>
-          <input type="range" min="20" max="500" step="10" value={nTrades} onChange={e=>{ setNTrades(+e.target.value); setStreak(null); }} style={{width:"100%", accentColor:C.gold}}/>
+          <input type="range" aria-label={cm.tradesLabel} min="20" max="500" step="10" value={nTrades} onChange={e=>{ setNTrades(+e.target.value); setStreak(null); }} style={{width:"100%", accentColor:C.gold}}/>
         </div>
         <div style={{textAlign:"center"}}>
           <button onClick={simulate} style={{fontFamily:"monospace", fontSize:14, fontWeight:700, padding:"12px 28px", borderRadius:4, cursor:"pointer", background:C.gold, color:C.black, border:"none"}}>{cm.runBtn}</button>
@@ -390,7 +390,8 @@ function SelfStats() {
           <p style={{fontSize:13,color:C.inkMid}}>{это_своё ? s.few : s.note}</p>
         ) : (
           <>
-            <div style={{overflowX:"auto",marginBottom:16}}>
+            {/* Таблица паттернов шире экрана — с клавиатуры тоже. */}
+            <div style={{overflowX:"auto",marginBottom:16}} tabIndex={0} role="region" aria-label={ss.title || "table"}>
               <table style={{borderCollapse:"collapse",width:"100%",fontSize:12,
                              fontFamily:"monospace"}}>
                 <thead>
@@ -588,7 +589,7 @@ function PatternMiniChart({ example, patternKey }) {
       {maxHold > 0 && (
         <div style={{display:"flex",alignItems:"center",gap:12,flexWrap:"wrap",padding:"0 2px"}}>
           <Mono size={9.5} color={C.inkFaint} spacing={0.5}>{ps.holdLabel}</Mono>
-          <input type="range" min={1} max={maxHold} value={Math.min(holdN,maxHold)} onChange={e=>setHoldN(+e.target.value)} style={{flex:1,minWidth:100}}/>
+          <input type="range" aria-label={ps.holdLabel} min={1} max={maxHold} value={Math.min(holdN,maxHold)} onChange={e=>setHoldN(+e.target.value)} style={{flex:1,minWidth:100}}/>
           {/* Палитра, а не свои литералы: #1c8a4a давал 4.14:1 на #faf8f5,
               C.green/C.red — те же зелёный и красный, уже сведённые к AA. */}
           {holdPct !== null && <Mono size={11} color={holdPct >= 0 ? C.green : C.red} spacing={0}>{ps.holdResult(Math.min(holdN,maxHold), holdPct)}</Mono>}
@@ -663,7 +664,8 @@ function CoreMeasureBlock({ patterns }) {
           <a href={"/chart.html?s="+instrument} target="_blank" rel="noopener" style={{marginLeft:6,fontFamily:"monospace",fontSize:10.5,color:C.goldText,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>{cm.instrumentLabel} →</a>
         )}
       </div>
-      <div style={{overflowX:"auto",marginBottom:20}}>
+      {/* Вторая прокручиваемая таблица главы — тоже с клавиатуры. */}
+      <div style={{overflowX:"auto",marginBottom:20}} tabIndex={0} role="region" aria-label={cm.title || "table"}>
         <table style={{borderCollapse:"collapse",width:"100%",minWidth:520}}>
           <thead>
             <tr>

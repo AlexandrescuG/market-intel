@@ -453,7 +453,7 @@ function BigOrderBridge() {
             <span style={{fontSize:11.5,color:"rgba(255,255,255,0.55)",fontFamily:"monospace"}}>{bo.sizeLabel}</span>
             <span style={{fontSize:13,fontWeight:700,color:C.goldText,fontFamily:"monospace"}}>{size} {bo.lotsUnit}</span>
           </div>
-          <input type="range" min="20" max={Math.round(totalDepth*1.3)} step="10" value={size}
+          <input type="range" aria-label={bo.sizeLabel} min="20" max={Math.round(totalDepth*1.3)} step="10" value={size}
             onChange={e => { setTouched(true); setSize(+e.target.value); }}
             style={{width:"100%",accentColor:C.gold,cursor:"pointer"}}/>
         </div>
@@ -507,7 +507,8 @@ function FootprintPlaces() {
   return (
     <div style={{marginBottom:48}}>
       <p style={{fontSize:14,color:C.inkMid,lineHeight:1.75,marginBottom:24,maxWidth:820}}>{fp.preamble}</p>
-      <div style={{overflowX:"auto",marginBottom:24}}>
+      {/* Таблица шире экрана — с клавиатуры тоже. */}
+      <div style={{overflowX:"auto",marginBottom:24}} tabIndex={0} role="region" aria-label={fp.title || "table"}>
         <table style={{borderCollapse:"collapse",width:"100%",minWidth:560}}>
           <thead>
             <tr>

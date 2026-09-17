@@ -835,6 +835,10 @@
     return e('div', {style:{textAlign:"center"}},
       e('div', {style:{fontFamily:"monospace", fontSize:28, fontWeight:700, color:C.goldText, marginBottom:14}}, fmt(val)),
       e('input', {
+        // Имя ползунка: диктор иначе скажет «ползунок» и не скажет, чего.
+        // Вопрос блока — самая осмысленная подпись, какая тут есть:
+        // он и объясняет, что именно двигают.
+        "aria-label": cfg.label || cfg.question || cfg.title || "",
         type:"range", min:cfg.min, max:cfg.max, step:cfg.step || 1, value:val, disabled:committed,
         onChange: function (ev) { setVal(+ev.target.value); },
         onMouseUp: release, onTouchEnd: release, onKeyUp: function (ev) { if (ev.key === "Enter") release(); },

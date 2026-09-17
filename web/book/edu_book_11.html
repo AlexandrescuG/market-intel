@@ -214,7 +214,7 @@ function PriceOfNotKnowingCalc() {
   const Field = ({ label, value, onChange, step = 0.1 }) => (
     <div style={{marginBottom:16}}>
       <Mono size={10} color={C.inkFaint} spacing={0.5} style={{display:"block",marginBottom:6}}>{label}</Mono>
-      <input type="number" value={value} step={step} onChange={e=>onChange(+e.target.value)} style={{width:"100%",padding:"9px 12px",border:`1px solid ${C.border}`,borderRadius:4,fontFamily:"monospace",fontSize:14}}/>
+      <input type="number" aria-label={label} value={value} step={step} onChange={e=>onChange(+e.target.value)} style={{width:"100%",padding:"9px 12px",border:`1px solid ${C.border}`,borderRadius:4,fontFamily:"monospace",fontSize:14}}/>
     </div>
   );
 
@@ -504,11 +504,11 @@ function MeasureYourBroker() {
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,marginBottom:16}} className="g2">
           <div>
             <Mono size={10} color={C.inkFaint} spacing={0.5} style={{display:"block",marginBottom:6}}>{m.m1Title}</Mono>
-            <input type="number" value={normalSpread} step={0.1} min={0} onChange={e=>setNormalSpread(+e.target.value)} style={{width:"100%",padding:"9px 12px",border:`1px solid ${C.border}`,borderRadius:4,fontFamily:"monospace",fontSize:14}}/>
+            <input type="number" aria-label={m.m1Title} value={normalSpread} step={0.1} min={0} onChange={e=>setNormalSpread(+e.target.value)} style={{width:"100%",padding:"9px 12px",border:`1px solid ${C.border}`,borderRadius:4,fontFamily:"monospace",fontSize:14}}/>
           </div>
           <div>
             <Mono size={10} color={C.inkFaint} spacing={0.5} style={{display:"block",marginBottom:6}}>{m.m2Title}</Mono>
-            <input type="number" value={releaseSpread} step={0.1} min={0} onChange={e=>setReleaseSpread(+e.target.value)} style={{width:"100%",padding:"9px 12px",border:`1px solid ${C.border}`,borderRadius:4,fontFamily:"monospace",fontSize:14}}/>
+            <input type="number" aria-label={m.m2Title} value={releaseSpread} step={0.1} min={0} onChange={e=>setReleaseSpread(+e.target.value)} style={{width:"100%",padding:"9px 12px",border:`1px solid ${C.border}`,borderRadius:4,fontFamily:"monospace",fontSize:14}}/>
           </div>
         </div>
         <div style={{textAlign:"center",background:C.black,borderRadius:6,padding:"18px 24px"}}>
