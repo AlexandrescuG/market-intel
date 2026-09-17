@@ -962,6 +962,15 @@ const _CLOCK_LOCALE = _PAGE_LANG === 'ro' ? 'ro-RO' : _PAGE_LANG === 'en' ? 'en-
    до его готовности падаем на _PAGE_LANG, который сервер уже подставил
    в эту же страницу, — а не на путь как есть: «как есть» здесь значит
    «по-русски», то есть ровно та ошибка, которую чиним. */
+/* Строка из словаря i18n с запасным значением. На этой странице своей
+   клиентской t() не было — серверная работает только на этапе рендера,
+   а бриф приезжает fetch'ем уже потом.
+   🔴 И да: фигурные скобки Jinja в комментарий писать нельзя. Этот файл
+   рендерится шаблонизатором, комментарий JS для него не комментарий —
+   упоминание подстановки в пояснении уронило главную в 500 целиком. */
+const ТЕКСТ = (ключ, запас) =>
+  (window.sbfI18n ? window.sbfI18n.t(ключ, запас) : (запас || ключ));
+
 const ЛОК = (путь) => {
   if (window.sbfI18n && window.sbfI18n.url) return window.sbfI18n.url(путь);
   if (!путь || _PAGE_LANG === 'ru' || !/^\//.test(путь)) return путь;
@@ -1244,6 +1253,8 @@ function renderBriefMovers(b){
   linkInstrumentsInReport(el);
 }
 
+let _последнийБриф = null;
+
 function renderBriefPatterns(b){
   const el = document.getElementById('briefPatterns');
   if(!el) return;
@@ -1254,7 +1265,13 @@ function renderBriefPatterns(b){
       : fmt_(I18N_BRIEF.patternsAgreeTpl, {pct: Math.round((p.agree_share_5||0)*100), n: p.n});
     const symName = window.SBFSymbols ? window.SBFSymbols.symbolName(p.symbol, {mode:'name'}) : p.symbol;
     return '<div class="brief-pattern-row"><span class="mono">'+escapeHtmlIdx(symName)+' '+escapeHtmlIdx(p.tf)+'</span>'
-      +escapeHtmlIdx(p.display_name_ru)+' <span class="agree">— '+escapeHtmlIdx(stat)+'</span></div>';
+      // 🔴 Имя паттерна — по ключу через словарь, а не поле display_name_ru
+      // из данных: оно русское по построению (core/patterns.py), и на
+      // /ro и /en в брифе стояло «Медвежье поглощение», «Молот» (Л-3).
+      // Запасное значение — то же русское имя: если ключа в словаре нет,
+      // лучше показать по-русски, чем pattern_key латиницей.
+      +escapeHtmlIdx(ТЕКСТ('pattern.' + (p.pattern_key || ''), p.display_name_ru))
+      +' <span class="agree">— '+escapeHtmlIdx(stat)+'</span></div>';
   }).join('');
   el.innerHTML = '<h3>📐 '+I18N_BRIEF.patternsTitle+'</h3>'+rows;
   el.style.display = 'block';
@@ -1335,6 +1352,11 @@ function renderOffContext(o){
 }
 
 function renderBrief(b){
+  // Бриф приезжает fetch'ем и может обогнать словарь i18n (тот тоже по
+  // сети). Запоминаем данные, чтобы перерисовать имена паттернов, когда
+  // словарь доедет: иначе на /ro и /en в блоке «Фигуры вчера» остаются
+  // русские «Молот» и «Медвежье поглощение» при переведённых ключах.
+  _последнийБриф = b;
   renderBriefHeadline(b);
   renderBriefCalendar(b);
   renderBriefEarnings(b);
@@ -2185,6 +2207,24 @@ document.addEventListener('click', e => {
   e.preventDefault();
   openChartSymbol(a.dataset.sym);
 });
+
+/* 🔴 Подписи направлений («акции / индексы / валюты / сырьё / крипта»)
+   берутся из словаря, а словарь i18n.js тянет сетью. Доска рисуется
+   раньше — и boardLabel() честно отдаёт запасное русское значение. Так на
+   /ro и /en вторая группа чипсов оставалась русской при полностью
+   переведённых ключах (Л-3 языкового аудита). Перерисовываем, когда
+   словарь доехал: ждём и объект, и его ready — объекта в момент
+   выполнения этого inline-скрипта ещё нет, он приходит с defer. */
+function _подписиДоскиКогдаБудетЯзык() {
+  if (!window.sbfI18n || !window.sbfI18n.ready) return;
+  window.sbfI18n.ready.then(function () {
+    try { renderBoardTabs(); } catch (e) {}
+    try { if (_последнийБриф) renderBriefPatterns(_последнийБриф); } catch (e) {}
+    if (typeof loadBoard === 'function' && document.getElementById('buzzBoard')) loadBoard();
+  }).catch(function () {});
+}
+if (window.sbfI18n) _подписиДоскиКогдаБудетЯзык();
+else document.addEventListener('DOMContentLoaded', _подписиДоскиКогдаБудетЯзык);
 
 async function loadBoard(){
   const sec = document.getElementById('buzzBoard');

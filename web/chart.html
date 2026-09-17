@@ -3054,7 +3054,9 @@ document.addEventListener('sbf:user-ready', async ev => {
       // символов брокера своего названия у нас нет. Вместо «EURCHF / EURCHF»
       // показываем подгруппу каталога («Minors», «Germany») — она хотя бы
       // что-то сообщает, а повтор не сообщает ничего.
-      + '<div class="inst-name">' + esc(it.name && it.name !== it.symbol ? it.name : (it.subgroup || '')) + '</div></div>'
+      // Имя: сначала общий справочник (он знает ru/ro/en), и только потом
+      // каталог брокера — тот русский, и на /ro//en давал «Евро / доллар».
+      + '<div class="inst-name">' + esc(имяИнструмента(it)) + '</div></div>'
       + sparkSvg(sparks[it.symbol], up)
       + '<div class="inst-px">' + px + '</div>'
       + (chartable ? '</button>' : '</div>')
@@ -3168,15 +3170,52 @@ document.addEventListener('sbf:user-ready', async ev => {
                                                  : catalog.length});
   }
 
+  /* Имя инструмента для списка. Каталог брокера (broker_catalog.json)
+     русскоязычный, поэтому спрашиваем сначала общий справочник имён — он
+     знает три языка и то же самое делает глава 5 и лента в шапке. Если
+     символа там нет (а в каталоге 800+ тикеров брокера), падаем на имя из
+     каталога, а при его отсутствии — на подгруппу: повтор тикера именем
+     не является. */
+  function имяИнструмента(it) {
+    if (window.SBFSymbols) {
+      var н = window.SBFSymbols.symbolName(it.symbol, {mode: 'name'});
+      if (н && н !== it.symbol) return н;
+    }
+    return (it.name && it.name !== it.symbol) ? it.name : (it.subgroup || '');
+  }
+
   async function get(url){
     const r = await fetch(url + '?t=' + Date.now());
     if (!r.ok) throw new Error(url + ' -> ' + r.status);
     return r.json();
   }
 
-  catsEl.innerHTML = CATS.map(c =>
-    '<button class="inst-cat' + (c[0] === cat ? ' on' : '') + '" data-cat="' + c[0] + '">'
-    + esc(t(c[1], c[2])) + '</button>').join('');
+  /* 🔴 Подписи категорий рисуются ДВАЖДЫ, и это не лишняя работа.
+     Строка выполняется при загрузке скрипта, а словарь i18n.js тянет
+     сетью: на первый проход t() возвращает запасное значение, то есть
+     русское. Так на /ro/chart.html и /en/chart.html оставались «Все /
+     Валюты / Индексы / Сырьё» при полностью переведённом словаре (Л-5
+     языкового аудита — «UI графика не локализован»; переводы были на
+     месте, до них просто не доживал рендер). Первый проход нужен, чтобы
+     кнопки существовали сразу, второй — чтобы они были на своём языке. */
+  function рисоватьКатегории() {
+    catsEl.innerHTML = CATS.map(c =>
+      '<button class="inst-cat' + (c[0] === cat ? ' on' : '') + '" data-cat="' + c[0] + '">'
+      + esc(t(c[1], c[2])) + '</button>').join('');
+  }
+  рисоватьКатегории();
+  // 🔴 i18n.js подключён с defer, а этот код — обычный inline: в момент
+  // выполнения window.sbfI18n ЕЩЁ НЕ СУЩЕСТВУЕТ, и подписка «если объект
+  // есть» не срабатывает вовсе. Первая версия правки именно так и
+  // промолчала: категории остались русскими, а замер показал ту же
+  // одиннадцать кириллических находок. Ждём DOMContentLoaded, как это
+  // уже делает календарь.
+  function _перерисоватьКогдаБудетЯзык() {
+    if (window.sbfI18n && window.sbfI18n.ready)
+      window.sbfI18n.ready.then(рисоватьКатегории).catch(function(){});
+  }
+  if (window.sbfI18n) _перерисоватьКогдаБудетЯзык();
+  else document.addEventListener('DOMContentLoaded', _перерисоватьКогдаБудетЯзык);
 
   catsEl.addEventListener('click', e => {
     const b = e.target.closest('[data-cat]');

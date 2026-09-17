@@ -339,6 +339,13 @@ function _rerenderEventsWhenI18nReady() {
   if (window.sbfI18n) {
     window.sbfI18n.ready.then(function () {
       if (_lastEvents && _lastEvents.length) renderRows(_lastEvents);
+      // 🔴 И подпись выбранного диапазона тоже. Она рисуется в самом конце
+      // файла, синхронно, — то есть до того, как i18n.js (defer + сеть)
+      // объявит язык. _monthsShort() в этот момент честно отвечает «ru»,
+      // и на /ro/calendar и /en/calendar в кнопке оставалось «17 сен»
+      // (Л-7 языкового аудита). Месяцы переведены давно; до них просто
+      // не доживал первый — и единственный — вызов.
+      if (typeof updateCalLabel === 'function') updateCalLabel();
     });
   }
 }

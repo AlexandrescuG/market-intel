@@ -18,6 +18,14 @@
 <link rel="stylesheet" href="/assets/design.css?v=20260909">
 <link rel="stylesheet" href="/edu/edu.css?v=20260903b">
 <script src="/assets/i18n.js?v=2" defer></script>
+<!-- 🔴 Справочник имён инструментов. Его тут не было вовсе, и лента в шапке
+     на /ro/edu и /en/edu оставалась русской: «ЗОЛОТО / СЕРЕБРО / СОЛАНА»
+     под румынским интерфейсом (Л-4 языкового аудита 17.09). На главной и
+     на chart.html файл подключён — оттуда и разница, которую отчёт увидел
+     как «шаблон edu не получает локаль виджета». Локаль он получал; не
+     получал словаря. Без defer — sbf-header.js читает window.SBFSymbols
+     при построении ленты. -->
+<script src="/assets/sbf-symbols.js?v=2"></script>
 <script src="/assets/sbf-header.js?v=23" defer></script>
 <script src="/assets/sbf-auth.js?v=1" defer></script>
 <script src="/assets/sbf-anon.js"></script>
