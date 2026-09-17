@@ -169,6 +169,11 @@ body{
 <div class="wrap" id="guideRoot">
   <a class="guide-back" href="{{ ('/' + lang + '/brokers') if lang != 'ru' else '/brokers' }}">{{ t('guide.back_to_table', lang) }}</a>
   <div id="guideContent"></div>
+  {# Без JS страница отдавала 20 знаков — при том что HowTo-разметка в
+     голове перечисляла все шаги. Разметка не должна быть подробнее
+     страницы, которую описывает. Имя файла слоя собирается из пути:
+     один шаблон обслуживает пять брокеров. #}
+  {{ guide_text_layer(page_path, lang) | safe }}
 </div>
 
 <script src="/assets/guide.js?v=3" defer></script>

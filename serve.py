@@ -1122,6 +1122,10 @@ _site_jinja.globals["symbol_name"] = _symbols.symbol_name
 # Определение ниже по файлу; здесь регистрируется ленивой обёрткой, чтобы не
 # зависеть от порядка объявлений в модуле.
 _site_jinja.globals["text_layer"] = lambda имя, lang: _text_layer(имя, lang)
+# Инструкции брокеров: один шаблон на пять адресов, поэтому имя файла
+# слоя собирается из пути страницы, а не пишется в шаблоне.
+_site_jinja.globals["guide_text_layer"] = lambda путь, lang: (
+    _text_layer("guide_" + путь.rstrip("/").rsplit("/", 1)[-1], lang) if путь else "")
 # canonical + hreflang: шаблоны зовут {{ alt_links('/brokers', lang) | safe }}
 _site_jinja.globals["alt_links"] = lambda путь, lang: _alt_links(путь, lang)
 # schema.org: {{ schema_ld('glossary', lang) | safe }}. Сборка — в
@@ -1376,6 +1380,11 @@ def _text_layer(имя: str, lang: str) -> str:
             # макета. Без JS он так и останется пустым, и человек увидит
             # пустой экран вместо статьи — убираем резерв ровно в этом случае.
             'html:not(.sbf-js) #sbf-book-root,'
+            # Резерв высоты таблицы брокеров (brokers.css: 1100px на
+            # десктопе, 3400px на телефоне) стоит на :empty и снимается
+            # монтированием. Без JS контейнер так и остаётся пустым, и
+            # человек получил бы экран пустоты перед текстом.
+            'html:not(.sbf-js) #brokersTableRoot:empty,'
             'html:not(.sbf-js) #glContainer{min-height:0}</style>'
             '<div class="sbf-text-layer">' + п.read_text(encoding="utf-8") + '</div>'
         )

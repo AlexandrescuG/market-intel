@@ -58,6 +58,13 @@ a{color:inherit}
   </header>
 
   <div id="brokersTableRoot"></div>
+  {# 🔴 Таблицу сравнения рисует brokers.js, и без JS страница отдавала
+     686 знаков: юрлица, лицензии, минимальный депозит и спреды — то,
+     ради чего сюда приходят и на что ссылаются — для машины не
+     существовали. Текст собирает tools/build_text_layer.js из того же
+     partners.json БЕЛЫМ СПИСКОМ полей: в этом файле рядом с фактами
+     лежат наши служебные пометки, и обход дерева вынес бы их наружу. #}
+  {{ text_layer('brokers', lang) | safe }}
 
   <aside class="disclosure" role="note">
     <b>{{ t('brokers.disclosure_mark', lang) }}</b> {{ t('brokers.disclosure_revshare', lang) }}

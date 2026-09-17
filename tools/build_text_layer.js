@@ -153,6 +153,150 @@ function глоссарий() {
   return итог;
 }
 
+/* ── Брокеры ────────────────────────────────────────────────────────────────
+   🔴 ЗДЕСЬ НЕЛЬЗЯ ОБХОДИТЬ ДЕРЕВО, как у глав. web/data/partners.json —
+   рабочий файл со служебными пометками: «ВЫВОД, А НЕ ОПУБЛИКОВАННЫЙ ФАКТ»,
+   «НЕ СНЯТЫ», blocker'ы, заметки о непроверенных партнёрских ссылках. У
+   главы весь объект — её содержимое, поэтому обход годится; здесь обход
+   вынес бы наши внутренние сомнения на страницу и в цитату ИИ-агента.
+   Поэтому ниже — БЕЛЫЙ СПИСОК полей: ровно то, что видит человек. */
+
+const ПОДПИСИ = {
+  ru: { брокеры:'Брокеры: сравнение', юрлицо:'Юридическое лицо', лицензия:'лицензия',
+        депозит:'Минимальный депозит', комиссия:'Комиссия', неактивность:'Плата за неактивность',
+        платформы:'Платформы', спреды:'Спреды, публикуемые брокером', средний:'средний',
+        мин:'минимальный', проверено:'проверено', нужно:'Что понадобится',
+        платформа:'Где', снято:'Кадры сняты', регулятор:'Регулятор', юрисдикция:'Юрисдикция' },
+  ro: { брокеры:'Brokeri: comparație', юрлицо:'Entitate juridică', лицензия:'licență',
+        депозит:'Depozit minim', комиссия:'Comision', неактивность:'Taxă de inactivitate',
+        платформы:'Platforme', спреды:'Spread-uri publicate de broker', средний:'mediu',
+        мин:'minim', проверено:'verificat', нужно:'De ce aveți nevoie',
+        платформа:'Unde', снято:'Capturi făcute', регулятор:'Autoritate', юрисдикция:'Jurisdicție' },
+  en: { брокеры:'Brokers: comparison', юрлицо:'Legal entity', лицензия:'licence',
+        депозит:'Minimum deposit', комиссия:'Commission', неактивность:'Inactivity fee',
+        платформы:'Platforms', спреды:'Spreads published by the broker', средний:'average',
+        мин:'minimum', проверено:'checked', нужно:'What you will need',
+        платформа:'Where', снято:'Screenshots taken', регулятор:'Regulator', юрисдикция:'Jurisdiction' },
+};
+
+/** Поле с языковым вариантом: commission_short → commission_short_en. */
+function поЯзыку(о, поле, яз) {
+  if (!о) return '';
+  return (яз !== 'ru' && о[`${поле}_${яз}`]) || о[поле] || '';
+}
+
+function брокеры() {
+  const итог = [];
+  const п = path.join(КОРЕНЬ, 'web', 'data', 'partners.json');
+  if (!fs.existsSync(п)) return итог;
+  const данные = JSON.parse(fs.readFileSync(п, 'utf8'));
+  const живые = (данные.partners || []).filter(б => б.enabled);
+
+  for (const яз of ЯЗЫКИ) {
+    const С = ПОДПИСИ[яз];
+    // Своего заголовка слою не нужно: h1 страницы уже говорит то же
+    // самое, а дубль заголовка для краулера — шум.
+    const части = [];
+    for (const б of живые) {
+      части.push(`<h3>${экран(б.name)}</h3>`);
+      const стр = [];
+      for (const e of б.entities || []) {
+        // Юрлицо, юрисдикция, регулятор и номер лицензии — самое
+        // цитируемое, что у нас есть: это проверяемые факты с номером.
+        const хвост = e.licence_no ? `, ${С.лицензия} ${e.licence_no}` : '';
+        стр.push(`${С.юрлицо}: ${e.legal_name} — ${С.юрисдикция} ${e.jurisdiction}`
+                 + (e.regulator ? `, ${С.регулятор}: ${e.regulator}` : '') + хвост);
+      }
+      const д = б.min_deposit;
+      if (д && д.value != null)
+        стр.push(`${С.депозит}: ${д.value} ${д.currency || ''}`.trim()
+                 + (д.checked ? ` (${С.проверено} ${д.checked})` : ''));
+      const ком = поЯзыку(б, 'commission_short', яз);
+      if (ком) стр.push(`${С.комиссия}: ${ком}`);
+      const неакт = поЯзыку(б, 'inactivity_short', яз);
+      if (неакт) стр.push(`${С.неактивность}: ${неакт}`);
+      if ((б.platforms || []).length)
+        стр.push(`${С.платформы}: ${б.platforms.join(', ')}`);
+      части.push(стр.map(с => `<p>${экран(с)}</p>`).join('\n'));
+
+      const сп = б.spreads_published;
+      if (сп && (сп.items || []).length) {
+        части.push(`<p>${экран(С.спреды)}`
+          + (сп.account_type ? ` (${экран(сп.account_type)})` : '')
+          + (сп.checked ? `, ${экран(С.проверено)} ${экран(сп.checked)}` : '') + ':</p>');
+        части.push('<ul>' + сп.items.map(и =>
+          `<li>${экран(и.symbol)}: ${С.средний} ${и.avg}`
+          + (и.min != null ? `, ${С.мин} ${и.min}` : '')
+          + (и.unit ? ` ${экран(и.unit)}` : '') + '</li>').join('') + '</ul>');
+      }
+    }
+    fs.writeFileSync(path.join(ВЫХОД, `brokers.${яз}.html`), части.join('\n'), 'utf8');
+    итог.push([яз, `${живые.length} площадок`, части.join('\n').length]);
+  }
+  return итог;
+}
+
+/** Инструкции: по файлу на брокера и язык, из тех же guides/*.json. */
+function инструкции() {
+  const итог = [];
+  const каталог = path.join(КОРЕНЬ, 'web', 'data', 'guides');
+  const список = ['xm', 'naga', 'fxpro', 'instaforex', 'avatrade'];
+  for (const ид of список) {
+    for (const яз of ЯЗЫКИ) {
+      const С = ПОДПИСИ[яз];
+      const файл = path.join(каталог, яз === 'ru' ? `${ид}.json` : `${ид}.${яз}.json`);
+      if (!fs.existsSync(файл)) continue;
+      const д = JSON.parse(fs.readFileSync(файл, 'utf8'));
+      const части = [`<h2>${экран(д.name || ид)}</h2>`];
+      if (д.lead) части.push(`<p>${экран(д.lead)}</p>`);
+
+      for (const пр of д.processes || []) {
+        части.push(`<h3>${экран(пр.label || пр.key || '')}</h3>`);
+        if (пр.intro) части.push(`<p>${экран(пр.intro)}</p>`);
+        const шапка = [];
+        if (пр.platform) шапка.push(`${С.платформа}: ${пр.platform}`);
+        if (пр.captured) шапка.push(`${С.снято}: ${пр.captured}`);
+        if (шапка.length) части.push(`<p>${экран(шапка.join(' · '))}</p>`);
+        if ((пр.needed || []).length)
+          части.push(`<p>${экран(С.нужно)}: ${экран(пр.needed.join('; '))}</p>`);
+
+        for (const б of пр.blocks || []) {
+          if (б.type === 'steps') {
+            // Подпись под кадром — это и есть шаг инструкции.
+            части.push('<ol>' + (б.items || []).filter(и => и.caption)
+              .map(и => `<li>${экран(и.caption)}</li>`).join('') + '</ol>');
+          } else if (б.type === 'callout' || б.type === 'text') {
+            if (б.title) части.push(`<h4>${экран(б.title)}</h4>`);
+            const тело = Array.isArray(б.body) ? б.body : (б.body ? [б.body] : []);
+            части.push(тело.map(т => `<p>${экран(т)}</p>`).join('\n'));
+          } else if (б.type === 'table' && (б.rows || []).length) {
+            части.push('<table>'
+              + (б.columns ? '<tr>' + б.columns.map(к => `<th>${экран(к)}</th>`).join('') + '</tr>' : '')
+              + б.rows.map(р => '<tr>' + р.map(я => `<td>${экран(я)}</td>`).join('') + '</tr>').join('')
+              + '</table>');
+          } else if (б.type === 'entity') {
+            const стр = [];
+            if (б.legal_name) стр.push(`${С.юрлицо}: ${б.legal_name}`);
+            if (б.jurisdiction) стр.push(`${С.юрисдикция}: ${б.jurisdiction}`);
+            if (б.regulator) стр.push(`${С.регулятор}: ${б.regulator}`);
+            if (б.licence_no) стр.push(`${С.лицензия}: ${б.licence_no}`);
+            if (стр.length) части.push(`<p>${экран(стр.join(' · '))}</p>`);
+            if (б.quote) части.push(`<blockquote>${экран(б.quote)}</blockquote>`);
+            // register_note и confirm_note рисует guide.js — это видимая
+            // часть страницы, а не служебная пометка.
+            for (const поле of ['register_note', 'confirm_note', 'missing'])
+              if (б[поле]) части.push(`<p>${экран(б[поле])}</p>`);
+          }
+        }
+      }
+      const html = части.filter(Boolean).join('\n');
+      fs.writeFileSync(path.join(ВЫХОД, `guide_${ид}.${яз}.html`), html, 'utf8');
+      if (яз === 'ru') итог.push([ид, `${(д.processes || []).length} процессов`, html.length]);
+    }
+  }
+  return итог;
+}
+
 fs.mkdirSync(ВЫХОД, { recursive: true });
 console.log('главы:');
 for (const [n, что, размер] of главы())
@@ -160,3 +304,9 @@ for (const [n, что, размер] of главы())
 console.log('глоссарий:');
 for (const [яз, что, размер] of глоссарий())
   console.log(`  ${яз} ${что.padEnd(16)} ${размер} знаков`);
+console.log('брокеры (страница сравнения):');
+for (const [яз, что, размер] of брокеры())
+  console.log(`  ${яз} ${что.padEnd(16)} ${размер} знаков`);
+console.log('инструкции:');
+for (const [ид, что, размер] of инструкции())
+  console.log(`  ${ид.padEnd(11)} ${что.padEnd(16)} ${размер} знаков (ru)`);
