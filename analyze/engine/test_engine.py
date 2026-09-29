@@ -235,6 +235,10 @@ class Maintenance(unittest.TestCase):
                               "status", "--porcelain", "--", "analyze/engine"],
                              capture_output=True, text=True)
         expect = [ln[3:].strip() for ln in out.stdout.splitlines() if ln.strip()]
+        # 🔴 29.09: только .py. Данные, которые движок пересчитывает сам
+        # (leg_correlation.json), делали каталог «грязным» и останавливали
+        # торговлю — одиннадцать дней без входов.
+        expect = [f for f in expect if f.endswith(".py")]
         self.assertEqual(engine_run.dirty_engine_files(), expect)
 
 
@@ -444,10 +448,11 @@ class Portfolio(unittest.TestCase):
         инструменту. Размеры подобраны так, чтобы не задеть долларовую ногу:
         иначе тест упрётся в неё и перестанет проверять то, что называет."""
         equity = 10_000.0
-        rm = equity * risk.RISK_PER_TRADE
-        self.assertLessEqual(3 * rm / equity, risk.leg_cap(),
-                             "три ставки в одну сторону уже не влезают в "
-                             "долларовую ногу — подбери размеры заново")
+        # 🔴 29.09: размер выводится из ЖИВОГО потолка ноги. Раньше тест
+        # стоял на 0.5% и падал, когда корреляция выросла с 0.58 до 0.62 и
+        # потолок сжался с 1.52% до 1.48%. Тест, привязанный к числу, которое
+        # система пересчитывает сама, ломается от нормальной работы.
+        rm = equity * risk.leg_cap() / 3.5
         for _ in range(2):
             self._open(symbol="XAUUSD", direction=LONG, rm=rm)
         risk.portfolio_gate(self.con, sig(symbol="EURUSD", direction=LONG,
@@ -540,7 +545,7 @@ class Portfolio(unittest.TestCase):
         """Лонг EURUSD и лонг USDJPY — ставки в РАЗНЫЕ стороны по доллару.
         Они обязаны вычитаться, иначе потолок ловил бы диверсификацию."""
         equity = 10_000.0
-        rm = equity * risk.RISK_PER_TRADE
+        rm = equity * risk.leg_cap() / 3.5      # см. коммент выше про живой потолок
         for i in range(3):
             self._open(symbol="EURUSD", direction=LONG, rm=rm, strategy=f"a{i}")
         # USD-нога здесь −3 сделки; встречная по доллару возвращает её к −2.
