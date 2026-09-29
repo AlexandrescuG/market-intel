@@ -158,6 +158,37 @@ def journal_state() -> tuple[dict, list[str]]:
     return info, bad
 
 
+def degraded() -> list[str]:
+    """Что отвалилось, НЕ остановив торговлю.
+
+    🔴 29.09, найдено при разборе простоя и прямо отвечает на вопрос «а если
+    Клод снова будет не оплачен». Движок от меня не зависит — проверено, в
+    analyze/engine ни одной ссылки на агента. Но источник `alpha_forecast`
+    читает таблицу forecasts, а её наполняет agent_run через claude CLI.
+    Окно свежести — три часа: как только агент отваливается, источник
+    перестаёт давать сигналы МОЛЧА, и это выглядит как «сигналов нет».
+
+    Замерено на 29.09: alpha_forecast — 20.3% сделок демо и 9.3% реала,
+    вклад +0.59 R на 46 сделках, то есть около нуля. Поэтому это именно
+    урезание, а не отказ: торговать без него можно, не знать об этом нельзя.
+
+    Разделение на «не идут» и «урезано» здесь принципиально. Если валить в
+    одну кучу, оператор привыкнет видеть красный при работающей торговле —
+    и это ровно тот путь, которым 811 алертов стали фоном."""
+    from analyze.engine import ledger
+    out: list[str] = []
+    con = ledger.connect()
+    row = con.execute("SELECT max(created_ts) FROM forecasts").fetchone()
+    age_h = (time.time() - ((row and row[0]) or 0)) / 3600.0
+    # 3 ч — окно, которым источник сам отбирает прогнозы (sources.from_forecasts).
+    if age_h > 3.0:
+        out.append(
+            f"источник alpha_forecast молчит: прогнозов нет {age_h:.1f} ч "
+            f"(наполняет agent_run через claude CLI — проверьте оплату/доступ). "
+            f"Остальные источники работают, это ~20% потока сигналов")
+    return out
+
+
 def guard_state() -> list[str]:
     """Держит ли что-нибудь входы намеренно."""
     from analyze.engine.run import dirty_engine_files, guard_verdict
@@ -183,17 +214,27 @@ def build() -> tuple[str, str]:
     except Exception as e:                                       # noqa: BLE001
         info = {}
         bad.append(f"журнал не читается: {e}")
+    try:
+        weak = degraded()
+    except Exception as e:                                       # noqa: BLE001
+        weak = [f"проверка урезания не прошла: {e}"]
 
     if bad:
-        key = "СТОП|" + "|".join(sorted(bad))
         head = "🔴 ТОРГИ НЕ ИДУТ"
+    elif weak:
+        head = "🟡 Торги идут, но урезаны"
     else:
-        key = "ИДУТ"
         head = "🟢 Торги идут"
+    # Ключ включает и урезание: переход «всё хорошо» -> «урезано» это смена
+    # вердикта и обязан прийти сообщением, иначе тихая деградация останется
+    # тихой — а именно она и стоила одиннадцати дней.
+    key = "|".join(["СТОП" if bad else "ИДУТ"] + sorted(bad) + sorted(weak))
 
     lines = [head]
     for b in bad:
         lines.append(f"· {b}")
+    for w in weak:
+        lines.append(f"🟡 {w}")
     if fixed:
         lines.append("")
         for f in fixed:
@@ -245,7 +286,7 @@ def main() -> int:
         {"key": key, "ts": time.time(),
          "sent_ts": time.time() if send else prev.get("sent_ts") or 0},
         ensure_ascii=False), encoding="utf-8")
-    return 0 if key == "ИДУТ" else 1
+    return 0 if key.startswith("ИДУТ") else 1
 
 
 if __name__ == "__main__":
