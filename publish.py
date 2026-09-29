@@ -220,7 +220,15 @@ def publish_charts() -> None:
                         "color": "rgba(30,142,90,.5)" if up else "rgba(192,57,43,.5)"})
         return candles, vol
 
-    con = sqlite3.connect(str(_BOT_DB))
+    # 🔴 Без таймаута соединение ждёт блокировку 5 секунд (дефолт sqlite) и
+    # падает с «database is locked». За 29.09 это 42 падения из 231 прогона:
+    # publish идёт по всем символам, а в ту же базу в это время пишут движок,
+    # strategy_monitor и таймерные job'ы. Правило «очередь лучше обрыва»
+    # записано в core/db.py::_connect (60 с), но это подключение заведено
+    # мимо него и о правиле не знало — как и ещё одиннадцать в репозитории
+    # (см. tools/check_db_timeouts.py).
+    con = sqlite3.connect(str(_BOT_DB), timeout=60)
+    con.execute("PRAGMA busy_timeout=60000")
     try:
         for canonical in available_symbols("1d"):
             pb_sym = alias_for(canonical, "price_bars") or canonical
