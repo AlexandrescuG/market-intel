@@ -139,8 +139,13 @@ def journal_state() -> tuple[dict, list[str]]:
             (acc,)).fetchone()
         last = (row and row[0]) or 0
         age = (time.time() - last) / 3600.0 if last else None
+        # 🔴 Только mode='live'. Теневые сделки тоже «открыты», но у брокера
+        # их нет — и первая же версия пульса показала 11 против 7 у брокера.
+        # Число, которое не сходится с терминалом, хуже отсутствующего:
+        # по нему нельзя понять, расходится журнал с брокером или нет.
         opened = con.execute(
-            "SELECT count(*) FROM engine_trades WHERE account=? AND status='open'",
+            "SELECT count(*) FROM engine_trades "
+            "WHERE account=? AND status='open' AND mode='live'",
             (acc,)).fetchone()[0]
         halted = [r[0] for r in con.execute(
             "SELECT strategy FROM engine_strategy_state "
