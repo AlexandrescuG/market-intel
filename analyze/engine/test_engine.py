@@ -9,8 +9,10 @@
 """
 from __future__ import annotations
 
+import os
 import sqlite3
 import sys
+import time
 import unittest
 from types import SimpleNamespace
 
@@ -240,6 +242,47 @@ class Maintenance(unittest.TestCase):
         # торговлю — одиннадцать дней без входов.
         expect = [f for f in expect if f.endswith(".py")]
         self.assertEqual(engine_run.dirty_engine_files(), expect)
+
+    def test_предохранитель_снимается_сам(self):
+        """🔴 29.09, главный урок простоя. Предохранитель, у которого нет
+        условия выхода, останавливает работу навсегда — ровно это и вышло:
+        одиннадцать дней без сделок при живых юнитах.
+
+        Условие выхода здесь по существу, а не по таймауту: правку не трогали
+        два часа И тесты зелёные. Проверяем обе развилки на файле с заданным
+        временем изменения, не трогая настоящее дерево."""
+        import tempfile
+        from analyze.engine import run as engine_run
+        if os.environ.get("SBF_GUARD_SELFTEST"):
+            self.skipTest("вложенный прогон: это guard_verdict запустил тесты")
+        root = "/mnt/sbfdata/sbf-platform/market_intel"
+        with tempfile.NamedTemporaryFile(suffix=".py", dir=f"{root}/analyze/engine",
+                                         delete=False) as fh:
+            rel = f"analyze/engine/{os.path.basename(fh.name)}"
+        try:
+            # только что тронули -> держим, и причина названа
+            os.utime(f"{root}/{rel}", (time.time(), time.time()))
+            blocked, why = engine_run.guard_verdict([rel])
+            self.assertTrue(blocked)
+            self.assertIn("идёт работа", why)
+
+            # тронули давно -> проверка по существу, а не по часам
+            old = time.time() - 5 * 3600
+            os.utime(f"{root}/{rel}", (old, old))
+            blocked, why = engine_run.guard_verdict([rel])
+            self.assertFalse(blocked, f"не снялся, хотя должен: {why}")
+            self.assertIn("тесты зелёные", why)
+        finally:
+            os.unlink(f"{root}/{rel}")
+
+    def test_удалённый_исходник_держит_входы(self):
+        """Удаление файла тоже правка, а mtime у него взять неоткуда:
+        без явной ветки функция упала бы на getmtime и предохранитель
+        молча перестал бы работать вовсе."""
+        from analyze.engine import run as engine_run
+        blocked, why = engine_run.guard_verdict(["analyze/engine/такого_нет.py"])
+        self.assertTrue(blocked)
+        self.assertIn("удал", why)
 
 
 class TwoAccounts(unittest.TestCase):
