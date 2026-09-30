@@ -1791,9 +1791,25 @@ const I18N_SIG = {
   reportFlag: {{ t('home.feed_report_flag_prefix', lang) | tojson }}
 };
 let SIG=null;
+
+/* 🔴 С 30.09.2026 signals.json отдаёт по СПИСКУ НА ЛОКАЛЬ:
+     {"by_lang":true, "economy":{"ru":[…], "en":[…], "ro":[…]}, …}
+   До этого список был один на всех, и на /en восемь карточек из двенадцати
+   приходили по-русски. Отбор целиком остался на сервере (publish.py): здесь
+   только выбор готового списка — иначе клиент и сервер снова знали бы про
+   правила ленты по-разному, а это уже было с лимитом перевода.
+   Старая форма (голый массив) продолжает читаться: у людей в кэше лежит
+   прежний signals.json, и до следующего прогона publish он и будет отдаваться. */
+function sigRows(dim){
+  const блок = SIG && SIG[dim];
+  if(!блок) return null;
+  if(Array.isArray(блок)) return блок;
+  return блок[_PAGE_LANG] || блок.ru || null;
+}
+
 function renderSignals(dim){
-  const el=document.getElementById('signals'); if(!SIG||!SIG[dim]){el.innerHTML='<div class="empty">'+I18N_SIG.noSignals+'</div>';return;}
-  const rows=SIG[dim]; if(!rows.length){el.innerHTML='<div class="empty">'+I18N_SIG.noSignalsWindow+'</div>';return;}
+  const el=document.getElementById('signals'); if(!sigRows(dim)){el.innerHTML='<div class="empty">'+I18N_SIG.noSignals+'</div>';return;}
+  const rows=sigRows(dim); if(!rows.length){el.innerHTML='<div class="empty">'+I18N_SIG.noSignalsWindow+'</div>';return;}
   const confLabel={media:I18N_SIG.confMedia, social_unverified:I18N_SIG.confSocial};
   el.innerHTML=rows.map(s=>{
     const ct=(s.cashtags||[]).map(t=>'$'+t).join(' ');

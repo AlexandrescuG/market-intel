@@ -109,6 +109,50 @@ def confidence_for(source: str, author: str) -> str:
     return "social_unverified"
 
 
+# ── Кто издание и на каком языке ────────────────────────────────────────────
+#
+# 🔴 topic_hint — НЕ синоним издания, и на трёх поверхностях он значит разное.
+# У сборщика твитов это ПОИСКОВЫЙ ЗАПРОС, и на главной висели карточки с
+# подписью «(sanctions OR tariff OR "trade war" OR embargo) min_faves:500».
+# У RSS туда кладётся entry.source.title (collectors/rss.py:105) — для Google
+# News это настоящий публикатор («USA Today», «TradingView»), а вот РБК
+# кладёт в <source> ПОДПИСЬ ПОД ФОТО, и в ленте появлялись издания
+# «Carl Court / Getty Images» и «Андрей Любимов / РБК».
+#
+# Имя ленты из конфига лежит в author и как раз надёжно. Поэтому правило:
+# соцсети — автор, RSS — резолвнутый публикатор, но если он похож на
+# фотокредит (несколько имён через слэш), берём имя ленты.
+#
+# Это же значение — ключ группировки для потолка на издание ниже. Пока подпись
+# у части карточек РБК была фотокредитом, они считались РАЗНЫМИ изданиями, и
+# любой потолок обходился бы сам собой.
+_ФОТОКРЕДИТ = re.compile(r"\s+/\s+")
+
+
+def outlet_of(it: dict) -> str:
+    source = (it.get("source") or "").lower()
+    author = (it.get("author") or "").strip()
+    hint = (it.get("topic_hint") or it.get("outlet") or "").strip()
+    if source in ("twitter", "telegram"):
+        return ("@" + author) if author else source
+    if hint and not _ФОТОКРЕДИТ.search(hint):
+        return hint
+    return author or hint or source
+
+
+_КИРИЛЛИЦА = re.compile(r"[А-Яа-яЁё]")
+
+
+def lang_of(text: str) -> str:
+    """Язык карточки по письменности: "ru" или "en".
+
+    Та же грубость и по той же причине, что в core/news_i18n.detect: румынский
+    — латиница, отличить его от английского по буквам нельзя, а решение тут
+    принимается одно — показывать карточку читателю этой локали или нет.
+    """
+    return "ru" if _КИРИЛЛИЦА.search(text or "") else "en"
+
+
 def _is_press_or_tier1(it: dict) -> bool:
     """SPEC_site_fixes_2026-07-29 §6 п.2: правило require_cashtag писалось
     против анонимных твиттер-аккаунтов -- к Reuters/BBC оно неприменимо.
@@ -164,7 +208,8 @@ def _report_flag_for(cashtags: list[str], unverified_texts: list[str]) -> str | 
 
 
 def apply_feed_rules(items: list[dict], limit: int, require_cashtag: bool | None = None,
-                      press_quota: int = 0) -> list[dict]:
+                      press_quota: int = 0, outlet_cap: int = 0,
+                      drop_langs: set[str] | None = None) -> list[dict]:
     """items -- вывод _sig() из publish.py (source, author, text, cashtags, ...).
     Возвращает отфильтрованный, помеченный и переупорядоченный список, уже
     обрезанный до `limit`.
@@ -185,7 +230,25 @@ def apply_feed_rules(items: list[dict], limit: int, require_cashtag: bool | None
     вытеснило -- ранжированием эту задачу не решить, пока RSS структурно не
     имеет вовлечённости. 0 (по умолчанию) -- поведение не меняется, для
     измерений, где пресса не ожидается (напр. "Соцсети" -- см. §7: вкладка
-    сознательно осталась чисто социальной, квота была бы противоречием)."""
+    сознательно осталась чисто социальной, квота была бы противоречием).
+
+    outlet_cap (30.09.2026): максимум карточек от ОДНОГО издания. Замер на
+    живой главной: в блоке «Экономика» из 12 карточек 7 были от РБК, а в
+    кандидатах топ-60 по importance РБК занимал 27 мест. Сбора это не касается
+    — из 17 прямых лент молчит одна, РБК даёт 67 публикаций за трое суток
+    против 660 у Yahoo. Дело в ранжировании: у РБК САМАЯ ВЫСОКАЯ средняя
+    importance из всех изданий (0.553 против 0.434 у следующего), потому что
+    это полная лента новостей агентства, а не тематическая выборка. Опускать
+    его оценку значило бы чинить симптом в метрике; потолок честнее — он
+    говорит «в обзоре рынка не бывает шести карточек подряд из одного места»,
+    и от смены весов не разъедется. 0 -- без потолка.
+
+    drop_langs: языки, которые читателю этой локали показывать бессмысленно.
+    Асимметрия сознательная и живёт в publish.py, где её видно рядом с
+    цифрами: англоязычного потока хватает с запасом, поэтому на EN/RO
+    кириллические карточки просто не показываются, а вот русскоязычного
+    контента в пуле 0,65% — русской локали отдаём всё, пока не вернётся
+    перевод."""
     cfg = load_config()
     need_cashtag = cfg["require_cashtag"] if require_cashtag is None else require_cashtag
     unverified_texts = _load_unverified_report_terms()
@@ -199,6 +262,8 @@ def apply_feed_rules(items: list[dict], limit: int, require_cashtag: bool | None
         text = it.get("text") or ""
         if _is_political(text, cfg):
             continue
+        if drop_langs and (it.get("lang") or lang_of(text)) in drop_langs:
+            continue
 
         it = dict(it)
         it["confidence"] = confidence_for(it.get("source"), it.get("author"))
@@ -209,6 +274,23 @@ def apply_feed_rules(items: list[dict], limit: int, require_cashtag: bool | None
         (shouty if _is_shouty(text, cfg) else kept).append(it)
 
     ordered = kept + shouty
+
+    # 🔴 Потолок применяется ДО обрезки до limit, а не после.
+    # После обрезки он означал бы «выбросить лишнее», то есть блок из 12
+    # карточек превращался бы в блок из 8. Здесь он означает «пропустить и
+    # взять следующего по важности», и блок остаётся полным — просто
+    # заполняется другими изданиями.
+    if outlet_cap:
+        сколько: dict[str, int] = {}
+        разрежённые = []
+        for it in ordered:
+            имя = outlet_of(it)
+            if сколько.get(имя, 0) >= outlet_cap:
+                continue
+            сколько[имя] = сколько.get(имя, 0) + 1
+            разрежённые.append(it)
+        ordered = разрежённые
+
     result = ordered[:limit]
 
     if press_quota:

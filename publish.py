@@ -85,17 +85,51 @@ def publish_signals() -> None:
     # задачу не решает. Не применяется к "Соцсети" (crowd) -- та вкладка
     # сознательно осталась чисто социальной (см. §7).
     PRESS_QUOTA = 4
-    out = {}
+    # 30.09.2026: не больше трёх карточек от одного издания. Замер «до» на
+    # живой главной — 7 карточек РБК из 12 в «Экономике». Обоснование и почему
+    # это потолок, а не правка весов — core/feed_filter.apply_feed_rules.
+    OUTLET_CAP = 3
+
+    # 🔴 ЛЕНТА СОБИРАЕТСЯ ПО ЛОКАЛЯМ, А НЕ ОДНИМ СПИСКОМ НА ВСЕХ.
+    #
+    # До 30.09.2026 signals.json был один на три локали, и англоязычный
+    # читатель видел на /en восемь из двенадцати карточек по-русски (замер на
+    # живой странице). Перевод для этого блока не подключён вовсе: механизм
+    # core/news_i18n.py написан, но ходит только из ленты по активу, которая
+    # за регистрацией, и его кэш последний раз пополнялся 11.09 — в день,
+    # когда бесплатный Google перестал отвечать.
+    #
+    # Асимметрия ниже — не небрежность, а следствие состава потока:
+    #   кириллицей в пуле  0,65% (≈220 публикаций из 33 600 за неделю)
+    #   латиницей          99,3%
+    # Поэтому EN/RO читателю русские карточки просто не показываются — своего
+    # материала хватает с многократным запасом. А русскому читателю отдаётся
+    # ВСЁ: отфильтруй мы для него по языку так же, блок опустел бы. Пока не
+    # вернётся перевод, английский заголовок русскому читателю — неудобство,
+    # а пустой блок — поломка.
+    ЯЗЫКИ = ("ru", "en", "ro")
+    СКРЫВАТЬ = {"ru": set(), "en": {"ru"}, "ro": {"ru"}}
+
+    сырьё = {}
     for dim in ("economy", "geopolitics"):
-        candidates = [_sig(s) for s in db.top_by_dimension(24, dim, DISPLAY_LIMIT * 4)]
+        # Кандидатов берём с бо́льшим запасом, чем раньше: после фильтра по
+        # языку и потолка на издание отсев стал глубже, и прежнего ×4 не
+        # хватало, чтобы набрать 12 карточек для EN.
+        сырьё[dim] = [_sig(s) for s in db.top_by_dimension(24, dim, DISPLAY_LIMIT * 12)]
+    сырьё["crowd"] = [_sig(s) for s in db.top_by_crowd(24, DISPLAY_LIMIT * 12)]
+
+    out = {}
+    for dim, candidates in сырьё.items():
         # geopolitics по данным структурно без тикеров (см. feed_filter.py) --
         # там штамп "нет тикера" убил бы вкладку целиком, требование ослаблено
         # сознательно, политический фильтр остаётся в силе.
-        out[dim] = apply_feed_rules(candidates, DISPLAY_LIMIT, require_cashtag=(dim != "geopolitics"),
-                                     press_quota=PRESS_QUOTA)
-    crowd_candidates = [_sig(s) for s in db.top_by_crowd(24, DISPLAY_LIMIT * 4)]
-    out["crowd"] = apply_feed_rules(crowd_candidates, DISPLAY_LIMIT)
-    _write("signals.json", {"updated": _now(), **out})
+        общие = dict(require_cashtag=(dim != "geopolitics"), outlet_cap=OUTLET_CAP)
+        if dim != "crowd":
+            общие["press_quota"] = PRESS_QUOTA
+        out[dim] = {lang: apply_feed_rules(candidates, DISPLAY_LIMIT,
+                                           drop_langs=СКРЫВАТЬ[lang], **общие)
+                    for lang in ЯЗЫКИ}
+    _write("signals.json", {"updated": _now(), "by_lang": True, **out})
 
 
 def _sig(s: dict) -> dict:
@@ -107,15 +141,25 @@ def _sig(s: dict) -> dict:
         raw = json.loads(s.get("raw") or "{}")
     except (json.JSONDecodeError, TypeError):
         raw = {}
-    return {
+    from core.feed_filter import lang_of, outlet_of
+    текст = (s["title"] or s["text"])[:280]
+    it = {
         "source": s["source"], "author": s["author"],
-        "outlet": s.get("topic_hint") or "",
+        "topic_hint": s.get("topic_hint") or "",
         "domain": raw.get("domain") or "",
-        "text": (s["title"] or s["text"])[:280], "url": s["url"],
+        "text": текст, "url": s["url"],
         "importance": s["importance"], "econ": s["econ_relevance"],
         "crowd": s["crowd_intensity"], "engagement": s["engagement"],
         "cashtags": json.loads(s["cashtags"] or "[]"),
     }
+    # 🔴 outlet больше не равен topic_hint. Раньше равнялся, и на главной
+    # висели «издания» с именами «(sanctions OR tariff OR "trade war" OR
+    # embargo) min_faves:500» (это поисковый запрос сборщика твитов) и
+    # «Carl Court / Getty Images» (это подпись под фото из ленты РБК).
+    # Правило и его обоснование — core/feed_filter.outlet_of().
+    it["outlet"] = outlet_of(it)
+    it["lang"] = lang_of(текст)
+    return it
 
 
 def publish_buzz() -> None:
