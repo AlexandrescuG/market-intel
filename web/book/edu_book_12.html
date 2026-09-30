@@ -2,8 +2,15 @@
 <html lang="{{ lang }}">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>SBF | {% if lang == 'ru' %}Глава 12. Японская философия (Ишимоку){% elif lang == 'ro' %}Capitolul 12. Filosofia Japoneză (Ichimoku){% else %}Chapter 12. Japanese Philosophy (Ichimoku){% endif %}</title>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="SBF Intelligence">
+<meta property="og:image" content="https://lp.sbfconsult.com/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://lp.sbfconsult.com/assets/og-image.png">
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
   <style>
@@ -104,7 +111,7 @@ const STRINGS = {
   },
 };
 
-const {C, Mono, Chip, Rule, AskAnalystBtn, getChUrl, QuizBlock, ComplianceFootnote, ColdStart} = window.AcademyShared;
+const {C, Mono, Chip, Rule, AntiMythBlock, AskAnalystBtn, getChUrl, QuizBlock, ComplianceFootnote, ColdStart, RevealSteps} = window.AcademyShared;
 
 function fillTemplate(str, vars) {
   if (!str) return str;
@@ -216,15 +223,10 @@ function IntroBlock() {
   const T = window.Ch12Content[INITIAL_LANG] || window.Ch12Content.ru;
   return (
     <div id="secAntiMyth" style={{marginBottom:48,scrollMarginTop:130}}>
-      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T.antiMyth.tag}</Mono>
-      <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px",marginBottom:28}}>
-        <p style={{fontWeight:600,fontSize:14.5,color:C.black,marginBottom:10}}>{T.antiMyth.title}</p>
-        <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,marginBottom:12}}>{T.antiMyth.body1}</p>
-        <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,marginBottom:12}}>{T.antiMyth.body2}</p>
-        <p style={{fontSize:13.5,color:C.black,lineHeight:1.7,margin:0,fontWeight:600}}>{T.antiMyth.body3}</p>
-      </div>
+      <AntiMythBlock lang={INITIAL_LANG} style={{marginBottom:28}}
+        data={{tag: T.antiMyth.tag, title: T.antiMyth.title, bodies: [T.antiMyth.body1, T.antiMyth.body2, T.antiMyth.body3]}}/>
 
-      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T.voiceSbf.tag}</Mono>
+      <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{T.voiceSbf.tag}</Mono>
       <div style={{borderLeft:`4px solid ${C.gold}`,paddingLeft:24}}>
         {T.voiceSbf.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:16,fontStyle:"italic",color:C.inkMid,lineHeight:1.7,fontFamily:"'DM Serif Display',serif",marginBottom:12}}>{p}</p>)}
       </div>
@@ -239,11 +241,11 @@ function PriceOfNotKnowing12() {
   const pct = React.useMemo(() => binomAtLeast(10, 6, 0.5), []);
   return (
     <div id="secPriceOfNotKnowing" style={{marginBottom:48,scrollMarginTop:130}}>
-      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{p.tag}</Mono>
+      <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{p.tag}</Mono>
       <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.black,marginBottom:14}}>{p.title}</div>
       <p style={{fontSize:14,color:C.inkMid,lineHeight:1.75,marginBottom:20,maxWidth:800}}>{p.intro}</p>
       <div style={{background:C.black,borderRadius:8,padding:"22px 28px",color:"#fff",display:"flex",alignItems:"center",gap:24,flexWrap:"wrap",marginBottom:16}}>
-        <div style={{fontFamily:"'DM Serif Display',serif",fontSize:38,color:C.gold}}>{pct.toFixed(1)}%</div>
+        <div style={{fontFamily:"'DM Serif Display',serif",fontSize:38,color:C.goldText}}>{pct.toFixed(1)}%</div>
         <div style={{fontSize:13,color:"rgba(255,255,255,0.75)",lineHeight:1.6,maxWidth:520}}>{p.resultLabel}</div>
       </div>
       <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.75,marginBottom:14,maxWidth:800}}>{p.afterNumber}</p>
@@ -268,6 +270,11 @@ function OriginStory12() {
 }
 
 // ─── Пять линий ──────────────────────────────────────────────────────────────
+// Цвет линии → тот же оттенок, пригодный для ТЕКСТА на светлом фоне
+// (#faf8f5). Пары подобраны так, чтобы тон сохранился, а контраст дошёл до
+// 4.5:1 — см. tools/pick_accessible_color.py. Чикоу (#805ad5) проходит сам.
+const ТЕКСТОМ = {"#e53e3e":"#E01E1E", "#3182ce":"#2C75B9", "#38a169":"#2D8154"};
+
 function IchimokuAnatomy() {
   const T = window.Ch12Content[INITIAL_LANG] || window.Ch12Content.ru;
   const a = T.anatomy;
@@ -282,10 +289,16 @@ function IchimokuAnatomy() {
               <div style={{fontWeight:600,fontSize:14.5,color:C.black}}>{ln.name}</div>
               <Mono size={9} color={C.inkFaint} spacing={0.5}>{ln.badge}</Mono>
             </div>
-            <Mono size={11.5} color={ln.color} spacing={0} style={{display:"block",marginBottom:10}}>{ln.formula}</Mono>
+            {/* 🔴 Формула — ТЕКСТ, и порог у неё 4.5:1, а не 3:1. Цвет линии
+                на графике и цвет подписи под неё — разные задачи: ln.color
+                узнаётся на полоске сверху (нетекстовая графика, 3:1 хватает),
+                а те же #e53e3e/#3182ce/#38a169 как текст 11.5px на #faf8f5
+                дают 3.89/3.80/3.06. ПОДПИСЬ — затемнённый близнец того же
+                оттенка, поэтому связь «линия ↔ формула» на глаз не рвётся. */}
+            <Mono size={11.5} color={ТЕКСТОМ[ln.color] || ln.color} spacing={0} style={{display:"block",marginBottom:10}}>{ln.formula}</Mono>
             <p style={{fontSize:12.5,color:C.inkMid,lineHeight:1.65,margin:0}}>{ln.beg}</p>
             {open[ln.key] && <p style={{fontSize:12,color:C.inkSoft,lineHeight:1.65,marginTop:10,paddingTop:10,borderTop:`1px dashed ${C.border}`}}>{ln.pro}</p>}
-            <button onClick={()=>setOpen(o=>({...o,[ln.key]:!o[ln.key]}))} style={{marginTop:10,background:"none",border:"none",color:C.gold,fontFamily:"monospace",fontSize:10.5,cursor:"pointer",padding:0,letterSpacing:0.5}}>
+            <button onClick={()=>setOpen(o=>({...o,[ln.key]:!o[ln.key]}))} style={{marginTop:10,background:"none",border:"none",color:C.goldText,fontFamily:"monospace",fontSize:10.5,cursor:"pointer",padding:0,letterSpacing:0.5}}>
               {open[ln.key] ? "− PRO" : "+ PRO"}
             </button>
           </div>
@@ -432,7 +445,7 @@ function IchimokuLiveChart() {
   return (
     <div style={{background:C.black,borderRadius:6,padding:"24px 5vw 28px",marginBottom:32,overflow:"hidden"}}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:10,marginBottom:14}}>
-        <Mono size={11} color={C.gold} spacing={2}>{lc.tag}</Mono>
+        <Mono size={11} color={C.goldText} spacing={2}>{lc.tag}</Mono>
         <div style={{display:"flex",gap:6}}>
           {ICHIMOKU_SYMBOLS.map(s => (
             <button key={s} onClick={()=>setSymbol(s)} style={{fontFamily:"monospace",fontSize:10.5,padding:"5px 10px",cursor:"pointer",background:s===symbol?C.gold:"transparent",color:s===symbol?"#18181a":"rgba(255,255,255,0.6)",border:`1px solid ${s===symbol?C.gold:"rgba(255,255,255,0.2)"}`,borderRadius:3}}>{window.SBFSymbols ? window.SBFSymbols.symbolName(s, {lang: INITIAL_LANG, mode:"name+ticker"}) : s}</button>
@@ -443,7 +456,7 @@ function IchimokuLiveChart() {
         <div ref={containerRef} data-source={"/data/ohlc_" + symbol + "_D1.json"}/>
         {!full && (
           <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",pointerEvents:"none"}}>
-            <Mono size={11} color="rgba(255,255,255,0.4)" spacing={1}>{lc.loadingLabel}</Mono>
+            <Mono size={11} color="rgba(255,255,255,0.55)" spacing={1}>{lc.loadingLabel}</Mono>
           </div>
         )}
       </div>
@@ -456,7 +469,7 @@ function IchimokuLiveChart() {
         ))}
       </div>
       <p style={{fontSize:12,color:"rgba(255,255,255,0.5)",lineHeight:1.65,margin:0,maxWidth:680}}>{lc.caption}</p>
-      <a href={"/chart.html?s=" + symbol} target="_blank" rel="noopener" style={{fontFamily:"monospace",fontSize:11.5,color:C.gold,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`,marginTop:10,display:"inline-block"}}>
+      <a href={"/chart.html?s=" + symbol} target="_blank" rel="noopener" style={{fontFamily:"monospace",fontSize:11.5,color:C.goldText,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`,marginTop:10,display:"inline-block"}}>
         {(() => { const symLabel = window.SBFSymbols ? window.SBFSymbols.symbolName(symbol, {lang: INITIAL_LANG, mode:"name+ticker"}) : symbol; return INITIAL_LANG==="ru"?`Открыть ${symLabel} на графике →`:INITIAL_LANG==="ro"?`Deschide ${symLabel} pe grafic →`:`Open ${symLabel} on the chart →`; })()}
       </a>
     </div>
@@ -470,7 +483,15 @@ function CloudShiftExplainer() {
   const [shifted, setShifted] = React.useState(false);
   return (
     <div style={{marginBottom:48}}>
-      {cs.body.map((p,i) => <p key={i} style={{fontSize:14,color: i===3?C.black:C.inkMid,fontWeight:i===3?600:400,lineHeight:1.78,marginBottom:14,maxWidth:820}}>{p}</p>)}
+      {/* Ключевое объяснение главы — четыре абзаца, где каждый следующий
+          отменяет вывод предыдущего: «показывает будущее» → «нет, это
+          сегодняшние цены» → «но уровень известен заранее» → «и поэтому
+          прошлую редакцию мы переписали». Выложенные разом, они
+          дочитываются как один длинный абзац, и разворот в середине
+          теряется. */}
+      <div style={{maxWidth:820}}>
+        <RevealSteps bodies={cs.body} lang={INITIAL_LANG} preset="layers"/>
+      </div>
 
       <div style={{background:C.black,borderRadius:8,padding:"26px 30px",marginTop:20}}>
         <div style={{display:"flex",justifyContent:"center",marginBottom:18}}>
@@ -510,12 +531,12 @@ function ChikouTautology() {
           </div>
         </div>
         <div style={{textAlign:"center",marginBottom: reveal ? 12 : 0}}>
-          <button onClick={()=>setReveal(r=>!r)} style={{background:"none",border:`1px dashed ${C.borderGold}`,borderRadius:4,padding:"8px 18px",cursor:"pointer",fontFamily:"monospace",fontSize:10.5,color:C.gold,letterSpacing:0.5}}>{ct.demoChikouLabel}</button>
+          <button onClick={()=>setReveal(r=>!r)} style={{background:"none",border:`1px dashed ${C.borderGold}`,borderRadius:4,padding:"8px 18px",cursor:"pointer",fontFamily:"monospace",fontSize:10.5,color:C.goldText,letterSpacing:0.5}}>{ct.demoChikouLabel}</button>
         </div>
         {reveal && (
           <div style={{textAlign:"center",background:C.goldPale,border:`1px solid ${C.borderGold}`,borderRadius:6,padding:"12px 16px"}}>
             <div style={{fontFamily:"monospace",fontSize:20,color:C.black,marginBottom:4}}>4 079.50</div>
-            <Mono size={10} color={C.gold} spacing={0.5}>{ct.demoSame}</Mono>
+            <Mono size={10} color={C.goldText} spacing={0.5}>{ct.demoSame}</Mono>
           </div>
         )}
       </div>
@@ -582,7 +603,7 @@ function SampleSizeCalculator() {
           <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,marginBottom:16}}>{ss.step2Intro}</p>
           <div style={{display:"flex",gap:24,flexWrap:"wrap",justifyContent:"center",background:C.black,borderRadius:6,padding:"20px 24px",marginBottom:14}}>
             <div style={{textAlign:"center"}}>
-              <div style={{fontFamily:"'DM Serif Display',serif",fontSize:28,color:C.gold}}>{example.n}</div>
+              <div style={{fontFamily:"'DM Serif Display',serif",fontSize:28,color:C.goldText}}>{example.n}</div>
               <Mono size={9.5} color="rgba(255,255,255,0.5)" spacing={0.5}>{ss.step2NeededLabel}</Mono>
             </div>
             <div style={{textAlign:"center"}}>
@@ -607,11 +628,11 @@ function SampleSizeCalculator() {
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,marginBottom:22}} className="g2">
             <div>
               <Mono size={10} color="rgba(255,255,255,0.5)" spacing={0.5} style={{display:"block",marginBottom:6}}>{ss.winRateLabel}</Mono>
-              <input type="number" value={winRate} min={1} max={99} onChange={e=>setWinRate(+e.target.value)} style={{width:"100%",padding:"9px 12px",background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.2)",borderRadius:4,color:"#fff",fontFamily:"monospace",fontSize:14}}/>
+              <input type="number" aria-label={ss.winRateLabel} value={winRate} min={1} max={99} onChange={e=>setWinRate(+e.target.value)} style={{width:"100%",padding:"9px 12px",background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.2)",borderRadius:4,color:"#fff",fontFamily:"monospace",fontSize:14}}/>
             </div>
             <div>
               <Mono size={10} color="rgba(255,255,255,0.5)" spacing={0.5} style={{display:"block",marginBottom:6}}>{ss.rrLabel}</Mono>
-              <input type="number" value={rr} min={0.1} step={0.1} onChange={e=>setRr(+e.target.value)} style={{width:"100%",padding:"9px 12px",background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.2)",borderRadius:4,color:"#fff",fontFamily:"monospace",fontSize:14}}/>
+              <input type="number" aria-label={ss.rrLabel} value={rr} min={0.1} step={0.1} onChange={e=>setRr(+e.target.value)} style={{width:"100%",padding:"9px 12px",background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.2)",borderRadius:4,color:"#fff",fontFamily:"monospace",fontSize:14}}/>
             </div>
           </div>
 
@@ -623,7 +644,7 @@ function SampleSizeCalculator() {
             <React.Fragment>
               <div style={{display:"flex",gap:20,flexWrap:"wrap",justifyContent:"center",marginBottom:14}}>
                 <div style={{textAlign:"center",minWidth:140}}>
-                  <div style={{fontFamily:"'DM Serif Display',serif",fontSize:24,color:C.gold}}>{custom.n}</div>
+                  <div style={{fontFamily:"'DM Serif Display',serif",fontSize:24,color:C.goldText}}>{custom.n}</div>
                   <Mono size={9} color="rgba(255,255,255,0.5)" spacing={0.5}>{ss.resultNeededLabel}</Mono>
                 </div>
                 <div style={{textAlign:"center",minWidth:140}}>
@@ -672,7 +693,7 @@ function WhatFiftyShows({ progress, loading }) {
       <div style={{marginBottom:16}}>
         {w.items.map((it,i) => (
           <div key={i} style={{display:"flex",gap:10,marginBottom:10,alignItems:"flex-start"}}>
-            <Mono size={11} color={C.gold} spacing={0}>{i+1}</Mono>
+            <Mono size={11} color={C.goldText} spacing={0}>{i+1}</Mono>
             <p style={{fontSize:13,color:C.inkMid,lineHeight:1.65,margin:0}}>{it}</p>
           </div>
         ))}
@@ -737,7 +758,7 @@ function LadderStep7({ progress, loading, onChanged }) {
 
   return (
     <div id="secLadderStep7" style={{marginBottom:48,scrollMarginTop:130}}>
-      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:14}}>{l7.tag}</Mono>
+      <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:14}}>{l7.tag}</Mono>
       <p style={{fontSize:14,color:C.inkMid,lineHeight:1.78,marginBottom:12,maxWidth:800}}>{l7.limitParagraph1}</p>
       <p style={{fontSize:14,color:C.black,fontWeight:600,lineHeight:1.78,marginBottom:24,maxWidth:800}}>{l7.limitParagraph2}</p>
 
@@ -802,12 +823,12 @@ function LadderStep7({ progress, loading, onChanged }) {
             {[[l7.entryLabel,entry,setEntry],[l7.stopLabel,stop,setStop],[l7.exitLabel,exit,setExit]].map(([label,val,setter],i) => (
               <div key={i} style={{marginBottom:14}}>
                 <Mono size={10} color={C.inkFaint} spacing={0.5} style={{display:"block",marginBottom:6}}>{label}</Mono>
-                <input value={val} onChange={e=>setter(e.target.value)} style={{width:"100%",padding:"10px 12px",border:`1px solid ${C.border}`,borderRadius:4,fontFamily:"'DM Sans',sans-serif",fontSize:13}}/>
+                <input value={val} aria-label={label} onChange={e=>setter(e.target.value)} style={{width:"100%",padding:"10px 12px",border:`1px solid ${C.border}`,borderRadius:4,fontFamily:"'DM Sans',sans-serif",fontSize:13}}/>
               </div>
             ))}
             <div style={{marginBottom:20}}>
               <Mono size={10} color={C.inkFaint} spacing={0.5} style={{display:"block",marginBottom:6}}>{l7.predictLabel}</Mono>
-              <input type="number" min={0} max={100} value={predictPct} onChange={e=>setPredictPct(+e.target.value)} style={{width:120,padding:"10px 12px",border:`1px solid ${C.border}`,borderRadius:4,fontFamily:"monospace",fontSize:13}}/>
+              <input type="number" aria-label={l7.predictLabel} min={0} max={100} value={predictPct} onChange={e=>setPredictPct(+e.target.value)} style={{width:120,padding:"10px 12px",border:`1px solid ${C.border}`,borderRadius:4,fontFamily:"monospace",fontSize:13}}/>
             </div>
             <button onClick={submit} disabled={!readyToStart || busy} style={{padding:"12px 26px",background: readyToStart ? C.black : C.inkFaint,color:"#fff",border:"none",borderRadius:4,cursor: readyToStart ? "pointer" : "not-allowed",fontFamily:"monospace",fontSize:12,letterSpacing:0.5}}>{l7.startBtn}</button>
           </div>
@@ -833,9 +854,12 @@ function SeriesCounter({ progress, loading, lang }) {
   else if (progress.status === "blocked") label = S.seriesCounterBlocked;
   else label = S.seriesCounterNotYet;
   return (
-    <div onClick={scrollToStep7} title={S.seriesCounterGoto} style={{cursor:"pointer",fontFamily:"monospace",fontSize:11.5,color:C.gold,border:`1px solid ${C.borderGold}`,borderRadius:20,padding:"5px 14px",letterSpacing:0.5,whiteSpace:"nowrap"}}>
+    /* Счётчик серии — это переход к нужному разделу, то есть управление.
+       Был <div> с курсором: мышью работает, с клавиатуры нет. */
+    <button type="button" onClick={scrollToStep7} title={S.seriesCounterGoto}
+      style={{cursor:"pointer",fontFamily:"monospace",fontSize:11.5,color:C.goldText,background:"none",border:`1px solid ${C.borderGold}`,borderRadius:20,padding:"5px 14px",letterSpacing:0.5,whiteSpace:"nowrap"}}>
     {label}
-    </div>
+    </button>
   );
 }
 
@@ -859,7 +883,7 @@ function Chapter12() {
 
       <div style={{position:"sticky",top:106,background:"rgba(255,255,255,0.96)",backdropFilter:"blur(10px)",borderBottom:`1px solid ${C.border}`,padding:"15px 5vw",display:"flex",alignItems:"center",justifyContent:"space-between",zIndex:50,gap:12,flexWrap:"wrap"}}>
         <div style={{display:"flex",alignItems:"center",gap:20}}>
-          <span onClick={() => window.location.href = getChUrl(11, lang)} style={{color:C.gold,cursor:"pointer",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</span>
+          <a href={getChUrl(11, lang)} aria-label={lang==="ru"?"Предыдущая глава":lang==="ro"?"Capitolul anterior":"Previous chapter"} style={{color:C.goldText,cursor:"pointer",textDecoration:"none",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</a>
           <Chip>{S.levelChip}</Chip>
           <Mono size={14} color={C.inkSoft} spacing={0} className="hide-mobile">{S.chapterNameShort}</Mono>
         </div>
@@ -873,15 +897,15 @@ function Chapter12() {
       <div style={{background:C.black,padding:"80px 5vw 70px",textAlign:"center",position:"relative",overflow:"hidden"}}>
         <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 100%, rgba(201,151,58,0.1) 0%, transparent 60%)"}}/>
         <div style={{position:"relative"}}>
-          <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:20}}>{S.heroEyebrow}</Mono>
+          <Mono size={11} color={C.goldText} spacing={4} style={{display:"block",marginBottom:20}}>{S.heroEyebrow}</Mono>
           <h1 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(36px,6vw,66px)",fontWeight:400,color:C.white,lineHeight:1.05,marginBottom:20}}>
-            {S.heroTitleLine1}<br/><span style={{color:C.gold}}>{S.heroTitleLine2}</span>
+            {S.heroTitleLine1}<br/><span style={{color:C.goldText}}>{S.heroTitleLine2}</span>
           </h1>
           <p style={{fontSize:"clamp(16px,2vw,20px)",color:"rgba(255,255,255,0.55)",maxWidth:640,margin:"0 auto 32px",lineHeight:1.65}}>{S.heroSubtitle}</p>
           <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
-            <Chip color={C.gold}>{S.fundamentalChip}</Chip>
-            <Chip color="rgba(255,255,255,0.3)">{S.technicalChip}</Chip>
-            <Chip color="rgba(255,255,255,0.3)">{S.interactiveChip}</Chip>
+            <Chip color={C.goldText}>{S.fundamentalChip}</Chip>
+            <Chip color="rgba(255,255,255,0.55)">{S.technicalChip}</Chip>
+            <Chip color="rgba(255,255,255,0.55)">{S.interactiveChip}</Chip>
           </div>
         </div>
       </div>
@@ -928,12 +952,12 @@ function Chapter12() {
         }} />
 
         <div style={{border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px",marginTop:8,marginBottom:24}}>
-          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T.predict.tag}</Mono>
+          <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{T.predict.tag}</Mono>
           <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,margin:0}}>{T.predict.question}</p>
         </div>
 
         <div style={{border:`1px dashed ${C.borderGold}`,borderRadius:8,padding:"20px 24px",marginBottom:32,background:C.surface}}>
-          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T.cliffhanger.tag}</Mono>
+          <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{T.cliffhanger.tag}</Mono>
           {T.cliffhanger.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:14,color:C.inkMid,lineHeight:1.7,marginBottom:10}}>{p}</p>)}
         </div>
 

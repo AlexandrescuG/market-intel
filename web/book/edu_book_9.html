@@ -2,8 +2,15 @@
 <html lang="{{ lang }}">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>SBF | {% if lang == 'ru' %}Глава 9. Отчётности и Осцилляторы{% elif lang == 'ro' %}Capitolul 9. Raportări și Oscilatoare{% else %}Chapter 9. Earnings and Oscillators{% endif %}</title>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="SBF Intelligence">
+<meta property="og:image" content="https://lp.sbfconsult.com/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://lp.sbfconsult.com/assets/og-image.png">
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
   <style>
@@ -94,7 +101,7 @@ const STRINGS = {
   },
 };
 
-const {C, Mono, Chip, Rule, AskAnalystBtn, getChUrl, QuizBlock, ComplianceFootnote, ColdStart} = window.AcademyShared;
+const {C, Mono, Chip, Rule, AntiMythBlock, RevealSteps, AskAnalystBtn, getChUrl, QuizBlock, ComplianceFootnote, ColdStart, CardTabs} = window.AcademyShared;
 
 const SectionTitle = ({children,sub,align="left",id}) => (
   <div id={id} style={{textAlign:align,marginBottom:36,scrollMarginTop:130}}>
@@ -178,7 +185,7 @@ function ColdStart9Entry({ scene, vars }) {
   const chartRef = useRef(null);
   const s = React.useState(false), committed = s[0], setCommitted = s[1];
 
-  if (!scene || !vars) return <div style={{background:C.black,padding:"60px 5vw",textAlign:"center"}}><Mono size={11} color={C.gold} spacing={4}>{cs.tag}</Mono></div>;
+  if (!scene || !vars) return <div style={{background:C.black,padding:"60px 5vw",textAlign:"center"}}><Mono size={11} color={C.goldText} spacing={4}>{cs.tag}</Mono></div>;
 
   const HIDE_FROM = 36; // idx 35 -- первое RSI>70 пересечение, оно же последний видимый бар
   const candles = scene.ohlc.map((c, i) => ({ time: Math.floor(Date.parse(c.time) / 1000), open: +c.open, high: +c.high, low: +c.low, close: +c.close, rsi: scene.rsi[i] }));
@@ -254,22 +261,23 @@ function IntroBlock() {
   const T9 = window.Ch9Content[INITIAL_LANG] || window.Ch9Content.ru;
   return (
     <div id="secAntiMyth" style={{marginBottom:48,scrollMarginTop:130}}>
-      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T9.antiMyth.tag}</Mono>
-      <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px",marginBottom:28}}>
-        <p style={{fontWeight:600,fontSize:14.5,color:C.black,marginBottom:10}}>{T9.antiMyth.title}</p>
-        <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,marginBottom:12}}>{T9.antiMyth.body1}</p>
-        <p style={{fontSize:13.5,color:C.black,lineHeight:1.7,margin:0,fontWeight:600}}>{T9.antiMyth.body2}</p>
-      </div>
+      <AntiMythBlock lang={INITIAL_LANG} style={{marginBottom:28}}
+        data={{tag: T9.antiMyth.tag, title: T9.antiMyth.title, bodies: [T9.antiMyth.body1, T9.antiMyth.body2]}}/>
 
-      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T9.voiceSbf.tag}</Mono>
+      <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{T9.voiceSbf.tag}</Mono>
       <div style={{borderLeft:`4px solid ${C.gold}`,paddingLeft:24,marginBottom:28}}>
         {T9.voiceSbf.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:16,fontStyle:"italic",color:C.inkMid,lineHeight:1.7,fontFamily:"'DM Serif Display',serif",marginBottom:12}}>{p}</p>)}
       </div>
 
       <div style={{background:C.black,borderRadius:8,padding:"26px 30px",color:C.white}}>
-        <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T9.priceOfNotKnowing.tag}</Mono>
+        <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{T9.priceOfNotKnowing.tag}</Mono>
         <div style={{fontFamily:"'DM Serif Display',serif",fontSize:20,color:C.white,marginBottom:12}}>{T9.priceOfNotKnowing.title}</div>
-        {T9.priceOfNotKnowing.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:13.5,lineHeight:1.75,color:"rgba(255,255,255,0.7)",marginBottom:10}}>{p}</p>)}
+        {/* Рубрика устроена как разбор: сценарий → счёт → итог → «честная
+            вторая половина». Порядок несёт смысл, поэтому абзацы открываются
+            по одному, а не лежат стеной. Подпись последней кнопки — не
+            выдумка: этими словами автор и начинает последний абзац. */}
+        <RevealSteps bodies={T9.priceOfNotKnowing.body.split("\n\n")}
+                     lang={INITIAL_LANG} preset="cost" dark/>
       </div>
     </div>
   );
@@ -281,14 +289,17 @@ function EarningsAnatomy() {
   const ea = T9.earningsAnatomy;
   return (
     <div style={{marginBottom:48}}>
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:14,marginBottom:20}} className="g3">
-        {[[ea.c1Title,ea.c1Text],[ea.c2Title,ea.c2Text],[ea.c3Title,ea.c3Text],[ea.c4Title,ea.c4Text],[ea.c5Title,ea.c5Text]].map(([t,x],i) => (
-          <div key={i} style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:6,padding:"18px 20px",borderTop:`3px solid ${C.gold}`}}>
-            <div style={{fontWeight:600,fontSize:13,color:C.black,marginBottom:8}}>{t}</div>
-            <p style={{fontSize:12,color:C.inkMid,lineHeight:1.65,margin:0}}>{x}</p>
-          </div>
-        ))}
-      </div>
+      {/* Пять строк отчёта — справочник, и пользуются им выборочно: смотрят
+          один термин, а не читают все пять подряд. Выложенные разом, они
+          давали 2505 знаков одним куском. Переключатель заодно называет все
+          пять сразу — в подписях кнопок, чего стена карточек не делала. */}
+      <CardTabs items={[
+        {title: ea.c1Title, body: ea.c1Text},
+        {title: ea.c2Title, body: ea.c2Text},
+        {title: ea.c3Title, body: ea.c3Text},
+        {title: ea.c4Title, body: ea.c4Text},
+        {title: ea.c5Title, body: ea.c5Text},
+      ]}/>
       <div style={{background:C.goldPale,border:`1px solid ${C.borderGold}`,borderRadius:6,padding:"18px 22px"}}>
         <div style={{fontWeight:600,fontSize:13,color:C.black,marginBottom:8}}>{ea.knownTitle}</div>
         <p style={{fontSize:12.5,color:C.inkMid,lineHeight:1.7,margin:0}}>{ea.knownBody}</p>
@@ -400,13 +411,13 @@ function HindsightTest({ cases }) {
         <div style={{background:C.black,borderRadius:8,padding:"28px 32px",color:"#fff"}}>
           <p style={{fontSize:12.5,color:"rgba(255,255,255,0.6)",marginBottom:16}}>{h.step3Intro}</p>
           <div style={{background:"rgba(255,255,255,0.05)",borderRadius:6,padding:"18px 22px",marginBottom:20}}>
-            <Chip color={C.gold}>{revealedCase[nameKey]} · {revealedCase.report_date}</Chip>
+            <Chip color={C.goldText}>{revealedCase[nameKey]} · {revealedCase.report_date}</Chip>
             <p style={{fontSize:12.5,color:"rgba(255,255,255,0.75)",marginTop:12,marginBottom:8}}>{revealedCase.actual_ru}</p>
             <p style={{fontSize:12.5,color:"rgba(255,255,255,0.75)",marginBottom:8}}>{revealedCase.guidance_ru}</p>
             <Mono size={20} color={revealedCase.reaction_1d_pct>=0?"#6ec99a":C.red} spacing={0}>{revealedCase.reaction_1d_pct>0?"+":""}{revealedCase.reaction_1d_pct}%</Mono>
           </div>
           <p style={{fontSize:14,color:"#fff",fontWeight:600,marginBottom:16}}>{h.step3Question}</p>
-          <div style={{display:"flex",justifyContent:"space-between",fontSize:10.5,color:"rgba(255,255,255,0.4)",fontFamily:"monospace",marginBottom:6}}>
+          <div style={{display:"flex",justifyContent:"space-between",fontSize:10.5,color:"rgba(255,255,255,0.55)",fontFamily:"monospace",marginBottom:6}}>
             <span>{h.certaintyNo}</span><span>{h.certaintyYes}</span>
           </div>
           <input type="range" min="0" max="100" value={hindsightConfidence} onChange={e=>setHindsightConfidence(+e.target.value)} style={{width:"100%",marginBottom:22}}/>
@@ -516,9 +527,19 @@ function OscillatorRealityTable({ cells }) {
         <table style={{borderCollapse:"collapse",width:"100%",minWidth:620}}>
           <thead>
             <tr>
+              {/* 🔴 Сортировка объявлена как сортировка. Раньше это был
+                  <th onClick>: мышью работает, с клавиатуры недостижимо,
+                  экранный диктор читает как обычный заголовок столбца.
+                  aria-sort сообщает текущее направление, кнопка внутри даёт
+                  фокус и Enter/Space без своей обработки клавиш. */}
               {cols.map(col => (
-                <th key={col.key} onClick={()=>onSort(col.key)} style={{textAlign:col.align,padding:"7px 9px",fontSize:10,fontFamily:"monospace",color:sortKey===col.key?C.gold:C.inkFaint,textTransform:"uppercase",borderBottom:`1px solid ${C.border}`,cursor:"pointer",userSelect:"none",whiteSpace:"nowrap"}}>
-                  {col.label}{sortKey===col.key ? (sortDir>0?" ▾":" ▴") : ""}
+                <th key={col.key} scope="col"
+                    aria-sort={sortKey===col.key ? (sortDir>0?"descending":"ascending") : "none"}
+                    style={{textAlign:col.align,padding:0,borderBottom:`1px solid ${C.border}`,whiteSpace:"nowrap"}}>
+                  <button type="button" onClick={()=>onSort(col.key)}
+                    style={{width:"100%",textAlign:col.align,padding:"7px 9px",fontSize:10,fontFamily:"monospace",color:sortKey===col.key?C.goldText:C.inkFaint,textTransform:"uppercase",cursor:"pointer",userSelect:"none",background:"none",border:"none",fontWeight:600,letterSpacing:0.5}}>
+                    {col.label}{sortKey===col.key ? (sortDir>0?" ▾":" ▴") : ""}
+                  </button>
                 </th>
               ))}
             </tr>
@@ -528,7 +549,7 @@ function OscillatorRealityTable({ cells }) {
               <tr key={i}>
                 <td style={{padding:"6px 9px",fontSize:11.5,color:C.black,fontWeight:600,borderBottom:`1px solid ${C.border}`}}>
                   {CHART_SYMBOLS.has(r.symbol)
-                    ? <a href={"/chart.html?s="+r.symbol} target="_blank" rel="noopener" style={{color:C.black,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>{window.SBFSymbols ? window.SBFSymbols.symbolName(r.symbol, {lang: INITIAL_LANG, mode:"name+ticker"}) : r.symbol}</a>
+                    ? <a href={"/chart.html?s="+r.symbol} target="_blank" rel="noopener" style={{color:C.black,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`,display:"inline-block",padding:"8px 0"}}>{window.SBFSymbols ? window.SBFSymbols.symbolName(r.symbol, {lang: INITIAL_LANG, mode:"name+ticker"}) : r.symbol}</a>
                     : (window.SBFSymbols ? window.SBFSymbols.symbolName(r.symbol, {lang: INITIAL_LANG, mode:"name+ticker"}) : r.symbol)}
                 </td>
                 <td style={{padding:"6px 9px",textAlign:"center",fontSize:10.5,fontFamily:"monospace",color:C.inkSoft,borderBottom:`1px solid ${C.border}`}}>{r.tf}</td>
@@ -570,7 +591,7 @@ function CoreMeasureBlock({ vars, cells }) {
         <div style={{fontWeight:600,fontSize:12.5,color:C.black,marginBottom:6}}>{cm.honestTitle}</div>
         <p style={{fontSize:12,color:C.inkMid,lineHeight:1.65,margin:0}}>{cm.honestBody}</p>
       </div>
-      <a href="/data/edu_stats/oscillator_reality.csv" download style={{fontFamily:"monospace",fontSize:12,color:C.gold,textDecoration:"none",border:`1px solid ${C.gold}`,padding:"9px 16px",borderRadius:4,display:"inline-block"}}>{cm.downloadCsv}</a>
+      <a href="/data/edu_stats/oscillator_reality.csv" download style={{fontFamily:"monospace",fontSize:12,color:C.goldText,textDecoration:"none",border:`1px solid ${C.gold}`,padding:"9px 16px",borderRadius:4,display:"inline-block"}}>{cm.downloadCsv}</a>
     </div>
   );
 }
@@ -601,7 +622,7 @@ function ThreeCases({ cases }) {
         })}
       </div>
       <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px",borderLeft:`3px solid ${C.gold}`,marginBottom:20}}>
-        <Mono size={10.5} color={C.gold} spacing={1} style={{display:"block",marginBottom:6}}>{tcase.mechanism}</Mono>
+        <Mono size={10.5} color={C.goldText} spacing={1} style={{display:"block",marginBottom:6}}>{tcase.mechanism}</Mono>
         <div style={{fontWeight:600,fontSize:15,color:C.black,marginBottom:10,display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
           <span>{real ? real[nameKey] : tcase.id}</span>
           {real && <span style={{color:C.inkFaint,fontWeight:400,fontSize:12}}>· {real.report_date}</span>}
@@ -658,7 +679,7 @@ function PredictDiv({ vars }) {
   const [picked, setPicked] = useState(null);
   return (
     <div style={{border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px",marginTop:8,marginBottom:24}}>
-      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{p.tag}</Mono>
+      <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{p.tag}</Mono>
       <p style={{fontSize:14.5,color:C.black,lineHeight:1.65,marginBottom:14}}>{p.question}</p>
       <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:14}}>
         {p.options.map((o,i) => (
@@ -690,7 +711,7 @@ function Chapter9() {
 
       <div style={{position:"sticky",top:106,background:"rgba(255,255,255,0.96)",backdropFilter:"blur(10px)",borderBottom:`1px solid ${C.border}`,padding:"15px 5vw",display:"flex",alignItems:"center",justifyContent:"space-between",zIndex:50}}>
         <div style={{display:"flex",alignItems:"center",gap:20}}>
-          <span onClick={() => window.location.href = getChUrl(8, lang)} style={{color:C.gold,cursor:"pointer",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</span>
+          <a href={getChUrl(8, lang)} aria-label={lang==="ru"?"Предыдущая глава":lang==="ro"?"Capitolul anterior":"Previous chapter"} style={{color:C.goldText,cursor:"pointer",textDecoration:"none",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</a>
           <Chip>{S.levelChip}</Chip>
           <Mono size={14} color={C.inkSoft} spacing={0} className="hide-mobile">{S.chapterNameShort}</Mono>
         </div>
@@ -703,15 +724,15 @@ function Chapter9() {
       <div style={{background:C.black,padding:"80px 5vw 70px",textAlign:"center",position:"relative",overflow:"hidden"}}>
         <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 100%, rgba(201,151,58,0.1) 0%, transparent 60%)"}}/>
         <div style={{position:"relative"}}>
-          <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:20}}>{S.heroEyebrow}</Mono>
+          <Mono size={11} color={C.goldText} spacing={4} style={{display:"block",marginBottom:20}}>{S.heroEyebrow}</Mono>
           <h1 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(36px,6vw,66px)",fontWeight:400,color:C.white,lineHeight:1.05,marginBottom:20}}>
-            {S.heroTitleLine1}<br/><span style={{color:C.gold}}>{S.heroTitleLine2}</span>
+            {S.heroTitleLine1}<br/><span style={{color:C.goldText}}>{S.heroTitleLine2}</span>
           </h1>
           <p style={{fontSize:"clamp(16px,2vw,20px)",color:"rgba(255,255,255,0.55)",maxWidth:640,margin:"0 auto 32px",lineHeight:1.65}}>{S.heroSubtitle}</p>
           <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
-            <Chip color={C.gold}>{S.fundamentalChip}</Chip>
-            <Chip color="rgba(255,255,255,0.3)">{S.technicalChip}</Chip>
-            <Chip color="rgba(255,255,255,0.3)">{S.interactiveChip}</Chip>
+            <Chip color={C.goldText}>{S.fundamentalChip}</Chip>
+            <Chip color="rgba(255,255,255,0.55)">{S.technicalChip}</Chip>
+            <Chip color="rgba(255,255,255,0.55)">{S.interactiveChip}</Chip>
           </div>
         </div>
       </div>
@@ -758,7 +779,7 @@ function Chapter9() {
         <PredictDiv vars={vars}/>
 
         <div style={{border:`1px dashed ${C.borderGold}`,borderRadius:8,padding:"20px 24px",marginBottom:32,background:C.surface}}>
-          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T9.cliffhanger.tag}</Mono>
+          <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{T9.cliffhanger.tag}</Mono>
           {T9.cliffhanger.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:14,color:C.inkMid,lineHeight:1.7,marginBottom:10}}>{p}</p>)}
         </div>
 
@@ -774,7 +795,7 @@ function Chapter9() {
               return (
                 <li>
                   {text}{" "}
-                  <a href="/data/edu_stats/oscillator_reality.csv" download style={{color:C.gold}}>{T9.sources.csvLabel}</a>
+                  <a href="/data/edu_stats/oscillator_reality.csv" download style={{color:C.goldText}}>{T9.sources.csvLabel}</a>
                 </li>
               );
             })()}

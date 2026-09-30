@@ -12,10 +12,12 @@ function _locale() {
   return (window.sbfI18n && window.sbfI18n.lang === 'ro') ? 'ro-RO' : 'ru-RU';
 }
 
-/* Цвета в raw hex (CSS vars не работают в SVG-атрибутах) */
+/* Цвета в raw hex (CSS vars не работают в SVG-атрибутах).
+   16.09.2026: затемнены до порога AA — тем же цветом рисуется и линия,
+   и подпись к ней, см. разбор в edu/assets/grafik-engine.js. */
 var C={
-  up:'#2E8B6F',down:'#C0504D',gold:'#C9A227',
-  surf:'#FCFAF5',border:'#E7DFCF',ink:'#2B2B33',muted:'#7C7563'
+  up:'#2C784E',down:'#C0392B',gold:'#866A19',
+  surf:'#FCFAF5',border:'#E7DFCF',ink:'#2B2B33',muted:'#716A5A'
 };
 
 /* ── Seeded RNG ────────────────────────────────────────────────────────────── */
@@ -84,28 +86,135 @@ var candleDefs=[
   ['harami','bull',t('eduindex.widgets.candle.harami.name','Харами (Harami)'),t('eduindex.widgets.candle.harami.desc','Малая свеча внутри тела предыдущей большой — затухание импульса.'),9]
 ];
 var chartDefs=[
-  [t('eduindex.widgets.chart.triangleAsc.name','Восходящий треугольник'),t('eduindex.widgets.chart.triangleAsc.desc','Горизонтальное сопротивление, восходящая поддержка.'),[50,61,54,61,57,61,59,61.5,64],3,55,[{type:'hline',y:61,label:t('eduindex.widgets.lbl_resistance','сопр.')},{type:'line',from:{i:0,y:50},to:{i:18,y:59}}]],
-  [t('eduindex.widgets.chart.triangleDesc.name','Нисходящий треугольник'),t('eduindex.widgets.chart.triangleDesc.desc','Горизонтальная поддержка, нисходящее сопротивление.'),[60,50,57,50,54,50,52,50,47],3,12,[{type:'hline',y:50,label:t('eduindex.widgets.lbl_support','подд.')},{type:'line',from:{i:0,y:60},to:{i:18,y:52}}]],
-  [t('eduindex.widgets.chart.pennant.name','Вымпел'),t('eduindex.widgets.chart.pennant.desc','Импульс (флагшток), затем сжатие в сходящемся треугольнике.'),[48,50,52,63,60,62,60.5,61.5,65],3,3,[{type:'line',from:{i:9,y:63},to:{i:24,y:61.7}},{type:'line',from:{i:11,y:59.6},to:{i:24,y:61.1}}]],
-  [t('eduindex.widgets.chart.hns.name','Голова и плечи'),t('eduindex.widgets.chart.hns.desc','Три пика, средний выше — разворот тренда.'),[48,57,51,63,51,57,49],3,8,[{type:'hline',y:51,label:t('eduindex.widgets.lbl_neckline','линия шеи')}]],
-  [t('eduindex.widgets.chart.doubleTop.name','Двойная вершина'),t('eduindex.widgets.chart.doubleTop.desc','Два пика на одном уровне — фигура «M».'),[48,60,53,59.5,49],4,21,[{type:'hline',y:53,label:t('eduindex.widgets.lbl_neckline','линия шеи')}]],
-  [t('eduindex.widgets.chart.doubleBottom.name','Двойное дно'),t('eduindex.widgets.chart.doubleBottom.desc','Два минимума на одном уровне — фигура «W».'),[60,50,57,50,62],4,2,[{type:'hline',y:57,label:t('eduindex.widgets.lbl_neckline','линия шеи')}]],
-  [t('eduindex.widgets.chart.wedge.name','Клин (Wedge)'),t('eduindex.widgets.chart.wedge.desc','Сходящиеся наклонные линии — ослабление тренда.'),[50,55,52.5,57,54.5,58.5,56.5,59,54],3,14,[{type:'line',from:{i:3,y:55},to:{i:21,y:59}},{type:'line',from:{i:0,y:50},to:{i:18,y:56.5}}]],
-  [t('eduindex.widgets.chart.flag.name','Флаг'),t('eduindex.widgets.chart.flag.desc','Импульс, затем наклонный канал против движения.'),[48,50,62,60,61,59.5,60.5,58.5,64],3,6,[{type:'line',from:{i:6,y:62},to:{i:21,y:59}},{type:'line',from:{i:8,y:59.5},to:{i:21,y:57}}]]
+  [t('eduindex.widgets.chart.triangleAsc.name','Восходящий треугольник'),t('eduindex.widgets.chart.triangleAsc.desc','Горизонтальное сопротивление, восходящая поддержка.'),[50,61,54,61,57,61,59,61.5,64],3,55,[{type:'hline',y:61,label:t('eduindex.widgets.lbl_resistance','сопр.')},{type:'line',from:{i:0,y:50},to:{i:18,y:59}}],'triangleAsc'],
+  [t('eduindex.widgets.chart.triangleDesc.name','Нисходящий треугольник'),t('eduindex.widgets.chart.triangleDesc.desc','Горизонтальная поддержка, нисходящее сопротивление.'),[60,50,57,50,54,50,52,50,47],3,12,[{type:'hline',y:50,label:t('eduindex.widgets.lbl_support','подд.')},{type:'line',from:{i:0,y:60},to:{i:18,y:52}}],'triangleDesc'],
+  [t('eduindex.widgets.chart.pennant.name','Вымпел'),t('eduindex.widgets.chart.pennant.desc','Импульс (флагшток), затем сжатие в сходящемся треугольнике.'),[48,50,52,63,60,62,60.5,61.5,65],3,3,[{type:'line',from:{i:9,y:63},to:{i:24,y:61.7}},{type:'line',from:{i:11,y:59.6},to:{i:24,y:61.1}}],'pennant'],
+  [t('eduindex.widgets.chart.hns.name','Голова и плечи'),t('eduindex.widgets.chart.hns.desc','Три пика, средний выше — разворот тренда.'),[48,57,51,63,51,57,49],3,8,[{type:'hline',y:51,label:t('eduindex.widgets.lbl_neckline','линия шеи')}],'hns'],
+  [t('eduindex.widgets.chart.doubleTop.name','Двойная вершина'),t('eduindex.widgets.chart.doubleTop.desc','Два пика на одном уровне — фигура «M».'),[48,60,53,59.5,49],4,21,[{type:'hline',y:53,label:t('eduindex.widgets.lbl_neckline','линия шеи')}],'doubleTop'],
+  [t('eduindex.widgets.chart.doubleBottom.name','Двойное дно'),t('eduindex.widgets.chart.doubleBottom.desc','Два минимума на одном уровне — фигура «W».'),[60,50,57,50,62],4,2,[{type:'hline',y:57,label:t('eduindex.widgets.lbl_neckline','линия шеи')}],'doubleBottom'],
+  [t('eduindex.widgets.chart.wedge.name','Клин (Wedge)'),t('eduindex.widgets.chart.wedge.desc','Сходящиеся наклонные линии — ослабление тренда.'),[50,55,52.5,57,54.5,58.5,56.5,59,54],3,14,[{type:'line',from:{i:3,y:55},to:{i:21,y:59}},{type:'line',from:{i:0,y:50},to:{i:18,y:56.5}}],'wedge'],
+  [t('eduindex.widgets.chart.flag.name','Флаг'),t('eduindex.widgets.chart.flag.desc','Импульс, затем наклонный канал против движения.'),[48,50,62,60,61,59.5,60.5,58.5,64],3,6,[{type:'line',from:{i:6,y:62},to:{i:21,y:59}},{type:'line',from:{i:8,y:59.5},to:{i:21,y:57}}],'flag']
 ];
 
-/* ── Pattern gallery ───────────────────────────────────────────────────────── */
+/* ── Pattern gallery ─────────────────────────────────────────────────────────
+   🔴 ДВЕ ПРАВКИ ЧЕСТНОСТИ. Первая: галерея была единственным из
+   инжектируемых блоков БЕЗ метки «СХЕМА · ИЛЛЮСТРАЦИЯ» — пятнадцать форм
+   рисуются генератором со случайным зерном, а заголовок «Паттерны рынка»
+   ничем не отличал их от наблюдений.
+
+   Вторая, и она важнее. По шести из этих паттернов у нас есть настоящие
+   измерения: pattern_stats_job считает их еженедельно по 80+ инструментам,
+   суммарно 117 тысяч наблюдений на эти шесть. И измерения говорят ровно
+   то, ради чего написана глава: доля случаев, когда цена через пять баров
+   пошла в обещанную сторону, лежит между 0.481 и 0.518. Монетка.
+   Показывать красивую форму и молчать о том, что мы её уже проверили, —
+   значит оставлять читателя при впечатлении, которое сами же опровергли. */
+var GALLERY_STATS = null;     // наши измерения по паттерну
+var GALLERY_EXAMPLES = null;  // настоящие вхождения в истории
+
+function _грузи(путь, дальше){
+  try {
+    var q = new XMLHttpRequest();
+    q.open('GET', путь, true);
+    q.onload = function(){
+      if (q.status !== 200) { дальше(null); return; }
+      try { дальше(JSON.parse(q.responseText)); } catch (e) { дальше(null); }
+    };
+    q.onerror = function(){ дальше(null); };
+    q.send();
+  } catch (e) { дальше(null); }
+}
+
+/* Оба файла приходят асинхронно, а карточки уже нарисованы схемами.
+   Поэтому после каждой загрузки карточки переcобираются заново — так они
+   не зависят от того, какой ответ пришёл первым. */
+function обновитьКарточки(){
+  document.querySelectorAll('[data-sbf-pat]').forEach(function(узел){
+    var ключ = узел.getAttribute('data-sbf-pat');
+    if (!ключ) return;
+    var пример = GALLERY_EXAMPLES && GALLERY_EXAMPLES['примеры'] && GALLERY_EXAMPLES['примеры'][ключ];
+    var было = узел.querySelector('.sbf-pat-stat');
+    if (было) было.remove();
+    var подпись = узел.querySelector('.sbf-pat-real');
+    if (подпись) подпись.remove();
+    if (пример){
+      var svg = узел.querySelector('svg');
+      if (svg) svg.outerHTML = реальныйГрафик(пример);
+      var метка = узел.querySelector('.sbf-pat-tag');
+      if (метка) метка.remove();   // это уже не схема
+      узел.setAttribute('data-sbf-real', '1');
+      узел.insertAdjacentHTML('beforeend', подписьПримера(пример));
+    }
+    узел.insertAdjacentHTML('beforeend', статистикаПаттерна(ключ));
+  });
+}
+
+function реальныйГрафик(пример){
+  var i = пример['индекс_паттерна'];
+  return buildSVG(пример['бары'], [], {zone:[i, i]});
+}
+
+function подписьПримера(пример){
+  var д = new Date(пример['ts'] * 1000);
+  var дата = ('0'+д.getUTCDate()).slice(-2)+'.'+('0'+(д.getUTCMonth()+1)).slice(-2)+'.'+д.getUTCFullYear();
+  var итог = пример['итог_процентов'];
+  var знак = итог >= 0 ? '+' : '';
+  // Цвет по тому, оправдался ли паттерн, а не по знаку движения: у
+  // медвежьего паттерна рост — это промах, и он обязан читаться как промах.
+  var напр = пример['направление'];
+  var верно = напр === 'bullish' ? итог > 0 : напр === 'bearish' ? итог < 0 : null;
+  var цвет = верно === null ? 'sbf-pat-neutral' : (верно ? 'sbf-pat-hit' : 'sbf-pat-miss');
+  return '<div class="sbf-pat-real">' + пример['имя'] + ' · ' + пример['tf'] + ' · ' + дата +
+    '<span class="' + цвет + '"> → через ' + (пример['бары'].length - 1 - i_пример(пример)) +
+    ' баров ' + знак + итог + '%</span></div>';
+}
+
+function i_пример(пример){ return пример['индекс_паттерна']; }
+
+function статистикаПаттерна(ключ){
+  if (!GALLERY_STATS || !GALLERY_STATS['паттерны']) return '';
+  var з = GALLERY_STATS['паттерны'][ключ];
+  if (!з) return '';
+  var доля = Math.round(з['доля_5'] * 1000) / 10;
+  var набл = з['наблюдений'].toLocaleString('ru-RU');
+  return '<div class="sbf-pat-stat">' +
+         t('eduindex.widgets.pat_stat_prefix', 'наша проверка:') + ' ' +
+         доля.toFixed(1) + '% · ' + набл + ' ' +
+         t('eduindex.widgets.pat_stat_obs', 'наблюдений') + '</div>';
+}
+
+_грузи('/data/edu_capsules/pattern_gallery_stats.json', function(j){
+  GALLERY_STATS = j; обновитьКарточки();
+});
+_грузи('/data/edu_capsules/pattern_examples.json', function(j){
+  GALLERY_EXAMPLES = j; обновитьКарточки();
+});
+
 function mountPatternGallery(el, opts) {
   var filter=(opts&&opts.filter)||'all';
   var html='';
   if(filter==='all'||filter==='candle') html+='<div class="sbf-sect-label">'+t('eduindex.widgets.section_candle','Свечные паттерны')+' <span class="sbf-sect-n">7</span></div><div class="sbf-card-grid" id="sbfw-cg"></div>';
   if(filter==='all'||filter==='chart')  html+='<div class="sbf-sect-label">'+t('eduindex.widgets.section_chart','Графические паттерны')+' <span class="sbf-sect-n">8</span></div><div class="sbf-card-grid" id="sbfw-hg"></div>';
-  el.innerHTML='<div class="sbf-widget"><div class="sbf-widget-head">'+t('eduindex.widgets.gallery_head','Паттерны рынка')+'</div>'+html+'</div>';
-  function card(name,desc,svg){return'<div class="sbf-pat-card">'+svg+'<div class="sbf-pat-name">'+name+'</div><div class="sbf-pat-desc">'+desc+'</div></div>';}
+  el.innerHTML='<div class="sbf-widget">'+
+    '<div class="sbf-widget-head">'+t('eduindex.widgets.gallery_head','Паттерны рынка')+'</div>'+html+'</div>';
+  function card(name,desc,svg,ключ){
+    // Пока не пришёл файл с примерами, честно считаем карточку схемой:
+    // она ею и является. Метку снимет обновитьКарточки(), когда окажется,
+    // что под этот паттерн есть настоящее вхождение.
+    return'<div class="sbf-pat-card" data-sbf-pat="'+(ключ||'')+'">'+
+      '<div class="sbf-pat-tag">'+t('eduindex.widgets.pat_tag_schema','схема')+'</div>'+
+      svg+'<div class="sbf-pat-name">'+name+'</div><div class="sbf-pat-desc">'+desc+'</div>'+
+      статистикаПаттерна(ключ)+'</div>';}
   var cg=el.querySelector('#sbfw-cg');
-  if(cg) candleDefs.forEach(function(p){var d=buildReversal(p[1],PAT[p[0]],p[4]);cg.innerHTML+=card(p[2],p[3],buildSVG(d.candles,[],{zone:d.zone,trend:d.trend}));});
+  if(cg) candleDefs.forEach(function(p){var d=buildReversal(p[1],PAT[p[0]],p[4]);cg.innerHTML+=card(p[2],p[3],buildSVG(d.candles,[],{zone:d.zone,trend:d.trend}),p[0]);});
   var hg=el.querySelector('#sbfw-hg');
-  if(hg) chartDefs.forEach(function(p){var d=buildChart(p[2],p[3],p[4],p[5]);hg.innerHTML+=card(p[0],p[1],buildSVG(d.candles,p[5],{}));});
+  if(hg) chartDefs.forEach(function(p){var d=buildChart(p[2],p[3],p[4],p[5]);hg.innerHTML+=card(p[0],p[1],buildSVG(d.candles,p[5],{}),p[6]);});
+  var виджет=el.querySelector('.sbf-widget');
+  if(виджет) виджет.insertAdjacentHTML('beforeend',
+    '<div class="sbf-pat-foot">'+t('eduindex.widgets.pat_foot',
+     'Каждый пример — одно настоящее вхождение из тысяч, выбранное как типичное по размаху, '+
+     'а не как удачное: что случилось после, не отбиралось. Один случай ничего не доказывает — '+
+     'смотри строку «наша проверка»: там доля по всем вхождениям сразу.')+'</div>');
 }
 
 /* ── Risk calculator ───────────────────────────────────────────────────────── */
@@ -118,23 +227,23 @@ function mountRiskCalc(el) {
     '<div class="sbf-panel">'+
       '<div class="sbf-panel-title">'+t('eduindex.widgets.risk.panel1_title','Позиция и риск')+'</div>'+
       '<div class="sbf-panel-sub">'+t('eduindex.widgets.risk.panel1_sub','Размер сделки от принятого риска')+'</div>'+
-      '<div class="sbf-field"><label>'+t('eduindex.widgets.risk.label_capital','Капитал ($)')+'</label><input id="sbfw-cap" type="number" value="10000" step="100"></div>'+
-      '<div class="sbf-field"><label>'+t('eduindex.widgets.risk.label_risk_pct','Риск на сделку (%)')+'</label><input id="sbfw-rsk" type="number" value="1" step="0.1"></div>'+
+      '<div class="sbf-field"><label for="sbfw-cap">'+t('eduindex.widgets.risk.label_capital','Капитал ($)')+'</label><input id="sbfw-cap" type="number" value="10000" step="100"></div>'+
+      '<div class="sbf-field"><label for="sbfw-rsk">'+t('eduindex.widgets.risk.label_risk_pct','Риск на сделку (%)')+'</label><input id="sbfw-rsk" type="number" value="1" step="0.1"></div>'+
       '<div class="sbf-row2">'+
-        '<div class="sbf-field"><label>'+t('eduindex.widgets.risk.label_entry','Вход')+'</label><input id="sbfw-entry" type="number" value="100" step="0.01"></div>'+
-        '<div class="sbf-field"><label>'+t('eduindex.widgets.risk.label_stop','Стоп-лосс')+'</label><input id="sbfw-stop" type="number" value="96" step="0.01"></div>'+
+        '<div class="sbf-field"><label for="sbfw-entry">'+t('eduindex.widgets.risk.label_entry','Вход')+'</label><input id="sbfw-entry" type="number" value="100" step="0.01"></div>'+
+        '<div class="sbf-field"><label for="sbfw-stop">'+t('eduindex.widgets.risk.label_stop','Стоп-лосс')+'</label><input id="sbfw-stop" type="number" value="96" step="0.01"></div>'+
       '</div>'+
-      '<div class="sbf-field"><label>'+t('eduindex.widgets.risk.label_target','Тейк-профит')+'</label><input id="sbfw-target" type="number" value="112" step="0.01"></div>'+
+      '<div class="sbf-field"><label for="sbfw-target">'+t('eduindex.widgets.risk.label_target','Тейк-профит')+'</label><input id="sbfw-target" type="number" value="112" step="0.01"></div>'+
       '<div class="sbf-out" id="sbfw-posOut"></div>'+
     '</div>'+
     /* Panel 2 */
     '<div class="sbf-panel">'+
       '<div class="sbf-panel-title">'+t('eduindex.widgets.risk.panel2_title','Ожидание системы')+'</div>'+
       '<div class="sbf-panel-sub">'+t('eduindex.widgets.risk.panel2_sub','Средний результат на сделку, в R')+'</div>'+
-      '<div class="sbf-field"><label>'+t('eduindex.widgets.risk.label_winrate','Винрейт (%)')+'</label><input id="sbfw-wr" type="number" value="45" step="1"></div>'+
+      '<div class="sbf-field"><label for="sbfw-wr">'+t('eduindex.widgets.risk.label_winrate','Винрейт (%)')+'</label><input id="sbfw-wr" type="number" value="45" step="1"></div>'+
       '<div class="sbf-row2">'+
-        '<div class="sbf-field"><label>'+t('eduindex.widgets.risk.label_avg_win','Сред. выигрыш (R)')+'</label><input id="sbfw-aw" type="number" value="2" step="0.1"></div>'+
-        '<div class="sbf-field"><label>'+t('eduindex.widgets.risk.label_avg_loss','Сред. проигрыш (R)')+'</label><input id="sbfw-al" type="number" value="1" step="0.1"></div>'+
+        '<div class="sbf-field"><label for="sbfw-aw">'+t('eduindex.widgets.risk.label_avg_win','Сред. выигрыш (R)')+'</label><input id="sbfw-aw" type="number" value="2" step="0.1"></div>'+
+        '<div class="sbf-field"><label for="sbfw-al">'+t('eduindex.widgets.risk.label_avg_loss','Сред. проигрыш (R)')+'</label><input id="sbfw-al" type="number" value="1" step="0.1"></div>'+
       '</div>'+
       '<div class="sbf-out" id="sbfw-expOut"></div>'+
       '<div class="sbf-verdict" id="sbfw-verdict"></div>'+
@@ -148,12 +257,12 @@ function mountRiskCalc(el) {
         '<button id="sbfw-ddB" class="sbf-seg-btn" type="button">'+t('eduindex.widgets.risk.seg_streak','Серия убытков')+'</button>'+
       '</div>'+
       '<div id="sbfw-panA"><div class="sbf-row2">'+
-        '<div class="sbf-field"><label>'+t('eduindex.widgets.risk.label_peak','Пик капитала')+'</label><input id="sbfw-peak" type="number" value="12000" step="100"></div>'+
-        '<div class="sbf-field"><label>'+t('eduindex.widgets.risk.label_current','Текущий')+'</label><input id="sbfw-cur" type="number" value="9600" step="100"></div>'+
+        '<div class="sbf-field"><label for="sbfw-peak">'+t('eduindex.widgets.risk.label_peak','Пик капитала')+'</label><input id="sbfw-peak" type="number" value="12000" step="100"></div>'+
+        '<div class="sbf-field"><label for="sbfw-cur">'+t('eduindex.widgets.risk.label_current','Текущий')+'</label><input id="sbfw-cur" type="number" value="9600" step="100"></div>'+
       '</div></div>'+
       '<div id="sbfw-panB" style="display:none"><div class="sbf-row2">'+
-        '<div class="sbf-field"><label>'+t('eduindex.widgets.risk.label_risk_per_trade','Риск/сделку (%)')+'</label><input id="sbfw-ddR" type="number" value="2" step="0.1"></div>'+
-        '<div class="sbf-field"><label>'+t('eduindex.widgets.risk.label_losses_streak','Убытков подряд')+'</label><input id="sbfw-ddN" type="number" value="8" step="1"></div>'+
+        '<div class="sbf-field"><label for="sbfw-ddR">'+t('eduindex.widgets.risk.label_risk_per_trade','Риск/сделку (%)')+'</label><input id="sbfw-ddR" type="number" value="2" step="0.1"></div>'+
+        '<div class="sbf-field"><label for="sbfw-ddN">'+t('eduindex.widgets.risk.label_losses_streak','Убытков подряд')+'</label><input id="sbfw-ddN" type="number" value="8" step="1"></div>'+
       '</div></div>'+
       '<div class="sbf-out" id="sbfw-ddOut"></div>'+
     '</div>'+

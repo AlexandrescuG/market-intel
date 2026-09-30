@@ -34,6 +34,34 @@ async def send_text(text: str, chat_id: str | None = None) -> None:
             log.error("send_text failed: %s", e)
 
 
+def post_sync(text: str, chat_id: str | None = None) -> int | None:
+    """Синхронная публикация с ВОЗВРАТОМ message_id. None — не ушло.
+
+    Заведена 01.09.2026 под посты в канал @SBFEconomics: остальные отправки
+    здесь ничего не возвращают, потому что адресату всё равно, а тут id поста
+    нужен обязательно — по нему бот форвардит пост подписчикам. Синхронная,
+    потому что вызывающий (outliers_job) — обычный скрипт по таймеру, и
+    заводить ради одной отправки event loop незачем.
+    """
+    chat = chat_id or TELEGRAM_CHAT_ID
+    if not TELEGRAM_BOT_TOKEN or not chat:
+        log.warning("post_sync: нет токена или chat_id — пост не отправлен")
+        return None
+    try:
+        with httpx.Client(timeout=20) as c:
+            r = c.post(f"{_API}/sendMessage", json={
+                "chat_id": chat, "text": text,
+                "parse_mode": "HTML", "disable_web_page_preview": True,
+            })
+        if r.status_code != 200:
+            log.error("post_sync %s: %s", r.status_code, r.text[:300])
+            return None
+        return (r.json().get("result") or {}).get("message_id")
+    except Exception as e:
+        log.error("post_sync failed: %s", e)
+        return None
+
+
 async def send_photo(photo: bytes, caption: str, chat_id: str | None = None) -> None:
     chat = chat_id or TELEGRAM_CHAT_ID
     if not TELEGRAM_BOT_TOKEN or not chat:

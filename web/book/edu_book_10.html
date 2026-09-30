@@ -2,8 +2,15 @@
 <html lang="{{ lang }}">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>SBF | {% if lang == 'ru' %}Глава 10. Психология и Паттерны{% elif lang == 'ro' %}Capitolul 10. Psihologie și Paternuri{% else %}Chapter 10. Psychology and Patterns{% endif %}</title>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="SBF Intelligence">
+<meta property="og:image" content="https://lp.sbfconsult.com/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://lp.sbfconsult.com/assets/og-image.png">
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
   <style>
@@ -95,7 +102,7 @@ const STRINGS = {
   },
 };
 
-const {C, Mono, Chip, Rule, AskAnalystBtn, getChUrl, QuizBlock, ComplianceFootnote, ColdStart} = window.AcademyShared;
+const {C, Mono, Chip, Rule, AntiMythBlock, RevealSteps, AskAnalystBtn, getChUrl, QuizBlock, ComplianceFootnote, ColdStart} = window.AcademyShared;
 
 const SectionTitle = ({children,sub,align="left",id}) => (
   <div id={id} style={{textAlign:align,marginBottom:36,scrollMarginTop:130}}>
@@ -151,7 +158,7 @@ function ColdStart10Entry({ patterns, examples }) {
 
   const ex = examples && examples.patterns && examples.patterns.double_top;
   const pooled = patterns && patterns.pattern_pooled && patterns.pattern_pooled.double_top;
-  if (!ex || !pooled) return <div style={{background:C.black,padding:"60px 5vw",textAlign:"center"}}><Mono size={11} color={C.gold} spacing={4}>{cs.tag}</Mono></div>;
+  if (!ex || !pooled) return <div style={{background:C.black,padding:"60px 5vw",textAlign:"center"}}><Mono size={11} color={C.goldText} spacing={4}>{cs.tag}</Mono></div>;
 
   const markerIdx = ex.candles.findIndex(c => c.time === ex.marker_time);
   const HIDE_FROM = markerIdx + 1;
@@ -181,7 +188,7 @@ function ColdStart10Entry({ patterns, examples }) {
     if (!chartRef.current) return;
     const n = committed ? ex.candles.length : HIDE_FROM;
     chartRef.current.candleSeries.setData(ex.candles.slice(0, n).map(c => ({ time: c.time, open: +c.open, high: +c.high, low: +c.low, close: +c.close })));
-    if (committed) chartRef.current.candleSeries.setMarkers([{ time: ex.marker_time, position: "aboveBar", color: C.gold, shape: "arrowDown" }]);
+    if (committed) chartRef.current.candleSeries.setMarkers([{ time: ex.marker_time, position: "aboveBar", color: C.goldText, shape: "arrowDown" }]);
     chartRef.current.chart.timeScale().fitContent();
   }, [committed]);
 
@@ -243,22 +250,22 @@ function ColdStart10Middle() {
 
   return (
     <div style={{background:C.black, padding:"64px 5vw 52px", color:"#fff"}}>
-      <Mono size={11} color={C.gold} spacing={4} style={{display:"block", marginBottom:22, textAlign:"center"}}>{cm.tag}</Mono>
+      <Mono size={11} color={C.goldText} spacing={4} style={{display:"block", marginBottom:22, textAlign:"center"}}>{cm.tag}</Mono>
       <p style={{fontFamily:"'DM Serif Display',serif", fontSize:"clamp(21px,3.2vw,28px)", color:"#fff", textAlign:"center", maxWidth:680, margin:"0 auto 30px", lineHeight:1.42}}>{cm.ask}</p>
       <div style={{maxWidth:420, margin:"0 auto"}}>
         <div style={{marginBottom:20}}>
           <div style={{display:"flex", justifyContent:"space-between", marginBottom:6}}>
             <span style={{fontSize:11.5, color:"rgba(255,255,255,0.55)", fontFamily:"monospace"}}>{cm.winRateLabel}</span>
-            <span style={{fontSize:13, fontWeight:700, color:C.gold, fontFamily:"monospace"}}>{winRate}%</span>
+            <span style={{fontSize:13, fontWeight:700, color:C.goldText, fontFamily:"monospace"}}>{winRate}%</span>
           </div>
-          <input type="range" min="20" max="80" value={winRate} onChange={e=>{ setWinRate(+e.target.value); setStreak(null); }} style={{width:"100%", accentColor:C.gold}}/>
+          <input type="range" aria-label={cm.winRateLabel} min="20" max="80" value={winRate} onChange={e=>{ setWinRate(+e.target.value); setStreak(null); }} style={{width:"100%", accentColor:C.gold}}/>
         </div>
         <div style={{marginBottom:20}}>
           <div style={{display:"flex", justifyContent:"space-between", marginBottom:6}}>
             <span style={{fontSize:11.5, color:"rgba(255,255,255,0.55)", fontFamily:"monospace"}}>{cm.tradesLabel}</span>
-            <span style={{fontSize:13, fontWeight:700, color:C.gold, fontFamily:"monospace"}}>{nTrades}</span>
+            <span style={{fontSize:13, fontWeight:700, color:C.goldText, fontFamily:"monospace"}}>{nTrades}</span>
           </div>
-          <input type="range" min="20" max="500" step="10" value={nTrades} onChange={e=>{ setNTrades(+e.target.value); setStreak(null); }} style={{width:"100%", accentColor:C.gold}}/>
+          <input type="range" aria-label={cm.tradesLabel} min="20" max="500" step="10" value={nTrades} onChange={e=>{ setNTrades(+e.target.value); setStreak(null); }} style={{width:"100%", accentColor:C.gold}}/>
         </div>
         <div style={{textAlign:"center"}}>
           <button onClick={simulate} style={{fontFamily:"monospace", fontSize:14, fontWeight:700, padding:"12px 28px", borderRadius:4, cursor:"pointer", background:C.gold, color:C.black, border:"none"}}>{cm.runBtn}</button>
@@ -269,7 +276,7 @@ function ColdStart10Middle() {
           <div style={{fontSize:16, lineHeight:1.62, color:"#fff"}}>{fillTemplate(cm.revealTemplate, { winRate, n: nTrades, streak })}</div>
         </div>
       )}
-      {streak != null && <p style={{textAlign:"center", fontFamily:"monospace", fontSize:12, color:C.gold, letterSpacing:0.5, marginTop:22, marginBottom:0}}>{cm.bridge}</p>}
+      {streak != null && <p style={{textAlign:"center", fontFamily:"monospace", fontSize:12, color:C.goldText, letterSpacing:0.5, marginTop:22, marginBottom:0}}>{cm.bridge}</p>}
     </div>
   );
 }
@@ -279,23 +286,20 @@ function IntroBlock() {
   const T10 = window.Ch10Content[INITIAL_LANG] || window.Ch10Content.ru;
   return (
     <div id="secAntiMyth" style={{marginBottom:48,scrollMarginTop:130}}>
-      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T10.antiMyth.tag}</Mono>
-      <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px",marginBottom:28}}>
-        <p style={{fontWeight:600,fontSize:14.5,color:C.black,marginBottom:10}}>{T10.antiMyth.title}</p>
-        <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,marginBottom:12}}>{T10.antiMyth.body1}</p>
-        <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,marginBottom:12}}>{T10.antiMyth.body2}</p>
-        <p style={{fontSize:13.5,color:C.black,lineHeight:1.7,margin:0,fontWeight:600}}>{T10.antiMyth.body3}</p>
-      </div>
+      <AntiMythBlock lang={INITIAL_LANG} style={{marginBottom:28}}
+        data={{tag: T10.antiMyth.tag, title: T10.antiMyth.title, bodies: [T10.antiMyth.body1, T10.antiMyth.body2, T10.antiMyth.body3]}}/>
 
-      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T10.voiceSbf.tag}</Mono>
+      <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{T10.voiceSbf.tag}</Mono>
       <div style={{borderLeft:`4px solid ${C.gold}`,paddingLeft:24,marginBottom:28}}>
         {T10.voiceSbf.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:16,fontStyle:"italic",color:C.inkMid,lineHeight:1.7,fontFamily:"'DM Serif Display',serif",marginBottom:12}}>{p}</p>)}
       </div>
 
       <div id="secPriceOfNotKnowing10" style={{background:C.black,borderRadius:8,padding:"26px 30px",color:C.white,scrollMarginTop:130}}>
-        <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T10.priceOfNotKnowing.tag}</Mono>
+        <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{T10.priceOfNotKnowing.tag}</Mono>
         <div style={{fontFamily:"'DM Serif Display',serif",fontSize:20,color:C.white,marginBottom:12}}>{T10.priceOfNotKnowing.title}</div>
-        {T10.priceOfNotKnowing.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:13.5,lineHeight:1.75,color:"rgba(255,255,255,0.7)",marginBottom:10}}>{p}</p>)}
+        {/* Разбор открывается по шагам — см. комментарий в главе 9. */}
+        <RevealSteps bodies={T10.priceOfNotKnowing.body.split("\n\n")}
+                     lang={INITIAL_LANG} preset="cost" dark/>
       </div>
     </div>
   );
@@ -312,7 +316,7 @@ function WhyControlFails() {
       <div style={{display:"flex",flexDirection:"column",gap:8,marginBottom:20}}>
         {w.items.map((it,i) => (
           <div key={i} style={{display:"flex",gap:12,alignItems:"flex-start"}}>
-            <span style={{color:C.gold,fontFamily:"monospace",fontSize:11,marginTop:2}}>0{i+1}</span>
+            <span style={{color:C.goldText,fontFamily:"monospace",fontSize:11,marginTop:2}}>0{i+1}</span>
             <span style={{fontSize:13,color:C.inkMid,lineHeight:1.65}}>{it}</span>
           </div>
         ))}
@@ -330,6 +334,9 @@ function SelfStats() {
   const T10 = window.Ch10Content[INITIAL_LANG] || window.Ch10Content.ru;
   const ss = T10.selfStats;
   const [state, setState] = useState("loading"); // loading | A | B | C
+  // Сам ответ, а не только буква состояния: рисовать разбор по часам не из
+  // чего, если сохранить одно слово «A».
+  const [данные, setДанные] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -338,12 +345,13 @@ function SelfStats() {
       fetch("/api/journal/aggregate-stats").then(r => r.ok ? r.json() : null).catch(() => null),
     ]).then(([self, agg]) => {
       if (cancelled) return;
-      // Оба эндпоинта пока не построены (см. докстринг ch10.js) -- живой fetch
-      // остаётся форвард-совместимым, но честно откатывается в состояние C,
-      // которое сейчас технически единственно верное: у всех пользователей
-      // платформы 0 записанных сделок в data/journal.db.
-      if (self && self.trade_count >= 20) setState("A");
-      else if (agg && agg.n_users >= 50 && agg.n_trades >= 1000) setState("B");
+      /* 🔴 Порог теперь один и живёт на сервере (core/journal_hours.py), а
+         здесь читается готовый `available`. Раньше клиент сравнивал
+         trade_count >= 20 сам — то есть порог был записан в двух местах, и
+         разойтись им было вопросом времени: сервер отдал бы «мало данных»,
+         а глава показала бы разбор по трём сделкам, или наоборот. */
+      if (self && self.available) { setДанные(self); setState("A"); }
+      else if (agg && agg.available) { setДанные(agg); setState("B"); }
       else setState("C");
     }).catch(() => setState("C"));
     return () => { cancelled = true; };
@@ -353,8 +361,100 @@ function SelfStats() {
     return <p style={{fontFamily:"monospace",fontSize:12,color:C.inkFaint}}>{ss.loadingLabel}</p>;
   }
 
-  // Состояния A и B реализуются тем же контейнером, когда эндпоинты появятся
-  // и данные накопятся -- сейчас в проде достижимо только состояние C.
+  /* 🔴 СОСТОЯНИЯ A И B ТЕПЕРЬ НАРИСОВАНЫ, А НЕ ОПИСАНЫ В КОММЕНТАРИИ.
+     Здесь стояло «реализуются тем же контейнером, когда эндпоинты появятся»
+     — то есть глава обещала читателю разбор по часам (обещание дано ещё в
+     главе 5: «через тридцать сделок дневник покажет, в какие часы ты
+     входишь и в какие зарабатываешь»), а показать его было нечем даже при
+     готовых данных. Обещание, у которого нет исполняющего кода, не
+     отличается от невыполненного.
+     Таблица одна на оба состояния: свои часы и часы платформы считаются
+     одинаково (core/journal_hours.py), значит и рисоваться должны
+     одинаково — иначе два вида одной величины начнут расходиться. */
+  if ((state === "A" || state === "B") && данные && данные["часы"]) {
+    const это_своё = state === "A";
+    const s = это_своё ? ss.stateA : ss.stateB;
+    const часы = данные["часы"];
+    const макс = Math.max(1, ...часы.map(ч => ч["сделок"]));
+    const подставить = (шаблон, п) =>
+      String(шаблон || "").replace(/\{(\w)\}/g, (_, k) => п[k]);
+    return (
+      <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"26px 30px"}}>
+        <p style={{fontSize:14,color:C.black,fontWeight:600,marginBottom:10}}>{s.title}</p>
+        <p style={{fontSize:13,color:C.inkMid,lineHeight:1.7,marginBottom:18}}>
+          {это_своё ? s.intro
+            : подставить(s.introTpl, {u: данные["n_users"], n: данные["n_trades"]})}
+        </p>
+
+        {данные["час_входов"] == null ? (
+          <p style={{fontSize:13,color:C.inkMid}}>{это_своё ? s.few : s.note}</p>
+        ) : (
+          <>
+            {/* Таблица паттернов шире экрана — с клавиатуры тоже. */}
+            <div style={{overflowX:"auto",marginBottom:16}} tabIndex={0} role="region" aria-label={ss.title || "table"}>
+              <table style={{borderCollapse:"collapse",width:"100%",fontSize:12,
+                             fontFamily:"monospace"}}>
+                <thead>
+                  <tr style={{textAlign:"left",color:C.inkFaint}}>
+                    <th style={{padding:"4px 8px"}}>{s.colHour || "ЧАС"}</th>
+                    <th style={{padding:"4px 8px"}}>{s.colTrades || ""}</th>
+                    <th style={{padding:"4px 8px"}}>{s.colR || "R"}</th>
+                    <th style={{padding:"4px 8px"}}>{s.colWin || ""}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {часы.map(ч => (
+                    /* Час с малым числом сделок показываем, но глушим цветом:
+                       спрятать его значило бы сделать картину глаже, чем она
+                       есть, а выделить наравне — позвать на вывод из двух
+                       наблюдений. */
+                    <tr key={ч["час"]} style={{opacity: ч["мало_данных"] ? 0.45 : 1,
+                                               borderTop:`1px solid ${C.border}`}}>
+                      <td style={{padding:"4px 8px",color:C.black}}>
+                        {String(ч["час"]).padStart(2,"0")}:00
+                      </td>
+                      <td style={{padding:"4px 8px",color:C.inkMid}}>
+                        <span style={{display:"inline-block",height:8,borderRadius:2,
+                          width: Math.max(4, Math.round(60 * ч["сделок"] / макс)),
+                          background: C.gold, marginRight:6, verticalAlign:"middle"}}/>
+                        {ч["сделок"]}
+                      </td>
+                      <td style={{padding:"4px 8px",
+                                  color: ч["сумма_r"] > 0 ? "#2E7D5B"
+                                       : ч["сумма_r"] < 0 ? "#8a2f2f" : C.inkMid}}>
+                        {ч["сумма_r"] > 0 ? "+" : ""}{ч["сумма_r"]}
+                      </td>
+                      <td style={{padding:"4px 8px",color:C.inkMid}}>
+                        {Math.round(100 * ч["доля_плюсовых"])}%
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <p style={{fontSize:13,color:C.inkMid,lineHeight:1.7,marginBottom:6}}>
+              {подставить(s.mostTpl, {h: данные["час_входов"],
+                                      n: данные["сделок_в_нём"],
+                                      r: данные["r_в_нём"]})}
+            </p>
+            <p style={{fontSize:13,color:C.inkMid,lineHeight:1.7,marginBottom:16}}>
+              {подставить(s.bestTpl, {h: данные["час_заработка"],
+                                      n: данные["сделок_в_лучшем"],
+                                      r: данные["r_в_лучшем"]})}
+            </p>
+            <div style={{background:C.goldPale,border:`1px solid ${C.borderGold}`,
+                         borderRadius:6,padding:"14px 18px"}}>
+              <p style={{fontSize:12.5,color:C.inkMid,lineHeight:1.65,margin:0}}>
+                {это_своё ? (данные["совпадают"] ? s.same : s.differ) : s.note}
+              </p>
+            </div>
+          </>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"26px 30px"}}>
       <p style={{fontSize:14,color:C.black,fontWeight:600,marginBottom:10}}>{ss.stateC.title}</p>
@@ -381,7 +481,7 @@ function FourMistakes() {
             <Mono size={9.5} color={C.inkFaint} spacing={0.5} style={{display:"block",marginBottom:4,textTransform:"uppercase"}}>{fm.calcLabel}</Mono>
             <p style={{fontSize:12,color:C.inkMid,lineHeight:1.6,marginBottom: fix!=="—"?12:0}}>{calc}</p>
             {fix!=="—" && <>
-              <Mono size={9.5} color={C.gold} spacing={0.5} style={{display:"block",marginBottom:4,textTransform:"uppercase"}}>{fm.fixLabel}</Mono>
+              <Mono size={9.5} color={C.goldText} spacing={0.5} style={{display:"block",marginBottom:4,textTransform:"uppercase"}}>{fm.fixLabel}</Mono>
               <p style={{fontSize:12,color:C.inkMid,lineHeight:1.6,margin:0}}>{fix}</p>
             </>}
           </div>
@@ -461,7 +561,7 @@ function PatternMiniChart({ example, patternKey }) {
     const s = seriesRef.current;
     if (!s.candleSeries || !example) return;
     s.candleSeries.setData(example.candles.map(c => ({ time: c.time, open: +c.open, high: +c.high, low: +c.low, close: +c.close })));
-    s.candleSeries.setMarkers([{ time: example.marker_time, position: example.direction === "bearish" ? "aboveBar" : "belowBar", color: C.gold, shape: example.direction === "bearish" ? "arrowDown" : "arrowUp" }]);
+    s.candleSeries.setMarkers([{ time: example.marker_time, position: example.direction === "bearish" ? "aboveBar" : "belowBar", color: C.goldText, shape: example.direction === "bearish" ? "arrowDown" : "arrowUp" }]);
     chartRef.current.timeScale().fitContent();
   }, [example]);
 
@@ -489,8 +589,10 @@ function PatternMiniChart({ example, patternKey }) {
       {maxHold > 0 && (
         <div style={{display:"flex",alignItems:"center",gap:12,flexWrap:"wrap",padding:"0 2px"}}>
           <Mono size={9.5} color={C.inkFaint} spacing={0.5}>{ps.holdLabel}</Mono>
-          <input type="range" min={1} max={maxHold} value={Math.min(holdN,maxHold)} onChange={e=>setHoldN(+e.target.value)} style={{flex:1,minWidth:100}}/>
-          {holdPct !== null && <Mono size={11} color={holdPct >= 0 ? "#1c8a4a" : "#c0392b"} spacing={0}>{ps.holdResult(Math.min(holdN,maxHold), holdPct)}</Mono>}
+          <input type="range" aria-label={ps.holdLabel} min={1} max={maxHold} value={Math.min(holdN,maxHold)} onChange={e=>setHoldN(+e.target.value)} style={{flex:1,minWidth:100}}/>
+          {/* Палитра, а не свои литералы: #1c8a4a давал 4.14:1 на #faf8f5,
+              C.green/C.red — те же зелёный и красный, уже сведённые к AA. */}
+          {holdPct !== null && <Mono size={11} color={holdPct >= 0 ? C.green : C.red} spacing={0}>{ps.holdResult(Math.min(holdN,maxHold), holdPct)}</Mono>}
         </div>
       )}
     </div>
@@ -527,7 +629,7 @@ function PatternBehaviorScreens({ patterns, examples }) {
               {it.mechanic && <p style={{fontSize:12,color:"#7a2418",fontStyle:"italic",margin:"0 0 10px"}}>{ps.mechanicNote}</p>}
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:10}}>
                 <Mono size={9.5} color={C.inkFaint} spacing={0.5}>{ps.baselineNote}</Mono>
-                <a href={"/chart.html?s="+PATTERN_CHART_SYMBOL} target="_blank" rel="noopener" style={{fontFamily:"monospace",fontSize:11.5,color:C.gold,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>{ps.openOnChart}</a>
+                <a href={"/chart.html?s="+PATTERN_CHART_SYMBOL} target="_blank" rel="noopener" style={{fontFamily:"monospace",fontSize:11.5,color:C.goldText,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>{ps.openOnChart}</a>
               </div>
             </div>
           );
@@ -559,10 +661,11 @@ function CoreMeasureBlock({ patterns }) {
           <button key={s} onClick={()=>setInstrument(s)} style={{fontFamily:"monospace",fontSize:10.5,padding:"5px 10px",cursor:"pointer",background:s===instrument?C.gold:"#fff",color:s===instrument?"#18181a":C.inkMid,border:`1px solid ${s===instrument?C.gold:C.border}`,borderRadius:3}}>{window.SBFSymbols ? window.SBFSymbols.symbolName(s, {lang: INITIAL_LANG, mode:"name+ticker"}) : s}</button>
         ))}
         {MATRIX_SYMBOLS_10.includes(instrument) && (
-          <a href={"/chart.html?s="+instrument} target="_blank" rel="noopener" style={{marginLeft:6,fontFamily:"monospace",fontSize:10.5,color:C.gold,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>{cm.instrumentLabel} →</a>
+          <a href={"/chart.html?s="+instrument} target="_blank" rel="noopener" style={{marginLeft:6,fontFamily:"monospace",fontSize:10.5,color:C.goldText,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>{cm.instrumentLabel} →</a>
         )}
       </div>
-      <div style={{overflowX:"auto",marginBottom:20}}>
+      {/* Вторая прокручиваемая таблица главы — тоже с клавиатуры. */}
+      <div style={{overflowX:"auto",marginBottom:20}} tabIndex={0} role="region" aria-label={cm.title || "table"}>
         <table style={{borderCollapse:"collapse",width:"100%",minWidth:520}}>
           <thead>
             <tr>
@@ -584,7 +687,7 @@ function CoreMeasureBlock({ patterns }) {
           </tbody>
         </table>
       </div>
-      <a href="/data/edu_stats/pattern_reality.csv" download style={{fontFamily:"monospace",fontSize:12,color:C.gold,textDecoration:"none",border:`1px solid ${C.gold}`,padding:"9px 16px",borderRadius:4,display:"inline-block"}}>{cm.downloadCsv}</a>
+      <a href="/data/edu_stats/pattern_reality.csv" download style={{fontFamily:"monospace",fontSize:12,color:C.goldText,textDecoration:"none",border:`1px solid ${C.gold}`,padding:"9px 16px",borderRadius:4,display:"inline-block"}}>{cm.downloadCsv}</a>
     </div>
   );
 }
@@ -632,7 +735,7 @@ function PredictHold() {
   const [picked, setPicked] = useState(null);
   return (
     <div style={{border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px",marginTop:8,marginBottom:24}}>
-      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{p.tag}</Mono>
+      <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{p.tag}</Mono>
       <p style={{fontSize:14.5,color:C.black,lineHeight:1.65,marginBottom:14}}>{p.question}</p>
       <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:14}}>
         {p.options.map((o,i) => (
@@ -663,7 +766,7 @@ function Chapter10() {
 
       <div style={{position:"sticky",top:106,background:"rgba(255,255,255,0.96)",backdropFilter:"blur(10px)",borderBottom:`1px solid ${C.border}`,padding:"15px 5vw",display:"flex",alignItems:"center",justifyContent:"space-between",zIndex:50}}>
         <div style={{display:"flex",alignItems:"center",gap:20}}>
-          <span onClick={() => window.location.href = getChUrl(9, lang)} style={{color:C.gold,cursor:"pointer",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</span>
+          <a href={getChUrl(9, lang)} aria-label={lang==="ru"?"Предыдущая глава":lang==="ro"?"Capitolul anterior":"Previous chapter"} style={{color:C.goldText,cursor:"pointer",textDecoration:"none",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</a>
           <Chip>{S.levelChip}</Chip>
           <Mono size={14} color={C.inkSoft} spacing={0} className="hide-mobile">{S.chapterNameShort}</Mono>
         </div>
@@ -676,15 +779,15 @@ function Chapter10() {
       <div style={{background:C.black,padding:"80px 5vw 70px",textAlign:"center",position:"relative",overflow:"hidden"}}>
         <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 100%, rgba(201,151,58,0.1) 0%, transparent 60%)"}}/>
         <div style={{position:"relative"}}>
-          <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:20}}>{S.heroEyebrow}</Mono>
+          <Mono size={11} color={C.goldText} spacing={4} style={{display:"block",marginBottom:20}}>{S.heroEyebrow}</Mono>
           <h1 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(36px,6vw,66px)",fontWeight:400,color:C.white,lineHeight:1.05,marginBottom:20}}>
-            {S.heroTitleLine1}<br/><span style={{color:C.gold}}>{S.heroTitleLine2}</span>
+            {S.heroTitleLine1}<br/><span style={{color:C.goldText}}>{S.heroTitleLine2}</span>
           </h1>
           <p style={{fontSize:"clamp(16px,2vw,20px)",color:"rgba(255,255,255,0.55)",maxWidth:640,margin:"0 auto 32px",lineHeight:1.65}}>{S.heroSubtitle}</p>
           <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
-            <Chip color={C.gold}>{S.fundamentalChip}</Chip>
-            <Chip color="rgba(255,255,255,0.3)">{S.technicalChip}</Chip>
-            <Chip color="rgba(255,255,255,0.3)">{S.interactiveChip}</Chip>
+            <Chip color={C.goldText}>{S.fundamentalChip}</Chip>
+            <Chip color="rgba(255,255,255,0.55)">{S.technicalChip}</Chip>
+            <Chip color="rgba(255,255,255,0.55)">{S.interactiveChip}</Chip>
           </div>
         </div>
       </div>
@@ -734,7 +837,7 @@ function Chapter10() {
         <PredictHold/>
 
         <div style={{border:`1px dashed ${C.borderGold}`,borderRadius:8,padding:"20px 24px",marginBottom:32,background:C.surface}}>
-          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T10.cliffhanger.tag}</Mono>
+          <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{T10.cliffhanger.tag}</Mono>
           {T10.cliffhanger.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:14,color:C.inkMid,lineHeight:1.7,marginBottom:10}}>{p}</p>)}
         </div>
 

@@ -2,7 +2,12 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+{# canonical + hreflang: сервер знает, что у курса локаль идёт
+   после /edu, а у остальных — перед; см. serve.py:_alt_links #}
+{{ alt_links('/chart.html', lang) | safe }}
+{{ page_meta(t('chart.page_title', lang), '', '/chart.html', lang,
+             t('chart.page_description', lang)) | safe }}
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script>
 // SPEC_visual_migration.md §1: ?design=v2 -- флаг рескина, persisted в
 // localStorage (та же логика, что index.html -- нужна здесь тоже, т.к. хром
@@ -16,33 +21,151 @@
   if (v === 'v2') document.documentElement.setAttribute('data-design', 'v2');
 })();
 </script>
-<title>SBF Chart</title>
+{# Заголовок был «SBF Chart» на всех трёх языках и ничего не говорил о
+   содержимом страницы — ни человеку в списке вкладок, ни выдаче. #}
+<title>{{ t('chart.page_title', lang) }}</title>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="SBF Intelligence">
+<meta property="og:image" content="https://lp.sbfconsult.com/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://lp.sbfconsult.com/assets/og-image.png">
 <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
 <link rel="alternate icon" type="image/png" href="/assets/favicon.png">
 <link rel="apple-touch-icon" href="/assets/icons/icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/design.css">
+<link rel="stylesheet" href="/assets/design.css?v=20260909">
 <link rel="stylesheet" href="/assets/tokens.css?v=1">
 <script src="/assets/i18n.js?v=2" defer></script>
 <script src="/assets/sbf-symbols.js?v=2"></script>
-<script src="/assets/sbf-header.js?v=16" defer></script>
+<script src="/assets/sbf-header.js?v=23" defer></script>
 <script src="/assets/sbf-auth.js?v=1"></script>
 <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
-<script src="/assets/grafik-engine.js"></script>
-<script src="/assets/sbf-thermo-widget.js"></script>
+<script src="/assets/grafik-engine.js?v=20260908"></script>
+<script src="/assets/sbf-thermo-widget.js?v=20260901a"></script>
 <script src="/assets/sbf-glossary.js?v=2" defer></script>
 <style>
 :root{
   --cream:#FBF6EF; --paper:#FFFFFF; --line:#E7DFCF; --grid:#F0E9DA;
-  --ink:#2B2B33; --muted:#8A8275; --gold:#C9A227; --glow:#E6C257;
-  --up:#1e8e5a; --down:#c0392b;
+  --ink:#2B2B33; --muted:#716A5A; --gold:#C9A227; --glow:#E6C257;
+  --up:#2C784E; --down:#c0392b;
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--cream);color:var(--ink);font-family:Montserrat,sans-serif;padding:0}
 .chart-top{display:flex;align-items:center;gap:12px;padding:10px 18px;background:var(--paper);border-bottom:1px solid var(--line);font-family:'JetBrains Mono',monospace}
 .chart-top a{font-size:11px;color:var(--muted);text-decoration:none;letter-spacing:.3px}
-.chart-top a:hover{color:var(--gold)}
+.chart-top a:hover{color:var(--gold-text,#866A19)}
 .chart-body{padding:18px}
+/* ── Панель инструментов (SPEC_chart_all_instruments §6) ──────────────────
+   Список слева, детальный график справа. Токены — из :root этой же страницы
+   (cream/paper/line/ink/muted/gold), новых hex не заводим: у SBF уже есть
+   бренд, и панель обязана выглядеть как часть страницы, а не как вставка. */
+.chart-layout{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:14px;
+  max-width:1320px;margin:0 auto;align-items:start}
+.chart-layout > .card{max-width:none;margin:0}
+/* 🔴 Панель ровно по высоте окна, а не по угаданному числу.
+   Было: панель липкая, а высоту ограничивал только внутренний список
+   (max-height: 100vh - 190px). 190 — это оценка шапки с поиском, категориями и
+   подписи «ещё 304» снизу. Оценка не сходилась: панель вылезала за экран, и
+   чтобы добраться до её низа, приходилось скроллить страницу целиком — второй
+   скролл поверх списка.
+   Стало: панель — колонка высотой в окно, список внутри растягивается на весь
+   остаток. Сколько бы места ни занимали шапка и подпись, список займёт ровно
+   то, что останется, и никаких магических чисел. */
+.inst-panel{background:var(--paper);border:1px solid var(--line);border-radius:14px;overflow:hidden;
+  box-shadow:0 6px 24px rgba(43,43,51,.06);position:sticky;top:14px;
+  max-height:calc(100vh - 28px);display:flex;flex-direction:column}
+.inst-head{padding:10px;border-bottom:1px solid var(--line)}
+.inst-search{display:flex;align-items:center;gap:6px;border:1px solid var(--line);
+  border-radius:9px;padding:6px 9px;background:var(--cream)}
+.inst-search svg{flex:none;color:var(--muted)}
+.inst-search input{border:0;outline:0;background:transparent;font:inherit;font-size:12px;
+  color:var(--ink);width:100%}
+.inst-search input::placeholder{color:var(--muted)}
+.inst-search:focus-within{border-color:var(--gold)}
+.inst-cats{display:flex;gap:4px;margin-top:8px;flex-wrap:wrap}
+.inst-cat{font-size:11px;padding:3px 8px;border-radius:8px;border:1px solid transparent;
+  background:none;color:var(--muted);cursor:pointer;font-family:inherit;line-height:1.5}
+.inst-cat:hover{color:var(--ink)}
+.inst-cat.on{background:rgba(201,162,39,.13);color:#8a6c10;border-color:rgba(201,162,39,.3)}
+.inst-cat:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+/* flex:1 + min-height:0 — список забирает весь остаток колонки и прокручивается
+   сам. min-height:0 обязателен: без него flex-элемент не даёт себя сжать ниже
+   содержимого, и список снова вылезет за окно. */
+.inst-list{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden}
+.inst-head{flex:none}
+.inst-group{font-size:10px;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);
+  padding:7px 10px 4px;font-family:'JetBrains Mono',monospace}
+/* Строка — контейнер из двух соседних управлений: «открыть график» на всю
+   ширину и «в избранное» справа. Сетка живёт на .inst-go, чтобы звёздочка
+   осталась снаружи и не оказалась кнопкой внутри кнопки. */
+.inst-row{display:grid;grid-template-columns:1fr 32px;align-items:center;
+  border-bottom:1px solid var(--grid);color:inherit;height:44px}
+.inst-go{display:grid;grid-template-columns:1fr 52px 58px;gap:6px;align-items:center;
+  padding:7px 0 7px 10px;height:100%;width:100%;box-sizing:border-box;
+  background:none;border:0;font:inherit;color:inherit;text-align:left;cursor:pointer}
+.inst-row:hover{background:var(--cream)}
+.inst-go:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}
+.inst-row.on{background:rgba(201,162,39,.11)}
+.inst-row.on .inst-tick{color:#8a6c10}
+.inst-row.noq{opacity:.5;cursor:default}
+/* Строка, по которой график пока не построится (нет баров, ярус 3 не сделан):
+   курсор обычный и тикер приглушён. Строка, выглядящая кликабельной и молча
+   ничего не делающая по клику, — это интерфейс, который врёт. */
+.inst-row.nochart{cursor:default}
+.inst-row.nochart .inst-tick{color:var(--muted);font-weight:500}
+.inst-row.nochart:hover{background:none}
+.inst-id{min-width:0}
+.inst-tick{font-size:12px;font-weight:600;font-family:'JetBrains Mono',monospace;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.inst-name{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.inst-spark{display:block}
+.inst-px{text-align:right;font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums}
+.inst-last{font-size:11px}
+.inst-chg{font-size:11px}
+.inst-chg.up{color:var(--up)} .inst-chg.down{color:var(--down)}
+.inst-none{font-size:11px;color:var(--muted)}
+/* 🔴 Цель касания, а не 16×13. Кнопка занимает всю высоту строки и свою
+   колонку целиком — палец попадает в 32×44, а звёздочка рисуется того же
+   размера, что и была. WCAG 2.5.8 требует 24×24 минимум; 44 по высоте —
+   рекомендация Apple/Google, и она здесь достаётся даром. */
+.inst-fav{border:0;background:none;padding:0;cursor:pointer;color:var(--line);font-size:13px;
+  line-height:1;opacity:0;transition:opacity .12s;
+  width:32px;height:100%;display:flex;align-items:center;justify-content:center}
+.inst-row:hover .inst-fav,.inst-fav.on,.inst-fav:focus-visible{opacity:1}
+/* 🔴 На устройстве без мыши :hover не наступает никогда, поэтому
+   добавить инструмент в избранное с телефона было нельзя вовсе:
+   кнопка становилась видимой только после того, как уже включена. */
+@media(hover:none){.inst-fav{opacity:.55}}
+.inst-fav.on{color:var(--gold-text,#866A19)}
+.inst-foot{padding:8px 10px;font-size:11px;color:var(--muted);text-align:center;
+  border-top:1px solid var(--line);flex:none}
+/* Кнопка «показать весь каталог» в подвале списка. Высота 44 px — тот же
+   порог попадания пальцем, что и у остальных мобильных элементов. */
+.inst-all{width:100%;min-height:44px;padding:0 14px;background:none;cursor:pointer;
+  border:1px solid var(--line);border-radius:8px;font:inherit;font-size:13px;
+  color:var(--ink);transition:border-color .15s,color .15s}
+.inst-all:hover{border-color:var(--gold);color:var(--gold-text,#866A19)}
+.inst-back{display:none}
+@media(max-width:900px){
+  /* §6: список и график рядом не помещаются. Список — отдельный экран,
+     график открывается поверх, назад — к списку. Не пытаемся ужать две
+     колонки в одну ширину телефона. */
+  .chart-layout{grid-template-columns:minmax(0,1fr)}
+  /* На телефоне список — отдельный экран, ограничивать его высотой окна не
+     нужно: он и есть содержимое страницы, скроллится сама страница. Снимаем и
+     потолок, и колонку, иначе список схлопнется в узкую полосу с внутренним
+     скроллом внутри и без того скроллящейся страницы. */
+  .inst-panel{position:static;max-height:none;display:block}
+  .inst-list{max-height:none;overflow:visible}
+  body.has-symbol .inst-panel{display:none}
+  body.has-symbol .inst-back{display:inline-block;font-size:12px;color:var(--muted);
+    text-decoration:none;padding:0 0 10px}
+  body.has-symbol .inst-back:hover{color:var(--gold-text,#866A19)}
+  body:not(.has-symbol) .chart-layout > .card{display:none}
+}
+@media(prefers-reduced-motion:reduce){.inst-fav{transition:none}}
 .mono{font-family:'JetBrains Mono',monospace}
 .card{background:var(--paper);border:1px solid var(--line);border-radius:14px;overflow:hidden;max-width:960px;margin:0 auto;
   box-shadow:0 6px 24px rgba(43,43,51,.06)}
@@ -66,11 +189,30 @@ body{margin:0;background:var(--cream);color:var(--ink);font-family:Montserrat,sa
 .bias.flat{color:var(--muted);border:1px solid var(--line)}
 /* Ряд контролов */
 .ctrl-row{display:flex;align-items:center;gap:8px;padding:9px 14px;border-bottom:1px solid var(--line);flex-wrap:wrap;background:var(--paper)}
+/* Ряд над графиком теперь несёт только таймфреймы — ему не нужен ни отступ
+   под слои, ни перенос строки. Всё остальное уехало под график (ТЗ 03.09). */
+.ctrl-row-top{padding-bottom:6px}
+/* Блок под графиком: слои, пояснения, тизер, термометр. Отделён от полотна
+   заметным полем — иначе кнопки читаются как часть графика. */
+.below-chart{padding:14px 0 4px;display:flex;flex-direction:column;gap:10px}
+.below-chart .tog{flex-wrap:wrap}
+.below-chart > :last-child{border-bottom:none}
+@media(max-width:760px){.below-chart{padding-top:10px;gap:8px}}
 .tf-grp,.mode,.tog{display:flex;gap:3px}
 .mode{margin-left:auto}
 /* Разделитель в контролах */
 .ctrl-sep{width:1px;height:22px;background:var(--line);flex-shrink:0}
 #chart{height:440px}
+#chartMsg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  pointer-events:none;z-index:5}
+#chartMsg[hidden]{display:none}
+#chartMsg .cm-box{display:flex;align-items:center;gap:10px;padding:12px 18px;border-radius:10px;
+  background:rgba(251,246,239,.92);border:1px solid rgba(0,0,0,.08);
+  font:500 14px/1.4 'Montserrat',sans-serif;color:#6b6b76;max-width:80%;text-align:center}
+#chartMsg .cm-spin{width:14px;height:14px;border:2px solid rgba(0,0,0,.15);
+  border-top-color:#C9A227;border-radius:50%;animation:cmspin .8s linear infinite;flex:0 0 auto}
+#chartMsg .cm-spin[hidden]{display:none}
+@keyframes cmspin{to{transform:rotate(360deg)}}
 .card.sbf-fs{display:flex!important;flex-direction:column!important;overflow:hidden!important}
 .card.sbf-fs #chartContainer{flex:1;min-height:0;position:relative}
 .card.sbf-fs #chart{height:100%!important;width:100%!important}
@@ -81,7 +223,7 @@ body.embed{overflow:hidden}
 body.embed .chart-body{padding:0}
 body.embed .card{border-radius:0;box-shadow:none;border:none;max-width:100%}
 .beginner{padding:12px 18px;border-top:1px solid var(--line);background:rgba(201,162,39,.06);font-size:13px;line-height:1.55;display:flex;gap:10px}
-.beginner .ic{color:var(--gold);font-weight:700} .beginner b{color:var(--gold)}
+.beginner .ic{color:var(--gold-text,#866A19);font-weight:700} .beginner b{color:var(--gold-text,#866A19)}
 .foot{padding:8px 18px;font-size:11px;color:var(--muted);border-top:1px solid var(--line)}
 .tog-label{font-size:10px;font-family:'JetBrains Mono';color:var(--muted);padding:0 4px;letter-spacing:.3px;text-transform:uppercase}
 .tog-hints{display:flex;flex-direction:column;gap:0;background:rgba(248,245,238,.7);border-bottom:1px solid var(--line)}
@@ -89,10 +231,16 @@ body.embed .card{border-radius:0;box-shadow:none;border:none;max-width:100%}
 .tog-hint-chip{font-family:'JetBrains Mono';font-size:11px;color:#444;padding:6px 14px;line-height:1.55;border-bottom:1px solid rgba(231,223,207,.6)}
 .tog-hint-chip:last-child{border-bottom:none}
 .tog-hint-chip b{color:#2B2B33;font-weight:600}
-#newsLayer{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+/* 🔴 z-index у ВСЕХ накладных слоёв. Полотна Lightweight Charts лежат с
+   z-index 1 и 2; слой без z-index уходит под них и не виден ни при какой
+   раскраске. Так молча пропадали сессии, события, новости и конфлюэнс — код
+   исправно считал координаты и добавлял узлы в DOM, на экране не было ничего.
+   Порядок снизу вверх: фон сессий → зоны схождения → новости → события.
+   События сверху: это точки на оси времени, их не должно перекрывать. */
+#newsLayer{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:5}
 .news-zone{position:absolute;top:0;bottom:20px;background:var(--gold);opacity:.08;cursor:pointer;pointer-events:auto}
 .news-zone:hover{opacity:.14}
-#confluenceLayer{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+#confluenceLayer{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:4}
 /* SPEC_chart_fixes_and_staged_signup.md §1: ширина полосы была артефактом
    кластеризации (min/max факторов), не измеренной границей -- жёсткий
    прямоугольник обещал читателю смысл, которого нет. Вместо него: мягкое
@@ -106,13 +254,31 @@ body.embed .card{border-radius:0;box-shadow:none;border:none;max-width:100%}
 .confluence-tick{position:absolute;left:6px;right:6px;height:2px;border-radius:1px;background:var(--gold);box-shadow:0 0 6px rgba(201,162,39,.75);pointer-events:none}
 
 /* Сессионная карта (Layer 3, Фаза 2) */
-#sessionLayer{position:absolute;inset:0;pointer-events:none;overflow:hidden}
-.sess-band{position:absolute;top:0;bottom:0}
-.sess-asia{background:var(--ink);opacity:.05}
-.sess-london{background:var(--gold);opacity:.05}
-.sess-ny{background:var(--up);opacity:.05}
-.sess-overlap{background:var(--gold);opacity:.10}
-.sess-label{position:absolute;top:3px;left:5px;font-size:9px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.3px;white-space:nowrap;pointer-events:none}
+/* 🔴 z-index обязателен. Полотна Lightweight Charts лежат с z-index 1 и 2, а у
+   слоя было `auto` — то есть сессии рисовались ПОД графиком и не были видны ни
+   при какой заливке. Именно поэтому слой выглядел «не работает»: полосы в DOM
+   были, на экране их не было. Проверено из консоли страницы: 7 полос шириной
+   до 236px, ни одна не видна. */
+#sessionLayer{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:3}
+/* 🔴 Сессии были нечитаемы: заливка opacity .05 — это почти белое на белом, а
+   подпись 9px цветом --muted терялась в сетке графика. Слой формально был,
+   пользы не приносил.
+   Стало: у каждой сессии свой оттенок и заметная, но не спорящая со свечами
+   заливка, сверху — цветная полоса-корешок, по которой сессия читается даже
+   там, где заливка попадает на плотный участок графика. Подпись крупнее, с
+   собственной подложкой. */
+.sess-band{position:absolute;top:0;bottom:0;border-left:1px solid rgba(43,43,51,.10)}
+.sess-band::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:currentColor;opacity:.85}
+.sess-asia{color:#5b7fbd;background:rgba(91,127,189,.09)}
+.sess-london{color:var(--gold-text,#866A19);background:rgba(201,162,39,.10)}
+.sess-ny{color:#1e8e5a;background:rgba(30,142,90,.09)}
+/* Перекрытие Лондона и Нью-Йорка — самый ликвидный час дня, ему и заметнее. */
+.sess-overlap{color:#b8541f;background:rgba(184,84,31,.16)}
+.sess-label{position:absolute;top:6px;left:6px;font-size:10px;font-weight:600;
+  color:currentColor;font-family:'JetBrains Mono',monospace;text-transform:uppercase;
+  letter-spacing:.4px;white-space:nowrap;pointer-events:none;
+  background:rgba(251,246,239,.75);padding:1px 5px;border-radius:5px}
 /* SPEC_chart_fixes_and_staged_signup.md §2: столбики активности по часам,
    привязанные к оси времени графика (см. redrawHourlyActivityLayer) --
    раньше была отдельная полоса из 24 одинаковых сегментов под графиком. */
@@ -120,27 +286,27 @@ body.embed .card{border-radius:0;box-shadow:none;border:none;max-width:100%}
 .hs-bar{position:absolute;bottom:0;background:var(--gold);opacity:.45;border-radius:1px 1px 0 0;cursor:pointer;pointer-events:auto}
 .hs-bar:hover{opacity:.75}
 .hs-bar.hs-peak{opacity:.85}
-.hs-peak-label{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);margin-bottom:2px;font-size:8px;font-family:'JetBrains Mono',monospace;color:var(--gold);text-transform:uppercase;letter-spacing:.3px;white-space:nowrap}
+.hs-peak-label{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);margin-bottom:2px;font-size:8px;font-family:'JetBrains Mono',monospace;color:var(--gold-text,#866A19);text-transform:uppercase;letter-spacing:.3px;white-space:nowrap}
 .hs-title{position:absolute;left:6px;bottom:100%;margin-bottom:3px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:.03em;text-transform:uppercase;pointer-events:none;white-space:nowrap}
-.hs-edu-link{color:var(--gold);font-weight:600;text-decoration:none}
+.hs-edu-link{color:var(--gold-text,#866A19);font-weight:600;text-decoration:none}
 .hs-edu-link:hover{text-decoration:underline}
 
 /* Сентимент толпы (Layer 3, Фаза 3) */
 .sentiment-panel{border-top:1px solid var(--line);padding:8px 18px 0}
 .sentiment-hd{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;padding-bottom:6px;cursor:pointer;letter-spacing:.2px}
-.sentiment-badge{margin-left:auto;color:var(--gold);font-weight:700;cursor:pointer;font-size:11px}
+.sentiment-badge{margin-left:auto;color:var(--gold-text,#866A19);font-weight:700;cursor:pointer;font-size:11px}
 .sentiment-body{height:0;overflow:hidden;transition:height .15s ease}
 .sentiment-body.on{height:64px;margin-bottom:8px}
 .sentiment-lock{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px;padding:14px 0}
 
 /* Мои сделки (Layer 4, Фаза 2) */
 .trades-teaser{display:flex;align-items:center;gap:10px;padding:8px 18px;background:rgba(201,162,39,.08);border-bottom:1px solid var(--line);font-size:12px;color:var(--ink)}
-.trades-teaser a{color:var(--gold);font-weight:600;text-decoration:none}
+.trades-teaser a{color:var(--gold-text,#866A19);font-weight:600;text-decoration:none}
 .trades-teaser a:hover{text-decoration:underline}
 .trades-teaser button{margin-left:auto;border:none;background:none;color:var(--muted);cursor:pointer;font-size:12px;padding:2px 4px}
 .evt-card .trade-context{margin-top:10px;padding:10px 12px;border-radius:10px;background:rgba(201,162,39,.07);border:1px solid rgba(201,162,39,.18);font-size:12px;line-height:1.6}
 .evt-card .trade-context div{margin-bottom:2px}
-#eventLayer{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+#eventLayer{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:6}
 .evt-line{position:absolute;top:0;bottom:20px;width:0;border-left:1px dashed rgba(43,43,51,.2);pointer-events:none}
 .evt-marker{position:absolute;bottom:4px;width:9px;height:9px;transform:translateX(-50%) rotate(45deg);cursor:pointer;pointer-events:auto;box-shadow:0 0 0 2px var(--paper)}
 .evt-marker.high{background:var(--gold)}
@@ -159,7 +325,7 @@ body.embed .card{border-radius:0;box-shadow:none;border:none;max-width:100%}
 .evt-card .zone-factor-row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-size:12.5px}
 .evt-card h4{margin:0 0 6px;font-family:Montserrat,sans-serif;font-size:14px;line-height:1.35;padding-right:20px}
 .evt-card .evt-meta{font-size:11px;color:var(--muted);margin-bottom:8px}
-.evt-card .evt-countdown{font-size:12px;color:var(--gold);font-weight:600;margin-bottom:8px}
+.evt-card .evt-countdown{font-size:12px;color:var(--gold-text,#866A19);font-weight:600;margin-bottom:8px}
 .evt-card .evt-nums{display:flex;gap:18px;margin-bottom:6px}
 .evt-card .evt-nums div{font-size:11px;color:var(--muted)}
 .evt-card .evt-nums b{display:block;font-size:14px;color:var(--ink);font-weight:600}
@@ -185,7 +351,7 @@ body.embed .card{border-radius:0;box-shadow:none;border:none;max-width:100%}
 .thermo-chip .tc-label{font-size:9.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:'JetBrains Mono',monospace;letter-spacing:.2px}
 .thermo-chip .tc-value{font-size:12.5px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:'JetBrains Mono',monospace;margin-top:1px}
 .thermo-chip .tc-value.tc-hot{color:var(--up)}
-.thermo-chip .tc-value.tc-warm{color:var(--gold)}
+.thermo-chip .tc-value.tc-warm{color:var(--gold-text,#866A19)}
 .thermo-chip .tc-value.tc-cold{color:var(--muted)}
 .thermo-chip .tc-bar{height:3px;border-radius:2px;background:var(--line);margin-top:5px;overflow:hidden}
 .thermo-chip .tc-bar i{display:block;height:100%;background:var(--gold)}
@@ -219,6 +385,20 @@ body.embed .card{border-radius:0;box-shadow:none;border:none;max-width:100%}
   </nav>
 </div>
 <div class="chart-body">
+<div class="chart-layout">
+<aside class="inst-panel" id="instPanel">
+  <div class="inst-head">
+    <label class="inst-search">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="instSearch" type="search" autocomplete="off" spellcheck="false" aria-label="search">
+    </label>
+    <div class="inst-cats" id="instCats"></div>
+  </div>
+  <div class="inst-list" id="instList"><div id="instRows"></div></div>
+  <div class="inst-foot" id="instFoot"></div>
+</aside>
+<a class="inst-back" href="?" data-i18n="chart.inst_back_to_list">← К списку инструментов</a>
 <div class="card">
   <div class="hd">
     <span class="sym" id="sym">—</span>
@@ -228,27 +408,55 @@ body.embed .card{border-radius:0;box-shadow:none;border:none;max-width:100%}
     <span class="stat">RSI <b id="rsi">—</b></span>
     <span class="stat"><span data-i18n="chart.nearest_label">ближайший:</span> <b id="near">—</b></span>
   </div>
-  <div class="ctrl-row">
+  <!-- 🔴 Над графиком остаётся только выбор таймфрейма.
+       ТЗ 03.09: «над графиком ставь только Time Frame и финансовый
+       инструмент, чтобы всё было проще». Инструмент, цена и RSI уже в
+       шапке карточки выше — здесь только таймфреймы.
+       Слои, их пояснения, тизер журнала и термометр переехали ПОД
+       график: человек приходит смотреть на цену, а не читать
+       инструкцию перед ней. -->
+  <div class="ctrl-row ctrl-row-top">
     <div class="tf-grp" id="tf">
-      <button class="tf" data-tf="M5">M5</button><button class="tf" data-tf="M15">M15</button>
+      <button class="tf" data-tf="M1">M1</button><button class="tf" data-tf="M5">M5</button><button class="tf" data-tf="M15">M15</button>
       <button class="tf" data-tf="M30">M30</button><button class="tf" data-tf="H1">H1</button>
       <button class="tf" data-tf="H4">H4</button><button class="tf on" data-tf="D1">D1</button>
       <button class="tf" data-tf="W1">W1</button>
     </div>
-    <div class="ctrl-sep"></div>
+  </div>
+  <div id="chartContainer" style="position:relative">
+    <div id="chart"></div>
+    <!-- Состояние графика словами. До 31.08.2026 отсутствие данных выглядело
+         как пустое белое поле без единого символа — неотличимо от поломки
+         страницы. Слой поверх холста, скрыт по умолчанию. -->
+    <div id="chartMsg" hidden><div class="cm-box"><span class="cm-spin" hidden></span><span class="cm-txt"></span></div></div>
+    <div id="sessionLayer"></div>
+    <div id="confluenceLayer"></div>
+    <div id="newsLayer"></div>
+    <div id="eventLayer"></div>
+    <div id="hourlyActivityLayer"></div>
+    <svg id="tradesLayer" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:hidden"></svg>
+  </div>
+  <!-- Под графиком: слои, пояснения к ним и термометр (ТЗ 03.09). -->
+  <div class="below-chart">
     <span class="tog-label" data-i18n="chart.layers_label">слои</span>
     <div class="tog" id="tog">
+      <!-- 🔴 Все слои, кроме пивотов, скрыты в разметке и показываются только
+           после того, как данные приехали (updateLayerChips). Раньше было
+           наоборот: страница открывалась с полным набором из восьми кнопок, а
+           через секунду лишние исчезали. Человек успевал увидеть «SMC» и
+           «Паттерны» на инструменте, где их нет, и нажать по исчезающей
+           кнопке. Пивоты считаются на фронте из тех же баров, что и график, —
+           они есть всегда, пока есть свечи. -->
       <button class="chip on" data-t="piv" data-i18n="home.pivots_toggle">Пивоты</button>
-      <button class="chip" data-t="cndl" data-i18n="home.patterns_toggle">Паттерны</button>
-      <button class="chip" data-t="smc">SMC</button>
-      <button class="chip on" data-t="evt" data-i18n="chart.events_toggle">События</button>
-      <button class="chip" data-t="news" data-i18n="chart.news_toggle">Новости</button>
-      <button class="chip on" data-t="lvl" data-i18n="chart.levels_toggle">Уровни</button>
-      <button class="chip" data-t="zone" data-i18n="chart.zones_toggle">Зоны</button>
-      <button class="chip" data-t="sess" data-i18n="chart.sessions_toggle">Сессии</button>
+      <button class="chip" data-t="cndl" data-i18n="home.patterns_toggle" style="display:none">Паттерны</button>
+      <button class="chip" data-t="smc" style="display:none">SMC</button>
+      <button class="chip on" data-t="evt" data-i18n="chart.events_toggle" style="display:none">События</button>
+      <button class="chip" data-t="news" data-i18n="chart.news_toggle" style="display:none">Новости</button>
+      <button class="chip on" data-t="lvl" data-i18n="chart.levels_toggle" style="display:none">Уровни</button>
+      <button class="chip" data-t="zone" data-i18n="chart.zones_toggle" style="display:none">Зоны</button>
+      <button class="chip" data-t="sess" data-i18n="chart.sessions_toggle" style="display:none">Сессии</button>
       <button class="chip on" data-t="trades" data-i18n="chart.trades_toggle" style="display:none">Мои сделки</button>
     </div>
-  </div>
   <div class="tog-hints" id="togHints"></div>
   <div class="trades-teaser" id="tradesTeaser" style="display:none">
     <span data-i18n="chart.trades_teaser_text">Записывай сделки в журнал — они появятся здесь, на графике.</span>
@@ -259,14 +467,6 @@ body.embed .card{border-radius:0;box-shadow:none;border:none;max-width:100%}
     <div class="thermo-chips" id="thermoChips"></div>
     <button class="thermo-chevron" id="thermoChevron" aria-label="toggle">▾</button>
   </div>
-  <div id="chartContainer" style="position:relative">
-    <div id="chart"></div>
-    <div id="sessionLayer"></div>
-    <div id="confluenceLayer"></div>
-    <div id="newsLayer"></div>
-    <div id="eventLayer"></div>
-    <div id="hourlyActivityLayer"></div>
-    <svg id="tradesLayer" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:hidden"></svg>
   </div>
   <div class="sentiment-panel" id="sentimentPanel" style="display:none">
     <div class="sentiment-hd" id="sentimentHd">
@@ -279,13 +479,17 @@ body.embed .card{border-radius:0;box-shadow:none;border:none;max-width:100%}
   <div class="beginner"><span class="ic">&#9432;</span><div id="explain">…</div></div>
   <!-- SPEC_fix_live_chart.md §6: единственное место на сайте, где число было
        без даты и источника — измеренная задержка (не декларируемая) и явное
-       "это не цена брокера". Текст источника меняется вместе с ним (§8: Yahoo/Bybit). -->
+       "это не цена вашего брокера". Конкретный источник называет liveSourceFoot
+       ниже и меняет вместе с ним; 20.08 строка под ним перестала называть Yahoo
+       поимённо — для большинства инструментов цена теперь брокерская, и
+       «Справочная цена Yahoo Finance» стала неправдой на самом видном месте. -->
   <div class="foot" id="liveSourceFoot" style="display:none"></div>
   <div class="foot">
-    <span data-i18n="chart.not_broker_price">Справочная цена Yahoo Finance. У брокера цена будет отличаться на спред.</span>
+    <span data-i18n="chart.not_broker_price">Справочная цена. У вашего брокера она будет отличаться на спред.</span>
     <a href="/brokers" data-i18n="chart.not_broker_price_link">Сравнить брокеров →</a>
   </div>
   <div class="foot" data-i18n="chart.footer_disclaimer">образовательная подсветка паттернов — контекст, не инвестиционная рекомендация</div>
+</div>
 </div>
 <div class="evt-card-backdrop" id="evtBackdrop"></div>
 <div class="evt-card" id="evtCard"></div>
@@ -310,6 +514,30 @@ function _defaultChartSymbol() {
   return 'GOLD';
 }
 const PARAM = _SP.get('s') || _defaultChartSymbol();
+
+// 🔴 Один инструмент — один адрес.
+//
+// У золота три имени: GOLD в каталоге и на графике, XAUUSD в дневнике сделок
+// и у брокера, GC=F в ленте котировок. Ссылка `?s=XAUUSD` приходила из
+// дневника и из внешних материалов и открывала пустой график, а после починки
+// открывала бы тот же самый график по второму адресу. Для человека это две
+// разные ссылки на одну страницу, для поисковика — две страницы с одинаковым
+// содержимым.
+//
+// Меняем ТОЛЬКО параметр `s`, остальные не трогаем: в адресе живут UTM-метки,
+// по которым считается, откуда пришёл лид, и стереть их здесь значило бы
+// потерять источник ровно у тех, кто пришёл по ссылке из рекламы.
+// replaceState, а не assign: перезагружать страницу ради переименования
+// параметра — значит выбросить уже нарисованный график.
+window.SBFCanonicalizeUrl = function (canonical) {
+  try {
+    if (!canonical) return;
+    const u = new URL(window.location.href);
+    if ((u.searchParams.get('s') || '') === canonical) return;
+    u.searchParams.set('s', canonical);
+    window.history.replaceState(null, '', u.pathname + u.search + u.hash);
+  } catch (e) { /* адрес не разобрался — просто оставляем как есть */ }
+};
 // Понятное название инструмента из общего реестра (SPEC_symbol_names.md §3);
 // без него — честный фолбэк на сырой символ, не выдумываем имя.
 function symName(sym, mode) {
@@ -338,14 +566,26 @@ function _focusTodayTF() {
 const YF = {
   GOLD:'GC=F', SILVER:'SI=F',
   BTC:'BTC-USD', ETH:'ETH-USD', SOL:'SOL-USD',
-  SPX:'^GSPC', NASDAQ:'^IXIC', DJI:'^DJI', VIX:'^VIX',
+  SPX:'^GSPC', NASDAQ:'^NDX', DJI:'^DJI', VIX:'^VIX',
   WTI:'CL=F', NG:'NG=F',
   EURUSD:'EURUSD=X', GBPUSD:'GBPUSD=X', USDJPY:'JPY=X', DXY:'DX-Y.NYB',
 };
-const BYBIT = {BTC:'BTCUSDT', ETH:'ETHUSDT', SOL:'SOLUSDT'};
 
 // ── Состояние ───────────────────────────────────────────────────────────────
-let chart = null, candleSeries = null, lastCandle = null, ws = null, curTF = 'D1';
+let chart = null, candleSeries = null, lastCandle = null, curTF = 'D1';
+// §1a (SPEC_chart_m1_m5): время последнего РЕАЛЬНОГО бара (из статики/тейла),
+// unix-сек. applyLive() его НЕ двигает — иначе since тейла считался бы от
+// выдуманной свечи и дыра самозапечатывалась (26 инструментов стояли с 6 авг).
+let _lastRealBarUnix = null;
+// Ряд пришёл из MT5 -> живую цену берём ТОЛЬКО оттуда же. Котировка из
+// /api/quotes для таких символов принадлежит другому инструменту (YF-карта
+// указывает на фьючерсы GC=F/SI=F/CL=F, а свечи спотовые) и рисует шип.
+let _liveFromMt5 = false;
+// §1a #3: данные протухли (последний реальный бар старше max(2 периода, 3 сут)).
+// Порог 3 сут отделяет мёртвый фид (USDRUB — 35 дней, Yahoo не отдаёт) от
+// обычного закрытия рынка на выходные (пт→пн ≈ 2.5 сут). Когда true — бейдж
+// показывает «данные от <дата>», а не зелёный live, и pollQuotes его не зеленит.
+let _dataStale = false;
 let _curData = null;           // результат SBFGrafik.loadBars
 let _curLines = [];            // priceLine refs (для удаления)
 let _curEvents = [];           // события календаря для текущего symbol/tf (Фаза 1)
@@ -355,6 +595,7 @@ let _curLevelsShown = [];      // после top-N фильтра — то, чт
 let _curConfluence = [];       // зоны внимания для текущего symbol (Layer 2, Фаза 2)
 let _curPatterns = [];         // паттерны из core.patterns.detect() (Layer 2, Фаза 3)
 let _curPatternsShown = [];    // после дедупликации — то, что реально на графике (для хит-теста клика)
+let _curSMC = [];              // структура рынка из core.smc.detect() (WP3.2 SPEC_alpha_engine_implementation.md)
 let _evtRO = null;             // ResizeObserver слоя событий
 const TOGGLES = {piv:true, cndl:false, smc:false, evt: FOCUS_TODAY || localStorage.getItem('sbf_chart_evt') !== '0', news:false,
   lvl: localStorage.getItem('sbf_chart_lvl') !== '0', zone:false, sess:false, trades:true};
@@ -378,7 +619,18 @@ function fmt_(tpl, vars) { return tpl.replace(/\{(\w+)\}/g, (_, k) => (vars[k] !
 function fmtPrice(v) {
   if (v == null) return '—';
   const av = Math.abs(+v);
-  const prec = av < 10 ? 4 : av < 1000 ? 2 : 1;
+  // 🔴 Четырёх знаков хватало, пока самым мелким инструментом был евродоллар.
+  // У SHIB цена 0.00000546, у PEPE — того же порядка: заголовок графика писал
+  // «0.0000», и рядом «ближайший: PP 0.0000 (-0.79%)». Числа на экране были,
+  // читать в них было нечего. В каталоге у таких инструментов digits=7, но
+  // здесь его нет под рукой — считаем по величине самой цены.
+  let prec;
+  if (av === 0)          prec = 2;
+  else if (av < 0.0001)  prec = 8;
+  else if (av < 0.01)    prec = 6;
+  else if (av < 10)      prec = 4;
+  else if (av < 1000)    prec = 2;
+  else                   prec = 1;
   return (+v).toLocaleString('en', {minimumFractionDigits: prec, maximumFractionDigits: prec});
 }
 
@@ -467,6 +719,24 @@ async function refreshPatterns(tf) {
   }
 }
 
+// WP3.2 SPEC_alpha_engine_implementation.md: раньше SBFGrafik.detectSMC
+// считался синхронно на клиенте по _curData.bars — теперь как и паттерны,
+// живой Python-эндпоинт (core.smc.detect(), сверен с JS на 200 барах,
+// см. Core-лог 11.08). Тот же from/to по видимым барам, что у паттернов.
+async function refreshSMC(tf) {
+  _curSMC = [];
+  if (_curData && _curData.lw.length) {
+    const bars = _curData.lw;
+    const from = barTimeToUnix(bars[0].time);
+    const to = barTimeToUnix(bars[bars.length - 1].time) + (TF_SEC[tf] || 86400) * 6;
+    try {
+      const r = await fetch(`/api/chart/smc?symbol=${encodeURIComponent(PARAM)}&tf=${tf}&from=${from}&to=${to}`);
+      const data = await r.json();
+      if (Array.isArray(data)) _curSMC = data;
+    } catch (e) {}
+  }
+}
+
 function findPatternAtX(x) {
   if (!chart || !_curPatternsShown.length) return null;
   let best = null, bestDist = 8;
@@ -540,56 +810,64 @@ function openPatternCard(p, clickX, clickY) {
     .catch(() => {});
 }
 
+// WP3.2 SPEC_alpha_engine_implementation.md: _curSMC теперь из живого
+// Python-эндпоинта (core.smc.detect(), сверен с этой же JS-функцией на
+// 200 барах XAUUSD H1 — полное совпадение по HH/LH/HL/LL, см. Core-лог
+// 11.08). SBFGrafik.detectSMC больше не вызывается здесь — остаётся
+// только в образовательной галерее (та же развилка, что у detectCandles).
 function getSMCMarkers() {
-  if (!_curData) return [];
-  const evts = SBFGrafik.detectSMC(_curData.bars, 5);
-  const start = Math.max(0, _curData.bars.length - 60);
+  if (!_curData || !_curSMC.length) return [];
+  const bars = _curData.lw;
+  const recentFromTs = bars.length > 60 ? barTimeToUnix(bars[bars.length - 60].time) : 0;
   const swingTypes = ['hh','lh','hl','ll'];
-  return evts
-    .filter(e => swingTypes.includes(e.type) && e.i >= start)
-    .map(e => {
-      const lw = _curData.lw[e.i];
-      if (!lw) return null;
-      return {
-        time: lw.time,
-        position: e.dir==='bull' ? 'belowBar' : 'aboveBar',
-        color: e.dir==='bull' ? '#2E8B6F' : '#C0504D',
-        shape: 'circle',
-        text: e.label
-      };
-    }).filter(Boolean);
+  return _curSMC
+    .filter(e => swingTypes.includes(e.event) && e.ts >= recentFromTs)
+    .map(e => ({
+      time: unixToBarTime(e.ts),
+      position: e.direction === 'bullish' ? 'belowBar' : 'aboveBar',
+      color: e.direction === 'bullish' ? '#2E8B6F' : '#C0504D',
+      shape: 'circle',
+      text: e.event.toUpperCase()
+    }));
 }
 
+// Python-бэкенд отдаёт ВСЮ историю (JS ограничивал 5 FVG/3 OB "для
+// читаемости", BOS считал только последний — недопустимо в расчёте, но
+// на графике так же рисовать ВСЁ означало бы сотни горизонтальных линий.
+// Берём последние по времени N — та же визуальная плотность, что была,
+// просто корректный (не структурно ограниченный) источник под капотом.
 function applySMCLines(evts) {
   const lines = [];
   if (!candleSeries) return lines;
-  evts.forEach(ev => {
-    if (ev.type === 'bos') {
-      const col = ev.dir==='bear' ? '#c0392b' : '#1e8e5a';
+  const byEvent = (key, n) => evts.filter(e => e.event === key).slice(-n);
+  const shown = [...byEvent('bos', 5), ...byEvent('choch', 5), ...byEvent('fvg', 5), ...byEvent('ob', 3)];
+  shown.forEach(ev => {
+    if (ev.event === 'bos' || ev.event === 'choch') {
+      const col = ev.direction === 'bearish' ? '#c0392b' : '#1e8e5a';
       lines.push(candleSeries.createPriceLine({
         price: ev.y, color: col, lineWidth: 1, lineStyle: 2,
-        axisLabelVisible: true, title: ev.label
+        axisLabelVisible: true, title: ev.event.toUpperCase()
       }));
     }
-    if (ev.type === 'fvg') {
-      const col = ev.dir==='bull' ? '#1D9E75' : '#c0392b';
+    if (ev.event === 'fvg') {
+      const col = ev.direction === 'bullish' ? '#1D9E75' : '#c0392b';
       lines.push(candleSeries.createPriceLine({
-        price: ev.yTop, color: col, lineWidth: 1, lineStyle: 3,
+        price: ev.top, color: col, lineWidth: 1, lineStyle: 3,
         axisLabelVisible: false, title: 'FVG'
       }));
       lines.push(candleSeries.createPriceLine({
-        price: ev.yBot, color: col, lineWidth: 1, lineStyle: 3,
+        price: ev.bottom, color: col, lineWidth: 1, lineStyle: 3,
         axisLabelVisible: false, title: ''
       }));
     }
-    if (ev.type === 'ob') {
-      const col = ev.dir==='bull' ? '#C9A227' : '#B07CC6';
+    if (ev.event === 'ob') {
+      const col = ev.direction === 'bullish' ? '#C9A227' : '#B07CC6';
       lines.push(candleSeries.createPriceLine({
-        price: ev.yTop, color: col, lineWidth: 1, lineStyle: 2,
+        price: ev.top, color: col, lineWidth: 1, lineStyle: 2,
         axisLabelVisible: false, title: 'OB'
       }));
       lines.push(candleSeries.createPriceLine({
-        price: ev.yBot, color: col, lineWidth: 1, lineStyle: 2,
+        price: ev.bottom, color: col, lineWidth: 1, lineStyle: 2,
         axisLabelVisible: false, title: ''
       }));
     }
@@ -602,7 +880,7 @@ function applySMCLines(evts) {
 // секции i18n выше про порядок исполнения синхронного/defer-скриптов).
 function getTogHints() {
   return {
-    piv: t('chart.hint_pivots', '<b>Пивоты</b> — уровни поддержки/сопротивления, рассчитанные по хаям и лоям предыдущих периодов. <span style="color:#1e8e5a">Зелёные</span> — поддержка (S1, S2), <span style="color:#c0392b">красные</span> — сопротивление (R1, R2), <span style="color:#C9A227">золотая</span> — точка разворота PP.'),
+    piv: t('chart.hint_pivots', '<b>Пивоты</b> — уровни поддержки/сопротивления, рассчитанные по хаям и лоям предыдущих периодов. <span style="color:#1e8e5a">Зелёные</span> — поддержка (S1, S2), <span style="color:#c0392b">красные</span> — сопротивление (R1, R2), <span style="color:var(--gold-text,#866A19)">золотая</span> — точка разворота PP.'),
     cndl: t('chart.hint_patterns', '<b>Паттерны</b> — значимые свечные формации на последних 40 барах. ↑ зелёная стрелка — бычий сигнал (молот, бычье поглощение и др.), ↓ красная — медвежий (харами, медвежье поглощение и др.), ● жёлтый — нейтральный (доджи). Не сигнал к сделке, контекст.'),
     smc: t('chart.hint_smc', '<b>SMC — структура рынка:</b> <b>HH</b> (Higher High) — новый максимум выше предыдущего, тренд вверх; <b>HL</b> (Higher Low) — откат не пробивает предыдущий лой, тренд вверх; <b>LH</b> (Lower High) — максимум ниже предыдущего, слабость; <b>LL</b> (Lower Low) — новый минимум, тренд вниз. <b>BOS</b> — пробой структуры (подтверждение); <b>OB</b> — Order Block, зона крупных ордеров; <b>FVG</b> — разрыв ликвидности, цена часто его закрывает.'),
     lvl: t('chart.hint_levels', '<b>Уровни</b> — исторические зоны поддержки/сопротивления по прошлым разворотам цены (не текущие пивоты). Число вида <b>×30</b> — сколько раз цена разворачивалась у этого уровня: больше касаний — сильнее уровень. Показаны только 6 самых сильных, чтобы не перегружать график — остальные видны при клике на близкий уровень. Нажмите на линию для деталей.'),
@@ -637,10 +915,9 @@ function applyToggles() {
     });
   }
 
-  // SMC priceLine (BOS, FVG, OB)
-  if (TOGGLES.smc && _curData) {
-    const smcEvts = SBFGrafik.detectSMC(_curData.bars, 5);
-    _curLines = _curLines.concat(applySMCLines(smcEvts));
+  // SMC priceLine (BOS, FVG, OB) — из _curSMC (refreshSMC), не клиентский detectSMC
+  if (TOGGLES.smc && _curSMC.length) {
+    _curLines = _curLines.concat(applySMCLines(_curSMC));
   }
 
   // Исторические S/R-уровни (Layer 2, Фаза 1) — сплошная линия (пивоты — пунктир),
@@ -679,7 +956,7 @@ function applyToggles() {
 }
 
 // ── Слой событий календаря (Фаза 1, SBF_Charts_Layer1_Spec) ────────────────
-const TF_SEC = {M5:300, M15:900, M30:1800, H1:3600, H4:14400, D1:86400, W1:604800};
+const TF_SEC = {M1:60, M5:300, M15:900, M30:1800, H1:3600, H4:14400, D1:86400, W1:604800};
 // Совпадает с pattern_stats_job.py's TIMEFRAMES -- статистика по паттернам
 // считается офлайн-джобом только на этих ТФ (SPEC_chart_fixes_and_staged_signup.md §3).
 const PATTERN_STATS_TFS = new Set(['H1', 'H4', 'D1']);
@@ -809,13 +1086,24 @@ function loadReactionBlock(ev) {
     .catch(() => { el.remove(); });
 }
 
+// Название события на языке страницы. Сервер кладёт русский перевод РЯДОМ с
+// исходным (title_ru), а не вместо него: английская версия сайта должна
+// остаться английской, подмена там была бы ошибкой не меньшей, чем английский
+// заголовок на русской странице.
+// Нет перевода — показываем оригинал: «Kansas Fed Composite Index» честнее
+// вольного пересказа, который читатель ни с чем не сопоставит.
+function evTitle(ev) {
+  const lang = (window.sbfI18n && window.sbfI18n.lang) || 'ru';
+  return (lang === 'ru' && ev && ev.title_ru) ? ev.title_ru : ((ev && ev.title) || '');
+}
+
 function singleEventHtml(ev) {
   const dt = new Date(ev.ts * 1000);
   const timeStr = dt.toLocaleString(undefined, {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'});
   const countdown = fmtCountdown(ev.ts);
   const dir = actualDir(ev);
   return `<div class="evt-item">
-    <h4>${escapeHtml(ev.title)}</h4>
+    <h4>${escapeHtml(evTitle(ev))}</h4>
     <div class="evt-meta">${escapeHtml(ev.currency || ev.country)} · ${timeStr}</div>
     ${countdown ? `<div class="evt-countdown">${countdown}</div>` : ''}
     <div class="evt-nums">
@@ -1005,7 +1293,14 @@ async function refreshNewsBursts(tf) {
 async function refreshLevels() {
   _curLevels = [];
   try {
-    const r = await fetch(`/api/chart/levels?symbol=${encodeURIComponent(PARAM)}`);
+    // Передаём текущую цену: сервер отбирает уровни рядом с ней, а не топ-12
+    // за всю историю. Без этого на инструменте в тренде все двенадцать
+    // приходили из прошлой ценовой эпохи и рисовались за пределами экрана —
+    // слой выглядел пустым (GOLD: уровни 1302-1956 при цене 4430).
+    const _lw = (_curData && _curData.lw) || [];
+    const _px = _lw.length ? _lw[_lw.length - 1].close : null;
+    const r = await fetch(`/api/chart/levels?symbol=${encodeURIComponent(PARAM)}`
+                          + (_px ? `&price=${encodeURIComponent(_px)}` : ''));
     const data = await r.json();
     if (Array.isArray(data)) _curLevels = data;
   } catch (e) {}
@@ -1228,11 +1523,52 @@ function sessionSegmentsForDate(dateUTC) {
   return segs;
 }
 
+// 🔴 Кнопка слоя, который для этого инструмента ничего не покажет, — обещание,
+// которого интерфейс не выполняет. Человек жмёт «Новости» или «Сессии», ничего
+// не происходит, и он делает единственный разумный вывод: сломано.
+//
+// Поэтому кнопки, у которых нет данных, скрываются. Прячем только те слои,
+// которые ЗАВИСЯТ ОТ ДАННЫХ по конкретному инструменту:
+//   события, новости, SMC, паттерны — приходят с сервера и часто пусты;
+//   сессии — имеют смысл только на внутридневных ТФ, на дневном и недельном
+//   сутки сжаты так, что полосы неразличимы.
+// Пивоты, уровни и зоны считаются из самих баров: если график построен, они
+// есть всегда, и прятать их нечего.
+function updateLayerChips() {
+  const has = {
+    evt:  _curEvents.length > 0,
+    news: _curNewsBursts.length > 0,
+    smc:  _curSMC.length > 0,
+    cndl: _curPatterns.length > 0,
+    // 🔴 Уровни и зоны в этом списке не значились вовсе, и их кнопки висели
+    // всегда — даже когда за ними ничего нет. Нажатие не давало ничего, и это
+    // читается хуже, чем отсутствие кнопки.
+    lvl:  _curLevels.length > 0,
+    zone: _curConfluence.length > 0,
+    sess: SESSION_TFS.has(curTF)
+  };
+  Object.keys(has).forEach(function (key) {
+    const chip = document.querySelector('#tog [data-t="' + key + '"]');
+    if (!chip) return;
+    chip.style.display = has[key] ? '' : 'none';
+    // Слой без данных не должен оставаться включённым: подсказка под графиком
+    // читает TOGGLES и иначе продолжала бы объяснять то, чего на экране нет.
+    if (!has[key] && TOGGLES[key]) {
+      TOGGLES[key] = false;
+      chip.classList.remove('on');
+    }
+  });
+}
+
+// Внутридневные ТФ, на которых сессии различимы. Раньше этот перечень был
+// выписан в четырёх местах подряд — теперь один.
+const SESSION_TFS = new Set(['M1', 'M5', 'M15', 'M30', 'H1']);
+
 function redrawSessionLayer() {
   const layer = document.getElementById('sessionLayer');
   if (!layer) return;
   layer.innerHTML = '';
-  if (!TOGGLES.sess || !chart || !(curTF === 'M5' || curTF === 'M15' || curTF === 'M30' || curTF === 'H1')) return;
+  if (!TOGGLES.sess || !chart || !SESSION_TFS.has(curTF)) return;
   const width = document.getElementById('chartContainer').clientWidth;
   const vr = chart.timeScale().getVisibleRange();
   if (!vr) return;
@@ -1271,7 +1607,7 @@ function redrawHourlyActivityLayer() {
   const layer = document.getElementById('hourlyActivityLayer');
   if (!layer) return;
   layer.innerHTML = '';
-  const show = TOGGLES.sess && (curTF === 'M5' || curTF === 'M15' || curTF === 'M30' || curTF === 'H1') && _curSessionProfile.length > 0;
+  const show = TOGGLES.sess && SESSION_TFS.has(curTF) && _curSessionProfile.length > 0;
   if (!show || !chart) return;
   const width = document.getElementById('chartContainer').clientWidth;
   const vr = chart.timeScale().getVisibleRange();
@@ -1415,7 +1751,7 @@ function renderSentimentChart() {
   if (_sentimentChart) { try { _sentimentChart.remove(); } catch (e) {} }
   _sentimentChart = LightweightCharts.createChart(document.getElementById('sentimentChartEl'), {
     autoSize: true,
-    layout: {background: {type: 'solid', color: '#FFFFFF'}, textColor: '#8A8275', fontFamily: 'JetBrains Mono', fontSize: 9},
+    layout: {background: {type: 'solid', color: '#FFFFFF'}, textColor: '#7C7563', fontFamily: 'JetBrains Mono', fontSize: 9},
     grid: {vertLines: {visible: false}, horzLines: {visible: false}},
     rightPriceScale: {borderVisible: false, scaleMargins: {top: 0.15, bottom: 0.15}},
     timeScale: {visible: false, rightOffset: 6},
@@ -1896,16 +2232,21 @@ async function drawOurs(tf) {
   // По умолчанию ON на M5-H1, OFF на H4+ (см. спеку Фазы 3; M5/M15 добавлены
   // SPEC_chart_fixes_and_staged_signup.md §3) — пересчитывается заново при
   // каждой смене TF, ручной выбор пользователя между TF не хранится.
-  TOGGLES.news = (tf === 'M5' || tf === 'M15' || tf === 'M30' || tf === 'H1');
+  TOGGLES.news = (tf === 'M1' || tf === 'M5' || tf === 'M15' || tf === 'M30' || tf === 'H1');
   document.querySelector('#tog [data-t="news"]').classList.toggle('on', TOGGLES.news);
   // Зоны внимания: ON на H1-D1, OFF на M5/M15/M30 (шум) и W1 (масштаб) — см. Фаза 2 спеки.
-  TOGGLES.zone = !(tf === 'M5' || tf === 'M15' || tf === 'M30' || tf === 'W1');
+  TOGGLES.zone = !(tf === 'M1' || tf === 'M5' || tf === 'M15' || tf === 'M30' || tf === 'W1');
   document.querySelector('#tog [data-t="zone"]').classList.toggle('on', TOGGLES.zone);
   // Сессионная карта: ON на M5-H1 (см. Layer3 Фаза2 — на H4+/D1/W1 сутки
   // сжаты слишком сильно, полосы сессий были бы неразличимы).
-  TOGGLES.sess = (tf === 'M5' || tf === 'M15' || tf === 'M30' || tf === 'H1');
+  TOGGLES.sess = SESSION_TFS.has(tf);
   document.querySelector('#tog [data-t="sess"]').classList.toggle('on', TOGGLES.sess);
+  // Показать «загружаем» ДО запроса: холодный каталожный инструмент отвечает
+  // 1.5-3.4 с, и всё это время пользователь смотрел на пустой холст.
+  setChartMsg('loading');
   _curData = await SBFGrafik.loadBars(PARAM, tf);
+  setChartMsg((_curData.lw && _curData.lw.length) ? null
+              : ((_curData.meta && _curData.meta.state) || 'nodata'));
   // Дождаться словаря i18n (если он есть) ДО построения текста — на первом
   // рендере этот async-код стартует раньше defer-скриптов (см. секцию i18n
   // выше); loadBars() — сетевой запрос, поэтому к этому моменту window.sbfI18n
@@ -1948,11 +2289,18 @@ async function drawOurs(tf) {
   document.getElementById('chart').innerHTML = '';
   chart = LightweightCharts.createChart(document.getElementById('chart'), {
     autoSize: true,
-    localization: {locale:'en'},
+    // 🔴 По умолчанию Lightweight Charts забирает вертикальный тач-драг себе
+    // (handleScroll.vertTouchDrag = true). Полотно занимает 440px из ~660px
+    // видимой части экрана телефона — палец почти всегда попадает в него, и
+    // страница переставала прокручиваться: человек упирался в график и не мог
+    // добраться ни до пояснений под ним, ни до нижней навигации.
+    // Горизонтальную прокрутку истории и щипок для масштаба оставляем.
+    handleScroll: {vertTouchDrag: false},
+    localization: {locale:'en', timeFormatter:SBFGrafik.lwCrosshairFmt},
     layout: {background:{type:'solid',color:'#FFFFFF'}, textColor:'#2B2B33', fontFamily:'JetBrains Mono'},
     grid: {vertLines:{color:'#F0E9DA'}, horzLines:{color:'#F0E9DA'}},
     rightPriceScale: {borderColor:'#E7DFCF'},
-    timeScale: {borderColor:'#E7DFCF', timeVisible: tf!=='D1'&&tf!=='W1', rightOffset:6},
+    timeScale: {borderColor:'#E7DFCF', timeVisible: tf!=='D1'&&tf!=='W1', rightOffset:6, tickMarkFormatter:SBFGrafik.lwTickFmt},
     crosshair: {mode: LightweightCharts.CrosshairMode.Normal,
       vertLine:{color:'#C9A227', labelBackgroundColor:'#C9A227'},
       horzLine:{color:'#C9A227', labelBackgroundColor:'#C9A227'}},
@@ -1965,7 +2313,10 @@ async function drawOurs(tf) {
   // индексы/крипта/золото (>=1000) — 1-2. Точной карты по символам нет,
   // магнитудная эвристика — простой и достаточно надёжный прокси.
   const _refPx = Math.abs(m && m.last != null ? m.last : (_curData.lw.length ? _curData.lw[_curData.lw.length-1].close : 1));
-  const _pxPrecision = _refPx < 10 ? 4 : _refPx < 1000 ? 2 : 1;
+  // Та же шкала, что у fmtPrice выше: у мем-монет цена 0.00000546, и на
+  // четырёх знаках вся ось превращалась в столбик нулей.
+  const _pxPrecision = _refPx === 0 ? 2
+    : _refPx < 0.0001 ? 8 : _refPx < 0.01 ? 6 : _refPx < 10 ? 4 : _refPx < 1000 ? 2 : 1;
   candleSeries = chart.addCandlestickSeries({
     upColor:'#1e8e5a', downColor:'#c0392b', borderVisible:false,
     wickUpColor:'#1e8e5a', wickDownColor:'#c0392b',
@@ -1973,6 +2324,10 @@ async function drawOurs(tf) {
   });
   candleSeries.setData(_curData.lw);
   lastCandle = _curData.lw.length ? Object.assign({}, _curData.lw[_curData.lw.length-1]) : null;
+  // §1a: точка отсчёта тейла — последний реальный бар статики, не lastCandle
+  // (который applyLive может двигать текущей ценой).
+  _lastRealBarUnix = lastCandle ? barTimeToUnix(lastCandle.time) : null;
+  _updateDataStale();   // §1a #3: честный бейдж по свежести данных
 
   // Объём
   const vol = chart.addHistogramSeries({priceFormat:{type:'volume'}, priceScaleId:'vol'});
@@ -1996,6 +2351,7 @@ async function drawOurs(tf) {
   // applyToggles(), т.к. их рендер идёт оттуда же.
   await refreshLevels();
   await refreshPatterns(tf);
+  await refreshSMC(tf);
 
   // Слои (пивоты/паттерны/SMC/уровни)
   applyToggles();
@@ -2010,6 +2366,9 @@ async function drawOurs(tf) {
   redrawConfluenceLayer();
   await refreshSessions();
   redrawSessionLayer();
+  // Кнопки слоёв обновляем ПОСЛЕ всех загрузок: до этого момента списки ещё
+  // пусты, и мы спрятали бы всё подряд, включая то, что через секунду приедет.
+  updateLayerChips();
   await refreshThermo();
   await refreshSentimentPanel();
   await refreshMyTrades();
@@ -2033,9 +2392,14 @@ function applyLive(price) {
     const bucket     = Math.floor(now / TF_SEC[curTF]) * TF_SEC[curTF];
     const lastBucket = barTimeToUnix(lastCandle.time);
     if (bucket > lastBucket) {
-      // Разрыв больше одного бара (вкладка была свёрнута) на клиенте не
-      // достраивается — это выдумывание данных. Пропущенные бары дозапросит
-      // тейл-эндпоинт (§2), здесь только честно откроется новая текущая свеча.
+      // §1a (SPEC_chart_m1_m5): при разрыве больше 2 баров фид мёртв/пропущен —
+      // НЕ открываем свечу текущей ценой поверх старого ряда. Именно это рисовало
+      // одиночный вертикальный скачок на 26 инструментах и скармливало выдуманный
+      // бар в RSI/Bias/пивоты под подписью «ФАКТ». Пропущенное дозапросит pollTail
+      // от _lastRealBarUnix; цена в шапке при этом обновляется (выше по функции).
+      if ((bucket - lastBucket) > TF_SEC[curTF] * 2) return;
+      // Разрыв в пределах пары баров (вкладка была свёрнута) — честно открываем
+      // новую текущую свечу; остальное дособерёт тейл.
       lastCandle = { time: unixToBarTime(bucket), open: price, high: price, low: price, close: price };
     } else {
       lastCandle.close = price;
@@ -2047,17 +2411,26 @@ function applyLive(price) {
 }
 
 // SPEC_fix_live_chart.md §6.1/§8: подпись источника и измеренной задержки
-// под графиком — общая для Yahoo/Bybit функция, текст меняется вместе с
-// источником (kind), а не показывает одно и то же для разных свойств данных.
+// под графиком — текст меняется вместе с источником (kind), а не показывает
+// одно и то же для разных свойств данных. Ветка 'bybit' убрана 20.08 вместе
+// с самим сокетом.
 function setLiveSourceLabel(kind, delaySec) {
   const el = document.getElementById('liveSourceFoot');
   if (!el) return;
-  if (kind === 'yahoo') {
+  if (kind === 'ctrader') {
+    // 🔴 Подпись обязана называть НАСТОЯЩИЙ источник. 01.09, сразу после
+    // перевода 80 инструментов на cTrader, под графиком EURUSD висело
+    // «Источник: Yahoo Finance · задержка ~131302 с»: ветки для нового
+    // источника не было, и он проваливался в ветку Yahoo вместе с чужой
+    // задержкой. Неверная подпись под верными данными — это не мелочь: по
+    // ней читатель судит, чьей цене он смотрит в глаза.
+    el.textContent = t('chart.source_ctrader', 'Источник: брокер cTrader · живые бары');
+  } else if (kind === 'mt5') {
+    el.textContent = t('chart.source_broker', 'Источник: брокер MT5 · живые бары');
+  } else if (kind === 'yahoo') {
     el.textContent = delaySec != null
       ? fmt_(t('chart.delay_yahoo_tpl', 'Источник: Yahoo Finance · задержка ~{sec} с'), {sec: delaySec})
       : t('chart.delay_yahoo_unknown', 'Источник: Yahoo Finance');
-  } else if (kind === 'bybit') {
-    el.textContent = t('chart.delay_bybit_live', 'Источник: Bybit · живой поток, без задержки');
   } else {
     el.textContent = '';
   }
@@ -2085,6 +2458,48 @@ function setStale(isStale, updatedIso) {
   } else {
     txt.textContent = t('chart.live_label', 'live');
   }
+}
+
+// §1a #3: бейдж отражает свежесть ДАННЫХ графика, а не факт опроса котировок.
+// Для мёртвого фида (данные старше 3 сут, Yahoo не оживил — напр. USDRUB)
+// зелёный live — активная неправда. Показываем «данные от <дата последнего
+// реального бара>». Порог обновляется при render() и после каждого pollTail.
+function _updateDataStale() {
+  if (_lastRealBarUnix == null) { _dataStale = false; return; }
+  const age = Math.floor(Date.now() / 1000) - _lastRealBarUnix;
+  _dataStale = age > Math.max(TF_SEC[curTF] * 2, 3 * 86400);
+  if (_dataStale) setDataStaleBadge(_lastRealBarUnix);
+}
+// Состояние графика словами вместо пустого холста.
+//   'loading'   — идёт запрос (холодный инструмент отвечает до 3.4 с);
+//   'feed_down' — брокер сейчас не отдаёт этот инструмент, данные вернутся;
+//   'nodata'    — ряда по этому инструменту нет вовсе;
+//   null        — данные есть, слой убрать.
+function setChartMsg(kind) {
+  const el = document.getElementById('chartMsg');
+  if (!el) return;
+  if (!kind) { el.hidden = true; return; }
+  const spin = el.querySelector('.cm-spin');
+  const txt  = el.querySelector('.cm-txt');
+  const map = {
+    loading:   ['chart.msg_loading',   'Загружаем данные…'],
+    feed_down: ['chart.msg_feed_down', 'Брокер сейчас не передаёт этот инструмент. Данные появятся, когда фид возобновится.'],
+    nodata:    ['chart.msg_nodata',    'По этому инструменту данных нет.']
+  };
+  const pair = map[kind] || map.nodata;
+  if (txt)  txt.textContent = t(pair[0], pair[1]);
+  if (spin) spin.hidden = (kind !== 'loading');
+  el.hidden = false;
+}
+
+function setDataStaleBadge(unix) {
+  const liveEl = document.getElementById('chartLiveDot');
+  const pxEl   = document.getElementById('px');
+  if (liveEl) liveEl.classList.add('stale');
+  if (pxEl)   pxEl.classList.add('stale');
+  const txt = liveEl ? liveEl.querySelector('.live-txt') : null;
+  if (txt) txt.textContent = fmt_(t('chart.data_from_tpl', 'данные от {date}'),
+                                   {date: new Date(unix * 1000).toISOString().slice(0, 10)});
 }
 
 // SPEC_fix_live_chart.md §7: рынок закрыт (выходные) — Yahoo продолжает
@@ -2150,6 +2565,10 @@ async function pollQuotes() {
     if (ageSec > 30) {
       setStale(true, q.updated);
       applyLive(null); // не подменяем цену устаревшей — applyLive(null) выходит сразу
+    } else if (_dataStale) {
+      // §1a #3: сборщик котировок жив, но САМИ данные графика мертвы (фид не
+      // оживляется даже Yahoo). Не зеленим «live» — держим честную метку даты.
+      setDataStaleBadge(_lastRealBarUnix);
     } else {
       setStale(false);
       const sym = YF[PARAM];
@@ -2158,8 +2577,18 @@ async function pollQuotes() {
         const closed = row.delay_sec != null && row.delay_sec > MARKET_CLOSED_DELAY_SEC;
         setMarketClosed(closed);
         if (!closed) {
-          applyLive(row.price);
-          setLiveSourceLabel('yahoo', row.delay_sec);
+          // 🔴 Правило одно на весь файл: живая цена применяется ТОЛЬКО если она
+          // из того же фида, что и свечи. Раньше проверялся один случай (ряд из
+          // MT5 — цену ведёт pollTail), но с 20.08 quotes.json сам стал
+          // брокерским для инструментов Ava, и зеркальный случай стал реальным:
+          // на D1 у символов без брокерской статики свечи ещё из Yahoo, а
+          // котировка уже из MT5 — расхождение по BTC на замере 06.08 было 0.8%.
+          // Не смешиваем ни в ту, ни в другую сторону.
+          const quoteFromMt5 = row.source === 'mt5';
+          if (!_liveFromMt5 && !quoteFromMt5) {
+            applyLive(row.price);
+            setLiveSourceLabel('yahoo', row.delay_sec);
+          }
           // §7: опрос не крутится бессмысленно при закрытом рынке — раз в 5мин
           // достаточно, чтобы заметить открытие, а не 15с ни за чем.
         } else {
@@ -2175,14 +2604,18 @@ async function pollQuotes() {
 // котировки (close=price, high/low растянуты по 8-секундным точкам, open —
 // из последней публикации статики). Частота привязана к таймфрейму: четверть
 // бара, но не чаще 30с — на D1 форма меняется медленно, опрашивать как на M5
-// бессмысленно. Крипта (BYBIT[PARAM]) свой поток через WS, тейл ей не нужен.
+// бессмысленно. Крипта идёт этим же путём — см. удалённый Bybit-WS ниже.
 let _tailTimer = null;
 let _tailInFlight = false;
 
 function scheduleTail() {
   if (_tailTimer) { clearInterval(_tailTimer); _tailTimer = null; }
-  if (BYBIT[PARAM] || !YF[PARAM]) return;
-  const intervalMs = Math.max(30000, (TF_SEC[curTF] || 86400) * 1000 / 4);
+  if (!YF[PARAM]) return;
+  // §6: на M1 опрос раз в минуту (бар закрывается раз в 60с — чаще бессмысленно
+  // и лишняя нагрузка на Yahoo). Прочие ТФ — четверть бара, но не чаще 30с.
+  const intervalMs = curTF === 'M1'
+    ? 10000
+    : Math.max(30000, (TF_SEC[curTF] || 86400) * 1000 / 4);
   pollTail();
   _tailTimer = setInterval(pollTail, intervalMs);
 }
@@ -2195,7 +2628,13 @@ async function pollTail() {
     // since) — без сдвига текущая незакрытая свеча никогда бы не попадала в
     // ответ и не обновлялась бы реальными данными, только последующие бары
     // после границы. Спека прямо просит "включая текущий незакрытый".
-    const since = barTimeToUnix(lastCandle.time) - 1;
+    // §1a: считаем since от последнего РЕАЛЬНОГО бара, а не от lastCandle
+    // (applyLive мог продвинуть его текущей ценой). Иначе тейл спрашивал бы
+    // бары новее «сейчас», получал пусто и никогда не достраивал разрыв.
+    const _anchor = _lastRealBarUnix != null
+      ? Math.min(barTimeToUnix(lastCandle.time), _lastRealBarUnix)
+      : barTimeToUnix(lastCandle.time);
+    const since = _anchor - 1;
     // /api/chart/tail ждёт метку сайта (PARAM, "GOLD"), сам резолвит тикер —
     // не YF[PARAM] ("GC=F"): это ключ для /api/quotes (§3), а тут другой
     // сервер-сайд справочник (serve.py::_M5_YF_TICKERS), другой формат ключа.
@@ -2214,8 +2653,31 @@ async function pollTail() {
           // более новых. Устаревший бар просто пропускаем: он уже неактуален.
           candleSeries.update(bar);
           lastCandle = bar;
+          _lastRealBarUnix = barTimeToUnix(bar.time);   // §1a: продвигаем реальный якорь
         } catch (e) { /* бар устарел за время запроса — пропускаем, не критично */ }
       }
+      _updateDataStale();   // §1a #3: свежесть могла измениться после достройки
+    }
+    // Живая цена — из ответа тейла, а не из чужого фида. Ставится ПОСЛЕ
+    // применения баров: applyLive двигает ту же lastCandle, и обратный
+    // порядок затирал бы только что полученную реальную форму свечи.
+    if (data.source === 'ctrader') {
+      // Свечи брокера, как и в ветке mt5: живая цена берётся из последней
+      // (незакрытой) свечи того же ряда, а не из чужого фида котировок —
+      // иначе на графике вырастает одиночный вертикальный шип на базисе.
+      _liveFromMt5 = true;
+      setLiveSourceLabel('ctrader', data.delay_sec);
+      if (data.live_price != null) applyLive(data.live_price);
+    } else if (data.source === 'mt5') {
+      _liveFromMt5 = true;
+      setLiveSourceLabel('mt5', data.delay_sec);
+      if (data.live_price != null) applyLive(data.live_price);
+    } else if (data.source !== undefined || Array.isArray(data.candles)) {
+      _liveFromMt5 = false;
+      // Подпись источника ставит тейл и в Yahoo-ветке: pollQuotes() теперь
+      // может законно не применить котировку (чужой фид) и не дойти до метки,
+      // а строка «Источник: …» под графиком не должна от этого пустеть.
+      if (data.delay_sec != null) setLiveSourceLabel('yahoo', data.delay_sec);
     }
   } catch (e) {
     // тихо: следующий цикл попробует снова, applyLive() тем временем держит
@@ -2225,55 +2687,15 @@ async function pollTail() {
   }
 }
 
-// SPEC_fix_live_chart.md §8: у сокета не было переподключения при обрыве —
-// один разрыв соединения (не редкость для долго открытой вкладки) навсегда
-// убивал живые обновления цены крипты без единого признака на странице.
-let _wsReconnectAttempts = 0;
-let _wsReconnectTimer = null;
-let _wsDeliberateClose = false;
-const WS_MAX_RECONNECT_ATTEMPTS = 5;
-
-function startCryptoWS() {
-  if (!BYBIT[PARAM]) return false;
-  try {
-    _wsDeliberateClose = false;
-    ws = new WebSocket('wss://stream.bybit.com/v5/public/spot');
-    ws.onopen = () => {
-      _wsReconnectAttempts = 0;
-      setLiveSourceLabel('bybit', null); // §6.1/§8: подпись источника меняется вместе с ним
-      ws.send(JSON.stringify({op:'subscribe', args:['tickers.'+BYBIT[PARAM]]}));
-    };
-    ws.onmessage = ev => {
-      const m = JSON.parse(ev.data);
-      if (m.topic && m.data && m.data.lastPrice) applyLive(parseFloat(m.data.lastPrice));
-    };
-    ws.onclose = () => { if (!_wsDeliberateClose) scheduleWSReconnect(); };
-    ws.onerror = () => { try { ws.close(); } catch (e) {} }; // onclose сработает следом сам
-    return true;
-  } catch (e) { return false; }
-}
-
-function scheduleWSReconnect() {
-  ws = null;
-  _wsReconnectAttempts++;
-  if (_wsReconnectAttempts > WS_MAX_RECONNECT_ATTEMPTS) {
-    // Сокет не поднимается — сдаёмся честно, откатываемся на Yahoo через
-    // pollQuotes() (задержанные котировки крипты тоже приходят в
-    // publish_quotes(), см. YF.BTC/ETH/SOL) вместо тихой мёртвой цены.
-    setLiveSourceLabel('yahoo', null);
-    pollQuotes();
-    return;
-  }
-  const delay = Math.min(30000, 1000 * Math.pow(2, _wsReconnectAttempts));
-  if (_wsReconnectTimer) clearTimeout(_wsReconnectTimer);
-  _wsReconnectTimer = setTimeout(startCryptoWS, delay);
-}
-
-function stopWS() {
-  _wsDeliberateClose = true;
-  if (_wsReconnectTimer) { clearTimeout(_wsReconnectTimer); _wsReconnectTimer = null; }
-  if (ws) { try { ws.close(); } catch(e){}; ws = null; }
-}
+// 🔴 20.08: блок Bybit-WebSocket удалён — это был ТРЕТИЙ источник цены.
+// Бары крипты приходят от брокера (BTCUSD/ETHUSD/SOLUSD у Ava, /api/chart/tail),
+// а lastPrice тянулся со спота Bybit: замер 20.08 — BTC 72181 против 72110.6
+// (+0.098%), ETH +0.108%, SOL +0.24%. applyLive() растягивал текущую свечу до
+// чужой цены — та же болезнь, что у золота, только на порядок мельче и потому
+// незаметная. Вдобавок _liveFromMt5 путь сокета не закрывал, а блок «Технический»
+// на главной уже брал крипту из MT5 — один и тот же инструмент показывал две
+// цены на двух страницах одного сайта.
+// stopWS() при этом не вызывался ниоткуда — сокет и закрыть было некому.
 
 // ── Переключение ────────────────────────────────────────────────────────────
 async function render(tf) {
@@ -2330,7 +2752,7 @@ render(_initialTF).then(() => {
   // записи раз в 15с (publish_quotes) — две трети опросов получали те же
   // байты. pollQuotes() теперь сам себя перепланирует через setTimeout (15с
   // открыт рынок / 5мин закрыт, §7) — здесь только первый вызов.
-  if (!startCryptoWS()) { pollQuotes(); }
+  pollQuotes();
   SBFGrafik.chartFullscreenButton(document.querySelector('.card'));
   _reportHeight();
 });
@@ -2386,5 +2808,560 @@ document.addEventListener('sbf:user-ready', async ev => {
 });
 </script>
 </div><!-- /.chart-body -->
+
+<script>
+/* ── Панель инструментов (SPEC_chart_all_instruments_2026-08-25.md §4/§6) ───
+   Список читает СНИМОК (web/data/broker_*.json), который пишет фоновый цикл
+   broker_catalog_loop.py. В MT5 из браузера не ходим никогда: мост живёт в
+   Wine, отвечает неровно и уже бывал заблокирован зависшим прогоном —
+   синхронный вызов из веб-запроса означал бы, что одно зависание вешает сайт.
+
+   Три файла с разным тактом, а не один: каталог (имена и категории, 85 КБ)
+   меняется раз в недели и тянется один раз; котировки (37 КБ) опрашиваются
+   каждые 15 с; спарклайны обновляет отдельный джоб раз в 15 минут. Общий файл
+   означал бы 138 КБ на каждый опрос, а сервер ничего не жмёт. */
+(function(){
+  const listEl = document.getElementById('instList');
+  const rowsEl = document.getElementById('instRows');
+  const footEl = document.getElementById('instFoot');
+  const catsEl = document.getElementById('instCats');
+  const searchEl = document.getElementById('instSearch');
+  if (!listEl || !rowsEl) return;
+
+  const ROW_H = 44;          // синхронно с .inst-row height в CSS
+  const OVERSCAN = 8;        // строк сверх видимой области — чтобы прокрутка не мигала
+  const FAV_KEY = 'sbf_chart_favorites';
+  const QUOTES_MS = 15000;
+  const SPARKS_MS = 5 * 60 * 1000;
+
+  const CATS = [
+    ['',          'chart.cat_all',       'Все'],
+    ['fx',        'chart.cat_fx',        'Валюты'],
+    ['index',     'chart.cat_index',     'Индексы'],
+    ['commodity', 'chart.cat_commodity', 'Сырьё'],
+    ['stock',     'chart.cat_stock',     'Акции'],
+    ['crypto',    'chart.cat_crypto',    'Крипта'],
+    ['etf',       'chart.cat_etf',       'ETF'],
+    ['bond',      'chart.cat_bond',      'Облигации'],
+    ['other',     'chart.cat_other',     'Прочее'],
+  ];
+
+  let catalog = [];            // [{symbol,name,canonical,category,...}]
+  let quotes = new Map();      // symbol -> {bid, chg, ts}
+  let sparks = {};             // symbol -> [24 close]
+  let cat = '';
+  let query = '';
+  const КОРОТКО = 24;          // сколько позиций видно на телефоне сразу
+  let весьКаталог = false;     // человек нажал «показать весь каталог»
+  let скрыто = 0;              // сколько позиций спрятано коротким списком
+  let повтор = false;          // идёт второй проход render по уточнённой высоте
+  let view = [];               // отфильтрованный и отсортированный список
+  let favs = loadFavs();
+
+  function loadFavs(){
+    try { return new Set(JSON.parse(localStorage.getItem(FAV_KEY) || '[]')); }
+    catch(e){ return new Set(); }   // приватное окно / очищенные данные — не повод падать
+  }
+  // 🔴 Избранное залогиненного пользователя живёт на сервере, а не в браузере.
+  //
+  // Звезда была чисто локальной: очистил кэш, сменил устройство — отметок нет.
+  // При этом серверный список (PUT /api/user/watchlist) в проекте уже был и
+  // использовался журналом, просто страница графиков о нём не знала. Две
+  // независимые копии одного и того же — источник расхождений, а не запас.
+  //
+  // Незалогиненному оставляем localStorage: отметить инструмент должно быть
+  // можно без регистрации, иначе звезда бесполезна ровно там, где человек ещё
+  // только присматривается.
+  function isLogged(){ return !!(window.SBF && window.SBF.user); }
+
+  function saveFavs(){
+    try { localStorage.setItem(FAV_KEY, JSON.stringify([...favs])); } catch(e){}
+    if (!isLogged()) return;
+    // Сервер принимает не больше десяти — отправляем первые десять и не
+    // пытаемся хитрить: молча обрезанный список хуже, чем видимое ограничение.
+    fetch('/api/user/watchlist', {
+      method: 'PUT',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({symbols: [...favs].slice(0, 10)})
+    }).catch(function(){ /* сеть отвалилась — локальная копия уже сохранена */ });
+  }
+
+  // Серверный список при загрузке страницы главнее локального: человек мог
+  // отметить инструмент на телефоне, а открыть на компьютере.
+  // Отдельного GET за списком нет и не нужно: /api/auth/me уже отдаёт
+  // watchlist, и страница получает его в window.SBF.user при загрузке. Лишний
+  // запрос за тем, что уже приехало, — это лишний способ рассинхронизироваться.
+  function pullFavsFromServer(){
+    if (!isLogged()) return;
+    const list = window.SBF.user.watchlist;
+    if (!Array.isArray(list) || !list.length) return;
+    favs = new Set(list.map(function (x) { return typeof x === 'string' ? x : x.symbol; })
+                       .filter(Boolean));
+    try { localStorage.setItem(FAV_KEY, JSON.stringify([...favs])); } catch(e){}
+  }
+
+  function esc(x){ return String(x == null ? '' : x)
+    .replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+  function fmtPrice(v, digits){
+    if (v == null) return '—';
+    const d = (digits == null) ? (Math.abs(v) >= 1000 ? 1 : Math.abs(v) >= 100 ? 2 : 4)
+                               : Math.min(digits, 6);
+    return v.toFixed(d);
+  }
+  function fmtChg(v){
+    if (v == null) return '';
+    const s = (v > 0 ? '+' : '') + v.toFixed(2).replace('.', ',') + '%';
+    return s.replace('-', '−');
+  }
+
+  /* Спарклайн нормализуется по СВОИМ краям: строка отвечает на вопрос «как
+     ходил этот инструмент за сутки», а не «сильнее ли он соседа» — общая шкала
+     на разнородном каталоге (EURUSD и биткоин в одном списке) сделала бы почти
+     все линии плоскими. */
+  function sparkSvg(vals, up){
+    if (!vals || vals.length < 2) return '<div class="inst-none" style="text-align:center">—</div>';
+    let lo = Infinity, hi = -Infinity;
+    for (const v of vals){ if (v < lo) lo = v; if (v > hi) hi = v; }
+    const span = (hi - lo) || 1;
+    const pts = vals.map((v, i) =>
+      (i * 52 / (vals.length - 1)).toFixed(1) + ',' + (18 - ((v - lo) / span) * 16).toFixed(1)).join(' ');
+    return '<svg class="inst-spark" viewBox="0 0 52 20" width="52" height="20" aria-hidden="true">'
+      + '<polyline points="' + pts + '" fill="none" stroke="' + (up ? 'var(--up)' : 'var(--down)')
+      + '" stroke-width="1.4" stroke-linejoin="round"/></svg>';
+  }
+
+  function current(){ return (typeof PARAM === 'string') ? PARAM : ''; }
+
+  // Проверенная доступность графика. Пустой объект = проверки ещё не было;
+  // тогда ничего не прячем — лучше показать лишнее, чем спрятать рабочее.
+  let availability = null;
+
+  function isChartable(it){
+    if (!availability) return !!it.canonical;
+    const rec = availability[it.symbol];
+    return !!(rec && rec.ok);
+  }
+
+  function rebuild(){
+    const q = query.trim().toLowerCase();
+    view = catalog.filter(it => {
+      // 🔴 Инструменты без графика в список не попадают вовсе.
+      //
+      // Раньше они лежали здесь серыми некликабельными строками, и человек,
+      // ищущий золото, пролистывал десятки таких, прежде чем дойти до живого.
+      // Показывать в разделе «Графики» то, у чего графика нет, — это обещание,
+      // которого интерфейс не выполняет.
+      if (availability && !isChartable(it)) return false;
+      if (cat && it.category !== cat) return false;
+      if (!q) return true;
+      return it.symbol.toLowerCase().includes(q) || (it.name || '').toLowerCase().includes(q);
+    });
+    // Порядок: избранное -> точность совпадения с запросом -> те, что реально
+    // открываются -> порядок каталога брокера.
+    //
+    // 🔴 Открывающиеся выше остальных — не косметика. Бары есть только у 31
+    // инструмента реестра, остальные 800+ пока инертны (ярус 3 не сделан), и
+    // список, где сверху лежит то, что не открывается, читается как сломанный.
+    // Живой пример: поиск «GOLD» первым выдавал PAX_GOLD — крипту без
+    // котировки и без графика, — а само золото уходило вниз.
+    const rank = it => {
+      if (!q) return 0;
+      const sym = it.symbol.toLowerCase(), nm = (it.name || '').toLowerCase();
+      if (sym === q) return 0;
+      if (sym.startsWith(q)) return 1;
+      if (nm.startsWith(q)) return 2;
+      if (sym.includes(q)) return 3;
+      return 4;
+    };
+    view.sort((a, b) => {
+      const fa = favs.has(a.symbol) ? 0 : 1, fb = favs.has(b.symbol) ? 0 : 1;
+      if (fa !== fb) return fa - fb;
+      const ra = rank(a), rb = rank(b);
+      if (ra !== rb) return ra - rb;
+      const ca = a.canonical ? 0 : 1, cb = b.canonical ? 0 : 1;
+      if (ca !== cb) return ca - cb;
+      return 0;
+    });
+
+    /* 🔴 НА ТЕЛЕФОНЕ СПИСОК НАЧИНАЕТСЯ КОРОТКИМ.
+       Весь каталог — 778 позиций, это 61 экран прокрутки, и человек,
+       зашедший посмотреть золото, листает мимо семисот бумаг. На мониторе
+       того же вопроса нет: там список — боковая колонка со своей
+       прокруткой в полтора экрана.
+       Обрезаем только «пустой» вид: как только человек что-то ищет или
+       выбрал категорию, он уже сказал, что ему нужно, — и список
+       показывается целиком. Поиск и категории при этом всегда идут по
+       всем 778: обрезка стоит ПОСЛЕ фильтра, а не вместо него.
+       Порядок каталога брокера здесь и есть «мажоры сверху» — он не
+       случайный (см. serve.py, сборка доски), поэтому отдельного списка
+       избранных имён заводить не нужно: вторая копия того же знания
+       разошлась бы с первой. Избранное пользователя стоит выше по
+       сортировке и в короткий список попадает само.
+       Признак телефона берём не из числа 900, продублированного из CSS,
+       а из факта: прокручивается список сам или страница. Одно и то же
+       знание в двух местах — то, из-за чего этот блок и понадобился. */
+    скрыто = 0;
+    if (!весьКаталог && !q && !cat && !своя_прокрутка() && view.length > КОРОТКО) {
+      скрыто = view.length - КОРОТКО;
+      view = view.slice(0, КОРОТКО);
+    }
+    render();
+  }
+
+  function rowHtml(it){
+    const q = quotes.get(it.symbol);
+    const fav = favs.has(it.symbol);
+    const isCur = it.canonical === current() || it.symbol === current();
+    // 🔴 Кликабельность определяется ПРОВЕРЕННЫМ наличием свечей, а не полем
+    // canonical.
+    //
+    // Раньше здесь стояло `!!it.canonical` — то есть «есть ли у инструмента имя
+    // в реестре». Реестр знает 37 имён из 842, поэтому 805 строк были мертвы
+    // для клика, включая те, что открываются прямой ссылкой безупречно
+    // (#BOEING, #REDDIT, _SAFRAN.FR). Список, где 95% строк не открывается,
+    // читается как сломанный сайт — и справедливо.
+    //
+    // Теперь источник правды — data/chart_available.json: там записан результат
+    // реального запроса /api/chart/tail по каждому инструменту. Не «мы думаем,
+    // что должно работать», а «мы спросили, и вот ответ».
+    const chartable = isChartable(it);
+    const cls = ['inst-row'];
+    if (!chartable) cls.push('nochart');
+    if (isCur) cls.push('on');
+    if (!q || q.ts == null) cls.push('noq');
+    const up = q && q.chg != null ? q.chg >= 0 : true;
+    const px = (!q || q.ts == null)
+      ? '<div class="inst-none">' + esc(t('chart.inst_noquote', 'нет котировки')) + '</div>'
+      : '<div class="inst-last">' + esc(fmtPrice(q.bid, it.digits)) + '</div>'
+        + '<div class="inst-chg ' + (up ? 'up' : 'down') + '">' + esc(fmtChg(q.chg)) + '</div>';
+    // 🔴 ДВЕ КНОПКИ-СЕСТРЫ, А НЕ КНОПКА ВНУТРИ КНОПКИ.
+    // Раньше строка сама была role="button" tabindex="0", а «в избранное»
+    // лежала внутри неё: 24 нарушения nested-interactive на телефоне.
+    // Диктор в такой паре объявляет строку кнопкой и зачитывает её
+    // содержимое одним именем — «EURUSD Minors 1.0850 +0.1% В избранное»,
+    // — и назвать вложенную кнопку отдельно уже нечем. Палец промахивался
+    // по той же причине: цель в 16 px внутри цели во всю ширину.
+    // Теперь .inst-row — обычный контейнер, а внутри два соседних
+    // управления: «открыть график» (вся строка минус звёздочка) и
+    // «в избранное». Обработчики не меняются: делегирование ищет
+    // [data-fav] и .inst-go по closest.
+    const надпись = esc(it.symbol)
+      + (it.name && it.name !== it.symbol ? ', ' + esc(it.name) : '');
+    return '<div class="' + cls.join(' ') + '" data-s="' + esc(it.symbol) + '">'
+      // data-go — то, что уйдёт в ссылку ?s=. Для инструментов реестра это
+      // каноническое имя (GOLD), для каталожных — имя самого брокера
+      // (#BOEING): каталог снят с терминала, переводить там нечего.
+      + (chartable
+          ? '<button type="button" class="inst-go" data-go="' + esc(it.canonical || it.symbol) + '"'
+            + ' aria-label="' + esc(t('chart.inst_open', 'Открыть график')) + ': ' + надпись + '">'
+          : '<div class="inst-go" title="' + esc(t('chart.inst_no_bars', 'график пока недоступен')) + '">')
+      + '<div class="inst-id"><div class="inst-tick">' + esc(it.symbol) + '</div>'
+      // Имя, совпадающее с тикером, — это не имя, а его отсутствие: у 800+
+      // символов брокера своего названия у нас нет. Вместо «EURCHF / EURCHF»
+      // показываем подгруппу каталога («Minors», «Germany») — она хотя бы
+      // что-то сообщает, а повтор не сообщает ничего.
+      // Имя: сначала общий справочник (он знает ru/ro/en), и только потом
+      // каталог брокера — тот русский, и на /ro//en давал «Евро / доллар».
+      + '<div class="inst-name">' + esc(имяИнструмента(it)) + '</div></div>'
+      + sparkSvg(sparks[it.symbol], up)
+      + '<div class="inst-px">' + px + '</div>'
+      + (chartable ? '</button>' : '</div>')
+      + '<button class="inst-fav' + (fav ? ' on' : '') + '" data-fav="' + esc(it.symbol) + '"'
+      // Имя кнопки называет инструмент: в списке из 800 строк двадцать
+      // одинаковых «В избранное» подряд не говорят диктору ничего.
+      + ' aria-pressed="' + (fav ? 'true' : 'false') + '"'
+      + ' aria-label="' + esc(t('chart.inst_fav_add', 'В избранное')) + ': ' + надпись + '">'
+      + (fav ? '★' : '☆')
+      + '</button></div>';
+  }
+
+  /* 🔴 КТО ИМЕННО ПРОКРУЧИВАЕТСЯ — СПИСОК ИЛИ СТРАНИЦА.
+     Оконный рендер спрашивал listEl.scrollTop и listEl.clientHeight, и на
+     мониторе это верно: список прокручивается сам. На телефоне же (медиазапрос
+     ≤900px выше) у него сознательно сняты и потолок высоты, и прокрутка —
+     список там и есть страница. После этого scrollTop всегда 0, а
+     clientHeight равен полной высоте содержимого, то есть «видимая область»
+     охватывает весь каталог — и в DOM попадали все 778 строк.
+     Замер 14.09.2026: /chart.html на iPhone SE — 61 экран, 34 639 px, из них
+     34 232 это строки инструментов. Комментарий ниже обещал, что тысячи строк
+     в DOM не будет «иначе телефон ляжет», — и описывал ровно то, что на
+     телефоне и происходило. Условие сломалось не при написании, а позже,
+     когда для мобильного сняли внутреннюю прокрутку: правка была в CSS, а
+     развалилась логика в JS, и в консоли при этом тихо.
+     Теперь источник координат выбирается по факту: если у списка своя
+     прокрутка — берём её, если нет — берём прокрутку страницы. */
+  // Прокручивается сам список (боковая колонка на мониторе) или страница
+  // целиком (телефон). Один этот факт отвечает и за координаты окна
+  // рендера, и за то, показывать ли короткий список.
+  function своя_прокрутка(){
+    const пр = getComputedStyle(listEl).overflowY;
+    return пр === 'auto' || пр === 'scroll';
+  }
+
+  function видимое(){
+    if (своя_прокрутка()) {
+      return {верх: listEl.scrollTop, высота: listEl.clientHeight || 480};
+    }
+    const r = listEl.getBoundingClientRect();
+    return {верх: Math.max(0, -r.top), высота: window.innerHeight || 480};
+  }
+
+  /* Оконный рендер: тысяча строк в DOM уронила бы телефон, а готовую
+     библиотеку тащить незачем — рисуем только то, что попадает в видимую
+     область, а место остальных занимают отступы контейнера. */
+  function render(){
+    const total = view.length;
+    const {верх, высота: h} = видимое();
+    const start = Math.max(0, Math.floor(верх / ROW_H) - OVERSCAN);
+    const end = Math.min(total, Math.ceil((верх + h) / ROW_H) + OVERSCAN);
+    rowsEl.style.paddingTop = (start * ROW_H) + 'px';
+    rowsEl.style.paddingBottom = Math.max(0, (total - end) * ROW_H) + 'px';
+    rowsEl.innerHTML = total
+      ? view.slice(start, end).map(rowHtml).join('')
+      : '<div class="inst-foot">' + esc(t('chart.inst_nothing', 'Ничего не найдено')) + '</div>';
+    // Подвал говорит одно из двух: либо сколько позиций осталось ниже по
+    // прокрутке, либо — если список обрезан — предлагает открыть весь
+    // каталог. Число в кнопке обязательно: «показать ещё» без количества
+    // не даёт понять, двадцать там позиций или семьсот.
+    if (скрыто > 0) {
+      footEl.innerHTML = '<button type="button" id="instShowAll" class="inst-all">'
+        + esc(fmt_(t('chart.inst_show_all', 'Показать весь каталог ({n})'),
+                   {n: скрыто + total})) + '</button>';
+    } else {
+      footEl.textContent = total
+        ? fmt_(t('chart.inst_more', 'ещё {n}'), {n: Math.max(0, total - (end - start))})
+        : '';
+    }
+
+    /* 🔴 ВЫСОТУ МЕРИЛИ ДО ТОГО, КАК РАСКЛАДКА ЕЁ ПЕРЕСЧИТАЛА.
+       Воспроизведение: набрать в поиске «lloyds» (останется одна строка,
+       список сожмётся до 44 px), затем очистить поиск. Окно считалось по
+       ещё старой высоте 44 — и вместо трёх десятков строк рисовалось
+       девять, а под ними зияла пустота на весь отступ. Дальше список
+       оставался таким, пока человек не прокрутит: прокрутка — это
+       единственное, что звало render заново.
+       Поэтому после записи строк высота перепроверяется, и если она
+       изменилась — рисуем ещё раз, уже по настоящей. Флаг против
+       рекурсии: второй проход идёт с верной высотой и третьего не
+       просит, но случись иначе — цикл не должен уйти в бесконечный. */
+    if (!повтор) {
+      const сейчас = видимое().высота;
+      if (Math.abs(сейчас - h) > 1) {
+        повтор = true;
+        try { render(); } finally { повтор = false; }
+      }
+    }
+  }
+
+  function applyQuotes(data){
+    const f = data.fields || [];
+    const iS = f.indexOf('symbol'), iB = f.indexOf('bid'), iC = f.indexOf('chg_pct'), iT = f.indexOf('quote_ts');
+    if (iS < 0) return;
+    const m = new Map();
+    for (const row of (data.items || [])) m.set(row[iS], {bid: row[iB], chg: row[iC], ts: row[iT]});
+    quotes = m;
+  }
+
+  // 🔴 Подсказка в поиске ставится ПОСЛЕ фильтрации и обновляется вместе с ней.
+  //
+  // Раньше она писалась один раз при первой порции котировок и брала
+  // catalog.length — «Поиск по 842 инструментам», хотя открывается 219. После
+  // перехода на view.length в том же месте вышло ещё хуже: «Поиск по 0», потому
+  // что список на тот момент ещё не построен. Число в подсказке — обещание;
+  // считать его надо там, где оно уже известно.
+  function updateSearchPlaceholder(){
+    if (!searchEl) return;
+    searchEl.placeholder = fmt_(t('chart.inst_search', 'Поиск по {n} инструментам'),
+                                {n: availability ? Object.values(availability).filter(v => v.ok).length
+                                                 : catalog.length});
+  }
+
+  /* Имя инструмента для списка. Каталог брокера (broker_catalog.json)
+     русскоязычный, поэтому спрашиваем сначала общий справочник имён — он
+     знает три языка и то же самое делает глава 5 и лента в шапке. Если
+     символа там нет (а в каталоге 800+ тикеров брокера), падаем на имя из
+     каталога, а при его отсутствии — на подгруппу: повтор тикера именем
+     не является. */
+  function имяИнструмента(it) {
+    if (window.SBFSymbols) {
+      var н = window.SBFSymbols.symbolName(it.symbol, {mode: 'name'});
+      if (н && н !== it.symbol) return н;
+    }
+    return (it.name && it.name !== it.symbol) ? it.name : (it.subgroup || '');
+  }
+
+  async function get(url){
+    const r = await fetch(url + '?t=' + Date.now());
+    if (!r.ok) throw new Error(url + ' -> ' + r.status);
+    return r.json();
+  }
+
+  /* 🔴 Подписи категорий рисуются ДВАЖДЫ, и это не лишняя работа.
+     Строка выполняется при загрузке скрипта, а словарь i18n.js тянет
+     сетью: на первый проход t() возвращает запасное значение, то есть
+     русское. Так на /ro/chart.html и /en/chart.html оставались «Все /
+     Валюты / Индексы / Сырьё» при полностью переведённом словаре (Л-5
+     языкового аудита — «UI графика не локализован»; переводы были на
+     месте, до них просто не доживал рендер). Первый проход нужен, чтобы
+     кнопки существовали сразу, второй — чтобы они были на своём языке. */
+  function рисоватьКатегории() {
+    catsEl.innerHTML = CATS.map(c =>
+      '<button class="inst-cat' + (c[0] === cat ? ' on' : '') + '" data-cat="' + c[0] + '">'
+      + esc(t(c[1], c[2])) + '</button>').join('');
+  }
+  рисоватьКатегории();
+  // 🔴 i18n.js подключён с defer, а этот код — обычный inline: в момент
+  // выполнения window.sbfI18n ЕЩЁ НЕ СУЩЕСТВУЕТ, и подписка «если объект
+  // есть» не срабатывает вовсе. Первая версия правки именно так и
+  // промолчала: категории остались русскими, а замер показал ту же
+  // одиннадцать кириллических находок. Ждём DOMContentLoaded, как это
+  // уже делает календарь.
+  function _перерисоватьКогдаБудетЯзык() {
+    if (window.sbfI18n && window.sbfI18n.ready)
+      window.sbfI18n.ready.then(рисоватьКатегории).catch(function(){});
+  }
+  if (window.sbfI18n) _перерисоватьКогдаБудетЯзык();
+  else document.addEventListener('DOMContentLoaded', _перерисоватьКогдаБудетЯзык);
+
+  catsEl.addEventListener('click', e => {
+    const b = e.target.closest('[data-cat]');
+    if (!b) return;
+    cat = b.dataset.cat;
+    catsEl.querySelectorAll('.inst-cat').forEach(x => x.classList.toggle('on', x.dataset.cat === cat));
+    listEl.scrollTop = 0;
+    rebuild();
+  });
+
+  let searchTimer = null;
+  searchEl.addEventListener('input', () => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => { query = searchEl.value; listEl.scrollTop = 0; rebuild(); }, 120);
+  });
+
+  footEl.addEventListener('click', (e) => {
+    if (!e.target.closest('#instShowAll')) return;
+    весьКаталог = true;
+    rebuild();
+  });
+
+  // Смена ориентации или ширины окна переключает режим раскладки: боковая
+  // колонка со своей прокруткой ↔ список во всю страницу. От этого зависит
+  // и короткий список, и координаты окна рендера, поэтому пересобираем.
+  // Без этого поворот телефона в альбом оставлял бы 24 позиции в колонке,
+  // которая прокручивается сама и спокойно вместила бы весь каталог.
+  window.addEventListener('resize', () => rebuild(), {passive: true});
+
+  listEl.addEventListener('scroll', () => render(), {passive: true});
+  // Когда прокручивается страница, а не список (телефон), событие приходит на
+  // window — без этой подписки список дорисовывался бы только при поиске и
+  // смене категории. Через rAF, чтобы не считать на каждый кадр прокрутки.
+  let ждёмКадр = false;
+  window.addEventListener('scroll', () => {
+    if (ждёмКадр) return;
+    ждёмКадр = true;
+    requestAnimationFrame(() => { ждёмКадр = false; render(); });
+  }, {passive: true});
+
+  // 🔴 Высота панели считается от её реального положения на экране, а не от
+  // одной только высоты окна.
+  //
+  // `max-height: calc(100vh - 28px)` даёт панель ровно в окно — но панель
+  // начинается не у верхнего края: над ней шапка сайта, лента котировок и
+  // хлебные крошки, вместе около двух сотен точек. Замер: окно 1077, панель
+  // 1049, её низ на 1248 — то есть она всё равно уходила за экран, и до низа
+  // списка приходилось прокручивать страницу. Ровно та жалоба, с которой всё
+  // началось.
+  //
+  // Считаем доступное место как «от верха панели до низа окна». Когда страница
+  // прокручена и панель прилипла к своим 14px, формула даёт полную высоту окна
+  // сама собой.
+  function fitPanel(){
+    if (!panelEl || getComputedStyle(panelEl).position !== 'sticky') {
+      if (panelEl) panelEl.style.maxHeight = '';
+      return;
+    }
+    const top = Math.max(14, panelEl.getBoundingClientRect().top);
+    panelEl.style.maxHeight = Math.max(240, window.innerHeight - top - 14) + 'px';
+  }
+  const panelEl = document.getElementById('instPanel');
+
+  // Список рисует только видимые строки, а сколько их видно — считается от
+  // высоты контейнера. Значит, после каждого пересчёта высоты нужен перерисов:
+  // иначе снизу останется пустая полоса, а список будет выглядеть коротким без
+  // причины.
+  function refit(){ fitPanel(); render(); }
+  window.addEventListener('resize', refit, {passive: true});
+  window.addEventListener('scroll', refit, {passive: true});
+  fitPanel();
+
+  function activate(el){
+    const go = el && el.dataset.go;
+    if (!go) return;
+    // Адрес меняется по-настоящему: ссылка на инструмент обязана продолжать
+    // работать, её кладут в закладки и присылают друг другу.
+    location.href = '?s=' + encodeURIComponent(go);
+  }
+  rowsEl.addEventListener('click', e => {
+    const favBtn = e.target.closest('[data-fav]');
+    if (favBtn){
+      const sym = favBtn.dataset.fav;
+      favs.has(sym) ? favs.delete(sym) : favs.add(sym);
+      saveFavs(); rebuild(); return;
+    }
+    // Открывает график только кнопка .inst-go: клик мимо неё (по пустому
+    // месту строки или по её рамке) больше ничего не делает — раньше вся
+    // строка была кнопкой, и попасть «в никуда» было нельзя.
+    activate(e.target.closest('.inst-go'));
+  });
+  // 🔴 Отдельный обработчик клавиатуры больше не нужен и вреден: <button>
+  // сам отвечает на Enter и Пробел и сам шлёт click. Оставить оба значило
+  // бы обрабатывать одно нажатие дважды.
+
+  if (_SP.get('s')) document.body.classList.add('has-symbol');
+
+  (async function init(){
+    try {
+      const [cat_, q, av] = await Promise.all([
+        get('/data/broker_catalog.json'),
+        get('/data/broker_quotes.json'),
+        // Доступность графиков — отдельным запросом и с мягким отказом: если
+        // файла нет (первая установка, проверка ещё не отработала), список
+        // просто останется прежним, а не опустеет. Пустой список хуже полного.
+        get('/data/chart_available.json').catch(function(){ return null; })
+      ]);
+      catalog = cat_.items || [];
+      if (av && av.items) availability = av.items;
+      pullFavsFromServer();
+      applyQuotes(q);
+      updateSearchPlaceholder();
+      rebuild();
+      // Открытый инструмент должен быть виден, а не найден прокруткой: при
+      // 842 строках GOLD лежит за сотней валютных пар, и список без этого
+      // выглядит так, будто он к графику не относится.
+      const curIdx = view.findIndex(it => it.canonical === current() || it.symbol === current());
+      if (curIdx > 3) {
+        listEl.scrollTop = Math.max(0, (curIdx - 3) * ROW_H);
+        render();
+      }
+    } catch (e) {
+      // Панель не приехала — страница графика обязана остаться рабочей: она
+      // и до этой спеки работала без списка.
+      footEl.textContent = '';
+      console.warn('inst panel:', e);
+      return;
+    }
+    try { sparks = (await get('/data/broker_sparklines.json')).series || {}; render(); }
+    catch (e) { console.warn('sparklines:', e); }
+
+    setInterval(async () => {
+      try { applyQuotes(await get('/data/broker_quotes.json')); render(); } catch (e) {}
+    }, QUOTES_MS);
+    setInterval(async () => {
+      try { sparks = (await get('/data/broker_sparklines.json')).series || {}; render(); } catch (e) {}
+    }, SPARKS_MS);
+  })();
+})();
+</script>
 </body>
 </html>

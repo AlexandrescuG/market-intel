@@ -54,10 +54,75 @@ _NEWS_TAG_SYMBOLS = {
 }
 
 
+def _candles_from_cache(symbol: str):
+    """Дневки из data/candle_cache.db, если файла-проекции нет.
+
+    🔴 Термометр считался только по тем инструментам, у которых на диске лежит
+    ohlc_{symbol}_D1.json, — а такие файлы публикуются только для реестра. На
+    витрине 780 инструментов, снапшотов было 27: на остальных панель под
+    графиком («диапазон дня», «новостной фон», «ближайшее событие») просто не
+    появлялась. Кэш свечей знает 788 символов — берём оттуда.
+    """
+    import sqlite3 as _sq
+    db = str(Path(__file__).resolve().parent / "data" / "candle_cache.db")
+    try:
+        con = _sq.connect(f"file:{db}?mode=ro", uri=True, timeout=20)
+        con.execute("PRAGMA busy_timeout=20000")
+        try:
+            row = con.execute(
+                "SELECT payload FROM candles WHERE symbol=? AND tf='D1'", (symbol,)).fetchone()
+        finally:
+            con.close()
+    except Exception:
+        return None
+    if not row:
+        return None
+    try:
+        raw = json.loads(row[0])
+    except Exception:
+        return None
+    out = []
+    for c in raw:
+        try:
+            out.append({"ts": int(c["time"]), "h": float(c["high"]), "l": float(c["low"])})
+        except (KeyError, TypeError, ValueError):
+            continue
+    if not out:
+        return None
+    out.sort(key=lambda b: b["ts"])
+    try:
+        last_price = float(raw[-1]["close"])
+    except (KeyError, IndexError, TypeError, ValueError):
+        last_price = None
+    return {"candles": out, "last": last_price}
+
+
+def _all_thermo_symbols() -> list:
+    """Реестр (файлы-проекции) плюс всё, по чему есть дневки в кэше свечей."""
+    import sqlite3 as _sq
+    reg = sorted({Path(f).stem.replace("ohlc_", "").replace("_D1", "")
+                  for f in glob.glob(str(_WEB_DATA / "ohlc_*_D1.json"))})
+    db = str(Path(__file__).resolve().parent / "data" / "candle_cache.db")
+    try:
+        con = _sq.connect(f"file:{db}?mode=ro", uri=True, timeout=20)
+        con.execute("PRAGMA busy_timeout=20000")
+        try:
+            cached = sorted({s for (s,) in con.execute(
+                "SELECT DISTINCT symbol FROM candles WHERE tf='D1'")})
+        finally:
+            con.close()
+    except Exception:
+        # Кэш недоступен — считаем по реестру, как считали раньше. Пустой
+        # список стёр бы термометр у всех.
+        return reg
+    seen = set(reg)
+    return reg + [s for s in cached if s not in seen]
+
+
 def _load_d1(symbol: str):
     f = _WEB_DATA / f"ohlc_{symbol}_D1.json"
     if not f.exists():
-        return None
+        return _candles_from_cache(symbol)
     try:
         data = json.loads(f.read_text())
     except (json.JSONDecodeError, OSError):
@@ -269,8 +334,7 @@ def run(verbose: bool = False) -> int:
     con_signals = sqlite3.connect(str(_SIGNALS_DB))
 
     now = int(time.time())
-    symbols = sorted({Path(f).stem.replace("ohlc_", "").replace("_D1", "")
-                       for f in glob.glob(str(_WEB_DATA / "ohlc_*_D1.json"))})
+    symbols = _all_thermo_symbols()
 
     written = 0
     for symbol in symbols:

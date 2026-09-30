@@ -2,8 +2,15 @@
 <html lang="{{ lang }}">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>SBF | {% if lang == 'ru' %}Глава 11. Тёмные Пулы и HFT{% elif lang == 'ro' %}Capitolul 11. Dark Pools și HFT{% else %}Chapter 11. Dark Pools and HFT{% endif %}</title>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="SBF Intelligence">
+<meta property="og:image" content="https://lp.sbfconsult.com/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://lp.sbfconsult.com/assets/og-image.png">
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
   <style>
@@ -23,6 +30,8 @@
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"></script>
 <script src="/edu/assets/ch11.js"></script>
+<link rel="stylesheet" href="/assets/brokers.css?v=1">
+<script src="/assets/brokers.js?v=16" defer></script>
 
 <script type="text/babel" data-presets="react">
 const INITIAL_LANG = "{{ lang }}";
@@ -91,7 +100,7 @@ const STRINGS = {
   },
 };
 
-const {C, Mono, Chip, Rule, AskAnalystBtn, getChUrl, QuizBlock, ComplianceFootnote, ColdStart} = window.AcademyShared;
+const {C, Mono, Chip, Rule, AntiMythBlock, AskAnalystBtn, getChUrl, QuizBlock, ComplianceFootnote, ColdStart, SortTwoBins, RevealSteps, PartnerPicker} = window.AcademyShared;
 
 function fillTemplate(str, vars) {
   if (!str) return str;
@@ -149,7 +158,7 @@ function ColdStart11Entry() {
             <button onClick={start} style={{fontFamily:"monospace", fontSize:14, fontWeight:700, padding:"16px 32px", borderRadius:4, cursor:"pointer", background:C.gold, color:C.black, border:"none"}}>{cs.readyBtn}</button>
           )}
           {phase === "waiting" && (
-            <div onClick={onClick} style={{cursor:"pointer", padding:"40px 0", fontFamily:"monospace", fontSize:20, color:"rgba(255,255,255,0.4)"}}>{cs.waitLabel}</div>
+            <div onClick={onClick} style={{cursor:"pointer", padding:"40px 0", fontFamily:"monospace", fontSize:20, color:"rgba(255,255,255,0.55)"}}>{cs.waitLabel}</div>
           )}
           {phase === "early" && (
             <div>
@@ -158,7 +167,7 @@ function ColdStart11Entry() {
             </div>
           )}
           {phase === "live" && (
-            <div onClick={() => { onClick(); csCommit(true); }} style={{cursor:"pointer", padding:"40px 0", fontFamily:"monospace", fontSize:32, fontWeight:700, color:C.gold}}>{cs.jumpLabel}</div>
+            <div onClick={() => { onClick(); csCommit(true); }} style={{cursor:"pointer", padding:"40px 0", fontFamily:"monospace", fontSize:32, fontWeight:700, color:C.goldText}}>{cs.jumpLabel}</div>
           )}
         </div>
       )}}
@@ -173,15 +182,10 @@ function IntroBlock() {
   const T11 = window.Ch11Content[INITIAL_LANG] || window.Ch11Content.ru;
   return (
     <div id="secAntiMyth" style={{marginBottom:48,scrollMarginTop:130}}>
-      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T11.antiMyth.tag}</Mono>
-      <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px",marginBottom:28}}>
-        <p style={{fontWeight:600,fontSize:14.5,color:C.black,marginBottom:10}}>{T11.antiMyth.title}</p>
-        <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,marginBottom:12}}>{T11.antiMyth.body1}</p>
-        <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,marginBottom:12}}>{T11.antiMyth.body2}</p>
-        <p style={{fontSize:13.5,color:C.black,lineHeight:1.7,margin:0,fontWeight:600}}>{T11.antiMyth.body3}</p>
-      </div>
+      <AntiMythBlock lang={INITIAL_LANG} style={{marginBottom:28}}
+        data={{tag: T11.antiMyth.tag, title: T11.antiMyth.title, bodies: [T11.antiMyth.body1, T11.antiMyth.body2, T11.antiMyth.body3]}}/>
 
-      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T11.voiceSbf.tag}</Mono>
+      <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{T11.voiceSbf.tag}</Mono>
       <div style={{borderLeft:`4px solid ${C.gold}`,paddingLeft:24}}>
         {T11.voiceSbf.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:16,fontStyle:"italic",color:C.inkMid,lineHeight:1.7,fontFamily:"'DM Serif Display',serif",marginBottom:12}}>{p}</p>)}
       </div>
@@ -210,13 +214,13 @@ function PriceOfNotKnowingCalc() {
   const Field = ({ label, value, onChange, step = 0.1 }) => (
     <div style={{marginBottom:16}}>
       <Mono size={10} color={C.inkFaint} spacing={0.5} style={{display:"block",marginBottom:6}}>{label}</Mono>
-      <input type="number" value={value} step={step} onChange={e=>onChange(+e.target.value)} style={{width:"100%",padding:"9px 12px",border:`1px solid ${C.border}`,borderRadius:4,fontFamily:"monospace",fontSize:14}}/>
+      <input type="number" aria-label={label} value={value} step={step} onChange={e=>onChange(+e.target.value)} style={{width:"100%",padding:"9px 12px",border:`1px solid ${C.border}`,borderRadius:4,fontFamily:"monospace",fontSize:14}}/>
     </div>
   );
 
   return (
     <div id="secPriceOfNotKnowing11" style={{marginBottom:48,scrollMarginTop:130}}>
-      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T11.priceOfNotKnowing.tag}</Mono>
+      <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{T11.priceOfNotKnowing.tag}</Mono>
       <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.black,marginBottom:10}}>{p.title}</div>
       <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,marginBottom:24,maxWidth:800}}>{p.intro}</p>
 
@@ -228,8 +232,8 @@ function PriceOfNotKnowingCalc() {
           <Field label={p.costBLabel} value={costB} onChange={setCostB}/>
         </div>
         <div style={{display:"flex",gap:24,flexWrap:"wrap",justifyContent:"center",background:C.black,borderRadius:6,padding:"20px 24px",marginTop:12,marginBottom:16}}>
-          <div style={{textAlign:"center"}}><div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.gold}}>{monthlyDiff.toFixed(1)}</div><Mono size={9.5} color="rgba(255,255,255,0.5)" spacing={0.5}>{p.monthlyDiffLabel}</Mono></div>
-          <div style={{textAlign:"center"}}><div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.gold}}>{yearlyDiff.toFixed(1)}</div><Mono size={9.5} color="rgba(255,255,255,0.5)" spacing={0.5}>{p.yearlyDiffLabel}</Mono></div>
+          <div style={{textAlign:"center"}}><div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.goldText}}>{monthlyDiff.toFixed(1)}</div><Mono size={9.5} color="rgba(255,255,255,0.5)" spacing={0.5}>{p.monthlyDiffLabel}</Mono></div>
+          <div style={{textAlign:"center"}}><div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.goldText}}>{yearlyDiff.toFixed(1)}</div><Mono size={9.5} color="rgba(255,255,255,0.5)" spacing={0.5}>{p.yearlyDiffLabel}</Mono></div>
           <div style={{textAlign:"center"}}><div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:"#fff"}}>{equivTrades!=null?equivTrades.toFixed(1):"—"}</div><Mono size={9.5} color="rgba(255,255,255,0.5)" spacing={0.5}>{p.equivTradesLabel}</Mono></div>
         </div>
         <p style={{fontSize:13,color:C.black,fontWeight:600,lineHeight:1.7,marginBottom:12}}>{p.keyPoint}</p>
@@ -269,17 +273,41 @@ function WhyOffExchange() {
 
 // ─── HFT: три разных явления ────────────────────────────────────────────────
 function HftThreeThings() {
+  const { useState } = React;
   const T11 = window.Ch11Content[INITIAL_LANG] || window.Ch11Content.ru;
   const h = T11.hftThreeThings;
+  // 🔴 Рубрика обещает «разделяем то, что обычно слито в один пугающий
+  // абзац» — и сама была тремя карточками, выложенными разом. Три явления,
+  // показанные одновременно, снова сливаются в один абзац; открытые по
+  // одному — остаются тремя. Выполняем обещание рубрики буквально.
+  const карточки = [[h.c1Title,h.c1Text],[h.c2Title,h.c2Text],[h.c3Title,h.c3Text]]
+    .filter(([t]) => t);
+  const [открыто, setОткрыто] = useState(1);
+  const ещё = карточки.length - открыто;
+  const СЛЕД = {ru:"СЛЕДУЮЩЕЕ ЯВЛЕНИЕ", ro:"URMĂTORUL FENOMEN", en:"NEXT PHENOMENON"};
+  const ИЗ = {ru:"%1 из %2", ro:"%1 din %2", en:"%1 of %2"};
   return (
     <div style={{marginBottom:48}}>
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:14,marginBottom:20}} className="g3">
-        {[[h.c1Title,h.c1Text],[h.c2Title,h.c2Text],[h.c3Title,h.c3Text]].map(([t,x],i) => (
-          <div key={i} style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:6,padding:"18px 20px",borderTop:`3px solid ${i===2?C.red:C.gold}`}}>
-            <div style={{fontWeight:600,fontSize:13,color:C.black,marginBottom:8}}>{t}</div>
-            <p style={{fontSize:12,color:C.inkMid,lineHeight:1.65,margin:0}}>{x}</p>
+      <div style={{display:"grid",gridTemplateColumns:`repeat(${карточки.length},1fr)`,gap:14,marginBottom:14}} className="g3">
+        {карточки.map(([t,x],i) => (
+          <div key={i} style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:6,padding:"18px 20px",borderTop:`3px solid ${i===2?C.red:C.gold}`,
+                               opacity: i < открыто ? 1 : 0.22}}>
+            <div style={{fontWeight:600,fontSize:13,color:C.black,marginBottom:8}}>{i < открыто ? t : "···"}</div>
+            {i < открыто && <p style={{fontSize:12,color:C.inkMid,lineHeight:1.65,margin:0}}>{x}</p>}
           </div>
         ))}
+      </div>
+      <div style={{display:"flex",alignItems:"center",gap:12,flexWrap:"wrap",marginBottom:20}}>
+        {ещё > 0 && (
+          <button onClick={()=>setОткрыто(открыто+1)}
+                  style={{fontFamily:"monospace",fontSize:11.5,padding:"9px 16px",cursor:"pointer",
+                          background:C.gold,color:"#18181a",border:"none",borderRadius:4,fontWeight:700}}>
+            {СЛЕД[INITIAL_LANG] || СЛЕД.ru}
+          </button>
+        )}
+        <Mono size={10.5} color={C.inkFaint}>
+          {(ИЗ[INITIAL_LANG] || ИЗ.ru).replace("%1", String(открыто)).replace("%2", String(карточки.length))}
+        </Mono>
       </div>
       <div style={{background:C.black,borderRadius:8,padding:"20px 24px",color:"#fff",marginBottom:16}}>
         <p style={{fontSize:13,color:"rgba(255,255,255,0.8)",lineHeight:1.7,margin:0}}>{h.warningNote}</p>
@@ -297,11 +325,12 @@ function WhereAreYou() {
   const T11 = window.Ch11Content[INITIAL_LANG] || window.Ch11Content.ru;
   const w = T11.whereAreYou;
   return (
+    /* Разворот главы — четыре абзаца, где третий это вывод. Выложенные
+       разом, они дочитываются глазами до конца и вывод теряется в середине;
+       по одному — каждый успевает сработать. */
     <div style={{background:C.goldPale,border:`1px solid ${C.borderGold}`,borderRadius:8,padding:"28px 32px",marginBottom:48}}>
-      <p style={{fontSize:14.5,color:C.inkMid,lineHeight:1.8,marginBottom:14}}>{w.body1}</p>
-      <p style={{fontSize:14.5,color:C.inkMid,lineHeight:1.8,marginBottom:14}}>{w.body2}</p>
-      <p style={{fontSize:14.5,color:C.black,lineHeight:1.8,marginBottom:14,fontWeight:600}}>{w.body3}</p>
-      <p style={{fontSize:14.5,color:C.inkMid,lineHeight:1.8,margin:0}}>{w.body4}</p>
+      <RevealSteps bodies={[w.body1, w.body2, w.body3, w.body4].filter(Boolean)}
+                   lang={INITIAL_LANG} preset="layers"/>
     </div>
   );
 }
@@ -339,15 +368,15 @@ function OrderPath() {
               <React.Fragment key={i}>
                 <div style={{background:"rgba(255,255,255,0.06)",border:`1px solid ${i===2?C.gold:"rgba(255,255,255,0.15)"}`,borderRadius:6,padding:"10px 14px",textAlign:"center",minWidth:110}}>
                   <div style={{fontSize:11.5,color:"#fff",fontWeight:600}}>{n}</div>
-                  {i===2 && <Mono size={8.5} color={C.gold} spacing={0} style={{display:"block",marginTop:4}}>{op.routeNotPublic}</Mono>}
+                  {i===2 && <Mono size={8.5} color={C.goldText} spacing={0} style={{display:"block",marginTop:4}}>{op.routeNotPublic}</Mono>}
                 </div>
-                {i<nodes.length-1 && <span style={{color:"rgba(255,255,255,0.3)"}}>→</span>}
+                {i<nodes.length-1 && <span style={{color:"rgba(255,255,255,0.55)"}}>→</span>}
               </React.Fragment>
             ))}
           </div>
           <div style={{display:"flex",justifyContent:"center",gap:8,marginBottom:8}}>
-            <span style={{color:"rgba(255,255,255,0.3)",fontSize:18}}>↙</span>
-            <span style={{color:"rgba(255,255,255,0.3)",fontSize:18}}>↘</span>
+            <span style={{color:"rgba(255,255,255,0.55)",fontSize:18}}>↙</span>
+            <span style={{color:"rgba(255,255,255,0.55)",fontSize:18}}>↘</span>
           </div>
           <div style={{display:"flex",gap:16,justifyContent:"center",marginBottom:24,flexWrap:"wrap"}}>
             <div style={{background:"rgba(242,54,69,0.1)",border:"1px solid rgba(242,54,69,0.3)",borderRadius:6,padding:"12px 16px",textAlign:"center",minWidth:150}}>
@@ -355,25 +384,30 @@ function OrderPath() {
             </div>
             <div style={{background:"rgba(8,153,129,0.1)",border:"1px solid rgba(8,153,129,0.3)",borderRadius:6,padding:"12px 16px",textAlign:"center",minWidth:150}}>
               <div style={{fontSize:11.5,color:"#fff",fontWeight:600}}>{op.nodeAbook}</div>
-              <Mono size={9} color="rgba(255,255,255,0.4)" spacing={0} style={{display:"block",marginTop:4}}>→ {op.nodeMarket}</Mono>
+              <Mono size={9} color="rgba(255,255,255,0.55)" spacing={0} style={{display:"block",marginTop:4}}>→ {op.nodeMarket}</Mono>
             </div>
           </div>
 
           {step === 3 && (
             <div style={{background:"rgba(255,255,255,0.04)",borderRadius:6,padding:"18px 22px"}}>
-              <Mono size={10} color="rgba(255,255,255,0.4)" spacing={1} style={{display:"block",marginBottom:10,textTransform:"uppercase"}}>{op.modeLabel}</Mono>
+              <Mono size={10} color="rgba(255,255,255,0.55)" spacing={1} style={{display:"block",marginBottom:10,textTransform:"uppercase"}}>{op.modeLabel}</Mono>
               <div style={{display:"flex",gap:8,marginBottom:18}}>
                 <button onClick={()=>setMode("calm")} style={{flex:1,padding:"9px 0",fontFamily:"monospace",fontSize:11,cursor:"pointer",background:mode==="calm"?C.gold:"transparent",color:mode==="calm"?"#18181a":"rgba(255,255,255,0.6)",border:`1px solid ${mode==="calm"?C.gold:"rgba(255,255,255,0.2)"}`,borderRadius:4}}>{op.modeCalm}</button>
                 <button onClick={()=>setMode("release")} style={{flex:1,padding:"9px 0",fontFamily:"monospace",fontSize:11,cursor:"pointer",background:mode==="release"?C.gold:"transparent",color:mode==="release"?"#18181a":"rgba(255,255,255,0.6)",border:`1px solid ${mode==="release"?C.gold:"rgba(255,255,255,0.2)"}`,borderRadius:4}}>{op.modeRelease}</button>
               </div>
               <div style={{display:"flex",gap:24,justifyContent:"center",flexWrap:"wrap",marginBottom:14}}>
-                <div style={{textAlign:"center"}}><Mono size={15} color={C.gold} spacing={0}>{metrics.delay}</Mono><Mono size={9} color="rgba(255,255,255,0.4)" spacing={0.5} style={{display:"block"}}>{op.metricDelay}</Mono></div>
-                <div style={{textAlign:"center"}}><Mono size={15} color="#fff" spacing={0}>{metrics.spread}</Mono><Mono size={9} color="rgba(255,255,255,0.4)" spacing={0.5} style={{display:"block"}}>{op.metricSpread}</Mono></div>
-                <div style={{textAlign:"center"}}><Mono size={15} color="#fff" spacing={0}>{metrics.requote}</Mono><Mono size={9} color="rgba(255,255,255,0.4)" spacing={0.5} style={{display:"block"}}>{op.metricRequote}</Mono></div>
+                <div style={{textAlign:"center"}}><Mono size={15} color={C.goldText} spacing={0}>{metrics.delay}</Mono><Mono size={9} color="rgba(255,255,255,0.55)" spacing={0.5} style={{display:"block"}}>{op.metricDelay}</Mono></div>
+                <div style={{textAlign:"center"}}><Mono size={15} color="#fff" spacing={0}>{metrics.spread}</Mono><Mono size={9} color="rgba(255,255,255,0.55)" spacing={0.5} style={{display:"block"}}>{op.metricSpread}</Mono></div>
+                <div style={{textAlign:"center"}}><Mono size={15} color="#fff" spacing={0}>{metrics.requote}</Mono><Mono size={9} color="rgba(255,255,255,0.55)" spacing={0.5} style={{display:"block"}}>{op.metricRequote}</Mono></div>
               </div>
-              <p style={{fontSize:11.5,color:"rgba(255,255,255,0.4)",fontStyle:"italic",textAlign:"center",margin:0}}>{op.releaseNote}</p>
+              {/* Три числа выше выглядят как метрики, поэтому рядом обязана
+                  стоять строка о том, чьи они. Контраст не ниже inkMid —
+                  дисклеймер, который не читается, хуже отсутствующего. */}
+              <p style={{fontSize:10.5,color:"rgba(255,255,255,0.62)",fontFamily:"monospace",
+                         letterSpacing:0.3,lineHeight:1.5,textAlign:"center",marginTop:0,marginBottom:12}}>{op.metricsNote}</p>
+              <p style={{fontSize:11.5,color:"rgba(255,255,255,0.55)",fontStyle:"italic",textAlign:"center",margin:0}}>{op.releaseNote}</p>
               <div style={{textAlign:"center",marginTop:14}}>
-                <a href="/chart.html?s=GOLD" target="_blank" rel="noopener" style={{fontFamily:"monospace",fontSize:11,color:C.gold,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>{op.openOnChart}</a>
+                <a href="/chart.html?s=GOLD" target="_blank" rel="noopener" style={{fontFamily:"monospace",fontSize:11,color:C.goldText,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>{op.openOnChart}</a>
               </div>
             </div>
           )}
@@ -408,13 +442,29 @@ function BookModels() {
           <p style={{fontSize:12.5,color:C.inkMid,lineHeight:1.6,margin:0}}>{b.bText}</p>
         </div>
       </div>
+      {/* Отличать A от B на слух бесполезно — отличать по последствию «чей
+          это доход» и есть смысл рубрики. До правки здесь шли 2644 знака
+          подряд без единого управления: две карточки, абзац «это не обман»,
+          список следствий и блок «про нас». */}
+      {b.sortItems && (
+        <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"20px 24px",marginBottom:20}}>
+          <div style={{fontWeight:600,fontSize:13,color:C.black,marginBottom:6}}>{b.sortTitle}</div>
+          <p style={{fontSize:12.5,color:C.inkFaint,lineHeight:1.6,marginBottom:14}}>{b.sortHint}</p>
+          <SortTwoBins items={b.sortItems} labels={[b.sortA, b.sortB]}
+                       lang={INITIAL_LANG} style={{marginBottom:0}}/>
+        </div>
+      )}
       <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.75,marginBottom:20,maxWidth:820}}>{b.notScam}</p>
+      {/* Три следствия, выложенные списком, читаются как один абзац: порядок
+          в них несёт смысл («узнать нельзя → но проверить можно → и вот
+          цифра»), а точки его прячут. Раскрытие по одному возвращает порядку
+          вес. */}
       <div style={{background:C.goldPale,border:`1px solid ${C.borderGold}`,borderRadius:6,padding:"18px 22px",marginBottom:20}}>
         <div style={{fontWeight:600,fontSize:12.5,color:C.black,marginBottom:10}}>{b.practicalTitle}</div>
-        {b.practical.map((t,i) => <p key={i} style={{fontSize:12.5,color:C.inkMid,lineHeight:1.6,marginBottom:8}}>· {t}</p>)}
+        <RevealSteps bodies={b.practical} lang={INITIAL_LANG} preset="layers"/>
       </div>
       <div style={{background:C.black,borderRadius:8,padding:"24px 28px",color:"#fff",marginBottom:16}}>
-        <Mono size={11} color={C.gold} spacing={2} style={{display:"block",marginBottom:10}}>{b.aboutUsTitle}</Mono>
+        <Mono size={11} color={C.goldText} spacing={2} style={{display:"block",marginBottom:10}}>{b.aboutUsTitle}</Mono>
         <p style={{fontSize:13,color:"rgba(255,255,255,0.8)",lineHeight:1.75,margin:0}}>{b.aboutUsBody}</p>
       </div>
       <p style={{fontSize:12,color:C.inkFaint,fontStyle:"italic",lineHeight:1.65,margin:0}}>{b.esmaNote}</p>
@@ -445,24 +495,24 @@ function MeasureYourBroker() {
           <div key={i} style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:6,padding:"18px 20px"}}>
             <div style={{fontWeight:600,fontSize:13,color:C.black,marginBottom:8}}>{t}</div>
             <p style={{fontSize:12.5,color:C.inkMid,lineHeight:1.6,margin: i<2 ? 10 : 0}}>{x}</p>
-            {i<2 && <a href="/chart.html?s=GOLD" target="_blank" rel="noopener" style={{fontFamily:"monospace",fontSize:10.5,color:C.gold,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>{m.openOnChart}</a>}
+            {i<2 && <a href="/chart.html?s=GOLD" target="_blank" rel="noopener" style={{fontFamily:"monospace",fontSize:10.5,color:C.goldText,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>{m.openOnChart}</a>}
           </div>
         ))}
       </div>
       <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"20px 24px",marginBottom:16}}>
-        <Mono size={10} color={C.gold} spacing={1} style={{display:"block",marginBottom:14,textTransform:"uppercase"}}>{m.multiplierLabel}</Mono>
+        <Mono size={10} color={C.goldText} spacing={1} style={{display:"block",marginBottom:14,textTransform:"uppercase"}}>{m.multiplierLabel}</Mono>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,marginBottom:16}} className="g2">
           <div>
             <Mono size={10} color={C.inkFaint} spacing={0.5} style={{display:"block",marginBottom:6}}>{m.m1Title}</Mono>
-            <input type="number" value={normalSpread} step={0.1} min={0} onChange={e=>setNormalSpread(+e.target.value)} style={{width:"100%",padding:"9px 12px",border:`1px solid ${C.border}`,borderRadius:4,fontFamily:"monospace",fontSize:14}}/>
+            <input type="number" aria-label={m.m1Title} value={normalSpread} step={0.1} min={0} onChange={e=>setNormalSpread(+e.target.value)} style={{width:"100%",padding:"9px 12px",border:`1px solid ${C.border}`,borderRadius:4,fontFamily:"monospace",fontSize:14}}/>
           </div>
           <div>
             <Mono size={10} color={C.inkFaint} spacing={0.5} style={{display:"block",marginBottom:6}}>{m.m2Title}</Mono>
-            <input type="number" value={releaseSpread} step={0.1} min={0} onChange={e=>setReleaseSpread(+e.target.value)} style={{width:"100%",padding:"9px 12px",border:`1px solid ${C.border}`,borderRadius:4,fontFamily:"monospace",fontSize:14}}/>
+            <input type="number" aria-label={m.m2Title} value={releaseSpread} step={0.1} min={0} onChange={e=>setReleaseSpread(+e.target.value)} style={{width:"100%",padding:"9px 12px",border:`1px solid ${C.border}`,borderRadius:4,fontFamily:"monospace",fontSize:14}}/>
           </div>
         </div>
         <div style={{textAlign:"center",background:C.black,borderRadius:6,padding:"18px 24px"}}>
-          <div style={{fontFamily:"'DM Serif Display',serif",fontSize:28,color:C.gold}}>{multiplier!=null?multiplier.toFixed(1)+"×":"—"}</div>
+          <div style={{fontFamily:"'DM Serif Display',serif",fontSize:28,color:C.goldText}}>{multiplier!=null?multiplier.toFixed(1)+"×":"—"}</div>
           <Mono size={9.5} color="rgba(255,255,255,0.5)" spacing={0.5}>{m.multiplierResultLabel}</Mono>
         </div>
       </div>
@@ -471,16 +521,25 @@ function MeasureYourBroker() {
   );
 }
 
-// ─── Ступень 6: pending заглушка ─────────────────────────────────────────────
-function LadderLimitBlock() {
+// ─── Ступень 6: сравнение площадок ──────────────────────────────────────────
+/* 🔴 ЗДЕСЬ БЫЛА ЗАГЛУШКА, И ЕЁ ПРИЧИНА УСТАРЕЛА. Текст гласил: «инструмент
+   сравнения площадок готовится отдельно вместе с остальной инфраструктурой
+   лестницы», комментарий рядом — «требует partners.json, которого не
+   существует». Файл существует: web/data/partners.json, пять партнёров,
+   юрлица с регуляторами и номерами лицензий, плечо по юрисдикциям, процент
+   теряющих счетов с датой и ссылкой на источник. Он уже питает страницу
+   /brokers. Сам виджет тоже был написан — BrokerPicker в brokers.js, — и
+   всё это время не был ни к чему подключён.
+
+   Собственная спека проекта состояние «блок есть, но вместо него обещание»
+   запрещает прямо: либо рабочий блок, либо ничего. Теперь рабочий. */
+function LadderBrokerPicker() {
   const T11 = window.Ch11Content[INITIAL_LANG] || window.Ch11Content.ru;
   const ll = T11.ladderLimit;
   return (
     <div style={{marginBottom:48}}>
       {ll.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:14,color:C.inkMid,lineHeight:1.75,marginBottom:14,maxWidth:800}}>{p}</p>)}
-      <div style={{border:`1px dashed ${C.borderGold}`,borderRadius:8,padding:"18px 22px",background:C.surface}}>
-        <p style={{fontSize:12,color:C.inkFaint,fontStyle:"italic",margin:0}}>{ll.pendingNote}</p>
-      </div>
+      <PartnerPicker limit={3} place="ch11_ladder6" errorText={ll.loadError}/>
     </div>
   );
 }
@@ -500,7 +559,7 @@ function PredictLossPct() {
   const esmaFact = INITIAL_LANG==="ru"?"По методике ESMA разброс между площадками действительно бывает больше десяти процентных пунктов — точную таблицу по нашим партнёрам опубликуем вместе с инструментом сравнения.":INITIAL_LANG==="ro"?"După metodologia ESMA, diferența dintre platforme poate fi într-adevăr mai mare de zece puncte procentuale — tabelul exact pentru partenerii noștri va fi publicat odată cu instrumentul de comparare.":"Per ESMA's methodology, the gap between platforms genuinely can exceed ten percentage points — we'll publish the exact table for our partners alongside the comparison tool.";
   return (
     <div style={{border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px",marginTop:8,marginBottom:24}}>
-      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{p.tag}</Mono>
+      <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{p.tag}</Mono>
       <p style={{fontSize:14.5,color:C.black,lineHeight:1.65,marginBottom:14}}>{p.question}</p>
       <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:14}}>
         {p.options.map((o,i) => (
@@ -530,7 +589,7 @@ function Chapter11() {
 
       <div style={{position:"sticky",top:106,background:"rgba(255,255,255,0.96)",backdropFilter:"blur(10px)",borderBottom:`1px solid ${C.border}`,padding:"15px 5vw",display:"flex",alignItems:"center",justifyContent:"space-between",zIndex:50}}>
         <div style={{display:"flex",alignItems:"center",gap:20}}>
-          <span onClick={() => window.location.href = getChUrl(10, lang)} style={{color:C.gold,cursor:"pointer",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</span>
+          <a href={getChUrl(10, lang)} aria-label={lang==="ru"?"Предыдущая глава":lang==="ro"?"Capitolul anterior":"Previous chapter"} style={{color:C.goldText,cursor:"pointer",textDecoration:"none",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</a>
           <Chip>{S.levelChip}</Chip>
           <Mono size={14} color={C.inkSoft} spacing={0} className="hide-mobile">{S.chapterNameShort}</Mono>
         </div>
@@ -543,15 +602,15 @@ function Chapter11() {
       <div style={{background:C.black,padding:"80px 5vw 70px",textAlign:"center",position:"relative",overflow:"hidden"}}>
         <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 100%, rgba(201,151,58,0.1) 0%, transparent 60%)"}}/>
         <div style={{position:"relative"}}>
-          <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:20}}>{S.heroEyebrow}</Mono>
+          <Mono size={11} color={C.goldText} spacing={4} style={{display:"block",marginBottom:20}}>{S.heroEyebrow}</Mono>
           <h1 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(36px,6vw,66px)",fontWeight:400,color:C.white,lineHeight:1.05,marginBottom:20}}>
-            {S.heroTitleLine1}<br/><span style={{color:C.gold}}>{S.heroTitleLine2}</span>
+            {S.heroTitleLine1}<br/><span style={{color:C.goldText}}>{S.heroTitleLine2}</span>
           </h1>
           <p style={{fontSize:"clamp(16px,2vw,20px)",color:"rgba(255,255,255,0.55)",maxWidth:640,margin:"0 auto 32px",lineHeight:1.65}}>{S.heroSubtitle}</p>
           <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
-            <Chip color={C.gold}>{S.fundamentalChip}</Chip>
-            <Chip color="rgba(255,255,255,0.3)">{S.technicalChip}</Chip>
-            <Chip color="rgba(255,255,255,0.3)">{S.interactiveChip}</Chip>
+            <Chip color={C.goldText}>{S.fundamentalChip}</Chip>
+            <Chip color="rgba(255,255,255,0.55)">{S.technicalChip}</Chip>
+            <Chip color="rgba(255,255,255,0.55)">{S.interactiveChip}</Chip>
           </div>
         </div>
       </div>
@@ -586,7 +645,7 @@ function Chapter11() {
 
         <Rule/>
 
-        <LadderLimitBlock/>
+        <LadderBrokerPicker/>
 
         <QuizBlock questions={T11.quiz} levelId="level_11" lang={lang} copy={{
           kicker: S.quizKicker, title: S.quizTitle, next: S.quizNext,
@@ -596,7 +655,7 @@ function Chapter11() {
         <PredictLossPct/>
 
         <div style={{border:`1px dashed ${C.borderGold}`,borderRadius:8,padding:"20px 24px",marginBottom:32,background:C.surface}}>
-          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T11.cliffhanger.tag}</Mono>
+          <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{T11.cliffhanger.tag}</Mono>
           {T11.cliffhanger.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:14,color:C.inkMid,lineHeight:1.7,marginBottom:10}}>{p}</p>)}
         </div>
 

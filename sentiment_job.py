@@ -98,6 +98,7 @@ def _load_labelled(con_signals):
 
 def run(backfill_hours: int = 1, verbose: bool = False) -> int:
     con_bot = sqlite3.connect(str(_BOT_DB))
+    con_bot.execute("PRAGMA busy_timeout=60000")
     con_bot.executescript("""
         CREATE TABLE IF NOT EXISTS sentiment_hourly(
           symbol TEXT, ts_hour INT, bull INT, bear INT, total INT, score REAL,
@@ -105,6 +106,7 @@ def run(backfill_hours: int = 1, verbose: bool = False) -> int:
     """)
     con_bot.commit()
     con_signals = sqlite3.connect(str(_SIGNALS_DB))
+    con_signals.execute("PRAGMA busy_timeout=60000")
 
     all_labelled = _load_labelled(con_signals)
     con_signals.close()

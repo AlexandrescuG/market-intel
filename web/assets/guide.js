@@ -44,6 +44,35 @@
     return arr.map(function (p) { return '<p>' + linkify(p) + '</p>'; }).join('');
   }
 
+  // ── Снимок экрана: один сборщик на все три места ───────────────────────────
+  //
+  // 🔴 Раньше <img> собирался в трёх местах (врезка про юрлицо, шаг, колбаут)
+  // тремя одинаковыми строками. Пока к нему добавлялись только alt и lazy,
+  // это была терпимая копипаста; с приходом webp и размеров расхождение стало
+  // вопросом времени, поэтому сборка одна.
+  //
+  // width/height — не украшение. Без них браузер не знает пропорций до
+  // загрузки, отводит картинке нулевую высоту и двигает страницу, когда она
+  // приходит. На гайде таких кадров до 25.
+  //
+  // <picture> строится ТОЛЬКО когда в данных есть img_webp. Это не
+  // перестраховка: <source>, который не загрузился, НЕ откатывается на <img>
+  // внутри того же <picture> — на месте картинки остаётся пустая рамка.
+  // Поэтому наличие webp подтверждается данными (их проставляет
+  // tools/prepare_guide_images.py по факту сборки файла), а не предполагается
+  // по имени: нет поля — отдаём обычный PNG, как и раньше.
+  function снимок(о, alt, кл) {
+    if (!о || !о.img) return '';
+    var разм = (о.img_w && о.img_h)
+      ? ' width="' + о.img_w + '" height="' + о.img_h + '"' : '';
+    var img = '<img src="' + escapeHtml(о.img) + '" alt="' + escapeHtml(alt || '') + '"'
+      + разм + (кл ? ' class="' + кл + '"' : '')
+      + ' loading="lazy" decoding="async">';
+    if (!о.img_webp) return img;
+    return '<picture><source type="image/webp" srcset="'
+      + escapeHtml(о.img_webp) + '">' + img + '</picture>';
+  }
+
   // ── Блок: врезка про юрлицо (только регистрация) ───────────────────────────
   function renderEntity(e) {
     if (!e) return '';
@@ -77,7 +106,7 @@
 
     return '<div class="entity-box">' +
       '<div class="entity-box-title">' + t('guide.entity_box_title', 'С кем на самом деле заключается договор') + '</div>' +
-      (e.img ? '<img src="' + escapeHtml(e.img) + '" alt="">' : '') +
+      снимок(e, t('guide.entity_box_title', 'С кем на самом деле заключается договор')) +
       rows + register +
       (e.quote ? '<p class="entity-quote">' + escapeHtml(e.quote) + '</p>' : '') +
       confirmNote + missing +
@@ -90,8 +119,11 @@
   // изначально текстовый (например, "откройте страницу инструмента"), плашка
   // здесь была бы враньём про несуществующую попытку съёмки.
   function renderStep(s, i) {
+    // alt берём из подписи шага, а не пустой: скриншот здесь несёт смысл
+    // (какое юрлицо названо на экране), а не декорация. loading="lazy" —
+    // на странице до 23 таких кадров, все грузились сразу (аудит 14.08.2026).
     var media = s.img
-      ? '<img src="' + escapeHtml(s.img) + '" alt="">'
+      ? снимок(s, String(s.caption || '').replace(/<[^>]*>/g, '').slice(0, 120))
       : ('img' in s ? '<div class="guide-step-nomedia">' + t('guide.step_no_image', 'Скриншот этого шага недоступен') + '</div>' : '');
     return '<div class="guide-step">' +
       '<div class="guide-step-cap"><span class="guide-step-num">' + (i + 1) + '</span>' + linkify(s.caption) + '</div>' +
@@ -105,17 +137,27 @@
     return '<div class="callout ' + escapeHtml(b.style || 'note') + '">' +
       (b.title ? '<div class="callout-title">' + linkify(b.title) + '</div>' : '') +
       paragraphs(b.body) +
-      (b.img ? '<img src="' + escapeHtml(b.img) + '" alt="">' : '') +
+      снимок(b, String(b.title || '').replace(/<[^>]*>/g, '').slice(0, 120)) +
       '</div>';
   }
 
   // ── Блок: произвольная таблица (условия торговли, факты) ───────────────────
+  // 🔴 Название колонки уезжает в data-col КАЖДОЙ ячейки, а не только в шапку.
+  // На телефоне таблица разворачивается в карточки (CSS в broker_guide.html):
+  // шапка скрыта, и без подписи внутри ячейки «5 USD в месяц после 90 дней»
+  // повисает без объяснения, что это. Подпись рисуется из ::before по
+  // data-col — поэтому она обязана быть в разметке, а не только в <th>.
   function renderTable(b) {
-    var thead = '<tr>' + b.columns.map(function (c) { return '<th>' + escapeHtml(c) + '</th>'; }).join('') + '</tr>';
+    var cols = b.columns || [];
+    var thead = '<tr>' + cols.map(function (c) { return '<th>' + escapeHtml(c) + '</th>'; }).join('') + '</tr>';
     var tbody = b.rows.map(function (row) {
-      return '<tr>' + row.map(function (cell) { return '<td>' + escapeHtml(cell) + '</td>'; }).join('') + '</tr>';
+      return '<tr>' + row.map(function (cell, i) {
+        return '<td data-col="' + escapeHtml(cols[i] || '') + '">' + escapeHtml(cell) + '</td>';
+      }).join('') + '</tr>';
     }).join('');
-    return '<table class="guide-table"><thead>' + thead + '</thead><tbody>' + tbody + '</tbody></table>' +
+    // data-cols нужен мобильной вёрстке: в таблице ровно из двух колонок
+    // подпись «Значение» над значением — шум (см. CSS в broker_guide.html).
+    return '<table class="guide-table" data-cols="' + cols.length + '"><thead>' + thead + '</thead><tbody>' + tbody + '</tbody></table>' +
       (b.caption ? '<p class="guide-table-caption">' + linkify(b.caption) + '</p>' : '');
   }
 
@@ -155,8 +197,17 @@
       '</div></div>';
     var lead = broker.lead ? '<p class="guide-lead">' + escapeHtml(broker.lead) + '</p>' : '';
     var processes = (broker.processes || []).map(function (p, i) { return renderProcess(p, i + 1); }).join('');
+    // Языковой вариант партнёрской ссылки, если он задан в данных гайда.
+    // Сейчас во всех трёх файлах (ru/en/ro) стоит одна и та же ссылка с
+    // зашитым языком партнёра — у XM это `l=ru`, у FxPro и InstaForex
+    // сегмент `/en/`. Правильные коды локалей знает только сам партнёр,
+    // проверяются они живым переходом (а он засчитывается как клик), поэтому
+    // подставлять их наугад нельзя: вместо чужого языка легко получить 404.
+    // Механизм готов — как только в guides/<id>.<lang>.json появится
+    // `affiliate` со своим языком, он сработает сам, это уже отдельный файл.
+    var affiliate = broker['affiliate_' + (window.sbfI18n && window.sbfI18n.lang)] || broker.affiliate;
     var cta = '<div class="guide-cta">' +
-      '<a class="primary" href="' + escapeHtml(broker.affiliate) + '" target="_blank" rel="noopener sponsored">' + t('guide.cta_open', 'Открыть счёт у') + ' ' + escapeHtml(broker.name) + '</a>' +
+      '<a class="primary" href="' + escapeHtml(affiliate) + '" target="_blank" rel="noopener sponsored">' + t('guide.cta_open', 'Открыть счёт у') + ' ' + escapeHtml(broker.name) + '</a>' +
       '<a class="secondary" href="' + escapeHtml(langPrefix() + (broker.table_link || '/brokers')) + '">' + t('guide.cta_compare', 'Сравнить всех брокеров') + '</a>' +
       '</div>';
     var risk = '<aside class="rwarn" role="note"><p>' + t('brokers.risk_warning_full', '') + '</p></aside>';
@@ -172,10 +223,16 @@
       // <id>.ro.json это полные переводы той же структуры. Если файла для языка
       // нет (ещё не переведён брокер), тихо падаем обратно на RU, а не на пустую
       // страницу -- отсутствие перевода не должно ломать чтение факта.
+      // Кэш-бастер -- без него правка ТОЛЬКО JSON-данных (без изменения самого
+      // guide.js) не долетала бы до вернувшегося читателя без хард-релоада:
+      // static-serving в serve.py (SimpleHTTPRequestHandler) не шлёт
+      // Cache-Control, версия в query у guide.js на этот случай не спасает.
+      // Тот же приём, что уже в brokers.js -> loadData()/loadLicences().
       var suffix = (_i18n.lang === 'en' || _i18n.lang === 'ro') ? '.' + _i18n.lang : '';
-      return fetch('/data/guides/' + id + suffix + '.json').then(function (r) {
+      var bust = '?t=' + Date.now();
+      return fetch('/data/guides/' + id + suffix + '.json' + bust).then(function (r) {
         if (r.ok) return r.json();
-        if (suffix) return fetch('/data/guides/' + id + '.json').then(function (r2) {
+        if (suffix) return fetch('/data/guides/' + id + '.json' + bust).then(function (r2) {
           if (!r2.ok) throw new Error('not found');
           return r2.json();
         });

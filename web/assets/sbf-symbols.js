@@ -69,6 +69,21 @@
     return canon ? REGISTRY[canon].class : null;
   }
 
+  /* Брокерское имя без служебных знаков: «#NVIDIA» → «NVIDIA»,
+     «#JP_MORGAN» → «JP MORGAN», «_FERRARI.IT» → «FERRARI.IT».
+
+     🔴 Решётка нужна только URL графика — это ИМЯ ПОЗИЦИИ В КАТАЛОГЕ
+     БРОКЕРА, а не название компании. В реестре понятных имён 74 записи, а
+     акций в каталоге 618: расписывать их руками бессмысленно, но и
+     показывать человеку «#PAYPAL» незачем. Снять префикс и вернуть
+     подчёркиванию пробел — ровно то улучшение, которое можно сделать без
+     выдумывания названий. */
+  function tidyBroker(sym) {
+    var s = String(sym);
+    if (s.charAt(0) !== '#' && s.charAt(0) !== '_') return s;
+    return s.slice(1).replace(/_/g, ' ');
+  }
+
   function symbolName(sym, opts) {
     opts = opts || {};
     var mode = opts.mode || 'name';
@@ -77,8 +92,8 @@
     var canon = canonOf(sym);
     var entry = canon ? REGISTRY[canon] : null;
     var lang = opts.lang || currentLang();
-    var name = entry ? (entry[lang] || entry.ru || sym) : sym;
-    var ticker = canon || sym;
+    var name = entry ? (entry[lang] || entry.ru || sym) : tidyBroker(sym);
+    var ticker = canon || tidyBroker(sym);
 
     if (mode === 'name+ticker') {
       return name.toUpperCase() === String(ticker).toUpperCase()

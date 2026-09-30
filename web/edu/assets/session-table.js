@@ -28,12 +28,25 @@
   var CONFIG_URL = "/data/edu_stats/market_hours.json";
   var _cache = null;
 
+  /* Своя копия палитры — не из window.AcademyShared: таблица сессий
+     подключается и на страницах без него. Значения держать согласованными
+     с assets/academy-shared.js, там же разобрано, почему пороги считаны
+     по #f0ebe0, а не по белому. gold остаётся заливкой и рамкой, для
+     текста goldText. */
   var C = {
-    gold: "#c9973a", goldPale: "#f7f0e3", black: "#18181a", inkMid: "#555555",
-    inkSoft: "rgba(24,24,26,0.58)", inkFaint: "rgba(24,24,26,0.28)",
+    gold: "#c9973a", goldPale: "#f7f0e3", goldText: "#876525",
+    black: "#18181a", inkMid: "#555555",
+    inkSoft: "rgba(24,24,26,0.68)", inkFaint: "rgba(24,24,26,0.61)",
     border: "rgba(24,24,26,0.1)", surface: "#faf8f5",
     red: "#f23645", redPale: "#fdecea", green: "#089981", greenPale: "#eaf5ee",
-    violet: "#8b5cf6"
+    violet: "#8b5cf6",
+    /* 🔴 Те же четыре цвета, пригодные для ТЕКСТА на светлом (#faf8f5).
+       Биржевые красный и зелёный подобраны под тёмный фон терминала и на
+       светлом дают 3.68 и 3.37, золото — 2.49. В таблице ими красится
+       название события и колонка значимости, то есть именно текст. Линии,
+       заливки и рамки продолжают брать C.red/C.green/C.gold: для
+       нетекстовой графики довольно 3:1, и узнаваемость цвета сохраняется. */
+    redText: "#D90E1E", greenText: "#067B68", violetText: "#7B46F5"
   };
 
   var T = {
@@ -138,11 +151,13 @@
     return "●".repeat(n) + "○".repeat(5 - n);
   }
 
+  /* Цвет вида события для ТЕКСТА. Отдельной функции для заливок пока не
+     нужно: в этой таблице вид события нигде не рисуется плашкой. */
   function kindColor(ev) {
-    if (ev.kind === "fix") return C.gold;
-    if (ev.kind === "release") return C.red;
-    if (ev.kind === "overlap") return C.green;
-    if (ev.kind === "broker") return C.violet;
+    if (ev.kind === "fix") return C.goldText;
+    if (ev.kind === "release") return C.redText;
+    if (ev.kind === "overlap") return C.greenText;
+    if (ev.kind === "broker") return C.violetText;
     return C.inkSoft;
   }
 
@@ -168,7 +183,7 @@
     cfg.zones.forEach(function (z) {
       var on = z.id === state.zone;
       h.push('<button data-zone="' + z.id + '" style="font-family:monospace;font-size:11px;letter-spacing:1px;padding:4px 10px;margin:2px;cursor:pointer;border:1px solid ' +
-        (on ? C.gold : C.border) + ';background:' + (on ? C.goldPale : "#fff") + ';color:' + (on ? C.gold : C.inkMid) + '">' +
+        (on ? C.gold : C.border) + ';background:' + (on ? C.goldPale : "#fff") + ';color:' + (on ? C.goldText : C.inkMid) + '">' +
         (z["label_" + lang] || z.label_en) + '</button>');
     });
     h.push('</div>');
@@ -176,7 +191,7 @@
     ["summer", "winter", "desync"].forEach(function (m) {
       var on = m === state.mode;
       h.push('<button data-mode="' + m + '" style="font-family:monospace;font-size:11px;letter-spacing:1px;padding:4px 10px;margin:2px;cursor:pointer;border:1px solid ' +
-        (on ? C.gold : C.border) + ';background:' + (on ? C.goldPale : "#fff") + ';color:' + (on ? C.gold : C.inkMid) + '">' + t[m] + '</button>');
+        (on ? C.gold : C.border) + ';background:' + (on ? C.goldPale : "#fff") + ';color:' + (on ? C.goldText : C.inkMid) + '">' + t[m] + '</button>');
     });
     h.push('</div></div>');
 
@@ -206,13 +221,27 @@
       var badges = "";
       if (ev.risk) badges += '<span style="font-size:10px;font-family:monospace;color:#c0392b;background:' + C.redPale + ';padding:2px 6px;border-radius:2px;margin-left:6px">⚠ ' + t.risk + '</span>';
       if (ev.conditional) badges += '<span style="font-size:10px;font-family:monospace;color:' + C.inkSoft + ';background:' + C.surface + ';padding:2px 6px;border-radius:2px;margin-left:6px">' + t.conditional + '</span>';
-      h.push('<tr data-ev-row="' + ev.id + '" style="cursor:pointer;border-bottom:1px solid ' + C.border + (r.moved ? ';background:' + C.goldPale : "") + (open ? ';background:' + C.surface : "") + '">' +
+      // 🔴 Строка раскрывается по нажатию — то есть это управление. Раньше
+      // им был сам <tr> с курсором-пальцем: мышью работает, с клавиатуры
+      // недоступна, диктор не назовёт ни роли, ни того, раскрыта ли строка.
+      // Восемь таких строк в главе 5.
+      //
+      // Управлением сделана кнопка внутри ячейки с названием (она же занимает
+      // всю её ширину, так что попасть мышью по-прежнему легко), а не сама
+      // строка: role="button" на <tr> отобрал бы у таблицы её собственную
+      // разметку — читатель с диктором перестал бы понимать, что это строка
+      // таблицы и в каком она столбце.
+      h.push('<tr data-ev-row="' + ev.id + '" style="border-bottom:1px solid ' + C.border + (r.moved ? ';background:' + C.goldPale : "") + (open ? ';background:' + C.surface : "") + '">' +
         '<td style="padding:13px 14px;font-family:monospace;white-space:nowrap;font-weight:' + (ev.highlight ? 700 : 400) + '">' +
           (ev.weekday === "sun" ? '<span style="color:' + C.inkFaint + '">' + t.sunday + ' </span>' : "") + r.time +
           '<div style="font-size:10px;color:' + C.inkFaint + '">' + r.utc + ' ' + t.utc + '</div></td>' +
-        '<td style="padding:13px 14px;font-weight:600;color:' + col + '">' +
-          '<span style="display:inline-block;width:12px;color:' + C.inkFaint + ';font-family:monospace">' + (open ? "▾" : "▸") + '</span> ' +
-          (ev["label_" + lang] || ev.label_en) + badges + '</td>' +
+        '<td style="padding:0;font-weight:600;color:' + col + '">' +
+          '<button type="button" data-ev-toggle="' + ev.id + '" aria-expanded="' + (open ? "true" : "false") + '"' +
+            ' style="display:block;width:100%;text-align:left;padding:13px 14px;background:none;border:none;' +
+            'font:inherit;color:inherit;cursor:pointer">' +
+            '<span style="display:inline-block;width:12px;color:' + C.inkFaint + ';font-family:monospace">' + (open ? "▾" : "▸") + '</span> ' +
+            (ev["label_" + lang] || ev.label_en) + badges +
+          '</button></td>' +
         '<td style="padding:13px 14px;font-family:monospace;color:' + col + ';white-space:nowrap">' + weightDots(ev.weight) + '</td>' +
       '</tr>');
       if (open) {
@@ -253,9 +282,9 @@
         render(el, cfg, state);
       };
     }
-    el.querySelectorAll("tr[data-ev-row]").forEach(function (tr) {
-      tr.onclick = function () {
-        var id = tr.getAttribute("data-ev-row");
+    el.querySelectorAll("button[data-ev-toggle]").forEach(function (b) {
+      b.onclick = function () {
+        var id = b.getAttribute("data-ev-toggle");
         state.expanded[id] = !state.expanded[id];
         render(el, cfg, state);
       };

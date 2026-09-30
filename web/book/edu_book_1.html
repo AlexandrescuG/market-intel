@@ -2,8 +2,18 @@
 <html lang="{{ lang }}">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>SBF | {% if lang == 'ru' %}Биржевая торговля — Руководство{% elif lang == 'ro' %}Trading la Bursă — Ghid{% else %}Exchange Trading — Guide{% endif %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  {# Заголовок был названием всего курса, а не первой главы: в выдаче и
+   во вкладках /edu/b/1 выглядела как оглавление, а не как материал.
+   Остальные четырнадцать глав подписаны «Глава N. …» — приводим к ним. #}
+<title>SBF | {% if lang == 'ru' %}Глава 1. Биржевая торговля{% elif lang == 'ro' %}Capitolul 1. Trading la Bursă{% else %}Chapter 1. Exchange Trading{% endif %}</title>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="SBF Intelligence">
+<meta property="og:image" content="https://lp.sbfconsult.com/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://lp.sbfconsult.com/assets/og-image.png">
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/edu/assets/history.css">
@@ -50,6 +60,9 @@
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
+<!-- Кадры станций по настоящим рядам. Общий файл с главой 2: станция 1987
+     есть в обеих, ряд под неё собран один, и рисовальщик тоже один. -->
+<script src="/edu/assets/chrono-frames.js"></script>
 <script src="/edu/assets/chrono.js"></script>
 
 <script type="text/babel" data-presets="react">
@@ -323,12 +336,14 @@ const QUIZ = {
   ],
 };
 
-const MARKET=[
-  {s:"S&P 500",v:"5,842",c:"+0.43%",up:true},{s:"GOLD",v:"$3,124",c:"+0.71%",up:true},
-  {s:"OIL",v:"$68.42",c:"−0.28%",up:false},{s:"EUR/USD",v:"1.0832",c:"+0.15%",up:true},
-  {s:"USD/MDL",v:"17.84",c:"−0.12%",up:false},{s:"BTC",v:"$83,421",c:"+1.24%",up:true},
-  {s:"NASDAQ",v:"18,261",c:"+0.52%",up:true},
-];
+/* 🔴 Здесь лежал const MARKET из семи котировок: «S&P 500 5,842 +0.43%»,
+   «GOLD $3,124», «BTC $83,421» и так далее — все выдуманные и все
+   застывшие в дне, когда их набрали. Grep по файлу: объявлено и ни разу
+   не использовано. Удалено, а не поправлено: живые котировки на странице
+   и так есть — их отдаёт /api/quotes в ленте наверху. Мёртвый блок с
+   правдоподобными числами опаснее пустого места: рано или поздно кто-то
+   «оживит» его, не проверив, откуда числа. */
+
 const GLOSSARY={
   ru:{
     "биржа":{s:"Место встречи покупателей и продавцов ценных бумаг",a:"Организованный рынок стандартизированных финансовых инструментов",e:"NYSE — $31.7T капитализации"},
@@ -374,9 +389,9 @@ function StartScreen({onStart}) {
   return React.createElement('div',{style:{minHeight:"100vh",background:C.white,color:C.ink,display:"flex",flexDirection:"column",fontFamily:"'DM Sans',sans-serif"}},
     React.createElement('div',{style:{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"75px 5vw 50px"}},
       React.createElement('div',{style:{textAlign:"center",marginBottom:60}},
-        React.createElement(Mono,{size:15,color:C.gold,spacing:8,style:{display:"block",marginBottom:25}},"SBF COMPANY"),
+        React.createElement(Mono,{size:15,color:C.goldText,spacing:8,style:{display:"block",marginBottom:25}},"SBF COMPANY"),
         React.createElement('h1',{style:{fontSize:"clamp(46px,7.5vw,91px)",fontWeight:700,margin:0,letterSpacing:-2,lineHeight:1,color:C.black,fontFamily:"'DM Serif Display',serif"}},tr.bookTitle),
-        React.createElement(Mono,{size:16,color:C.gold,spacing:5,style:{display:"block",marginTop:13}},tr.bookSubtitle),
+        React.createElement(Mono,{size:16,color:C.goldText,spacing:5,style:{display:"block",marginTop:13}},tr.bookSubtitle),
         React.createElement(Rule,{w:"250px",my:35})
       ),
       React.createElement('div',{style:{maxWidth:1040,width:"100%",textAlign:"center"}},
@@ -388,7 +403,7 @@ function StartScreen({onStart}) {
             padding:"30px 25px",cursor:"pointer",textAlign:"left",fontFamily:"'DM Sans',sans-serif",
             color:C.ink,transition:"all 0.25s",boxShadow:path===p.id?"0 3px 15px rgba(201,151,58,0.15)":"none",
           }},
-            React.createElement('div',{style:{fontSize:38,color:C.gold,marginBottom:15}},p.icon),
+            React.createElement('div',{style:{fontSize:38,color:C.goldText,marginBottom:15}},p.icon),
             React.createElement('div',{style:{fontSize:21,fontWeight:700,marginBottom:10,color:C.black,fontFamily:"'DM Serif Display',serif"}},p.title),
             React.createElement('div',{style:{fontSize:15,color:C.inkSoft,lineHeight:1.7}},p.desc)
           ))
@@ -434,6 +449,20 @@ function Level1({onBack, onNext, path}) {
   };
   const [chronoIdx, setChronoIdx] = useState(chronoInitialIdx);
   const [chronoDone, setChronoDone] = useState(() => chronoStations.map((_, i) => i === chronoInitialIdx()));
+  // Ряды станций (chrono2_frames.json) приходят после первой отрисовки. Без
+  // этой подписки станция 1987, показанная до их загрузки, так и осталась бы
+  // рисунком, и картина зависела бы от скорости сети.
+  const [, setChronoFramesTick] = useState(0);
+  useEffect(() => {
+    const onFrames = () => setChronoFramesTick(t => t + 1);
+    window.addEventListener("chrono2-frames", onFrames);
+    // Подписи авторов приходят своим файлом и тоже позже первой отрисовки.
+    window.addEventListener("chrono-credits", onFrames);
+    return () => {
+      window.removeEventListener("chrono2-frames", onFrames);
+      window.removeEventListener("chrono-credits", onFrames);
+    };
+  }, []);
   const chronoStation = chronoStations[chronoIdx];
   const chronoArt = (key) => (window.ChronoStationArtHTML ? window.ChronoStationArtHTML(key) : '') + (window.ChronoArchiveStamp || '');
   const chronoGo = (i) => {
@@ -530,7 +559,7 @@ function Level1({onBack, onNext, path}) {
       padding:"15px 5vw",display:"flex",alignItems:"center",justifyContent:"space-between",zIndex:50,
     }},
       React.createElement('div',{style:{display:"flex",alignItems:"center",gap:20}},
-        React.createElement('span',{onClick:onBack,style:{color:C.gold,cursor:"pointer",fontFamily:"monospace",fontSize:14,letterSpacing:2}},"←"),
+        React.createElement('span',{onClick:onBack,style:{color:C.goldText,cursor:"pointer",fontFamily:"monospace",fontSize:14,letterSpacing:2}},"←"),
         React.createElement(Chip,{},tr.levelTag),
         React.createElement(Mono,{size:15,color:C.inkSoft,spacing:0,style:{fontFamily:"inherit"}, className:"hide-mobile"},lang==="ru"?"Фондовые биржи":lang==="en"?"Stock Exchanges":"Burse de Valori")
       ),
@@ -548,7 +577,7 @@ function Level1({onBack, onNext, path}) {
     React.createElement('div',{style:{maxWidth:1060,margin:"0 auto",padding:"60px 5vw 120px"}},
       React.createElement('div',{style:{background:C.dark,color:C.white,padding:"45px 5vw",marginBottom:60,position:"relative",overflow:"hidden"}},
         React.createElement('div',{style:{position:"absolute",top:-12,right:30,fontSize:127,opacity:0.05,fontFamily:"monospace"}},"⚡"),
-        React.createElement(Chip,{color:C.gold},tr.antiMythTag),
+        React.createElement(Chip,{color:C.goldText},tr.antiMythTag),
         React.createElement('h2',{style:{fontSize:"clamp(25px,3.5vw,38px)",fontWeight:700,margin:"18px 0 12px",color:C.white,lineHeight:1.25,fontFamily:"'DM Serif Display',serif"}},tr.antiMythTitle),
         React.createElement('p',{style:{fontSize:19,color:"#cccccc",lineHeight:1.8,margin:0}},tr.antiMythBody)
       ),
@@ -559,7 +588,7 @@ function Level1({onBack, onNext, path}) {
       ),
 
       React.createElement('div',{style:{background:C.surface,border:`1px solid ${C.border}`,padding:"30px 5vw",marginBottom:60,display:"flex",gap:25,alignItems:"flex-start"}},
-        React.createElement('div',{style:{fontSize:40,color:C.gold,lineHeight:1,flexShrink:0}},"◈"),
+        React.createElement('div',{style:{fontSize:40,color:C.goldText,lineHeight:1,flexShrink:0}},"◈"),
         React.createElement('div',{},
           React.createElement(Chip,{},tr.priceTag),
           React.createElement('p',{style:{fontSize:19,color:C.ink,margin:"12px 0 5px",lineHeight:1.8}},tr.priceBody),
@@ -570,9 +599,9 @@ function Level1({onBack, onNext, path}) {
       React.createElement(Rule,{}),
 
       React.createElement('div',{style:{background:C.goldPale,border:`1px solid ${C.borderGold}`,padding:"12px 5vw",marginBottom:30,display:"flex",alignItems:"center",gap:15, flexWrap:"wrap"}},
-        React.createElement(Mono,{size:11,color:C.gold,spacing:2},mode==="beginner"?( lang==="ru"?"РЕЖИМ НОВИЧКА":lang==="en"?"BEGINNER MODE":"MOD ÎNCEPĂTOR"):( lang==="ru"?"РЕЖИМ ПРОФИ":lang==="en"?"PRO MODE":"MOD PRO")),
+        React.createElement(Mono,{size:11,color:C.goldText,spacing:2},mode==="beginner"?( lang==="ru"?"РЕЖИМ НОВИЧКА":lang==="en"?"BEGINNER MODE":"MOD ÎNCEPĂTOR"):( lang==="ru"?"РЕЖИМ ПРОФИ":lang==="en"?"PRO MODE":"MOD PRO")),
         React.createElement('span',{style:{fontSize:15,color:C.inkMid}},mode==="beginner"?(lang==="ru"?"Метафоры и примеры из жизни":lang==="en"?"Metaphors and real-life examples":"Metafore și exemple din viață"):(lang==="ru"?"Математика, формулы, нюансы":lang==="en"?"Math, formulas, nuances":"Matematică, formule, nuanțe")),
-        React.createElement('button',{onClick:()=>setMode(mode==="beginner"?"pro":"beginner"),style:{marginLeft:"auto",background:"none",border:`1px solid ${C.gold}`,color:C.gold,fontSize:13,fontFamily:"monospace",cursor:"pointer",padding:"5px 15px",letterSpacing:2}},
+        React.createElement('button',{onClick:()=>setMode(mode==="beginner"?"pro":"beginner"),style:{marginLeft:"auto",background:"none",border:`1px solid ${C.gold}`,color:C.goldText,fontSize:13,fontFamily:"monospace",cursor:"pointer",padding:"5px 15px",letterSpacing:2}},
           mode==="beginner"?(lang==="ru"?"→ ПРОФИ":lang==="en"?"→ PRO":"→ PRO"):(lang==="ru"?"→ НОВИЧОК":lang==="en"?"→ BEGINNER":"→ ÎNCEPĂTOR")
         )
       ),
@@ -595,7 +624,19 @@ function Level1({onBack, onNext, path}) {
           <div className="h-station" style={{marginBottom:60}}>
             <div className="h-passepartout">
               <div className="h-artwork" dangerouslySetInnerHTML={{__html: chronoArt(chronoStation.illustration)}} />
-              <div className="h-caption"><span>{chronoStation.year} · {chronoStation.place}</span><span className="h-src">{chronoStation.source}</span></div>
+              {/* Автор и лицензия снимка — условие CC-BY, см. chrono.js.
+                  Приходят отдельным файлом и позже первой отрисовки, поэтому
+                  компонент подписан на событие chrono-credits ниже. */}
+              <div className="h-caption"
+                   dangerouslySetInnerHTML={{__html:
+                     '<span>' + chronoStation.year + ' · ' + chronoStation.place + '</span>'
+                     + '<span class="h-src">' + (chronoStation.source || '') + '</span>'
+                     /* Ключ картинки — illustration («1602_beurs»), а не id
+                        («1602»). Первый вариант звал по id и молча не
+                        показывал ни одной подписи: функция ничего не находит
+                        и честно возвращает пустую строку. */
+                     + (window.ChronoPhotoCredit
+                        ? window.ChronoPhotoCredit(chronoStation.illustration) : '')}}/>
             </div>
             <div>
               <div className="h-station-head"><span className="h-station-year">{chronoStation.year}</span><span className="h-station-place">{chronoStation.place}</span></div>
@@ -827,7 +868,7 @@ function Level1({onBack, onNext, path}) {
           ? React.createElement('div',{style:{fontSize:12.5,color:C.inkFaint,fontFamily:"monospace",marginTop:20}},tr.calcLoading)
           : calcResult && React.createElement('div',{style:{marginTop:30}},
               React.createElement('div',{style:{padding:"25px 5vw",background:C.white,border:`1px solid ${C.borderGold}`,marginBottom:15}},
-                React.createElement('div',{style:{fontSize:33,fontFamily:"monospace",fontWeight:700,color:C.gold}},
+                React.createElement('div',{style:{fontSize:33,fontFamily:"monospace",fontWeight:700,color:C.goldText}},
                   "$"+Math.round(calcResult.amount).toLocaleString()+" → $"+Math.round(calcResult.final).toLocaleString()
                 ),
                 React.createElement('div',{style:{fontSize:13,color:C.inkFaint,marginTop:6,fontFamily:"monospace"}},
@@ -841,7 +882,7 @@ function Level1({onBack, onNext, path}) {
       ),
 
       (lang==="ru"||lang==="ro")&&React.createElement('div',{style:{border:`1px solid ${C.border}`,padding:"35px 5vw",marginBottom:60,background:C.surface}},
-        React.createElement('div',{style:{marginBottom:15}},React.createElement(Chip,{color:C.gold},tr.moldovaTag)),
+        React.createElement('div',{style:{marginBottom:15}},React.createElement(Chip,{color:C.goldText},tr.moldovaTag)),
         React.createElement('p',{style:{fontSize:20,fontWeight:700,margin:"0 0 10px",color:C.black,fontFamily:"'DM Serif Display',serif"}},tr.moldovaTitle),
         React.createElement('p',{style:{fontSize:18,color:C.inkMid,lineHeight:1.8,margin:0}},tr.moldovaBody)
       ),
@@ -886,80 +927,6 @@ function Level1({onBack, onNext, path}) {
   );
 }
 
-function ComingSoon({ onTree, onBack }) {
-  const tr = TR[INITIAL_LANG] || TR.ru;
-  const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
-  return (
-    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: C.white, padding: "30px 5vw", textAlign: "center" }}>
-      <div style={{ fontSize: 81, marginBottom: 30 }}>🚧</div>
-      <h1 style={{ fontSize: "clamp(30px, 6vw, 46px)", fontFamily: "'DM Serif Display', serif", color: C.black, marginBottom: 20 }}>{tr.soonTitle}</h1>
-      <p style={{ fontSize: 20, color: C.inkMid, maxWidth: 500, lineHeight: 1.6, marginBottom: 50 }}>{tr.soonDesc}</p>
-      
-      <button onClick={onTree} style={{ background: C.gold, color: C.white, border: "none", padding: "20px 40px", fontSize: 16, fontFamily: "monospace", fontWeight: 700, cursor: "pointer", letterSpacing: 1, marginBottom: 20 }}>
-        {tr.treeBtn}
-      </button>
-      <button onClick={onBack} style={{ background: "transparent", color: C.inkSoft, border: "none", textDecoration: "underline", cursor: "pointer", fontFamily: "monospace", fontSize: 16 }}>
-        {S.comingSoonBack}
-      </button>
-    </div>
-  );
-}
-
-function SkillTree({ path, onBack }) {
-  const tr = TR[INITIAL_LANG] || TR.ru;
-  const S = STRINGS[INITIAL_LANG] || STRINGS.ru;
-  const pathName = path === "investor" ? (INITIAL_LANG==="ru"?"Инвестор":INITIAL_LANG==="en"?"Investor":"Investitor") : path === "trader" ? "Trader" : (INITIAL_LANG==="ru"?"Исследователь":INITIAL_LANG==="en"?"Explorer":"Explorator");
-  
-  return (
-    <div style={{ minHeight: "100vh", background: C.dark, color: C.white, padding: "75px 5vw", fontFamily: "'DM Sans', sans-serif" }}>
-      <div style={{ maxWidth: 1000, margin: "0 auto" }}>
-        <span onClick={onBack} style={{ color: C.gold, cursor: "pointer", fontFamily: "monospace", fontSize: 15, letterSpacing: 2, display: "inline-block", marginBottom: 38 }}>{S.treeBack}</span>
-        
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 20, borderBottom: `1px solid #333`, paddingBottom: 25, marginBottom: 50 }}>
-          <div>
-            <h1 style={{ fontSize: "clamp(32px, 5vw, 40px)", fontFamily: "'DM Serif Display', serif", color: C.gold, margin: "0 0 10px" }}>{tr.treeTitle}</h1>
-            <div style={{ fontSize: 18, color: "#aaa", fontFamily: "monospace" }}>{tr.treeClass} <span style={{ color: C.white, fontWeight: 700 }}>{pathName}</span></div>
-          </div>
-          <div style={{ textAlign: "right" }}>
-            <div style={{ fontSize: 30, color: C.white, fontWeight: 700, fontFamily: "monospace" }}>1250 <span style={{ fontSize: 18, color: C.gold }}>XP</span></div>
-            <div style={{ fontSize: 14, color: "#666" }}>{S.treeLevelDone}</div>
-          </div>
-        </div>
-
-        <div style={{ position: "relative", padding: "50px 0", textAlign: "center", overflowX: "hidden" }}>
-          
-          <div style={{ width: 177, margin: "0 auto", background: C.gold, color: C.black, padding: "20px", borderRadius: "50%", aspectRatio: "1/1", display: "flex", flexDirection: "column", justifyContent: "center", border: `5px solid ${C.goldLight}`, boxShadow: "0 0 38px rgba(201,151,58,0.4)", zIndex: 2, position: "relative" }}>
-            <span style={{ fontSize: 30 }}>🏛️</span>
-            <span style={{ fontSize: 13, fontWeight: 700, fontFamily: "monospace", marginTop: 5 }}>{S.treeMarketBase}</span>
-          </div>
-
-          <div style={{ display: "flex", justifyContent: "center", gap: "clamp(20px, 5vw, 76px)", marginTop: 50, position: "relative", flexWrap: "wrap" }}>
-
-            <div style={{ width: 127, background: path==="trader"?C.goldPale:"#222", color: path==="trader"?C.black:"#888", padding: "15px", borderRadius: "10px", border: `1px solid ${path==="trader"?C.gold:"#444"}`, zIndex: 1 }}>
-              <div style={{ fontSize: 23, marginBottom: 5 }}><img class='mi-icon' style={{verticalAlign:'middle'}} src='/assets/icons/icon-trend-up.png' alt='' width='20' height='20' /></div>
-              <div style={{ fontSize: 13, fontFamily: "monospace", fontWeight: 700 }}>{S.treeTechAnalysis}</div>
-              <div style={{ fontSize: 11, marginTop: 5 }}>{S.treeUnlocked}</div>
-            </div>
-
-            <div style={{ width: 127, background: path==="investor"?C.goldPale:"#222", color: path==="investor"?C.black:"#888", padding: "15px", borderRadius: "10px", border: `1px solid ${path==="investor"?C.gold:"#444"}`, zIndex: 1 }}>
-              <div style={{ fontSize: 23, marginBottom: 5 }}>🏢</div>
-              <div style={{ fontSize: 13, fontFamily: "monospace", fontWeight: 700 }}>{S.treeFundamentals}</div>
-              <div style={{ fontSize: 11, marginTop: 5 }}>{S.treeInProgress}</div>
-            </div>
-
-            <div style={{ width: 127, background: "#222", color: "#888", padding: "15px", borderRadius: "10px", border: "1px solid #444", zIndex: 1 }}>
-              <div style={{ fontSize: 23, marginBottom: 5 }}><img class='mi-icon' style={{verticalAlign:'middle'}} src='/assets/icons/icon-mindset.png' alt='' width='20' height='20' /></div>
-              <div style={{ fontSize: 13, fontFamily: "monospace", fontWeight: 700 }}>{S.treePsychology}</div>
-              <div style={{ fontSize: 11, marginTop: 5 }}>{S.treeLocked}</div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  );
-}
-
 function App() {
   const [screen, setScreen] = React.useState("start");
   const [path, setPath] = React.useState("explorer");
@@ -980,14 +947,11 @@ function App() {
     );
   }
   
-  if (screen === "soon") {
-    return <ComingSoon onBack={() => setScreen("level1")} onTree={() => setScreen("tree")} />;
-  }
-  
-  if (screen === "tree") {
-    return <SkillTree onBack={() => setScreen("soon")} path={path} />;
-  }
-  
+  /* Экраны "soon" и "tree" отсюда были недостижимы: из level1 переход
+     идёт на /edu/b/2 (строка выше), а setScreen("soon") не вызывается
+     нигде. Внутри ComingSoon стояла плашка «Глава 2 в разработке» —
+     неверная с тех пор, как глава 2 написана, — а в SkillTree жёстко
+     вбитые «1250 XP». Ветки убраны вместе с компонентами. */
   return <StartScreen onStart={(p) => { setPath(p); setScreen("level1"); }} />;
 }
 

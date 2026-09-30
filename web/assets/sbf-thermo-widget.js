@@ -88,7 +88,21 @@
     let evVal, evLabel;
     if (within48h && data.next_event) {
       const cd = fmtCountdown(data.next_event_ts, t);
-      evVal = esc(data.next_event.title || data.next_event.event_type) + (cd ? ' · ' + cd : '');
+      // Русское название, если сервер его дал и страница русская: чип
+      // «Ближайшее событие» показывает тот же релиз, что и карточка при клике,
+      // и английский заголовок рядом с русской карточкой выглядит недоделкой.
+      const _lang = (window.sbfI18n && window.sbfI18n.lang) || 'ru';
+      const _evTitle = (_lang === 'ru' && data.next_event.title_ru)
+        ? data.next_event.title_ru
+        : (data.next_event.title || data.next_event.event_type);
+      /* 🔴 Обратный отсчёт ПЕРВЫМ, название после.
+         Было наоборот: «Занятость ADP, за неделю · США · через 22ч 8м».
+         На телефоне чип шириной в полэкрана, строка переносится и хвост
+         усекается — то есть съедается ровно «через 22ч 8м», единственный
+         ответ на вопрос, который чип и задаёт своей подписью «Ближайшее
+         событие». Порядок решает: усечение всегда откусывает конец, значит
+         в конце должно стоять наименее важное. */
+      evVal = (cd ? cd + ' · ' : '') + esc(_evTitle);
       evLabel = t('chart.thermo_event_label', 'Ближайшее событие');
     } else if (data.next_event_ts) {
       evVal = fmt(t('chart.thermo_calm_until_tpl', 'Спокоен до {day}'), {day: weekdayShort(data.next_event_ts)});

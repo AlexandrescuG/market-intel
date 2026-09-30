@@ -12,18 +12,21 @@ from __future__ import annotations
 
 import asyncio
 import concurrent.futures
+import html
 import logging
+import pathlib
 import re
+import sqlite3
 from datetime import datetime, timedelta, timezone
 from urllib.parse import quote_plus
 
 import cloakbrowser
 
-from core import db, scoring
+from core import db, news_media, scoring
 from core.config import (ALERT_MIN_ENGAGEMENT, ALERT_MIN_GROWTH,
-                         ALERT_MIN_IMPORTANCE, STORE_MIN_ECON_RELEVANCE,
-                         TRANSLATE, TWITTER_PASSWORD, TWITTER_QUERIES,
-                         TWITTER_USERNAME)
+                         ALERT_MIN_IMPORTANCE, DB_PATH,
+                         STORE_MIN_ECON_RELEVANCE, TRANSLATE, TWITTER_PASSWORD,
+                         TWITTER_QUERIES, TWITTER_USERNAME)
 from core.telegram import send_photo, send_text
 
 log = logging.getLogger("twitter")
@@ -35,18 +38,50 @@ def _is_russian(t: str) -> bool:
     return sum(1 for c in t if "Ѐ" <= c <= "ӿ") / max(len(t), 1) > 0.25
 
 
+# @Markgandon_bot, 25.08.2026: пользователь заметил, что вместо перевода
+# в подписи иногда приходит "🇷🇺 Error 500 (Server Error)!!1500.That's an
+# error...." — это дословный текст generic-страницы ошибки Google (когда
+# translate.google.com отдаёт её вместо перевода), а не наш текст. Причина в
+# deep_translator: он не бросает исключение на такой ответ, а возвращает тело
+# страницы как будто это успешный перевод, и старый except Exception это не
+# ловил. Сигнатура специфичная (реальный перевод экономического твита никогда
+# не будет содержать эту точную английскую фразу) — считаем такой ответ
+# неудачей и просто опускаем строку с переводом, как и при любом другом сбое.
+_GOOGLE_ERROR_SIGNATURE = "Error 500 (Server Error)"
+
+
 async def _translate(text: str) -> str | None:
     if not TRANSLATE or not text or _is_russian(text):
         return None
-    try:
+    # 🔴 17.09: два переводчика подряд. Google режет по лимиту («too many
+    # requests… 5 requests per second») и отвечает страницей ошибки — на этом
+    # 15-16.09 перевод пропадал целиком. MyMemory тот же текст переводит; тот
+    # же фоллбэк уже стоит в outliers_job._ru().
+    def _google() -> str | None:
         from deep_translator import GoogleTranslator
-        loop = asyncio.get_event_loop()
-        tr = await loop.run_in_executor(
-            _pool, lambda: GoogleTranslator(source="auto", target="ru").translate(text[:1500]))
-        return tr if tr and tr.strip() != text.strip() else None
-    except Exception as e:
-        log.debug("translate failed: %s", e)
-        return None
+        return GoogleTranslator(source="auto", target="ru").translate(text[:1500])
+
+    def _mymemory() -> str | None:
+        from deep_translator import MyMemoryTranslator
+        # MyMemory требует локаль, а не просто язык, и не умеет auto.
+        return MyMemoryTranslator(source="en-US", target="ru-RU").translate(text[:480])
+
+    loop = asyncio.get_event_loop()
+    for attempt in (_google, _mymemory):
+        try:
+            tr = await loop.run_in_executor(_pool, attempt)
+        except Exception as e:
+            log.debug("translate (%s) failed: %s", attempt.__name__, e)
+            continue
+        if not tr or _GOOGLE_ERROR_SIGNATURE in tr or tr.strip() == text.strip():
+            continue
+        # Результат обязан быть русским: англоязычный «перевод» — это отказ,
+        # а не результат, и подпись «🇷🇺 <английский текст>» бессмысленна.
+        if not _is_russian(tr):
+            continue
+        return tr
+    log.warning("translate: оба переводчика отказали — пост уйдёт с оригиналом")
+    return None
 
 
 # ─── парсинг (перенесён из monitor.py, без изменений логики) ─────────────────────
@@ -134,6 +169,7 @@ async def _ensure_login(page) -> bool:
         return True
     if not TWITTER_USERNAME or not TWITTER_PASSWORD:
         log.error("not logged in and no credentials")
+        await send_text("⚠️ Twitter/X: сессия разлогинена, автологин не настроен (нет TWITTER_USERNAME/PASSWORD) — сбор твитов не идёт")
         return False
     try:
         await page.goto("https://x.com/i/flow/login", wait_until="domcontentloaded", timeout=40_000)
@@ -152,9 +188,13 @@ async def _ensure_login(page) -> bool:
         if "home" in page.url:
             return True
         log.info("жду 60с на ручной 2FA…"); await asyncio.sleep(60)
-        return "home" in page.url
+        ok = "home" in page.url
+        if not ok:
+            await send_text("⚠️ Twitter/X: автологин не прошёл (2FA/challenge?) — сбор твитов не идёт")
+        return ok
     except Exception as e:
         log.error("login error: %s", e)
+        await send_text(f"⚠️ Twitter/X: ошибка логина — {e}")
         return False
 
 
@@ -173,16 +213,61 @@ async def _screenshot(ctx, url: str) -> bytes | None:
         await page.close()
 
 
+_SHOT_DIR = pathlib.Path(__file__).resolve().parent.parent / "web" / "media" / "shots"
+
+
+def _store_shot(uid: str, png: bytes) -> None:
+    """Сохранить скриншот твита рядом с сайтом и записать путь в базу.
+
+    Ошибка здесь не должна ронять рассылку: картинка на витрине — приятное
+    дополнение, а отправка алерта в канал — основная работа этой функции.
+    Поэтому всё в try, и в худшем случае новость останется без картинки.
+    """
+    try:
+        _SHOT_DIR.mkdir(parents=True, exist_ok=True)
+        name = re.sub(r"[^A-Za-z0-9_-]", "", uid)[:64] + ".png"
+        (_SHOT_DIR / name).write_bytes(png)
+        con = sqlite3.connect(str(DB_PATH), timeout=30)
+        try:
+            con.execute("PRAGMA busy_timeout=30000")
+            news_media.save_shot(con, uid, f"/media/shots/{name}")
+        finally:
+            con.close()
+    except Exception as e:
+        log.warning("скриншот твита не сохранён: %s", str(e)[:120])
+
+
 def _fmt(n: int) -> str:
     return f"{n/1e6:.1f}M" if n >= 1e6 else f"{n/1e3:.1f}K" if n >= 1e3 else str(n)
 
 
 async def _caption(tw: dict, dim: str) -> str:
-    tr = await _translate(tw["text"][:200])
-    tline = f"\n\n🇷🇺 {tr.strip()}" if tr else ""
+    """🔴 17.09.2026: в подписи теперь ЕСТЬ сам текст твита.
+
+    Раньше подпись состояла из иконки, @автора, ПЕРЕВОДА и счётчиков — то
+    есть весь текст поста держался на внешнем переводчике. 15-16.09 Google
+    начал отвечать «too many requests», перевод возвращал None, и в канал
+    два дня уходили посты вообще без текста: «💰 @author / ❤️ 12K 🔁 3K /
+    ссылка». Владелец это и заметил.
+
+    Оригинал — наши собственные данные, он есть всегда. Перевод остаётся
+    дополнением сверху, а не единственным содержанием.
+    """
+    original = (tw.get("text") or "").strip()
     icon = {"economy": "💰", "geopolitics": "🌍", "crowd": "🔥"}.get(dim, "📊")
-    return (f"{icon} <b>@{tw['author']}</b>{tline}\n\n"
-            f"❤️ {_fmt(tw['likes'])}   🔁 {_fmt(tw['retweets'])}\n{tw['url']}")
+    lines = [f"{icon} <b>@{tw['author']}</b>"]
+    if original:
+        lines.append("")
+        lines.append(html.escape(original[:600]))
+    # Перевод не нужен, если твит и так по-русски (_translate вернёт None) и
+    # не нужен, если он не удался: текст читатель уже получил выше.
+    tr = await _translate(original[:400])
+    if tr:
+        lines.append("")
+        lines.append(f"🇷🇺 {html.escape(tr.strip())}")
+    lines.append("")
+    lines.append(f"❤️ {_fmt(tw['likes'])}   🔁 {_fmt(tw['retweets'])}\n{tw['url']}")
+    return "\n".join(lines)
 
 
 async def _scan_query(page, dimension: str, query: str) -> list[dict]:
@@ -205,11 +290,15 @@ async def _scan_query(page, dimension: str, query: str) -> list[dict]:
     return tweets
 
 
+_consecutive_empty_cycles = 0
+
+
 async def collect_with_context(ctx) -> int:
     """Один прогон по всем запросам. Пишет сигналы, шлёт алерты. Возвращает #алертов."""
     db.init_db()
     page = await ctx.new_page()
     alerts = 0
+    total_tweets = 0
     try:
         if not await _ensure_login(page):
             return 0
@@ -217,6 +306,7 @@ async def collect_with_context(ctx) -> int:
         for dimension, queries in TWITTER_QUERIES.items():
             for q in queries:
                 tweets = await _scan_query(page, dimension, q)
+                total_tweets += len(tweets)
                 log.info("twitter [%s] %d tweets", dimension, len(tweets))
                 for tw in tweets:
                     eng = tw["likes"] + tw["retweets"]
@@ -247,11 +337,30 @@ async def collect_with_context(ctx) -> int:
                      tw["likes"] + tw["retweets"])
             cap = await _caption(tw, res["dimension"])
             photo = await _screenshot(ctx, tw["url"])
+            if photo:
+                # 🔴 Снимок уже сделан — не выбрасывать его после отправки.
+                # До 10.09.2026 байты уходили в Telegram и терялись, а лента
+                # упоминаний по активу на сайте оставалась без картинок. X не
+                # отдаёт превью никому без API, так что этот скриншот —
+                # единственная картинка, которая у нас по твиту вообще будет.
+                _store_shot(res["uid"], photo)
             await (send_photo(photo, cap) if photo else send_text(cap))
             await asyncio.sleep(1)
             alerts += 1
         if not uniq:
             log.info("twitter: нет новых важных тредов")
+
+        global _consecutive_empty_cycles
+        if total_tweets == 0:
+            _consecutive_empty_cycles += 1
+            log.warning("twitter: 0 постов за весь цикл (подряд: %d)", _consecutive_empty_cycles)
+            if _consecutive_empty_cycles == 2:
+                await send_text(
+                    "⚠️ Twitter/X: 0 постов два цикла подряд — похоже на разлогин "
+                    "или блокировку, а не на тишину. Проверь сессию (data/browser_profile)."
+                )
+        else:
+            _consecutive_empty_cycles = 0
     finally:
         await page.close()
     return alerts

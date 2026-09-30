@@ -1,6 +1,7 @@
 """Static server + /api/quotes proxy + /edu book renderer.
 JSX компилируется серверно при старте (Node.js + Babel). Браузер получает чистый JS."""
 import glob
+import html as html_lib          # экранирование значений meta-тегов
 import http.server
 import json
 import math
@@ -10,6 +11,7 @@ import subprocess
 import socketserver
 import os
 import sys
+import threading
 import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -17,8 +19,10 @@ from urllib.parse import urlparse, parse_qs, unquote
 
 # Journal modules (добавляем core/ в path)
 sys.path.insert(0, str(Path(__file__).parent))
-from core import journal_db, journal_crypto, journal_ocr, journal_csv, journal_meta, journal_discipline, journal_alerts, journal_brief, journal_setups, journal_tilt, journal_gamification, journal_goals, journal_account, journal_auth, journal_feedback, journal_import, journal_analytics, journal_review, journal_cooldown, journal_rules, journal_tradeplan, journal_gate, i18n
+from core import journal_db, journal_crypto, journal_ocr, journal_csv, journal_meta, journal_discipline, journal_alerts, journal_brief, journal_setups, journal_tilt, journal_gamification, journal_goals, journal_account, journal_auth, journal_feedback, journal_import, journal_analytics, journal_hours, journal_review, journal_cooldown, journal_rules, journal_tradeplan, journal_gate, i18n
 from core import symbols as _symbols
+from core import candle_cache
+from core import news_media, news_i18n, news_junk, symbol_alias
 from core.symbols_registry import yahoo_ticker as _registry_yahoo_ticker
 from core.event_types import normalize_event_type
 from core.config import DB_PATH as _SIGNALS_DB
@@ -29,6 +33,7 @@ from day_thermo_job import _load_d1 as _thermo_load_d1, _range_series as _thermo
 from core.sessions import session_bounds_utc, session_at
 from core.journal_symbols import to_chart_symbol, chart_symbol_aliases
 from core import focus_db
+from core import schema_ld
 from core.focus import DEFAULT_UNIVERSE, select_focus
 from core.sentiment_lexicon import detect_divergence
 from sr_levels_job import _atr14, _load_d1_candles
@@ -37,7 +42,11 @@ from sentiment_job import STARTER_SYMBOLS as _SENTIMENT_SYMBOLS
 from jinja2 import Environment, FileSystemLoader
 from markupsafe import Markup
 
-PORT = 8085
+# Порт можно увести переменной — нужно стенду tools/edu_preview.py, который
+# поднимает второй экземпляр на копии базы, чтобы смотреть платные главы,
+# не выдавая себе право в боевой journal.db. В проде переменной нет и порт
+# остаётся тем же 8085.
+PORT = int(os.getenv("SBF_PORT") or 8085)
 DIRECTORY = os.path.join(os.path.dirname(os.path.abspath(__file__)), "web")
 BOOK_DIR = Path(__file__).parent / "web" / "book"
 EDU_DIR  = Path(__file__).parent / "web" / "edu"
@@ -52,27 +61,866 @@ _m5_cache: dict = {}
 _M5_CACHE_TTL = 90  # сек
 
 # H4/W1 у Yahoo нет нативно — ресэмплим из H1/D1, как publish.py::publish_charts.
-_TAIL_YF_INTERVAL = {"M5": "5m", "M15": "15m", "M30": "30m", "H1": "60m",
+# M1 (SPEC_chart_m1_m5 §5): минутка on-demand из Yahoo, окно сутки. Отдельного
+# фида/ретенции в price_bars намеренно нет — Yahoo даёт 1m за ~7 дней, а нам для
+# графика нужно «последние сутки». Тот же оконный механизм, что M5, а не третья
+# подсистема. Yahoo нативно даёт 1m/5m/15m/30m/60m/1d; H4 и W1 ресэмплим.
+_TAIL_YF_INTERVAL = {"M1": "1m", "M5": "5m", "M15": "15m", "M30": "30m", "H1": "60m",
                      "H4": "60m", "D1": "1d", "W1": "1d"}
-_TAIL_YF_PERIOD   = {"M5": "2d", "M15": "5d", "M30": "7d", "H1": "1mo",
+_TAIL_YF_PERIOD   = {"M1": "1d", "M5": "2d", "M15": "5d", "M30": "7d", "H1": "1mo",
                      "H4": "1mo", "D1": "3mo", "W1": "1y"}
 _TAIL_RESAMPLE    = {"H4": "4h", "W1": "1W"}
-_TAIL_TF_SEC      = {"M5": 300, "M15": 900, "M30": 1800, "H1": 3600,
+_TAIL_TF_SEC      = {"M1": 60, "M5": 300, "M15": 900, "M30": 1800, "H1": 3600,
                      "H4": 14400, "D1": 86400, "W1": 604800}
 _tail_cache: dict = {}
 _TAIL_CACHE_TTL = 25  # чуть меньше минимальной частоты клиента (30с, §2)
 
+# ── Real-time внутридневка из брокера MT5 (SPEC_chart_m1_m5) ─────────────────
+# Yahoo отдаёт фьючерсы/индексы (GOLD/SILVER/WTI/US_500…) с задержкой ~10 мин.
+# У брокера те же инструменты идут в реальном времени (~0.3 мин, проверено).
+# Отдаём внутридневку (M1..H4) из моста для символов CHART_BROKER_MAP, Yahoo —
+# фолбэк. Выборка 200-400 баров ~0.17с, кэш 20с, блокировка (мост последователен),
+# любая ошибка -> None -> Yahoo (график не ломается, если мост лёг).
+_mt5_lock = threading.Lock()
+_mt5_conn = None
+_mt5_tail_cache: dict = {}
+_MT5_TAIL_TTL = 20
+# 🔴 Символы, у которых фид брокера МЁРТВ (а не «на паузе»).
+# Пустой ответ моста бывает двух разных природ, и путать их нельзя:
+#   • пауза/сбой — брокер скоро продолжит, подставлять сюда Yahoo нельзя
+#     (получится чужой скачок поверх брокерского ряда, семейство бага 20.08);
+#   • фид умер — брокер перестал котировать символ насовсем (USDRUB стоит с
+#     17 марта), и держать пустой график, когда у Yahoo есть свежие часовые
+#     бары, — это не осторожность, а потеря данных.
+# Заполняется в _mt5_tail, читается в _mt5_tail_supported. Час TTL: если
+# брокер вернёт символ к жизни, запись протухнет сама.
+_mt5_dead_feed: dict = {}
+_MT5_DEAD_TTL = 3600
+# Метка времени котировки каждого символа каталога — её уже собирает
+# broker_catalog_loop раз в 15 с и кладёт в broker_symbols.quote_ts.
+# Позволяет узнать, что фид мёртв, НЕ дёргая мост вообще.
+_quote_ts_cache: tuple = (0.0, {})
+_QUOTE_TS_TTL = 300
+_FROZEN_SEC = 7 * 86400
+_MT5_TF_ATTR = {"M1": "TIMEFRAME_M1", "M5": "TIMEFRAME_M5", "M15": "TIMEFRAME_M15",
+                "M30": "TIMEFRAME_M30", "H1": "TIMEFRAME_H1", "H4": "TIMEFRAME_H4",
+                # 🔴 20.08.2026: D1/W1 сюда добавлены после того, как шип нашёлся
+                # на ДЕФОЛТНОМ таймфрейме. До этого дневки/недельки уходили в
+                # Yahoo-ветку ниже, и получалось так: история — из price_bars
+                # (спот брокера, GOLD 4483.5), а сегодняшний бар тейл приносил
+                # из GC=F (фьючерс, o=4580 c=4540.3) и клал его через
+                # series.update() поверх. На экране это ровно «две цены сразу»:
+                # весь ряд в одном масштабе цен и последняя свеча в другом,
+                # оторванная вверх на 1.3%. Проверено живым Chrome 20.08:
+                # lastCandle {open:4580, close:4542.5} против предыдущего
+                # закрытия 4483.5.
+                "D1": "TIMEFRAME_D1", "W1": "TIMEFRAME_W1"}
+# Глубина хвоста. 🔴 20.08: было 300 на всех внутридневных ТФ, и на M1 это
+# давало ПЯТЬ ЧАСОВ истории — график начинался посреди вчерашнего вечера и
+# читался как «недостроенный». Замер стоимости выборки через мост:
+# 300 баров — 0.07 с, 10000 баров — 0.11 с. То есть ограничение в 300
+# ничего не экономило: время уходит на сам вызов, не на объём.
+# Глубина по ТФ: M1 ~7 суток, M5 ~17, M15 ~31, M30 ~62, H1 ~125, H4 ~330.
+_MT5_COUNT = {"M1": 10000, "M5": 5000, "M15": 3000, "M30": 3000,
+              "H1": 3000, "H4": 2000, "D1": 3000, "W1": 1000}
+_MT5_PATH = r"C:\Program Files\MetaTrader 5\terminal64.exe"
+
+
+def _mt5_bridge():
+    global _mt5_conn
+    if _mt5_conn is not None:
+        try:
+            _mt5_conn.ping()
+            return _mt5_conn
+        except Exception:
+            _mt5_conn = None
+    import rpyc
+    _mt5_conn = rpyc.classic.connect("127.0.0.1", 18812)
+    # 🔴 Ограничение времени ответа ОБЯЗАТЕЛЬНО. Этот вызов идёт синхронно из
+    # обработчика веб-запроса (_mt5_tail <- /api/chart/tail). До 31.08 сервер
+    # был однопоточным, и один запрос, ждущий мост, замораживал ВСЕ остальные —
+    # туннель отдавал 502 на весь сайт. Ровно это и случилось 25.08, когда обход
+    # спарклайнов насытил мост: сервис был "active", локальный curl не отвечал
+    # вовсе, снаружи — bad gateway. Сервер теперь многопоточный, но таймаут
+    # нужен по-прежнему: без него поток висит на мосту неограниченно, копится
+    # очередь, и мы возвращаемся к тому же исчерпанию.
+    # Без таймаута rpyc ждёт ответа сколько угодно.
+    # 8 секунд — заметно больше обычного ответа моста (сотые доли секунды) и
+    # заметно меньше терпения пользователя; не дождавшись, _mt5_tail вернёт
+    # None и график честно возьмёт запасной источник, а не повесит сайт.
+    _mt5_conn._config["sync_request_timeout"] = 8
+    _mt5_conn.modules["MetaTrader5"].initialize(path=_MT5_PATH, timeout=60000)
+    return _mt5_conn
+
+
+def _mt5_tail_supported(our_key, tf):
+    """Можно ли отдавать хвост этого символа/ТФ из брокера.
+
+    Условие НЕ сводится к «инструмент есть у брокера»: для D1/W1 хвост ложится
+    на статику, набранную publish_charts из price_bars, и склеивать два фида в
+    одном ряду нельзя. Внутридневка у брокера есть для всех CHART_BROKER_MAP;
+    дневки/недельки — только там, где статика тоже брокерская
+    (mt5_config.bars_from_broker(), там же замеры расхождения).
+
+    🔴 Для инструментов КАТАЛОГА оговорка про D1/W1 не действует, и это не
+    послабление, а следствие: склеивать нечего. Ограничение существует потому,
+    что у 31 символа реестра дневки/недельки уже опубликованы статикой из
+    price_bars, и хвост из другого фида поверх неё давал бы «две цены сразу»
+    (шип 20.08). У символа каталога статики нет вовсе — весь ряд приходит
+    одним источником, из моста, и смешивать его не с чем.
+    """
+    from mt5_config import CHART_BROKER_MAP, bars_from_broker
+    if tf not in _MT5_TF_ATTR:
+        return False
+    dead = _mt5_dead_feed.get((our_key, tf))
+    if dead and time.time() - dead < _MT5_DEAD_TTL:
+        # Фид этого символа мёртв — отвечаем «брокер его не умеет», и
+        # обработчик честно уходит на Yahoo вместо пустого графика.
+        return False
+    if not CHART_BROKER_MAP.get(our_key):
+        # Каталожный символ: спрашиваем УЖЕ СОБРАННУЮ метку котировки, а не
+        # мост. Инвентарь 26.08: из 842 инструментов каталога 773 живые, 61
+        # заморожен (делистинг — #TWITTER, #SVBFINANCIAL, USDRUB, VIX…), 8 без
+        # котировки вовсе. По каждому из 69 мёртвых иначе уходил бы напрасный
+        # вызов в мост на каждый первый запрос.
+        age = _broker_quote_ages().get(our_key)
+        if age is None or age > _FROZEN_SEC:
+            return False
+    if CHART_BROKER_MAP.get(our_key):
+        if tf in ("D1", "W1"):
+            return our_key in bars_from_broker()
+        return True
+    return our_key in _broker_catalog_symbols()
+
+
+def _mt5_broker_symbol(our_key):
+    """Имя инструмента у брокера. Для реестра — через карту (GOLD -> XAUUSD),
+    для каталога ключ И ЕСТЬ имя брокера (#3M, _BMW.DE): каталог снят с самого
+    терминала, переводить нечего."""
+    from mt5_config import CHART_BROKER_MAP
+    bs = CHART_BROKER_MAP.get(our_key)
+    if bs:
+        return bs
+    return our_key if our_key in _broker_catalog_symbols() else None
+
+
+_econ_ru: tuple = (0.0, {})
+
+
+def _econ_ru_dict() -> dict:
+    """Словарь русских названий макропоказателей. Файл, а не код.
+
+    В календаре 683 разных индикатора и 1208 заголовков — руками все не
+    перевести и не нужно: полсотни самых частых закрывают подавляющую часть
+    событий, доходящих до графика. Остальное показывается по-английски, и это
+    честнее выдуманного перевода: «Kansas Fed Composite Index» в вольном
+    пересказе читатель не сопоставит ни с чем.
+    """
+    global _econ_ru
+    path = Path(DIRECTORY).parent / "data" / "econ_indicator_ru.json"
+    try:
+        mtime = path.stat().st_mtime
+    except OSError:
+        return {}
+    if _econ_ru[0] == mtime:
+        return _econ_ru[1]
+    try:
+        _econ_ru = (mtime, json.loads(path.read_text(encoding="utf-8")))
+    except Exception:
+        return _econ_ru[1]
+    return _econ_ru[1]
+
+
+def _econ_title_ru(indicator, title, country) -> str | None:
+    """«Retail Sales MoM (November)» → «Розничные продажи, месяц к месяцу ·
+    США · ноябрь». None — перевода нет, показываем оригинал."""
+    d = _econ_ru_dict()
+    if not d:
+        return None
+    key = (indicator or "").strip().lower()
+    base = d.get(key)
+    if not base:
+        # Один и тот же показатель приходит в разных написаниях: «PPI MoM»,
+        # «PPI m/m», «PPI MoM Prel». Держать в словаре все варианты — значит
+        # обречь его на вечное отставание от источника. Приводим к общему виду:
+        # разделители к «mom/yoy/qoq», предварительные и финальные пометки прочь.
+        norm = re.sub(r"\bm\s*/\s*m\b", "mom", key)
+        norm = re.sub(r"\by\s*/\s*y\b", "yoy", norm)
+        norm = re.sub(r"\bq\s*/\s*q\b", "qoq", norm)
+        norm = re.sub(r"\b(prel|preliminary|final|flash|adv|advance|revised)\b", "", norm)
+        norm = re.sub(r"\s+", " ", norm).strip()
+        base = d.get(norm)
+    if not base:
+        return None
+    parts = [base]
+    cn = (d.get("_countries") or {}).get((country or "").upper())
+    if cn:
+        parts.append(cn)
+    # Период берём из скобок исходного заголовка: «PCE (November)». Своей
+    # колонки под него нет, а выбрасывать жалко — без месяца непонятно, к
+    # какому периоду относится цифра.
+    m = re.search(r"\(([^)]+)\)\s*$", title or "")
+    if m:
+        raw = m.group(1).strip().lower()
+        parts.append((d.get("_months") or {}).get(raw, m.group(1).strip()))
+    return " · ".join(parts)
+
+
+_ctrader_map: tuple = (0.0, {})
+
+
+def _ctrader_symbols() -> dict:
+    """Карта инструментов, переведённых на cTrader. Файл, не база.
+
+    Собирается tools/ctrader_build_map.py и дальше только читается: соответствие
+    имён — решение, принятое один раз и записанное, а не догадка в момент
+    показа страницы. Тихого фолбэка «возьмём имя как есть» здесь нет намеренно —
+    он однажды подставил бы фонду #XRP график монеты XRP.
+    """
+    global _ctrader_map
+    path = Path(DIRECTORY).parent / "data" / "ctrader_map.json"
+    try:
+        mtime = path.stat().st_mtime
+    except OSError:
+        return {}
+    if _ctrader_map[0] == mtime:
+        return _ctrader_map[1]
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return _ctrader_map[1]
+    _ctrader_map = (mtime, data)
+    return data
+
+
+def _ctrader_tail(our_key, tf):
+    """Свечи инструментов, переведённых на cTrader. None — не наш случай.
+
+    🔴 В брокера отсюда НЕ ходим. Наполнением занимается отдельный процесс
+    ctrader_pull.py, здесь только чтение с диска. Причина та же, по которой мы
+    уходили от MT5: сетевой вызов внутри обработчика веб-запроса связывает
+    живучесть сайта с живучестью чужого соединения. Пуллер упал — витрина
+    продолжает отдавать последние свечи, а не гаснет.
+
+    Возвращает ([], True), если инструмент наш, но кэш пуст: вызывающий должен
+    сказать об этом словами, а не свалиться на MT5 — иначе на графике окажется
+    ряд другого брокера, склеенный с нашим (семейство бага 20.08).
+    """
+    if our_key not in _ctrader_symbols():
+        return None
+    bars, _stale = candle_cache.get(our_key, tf)
+    return bars or []
+
+
+_geo_places_cache: tuple = (0.0, {})
+
+
+def _geo_places() -> dict:
+    """{код страны: {lon, lat, city}} из data/geo_places.json.
+
+    Координаты держит платформа, а не сайт: у сайта был свой список из
+    двадцати четырёх столиц, и при расхождении одна и та же страна оказалась
+    бы в разных точках на карте и на глобусе.
+    """
+    global _geo_places_cache
+    path = Path(DIRECTORY).parent / "data" / "geo_places.json"
+    try:
+        mtime = path.stat().st_mtime
+    except OSError:
+        return _geo_places_cache[1]
+    if _geo_places_cache[0] == mtime and _geo_places_cache[1]:
+        return _geo_places_cache[1]
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return _geo_places_cache[1]
+    out = {}
+    for code, meta in raw.items():
+        if code.startswith("_") or not isinstance(meta, dict):
+            continue
+        try:
+            out[code] = {"lon": float(meta["lon"]), "lat": float(meta["lat"]),
+                         "city": meta.get("город", code),
+                         # Сайт трёхъязычный, и до 09.09.2026 на английской
+                         # версии под заголовком стояло «ФРАНКФУРТ»
+                         # кириллицей. Заводить второй справочник имён у
+                         # сайта нельзя по той же причине, по которой у него
+                         # убрали справочник координат: два списка на проект
+                         # разъедутся. Поэтому имена едут отсюда.
+                         "city_en": meta.get("город_en") or meta.get("город", code),
+                         "city_ro": meta.get("город_ro") or meta.get("город", code)}
+        except (KeyError, ValueError):
+            continue
+    if out:
+        _geo_places_cache = (mtime, out)
+    return out
+
+
+def _raw_domain(raw: str | None) -> str:
+    """Домен издания из signals.raw — его туда кладёт collectors/rss.py.
+
+    Нужен для логотипа источника: у новостей, пришедших ссылкой Google News,
+    адреса статьи нет, а домен издания есть.
+    """
+    try:
+        return (json.loads(raw or "{}").get("domain") or "").lower()
+    except (ValueError, TypeError):
+        return ""
+
+
+def _title_lang(title: str) -> str:
+    """На каком языке пришёл заголовок: "ru", "en" или "" если не понять.
+
+    Не перевод и не претензия на него. Заголовки новостей мы не переводим —
+    выдумывать чужой текст нельзя, — но витрине нужно решать, показывать ли
+    русский заголовок на английской версии. Определяем по письменности: это
+    честные 100% на кириллице против латиницы и осознанно бесполезно для
+    румынского, который тоже латиница.
+    """
+    cyr = sum(1 for c in title if "Ѐ" <= c <= "ӿ")
+    lat = sum(1 for c in title if ("a" <= c <= "z") or ("A" <= c <= "Z"))
+    if cyr > lat:
+        return "ru"
+    if lat > cyr:
+        return "en"
+    return ""
+
+
+_board_meta_cache: tuple = (0.0, {})
+_BOARD_META_TTL = 60
+
+
+def _board_display_name(broker_symbol: str, name: str | None) -> str:
+    """Человеческое имя для доски.
+
+    У валют и сырья в каталоге лежит нормальное название («Евро / доллар»,
+    «Золото»), а у акций — биржевой тикер: `#NETFLIX` подписан как «NFLX»,
+    `_COMMERZBANK.DE` как «CBK». На доске, куда человек попадает с первого
+    экрана, три буквы не говорят ничего. Само имя инструмента при этом
+    читаемо — берём его.
+    """
+    s = broker_symbol
+    if s.startswith(("#", "_")):
+        base = s.lstrip("#_")
+        base = re.sub(r"\.(DE|UK|IT|FR|ES|NL|BE|PT|AT|FI|CH|SE|NO|DK|IE|PL)$", "", base)
+        base = base.replace("_", " ").strip()
+        if base:
+            # JP_MORGAN -> Jp Morgan; оставляем короткие аббревиатуры как есть
+            return base if len(base) <= 3 else base.capitalize()
+    return name or s
+
+
+def _board_symbol_meta() -> dict:
+    """{имя из счётчика упоминаний: как показать его на доске}.
+
+    Собирает три вещи в одном месте, потому что доске нужны все три сразу:
+    под каким именем открывать график, как назвать по-человечески и какая
+    сейчас цена. Источник — broker_symbols (там и цена, и изменение, и
+    каноническое имя) плюс список доступных графиков.
+
+    Ключ схлопывания — каноническое имя: WTI и CrudeOIL, NG и NATURAL_GAS,
+    XRP и XRPUSD это один актив под двумя именами.
+    """
+    global _board_meta_cache
+    now = time.time()
+    if now - _board_meta_cache[0] < _BOARD_META_TTL and _board_meta_cache[1]:
+        return _board_meta_cache[1]
+
+    blocked = set(_blocked_symbols())
+    try:
+        avail = json.loads((Path(DIRECTORY) / "data" / "chart_available.json")
+                           .read_text(encoding="utf-8"))["items"]
+    except Exception:
+        avail = {}
+
+    out: dict = {}
+    try:
+        con = sqlite3.connect(f"file:{_BOT_DB}?mode=ro", uri=True, timeout=10)
+        con.execute("PRAGMA busy_timeout=10000")
+        try:
+            rows = con.execute(
+                "SELECT broker_symbol, canonical, display_name, bid, chg_pct "
+                "FROM broker_symbols").fetchall()
+        finally:
+            con.close()
+    except Exception:
+        return _board_meta_cache[1]
+
+    for bs, canon, name, bid, chg in rows:
+        if bs in blocked or (canon and canon in blocked):
+            continue
+        if not (avail.get(bs) or {}).get("ok"):
+            continue
+        key = canon or bs
+        rec = {"key": key, "name": _board_display_name(bs, name), "price": bid,
+               "chg": round(chg, 2) if chg is not None else None,
+               # Короткая форма для мелких кругов на телефоне: у акций в
+               # каталоге display_name — это биржевой тикер (NFLX, HOOD), и
+               # он влезает туда, где «NETFLIX» обрезается на середине.
+               # У валют и сырья короткого имени нет — там и так EURUSD, GOLD.
+               "ticker": (name or "").strip() if bs.startswith(("#", "_")) else None}
+        out[bs] = rec
+        if canon:
+            out[canon] = rec
+    if out:
+        _board_meta_cache = (now, out)
+    return out
+
+
+def _board_category_fill(cat: str) -> list:
+    """Инструменты направления, о которых сегодня не писали, — в порядке каталога.
+
+    Нужны, чтобы в выбранном направлении всегда было не меньше десяти кругов.
+    Счётчик упоминаний знает только тех, кого хоть раз упомянули за неделю; по
+    крипте это восемь инструментов из четырнадцати доступных. Остальные шесть
+    от этого не перестают отслеживаться — просто про них молчат, и честнее
+    показать их нулём, чем сделать вид, что мы следим за восемью.
+
+    Порядок каталога брокера — не случайный: там сверху мажоры. Сортировать
+    нечем (упоминаний ноль у всех), а стабильный порядок важнее — доска не
+    должна перетасовываться при каждом обновлении.
+    """
+    meta = _board_symbol_meta()
+    out, seen = [], set()
+    try:
+        raw = json.loads((WEB_DIR / "data" / "broker_catalog.json").read_text(encoding="utf-8"))
+        items = raw.get("items", raw) if isinstance(raw, dict) else raw
+    except Exception:
+        return out
+    for it in items:
+        our_cat = _BOARD_CATEGORY_OF.get(it.get("category"))
+        if our_cat != cat:
+            continue
+        m = meta.get(it["symbol"])
+        if not m or m["key"] in seen:
+            continue
+        seen.add(m["key"])
+        out.append({"symbol": m["key"], "name": m["name"], "category": cat,
+                    "mentions": 0, "burst": 0.0, "price": m["price"],
+                    "chg": m["chg"], "ticker": m.get("ticker")})
+    return out
+
+
+# Категория каталога → направление на доске. Тот же словарь, что в pulse_job:
+# держать два разных значило бы получить инструмент в одном направлении в
+# счётчике и в другом на витрине.
+_BOARD_CATEGORY_OF = {
+    "crypto": "crypto", "stock": "stocks", "index": "indices",
+    "fx": "fx", "commodity": "commodity", "etf": "stocks", "bond": "indices",
+}
+
+
+_blocklist_cache: tuple = (0.0, {})
+
+
+def _blocked_symbols() -> dict:
+    """Инструменты, скрытые с витрины сознательно (data/instrument_blocklist.json).
+
+    Список инструментов уже не показывает их — он читает chart_available.json,
+    где они помечены отказом. Но прямая ссылка `?s=SHIBUSD` открывала бы график
+    как ни в чём не бывало: такие ссылки живут в закладках, в телеграме и в
+    поисковой выдаче. Решение «мы это не показываем» должно соблюдаться на
+    сервере, а не только в отрисовке списка.
+    """
+    global _blocklist_cache
+    path = Path(DIRECTORY).parent / "data" / "instrument_blocklist.json"
+    try:
+        mtime = path.stat().st_mtime
+    except OSError:
+        return {}
+    if _blocklist_cache[0] == mtime:
+        return _blocklist_cache[1]
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+        data = {k: v for k, v in raw.items()
+                if not k.startswith("_") and isinstance(v, dict)}
+    except Exception:
+        return _blocklist_cache[1]
+    _blocklist_cache = (mtime, data)
+    return data
+
+
+_crypto_map: tuple = (0.0, {})
+
+
+def _crypto_symbols() -> dict:
+    """Карта инструмент → пары на биржах (data/crypto_map.json).
+
+    Файл, а не код, и заполняется руками: тихого фолбэка «возьмём имя как
+    есть» здесь нет намеренно — он однажды подставил бы фонду #XRP график
+    монеты XRP. Ровно та же причина, что у карты cTrader выше.
+    """
+    global _crypto_map
+    path = Path(DIRECTORY).parent / "data" / "crypto_map.json"
+    try:
+        mtime = path.stat().st_mtime
+    except OSError:
+        return {}
+    if _crypto_map[0] == mtime:
+        return _crypto_map[1]
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+        data = {k: v for k, v in raw.items()
+                if not k.startswith("_") and isinstance(v, dict)}
+    except Exception:
+        return _crypto_map[1]
+    _crypto_map = (mtime, data)
+    return data
+
+
+def _crypto_tail(our_key, tf):
+    """Свечи с криптобиржи. None — инструмент не наш случай.
+
+    В биржу отсюда не ходим: наполняет crypto_pull.py, здесь только чтение с
+    диска. Причина та же, что у cTrader и MT5 — сетевой вызов внутри
+    обработчика веб-запроса связывает живучесть сайта с чужим соединением.
+    """
+    if our_key not in _crypto_symbols():
+        return None
+    bars, _stale = candle_cache.get(our_key, tf)
+    return bars or None
+
+
+def _mt5_tail(our_key, tf):
+    """Свечи из брокера в реальном времени. None -> Yahoo-фолбэк."""
+    global _mt5_conn
+    bs = _mt5_broker_symbol(our_key)
+    if not bs or not _mt5_tail_supported(our_key, tf):
+        return None
+    now = time.time()
+    ck = (our_key, tf)
+    # M1 — короткий кэш (8с): бар минутный, текущую минуту надо показывать быстро,
+    # иначе график «отстаёт на минуту». Выборка из моста дешёвая (~0.17с).
+    ttl = 8 if tf == "M1" else _MT5_TAIL_TTL
+    c = _mt5_tail_cache.get(ck)
+    if c and now - c[0] < ttl:
+        return c[1]
+
+    # ── Диск: свечи, взятые у брокера раньше ────────────────────────────────
+    # 🔴 Читаем ДО захвата _mt5_lock. Замок последователен (мост однопоточен), и
+    # если встать в очередь за ним, второй посетитель ждёт чужой поход в
+    # терминал — 1.5-3.4 с на холодном инструменте. Свежая копия на диске
+    # снимает вопрос за миллисекунды, не касаясь ни замка, ни моста.
+    disk, disk_stale = candle_cache.get(our_key, tf)
+    if disk and not disk_stale:
+        _mt5_tail_cache[ck] = (now, disk)
+        return disk
+
+    # 🔴 Замок с таймаутом, а не безусловное ожидание. Раньше запрос вставал в
+    # очередь к мосту насмерть, а сервер однопоточный — один посетитель,
+    # ждущий свой график, останавливал сайт для всех. Теперь: не дождались за
+    # секунду — отдаём устаревшую копию (она честно помечена возрастом
+    # последней свечи), а мост оставляем тому, кто его уже занял.
+    if not _mt5_lock.acquire(timeout=1.0):
+        return disk or None
+    try:
+        c = _mt5_tail_cache.get(ck)
+        if c and now - c[0] < ttl:
+            return c[1]
+        data = None
+        # Две попытки: sbf-mt5-pull в конце прогона вызывает mt5.shutdown() на ОБЩЕМ
+        # серверном модуле — после каждого прогона первая выборка иначе падала и
+        # отдавала Yahoo (а Yahoo M1 у FX плоский, o=h=l=c). Переинициализируем на
+        # каждой выборке (initialize() идемпотентен) и при обрыве соединения
+        # сбрасываем его и пробуем ещё раз.
+        for _attempt in (1, 2):
+            try:
+                import rpyc
+                conn = _mt5_bridge()
+                mt5 = conn.modules["MetaTrader5"]
+                mt5.initialize(path=_MT5_PATH, timeout=60000)
+                if not mt5.symbol_select(bs, True):
+                    return disk or None
+                tfc = getattr(mt5, _MT5_TF_ATTR[tf])
+                rates = mt5.copy_rates_from_pos(bs, tfc, 0, _MT5_COUNT.get(tf, 300))
+                if rates is None or len(rates) == 0:
+                    return disk or None
+                data = rpyc.classic.obtain(rates)
+                break
+            except Exception:
+                _mt5_conn = None  # сбросить и попробовать заново
+                data = None
+        if data is None:
+            # 🔴 Мост не ответил — отдаём копию с диска, а не пустоту.
+            # Пустой ответ фронт рисует белым полем без единого слова, и это
+            # ровно то, что читается как «график сломан». Устаревший ряд честен:
+            # delay_sec считается от последней свечи, страница показывает
+            # «данные от …». Молчание моста — не повод терять данные.
+            return disk or None
+        candles = [{"time": int(x["time"]),
+                    "open": round(float(x["open"]), 5), "high": round(float(x["high"]), 5),
+                    "low": round(float(x["low"]), 5), "close": round(float(x["close"]), 5)}
+                   for x in data]
+        # 🔴 Мёртвый фид брокера НЕ выдаём: пусть лучше сработает Yahoo.
+        #
+        # Поймано 26.08 при открытии каталога ярусу 3. У USDRUB символ в
+        # каталоге есть, copy_rates_from_pos() честно отдаёт 3000 баров — вот
+        # только последний из них от 17 марта: брокер перестал его котировать
+        # и с тех пор просто хранит старое. До расширения на каталог USDRUB
+        # сюда не попадал и уходил на Yahoo со свежими часовыми барами;
+        # молча подменить их пятимесячной заморозкой было бы ухудшением.
+        #
+        # Неделя — порог, который не задевает ни выходные (макс ~60 ч), ни
+        # праздники, ни закрытые биржи: столько подряд не стоит ни один живой
+        # рынок. Возврат None роняет запрос в Yahoo-ветку обработчика.
+        if candles and (time.time() - candles[-1]["time"]) > 7 * 86400:
+            _mt5_dead_feed[ck] = now
+            _mt5_tail_cache[ck] = (now, None)
+            candle_cache.drop(our_key, tf)
+            return None
+        _mt5_dead_feed.pop(ck, None)
+        _mt5_tail_cache[ck] = (now, candles)
+        candle_cache.put(our_key, tf, candles)
+        return candles
+    finally:
+        _mt5_lock.release()
+
 
 def _chart_symbols() -> set:
-    """Список инструментов графика — те же 15, что day_thermo_job.py/
-    sr_levels_job.py используют как "все инструменты" (glob по ohlc_*_D1.json).
+    """Инструменты, которые умеет рисовать ДЕТАЛЬНЫЙ график.
+
     SBF_Charts_Layer4_Spec, Фаза 1.3: валидация ватчлиста ДОЛЖНА идти против
     этого списка, не journal_brief.get_available_symbols() (тот читает
     price_bars — другой, гораздо более узкий и по-другому именованный набор:
-    XAUUSD вместо GOLD, нет крипты/индексов/commodities вовсе — не тот домен)."""
-    return {Path(f).stem.replace("ohlc_", "").replace("_D1", "")
-            for f in glob.glob(str(WEB_DIR / "data" / "ohlc_*_D1.json"))}
+    XAUUSD вместо GOLD, нет крипты/индексов/commodities вовсе — не тот домен).
+
+    SPEC_chart_all_instruments §5: раньше список был глобом по
+    web/data/ohlc_*_D1.json — то есть инструмент существовал ровно постольку,
+    поскольку для него заранее опубликовали файлы по каждому ТФ. На каталоге
+    брокера (842 символа x 6 ТФ) это пять тысяч файлов, которых не будет
+    никогда. Источник — реестр; множество то же самое, проверено сверкой:
+    глоб и реестр дают одни и те же 31, разницы ноль в обе стороны.
+
+    🔴 Это НЕ каталог брокера. Здесь — ИМЕНОВАННЫЕ инструменты реестра: у них
+    есть человеческое название, переводы и заранее опубликованная статика
+    ohlc_*.json. Их и предлагает выпадающий список ватчлиста
+    (/api/chart/symbols): вывалить туда 842 сырых тикера вроде #3M значило бы
+    сломать выбор ради полноты.
+
+    Множество «что вообще можно нарисовать» — шире, см. _chartable_symbols()."""
+    from core.symbols_registry import _load as _load_symbol_registry
+    return {k for k, v in _load_symbol_registry().items()
+            if isinstance(v, dict) and v.get("chart")}
 _BOT_DB  = Path("/mnt/sbfdata/sbf-platform/SBFAcademy_bot/bot.db")
+
+_catalog_cache: tuple = (0.0, set())
+_CATALOG_TTL = 300
+
+
+def _broker_catalog_symbols() -> set:
+    """Тикеры каталога брокера (broker_symbols, ~842). Кэш на 5 минут: состав
+    каталога меняется раз в недели, а спрашивают его на каждый запрос графика."""
+    global _catalog_cache
+    now = time.time()
+    if now - _catalog_cache[0] < _CATALOG_TTL and _catalog_cache[1]:
+        return _catalog_cache[1]
+    try:
+        con = sqlite3.connect(str(_BOT_DB), timeout=10)
+        con.execute("PRAGMA busy_timeout=10000")
+        try:
+            syms = {s for (s,) in con.execute("SELECT broker_symbol FROM broker_symbols")}
+        finally:
+            con.close()
+    except Exception:
+        # Пустой ответ = «не знаю», а не «пусто»: отдать старый кэш честнее,
+        # чем молча сузить платформу до реестра из-за занятой на секунду базы.
+        return _catalog_cache[1]
+    if syms:
+        _catalog_cache = (now, syms)
+    return _catalog_cache[1]
+
+
+_alias_cache: tuple = (0.0, {})
+
+
+def _canonical_alias_map() -> dict:
+    """{каноническое имя → тикер брокера}, например LINK → LINKUSD.
+
+    🔴 Зачем это вообще нужно. В каталоге у 18 инструментов имя брокера и
+    каноническое имя расходятся: `LINKUSD` / `LINK`, `US_500` / `SPX`,
+    `CrudeOIL` / `WTI`. Список инструментов на графике строит ссылку по
+    КАНОНИЧЕСКОМУ имени (`data-go = canonical || symbol`), а свечи лежат под
+    именем брокера. Для десяти из восемнадцати перевод был прописан руками в
+    `CHART_BROKER_MAP` — SPX, DJI, BTC, WTI открывались. Для остальных
+    восьми (XLM, LTC, XRP, LINK, UNI, DOGE, SHIB, MATIC, PEPE) его не было, и
+    страница честно отвечала «по этому инструменту данных нет», хотя те же
+    свечи прекрасно отдавались по `?s=LINKUSD`.
+
+    Проверка доступности этого не ловила: `chart_available.json` заполнялся по
+    именам брокера, а ломались ссылки по каноническим — то есть мерили одно
+    имя, а кликали по другому.
+
+    Карта строится из самого каталога, а не пишется руками: новый инструмент с
+    расходящимися именами начнёт работать сам.
+    """
+    global _alias_cache
+    now = time.time()
+    if now - _alias_cache[0] < _CATALOG_TTL and _alias_cache[1]:
+        return _alias_cache[1]
+    try:
+        raw = json.loads((WEB_DIR / "data" / "broker_catalog.json").read_text(encoding="utf-8"))
+        items = raw.get("items", raw) if isinstance(raw, dict) else raw
+        m = {}
+        for it in items:
+            canon, sym = it.get("canonical"), it.get("symbol")
+            if canon and sym and canon != sym:
+                m[canon] = sym
+    except Exception:
+        return _alias_cache[1]
+    if m:
+        _alias_cache = (now, m)
+    return _alias_cache[1]
+
+
+_LEVELS_LIMIT = 12
+# Полосы поиска вокруг текущей цены, от узкой к широкой. Берём первую, в
+# которой набирается достаточно уровней.
+_LEVEL_BANDS = (0.08, 0.15, 0.30, 0.60)
+
+
+def _levels_near_price(items: list, price) -> list:
+    """Топ-12 уровней рядом с ценой, а не топ-12 за всю историю.
+
+    🔴 Score = touches × log(age+1) — и ни слова о том, где цена сейчас. На
+    инструменте в тренде это выдаёт уровни из другой ценовой эпохи: у GOLD при
+    цене 4430 все двенадцать уровней лежали в 1302–1956, у ITALY_40 при 52 215
+    — в 27 880–35 030. График честно их рисовал, просто за пределами экрана, и
+    слой «Уровни» выглядел пустым. Замер 07.09 — на обоих инструментах ни
+    одной линии в видимой области.
+
+    Формула не менялась: старый уровень с многими касаниями действительно
+    ценнее свежего и случайного. Изменился отбор кандидатов — сначала берём те,
+    до которых цене есть дело, и уже среди них ранжируем.
+
+    Полоса расширяется, пока не наберётся достаточно уровней: у спокойного
+    инструмента хватит ±8%, у волатильного — нет, и жёсткий порог оставил бы
+    его вовсе без слоя. Если не набралось и в самой широкой — отдаём топ по
+    старой логике: показать далёкие уровни лучше, чем не показать ничего.
+    """
+    if not price or price <= 0:
+        return items[:_LEVELS_LIMIT]
+    for band in _LEVEL_BANDS:
+        lo, hi = price * (1 - band), price * (1 + band)
+        near = [it for it in items if lo <= it["price"] <= hi]
+        if len(near) >= _LEVELS_LIMIT:
+            return near[:_LEVELS_LIMIT]
+    near = [it for it in items
+            if price * (1 - _LEVEL_BANDS[-1]) <= it["price"] <= price * (1 + _LEVEL_BANDS[-1])]
+    return near[:_LEVELS_LIMIT] if near else items[:_LEVELS_LIMIT]
+
+
+def _resolve_chart_symbol(symbol: str) -> str:
+    """Имя, под которым инструмент реально лежит у брокера.
+
+    Порядок важен: сначала пробуем имя как есть (для реестра оно рабочее и
+    переведено через CHART_BROKER_MAP), и только если брокер такого не знает —
+    смотрим карту канонических имён, а потом journal-домен. Иначе можно
+    сломать те, что уже работали.
+
+    🔴 Третья ветка про journal-домен добавлена 08.09 по живому вопросу «почему
+    по золоту нет данных» со ссылкой `?s=XAUUSD`. У золота три имени: `GOLD` в
+    каталоге и на графике, `XAUUSD` в дневнике сделок и у брокера, `GC=F` в
+    ленте котировок. Ссылка с `XAUUSD` приходила из дневника и из внешних
+    материалов — и отдавала пустой график, хотя те же свечи прекрасно
+    открывались по `?s=GOLD`.
+    """
+    if not symbol:
+        return symbol
+    from mt5_config import CHART_BROKER_MAP
+    if symbol in CHART_BROKER_MAP or symbol in _broker_catalog_symbols():
+        return symbol
+    alias = _canonical_alias_map().get(symbol)
+    if alias:
+        return alias
+    try:
+        from core.journal_symbols import to_chart_symbol
+        chart = to_chart_symbol(symbol)
+        if chart:
+            return chart
+    except Exception:
+        pass
+    return symbol
+
+
+def _canonical_link_name(symbol: str) -> str:
+    """Одно имя инструмента для ссылки — то, что видно в адресе страницы.
+
+    Не то же самое, что _resolve_chart_symbol: там мы ищем имя, под которым
+    лежат свечи (LINK → LINKUSD), а здесь — имя, под которым инструмент
+    показывается человеку и попадает в ссылку (LINKUSD → LINK, XAUUSD → GOLD).
+
+    Зачем вообще: у одного актива до трёх имён, и каждое открывало свою
+    страницу. Один и тот же график расходился по разным адресам в закладках,
+    в переписке и в поисковой выдаче — а для поисковика это ещё и две страницы
+    с одинаковым содержимым.
+    """
+    if not symbol:
+        return symbol
+    s = symbol.upper().strip()
+    # journal-домен → домен графика (XAUUSD → GOLD)
+    try:
+        from core.journal_symbols import to_chart_symbol
+        chart = to_chart_symbol(s)
+        if chart:
+            s = chart
+    except Exception:
+        pass
+    # имя брокера → каноническое имя каталога (LINKUSD → LINK)
+    for canon, broker in _canonical_alias_map().items():
+        if broker == s:
+            return canon
+    return s
+
+
+def _broker_quote_ages() -> dict:
+    """{тикер: возраст его котировки в секундах} из broker_symbols.
+
+    Данные уже собраны — broker_catalog_loop пишет туда снимок каждые 15 с.
+    Спрашивать у моста то, что лежит в базе, незачем: замер 26.08 показал,
+    что обход каталога через мост (842 вызова) насыщает его настолько, что
+    график перестаёт отвечать вовсе. Тот же ответ отсюда стоит один SELECT."""
+    global _quote_ts_cache
+    now = time.time()
+    if now - _quote_ts_cache[0] < _QUOTE_TS_TTL and _quote_ts_cache[1]:
+        return _quote_ts_cache[1]
+    try:
+        con = sqlite3.connect(str(_BOT_DB), timeout=10)
+        con.execute("PRAGMA busy_timeout=10000")
+        try:
+            ages = {s: (now - ts if ts else None)
+                    for s, ts in con.execute(
+                        "SELECT broker_symbol, quote_ts FROM broker_symbols")}
+        finally:
+            con.close()
+    except Exception:
+        return _quote_ts_cache[1]
+    if ages:
+        _quote_ts_cache = (now, ages)
+    return _quote_ts_cache[1]
+
+
+def _chartable_symbols() -> set:
+    """Всё, что платформа умеет нарисовать: именованный реестр ПЛЮС весь
+    каталог брокера.
+
+    Ярус 3 из SPEC_chart_all_instruments §4 — «детальный график по клику; для
+    инструментов, которых нет у Yahoo, из MT5 по запросу с кэшем». До 26.08
+    здесь было только 31 имя реестра, и клик по любой из остальных 811 строк
+    левой панели упирался в пустой график: котировка в списке есть, свечей
+    взять неоткуда.
+
+    Замер 26.08, по одному символу каждой категории (H1, 3000 баров): акции
+    1.06 с, ETF 1.35, индексы 1.23, крипта 1.18, FX 0.73, облигации 0.60,
+    сырьё 0.01. Бары есть у ВСЕХ категорий каталога.
+
+    🔴 Почему это не повторяет аварию 25.08. Тогда сайт лёг из-за фонового
+    ОБХОДА каталога (спарклайны: сотни вызовов подряд насытили мост, а сервер
+    однопоточный). Здесь обхода нет вовсе: один открытый график — один вызов
+    с кэшем на 20 с, ровно та же стоимость, что у нынешних 31 инструмента.
+    Массовой заливки каталога в price_bars тоже нет и не предполагается: 842
+    символа x 6 ТФ — это ~84 минуты на проход при часовом такте и ~30 млн
+    строк, то есть возврат к той же нагрузке, что мост уже не выдержал."""
+    return _chart_symbols() | _broker_catalog_symbols()
 
 _COUNTRY_SYM = {
     "US": "EURUSD", "EU": "EURUSD", "EA": "EURUSD",
@@ -87,8 +935,49 @@ _COUNTRY_CURRENCY = {
 }
 
 def _ensure_schema() -> None:
-    """Создаёт новые таблицы БД Фазы 1 если не существуют."""
-    con = sqlite3.connect(str(_BOT_DB))
+    """Обёртка: досоздание схемы не имеет права уронить веб-сервер.
+
+    🔴 01.09 сайт лежал четыре минуты именно здесь. Цикл анализа держал запись
+    в bot.db, sbf-web стоял на executescript, порт никто не слушал, туннель
+    отдавал 502 — а юнит числился active. Ожидание чужой транзакции не должно
+    решать, работает ли сайт: страницы, графики и кэш свечей от bot.db не
+    зависят вовсе, а таблицы, которые тут создаются, к этому моменту почти
+    всегда уже существуют.
+    """
+    try:
+        _ensure_schema_inner()
+    except Exception as e:
+        print(f"схема bot.db недоступна ({e}) — поднимаюсь без неё", flush=True)
+
+
+def _ensure_schema_inner() -> None:
+    """Создаёт новые таблицы БД Фазы 1 если не существуют.
+
+    🔴 busy_timeout обязателен. bot.db пишут соседние джобы (доливка баров,
+    снимок каталога брокера), и без ожидания ЛЮБАЯ их запись в момент старта
+    роняет весь веб-сервер: 25.08 sbf-web.service упал на этой строке с
+    "database is locked", когда каталог инструментов писал свои 842 строки.
+    Сервис поднялся рестартом, но падать веб-серверу из-за чужой транзакции
+    незачем — тот же приём уже применён в outliers_job и доливке баров."""
+    # 🔴 Ждать — но не бесконечно, и не ценой самого сайта.
+    #
+    # Ожидание в 60 секунд оказалось недостаточным: 01.09 цикл анализа
+    # (analyze.run_cycle --profile h4) держал запись в bot.db больше четырёх
+    # минут, sbf-web стоял на этой строке, порт 8085 никто не слушал, туннель
+    # отдавал 502 — сайт лежал целиком. Юнит при этом числился active: снаружи
+    # «работает», для посетителя пусто. Тот же класс отказа, который мы ловим
+    # в этом проекте третью неделю.
+    #
+    # Схема здесь только ДОСОЗДАЁТСЯ (всё CREATE IF NOT EXISTS). Если её сейчас
+    # не создать — почти всегда потому, что она уже есть, а база занята чужой
+    # транзакцией. Это не повод не поднимать сайт: страницы, графики и кэш
+    # свечей от bot.db не зависят вовсе.
+    try:
+        con = sqlite3.connect(str(_BOT_DB), timeout=15)
+        con.execute("PRAGMA busy_timeout=15000")
+    except Exception as e:
+        print(f"схема bot.db недоступна ({e}) — поднимаюсь без неё", flush=True)
+        return
     con.executescript("""
         CREATE TABLE IF NOT EXISTS price_bars (
             symbol TEXT NOT NULL, tf TEXT NOT NULL, ts INTEGER NOT NULL,
@@ -177,8 +1066,14 @@ def _ensure_schema() -> None:
             ("CN", "GOLD", 1), ("CN", "WTI", 1), ("CN", "SPX", 1),
         ],
     )
-    con.commit()
-    con.close()
+    # Досоздание схемы не должно ронять сервер: если база занята чужой
+    # транзакцией, поднимаемся без неё — таблицы почти наверняка уже есть.
+    try:
+        con.commit()
+    except Exception as e:
+        print(f"схема bot.db не записана ({e}) — продолжаю", flush=True)
+    finally:
+        con.close()
 
 # ── Jinja2 ──────────────────────────────────────────────────────────────────
 def _url_for(endpoint, **values):
@@ -224,6 +1119,204 @@ _jinja.globals["url_for"] = _url_for
 _site_jinja = Environment(loader=FileSystemLoader(str(WEB_DIR)), autoescape=True)
 _site_jinja.globals["t"] = i18n.t
 _site_jinja.globals["symbol_name"] = _symbols.symbol_name
+# Текстовый слой для краулеров — доступен шаблонам как text_layer(имя, lang).
+# Определение ниже по файлу; здесь регистрируется ленивой обёрткой, чтобы не
+# зависеть от порядка объявлений в модуле.
+_site_jinja.globals["text_layer"] = lambda имя, lang: _text_layer(имя, lang)
+# Инструкции брокеров: один шаблон на пять адресов, поэтому имя файла
+# слоя собирается из пути страницы, а не пишется в шаблоне.
+_site_jinja.globals["guide_text_layer"] = lambda путь, lang: (
+    _text_layer("guide_" + путь.rstrip("/").rsplit("/", 1)[-1], lang) if путь else "")
+# canonical + hreflang: шаблоны зовут {{ alt_links('/brokers', lang) | safe }}
+_site_jinja.globals["alt_links"] = lambda путь, lang: _alt_links(путь, lang)
+# schema.org: {{ schema_ld('glossary', lang) | safe }}. Сборка — в
+# core/schema_ld.py, чтобы её можно было позвать и проверить без сервера.
+_site_jinja.globals["schema_ld"] = lambda вид, lang, арг=None: _schema_ld(вид, lang, арг)
+# description + og/twitter: {{ page_meta(t('glossary.page_title', lang),
+#                                        'glossary', '/glossary', lang) | safe }}
+_site_jinja.globals["page_meta"] = lambda заголовок, слой, путь, lang, описание="": (
+    _page_meta(заголовок, слой, путь, lang, описание))
+_site_jinja.globals["guide_meta"] = lambda путь, lang: _guide_meta(путь, lang)
+
+
+def _guide_meta(путь: str, lang: str) -> str:
+    """Мета для инструкции: заголовок с именем площадки.
+
+    🔴 Ключ guide.page_title даёт «Инструкция по брокеру» — одинаково для
+    всех пяти страниц. Одинаковый заголовок на пяти адресах и в выдаче, и
+    в пересланной ссылке означает «это одно и то же»; имя площадки здесь
+    единственное, что их различает.
+    """
+    ид = (путь or "").rstrip("/").rsplit("/", 1)[-1]
+    if not ид:
+        return ""
+    имя, вводка = ид.upper(), ""
+    try:
+        д = schema_ld._гайд(ид, lang)
+        имя = д.get("name") or имя
+        # lead — вводка самой инструкции. Лучше, чем срезка текстового
+        # слоя: та начинается с имени площадки и склеивается с первой
+        # фразой («XM Инструкция по всем пяти процессам…»).
+        вводка = д.get("lead") or ""
+    except Exception:
+        pass
+    заголовок = f"{имя} — {i18n.t('guide.page_title', lang)}"
+    return _page_meta(заголовок, f"guide_{ид}", путь, lang, вводка)
+
+
+# 🔴 Одно место, где живёт граница платного. Правило «с шестой главы нужен
+# PRO» проверяется в _handle_edu и объявляется в разметке
+# (isAccessibleForFree). Пока чисел было два, они молча разъезжались —
+# ровно так подписи статусов лида в CRM разошлись по шести файлам.
+ПЕРВАЯ_ПЛАТНАЯ_ГЛАВА = 6
+
+
+def _schema_ld_глава(ch: int, lang: str) -> str:
+    try:
+        return schema_ld.глава(ch, lang,
+                               бесплатная=ch < ПЕРВАЯ_ПЛАТНАЯ_ГЛАВА)
+    except Exception as e:
+        print(f"[schema.org] глава {ch}/{lang}: {e}", flush=True)
+        return ""
+
+
+_РАЗДЕЛЫ_САЙТА = (
+    ("/",           "nav.today"),
+    ("/chart.html", "nav.charts"),
+    ("/edu/",       "nav.edu"),
+    ("/calendar",   "nav.calendar"),
+    ("/brokers",    "nav.brokers"),
+    ("/glossary",   "glossary.h1"),
+)
+
+
+def _прогрессивный_щит() -> str:
+    """Скрипт и стиль, прячущие серверные блоки, когда JavaScript работает.
+
+    Один и тот же механизм у текстового слоя и у навигации: класс
+    sbf-js ставится синхронно, до того как браузер дойдёт до самого
+    блока, поэтому человек не видит его ни мгновения. Повторная выдача
+    безвредна — класс идемпотентен, стиль тоже.
+    """
+    return ('<script>document.documentElement.classList.add("sbf-js")</script>'
+            '<style>html.sbf-js .sbf-text-layer{display:none}'
+            'html:not(.sbf-js) #sbf-book-root,'
+            'html:not(.sbf-js) #brokersTableRoot:empty,'
+            'html:not(.sbf-js) #glContainer{min-height:0}'
+            '.sbf-text-nav{font:14px/1.6 system-ui,sans-serif;padding:12px 16px;'
+            'border-bottom:1px solid #E7DFCF}'
+            '.sbf-text-nav a{color:#866A19;margin-right:14px}</style>')
+
+
+def _навигация(lang: str) -> str:
+    """Навигация по разделам в самой разметке, а не только в JavaScript.
+
+    🔴 ВСЮ навигацию сайта рисует sbf-header.js — шапку и нижнюю панель,
+    через innerHTML. Значит для того, кто JavaScript не исполняет, сайт
+    состоит из страниц, между которыми нет ни одного перехода. Замер
+    17.09.2026 без JS: /brokers и /calendar — ноль ссылок, /glossary —
+    одна на 24 289 знаков текста. Карта сайта перечисляет адреса, но вес
+    между страницами передаётся ссылками, и обходчик идёт по ним.
+
+    Это же чинит страницу для человека с выключенным JavaScript: до сих
+    пор он не мог уйти со страницы, на которую попал.
+    """
+    ссылки = []
+    for путь, ключ in _РАЗДЕЛЫ_САЙТА:
+        подпись = i18n.t(ключ, lang)
+        ссылки.append(f'<a href="{_локальный_адрес(путь, lang)}">'
+                      f'{html_lib.escape(подпись)}</a>')
+    return ('<nav class="sbf-text-layer sbf-text-nav" aria-label="SBF">'
+            + "".join(ссылки) + "</nav>")
+
+
+def _соседние_главы(ch: int, lang: str) -> str:
+    """Предыдущая и следующая глава плюс оглавление.
+
+    Курс — единственное место на сайте, где порядок материалов задан, и
+    именно его обходчику полезнее всего: пятнадцать страниц, связанных
+    в цепочку, читаются как один материал, а не как пятнадцать чужих
+    друг другу адресов.
+    """
+    звенья = []
+    for сосед in (ch - 1, ch + 1):
+        if 1 <= сосед <= 15:
+            подпись = i18n.t(f"eduindex.chapters.{сосед}.title", lang)
+            звенья.append(f'<a href="{_локальный_адрес(f"/edu/b/{сосед}", lang)}">'
+                          f'{сосед}. {html_lib.escape(подпись)}</a>')
+    звенья.append(f'<a href="{_локальный_адрес("/edu/", lang)}">'
+                  f'{html_lib.escape(i18n.t("nav.edu", lang))}</a>')
+    return ('<nav class="sbf-text-layer sbf-text-nav">' + "".join(звенья) + "</nav>")
+
+
+def _описание_из_слоя(имя: str, lang: str, предел: int = 200) -> str:
+    """Краткое описание страницы — из её же текстового слоя.
+
+    🔴 Не выдумываем и не пишем вторую копию: description — это первые
+    фразы того самого текста, который отдаётся краулеру. Так описание не
+    может разойтись со страницей, а разойтись ему было бы легко: его
+    никто не перечитывает.
+
+    Обрезаем по границе предложения, а не по счётчику знаков: обрубок на
+    полуслове в выдаче выглядит как ошибка сайта.
+    """
+    сырой = _text_layer(имя, lang)
+    if not сырой:
+        return ""
+    текст = re.sub(r"<[^>]+>", " ", сырой.split('<div class="sbf-text-layer">', 1)[-1])
+    текст = html_lib.unescape(текст)
+    текст = re.sub(r"\s+", " ", текст).strip()
+    if len(текст) <= предел:
+        return текст
+    кусок = текст[:предел]
+    точка = max(кусок.rfind("."), кусок.rfind("!"), кусок.rfind("?"))
+    if точка > предел // 2:
+        return кусок[:точка + 1]
+    пробел = кусок.rfind(" ")
+    return (кусок[:пробел] if пробел > 0 else кусок).rstrip(",;:—- ") + "…"
+
+
+def _page_meta(заголовок: str, слой: str, путь: str, lang: str,
+               описание: str = "") -> str:
+    """description + og/twitter для одной страницы.
+
+    🔴 Замер 17.09.2026: og:title, og:description и og:url не стояли ни на
+    одной странице, кроме главной, а meta description — на трёх из
+    одиннадцати. og:image при этом был везде. То есть ссылку на любую
+    нашу страницу можно было кинуть в Telegram или Slack и получить
+    карточку с картинкой, но без заголовка и текста — ровно там, где
+    начинаются упоминания на чужих площадках.
+    """
+    описание = (описание or "").strip() or _описание_из_слоя(слой, lang)
+    адрес = ДОМЕН_САЙТА + _локальный_адрес(путь, lang)
+    э = html_lib.escape
+    части = [f'<meta property="og:title" content="{э(заголовок)}">',
+             f'<meta property="og:url" content="{э(адрес)}">',
+             f'<meta name="twitter:title" content="{э(заголовок)}">']
+    if описание:
+        части.insert(0, f'<meta name="description" content="{э(описание)}">')
+        части.append(f'<meta property="og:description" content="{э(описание)}">')
+        части.append(f'<meta name="twitter:description" content="{э(описание)}">')
+    return "\n".join(части)
+
+
+def _schema_ld(вид: str, lang: str, арг=None) -> str:
+    """Разметка страницы. Молчит, а не падает: пустой <script> хуже, чем
+    его отсутствие, но белая страница хуже их обоих."""
+    try:
+        if вид == "course":
+            return schema_ld.курс(lang)
+        if вид == "glossary":
+            return schema_ld.глоссарий(lang)
+        if вид == "brokers":
+            return schema_ld.брокеры(lang)
+        if вид == "guide":
+            # арг — путь вида /brokers/xm, брокер берём последним сегментом.
+            брокер = (арг or "").rstrip("/").rsplit("/", 1)[-1]
+            return schema_ld.инструкция(брокер, lang) if брокер else ""
+    except Exception as e:
+        print(f"[schema.org] {вид}/{lang}: {e}", flush=True)
+    return ""
 
 
 def _tojson_filter(value) -> Markup:
@@ -244,12 +1337,29 @@ def _tojson_filter(value) -> Markup:
 _site_jinja.filters["tojson"] = _tojson_filter
 
 _EDU_RE     = re.compile(r'^/edu(?:/(?P<lang>ro|en))?/b(?:/(?P<ch>\d+))?(?:\?.*)?$')
-_EDU_TOC_RE = re.compile(r'^/edu/?(?:\?.*)?$')
+
+# Куда вести с адреса-исходника. Ключ — путь файла в web/, значение —
+# канонический маршрут той же страницы. Пары, у которых .html-вариант уже
+# перехвачен маршрутом выше (/glossary.html, /brokers.html, /register.html,
+# /login.html, /survey.html, /privacy.html, /admin.html), сюда не нужны.
+_КАНОНИЧЕСКИЙ_АДРЕС = {
+    "/index.html":         "/",
+    "/edu/index.html":     "/edu/",
+    "/edu/calendar.html":  "/calendar",
+    "/edu/glossary.html":  "/glossary",
+    "/broker_guide.html":  "/brokers",
+    "/journal.html":       "/journal",
+    "/grafik.html":        "/chart.html",
+}
+_КНИГА_ФАЙЛ_RE = re.compile(r'^/book/edu_book_(\d{1,2})\.html$')
+# Оглавление курса разбирается по path_clean (см. do_GET), отдельное
+# выражение по self.path было слепо к префиксу локали: /ro/edu/ под него
+# не подходил и уезжал в статику.
 
 _EDU_LIVE = {
     1: "^GSPC", 2: "^GSPC", 3: "GC=F",      4: "^GSPC",    5: "EURUSD=X",
     6: "^VIX",  7: "^GSPC", 8: "^GSPC",     9: "GC=F",     10: "^GSPC",
-    11: "^IXIC",12: "EURUSD=X",13: "GC=F",  14: "EURUSD=X",15: "^GSPC",
+    11: "^NDX", 12: "EURUSD=X",13: "GC=F",  14: "EURUSD=X",15: "^GSPC",
 }
 _EDU_LIVE_LABEL = {
     1: "S&P 500", 2: "S&P 500", 3: "Золото",  4: "S&P 500",  5: "EUR/USD",
@@ -338,6 +1448,105 @@ def _precompile_all() -> None:
     print(f"Готово: {len(_COMPILED)}/15 глав скомпилированы", flush=True)
 
 
+ДОМЕН_САЙТА = "https://lp.sbfconsult.com"
+_ЯЗЫКИ_САЙТА = ("ru", "ro", "en")
+
+
+def _локальный_адрес(путь: str, язык: str) -> str:
+    """Адрес страницы в нужной локали.
+
+    🔴 У курса локаль стоит ПОСЛЕ /edu (/edu/ro/b/3), у всего остального —
+    перед (/ro/brokers). Та же развилка уже дала 404 на /ro/edu/b (Л-2
+    языкового аудита), когда адрес собирали приклеиванием префикса.
+    """
+    if язык == "ru":
+        return путь
+    if путь.startswith("/edu/b"):
+        return путь.replace("/edu/b", f"/edu/{язык}/b", 1)
+    if путь.rstrip("/") == "/edu":
+        return f"/{язык}/edu/"
+    return f"/{язык}{путь}"
+
+
+def _alt_links(путь: str, lang: str) -> str:
+    """canonical + hreflang для страницы.
+
+    🔴 Без этого у трёхъязычного сайта три отдельные страницы вместо одной
+    с переводами: ни поисковик, ни ИИ-агент не знают, что /brokers,
+    /ro/brokers и /en/brokers — один материал, и выбирают между ними
+    наугад. Замер 17.09.2026: ни canonical, ни hreflang не было ни на
+    одной странице сайта.
+    x-default указывает на русскую версию — она полная и обновляется
+    первой.
+    """
+    свой = _локальный_адрес(путь, lang)
+    части = [f'<link rel="canonical" href="{ДОМЕН_САЙТА}{свой}">']
+    for я in _ЯЗЫКИ_САЙТА:
+        части.append(f'<link rel="alternate" hreflang="{я}" '
+                     f'href="{ДОМЕН_САЙТА}{_локальный_адрес(путь, я)}">')
+    части.append(f'<link rel="alternate" hreflang="x-default" '
+                 f'href="{ДОМЕН_САЙТА}{путь}">')
+    return "\n".join(части)
+
+
+_TEXT_LAYER_DIR = Path(__file__).parent / "web" / "data" / "text"
+_text_layer_cache: dict[str, str] = {}
+
+
+def _text_layer(имя: str, lang: str) -> str:
+    """Готовый текст страницы для тех, кто не исполняет JavaScript.
+
+    Файлы собирает tools/build_text_layer.js из тех же chN.js и
+    glossary*.json, что читает живая страница. Пустая строка, если файла
+    нет: отсутствие текстового слоя не должно ронять страницу — это
+    улучшение для краулера, а не условие работы сайта.
+
+    🔴 Молчать об отсутствии файла всё же нельзя, иначе «слой есть» и
+    «слоя нет» выглядят одинаково — ровно тот случай, когда ноль в отчёте
+    означает «я туда не дошёл». Поэтому промах пишется в лог один раз.
+    """
+    ключ = f"{имя}.{lang}"
+    if ключ in _text_layer_cache:
+        return _text_layer_cache[ключ]
+    п = _TEXT_LAYER_DIR / f"{ключ}.html"
+    try:
+        # 🔴 СЛОЙ ВИДЕН РОВНО ТОГДА, КОГДА БЕЗ НЕГО СТРАНИЦА ПУСТА.
+        # Текст лежит в потоке до монтирования React, а потом заменяется
+        # его разметкой — и всё, что ниже, прыгает: замер дал CLS 0.180 на
+        # мобильном /edu/b/3 и 0.121 на /glossary там, где было 0. Ограничение
+        # высоты первым экраном сняло лишь часть (0.180 → 0.155): дело не в
+        # длине, а в самом факте замены.
+        #
+        # Поэтому решает не CSS-обрезка, а признак «JS работает»: строка
+        # ниже ставит класс синхронно, ДО того как браузер дойдёт до самого
+        # текста, и в браузере с включённым JS слой не занимает места ни
+        # мгновения. Без JS класса нет — человек читает статью целиком.
+        # Краулеру безразличны и класс, и стиль: он берёт текст из разметки.
+        # Это обычное прогрессивное улучшение, а не подмена контента для
+        # робота: текст тот же самый, из тех же исходников.
+        текст = (
+            '<script>document.documentElement.classList.add("sbf-js")</script>'
+            '<style>html.sbf-js .sbf-text-layer{display:none}'
+            # Пустой корень держит экран высотой 100vh ради устойчивого
+            # макета. Без JS он так и останется пустым, и человек увидит
+            # пустой экран вместо статьи — убираем резерв ровно в этом случае.
+            'html:not(.sbf-js) #sbf-book-root,'
+            # Резерв высоты таблицы брокеров (brokers.css: 1100px на
+            # десктопе, 3400px на телефоне) стоит на :empty и снимается
+            # монтированием. Без JS контейнер так и остаётся пустым, и
+            # человек получил бы экран пустоты перед текстом.
+            'html:not(.sbf-js) #brokersTableRoot:empty,'
+            'html:not(.sbf-js) #glContainer{min-height:0}</style>'
+            '<div class="sbf-text-layer">' + п.read_text(encoding="utf-8") + '</div>'
+        )
+    except OSError:
+        текст = ""
+        print(f"[text-layer] нет файла {п.name} — страница уйдёт без текста "
+              f"для краулеров (собрать: node tools/build_text_layer.js)")
+    _text_layer_cache[ключ] = текст
+    return текст
+
+
 def _edu_inject(ch: int, lang: str = i18n.DEFAULT_LANG) -> str:
     """Генерирует HTML инжекции для главы: nav, прогресс-бар, дисклеймер, live."""
     # Ссылки между главами должны сохранять текущий язык, иначе "Далее"/
@@ -393,6 +1602,13 @@ def _edu_inject(ch: int, lang: str = i18n.DEFAULT_LANG) -> str:
         8:  [("smc","structure",i18n.t("edu.fig.8.1", lang)),
              ("smc","bos",i18n.t("edu.fig.8.2", lang)),
              ("ind","ma",i18n.t("edu.fig.8.3", lang))],
+        # 🔴 Глава 9 была единственной из пятнадцати вообще без графики: в
+        # _FIG_MAP не было ключа 9, а виджета ей, в отличие от главы 10, не
+        # полагалось. Глава при этом ровно про осцилляторы — RSI, MACD,
+        # дивергенции, — и объясняла их словами, ни разу не показав.
+        9:  [("ind","rsi",i18n.t("edu.fig.9.1", lang)),
+             ("ind","macd",i18n.t("edu.fig.9.2", lang)),
+             ("ind","stoch",i18n.t("edu.fig.9.3", lang))],
         11: [("ind","volume",i18n.t("edu.fig.11.1", lang))],
         12: [("ind","ichimoku",i18n.t("edu.fig.12.1", lang))],
         13: [("chart","hns",i18n.t("edu.fig.13.1", lang)),
@@ -499,12 +1715,12 @@ def _edu_inject(ch: int, lang: str = i18n.DEFAULT_LANG) -> str:
 
 <div style="max-width:780px;margin:24px auto 0;padding:0 24px">
   <div style="border:1px solid #E7DFCF;border-radius:10px;padding:16px 20px;background:rgba(201,162,39,.04)">
-    <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#C9A227;margin-bottom:10px">{i18n.t("edu.live_concept_title", lang)}</div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#866A19;margin-bottom:10px">{i18n.t("edu.live_concept_title", lang)}</div>
     <div id="edu-live-widget" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-family:'JetBrains Mono',monospace;font-size:12px">
-      <span style="color:#8A8275">{i18n.t("edu.loading", lang)}</span>
+      <span style="color:#716A5A">{i18n.t("edu.loading", lang)}</span>
     </div>
     <a href="/chart.html?s={chart_key}" target="_blank"
-       style="display:inline-flex;align-items:center;gap:6px;margin-top:12px;padding:7px 16px;background:#C9A227;color:#fff;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.5px;text-decoration:none;border-radius:6px">
+       style="display:inline-flex;align-items:center;gap:6px;margin-top:12px;padding:7px 16px;background:#C9A227;color:#2B2B33;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.5px;text-decoration:none;border-radius:6px">
       {i18n.t("edu.open_in_terminal", lang, live_label=live_label)}
     </a>
   </div>
@@ -519,12 +1735,32 @@ def _edu_inject(ch: int, lang: str = i18n.DEFAULT_LANG) -> str:
 <script src="/edu/edu-live.js"></script>
 <div id="sbf-pro-toast" style="position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#2B2B33;color:#fff;font-family:'JetBrains Mono',monospace;font-size:12px;padding:10px 20px;border-radius:8px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:9999">{i18n.t("edu.pro_available_later", lang)}</div>
 <script>
+/* Плашка поднимается НАД закреплёнными полосами — и сразу при загрузке, а не
+   только в момент показа. Она невидима (opacity:0), но в раскладке стоит, и
+   проверка перекрытий честно находила её на панели главы: «невидимо, значит
+   не считается» — плохое оправдание, потому что показывается она ровно туда,
+   где лежала. Высоту стека считает sbf-feedback.js: один расчёт на всех. */
+function sbfПоднятьПлашку() {{
+  var t=document.getElementById('sbf-pro-toast');
+  if(t && window.SbfНизСтека) t.style.bottom=(window.SbfНизСтека(t)+12)+'px';
+}}
+window.addEventListener('load', function(){{ setTimeout(sbfПоднятьПлашку, 1200); }});
+
 function sbfNavigate(tool) {{
   var routes = {{grafik:'/grafik',chart:'/grafik','risk-calc':'/grafik'}};
   var href = routes[tool];
   if(href){{ window.location.href=href; return; }}
   var t=document.getElementById('sbf-pro-toast');
-  if(t){{t.style.opacity='1';setTimeout(function(){{t.style.opacity='0';}},2800);}}
+  // 🔴 Плашка стоит НАД закреплёнными полосами, а не поверх них. В разметке
+  // у неё bottom:80px — число из времён, когда снизу была одна полоса. Потом
+  // добавился нижний нав, панель главы уехала вверх, и плашка стала всплывать
+  // ровно на ней: замер на живом телефоне 14.09.2026 — перекрытие 184×26 px.
+  // Высоту стека считает sbf-feedback.js (window.SbfНизСтека) — один расчёт
+  // на всех, иначе следующая полоса снова разойдётся с числом в разметке.
+  if(t){{
+    sbfПоднятьПлашку();
+    t.style.opacity='1';setTimeout(function(){{t.style.opacity='0';}},2800);
+  }}
 }}
 (function(){{
   var K='sbf_edu_done', C={ch}, TICK='{ticker}';
@@ -548,7 +1784,7 @@ function sbfNavigate(tool) {{
     if(!q) return;
     var p = q.price, chg = q.change_pct||0;
     var sign = chg > 0 ? '+' : '';
-    var col  = chg > 0 ? '#1e8e5a' : chg < 0 ? '#c0392b' : '#8A8275';
+    var col  = chg > 0 ? '#1A7D4F' : chg < 0 ? '#C0392B' : '#716A5A';
     var priceStr = p.toLocaleString('ru-RU',{{maximumFractionDigits:4}});
     var chgHtml  = '<span style="color:' + col + '">' + sign + chg.toFixed(2) + '%</span>';
 
@@ -561,12 +1797,12 @@ function sbfNavigate(tool) {{
         '<span style="font-weight:700;color:#2B2B33">' + TICK + '</span>'
         + '<span style="color:#2B2B33">' + priceStr + '</span>'
         + chgHtml
-        + '<span style="color:#E7DFCF">│</span>';
+        + '<span style="color:#716A5A">│</span>';
     }}
   }}).then(function(){{
     // Добавить RSI из OHLC
     var OHLC_MAP = {{'GC=F':'ohlc_GOLD_D1.json','EURUSD=X':'ohlc_EURUSD_D1.json',
-      '^GSPC':'ohlc_SPX_D1.json','^IXIC':'ohlc_NASDAQ_D1.json',
+      '^GSPC':'ohlc_SPX_D1.json','^NDX':'ohlc_NASDAQ_D1.json',
       'CL=F':'ohlc_WTI_D1.json','BTC-USD':'ohlc_BTC_D1.json'}};
     var ohlcFile = OHLC_MAP[TICK];
     if(!ohlcFile) return;
@@ -574,7 +1810,7 @@ function sbfNavigate(tool) {{
       var rsi = o && o.rsi;
       if(rsi == null) return;
       var zone = rsi>=70?'{i18n.t("edu.rsi_overbought", lang)}':rsi<=30?'{i18n.t("edu.rsi_oversold", lang)}':'{i18n.t("edu.rsi_neutral", lang)}';
-      var zCol = rsi>=70?'#c0392b':rsi<=30?'#1e8e5a':'#8A8275';
+      var zCol = rsi>=70?'#C0392B':rsi<=30?'#1A7D4F':'#716A5A';
       var wEl = document.getElementById('edu-live-widget');
       if(wEl){{
         wEl.innerHTML += '<span>RSI(14): <b style="color:'+zCol+'">'+rsi.toFixed(1)+'</b></span>'
@@ -630,21 +1866,21 @@ def _build_edu_page(ch: int, lang: str) -> bytes:
     # главе независимо от lang (баг, существовавший и до английской версии --
     # главы никогда не грузили /assets/i18n.js, только сам sbf-header.js).
     css_tags = (
-        '<link rel="stylesheet" href="/assets/design.css">\n'
-        '<link rel="stylesheet" href="/edu/edu.css">\n'
-        '<link rel="stylesheet" href="/assets/sbf-nav.css">\n'
+        '<link rel="stylesheet" href="/assets/design.css?v=20260909">\n'
+        '<link rel="stylesheet" href="/edu/edu.css?v=20260903b">\n'
+        '<link rel="stylesheet" href="/assets/sbf-nav.css?v=20260903b">\n'
         '<script src="/assets/i18n.js?v=2" defer></script>\n'
         '<script src="/assets/sbf-symbols.js?v=2"></script>\n'
-        '<script src="/assets/sbf-header.js?v=16" defer></script>'
+        '<script src="/assets/sbf-header.js?v=23" defer></script>'
     )
-    if '/edu/edu.css' not in html:
+    if '/edu/edu.css?v=20260903b' not in html:
         html = html.replace("</head>", f"{css_tags}\n</head>", 1)
-    elif '/assets/sbf-header.js?v=16' not in html:
+    elif '/assets/sbf-header.js?v=23' not in html:
         html = html.replace("</head>",
-            '<link rel="stylesheet" href="/assets/sbf-nav.css">\n'
+            '<link rel="stylesheet" href="/assets/sbf-nav.css?v=20260903b">\n'
             '<script src="/assets/i18n.js?v=2" defer></script>\n'
             '<script src="/assets/sbf-symbols.js?v=2"></script>\n'
-            '<script src="/assets/sbf-header.js?v=16" defer></script>\n</head>', 1)
+            '<script src="/assets/sbf-header.js?v=23" defer></script>\n</head>', 1)
 
     grafik_tags = (
         '<script src="/edu/assets/grafik-engine.js"></script>\n'
@@ -704,11 +1940,66 @@ def _build_edu_page(ch: int, lang: str) -> bytes:
         html = html.replace(
             "</head>", '<script src="/edu/assets/simple-lang.js?v=1"></script>\n</head>', 1)
 
+    # canonical + hreflang. Главы — единственные страницы сайта, которые
+    # рендерит не Jinja (у книги свой конвейер с Babel), поэтому теги
+    # вставляются здесь, а не в шаблоне: иначе пятнадцать материалов в трёх
+    # языках остались бы без связи между версиями.
+    if 'rel="canonical"' not in html:
+        html = html.replace("</head>", _alt_links(f"/edu/b/{ch}", lang) + "\n</head>", 1)
+
+    # Разметка главы. Сюда попадают только те, кого сервер реально пустил:
+    # анониму главы 6-15 отдаёт _send_edu_paywall, и разметку он ставит
+    # свою, с isAccessibleForFree:false.
+    if "application/ld+json" not in html:
+        html = html.replace(
+            "</head>",
+            _schema_ld_глава(ch, lang) + "\n</head>", 1)
+
+    # description и og. Замер 17.09.2026: у всех пятнадцати глав не было
+    # ни того, ни другого — при том что og:image стоял. Ссылку на главу
+    # можно было переслать и получить карточку с картинкой без строчки
+    # текста. Заголовок берём из оглавления курса (i18n), описание —
+    # подзаголовок главы оттуда же.
+    if 'property="og:title"' not in html:
+        название = i18n.t(f"eduindex.chapters.{ch}.title", lang)
+        html = html.replace("</head>", _page_meta(
+            f"{ch}. {название} — SBF", f"edu_b{ch}", f"/edu/b/{ch}", lang,
+            i18n.t(f"eduindex.chapters.{ch}.sub", lang)) + "\n</head>", 1)
+
     # Хедер инжектирует sbf-header.js (добавлен через css_tags выше)
 
     # Инжектируем nav + прогресс + дисклеймер перед </body>
     inject = _edu_inject(ch, lang)
     html = html.replace("</body>", f"{inject}\n</body>", 1)
+
+    # 🔴 ТЕКСТ ГЛАВЫ В САМОМ HTML, А НЕ ТОЛЬКО В БРАУЗЕРЕ.
+    # Глава собирается React'ом, поэтому в ответе сервера её содержимого не
+    # было вовсе: замер 17.09.2026 с выключенным JS — 514 знаков на /edu/b/3
+    # при 13 949 живых. ИИ-краулеры (GPTBot, ClaudeBot, PerplexityBot)
+    # JavaScript не исполняют — значит для них пятнадцати глав курса просто
+    # нет, и сослаться на нас им нечем.
+    # Текст кладётся ВНУТРЬ #sbf-book-root: при монтировании
+    # ReactDOM.createRoot(...).render() заменяет содержимое корня целиком,
+    # так что человек видит обычную интерактивную главу, а тот, кто пришёл
+    # без JS, читает статью. Собирается из тех же chN.js —
+    # tools/build_text_layer.js, второй копии текста не заводим.
+    # 🔴 Слой кладётся ПОСЛЕ корня, а не внутрь него. Внутри он становился
+    # частью того самого блока, который React заменяет при монтировании:
+    # tools/audit_cls.py назвал виновником сдвига именно div#sbf-book-root,
+    # и CLS на десктопе вырос с 0.10 до 0.25 даже при display:none —
+    # лишние узлы внутри корня меняют его высоту в момент замены.
+    # Снаружи корень ведёт себя ровно как раньше, а текст остаётся в
+    # разметке. Без JS корню не нужен min-height:100vh (иначе человек
+    # увидит пустой экран, а текст — только прокрутив), поэтому слой сам
+    # его и снимает.
+    html = html.replace('<div id="sbf-book-root"></div>',
+                        f'<div id="sbf-book-root"></div>{_text_layer(f"edu_b{ch}", lang)}', 1)
+
+    # Навигация по разделам плюс переходы между главами. Без JavaScript
+    # глава была тупиком: из неё не вело ни одной ссылки, включая
+    # соседние главы того же курса.
+    html = html.replace("<body>", "<body>" + _прогрессивный_щит()
+                        + _навигация(lang) + _соседние_главы(ch, lang), 1)
 
     return html.encode("utf-8")
 
@@ -1175,6 +2466,10 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         # ── Auth / Onboarding ──
         elif path_clean == "/api/auth/me":
             self._handle_auth_me()
+        elif path_clean in ("/unsubscribe", "/api/unsubscribe"):
+            self._handle_unsubscribe()
+        elif path_clean == "/api/user/watchlist-news":
+            self._handle_user_watchlist_news()
         elif path_clean == "/api/auth/my-path":
             self._handle_auth_my_path()
         elif path_clean == "/api/auth/survey-status":
@@ -1187,6 +2482,18 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self._handle_analytics_discipline_cost()
         elif path_clean == "/api/journal/analytics/setups":
             self._handle_analytics_setups()
+        # ── Статистика для главы 10: часы входа против часов заработка ──
+        #
+        # 🔴 ОТВЕТ «ДАННЫХ НЕТ» — ЭТО НЕ ТО ЖЕ, ЧТО 404, И НЕ ТО ЖЕ, ЧТО НОЛЬ.
+        # Глава спрашивает оба адреса на каждом открытии. Пока маршрутов не
+        # было, каждое открытие давало два 404 — предсказуемый шум, в котором
+        # тонет отказ, что-то значащий. Теперь считаем по-настоящему
+        # (core/journal_hours.py), а когда данных не хватает — говорим, чего
+        # именно и сколько ещё нужно, вместо пустого ответа.
+        elif path_clean == "/api/journal/self-stats":
+            self._send_json(journal_hours.свои_часы(self._current_user_id()))
+        elif path_clean == "/api/journal/aggregate-stats":
+            self._send_json(journal_hours.часы_платформы())
         # ── Weekly review ──
         elif path_clean == "/api/journal/review/current":
             self._handle_review_current()
@@ -1207,6 +2514,12 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self._render_site_page("login.html", req_lang)
         elif path_clean in ("/survey", "/survey.html"):
             self._render_site_page("survey.html", req_lang)
+        # 27.08.2026: обязательные согласия на /register и /survey ссылались
+        # на политику, которой не существовало — register.html вёл на "#",
+        # survey.html на /privacy с ответом 404. Человек соглашался с
+        # документом, которого нельзя открыть.
+        elif path_clean in ("/privacy", "/privacy.html"):
+            self._render_site_page("privacy.html", req_lang)
         elif path_clean in ("/brokers", "/brokers.html"):
             self._render_site_page("brokers.html", req_lang)
         elif path_clean in ("/brokers/xm", "/brokers/naga", "/brokers/fxpro", "/brokers/instaforex", "/brokers/avatrade"):
@@ -1216,25 +2529,33 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             # поэтому один и тот же шаблон обслуживает все маршруты без сервер-side
             # переменных. Список литеральный (не regex): маршрут добавляется только
             # когда для брокера реально есть данные в web/data/guides/.
-            self._render_site_page("broker_guide.html", req_lang)
+            self._render_site_page("broker_guide.html", req_lang,
+                                   page_path=path_clean)
         elif path_clean == "/journal":
             self._serve_static(WEB_DIR / "journal.html")
         # ── Legacy /m/* routes → redirect to unified index ──
-        elif path_clean.startswith("/m"):
+        #
+        # 🔴 Условие проверяет ПУТЬ, а не префикс строки. Было
+        # startswith("/m") — и под него попадало всё, что начинается с буквы
+        # «m»: /media/logos/marketbeat.com.ico отдавал 301 на главную.
+        # Логотипы изданий лежали на диске, путь в базе был правильный, в
+        # разметке тоже — а браузер получал редирект и рисовал значок битой
+        # картинки. Снаружи это выглядело как «картинки не грузятся».
+        elif path_clean == "/m" or path_clean.startswith("/m/"):
             self.send_response(301)
             self.send_header("Location", "/")
             self.end_headers()
         elif path_clean in ("/glossary", "/glossary.html"):
             self._render_site_page("glossary.html", req_lang)
-        # ── Gated LP API endpoints ──
-        elif path_clean == "/api/lp/signals":
-            self._handle_lp_signals()
-        elif path_clean == "/api/lp/buzz":
-            self._handle_lp_buzz()
-        elif path_clean == "/api/lp/patterns":
-            self._handle_lp_patterns()
-        elif path_clean == "/api/lp/gold-scenarios":
-            self._handle_lp_gold_scenarios()
+        # ── /api/lp/* удалены 02.09.2026 ──
+        # Четыре обработчика (signals, buzz, patterns, gold-scenarios) исправно
+        # отвечали 401 и требовали авторизации, то есть работали. Звал их при
+        # этом никто: поиск "api/lp/" по всему web/ (html + js) давал ноль
+        # совпадений. Данные они брали из signals.json и buzz.json, которые
+        # тоже никто больше не читает.
+        # Работающий код без единого вызывающего — не запас, а лишняя
+        # поверхность: его надо поддерживать при каждом изменении авторизации
+        # и он путает того, кто читает маршруты.
         elif path_clean.startswith("/api/calendar/events"):
             self._handle_calendar_api()
         elif path_clean.startswith("/api/event/"):
@@ -1243,8 +2564,12 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 self._handle_event_history(segs[0])
             elif len(segs) == 2 and segs[1] == "markers":
                 self._handle_event_markers(segs[0])
-            elif len(segs) == 2 and segs[1] == "reactions":
-                self._send_json({"error": "скоро (Фаза 2)", "status": 501}, 501)
+            # Заглушка /api/event/{key}/reactions → 501 «скоро (Фаза 2)»
+            # удалена 02.09.2026: Фаза 2 давно сделана в другом месте. Рабочий
+            # маршрут — /api/chart/event-reaction, его зовут chart.html и
+            # edu/calendar.html, таблица event_reaction_stats содержит 4092
+            # строки. Обещание «скоро» в коде, где функциональность уже год как
+            # есть, дезориентирует сильнее, чем честный 404.
             else:
                 self._send_json({"error": "not found"}, 404)
         elif path_clean == "/api/price":
@@ -1257,10 +2582,16 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self._handle_chart_news_bursts()
         elif path_clean == "/api/chart/news":
             self._handle_chart_news()
+        elif path_clean == "/api/geo/feed":
+            self._handle_geo_feed()
+        elif path_clean == "/api/pulse/board":
+            self._handle_pulse_board()
         elif path_clean == "/api/pulse":
             self._handle_pulse()
         elif path_clean == "/api/pulse/feed":
             self._handle_pulse_feed()
+        elif path_clean == "/api/pulse/translate":
+            self._handle_pulse_translate()
         elif path_clean == "/api/chart/levels":
             self._handle_chart_levels()
         elif path_clean == "/api/chart/confluence":
@@ -1283,14 +2614,22 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self._handle_chart_sentiment()
         elif path_clean == "/api/chart/symbols":
             self._send_json(sorted(_chart_symbols()))
+        elif path_clean == "/api/chart/smc":
+            self._handle_chart_smc()
         elif path_clean == "/api/focus":
             self._handle_focus(user_id)
         elif path_clean == "/api/chart/my-trades":
             self._handle_chart_my_trades()
         elif path_clean == "/api/chart/trade-context":
             self._handle_chart_trade_context()
-        elif _EDU_TOC_RE.match(self.path):
-            self._handle_edu_toc()
+        # 🔴 Оглавление курса, календарь и график раньше отдавались файлом
+        # как есть, мимо Jinja: три страницы из двадцати восьми, у которых
+        # нет ни одной серверной подстановки — и это не было видно, пока им
+        # не понадобился первый {{ }} (canonical/hreflang). Замер 17.09.2026:
+        # 9 адресов из 84 без canonical, причём файлы правку получили.
+        # Теперь они идут тем же путём, что и остальные страницы сайта.
+        elif path_clean in ("/edu", "/edu/"):
+            self._render_site_page("edu/index.html", req_lang)
         elif _EDU_RE.match(self.path):
             self._handle_edu()
         elif path_clean == "/grafik":
@@ -1300,7 +2639,9 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.send_header("Location", "/glossary")
             self.end_headers()
         elif path_clean in ("/edu/calendar", "/calendar"):
-            self._serve_static(EDU_DIR / "calendar.html")
+            self._render_site_page("edu/calendar.html", req_lang)
+        elif path_clean in ("/chart.html", "/chart"):
+            self._render_site_page("chart.html", req_lang)
         # ── Admin panel ──
         elif path_clean in ("/admin", "/admin.html"):
             self._serve_static(WEB_DIR / "admin.html")
@@ -1328,6 +2669,29 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 Path(__file__).parent / "data" / "screenshots" / fname,
                 content_type="image/jpeg",
             )
+        elif path_clean.endswith((".html", ".htm")):
+            # 🔴 ИСХОДНИК ШАБЛОНА С КОДОМ 200. web/ — одновременно корень
+            # статики и каталог Jinja-шаблонов, поэтому любой .html, не
+            # перехваченный маршрутом выше, уезжал в super().do_GET() и
+            # отдавался КАК ФАЙЛ. Замер 17.09.2026: /index.html — 36
+            # следов шаблона в тексте и заголовок «{{ t('home.page_title',
+            # lang) }}», /broker_guide.html — то же самое и при этом
+            # robots: index, follow. Снаружи это 200 и «страница есть»:
+            # ни лог, ни код ответа об этом не скажут.
+            # Ответ — редирект на канонический адрес, а не рендер: иначе у
+            # каждой страницы появился бы второй адрес с тем же
+            # содержимым, и canonical пришлось бы объяснять дважды.
+            цель = _КАНОНИЧЕСКИЙ_АДРЕС.get(path_clean)
+            if цель is None:
+                м = _КНИГА_ФАЙЛ_RE.match(path_clean)
+                цель = f"/edu/b/{м.group(1)}" if м else None
+            if цель:
+                self._redirect(_локальный_адрес(цель, req_lang), 301)
+            else:
+                self.send_response(404)
+                self.send_header("Content-Type", "text/plain; charset=utf-8")
+                self.end_headers()
+                self.wfile.write("Такой страницы нет".encode("utf-8"))
         else:
             if req_lang != i18n.DEFAULT_LANG:
                 # Страница ещё не переведена (нет явного Jinja-маршрута выше) --
@@ -1336,17 +2700,6 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 query = self.path.split("?", 1)
                 self.path = path_clean + ("?" + query[1] if len(query) > 1 else "")
             super().do_GET()
-
-    def _handle_edu_toc(self):
-        toc_path = EDU_DIR / "index.html"
-        try:
-            body = toc_path.read_bytes()
-            self.send_response(200)
-            self.send_header("Content-Type", "text/html; charset=utf-8")
-            self.end_headers()
-            self.wfile.write(body)
-        except Exception as e:
-            self._redirect("/edu/b/1")
 
     def _handle_edu(self):
         m = _EDU_RE.match(self.path)
@@ -1363,7 +2716,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         # ссылке, значки "PRO" на 6-15 чисто косметические. Теперь настоящий
         # серверный гейт (не клиентский, который легко обойти прямой ссылкой).
         # Главы 1-5 остаются бесплатными без проверки.
-        if ch >= 6:
+        if ch >= ПЕРВАЯ_ПЛАТНАЯ_ГЛАВА:
             user_id = self._current_user_id()
             if not journal_auth.is_pro(user_id):
                 self._send_edu_paywall(ch, lang, logged_in=(user_id != "default"))
@@ -1386,19 +2739,42 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         Тот же "хром" (шапка/нав/шрифты), что и у обычной главы, чтобы не
         выглядело как ошибка — целенаправленный экран с понятным следующим
         шагом, а не 403 в браузерном стиле."""
-        cta_href = f"/edu/{'' if lang == 'ru' else lang + '/'}b/4" if logged_in else (
-            "/register" if lang == "ru" else f"/{lang}/register")
+        # 27.08.2026: для незалогиненного кнопка вела на /register — форму,
+        # которая просит почту с паролем и ничего не обещает взамен. При этом
+        # /survey делает ровно то же самое (тот же journal_auth.register), но
+        # одним заходом с опросом и сразу выдаёт 30 дней PRO через
+        # grant_survey_pro(). Человек, упёршийся в платную главу, — самый
+        # горячий посетитель на сайте; отправлять его в форму без обещания
+        # было прямой потерей.
+        lang_pref = "" if lang == "ru" else f"/{lang}"
+        # 🔴 Якорь #survey обязателен, а не украшение. Подпись кнопки обещает
+        # опросник, а он лежит в самом низу длинной главы 4, свёрнутый за
+        # кнопкой «Заполнить». Без якоря человек попадал на верх главы и не
+        # находил того, за чем пришёл. Обработчик якоря — в edu_book_4.html:
+        # разворачивает форму, прокручивает к ней и подсвечивает блок.
+        cta_href = (f"/edu/{'' if lang == 'ru' else lang + '/'}b/4#survey"
+                    if logged_in else f"{lang_pref}/survey")
         cta_label = i18n.t("eduindex.paywall.cta_survey" if logged_in else "eduindex.paywall.cta_register", lang)
         toc_href = "/edu" if lang == "ru" else f"/edu/{lang}/b"
+        # 🔴 Пейволл — это тот же адрес главы, а не отдельная страница, и
+        # анониму (в том числе краулеру) сайт отдаёт именно его. Без этих
+        # тегов тридцать адресов из восьмидесяти четырёх — десять платных
+        # глав в трёх языках — оставались без canonical и без связи между
+        # языками: ровно те страницы, ссылку на которые мы и продаём.
         html = f"""<!doctype html><html lang="{lang}"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+{_alt_links(f"/edu/b/{ch}", lang)}
+{_schema_ld_глава(ch, lang)}
+{_page_meta(f"{ch}. " + i18n.t(f'eduindex.chapters.{ch}.title', lang) + " — SBF",
+            "", f"/edu/b/{ch}", lang,
+            i18n.t(f'eduindex.chapters.{ch}.sub', lang))}
 <title>{i18n.t('eduindex.paywall.title', lang)}</title>
-<link rel="stylesheet" href="/assets/design.css">
-<link rel="stylesheet" href="/edu/edu.css">
-<link rel="stylesheet" href="/assets/sbf-nav.css">
+<link rel="stylesheet" href="/assets/design.css?v=20260909">
+<link rel="stylesheet" href="/edu/edu.css?v=20260903b">
+<link rel="stylesheet" href="/assets/sbf-nav.css?v=20260903b">
 <script src="/assets/i18n.js?v=2" defer></script>
 <script src="/assets/sbf-symbols.js?v=2"></script>
-<script src="/assets/sbf-header.js?v=16" defer></script>
+<script src="/assets/sbf-header.js?v=23" defer></script>
 <script src="/assets/sbf-auth.js?v=1" defer></script>
 <style>
 .paywall-wrap{{max-width:560px;margin:80px auto;padding:0 20px;text-align:center}}
@@ -1406,9 +2782,15 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 .paywall-wrap p{{color:var(--muted);line-height:1.6;margin-bottom:24px}}
 .paywall-wrap a.btn{{display:inline-block;background:var(--gold);color:#18181a;font-weight:700;padding:12px 28px;border-radius:8px;text-decoration:none}}
 .paywall-wrap a.btn:hover{{opacity:.9}}
-.paywall-wrap .back{{display:block;margin-top:20px;color:var(--muted);text-decoration:underline;font-size:13px}}
+/* 🔴 Цель касания. Ссылка была 334×16: по высоте вдвое ниже минимума
+   WCAG 2.5.8 (24) и втрое ниже рекомендованных 44. Это единственный
+   способ уйти с пейволла назад в оглавление, и он стоит на десяти
+   страницах — главы 6-15. Ширину растягивать не надо, добираем высоту
+   отступами, inline-block — чтобы они считались. */
+.paywall-wrap .back{{display:inline-block;margin-top:14px;padding:12px 16px;
+  color:var(--muted);text-decoration:underline;font-size:13px;line-height:20px}}
 </style>
-</head><body>
+</head><body>{_прогрессивный_щит()}{_навигация(lang)}{_соседние_главы(ch, lang)}
 <div class="paywall-wrap">
   <h1>{i18n.t('eduindex.paywall.title', lang)}</h1>
   <p>{i18n.t('eduindex.paywall.body', lang)}</p>
@@ -1435,14 +2817,44 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(b"Not found")
 
-    def _render_site_page(self, template_name: str, lang: str = i18n.DEFAULT_LANG) -> None:
+    def _render_site_page(self, template_name: str, lang: str = i18n.DEFAULT_LANG,
+                          page_path: str | None = None) -> None:
         """Рендерит web/<template_name> через _site_jinja с {{ t(key) }}
         доступным внутри. lang прокидывается в шаблон явно (а не только
         через глобальный t, у которого свой параметр по умолчанию) -- сами
-        шаблоны используют `{{ t('key', lang) }}`."""
+        шаблоны используют `{{ t('key', lang) }}`.
+
+        🔴 `anon` — знает ли сервер, что посетитель не залогинен.
+        16.09.2026: блок «что даёт аккаунт» на главной показывался только
+        анониму, и решение принимал КЛИЕНТ — по событию sbf:user-ready,
+        то есть после ответа /api/auth/me. До этого момента блок стоял
+        `hidden`, места не занимал, а появившись — толкал страницу вниз
+        на пол-экрана (вклад в CLS 0.46 на мобильном).
+        Резерв высоты тут не годится: залогиненному блок не показывается
+        никогда, и зарезервированное место осталось бы дырой. Сервер сессию
+        читает и так (тот же validate_session, что и /api/auth/me), поэтому
+        решение переехало на сервер: нет блока — нет и сдвига.
+        Страница отдаётся с Cache-Control: no-store, так что персональный
+        рендер ничего не ломает в кэше."""
+        try:
+            anon = self._current_user_id() == "default"
+        except Exception:
+            # Сессию не прочитали — считаем гостем: показать блок лишний раз
+            # безобиднее, чем спрятать его от того, кому он адресован.
+            anon = True
         try:
             tpl = _site_jinja.get_template(template_name)
-            html = _normalize_favicon(tpl.render(lang=lang))
+            # page_path — для шаблонов, которые обслуживают несколько
+            # адресов (broker_guide.html — один файл на пять брокеров).
+            # У остальных путь в шаблоне написан явно, и это честнее:
+            # canonical виден там же, где страница.
+            html = _normalize_favicon(tpl.render(lang=lang, anon=anon,
+                                                 page_path=page_path))
+            # Навигация вставляется здесь, а не в девяти шаблонах: она
+            # нужна КАЖДОЙ странице, и забыть её в одном шаблоне было бы
+            # незаметно — отсутствие ссылок глазами не видно.
+            html = html.replace(
+                "<body>", "<body>" + _прогрессивный_щит() + _навигация(lang), 1)
         except Exception as e:
             self.send_response(500)
             self.send_header("Content-Type", "text/plain; charset=utf-8")
@@ -1568,6 +2980,12 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             for r in rows:
                 r["importance"] = r.pop("impact")
                 r["currency"] = _COUNTRY_CURRENCY.get(r["country"], r["country"])
+                # Русское название рядом с исходным, а не вместо него: фронт
+                # берёт его только на русской странице, английская остаётся как
+                # была. Нет перевода — ключа нет, и фронт покажет оригинал.
+                ru = _econ_title_ru(r.get("indicator"), r.get("title"), r.get("country"))
+                if ru:
+                    r["title_ru"] = ru
                 # Для блока "Прошлые разы" (Фаза 2) — фронтенд передаёт это как
                 # есть в /api/chart/event-reaction, не дублируя regex-словарь.
                 r["event_type"] = normalize_event_type(r.pop("indicator") or r["title"])
@@ -1685,6 +3103,11 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         except Exception as e:
             self._send_json({"error": str(e)}, 500)
 
+    # Тот же пол, что в pulse_job.MIN_BASELINE. Держим копию здесь осознанно:
+    # витрина не импортирует джобы, а разъехаться эти два числа не могут
+    # молча — при расхождении «нормы нет» покажется там, где она есть.
+    _PULSE_MIN_BASELINE = 0.5
+
     def _handle_pulse(self) -> None:
         """Фаза 4: топ-8 обсуждаемости по вкладке (pulse_job.py, раз в 15 мин).
         Публично (витрина). Ночью/без активности — фолбэк на топ-8 по
@@ -1708,9 +3131,34 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 "SELECT symbol, mentions, baseline, score FROM pulse_scores WHERE category=? AND ts=?",
                 (category, latest_ts),
             ).fetchall()
-            top_by_score = sorted(snapshot, key=lambda r: r["score"], reverse=True)[:8]
-            calm = not top_by_score or top_by_score[0]["score"] <= 0
-            chosen = top_by_score if not calm else sorted(snapshot, key=lambda r: r["mentions"], reverse=True)[:8]
+            # 🔴 Порядок — по числу упоминаний за час, а не по кратности.
+            #
+            # По кратности сортировать нельзя, пока она есть не у всех: 314
+            # инструментов из 343 пока без собственной нормы, у них множителя
+            # нет вовсе. Сортировка по нему ставила рядом отношение и счётчик
+            # («×6.1» у четырёх упоминаний выше, чем «3 за час») и поднимала
+            # наверх ×0.6 и ×0.7 — то есть «тише обычного» в блоке под
+            # названием «Эпицентр».
+            #
+            # Абсолютное число упоминаний сравнимо для всех и отвечает на
+            # вопрос блока — где сейчас концентрируется внимание. Кратность
+            # осталась в строке как уточнение: много это для инструмента или
+            # для него обычно.
+            # 🔴 Ноль упоминаний — это не строка блока «Эпицентр».
+            #
+            # Вкладка добирала до восьми всегда, даже когда за час упомянули
+            # четыре актива: остальные четыре вставали в список с «0 за час»
+            # и «×0.0». Блок обещает показать, где сейчас концентрируется
+            # внимание, — и дописывал туда активы, о которых не было ни
+            # одной новости. Лучше короткий список, чем длинный с выдумкой.
+            #
+            # Если за час не упомянули никого — блок честно говорит «тихо»
+            # (флаг calm), и витрина показывает это состояние, а не таблицу
+            # нулей.
+            chosen = sorted((r for r in snapshot if r["mentions"] > 0),
+                            key=lambda r: (r["mentions"], r["score"]),
+                            reverse=True)[:8]
+            calm = not chosen
 
             since = latest_ts - 24 * 3600
             items = []
@@ -1722,6 +3170,19 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 items.append({
                     "symbol": r["symbol"], "mentions": r["mentions"],
                     "baseline": round(r["baseline"], 2), "score": round(r["score"], 2),
+                    # 🔴 Есть ли у инструмента собственная норма, или она
+                    # упёрлась в пол 0.5 упоминания в час.
+                    #
+                    # Пол существует, чтобы не делить на ноль, но у него есть
+                    # побочный эффект: пока по инструменту нет истории,
+                    # множитель — это просто удвоенное число упоминаний за
+                    # час. 09.09.2026 после расширения сбора новостей норма
+                    # была на полу у 292 инструментов из 311, и витрина
+                    # показывала «×84 к своей норме» там, где честный ответ —
+                    # «нормы пока нет, мерить не с чем». Показывать
+                    # множитель, не имея знаменателя, — это выдавать шум за
+                    # измерение.
+                    "has_norm": r["baseline"] > self._PULSE_MIN_BASELINE,
                     "sparkline": [round(s["score"], 2) for s in spark],
                 })
             con.close()
@@ -1730,9 +3191,540 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         except Exception as e:
             self._send_json({"error": str(e)}, 500)
 
+    # Сколько инструментов каждого направления берём на доску. Сумма 20 —
+    # столько пузырей помещается на экран, оставаясь различимыми; при 30 мелкие
+    # сливаются в кашу, при 10 доска перестаёт быть картой рынка.
+    #
+    # Квота одинаковая для всех пяти направлений: с 08.09 доска разбита на
+    # группы, и колонка из одного круга рядом с колонкой из шести читается как
+    # «здесь данных нет», хотя дело только в разной активности новостного
+    # потока. Ровные четыре на каждое направление держат картинку сравнимой.
+    _BOARD_QUOTA = {"crypto": 4, "stocks": 4, "indices": 4, "fx": 4, "commodity": 4}
+    # Добор до двадцати, если по какому-то направлению сегодня молчат. Потолок
+    # на группу не даёт одному направлению занять всю доску.
+    _BOARD_GROUP_CAP = 6
+    _BOARD_TOTAL = 20
+
+    # Сколько показываем, когда выбрано одно направление. Десять — нижняя
+    # граница, заданная владельцем: доска одного направления должна давать
+    # картину рынка, а не тройку самых шумных.
+    #
+    # Верхняя граница — «сколько отслеживаем», а не «сколько поместится».
+    # По валютам это 58 пар, по индексам 32, по сырью 19, по крипте 14 — все
+    # они и показываются. Потолок в 60 стоит ради акций: их в каталоге 618, и
+    # шестьсот кругов это не карта рынка, а серый шум. Шестьдесят —
+    # эмпирический предел, за которым подпись перестаёт читаться даже на
+    # десктопе (проверено замером радиусов, не на глаз).
+    _BOARD_CAT_MIN = 10
+    _BOARD_CAT_MAX = 60
+
+    # Сколько отдаём на карту. Больше полусотни точек на глобусе сливаются в
+    # кашу, а лента всё равно листается по одной.
+    _GEO_LIMIT = 60
+
+    # Инструмент, на котором показываем реакцию рынка на событие страны.
+    # Событие в календаре страновое, а «двинулось» бывает у чего-то одного:
+    # для показателя США это доллар, для Японии — USDJPY. Статистика
+    # (event_reaction_stats) считается по event_type без учёта страны, поэтому
+    # берём тот инструмент, который к стране относится напрямую, — иначе
+    # реакция немецкого ИПЦ показывалась бы на австралийце.
+    _GEO_REACTION_SYMBOL = {
+        "US": "DXY", "EU": "EURUSD", "DE": "EURUSD", "FR": "EURUSD",
+        "IT": "EURUSD", "ES": "EURUSD", "NL": "EURUSD", "BE": "EURUSD",
+        "AT": "EURUSD", "PT": "EURUSD", "GR": "EURUSD", "IE": "EURUSD",
+        "FI": "EURUSD", "GB": "GBPUSD", "JP": "USDJPY", "CN": "USDCNY",
+        "AU": "AUDUSD", "NZ": "NZDUSD", "CA": "USDCAD", "CH": "USDCHF",
+        "RU": "USDRUB", "TR": "USDTRY", "MX": "USDMXN", "ZA": "USDZAR",
+        "PL": "USDPLN", "KR": "USDKRW", "HU": "USDHUF",
+    }
+
+    # Валютная пара двигается в пунктах (pips), индекс и сырьё — в пунктах
+    # цены. Без этой пометки «10.4» на витрине означало бы что угодно.
+    @staticmethod
+    def _reaction_unit(symbol: str) -> str:
+        return "pips" if len(symbol) == 6 and symbol.isalpha() else "points"
+
+    def _geo_reaction(self, con, country: str, indicator: str, title: str) -> dict | None:
+        """Как рынок обычно ходит на этом показателе.
+
+        🔴 Это ТИПИЧНАЯ реакция по прошлым выпускам, а не то, что было в
+        последний раз, и поле называется так, чтобы это было видно снаружи:
+        `kind: "typical"` плюс `n` и `period`. Сайт до этого доставал реакцию
+        сам из brief_today.json по паре (страна, время) — чужой формат по
+        неявному ключу, ломается при первой правке брифа.
+
+        Почему не «прошлый раз»: event_key хешируется по точному заголовку,
+        а он содержит месяц, поэтому у каждого выпуска ключ свой и историю по
+        нему не собрать. Агрегат event_reaction_stats для этого и считается.
+        """
+        symbol = self._GEO_REACTION_SYMBOL.get(country)
+        if not symbol:
+            return None
+        event_type = normalize_event_type(indicator or title or "")
+        if not event_type:
+            return None
+        row = con.execute(
+            """SELECT n, avg_move_30m, median_move_30m, baseline_ratio_30m,
+                      period_from, period_to
+               FROM event_reaction_stats
+               WHERE event_type=? AND symbol=? ORDER BY n DESC LIMIT 1""",
+            (event_type, symbol)).fetchone()
+        if not row or not row["n"] or row["avg_move_30m"] is None:
+            return None
+        return {
+            "kind": "typical", "symbol": symbol,
+            "unit": self._reaction_unit(symbol),
+            "event_type": event_type,
+            "avg_move_30m": round(row["avg_move_30m"], 4),
+            "median_move_30m": (round(row["median_move_30m"], 4)
+                                if row["median_move_30m"] is not None else None),
+            # Во сколько раз получасовой ход больше обычного получаса. Больше
+            # единицы — событие рынок действительно двигает.
+            "vs_normal": (round(row["baseline_ratio_30m"], 2)
+                          if row["baseline_ratio_30m"] is not None else None),
+            "n": row["n"],
+            "period": [row["period_from"], row["period_to"]],
+        }
+
+    def _handle_geo_feed(self) -> None:
+        """Лента для карты и глобуса sbfconsult.com: что и где происходит.
+
+        Два потока в одном формате:
+          event — макро-событие календаря. Страна есть в данных, координата
+                  берётся по стране, время — время публикации показателя.
+          news  — новость с гео-привязкой (news_geo_job). Ставится только
+                  когда для места есть основание; крипта и золото сюда не
+                  попадают, у них страны нет по природе.
+
+        🔴 Формат намеренно несёт `rule` — на каком основании поставлена точка.
+        Карта — это утверждение «здесь произошло вот что», и сайт должен иметь
+        возможность показывать только надёжное: до этой ручки тикеры на карте
+        расставлялись по первым свободным городам, и Amazon оказывался в
+        Гонконге, а Intel во Франкфурте.
+        """
+        params = parse_qs(urlparse(self.path).query)
+        try:
+            hours = max(1, min(72, int(params.get("hours", ["24"])[0])))
+        except ValueError:
+            hours = 24
+        kinds = (params.get("kind", ["all"])[0] or "all").lower()
+        try:
+            limit = max(1, min(self._GEO_LIMIT, int(params.get("limit", ["40"])[0])))
+        except ValueError:
+            limit = 40
+        # ?market=1 — отдавать только новости, в которых разметка опознала хотя
+        # бы один инструмент. Фильтруем на нашей стороне, а не на витрине,
+        # потому что иначе limit срезает выборку ДО фильтра и на карту приходит
+        # десять точек вместо сорока.
+        market_only = params.get("market", ["0"])[0] in ("1", "true", "yes")
+
+        places = _geo_places()
+        items = []
+        now = int(time.time())
+        since = now - hours * 3600
+        try:
+            if kinds in ("all", "event"):
+                con = sqlite3.connect(f"file:{_BOT_DB}?mode=ro", uri=True, timeout=10)
+                con.row_factory = sqlite3.Row
+                try:
+                    rows = con.execute(
+                        """SELECT id, country, title, indicator, impact, scheduled_ts,
+                                  actual, forecast, previous
+                           FROM econ_events
+                           WHERE scheduled_ts BETWEEN ? AND ?
+                             AND impact IN ('high','medium')
+                           ORDER BY scheduled_ts DESC LIMIT ?""",
+                        (since, now + 6 * 3600, limit)).fetchall()
+                    for r in rows:
+                        p = places.get(r["country"])
+                        if not p:
+                            continue
+                        items.append({
+                            "kind": "event", "id": f"ev-{r['id']}",
+                            # Перевода может не быть — тогда честно отдаём
+                            # оригинал, а не выдуманный русский вариант.
+                            "title": (_econ_title_ru(r["indicator"], r["title"],
+                                                     r["country"]) or r["title"]),
+                            "title_en": r["title"], "country": r["country"],
+                            "place": p["city"], "place_en": p["city_en"],
+                            "place_ro": p["city_ro"],
+                            "lon": p["lon"], "lat": p["lat"],
+                            "ts": r["scheduled_ts"], "impact": r["impact"],
+                            "rule": "calendar", "market": True,
+                            "actual": r["actual"], "forecast": r["forecast"],
+                            "previous": r["previous"],
+                            "reaction": self._geo_reaction(
+                                con, r["country"], r["indicator"], r["title"]),
+                        })
+                finally:
+                    con.close()
+
+            if kinds in ("all", "news"):
+                con = sqlite3.connect(f"file:{_SIGNALS_DB}?mode=ro", uri=True, timeout=10)
+                con.row_factory = sqlite3.Row
+                try:
+                    rows = con.execute(
+                        """SELECT g.news_uid, g.country, g.lon, g.lat, g.rule,
+                                  g.evidence, s.title, s.url, s.topic_hint,
+                                  s.last_seen
+                           FROM news_geo g JOIN signals s ON s.uid = g.news_uid
+                           WHERE s.last_seen >= datetime('now', ?)
+                             AND s.title <> ''
+                           ORDER BY s.last_seen DESC LIMIT ?""",
+                        (f"-{hours} hours", limit * 3 if market_only else limit)
+                    ).fetchall()
+                    # Инструменты, опознанные в новости разметкой. Это ответ на
+                    # вопрос «а она вообще про рынок» — фактом, а не догадкой:
+                    # сайт до этого угадывал сам («нужно рыночное слово И
+                    # число»), и через ленту к нему проезжали «обед в честь
+                    # ФРС» и подпись к фотографии здания.
+                    uids = [r["news_uid"] for r in rows]
+                    tags: dict[str, list[str]] = {}
+                    if uids:
+                        q = ",".join("?" * len(uids))
+                        for uid, sym in con.execute(
+                                f"SELECT news_uid, symbol FROM news_instrument_tags "
+                                f"WHERE news_uid IN ({q})", uids):
+                            tags.setdefault(uid, []).append(sym)
+                finally:
+                    con.close()
+                for r in rows:
+                    try:
+                        ts = int(datetime.fromisoformat(r["last_seen"]).timestamp())
+                    except (ValueError, TypeError):
+                        continue
+                    p = places.get(r["country"], {})
+                    syms = sorted(set(tags.get(r["news_uid"], [])))[:8]
+                    if market_only and not syms:
+                        continue
+                    items.append({
+                        "kind": "news", "id": f"nw-{abs(hash(r['url'] or r['title'])) % 10**9}",
+                        "title": r["title"], "country": r["country"],
+                        # Заголовок новости не переводится: выдумывать чужой
+                        # текст нельзя. Вместо перевода отдаём, на каком языке
+                        # он пришёл, — витрине этого хватает, чтобы решить,
+                        # показывать его на /en/ и /ro/ или нет.
+                        #
+                        # 🔴 title_en у новости есть ТОЛЬКО когда заголовок и
+                        # так английский. В задании было написано «есть
+                        # всегда» — это неправда, и сайт на неё рассчитывал:
+                        # на румынской версии в итоге стоял оригинал. Пустое
+                        # поле честнее, чем машинный перевод новости.
+                        "lang": _title_lang(r["title"]),
+                        "title_en": (r["title"] if _title_lang(r["title"]) == "en"
+                                     else None),
+                        "place": p.get("city", r["country"]),
+                        "place_en": p.get("city_en", r["country"]),
+                        "place_ro": p.get("city_ro", r["country"]),
+                        "lon": r["lon"], "lat": r["lat"], "ts": ts,
+                        "source": r["topic_hint"], "url": r["url"],
+                        "rule": r["rule"],
+                        # Подстрока заголовка, из-за которой точка встала сюда.
+                        # Делает ярус проверяемым: «почему это в Москве» теперь
+                        # отвечается полем, а не чтением регулярных выражений.
+                        "place_evidence": r["evidence"] or None,
+                        "symbols": syms, "market": bool(syms),
+                    })
+
+            items.sort(key=lambda x: x["ts"], reverse=True)
+            self._send_json({
+                "updated": datetime.now(timezone.utc).isoformat(),
+                "window_hours": hours,
+                "items": items[:limit],
+            })
+        except Exception as e:
+            self._send_json({"error": str(e)}, 500)
+
+    def _handle_pulse_board(self) -> None:
+        """Доска обсуждаемости для главной.
+
+        Без параметра — срез по всему рынку: по четыре инструмента каждого из
+        пяти направлений, чтобы их можно было сравнить между собой.
+        С `?cat=<направление>` — одно направление и не меньше десяти
+        инструментов в нём.
+
+        Отличие от /api/pulse (вкладки «крипта / акции / индексы»): там топ-8
+        по всплеску внутри направления, здесь — по абсолютным упоминаниям за
+        сутки, потому что размер пузыря должен отвечать на вопрос «о чём
+        говорят больше», а не «где сильнее разогналось».
+        """
+        params = parse_qs(urlparse(self.path).query)
+        cat = params.get("cat", [None])[0]
+        if cat and cat not in self._BOARD_QUOTA:
+            self._send_json({"error": "unknown cat"}, 400)
+            return
+        try:
+            con = sqlite3.connect(str(_SIGNALS_DB))
+            con.row_factory = sqlite3.Row
+            ts = con.execute("SELECT MAX(ts) FROM pulse_scores").fetchone()[0]
+            if ts is None:
+                self._send_json({"items": [], "updated": None})
+                con.close()
+                return
+            rows = con.execute(
+                "SELECT symbol, category, mentions, mentions_24h, score "
+                "FROM pulse_scores WHERE ts=?", (ts,)).fetchall()
+            con.close()
+
+            # 🔴 Схлопываем имена одного и того же актива. В счётчике WTI и
+            # CrudeOIL, NG и NATURAL_GAS, XRP и XRPUSD живут отдельными
+            # строками — это одно и то же, просто каноническое имя и имя
+            # брокера. Без слияния доска показала бы нефть дважды и заняла бы
+            # два места из двадцати.
+            meta = _board_symbol_meta()
+            merged: dict = {}
+            for r in rows:
+                m = meta.get(r["symbol"])
+                if not m:
+                    # Символа нет среди открывающихся инструментов — это
+                    # кештег вроде LUNA или GME, который мы не показываем.
+                    # Молча пропускаем: доска должна вести на график.
+                    continue
+                key = m["key"]
+                cur = merged.setdefault(key, {
+                    "symbol": key, "name": m["name"], "category": r["category"],
+                    "mentions": 0, "burst": 0.0, "price": m["price"], "chg": m["chg"],
+                    "ticker": m.get("ticker"),
+                })
+                cur["mentions"] += r["mentions_24h"] or 0
+                cur["burst"] = max(cur["burst"], round(r["score"] or 0, 2))
+
+            pool = sorted(merged.values(), key=lambda x: x["mentions"], reverse=True)
+
+            # ── Одно направление ────────────────────────────────────────────
+            if cat:
+                items = [x for x in pool if x["category"] == cat][:self._BOARD_CAT_MAX]
+                # 🔴 Добираем инструментами, о которых сегодня не писали. Ноль
+                # упоминаний — это факт, а не пустота: инструмент
+                # отслеживается, просто про него молчат. Показать по валютам
+                # три круга вместо пятидесяти значило бы соврать, что мы
+                # следим только за тремя.
+                #
+                # Добираем до потолка, а не до минимума: раздел отвечает на
+                # вопрос «за чем мы следим в этом направлении», и ответ на
+                # него — весь список, а не его верхушка.
+                if len(items) < self._BOARD_CAT_MAX:
+                    have = {x["symbol"] for x in items}
+                    for extra in _board_category_fill(cat):
+                        if extra["symbol"] in have:
+                            continue
+                        items.append(extra)
+                        have.add(extra["symbol"])
+                        if len(items) >= self._BOARD_CAT_MAX:
+                            break
+                items.sort(key=lambda x: x["mentions"], reverse=True)
+                self._send_json({
+                    "updated": datetime.fromtimestamp(ts, timezone.utc).isoformat(),
+                    "window_hours": 24, "category": cat, "items": items,
+                })
+                return
+
+            chosen, taken = [], {k: 0 for k in self._BOARD_QUOTA}
+            for it in pool:
+                q = self._BOARD_QUOTA.get(it["category"])
+                if q is None or taken[it["category"]] >= q:
+                    continue
+                taken[it["category"]] += 1
+                chosen.append(it)
+            # Квоты добираем общим топом: если про сырьё сегодня молчат, место
+            # не должно пустовать. Но не больше потолка на группу — иначе
+            # акции, которых в каталоге 618, вытеснили бы все остальные.
+            if len(chosen) < self._BOARD_TOTAL:
+                have = {c["symbol"] for c in chosen}
+                for it in pool:
+                    if it["symbol"] in have:
+                        continue
+                    if taken.get(it["category"], 0) >= self._BOARD_GROUP_CAP:
+                        continue
+                    taken[it["category"]] = taken.get(it["category"], 0) + 1
+                    chosen.append(it)
+                    if len(chosen) >= self._BOARD_TOTAL:
+                        break
+            chosen = chosen[:self._BOARD_TOTAL]
+            chosen.sort(key=lambda x: x["mentions"], reverse=True)
+            self._send_json({
+                "updated": datetime.fromtimestamp(ts, timezone.utc).isoformat(),
+                "window_hours": 24,
+                "items": chosen,
+            })
+        except Exception as e:
+            self._send_json({"error": str(e)}, 500)
+
+    _FEED_LIMIT = 30
+
+    @staticmethod
+    def _dedupe_feed(con, items: list[dict]) -> list[dict]:
+        """Один материал — одна карточка, и берём ту копию, что лучше.
+
+        🔴 Одна и та же статья приезжает несколькими путями: прямой лентой
+        издания и двумя-тремя поисковыми лентами Google News под разные
+        инструменты. Ссылки при этом разные, поэтому дедупликация по url не
+        срабатывала: замер по #APPLE показал по четыре копии одного заголовка.
+
+        Копии не равноценны. У прямой ссылки на издание есть og:image и
+        человек попадает на статью; у ссылки news.google.com картинки нет
+        никогда (страница рисуется скриптом, адрес статьи в ней не лежит), и
+        клик ведёт через редирект. Поэтому из группы берётся копия с
+        картинкой, а при прочих равных — с прямой ссылкой.
+
+        Побочный и приятный эффект: доля карточек с фотографией растёт без
+        единого нового похода наружу — просто перестаём показывать худшую
+        копию там, где есть лучшая.
+        """
+        if not items:
+            return items
+        media = {}
+        try:
+            media = news_media.media_for(con, [i["uid"] for i in items])
+        except Exception:
+            pass
+
+        def вес(it: dict) -> tuple:
+            есть_фото = 1 if media.get(it["uid"]) else 0
+            прямая = 0 if news_media.domain_of(it.get("url") or "") in (
+                "news.google.com", "") else 1
+            return (есть_фото, прямая, it["ts"])
+
+        лучшие: dict[str, dict] = {}
+        порядок: list[str] = []
+        for it in items:
+            ключ = re.sub(r"\W+", " ", (it.get("title") or "").lower()).strip()[:110]
+            if not ключ:
+                ключ = "uid:" + it["uid"]      # у постов заголовка нет, не склеиваем
+            if ключ not in лучшие:
+                лучшие[ключ] = it
+                порядок.append(ключ)
+            elif вес(it) > вес(лучшие[ключ]):
+                лучшие[ключ] = it
+        out = [лучшие[k] for k in порядок]
+        out.sort(key=lambda x: x["ts"], reverse=True)
+        return out
+
+    def _decorate_feed(self, con, items: list[dict], lang: str) -> None:
+        """Дописать в пункты ленты картинку, логотип и перевод заголовка.
+
+        Работает по месту, ничего не возвращает. Любая из трёх частей может
+        не сложиться — тогда поля просто нет, а карточка остаётся собой:
+        заголовок, источник, время. Ни одна из этих подпорок не стоит того,
+        чтобы из-за неё лента не открылась.
+        """
+        if not items:
+            return
+        uids = [it["uid"] for it in items]
+
+        try:
+            media = news_media.media_for(con, uids)
+            # Развёрнутый адрес: клик ведёт на статью, а не на промежуточную
+            # страницу Google. Домен пересчитывается по нему же, иначе в
+            # подписи остался бы домен из raw, а логотип подбирался по нему.
+            ссылки = news_media.links_for(con, uids)
+            for it in items:
+                настоящая = ссылки.get(it["uid"])
+                if настоящая:
+                    it["url"] = настоящая
+                    it["domain"] = news_media.domain_of(настоящая) or it["domain"]
+            logos = news_media.logos_for(
+                con, sorted({it["domain"] for it in items if it["domain"]}))
+        except Exception as e:
+            # print, а не логгер: в serve.py логгера нет, а глотать молча
+            # нельзя — «у половины ленты пропали картинки» иначе выглядит как
+            # «данных нет», а не как поломка.
+            print(f"[лента] картинки: {str(e)[:140]}", file=sys.stderr)
+            media, logos = {}, {}
+
+        try:
+            news_i18n.ensure_schema(con)
+            # 🔴 Только кэш. Перевод наружу отсюда УБРАН.
+            #
+            # Замер 10.09.2026 по ленте #APPLE: выборка новостей 5 мс, теги
+            # 3 мс, картинки и логотипы по 0 мс — и 6297 мс на перевод. Лента
+            # открывалась шесть секунд и всё это время показывала «…». Человек
+            # ждал не новости, а переводчик.
+            #
+            # Непереведённое добирает /api/pulse/translate отдельным запросом,
+            # уже после того, как список показан. Оригиналы читаются сразу,
+            # переводы подставляются, когда приедут.
+            cached = news_i18n.cached(con, uids, lang)
+        except Exception as e:
+            print(f"[лента] перевод: {str(e)[:140]}", file=sys.stderr)
+            cached = {}
+
+        for it in items:
+            # 🔴 Язык заголовка. Без него витрина не запрашивает перевод
+            # ВООБЩЕ: fillTranslations отбирает пункты условием
+            # `n.lang && n.lang !== lang`, и при отсутствующем поле условие
+            # ложно для всех. Ручка перевода была написана, кэш заполнялся,
+            # запрос не уходил ни разу — заголовки оставались английскими, и
+            # выглядело это как «перевод не работает».
+            it["lang"] = _title_lang(it.get("title") or "")
+            img = media.get(it["uid"])
+            if img:
+                it["image"] = img
+            logo = logos.get(it["domain"] or "")
+            if logo:
+                it["logo"] = logo
+            tr = cached.get(it["uid"])
+            if tr:
+                it["title_local"] = tr
+            # uid остаётся в ответе: витрина по нему просит перевод вторым
+            # запросом. Это внутренний хеш новости, не персональные данные.
+
+    def _handle_pulse_translate(self) -> None:
+        """Перевод заголовков вторым запросом, уже после показа ленты.
+
+        Почему отдельная ручка, а не часть /api/pulse/feed: поход к
+        переводчику занимает около шести секунд на дюжину заголовков, и пока
+        он шёл внутри основного запроса, человек смотрел на «…» вместо
+        новостей. Теперь список приходит за десятки миллисекунд, а переводы
+        подставляются в него, когда приедут.
+
+        Переведённое складывается в кэш, поэтому второй заход по тому же
+        активу наружу уже не ходит.
+        """
+        if not self._lp_require_auth():
+            return
+        params = parse_qs(urlparse(self.path).query)
+        lang = (params.get("lang", ["ru"])[0] or "ru").lower()
+        uids = [u for u in (params.get("uids", [""])[0] or "").split(",") if u][:40]
+        if lang not in news_i18n.SUPPORTED or not uids:
+            self._send_json({})
+            return
+        try:
+            con = sqlite3.connect(str(_SIGNALS_DB), timeout=30)
+            con.execute("PRAGMA busy_timeout=30000")
+            try:
+                news_i18n.ensure_schema(con)
+                готовые = news_i18n.cached(con, uids, lang)
+                q = ",".join("?" * len(uids))
+                строки = con.execute(
+                    f"SELECT uid, title FROM signals WHERE uid IN ({q})", uids).fetchall()
+                todo = [(u, t) for u, t in строки
+                        if u not in готовые and t and news_i18n.detect(t) != lang]
+                if todo:
+                    готовые.update(news_i18n.translate_missing(con, todo, lang))
+            finally:
+                con.close()
+            self._send_json(готовые)
+        except Exception as e:
+            print(f"[перевод] {str(e)[:140]}", file=sys.stderr)
+            self._send_json({})
+
     def _handle_pulse_feed(self) -> None:
-        """Фаза 4: лента упоминаний по тикеру (тап на карточку) — за регистрацией,
-        консистентно с /api/chart/event-reaction (см. _lp_require_auth)."""
+        """Лента упоминаний по тикеру (тап на карточку в Эпицентре).
+
+        За регистрацией, консистентно с /api/chart/event-reaction.
+
+        Отдаёт не только заголовок и ссылку, но и то, из чего собирается
+        карточка: `image` (фото статьи или наш скриншот твита), `logo`
+        (логотип издания, когда фотографии нет и не будет) и `title_local` —
+        машинный перевод на язык интерфейса.
+
+        🔴 Перевод отдаётся ОТДЕЛЬНЫМ полем, оригинал остаётся в `title`.
+        Подменять чужой заголовок машинным переводом молча нельзя: читатель
+        должен видеть, что именно написало издание, — особенно когда речь
+        о цифрах и о том, кто что заявил. Витрина показывает перевод крупно,
+        оригинал под ним мелким шрифтом.
+        """
         if not self._lp_require_auth():
             return
         params = parse_qs(urlparse(self.path).query)
@@ -1740,51 +3732,101 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         if not symbol:
             self._send_json({"error": "symbol required"}, 400)
             return
+        lang = (params.get("lang", ["ru"])[0] or "ru").lower()
+        if lang not in news_i18n.SUPPORTED:
+            lang = "ru"
+        # 🔴 Один актив, два имени. Разметка по словарю пишет имя каталога
+        # («#NVIDIA»), кештеги из X приходят тикером («NVDA»). Собираем оба,
+        # иначе по нажатию на «#NVIDIA» лента теряет все посты из соцсетей, а
+        # по нажатию на «NVDA» — все новости из разметки.
+        имена = symbol_alias.names_for(symbol)
+        канон = symbol_alias.canon(symbol)
         try:
-            con = sqlite3.connect(str(_SIGNALS_DB))
+            con = sqlite3.connect(str(_SIGNALS_DB), timeout=30)
+            con.execute("PRAGMA busy_timeout=30000")
             con.row_factory = sqlite3.Row
             cutoff_iso = (datetime.now(timezone.utc) - timedelta(days=14)).isoformat()
             rows = con.execute(
-                """SELECT source, title, text, url, topic_hint, cashtags, last_seen
+                """SELECT uid, source, title, text, url, topic_hint, author, cashtags,
+                          raw, last_seen
                    FROM signals WHERE last_seen >= ? ORDER BY last_seen DESC LIMIT 800""",
                 (cutoff_iso,),
             ).fetchall()
             items = []
+            seen_uids = set()
             for r in rows:
                 try:
                     tags = json.loads(r["cashtags"] or "[]")
                 except (ValueError, TypeError):
                     tags = []
-                if symbol not in tags:
+                if канон not in {symbol_alias.canon(t) for t in tags}:
                     continue
                 try:
                     ts = int(datetime.fromisoformat(r["last_seen"]).timestamp())
                 except (ValueError, TypeError):
                     continue
+                seen_uids.add(r["uid"])
+                # 🔴 У поста из X и Telegram нет заголовка — есть текст и
+                # автор. Раньше в подпись шёл topic_hint, а у сборщика твитов
+                # это ПОИСКОВЫЙ ЗАПРОС: в ленте появлялись карточки с
+                # подписью «(CPI OR inflation OR "rate hike") min_faves:500».
+                # Выглядит как поломка сайта, потому что это она и есть.
+                соцсеть = (r["source"] or "") in ("twitter", "telegram")
+                подпись = (("@" + r["author"]) if соцсеть and r["author"]
+                           else (r["topic_hint"] if not соцсеть else r["source"]))
                 items.append({
+                    "uid": r["uid"],
                     "title": r["title"] or (r["text"] or "")[:140],
-                    "url": r["url"], "source": r["source"] or r["topic_hint"], "ts": ts,
+                    "url": r["url"], "source": подпись,
+                    "kind": "post" if соцсеть else "news",
+                    "domain": _raw_domain(r["raw"]), "ts": ts,
                 })
             # + RSS-заголовки с тегом инструмента (Фаза 3), релевантно для индексов
             try:
                 news_rows = con.execute(
-                    """SELECT s.title, s.url, s.topic_hint AS source, s.raw, s.first_seen
+                    f"""SELECT s.uid, s.title, s.text, s.url, s.source AS kind_src,
+                              s.topic_hint, s.author, s.raw, s.first_seen
                        FROM news_instrument_tags t JOIN signals s ON s.uid = t.news_uid
-                       WHERE t.symbol = ?""",
-                    (symbol,),
+                       WHERE t.symbol IN ({','.join('?' * len(имена))})""",
+                    имена,
                 ).fetchall()
                 for r in news_rows:
+                    # Один и тот же материал мог прийти и кештегом, и тегом
+                    # инструмента. Без этой проверки он вставал в ленту дважды.
+                    if r["uid"] in seen_uids:
+                        continue
                     try:
                         ts = float(json.loads(r["raw"] or "{}").get("published") or 0) \
                              or datetime.fromisoformat(r["first_seen"]).timestamp()
                     except (ValueError, TypeError):
                         continue
-                    items.append({"title": r["title"], "url": r["url"], "source": r["source"], "ts": int(ts)})
+                    seen_uids.add(r["uid"])
+                    # 🔴 Та же подмена подписи, что и в ветке кештегов выше.
+                    # Тут я её вчера не поправил: ветки писались в разные дни,
+                    # и карточки с подписью «(NATO OR Kremlin OR Pentagon…)»
+                    # остались на экране. Правка в одной ветке из двух — это
+                    # не правка.
+                    соц = (r["kind_src"] or "") in ("twitter", "telegram")
+                    подпись = (("@" + r["author"]) if соц and r["author"]
+                               else (r["kind_src"] if соц else r["topic_hint"]))
+                    items.append({"uid": r["uid"],
+                                  "title": r["title"] or (r["text"] or "")[:140],
+                                  "url": r["url"],
+                                  "source": подпись, "kind": "post" if соц else "news",
+                                  "domain": _raw_domain(r["raw"]), "ts": int(ts)})
             except sqlite3.OperationalError:
                 pass
-            con.close()
+
+            # Поточные заметки об отчётности фондов не показываем. Сборщик их
+            # уже не тегирует (news_burst_job), но в базе остались помеченные
+            # раньше — и за них цепляется лента, пока они не истекут по сроку
+            # хранения. Проверка на выдаче дешёвая и снимает вопрос сразу.
+            items = [i for i in items if not news_junk.is_filing_note(i.get("title"))]
             items.sort(key=lambda x: x["ts"], reverse=True)
-            self._send_json(items[:30])
+            items = self._dedupe_feed(con, items)[:self._FEED_LIMIT]
+            self._decorate_feed(con, items, lang)
+            con.close()
+            self._send_json(items)
         except Exception as e:
             self._send_json({"error": str(e)}, 500)
 
@@ -1797,6 +3839,13 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         if not symbol:
             self._send_json({"error": "symbol required"}, 400)
             return
+        # Ссылка приходит с каноническим именем (LINK), а уровни и зоны
+        # посчитаны под именем брокера (LINKUSD) — см. _canonical_alias_map.
+        symbol = _resolve_chart_symbol(symbol)
+        try:
+            price = float(params.get("price", [""])[0])
+        except (TypeError, ValueError):
+            price = None
         try:
             con = sqlite3.connect(str(_BOT_DB))
             con.row_factory = sqlite3.Row
@@ -1810,7 +3859,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             for it in items:
                 it["score"] = round(it["touches"] * math.log(it["age_days"] + 1), 3)
             items.sort(key=lambda x: x["score"], reverse=True)
-            self._send_json(items[:12])
+            self._send_json(_levels_near_price(items, price))
         except Exception as e:
             self._send_json({"error": str(e)}, 500)
 
@@ -1822,6 +3871,9 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         if not symbol:
             self._send_json({"error": "symbol required"}, 400)
             return
+        # Ссылка приходит с каноническим именем (LINK), а уровни и зоны
+        # посчитаны под именем брокера (LINKUSD) — см. _canonical_alias_map.
+        symbol = _resolve_chart_symbol(symbol)
         try:
             con = sqlite3.connect(str(_BOT_DB))
             con.row_factory = sqlite3.Row
@@ -1855,6 +3907,10 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         if not symbol:
             self._send_json({"error": "symbol required"}, 400)
             return
+        # ⚠️ Здесь перевода имени НЕТ, в отличие от levels/confluence рядом.
+        # day_thermo индексирован символами графика (GOLD, SPX), то есть как
+        # раз каноническими — перевод в имя брокера сломал бы попадание.
+        # Ниже есть свой фолбэк через to_chart_symbol для journal-домена.
         try:
             con = sqlite3.connect(str(_BOT_DB))
             con.row_factory = sqlite3.Row
@@ -1883,6 +3939,12 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                     ev = dict(ev)
                     ev["importance"] = ev.pop("impact")
                     ev["currency"] = _COUNTRY_CURRENCY.get(ev["country"], ev["country"])
+                    # Тот же перевод, что и в /api/chart/events: «Ближайшее
+                    # событие» в шапке графика — тот же самый релиз, и видеть его
+                    # по-английски там, где карточка уже по-русски, странно.
+                    ru = _econ_title_ru(ev.get("indicator"), ev.get("title"), ev.get("country"))
+                    if ru:
+                        ev["title_ru"] = ru
                     ev["event_type"] = normalize_event_type(ev.pop("indicator") or ev["title"])
                     out["next_event"] = ev
             con.close()
@@ -2153,12 +4215,110 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         tf = params.get("tf", [None])[0]
         since_raw = params.get("since", ["0"])[0]
         if not symbol or tf not in _TAIL_YF_INTERVAL:
-            self._send_json({"error": "s and tf (M5/M15/M30/H1/H4/D1/W1) required"}, 400)
+            self._send_json({"error": "s and tf (M1/M5/M15/M30/H1/H4/D1/W1) required"}, 400)
             return
         try:
             since = int(since_raw)
         except ValueError:
             since = 0
+
+        # Ссылка из списка инструментов приходит с каноническим именем (LINK),
+        # а свечи лежат под именем брокера (LINKUSD) — см. _canonical_alias_map.
+        link_name = _canonical_link_name(symbol)
+        symbol = _resolve_chart_symbol(symbol)
+
+        # Скрытые сознательно отвечают отказом с причиной, а не пустым рядом:
+        # пустой график человек читает как поломку сайта, а не как решение.
+        blocked = _blocked_symbols().get(symbol)
+        if blocked:
+            self._send_json({"candles": [], "blocked": True,
+                             "reason": blocked.get("причина", "не показывается")})
+            return
+
+        # ── cTrader: 80 инструментов витрины переведены сюда (01.09.2026) ──
+        # Валюты, металлы, нефть, индексы, крипта. Читается с диска, к брокеру
+        # обработчик не ходит вовсе — ни к cTrader, ни к MT5.
+        ct = _ctrader_tail(symbol, tf)
+
+        # 🔴 Кэш ещё пуст (первое наполнение, пуллер лежит) — уходим на MT5, а
+        # не показываем пустой график.
+        #
+        # Сначала здесь стоял честный feed_down, и это было неверно: первый
+        # проход пуллера идёт по алфавиту около четырёх минут, и всё это время
+        # EURUSD, GOLD и US_500 отдавали пустоту, хотя MT5 рядом отдавал их
+        # прекрасно. Проверено на живом сервере — поймано ровно так.
+        #
+        # Подмена источника здесь безопасна, в отличие от случая 20.08: тогда
+        # хвост ДОПИСЫВАЛСЯ к чужому ряду и рисовал ступеньку на стыке. Мы
+        # отдаём весь ряд целиком из одного источника, и следующая загрузка
+        # страницы просто заменит его целиком же.
+        broker = ct if ct else _mt5_tail(symbol, tf)
+        src = "ctrader" if ct else ("mt5" if broker else None)
+
+        # 🔴 Биржевые свечи — последними, а не первыми. У брокера живы
+        # шестнадцать монет из двадцати одной, и подменять их чужим рядом
+        # незачем: цена в списке инструментов, котировка и график должны
+        # приходить из одного места, иначе на стыке получается ступенька
+        # (семейство бага 20.08). Биржа закрывает ровно то, чего у брокера
+        # нет: SHIBUSD с котировкой 121-дневной давности, BTGUSD, ETHBTC,
+        # MELANIAUSD и PAX_GOLD — по ним баров не было вовсе.
+        if not broker:
+            broker = _crypto_tail(symbol, tf)
+            if broker:
+                src = "exchange"
+
+        if broker:
+            filtered = [c for c in broker if c["time"] > since]
+            last_ts = broker[-1]["time"]
+            delay_sec = max(0, int(time.time() - last_ts))
+            market_open = delay_sec < _TAIL_TF_SEC[tf] * 3
+            # 🔴 live_price — цена ТОГО ЖЕ инструмента, что и свечи.
+            # Фронт до 20.08 брал живую цену из /api/quotes по карте YF, где у
+            # золота стоит GC=F, у серебра SI=F, у нефти CL=F — это ФЬЮЧЕРСЫ, а
+            # ряд идёт из MT5 по СПОТУ. Фьючерс торгуется с базисом: замер
+            # 20.08 — 4546.4 против спота 4492.7, разница 54 пункта. applyLive()
+            # растягивал текущую свечу до фьючерсной цены, и получался одиночный
+            # вертикальный шип. По валютам (EURUSD=X) базиса почти нет — поэтому
+            # ломалось «на некоторых активах», а не на всех.
+            # Последняя свеча MT5 — незакрытая, её close и есть текущая цена.
+            self._send_json({"updated": datetime.now(timezone.utc).isoformat(),
+                             "delay_sec": delay_sec, "market_open": market_open,
+                             # Источник помечаем честно: по нему на странице
+                             # подписано, чьи это котировки, и по нему же
+                             # различаются отказы в логах.
+                             "candles": filtered,
+                             # exchange — свечи с криптобиржи, не от брокера.
+                             # Подписывать их как «mt5» значило бы говорить
+                             # неправду в том самом месте, где страница
+                             # объясняет человеку, чьи это котировки.
+                             "source": src or "mt5",
+                             # Одно имя для ссылки: страница по нему поправит
+                             # адрес, чтобы XAUUSD и GOLD не жили как две
+                             # разные страницы одного графика.
+                             "canonical": link_name,
+                             "live_price": broker[-1]["close"]})
+            return
+
+        # 🔴 Ряд НЕ склеивается из двух источников.
+        #
+        # Симптом, с которым это найдено: свеча EURUSD прыгала вертикально на
+        # ровном месте. Замер 20.08 02:11 — MT5 bid 1.16754, Yahoo close
+        # 1.16795, разница 4.1 пункта, и она держится. Пока мост падал
+        # (973 перезапуска из-за отмонтированного диска), хвост переключался
+        # между двумя фидами каждые 8-20 секунд по TTL кэша, и график рисовал
+        # эту разницу как движение цены. Данные при этом целы — испорчена
+        # именно склейка.
+        #
+        # Yahoo остаётся источником для символов, которых у брокера нет. Но
+        # если внутридневка символа ЖИВЁТ в MT5, а мост сейчас молчит, честный
+        # ответ — пустой хвост: график замирает на последней настоящей свече.
+        # Пауза — правда, скачок на 4 пункта — нет. Фронт видит feed_down и
+        # может сказать об этом словами вместо того, чтобы дорисовывать.
+        if _mt5_tail_supported(symbol, tf):
+            self._send_json({"candles": [], "updated": datetime.now(timezone.utc).isoformat(),
+                             "delay_sec": None, "market_open": None,
+                             "source": "mt5", "feed_down": True})
+            return
 
         ticker = _registry_yahoo_ticker(symbol)
         if not ticker:
@@ -2422,6 +4582,39 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         except Exception as e:
             self._send_json({"error": str(e)}, 500)
 
+    def _handle_chart_smc(self) -> None:
+        """WP3.2 SPEC_alpha_engine_implementation.md: структура рынка
+        (свинги HH/LH/HL/LL, BOS/CHoCH, FVG, OB, пулы ликвидности, sweep) —
+        живой детект через core.smc.detect(), порт SBFGrafik.detectSMC
+        (grafik-engine.js:528-609), сверенный с ним на 200 барах (Core-лог
+        11.08). SBFGrafik.detectSMC остаётся только для образовательной
+        галереи (§3 спеки) — та же развилка, что уже у detectCandles
+        (chart.html:431-432)."""
+        params = parse_qs(urlparse(self.path).query)
+        symbol = params.get("symbol", [None])[0]
+        tf = params.get("tf", ["D1"])[0]
+        if not symbol:
+            self._send_json({"error": "symbol required"}, 400)
+            return
+        try:
+            from_ts = int(params.get("from", [None])[0] or 0)
+            to_ts = int(params.get("to", [None])[0] or int(time.time()) + 365 * 86400)
+        except ValueError:
+            self._send_json({"error": "invalid from/to"}, 400)
+            return
+        try:
+            from pattern_stats_job import _load_candles as _load_ohlc
+            from core.smc import detect as _detect_smc
+            candles = _load_ohlc(symbol, tf)
+            if not candles:
+                self._send_json([])
+                return
+            events = _detect_smc(candles)
+            items = [e for e in events if from_ts <= e["ts"] <= to_ts]
+            self._send_json(items)
+        except Exception as e:
+            self._send_json({"error": str(e)}, 500)
+
     def _handle_chart_pattern_stats(self) -> None:
         """SBF_Charts_Layer2_Spec, Фаза 3: статистика отработки паттерна
         (pattern_stats_job.py, еженедельно). За регистрацией — как event-reaction
@@ -2476,8 +4669,10 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         except Exception as e:
             self._send_json({"error": str(e)}, 500)
 
-    def _redirect(self, location):
-        self.send_response(302)
+    def _redirect(self, location, код: int = 302):
+        # 301 там, где адрес неправильный навсегда (исходники шаблонов по
+        # .html): временный редирект оставил бы дубль в индексе.
+        self.send_response(код)
         self.send_header("Location", location)
         self.end_headers()
 
@@ -2521,6 +4716,11 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 except Exception:
                     pass
             self._send_json(result, 201 if not result.get("duplicate") else 200)
+        except ValueError as e:
+            # Данные клиента не прошли ограничение таблицы — это его ошибка,
+            # а не сбой сервера. 500 здесь врал бы дважды: и про виновника, и
+            # про то, поможет ли повтор запроса.
+            self._send_json({"error": str(e)}, 400)
         except Exception as e:
             self._send_json({"error": str(e)}, 500)
 
@@ -2993,6 +5193,24 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         anon_id = str(body.get("anon_id") or "").strip()[:128]
         if anon_id and result.get("user_id"):
             journal_gamification.migrate_anon_progress(anon_id, result["user_id"])
+        # Источник перехода и лид в CRM (27.08.2026). Здесь опроса ещё нет —
+        # карточка создаётся «тонкой», а ответы к ней добавит
+        # crm_leads.enrich_with_survey(), когда человек дойдёт до опроса.
+        if result.get("user_id"):
+            attrib = body.get("attrib") or {}
+            if attrib:
+                try:
+                    journal_auth.save_attribution(result["user_id"], attrib)
+                except Exception:
+                    pass
+            try:
+                from core import crm_leads
+                crm_leads.create_lead(
+                    email=(body.get("email") or "").strip().lower(),
+                    name=" ".join(x for x in (body.get("first_name"), body.get("last_name")) if x).strip(),
+                    attrib=attrib)
+            except Exception as e:
+                log.error("CRM: лид не создан (обычная регистрация) — %s", e)
         status = 400 if "error" in result else 201
         self._send_json(result, status)
 
@@ -3040,6 +5258,79 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             user["pinned"] = journal_brief.get_pinned(user_id)  # Focus Engine §6
         self._send_json(user or {"error": "not found"})
 
+    def _handle_unsubscribe(self) -> None:
+        """Отписка от рассылки по ссылке из письма — без входа в аккаунт.
+
+        🔴 Требовать вход здесь нельзя. Человек, которому надоели письма, не
+        станет вспоминать пароль — он нажмёт «Спам», и пострадает домен, с
+        которого уходят коды входа. Одно нажатие должно работать.
+        Подпись в ссылке защищает от подстановки чужого id: без неё отписать
+        любого мог бы кто угодно, подобрав идентификатор.
+        """
+        params = parse_qs(urlparse(self.path).query)
+        user_id = (params.get("u", [""])[0] or "").strip()
+        token = (params.get("t", [""])[0] or "").strip()
+        ok = False
+        if user_id and token:
+            import hashlib
+            import hmac as _hmac
+            secret = (journal_auth._SBF_JWT_SECRET or "").encode()
+            expected = _hmac.new(secret, f"unsub:{user_id}".encode(),
+                                 hashlib.sha256).hexdigest()[:32]
+            if _hmac.compare_digest(expected, token):
+                try:
+                    con = sqlite3.connect(str(Path(DIRECTORY).parent / "data" / "journal.db"))
+                    con.execute("UPDATE users SET consent_marketing = 0 WHERE id = ?", (user_id,))
+                    con.commit()
+                    con.close()
+                    ok = True
+                except Exception as e:
+                    print(f"отписка {user_id}: {e}", flush=True)
+        body = ("<h2>Вы отписаны</h2><p>Больше не будем присылать утренний брифинг. "
+                "Вернуть рассылку можно в профиле на платформе.</p>" if ok else
+                "<h2>Ссылка не сработала</h2><p>Возможно, она устарела. "
+                "Отписаться можно в профиле на платформе.</p>")
+        html = ("<!doctype html><meta charset='utf-8'>"
+                "<meta name='viewport' content='width=device-width,initial-scale=1'>"
+                "<body style=\"font-family:-apple-system,Segoe UI,Arial,sans-serif;"
+                "background:#FBF6EF;color:#2B2B33;display:flex;min-height:90vh;"
+                "align-items:center;justify-content:center;text-align:center\">"
+                f"<div style='max-width:420px;padding:20px'>{body}"
+                "<p><a href='/' style='color:#866A19'>На платформу →</a></p></div></body>")
+        self.send_response(200)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.end_headers()
+        self.wfile.write(html.encode("utf-8"))
+
+    def _handle_user_watchlist_news(self) -> None:
+        """Что нового по инструментам, отмеченным звездой.
+
+        Ленту наполняет watchlist_news_job.py; здесь только чтение. Считать её
+        на лету по каждому запросу значило бы гонять соединение JOIN по 20 тыс.
+        тегов на каждое открытие страницы — ровно тот путь, который уже привёл
+        нас к однопоточному серверу в очереди за мостом.
+        """
+        user_id = self._lp_require_auth()
+        if not user_id:
+            return
+        try:
+            limit = min(int(parse_qs(urlparse(self.path).query).get("limit", ["30"])[0]), 100)
+        except ValueError:
+            limit = 30
+        try:
+            con = sqlite3.connect(str(Path(DIRECTORY).parent / "data" / "journal.db"))
+            con.row_factory = sqlite3.Row
+            rows = con.execute(
+                "SELECT symbol, title, url, source, ts, seen FROM watchlist_feed "
+                "WHERE user_id = ? ORDER BY ts DESC LIMIT ?", (user_id, limit)).fetchall()
+            unseen = con.execute(
+                "SELECT COUNT(*) FROM watchlist_feed WHERE user_id = ? AND seen = 0",
+                (user_id,)).fetchone()[0]
+            con.close()
+            self._send_json({"items": [dict(r) for r in rows], "unseen": unseen})
+        except Exception as e:
+            self._send_json({"error": str(e)}, 500)
+
     def _handle_user_watchlist_put(self) -> None:
         """SBF_Charts_Layer4_Spec, Фаза 1.3: PUT — полная замена ватчлиста
         (редактор — чипы+drag, не инкрементальный add/remove, отсюда PUT а не
@@ -3060,7 +5351,10 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         if len(symbols) > 10:
             self._send_json({"error": "max 10 symbols"}, 400)
             return
-        valid = _chart_symbols()
+        # Ватчлист принимает всё, что платформа умеет нарисовать, включая
+        # каталог брокера (ярус 3). Выпадающий СПИСОК при этом остаётся
+        # именованным реестром — см. /api/chart/symbols.
+        valid = _chartable_symbols()
         cleaned = []
         for s in symbols:
             if not isinstance(s, str):
@@ -3108,7 +5402,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self._send_json({"error": "layers must be an object"}, 400)
             return
         if last_symbol is not None:
-            if not isinstance(last_symbol, str) or last_symbol.upper() not in _chart_symbols():
+            if not isinstance(last_symbol, str) or last_symbol.upper() not in _chartable_symbols():
                 self._send_json({"error": "invalid last_symbol"}, 400)
                 return
             last_symbol = last_symbol.upper()
@@ -3178,6 +5472,18 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         result = journal_auth.save_onboarding_answers(user_id, answers)
         path = journal_auth.get_my_path(user_id)
         result["path"] = path
+        # Опрос пройден уже зарегистрированным человеком (пришёл с /register
+        # раньше, а до опроса дошёл позже) — ДОПОЛНЯЕМ его карточку в CRM,
+        # а не заводим вторую. Поиск по почте внутри enrich_with_survey.
+        try:
+            from core import crm_leads
+            prof = journal_auth.get_user(user_id)
+            email = (prof or {}).get("email")
+            if email and answers:
+                crm_leads.enrich_with_survey(email=email, answers=answers,
+                                             pro_until=result.get("pro_until"))
+        except Exception as e:
+            log.error("CRM: карточка не дополнена опросом — %s", e)
         self._send_json(result)
 
     # ── Feedback handlers ────────────────────────────────────────────────────
@@ -3592,61 +5898,9 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             return None
         return user_id
 
-    def _handle_lp_signals(self) -> None:
-        if not self._lp_require_auth():
-            return
-        try:
-            data = json.loads((WEB_DIR / "data" / "signals.json").read_text())
-            self._send_json(data)
-        except Exception:
-            self._send_json({})
 
-    def _handle_lp_buzz(self) -> None:
-        if not self._lp_require_auth():
-            return
-        try:
-            data = json.loads((WEB_DIR / "data" / "buzz.json").read_text())
-            self._send_json(data)
-        except Exception:
-            self._send_json({"tickers": []})
 
-    def _handle_lp_patterns(self) -> None:
-        if not self._lp_require_auth():
-            return
-        from urllib.parse import urlparse, parse_qs
-        qs = parse_qs(urlparse(self.path).query)
-        sym = (qs.get("sym") or ["GOLD"])[0]
-        tf  = (qs.get("tf")  or ["D1"])[0]
-        sym = "".join(c for c in sym if c.isalnum() or c in "-.")[:10]
-        tf  = "".join(c for c in tf if c.isalnum())[:4]
-        try:
-            data = json.loads((WEB_DIR / "data" / f"ohlc_{sym}_{tf}.json").read_text())
-            result = {
-                "candles":  data.get("candles", []),
-                "volume":   data.get("volume", []),
-                "patterns": data.get("patterns", []),
-                "zones":    [{"price": L["price"], "color": L.get("color","#C9A227"), "name": L["name"]}
-                             for L in data.get("levels", [])],
-            }
-            self._send_json(result)
-        except Exception:
-            self._send_json({"candles": [], "patterns": [], "zones": []})
 
-    def _handle_lp_gold_scenarios(self) -> None:
-        if not self._lp_require_auth():
-            return
-        try:
-            data = json.loads((WEB_DIR / "data" / "ohlc_GOLD_D1.json").read_text())
-            # Build scenarios dict: level_name → short scenario description
-            scenarios: dict[str, str] = {}
-            for L in data.get("levels", []):
-                side = "покупка" if L["name"].startswith("S") else "продажа"
-                scenarios[L["name"]] = f"Реакция {side} при тесте {L['price']}"
-            self._send_json(scenarios)
-        except Exception:
-            self._send_json({})
-
-    # ── Survey fast-track registration ─────────────────────────────────────────
 
     def _handle_register_via_survey(self) -> None:
         body = self._read_body_json()
@@ -3687,6 +5941,16 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 journal_auth.save_onboarding_answers(user_id, answers)
             except Exception:
                 pass
+        # Источник перехода (27.08.2026). До этого метки кампаний не доезжали
+        # до регистрации вообще: полей под них здесь не было, и ответить
+        # «из какого ролика пришёл этот человек» было нечем. Ошибка не роняет
+        # регистрацию — аккаунт важнее метки.
+        attrib = body.get("attrib") or {}
+        if attrib:
+            try:
+                journal_auth.save_attribution(user_id, attrib)
+            except Exception:
+                pass
         # Grant PRO regardless (survey completion)
         try:
             pro = journal_auth.grant_survey_pro(user_id)
@@ -3694,6 +5958,17 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             result["pro_until"]   = pro.get("expires_ts")
         except Exception:
             result["pro_granted"] = False
+
+        # Лид в SBFCRM (27.08.2026). Регистрация через опрос — это сразу и
+        # аккаунт, и пройденный опрос, поэтому карточка создаётся уже полной:
+        # источник перехода, ответы, срок PRO. Ошибка CRM не должна отменять
+        # регистрацию — человек важнее записи в чужой системе.
+        try:
+            from core import crm_leads
+            crm_leads.create_lead(email=email, name=name, attrib=attrib,
+                                  answers=answers, pro_until=result.get("pro_until"))
+        except Exception as e:
+            log.error("CRM: лид не создан (регистрация через опрос) — %s", e)
 
         self._send_json(result, 201)
 
@@ -3857,6 +6132,30 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(body)
 
+    # Статика, которую можно и нужно кэшировать. Ключ — расширение, значение —
+    # срок в секундах.
+    #
+    # 🔴 Правило `no-store на всё, кроме /api/` било далеко за пределы своей
+    # цели. Оно писалось про HTML (см. комментарий ниже), но `end_headers`
+    # вызывается и для картинок, и для шрифтов, и для скриптов, поэтому
+    # браузер выбрасывал их сразу и тянул заново на каждой странице.
+    # Замер на мобильном вьюпорте 390px: главная — 5799 КБ и 41 запрос,
+    # график — 5795 КБ, дневник — 5832 КБ, и в каждом случае 5481 КБ из них
+    # это один `logo.png`, скачиваемый заново при каждом переходе.
+    # (Сам логотип тоже починен: был 4000×4000 при показе в 32–44px.)
+    #
+    # Скрипты и стили держим на коротком сроке: у них есть `?v=N` в ссылках,
+    # но соглашение не проверяется автоматически, и забытый бамп версии при
+    # годовом кэше означал бы сломанный сайт у части людей без возможности
+    # это заметить. Пять минут — достаточно, чтобы переход между страницами
+    # не тянул одни и те же 200 КБ, и мало, чтобы правка доехала сама.
+    _STATIC_TTL = {
+        ".png": 604800, ".jpg": 604800, ".jpeg": 604800, ".webp": 604800,
+        ".gif": 604800, ".svg": 604800, ".ico": 604800,
+        ".woff": 2592000, ".woff2": 2592000, ".ttf": 2592000,
+        ".js": 300, ".css": 300, ".mjs": 300,
+    }
+
     def end_headers(self):
         # no-store (не no-cache): без ETag/Last-Modified эти страницы нечем
         # ревалидировать, и no-cache в таком виде на практике вело себя как
@@ -3866,7 +6165,11 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         # навигация/обновление страницы всегда идёт на сервер.
         path = self.path.split("?")[0]
         if not path.startswith("/api/"):
-            self.send_header("Cache-Control", "no-store")
+            ttl = self._STATIC_TTL.get(os.path.splitext(path)[1].lower())
+            if ttl and not path.endswith((".html", ".htm")):
+                self.send_header("Cache-Control", f"public, max-age={ttl}")
+            else:
+                self.send_header("Cache-Control", "no-store")
         super().end_headers()
 
     def log_message(self, fmt, *args):
@@ -3931,7 +6234,25 @@ if __name__ == "__main__":
     _ensure_schema()
     threading.Thread(target=_precompile_all, daemon=True).start()
     threading.Thread(target=_run_calendar_pull, daemon=True).start()
-    socketserver.TCPServer.allow_reuse_address = True
-    with socketserver.TCPServer(("127.0.0.1", PORT), Handler) as httpd:
+    # 🔴 Сервер многопоточный (31.08.2026). Раньше был обычный TCPServer — один
+    # запрос за раз. Любой поход в мост MT5 (1.5-3.4 с на холодный инструмент)
+    # останавливал сайт целиком для всех остальных: замер 6 параллельных
+    # запросов давал 5.3 с, выстроенных в очередь.
+    #
+    # Почему это безопасно именно здесь, а не «вообще»: обработчик создаётся
+    # заново на каждый запрос (своего состояния не делит), соединения к SQLite
+    # везде открываются на вызов, а не хранятся на уровне модуля
+    # (core/journal_*.py::_get_conn, check_same_thread=False + WAL), единственный
+    # общий ресурс — соединение с мостом _mt5_conn, и оно закрыто _mt5_lock.
+    # Кэш свечей держит соединение в threading.local. Файлов обработчики не
+    # пишут — гонок за запись нет.
+    #
+    # daemon_threads: не ждать зависший запрос при остановке юнита, иначе
+    # systemctl restart упирается в таймаут.
+    class _ThreadedServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
+        daemon_threads = True
+        allow_reuse_address = True
+
+    with _ThreadedServer(("127.0.0.1", PORT), Handler) as httpd:
         print(f"Serving {DIRECTORY} on http://127.0.0.1:{PORT}")
         httpd.serve_forever()

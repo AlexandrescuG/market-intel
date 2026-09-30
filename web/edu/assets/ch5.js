@@ -78,6 +78,9 @@ window.Ch5Content = {
       title: "Арифметика неудачного часа",
       bodyIntro: "Трейдер работает днём и торгует поздно вечером и ночью — единственное свободное время, всё честно. Инструмент — золото.\n\nНочью два фактора работают против него одновременно, и оба измеримы. Первый — спред: в тонкой книге он шире дневного (глава 4, режим «Азиатская ночь»); допустим, вместо 0.3 он платит 1.2 — переплата 0.9 пункта на сделку. Второй, и он тяжелее: диапазон. По нашим измерениям средний получасовой бар золота в азиатские часы — это {{night_share}}% от суточного диапазона, а не полноценный час движения — цель набирается не за час, а за половину ночи, либо не набирается вовсе.",
       calcIntro: "Подставь свои числа и увидь свою цифру.",
+      // Подпись только для скринридера: у ползунка часа видимой подписи нет,
+      // её роль играет сама шкала под ним. Ключ в каждом языке, иначе
+      // англичанин и румын услышали бы русское слово.
       tradesLabel: "Сделок в месяц", overpayLabel: "Переплата спреда, пунктов за сделку", targetLabel: "Цель по сделке, пунктов",
       resultLabel: "Пунктов в месяц отдано только за право торговать в неудачный час",
       resultOfLabel: (expected) => `из ожидаемых ${expected}`,
@@ -91,6 +94,9 @@ window.Ch5Content = {
       tableCaption: "Часы бирж и фиксингов проверены по первоисточникам (JPX, LBMA/ICE, NBER); часы CME по золоту сверять перед торговлей на cmegroup.com/trading-hours.",
     },
     globe: {
+      // Подпись только для скринридера: у ползунка часа видимой
+      // подписи нет, её роль играет шкала под ним.
+      hourSliderLabel: "Час (UTC)",
       tag: "ГЛОБУС ЛИКВИДНОСТИ",
       title: "Сколько рынок реально проходит по часам",
       step1Legend: "Это карта суток. Верхняя полоса — двадцать четыре часа по UTC. Три цветные ленты — часы, в которые за столом сидят Азия, Европа и Америка. Столбики внизу — НЕ выдуманная кривая «активности», а измеренный нами средний размер получасового бара в этот час: сколько рынок реально проходит. Данные — наш бэкфилл MT5, {{n_days_label}} по золоту. Двигай ползунок — увидишь, кто за столом и сколько в этот час стоит движение.",
@@ -403,6 +409,7 @@ window.Ch5Content = {
       tableCaption: "Orele burselor și fixing-urilor sunt verificate la sursele primare (JPX, LBMA/ICE, NBER); orele CME pentru aur se verifică înainte de tranzacționare pe cmegroup.com/trading-hours.",
     },
     globe: {
+      hourSliderLabel: "Ora (UTC)",
       tag: "GLOBUL LICHIDITĂȚII",
       title: "Cât parcurge piața cu adevărat, oră de oră",
       step1Legend: "Aceasta e harta zilei. Banda de sus — douăzeci și patru de ore UTC. Trei benzi colorate — orele în care Asia, Europa și America sunt la masă. Barele de jos NU sunt o curbă „de activitate” inventată, ci dimensiunea medie măsurată de noi a barei de 30 de minute în ora respectivă. Date — bekfill-ul nostru MT5, {{n_days_label}} pe aur. Mișcă cursorul — vezi cine e la masă și cât valorează mișcarea în ora respectivă.",
@@ -705,6 +712,7 @@ window.Ch5Content = {
       tableCaption: "Exchange and fixing hours verified against primary sources (JPX, LBMA/ICE, NBER); CME gold hours should be re-checked before trading at cmegroup.com/trading-hours.",
     },
     globe: {
+      hourSliderLabel: "Hour (UTC)",
       tag: "LIQUIDITY GLOBE",
       title: "How far the market actually moves, hour by hour",
       step1Legend: "This is a map of the day. The top bar is 24 hours in UTC. The three coloured bands mark the hours Asia, Europe and America are at the table. The bars below are NOT a made-up \"activity\" curve — they're our own measured median 30-minute bar size for that hour: how far the market actually moves. Data — our MT5 backfill, {{n_days_label}} of gold. Drag the slider — see who's at the table and how much movement that hour is worth.",

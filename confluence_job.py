@@ -19,7 +19,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from sr_levels_job import _load_d1_candles, _atr14, _WEB_DATA
+from sr_levels_job import _load_d1_candles, _atr14, _WEB_DATA, _all_symbols
 import core.price_bars as _price_bars
 
 _BOT_DB = Path("/mnt/sbfdata/sbf-platform/SBFAcademy_bot/bot.db")
@@ -193,7 +193,10 @@ def run(verbose: bool = False) -> int:
     con.commit()
 
     now_ts = int(time.time())
-    symbols = _price_bars.available_symbols("1d")
+    # Тот же список, что у sr_levels_job: реестр плюс всё, по чему есть
+    # дневки в кэше свечей. Зоны строятся поверх уровней, и считать их по
+    # более узкому списку значит оставить половину графиков без слоя.
+    symbols = _all_symbols()
 
     written = 0
     for symbol in symbols:

@@ -76,6 +76,7 @@ def repack_price(verbose=False) -> int:
     fs.register_factor("price.range", "price", "High-Low бара", "points",
                         tf_native="varies", source_job="factor_repack_job.repack_price")
     con = sqlite3.connect(str(_BOT_DB))
+    con.execute("PRAGMA busy_timeout=60000")
     n = 0
     try:
         for pb_sym, tf in con.execute(
@@ -132,6 +133,7 @@ def repack_calendar(verbose=False) -> int:
     fs.register_factor("calendar.importance", "calendar", "impact релиза календаря", "ordinal",
                         source_job="factor_repack_job.repack_calendar")
     con = sqlite3.connect(str(_BOT_DB))
+    con.execute("PRAGMA busy_timeout=60000")
     n = 0
     try:
         rows = con.execute(
@@ -205,10 +207,13 @@ def repack_levels(now_ts: int, verbose=False) -> int:
     """levels: sr_levels (D1-только, см. sr_levels_job) + confluence_zones —
     снэпшот на последний D1-бар, asof_ts=сейчас (момент этого repack-прогона)."""
     fs.register_factor("levels.nearest_touches", "levels", "касания ближайшего S/R уровня",
-                        "count", tf_native="1d", source_job="factor_repack_job.repack_levels")
+                        "count", tf_native="1d", source_job="factor_repack_job.repack_levels",
+                        history=False)
     fs.register_factor("levels.confluence_score", "levels", "максимальный скор зоны внимания",
-                        "score", tf_native="1d", source_job="factor_repack_job.repack_levels")
+                        "score", tf_native="1d", source_job="factor_repack_job.repack_levels",
+                        history=False)
     con = sqlite3.connect(str(_BOT_DB))
+    con.execute("PRAGMA busy_timeout=60000")
     n = 0
     try:
         for canonical in _price_bars.available_symbols("1d"):
@@ -249,6 +254,7 @@ def repack_pattern(now_ts: int, verbose=False) -> int:
     """pattern: pattern_stats.agree_share_5 — снэпшот на последний бар ТФ,
     один factor_key на pattern_key (напр. pattern.bearish_engulfing.agree5)."""
     con = sqlite3.connect(str(_BOT_DB))
+    con.execute("PRAGMA busy_timeout=60000")
     n = 0
     try:
         rows = con.execute(
@@ -269,7 +275,8 @@ def repack_pattern(now_ts: int, verbose=False) -> int:
             fkey = f"pattern.{pattern_key}.agree5"
             if fkey not in seen_keys:
                 fs.register_factor(fkey, "pattern", f"согласованность {pattern_key} через 5 баров",
-                                    "share", tf_native=tf, source_job="factor_repack_job.repack_pattern")
+                                    "share", tf_native=tf, source_job="factor_repack_job.repack_pattern",
+                                    history=False)
                 seen_keys.add(fkey)
             batch.append({"symbol": pb_sym, "tf": pb_tf, "ts": last_ts,
                           "factor_key": fkey, "value": float(agree5), "asof_ts": now_ts})
@@ -285,10 +292,13 @@ def repack_vol(now_ts: int, verbose=False) -> int:
     """vol: hourly_vol_profile (типичный диапазон в ЭТОТ час суток) +
     day_thermo.range_pctl/dvol_pctl — снэпшот на последний бар."""
     fs.register_factor("vol.hourly_avg_range", "vol", "типичный диапазон этого часа (90д)",
-                        "points", tf_native="30m", source_job="factor_repack_job.repack_vol")
+                        "points", tf_native="30m", source_job="factor_repack_job.repack_vol",
+                        history=False)
     fs.register_factor("vol.day_range_pctl", "vol", "перцентиль дневного диапазона", "pct",
-                        tf_native="1d", source_job="factor_repack_job.repack_vol")
+                        tf_native="1d", source_job="factor_repack_job.repack_vol",
+                        history=False)
     con = sqlite3.connect(str(_BOT_DB))
+    con.execute("PRAGMA busy_timeout=60000")
     n = 0
     try:
         for canonical in _price_bars.available_symbols("30m"):
@@ -329,8 +339,10 @@ def repack_event_reaction(now_ts: int, verbose=False) -> int:
     целом, не конкретного internal бара)."""
     fs.register_factor("event_reaction.baseline_ratio_30m", "event-reaction",
                         "во сколько раз реакция на событие превышает фон часа", "ratio",
-                        source_job="factor_repack_job.repack_event_reaction")
+                        source_job="factor_repack_job.repack_event_reaction",
+                        history=False)
     con = sqlite3.connect(str(_BOT_DB))
+    con.execute("PRAGMA busy_timeout=60000")
     n = 0
     try:
         rows = con.execute(
@@ -359,8 +371,10 @@ def repack_sentiment(now_ts: int, verbose=False) -> int:
     Покрытие сейчас тонкое (только BTC на момент внедрения WP1.5) — честно
     репакуется что есть, не выдумывается для остальных."""
     fs.register_factor("sentiment.score", "sentiment", "почасовой bull/bear score толпы",
-                        "score", tf_native="1h", source_job="factor_repack_job.repack_sentiment")
+                        "score", tf_native="1h", source_job="factor_repack_job.repack_sentiment",
+                        history=False)
     con = sqlite3.connect(str(_BOT_DB))
+    con.execute("PRAGMA busy_timeout=60000")
     n = 0
     try:
         rows = con.execute(
@@ -393,10 +407,12 @@ def repack_news(now_ts: int, verbose=False) -> int:
     news_bursts сейчас пуста (0 строк на момент внедрения) — честно, репак
     отдаёт 0 без выдумки."""
     fs.register_factor("news.pulse_score", "news", "интенсивность упоминаний cashtag", "score",
-                        source_job="factor_repack_job.repack_news")
+                        source_job="factor_repack_job.repack_news",
+                        history=False)
     registry = _load_registry()
     known_pb_syms = {entry.get("price_bars", k) for k, entry in registry.items() if isinstance(entry, dict)}
     con_sig = sqlite3.connect(str(_SIGNALS_DB))
+    con_sig.execute("PRAGMA busy_timeout=60000")
     n = 0
     try:
         rows = con_sig.execute(

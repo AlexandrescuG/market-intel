@@ -2244,7 +2244,7 @@
   function _showXpToast(msg) {
     var toast = document.createElement('div');
     toast.style.cssText = 'position:fixed;top:80px;right:20px;z-index:9000;' +
-      'background:var(--gold);color:#fff;padding:10px 18px;border-radius:10px;' +
+      'background:var(--gold);color:var(--ink,#2B2B33);padding:10px 18px;border-radius:10px;' +
       'font-weight:700;font-size:13px;box-shadow:0 4px 16px rgba(0,0,0,.2);' +
       'animation:fadeOut 2.5s forwards';
     toast.textContent = msg;

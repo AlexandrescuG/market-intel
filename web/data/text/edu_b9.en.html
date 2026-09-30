@@ -1,0 +1,107 @@
+<h2>OVERBOUGHT — MEANS IT'LL FALL?</h2>
+<p>RSI above 70. The right side of the chart is hidden. What happens next?</p>
+<p>In this case (GOLD, {{caseDate}}, RSI {{caseRsi}}): 10 bars later price {{caseDirWord}}, from {{caseFrom}} to {{caseTo}}. Across all {{n}} RSI&gt;70 cases: a reversal happens {{share}}% of the time (base rate without the condition — {{base}}%) — no edge.</p>
+<p>Next: why «overbought» can hold for weeks, and what to do about it when it does.</p>
+<h2>ANTI-MYTH</h2>
+<h2>«A good report means the stock rises. A bad one, it falls.»</h2>
+<p>Disproved by the same mechanism as chapter 6: what trades isn't the level, it's the distance to expectation. But here a second layer gets added that doesn't exist in macro data: a company's report contains not just the past, but the future. Guidance — the company's own forecast for the next quarter — often weighs more than the fact for the quarter just closed, because the fact is already half-known to the market from related data, while guidance isn't.</p>
+<p>The opposite edge: «earnings are a lottery, you can't trade through them». That's wrong too, but differently: it isn't a lottery — it's an event with a known date and an unknown outcome, exactly what chapter 6 taught. The rule is the same: the calendar tells you when and roughly how much, but never which way.</p>
+<h2>SBF VOICE</h2>
+<p>In hindsight, every earnings report and every divergence looks predictable: we look at the reversal and find the signal that &quot;explained&quot; it. There's one real test — write the call down before the event, not after. Without a recorded forecast, accuracy is indistinguishable from chance, while hindsight confidence is almost always near-perfect — and those are two different numbers.</p>
+<h2>THE PRICE OF NOT KNOWING</h2>
+<h2>Analysis without feedback</h2>
+<p>Someone studies earnings reports on historical charts. They open up ten cases, see an «obvious» picture in each one, derive a rule, and start trading. The very first real reports go against the rule, and they conclude that «the market changed» or that they «need more experience».</p><p>Let's work out what this actually costs, without guessing at the outcome: the cost isn't in losses on individual trades — it's in lost learning time. Someone studying the market in hindsight gets no feedback at all — every retrospective confirms they were right. They can spend a whole year like this and get nowhere, because the learning mechanism never engages: there's no moment where reality pushes back.</p><p>The honest second half: studying history is useful — but only as a way to understand the mechanics, not as a way to measure yourself. You can only measure yourself going forward, and it costs one line, written down before the event.</p>
+<h2>HOW TO READ AN EARNINGS REPORT</h2>
+<h2>Revenue</h2>
+<p>Total sales for the period. What matters isn't the absolute number but year-over-year growth and how it stacks up against analyst consensus.</p>
+<h2>EPS (earnings per share)</h2>
+<p>Net income divided by share count. Often published in two forms — GAAP (standard accounting) and adjusted — and the market usually trades the adjusted figure against consensus.</p>
+<h2>Operating margin</h2>
+<p>The share of revenue left after operating expenses. Shows whether producing the same volume of sales is getting more or less expensive for the company.</p>
+<h2>Segmentation</h2>
+<p>The breakdown of revenue/profit by business line or region. This, not the headline number, is often where the reason for a move actually sits — say, one segment slowing while total revenue grows.</p>
+<h2>Guidance</h2>
+<p>The company's own forecast for the next period. The only forward-looking part of the report — and often the most important one for price.</p>
+<h2>What the market already knows before publication</h2>
+<p>A report is rarely a complete surprise: some of the data leaks out through industry statistics, supplier and customer reports, and preliminary estimates. By the time of publication, analyst consensus isn't a guess — it's an aggregated estimate from people who follow the company professionally. That's why the surprise is usually small, and what actually drives the move is the detail: guidance, segment margin, management's comments on the call.</p>
+<h2>WHY STOCKS FALL ON A GOOD REPORT</h2>
+<h2>The expectation is already in the price</h2>
+<p>The same mechanism as chapter 6. If the market spent a week pricing in a strong report, the buyers ran out before publication.</p>
+<h2>Guidance matters more than the fact</h2>
+<p>The fact is the past, guidance is the future, and the company gets valued on the future. Hence the «beat every line and still fell» configuration: the past confirmed expectations, the future undercut them.</p>
+<h2>A reaction to the reaction</h2>
+<p>The first move often reverses over the course of the day: orders fire, positions built ahead of the event get closed out, people who were waiting for a price step in. The first candle after publication isn't the market's conclusion — it's its first reply.</p>
+<p>What we're NOT claiming. That guidance «matters more» systematically. The three cases below show three different mechanisms; how often each one wins — we haven't measured, and until we have, we won't say.</p>
+<h2>HINDSIGHT BIAS</h2>
+<p>A short exercise is coming up. It'll take a minute and will show you one thing about how memory works when you learn from charts. Answer honestly — only you see the result, it isn't sent anywhere.</p>
+<p>What will price do on the first day after publication?</p>
+<p>Now a different case. This time — with the outcome shown upfront.</p>
+<p>Do you think you would have predicted this if you hadn't seen the outcome?</p>
+<h2>What you just rated is called hindsight bias</h2>
+<p>On the first three cases, where the outcome was hidden, your accuracy was {{user_accuracy}}% at an average confidence of {{user_confidence}}%. On the fourth, where you already knew the answer, you rated your ability to have predicted it at {{user_hindsight}}%.</p><p>The gap between these numbers is exactly why reviewing charts in hindsight barely teaches you anything. Once the outcome is known, it looks like the only possible one, and the alternatives that felt real beforehand stop being remembered.</p><p>This isn't about intelligence, and it isn't fixed by paying closer attention. The only defense that actually works is writing down your expectation beforehand, then reading what you wrote. Not from memory. From the record.</p>
+<p>None of this exercise is sent anywhere — the three numbers above are computed right in this browser tab.</p>
+<p>+35 XP for completing it — for doing the exercise, not for accuracy.</p>
+<h2>The real cases used in this exercise</h2>
+<h2>OSCILLATORS: WHAT THEY ACTUALLY MEASURE</h2>
+<h2>RSI</h2>
+<p>RSI compares the average size of up-moves to the average size of down-moves over the last N bars. That's it. A value of 70 means exactly one thing: the recent rise has been fast relative to recent declines. It doesn't mean «expensive», and it doesn't mean «due for a drop».</p><p>The word «overbought» is misleading here, and that's not a nitpick about terminology: in a strong trend, RSI sits above 70 for weeks, and the whole time it's formally pointing at a reversal that isn't happening. We measured what actually happens after RSI &gt; 70 — below.</p>
+<h2>MACD</h2>
+<p>MACD is the difference between two exponential moving averages — exactly the object you worked with last chapter. Everything said there about fitted parameters applies here too: 12, 26, and 9 aren't derived constants, they're numbers that stuck historically. A line crossover is a statement that the short average has overtaken the long one. Not a prediction.</p>
+<h2>Divergence</h2>
+<p>Divergence is a mismatch between a new price extreme and the absence of one on the oscillator. That's a description of a fact: the momentum of the latest move is weaker than the previous one. What comes next is interpretation, and that's where you need to be careful: the exact same mismatch also shows up in the middle of a strong trend, where nothing reverses at all.</p><p>And the key part — divergences are mostly visible in hindsight. On a finished chart they're easy to find, because the eye looks for them right next to a reversal that already happened. That's exactly the effect you just measured on yourself.</p>
+<h2>&quot;OUR OWN MEASUREMENTS&quot; — WHAT HAPPENS AFTERWARD</h2>
+<p>The claims «a pullback is likely after RSI above 70» and «divergence signals a reversal» are testable. We tested them on our own history, across instruments and timeframes.</p>
+<h2>A method fixed before the count</h2>
+<p>For RSI: every case of crossing the 70 threshold from below; what price did 5, 10, and 20 bars later; the share of cases where the move went against the prior trend — a «reversal». For divergence: the formal definition (a new price extreme with no new RSI extreme within a 20-bar window), then the same windows. The baseline is the base rate of the same kind of reversal across all bars of the instrument, with no condition at all — not 50%: if an instrument reverses 40% of the time anyway, then 42% after a divergence isn't a finding.</p>
+<h2>1 · RSI above 70 doesn't raise the odds of a pullback</h2>
+<p>The reversal share after RSI &gt; 70 is {{rsi_share}}% versus a baseline of {{rsi_base}}%, at n = {{rsi_n}}. The difference is {{rsi_edge}} percentage points. {{rsi_verdict}}</p>
+<h2>2 · Divergence doesn't raise the odds of a reversal</h2>
+<p>{{div_share}}% versus a baseline of {{div_base}}%, at n = {{div_n}}. The difference is {{div_edge}} percentage points. {{div_verdict}} The headline calling divergence the strongest reversal cue was removed from this chapter right after this calculation.</p>
+<h2>3 · Duration matters more than the threshold</h2>
+<p>The median run of RSI above 70 lasts {{rsi_duration}} bars in a row, but on the daily chart individual runs genuinely stretch to 14-25 bars (that's several weeks) in a strong trend. This number explains why trading «from overbought» blows up accounts in a trend: the condition is usually short, but sometimes it holds for a very long time, and a person enters against it once and waits.</p>
+<p>Statistically indistinguishable from chance — the edge is essentially zero.</p>
+<p>There's a small edge, but it's far from a reliable rule.</p>
+<p>The edge is more noticeable than we expected — but still check it against your own series.</p>
+<h2>The honest plate</h2>
+<p>Measured: formal conditions on our history, without context. Not measured: combination with a level, a calendar event, market phase — exactly what oscillators are usually looked at for in the first place. We tested the condition on its own, because that's exactly how it's sold. The comparison runs against the base reversal rate on the same instrument, not against 50%.</p>
+<h2>THREE CASES — THREE MECHANISMS</h2>
+<p>Three cases are three cases. We showed them so you'd see there are several mechanisms and they're different. How often each one wins — we haven't counted, and so we don't claim. If we start counting, we'll publish it, like everything else in this course.</p>
+<p>Which way do you think the stock moved after this report?</p>
+<p>When guidance and a leading metric decide it</p>
+<p>February 2022. Meta reported roughly in line with expectations but showed the first-ever quarterly decline in daily active users in the company's history — and gave next-quarter guidance below what the market was pricing in.</p>
+<p>Reaction: −26.4% in a single session, the largest one-day market-cap loss in US market history at the time. No single fact on its own was a catastrophe — the coincidence of weak guidance and a weak leading metric mattered more than either one alone.</p>
+<p>When neither the fact nor guidance decides it — management's commentary does</p>
+<p>April 2024. Tesla missed on both earnings per share and revenue — the year-over-year revenue decline was the largest since 2012. By the logic of the first two mechanisms, the stock should have fallen.</p>
+<p>It rose: on the investor call, Musk announced an earlier-than-expected launch of affordable models. Neither the fact nor formal guidance changed — a verbal statement decided it.</p>
+<p>When the growth rate of a key metric decides it, not the fact itself</p>
+<p>January 2026. Microsoft beat consensus on both earnings and revenue.</p>
+<p>The stock fell 7%. The reason: growth in the Azure cloud business slowed slightly from the prior quarter against a backdrop of sharply rising AI infrastructure capital spending. The company didn't miss a single published number — the market reacted to the deceleration in growth rate and to what rising spending means for future quarters' margins.</p>
+<h2>RUNG 4 — THREE ALERTS AND THREE WRITTEN FORECASTS</h2>
+<p>You just measured on yourself how convincingly memory explains an outcome that's already known. Now the uncomfortable consequence: everything we can show you in this chapter is the past. Any example of ours, any breakdown, any pretty divergence on our chart — it's something that's already over.</p><p>This chapter can't be checked in hindsight, and it isn't because we're short on data. It can't be checked in principle: the mechanism it describes fires at the exact moment of the check. The only way is to write down the expectation before the fact, then read what you wrote.</p>
+<h2>What to do</h2>
+<p>Pick three companies, set alerts for their report dates in your terminal's calendar, and before publication, write one line in your journal for each — what the market expects (the consensus) and what you think price will do.</p><p>In three weeks you'll have three entries and one number: how often you were wrong, and which way you're biased. That number becomes the entry point for chapter 10.</p>
+<h2>If you put off the demo back in chapter 7</h2>
+<p>That's fine — the course reads just as well without it. This chapter's assignment works on paper too: write down three companies, their report dates, and your forecast in any notebook. The mechanism works identically; there's no difference for the learning itself.</p><p>The difference shows up in chapter 10: there we show you your own personal statistics, and those can only be built from journal entries. If you decide to — here's the door. If not — we continue, and we won't bring this up again.</p>
+<p>The card with alerts and linking forecasts to your journal is being prepared separately, alongside the rest of the ladder infrastructure — this chapter is published without it so the content doesn't wait on the commercial layer. The assignment above can be done right now, by hand.</p>
+<p>A company beat forecast on revenue and earnings, and the stock fell. The most likely explanation, from what we covered?</p>
+<p>Guidance below expectations, or the expectation was already in the price</p>
+<p>Correct. The same mechanism as this whole chapter.</p>
+<p>Not quite. The breakdown above shows: most often it's guidance, or a strong report that was already priced in ahead of time.</p>
+<p>RSI has stayed above 70 for three weeks. What does that mean?</p>
+<p>The rise has been fast relative to declines — and is continuing; the condition can hold indefinitely</p>
+<p>Correct. We measured runs as long as 25 bars in a row on the daily chart during a strong trend.</p>
+<p>Not quite. RSI&gt;70 isn't a reversal timer; in a strong trend it can hold for weeks.</p>
+<p>The difference between two exponential moving averages — the same object as last chapter</p>
+<p>Correct — chapter 8. Everything said there about fitted periods applies to MACD's 12/26/9 too.</p>
+<p>Not quite. MACD is built from two EMAs — chapter 8 already showed fitted periods don't transfer to the future.</p>
+<p>What moves price when data gets published?</p>
+<p>The gap between the value and the expectation</p>
+<p>Not quite. What moves it is the gap to expectation (the surprise), not the number itself (chapter 6).</p>
+<h2>PREDICTION OF THE WEEK</h2>
+<p>Do you think a reversal happens more often after a divergence than without one?</p>
+<p>Per our data: reversal after a divergence — {{div_share}}%, base rate with no condition at all — {{div_base}}%, at n = {{div_n}}. The difference is essentially zero.</p>
+<p>+15 XP for participating. About a measurable quantity, not price.</p>
+<h2>CLIFFHANGER → CHAPTER 10</h2>
+<p>You wrote down three forecasts. In three weeks you'll have something almost no one who's been trading for a year or two has: three honest measurements of yourself.</p><p>The next episode is about what to do with those measurements. It's about psychology, but not in the «control your emotions» genre — advice like that is useless for the exact reason that emotions are emotions. It's about what typical mistakes look like in numbers: which hours a person enters most often, what makes them raise their risk, how much time passes between a loss and the next trade.</p><p>And a separate warning: in the next chapter we offer nothing and lead you nowhere. Not a single link. There we break down your own mistakes, and any offer in that spot would look exactly like we were profiting from them.</p>
+<h2>CHAPTER SOURCES</h2>
+<p>SBF Company SRL. Testing whether RSI above 70 and divergence raise the odds of a reversal. Data: 16 instruments, H1/H4/D1 timeframes, {{n_cells}} instrument×timeframe combinations. Method: the reversal share after the condition versus the baseline share on the same instrument with no condition; RSI period {{rsi_period}}, divergence window {{div_window}} bars. Recomputed as of {{built}}.</p>

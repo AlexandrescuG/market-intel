@@ -25,7 +25,11 @@ symbol здесь — ИМЯ В ПРОСТРАНСТВЕ price_bars (XAUUSD, н�
 from __future__ import annotations
 
 import sqlite3
+import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from core import db_migrations as _migrations
 
 _BOT_DB = Path("/mnt/sbfdata/sbf-platform/SBFAcademy_bot/bot.db")
 
@@ -35,7 +39,8 @@ _SCHEMA = """
     CREATE TABLE IF NOT EXISTS factor_registry (
       factor_key TEXT PRIMARY KEY, family TEXT, description TEXT, unit TEXT,
       tf_native TEXT, publish_lag INTEGER, source_job TEXT,
-      status TEXT DEFAULT 'experimental', retired_ts INTEGER, retired_reason TEXT
+      status TEXT DEFAULT 'experimental', retired_ts INTEGER, retired_reason TEXT,
+      history INTEGER DEFAULT 1
     );
     CREATE TABLE IF NOT EXISTS factor_values (
       symbol TEXT, tf TEXT, ts INTEGER, factor_key TEXT, value REAL,
@@ -51,31 +56,62 @@ def _connect() -> sqlite3.Connection:
     con.execute("PRAGMA journal_mode=WAL")
     con.execute("PRAGMA busy_timeout=10000")
     con.executescript(_SCHEMA)
+    _migrations.apply_all(con)  # factor_registry.history (WP2, §4 ревью 12.08) — таблица
+    # могла быть создана ДО появления этой колонки в _SCHEMA выше (CREATE TABLE IF NOT
+    # EXISTS не трогает уже существующую таблицу).
     return con
 
 
 def register_factor(factor_key: str, family: str, description: str = "", unit: str = "",
                      tf_native: str | None = None, publish_lag: int = 0,
-                     source_job: str = "", status: str = "experimental") -> None:
+                     source_job: str = "", status: str = "experimental",
+                     history: bool = True) -> None:
     """Идемпотентная регистрация/обновление метаданных фактора в factor_registry.
     Не обязательна перед put() (таблицы независимы, без FK), но без записи
     здесь фактор не виден в каталоге -- вызывать при первом переупаковывании
-    семейства (WP1.5), не при каждой записи значения."""
+    семейства (WP1.5), не при каждой записи значения.
+
+    history=False — 🔴 ревью §4 (12.08): для 6 "снэпшот"-семейств
+    (levels/pattern/vol/event-reaction/sentiment/news, категория B в
+    docstring `factor_repack_job.py`) каждая запись пишется с
+    asof_ts=момент repack-прогона, а не с честным моментом по бару —
+    исходные таблицы (sr_levels, pattern_stats, ...) не хранят историю
+    задним числом, так что per-ts исторических ревизий у этих факторов
+    физически нет, только "как это выглядит сейчас". history=False
+    помечает это в реестре, чтобы бэктест не мог молча принять снэпшот
+    за честный временной ряд (см. `snapshot_for_backtest`)."""
     con = _connect()
     try:
         con.execute(
             """INSERT INTO factor_registry (factor_key, family, description, unit,
-                                             tf_native, publish_lag, source_job, status)
-               VALUES (?,?,?,?,?,?,?,?)
+                                             tf_native, publish_lag, source_job, status, history)
+               VALUES (?,?,?,?,?,?,?,?,?)
                ON CONFLICT(factor_key) DO UPDATE SET
                  family=excluded.family, description=excluded.description,
                  unit=excluded.unit, tf_native=excluded.tf_native,
-                 publish_lag=excluded.publish_lag, source_job=excluded.source_job""",
-            (factor_key, family, description, unit, tf_native, publish_lag, source_job, status),
+                 publish_lag=excluded.publish_lag, source_job=excluded.source_job,
+                 history=excluded.history""",
+            (factor_key, family, description, unit, tf_native, publish_lag, source_job, status,
+             1 if history else 0),
         )
         con.commit()
     finally:
         con.close()
+
+
+def factor_keys_without_history(con: sqlite3.Connection | None = None) -> set[str]:
+    """{factor_key} тех факторов, у кого history=0 в реестре — снэпшот-семейства
+    WP1.5 категории B (см. `register_factor`). Нужен вызывающему коду
+    бэктеста, чтобы явно решить, допускать их или нет (см.
+    `snapshot_for_backtest`)."""
+    owns_con = con is None
+    con = con or _connect()
+    try:
+        rows = con.execute("SELECT factor_key FROM factor_registry WHERE history=0").fetchall()
+        return {r[0] for r in rows}
+    finally:
+        if owns_con:
+            con.close()
 
 
 def _next_rev(con: sqlite3.Connection, symbol: str, tf: str, ts: int, factor_key: str) -> int:
@@ -136,7 +172,18 @@ def snapshot(symbol: str, tf: str, ts: int, as_of: int | None = None) -> dict[st
     фактора. as_of=None — без ограничения по asof_ts (берёт самую свежую
     ревизию как есть, для live-использования). as_of=T — правило 2: НЕ
     возвращает ни одного значения с asof_ts>T (защита от lookahead в
-    бэктесте, тестируется на подложенных данных в Acceptance WP1)."""
+    бэктесте, тестируется на подложенных данных в Acceptance WP1).
+
+    🔴 14.08 (ревью, п.5): as_of не None семантически ВСЕГДА означает
+    исторический/бэктест-вызов (live-код передаёт as_of=None) -- поэтому
+    фильтр non-history факторов (снэпшот-семейства WP1.5 категории B,
+    `factor_keys_without_history()`) стоит ЗДЕСЬ, а не только в
+    `snapshot_for_backtest()`. Раньше защита была ТОЛЬКО в обёртке — любой
+    код, вызвавший голый `snapshot(as_of=T)` напрямую (например, забыв про
+    существование `_for_backtest`), получал их без предупреждения. Сейчас
+    оба пути защищены одинаково; `snapshot_for_backtest()` остаётся ради
+    обязательного (не Optional) as_of в сигнатуре — так вызывающий код,
+    случайно забывший as_of, ловит TypeError, а не тихий live-режим."""
     con = _connect()
     try:
         if as_of is None:
@@ -145,12 +192,23 @@ def snapshot(symbol: str, tf: str, ts: int, as_of: int | None = None) -> dict[st
                 "WHERE symbol=? AND tf=? AND ts=? GROUP BY factor_key",
                 (symbol, tf, ts),
             ).fetchall()
-        else:
-            rows = con.execute(
-                "SELECT factor_key, value, MAX(rev) FROM factor_values "
-                "WHERE symbol=? AND tf=? AND ts=? AND asof_ts<=? GROUP BY factor_key",
-                (symbol, tf, ts, as_of),
-            ).fetchall()
-        return {fk: v for fk, v, _ in rows}
+            return {fk: v for fk, v, _ in rows}
+        rows = con.execute(
+            "SELECT factor_key, value, MAX(rev) FROM factor_values "
+            "WHERE symbol=? AND tf=? AND ts=? AND asof_ts<=? GROUP BY factor_key",
+            (symbol, tf, ts, as_of),
+        ).fetchall()
     finally:
         con.close()
+    no_history = factor_keys_without_history()
+    return {fk: v for fk, v, _ in rows if fk not in no_history}
+
+
+def snapshot_for_backtest(symbol: str, tf: str, ts: int, as_of: int) -> dict[str, float]:
+    """Обёртка над `snapshot()` с ОБЯЗАТЕЛЬНЫМ (не Optional) as_of — бэктест-
+    код, забывший его передать, получает TypeError на вызове, а не тихий
+    live-режим (`snapshot(as_of=None)`). Сама фильтрация non-history
+    факторов теперь встроена в `snapshot()` при любом as_of не None (см. её
+    докстринг) — эта функция больше не единственная линия защиты, только
+    более строгий контракт вызова для бэктест-кода."""
+    return snapshot(symbol, tf, ts, as_of=as_of)

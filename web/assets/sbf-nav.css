@@ -17,7 +17,7 @@
   font-family: 'Montserrat', system-ui, sans-serif;
   font-size: 13px;
   font-weight: 600;
-  color: var(--muted, #7C7563);
+  color: var(--muted,#716A5A);
   text-decoration: none;
   padding: 6px 11px;
   border-radius: 7px;
@@ -33,12 +33,16 @@
 }
 
 .g-nav-item.active {
-  color: var(--gold, #C9A227);
+  /* Брендовое золото #C9A227 как текст даёт 2.41:1 на кремовом фоне шапки —
+     это самый низкий контраст на главной странице, и достаётся он пункту,
+     который обязан читаться лучше остальных. Золото как ЦВЕТ остаётся
+     у подчёркивания и рамок; текст берёт --gold-text. */
+  color: var(--gold-text, #866A19);
   font-weight: 700;
 }
 
 /* ─── Mobile: скрываем desktop-nav ─────────────────────────────────────── */
-@media (max-width: 760px) {
+@media (max-width: 900px) {
   .g-nav { display: none !important; }
   body   { padding-bottom: var(--g-bn-h) !important; }
 }
@@ -57,7 +61,7 @@
   box-shadow: 0 -2px 16px rgba(43,43,51,.07);
 }
 
-@media (max-width: 760px) {
+@media (max-width: 900px) {
   .g-bottom-nav { display: flex; }
 }
 
@@ -69,7 +73,7 @@
   justify-content: center;
   gap: 3px;
   text-decoration: none;
-  color: var(--muted, #7C7563);
+  color: var(--muted,#716A5A);
   padding: 6px 0 8px;
   transition: color .12s;
   -webkit-tap-highlight-color: transparent;

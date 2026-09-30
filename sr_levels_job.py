@@ -35,8 +35,85 @@ def _load_d1_candles(symbol: str):
     """WP1.2 SPEC_alpha_engine_implementation.md: раньше парсил
     ohlc_{symbol}_D1.json напрямую (входом для расчёта был файл-проекция,
     а не price_bars — см. §1.2 спеки, "два несвязанных пространства цен").
-    Теперь price_bars — источник, JSON остаётся только выходом для графика."""
-    return _price_bars.load_candles(symbol, "1d")
+    Теперь price_bars — источник, JSON остаётся только выходом для графика.
+
+    🔴 Второй источник — кэш свечей. price_bars знает 31 инструмент реестра,
+    а на графике их 780: витрина расширилась в августе, а уровни и зоны
+    считались по-прежнему только по реестру. Со стороны это выглядело как
+    «зоны есть не везде» — на золоте и евродолларе слои рисуются, на
+    ITALY_40 и BCHUSD кнопки слоёв просто пропадают.
+
+    Порядок источников намеренный: price_bars первым. У реестра там глубокая
+    история (GOLD — 2707 дневок против 835 в кэше), а уровень тем ценнее, чем
+    дольше цена его помнит.
+    """
+    rows = _price_bars.load_candles(symbol, "1d")
+    if rows:
+        return rows
+    return _candles_from_cache(symbol)
+
+
+def _candles_from_cache(symbol: str):
+    """Свечи из data/candle_cache.db, приведённые к форме price_bars.
+
+    Кэш хранит то, что отдаёт брокер: {time, open, high, low, close}.
+    Остальной джоб работает с {ts, o, h, l, c} — переводим здесь, чтобы
+    расчётная часть не знала о существовании второго источника.
+    """
+    import json as _json
+    import sqlite3 as _sq
+    db = str(Path(__file__).resolve().parent / "data" / "candle_cache.db")
+    try:
+        con = _sq.connect(f"file:{db}?mode=ro", uri=True, timeout=20)
+        con.execute("PRAGMA busy_timeout=20000")
+        try:
+            row = con.execute(
+                "SELECT payload FROM candles WHERE symbol=? AND tf='D1'", (symbol,)
+            ).fetchone()
+        finally:
+            con.close()
+    except Exception:
+        return []
+    if not row:
+        return []
+    try:
+        raw = _json.loads(row[0])
+    except Exception:
+        return []
+    out = []
+    for c in raw:
+        try:
+            out.append({"ts": int(c["time"]), "o": float(c["open"]), "h": float(c["high"]),
+                        "l": float(c["low"]), "c": float(c["close"])})
+        except (KeyError, TypeError, ValueError):
+            continue
+    return out
+
+
+def _all_symbols() -> list:
+    """Реестр плюс всё, по чему есть дневки в кэше свечей.
+
+    Порядок: сначала реестр (по нему считают ещё и бот, и движок — эти строки
+    должны обновиться даже если проход по каталогу упрётся во время), потом
+    остальное по алфавиту.
+    """
+    import sqlite3 as _sq
+    reg = list(_price_bars.available_symbols("1d"))
+    db = str(Path(__file__).resolve().parent / "data" / "candle_cache.db")
+    try:
+        con = _sq.connect(f"file:{db}?mode=ro", uri=True, timeout=20)
+        con.execute("PRAGMA busy_timeout=20000")
+        try:
+            cached = sorted({s for (s,) in con.execute(
+                "SELECT DISTINCT symbol FROM candles WHERE tf='D1'")})
+        finally:
+            con.close()
+    except Exception:
+        # Кэш недоступен — считаем по реестру, как считали раньше. Молча
+        # вернуть пустой список значило бы стереть уровни у всех.
+        return reg
+    seen = set(reg)
+    return reg + [s for s in cached if s not in seen]
 
 
 def _atr14(candles) -> float | None:
@@ -166,7 +243,31 @@ def compute_symbol(symbol: str, now_ts: int, verbose=False):
 
 
 def run(verbose: bool = False) -> int:
-    con = sqlite3.connect(str(_BOT_DB))
+    # 🔴 ЗАДАЧА ДЕРЖАЛА ЗАПИСЬ В bot.db ВСЁ ВРЕМЯ ПРОГОНА И САМА ЖЕ ПАДАЛА.
+    #
+    # Симптом: за неделю (07–14.09.2026) юнит sbf-sr-levels стартовал один
+    # раз и упал с «database is locked» на первом же DELETE. То есть уровни
+    # поддержки и сопротивления на графиках не пересчитывались неделю, и
+    # снаружи это выглядело не поломкой, а просто старыми уровнями.
+    #
+    # Две причины, обе здесь:
+    # 1. connect() без timeout — это 5 секунд ожидания по умолчанию. Любой
+    #    другой писатель в bot.db, занятый дольше пяти секунд, валит прогон
+    #    целиком. Ставим 60 и busy_timeout тем же числом: timeout влияет на
+    #    сам connect, PRAGMA — на дальнейшие операции, одного мало.
+    # 2. Транзакция на весь прогон. sqlite3 открывает её на первом DELETE и
+    #    закрывает единственным commit() в конце, а между ними — расчёт
+    #    уровней по восьмистам символам. Пока идёт счёт, запись в bot.db
+    #    закрыта для всех остальных. Коммит после каждого символа делает
+    #    блокировку короткой и частой вместо одной длинной: соседи ждут
+    #    миллисекунды, а не минуты.
+    #
+    # Частичный результат при обрыве посередине здесь безопасен: набор строк
+    # символа заменяется целиком и независимо от других символов, так что
+    # прерванный прогон оставляет часть символов пересчитанной, а часть — со
+    # старыми уровнями. Это ровно то, что было бы при пропуске запуска.
+    con = sqlite3.connect(str(_BOT_DB), timeout=60)
+    con.execute("PRAGMA busy_timeout=60000")
     con.executescript("""
         CREATE TABLE IF NOT EXISTS sr_levels(
           id INTEGER PRIMARY KEY, symbol TEXT, price REAL, tolerance REAL,
@@ -177,7 +278,7 @@ def run(verbose: bool = False) -> int:
     con.commit()
 
     now_ts = int(time.time())
-    symbols = _price_bars.available_symbols("1d")
+    symbols = _all_symbols()
 
     written = 0
     for symbol in symbols:
@@ -203,6 +304,8 @@ def run(verbose: bool = False) -> int:
                  lv["age_days"], lv["first_ts"], lv["last_touch_ts"], lv["broken"], lv["computed_ts"]),
             )
             written += 1
+        # Коммит на символ, а не на весь прогон: см. комментарий выше.
+        con.commit()
 
     con.commit()
     con.close()

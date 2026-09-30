@@ -2,8 +2,15 @@
 <html lang="{{ lang }}">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>SBF | {% if lang == 'ru' %}Глава 6. Пульс Новостей{% elif lang == 'ro' %}Capitolul 6. Pulsul Știrilor{% else %}Chapter 6. News Pulse{% endif %}</title>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="SBF Intelligence">
+<meta property="og:image" content="https://lp.sbfconsult.com/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://lp.sbfconsult.com/assets/og-image.png">
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
   <style>
@@ -106,7 +113,7 @@ const STRINGS = {
   },
 };
 
-const {C, Mono, Chip, Rule, AskAnalystBtn, getChUrl, QuizBlock, ImpactMatrix, ComplianceFootnote, ColdStart} = window.AcademyShared;
+const {C, Mono, Chip, Rule, AntiMythBlock, RevealSteps, AskAnalystBtn, getChUrl, QuizBlock, ImpactMatrix, ComplianceFootnote, ColdStart, CardTabs} = window.AcademyShared;
 
 const SectionTitle = ({children,sub,align="left",id}) => (
   <div id={id} style={{textAlign:align,marginBottom:36,scrollMarginTop:130}}>
@@ -204,7 +211,7 @@ function buildVars(stats, scene, lang) {
 function ColdStart6Entry({ scene }) {
   const T6 = window.Ch6Content[INITIAL_LANG] || window.Ch6Content.ru;
   const cs = T6.coldStart;
-  if (!scene) return <div style={{background:C.black,padding:"60px 5vw",textAlign:"center"}}><Mono size={11} color={C.gold} spacing={4}>{cs.tag}</Mono></div>;
+  if (!scene) return <div style={{background:C.black,padding:"60px 5vw",textAlign:"center"}}><Mono size={11} color={C.goldText} spacing={4}>{cs.tag}</Mono></div>;
   const meta = scene.meta;
   const candles = (scene.candles || []).map(c => ({ ...c, time: Math.floor(Date.parse(c.time) / 1000) }));
   const markerTime = Math.floor(Date.parse(meta.marker_time) / 1000);
@@ -263,23 +270,24 @@ function IntroBlock({ vars }) {
   const T6 = window.Ch6Content[INITIAL_LANG] || window.Ch6Content.ru;
   return (
     <div style={{marginBottom:48}}>
-      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T6.antiMyth.tag}</Mono>
-      <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px",marginBottom:28}}>
-        <p style={{fontWeight:600,fontSize:14.5,color:C.black,marginBottom:10}}>{T6.antiMyth.title}</p>
-        <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,marginBottom:12}}>{vars ? fillTemplate(T6.antiMyth.body1, vars) : "—"}</p>
-        <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,marginBottom:12}}>{vars ? fillTemplate(T6.antiMyth.body2, vars) : "—"}</p>
-        <p style={{fontSize:13.5,color:C.black,lineHeight:1.7,margin:0,fontWeight:600}}>{T6.antiMyth.body3}</p>
-      </div>
+      <AntiMythBlock lang={INITIAL_LANG} style={{marginBottom:28}}
+        data={{tag: T6.antiMyth.tag, title: T6.antiMyth.title, bodies: [vars ? fillTemplate(T6.antiMyth.body1, vars) : "—", vars ? fillTemplate(T6.antiMyth.body2, vars) : "—", T6.antiMyth.body3]}}/>
 
-      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T6.voiceSbf.tag}</Mono>
+      <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{T6.voiceSbf.tag}</Mono>
       <div style={{borderLeft:`4px solid ${C.gold}`,paddingLeft:24,marginBottom:28}}>
         {T6.voiceSbf.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:16,fontStyle:"italic",color:C.inkMid,lineHeight:1.7,fontFamily:"'DM Serif Display',serif",marginBottom:12}}>{p}</p>)}
       </div>
 
       <div style={{background:C.black,borderRadius:8,padding:"26px 30px",color:C.white}}>
-        <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T6.priceOfNotKnowing.tag}</Mono>
+        <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{T6.priceOfNotKnowing.tag}</Mono>
         <div style={{fontFamily:"'DM Serif Display',serif",fontSize:20,color:C.white,marginBottom:12}}>{T6.priceOfNotKnowing.title}</div>
-        {T6.priceOfNotKnowing.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:13.5,lineHeight:1.75,color:"rgba(255,255,255,0.7)",marginBottom:10}}>{vars ? fillTemplate(p, vars) : p}</p>)}
+        {/* Разбор открывается по шагам — см. комментарий в главе 9.
+            Живые числа подставляются до передачи в компонент: fillTemplate
+            должен отработать на каждом абзаце, иначе читатель увидит
+            {{cost_per_trade}} вместо цифры. */}
+        <RevealSteps lang={INITIAL_LANG} preset="cost" dark
+          bodies={T6.priceOfNotKnowing.body.split("\n\n")
+                    .map(p => vars ? fillTemplate(p, vars) : p)}/>
       </div>
     </div>
   );
@@ -300,16 +308,14 @@ function CalendarExplainer() {
       <div style={{background:C.goldPale,border:`1px solid ${C.borderGold}`,borderRadius:6,padding:"18px 22px",marginBottom:20,textAlign:"center"}}>
         <p style={{fontSize:14,color:C.black,lineHeight:1.65,margin:0,fontWeight:600}}>{cal.surprisePlate}</p>
       </div>
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}} className="g2">
-        <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:6,padding:"18px 22px"}}>
-          <div style={{fontWeight:600,fontSize:13,color:C.black,marginBottom:8}}>{cal.importanceTitle}</div>
-          <p style={{fontSize:12.5,color:C.inkMid,lineHeight:1.65,margin:0}}>{cal.importanceText}</p>
-        </div>
-        <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:6,padding:"18px 22px"}}>
-          <div style={{fontWeight:600,fontSize:13,color:C.black,marginBottom:8}}>{cal.revisionsTitle}</div>
-          <p style={{fontSize:12.5,color:C.inkMid,lineHeight:1.65,margin:0}}>{cal.revisionsText}</p>
-        </div>
-      </div>
+      {/* «Важность» и «Ревизии» — две оговорки к календарю, каждая со своим
+          сюжетом. Стояли двумя столбцами и дочитывались как продолжение
+          предыдущего абзаца; названия обеих теперь видны в подписях кнопок
+          сразу, а читаются по одной. */}
+      <CardTabs items={[
+        {title: cal.importanceTitle, body: cal.importanceText},
+        {title: cal.revisionsTitle, body: cal.revisionsText},
+      ]} style={{marginBottom:0}}/>
     </div>
   );
 }
@@ -340,13 +346,13 @@ function SurpriseCalc({ stats, vars }) {
         <p style={{fontSize:13,color:C.inkMid,marginBottom:14}}>{sc.step3Task}</p>
         {bins.length > 0 ? (
           <>
-            <input type="range" min="0" max={bins.length-1} value={binIdx} onChange={e=>setBinIdx(+e.target.value)} style={{width:"100%",marginBottom:14}}/>
+            <input type="range" aria-label={INITIAL_LANG==="ru"?"Диапазон отклонения, σ":INITIAL_LANG==="ro"?"Intervalul de abatere, σ":"Deviation range, σ"} min="0" max={bins.length-1} value={binIdx} onChange={e=>setBinIdx(+e.target.value)} style={{width:"100%",marginBottom:14}}/>
             <div style={{display:"flex",justifyContent:"space-between",fontSize:10,fontFamily:"monospace",color:C.inkFaint,marginBottom:18}}>
               {bins.map((bb,i) => <span key={i}>{bb.from}σ{bb.to?`–${bb.to}σ`:"+"}</span>)}
             </div>
             <div style={{display:"flex",justifyContent:"center",alignItems:"baseline",gap:14,marginBottom:10}}>
               <Mono size={13} color={C.inkSoft} spacing={1}>{sc.sliderLabel}: {b.from}σ{b.to?`–${b.to}σ`:"+"}</Mono>
-              <span style={{fontFamily:"'DM Serif Display',serif",fontSize:34,color:C.gold}}>{b.median_move != null ? b.median_move : "—"}</span>
+              <span style={{fontFamily:"'DM Serif Display',serif",fontSize:34,color:C.goldText}}>{b.median_move != null ? b.median_move : "—"}</span>
               <Mono size={11} color={C.inkFaint} spacing={0}>n={b.n}</Mono>
             </div>
             <p style={{fontSize:11.5,color:C.inkFaint,textAlign:"center",fontStyle:"italic",margin:0}}>{sc.step3Note}</p>
@@ -379,7 +385,8 @@ function SurpriseScatter({ stats }) {
           <button key={s} onClick={()=>setInstrument(s)} style={{fontFamily:"monospace",fontSize:10.5,padding:"5px 10px",cursor:"pointer",background:s===instrument?C.gold:"#fff",color:s===instrument?"#18181a":C.inkMid,border:`1px solid ${s===instrument?C.gold:C.border}`,borderRadius:3}}>{window.SBFSymbols ? window.SBFSymbols.symbolName(s, {lang: INITIAL_LANG, mode:"name+ticker"}) : s}</button>
         ))}
       </div>
-      <div style={{overflowX:"auto"}}>
+      {/* Область с прокруткой — достижима и с клавиатуры (WCAG 2.1.1). */}
+      <div style={{overflowX:"auto"}} tabIndex={0} role="region" aria-label={INITIAL_LANG==="ru"?"Диаграмма рассеяния: сюрприз и движение":INITIAL_LANG==="ro"?"Diagramă de dispersie":"Scatter plot"}>
         <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",minWidth:520,background:C.surface,border:`1px solid ${C.border}`,borderRadius:6}}>
           <line x1={toX(0)} y1={PAD} x2={toX(0)} y2={H-PAD} stroke={C.border} strokeWidth="1"/>
           <line x1={PAD} y1={H-PAD} x2={W-PAD} y2={H-PAD} stroke={C.border} strokeWidth="1"/>
@@ -394,7 +401,7 @@ function SurpriseScatter({ stats }) {
               <title>{p.event_type} · {p.date} · {p.surprise_sigma}σ · {p.move_30m_norm}</title>
             </circle>
           ))}
-          <text x={W/2} y={H-8} textAnchor="middle" fontSize="9" fontFamily="monospace" fill={C.inkFaint}>surprise, σ</text>
+          <text x={W/2} y={H-8} textAnchor="middle" fontSize="9" fontFamily="monospace" fill="rgba(24,24,26,0.61)">surprise, σ</text>
         </svg>
       </div>
       <p style={{fontSize:11,color:C.inkFaint,marginTop:8,fontStyle:"italic"}}>{window.SBFSymbols ? window.SBFSymbols.symbolName(instrument, {lang: INITIAL_LANG, mode:"name+ticker"}) : instrument} · {points.length} {INITIAL_LANG==="ru"?"точек":INITIAL_LANG==="ro"?"puncte":"points"} · {INITIAL_LANG==="ru"?"красная линия — медиана по бину":INITIAL_LANG==="ro"?"linia roșie — mediana pe bin":"red line — bin median"}</p>
@@ -432,7 +439,7 @@ function StrengthMatrix({ stats }) {
   }));
   const minCases = (stats && stats._meta && stats._meta.min_cell_n) || 4;
   return (
-    <ImpactMatrix rows={rows} columns={columns} minCases={minCases} copy={{
+    <ImpactMatrix rows={rows} columns={columns} minCases={minCases} lang={INITIAL_LANG} copy={{
       rowHead: cm.eventTypeLabel, naLabel: cm.matrixNaLabel, lowSampleLegend: cm.matrixLowSampleLegend,
     }}/>
   );
@@ -452,15 +459,15 @@ function CoreMeasureBlock({ stats, vars }) {
         <SurpriseScatter stats={stats}/>
       </div>
 
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:20,marginBottom:32}} className="g2">
-        <div>
-          <div style={{fontWeight:600,fontSize:14.5,color:C.black,marginBottom:8}}>{cm.finding2Title}</div>
-          <p style={{fontSize:13,color:C.inkMid,lineHeight:1.7,margin:0}}>{vars ? fillTemplate(cm.finding2Text, vars) : "—"}</p>
-        </div>
-        <div>
-          <div style={{fontWeight:600,fontSize:14.5,color:C.black,marginBottom:8}}>{cm.finding3Title}</div>
-          <p style={{fontSize:13,color:C.inkMid,lineHeight:1.7,margin:0}}>{vars ? fillTemplate(cm.finding3Text, vars) : "—"}</p>
-        </div>
+      {/* Две находки, выложенные в два столбца, читаются как один абзац на
+          два экрана — и это был самый длинный кусок главы. Переключатель
+          заодно называет обе сразу, в подписях кнопок: читатель видит, что
+          находок две и про что каждая, ещё до того, как начал читать. */}
+      <div style={{marginBottom:32}}>
+        <CardTabs items={[
+          {title: cm.finding2Title, body: vars ? fillTemplate(cm.finding2Text, vars) : "—"},
+          {title: cm.finding3Title, body: vars ? fillTemplate(cm.finding3Text, vars) : "—"},
+        ]} style={{marginBottom:0}}/>
       </div>
 
       <div style={{marginBottom:8}}>
@@ -474,7 +481,7 @@ function CoreMeasureBlock({ stats, vars }) {
         <p style={{fontSize:12,color:C.inkMid,lineHeight:1.65,margin:0}}>{vars ? fillTemplate(cm.honestBody, vars) : "—"}</p>
       </div>
 
-      <a href="/data/edu_stats/surprise_reaction.json" download style={{fontFamily:"monospace",fontSize:12,color:C.gold,textDecoration:"none",border:`1px solid ${C.gold}`,padding:"9px 16px",borderRadius:4,display:"inline-block"}}>{cm.downloadCsv}</a>
+      <a href="/data/edu_stats/surprise_reaction.json" download style={{fontFamily:"monospace",fontSize:12,color:C.goldText,textDecoration:"none",border:`1px solid ${C.gold}`,padding:"9px 16px",borderRadius:4,display:"inline-block"}}>{cm.downloadCsv}</a>
     </div>
   );
 }
@@ -511,7 +518,7 @@ function ZeroSurpriseBlock() {
       <div style={{display:"flex",flexDirection:"column",gap:10,marginBottom:20}}>
         {[z.r1,z.r2,z.r3].map((r,i) => (
           <div key={i} style={{display:"flex",gap:12,alignItems:"flex-start"}}>
-            <span style={{color:C.gold,fontFamily:"monospace",fontSize:11,marginTop:2}}>0{i+1}</span>
+            <span style={{color:C.goldText,fontFamily:"monospace",fontSize:11,marginTop:2}}>0{i+1}</span>
             <span style={{fontSize:13,color:C.inkMid,lineHeight:1.65}}>{r}</span>
           </div>
         ))}
@@ -579,7 +586,7 @@ function ReleaseSimulatorV2({ stats }) {
       <div style={{background:"#fff",border:`1px solid ${C.border}`,borderRadius:6,padding:"14px 18px",marginBottom:20,display:"flex",gap:24,flexWrap:"wrap",fontFamily:"monospace",fontSize:12.5}}>
         <span>forecast: <b>{r.forecast}</b></span>
         <span>actual: <b>{r.actual}</b></span>
-        <span title={sim.sigmaTooltip}>σ: <b style={{color:C.gold}}>{r.surprise_sigma}</b></span>
+        <span title={sim.sigmaTooltip}>σ: <b style={{color:C.goldText}}>{r.surprise_sigma}</b></span>
       </div>
 
       {!revealed ? (
@@ -601,7 +608,7 @@ function ReleaseSimulatorV2({ stats }) {
       ) : (
         <>
           <div style={{background:C.goldPale,border:`1px solid ${C.borderGold}`,borderRadius:6,padding:"16px 20px",marginBottom:14}}>
-            <Mono size={20} color={C.gold} spacing={0}>{r.actual_move_30m}</Mono>
+            <Mono size={20} color={C.goldText} spacing={0}>{r.actual_move_30m}</Mono>
             <p style={{fontSize:12,color:C.inkMid,marginTop:8,marginBottom:0}}>{sim.revealPrefix}</p>
           </div>
           <button onClick={next} style={{padding:"12px 26px",background:C.black,color:"#fff",border:"none",borderRadius:4,cursor:"pointer",fontFamily:"monospace",fontSize:12,letterSpacing:1}}>{sim.nextBtn}</button>
@@ -643,7 +650,7 @@ function LiveCalendarStage() {
 
   return (
     <div style={{border:`1px solid ${C.borderGold}`,borderRadius:8,padding:"26px 30px",marginBottom:56,background:C.goldPale}}>
-      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:14}}>{ls.tag}</Mono>
+      <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:14}}>{ls.tag}</Mono>
       <p style={{fontWeight:600,fontSize:15,color:C.black,marginBottom:14}}>{ls.title}</p>
       {ls.body.map((p,i) => (
         <p key={i} style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,marginBottom:12}}>{fillTemplate(p, {next_nfp_date: dateLabel})}</p>
@@ -788,7 +795,7 @@ function SqueezeTrainer() {
     upperSeries.setData(bandSlice.map((b,i) => b ? { time: visible[i].time, value: b.upper } : null).filter(Boolean));
     lowerSeries.setData(bandSlice.map((b,i) => b ? { time: visible[i].time, value: b.lower } : null).filter(Boolean));
     if (revealed && candles) {
-      candleSeries.setMarkers([{ time: candles[squeezeIdx - 7].time, position: "aboveBar", color: C.gold, shape: "arrowDown", text: "SQUEEZE" }]);
+      candleSeries.setMarkers([{ time: candles[squeezeIdx - 7].time, position: "aboveBar", color: C.goldText, shape: "arrowDown", text: "SQUEEZE" }]);
     } else {
       candleSeries.setMarkers([]);
     }
@@ -823,7 +830,7 @@ function SqueezeTrainer() {
           <div ref={containerRef} data-source="/data/ohlc_GOLD_M30.json"/>
           {!revealed && (
             <div style={{position:"absolute",top:0,right:0,bottom:0,width:"22%",background:"rgba(19,23,34,0.92)",display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(2px)",pointerEvents:"none"}}>
-              <span style={{color:"rgba(255,255,255,0.4)",fontSize:12,fontFamily:"monospace",letterSpacing:1.5,textAlign:"center",padding:"0 8px"}}>{sq.futureHidden}</span>
+              <span style={{color:"rgba(255,255,255,0.55)",fontSize:12,fontFamily:"monospace",letterSpacing:1.5,textAlign:"center",padding:"0 8px"}}>{sq.futureHidden}</span>
             </div>
           )}
         </div>
@@ -836,7 +843,7 @@ function SqueezeTrainer() {
         )}
       </div>
       <p style={{fontSize:12,color:C.inkSoft,lineHeight:1.65,marginTop:14,fontStyle:"italic",maxWidth:780}}>{sq.calendarLink}</p>
-      <a href="/chart.html?s=GOLD" target="_blank" rel="noopener" style={{fontFamily:"monospace",fontSize:12,color:C.gold,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>
+      <a href="/chart.html?s=GOLD" target="_blank" rel="noopener" style={{fontFamily:"monospace",fontSize:12,color:C.goldText,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>
         {(() => { const symLabel = window.SBFSymbols ? window.SBFSymbols.symbolName("GOLD", {lang: INITIAL_LANG, mode:"name+ticker"}) : "GOLD"; return INITIAL_LANG==="ru"?`Открыть ${symLabel} на графике →`:INITIAL_LANG==="ro"?`Deschide ${symLabel} pe grafic →`:`Open ${symLabel} on the chart →`; })()}
       </a>
 
@@ -869,7 +876,7 @@ function Chapter6() {
 
       <div style={{position:"sticky",top:106,background:"rgba(255,255,255,0.96)",backdropFilter:"blur(10px)",borderBottom:`1px solid ${C.border}`,padding:"15px 5vw",display:"flex",alignItems:"center",justifyContent:"space-between",zIndex:50}}>
         <div style={{display:"flex",alignItems:"center",gap:20}}>
-          <span onClick={() => window.location.href = getChUrl(5, lang)} style={{color:C.gold,cursor:"pointer",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</span>
+          <a href={getChUrl(5, lang)} aria-label={lang==="ru"?"Предыдущая глава":lang==="ro"?"Capitolul anterior":"Previous chapter"} style={{color:C.goldText,cursor:"pointer",textDecoration:"none",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</a>
           <Chip>{S.levelChip}</Chip>
           <Mono size={14} color={C.inkSoft} spacing={0} className="hide-mobile">{S.chapterNameShort}</Mono>
         </div>
@@ -882,15 +889,15 @@ function Chapter6() {
       <div style={{background:C.black,padding:"80px 5vw 70px",textAlign:"center",position:"relative",overflow:"hidden"}}>
         <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 100%, rgba(201,151,58,0.1) 0%, transparent 60%)"}}/>
         <div style={{position:"relative"}}>
-          <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:20}}>{S.heroEyebrow}</Mono>
+          <Mono size={11} color={C.goldText} spacing={4} style={{display:"block",marginBottom:20}}>{S.heroEyebrow}</Mono>
           <h1 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(36px,6vw,66px)",fontWeight:400,color:C.white,lineHeight:1.05,marginBottom:20}}>
-            {S.heroTitleLine1}<br/><span style={{color:C.gold}}>{S.heroTitleLine2}</span>
+            {S.heroTitleLine1}<br/><span style={{color:C.goldText}}>{S.heroTitleLine2}</span>
           </h1>
           <p style={{fontSize:"clamp(16px,2vw,20px)",color:"rgba(255,255,255,0.55)",maxWidth:640,margin:"0 auto 32px",lineHeight:1.65}}>{S.heroSubtitle}</p>
           <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
-            <Chip color={C.gold}>{S.fundamentalChip}</Chip>
-            <Chip color="rgba(255,255,255,0.3)">{S.technicalChip}</Chip>
-            <Chip color="rgba(255,255,255,0.3)">{S.interactiveChip}</Chip>
+            <Chip color={C.goldText}>{S.fundamentalChip}</Chip>
+            <Chip color="rgba(255,255,255,0.55)">{S.technicalChip}</Chip>
+            <Chip color="rgba(255,255,255,0.55)">{S.interactiveChip}</Chip>
           </div>
         </div>
       </div>
@@ -946,12 +953,12 @@ function Chapter6() {
         <Rule/>
 
         <div style={{marginBottom:40}}>
-          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:16,textAlign:"center"}}>{T6.takeaways.tag}</Mono>
+          <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:16,textAlign:"center"}}>{T6.takeaways.tag}</Mono>
           <h3 style={{fontFamily:"'DM Serif Display',serif",fontSize:22,fontWeight:400,color:C.black,textAlign:"center",marginBottom:24}}>{T6.takeaways.title}</h3>
           <div style={{display:"flex",flexDirection:"column",gap:10,maxWidth:820,margin:"0 auto"}}>
             {T6.takeaways.items.map((it,i) => (
               <div key={i} style={{display:"flex",gap:12,alignItems:"flex-start",background:C.surface,border:`1px solid ${C.border}`,borderRadius:6,padding:"12px 16px"}}>
-                <span style={{color:C.gold,fontFamily:"monospace",fontSize:11,marginTop:2}}>0{i+1}</span>
+                <span style={{color:C.goldText,fontFamily:"monospace",fontSize:11,marginTop:2}}>0{i+1}</span>
                 <span style={{fontSize:13,color:C.inkMid,lineHeight:1.6}}>{it}</span>
               </div>
             ))}
@@ -966,7 +973,7 @@ function Chapter6() {
         <PredictMagnitude/>
 
         <div style={{border:`1px dashed ${C.borderGold}`,borderRadius:8,padding:"20px 24px",marginBottom:32,background:C.surface}}>
-          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T6.cliffhanger.tag}</Mono>
+          <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{T6.cliffhanger.tag}</Mono>
           {T6.cliffhanger.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:14,color:C.inkMid,lineHeight:1.7,marginBottom:10}}>{p}</p>)}
         </div>
 
@@ -989,7 +996,7 @@ function Chapter6() {
               return (
                 <li>
                   {text}{" "}
-                  <a href="/data/edu_stats/surprise_reaction.csv" download style={{color:C.gold}}>{T6.sources.csvLabel}</a>
+                  <a href="/data/edu_stats/surprise_reaction.csv" download style={{color:C.goldText}}>{T6.sources.csvLabel}</a>
                 </li>
               );
             })()}
@@ -1025,7 +1032,7 @@ function PredictMagnitude() {
   const [picked, setPicked] = useState(null);
   return (
     <div style={{border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px",marginTop:8,marginBottom:24}}>
-      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{p.tag}</Mono>
+      <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{p.tag}</Mono>
       <p style={{fontSize:14.5,color:C.black,lineHeight:1.65,marginBottom:14}}>{p.question}</p>
       <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:14}}>
         {p.options.map((o,i) => (

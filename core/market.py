@@ -58,7 +58,19 @@ def to_ticker(tag: str) -> str:
 
 
 def snapshot(tickers: list[str]) -> dict[str, dict]:
-    """{ticker: {price, change_pct, prev}} по дневным барам. Кэш на _TTL."""
+    """{ticker: {price, change_pct, prev}} по дневным барам. Кэш на _TTL.
+
+    🔴 20.08.2026: инструменты, что есть у брокера, берутся у НЕГО, а не у
+    Yahoo. Через эту функцию идут market.json, утренний бриф, режим рынка,
+    дивергенции и проверка прогнозов — то есть почти всё, что говорит о
+    цене словами. Пока она ходила в yfinance, сайт произносил про золото
+    два разных числа: график 4 487 (спот брокера), а всё остальное 4 545
+    (фьючерс GC=F). См. core/mt5_quotes.py — там же, почему это нельзя
+    было закрыть подменой тикера.
+
+    Отказ моста не роняет функцию и не маскируется: те тикеры, что он не
+    дал, честно уходят в ветку Yahoo ниже, о чём пишется предупреждение.
+    """
     import yfinance as yf
     out: dict[str, dict] = {}
     fresh = []
@@ -69,6 +81,23 @@ def snapshot(tickers: list[str]) -> dict[str, dict]:
             out[t] = c[1]
         else:
             fresh.append(t)
+
+    if fresh:
+        try:
+            from core import mt5_quotes
+            broker = mt5_quotes.snapshot(set(fresh))
+        except Exception as e:
+            broker = {}
+            log.warning("snapshot: мост MT5 недоступен (%s) — цены от Yahoo; "
+                        "по золоту это фьючерс против спота на графике", e)
+        for t, data in broker.items():
+            _cache[t] = (now, data)
+            out[t] = data
+        missed = [t for t in fresh if t not in broker]
+        if broker and missed:
+            log.debug("snapshot: у брокера нет %s — остаются на Yahoo", missed)
+        fresh = missed
+
     for t in fresh:
         try:
             h = yf.Ticker(t).history(period="6d", interval="1d")
@@ -135,16 +164,48 @@ def enrich_cashtags(tags: list[str], limit: int = 12) -> list[dict]:
     return [{"tag": t, "ticker": tk, **snap.get(tk, {})} for t, tk in tickers.items()]
 
 
+def _registry_labels() -> dict[str, str]:
+    """yahoo-тикер -> человеческое имя из symbols.json (ru)."""
+    try:
+        from core.symbols_registry import _load
+        out = {}
+        for _k, v in _load().items():
+            y = v.get("yahoo") if isinstance(v, dict) else None
+            if y:
+                out[y] = v.get("ru") or v.get("en") or _k
+        return out
+    except Exception:
+        return {}
+
+
 def market_state_block(extra_tags: list[str] | None = None) -> str:
     """Готовый markdown-блок для брифа: дашборд + крипто F&G + тикеры из брифа."""
-    lines = ["## 📉 РЕАЛЬНОЕ СОСТОЯНИЕ РЫНКА (yfinance, d/d)"]
+    # 🔴 20.08: заголовок больше не называет yfinance. С переводом snapshot()
+    # на брокера 13 строк из 14 приходят от MT5, и подпись «yfinance» стала
+    # неправдой ровно в том месте, которое эту неправду и должно опровергать
+    # («приоритет над ценами из соцсетей» — то есть блок ЗАЯВЛЯЕТ источник).
+    # Источник теперь проставляется по факту, из самих данных.
+    lines = ["## 📉 РЕАЛЬНОЕ СОСТОЯНИЕ РЫНКА (d/d)"]
     snap = snapshot(DASHBOARD)
-    names = {"^GSPC": "S&P 500", "^IXIC": "Nasdaq", "DX-Y.NYB": "DXY",
-             "GC=F": "Gold", "CL=F": "WTI", "BTC-USD": "BTC", "^VIX": "VIX"}
-    for tk in DASHBOARD:
-        d = snap.get(tk, {})
-        if d.get("price") is not None:
-            lines.append(f"  {names[tk]:9} {d['price']:>10,.2f}  {d['change_pct']:+.2f}%")
+    # DASHBOARD собирается из реестра (symbols.json, quote=true), а подписи
+    # жили тут отдельным словарём — и обращение шло по names[tk] без запаса.
+    # 20.08 это чуть не уронило бриф: смена тикера Nasdaq на ^NDX (реестр
+    # называл инструмент «Nasdaq 100», а тянул ^IXIC — Composite, другой
+    # индекс) дала бы KeyError на первом же прогоне. Подпись по .get с
+    # фолбэком на сам тикер: неизвестный инструмент должен появиться в брифе
+    # своим именем, а не обрушить весь блок.
+    # Подписи берём из того же реестра, что и сам список тикеров, иначе это
+    # два источника правды: локальный словарь покрывал 7 тикеров из 14, и
+    # остальные (SI=F, NG=F, ^DJI, ETH-USD…) выводились бы сырыми кодами.
+    names = _registry_labels()
+    # Ширина колонки — по самому длинному ИМЕЮЩЕМУСЯ имени, а не константа 9:
+    # с русскими подписями «Природный газ» и «Индекс доллара» фиксированная
+    # ширина ломала выравнивание всей таблицы.
+    shown = [tk for tk in DASHBOARD if snap.get(tk, {}).get("price") is not None]
+    w = max((len(names.get(tk, tk)) for tk in shown), default=9)
+    for tk in shown:
+        d = snap[tk]
+        lines.append(f"  {names.get(tk, tk):<{w}} {d['price']:>12,.2f}  {d['change_pct']:+.2f}%")
     fng = crypto_fear_greed()
     if fng:
         lines.append(f"  Crypto F&G: {fng['value']} ({fng['label']})")
@@ -156,7 +217,13 @@ def market_state_block(extra_tags: list[str] | None = None) -> str:
         if rows:
             lines.append("\n  Тикеры из брифа:")
             lines += rows
-    lines.append("\n  ⚠️ Цифры из yfinance — приоритет над ценами из соцсетей.")
+    # Порядок фиксированный, не sorted(): по кодам символов латиница идёт
+    # раньше кириллицы, и получалось «из yfinance и брокер MT5» — и порядок
+    # не тот, и падеж.
+    srcs = {snap[tk].get("source") for tk in shown}
+    parts = [n for k, n in (("mt5", "брокера MT5"), (None, "yfinance")) if k in srcs]
+    src_txt = " и ".join(parts) or "yfinance"
+    lines.append(f"\n  ⚠️ Цифры из {src_txt} — приоритет над ценами из соцсетей.")
     return "\n".join(lines) + "\n"
 
 

@@ -12,6 +12,8 @@ from __future__ import annotations
 import hashlib
 import logging
 import time
+import os
+import socket
 from collections import Counter
 from datetime import datetime, timezone
 from urllib.parse import urlparse
@@ -20,8 +22,8 @@ import feedparser
 
 from core import db
 from core.config import (RSS_FEEDS, RSS_TREND_WINDOW_HOURS,
-                         STORE_MIN_ECON_RELEVANCE)
-from core import scoring
+                         STORE_MIN_ECON_RELEVANCE, rotating_news_feeds)
+from core import news_patterns, scoring
 
 log = logging.getLogger("rss")
 
@@ -48,11 +50,40 @@ def _entry_time(entry) -> float:
     return time.time()
 
 
+# 🔴 Предел ожидания на КАЖДУЮ ленту.
+#
+# feedparser ходит через urllib и своего таймаута не имеет: без этого он ждёт
+# столько, сколько согласен молчать чужой сервер. Предел стоял только на цикл
+# целиком (collectors/run.py::CYCLE_TIMEOUT, 900 с), и одна залипшая лента
+# съедала его за всех — замер 09.09: прогон встал на восьмой ленте из двадцати
+# девяти и не сдвинулся за пять минут, то есть двадцать одна лента в этом
+# цикле не опрашивалась вовсе. Со стороны это выглядит как «про эти активы не
+# пишут», а не как зависший сетевой вызов.
+#
+# 20 секунд: живая лента отвечает за секунду-две, а всё, что молчит дольше,
+# всё равно не успело бы в бюджет цикла.
+FEED_TIMEOUT_SEC = int(os.getenv("RSS_FEED_TIMEOUT_SEC", "20"))
+
+
 def collect() -> int:
     """Тянем все ленты, пишем релевантные сигналы. Возвращаем число сохранённых."""
+    socket.setdefaulttimeout(FEED_TIMEOUT_SEC)
     db.init_db()
     saved = 0
-    for name, url in RSS_FEEDS.items():
+    # Постоянные ленты плюс порция запросов по инструментам витрины. Порция
+    # сдвигается каждый прогон, полный круг — несколько циклов (см.
+    # core/config.rotating_news_feeds).
+    # 🔴 Порция по инструментам идёт ПЕРВОЙ, а не последней.
+    #
+    # На весь цикл стоит предел в 900 секунд (collectors/run.py::CYCLE_TIMEOUT),
+    # и одна медленная лента съедает его за всех: замер 09.09 — прогон встал на
+    # восьмой ленте из двадцати девяти и не двинулся за пять минут. Что стоит
+    # в конце словаря, то опрашивается реже всего, а при неудачном дне — не
+    # опрашивается вовсе. Ленты по инструментам как раз и нужны, чтобы закрыть
+    # хвост, поэтому очередь у них первая.
+    feeds = dict(rotating_news_feeds())
+    feeds.update(RSS_FEEDS)
+    for name, url in feeds.items():
         try:
             feed = feedparser.parse(url, agent=UA)
         except Exception as e:
@@ -88,7 +119,24 @@ def collect() -> int:
                     domain = urlparse(href).netloc.removeprefix("www.")
             blob = f"{title}\n{text}"
             er = scoring.econ_relevance(blob)
-            if er < STORE_MIN_ECON_RELEVANCE:
+            # 🔴 Новость про наш инструмент сохраняем независимо от оценки
+            # «похоже ли это на макроэкономику».
+            #
+            # econ_relevance считает по общим словам — ставка, инфляция,
+            # доходность — и про отдельный актив ничего не знает. Замер
+            # 09.09.2026 на реальных заголовках:
+            #     «DAX closes lower as German industrial output disappoints» — 0.00
+            #     «Cocoa prices hit three-month low» — 0.00
+            #     «Nike cuts full-year outlook as China sales slow» — 0.10
+            # при пороге 0.25. То есть новость ровно про инструмент витрины
+            # выбрасывалась ДО того, как её мог кто-либо пометить, и на графике
+            # DAX не появлялось ни одной отметки. Со стороны это выглядело как
+            # «про этот актив не пишут» — а писали, просто мы не сохраняли.
+            #
+            # Обратной опасности здесь нет: словарь узкий и проверенный на
+            # ложные срабатывания, и совпадение с ним — это ровно тот признак
+            # релевантности, ради которого гейт и ставился.
+            if er < STORE_MIN_ECON_RELEVANCE and not news_patterns.mentions_instrument(title, text):
                 continue  # СМИ постят много нерелевантного — отсекаем
             db.upsert(
                 source="rss",

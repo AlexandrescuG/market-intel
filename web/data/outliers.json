@@ -1,0 +1,73 @@
+{
+  "updated": "2026-09-30T07:46:09.412887+00:00",
+  "thresholds": {
+    "equity": {
+      "abs_chg_pct": 20.0,
+      "min_price_usd": 1.0,
+      "min_dollar_volume": 5000000
+    },
+    "crypto": {
+      "abs_chg_pct": 30.0,
+      "min_dollar_volume": 20000000
+    }
+  },
+  "items": [
+    {
+      "symbol": "QNTUSDT",
+      "name": "QNT",
+      "asset_class": "crypto",
+      "chg_pct": 39.95,
+      "peak_chg_pct": 47.41,
+      "price": 291.93,
+      "dollar_volume": 27240660.0,
+      "screener": "bybit_spot",
+      "seen_utc": "2026-09-30T02:30:25+00:00",
+      "explained": false
+    },
+    {
+      "symbol": "GRASSUSDT",
+      "name": "GRASS",
+      "asset_class": "crypto",
+      "chg_pct": 30.39,
+      "peak_chg_pct": 43.23,
+      "price": 0.7449,
+      "dollar_volume": 20527299.0,
+      "screener": "bybit_spot",
+      "seen_utc": "2026-09-30T01:45:00+00:00",
+      "explained": false
+    },
+    {
+      "symbol": "IOVA",
+      "name": "Iovance Biotherapeutics, Inc.",
+      "asset_class": "equity",
+      "chg_pct": 31.48,
+      "peak_chg_pct": 39.22,
+      "price": 14.45,
+      "dollar_volume": 1127536722.0,
+      "screener": "day_gainers",
+      "seen_utc": "2026-09-30T07:45:00+00:00",
+      "explained": false
+    },
+    {
+      "symbol": "FICO",
+      "name": "Fair Isaac Corporation",
+      "asset_class": "equity",
+      "chg_pct": -26.52,
+      "peak_chg_pct": -29.22,
+      "price": 617.87,
+      "dollar_volume": 3025069895.0,
+      "screener": "day_losers",
+      "seen_utc": "2026-09-30T07:45:00+00:00",
+      "explained": true
+    }
+  ],
+  "off_context": [
+    {
+      "label": "yields",
+      "text": "Доходности Treasuries превысили 5%, доллар поднялся к 16-месячному максимуму к евро; индексы акций США снижаются, Hang Seng -0,5% до 24 524.",
+      "publishers": 22,
+      "items": 34,
+      "symbol": null
+    }
+  ]
+}

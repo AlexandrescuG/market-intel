@@ -42,7 +42,7 @@
         fact: "0.25% комиссии тогда — 0.00% у брокеров сегодня. Кто теперь платит за твою сделку? Ответ — в главе 11 (PFOF/HFT).",
         hook: "Биржа НЕ строилась государством — это картель уличных брокеров, договорившихся торговать друг с другом.",
         legend: null,
-        source: "Wikimedia Commons · NYPL Digital Collections",
+        source: "Library of Congress (PD)",
         illustration: "1792_buttonwood"
       },
       {
@@ -62,7 +62,7 @@
         fact: "Байка о чистильщике обуви, который давал советы по акциям самому Джозефу Кеннеди, — символ пика толпы: когда рынок обсуждают все, покупать поздно.",
         hook: "−12.8% 28 октября, −11.7% 29 октября, дно −198.69 13 ноября.",
         legend: "чистильщик обуви — байка эпохи, но индикатор реальный",
-        source: "Library of Congress (PD)",
+        source: "Wikimedia Commons · Associated Press (PD)",
         illustration: "1929_crowd"
       },
       {
@@ -196,7 +196,7 @@
         fact: "0.25% comision atunci — 0.00% la brokerii de azi. Cine plătește acum pentru tranzacția ta? Răspunsul — în capitolul 11 (PFOF/HFT).",
         hook: "Bursa NU a fost construită de stat — e un cartel de brokeri stradali care au decis să tranzacționeze între ei.",
         legend: null,
-        source: "Wikimedia Commons · NYPL Digital Collections",
+        source: "Library of Congress (PD)",
         illustration: "1792_buttonwood"
       },
       {
@@ -216,7 +216,7 @@
         fact: "Povestea despre lustragiul care i-ar fi dat sfaturi bursiere lui Joseph Kennedy este simbolul vârfului mulțimii: când toți vorbesc despre piață, e prea târziu să cumperi.",
         hook: "−12.8% pe 28 octombrie, −11.7% pe 29 octombrie, minim −198.69 pe 13 noiembrie.",
         legend: "lustragiul — o poveste de epocă, dar indicatorul e real",
-        source: "Library of Congress (domeniu public)",
+        source: "Wikimedia Commons · Associated Press (domeniu public)",
         illustration: "1929_crowd"
       },
       {
@@ -350,7 +350,7 @@
         fact: "The agreement fit in a single paragraph and needed neither a building nor a license.",
         hook: "0.25% commission then — 0.00% at today's brokers. Who pays for your trade now? The answer is in chapter 11 (PFOF/HFT).",
         legend: null,
-        source: "Wikimedia Commons · NYPL Digital Collections",
+        source: "Library of Congress (PD)",
         illustration: "1792_buttonwood"
       },
       {
@@ -370,7 +370,7 @@
         fact: "The tale of the shoeshine boy giving Joseph Kennedy stock tips is the symbol of a crowd at its peak: when everyone's talking about the market, it's too late to buy.",
         hook: "−12.8% on October 28, −11.7% on October 29, bottom at −198.69 on November 13.",
         legend: "the shoeshine boy — a period tale, but the indicator is real",
-        source: "Library of Congress (public domain)",
+        source: "Wikimedia Commons · Associated Press (public domain)",
         illustration: "1929_crowd"
       },
       {
@@ -585,7 +585,7 @@
       + '<rect x="40" y="96" width="640" height="26"/></g>'
       + '<g stroke="#6d6350" stroke-width="3" fill="#efe8d8"><rect x="330" y="34" width="60" height="64"/><path d="M325 34 L360 6 L395 34 Z"/></g>'
       + '<g fill="#5c5342">' + person(150,296) + person(196,304) + person(420,296) + person(462,302) + person(560,299) + '</g>'
-      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#8A8275">скан 1653 г., Wikimedia Commons</text></svg>';
+      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#716A5A">рисунок по мотивам гравюр XVII века</text></svg>';
     },
     "1720_tafereel": function(){
       return '<svg class="h-art" viewBox="0 0 720 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Крах 1720 года">'
@@ -596,7 +596,7 @@
       + '<circle cx="330" cy="250" r="34" fill="none" stroke="#6d6350" stroke-width="3"/>'
       + '<path d="M316 262 q14 12 28 0" fill="none" stroke="#6d6350" stroke-width="3"/>'
       + '<circle cx="320" cy="242" r="3" fill="#6d6350"/><circle cx="342" cy="242" r="3" fill="#6d6350"/>'
-      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#8A8275">«Het Groote Tafereel der Dwaasheid», 1720</text></svg>';
+      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#716A5A">«Het Groote Tafereel der Dwaasheid», 1720</text></svg>';
     },
     "1730_dojima": function(){
       return '<svg class="h-art" viewBox="0 0 720 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Рисовая биржа Додзима">'
@@ -607,7 +607,7 @@
       + '<line x1="580" y1="330" x2="580" y2="300"/><line x1="600" y1="330" x2="600" y2="270"/><line x1="620" y1="330" x2="620" y2="310"/><line x1="640" y1="330" x2="640" y2="255"/><line x1="660" y1="330" x2="660" y2="290"/>'
       + '</g>'
       + '<g fill="#5c5342">' + person(180,300) + person(226,306) + '</g>'
-      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#8A8275">рынок риса Додзима, Осака</text></svg>';
+      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#716A5A">рынок риса Додзима, Осака</text></svg>';
     },
     "1792_buttonwood": function(){
       return '<svg class="h-art" viewBox="0 0 720 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Платановое соглашение">'
@@ -616,7 +616,7 @@
       + '<rect x="345" y="230" width="26" height="80" fill="#6d6350"/>'
       + '<circle cx="358" cy="150" r="95" fill="#cdd8b8" stroke="#6d6350" stroke-width="3"/>'
       + '<g fill="#5c5342">' + person(300,290,0.9) + person(340,296,0.9) + person(380,296,0.9) + person(420,290,0.9) + '</g>'
-      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#8A8275">Buttonwood Agreement, Уолл-стрит 1792</text></svg>';
+      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#716A5A">Buttonwood Agreement, Уолл-стрит 1792</text></svg>';
     },
     "1867_ticker": function(){
       return '<svg class="h-art" viewBox="0 0 720 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Биржевой тикер">'
@@ -626,7 +626,7 @@
       + '<path d="M180 100 Q 340 40 480 120 Q 600 180 660 90" stroke="#6d6350" stroke-width="2" fill="none"/>'
       + '<circle cx="470" cy="230" r="46" fill="#efe8d8" stroke="#6d6350" stroke-width="3"/>'
       + '<path d="M470 230 q60 10 90 60 q20 34 -6 60 q-30 24 -70 4 q-30 -16 -20 -50" fill="none" stroke="#8a2f2f" stroke-width="3"/>'
-      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#8A8275">тикерная лента, 1867</text></svg>';
+      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#716A5A">тикерная лента, 1867</text></svg>';
     },
     "1929_crowd": function(){
       var ppl = '';
@@ -637,7 +637,7 @@
       + '<g stroke="#6d6350" stroke-width="3" fill="#efe8d8"><rect x="30" y="60" width="660" height="180"/>'
       + '<path d="M70 240 V90 M150 240 V90 M230 240 V90 M310 240 V90 M390 240 V90 M470 240 V90 M550 240 V90 M630 240 V90"/></g>'
       + '<g fill="#5c5342">' + ppl + '</g>'
-      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#8A8275">толпа у NYSE, Library of Congress</text></svg>';
+      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#716A5A">рисунок: толпа у здания биржи</text></svg>';
     },
     "1971_nasdaq": function(){
       return '<svg class="h-art" viewBox="0 0 720 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="NASDAQ, биржа без зала">'
@@ -648,14 +648,14 @@
       + '<line x1="300" y1="90" x2="580" y2="230"/><line x1="140" y1="120" x2="600" y2="100"/></g>'
       + '<g fill="#efe8d8" stroke="#6d6350" stroke-width="3">'
       + '<circle cx="140" cy="120" r="14"/><circle cx="300" cy="90" r="14"/><circle cx="460" cy="140" r="14"/><circle cx="260" cy="220" r="14"/><circle cx="600" cy="100" r="14"/><circle cx="580" cy="230" r="14"/></g>'
-      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#8A8275">NASDAQ, сеть дилеров без торгового зала</text></svg>';
+      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#716A5A">NASDAQ, сеть дилеров без торгового зала</text></svg>';
     },
     "1987_blackmonday": function(){
       return '<svg class="h-art" viewBox="0 0 720 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Чёрный понедельник 1987">'
       + hatchBg() + '<rect y="300" width="720" height="100" fill="url(#hatch2)"/>'
       + '<polyline points="60,110 160,120 260,100 340,130 400,140 440,170 470,230 500,290 540,320" fill="none" stroke="#8a2f2f" stroke-width="4.5"/>'
       + '<g fill="#5c5342">' + person(120,270,0.85) + person(170,278,0.9) + person(220,272,0.8) + person(600,270,0.85) + person(650,276,0.9) + '</g>'
-      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#8A8275">−22.6% за день, 19 октября 1987</text></svg>';
+      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#716A5A">−22.6% за день, 19 октября 1987</text></svg>';
     },
     "2000_dotcom": function(){
       return '<svg class="h-art" viewBox="0 0 720 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Пузырь доткомов">'
@@ -663,7 +663,7 @@
       + '<polyline points="60,270 140,240 220,190 300,120 360,90 420,160 470,220 520,260 580,285 640,300" fill="none" stroke="#6d6350" stroke-width="4"/>'
       + '<g fill="none" stroke="#8a2f2f" stroke-width="2.4"><circle cx="360" cy="90" r="26"/><line x1="340" y1="70" x2="380" y2="110"/><line x1="380" y1="70" x2="340" y2="110"/></g>'
       + '<g fill="none" stroke="#6d6350" stroke-width="1.6"><circle cx="180" cy="150" r="16"/><circle cx="500" cy="120" r="12"/><circle cx="560" cy="200" r="10"/></g>'
-      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#8A8275">NASDAQ, пик 5132 → дно 1114</text></svg>';
+      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#716A5A">NASDAQ, пик 5132 → дно 1114</text></svg>';
     },
     "2008_lehman": function(){
       return '<svg class="h-art" viewBox="0 0 720 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Lehman Brothers 2008">'
@@ -673,7 +673,7 @@
       + '<path d="M270 95 L 400 200 L 340 300" fill="none" stroke="#8a2f2f" stroke-width="4"/>'
       + '<polyline points="500,320 540,290 570,310 600,260 630,300 660,240" fill="none" stroke="#8a2f2f" stroke-width="3"/>'
       + '<g fill="#5c5342">' + person(150,280,0.9) + person(195,286,0.85) + '</g>'
-      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#8A8275">крупнейшее банкротство в истории США</text></svg>';
+      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#716A5A">крупнейшее банкротство в истории США</text></svg>';
     },
     "2010_flashcrash": function(){
       return '<svg class="h-art" viewBox="0 0 720 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Flash Crash 2010">'
@@ -683,7 +683,7 @@
       + '<line x1="180" y1="180" x2="228" y2="195" stroke="#6d6350" stroke-width="4"/>'
       + '<circle cx="180" cy="180" r="4" fill="#6d6350"/>'
       + '<polyline points="330,150 380,155 420,160 450,290 490,300 530,170 570,160 640,158" fill="none" stroke="#8a2f2f" stroke-width="4"/>'
-      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#8A8275">−998 пунктов и обратно за 36 минут</text></svg>';
+      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#716A5A">−998 пунктов и обратно за 36 минут</text></svg>';
     },
     "2021_gamestop": function(){
       return '<svg class="h-art" viewBox="0 0 720 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="GameStop 2021">'
@@ -692,7 +692,7 @@
       + '<g fill="#efe8d8" stroke="#6d6350" stroke-width="2.4">'
       + '<rect x="520" y="150" width="46" height="80" rx="6"/><rect x="580" y="190" width="46" height="80" rx="6"/><rect x="460" y="210" width="46" height="80" rx="6"/></g>'
       + '<g fill="none" stroke="#6d6350" stroke-width="1.6"><path d="M500 140 q14 -18 30 -6"/><path d="M630 180 q14 -18 30 -6"/></g>'
-      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#8A8275">$20 → $483, толпа против фонда</text></svg>';
+      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#716A5A">$20 → $483, толпа против фонда</text></svg>';
     },
     "2020_covid": function(){
       return '<svg class="h-art" viewBox="0 0 720 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="COVID-крах 2020">'
@@ -701,7 +701,7 @@
       + '<circle cx="340" cy="290" r="90" fill="none" stroke="#6d6350" stroke-width="2" stroke-dasharray="4 5"/>'
       + '<line x1="340" y1="290" x2="340" y2="230" stroke="#6d6350" stroke-width="2.5"/>'
       + '<line x1="340" y1="290" x2="380" y2="300" stroke="#6d6350" stroke-width="2.5"/>'
-      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#8A8275">−34% индекса S&amp;P 500 за 33 дня</text></svg>';
+      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#716A5A">−34% индекса S&amp;P 500 за 33 дня</text></svg>';
     },
     "2022_ukraine": function(){
       return '<svg class="h-art" viewBox="0 0 720 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Рынок и война в Украине 2022">'
@@ -709,7 +709,7 @@
       + '<g fill="#efe8d8" stroke="#6d6350" stroke-width="3"><rect x="90" y="200" width="40" height="100"/><path d="M90 200 q20 -30 40 0"/></g>'
       + '<g fill="none" stroke="#6d6350" stroke-width="2"><line x1="180" y1="120" x2="180" y2="300"/><line x1="220" y1="150" x2="220" y2="300"/><line x1="260" y1="100" x2="260" y2="300"/></g>'
       + '<polyline points="360,260 420,230 460,150 500,90 540,110 600,80 650,60" fill="none" stroke="#8a2f2f" stroke-width="4.5"/>'
-      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#8A8275">нефть Brent выше $100, MOEX −45% за сессию</text></svg>';
+      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#716A5A">нефть Brent выше $100, MOEX −45% за сессию</text></svg>';
     },
     "today_terminal": function(){
       return '<svg class="h-art" viewBox="0 0 720 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Экраны и алгоритмы сегодня">'
@@ -719,7 +719,7 @@
       + '<polyline points="290,150 320,165 350,120 380,140 410,100 440,125" fill="none" stroke="#8a2f2f" stroke-width="3"/>'
       + '<polyline points="500,160 530,130 560,150 590,105 620,135 645,90" fill="none" stroke="#6d6350" stroke-width="3"/>'
       + '<g fill="#5c5342">' + person(150,240) + person(360,246) + person(570,240) + '</g>'
-      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#8A8275">торговый зал 1980-х</text></svg>';
+      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#716A5A">рисунок: рабочее место трейдера</text></svg>';
     }
   };
 
@@ -766,21 +766,114 @@
     "2022_ukraine":   { webp:"/edu/assets/history/2022_ukraine.webp",   jpg:"/edu/assets/history/2022_ukraine_web.jpg",   w:600, h:900,
       alt:"Здание Московской биржи (MOEX)" },
     "today_terminal": { webp:"/edu/assets/history/today_terminal.webp", jpg:"/edu/assets/history/today_terminal_web.jpg", w:900, h:675,
-      alt:"Терминал Bloomberg, рабочее место аналитика" }
+      alt:"Терминал Bloomberg, рабочее место аналитика" },
+    // Станции главы 2 (центральные банки). Отобраны на Wikimedia Commons
+    // 15.09.2026, лицензии и ссылки — в history/manifest.json. Файлы качает
+    // владелец; пока их нет, картинка не загрузится и станция сама вернётся
+    // к ряду данных — см. ЗАПАСНОЙ ПУТЬ ниже.
+    "1907_morgan":    { webp:"/edu/assets/history/1907_morgan.webp",    jpg:"/edu/assets/history/1907_morgan_web.jpg",    w:900, h:1119,
+      alt:"Толпа на Уолл-стрит во время банковской паники, октябрь 1907" },
+    "1913_fed":       { webp:"/edu/assets/history/1913_fed.webp",       jpg:"/edu/assets/history/1913_fed_web.jpg",       w:900, h:1295,
+      alt:"Газетная полоса: Вильсон подписывает закон о Федеральном резерве, 24 декабря 1913" },
+    "1944_bretton":   { webp:"/edu/assets/history/1944_bretton.webp",   jpg:"/edu/assets/history/1944_bretton_web.jpg",   w:706, h:572,
+      alt:"Моргентау открывает Бреттон-Вудскую конференцию, июль 1944" },
+    "1971_nixon":     { webp:"/edu/assets/history/1971_nixon.webp",     jpg:"/edu/assets/history/1971_nixon_web.jpg",     w:900, h:1127,
+      alt:"Ричард Никсон, официальный портрет, 8 июля 1971" }
+  };
+
+  /* ── ЗАПАСНОЙ ПУТЬ, КОГДА ФАЙЛА НЕТ ───────────────────────────────────────
+     🔴 ЗАЧЕМ. Запись в STATION_IMAGE — это обещание, что файл лежит на диске.
+     Обещание можно дать раньше, чем файл появится (картинки скачивает
+     владелец), и тогда читатель увидит не станцию, а значок битой картинки:
+     это хуже схемы, которая была там раньше. Поэтому запись проверяется
+     браузером, а не нами: не загрузилось — станция молча возвращается к
+     ряду данных или к рисунку, ровно как до появления записи.
+     Тот же путь защищает и четырнадцать работающих станций от случайно
+     удалённого файла. */
+  // Глава 2 спрашивает, есть ли под станцию снимок, чтобы не показать ряд
+  // данных поверх фотографии (см. art2HTML в chrono2.js).
+  window.ChronoStationImageHas = function(key){ return !!STATION_IMAGE[key]; };
+
+  window.SbfChronoImgFail = function(el, key){
+    var блок = el.closest ? el.closest('picture') : null;
+    var запас = '';
+    // Глава может подставить свой запасной рисунок: у главы 2 половина
+    // станций (1907, 1913, 1944, 1971) рисуется в chrono2.js, и chrono.js
+    // про эти ключи ничего не знает. Замер это и поймал — без хука станция
+    // оставалась пустой рамкой.
+    if (window.SbfChronoFallbackHTML) запас = window.SbfChronoFallbackHTML(key) || '';
+    if (!запас && window.SbfChronoFrames) запас = window.SbfChronoFrames.кадр(key) || '';
+    if (!запас && STATION_ART[key]) запас = STATION_ART[key]();
+    if (блок && запас) блок.outerHTML = запас;
+    else if (блок) блок.remove();
   };
 
   function stationArtHTML(key){
     var img = STATION_IMAGE[key];
+    // 🔴 Нет фотографии — показываем настоящий ряд, если он есть, и только
+    // потом рисунок. Станция 1987 («чёрный понедельник») — единственная из
+    // пятнадцати без архивного снимка, и до сих пор она рисовалась ломаной,
+    // набранной координатами вручную, под настоящей подписью «−22.6% за
+    // день». Ряд под неё собран (S&P 500, ^GSPC) и лежит в
+    // chrono2_frames.json; рисовальщик общий с главой 2 — chrono-frames.js.
+    if (!img && window.SbfChronoFrames) {
+      var кадр = window.SbfChronoFrames.кадр(key);
+      if (кадр) return кадр;
+    }
     if (img){
       return '<picture>'
         + '<source type="image/webp" srcset="'+img.webp+'">'
-        + '<img src="'+img.jpg+'" alt="'+img.alt+'" loading="lazy" width="'+img.w+'" height="'+img.h+'">'
+        + '<img src="'+img.jpg+'" alt="'+img.alt+'" loading="lazy" width="'+img.w+'" height="'+img.h+'"'
+        + ' onerror="window.SbfChronoImgFail&amp;&amp;window.SbfChronoImgFail(this,\''+key+'\')">'
         + '</picture>';
     }
     return STATION_ART[key] ? STATION_ART[key]() : '';
   }
 
+  /* ── Атрибуция под фотографией ──────────────────────────────────────────
+     🔴 УСЛОВИЕ ЛИЦЕНЗИИ, А НЕ УКРАШЕНИЕ. Семь снимков хроники лежат под
+     CC-BY / CC-BY-SA: они разрешены к показу ровно при условии, что имя
+     автора и название лицензии видны читателю. У нас всё это было собрано
+     и записано — в history/manifest.json, файле, который читатель никогда
+     не откроет. Информация есть, условие не выполняется: со стороны
+     выглядит как соблюдение, по сути — нет.
+     Строки готовит tools/build_photo_credits.py из того же манифеста, чтобы
+     фамилию и версию лицензии не переписывали руками: ошибка в атрибуции
+     хуже её отсутствия — она называет неверного автора. */
+  var КРЕДИТЫ = null;
+  fetch('/edu/assets/history/credits.json', {cache: 'no-cache'})
+    .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(function (j) {
+      КРЕДИТЫ = (j && j['кредиты']) || null;
+      if (!КРЕДИТЫ) throw new Error('в файле нет ключа "кредиты"');
+      window.dispatchEvent(new Event('chrono-credits'));
+    })
+    .catch(function (e) {
+      if (window.console && console.warn) {
+        console.warn('[chrono] подписи авторов не загрузились (' + e.message +
+          '). Для снимков CC-BY это нарушение условия лицензии. Файл ' +
+          'собирается командой python3 tools/build_photo_credits.py');
+      }
+    });
+
+  function creditHTML(key) {
+    if (!КРЕДИТЫ || !КРЕДИТЫ[key] || !STATION_IMAGE[key]) return '';
+    var c = КРЕДИТЫ[key];
+    var автор = (c['автор'] || '').replace(/^Object:\s*/, '');
+    if (автор.length > 44) автор = автор.slice(0, 43).replace(/[ ,(]+$/, '') + '…';
+    var части = [];
+    if (автор) части.push(автор);
+    if (c['лицензия']) части.push(c['лицензия']);
+    if (!части.length) return '';
+    var текст = части.join(' · ');
+    return c['ссылка']
+      ? '<a class="h-credit" href="' + c['ссылка'] + '" target="_blank" ' +
+        'rel="noopener noreferrer">' + текст + '</a>'
+      : '<span class="h-credit">' + текст + '</span>';
+  }
+
   window.ChronoStationArt = STATION_ART;
+  window.ChronoPhotoCredit = creditHTML;
   window.ChronoStationArtHTML = stationArtHTML;
   window.ChronoArchiveStamp = STAMP;
 })();

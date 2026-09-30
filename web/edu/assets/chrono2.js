@@ -18,7 +18,7 @@
         title: "Один человек вместо центробанка",
         body: "Паника 1907 года: банки падают домино, биржа теряет половину стоимости, а центрального банка в США просто нет. Частный банкир Дж. П. Морган запирает крупнейших финансистов Нью-Йорка в своей библиотеке и не выпускает, пока те не скидываются на спасение системы. Работает. Но у всех остаётся один вопрос: а если в следующий раз Моргана не будет?",
         fact: "Заперты они были в буквальном смысле — Морган забрал ключ от двери библиотеки.",
-        legend: null, source: "SPEC_edu_level2_central_banks.md", illustration: "1907_morgan"
+        legend: null, source: "Federal Reserve History · Panic of 1907", illustration: "1907_morgan"
       },
       {
         id: "1913", year: "1913", place: "Вашингтон",
@@ -128,7 +128,7 @@
         title: "Три центробанка тянут в разные стороны",
         body: "Июль 2026-го: ФРС — в цикле снижения (эффективная ставка ~3.6%); ЕЦБ 11 июня 2026-го впервые за три года поднял ставку (+25 бп, депозитная 2.25%) — война на Ближнем Востоке разогнала энергию и инфляцию; Банк Японии 16 июня поднял до 1.00% — максимум с 1995 года. Впервые за десятилетия три великих ЦБ движутся в трёх разных направлениях. Что делает золото, когда центробанки спорят между собой? Открой терминал — этот график живёт прямо сейчас.",
         fact: "Технологии и десятилетия менялись. Ставка как гравитация, действующая на всё сразу, — нет.",
-        legend: null, source: "Federal Reserve H.15 · ECB · Bank of Japan (на 23.07.2026)", illustration: "today_ch2",
+        legend: null, source: "Federal Reserve · ECB · Bank of Japan (через FRED)", illustration: "today_ch2",
         scene: "ch2_now", bridge: true
       }
     ],
@@ -139,7 +139,7 @@
         title: "Un singur om în locul unei bănci centrale",
         body: "Panica din 1907: băncile cad ca dominourile, bursa pierde jumătate din valoare, iar în SUA pur și simplu nu există bancă centrală. Bancherul privat J.P. Morgan îi încuie pe cei mai mari financiari din New York în biblioteca sa și nu-i lasă să plece până nu strâng bani pentru a salva sistemul. Funcționează. Dar tuturor le rămâne o singură întrebare: dacă data viitoare nu va exista un Morgan?",
         fact: "Au fost încuiați la propriu — Morgan a luat cheia ușii bibliotecii.",
-        legend: null, source: "SPEC_edu_level2_central_banks.md", illustration: "1907_morgan"
+        legend: null, source: "Federal Reserve History · Panic of 1907", illustration: "1907_morgan"
       },
       {
         id: "1913", year: "1913", place: "Washington",
@@ -249,7 +249,7 @@
         title: "Trei bănci centrale trag în direcții diferite",
         body: "Iulie 2026: Fed — în ciclu de reducere (dobânda efectivă ~3.6%); BCE, pe 11 iunie 2026, a majorat dobânda pentru prima dată în trei ani (+25 pb, dobânda de depozit 2.25%) — războiul din Orientul Mijlociu a accelerat energia și inflația; Banca Japoniei, pe 16 iunie, a urcat la 1.00% — maximul din 1995 încoace. Pentru prima dată în decenii, trei mari bănci centrale se mișcă în trei direcții diferite. Ce face aurul când băncile centrale se contrazic? Deschide terminalul — acest grafic trăiește chiar acum.",
         fact: "Tehnologiile și deceniile s-au schimbat. Dobânda, ca o gravitație care acționează asupra tuturor simultan — niciodată.",
-        legend: null, source: "Federal Reserve H.15 · BCE · Bank of Japan (la 23.07.2026)", illustration: "today_ch2",
+        legend: null, source: "Federal Reserve · BCE · Bank of Japan (prin FRED)", illustration: "today_ch2",
         scene: "ch2_now", bridge: true
       }
     ],
@@ -260,7 +260,7 @@
         title: "One man instead of a central bank",
         body: "The Panic of 1907: banks fall like dominoes, the market loses half its value, and the US simply has no central bank. Private banker J.P. Morgan locks New York's biggest financiers in his library and won't let them out until they pool money to save the system. It works. But everyone's left with one question: what if next time there's no Morgan?",
         fact: "They were locked in literally — Morgan took the key to the library door.",
-        legend: null, source: "SPEC_edu_level2_central_banks.md", illustration: "1907_morgan"
+        legend: null, source: "Federal Reserve History · Panic of 1907", illustration: "1907_morgan"
       },
       {
         id: "1913", year: "1913", place: "Washington",
@@ -370,7 +370,7 @@
         title: "Three central banks pulling in different directions",
         body: "July 2026: the Fed is in a cutting cycle (effective rate ~3.6%); the ECB, on June 11, 2026, raised its rate for the first time in three years (+25bp, deposit rate 2.25%) as Middle East conflict drove up energy and inflation; the Bank of Japan, on June 16, hiked to 1.00% — the highest since 1995. For the first time in decades, the three great central banks are moving in three different directions. What does gold do when the central banks disagree with each other? Open the terminal — this chart is live right now.",
         fact: "The technology changed, the decades changed. Interest rates, as a gravity acting on everything at once — never.",
-        legend: null, source: "Federal Reserve H.15 · ECB · Bank of Japan (as of 07/23/2026)", illustration: "today_ch2",
+        legend: null, source: "Federal Reserve · ECB · Bank of Japan (via FRED)", illustration: "today_ch2",
         scene: "ch2_now", bridge: true
       }
     ]
@@ -385,7 +385,23 @@
    та же картинка) — chrono.js должен грузиться на странице ДО этого файла. Станции 10-16 (2012→сегодня)
    по спеке §7 намеренно без фото (пресс-фото Драги/SNB/Уэды не PD) — остаются авторскими графиками/SVG. */
 (function(){
-  function hatchBg(h){ h = h || 400; return '<rect width="720" height="'+h+'" fill="url(#hatch)"/>'; }
+  /* 🔴 ПАТТЕРНОВ #hatch И #hatch2 НЕ СУЩЕСТВОВАЛО НИГДЕ.
+     Каждая рисованная станция начиналась с <rect fill="url(#hatch)"> на всю
+     площадь и ещё одного — «пол» внизу кадра. Ни один из двух паттернов не
+     объявлен ни в этом файле, ни в chrono.js, ни в разметке главы: поиск по
+     всему web/ не находит ни одного `pattern id="hatch"`. По спецификации SVG
+     недостижимая ссылка в fill означает, что элемент не рисуется вовсе, —
+     то есть фон и пол отсутствовали на всех станциях с самого начала, молча
+     и без ошибки в консоли. Задуманная фактура «архивной бумаги» не
+     показывалась ни разу.
+     Объявляем оба здесь же, внутри каждого кадра: так SVG остаётся
+     самодостаточным и не зависит от того, что ещё есть на странице, — а
+     зависимость от «где-то определено» и была причиной поломки. */
+  // Паттерны объявлены в общем модуле — одно объявление на обе главы.
+  function defs(){
+    return window.SbfChronoFrames ? window.SbfChronoFrames.defs() : '';
+  }
+  function hatchBg(h){ h = h || 400; return defs() + '<rect width="720" height="'+h+'" fill="url(#hatch)"/>'; }
   function person(cx, cy, s){ s = s || 1; return '<ellipse cx="'+cx+'" cy="'+(cy+26*s)+'" rx="'+(12*s)+'" ry="'+(26*s)+'"/><circle cx="'+cx+'" cy="'+cy+'" r="'+(9*s)+'"/>'; }
 
   var ART = {
@@ -398,7 +414,7 @@
       + '<circle cx="360" cy="180" r="22" fill="none" stroke="#C9A227" stroke-width="3"/>'
       + '<circle cx="360" cy="180" r="6" fill="#C9A227"/><rect x="356" y="180" width="8" height="20" fill="#C9A227"/>'
       + '<g fill="#5c5342">' + person(590,300,0.9) + person(630,306,0.85) + '</g>'
-      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#8A8275">библиотека Моргана, Нью-Йорк 1907</text></svg>';
+      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#716A5A">библиотека Моргана, Нью-Йорк 1907</text></svg>';
     },
     "1913_fed": function(){
       return '<svg class="h-art" viewBox="0 0 720 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Федеральный резервный акт, 1913">'
@@ -407,7 +423,7 @@
       + '<path d="M190 300 v-120 a20 24 0 0 1 40 0 v120 Z M270 300 v-120 a20 24 0 0 1 40 0 v120 Z M350 300 v-120 a20 24 0 0 1 40 0 v120 Z M430 300 v-120 a20 24 0 0 1 40 0 v120 Z M490 300 v-120 a20 24 0 0 1 40 0 v120 Z"/>'
       + '<path d="M130 140 L360 80 L590 140 Z"/></g>'
       + '<circle cx="360" cy="110" r="16" fill="none" stroke="#C9A227" stroke-width="2.5"/>'
-      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#8A8275">Federal Reserve Act, 23.12.1913</text></svg>';
+      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#716A5A">Federal Reserve Act, 23.12.1913</text></svg>';
     },
     "1944_bretton": function(){
       return '<svg class="h-art" viewBox="0 0 720 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Бреттон-Вудская конференция, 1944">'
@@ -416,7 +432,7 @@
       + '<g stroke="#6d6350" stroke-width="3" fill="#efe8d8"><rect x="270" y="220" width="180" height="90"/><path d="M260 220 L360 170 L460 220 Z"/></g>'
       + '<circle cx="600" cy="150" r="34" fill="none" stroke="#6d6350" stroke-width="2.5"/>'
       + '<path d="M566 150 h68 M600 116 v68 M578 128 q22 22 44 0 M578 172 q22 -22 44 0" fill="none" stroke="#6d6350" stroke-width="1.6"/>'
-      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#8A8275">Бреттон-Вудская конференция, 1944</text></svg>';
+      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#716A5A">Бреттон-Вудская конференция, 1944</text></svg>';
     },
     "1971_nixon": function(){
       return '<svg class="h-art" viewBox="0 0 720 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Никсон-шок, 1971">'
@@ -427,16 +443,20 @@
       + '<rect x="270" y="150" width="180" height="100" fill="#efe6d6" stroke="#6d6350" stroke-width="1.6"/>'
       + '<g fill="none" stroke="#8a2f2f" stroke-width="3"><rect x="120" y="230" width="70" height="34" rx="4"/><line x1="130" y1="247" x2="180" y2="247"/></g>'
       + '<g fill="none" stroke="#6d6350" stroke-width="2"><path d="M520 220 h90"/><path d="M600 220 l-14 -10 M600 220 l-14 10"/></g>'
-      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#8A8275">телеобращение Никсона, 15.08.1971</text></svg>';
+      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#716A5A">телеобращение Никсона, 15.08.1971</text></svg>';
     },
     "1980_volcker": function(){
       return '<svg class="h-art" viewBox="0 0 720 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Волкер и ставка 20%, 1980">'
       + hatchBg() + '<rect y="300" width="720" height="100" fill="url(#hatch2)"/>'
       + '<g stroke="#6d6350" stroke-width="3" fill="#efe8d8"><rect x="380" y="120" width="280" height="160"/><path d="M420 280 v-100 a20 22 0 0 1 40 0 v100 Z M480 280 v-100 a20 22 0 0 1 40 0 v100 Z M540 280 v-100 a20 22 0 0 1 40 0 v100 Z M600 280 v-100 a20 22 0 0 1 40 0 v100 Z"/></g>'
-      + '<polyline points="60,280 130,270 130,270" fill="none"/>'
       + '<g stroke="#5c5342" stroke-width="3" fill="none"><rect x="80" y="240" width="120" height="36" rx="4"/><circle cx="105" cy="284" r="16"/><circle cx="175" cy="284" r="16"/></g>'
-      + '<polyline points="60,150 100,120 140,160 180,90 220,130 260,60" fill="none" stroke="#8a2f2f" stroke-width="4"/>'
-      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#8A8275">Волкер, ставка 20%, фермеры-тракторы у ФРС</text></svg>';
+      // 🔴 Рисунок остаётся ЗАПАСНЫМ вариантом, а не основным: у станции
+      // теперь есть кадр по данным — доходность десятилетних US Treasuries
+      // за 1979–83 (см. build_chrono2_frames.py). Самой ставки ФРС у нас
+      // по-прежнему нет, и подпись кадра это прямо оговаривает: показана
+      // рыночная ставка, а не ставка ФРС. Сюда попадём, только если файл с
+      // рядами не загрузится.
+      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#716A5A">Волкер, ставка 20%, фермеры-тракторы у ФРС</text></svg>';
     },
     "1998_ltcm": function(){
       return '<svg class="h-art" viewBox="0 0 720 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="LTCM, 1998">'
@@ -446,7 +466,7 @@
       + '<text x="150" y="140" font-family="Georgia,serif" font-size="46" fill="#6d6350" font-style="italic">Σ</text>'
       + '<text x="260" y="150" font-family="Georgia,serif" font-size="46" fill="#6d6350" font-style="italic">σ</text>'
       + '<text x="540" y="150" font-family="monospace" font-size="26" fill="#8a2f2f">25:1</text>'
-      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#8A8275">крах LTCM, 1998</text></svg>';
+      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#716A5A">крах LTCM, 1998</text></svg>';
     },
     "2012_draghi": function(){
       return '<svg class="h-art" viewBox="0 0 720 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Три слова Драги, 2012">'
@@ -456,7 +476,7 @@
       + '<text x="200" y="180" text-anchor="middle" font-family="Georgia,serif" font-style="italic" font-size="20" fill="#2B2B33">whatever it takes</text>'
       + '<g fill="none" stroke="#C9A227" stroke-width="1.6">'
       + '<circle cx="600" cy="200" r="3"/><circle cx="618" cy="192" r="3"/><circle cx="632" cy="204" r="3"/><circle cx="628" cy="222" r="3"/><circle cx="610" cy="228" r="3"/></g>'
-      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#8A8275">Марио Драги, ЕЦБ, 26.07.2012</text></svg>';
+      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#716A5A">Марио Драги, ЕЦБ, 26.07.2012</text></svg>';
     },
     "2015_snb": function(){
       return '<svg class="h-art" viewBox="0 0 720 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="SNB, 2015">'
@@ -464,16 +484,16 @@
       + '<rect x="120" y="130" width="70" height="70" fill="#8a2f2f"/><rect x="142" y="108" width="26" height="114" fill="#efe8d8"/><rect x="98" y="152" width="114" height="26" fill="#efe8d8"/>'
       + '<line x1="240" y1="160" x2="640" y2="160" stroke="#6d6350" stroke-width="1.6" stroke-dasharray="6 5"/>'
       + '<polyline points="240,160 320,158 340,160 360,300 420,120 480,150 560,145 640,140" fill="none" stroke="#8a2f2f" stroke-width="4"/>'
-      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#8A8275">SNB отменяет пол EURCHF, 15.01.2015</text></svg>';
+      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#716A5A">SNB отменяет пол EURCHF, 15.01.2015</text></svg>';
     },
     "2016_boj": function(){
       return '<svg class="h-art" viewBox="0 0 720 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Отрицательные ставки Японии, 2016">'
       + hatchBg() + '<rect y="300" width="720" height="100" fill="url(#hatch2)"/>'
       + '<g stroke="#8a2f2f" stroke-width="8" fill="none"><path d="M480 90 h140 M550 90 v190 M500 150 h100 M510 150 l-30 130 M590 150 l30 130"/></g>'
       + '<line x1="60" y1="200" x2="420" y2="200" stroke="#6d6350" stroke-width="1.6"/>'
-      + '<text x="40" y="205" font-family="monospace" font-size="12" fill="#8A8275">0</text>'
+      + '<text x="40" y="205" font-family="monospace" font-size="12" fill="#716A5A">0</text>'
       + '<polyline points="60,190 120,195 180,210 240,230 300,225 360,250 420,245" fill="none" stroke="#8a2f2f" stroke-width="4"/>'
-      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#8A8275">BoJ вводит отрицательную ставку, 2016</text></svg>';
+      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#716A5A">BoJ вводит отрицательную ставку, 2016</text></svg>';
     },
     "2022_cycle": function(){
       return '<svg class="h-art" viewBox="0 0 720 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Цикл повышения ставки, 2022">'
@@ -481,45 +501,134 @@
       + '<g fill="none" stroke="#8a2f2f" stroke-width="4">'
       + '<path d="M60 270 h60 v-30 h60 v-40 h60 v-40 h60 v-40 h60 v-30 h60 v-20 h60 v-10 h60"/></g>'
       + '<g fill="#5c5342">' + person(640,250,0.85) + '</g>'
-      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#8A8275">цикл ФРС 2022-23, 0 → 5.25-5.50%</text></svg>';
+      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#716A5A">цикл ФРС 2022-23, 0 → 5.25-5.50%</text></svg>';
     },
     "2024_boj": function(){
       return '<svg class="h-art" viewBox="0 0 720 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Иена и разворот кэрри-трейда, 2024">'
       + hatchBg() + '<rect y="300" width="720" height="100" fill="url(#hatch2)"/>'
       + '<text x="120" y="200" font-family="Georgia,serif" font-size="70" fill="#6d6350">¥</text>'
       + '<polyline points="220,140 300,150 340,145 380,160 420,290 460,260 500,270 560,255 640,150" fill="none" stroke="#8a2f2f" stroke-width="4.5"/>'
-      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#8A8275">Nikkei −12.4% за день, 05.08.2024</text></svg>';
+      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#716A5A">Nikkei −12.4% за день, 05.08.2024</text></svg>';
     },
     "today_ch2": function(){
-      // Реальные значения из web/data/edu_capsules/cb_rates_now.json (обновлено 23.07.2026):
-      // Fed 3.63% (as_of 21.07.2026, снижение с пика 5.25-5.50% цикла 2022-23 -- ст.11 этой же хроники);
-      // ECB 2.25% (as_of 11.06.2026, "first hike in 3 years"); BoJ 1.00% (as_of 16.06.2026, "highest since 1995").
-      // Направления стрелок выведены из этих же реальных данных, не нарисованы на глаз.
-      return '<svg class="h-art" viewBox="0 0 720 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Три центробанка, сегодня: ФРС 3.63% вниз, ЕЦБ 2.25% вверх, BoJ 1.00% вверх">'
-      + hatchBg() + '<rect y="300" width="720" height="100" fill="url(#hatch2)"/>'
-      + '<circle cx="360" cy="190" r="14" fill="#C9A227" stroke="#2B2B33" stroke-width="2"/>'
-      + '<g stroke="#2E7D5B" stroke-width="4" fill="none"><path d="M360 190 L200 110"/><path d="M200 110 l24 6 M200 110 l-2 -26"/></g>'
-      + '<g stroke="#8a2f2f" stroke-width="4" fill="none"><path d="M360 190 L490 250"/><path d="M490 250 l-26 -2 M490 250 l2 -26"/></g>'
-      + '<g stroke="#6d6350" stroke-width="4" fill="none"><path d="M360 190 L560 130"/><path d="M560 130 l-24 8 M560 130 l-10 -24"/></g>'
-      + '<text x="200" y="94" text-anchor="middle" font-family="monospace" font-size="13" font-weight="700" fill="#2E7D5B">BoJ 1.00% ↑</text>'
-      + '<text x="200" y="110" text-anchor="middle" font-family="monospace" font-size="9" fill="#8A8275">макс. с 1995 · 16.06.2026</text>'
-      + '<text x="560" y="112" text-anchor="middle" font-family="monospace" font-size="13" font-weight="700" fill="#6d6350">ЕЦБ 2.25% ↑</text>'
-      + '<text x="560" y="128" text-anchor="middle" font-family="monospace" font-size="9" fill="#8A8275">первое повышение за 3 года · 11.06.2026</text>'
-      + '<text x="490" y="268" text-anchor="middle" font-family="monospace" font-size="13" font-weight="700" fill="#8a2f2f">ФРС 3.63% ↓</text>'
-      + '<text x="490" y="284" text-anchor="middle" font-family="monospace" font-size="9" fill="#8A8275">пик цикла 5.25-5.50% (2023) · 21.07.2026</text>'
-      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="12" fill="#8A8275">три ЦБ, три направления, июль 2026</text></svg>';
+      /* 🔴 ЕДИНСТВЕННАЯ СТАНЦИЯ, КОТОРАЯ УСТАРЕВАЕТ САМА. Здесь стояли три
+         ставки строковыми литералами, а комментарий над ними ссылался на
+         web/data/edu_capsules/cb_rates_now.json «обновлено 23.07.2026» —
+         файла с таким именем в проекте не было вовсе. Числа были верны в
+         день, когда их вписали; беда в том, что перестать быть верными они
+         могли только молча. Теперь файл существует и его раз в сутки
+         пишет cb_rates_job.py из FRED, а рисует станцию СТАВКИ() ниже.
+         Если данных нет — станция говорит об этом, а не показывает
+         вчерашние числа с уверенной датой. */
+      return СТАВКИ();
     }
   };
 
+  /* ── Станция «Сейчас»: три ставки из cb_rates_now.json ────────────────── */
+  var СТАВКИ_ДАННЫЕ = null;
+  fetch('/data/edu_capsules/cb_rates_now.json', {cache:'no-cache'})
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(j){
+      if (!j || !j['банки']) return;
+      СТАВКИ_ДАННЫЕ = j;
+      window.dispatchEvent(new Event('chrono2-frames'));  // перерисовать станцию
+    })
+    .catch(function(){ /* сеть отвалилась — станция покажет «нет данных» */ });
+
+  var МЕСЯЦЫ = ['январь','февраль','март','апрель','май','июнь',
+                'июль','август','сентябрь','октябрь','ноябрь','декабрь'];
+  function _месяц(строка){
+    if (!строка) return '';
+    var ч = строка.split('-');
+    return ч.length >= 2 ? МЕСЯЦЫ[+ч[1] - 1] + ' ' + ч[0] : строка;
+  }
+
+  function _дата(строка){
+    if (!строка) return '';
+    var ч = строка.split('-');
+    return ч.length === 3 ? ч[2] + '.' + ч[1] + '.' + ч[0] : строка;
+  }
+
+  function СТАВКИ(){
+    var шапка = '<svg class="h-art" viewBox="0 0 720 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ставки трёх центробанков">'
+      + hatchBg() + '<rect y="300" width="720" height="100" fill="url(#hatch2)"/>';
+    if (!СТАВКИ_ДАННЫЕ){
+      // Честное «не знаю» вместо трёх чисел неизвестной свежести.
+      return шапка
+        + '<text x="360" y="185" text-anchor="middle" font-family="Georgia,serif" font-size="19" fill="#6d6350">Ставки центробанков</text>'
+        + '<text x="360" y="215" text-anchor="middle" font-family="monospace" font-size="12" fill="#716A5A">данные не загрузились</text>'
+        + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="11" fill="#716A5A">источник: FRED · cb_rates_job.py</text></svg>';
+    }
+    var б = СТАВКИ_ДАННЫЕ['банки'];
+    // Три луча из одной точки: цвет по направлению последнего шага,
+    // а не по тому, кто где стоял на картинке в июле.
+    var места = [
+      {x:200, y:110, tx:200, ty:94},
+      {x:560, y:130, tx:560, ty:112},
+      {x:490, y:250, tx:490, ty:268}
+    ];
+    var цвета = {'↑':'#2E7D5B', '↓':'#8a2f2f', '=':'#6d6350'};
+    var тело = '<circle cx="360" cy="190" r="14" fill="#C9A227" stroke="#2B2B33" stroke-width="2"/>';
+    for (var i = 0; i < б.length && i < 3; i++){
+      var м = места[i], з = б[i], ц = цвета[з['направление']] || '#6d6350';
+      тело += '<g stroke="' + ц + '" stroke-width="4" fill="none"><path d="M360 190 L' + м.x + ' ' + м.y + '"/></g>'
+        + '<text x="' + м.tx + '" y="' + м.ty + '" text-anchor="middle" font-family="monospace" font-size="13" font-weight="700" fill="' + ц + '">'
+        + з['банк'] + ' ' + з['подпись_ставки'] + ' ' + з['направление'] + '</text>';
+      // Вторая строка: чем именно является это число и когда оно такое.
+      var низ = з['это_факт_а_не_цель']
+        ? 'фактическая овернайт, ' + _месяц(з['месяц_наблюдения'])
+        : 'изменена ' + _дата(з['изменена']);
+      тело += '<text x="' + м.tx + '" y="' + (м.ty + 16) + '" text-anchor="middle" font-family="monospace" font-size="9" fill="#716A5A">' + низ + '</text>';
+    }
+    var собрано = (СТАВКИ_ДАННЫЕ['собрано'] || '').slice(0, 10);
+    return шапка + тело
+      + '<text x="360" y="386" text-anchor="middle" font-family="monospace" font-size="11" fill="#716A5A">FRED, данные на ' + _дата(собрано) + '</text></svg>';
+  }
+
   function art2HTML(key){
+    // 🔴 ПОРЯДОК. Сначала архивный снимок, потом ряд данных, потом рисунок —
+    // тот же порядок, что в главе 1. Раньше ряд стоял первым, и это было
+    // верно ровно до тех пор, пока фотографий у этих станций не было: как
+    // только к 1907/1913/1944/1971 нашлись снимки, прежний порядок стал бы
+    // молча их прятать — код продолжал бы «работать», а правка не дошла бы
+    // до экрана. Ряд остаётся для станций без снимка (1980, 1987, 1998,
+    // 2012, 2015, 2016, 2024) и как запасной путь, если файл не загрузился.
+    if (window.ChronoStationImageHas && window.ChronoStationImageHas(key)
+        && window.ChronoStationArtHTML) {
+      return window.ChronoStationArtHTML(key);
+    }
+    if (window.SbfChronoFrames) {
+      var svg = window.SbfChronoFrames.кадр(key);
+      if (svg) return svg;
+    }
     if (window.ChronoStationArtHTML && window.ChronoStationArt && window.ChronoStationArt[key]) {
       return window.ChronoStationArtHTML(key); // переиспользуем ассет главы 1 (фото или SVG)
     }
-    return ART[key] ? ART[key]() : '';
+    if (ART[key]) return ART[key]();
+    // 🔴 Отсутствие ассета обязано быть слышно. Раньше здесь стоял молчаливый
+    // return '': когда chrono.js не подключили на странице, четыре станции из
+    // шестнадцати показывали пустую рамку, и узнать об этом можно было только
+    // глазами, пролистав хронику до конца. Пустой экран сам о себе не
+    // сообщает — сообщать должен код.
+    if (window.console && console.warn) {
+      console.warn('[chrono2] нет иллюстрации для станции "' + key +
+        '". Ключи 1929_crowd/1987_blackmonday/2008_lehman/2020_covid живут в ' +
+        'chrono.js — он должен грузиться на странице ДО chrono2.js.');
+    }
+    return '';
   }
 
   window.Chrono2StationArt = ART;
   window.Chrono2StationArtHTML = art2HTML;
+  // Что показать, если снимок станции не загрузился (см. SbfChronoImgFail).
+  window.SbfChronoFallbackHTML = function(key){
+    if (window.SbfChronoFrames) {
+      var svg = window.SbfChronoFrames.кадр(key);
+      if (svg) return svg;
+    }
+    return ART[key] ? ART[key]() : '';
+  };
+
 })();
 
 /* Четыре крупнейших ЦБ — карточки (SPEC §3.2). window.Chrono2Organizations = {ru:[4],ro:[4],en:[4]}. */

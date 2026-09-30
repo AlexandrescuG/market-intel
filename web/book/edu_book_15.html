@@ -2,8 +2,15 @@
 <html lang="{{ lang }}">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>SBF | {% if lang == 'ru' %}Глава 15. От Теории к Практике{% elif lang == 'ro' %}Capitolul 15. De la Teorie la Practică{% else %}Chapter 15. From Theory to Practice{% endif %}</title>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="SBF Intelligence">
+<meta property="og:image" content="https://lp.sbfconsult.com/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://lp.sbfconsult.com/assets/og-image.png">
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
   <style>
@@ -23,6 +30,8 @@
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"></script>
 <script src="/edu/assets/ch15.js"></script>
+<link rel="stylesheet" href="/assets/brokers.css?v=1">
+<script src="/assets/brokers.js?v=16" defer></script>
 
 <script type="text/babel" data-presets="react">
 const INITIAL_LANG = "{{ lang }}";
@@ -73,7 +82,7 @@ const STRINGS = {
   },
 };
 
-const {C, Mono, Chip, Rule, getChUrl, ComplianceFootnote, ColdStart} = window.AcademyShared;
+const {C, Mono, Chip, Rule, getChUrl, ComplianceFootnote, ColdStart, CheckList, SortTwoBins, PartnerPicker} = window.AcademyShared;
 
 function fillTemplate(str, vars) {
   if (!str) return str;
@@ -110,7 +119,7 @@ function ColdStart15Entry({ lang }) {
   const cs = T.coldStart;
   const claims = useClaims();
   const claimField = "claim_" + lang;
-  if (!claims) return <div style={{background:C.black,padding:"60px 5vw",textAlign:"center"}}><Mono size={11} color={C.gold} spacing={4}>{cs.tag}</Mono></div>;
+  if (!claims) return <div style={{background:C.black,padding:"60px 5vw",textAlign:"center"}}><Mono size={11} color={C.goldText} spacing={4}>{cs.tag}</Mono></div>;
 
   return (
     <ColdStart
@@ -121,12 +130,20 @@ function ColdStart15Entry({ lang }) {
           {claims.map((c, i) => {
             const isPicked = answer === i;
             return (
-              <div key={i} onClick={() => csCommit(i)} style={{
+              /* 🔴 Вариант ответа — управление, а не абзац. Был <div> с
+                 курсором: с клавиатуры не выбрать, диктор не назовёт ни
+                 роли, ни того, что выбрано. Кнопка с aria-pressed говорит
+                 и то, и другое; disabled после ответа снимает её из
+                 обхода табом, как и положено уже нерабочему выбору. */
+              <button key={i} type="button" onClick={() => csCommit(i)}
+                disabled={committed} aria-pressed={isPicked ? "true" : "false"}
+                style={{
+                display:"block", width:"100%", textAlign:"left", font:"inherit", border:"none",
                 padding:"14px 18px", borderBottom: i < claims.length - 1 ? "1px solid rgba(255,255,255,0.1)" : "none",
                 cursor: committed ? "default" : "pointer", background: isPicked ? "rgba(201,151,58,0.12)" : "transparent",
               }}>
                 <p style={{fontSize:13, color:"#fff", lineHeight:1.55, margin:0}}>{c[claimField] || c.claim_ru}</p>
-              </div>
+              </button>
             );
           })}
         </div>
@@ -139,7 +156,7 @@ function ColdStart15Entry({ lang }) {
         return (
           <div>
             <div>{method} · {date}</div>
-            {dl && <a href={dl} download style={{display:"inline-block", marginTop:10, fontFamily:"monospace", fontSize:12, color:C.gold, textDecoration:"none", border:`1px solid ${C.gold}`, padding:"8px 14px", borderRadius:4}}>{cs.downloadLabel}</a>}
+            {dl && <a href={dl} download style={{display:"inline-block", marginTop:10, fontFamily:"monospace", fontSize:12, color:C.goldText, textDecoration:"none", border:`1px solid ${C.gold}`, padding:"8px 14px", borderRadius:4}}>{cs.downloadLabel}</a>}
           </div>
         );
       }}
@@ -167,12 +184,12 @@ function PropMechanics() {
       </div>
 
       <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"18px 22px",marginBottom:28}}>
-        <Mono size={10} color={C.gold} spacing={1} style={{display:"block",marginBottom:8,textTransform:"uppercase"}}>{p.compareLabel}</Mono>
+        <Mono size={10} color={C.goldText} spacing={1} style={{display:"block",marginBottom:8,textTransform:"uppercase"}}>{p.compareLabel}</Mono>
         <p style={{fontSize:13,color:C.inkMid,lineHeight:1.65,margin:0}}>{p.compareText}</p>
       </div>
 
       <div style={{background:C.black,borderRadius:8,padding:"26px 30px",color:"#fff",marginBottom:16}}>
-        <Mono size={11} color={C.gold} spacing={2} style={{display:"block",marginBottom:12}}>{p.caseTitle}</Mono>
+        <Mono size={11} color={C.goldText} spacing={2} style={{display:"block",marginBottom:12}}>{p.caseTitle}</Mono>
         <p style={{fontSize:13.5,color:"rgba(255,255,255,0.85)",lineHeight:1.75,marginBottom:14}}>{p.caseText}</p>
         <p style={{fontSize:13.5,color:"rgba(255,255,255,0.7)",lineHeight:1.75,margin:0,fontStyle:"italic"}}>{p.caseNeutral}</p>
       </div>
@@ -185,7 +202,7 @@ function PropMechanics() {
             <div key={i} style={{padding:"12px 18px",borderBottom: i<p.regItems.length-1 ? `1px solid ${C.border}` : "none"}}>
               <div style={{display:"flex",gap:10,alignItems:"baseline",marginBottom:4,flexWrap:"wrap"}}>
                 <span style={{fontSize:13,fontWeight:600,color:C.black}}>{row[0]}</span>
-                <Mono size={10} color={C.gold} spacing={0}>{row[1]}</Mono>
+                <Mono size={10} color={C.goldText} spacing={0}>{row[1]}</Mono>
               </div>
               <p style={{fontSize:12.5,color:C.inkMid,lineHeight:1.6,margin:0}}>{row[2]}</p>
             </div>
@@ -207,12 +224,9 @@ function PropChecklist() {
       <div style={{background:C.goldPale,border:`1px solid ${C.borderGold}`,borderRadius:8,padding:"16px 22px",marginBottom:20}}>
         <p style={{fontSize:13,color:C.black,lineHeight:1.65,margin:0}}>{c.frame}</p>
       </div>
-      {c.items.map((it,i) => (
-        <div key={i} style={{display:"flex",gap:12,marginBottom:12,alignItems:"flex-start"}}>
-          <Mono size={11} color={C.gold} spacing={0}>{i+1}</Mono>
-          <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.65,margin:0}}>{it}</p>
-        </div>
-      ))}
+      {/* Рубрика называется «ЧТО ПРОВЕРИТЬ» — пусть проверять и получается.
+          Пять вопросов, на которые читатель отмечает, что уже выяснил. */}
+      <CheckList items={c.items} lang={INITIAL_LANG} mode="all"/>
     </div>
   );
 }
@@ -235,28 +249,30 @@ function NineRules() {
   const r = T.nineRules;
   return (
     <div style={{marginBottom:48}}>
-      <Mono size={10} color={C.inkFaint} spacing={1} style={{display:"block",marginBottom:10,textTransform:"uppercase"}}>{r.group1Label}</Mono>
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:24}} className="g2">
-        {r.group1.map((it,i) => (
-          <div key={i} style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:6,padding:"12px 16px",display:"flex",gap:10,alignItems:"flex-start"}}>
-            <Mono size={10} color={C.gold} spacing={0}>{i+1}</Mono>
-            <span style={{fontSize:12.5,color:C.black,lineHeight:1.5}}>{it}</span>
-          </div>
-        ))}
-      </div>
+      {/* 🔴 Девятое правило звучит «отличай правило процесса от параметра
+          метода» — и до правки восемь предыдущих правил были просто списком,
+          уже разложенным по двум подписанным группам. То есть навык, который
+          глава объявляет главным, читателю предлагалось получить чтением
+          готового ответа.
 
-      <Mono size={10} color={C.inkFaint} spacing={1} style={{display:"block",marginBottom:10,textTransform:"uppercase"}}>{r.group2Label}</Mono>
-      <div style={{marginBottom:24}}>
-        {r.group2.map((it,i) => (
-          <div key={i} style={{display:"flex",gap:10,marginBottom:10,alignItems:"flex-start"}}>
-            <Mono size={10} color={C.inkFaint} spacing={0}>{6+i}</Mono>
-            <p style={{fontSize:12.5,color:C.inkSoft,lineHeight:1.6,margin:0,fontStyle:"italic"}}>{it}</p>
-          </div>
-        ))}
-      </div>
+          Теперь он его применяет: восемь утверждений вперемешку, две корзины,
+          разбор после того, как разложено всё. Подписи корзин — те же
+          group1Label/group2Label, только укороченные до сути: полная подпись
+          («правила процесса (верны всегда)») сама по себе подсказка. */}
+      <SortTwoBins lang={INITIAL_LANG} style={{marginBottom:24}}
+        labels={[r.group1Label.replace(/^Группа \d+ — /, "").replace(/ \(.*\)$/, ""),
+                 r.group2Label.replace(/^Группа \d+ — /, "").replace(/ \(.*\)$/, "")]}
+        items={[
+          ...r.group1.map(t => ({text: t, bin: 0})),
+          ...r.group2.map(t => ({text: t, bin: 1})),
+        ].map((it, i) => ({...it, _k: i}))
+         /* Перемешивание фиксированное, а не случайное: при случайном порядке
+            два читателя видят разные задания, и обсуждать «а у тебя как» уже
+            нельзя. Достаточно того, что порядок не совпадает с группами. */
+         .sort((a, b) => ((a._k * 5) % 8) - ((b._k * 5) % 8))}/>
 
       <div style={{background:C.black,borderRadius:8,padding:"26px 30px",color:"#fff"}}>
-        <Mono size={11} color={C.gold} spacing={2} style={{display:"block",marginBottom:12}}>{r.ninthLabel}</Mono>
+        <Mono size={11} color={C.goldText} spacing={2} style={{display:"block",marginBottom:12}}>{r.ninthLabel}</Mono>
         <p style={{fontSize:14.5,color:"#fff",lineHeight:1.75,margin:0,fontFamily:"'DM Serif Display',serif"}}>{r.ninthText}</p>
       </div>
     </div>
@@ -324,8 +340,8 @@ function ThreePaths({ lang }) {
                   const cond = gate.conditions[key];
                   return (
                     <div key={key} style={{display:"flex",justifyContent:"space-between",fontSize:11,fontFamily:"monospace"}}>
-                      <span style={{color:cond.ok?C.gold:C.inkMid}}>{cond.ok ? "✓" : "·"} {label}</span>
-                      <span style={{color:cond.ok?C.gold:C.inkFaint}}>{cond.have}/{cond.need}</span>
+                      <span style={{color:cond.ok?C.goldText:C.inkMid}}>{cond.ok ? "✓" : "·"} {label}</span>
+                      <span style={{color:cond.ok?C.goldText:C.inkFaint}}>{cond.have}/{cond.need}</span>
                     </div>
                   );
                 })}
@@ -338,17 +354,24 @@ function ThreePaths({ lang }) {
                 <div style={{marginBottom:10}}>
                   <label style={{fontSize:10.5,color:C.inkFaint,fontFamily:"monospace",display:"block",marginBottom:4}}>{tp.path2.projLabel}: {pace}</label>
                   <input type="range" min="1" max="20" value={pace} onChange={e=>setPace(Number(e.target.value))} style={{width:"100%"}}/>
-                  <p style={{fontSize:11,color:C.gold,fontFamily:"monospace",margin:"4px 0 0"}}>
+                  <p style={{fontSize:11,color:C.goldText,fontFamily:"monospace",margin:"4px 0 0"}}>
                     {tp.path2.projResult(Math.ceil((gate.conditions.trades.need - gate.conditions.trades.have) / pace))}
                   </p>
                 </div>
               )}
-              <span onClick={()=>window.location.href=getChUrl(14,lang)} style={{fontSize:11,color:C.gold,cursor:"pointer",fontFamily:"monospace"}}>{tp.path2.gotoGate}</span>
+              {/* Переход в главу 14 — это ссылка, и должна быть ссылкой:
+                  открывается в новой вкладке средним кликом, работает с
+                  клавиатуры, видна диктору. */}
+              <a href={getChUrl(14,lang)} style={{fontSize:11,color:C.goldText,cursor:"pointer",fontFamily:"monospace",textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>{tp.path2.gotoGate}</a>
             </div>
           )}
           {selected === "live" && !gateLoading && gate && gate.all_ok && (
             <div style={{background:"#fff",border:`1px dashed ${C.borderGold}`,borderRadius:6,padding:"10px 12px",marginBottom:12}}>
-              <p style={{fontSize:11.5,color:C.inkFaint,fontStyle:"italic",margin:0}}>{tp.path2.pendingNote}</p>
+              {/* Список площадок с проверенными юрлицами и лицензиями —
+                  тот же, что в главах 11 и 14 и на /brokers. Пока он был
+                  «готовится отдельно», читатель на последней странице курса
+                  упирался в пустую рамку. */}
+              <PartnerPicker limit={3} place="ch15_path2" errorText={tp.path2.loadError}/>
             </div>
           )}
           <button onClick={()=>setSelected("live")} style={btnStyle(selected==="live")}>{tp.path2.cta}</button>
@@ -364,7 +387,7 @@ function ThreePaths({ lang }) {
         </div>
       </div>
 
-      {selected && <p style={{fontSize:13,color:C.gold,textAlign:"center",marginBottom:24}}>{tp.selectedNote}</p>}
+      {selected && <p style={{fontSize:13,color:C.goldText,textAlign:"center",marginBottom:24}}>{tp.selectedNote}</p>}
 
       <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"20px 24px"}}>
         <div style={{fontWeight:600,fontSize:12.5,color:C.black,marginBottom:8}}>{tp.whatWeDontDoTitle}</div>
@@ -383,13 +406,15 @@ function StopList() {
       <div style={{background:"rgba(242,54,69,0.06)",border:"1px solid rgba(242,54,69,0.25)",borderRadius:8,padding:"26px 30px"}}>
         <Mono size={11} color="#c0392b" spacing={2} style={{display:"block",marginBottom:6}}>{s.tag}</Mono>
         <p style={{fontSize:13,color:C.inkSoft,marginBottom:18}}>{s.subtitle}</p>
-        {s.items.map((it,i) => (
-          <div key={i} style={{display:"flex",gap:10,marginBottom:10,alignItems:"flex-start"}}>
-            <span style={{color:"#c0392b",fontSize:13}}>·</span>
-            <p style={{fontSize:13,color:C.inkMid,lineHeight:1.6,margin:0}}>{it}</p>
-          </div>
-        ))}
-        <p style={{fontSize:13.5,color:C.black,fontWeight:600,lineHeight:1.7,marginTop:16,marginBottom:0}}>{s.outro}</p>
+        {/* 🔴 Самый важный чек-лист курса, и он был списком точек.
+            Семь причин не открывать реальный счёт человек пролистывал как
+            текст — а это ровно те вопросы, на которые он должен ответить
+            себе до, а не после. Отмеченная галочка это ответ; точка — нет.
+            Вывод («ответ — путь первый») показывается, как только отмечен
+            хотя бы один пункт: любого из них достаточно.
+            Ответы никуда не уходят и нигде не сохраняются. */}
+        <CheckList items={s.items} lang={INITIAL_LANG} mode="any"
+                   accent="#c0392b" verdict={s.outro}/>
       </div>
     </div>
   );
@@ -428,7 +453,7 @@ function Chapter15() {
 
       <div style={{position:"sticky",top:106,background:"rgba(255,255,255,0.96)",backdropFilter:"blur(10px)",borderBottom:`1px solid ${C.border}`,padding:"15px 5vw",display:"flex",alignItems:"center",justifyContent:"space-between",zIndex:50,gap:12,flexWrap:"wrap"}}>
         <div style={{display:"flex",alignItems:"center",gap:20}}>
-          <span onClick={() => window.location.href = getChUrl(14, lang)} style={{color:C.gold,cursor:"pointer",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</span>
+          <a href={getChUrl(14, lang)} aria-label={lang==="ru"?"Предыдущая глава":lang==="ro"?"Capitolul anterior":"Previous chapter"} style={{color:C.goldText,cursor:"pointer",textDecoration:"none",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</a>
           <Chip>{S.levelChip}</Chip>
           <Mono size={14} color={C.inkSoft} spacing={0} className="hide-mobile">{S.chapterNameShort}</Mono>
         </div>
@@ -437,9 +462,9 @@ function Chapter15() {
       <div style={{background:C.black,padding:"80px 5vw 70px",textAlign:"center",position:"relative",overflow:"hidden"}}>
         <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 100%, rgba(201,151,58,0.1) 0%, transparent 60%)"}}/>
         <div style={{position:"relative"}}>
-          <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:20}}>{S.heroEyebrow}</Mono>
+          <Mono size={11} color={C.goldText} spacing={4} style={{display:"block",marginBottom:20}}>{S.heroEyebrow}</Mono>
           <h1 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(36px,6vw,66px)",fontWeight:400,color:C.white,lineHeight:1.05,marginBottom:20}}>
-            {S.heroTitleLine1}<br/><span style={{color:C.gold}}>{S.heroTitleLine2}</span>
+            {S.heroTitleLine1}<br/><span style={{color:C.goldText}}>{S.heroTitleLine2}</span>
           </h1>
           <p style={{fontSize:"clamp(16px,2vw,20px)",color:"rgba(255,255,255,0.55)",maxWidth:640,margin:"0 auto",lineHeight:1.65}}>{S.heroSubtitle}</p>
         </div>

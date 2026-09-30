@@ -1,107 +1,120 @@
 {
-  "updated": "2026-08-11T08:30:22.155052+00:00",
+  "updated": "2026-09-30T07:46:29.521136+00:00",
   "items": [
     {
       "name": "Золото",
       "ticker": "GC=F",
-      "price": 4421.8,
-      "prev": 4361.8,
-      "change_pct": 1.38
+      "price": 4191.58,
+      "prev": 4184.86,
+      "change_pct": 0.16,
+      "source": "mt5"
     },
     {
       "name": "Серебро",
       "ticker": "SI=F",
-      "price": 64.82,
-      "prev": 65.11,
-      "change_pct": -0.44
+      "price": 61.19,
+      "prev": 61.5,
+      "change_pct": -0.51,
+      "source": "mt5"
     },
     {
       "name": "Нефть WTI",
       "ticker": "CL=F",
-      "price": 84.32,
-      "prev": 82.13,
-      "change_pct": 2.67
+      "price": 89.35,
+      "prev": 89.03,
+      "change_pct": 0.36,
+      "source": "mt5"
     },
     {
       "name": "Природный газ",
       "ticker": "NG=F",
-      "price": 2.774,
-      "prev": 2.794,
-      "change_pct": -0.72
+      "price": 3.015,
+      "prev": 3.022,
+      "change_pct": -0.23,
+      "source": "mt5"
     },
     {
       "name": "Евро / доллар",
       "ticker": "EURUSD=X",
-      "price": 1.1537,
-      "prev": 1.1556,
-      "change_pct": -0.17
+      "price": 1.1346,
+      "prev": 1.134,
+      "change_pct": 0.05,
+      "source": "mt5"
     },
     {
       "name": "Фунт / доллар",
       "ticker": "GBPUSD=X",
-      "price": 1.3502,
-      "prev": 1.3491,
-      "change_pct": 0.08
+      "price": 1.3268,
+      "prev": 1.3229,
+      "change_pct": 0.3,
+      "source": "mt5"
     },
     {
       "name": "Индекс доллара",
       "ticker": "DX-Y.NYB",
-      "price": 99.88,
-      "prev": 99.81,
-      "change_pct": 0.07
+      "price": 101.02,
+      "prev": 101.11,
+      "change_pct": -0.09,
+      "source": "mt5"
     },
     {
       "name": "S&P 500",
       "ticker": "^GSPC",
-      "price": 7753.11,
-      "prev": 7757.64,
-      "change_pct": -0.06
+      "price": 7752.75,
+      "prev": 7750.5,
+      "change_pct": 0.03,
+      "source": "mt5"
     },
     {
       "name": "Nasdaq 100",
-      "ticker": "^IXIC",
-      "price": 26605.36,
-      "prev": 26690.62,
-      "change_pct": -0.32
+      "ticker": "^NDX",
+      "price": 30683.25,
+      "prev": 30711.25,
+      "change_pct": -0.09,
+      "source": "mt5"
     },
     {
       "name": "Dow Jones",
       "ticker": "^DJI",
-      "price": 53975.98,
-      "prev": 54036.93,
-      "change_pct": -0.11
+      "price": 51935.0,
+      "prev": 51830.0,
+      "change_pct": 0.2,
+      "source": "mt5"
     },
     {
       "name": "VIX",
       "ticker": "^VIX",
-      "price": 15.48,
-      "prev": 15.46,
-      "change_pct": 0.13
+      "price": 15.89,
+      "prev": 16.04,
+      "change_pct": -0.94
     },
     {
       "name": "Биткоин",
       "ticker": "BTC-USD",
-      "price": 63984.72,
-      "prev": 63910.59,
-      "change_pct": 0.12
+      "price": 83366.5,
+      "prev": 83621.2,
+      "change_pct": -0.3,
+      "source": "mt5"
     },
     {
       "name": "Эфириум",
       "ticker": "ETH-USD",
-      "price": 1875.01,
-      "prev": 1871.28,
-      "change_pct": 0.2
+      "price": 2673.39,
+      "prev": 2676.49,
+      "change_pct": -0.12,
+      "source": "mt5"
     },
     {
       "name": "Солана",
       "ticker": "SOL-USD",
-      "price": 75.71,
-      "prev": 75.95,
-      "change_pct": -0.31
+      "price": 118.54,
+      "prev": 118.93,
+      "change_pct": -0.33,
+      "source": "mt5"
     }
   ],
   "fear_greed": {
-    "value": 29,
-    "label": "Fear"
+    "value": 71,
+    "label": "Greed"
   }
 }

@@ -122,8 +122,18 @@ def _now() -> str:
 
 
 def _connect() -> sqlite3.Connection:
-    con = sqlite3.connect(DB_PATH, timeout=10)
-    con.execute("PRAGMA busy_timeout=10000")
+    # 🔴 07.09: было 10 с, и этого не хватало. `database is locked` ронял
+    # alpha_cycle с exit_code=3 дважды за девять дней — то есть писатель
+    # держал блокировку ДОЛЬШЕ десяти секунд. Так и есть: шаг resolve пишет
+    # сотни строк за транзакцию, а в bot.db одновременно ходят движок,
+    # strategy_monitor и все job'ы по таймерам.
+    #
+    # Цена ожидания и цена отказа тут несимметричны: подождать минуту —
+    # ничего не стоит, а упавший прогон означает потерянные прогнозы и
+    # несведённые сделки. Тот же аргумент, что для flock на MT5-мосту:
+    # очередь лучше обрыва.
+    con = sqlite3.connect(DB_PATH, timeout=60)
+    con.execute("PRAGMA busy_timeout=60000")
     return con
 
 

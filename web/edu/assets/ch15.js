@@ -33,6 +33,12 @@
  * заменяет формальную юридическую проверку, которую спека требует явно —
  * рекомендация ниже (в документации закрытия) отражает это прямо.
  *
+ * [ОБНОВЛЕНО 15.09.2026] Пометки ниже про «partners.json не существует»
+ * устарели: файл есть (web/data/partners.json), путь 2 показывает
+ * площадки через AcademyShared.PartnerPicker — тот же список, что в
+ * главах 7, 11 и 14 и на /brokers. Путь 3 по-прежнему ждёт юридической
+ * проверки, и это единственная оставшаяся здесь заглушка.
+ *
  * [РЕШЕНИЕ] Путь 2 (реальный счёт) не раскрывает <PartnerBridge tier="path">
  * с реальными данными площадки — partners.json не существует (та же причина,
  * что отложила ступень 6 в главе 11 и полное раскрытие в ступени 9 главы 14).
@@ -142,7 +148,7 @@ window.Ch15Content = {
           const word = (mod10 === 1 && mod100 !== 11) ? "неделя" : (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) ? "недели" : "недель";
           return `ещё ${weeks} ${word} до 50 сделок`;
         }, projDone: "условие по сделкам уже выполнено",
-        pendingNote: "Список площадок с проверенными данными по юрлицам и лицензиям готовится отдельно и пока не показан здесь — по той же причине, по которой мы не публикуем непроверенные цифры нигде в курсе.",
+        loadError: "Список площадок не загрузился — он же лежит в /brokers.",
       },
       path3: {
         title: "Путь третий: доверительное управление",
@@ -292,7 +298,7 @@ window.Ch15Content = {
         gotoGate: "To chapter 14's gate →",
         condTrades: "Trades logged", condWeeks: "Active weeks", condSystem: "Rules written down", condMath: "Cost calculator done",
         projLabel: "Trades per week (your pace)", projResult: (weeks) => weeks === 1 ? "1 more week to 50 trades" : `${weeks} more weeks to 50 trades`, projDone: "the trades condition is already met",
-        pendingNote: "The list of platforms with verified legal-entity and license data is being prepared separately and isn't shown here yet — for the same reason we don't publish unverified numbers anywhere in the course.",
+        loadError: "The platform list failed to load — it also lives at /brokers.",
       },
       path3: {
         title: "Path three: managed accounts",
@@ -442,7 +448,7 @@ window.Ch15Content = {
         gotoGate: "La poarta capitolului 14 →",
         condTrades: "Tranzacții înregistrate", condWeeks: "Săptămâni active", condSystem: "Reguli scrise", condMath: "Calculator de costuri făcut",
         projLabel: "Tranzacții pe săptămână (ritmul tău)", projResult: (weeks) => weeks === 1 ? "încă 1 săptămână până la 50" : `încă ${weeks} săptămâni până la 50`, projDone: "condiția de tranzacții e deja îndeplinită",
-        pendingNote: "Lista platformelor cu date verificate despre entități juridice și licențe e în pregătire separată și nu e încă arătată aici — din același motiv pentru care nu publicăm cifre neverificate nicăieri în curs.",
+        loadError: "Lista platformelor nu s-a încărcat — o găsești la /brokers.",
       },
       path3: {
         title: "Calea a treia: administrare fiduciară",

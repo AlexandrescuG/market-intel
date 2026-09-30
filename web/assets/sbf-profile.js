@@ -8,6 +8,17 @@
 
   // ── i18n (см. assets/i18n.js, паттерн — sbf-header.js) ───────────────────
   var _i18n = window.sbfI18n || { lang: 'ru', t: function (k, fb) { return fb || k; }, ready: Promise.resolve() };
+  /* Адрес в текущей локали. Ссылки «Войти» и «Создать аккаунт» вели на
+     /login.html и /register.html без префикса: с румынской страницы
+     человек попадал в русскую форму входа (Л-6 языкового аудита).
+     Берём общий помощник из i18n.js, а пока его нет — язык из адреса. */
+  function ЛОК(путь) {
+    var i = window.sbfI18n;
+    if (i && i.url) return i.url(путь);
+    var л = (location.pathname.match(/^\/(ro|en)(\/|$)/) || [])[1];
+    return л ? '/' + л + путь : путь;
+  }
+
   function t(key, fallback) { return _i18n.t(key, fallback); }
 
   // Патч-пасс для узлов, отрисованных ДО того как словарь догрузился:
@@ -120,11 +131,41 @@
     'button.sbf-av:hover{box-shadow:0 0 0 3px rgba(201,162,39,.3);transform:scale(1.06);}',
     'button.sbf-av:focus-visible{box-shadow:0 0 0 3px rgba(201,162,39,.5);}',
 
-    '.sbf-login-link{margin-left:10px;padding:7px 16px;border-radius:8px;',
-    'background:var(--gold,#C9A227);color:#fff;font-family:Montserrat,sans-serif;',
+    // 27.08.2026: «Войти» была единственной кнопкой в шапке и единственным
+    // видимым действием на всём сайте. Холодный посетитель из ролика читает
+    // её как «для своих» — она не обещает ничего, чего он ещё не получил,
+    // потому что терминал и так открыт. Рядом появилась главная кнопка,
+    // ведущая в опрос: он даёт аккаунт И 30 дней PRO (grant_survey_pro,
+    // journal_auth.py:723), то есть главы курса с 6-й по 15-ю. Ведём именно
+    // на /survey, а не на /register: вторая просит почту с паролем и ничего
+    // не обещает взамен.
+    '.sbf-login-link{margin-left:10px;padding:7px 14px;border-radius:8px;',
+    'background:transparent;color:var(--ink,#2B2B33);font-family:Montserrat,sans-serif;',
+    'font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap;',
+    'border:1px solid var(--line,#E7DFCF);transition:border-color .12s,color .12s;}',
+    '.sbf-login-link:hover{border-color:var(--gold,#C9A227);color:var(--gold,#C9A227);}',
+
+    '.sbf-cta-link{margin-left:10px;padding:8px 16px;border-radius:8px;',
+    'background:var(--gold,#C9A227);color:#1E1B12;font-family:Montserrat,sans-serif;',
     'font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap;',
     'transition:background .12s;}',
-    '.sbf-login-link:hover{background:#B8931F;}',
+    // 🔴 Цвет текста повторяем в :hover, хотя он и так задан выше.
+    //
+    // Кнопка — это ссылка, и на неё действует общее правило страницы
+    // `a:hover{color:var(--glow)}` (index.html). Фон при наведении становится
+    // тем же --glow, и надпись «30 дней PRO» исчезала целиком: замер
+    // computed style — текст rgb(230,194,87) на фоне rgb(230,194,87),
+    // разница яркости ноль. На экране это выглядело как пустой золотой
+    // прямоугольник на главной кнопке сайта.
+    //
+    // Компонент, у которого есть собственный фон, обязан задавать и свой цвет
+    // текста в каждом состоянии — иначе он зависит от того, какие правила для
+    // ссылок написаны на конкретной странице.
+    '.sbf-cta-link:hover{background:var(--glow,#E6C257);color:#1E1B12;text-decoration:none;}',
+    // На узком экране кнопки не должны выталкивать логотип: вторичная
+    // сжимается, главная остаётся целой.
+    '@media (max-width:520px){.sbf-login-link{padding:7px 10px;margin-left:6px;}',
+    '.sbf-cta-link{padding:8px 12px;margin-left:6px;}}',
     '.sbf-av img{width:100%;height:100%;object-fit:cover;display:block;}',
     // Аватар внутри кнопки (не кликабельный сам по себе)
     '.sbf-av-in{pointer-events:none;}',
@@ -451,9 +492,9 @@
       '<div class="sbf-pp-guest-banner" id="sbfGuestBanner" style="display:none">',
       '  <span data-i18n="profile.guest_banner_text">' + t('profile.guest_banner_text', 'Это гостевой профиль — прогресс хранится только в этом браузере и пропадёт при очистке.') + '</span>',
       '  <span class="sbf-pp-gb-actions">',
-      '    <a href="/login.html" class="sbf-pp-gb-link" data-i18n="profile.guest_login_button">' + t('profile.guest_login_button', 'Войти') + '</a>',
+      '    <a href="' + ЛОК('/login.html') + '" class="sbf-pp-gb-link" data-i18n="profile.guest_login_button">' + t('profile.guest_login_button', 'Войти') + '</a>',
       '    <span class="sbf-pp-gb-sep">·</span>',
-      '    <a href="/register.html" class="sbf-pp-gb-link" data-i18n="profile.guest_register_button">' + t('profile.guest_register_button', 'Создать аккаунт') + '</a>',
+      '    <a href="' + ЛОК('/register.html') + '" class="sbf-pp-gb-link" data-i18n="profile.guest_register_button">' + t('profile.guest_register_button', 'Создать аккаунт') + '</a>',
       '  </span>',
       '</div>',
 
@@ -648,7 +689,7 @@
       '    <a href="/brokers" class="sbf-pp-jlink">',
       '      <span class="sbf-pp-jlink-ico">🏦</span>',
       '      <span class="sbf-pp-jlink-lbl" data-i18n="profile.link_brokers">' + t('profile.link_brokers', 'Брокеры') + '</span></a>',
-      '    <a href="/register.html?retake=1" class="sbf-pp-jlink">',
+      '    <a href="' + ЛОК('/register.html') + '?retake=1" class="sbf-pp-jlink">',
       '      <span class="sbf-pp-jlink-ico">📋</span>',
       '      <span class="sbf-pp-jlink-lbl" data-i18n="profile.link_survey">' + t('profile.link_survey', 'Опросник') + '</span></a>',
       '  </div>',
@@ -1068,12 +1109,28 @@
   // связаны из обычной навигации. Аватар в шапке для гостя открывал только
   // локальный гостевой профиль (геймификация), что выглядело как "я уже
   // вошёл", а входа на самом деле не было. Найдено пользователем вживую.
+  // Язык страницы сохраняем в ссылке: без префикса переход из ro/en сбрасывал
+  // бы человека в русскую версию — тот же приём, что langPrefix() в brokers.js.
+  function _langPrefix() {
+    var l = (window.sbfI18n && window.sbfI18n.lang) || document.documentElement.lang || 'ru';
+    return (l === 'en' || l === 'ro') ? '/' + l : '';
+  }
+
   function makeLoginLink() {
     var a = document.createElement('a');
     a.className = 'sbf-login-link';
-    a.href = '/login.html';
+    a.href = _langPrefix() + '/login';
     a.setAttribute('data-i18n', 'nav.login');
     a.textContent = t('nav.login', 'Войти');
+    return a;
+  }
+
+  function makeSurveyCta() {
+    var a = document.createElement('a');
+    a.className = 'sbf-cta-link';
+    a.href = _langPrefix() + '/survey';
+    a.setAttribute('data-i18n', 'nav.cta_survey');
+    a.textContent = t('nav.cta_survey', '30 дней PRO');
     return a;
   }
 
@@ -1083,7 +1140,10 @@
     if (window.sbfAuth && window.sbfAuth.isLoggedIn()) {
       right.appendChild(makeHeaderAvatar());
     } else {
+      // Порядок важен: вторичная слева, главная справа — у правого края
+      // взгляд останавливается последним, и там должна быть регистрация.
       right.appendChild(makeLoginLink());
+      right.appendChild(makeSurveyCta());
     }
     return true;
   }
@@ -1099,7 +1159,7 @@
         // Анонимный: показываем ссылку «Войти» (была ошибочно /survey — единственный
         // путь входа с телефона вёл в опрос вместо формы логина, см. координацию 28.07)
         item = document.createElement('a');
-        item.href = '/login.html';
+        item.href = ЛОК('/login.html');
         item.className = 'sbf-bn-prof g-bn-item';
         item.setAttribute('data-i18n-aria', 'profile.login_label');
         item.setAttribute('aria-label', t('profile.login_label', 'Войти'));

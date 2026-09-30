@@ -13,16 +13,46 @@
       "label": "Registration",
       "platform": "instaforex.com, web",
       "captured": "2026-08-05",
-      "needed": ["Name, email, phone", "About two minutes"],
+      "needed": [
+        "Name, email, phone",
+        "About two minutes"
+      ],
       "blocks": [
-        { "type": "steps", "items": [
-          { "img": "/assets/guides/instaforex/registration/01_start.png", "caption": "Open instaforex.com." },
-          { "img": "/assets/guides/instaforex/registration/02_country.png", "caption": "Registration form: name, email, phone, country/region (detected automatically by IP), currency, and account type (MT4/MT5)." },
-          { "img": "/assets/guides/instaforex/registration/05_account_type.png", "caption": "The full specifications page shows all 5 account types at once and a spread/swap/lot table for each — worth checking before you choose." },
-          { "img": "/assets/guides/instaforex/registration/06_consents.png", "caption": "The terms-agreement checkbox — NOT ticked by default, tick it manually." }
-        ] },
-        { "type": "text", "body": "After you submit the form, the confirmation page issues two passwords — a trading one and an investor one. The trading password is for logging into the terminal; the investor one gives view-only access to the account, with no right to trade." },
-        { "type": "entity",
+        {
+          "type": "steps",
+          "items": [
+            {
+              "img": "/assets/guides/instaforex/registration/01_start.png",
+              "caption": "Open instaforex.com.",
+              "img_webp": "/assets/guides/instaforex/registration/01_start.webp",
+              "img_w": 1440,
+              "img_h": 900
+            },
+            {
+              "img": "/assets/guides/instaforex/registration/02_country.png",
+              "caption": "Registration form: name, email, phone, country/region (detected automatically by IP), currency, and account type (MT4/MT5).",
+              "img_webp": "/assets/guides/instaforex/registration/02_country.webp",
+              "img_w": 1440,
+              "img_h": 900
+            },
+            {
+              "img": "/assets/guides/instaforex/registration/05_account_type.png",
+              "caption": "The full specifications page shows all 5 account types at once and a spread/swap/lot table for each — worth checking before you choose.",
+              "img_webp": "/assets/guides/instaforex/registration/05_account_type.webp",
+              "img_w": 1440,
+              "img_h": 900
+            },
+            {
+              "img": "/assets/guides/instaforex/registration/06_consents.png",
+              "caption": "The terms-agreement checkbox — NOT ticked by default, tick it manually.",
+              "img_webp": "/assets/guides/instaforex/registration/06_consents.webp",
+              "img_w": 435,
+              "img_h": 60
+            }
+          ]
+        },
+        {
+          "type": "entity",
           "img": "/assets/guides/instaforex/registration/03_entity_named.png",
           "legal_name": "InstaFinance Ltd",
           "jurisdiction": "British Virgin Islands (BVI)",
@@ -37,64 +67,308 @@
             "a compensation fund — instead of insurance, there's only a promotion tied to referring friends or a tenfold deposit",
             "a published percentage of losing accounts",
             "🔴 negative balance protection — the only one of the five partners without it. The contract explicitly states the opposite right: \"The Company reserves the right to restore a negative balance on one of the Client's accounts using funds available on their other accounts\""
-          ]
+          ],
+          "img_webp": "/assets/guides/instaforex/registration/03_entity_named.webp",
+          "img_w": 1440,
+          "img_h": 900
         }
       ]
     },
     {
       "key": "activation",
       "label": "Account activation",
+      "platform": "instaforex.com, fast_open_live_account",
+      "captured": "2026-08-13",
+      "intro": "InstaForex has no separate \"activation\" step with a questionnaire like some other brokers — the account becomes real and tradable as soon as the registration form is submitted.",
       "blocks": [
-        { "type": "callout", "style": "gap", "title": "No screenshots — requires logging into the dashboard" },
-        { "type": "table", "columns": ["Parameter", "Value"], "rows": [
-          ["Account type", "Insta.Standard"],
-          ["Leverage", "up to 1:1000"],
-          ["Minimum lot", "0.01"],
-          ["Platforms", "MT4, MT5, web terminal"]
-        ] }
+        {
+          "type": "steps",
+          "items": [
+            {
+              "img": "/assets/guides/instaforex/activation/01_account_created.png",
+              "caption": "Right after the form — a \"Well done! You have opened an InstaForex live account\" screen with the account number, password, and server (instaforex-mt5.com). The same password is also emailed to you.",
+              "note": "Credentials in the screenshot have been redacted by us.",
+              "img_webp": "/assets/guides/instaforex/activation/01_account_created.webp",
+              "img_w": 1280,
+              "img_h": 1220
+            }
+          ]
+        },
+        {
+          "type": "callout",
+          "style": "gap",
+          "title": "One password on screen, not two",
+          "body": "This screen shows exactly one password — a trading one, for MT4. There's no separate investor (view-only, no trading rights) password anywhere in the fields or the text — despite that being the standard pair for MetaTrader accounts. We can't say whether it's issued in a separate email or generated inside the terminal instead: we simply haven't seen it."
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Parameter",
+            "Value"
+          ],
+          "rows": [
+            [
+              "Account type",
+              "Insta.Standard"
+            ],
+            [
+              "Leverage (maximum per specification)",
+              "up to 1:1000"
+            ],
+            [
+              "Minimum lot",
+              "0.01"
+            ],
+            [
+              "Platforms",
+              "MT4, MT5, web terminal"
+            ]
+          ]
+        },
+        {
+          "type": "callout",
+          "style": "fact",
+          "title": "The real account opened with 1:100 leverage, not 1:1000",
+          "body": "The fast-registration form (fast_open_live_account) never asks about leverage — you don't choose it. In the web terminal, the account opened this way shows \"Leverage: 1:100\" under Information, not the \"up to 1:1000\" InstaForex advertises on its account-types page. This isn't a contradiction of the numbers — 1:1000 remains the maximum for the Insta.Standard account spec — but the fastest registration path specifically defaults to five times less leverage, with no clear warning about it on the form."
+        }
       ]
     },
     {
       "key": "funding",
       "label": "Funding",
+      "platform": "secure.instaforex.com, dashboard · MixPay",
+      "captured": "2026-08-13",
+      "intro": "The \"Deposit money\" section lists all ten methods on one screen, with the fee and crediting time for each. Below is the full path using Tether (USDT) as the most detailed example — from picking the method to the address you pay.",
       "blocks": [
-        { "type": "callout", "style": "gap", "title": "No screenshots — requires logging into the dashboard" },
-        { "type": "table", "columns": ["Parameter", "Value", "Source"], "rows": [
-          ["Minimum deposit", "1 USD", "broker's website"],
-          ["Inactivity fee", "10 USD/month after 3 months", "BVI agreement"],
-          ["Methods", "card, bank and electronic transfer, Bitcoin, Tether, Litecoin, Ethereum, and others", "broker's website"]
-        ] },
-        { "type": "callout", "style": "note", "title": "Fees for funding methods aren't visible",
-          "body": "The deposit and withdrawal pages are behind a login, so you can't compare the cost of methods before registering. This is the one thing InstaForex doesn't show publicly — everything else, it does." }
+        {
+          "type": "steps",
+          "items": [
+            {
+              "img": "/assets/guides/instaforex/funding/01_deposit_methods.png",
+              "caption": "\"Money deposit\" — Visa/Mastercard (no commission, credited in 15 minutes to 7 business days) and eight \"No fees\" methods, differing only in timing: crypto (USDC, Bitcoin, Tether, Ethereum, Litecoin, others) — 3 hours, Skrill — up to 24 hours, PayCo and NETELLER — instant.",
+              "note": "Account number in the screenshot redacted by us.",
+              "img_webp": "/assets/guides/instaforex/funding/01_deposit_methods.webp",
+              "img_w": 1280,
+              "img_h": 1220
+            },
+            {
+              "img": "/assets/guides/instaforex/funding/02_tether_amount.png",
+              "caption": "Pick \"Deposit in Tether\", enter the amount in USDT or USD and the network protocol (TRC20, ERC20, and others) — the protocol determines the address you'll have to pay.",
+              "note": "Account number redacted by us.",
+              "img_webp": "/assets/guides/instaforex/funding/02_tether_amount.webp",
+              "img_w": 1280,
+              "img_h": 1220
+            },
+            {
+              "img": "/assets/guides/instaforex/funding/03_tether_confirm.png",
+              "caption": "The confirmation screen shows the conversion rate and the fee as a separate line — on 1000 USDT, \"Fees: 0 USD\", 999.9 USD credited at a 0.9999 rate.",
+              "note": "Account number redacted by us.",
+              "img_webp": "/assets/guides/instaforex/funding/03_tether_confirm.webp",
+              "img_w": 1280,
+              "img_h": 1220
+            },
+            {
+              "img": "/assets/guides/instaforex/funding/04_mixpay_provider.png",
+              "caption": "Next — a redirect to mixpay.me: InstaForex hands crypto deposits off to a third-party processor, MixPay Protocol, rather than handling them itself. Here you pick the exact network — e.g. USDT (TRC-20).",
+              "img_webp": "/assets/guides/instaforex/funding/04_mixpay_provider.webp",
+              "img_w": 1280,
+              "img_h": 1220
+            },
+            {
+              "img": "/assets/guides/instaforex/funding/05_crypto_address.png",
+              "caption": "The final screen — an address and QR code to pay, with a timer (about 20 minutes in this example) and a warning: pay only in the chosen protocol, the address is single-use.",
+              "img_webp": "/assets/guides/instaforex/funding/05_crypto_address.webp",
+              "img_w": 1280,
+              "img_h": 1220
+            }
+          ]
+        },
+        {
+          "type": "callout",
+          "style": "gap",
+          "title": "Crypto deposits are outsourced to a third-party processor",
+          "body": "MixPay Protocol isn't InstaForex and isn't a bank partner named in its agreement — it's a separate crypto payment service, mentioned only inside the deposit flow itself. It doesn't appear on any public InstaForex page about payment methods — the broker's site simply says \"Deposit in Tether\" without naming who technically receives the payment."
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Parameter",
+            "Value",
+            "Source"
+          ],
+          "rows": [
+            [
+              "Minimum deposit",
+              "1 USD",
+              "broker's website"
+            ],
+            [
+              "Inactivity fee",
+              "10 USD/month after 3 months",
+              "BVI agreement"
+            ],
+            [
+              "Methods",
+              "card, bank and electronic transfer, Bitcoin, Tether, Litecoin, Ethereum, and others",
+              "broker's website"
+            ]
+          ]
+        }
       ]
     },
     {
       "key": "verification",
       "label": "Verification",
+      "platform": "cabinet.instaforex.org, broker's trial dashboard",
+      "captured": "2026-08-13",
+      "intro": "Our own account hasn't gone through verification yet, so what's below isn't our dashboard — it's InstaForex's own trial dashboard, with sample data (\"John Smith\"), which the broker opens to anyone who wants to see the interface before registering. The structure and wording are real — it's the same screen our account will see once it gets there.",
       "blocks": [
-        { "type": "callout", "style": "gap", "title": "No screenshots — requires logging into the dashboard" },
-        { "type": "text", "body": "A demo account doesn't require verification: the form only asks for country, email, currency, and virtual deposit size." }
+        {
+          "type": "steps",
+          "items": [
+            {
+              "img": "/assets/guides/instaforex/verification/01_verification_levels.png",
+              "caption": "\"Trading account verification\": three levels, documents reviewed within 72 working hours. The second level is only granted after the first; the third is optional, at the company's discretion.",
+              "img_webp": "/assets/guides/instaforex/verification/01_verification_levels.webp",
+              "img_w": 1280,
+              "img_h": 1220
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "body": "Level one is a scan of your passport or another ID document. Level two is a second document (of a different type) or proof of address. The screen also shows a rejection example: \"The document failed verification\" with the exact reason — the file must be jpg/jpeg/bmp/gif/png/pdf and under 25 MB."
+        },
+        {
+          "type": "callout",
+          "style": "note",
+          "title": "A demo account doesn't require verification",
+          "body": "Separately from the trading dashboard: the demo-account signup form only asks for country, email, currency, and virtual deposit size — verification never comes up there at all."
+        }
       ]
     },
     {
       "key": "trading",
       "label": "Trading",
+      "platform": "webtrader.instaforex.com",
+      "captured": "2026-08-13",
       "blocks": [
-        { "type": "callout", "style": "fact", "title": "Conditions are published in full, no registration needed" },
-        { "type": "table", "columns": ["Instrument", "Spread", "Commission", "Swap L / S", "Lot"], "rows": [
-          ["EUR/USD", "0.6 points", "0", "−10.1 / +1.1", "10,000"],
-          ["GBP/USD", "0.8", "0", "−5.9 / −3.6", "10,000"],
-          ["USD/JPY", "0.7", "0", "−14.5 / −24.2", "10,000"],
-          ["Gold", "$0.15", "$10", "−327 / +0.69", "100 oz"],
-          ["Silver", "$0.35", "$10", "−51.68 / +0.09", "500 oz"],
-          ["Bitcoin", "$0.25", "0.1% of volume", "−0.05%/day", "1 BTC"]
-        ], "caption": "Insta.Standard account specification, checked 2026-08-05." },
-        { "type": "callout", "style": "note", "title": "The lot here is 10,000, not 100,000",
-          "body": ["This is the key thing to know about InstaForex when comparing brokers. A \"0.6-point\" spread here isn't $6 a round turn, it's 60 cents — but the position is also ten times smaller. You can't compare spreads in points with other brokers, only through the money cost of a round turn.", "Silver is 500 oz instead of the standard 5,000. And be careful: gold has two symbols with a fivefold difference in contract size — GOLD.m is 100 oz, XAUUSD.m is 500 oz. Open a position in the wrong symbol and you'll get five times the volume you expected."] },
-        { "type": "callout", "style": "note", "title": "Where crypto costs hide",
-          "body": "Bitcoin's spread is 25 cents, and it's easy to stop looking there. But a 0.1% commission on volume, at a price around $64,000, works out to roughly $64 one-way and $128 for a round turn. The real cost of the trade isn't where you're looking." },
-        { "type": "callout", "style": "note", "title": "Gold's long swap",
-          "body": "−327 versus +0.69 short. Holding a gold buy position overnight here costs roughly three spreads. For anyone trading gold beyond intraday, that matters more than the spread." }
+        {
+          "type": "callout",
+          "style": "fact",
+          "title": "Conditions are published in full, no registration needed"
+        },
+        {
+          "type": "steps",
+          "items": [
+            {
+              "img": "/assets/guides/instaforex/trading/01_webtrader_classic.png",
+              "caption": "The web terminal's \"Classic\" tab — instruments as rows: Sell/Buy prices, trend, daily change.",
+              "note": "Name and account number in the screenshot redacted by us.",
+              "img_webp": "/assets/guides/instaforex/trading/01_webtrader_classic.webp",
+              "img_w": 1280,
+              "img_h": 1220
+            },
+            {
+              "img": "/assets/guides/instaforex/trading/02_webtrader_dashboard.png",
+              "caption": "\"Dashboard\" — the same instruments as tiles: price, direction, change with color fill.",
+              "note": "Name and account number redacted by us.",
+              "img_webp": "/assets/guides/instaforex/trading/02_webtrader_dashboard.webp",
+              "img_w": 1280,
+              "img_h": 1220
+            },
+            {
+              "img": "/assets/guides/instaforex/trading/03_webtrader_chart.png",
+              "caption": "\"Chart\" — a candlestick chart with drawing tools, a Sell/Buy quote, and a \"Trader positions\" widget on the right.",
+              "note": "Name and account number redacted by us.",
+              "img_webp": "/assets/guides/instaforex/trading/03_webtrader_chart.webp",
+              "img_w": 1280,
+              "img_h": 1220
+            }
+          ]
+        },
+        {
+          "type": "callout",
+          "style": "note",
+          "title": "\"Trader positions\" at 50/50 looks like a placeholder, not data",
+          "body": "The widget shows a Sell/Buy split for the instrument. On our account balance is 0.00 with no open positions, and on every instrument we checked (ten stocks on the Classic screen and #A on the chart) the value is exactly 50%/50% with zero deviation — real trader-position distribution never looks like that. This looks like an interface default rather than a live aggregation of trades; don't treat it as a fact about what other clients are doing."
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Instrument",
+            "Spread",
+            "Commission",
+            "Swap L / S",
+            "Lot"
+          ],
+          "rows": [
+            [
+              "EUR/USD",
+              "0.6 points",
+              "0",
+              "−10.1 / +1.1",
+              "10,000"
+            ],
+            [
+              "GBP/USD",
+              "0.8",
+              "0",
+              "−5.9 / −3.6",
+              "10,000"
+            ],
+            [
+              "USD/JPY",
+              "0.7",
+              "0",
+              "−14.5 / −24.2",
+              "10,000"
+            ],
+            [
+              "Gold",
+              "$0.15",
+              "$10",
+              "−327 / +0.69",
+              "100 oz"
+            ],
+            [
+              "Silver",
+              "$0.35",
+              "$10",
+              "−51.68 / +0.09",
+              "500 oz"
+            ],
+            [
+              "Bitcoin",
+              "$0.25",
+              "0.1% of volume",
+              "−0.05%/day",
+              "1 BTC"
+            ]
+          ],
+          "caption": "Insta.Standard account specification, checked 2026-08-05."
+        },
+        {
+          "type": "callout",
+          "style": "note",
+          "title": "The lot here is 10,000, not 100,000",
+          "body": [
+            "This is the key thing to know about InstaForex when comparing brokers. A \"0.6-point\" spread here isn't $6 a round turn, it's 60 cents — but the position is also ten times smaller. You can't compare spreads in points with other brokers, only through the money cost of a round turn.",
+            "Silver is 500 oz instead of the standard 5,000. And be careful: gold has two symbols with a fivefold difference in contract size — GOLD.m is 100 oz, XAUUSD.m is 500 oz. Open a position in the wrong symbol and you'll get five times the volume you expected."
+          ]
+        },
+        {
+          "type": "callout",
+          "style": "note",
+          "title": "Where crypto costs hide",
+          "body": "Bitcoin's spread is 25 cents, and it's easy to stop looking there. But a 0.1% commission on volume, at a price around $64,000, works out to roughly $64 one-way and $128 for a round turn. The real cost of the trade isn't where you're looking."
+        },
+        {
+          "type": "callout",
+          "style": "note",
+          "title": "Gold's long swap",
+          "body": "−327 versus +0.69 short. Holding a gold buy position overnight here costs roughly three spreads. For anyone trading gold beyond intraday, that matters more than the spread."
+        }
       ]
     }
   ]

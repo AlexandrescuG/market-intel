@@ -1,102 +1,233 @@
 #!/usr/bin/env python3
 """
-pulse_job.py — SBF_Charts_Layer1_Spec, Фаза 4 («Пульс Рынка»).
+pulse_job.py — сколько раз актив упомянули в сети. Питает блок «Эпицентр».
 
-Офлайн-джоб (раз в 15 мин, см. sbf-pulse.timer): единый скоринг обсуждаемости
-для трёх вкладок (Крипта/Акции/Индексы) поверх уже собранных данных —
-ApeWisdom нигде не подключён (проверено в Фазе 1), поэтому источник —
-signals.cashtags (twitter+stocktwits+rss) + news_instrument_tags (Фаза 3,
-только для индексов — своя RSS-подсчётная колонка, как и просит спека).
+🔴 ПОЧЕМУ ПЕРЕПИСАН (08.09.2026). Считалось по одному полю `signals.cashtags` —
+это тикеры вида $BTC, которые ставят в твитах. Замер: за сутки такие теги
+нашлись в **36 сигналах из 2391**, полтора процента потока. Остальные 98,5% —
+RSS-заголовки, телеграм-посты и обычные твиты без доллара — механизм не видел
+вовсе. Результат на витрине: у всех активов ноль упоминаний, подпись
+«спокойный фон» и пустой блок на главной странице. Формально работало,
+фактически показывало пустоту.
 
-pulse(symbol) = mentions_1h / max(avg_mentions_1h_7d, 0.5)
+ЧТО СЧИТАЕМ ТЕПЕРЬ. `news_instrument_tags` — таблицу, которую наполняет
+news_burst_job по словарю из 768 инструментов, по всем трём источникам сразу
+(RSS + X + Telegram). Кештеги оттуда никуда не делись: они тоже учитываются,
+просто больше не являются единственным источником.
+
+ДВА ЧИСЛА, И ОНИ ОТВЕЧАЮТ НА РАЗНЫЕ ВОПРОСЫ:
+  • mentions_24h — сколько всего упоминаний за сутки. Это «о чём вообще
+    говорят», и именно оно определяет размер пузыря на главной.
+  • score = упоминания за час / средний час недели. Это «где сейчас
+    всплеск» — актив может быть тихим по объёму, но резко разогреться.
+Раньше существовало только второе, и на спокойном рынке блок был пуст.
 
 Использование:
   python3 pulse_job.py [--verbose]
 """
 import argparse
 import json
+import re
 import sqlite3
 import sys
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent))
-from core.config import DB_PATH
+ROOT = Path(__file__).resolve().parent
+sys.path.insert(0, str(ROOT))
+from core import sqlite_write, symbol_alias  # noqa: E402
+from core.config import DB_PATH  # noqa: E402
 
-# Классификация тикеров по вкладкам. ApeWisdom не подключён (см. память
-# project_sbf_charts_layer1) — картировано вручную: crypto-аллоулист +
-# index-аллоулист (индексы и ETF-трекеры индексов), всё остальное — Акции
-# по умолчанию (ловит любой реальный cashtag типа AAPL/NVDA без исчерпывающего
-# списка акций).
-CRYPTO_TICKERS = {
-    "BTC", "ETH", "SOL", "XRP", "DOGE", "ADA", "BNB", "LTC", "LINK", "MATIC",
-    "POL", "AVAX", "DOT", "SHIB", "TRX", "UNI", "ATOM", "NEAR", "ARB", "OP",
-    "APT", "SUI", "PEPE", "WIF", "BONK", "TON", "ICP", "FIL", "ETC", "XLM",
-    "HBAR", "VET", "ALGO", "AAVE", "MKR", "INJ", "RUNE", "SEI", "TIA", "PYTH", "JUP",
-}
-INDEX_TICKERS = {
-    "SPX", "US500", "NDX", "NASDAQ", "QQQ", "DJI", "DOW", "US30", "VIX",
-    "DAX", "FTSE", "NIKKEI", "RUT", "IWM", "DIA", "SPY", "DXY",
-}
-# news_instrument_tags (Фаза 3) использует символы chart.html — только
-# индексные символы релевантны вкладке "Индексы" (FX/commodity-символы Фазы 3
-# сюда не попадают, .get() просто вернёт None и они будут пропущены).
-_NEWS_TAG_TO_TICKER = {"SPX": "SPX", "NASDAQ": "NASDAQ", "DJI": "DJI", "VIX": "VIX", "DXY": "DXY"}
+CATALOG = ROOT / "web" / "data" / "broker_catalog.json"
+BLOCKLIST = ROOT / "data" / "instrument_blocklist.json"
 
 MIN_BASELINE = 0.5
 BURST_LOOKBACK_HOURS = 1
+BOARD_WINDOW_HOURS = 24
 BASELINE_DAYS = 7
-HISTORY_KEEP_DAYS = 2  # для 24ч спарклайна с запасом
+HISTORY_KEEP_DAYS = 2      # для 24-часового спарклайна с запасом
+
+# Направления, которые показываем как «разные». Ключ — категория каталога
+# брокера, значение — как это называется у нас на витрине.
+CATEGORY_MAP = {
+    "crypto": "crypto", "stock": "stocks", "index": "indices",
+    "fx": "fx", "commodity": "commodity", "etf": "stocks", "bond": "indices",
+}
+
+# Реестровые имена, которых нет в каталоге брокера как отдельных строк
+# (GOLD/WTI/SPX и т.п. лежат там под именами брокера) — задаём направление явно.
+REGISTRY_CATEGORY = {
+    "GOLD": "commodity", "SILVER": "commodity", "WTI": "commodity", "NG": "commodity",
+    "BTC": "crypto", "ETH": "crypto", "SOL": "crypto", "XRP": "crypto",
+    "LTC": "crypto", "LINK": "crypto", "XLM": "crypto", "UNI": "crypto",
+    "SPX": "indices", "NASDAQ": "indices", "DJI": "indices", "VIX": "indices",
+    "DXY": "fx",
+}
+
+_FX_RE = re.compile(r"^[A-Z]{3}[A-Z]{3}$")
+# Брокерское имя индекса: страна и число пунктов — US_500, JAPAN_225,
+# GERMANY_40, UK_100. Нужно для тех, кого в каталоге нет вовсе: INDIA_50
+# висел во вкладке «Акции», потому что неизвестное имя по умолчанию
+# считалось акцией.
+_INDEX_RE = re.compile(r"^[A-Z]{2,10}_\d{2,4}$")
 
 
-def _classify(ticker: str) -> str:
-    if ticker in CRYPTO_TICKERS:
-        return "crypto"
-    if ticker in INDEX_TICKERS:
+def _catalog_categories() -> dict:
+    """{символ: направление} из каталога брокера, плюс канонические имена."""
+    out = dict(REGISTRY_CATEGORY)
+    try:
+        raw = json.loads(CATALOG.read_text(encoding="utf-8"))
+        items = raw.get("items", raw) if isinstance(raw, dict) else raw
+    except Exception:
+        return out
+    for it in items:
+        cat = CATEGORY_MAP.get(it.get("category"))
+        if not cat:
+            continue
+        out.setdefault(it["symbol"], cat)
+        if it.get("canonical"):
+            out.setdefault(it["canonical"], cat)
+    return out
+
+
+def _blocked() -> set:
+    try:
+        raw = json.loads(BLOCKLIST.read_text(encoding="utf-8"))
+        return {k for k in raw if not k.startswith("_")}
+    except Exception:
+        return set()
+
+
+def _classify(symbol: str, cats: dict) -> str:
+    """Направление инструмента. Валютную пару узнаём по форме имени.
+
+    🔴 Раньше здесь стояло «всё, что не крипта и не индекс — акция», и на
+    витрине в разделе «Акции» висел GBP. Категория берётся из каталога, а
+    догадка по форме имени — только для того, чего в каталоге нет.
+    """
+    if symbol in cats:
+        return cats[symbol]
+    if _FX_RE.match(symbol):
+        return "fx"
+    if _INDEX_RE.match(symbol):
         return "indices"
+    if symbol.startswith(("#", "_")):
+        return "stocks"
     return "stocks"
 
 
-def _cashtag_counts(con, since_iso: str) -> dict[str, int]:
-    counts: dict[str, int] = {}
-    for row in con.execute("SELECT cashtags FROM signals WHERE last_seen >= ?", (since_iso,)):
-        for t in json.loads(row[0] or "[]"):
-            counts[t] = counts.get(t, 0) + 1
-    return counts
+def _tag_counts(con, since_iso: str) -> dict:
+    """{символ: сколько упоминаний} по news_instrument_tags за окно.
 
+    Считаем по first_seen — по моменту, когда материал ВПЕРВЫЕ попал в поток,
+    а не по дате публикации и не по last_seen.
 
-def _news_tag_counts(con, since_ts: float) -> dict[str, int]:
-    """Только для индексов — доп. счётчик из RSS-тегов Фазы 3 (news_instrument_tags)."""
-    counts: dict[str, int] = {}
+    🔴 Здесь стоял last_seen, и это ломало метрику скрытно.
+
+    last_seen обновляется каждый раз, когда коллектор снова видит ту же
+    статью в ленте, — а ленты он перечитывает раз в 20 минут, и статья висит
+    в них сутками. Замер 10.09.2026: за час 1119 новостей появились впервые
+    и 3177 старых были перечитаны, и все 4296 считались упоминаниями «за
+    последний час».
+
+    Хуже всего то, что числитель и знаменатель мерились разными линейками. За
+    час одна и та же статья попадала в счёт при каждом перечитывании; за 7
+    дней она же попадала один раз, потому что в окно влезает почти всё. По
+    #NVIDIA это давало 84 упоминания за час против 26 реальных — отсюда
+    «×66 к своей норме» у инструмента, о котором пишут пару десятков раз в
+    день.
+
+    Перечитывание статьи — это не новое упоминание. Один материал — один раз,
+    в тот час, когда он пришёл.
+
+    Возвращает {символ: {uid, uid, …}} — множества, а не числа. Так суммы с
+    кештегами складываются без двойного счёта: статья, помеченная и словарём,
+    и кештегом, остаётся одним упоминанием.
+    """
+    counts: dict[str, set] = {}
     try:
         rows = con.execute(
-            "SELECT t.symbol, s.raw, s.first_seen FROM news_instrument_tags t "
-            "JOIN signals s ON s.uid = t.news_uid"
+            """SELECT t.symbol, t.news_uid FROM news_instrument_tags t
+               JOIN signals s ON s.uid = t.news_uid
+               WHERE s.first_seen >= ?""",
+            (since_iso,),
         ).fetchall()
     except sqlite3.OperationalError:
-        return counts  # таблица Фазы 3 ещё не создана
-    for symbol, raw, first_seen in rows:
-        ticker = _NEWS_TAG_TO_TICKER.get(symbol)
-        if not ticker:
-            continue
-        try:
-            ts = float(json.loads(raw or "{}").get("published") or 0)
-        except (ValueError, TypeError):
-            ts = 0
-        if not ts:
-            try:
-                ts = datetime.fromisoformat(first_seen).timestamp()
-            except (ValueError, TypeError):
-                continue
-        if ts >= since_ts:
-            counts[ticker] = counts.get(ticker, 0) + 1
+        return counts
+    for sym, uid in rows:
+        counts.setdefault(symbol_alias.canon(sym), set()).add(uid)
     return counts
+
+
+def _cashtag_counts(con, since_iso: str) -> dict:
+    """Кештеги ($BTC) — как дополнение, а не как единственный источник.
+
+    Окно по first_seen, по той же причине, что и в _tag_counts: считаем
+    материалы, а не то, сколько раз коллектор их перечитал.
+
+    🔴 Кештег приводится к каноническому имени. Он приходит биржевым тикером
+    ($NVDA), а разметка по словарю называет тот же актив именем из каталога
+    брокера (#NVIDIA). Без приведения это два разных ключа — и на доске
+    Эпицентра стояли две строки про одну компанию, причём младшая, без
+    истории и без нормы, обгоняла старшую по множителю.
+    """
+    counts: dict[str, set] = {}
+    for uid, raw in con.execute(
+            "SELECT uid, cashtags FROM signals WHERE first_seen >= ?", (since_iso,)):
+        try:
+            for t in json.loads(raw or "[]"):
+                counts.setdefault(symbol_alias.canon(t), set()).add(uid)
+        except (ValueError, TypeError):
+            continue
+    return counts
+
+
+def _merge(a: dict, b: dict) -> dict:
+    """Объединение множеств новостей, а не сложение счётчиков.
+
+    🔴 Раньше здесь складывались числа. Одна и та же статья, помеченная и
+    словарём, и кештегом, давала два упоминания вместо одного — и ровно у
+    самых обсуждаемых активов, где оба источника срабатывают чаще всего.
+    """
+    out = {k: set(v) for k, v in a.items()}
+    for k, v in b.items():
+        out.setdefault(k, set()).update(v)
+    return out
+
+
+def _записать(con: sqlite3.Connection, строки: list[tuple], порог: int,
+              verbose: bool = False) -> None:
+    """Одна короткая транзакция на всю запись, с повторами.
+
+    Почему одного busy_timeout=60000 (он стоит у connect выше) не хватало —
+    подробно в core/sqlite_write.py: отказ по снимку SQLite не повторяет
+    вовсе, а в логе он неотличим от обычной занятости. К этому месту
+    m_1h/m_24h/m_7d уже посчитаны, читать больше нечего — значит запись
+    можно взять сразу и отдать через доли секунды.
+    """
+    def пишем(c: sqlite3.Connection) -> None:
+        c.executemany(
+            "INSERT OR REPLACE INTO pulse_scores"
+            "(symbol, category, ts, mentions, baseline, score, mentions_24h) "
+            "VALUES(?,?,?,?,?,?,?)", строки)
+        c.execute("DELETE FROM pulse_scores WHERE ts < ?", (порог,))
+
+    sqlite_write.записать(con, пишем, verbose=verbose)
 
 
 def run(verbose: bool = False) -> int:
-    con = sqlite3.connect(str(DB_PATH), timeout=10)
-    con.execute("PRAGMA busy_timeout=10000")
+    # 🔴 Ожидание 10 секунд не хватало: юнит падал с «database is locked» через
+    # раз. Причина — signals.db в это же время пишут коллекторы. WAL важнее
+    # самого таймаута: без него любой писатель блокирует всех читателей.
+    con = sqlite3.connect(str(DB_PATH), timeout=60)
+    con.execute("PRAGMA busy_timeout=60000")
+    con.execute("PRAGMA journal_mode=WAL")
+    # Окна упоминаний считаются по first_seen (см. _tag_counts). Индекс был
+    # только по last_seen — по полю, которое мы перестали использовать, — и без
+    # этого каждый прогон уходил бы в полный перебор signals.
+    con.execute("CREATE INDEX IF NOT EXISTS idx_signals_first_seen "
+                "ON signals(first_seen)")
     con.executescript("""
         CREATE TABLE IF NOT EXISTS pulse_scores(
             symbol TEXT NOT NULL, category TEXT NOT NULL, ts INT NOT NULL,
@@ -104,41 +235,58 @@ def run(verbose: bool = False) -> int:
             PRIMARY KEY(symbol, category, ts)
         );
     """)
+    # Колонка добавлена 08.09 вместе с переходом на news_instrument_tags.
+    # ALTER без IF NOT EXISTS — ловим ошибку, иначе второй прогон падал бы.
+    try:
+        con.execute("ALTER TABLE pulse_scores ADD COLUMN mentions_24h INT")
+    except sqlite3.OperationalError:
+        pass
     con.commit()
 
     now = time.time()
-    now_iso = datetime.fromtimestamp(now, timezone.utc).isoformat()
-    h1_iso = datetime.fromtimestamp(now - BURST_LOOKBACK_HOURS * 3600, timezone.utc).isoformat()
-    d7_iso = datetime.fromtimestamp(now - BASELINE_DAYS * 86400, timezone.utc).isoformat()
+    iso = lambda sec: datetime.fromtimestamp(now - sec, timezone.utc).isoformat()
+    h1  = iso(BURST_LOOKBACK_HOURS * 3600)
+    d1  = iso(BOARD_WINDOW_HOURS * 3600)
+    d7  = iso(BASELINE_DAYS * 86400)
 
-    mentions_1h = _cashtag_counts(con, h1_iso)
-    mentions_7d = _cashtag_counts(con, d7_iso)
-    news_1h = _news_tag_counts(con, now - BURST_LOOKBACK_HOURS * 3600)
-    news_7d = _news_tag_counts(con, now - BASELINE_DAYS * 86400)
+    m_1h  = _merge(_tag_counts(con, h1), _cashtag_counts(con, h1))
+    m_24h = _merge(_tag_counts(con, d1), _cashtag_counts(con, d1))
+    m_7d  = _merge(_tag_counts(con, d7), _cashtag_counts(con, d7))
 
-    all_tickers = set(mentions_7d) | set(news_7d)
+    cats = _catalog_categories()
+    blocked = _blocked()
     written = 0
-    for ticker in all_tickers:
-        category = _classify(ticker)
-        m1h = mentions_1h.get(ticker, 0) + news_1h.get(ticker, 0)
-        m7d = mentions_7d.get(ticker, 0) + news_7d.get(ticker, 0)
-        baseline = max(m7d / (BASELINE_DAYS * 24), MIN_BASELINE)
-        score = m1h / baseline
-        con.execute(
-            "INSERT OR REPLACE INTO pulse_scores(symbol, category, ts, mentions, baseline, score) VALUES(?,?,?,?,?,?)",
-            (ticker, category, int(now), m1h, baseline, score),
-        )
+    строки: list[tuple] = []
+    ts_now = int(now)
+    for symbol in set(m_7d) | set(m_24h):
+        if symbol in blocked:
+            continue
+        category = _classify(symbol, cats)
+        m1 = len(m_1h.get(symbol, ()))
+        m24 = len(m_24h.get(symbol, ()))
+        m7 = len(m_7d.get(symbol, ()))
+        # 🔴 Текущий час из нормы вычитается.
+        #
+        # Норма считалась как «всё за 7 дней ÷ 168», а «всё за 7 дней»
+        # включает и тот самый час, который мы с ней сравниваем. Пока приток
+        # ровный, разница незаметна. 09.09.2026 расширенный сбор новостей за
+        # два часа принёс 2244 материала при обычных 30–130 в час — и этот
+        # пакет задал сам себе норму, а потом отчитался о рекорде
+        # относительно неё. Сравнивать час нужно с тем, что было ДО него.
+        prev = max(m7 - m1, 0)
+        hours = BASELINE_DAYS * 24 - BURST_LOOKBACK_HOURS
+        baseline = max(prev / hours, MIN_BASELINE)
+        score = m1 / baseline
+        строки.append((symbol, category, ts_now, m1, baseline, score, m24))
         written += 1
-        if verbose and score >= 1.5:
-            print(f"  {category}/{ticker}: mentions={m1h} baseline={baseline:.2f} score={score:.2f}")
+        if verbose and m24:
+            print(f"  {category:9s}/{symbol:12s} за сутки={m24:4d} за час={m1:3d} "
+                  f"фон={baseline:.2f} всплеск={score:.2f}")
 
-    # чистка старой истории — не нужна глубже 24ч+запас для спарклайна
-    cutoff = int(now - HISTORY_KEEP_DAYS * 86400)
-    con.execute("DELETE FROM pulse_scores WHERE ts < ?", (cutoff,))
-    con.commit()
+    _записать(con, строки, int(now - HISTORY_KEEP_DAYS * 86400), verbose)
     con.close()
     if verbose:
-        print(f"готово: {written} (symbol,category) пар записано")
+        print(f"готово: {written} инструментов записано")
     return written
 
 

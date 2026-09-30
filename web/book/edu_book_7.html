@@ -2,8 +2,15 @@
 <html lang="{{ lang }}">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>SBF | {% if lang == 'ru' %}Глава 7. Институциональный след{% elif lang == 'ro' %}Capitolul 7. Amprenta Instituțională{% else %}Chapter 7. Institutional Footprint{% endif %}</title>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="SBF Intelligence">
+<meta property="og:image" content="https://lp.sbfconsult.com/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://lp.sbfconsult.com/assets/og-image.png">
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
   <style>
@@ -24,6 +31,8 @@
 <script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
 <script src="/edu/assets/ch7.js"></script>
+<link rel="stylesheet" href="/assets/brokers.css?v=1">
+<script src="/assets/brokers.js?v=16" defer></script>
 
 <script type="text/babel" data-presets="react">
 const INITIAL_LANG = "{{ lang }}";
@@ -95,7 +104,7 @@ const STRINGS = {
   },
 };
 
-const {C, Mono, Chip, Rule, AskAnalystBtn, getChUrl, QuizBlock, ComplianceFootnote, ColdStart} = window.AcademyShared;
+const {C, Mono, Chip, Rule, AntiMythBlock, RevealSteps, AskAnalystBtn, getChUrl, QuizBlock, ComplianceFootnote, ColdStart, PartnerPicker} = window.AcademyShared;
 
 const SectionTitle = ({children,sub,align="left",id}) => (
   <div id={id} style={{textAlign:align,marginBottom:36,scrollMarginTop:130}}>
@@ -156,15 +165,17 @@ function buildVars(patterns, xray, lang) {
 }
 
 // ─── Cold start: "Цена спешки" (SPEC_coldstart_interactives_ch6_15.md §3) ──────
-// Заменяет прежний ColdOpen7. BIG_ORDER_BOOK -- тот же стакан, что чуть ниже
-// использует BigOrderBridge (реальный "мост со стаканом главы 4"), просто
-// читается раньше по счёту функций -- порядок объявлений не важен, это
-// module-level const, вычисляется один раз при загрузке скрипта.
+// Заменяет прежний ColdOpen7. Стакан — тот же, что ниже у BigOrderBridge
+// («мост со стаканом главы 4»), только там середина берётся из живой
+// котировки золота. Здесь компонент не ждёт сети: холодный старт — первое,
+// что видит читатель, и мигать числом в нём нельзя. Поэтому берётся
+// запасная середина, а разница с живой ценой на выводе не сказывается:
+// показываются РАЗНОСТИ (проскальзывание, пункты), а не сами уровни.
 function ColdStart7Entry() {
   const T7 = window.Ch7Content[INITIAL_LANG] || window.Ch7Content.ru;
   const cs = T7.coldStart;
   const SIZE = 500;
-  const { asks } = BIG_ORDER_BOOK;
+  const { asks } = buildBook(FALLBACK_MID);
   const walk = (size) => {
     let remaining = size, cost = 0, filledQty = 0;
     for (const a of asks) {
@@ -260,7 +271,7 @@ function ColdStart7Middle() {
     chartRef.current.volumeSeries.setData(picked == null ? [] : day.map(c => ({ time: c.time, value: c.vol.value, color: c.vol.color })));
   }, [picked, day]);
 
-  if (!day || !zones) return <div style={{background:C.black,padding:"60px 5vw",textAlign:"center"}}><Mono size={11} color={C.gold} spacing={4}>{cm.tag}</Mono></div>;
+  if (!day || !zones) return <div style={{background:C.black,padding:"60px 5vw",textAlign:"center"}}><Mono size={11} color={C.goldText} spacing={4}>{cm.tag}</Mono></div>;
 
   const topZone = zones.reduce((a, b) => (b.vol > a.vol ? b : a));
 
@@ -287,7 +298,7 @@ function ColdStart7Middle() {
               );
             })}
           </div>
-          {picked != null && <p style={{textAlign:"center", fontSize:11, color:"rgba(255,255,255,0.4)", fontStyle:"italic", marginTop:14}}>{cm.noteTicks}</p>}
+          {picked != null && <p style={{textAlign:"center", fontSize:11, color:"rgba(255,255,255,0.55)", fontStyle:"italic", marginTop:14}}>{cm.noteTicks}</p>}
         </div>
       )}}
       reveal={() => picked == null ? null : fillTemplate(cm.revealTemplate, {
@@ -304,44 +315,60 @@ function IntroBlock() {
   const T7 = window.Ch7Content[INITIAL_LANG] || window.Ch7Content.ru;
   return (
     <div id="secAntiMyth" style={{marginBottom:48,scrollMarginTop:130}}>
-      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T7.antiMyth.tag}</Mono>
-      <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px",marginBottom:28}}>
-        <p style={{fontWeight:600,fontSize:14.5,color:C.black,marginBottom:10}}>{T7.antiMyth.title}</p>
-        <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,marginBottom:12}}>{T7.antiMyth.body1}</p>
-        <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,marginBottom:12}}>{T7.antiMyth.body2}</p>
-        <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,marginBottom:12}}>{T7.antiMyth.body3}</p>
-        <p style={{fontSize:13.5,color:C.black,lineHeight:1.7,margin:0,fontWeight:600}}>{T7.antiMyth.body4}</p>
-      </div>
+      <AntiMythBlock lang={INITIAL_LANG} style={{marginBottom:28}}
+        data={{tag: T7.antiMyth.tag, title: T7.antiMyth.title, bodies: [T7.antiMyth.body1, T7.antiMyth.body2, T7.antiMyth.body3, T7.antiMyth.body4]}}/>
 
-      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T7.voiceSbf.tag}</Mono>
+      <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{T7.voiceSbf.tag}</Mono>
       <div style={{borderLeft:`4px solid ${C.gold}`,paddingLeft:24,marginBottom:28}}>
         {T7.voiceSbf.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:16,fontStyle:"italic",color:C.inkMid,lineHeight:1.7,fontFamily:"'DM Serif Display',serif",marginBottom:12}}>{p}</p>)}
       </div>
 
       <div style={{background:C.black,borderRadius:8,padding:"26px 30px",color:C.white}}>
-        <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T7.priceOfNotKnowing.tag}</Mono>
+        <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{T7.priceOfNotKnowing.tag}</Mono>
         <div style={{fontFamily:"'DM Serif Display',serif",fontSize:20,color:C.white,marginBottom:12}}>{T7.priceOfNotKnowing.title}</div>
-        {T7.priceOfNotKnowing.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:13.5,lineHeight:1.75,color:"rgba(255,255,255,0.7)",marginBottom:10}}>{p}</p>)}
+        {/* Разбор открывается по шагам — см. комментарий в главе 9. */}
+        <RevealSteps bodies={T7.priceOfNotKnowing.body.split("\n\n")}
+                     lang={INITIAL_LANG} preset="cost" dark/>
       </div>
     </div>
   );
 }
 
 // ─── Задача крупного участника — мост со стаканом главы 4 ─────────────────────
-const BIG_ORDER_BOOK = (() => {
-  const mid = 4079.4;
+/* 🔴 ЧТО ЗДЕСЬ НАСТОЯЩЕЕ, А ЧТО НЕТ. Раньше книга собиралась так:
+   mid = 4079.4 константой и v = Math.round(35 + Math.random() * 45) на
+   каждый уровень. Под ней стоял вывод «разница, измеряемая в сотнях
+   тысяч», а числа средней цены и проскальзывания подавались как
+   измерение. Две беды сразу: середина рынка навсегда осталась в том дне,
+   когда её вписали, а объёмы менялись при каждой перезагрузке страницы —
+   читатель, вернувшийся на урок, видел другие «измерения».
+
+   Что исправлено. Середина берётся из живой котировки золота (/api/quotes,
+   GC=F) — это у нас есть. Глубины стакана у нас нет и взяться ей неоткуда:
+   биржевой DOM мы не храним. Поэтому объёмы теперь не случайные, а
+   заданные — одна и та же лесенка при каждом заходе, — и над панелью
+   стоит depthNote: цена настоящая, объёмы нет. Случайность здесь не
+   добавляла правдоподобия, она добавляла ровно одно: невозможность
+   повторить у себя то, что показано. */
+
+// Лесенка объёмов на 16 уровней. Пол 35 лотов сохранён (суммарно ≥560),
+// чтобы заявка на 500 лотов гарантированно шла сквозь несколько уровней и
+// проскальзывание не выходило 0.00 — баг, пойманный на скриншоте раньше.
+const DEPTH_LADDER = [42, 58, 47, 71, 39, 63, 52, 78, 44, 67, 55, 80, 48, 61, 73, 51];
+
+function buildBook(mid) {
   const asks = [], bids = [];
-  // 16 уровней с полом объёма 35 (мин. суммарная глубина 16*35=560) --
-  // гарантирует, что заявка на 500 лотов реально проходит сквозь НЕСКОЛЬКО
-  // уровней и никогда не закрывается одним верхним уровнем целиком (баг,
-  // пойманный на скриншоте: с *10-масштабом и 12 уровнями топ оф бук иногда
-  // в одиночку перекрывал весь объём, и slippage выходил 0.00).
-  for (let i = 0; i < 16; i++) {
-    asks.push({ p: mid + 0.10 + i * 0.10, v: Math.round(35 + Math.random() * 45) });
-    bids.push({ p: mid - 0.10 - i * 0.10, v: Math.round(35 + Math.random() * 45) });
+  for (let i = 0; i < DEPTH_LADDER.length; i++) {
+    asks.push({ p: +(mid + 0.10 + i * 0.10).toFixed(2), v: DEPTH_LADDER[i] });
+    bids.push({ p: +(mid - 0.10 - i * 0.10).toFixed(2), v: DEPTH_LADDER[DEPTH_LADDER.length - 1 - i] });
   }
   return { asks, bids, mid };
-})();
+}
+
+// Запасная середина на случай, если котировка не пришла: последняя цена
+// золота, на которой панель проверялась. Она помечена как запасная и в
+// подписи, и здесь — молчаливой её оставлять нельзя.
+const FALLBACK_MID = 4270.0;
 
 function BigOrderBridge() {
   const { useState, useMemo } = React;
@@ -351,7 +378,17 @@ function BigOrderBridge() {
   const [touched, setTouched] = useState(false);
   const [size, setSize] = useState(100);
 
-  const { asks, bids, mid } = BIG_ORDER_BOOK;
+  // Середина рынка — из живой котировки золота; глубина построена от неё.
+  const [liveMid, setLiveMid] = React.useState(null);
+  React.useEffect(() => {
+    fetch("/api/quotes").then(r => r.json()).then(d => {
+      const строки = d && Array.isArray(d.quotes) ? d.quotes : [];
+      const золото = строки.find(r => r.ticker === "GC=F");
+      if (золото && золото.price) setLiveMid(золото.price);
+    }).catch(() => {});
+  }, []);
+  const { asks, bids, mid } = useMemo(
+    () => buildBook(liveMid || FALLBACK_MID), [liveMid]);
   const maxVol = Math.max(...asks.map(a=>a.v), ...bids.map(b=>b.v));
   const totalDepth = asks.reduce((s,a) => s+a.v, 0);
 
@@ -368,7 +405,13 @@ function BigOrderBridge() {
     }
     const avg = filledQty ? cost / filledQty : asks[0].p;
     return { avg, remaining, topOfBook: asks[0].p, slippage: avg - asks[0].p, filledQty };
-  }, [size]);
+    // 🔴 asks В ЗАВИСИМОСТЯХ. Раньше стоял только [size], и пока книга была
+    // константой, это работало. С живой ценой золота книга перестала быть
+    // константой — и замер показал ровно то, что бывает в таких случаях:
+    // уровни в стакане уже шли от 4270.74, а «Цена лучшего предложения»
+    // под ними держалась 4270.10 от запасной середины. Две правды на одном
+    // экране, обе выглядят как измерение.
+  }, [size, asks]);
 
   return (
     <div style={{marginBottom:48}}>
@@ -391,7 +434,7 @@ function BigOrderBridge() {
               <div key={i} style={{display:"flex",justifyContent:"space-between",padding:"3px 10px",position:"relative"}}>
                 <div style={{position:"absolute",right:0,top:0,bottom:0,width:`${a.v/maxVol*100}%`,background:"rgba(242,54,69,0.18)"}}/>
                 <Mono size={11} color={C.chartRed} spacing={0} style={{position:"relative"}}>{a.p.toFixed(2)}</Mono>
-                <Mono size={10} color="rgba(255,255,255,0.35)" spacing={0} style={{position:"relative"}}>{a.v}</Mono>
+                <Mono size={10} color="rgba(255,255,255,0.55)" spacing={0} style={{position:"relative"}}>{a.v}</Mono>
               </div>
             ))}
           </div>
@@ -400,7 +443,7 @@ function BigOrderBridge() {
               <div key={i} style={{display:"flex",justifyContent:"space-between",padding:"3px 10px",position:"relative"}}>
                 <div style={{position:"absolute",left:0,top:0,bottom:0,width:`${b.v/maxVol*100}%`,background:"rgba(8,153,129,0.18)"}}/>
                 <Mono size={11} color={C.chartGreen} spacing={0} style={{position:"relative"}}>{b.p.toFixed(2)}</Mono>
-                <Mono size={10} color="rgba(255,255,255,0.35)" spacing={0} style={{position:"relative"}}>{b.v}</Mono>
+                <Mono size={10} color="rgba(255,255,255,0.55)" spacing={0} style={{position:"relative"}}>{b.v}</Mono>
               </div>
             ))}
           </div>
@@ -408,22 +451,30 @@ function BigOrderBridge() {
         <div style={{maxWidth:420,margin:"0 auto 18px"}}>
           <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
             <span style={{fontSize:11.5,color:"rgba(255,255,255,0.55)",fontFamily:"monospace"}}>{bo.sizeLabel}</span>
-            <span style={{fontSize:13,fontWeight:700,color:C.gold,fontFamily:"monospace"}}>{size} {bo.lotsUnit}</span>
+            <span style={{fontSize:13,fontWeight:700,color:C.goldText,fontFamily:"monospace"}}>{size} {bo.lotsUnit}</span>
           </div>
-          <input type="range" min="20" max={Math.round(totalDepth*1.3)} step="10" value={size}
+          <input type="range" aria-label={bo.sizeLabel} min="20" max={Math.round(totalDepth*1.3)} step="10" value={size}
             onChange={e => { setTouched(true); setSize(+e.target.value); }}
             style={{width:"100%",accentColor:C.gold,cursor:"pointer"}}/>
         </div>
         <div style={{textAlign:"center"}}>
           <div style={{display:"flex",justifyContent:"center",gap:28,flexWrap:"wrap",marginBottom:14,fontFamily:"monospace",fontSize:13}}>
             <span>{bo.topOfBook}: <b>{filled.topOfBook.toFixed(2)}</b></span>
-            <span>{bo.avgFill}: <b style={{color:C.gold}}>{filled.avg.toFixed(2)}</b></span>
-            <span>{bo.slippage}: <b style={{color: filled.slippage>0 ? C.red : "rgba(255,255,255,0.4)"}}>+{filled.slippage.toFixed(2)}</b></span>
+            <span>{bo.avgFill}: <b style={{color:C.goldText}}>{filled.avg.toFixed(2)}</b></span>
+            {/* Панель исполнения ордера тёмная, и код это знает — значит и
+                цвета берутся из тёмного яруса палитры. C.red (#c0392b) на
+                #18181a даёт 3.26:1, rgba(255,255,255,0.4) — 3.82:1. */}
+            <span>{bo.slippage}: <b style={{color: filled.slippage>0 ? C.redOnDark : C.inkFaintOnDark}}>+{filled.slippage.toFixed(2)}</b></span>
           </div>
           {filled.remaining > 0 && (
             <p style={{fontSize:12,color:"#e74c3c",fontFamily:"monospace",marginBottom:8}}>{fillTemplate(bo.beyondBookNote, {remaining: filled.remaining})}</p>
           )}
-          <p style={{fontSize:13,color:C.gold,fontStyle:"italic",margin:0}}>{touched ? bo.bridgeResultLabel : bo.dragHint}</p>
+          <p style={{fontSize:13,color:C.goldText,fontStyle:"italic",margin:0}}>{touched ? bo.bridgeResultLabel : bo.dragHint}</p>
+          {/* Метка честности по образцу gameSyntheticNote главы 4: цвет не
+              бледнее inkMid, иначе дисклеймер не читается (README, раздел
+              «Постоянные проверки»). */}
+          <p style={{fontSize:10.5,color:"rgba(255,255,255,0.62)",fontFamily:"monospace",
+                     letterSpacing:0.3,lineHeight:1.5,marginTop:14,marginBottom:0}}>{bo.depthNote}</p>
         </div>
       </div>
     </div>
@@ -456,7 +507,8 @@ function FootprintPlaces() {
   return (
     <div style={{marginBottom:48}}>
       <p style={{fontSize:14,color:C.inkMid,lineHeight:1.75,marginBottom:24,maxWidth:820}}>{fp.preamble}</p>
-      <div style={{overflowX:"auto",marginBottom:24}}>
+      {/* Таблица шире экрана — с клавиатуры тоже. */}
+      <div style={{overflowX:"auto",marginBottom:24}} tabIndex={0} role="region" aria-label={fp.title || "table"}>
         <table style={{borderCollapse:"collapse",width:"100%",minWidth:560}}>
           <thead>
             <tr>
@@ -468,7 +520,7 @@ function FootprintPlaces() {
               <tr key={i}>
                 <td style={{padding:"10px 10px",fontSize:12.5,color:C.black,fontWeight:600,borderBottom:`1px solid ${C.border}`,verticalAlign:"top"}}>{r.where}</td>
                 <td style={{padding:"10px 10px",fontSize:12,color:C.inkMid,borderBottom:`1px solid ${C.border}`,verticalAlign:"top"}}>{r.what}</td>
-                <td style={{padding:"10px 10px",fontSize:11.5,color:C.gold,fontFamily:"monospace",borderBottom:`1px solid ${C.border}`,verticalAlign:"top"}}>{r.access}</td>
+                <td style={{padding:"10px 10px",fontSize:11.5,color:C.goldText,fontFamily:"monospace",borderBottom:`1px solid ${C.border}`,verticalAlign:"top"}}>{r.access}</td>
               </tr>
             ))}
           </tbody>
@@ -494,9 +546,44 @@ function PatternRealityTable({ patterns }) {
   const [instrument, setInstrument] = useState("GOLD");
   const cells = (patterns && patterns.cells) || [];
   const symbols = useMemo(() => Array.from(new Set(cells.map(c=>c.symbol))).sort(), [cells]);
-  const rows = useMemo(() => cells.filter(c => c.symbol === instrument).sort((a,b) => b.n - a.n), [cells, instrument]);
   const nameKey = "display_name_" + INITIAL_LANG;
   const naData = INITIAL_LANG==="ru"?"мало данных":INITIAL_LANG==="ro"?"date insuficiente":"not enough data";
+  // 🔴 Таблица отвечала на один вопрос — «у какого паттерна больше
+  // наблюдений». А читатель приходит сюда с другим: «какой дальше всех от
+  // опорных 50%». Сортировка по колонке превращает выкладку в инструмент, а
+  // не в картинку: 2685 знаков подряд читались как абзац.
+  //
+  // Шапка сделана так же, как в главах 8 и 9: aria-sort сообщает направление,
+  // кнопка внутри даёт фокус и Enter/Space без своей обработки клавиш.
+  const [sortKey, setSortKey] = useState("n");
+  const [sortDir, setSortDir] = useState(1);          // 1 = по убыванию
+  const onSort = (k) => {
+    if (k === sortKey) { setSortDir(-sortDir); return; }
+    setSortKey(k); setSortDir(1);
+  };
+  const rows = useMemo(() => {
+    const взять = (c) => {
+      if (sortKey === "pattern") return (c[nameKey] || c.pattern_key || "").toLowerCase();
+      if (sortKey === "tf") return c.tf || "";
+      // Отклонение от случайности, а не сам процент: 42% и 58% одинаково
+      // далеки от опорной линии, и в таблице про «есть ли сигнал» важно
+      // именно расстояние.
+      if (sortKey === "agree") return c.shown ? Math.abs(c.agree_5 * 100 - 50) : -1;
+      return c.n || 0;
+    };
+    const свои = cells.filter(c => c.symbol === instrument);
+    return свои.slice().sort((a, b) => {
+      const x = взять(a), y = взять(b);
+      if (typeof x === "string") return sortDir * y.localeCompare(x);
+      return sortDir * (y - x);
+    });
+  }, [cells, instrument, sortKey, sortDir, nameKey]);
+  const колонки = [
+    {key:"pattern", label: cm.patternLabel, align:"left"},
+    {key:"tf", label:"TF", align:"center"},
+    {key:"agree", label:"agree_5", align:"center"},
+    {key:"n", label:"n", align:"center"},
+  ];
 
   return (
     <div>
@@ -509,11 +596,28 @@ function PatternRealityTable({ patterns }) {
         <table style={{borderCollapse:"collapse",width:"100%",minWidth:560}}>
           <thead>
             <tr>
-              <th style={{textAlign:"left",padding:"8px 10px",fontSize:10.5,fontFamily:"monospace",color:C.inkFaint,textTransform:"uppercase",borderBottom:`1px solid ${C.border}`}}>{cm.patternLabel}</th>
-              <th style={{textAlign:"center",padding:"8px 10px",fontSize:10.5,fontFamily:"monospace",color:C.inkFaint,borderBottom:`1px solid ${C.border}`}}>TF</th>
-              <th style={{textAlign:"center",padding:"8px 10px",fontSize:10.5,fontFamily:"monospace",color:C.inkFaint,borderBottom:`1px solid ${C.border}`}}>agree_5</th>
-              <th style={{textAlign:"center",padding:"8px 10px",fontSize:10.5,fontFamily:"monospace",color:C.inkFaint,borderBottom:`1px solid ${C.border}`}}>CI95</th>
-              <th style={{textAlign:"center",padding:"8px 10px",fontSize:10.5,fontFamily:"monospace",color:C.inkFaint,borderBottom:`1px solid ${C.border}`}}>n</th>
+              {колонки.slice(0,3).map(col => (
+                <th key={col.key} scope="col"
+                    aria-sort={sortKey===col.key ? (sortDir>0?"descending":"ascending") : "none"}
+                    style={{textAlign:col.align,padding:0,borderBottom:`1px solid ${C.border}`,whiteSpace:"nowrap"}}>
+                  <button type="button" onClick={()=>onSort(col.key)}
+                    style={{width:"100%",textAlign:col.align,padding:"8px 10px",fontSize:10.5,fontFamily:"monospace",color:sortKey===col.key?C.goldText:C.inkFaint,textTransform:"uppercase",cursor:"pointer",userSelect:"none",background:"none",border:"none",fontWeight:600}}>
+                    {col.label}{sortKey===col.key ? (sortDir>0?" ▾":" ▴") : ""}
+                  </button>
+                </th>
+              ))}
+              <th scope="col" style={{textAlign:"center",padding:"8px 10px",fontSize:10.5,fontFamily:"monospace",color:C.inkFaint,borderBottom:`1px solid ${C.border}`}}>CI95</th>
+              <th scope="col"
+                  aria-sort={sortKey==="n" ? (sortDir>0?"descending":"ascending") : "none"}
+                  style={{textAlign:"center",padding:0,borderBottom:`1px solid ${C.border}`}}>
+                {/* C.gold как ТЕКСТ — 2.63:1: это цвет плашек и рамок, не
+                    подписей. Активная колонка помечается goldText (он же
+                    светлеет сам, если заголовок окажется на тёмном). */}
+                <button type="button" onClick={()=>onSort("n")}
+                  style={{width:"100%",textAlign:"center",padding:"8px 10px",fontSize:10.5,fontFamily:"monospace",color:sortKey==="n"?C.goldText:C.inkFaint,cursor:"pointer",userSelect:"none",background:"none",border:"none",fontWeight:600}}>
+                  n{sortKey==="n" ? (sortDir>0?" ▾":" ▴") : ""}
+                </button>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -522,7 +626,7 @@ function PatternRealityTable({ patterns }) {
               <tr key={i}>
                 <td style={{padding:"7px 10px",fontSize:12,color:C.black,fontWeight:600,borderBottom:`1px solid ${C.border}`}}>{c[nameKey] || c.pattern_key}</td>
                 <td style={{padding:"7px 10px",textAlign:"center",fontSize:11,fontFamily:"monospace",color:C.inkSoft,borderBottom:`1px solid ${C.border}`}}>{c.tf}</td>
-                <td style={{padding:"7px 10px",textAlign:"center",fontSize:12,fontFamily:"monospace",fontWeight:600,color: c.shown ? (Math.abs(c.agree_5*100-50)>10?C.gold:C.black) : C.inkFaint,borderBottom:`1px solid ${C.border}`}}>{c.shown ? (c.agree_5*100).toFixed(1)+"%" : naData}</td>
+                <td style={{padding:"7px 10px",textAlign:"center",fontSize:12,fontFamily:"monospace",fontWeight:600,color: c.shown ? (Math.abs(c.agree_5*100-50)>10?C.goldText:C.black) : C.inkFaint,borderBottom:`1px solid ${C.border}`}}>{c.shown ? (c.agree_5*100).toFixed(1)+"%" : naData}</td>
                 <td style={{padding:"7px 10px",textAlign:"center",fontSize:11,fontFamily:"monospace",color:C.inkFaint,borderBottom:`1px solid ${C.border}`}}>{c.shown && c.ci95[0]!=null ? `${c.ci95[0]}–${c.ci95[1]}` : "—"}</td>
                 <td style={{padding:"7px 10px",textAlign:"center",fontSize:11,fontFamily:"monospace",color:C.inkSoft,borderBottom:`1px solid ${C.border}`}}>{c.n}</td>
               </tr>
@@ -551,7 +655,7 @@ function CoreMeasureBlock({ patterns, vars }) {
       <div style={{display:"flex",flexDirection:"column",gap:14,marginBottom:28}}>
         {[cm.finding1, cm.finding2, cm.finding3].map((f,i) => (
           <div key={i} style={{display:"flex",gap:12,alignItems:"flex-start"}}>
-            <span style={{color:C.gold,fontFamily:"monospace",fontSize:11,marginTop:2}}>0{i+1}</span>
+            <span style={{color:C.goldText,fontFamily:"monospace",fontSize:11,marginTop:2}}>0{i+1}</span>
             <span style={{fontSize:13,color:C.inkMid,lineHeight:1.65}}>{vars ? fillTemplate(f, vars) : "—"}</span>
           </div>
         ))}
@@ -564,7 +668,7 @@ function CoreMeasureBlock({ patterns, vars }) {
         <p style={{fontSize:12,color:C.inkMid,lineHeight:1.65,margin:0}}>{cm.honestBody}</p>
       </div>
 
-      <a href="/data/edu_stats/pattern_reality.csv" download style={{fontFamily:"monospace",fontSize:12,color:C.gold,textDecoration:"none",border:`1px solid ${C.gold}`,padding:"9px 16px",borderRadius:4,display:"inline-block"}}>{cm.downloadCsv}</a>
+      <a href="/data/edu_stats/pattern_reality.csv" download style={{fontFamily:"monospace",fontSize:12,color:C.goldText,textDecoration:"none",border:`1px solid ${C.gold}`,padding:"9px 16px",borderRadius:4,display:"inline-block"}}>{cm.downloadCsv}</a>
     </div>
   );
 }
@@ -574,10 +678,18 @@ function DisclosureItem({ item, idx, colKey, open, onToggle, accent }) {
   const isOpen = open === colKey + idx;
   return (
     <div style={{marginBottom:10}}>
-      <div onClick={()=>onToggle(isOpen ? null : colKey + idx)} style={{cursor:"pointer",display:"flex",gap:8,alignItems:"flex-start"}}>
+      {/* 🔴 Это раскрывающаяся карточка, то есть управление. Была обычным
+          <div> с курсором-пальцем: мышью работает, с клавиатуры нет, диктор
+          управлением не называет. Тринадцать таких в главе — больше, чем в
+          любой другой. Кнопка с aria-expanded говорит и о роли, и о
+          состоянии. */}
+      <button type="button" onClick={()=>onToggle(isOpen ? null : colKey + idx)}
+        aria-expanded={isOpen ? "true" : "false"}
+        style={{cursor:"pointer",display:"flex",gap:8,alignItems:"flex-start",
+                width:"100%",textAlign:"left",background:"none",border:"none",padding:0,font:"inherit"}}>
         <span style={{color:accent,fontFamily:"monospace",fontSize:11,marginTop:1}}>{isOpen ? "−" : "+"}</span>
         <p style={{fontSize:12.5,color:C.inkMid,lineHeight:1.65,margin:0}}>{item.claim}</p>
-      </div>
+      </button>
       {isOpen && (
         <p style={{fontSize:11.5,color:C.inkSoft,lineHeight:1.6,margin:"6px 0 0 19px",paddingLeft:10,borderLeft:`2px solid ${accent}`,fontStyle:"italic"}}>{item.disclosure}</p>
       )}
@@ -668,7 +780,7 @@ function XrayReversed({ xray }) {
     }));
 
     if (day.touch) {
-      s.candleSeries.setMarkers([{ time: day.touch.touch_time, position: "aboveBar", color: C.gold, shape: "circle", text: day.touch.zone_price.toFixed(0) }]);
+      s.candleSeries.setMarkers([{ time: day.touch.touch_time, position: "aboveBar", color: C.goldText, shape: "circle", text: day.touch.zone_price.toFixed(0) }]);
     } else {
       s.candleSeries.setMarkers([]);
     }
@@ -722,11 +834,11 @@ function XrayReversed({ xray }) {
             )}
           </div>
           {day.touch && dayGuesses[dayIdx] !== undefined && (
-            <p style={{fontSize:11.5,color:C.gold,fontFamily:"monospace",marginBottom:10}}>
+            <p style={{fontSize:11.5,color:C.goldText,fontFamily:"monospace",marginBottom:10}}>
               {day.touch.outcome === "inconclusive" ? xr.predictInconclusive : (dayGuesses[dayIdx] === day.touch.outcome ? xr.predictCorrect : xr.predictWrong)}{" "}{outcomeLabel(day.touch.outcome)}
             </p>
           )}
-          <p style={{fontSize:9.5,color:"rgba(255,255,255,0.32)",fontFamily:"monospace",lineHeight:1.5,marginBottom:10}}>{xr.volumeCaption}</p>
+          <p style={{fontSize:9.5,color:"rgba(255,255,255,0.55)",fontFamily:"monospace",lineHeight:1.5,marginBottom:10}}>{xr.volumeCaption}</p>
 
           {step === 2 && (
             <div style={{textAlign:"center"}}>
@@ -754,16 +866,52 @@ function XrayReversed({ xray }) {
   );
 }
 
-// ─── Ступень 2: предел макета (ladder pending) ─────────────────────────────────
-function LadderLimitBlock() {
+// ─── Ступень 2: демо-терминал ───────────────────────────────────────────────
+/* 🔴 ЗАГЛУШКА СНЯТА. Здесь стояло «карточка демо-счёта готовится отдельно
+   вместе с остальной партнёрской инфраструктурой курса». Инфраструктура
+   готова: в partners.json у всех пяти площадок проверено, что демо
+   открывается БЕЗ верификации — с цитатами из условий, датами проверки, а
+   у NAGA подтверждено собственным доступом (счёт #3402015).
+
+   Сноска ниже считает эти факты из файла, а не пересказывает их: если
+   завтра у кого-то появится требование верификации, число «5 из 5»
+   изменится само, а не останется висеть неправдой. */
+function LadderDemoBlock() {
+  const { useEffect, useState } = React;
   const T7 = window.Ch7Content[INITIAL_LANG] || window.Ch7Content.ru;
   const ll = T7.ladderLimit;
+  const [демо, setДемо] = useState(null);
+
+  useEffect(() => {
+    fetch("/data/partners.json", {cache: "no-cache"})
+      .then(r => r.ok ? r.json() : null)
+      .then(j => {
+        const все = (j && j.partners || []).filter(p => p.enabled);
+        if (!все.length) return;
+        const без = все.filter(p => p.demo_requires_verification === false);
+        const даты = все.map(p => p.demo_checked || p.loss_pct_checked)
+                        .filter(Boolean).sort();
+        setДемо({всего: все.length, без: без.length,
+                 проверено: даты.length ? даты[даты.length - 1] : null});
+      })
+      .catch(() => {});
+  }, []);
+
   return (
     <div style={{marginBottom:48}}>
       {ll.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:14,color:C.inkMid,lineHeight:1.75,marginBottom:14,maxWidth:800}}>{p}</p>)}
-      <div style={{border:`1px dashed ${C.borderGold}`,borderRadius:8,padding:"18px 22px",background:C.surface}}>
-        <p style={{fontSize:12,color:C.inkFaint,fontStyle:"italic",margin:0}}>{ll.pendingNote}</p>
-      </div>
+      <PartnerPicker limit={3} place="ch7_ladder2" errorText={ll.loadError}/>
+      {демо && (
+        <p style={{fontSize:11.5,color:C.inkFaint,fontFamily:"monospace",lineHeight:1.6,marginTop:12}}>
+          {/* Ключи шаблона — латиницей, и это не вкусовщина: fillTemplate
+              ищет {{\w+}}, а \w в JavaScript не включает кириллицу. С
+              русскими ключами подстановка молча не срабатывает, и на экран
+              уходит «{{без}} площадок из {{всего}}» — ровно это и показал
+              первый прогон. */}
+          {fillTemplate(ll.demoNote, {noVerif: демо.без, total: демо.всего,
+                                      checked: демо.проверено || "—"})}
+        </p>
+      )}
     </div>
   );
 }
@@ -776,7 +924,7 @@ function PredictTf({ vars }) {
   const [picked, setPicked] = useState(null);
   return (
     <div style={{border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px",marginTop:8,marginBottom:24}}>
-      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{p.tag}</Mono>
+      <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{p.tag}</Mono>
       <p style={{fontSize:14.5,color:C.black,lineHeight:1.65,marginBottom:14}}>{p.question}</p>
       <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:14}}>
         {p.options.map((o,i) => (
@@ -808,7 +956,7 @@ function Chapter7() {
 
       <div style={{position:"sticky",top:106,background:"rgba(255,255,255,0.96)",backdropFilter:"blur(10px)",borderBottom:`1px solid ${C.border}`,padding:"15px 5vw",display:"flex",alignItems:"center",justifyContent:"space-between",zIndex:50}}>
         <div style={{display:"flex",alignItems:"center",gap:20}}>
-          <span onClick={() => window.location.href = getChUrl(6, lang)} style={{color:C.gold,cursor:"pointer",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</span>
+          <a href={getChUrl(6, lang)} aria-label={lang==="ru"?"Предыдущая глава":lang==="ro"?"Capitolul anterior":"Previous chapter"} style={{color:C.goldText,cursor:"pointer",textDecoration:"none",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</a>
           <Chip>{S.levelChip}</Chip>
           <Mono size={14} color={C.inkSoft} spacing={0} className="hide-mobile">{S.chapterNameShort}</Mono>
         </div>
@@ -821,15 +969,15 @@ function Chapter7() {
       <div style={{background:C.black,padding:"80px 5vw 70px",textAlign:"center",position:"relative",overflow:"hidden"}}>
         <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 100%, rgba(201,151,58,0.1) 0%, transparent 60%)"}}/>
         <div style={{position:"relative"}}>
-          <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:20}}>{S.heroEyebrow}</Mono>
+          <Mono size={11} color={C.goldText} spacing={4} style={{display:"block",marginBottom:20}}>{S.heroEyebrow}</Mono>
           <h1 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(36px,6vw,66px)",fontWeight:400,color:C.white,lineHeight:1.05,marginBottom:20}}>
-            {S.heroTitleLine1}<br/><span style={{color:C.gold}}>{S.heroTitleLine2}</span>
+            {S.heroTitleLine1}<br/><span style={{color:C.goldText}}>{S.heroTitleLine2}</span>
           </h1>
           <p style={{fontSize:"clamp(16px,2vw,20px)",color:"rgba(255,255,255,0.55)",maxWidth:640,margin:"0 auto 32px",lineHeight:1.65}}>{S.heroSubtitle}</p>
           <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
-            <Chip color={C.gold}>{S.fundamentalChip}</Chip>
-            <Chip color="rgba(255,255,255,0.3)">{S.technicalChip}</Chip>
-            <Chip color="rgba(255,255,255,0.3)">{S.interactiveChip}</Chip>
+            <Chip color={C.goldText}>{S.fundamentalChip}</Chip>
+            <Chip color="rgba(255,255,255,0.55)">{S.technicalChip}</Chip>
+            <Chip color="rgba(255,255,255,0.55)">{S.interactiveChip}</Chip>
           </div>
         </div>
       </div>
@@ -868,7 +1016,7 @@ function Chapter7() {
 
         <Rule/>
 
-        <LadderLimitBlock/>
+        <LadderDemoBlock/>
 
         <QuizBlock questions={T7.quiz} levelId="level_7" lang={lang} copy={{
           kicker: S.quizKicker, title: S.quizTitle, next: S.quizNext,
@@ -878,7 +1026,7 @@ function Chapter7() {
         <PredictTf vars={vars}/>
 
         <div style={{border:`1px dashed ${C.borderGold}`,borderRadius:8,padding:"20px 24px",marginBottom:32,background:C.surface}}>
-          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T7.cliffhanger.tag}</Mono>
+          <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{T7.cliffhanger.tag}</Mono>
           {T7.cliffhanger.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:14,color:C.inkMid,lineHeight:1.7,marginBottom:10}}>{p}</p>)}
         </div>
 
@@ -897,7 +1045,7 @@ function Chapter7() {
               return (
                 <li>
                   {text}{" "}
-                  <a href="/data/edu_stats/pattern_reality.csv" download style={{color:C.gold}}>{T7.sources.csvLabel}</a>
+                  <a href="/data/edu_stats/pattern_reality.csv" download style={{color:C.goldText}}>{T7.sources.csvLabel}</a>
                 </li>
               );
             })()}

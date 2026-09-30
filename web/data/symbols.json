@@ -120,7 +120,9 @@
       "RUB=X",
       "USD/RUB"
     ],
-    "class": "fx"
+    "class": "fx",
+    "chart": true,
+    "yahoo": "USDRUB=X"
   },
   "USDKZT": {
     "ru": "Доллар / тенге",
@@ -363,11 +365,11 @@
       "NAS100",
       "USTEC",
       "QQQ",
-      "^IXIC"
+      "^NDX"
     ],
     "class": "index",
     "chart": true,
-    "yahoo": "^IXIC",
+    "yahoo": "^NDX",
     "quote": true
   },
   "DJI": {

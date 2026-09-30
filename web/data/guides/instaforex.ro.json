@@ -13,16 +13,46 @@
       "label": "Înregistrare",
       "platform": "instaforex.com, web",
       "captured": "2026-08-05",
-      "needed": ["Nume, email, telefon", "Circa două minute"],
+      "needed": [
+        "Nume, email, telefon",
+        "Circa două minute"
+      ],
       "blocks": [
-        { "type": "steps", "items": [
-          { "img": "/assets/guides/instaforex/registration/01_start.png", "caption": "Deschideți instaforex.com." },
-          { "img": "/assets/guides/instaforex/registration/02_country.png", "caption": "Formular de înregistrare: nume, email, telefon, țară/regiune (determinată automat după IP), valută și tip de cont (MT4/MT5)." },
-          { "img": "/assets/guides/instaforex/registration/05_account_type.png", "caption": "Pagina completă de specificații arată toate cele 5 tipuri de cont deodată și un tabel spread/swap/lot pentru fiecare — util de verificat înainte de a alege." },
-          { "img": "/assets/guides/instaforex/registration/06_consents.png", "caption": "Caseta de acord cu termenii — NU este bifată implicit, se bifează manual." }
-        ] },
-        { "type": "text", "body": "După trimiterea formularului, pagina de confirmare emite două parole — una de tranzacționare și una de investitor. Parola de tranzacționare este pentru autentificarea în terminal; cea de investitor oferă acces doar de vizualizare a contului, fără drept de tranzacționare." },
-        { "type": "entity",
+        {
+          "type": "steps",
+          "items": [
+            {
+              "img": "/assets/guides/instaforex/registration/01_start.png",
+              "caption": "Deschideți instaforex.com.",
+              "img_webp": "/assets/guides/instaforex/registration/01_start.webp",
+              "img_w": 1440,
+              "img_h": 900
+            },
+            {
+              "img": "/assets/guides/instaforex/registration/02_country.png",
+              "caption": "Formular de înregistrare: nume, email, telefon, țară/regiune (determinată automat după IP), valută și tip de cont (MT4/MT5).",
+              "img_webp": "/assets/guides/instaforex/registration/02_country.webp",
+              "img_w": 1440,
+              "img_h": 900
+            },
+            {
+              "img": "/assets/guides/instaforex/registration/05_account_type.png",
+              "caption": "Pagina completă de specificații arată toate cele 5 tipuri de cont deodată și un tabel spread/swap/lot pentru fiecare — util de verificat înainte de a alege.",
+              "img_webp": "/assets/guides/instaforex/registration/05_account_type.webp",
+              "img_w": 1440,
+              "img_h": 900
+            },
+            {
+              "img": "/assets/guides/instaforex/registration/06_consents.png",
+              "caption": "Caseta de acord cu termenii — NU este bifată implicit, se bifează manual.",
+              "img_webp": "/assets/guides/instaforex/registration/06_consents.webp",
+              "img_w": 435,
+              "img_h": 60
+            }
+          ]
+        },
+        {
+          "type": "entity",
           "img": "/assets/guides/instaforex/registration/03_entity_named.png",
           "legal_name": "InstaFinance Ltd",
           "jurisdiction": "Insulele Virgine Britanice (BVI)",
@@ -37,64 +67,308 @@
             "un fond de compensare — în locul unei asigurări, doar o promoție condiționată de aducerea de recomandări sau de un depozit de zece ori mai mare",
             "un procent publicat al conturilor în pierdere",
             "🔴 protecție împotriva soldului negativ — singurul dintre cei cinci parteneri fără aceasta. Contractul afirmă explicit dreptul opus: „Compania își rezervă dreptul de a restabili un sold negativ pe unul dintre conturile Clientului folosind fonduri disponibile pe celelalte conturi ale sale”"
-          ]
+          ],
+          "img_webp": "/assets/guides/instaforex/registration/03_entity_named.webp",
+          "img_w": 1440,
+          "img_h": 900
         }
       ]
     },
     {
       "key": "activation",
       "label": "Activarea contului",
+      "platform": "instaforex.com, fast_open_live_account",
+      "captured": "2026-08-13",
+      "intro": "InstaForex nu are un pas separat de „activare” cu chestionar, ca la unii alți brokeri — contul devine real și tranzacționabil imediat după trimiterea formularului de înregistrare.",
       "blocks": [
-        { "type": "callout", "style": "gap", "title": "Fără capturi — necesită autentificare în cont" },
-        { "type": "table", "columns": ["Parametru", "Valoare"], "rows": [
-          ["Tip de cont", "Insta.Standard"],
-          ["Levier", "până la 1:1000"],
-          ["Lot minim", "0,01"],
-          ["Platforme", "MT4, MT5, terminal web"]
-        ] }
+        {
+          "type": "steps",
+          "items": [
+            {
+              "img": "/assets/guides/instaforex/activation/01_account_created.png",
+              "caption": "Imediat după formular — un ecran „Well done! You have opened an InstaForex live account” cu numărul de cont, parola și serverul (instaforex-mt5.com). Aceeași parolă este trimisă și pe email.",
+              "note": "Datele din captură au fost cenzurate de noi.",
+              "img_webp": "/assets/guides/instaforex/activation/01_account_created.webp",
+              "img_w": 1280,
+              "img_h": 1220
+            }
+          ]
+        },
+        {
+          "type": "callout",
+          "style": "gap",
+          "title": "O singură parolă pe ecran, nu două",
+          "body": "Acest ecran arată exact o parolă — de tranzacționare, pentru MT4. Nu există nicio parolă separată de investitor (doar vizualizare, fără drept de tranzacționare) nici în câmpuri, nici în text — deși aceasta este perechea standard pentru conturile MetaTrader. Nu putem spune dacă este emisă printr-un email separat sau generată în terminal: pur și simplu nu am văzut-o."
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Parametru",
+            "Valoare"
+          ],
+          "rows": [
+            [
+              "Tip de cont",
+              "Insta.Standard"
+            ],
+            [
+              "Levier (maxim conform specificației)",
+              "până la 1:1000"
+            ],
+            [
+              "Lot minim",
+              "0,01"
+            ],
+            [
+              "Platforme",
+              "MT4, MT5, terminal web"
+            ]
+          ]
+        },
+        {
+          "type": "callout",
+          "style": "fact",
+          "title": "Contul real s-a deschis cu levier 1:100, nu 1:1000",
+          "body": "Formularul de înregistrare rapidă (fast_open_live_account) nu întreabă niciodată despre levier — nu îl alegeți. În terminalul web, contul deschis astfel arată „Leverage: 1:100” la Information, nu „până la 1:1000” pe care InstaForex îl promovează pe pagina tipurilor de cont. Nu este o contradicție a cifrelor — 1:1000 rămâne maximul conform specificației contului Insta.Standard — dar tocmai această cale de înregistrare, cea mai rapidă, oferă implicit un levier de cinci ori mai mic, fără un avertisment clar pe formular."
+        }
       ]
     },
     {
       "key": "funding",
       "label": "Alimentare",
+      "platform": "secure.instaforex.com, cont · MixPay",
+      "captured": "2026-08-13",
+      "intro": "Secțiunea „Deposit money” listează toate cele zece metode pe un singur ecran, cu comisionul și timpul de creditare pentru fiecare. Mai jos — traseul complet cu Tether (USDT) ca exemplu, cel mai detaliat: de la alegerea metodei până la adresa de plată.",
       "blocks": [
-        { "type": "callout", "style": "gap", "title": "Fără capturi — necesită autentificare în cont" },
-        { "type": "table", "columns": ["Parametru", "Valoare", "Sursă"], "rows": [
-          ["Depozit minim", "1 USD", "site-ul brokerului"],
-          ["Comision de inactivitate", "10 USD/lună după 3 luni", "contractul BVI"],
-          ["Metode", "card, transfer bancar și electronic, Bitcoin, Tether, Litecoin, Ethereum și altele", "site-ul brokerului"]
-        ] },
-        { "type": "callout", "style": "note", "title": "Comisioanele pentru metodele de alimentare nu se pot vedea",
-          "body": "Paginile de depunere și retragere sunt ascunse după autentificare, deci nu puteți compara costul metodelor înainte de înregistrare. Este singurul lucru pe care InstaForex nu îl arată public — tot restul, îl arată." }
+        {
+          "type": "steps",
+          "items": [
+            {
+              "img": "/assets/guides/instaforex/funding/01_deposit_methods.png",
+              "caption": "„Money deposit” — Visa/Mastercard (fără comision, creditare în 15 minute – 7 zile lucrătoare) și opt metode „No fees”, diferența fiind doar în timp: cripto (USDC, Bitcoin, Tether, Ethereum, Litecoin, altele) — 3 ore, Skrill — până la 24 de ore, PayCo și NETELLER — instant.",
+              "note": "Numărul de cont din captură a fost cenzurat de noi.",
+              "img_webp": "/assets/guides/instaforex/funding/01_deposit_methods.webp",
+              "img_w": 1280,
+              "img_h": 1220
+            },
+            {
+              "img": "/assets/guides/instaforex/funding/02_tether_amount.png",
+              "caption": "Alegeți „Deposit in Tether”, introduceți suma în USDT sau USD și protocolul rețelei (TRC20, ERC20 și altele) — protocolul determină adresa la care va trebui să plătiți.",
+              "note": "Numărul de cont cenzurat de noi.",
+              "img_webp": "/assets/guides/instaforex/funding/02_tether_amount.webp",
+              "img_w": 1280,
+              "img_h": 1220
+            },
+            {
+              "img": "/assets/guides/instaforex/funding/03_tether_confirm.png",
+              "caption": "Ecranul de confirmare arată rata de conversie și comisionul pe un rând separat — la 1000 USDT, „Fees: 0 USD”, se creditează 999,9 USD la un curs de 0,9999.",
+              "note": "Numărul de cont cenzurat de noi.",
+              "img_webp": "/assets/guides/instaforex/funding/03_tether_confirm.webp",
+              "img_w": 1280,
+              "img_h": 1220
+            },
+            {
+              "img": "/assets/guides/instaforex/funding/04_mixpay_provider.png",
+              "caption": "Apoi — o redirecționare către mixpay.me: InstaForex nu procesează singur depozitele în cripto, ci le predă unui procesator terț, MixPay Protocol. Aici se alege rețeaua exactă — de exemplu USDT (TRC-20).",
+              "img_webp": "/assets/guides/instaforex/funding/04_mixpay_provider.webp",
+              "img_w": 1280,
+              "img_h": 1220
+            },
+            {
+              "img": "/assets/guides/instaforex/funding/05_crypto_address.png",
+              "caption": "Ecranul final — adresa și codul QR pentru plată, cu un cronometru (circa 20 de minute în acest exemplu) și un avertisment: plătiți doar în protocolul ales, adresa este de unică folosință.",
+              "img_webp": "/assets/guides/instaforex/funding/05_crypto_address.webp",
+              "img_w": 1280,
+              "img_h": 1220
+            }
+          ]
+        },
+        {
+          "type": "callout",
+          "style": "gap",
+          "title": "Depozitele în cripto sunt externalizate unui procesator terț",
+          "body": "MixPay Protocol nu este InstaForex și nu este un partener bancar menționat în contract — este un serviciu separat de plăți în cripto, menționat doar în interiorul fluxului de depunere. Nu apare pe nicio pagină publică a InstaForex despre metodele de plată — site-ul brokerului spune simplu „Deposit in Tether”, fără să numească cine primește tehnic plata."
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Parametru",
+            "Valoare",
+            "Sursă"
+          ],
+          "rows": [
+            [
+              "Depozit minim",
+              "1 USD",
+              "site-ul brokerului"
+            ],
+            [
+              "Comision de inactivitate",
+              "10 USD/lună după 3 luni",
+              "contractul BVI"
+            ],
+            [
+              "Metode",
+              "card, transfer bancar și electronic, Bitcoin, Tether, Litecoin, Ethereum și altele",
+              "site-ul brokerului"
+            ]
+          ]
+        }
       ]
     },
     {
       "key": "verification",
       "label": "Verificare",
+      "platform": "cabinet.instaforex.org, contul de probă al brokerului",
+      "captured": "2026-08-13",
+      "intro": "Contul nostru nu a trecut încă prin verificare, așa că ce urmează nu este contul nostru — este contul de probă (trial) propriu al InstaForex, cu date demonstrative („John Smith”), pe care brokerul îl deschide oricui vrea să vadă interfața înainte de înregistrare. Structura și formulările sunt reale — este exact ecranul pe care îl va vedea și contul nostru când va ajunge acolo.",
       "blocks": [
-        { "type": "callout", "style": "gap", "title": "Fără capturi — necesită autentificare în cont" },
-        { "type": "text", "body": "Un cont demo nu necesită verificare: formularul cere doar țara, email-ul, valuta și mărimea depozitului virtual." }
+        {
+          "type": "steps",
+          "items": [
+            {
+              "img": "/assets/guides/instaforex/verification/01_verification_levels.png",
+              "caption": "„Verificarea contului de tranzacționare”: trei niveluri, documentele sunt verificate în 72 de ore lucrătoare. Al doilea nivel se acordă doar după primul, al treilea nu este obligatoriu și se acordă la discreția companiei.",
+              "img_webp": "/assets/guides/instaforex/verification/01_verification_levels.webp",
+              "img_w": 1280,
+              "img_h": 1220
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "body": "Nivelul unu este o scanare a pașaportului sau a altui document de identitate. Nivelul doi este un al doilea document (de alt tip) sau dovada adresei. Ecranul mai arată și un exemplu de respingere: „Documentul nu a trecut verificarea” cu motivul exact — fișierul trebuie să fie jpg/jpeg/bmp/gif/png/pdf și sub 25 MB."
+        },
+        {
+          "type": "callout",
+          "style": "note",
+          "title": "Un cont demo nu necesită verificare",
+          "body": "Separat de contul de tranzacționare: formularul de creare a contului demo cere doar țara, email-ul, valuta și mărimea depozitului virtual — verificarea nu apare deloc acolo."
+        }
       ]
     },
     {
       "key": "trading",
       "label": "Tranzacționare",
+      "platform": "webtrader.instaforex.com",
+      "captured": "2026-08-13",
       "blocks": [
-        { "type": "callout", "style": "fact", "title": "Condițiile sunt publicate integral, fără înregistrare" },
-        { "type": "table", "columns": ["Instrument", "Spread", "Comision", "Swap L / S", "Lot"], "rows": [
-          ["EUR/USD", "0,6 puncte", "0", "−10,1 / +1,1", "10.000"],
-          ["GBP/USD", "0,8", "0", "−5,9 / −3,6", "10.000"],
-          ["USD/JPY", "0,7", "0", "−14,5 / −24,2", "10.000"],
-          ["Aur", "$0,15", "$10", "−327 / +0,69", "100 uncii"],
-          ["Argint", "$0,35", "$10", "−51,68 / +0,09", "500 uncii"],
-          ["Bitcoin", "$0,25", "0,1% din volum", "−0,05%/zi", "1 BTC"]
-        ], "caption": "Specificația contului Insta.Standard, verificat 2026-08-05." },
-        { "type": "callout", "style": "note", "title": "Aici lotul este 10.000, nu 100.000",
-          "body": ["Acesta este lucrul esențial de știut despre InstaForex când comparați brokeri. Un spread de „0,6 puncte” aici nu costă 6 dolari per rundă, ci 60 de cenți — dar și poziția este de zece ori mai mică. Nu se pot compara spread-urile în puncte cu alți brokeri, ci doar prin costul în bani al unei runde.", "Argintul are 500 de uncii în loc de standardul de 5.000. Și atenție: aurul are două simboluri cu o diferență de cinci ori a contractului — GOLD.m are 100 de uncii, XAUUSD.m are 500 de uncii. Dacă deschideți o poziție pe simbolul greșit, veți obține un volum de cinci ori mai mare decât cel așteptat."] },
-        { "type": "callout", "style": "note", "title": "Unde se ascunde costul la cripto",
-          "body": "Spreadul la Bitcoin este de 25 de cenți, și e ușor să vă opriți aici. Dar un comision de 0,1% din volum, la un preț de circa 64.000 de dolari, înseamnă aproximativ 64 de dolari într-un sens și 128 pentru o rundă completă. Costul real al tranzacției nu se află acolo unde priviți." },
-        { "type": "callout", "style": "note", "title": "Swap-ul la aur în poziție long",
-          "body": "−327 față de +0,69 la short. Menținerea unei poziții de cumpărare la aur peste noapte costă aici aproximativ cât trei spread-uri. Pentru cei care tranzacționează aurul dincolo de intraday, asta contează mai mult decât spreadul." }
+        {
+          "type": "callout",
+          "style": "fact",
+          "title": "Condițiile sunt publicate integral, fără înregistrare"
+        },
+        {
+          "type": "steps",
+          "items": [
+            {
+              "img": "/assets/guides/instaforex/trading/01_webtrader_classic.png",
+              "caption": "Tab-ul „Classic” al terminalului web — instrumentele ca rânduri: prețuri Sell/Buy, trend, variație zilnică.",
+              "note": "Numele și numărul de cont din captură au fost cenzurate de noi.",
+              "img_webp": "/assets/guides/instaforex/trading/01_webtrader_classic.webp",
+              "img_w": 1280,
+              "img_h": 1220
+            },
+            {
+              "img": "/assets/guides/instaforex/trading/02_webtrader_dashboard.png",
+              "caption": "„Dashboard” — aceleași instrumente ca dale: preț, direcție, variație cu umplere colorată.",
+              "note": "Numele și numărul de cont cenzurate de noi.",
+              "img_webp": "/assets/guides/instaforex/trading/02_webtrader_dashboard.webp",
+              "img_w": 1280,
+              "img_h": 1220
+            },
+            {
+              "img": "/assets/guides/instaforex/trading/03_webtrader_chart.png",
+              "caption": "„Chart” — un grafic cu lumânări, instrumente de desenat, o cotație Sell/Buy și un widget „Trader positions” în dreapta.",
+              "note": "Numele și numărul de cont cenzurate de noi.",
+              "img_webp": "/assets/guides/instaforex/trading/03_webtrader_chart.webp",
+              "img_w": 1280,
+              "img_h": 1220
+            }
+          ]
+        },
+        {
+          "type": "callout",
+          "style": "note",
+          "title": "„Trader positions” la 50/50 pare un substitut, nu date reale",
+          "body": "Widgetul arată o distribuție Sell/Buy pentru instrument. Contul nostru are sold 0,00, fără poziții deschise, iar la toate instrumentele verificate (zece acțiuni pe ecranul Classic și #A pe grafic) valoarea este exact 50%/50%, fără nicio abatere — o distribuție reală a pozițiilor traderilor nu arată niciodată așa. Pare o valoare implicită a interfeței, nu o agregare live a tranzacțiilor; nu tratați asta ca pe un fapt despre ce fac ceilalți clienți."
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Instrument",
+            "Spread",
+            "Comision",
+            "Swap L / S",
+            "Lot"
+          ],
+          "rows": [
+            [
+              "EUR/USD",
+              "0,6 puncte",
+              "0",
+              "−10,1 / +1,1",
+              "10.000"
+            ],
+            [
+              "GBP/USD",
+              "0,8",
+              "0",
+              "−5,9 / −3,6",
+              "10.000"
+            ],
+            [
+              "USD/JPY",
+              "0,7",
+              "0",
+              "−14,5 / −24,2",
+              "10.000"
+            ],
+            [
+              "Aur",
+              "$0,15",
+              "$10",
+              "−327 / +0,69",
+              "100 uncii"
+            ],
+            [
+              "Argint",
+              "$0,35",
+              "$10",
+              "−51,68 / +0,09",
+              "500 uncii"
+            ],
+            [
+              "Bitcoin",
+              "$0,25",
+              "0,1% din volum",
+              "−0,05%/zi",
+              "1 BTC"
+            ]
+          ],
+          "caption": "Specificația contului Insta.Standard, verificat 2026-08-05."
+        },
+        {
+          "type": "callout",
+          "style": "note",
+          "title": "Aici lotul este 10.000, nu 100.000",
+          "body": [
+            "Acesta este lucrul esențial de știut despre InstaForex când comparați brokeri. Un spread de „0,6 puncte” aici nu costă 6 dolari per rundă, ci 60 de cenți — dar și poziția este de zece ori mai mică. Nu se pot compara spread-urile în puncte cu alți brokeri, ci doar prin costul în bani al unei runde.",
+            "Argintul are 500 de uncii în loc de standardul de 5.000. Și atenție: aurul are două simboluri cu o diferență de cinci ori a contractului — GOLD.m are 100 de uncii, XAUUSD.m are 500 de uncii. Dacă deschideți o poziție pe simbolul greșit, veți obține un volum de cinci ori mai mare decât cel așteptat."
+          ]
+        },
+        {
+          "type": "callout",
+          "style": "note",
+          "title": "Unde se ascunde costul la cripto",
+          "body": "Spreadul la Bitcoin este de 25 de cenți, și e ușor să vă opriți aici. Dar un comision de 0,1% din volum, la un preț de circa 64.000 de dolari, înseamnă aproximativ 64 de dolari într-un sens și 128 pentru o rundă completă. Costul real al tranzacției nu se află acolo unde priviți."
+        },
+        {
+          "type": "callout",
+          "style": "note",
+          "title": "Swap-ul la aur în poziție long",
+          "body": "−327 față de +0,69 la short. Menținerea unei poziții de cumpărare la aur peste noapte costă aici aproximativ cât trei spread-uri. Pentru cei care tranzacționează aurul dincolo de intraday, asta contează mai mult decât spreadul."
+        }
       ]
     }
   ]

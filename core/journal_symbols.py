@@ -28,11 +28,11 @@ def to_chart_symbol(journal_symbol: str) -> str | None:
     сделки) — используем как есть. USDCNY/USDAED/USDZAR графика не имеют
     вовсе (не входят в 15 инструментов ohlc_*.json) — вернётся None, сделка
     в них честно не покажется ни на одном графике."""
-    from serve import _chart_symbols  # локальный импорт — избегаем цикла на старте
+    from serve import _chartable_symbols  # локальный импорт — избегаем цикла на старте
     s = (journal_symbol or "").upper().strip()
     if not s:
         return None
-    if s in _chart_symbols():
+    if s in _chartable_symbols():
         return s
     return _JOURNAL_TO_CHART.get(s)
 

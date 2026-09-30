@@ -6,23 +6,51 @@
   "table_link": "/brokers",
   "account_kind": "real",
   "account_label": "MT5 Standard",
-  "lead": "Ghid pentru patru procese. Fiecare captură de ecran este a noastră, cu data dedesubt. Acolo unde nu există o captură, spunem asta direct — un ghid nu trebuie să facă promisiuni goale.",
+  "lead": "Ghid pentru toate cele cinci procese — de la înregistrare până la un ordin real în terminal, aproape peste tot pe capturi reale. Fiecare captură are data dedesubt. Acolo unde tot nu există o captură, spunem asta direct — un ghid nu trebuie să facă promisiuni goale.",
   "processes": [
     {
       "key": "registration",
       "label": "Înregistrare",
       "platform": "xm.com, web",
       "captured": "2026-08-05",
-      "needed": ["Email", "Câteva minute — formularul e pe un singur ecran"],
+      "needed": [
+        "Email",
+        "Câteva minute — formularul e pe un singur ecran"
+      ],
       "blocks": [
-        { "type": "steps", "items": [
-          { "img": "/assets/guides/xm/registration/01_start.png", "caption": "Deschideți xm.com și apăsați „Get Started”." },
-          { "img": "/assets/guides/xm/registration/02_country.png", "caption": "Alegeți țara de reședință — determinată automat după IP. Acest câmp stabilește cu ce companie din grup veți semna contractul." },
-          { "img": "/assets/guides/xm/registration/04_form.png", "caption": "Introduceți email-ul și parola. Tipul de cont și levierul nu se cer aici — se stabilesc după înregistrare." },
-          { "img": null, "caption": "Bifați consimțământul pentru prelucrarea datelor și apăsați „Register”.",
-            "note": "Nu am putut captura acest ecran din motive tehnice (instrumentul de captură intra constant în timeout), dar textul consimțământului este notat cuvânt cu cuvânt: „Prin înregistrare, declar că am citit cu atenție, am înțeles și accept întregul text al documentelor juridice adoptate de companie și al Politicii de Confidențialitate. De asemenea, înțeleg că voi primi de la companie scrisori, noutăți despre companie și informații despre produse noi.” O bifă separată acoperă mesajele de marketing — poate fi retrasă oricând și nu afectează deschiderea contului." }
-        ] },
-        { "type": "entity",
+        {
+          "type": "steps",
+          "items": [
+            {
+              "img": "/assets/guides/xm/registration/01_start.png",
+              "caption": "Deschideți xm.com și apăsați „Get Started”.",
+              "img_webp": "/assets/guides/xm/registration/01_start.webp",
+              "img_w": 1408,
+              "img_h": 681
+            },
+            {
+              "img": "/assets/guides/xm/registration/02_country.png",
+              "caption": "Alegeți țara de reședință — determinată automat după IP. Acest câmp stabilește cu ce companie din grup veți semna contractul.",
+              "img_webp": "/assets/guides/xm/registration/02_country.webp",
+              "img_w": 1408,
+              "img_h": 681
+            },
+            {
+              "img": "/assets/guides/xm/registration/04_form.png",
+              "caption": "Introduceți email-ul și parola. Tipul de cont și levierul nu se cer aici — se stabilesc după înregistrare.",
+              "img_webp": "/assets/guides/xm/registration/04_form.webp",
+              "img_w": 1408,
+              "img_h": 681
+            },
+            {
+              "img": null,
+              "caption": "Bifați consimțământul pentru prelucrarea datelor și apăsați „Register”.",
+              "note": "Nu am putut captura acest ecran din motive tehnice (instrumentul de captură intra constant în timeout), dar textul consimțământului este notat cuvânt cu cuvânt: „Prin înregistrare, declar că am citit cu atenție, am înțeles și accept întregul text al documentelor juridice adoptate de companie și al Politicii de Confidențialitate. De asemenea, înțeleg că voi primi de la companie scrisori, noutăți despre companie și informații despre produse noi.” O bifă separată acoperă mesajele de marketing — poate fi retrasă oricând și nu afectează deschiderea contului."
+            }
+          ]
+        },
+        {
+          "type": "entity",
           "img": "/assets/guides/xm/registration/03_entity.png",
           "legal_name": "XM Global Limited",
           "jurisdiction": "Belize",
@@ -30,13 +58,16 @@
           "licence_no": "8557558",
           "register_url": null,
           "register_note": "Registrul public al FSC din Belize nu poate fi citit automat — nu există un link direct către fișa companiei.",
-          "quote": "«Компания XM Global Limited имеет лицензию на ведение деятельности от Комиссии по финансовым услугам (FSC) Белиза, согласно закону «О рынке ценных бумаг» 2021 года, номер лицензии 8557558.»",
+          "quote": "«Компания XM Global Limited имеет лицензию на ведение деятельности от Комиссии по финансовым услугам (FSC) Белиза, согласно закону «О рынке ценных бумаг» 2021 года, номер лицензии 8557558.» — capturat din versiunea în limba rusă a site-ului; traducere: „Compania XM Global Limited este autorizată să desfășoare activitate de către Comisia pentru Servicii Financiare (FSC) din Belize, conform Legii industriei valorilor mobiliare din 2021, numărul licenței 8557558.”",
           "confirmed": false,
           "confirm_note": "Atenție la interpretare: această linie este subsolul versiunii globale a site-ului, identic indiferent de țara selectată. Ea dovedește că „site-ul global este operat de XM Global”, nu direct că „această entitate anume este alocată țării dumneavoastră”. Există o confirmare indirectă: un cont real deschis dintr-o țară CSI/Europa non-UE are levier 1:1000 — acesta este plafonul entității din Belize (cea din Cipru are 1:30).",
           "missing": [
             "un fond de compensare (entitatea XM din Cipru are unul — 20.000 €; cea din Belize nu)",
             "un procent publicat al conturilor în pierdere"
-          ]
+          ],
+          "img_webp": "/assets/guides/xm/registration/03_entity.webp",
+          "img_w": 1408,
+          "img_h": 681
         }
       ]
     },
@@ -44,63 +75,271 @@
       "key": "activation",
       "label": "Activarea contului",
       "blocks": [
-        { "type": "steps", "items": [
-          { "img": "/assets/guides/xm/activation/01_cabinet_overview.png",
-            "caption": "Ecranul principal al contului: o fișă a contului cu butoanele „Actions” și „Deposit”, iar în dreapta un sumar al contului unde se vede imediat levierul 1000:1.",
-            "note": "Sus, o bară galbenă „Verificați contul și primiți bonus de depozit 100%” cu butonul „Verify account” — acesta este punctul de intrare în verificare. Am acoperit datele contului și sumele." }
-        ] },
-        { "type": "callout", "style": "note", "title": "Ce să observați pe acest ecran",
-          "body": ["Levierul 1:1000 nu este „generozitatea brokerului”, ci un semn al unei entități offshore: compania europeană sub același brand are un plafon de 1:30. Merită observat imediat, nu mai târziu.", "Separat: verificarea este oferită aici împreună cu un bonus. Bonusul nu este un motiv să vă grăbiți cu încărcarea documentelor — verificarea este necesară în sine, pentru a putea retrage bani."] },
-        { "type": "table", "columns": ["Parametru", "Valoare"], "rows": [
-          ["Tip de cont", "MT5 Standard"],
-          ["Levier", "1:1000"],
-          ["Dimensiunea contractului", "standard: 100.000 de unități din valuta de bază"],
-          ["Platforme", "MT4, MT5, versiunea web MT5, aplicația XM"]
-        ] }
+        {
+          "type": "steps",
+          "items": [
+            {
+              "img": "/assets/guides/xm/activation/01_cabinet_overview.png",
+              "caption": "Ecranul principal al contului: o fișă a contului cu butoanele „Actions” și „Deposit”, iar în dreapta un sumar al contului unde se vede imediat levierul 1000:1.",
+              "note": "Sus, o bară galbenă „Verificați contul și primiți bonus de depozit 100%” cu butonul „Verify account” — acesta este punctul de intrare în verificare. Am acoperit datele contului și sumele.",
+              "img_webp": "/assets/guides/xm/activation/01_cabinet_overview.webp",
+              "img_w": 1288,
+              "img_h": 930
+            }
+          ]
+        },
+        {
+          "type": "callout",
+          "style": "note",
+          "title": "Ce să observați pe acest ecran",
+          "body": [
+            "Levierul 1:1000 nu este „generozitatea brokerului”, ci un semn al unei entități offshore: compania europeană sub același brand are un plafon de 1:30. Merită observat imediat, nu mai târziu.",
+            "Separat: verificarea este oferită aici împreună cu un bonus. Bonusul nu este un motiv să vă grăbiți cu încărcarea documentelor — verificarea este necesară în sine, pentru a putea retrage bani."
+          ]
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Parametru",
+            "Valoare"
+          ],
+          "rows": [
+            [
+              "Tip de cont",
+              "MT5 Standard"
+            ],
+            [
+              "Levier",
+              "1:1000"
+            ],
+            [
+              "Dimensiunea contractului",
+              "standard: 100.000 de unități din valuta de bază"
+            ],
+            [
+              "Platforme",
+              "MT4, MT5, versiunea web MT5, aplicația XM"
+            ]
+          ]
+        }
       ]
     },
     {
       "key": "funding",
       "label": "Alimentare",
+      "platform": "my.xm.com, cont",
+      "captured": "2026-08-13",
+      "intro": "Secțiunea de alimentare a fost captată din nou — data trecută butonul „Deposit” nu se deschidea (aplicația SPA nu reacționa). De data aceasta s-a deschis panoul metodelor de plată, și a ieșit la iveală de ce contează: pe un cont neverificat, nu ai cu ce alimenta deloc.",
       "blocks": [
-        { "type": "callout", "style": "gap", "title": "De data aceasta, fără capturi",
-          "body": "De data aceasta am reușit să intrăm în cont, dar secțiunea de alimentare nu s-a deschis: my.xm.com/ru/member/deposit returnează 404, iar butonul „Deposit” de pe fișa contului nu răspundea la click — aplicația SPA nu reacționa. Oricum, această secțiune este întotdeauna captată doar până la ecranul de confirmare: niciun transfer real nu se efectuează, iar formularul cardului este captat gol." },
-        { "type": "table", "columns": ["Parametru", "Valoare", "Sursă"], "rows": [
-          ["Depozit minim", "5 USD", "site-ul brokerului"],
-          ["Comision de inactivitate", "5 USD/lună după 90 de zile fără tranzacții", "documentul de costuri XM"]
-        ] },
-        { "type": "callout", "style": "note", "title": "La ce să fiți atenți la alimentare",
-          "body": "Comisionul de inactivitate nu este un fleac: un cont uitat timp de un an pierde 60 USD, față de un depozit minim de doar 5 USD. Dacă deschideți un cont „doar să vedeți” și nu intenționați să tranzacționați, e mai înțelept să retrageți soldul decât să-l lăsați acolo." }
+        {
+          "type": "steps",
+          "items": [
+            {
+              "img": "/assets/guides/xm/funding/01_deposit_locked.png",
+              "caption": "Panoul „Metode de alimentare a contului”: toate cele cinci metode — Credit/Debit Cards, Neteller, Skrill, Binance Pay, Cryptocurrencies — au o iconiță de lacăt, la „Metode dezactivate”.",
+              "note": "Numărul de cont din captură a fost cenzurat de noi.",
+              "img_webp": "/assets/guides/xm/funding/01_deposit_locked.webp",
+              "img_w": 1280,
+              "img_h": 1222
+            }
+          ]
+        },
+        {
+          "type": "callout",
+          "style": "gap",
+          "title": "Nu poți alimenta contul înainte de verificare",
+          "body": "Textul de sub lacăte, cuvânt cu cuvânt: „Aceste metode de plată nu sunt disponibile deoarece sunt destinate doar clienților verificați.” Nu o parte din metode, nu o limită redusă — toate cele cinci sunt blocate deodată. La XM, verificarea nu este o formalitate pentru retragerea profitului, ci o condiție pentru chiar primul depozit."
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Parametru",
+            "Valoare",
+            "Sursă"
+          ],
+          "rows": [
+            [
+              "Depozit minim",
+              "5 USD",
+              "site-ul brokerului"
+            ],
+            [
+              "Comision de inactivitate",
+              "5 USD/lună după 90 de zile fără tranzacții",
+              "documentul de costuri XM"
+            ]
+          ]
+        },
+        {
+          "type": "callout",
+          "style": "note",
+          "title": "La ce să fiți atenți la alimentare",
+          "body": "Comisionul de inactivitate nu este un fleac: un cont uitat timp de un an pierde 60 USD, față de un depozit minim de doar 5 USD. Dacă deschideți un cont „doar să vedeți” și nu intenționați să tranzacționați, e mai înțelept să retrageți soldul decât să-l lăsați acolo."
+        }
       ]
     },
     {
       "key": "verification",
       "label": "Verificare",
+      "platform": "my.xm.com, cont · Sumsub",
+      "captured": "2026-08-13",
+      "intro": "Instrumentul de captură nu mai blochează pe această pagină — data trecută se bloca și aici, și la înregistrare, acum tot traseul a fost captat cu adevărat. Butonul „Verify account” din bannerul galben trece prin cinci ecrane la rând: telefon, date personale, adresă, un chestionar de investitor și abia apoi documentele, prin Sumsub (același furnizor de verificare folosit de NAGA).",
       "blocks": [
-        { "type": "text", "body": "Nu începe cu documente, ci cu telefonul. Butonul „Verify account” din banner duce la primul pas: „Verificarea numărului de telefon” — un câmp cu codul țării (completat automat pe baza țării dumneavoastră), numărul și un buton „Get code”. Sus rulează o bară de progres: telefonul este doar prima etapă din mai multe." },
-        { "type": "callout", "style": "gap", "title": "Nu am putut salva o captură a acestui ecran",
-          "body": ["Pagina de verificare XM blochează constant instrumentul nostru de captură — la fel s-a întâmplat și pe pagina de înregistrare. Ecranul este descris cuvânt cu cuvânt mai sus, dar nu există o captură, și nu punem în locul ei o imagine asemănătoare.", "Nu am apăsat intenționat „Get code”: asta trimite un SMS pe un număr real, adică este o acțiune, nu doar o vizualizare."] },
-        { "type": "text", "body": "Pașii următori — încărcarea documentelor — sunt captați doar cu un eșantion evident fals. O fotografie a unui pașaport real nu este publicată sub nicio formă." }
+        {
+          "type": "steps",
+          "items": [
+            {
+              "img": "/assets/guides/xm/verification/01_phone_verify.png",
+              "caption": "Pasul 1 — „Verificarea numărului de telefon”: codul țării se completează automat, apoi un buton „Get code”.",
+              "note": "Nu am apăsat intenționat „Get code”: asta trimite un SMS pe un număr real, adică este o acțiune, nu doar o vizualizare.",
+              "img_webp": "/assets/guides/xm/verification/01_phone_verify.webp",
+              "img_w": 1280,
+              "img_h": 1220
+            },
+            {
+              "img": "/assets/guides/xm/verification/02_personal_details.png",
+              "caption": "„Introduceți datele dumneavoastră”: prenume, al doilea prenume (opțional), nume și data nașterii — exact așa cum apar în documentul de identitate.",
+              "img_webp": "/assets/guides/xm/verification/02_personal_details.webp",
+              "img_w": 1280,
+              "img_h": 1220
+            },
+            {
+              "img": "/assets/guides/xm/verification/03_investor_profile.png",
+              "caption": "„Introduceți datele dumneavoastră de investitor” — o întrebare da/nu: ați urmat o instruire în tranzacționare pe Forex și ați efectuat cel puțin 15 tranzacții cu instrumente derivate (Forex, CFD)? Este un test real de experiență de investitor, nu un formular de bifat — răspunsul decide ce avertismente de risc va vedea acest cont.",
+              "img_webp": "/assets/guides/xm/verification/03_investor_profile.webp",
+              "img_w": 1280,
+              "img_h": 1220
+            },
+            {
+              "img": "/assets/guides/xm/verification/04_confirm_identity.png",
+              "caption": "„Confirmați-vă identitatea”: veți avea nevoie de copii ale documentului de identitate și ale dovezii de adresă, opțional și un selfie.",
+              "img_webp": "/assets/guides/xm/verification/04_confirm_identity.webp",
+              "img_w": 1280,
+              "img_h": 1220
+            },
+            {
+              "img": "/assets/guides/xm/verification/05_doc_type.png",
+              "caption": "Apoi — Sumsub: țara emitentă a documentului și tipul (ID-carte, pașaport, permis de ședere, permis de conducere).",
+              "img_webp": "/assets/guides/xm/verification/05_doc_type.webp",
+              "img_w": 1280,
+              "img_h": 1220
+            },
+            {
+              "img": "/assets/guides/xm/verification/06_upload.png",
+              "caption": "Încărcarea documentului — față și verso separat, JPG/PNG/HEIC/WEBP/PDF până la 50 MB.",
+              "note": "Nu am încărcat și nu am fotografiat un document real — aceste câmpuri sunt arătate goale.",
+              "img_webp": "/assets/guides/xm/verification/06_upload.webp",
+              "img_w": 1280,
+              "img_h": 1220
+            },
+            {
+              "img": "/assets/guides/xm/verification/07_phone_qr.png",
+              "caption": "La fiecare pas Sumsub există un buton „Continue on phone” — codul QR deschide același proces pe camera telefonului, dacă e mai comod decât să fotografiați documentul de pe calculator.",
+              "img_webp": "/assets/guides/xm/verification/07_phone_qr.webp",
+              "img_w": 1280,
+              "img_h": 1220
+            }
+          ]
+        },
+        {
+          "type": "callout",
+          "style": "note",
+          "title": "Dificultatea crește treptat",
+          "body": "Telefonul și numele sunt o formalitate. Chestionarul de investitor este deja o întrebare de fond despre experiența de tranzacționare. Încărcarea unui document pe ambele fețe plus verificarea de tip liveness (Sumsub, același furnizor folosit de NAGA) este locul unde chiar renunță o parte dintre utilizatori. Până la finalizarea tuturor pașilor, alimentarea nu este posibilă prin nicio metodă (vezi secțiunea „Alimentare”)."
+        }
       ]
     },
     {
       "key": "trading",
       "label": "Tranzacționare",
+      "platform": "my.xm.com/markets, terminal web",
+      "captured": "2026-08-13",
       "blocks": [
-        { "type": "callout", "style": "gap", "title": "Fără capturi" },
-        { "type": "text", "body": "Ce am măsurat noi înșine în terminalul XM (o captură în afara ferestrelor metodologiei, 2026-08-05, în jurul orei 10:00 UTC) față de ce publică brokerul despre sine:" },
-        { "type": "table", "columns": ["Instrument", "Spread mediu al brokerului", "Captura noastră din terminal"], "rows": [
-          ["EUR/USD", "2,0 pips", "1,9"],
-          ["GBP/USD", "2,4", "2,4"],
-          ["USD/JPY", "2,5", "2,3"],
-          ["Aur", "5,5", "$0,55"],
-          ["Petrol WTI", "0,05", "$0,05"],
-          ["Bitcoin", "50,00", "$50,00"]
-        ] },
-        { "type": "callout", "style": "fact", "title": "XM publică un spread mediu, iar acesta coincide cu măsurătoarea noastră",
-          "body": ["E o raritate: majoritatea platformelor din comparația noastră arată fie „spread de la...”, fie nimic. XM publică spreadul mediu și minim pentru toate clasele de instrumente, iar la Bitcoin și Ether cifrele au coincis exact cu captura noastră din terminal.", "Surse: paginile de condiții XM pe clase de instrumente, verificat la 2026-08-06. Captura noastră provine din terminalul unui cont real, luată în afara ferestrelor metodologiei, prezentată aici ca punct de referință."] },
-        { "type": "callout", "style": "note", "title": "Atenție la unitatea de măsură",
-          "body": "„Pipul” la XM înseamnă zece puncte de cotație, nu ultima cifră. La aur, 5,5 pips înseamnă 0,55 dolari. Dacă tratați pipul ca ultima cifră, eroarea la aur devine de zece ori mai mare." }
+        {
+          "type": "steps",
+          "items": [
+            {
+              "img": "/assets/guides/xm/trading/01_terminal_order.png",
+              "caption": "Secțiunea „Markets”: lista instrumentelor în stânga cu cotații live, un grafic pe aur și un panou „Ordin dintr-un click” în dreapta.",
+              "note": "Contul are sold 0 USD, așa că sub butonul de ordin apare „Marjă insuficientă pentru plasarea acestui ordin” — este un mesaj onest al terminalului, nu ceva regizat de noi.",
+              "img_webp": "/assets/guides/xm/trading/01_terminal_order.webp",
+              "img_w": 1280,
+              "img_h": 1222
+            },
+            {
+              "img": "/assets/guides/xm/trading/02_copytrading.png",
+              "caption": "Un tab separat „Copy trading” — o vitrină de strategii cu cifre reale: profit lunar, fondurile proprii ale managerului, suma investită, investiția minimă, comisionul, numărul de investitori, drawdown-ul.",
+              "img_webp": "/assets/guides/xm/trading/02_copytrading.webp",
+              "img_w": 1280,
+              "img_h": 1222
+            }
+          ]
+        },
+        {
+          "type": "callout",
+          "style": "note",
+          "title": "Copy trading nu este doar la NAGA",
+          "body": "XM are același tip de funcție pe care am arătat-o deja la NAGA („Find Leaders”): abonarea la tranzacțiile unui trader anume contra unui comision din profit (aici — între 10% și 30%, în funcție de strategie). Randamentul trecut al unui lider nu este o garanție a celui viitor, iar profitul afișat este profitul liderului, nu al abonatului — comisionul și întârzierea copierii îl reduc."
+        },
+        {
+          "type": "text",
+          "body": "Ce am măsurat noi înșine în terminalul XM (o captură în afara ferestrelor metodologiei, 2026-08-05, în jurul orei 10:00 UTC) față de ce publică brokerul despre sine:"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Instrument",
+            "Spread mediu al brokerului",
+            "Captura noastră din terminal"
+          ],
+          "rows": [
+            [
+              "EUR/USD",
+              "2,0 pips",
+              "1,9"
+            ],
+            [
+              "GBP/USD",
+              "2,4",
+              "2,4"
+            ],
+            [
+              "USD/JPY",
+              "2,5",
+              "2,3"
+            ],
+            [
+              "Aur",
+              "5,5",
+              "$0,55"
+            ],
+            [
+              "Petrol WTI",
+              "0,05",
+              "$0,05"
+            ],
+            [
+              "Bitcoin",
+              "50,00",
+              "$50,00"
+            ]
+          ]
+        },
+        {
+          "type": "callout",
+          "style": "fact",
+          "title": "XM publică un spread mediu, iar acesta coincide cu măsurătoarea noastră",
+          "body": [
+            "E o raritate: majoritatea platformelor din comparația noastră arată fie „spread de la...”, fie nimic. XM publică spreadul mediu și minim pentru toate clasele de instrumente, iar la Bitcoin și Ether cifrele au coincis exact cu captura noastră din terminal.",
+            "Surse: paginile de condiții XM pe clase de instrumente, verificat la 2026-08-06. Captura noastră provine din terminalul unui cont real, luată în afara ferestrelor metodologiei, prezentată aici ca punct de referință."
+          ]
+        },
+        {
+          "type": "callout",
+          "style": "note",
+          "title": "Atenție la unitatea de măsură",
+          "body": "„Pipul” la XM înseamnă zece puncte de cotație, nu ultima cifră. La aur, 5,5 pips înseamnă 0,55 dolari. Dacă tratați pipul ca ultima cifră, eroarea la aur devine de zece ori mai mare."
+        }
       ]
     }
   ]

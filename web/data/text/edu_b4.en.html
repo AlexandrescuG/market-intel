@@ -1,0 +1,66 @@
+<h2>CHAPTER 4 — THE CASE OF THE FIVE POINTS</h2>
+<h2>The Case of the Five Points</h2>
+<p>The last episode ended on a mystery: the stop sat at 2494, but filled at 2489. The broker didn't cheat you. The market wasn't &quot;hunting&quot; you. It's just that at 14:30:03, at the 2494 level, there wasn't a single buyer — and your order went down the queue, sweeping up whoever was there: 2492… 2490… 2489. This chapter is about the queue. After it, you won't see candles anymore — you'll see what they're made of.</p>
+<h2>ANTI-MYTH</h2>
+<h2>&quot;On an exchange you can always buy and sell at the price on screen&quot;</h2>
+<p>The price on screen is the price of the LAST trade — the past. Your trade fills against the CURRENT order queue — and between those two numbers lies everything: spread, depth, slippage. In a quiet hour the difference is pennies, and the myth is harmless. At 14:30 on NFP Friday the difference is points and tens of points, and the myth costs money. A professional isn't different from a novice because of forecasts — they know AT WHAT PRICE their order will actually fill.</p>
+<h2>SBF'S VOICE</h2>
+<p>&quot;Colleague, novices study 'where the price will go.' That's half the craft. The other half is 'how I get in and how I get out': what order type, into what liquidity, at what spread. I've seen strategies with beautiful statistics that died from one thing — execution. Five points of slippage on a trade targeting fifteen is minus a third of the profit, before any analysis. This chapter is boring, like an engine room. But that's exactly where it gets decided whether the ship makes it.&quot;</p>
+<h2>THE PRICE OF NOT KNOWING</h2>
+<h2>&quot;Spreads from 0.1 points&quot;</h2>
+<p>A trader trades with a broker advertising &quot;spreads from 0.1 points.&quot; They make 20 trades a week with market orders, half of them in the first minutes after news releases, when the spread widens 10-30x. At an average overpay of just 1.5 points per trade, that's minus 30 points a week — minus 120 a month. Their strategy, targeting +150 points a month, was profitable. Their execution wasn't. They left the market convinced &quot;the strategy stopped working.&quot; The strategy worked. They were paying the queue without knowing it.</p>
+<h2>MAIN INTERACTIVE</h2>
+<h2>A Candle Under the Microscope</h2>
+<p>This is the order book (DOM, Depth of Market) — the queue of everyone who wants to buy or sell right now. Top right — sellers (ASK): these are the prices at which you can BUY. Bottom left — buyers (BID): these are the prices at which you can SELL. The gap between the best BID and best ASK is the spread: it's not a broker commission, it's the price of immediacy — what you pay for not wanting to wait. The numbers next to the prices are order volume: how many lots are queued at each level. The tape below is the log of completed trades: price, volume, second. The chart shows the past; the book shows the present; the tape shows the exact moment of exchange.</p>
+<h2>Guided example</h2>
+<p>A market BUY order for 5 lots hits the book — 3 lots fill at 2505.70, 2 at 2505.80. The average fill price isn't &quot;a price&quot; — it's two prices at once: already micro-slippage.</p>
+<p>A large 40-lot order sweeps four levels in a row — this is why whales don't just smash the BUY button without looking (remember this, we'll come back to it in chapter 7).</p>
+<p>Spread 0.3, the book is thick — market orders fill with almost no loss.</p>
+<p>Market makers pull their orders, the book empties, the spread tears from 0.3 to 4+, the tape goes wild.</p>
+<p>The book is thin, spread 1.2, sparse tape — the same order, just more expensive.</p>
+<p>Fill a BUY 10 lots before and after the trigger — compare the average price.</p>
+<p>Same order — why is it more expensive than during the day?</p>
+<p>Spread is a liquidity thermometer. Remember the three states — daytime, on news, at night. In chapter 5 you'll learn their schedule.</p>
+<p>The presets are calibrated on our real M30 ranges by hour of day (an NFP release day: ~24 points vs ~12 points in a normal hour — exactly 2×, hence the CPI-mode multiplier). Everything else on the panel is not a measurement: we do not store the exchange order book at all, so the depth, the per-level volumes and the time-and-sales down to the second are a teaching example. They show HOW the book behaves in three regimes, not what stood in the book at the hour named.</p>
+<p>A market maker isn't your enemy or your benefactor: it's a shop that's always open and earns on markup (the spread). During a storm, the shop raises prices or closes — it's entitled to.</p>
+<p>Part of the queue you never see at all: iceberg orders and dark pools. We'll cover those in chapter 11 — once you can read the visible part.</p>
+<h2>SCENE — SLIPPAGE, LIVE</h2>
+<p>Look at the 12:30 UTC bar — inside it the spread widened by multiples, and the price moved in minutes what it normally moves in half a day.</p>
+<p>You're in a position with a stop inside this range. Your stop is a market order once triggered. At what price will it fill — at its level, or in the queue?</p>
+<p>The historical bar shows a real price range; the spread itself isn't stored historically — its widening is shown via typical broker values, not a measurement. This is labelled intentionally.</p>
+<h2>TOOLS OF THE QUEUE</h2>
+<h2>Order Types</h2>
+<p>An order type is your answer to one question: what matters more to you — PRICE or GUARANTEED ENTRY? Market says: &quot;get me in now, price is secondary.&quot; Limit: &quot;only at my price, I might not get in at all.&quot; Stop: &quot;get me in once the market proves the move — even at a worse price.&quot; Stop-Limit: &quot;prove the move, but I won't pay more than this.&quot; Everything else is a combination of these four answers.</p>
+<p>Waiting for a pullback to support at 2480</p>
+<p>BUY LIMIT at 2480: the queue works for me, I don't pay the spread.</p>
+<p>BUY STOP above the level: I pay for confirmation of the move.</p>
+<p>News in 3 minutes, I want to be in the market</p>
+<p>I stop myself: a market order into an empty queue is the most expensive way to learn about spread.</p>
+<p>Limit orders only, and don't be surprised by partial fills.</p>
+<p>SBF's rule: a market order is a tool for the liquid hour. The rest of the time, the queue should work for you, not the other way around.</p>
+<p>Drag the line above or below the current price — the label updates itself.</p>
+<p>You placed the order above price. You can only buy above the market on a breakout — so that's BUY STOP. You can only sell above the market at a limit — so that's SELL LIMIT.</p>
+<p>You placed the order below price. You can only buy below the market at a limit — so that's BUY LIMIT. You can only sell below the market on a breakout — so that's SELL STOP.</p>
+<p>The price crawls across the chart. Your job is to execute six order types correctly: place the line where that type actually makes sense (BUY LIMIT — below price, BUY STOP — above, and the reverse for SELL; STOP LIMIT and TRAILING STOP follow their own logic). Place it wrong, and the trainer will explain why the order won't fire, or will fire differently than you expected.</p>
+<h2>7 QUESTIONS FOR YOUR BROKER</h2>
+<p>Brokers get picked by bonuses and ads. A professional picks by execution. Here are the questions whose answers are worth more than any bonus — ask them before you deposit:</p>
+<p>Not sure how to read the answers — SBF's team matches brokers to a client's needs; it's part of our support.</p>
+<h2>LOCAL CONTEXT</h2>
+<p>Wherever you open an account, execution quality is measurable — ask for the numbers, not the marketing page. The seven questions above are your checklist.</p>
+<p>The price of immediacy — the gap between the best buyer and seller</p>
+<p>Correct. Spread is paid to the queue, not the broker (the broker's commission is separate — question 6 of the &quot;7 questions&quot;).</p>
+<p>Not quite. Spread isn't a commission or a tax — it's the price of immediacy: the gap between the best BID and best ASK.</p>
+<p>A stop-loss triggers. What kind of order goes to the market, and at what price will it fill?</p>
+<p>A market order — in the queue, not at its level</p>
+<p>Correct — that's exactly this chapter's cold open. Guaranteed stops are a separate paid service (question 5).</p>
+<p>Not quite. A triggered stop becomes a market order and fills in the queue, not strictly at its level.</p>
+<p>You want to buy a pullback to support without overpaying the spread at the moment of touch. Your order?</p>
+<p>Correct. A limit order waits in the queue — the queue works for you.</p>
+<p>Not quite. Only a BUY LIMIT right at the level waits in the queue without overpaying the spread.</p>
+<p>Why did franc stops on 2015-01-15 fill thousands of points worse than their levels?</p>
+<p>The queue itself vanished — there were no prices to fill against</p>
+<p>Correct — chapter 2's station 11 plus this chapter: a stop protects against price movement, but not against liquidity vanishing. Position size protects against that (chapter 3).</p>
+<p>Not quite. It wasn't collusion or broken stops — for a few seconds the order queue itself vanished; there was nothing to fill against.</p>
+<p>NFP is Friday. Will gold's daily range be bigger or smaller than the monthly average?</p>
+<p>Will Friday's gold daily bar close above its open?</p>
+<p>Now you know: every trade has a second side, and sometimes it walks away from the counter. But here's the strange part: it walks away ON A SCHEDULE. At 3am Moscow time, the queue is always thin. At 16:30, it's always thick. Gold &quot;explodes&quot; at 15:30 not sometimes, but almost every day. The market runs 24 hours — but not evenly: liquidity moves around the planet chasing the sun, like a tide. Who accumulates at night, who manipulates in the morning, and who distributes in the evening — the next episode breaks down the trading day, hour by hour. Spoiler: &quot;random&quot; nighttime breakouts have a first name, a last name, and a motive.</p>

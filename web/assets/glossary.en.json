@@ -1,0 +1,416 @@
+[
+  {
+    "slug": "pivot",
+    "term": "Pivot (PP)",
+    "aliases": ["pivot", "pivot point", "pivot points", "pp"],
+    "short": "A calculated reversal level derived from the previous period's high, low and close.",
+    "full": "The pivot point (PP) is a base level computed as PP = (High + Low + Close) / 3 over the previous period — day, week or month. Resistance levels (R1, R2, R3) and support levels (S1, S2, S3) are built around it. Intraday traders watch these levels closely: price often turns near them or accelerates once they break. Pivots are public, calculated automatically, and are not trading advice.",
+    "related": ["support", "resistance", "timeframe"],
+    "etym": "From \"pivot\" — a point something turns around: the level price rotates about."
+  },
+  {
+    "slug": "support",
+    "term": "Support",
+    "aliases": ["support", "support level", "support zone"],
+    "short": "A price level where demand has historically exceeded supply, halting a decline.",
+    "full": "A support level is a horizontal zone where price has repeatedly stopped falling and turned back up. Buyers tend to become active near these zones. The more times price has tested a level without breaking it, the more significant that support is considered. Once broken, support often turns into resistance — the flip. Support levels are used to place stop-losses and to look for entries on retests.",
+    "related": ["resistance", "pivot", "stoploss"],
+    "etym": "From \"support\" — the floor that holds price up."
+  },
+  {
+    "slug": "resistance",
+    "term": "Resistance",
+    "aliases": ["resistance", "resistance level", "resistance zone"],
+    "short": "A price level where supply has historically exceeded demand, halting a rally.",
+    "full": "A resistance level is a price zone where sellers have systematically outweighed buyers. Price approaches the level, is pushed back and declines. Once broken, former resistance frequently becomes support. Traders use resistance levels to take profit and to judge how much room a move has left. Round numbers (1000, 1500, 2000) often act as psychological resistance.",
+    "related": ["support", "pivot", "resistance"],
+    "etym": "From \"resistance\" — the ceiling that slows a rally."
+  },
+  {
+    "slug": "rsi",
+    "term": "RSI",
+    "aliases": ["rsi", "relative strength index"],
+    "short": "A 0–100 oscillator measuring the speed and size of price changes.",
+    "full": "RSI (Relative Strength Index) is a technical indicator developed by J. Welles Wilder. Readings above 70 are traditionally called overbought, below 30 oversold. Important: overbought is not a sell signal — in a strong trend RSI can stay above 70 for a long time. RSI divergence (price rising while RSI falls) is a popular sign of a weakening trend. RSI is calculated as 100 − 100/(1 + RS), where RS is the ratio of average gains to average losses over the period.",
+    "related": ["divergence", "timeframe", "trend"],
+    "etym": "Introduced by J. Welles Wilder in 1978 in \"New Concepts in Technical Trading Systems\"."
+  },
+  {
+    "slug": "smc",
+    "term": "SMC",
+    "aliases": ["smc", "smart money", "smart money concepts"],
+    "short": "An approach that reads the market through the actions of large participants — banks and hedge funds.",
+    "full": "SMC (Smart Money Concepts) is a technical-analysis methodology built on the assumption that large institutional participants — banks, hedge funds, market makers — deliberately create patterns to capture liquidity before a reversal. Its key ideas are the Order Block (a zone of large orders), the Fair Value Gap, Break of Structure and Inducement. SMC is an educational framework; trade outcomes remain unpredictable.",
+    "related": ["fvg", "liquidity-sweep", "orderblock", "marketmaker"],
+    "etym": "The term took hold in trading communities in the 2010s as an alternative to classical technical analysis."
+  },
+  {
+    "slug": "fvg",
+    "term": "Fair Value Gap",
+    "aliases": ["fair value gap", "fvg", "imbalance"],
+    "short": "A price gap left behind by a sharp impulsive move.",
+    "full": "A Fair Value Gap (FVG) is three consecutive candles where the wicks of the first and third do not overlap: price moved so fast that trading never covered the whole range. The market is assumed to want to fill the FVG by returning to that zone. An FVG can be bullish (price jumped up) or bearish (price jumped down). Within SMC it is used as a potential retest area.",
+    "related": ["smc", "orderblock", "liquidity-sweep"],
+    "etym": "\"Fair value gap\" — a price interval left untraded by an impulsive move."
+  },
+  {
+    "slug": "liquidity-sweep",
+    "term": "Liquidity Sweep",
+    "aliases": ["liquidity sweep", "stop hunt", "sweep"],
+    "short": "A brief break of a key level that triggers the stop orders resting behind it.",
+    "full": "A liquidity sweep is a move where price briefly breaks an important level — a high, a low, a support line — clears out other traders' stop-losses and then reverses. In SMC terms this is read as a deliberate manoeuvre by large players to source liquidity before the real move. SMC traders look for a sweep followed by a reversal structure as their signal.",
+    "related": ["smc", "fvg", "support", "resistance"],
+    "etym": "\"Sweeping liquidity\" — price briefly takes out the stops beyond a level before turning."
+  },
+  {
+    "slug": "orderblock",
+    "term": "Order Block",
+    "aliases": ["order block", "orderblock", "ob"],
+    "short": "The last consolidation zone before a strong impulsive move.",
+    "full": "An Order Block is the last candle (or group of candles) before a sharp impulsive move, assumed to hold large institutional orders. A bullish OB is a bearish candle preceding a bullish impulse; a bearish OB is a bullish candle preceding a bearish one. Price is expected to react when it retests the OB zone. The OB is an educational concept, not a guarantee of an outcome.",
+    "related": ["smc", "fvg", "liquidity-sweep"],
+    "etym": "\"Block of orders\" — a zone where a large player is presumed to have placed size."
+  },
+  {
+    "slug": "marketmaker",
+    "term": "Market maker",
+    "aliases": ["market maker", "market-maker", "marketmaker", "liquidity provider"],
+    "short": "A participant who supplies liquidity by continuously quoting both sides of the market.",
+    "full": "A market maker is a firm or trader that simultaneously posts bids and asks, earning the difference — the spread. On futures and FX markets, market makers provide liquidity even when there is no matching order on the other side. Banks, large brokers and specialist firms such as Citadel and Virtu act as market makers. Their presence narrows spreads and improves execution.",
+    "related": ["spread", "liquidity", "orderbook"],
+    "etym": "From \"market maker\" — the participant who makes a market by quoting both sides."
+  },
+  {
+    "slug": "pattern",
+    "term": "Pattern",
+    "aliases": ["pattern", "chart pattern", "candlestick pattern"],
+    "short": "A recurring candle or price configuration that traders read as predictive.",
+    "full": "A pattern is a repeatable visual structure on a price chart. Candlestick patterns: Engulfing, Doji, Hammer, Evening and Morning Star. Chart patterns: head and shoulders, double bottom and top, flag, wedge, triangle. Important: the statistical reliability of patterns varies widely, and no pattern works every time. A pattern is one input to analysis, not a trading signal.",
+    "related": ["engulfing", "trend", "timeframe"],
+    "etym": "From \"pattern\" — a repeating template, here of price."
+  },
+  {
+    "slug": "engulfing",
+    "term": "Engulfing",
+    "aliases": ["engulfing", "bullish engulfing", "bearish engulfing"],
+    "short": "A two-candle reversal pattern where the second candle fully engulfs the body of the first.",
+    "full": "A bullish engulfing appears after a downtrend: a bullish candle engulfs the bearish one, opening lower and closing above the previous candle. It is read as a shift in sentiment towards the buyers. A bearish engulfing is the mirror image in an uptrend. These patterns carry more weight on higher timeframes and near key support and resistance levels.",
+    "related": ["pattern", "trend", "support"],
+    "etym": "From \"to engulf\" — a candle that completely covers the body of the one before it."
+  },
+  {
+    "slug": "fear-greed",
+    "term": "Fear & Greed",
+    "aliases": ["fear and greed", "fear & greed", "fear greed index"],
+    "short": "A composite 0–100 index reflecting the current emotional backdrop of the crypto market.",
+    "full": "The Crypto Fear & Greed Index runs from 0 to 100: 0–25 extreme fear, 26–45 fear, 46–55 neutral, 56–75 greed, 76–100 extreme greed. It weighs volatility, trading volume, social-media sentiment, Bitcoin dominance and search trends. Buffett's line applies: be fearful when others are greedy and greedy when others are fearful. The index measures mood; it is not a trading signal.",
+    "related": ["vix", "volatility", "trend"],
+    "etym": "Devised by CNNMoney to gauge market sentiment across seven factors."
+  },
+  {
+    "slug": "nfp",
+    "term": "Non-Farm Payrolls (NFP)",
+    "aliases": ["nfp", "non-farm payrolls", "nonfarm payrolls", "payrolls"],
+    "short": "The key US macro report on jobs added outside agriculture.",
+    "full": "NFP (Non-Farm Payrolls) is a monthly US Department of Labor report released on the first Friday of the month. It shows the change in employment over the previous month. Strong data — above forecast — usually strengthens the dollar; weak data weakens it. NFP is one of the most volatile events on the calendar: the first 30 minutes after the release can bring sharp moves across every market. Together with the unemployment rate and wage growth it feeds into Fed decisions.",
+    "related": ["cpi", "fed", "volatility"],
+    "etym": "Agriculture is excluded from the report because of its strong seasonal swings."
+  },
+  {
+    "slug": "cpi",
+    "term": "CPI",
+    "aliases": ["cpi", "consumer price index", "core cpi"],
+    "short": "The Consumer Price Index — the headline measure of inflation.",
+    "full": "CPI (Consumer Price Index) measures the change in the cost of a basket of goods and services and is published monthly. Core CPI strips out food and energy, the most volatile components. The Fed targets PCE inflation, but CPI is what the market watches. A reading above forecast tends to strengthen the dollar and weigh on equities, as tighter policy is priced in; below forecast, the reverse. Look at Core CPI against the forecast, not just against the previous print.",
+    "related": ["fed", "nfp", "volatility"],
+    "etym": "Compiled by the US Bureau of Labor Statistics since the early 20th century."
+  },
+  {
+    "slug": "fed",
+    "term": "The Fed",
+    "aliases": ["fed", "federal reserve", "fomc"],
+    "short": "The US central bank, which sets the key rate and moves every market in the world.",
+    "full": "The Federal Reserve is the central bank of the United States, setting monetary policy through the Fed Funds Rate. The FOMC meets eight times a year. A rate hike is tightening — hawkish: credit becomes dearer, the dollar firms, equities and crypto come under pressure. A cut is easing — dovish: cheaper money, risk assets rally. The chair's language at the press conference often matters more than the decision itself.",
+    "related": ["cpi", "nfp", "volatility"],
+    "etym": "The Federal Reserve System was created in 1913 as the US central bank."
+  },
+  {
+    "slug": "stoploss",
+    "term": "Stop-loss",
+    "aliases": ["stop-loss", "stop loss", "stoploss", "sl"],
+    "short": "An order that closes a position automatically once a set loss is reached.",
+    "full": "A stop-loss (SL) is a protective order that caps the loss. It sits at the level where the position is closed automatically. It is the core of risk management: without a stop, a single losing trade can wipe out an account. The 1% rule says risk no more than 1% of the deposit on one trade. Stops are placed beyond a support or resistance level, beyond a candle extreme, or by volatility (ATR × multiplier). Having stops taken out en masse is a liquidity sweep.",
+    "related": ["takeprofit", "r-ratio", "leverage", "support"],
+    "etym": "From \"stop loss\" — literally, stop the loss."
+  },
+  {
+    "slug": "takeprofit",
+    "term": "Take-profit",
+    "aliases": ["take-profit", "take profit", "takeprofit", "tp"],
+    "short": "An order that closes a position automatically once the profit target is reached.",
+    "full": "A take-profit (TP) locks in profit at a predefined level and is used alongside a stop-loss. The ratio of TP to SL is the risk-to-reward (R:R). A common minimum is 1:2 — profit twice the risk — which leaves a system profitable at a 34% win rate. Closing part of the position at the first target and moving the stop to breakeven is a widespread way to manage the rest.",
+    "related": ["stoploss", "r-ratio", "risk"],
+    "etym": "From \"take profit\" — literally, take the profit."
+  },
+  {
+    "slug": "r-ratio",
+    "term": "R-multiple",
+    "aliases": ["r-multiple", "r multiple", "risk-to-reward", "risk reward", "r:r"],
+    "short": "The ratio of potential profit to the risk accepted on a single trade.",
+    "full": "R (the risk unit) is the distance from entry to stop-loss expressed in money. 1R is the risk on a trade. A take-profit at 2R means potential profit twice the risk. Keeping a P&L journal in R lets you compare trades across instruments and account sizes. Average R over a period is the key measure of a system's quality. The \"cost of indiscipline\" is the difference in R between clean trades and trades that broke your rules.",
+    "related": ["stoploss", "takeprofit", "risk", "leverage"],
+    "etym": "\"R\" stands for risk: one unit of risk per trade, with results measured in multiples of it."
+  },
+  {
+    "slug": "leverage",
+    "term": "Leverage",
+    "aliases": ["leverage", "margin trading", "gearing"],
+    "short": "Using borrowed broker funds to increase position size.",
+    "full": "Leverage lets you trade a position larger than your own capital. At 1:10, a $1,000 deposit controls a $10,000 position. Profit and loss scale in proportion. A margin call is the forced closure of positions once margin is exhausted. High leverage means a small move against you can liquidate the position. Professional traders typically stay within 1:3 to 1:5.",
+    "related": ["stoploss", "risk", "spread", "margin"],
+    "etym": "From \"lever\": a small amount of capital moves a large position."
+  },
+  {
+    "slug": "spread",
+    "term": "Spread",
+    "aliases": ["spread", "bid-ask spread", "bid ask"],
+    "short": "The difference between the ask (buy) and bid (sell) price of an instrument.",
+    "full": "The spread is the broker's implicit commission: on entry a trader is immediately down by the spread. Liquid instruments have tight spreads — EURUSD around 0.2–0.5 pips; exotic pairs and thin stocks can run to several per cent. Spreads widen around news and in low-liquidity hours — overnight, holidays. For scalping and high-frequency trading the spread is decisive.",
+    "related": ["liquidity", "leverage", "marketmaker"],
+    "etym": "From \"spread\" — the gap between the buying and the selling price."
+  },
+  {
+    "slug": "liquidity",
+    "term": "Liquidity",
+    "aliases": ["liquidity", "liquid market", "illiquid"],
+    "short": "How easily an asset can be bought or sold without moving its price.",
+    "full": "Liquidity is a defining property of a market. Highly liquid markets — EUR/USD, the S&P 500, BTC — offer tight spreads, fast fills and little slippage. Illiquid ones — penny stocks, exotic crypto — bring wide spreads and heavy slippage. Liquidity drops outside main trading hours. In SMC, \"liquidity\" also means the stop orders stacked above and below key levels that large players are said to hunt.",
+    "related": ["spread", "marketmaker", "orderbook", "slippage"],
+    "etym": "From the Latin liquidus — flowing, fluid."
+  },
+  {
+    "slug": "orderbook",
+    "term": "Order book",
+    "aliases": ["order book", "orderbook", "depth of market", "dom"],
+    "short": "The list of open buy and sell orders with their prices and sizes.",
+    "full": "The order book visualises supply and demand. The bid side holds buy orders — what buyers are willing to pay. The ask side holds sell orders. The best bid and best ask together form the spread. A \"wall\" — one very large order — can hold price up temporarily. A deep book, with orders at many levels, means high liquidity. On futures and spot crypto the book updates in real time.",
+    "related": ["liquidity", "spread", "marketmaker"],
+    "etym": "The book of orders: the list of resting bids and offers by price level."
+  },
+  {
+    "slug": "slippage",
+    "term": "Slippage",
+    "aliases": ["slippage", "slip", "requote"],
+    "short": "The difference between the expected fill price and the actual one.",
+    "full": "Slippage happens when an order fills at a worse price than requested. The causes are thin liquidity, high volatility around news, and slow order handling. Market orders are the most exposed. Limit orders remove negative slippage but may not fill at all. In scalping and HFT, slippage is a make-or-break factor.",
+    "related": ["liquidity", "spread", "stoploss", "orderbook"],
+    "etym": "From \"to slip\" — the gap between the price you expected and the one you got."
+  },
+  {
+    "slug": "timeframe",
+    "term": "Timeframe",
+    "aliases": ["timeframe", "time frame", "tf"],
+    "short": "The time interval each candle on a chart covers (M30, H1, H4, D1, W1).",
+    "full": "A timeframe is the period one candle represents. M1/M5/M15 suit scalping and intraday work. M30/H1 are intraday and swing. H4/D1 are medium-term. W1/MN are long-term. The multi-timeframe principle: read the trend on the higher timeframe, find the entry on the lower one. Levels drawn on a higher timeframe carry more weight than those on a lower one.",
+    "related": ["trend", "pattern", "support", "resistance"],
+    "etym": "The frame of time a single candle covers."
+  },
+  {
+    "slug": "trend",
+    "term": "Trend",
+    "aliases": ["trend", "uptrend", "downtrend", "trending"],
+    "short": "A sustained directional move: up (bullish), down (bearish) or sideways (range).",
+    "full": "A trend is defined by its sequence of extremes: bullish means higher highs and higher lows, bearish means lower highs and lower lows. A range is horizontal, with no clear direction. Dow's axiom holds that a trend is in force until proven otherwise. Identifying the trend is the first step of any analysis, and trading with it reduces the odds of a bad trade.",
+    "related": ["timeframe", "support", "resistance", "flat"],
+    "etym": "From \"trend\" — the prevailing direction of price."
+  },
+  {
+    "slug": "flat",
+    "term": "Range (flat)",
+    "aliases": ["range", "flat", "sideways", "consolidation"],
+    "short": "A period of trading inside a horizontal price band with no clear trend.",
+    "full": "A range, or flat, is price moving between support and resistance without forming a sustained trend. Trend strategies produce many false signals in a range. Counter-trend approaches work better: buy near the lower boundary, sell near the upper one. Volume usually drops inside a range, and a break on high volume often marks the start of a trend.",
+    "related": ["trend", "support", "resistance", "volatility"],
+    "etym": "\"Flat\" — price moving along a horizontal band."
+  },
+  {
+    "slug": "volatility",
+    "term": "Volatility",
+    "aliases": ["volatility", "volatile", "implied volatility"],
+    "short": "A measure of how widely price swings over a period.",
+    "full": "Volatility measures how far price strays from its average. High volatility means large candles, wide spreads and strong moves; low volatility means narrow candles and a quiet market. ATR (Average True Range) is a popular measure of historical volatility. Implied volatility (IV) is the volatility the market expects, priced into options. For equities the benchmark is the VIX, the \"fear index\". Volatility usually compresses ahead of a release and jumps after it.",
+    "related": ["vix", "atr", "spread", "trend"],
+    "etym": "From the Latin volatilis — flying, fleeting."
+  },
+  {
+    "slug": "vix",
+    "term": "VIX",
+    "aliases": ["vix", "fear index", "volatility index"],
+    "short": "The expected 30-day volatility of the S&P 500 — the market's \"fear gauge\".",
+    "full": "The VIX (CBOE Volatility Index) is derived from S&P 500 option prices. Below 15 the market is calm. Between 20 and 30 there is moderate uncertainty. Above 30 signals high anxiety, often near a market bottom. It is inversely correlated with the S&P 500: when the index falls, the VIX rises. The VIX says nothing about direction, only about amplitude. Crypto has an equivalent in DVOL, the Deribit volatility index for BTC.",
+    "related": ["fear-greed", "volatility", "trend"],
+    "etym": "Introduced by the CBOE in 1993 as a measure of expected market volatility."
+  },
+  {
+    "slug": "divergence",
+    "term": "Divergence",
+    "aliases": ["divergence", "bullish divergence", "bearish divergence", "hidden divergence"],
+    "short": "A disagreement between price and an oscillator, pointing to a weakening trend.",
+    "full": "Bullish divergence: price makes a new low, the oscillator (RSI, MACD) does not — bearish pressure is fading. Bearish divergence: price makes a new high while the oscillator prints a lower one — bullish pressure is fading. Hidden divergence signals continuation instead. Divergence does not give an entry by itself; it needs confirmation from price structure or a pattern. It is most reliable on H4 and above.",
+    "related": ["rsi", "trend", "pattern", "oscillator"],
+    "etym": "From \"to diverge\" — price and indicator moving apart."
+  },
+  {
+    "slug": "volume",
+    "term": "Volume",
+    "aliases": ["volume", "trading volume", "volume profile"],
+    "short": "The number of lots, contracts or coins traded over a period.",
+    "full": "Volume is an important secondary indicator. A move on high volume carries more weight. A rally on thin volume is a potentially weak signal, and falling volume inside a trend warns of a possible reversal. A volume profile shows at which prices the most trading took place; the Point of Control — the price with the highest traded volume — often acts as support or resistance.",
+    "related": ["liquidity", "trend", "flat", "orderbook"],
+    "etym": "From \"volume\" — the amount traded."
+  },
+  {
+    "slug": "long",
+    "term": "Long",
+    "aliases": ["long", "long position", "going long"],
+    "short": "Buying an asset in expectation of a rise.",
+    "full": "A long position is the basic market stance: the trader buys an asset expecting to sell it higher later. Profit comes from a rising price, loss from a falling one. The opposite of a short.",
+    "related": ["short"],
+    "etym": "\"Long\" — holding the asset itself, in contrast to borrowing it."
+  },
+  {
+    "slug": "short",
+    "term": "Short",
+    "aliases": ["short", "short position", "short selling", "shorting"],
+    "short": "Selling an asset borrowed from the broker in expectation of a fall.",
+    "full": "In a short sale the trader borrows an asset from the broker, sells it at the current price and undertakes to return it later. If the price falls, they buy it back cheaper, return the loan and keep the difference. If the price rises, the loss is theoretically unlimited.",
+    "related": ["long"],
+    "etym": "\"Short\" — being short of the asset you have sold."
+  },
+  {
+    "slug": "ath",
+    "term": "All-Time High (ATH)",
+    "aliases": ["ath", "all-time high", "all time high", "record high"],
+    "short": "All-Time High — the highest price an asset has ever reached.",
+    "full": "The ATH is the highest price an asset has traded at in its entire history. A new ATH usually draws retail attention and media coverage, which is no guarantee the rally continues.",
+    "related": ["bull-market"],
+    "etym": "All-Time High — the record across the whole trading history."
+  },
+  {
+    "slug": "bull-market",
+    "term": "Bull market",
+    "aliases": ["bull market", "bullish market", "bull run"],
+    "short": "A sustained rise, usually 20% or more from a recent low.",
+    "full": "A bull market is a period in which most assets are rising and participants are optimistic.",
+    "related": ["bear-market", "ath"],
+    "etym": "A bull strikes upward with its horns — hence the rising market."
+  },
+  {
+    "slug": "bear-market",
+    "term": "Bear market",
+    "aliases": ["bear market", "bearish market"],
+    "short": "A sustained decline, usually 20% or more from a recent high.",
+    "full": "A bear market is a prolonged period of falling prices and pessimistic sentiment.",
+    "related": ["bull-market", "dno"],
+    "etym": "A bear swipes downward with its paw — hence the falling market."
+  },
+  {
+    "slug": "hedge",
+    "term": "Hedge",
+    "aliases": ["hedge", "hedging", "hedged"],
+    "short": "A position that insures a portfolio against the risk of another position.",
+    "full": "Hedging means opening a position that offsets the loss on another one if price moves the wrong way. A hedge reduces risk — and potential profit along with it.",
+    "related": ["leverage"],
+    "etym": "From \"hedge\" — a fence around a field, here around a position."
+  },
+  {
+    "slug": "khomyak",
+    "term": "Bagholder",
+    "aliases": ["bagholder", "bag holder", "retail trader"],
+    "short": "A mocking name for an inexperienced retail trader who loses money to their own emotions.",
+    "full": "\"Bagholder\" is slang for the mass retail trader with no system, acting on emotion, hype and social-media tips — and left holding the bag when the move ends.",
+    "related": ["kukl", "slit"],
+    "etym": "The one left holding the bag after everyone else has sold."
+  },
+  {
+    "slug": "kukl",
+    "term": "The puppeteer",
+    "aliases": ["puppeteer", "whale", "smart money"],
+    "short": "A large player or market maker whose moves run against retail traders.",
+    "full": "\"The puppeteer\" is slang for a large market participant that retail traders suspect of moving price for its own benefit — for instance, clearing stops before a reversal.",
+    "related": ["marketmaker", "liquidity-sweep"],
+    "etym": "A trader's name for whoever is assumed to be pulling the strings."
+  },
+  {
+    "slug": "dno",
+    "term": "The bottom",
+    "aliases": ["bottom", "market bottom", "the low"],
+    "short": "The lowest point of a decline before price turns up.",
+    "full": "The bottom is the point below which price did not go during the current move, after which it turned up. Whether a bottom is in can only be known after the fact.",
+    "related": ["bear-market", "otskok"],
+    "etym": "The floor of a move — the lowest point reached."
+  },
+  {
+    "slug": "otskok",
+    "term": "Bounce",
+    "aliases": ["bounce", "dead cat bounce", "pullback"],
+    "short": "A short-lived rally after a sharp fall — not necessarily a change of trend.",
+    "full": "A bounce is a quick, brief recovery after a sharp decline. Unlike a real reversal it usually leaves the dominant trend intact and is often followed by more selling.",
+    "related": ["dno", "bear-market"],
+    "etym": "Price bouncing off a level rather than turning at it."
+  },
+  {
+    "slug": "slit",
+    "term": "Blowing up an account",
+    "aliases": ["blow up", "blown account", "wipeout"],
+    "short": "Losing a deposit quickly and painfully, usually to excessive risk or leverage.",
+    "full": "To blow up an account is to lose all the trading capital, or a large part of it, usually through absent risk management, excessive leverage or emotional trading after a run of losses.",
+    "related": ["leverage", "khomyak"],
+    "etym": "The account \"blows up\" — the capital is gone in one stretch."
+  },
+  {
+    "slug": "razvorot",
+    "term": "Reversal",
+    "aliases": ["reversal", "trend reversal", "turn"],
+    "short": "A change of trend direction, from up to down or the other way round.",
+    "full": "A reversal is the moment the dominant trend turns the other way. It is confirmed after the fact, by a break of structure — not by a single candle.",
+    "related": ["trend", "dno"],
+    "etym": "From \"to reverse\" — the trend turning the other way."
+  },
+  {
+    "slug": "risk",
+    "term": "Risk",
+    "aliases": ["risk", "risk per trade", "risk management"],
+    "short": "The share of the deposit a trader knowingly accepts losing on one trade.",
+    "full": "Risk is set BEFORE the entry and counted as a percentage of the deposit, not in currency: 1% of $10,000 and 1% of $1,000 are different sums but the same decision. Position size follows from risk, never the other way round: first \"how much am I prepared to lose\", then \"how many lots that means at my stop\". A common guide is 1–2% per trade: at 1%, ten losses in a row cost about 10% of the account; at 5%, half of it. Drawdown is asymmetric — recovering from −50% takes +100%. Risk not capped by a stop-loss is capped by the size of the deposit.",
+    "related": ["stoploss", "r-ratio", "leverage", "slit"],
+    "etym": "From the Italian risco — a danger you accept knowingly."
+  },
+  {
+    "slug": "margin",
+    "term": "Margin",
+    "aliases": ["margin", "free margin", "margin call", "stop out"],
+    "short": "The part of the deposit a broker locks as collateral against an open position.",
+    "full": "Margin is neither a commission nor a cost: it is money frozen and returned when the position closes. Required margin = position size / leverage — at 1:100 a $10,000 position ties up $100. Free margin is what remains to carry new positions or absorb losses on current ones. Margin level = equity / used margin × 100%: while it stays high the account lives. When it falls to the threshold the broker first warns (margin call) and then closes positions itself (stop out). The exact thresholds are set by the broker and differ between them — worth reading in the account specification before the first trade, not after.",
+    "related": ["leverage", "stoploss", "risk", "spread"],
+    "etym": "From \"margin\" — the reserve set aside against a position."
+  },
+  {
+    "slug": "atr",
+    "term": "ATR",
+    "aliases": ["atr", "average true range", "true range"],
+    "short": "The average range of a candle over a period — volatility in points, with no direction.",
+    "full": "The true range of a candle is the largest of three values: (high − low), |high − previous close| and |low − previous close|. The last two exist for gaps: if the market opened away from the previous close, the plain candle range understates the move. ATR is a moving average of true range, most often over 14 periods. It says nothing about direction — a crash and a rally give equally high readings. In practice it is used for volatility-based stops (ATR × multiplier instead of a round number of points), for normalising targets, and for comparing instruments: 50 points on gold and 50 on EUR/USD are entirely different moves, but in ATR they are comparable.",
+    "related": ["volatility", "stoploss", "timeframe", "vix"],
+    "etym": "Average True Range, introduced by J. Welles Wilder alongside the RSI in 1978."
+  },
+  {
+    "slug": "oscillator",
+    "term": "Oscillator",
+    "aliases": ["oscillator", "stochastic", "momentum indicator"],
+    "short": "An indicator whose values swing inside a fixed range — usually 0 to 100.",
+    "full": "A trend indicator follows price; an oscillator measures the speed and the \"overheating\" of a move. Hence the bounded scale: the value runs into its limits and turns, like a pendulum. RSI, the stochastic and the MACD histogram are oscillators. Overbought and oversold zones are not reversal signals in themselves: in a strong trend an oscillator can hold above 70 for weeks, and \"selling overbought\" is a classic way to stand against the market. Oscillators work better in a range than in a trend. Their most informative event is divergence: price makes a new extreme and the oscillator does not.",
+    "related": ["rsi", "divergence", "volatility", "flat"],
+    "etym": "From the Latin oscillare — to swing."
+  }
+]

@@ -2,13 +2,35 @@
 <html lang="{{ lang }}">
 <head>
 <meta charset="UTF-8">
+{# canonical + hreflang: сервер знает, что у курса локаль идёт
+   после /edu, а у остальных — перед; см. serve.py:_alt_links #}
+{{ alt_links('/glossary', lang) | safe }}
+{# 46 терминов в машинном виде: у каждого имя, определение и свой якорь.
+   Это то, чем ИИ-агент сошлётся на конкретную статью, а не на страницу
+   целиком. Собирается из того же glossary*.json — core/schema_ld.py. #}
+{{ schema_ld('glossary', lang) | safe }}
+{# description и og — из первых фраз того же текстового слоя, а не
+   второй копией текста: копия разошлась бы, и никто бы не заметил. #}
+{# 🔴 Описание здесь задаётся явно, а не берётся из первых фраз слоя:
+   слой начинается с первого термина словаря, и описанием страницы
+   оказывалось определение «пивота» — рассказ про одну статью вместо
+   рассказа про справочник. #}
+{{ page_meta(t('glossary.page_title', lang), 'glossary', '/glossary', lang,
+             t('glossary.subtitle', lang)) | safe }}
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>{{ t('glossary.page_title', lang) }}</title>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="SBF Intelligence">
+<meta property="og:image" content="https://lp.sbfconsult.com/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://lp.sbfconsult.com/assets/og-image.png">
 <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/design.css">
+<link rel="stylesheet" href="/assets/design.css?v=20260909">
 <style>
-:root{--cream:#FBF6EF;--paper:#FFFFFF;--line:#E7DFCF;--ink:#2B2B33;--muted:#8A8275;--gold:#C9A227;--up:#1e8e5a;--down:#c0392b;--nav:62px}
+:root{--cream:#FBF6EF;--paper:#FFFFFF;--line:#E7DFCF;--ink:#2B2B33;--muted:#716A5A;--gold:#C9A227;--up:#2C784E;--down:#c0392b;--nav:62px}
 *{box-sizing:border-box}
 body{margin:0;background:var(--cream);color:var(--ink);font-family:Montserrat,sans-serif;font-size:14px;
   padding-bottom:calc(var(--nav) + env(safe-area-inset-bottom))}
@@ -16,18 +38,33 @@ body{margin:0;background:var(--cream);color:var(--ink);font-family:Montserrat,sa
 .gl-hero{padding:16px 0 8px}
 .gl-hero h1{font-size:20px;font-weight:700;margin:0 0 4px}
 .gl-hero p{font-size:13px;color:var(--muted);margin:0}
+
+/* Заголовок карточки термина — основная кнопка страницы, была 42px. */
+@media(max-width:900px){
+  .gl-card-hd{min-height:44px}
+  .gl-list a,.gl-idx a{min-height:44px;display:flex;align-items:center}
+}
 </style>
 </head>
 <body>
 <script src="/assets/i18n.js?v=2" defer></script>
 <script src="/assets/sbf-symbols.js?v=2"></script>
-<script src="/assets/sbf-header.js?v=16" defer></script>
+<script src="/assets/sbf-header.js?v=23" defer></script>
 <div class="gl-page">
   <div class="gl-hero">
     <h1>{{ t('glossary.h1', lang) }}</h1>
-    <p>{{ t('glossary.subtitle', lang) }} · <a href="/" style="color:var(--gold)">{{ t('glossary.back_home', lang) }}</a></p>
+    {# Ссылка «домой» — в своей локали: «← Acasă» вела на русскую главную
+       (Л-6). lang сюда уже приходит с сервера, префикс собираем здесь. #}
+    <p>{{ t('glossary.subtitle', lang) }} · <a href="{{ ('/' + lang + '/') if lang != 'ru' else '/' }}" style="color:var(--gold-text,#866A19)">{{ t('glossary.back_home', lang) }}</a></p>
   </div>
+  {# 🔴 Текст глоссария приходит из сервера, а не только из JS. Список
+     строится sbf-glossary.js из JSON — и для того, кто JavaScript не
+     исполняет, страница была пустой: 63 знака из 1497. ИИ-краулеры именно
+     такие. Скрипт при старте заменяет содержимое контейнера целиком, так
+     что человек видит обычный раскрывающийся список.
+     Текст собирает tools/build_text_layer.js из того же glossary.json. #}
   <div id="glContainer"></div>
+  {{ text_layer('glossary', lang) | safe }}
 </div>
 <script src="/assets/sbf-glossary.js?v=2"></script>
 <script>

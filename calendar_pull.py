@@ -391,7 +391,7 @@ def _upsert(con: sqlite3.Connection, ev: dict) -> bool:
             now_ts, now_ts,
         ))
         if ev["actual"]:
-            _history_append(con, ev, now_ts)
+            _history_append(con, ev)
             return True
         return False
 
@@ -416,18 +416,21 @@ def _upsert(con: sqlite3.Connection, ev: dict) -> bool:
 
     # Факт появился впервые
     if ev["actual"] and not old_actual:
-        _history_append(con, ev, now_ts)
+        _history_append(con, ev)
         return True
     return False
 
 
-def _history_append(con: sqlite3.Connection, ev: dict, ts: int) -> None:
+def _history_append(con: sqlite3.Connection, ev: dict) -> None:
+    """Пишет строку истории с реальной датой релиза (scheduled_ts), а не
+    временем обработки — иначе бэкфилл/повторный прогон штампует историю
+    временем импорта вместо настоящей даты события."""
     try:
         con.execute("""
             INSERT OR IGNORE INTO econ_event_history
               (event_key, ts, actual, forecast, previous, unit)
             VALUES (?,?,?,?,?,?)
-        """, (ev["event_key"], ts, ev["actual"], ev["forecast"], ev["previous"], ev["unit"]))
+        """, (ev["event_key"], ev["scheduled_ts"], ev["actual"], ev["forecast"], ev["previous"], ev["unit"]))
     except sqlite3.Error as e:
         print(f"  history: {e}", file=sys.stderr)
 

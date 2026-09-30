@@ -1,172 +1,338 @@
 {
-  "date": "2026-08-11",
-  "generated_at": "2026-08-11T07:36:03.338463+00:00",
+  "date": "2026-09-30",
+  "generated_at": "2026-09-30T03:03:36.832213+00:00",
   "calendar": [
     {
-      "ts_utc": "2026-08-11T01:30:00Z",
-      "scheduled_ts": 1786411800,
-      "country": "AU",
-      "title": "NAB Business Confidence",
+      "ts_utc": "2026-09-30T00:00:00Z",
+      "scheduled_ts": 1790726400,
+      "country": "NZ",
+      "title": "ANZ Business Confidence",
       "indicator": "Business Confidence",
-      "impact": "high",
+      "impact": "medium",
       "forecast": null,
-      "previous": "-6",
+      "previous": "53.7",
       "symbols": [
-        "AUDUSD"
+        "AUDNZD",
+        "EURNZD",
+        "GBPNZD",
+        "NZDCAD",
+        "NZDCHF",
+        "NZDJPY",
+        "NZDUSD"
       ],
       "past_reaction": {
-        "symbol": "AUDUSD",
-        "n": 5,
-        "median_atr_30m": 0.022653721682845376
+        "symbol": "NZDUSD",
+        "n": 9,
+        "median_atr_30m": 0.16890822784810208
       }
     },
     {
-      "ts_utc": "2026-08-11T04:30:00Z",
-      "scheduled_ts": 1786422600,
+      "ts_utc": "2026-09-30T01:30:00Z",
+      "scheduled_ts": 1790731800,
       "country": "AU",
-      "title": "RBA Interest Rate Decision",
-      "indicator": "Interest Rate",
-      "impact": "high",
-      "forecast": "4.35",
-      "previous": "4.35",
-      "symbols": [
-        "AUDUSD"
-      ],
-      "past_reaction": null
-    },
-    {
-      "ts_utc": "2026-08-11T04:30:00Z",
-      "scheduled_ts": 1786422600,
-      "country": "AU",
-      "title": "Cash Rate",
-      "indicator": "Cash Rate",
-      "impact": "high",
-      "forecast": "4.35%",
-      "previous": "4.35%",
-      "symbols": [
-        "AUDUSD"
-      ],
-      "past_reaction": null
-    },
-    {
-      "ts_utc": "2026-08-11T04:30:00Z",
-      "scheduled_ts": 1786422600,
-      "country": "AU",
-      "title": "RBA Monetary Policy Statement",
-      "indicator": "RBA Monetary Policy Statement",
-      "impact": "high",
-      "forecast": null,
-      "previous": null,
-      "symbols": [
-        "AUDUSD"
-      ],
-      "past_reaction": null
-    },
-    {
-      "ts_utc": "2026-08-11T04:30:00Z",
-      "scheduled_ts": 1786422600,
-      "country": "AU",
-      "title": "RBA Rate Statement",
-      "indicator": "RBA Rate Statement",
-      "impact": "high",
-      "forecast": null,
-      "previous": null,
-      "symbols": [
-        "AUDUSD"
-      ],
-      "past_reaction": null
-    },
-    {
-      "ts_utc": "2026-08-11T05:30:00Z",
-      "scheduled_ts": 1786426200,
-      "country": "AU",
-      "title": "RBA Press Conference",
-      "indicator": "Interest Rate",
+      "title": "Building Permits MoM Prel",
+      "indicator": "Building Permits MoM",
       "impact": "medium",
-      "forecast": null,
-      "previous": null,
+      "forecast": "-2",
+      "previous": "-3.6",
       "symbols": [
-        "AUDUSD"
+        "AUDCAD",
+        "AUDCHF",
+        "AUDJPY",
+        "AUDNZD",
+        "AUDUSD",
+        "AUS_200",
+        "EURAUD",
+        "GBPAUD"
       ],
-      "past_reaction": null
+      "past_reaction": {
+        "symbol": "AUDUSD",
+        "n": 12,
+        "median_atr_30m": 0.05007530120482573
+      }
+    },
+    {
+      "ts_utc": "2026-09-30T01:30:00Z",
+      "scheduled_ts": 1790731800,
+      "country": "AU",
+      "title": "RBA Trimmed Mean CPI YoY",
+      "indicator": "Core Inflation Rate",
+      "impact": "medium",
+      "forecast": "3.6",
+      "previous": "3.6",
+      "symbols": [
+        "AUDCAD",
+        "AUDCHF",
+        "AUDJPY",
+        "AUDNZD",
+        "AUDUSD",
+        "AUS_200",
+        "EURAUD",
+        "GBPAUD"
+      ],
+      "past_reaction": {
+        "symbol": "AUDUSD",
+        "n": 8,
+        "median_atr_30m": 0.45990210843373647
+      }
+    },
+    {
+      "ts_utc": "2026-09-30T01:30:00Z",
+      "scheduled_ts": 1790731800,
+      "country": "AU",
+      "title": "Inflation Rate YoY",
+      "indicator": "Inflation Rate",
+      "impact": "medium",
+      "forecast": "4.1",
+      "previous": "3.5",
+      "symbols": [
+        "AUDCAD",
+        "AUDCHF",
+        "AUDJPY",
+        "AUDNZD",
+        "AUDUSD",
+        "AUS_200",
+        "EURAUD",
+        "GBPAUD"
+      ],
+      "past_reaction": {
+        "symbol": "AUDUSD",
+        "n": 8,
+        "median_atr_30m": 0.45990210843373647
+      }
+    },
+    {
+      "ts_utc": "2026-09-30T01:30:00Z",
+      "scheduled_ts": 1790731800,
+      "country": "CN",
+      "title": "NBS Manufacturing PMI",
+      "indicator": "Business Confidence",
+      "impact": "high",
+      "forecast": "50.1",
+      "previous": "49.8",
+      "symbols": [
+        "CHINA_A50",
+        "CHINA_INTERNET",
+        "USDCNY"
+      ],
+      "past_reaction": {
+        "symbol": "USDCNY",
+        "n": 12,
+        "median_atr_30m": 0.21283783783784635
+      }
+    },
+    {
+      "ts_utc": "2026-09-30T01:30:00Z",
+      "scheduled_ts": 1790731800,
+      "country": "AU",
+      "title": "Inflation Rate MoM",
+      "indicator": "Inflation Rate MoM",
+      "impact": "medium",
+      "forecast": "0.5",
+      "previous": "1",
+      "symbols": [
+        "AUDCAD",
+        "AUDCHF",
+        "AUDJPY",
+        "AUDNZD",
+        "AUDUSD",
+        "AUS_200",
+        "EURAUD",
+        "GBPAUD"
+      ],
+      "past_reaction": {
+        "symbol": "AUDUSD",
+        "n": 8,
+        "median_atr_30m": 0.45990210843373647
+      }
     }
   ],
-  "calendar_more": 5,
+  "calendar_more": 27,
   "untranslated": [
-    "Cash Rate",
-    "RBA Monetary Policy Statement",
-    "RBA Rate Statement"
+    "Core PCE Price Index m/m"
   ],
   "earnings": [],
   "movers": {
     "up": [
       {
-        "symbol": "USDJPY",
-        "bar_date": "2026-08-10",
-        "close": 159.152,
-        "chg_pct": 0.79,
-        "ratio": 1.3519080927399307,
+        "symbol": "USDRUB",
+        "bar_date": "2026-09-29",
+        "close": 84.4949,
+        "chg_pct": 3.17,
+        "ratio": 1.8112990173696568,
         "event": {
-          "title": "Fed Hammack Speech",
-          "ts_utc": "2026-08-10T19:00:00Z"
+          "title": "ADP Employment Change Weekly",
+          "ts_utc": "2026-09-29T12:15:00Z"
         }
       },
       {
-        "symbol": "GOLD",
-        "bar_date": "2026-08-10",
-        "close": 4402.45,
-        "chg_pct": 1.6,
-        "ratio": 1.0573889477426262,
+        "symbol": "SOL",
+        "bar_date": "2026-09-29",
+        "close": 118.93,
+        "chg_pct": 0.24,
+        "ratio": 1.0133115691627654,
         "event": {
-          "title": "Fed Hammack Speech",
-          "ts_utc": "2026-08-10T19:00:00Z"
+          "title": "ADP Employment Change Weekly",
+          "ts_utc": "2026-09-29T12:15:00Z"
+        }
+      },
+      {
+        "symbol": "DXY",
+        "bar_date": "2026-09-29",
+        "close": 101.112,
+        "chg_pct": 0.2,
+        "ratio": 1.0012698053727638,
+        "event": {
+          "title": "ADP Employment Change Weekly",
+          "ts_utc": "2026-09-29T12:15:00Z"
         }
       }
     ],
     "down": [
       {
-        "symbol": "EURUSD",
-        "bar_date": "2026-08-10",
-        "close": 1.1546,
-        "chg_pct": -0.08,
-        "ratio": 0.543777300524785,
+        "symbol": "WTI",
+        "bar_date": "2026-09-29",
+        "close": 89.03,
+        "chg_pct": -4.43,
+        "ratio": 1.558101899234236,
         "event": {
-          "title": "Fed Hammack Speech",
-          "ts_utc": "2026-08-10T19:00:00Z"
+          "title": "ADP Employment Change Weekly",
+          "ts_utc": "2026-09-29T12:15:00Z"
+        }
+      },
+      {
+        "symbol": "EURUSD",
+        "bar_date": "2026-09-29",
+        "close": 1.134,
+        "chg_pct": -0.26,
+        "ratio": 1.4558622006152189,
+        "event": {
+          "title": "Economic Sentiment",
+          "ts_utc": "2026-09-29T09:00:00Z"
+        }
+      },
+      {
+        "symbol": "NG",
+        "bar_date": "2026-09-29",
+        "close": 3.022,
+        "chg_pct": -3.67,
+        "ratio": 1.313167693063786,
+        "event": {
+          "title": "ADP Employment Change Weekly",
+          "ts_utc": "2026-09-29T12:15:00Z"
         }
       }
     ]
   },
   "patterns": [
     {
-      "symbol": "GOLD",
+      "symbol": "NG",
       "tf": "D1",
-      "pattern_key": "bullish_engulfing",
-      "display_name_ru": "Бычье поглощение",
-      "direction": "bullish",
-      "ts": 1786320000,
-      "agree_share_5": 0.5211,
-      "n": 142
-    },
-    {
-      "symbol": "SILVER",
-      "tf": "D1",
-      "pattern_key": "pin_bar_top",
-      "display_name_ru": "Пин-бар сверху",
+      "pattern_key": "bearish_engulfing",
+      "display_name_ru": "Медвежье поглощение",
       "direction": "bearish",
-      "ts": 1785974400,
-      "agree_share_5": 0.4,
-      "n": 50
+      "ts": 1790640000,
+      "agree_share_5": 0.4748,
+      "n": 139
     },
     {
       "symbol": "DJI",
       "tf": "D1",
-      "pattern_key": "pin_bar_top",
-      "display_name_ru": "Пин-бар сверху",
+      "pattern_key": "pin_bar_bottom",
+      "display_name_ru": "Пин-бар снизу",
+      "direction": "bullish",
+      "ts": 1790640000,
+      "agree_share_5": 0.5312,
+      "n": 96
+    },
+    {
+      "symbol": "USDRUB",
+      "tf": "D1",
+      "pattern_key": "double_top",
+      "display_name_ru": "Двойная вершина",
       "direction": "bearish",
-      "ts": 1785888000,
-      "agree_share_5": 0.3514,
-      "n": 37
+      "ts": 1790640000,
+      "agree_share_5": 0.4571,
+      "n": 70
+    },
+    {
+      "symbol": "DJI",
+      "tf": "D1",
+      "pattern_key": "hammer",
+      "display_name_ru": "Молот",
+      "direction": "bullish",
+      "ts": 1790640000,
+      "agree_share_5": 0.6571,
+      "n": 35
+    }
+  ],
+  "outliers": [
+    {
+      "symbol": "QNTUSDT",
+      "name": "QNT",
+      "asset_class": "crypto",
+      "chg_pct": 39.95,
+      "peak_chg_pct": 47.41,
+      "price": 291.93,
+      "dollar_volume": 27240660.0,
+      "screener": "bybit_spot",
+      "seen_utc": "2026-09-30T02:30:25+00:00",
+      "explained": false
+    },
+    {
+      "symbol": "GRASSUSDT",
+      "name": "GRASS",
+      "asset_class": "crypto",
+      "chg_pct": 30.39,
+      "peak_chg_pct": 43.23,
+      "price": 0.7449,
+      "dollar_volume": 20527299.0,
+      "screener": "bybit_spot",
+      "seen_utc": "2026-09-30T01:45:00+00:00",
+      "explained": false
+    },
+    {
+      "symbol": "IOVA",
+      "name": "Iovance Biotherapeutics, Inc.",
+      "asset_class": "equity",
+      "chg_pct": 31.48,
+      "peak_chg_pct": 39.22,
+      "price": 14.45,
+      "dollar_volume": 1127536722.0,
+      "screener": "day_gainers",
+      "seen_utc": "2026-09-30T03:00:00+00:00",
+      "explained": false
+    }
+  ],
+  "off_context": [
+    {
+      "label": "yields",
+      "text": "Доходности Treasuries превысили 5%, доллар поднялся к 16-месячному максимуму к евро; индексы акций США снижаются, Hang Seng -0,5% до 24 524.",
+      "publishers": 21,
+      "items": 30,
+      "sources": [
+        {
+          "title": "Dollar Hits 16-Month High Against Euro as Rising U.S. Yields Provide Tailwind",
+          "url": "https://news.google.com/rss/articles/CBMidkFVX3lxTE81M1NSaHhCSGpJcFdsQ1gtOEtZQS1WZGNpNW1kd2ZKRUlFNVJNVTdxVWJnRzdiWVNYdFE2d3g4cG9Qek1WUmJHQW8yaDEtOGFpWjZjU0Q3dWNBN1hXdV9aT1RkQUxuQ2Y5SHZXNF9qUGtSNENHYUE?oc=5",
+          "publisher": "finance.biggo.com"
+        },
+        {
+          "title": "US Dollar Climbs to a 16-Month High as Treasury Yields Top 5%",
+          "url": "https://news.google.com/rss/articles/CBMiY0FVX3lxTE51NVAyWHlRc2RXeVlWa21zMFhubTFtb1Zzb2hva2pxY3ljOEpvTmdXYWp1SURKVVVBYVdtSF82VFlDdmxQR2gtNXl1QWJSLWhQaXlTTXBybjJqOXQ0aEpwQzFJNA?oc=5",
+          "publisher": "Межа. Новини України."
+        },
+        {
+          "title": "Hong Kong Stock Exchange: Hang Seng Slips About 0.5% to 24,524 as Tech Stocks and Bond Yields Weigh",
+          "url": "https://news.google.com/rss/articles/CBMizAFBVV95cUxNakpEdUNsdFVkdTAzQl8zUGR3MFRtX2lZZEt3cDE2ai1JdFhMSVN5UjN6R3hyclJJNXFPOXVmSkN3OGM3bXBTcVdVRlBVcWl0UXI3ZE4xWUtQSFVOc2xyeUN1Z1MxclM4ZHlIMWlUVlRVSjkyeVg4NjVVV0p2dDVYbXp3YjF6NW1ma01KSXRoYVRERzlDTlVnVkFMTHpuY041Ti1zM1k1azRCNXlXQUNPU0hFSTlZM1ZOUDRHdHRQTHpIUTB1X3FVWVJ2M18?oc=5",
+          "publisher": "BBN Times"
+        },
+        {
+          "title": "US stock indices decline as bond yields rise — Anadolu Agency",
+          "url": "https://news.google.com/rss/articles/CBMivgFBVV95cUxQYzNuVDNlNUhRMXNrZF9tUU9VbldoUVN6NlJKazAzTXVjRjdkQ1Vtb0gxejFSb3JjeUlUQkVHbUtoSGhLRnFSTkZ3RUlGS3VhX21UM2ZqTTJ2UFI5azVsN0I1MHJ3dFcyV2M4S1ZDYVd2S3FCdnVDV1Fid0lvUGRISC1KY1hqTHBGV2Z6M0FpMXZGcEdPTUVxZzFVRnZJRW9faU81ZWQxeEtsR1FXbU9mOVk4WFdNZjlBLTljaUVB?oc=5",
+          "publisher": "UA.NEWS"
+        }
+      ],
+      "symbol": null
     }
   ],
   "_meta": {
@@ -177,23 +343,24 @@
       "calendar": "econ_events + event_reaction_stats (bot.db)",
       "earnings": "web/data/earnings_calendar.json (ручной, вариант A)",
       "movers": "ohlc_{symbol}_D1.json + core.focus.yesterday_deviation",
-      "patterns": "core.patterns.detect() + pattern_stats (bot.db), n>=15"
+      "patterns": "core.patterns.detect() + pattern_stats (bot.db), n>=15",
+      "outliers": "market_outliers (bot.db) <- outliers_job.py, скринеры Yahoo + Bybit",
+      "off_context": "news_clusters (bot.db), summary_status=ok <- core/outlier_triage.py"
     }
   },
-  "headline": "Золото у рекордных $4 345 перед CPI США в среду; нефть Brent выше $88 на риске вокруг Ормуза",
+  "headline": "Металлы под давлением: золото 4 179 (−0,13%), серебро 61,08 (−0,69%); курс ЦБ на 30 сентября выше ₽84",
   "context": [
     {
-      "text": "Золото в пятницу +2,19% до рекордных $4 345 (×1,7 к своей норме волатильности), на дневном графике бычье поглощение; евро/доллар 1,1555, доллар/иена −0,43%.",
+      "text": "Золото 4 179,46 (−0,13%), серебро 61,08 (−0,69%), нефть WTI 89,59 (+0,63%). S&P 500 7 743,50 (−0,09%), VIX 16,04, биткоин 83 342 (−0,33%), индекс страха и жадности 71.",
       "confidence": "quotes"
     },
     {
-      "text": "Нефть Brent впервые с конца июля выше $88 на фоне напряжённости вокруг Ормузского пролива; в Палату представителей США внесён законопроект о санкциях против России.",
+      "text": "РБК: ЦБ установил курс доллара на 30 сентября выше ₽84. Акции «Самолета» потеряли почти 9%, дефицит бюджета и прибыли банков — в центре российской повестки.",
       "confidence": "media"
     },
     {
-      "text": "Крипта (соцсети, цена не подтверждена): недельный приток в биткоин-ETF ~$853 млн — максимум за 3 мес., в эфириум-ETF ~$244 млн; фон эйфоричный — прогнозы «$1 млрд», мемкоин-мания.",
+      "text": "Соцсети: Иран готов остановить обогащение урана за снятие санкций, нефть на этом отошла к $89,6. Там же пишут о доходности 10 лет выше 5,2% — блок котировок её не содержит.",
       "confidence": "social_unverified"
     }
-  ],
-  "unknown": "Главный риск недели — CPI США в среду: золото перегрето, и инфляционный принт способен качнуть металл и доллар в любую сторону."
+  ]
 }

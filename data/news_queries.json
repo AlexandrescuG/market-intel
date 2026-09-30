@@ -1,0 +1,86 @@
+{
+  "_описание": "Поисковые запросы к Google News по инструментам витрины. Каждый запрос — это агрегатор тысяч изданий по одной теме, а не один сайт: reuters, bloomberg, местная деловая пресса. Так закрывается длинный хвост, о котором общие ленты (BBC World, Guardian) не пишут.",
+
+  "_зачем": "До 09.09.2026 таких запросов было восемь: EURUSD, GBPUSD, USDJPY, золото, нефть, биткоин, ФРС, ЕЦБ. Ровно эти инструменты и были в топе доски обсуждаемости, а остальные семьсот выглядели как «о них не пишут». Писали — мы не спрашивали.",
+
+  "_как_работает": "Запросы опрашиваются не все сразу, а порциями по кругу (см. core/config.py::_rotating_news_queries). Полный круг проходится за несколько циклов сборщика — при опросе раз в 20 минут это меньше часа, что для дневного счётчика упоминаний достаточно.",
+
+  "_правило_запроса": "Формулировка должна отсекать омонимы на стороне поиска, а не надеяться на наш фильтр: не «Nike», а «Nike stock»; не «Corn», а «corn futures price». Проверять глазами после добавления — Google News охотно приносит спорт и кулинарию.",
+
+  "валюты": {
+    "AUDUSD": "Australian dollar forex",
+    "NZDUSD": "New Zealand dollar forex",
+    "USDCAD": "Canadian dollar forex",
+    "USDCHF": "Swiss franc forex",
+    "EURGBP": "euro pound exchange rate",
+    "EURJPY": "euro yen exchange rate",
+    "USDMXN": "Mexican peso exchange rate",
+    "USDZAR": "South African rand exchange rate",
+    "USDTRY": "Turkish lira exchange rate",
+    "USDCNY": "Chinese yuan exchange rate"
+  },
+
+  "индексы": {
+    "GERMANY_40": "DAX index",
+    "UK_100": "FTSE 100 index",
+    "JAPAN_225": "Nikkei 225 index",
+    "FRANCE_40": "CAC 40 index",
+    "EUROPE_50": "Euro Stoxx 50",
+    "HK_50": "Hang Seng index",
+    "AUS_200": "ASX 200 index",
+    "SPAIN35": "IBEX 35 index",
+    "ITALY_40": "FTSE MIB index",
+    "INDIA_50": "Nifty 50 index",
+    "CANADA_60": "TSX index Canada",
+    "US_2000": "Russell 2000 index"
+  },
+
+  "сырьё": {
+    "COPPER": "copper price futures",
+    "PLATINUM": "platinum price",
+    "PALLADIUM": "palladium price",
+    "WHEAT": "wheat futures price",
+    "CORN": "corn futures price",
+    "SOYBEAN": "soybean futures price",
+    "COFFEE_C": "coffee futures price",
+    "COCOA": "cocoa futures price",
+    "BRENT_OIL": "Brent crude price",
+    "NATURAL_GAS": "natural gas price futures",
+    "GASOLINE": "gasoline futures price",
+    "SILVER": "silver price"
+  },
+
+  "крипта": {
+    "XRP": "XRP Ripple crypto",
+    "LTC": "Litecoin crypto",
+    "BCHUSD": "Bitcoin Cash crypto",
+    "LINK": "Chainlink crypto",
+    "SOL": "Solana crypto",
+    "XLM": "Stellar XLM crypto",
+    "UNI": "Uniswap crypto",
+    "ETH": "Ethereum price"
+  },
+
+  "акции": {
+    "#APPLE": "Apple stock",
+    "#MICROSOFT": "Microsoft stock",
+    "#NVIDIA": "Nvidia stock",
+    "#AMAZON": "Amazon stock",
+    "#GOOGLE": "Alphabet Google stock",
+    "#TESLA": "Tesla stock",
+    "#META": "Meta Platforms stock",
+    "#NETFLIX": "Netflix stock",
+    "#JP_MORGAN": "JPMorgan stock",
+    "#BOEING": "Boeing stock",
+    "#NIKE": "Nike stock earnings",
+    "#COCA-COLA": "Coca-Cola stock",
+    "#PFIZER": "Pfizer stock",
+    "#EXXON": "Exxon Mobil stock",
+    "#WALMART": "Walmart stock",
+    "#DISNEY": "Disney stock",
+    "#INTEL": "Intel stock",
+    "#AMD": "AMD stock",
+    "#COINBASE": "Coinbase stock",
+    "#PAYPAL": "PayPal stock"
+  }
+}

@@ -35,7 +35,7 @@ TECH_BASE = [
     "GC=F", "SI=F",
     "BTC-USD", "ETH-USD", "SOL-USD",
     "EURUSD=X", "GBPUSD=X",
-    "^GSPC", "^IXIC", "^DJI",
+    "^GSPC", "^NDX", "^DJI",
     "CL=F", "NG=F",
 ]
 
@@ -138,26 +138,11 @@ def publish_report() -> None:
     })
 
 
-def publish_stories() -> None:
-    from core.stories import active_stories, attach_market, rebuild_stories
-    rebuild_stories(hours=48)
-    stories = [attach_market(s) for s in active_stories(limit=12)]
-    _write("stories.json", {"updated": _now(), "stories": stories})
-
 
 def publish_regime() -> None:
     from core.regime import detect_regime
     _write("regime.json", detect_regime())
 
-
-def publish_verification() -> None:
-    from core.verification import scorecard, recent_observations, resolve_due
-    resolve_due()
-    _write("verification.json", {
-        "updated": _now(),
-        "scorecard": scorecard(),
-        "recent": recent_observations(limit=15),
-    })
 
 
 def publish_macro() -> None:
@@ -165,19 +150,6 @@ def publish_macro() -> None:
     _write("macro.json", macro_snapshot())
 
 
-def publish_divergence() -> None:
-    from core.divergence import sentiment_price_divergence, changes_since
-    _write("divergence.json", {
-        "updated": _now(),
-        "divergences": sentiment_price_divergence(),
-        "changes": changes_since(),
-    })
-
-
-def publish_anomalies() -> None:
-    from core.anomaly import anomalies, update_baselines
-    update_baselines()
-    _write("anomalies.json", {"updated": _now(), "anomalies": anomalies()})
 
 
 def publish_charts() -> None:
@@ -198,9 +170,20 @@ def publish_charts() -> None:
     """
     import sqlite3
     import pandas as pd
+    from mt5_config import RECENT_BARS
     from core.technical import pivots as calc_pivots, _rsi, patterns as _tech_patterns
     from core.price_bars import available_symbols
     from core.symbols_registry import alias_for
+
+    # Сколько свечей уходит в файл. Ключи — веб-таймфреймы, значения берём из
+    # той же карты, по которой качаются бары из моста: один предел на оба конца
+    # конвейера, а не два разных числа в разных файлах.
+    _WEB_TF_LIMIT = {"M15": RECENT_BARS.get("15m", 3000),
+                     "M30": RECENT_BARS.get("30m", 3000),
+                     "H1":  RECENT_BARS.get("1h", 3000),
+                     "H4":  RECENT_BARS.get("4h", 2000),
+                     "D1":  RECENT_BARS.get("1d", 2000),
+                     "W1":  RECENT_BARS.get("1w", 1000)}
 
     def _frame(con, pb_sym, tf):
         rows = con.execute(
@@ -237,7 +220,15 @@ def publish_charts() -> None:
                         "color": "rgba(30,142,90,.5)" if up else "rgba(192,57,43,.5)"})
         return candles, vol
 
-    con = sqlite3.connect(str(_BOT_DB))
+    # 🔴 Без таймаута соединение ждёт блокировку 5 секунд (дефолт sqlite) и
+    # падает с «database is locked». За 29.09 это 42 падения из 231 прогона:
+    # publish идёт по всем символам, а в ту же базу в это время пишут движок,
+    # strategy_monitor и таймерные job'ы. Правило «очередь лучше обрыва»
+    # записано в core/db.py::_connect (60 с), но это подключение заведено
+    # мимо него и о правиле не знало — как и ещё одиннадцать в репозитории
+    # (см. tools/check_db_timeouts.py).
+    con = sqlite3.connect(str(_BOT_DB), timeout=60)
+    con.execute("PRAGMA busy_timeout=60000")
     try:
         for canonical in available_symbols("1d"):
             pb_sym = alias_for(canonical, "price_bars") or canonical
@@ -259,10 +250,15 @@ def publish_charts() -> None:
                     else "смешанная / нейтральная")
             pats = _tech_patterns(d1) if len(d1) >= 2 else []
 
+            # 🔴 Цвет уровня приезжает с сервера и на клиенте красит И линию на
+            # графике, И подпись «S1 1.0878» под ним. Значит порог — текстовый
+            # (4.5:1), а не графический: старое золото #C9A227 давало подписи
+            # 2.42:1, зелёное #1e8e5a — 4.14:1. Держать согласованно с палитрой
+            # web/assets/grafik-engine.js.
             levels = [
-                ("R2", pv["R2"], "#c0392b"), ("R1", pv["R1"], "#c0392b"),
-                ("PP", pv["PP"], "#C9A227"),
-                ("S1", pv["S1"], "#1e8e5a"), ("S2", pv["S2"], "#1e8e5a"),
+                ("R2", pv["R2"], "#C0392B"), ("R1", pv["R1"], "#C0392B"),
+                ("PP", pv["PP"], "#866A19"),
+                ("S1", pv["S1"], "#1A7D4F"), ("S2", pv["S2"], "#1A7D4F"),
             ]
             nearest = min(levels, key=lambda L: abs(L[1] - price))
             meta = {
@@ -296,7 +292,23 @@ def publish_charts() -> None:
                     # без выдумки" должно значить "нет файла", а не "старый файл".
                     (WEB_DATA / fname).unlink(missing_ok=True)
                     continue
-                candles, vol = _rows_from(df, intraday)
+                # 🔴 В файл идёт хвост, а не вся история.
+                #
+                # Выгрузка была без предела: ohlc_GOLD_M30.json — 100 796 свечей
+                # с 2018 года, 22.7 МБ, и браузер скачивал их целиком при каждом
+                # переключении на M30. Вся выкладка занимала 251 МБ. На телефоне
+                # это просто не открывалось за разумное время.
+                #
+                # Пределы те же, что уже действуют при выкачке из моста
+                # (mt5_config.RECENT_BARS) — чтобы «глубина графика» не значила в
+                # двух местах разное. Три тысячи получасовых свечей это больше
+                # трёх месяцев: на экране всё равно помещается пара сотен.
+                #
+                # Обрезается ТОЛЬКО то, что пишется в файл. Пивоты, RSI, MA50 и
+                # паттерны выше посчитаны по полному ряду и не меняются.
+                keep = _WEB_TF_LIMIT.get(web_tf)
+                out_df = df.tail(keep) if keep else df
+                candles, vol = _rows_from(out_df, intraday)
                 _write(fname, {**meta, "interval": web_tf, "candles": candles, "volume": vol})
     finally:
         con.close()
@@ -400,13 +412,22 @@ def publish_quotes() -> None:
     if n_fail:
         log.debug("publish_quotes: %d/%d тикеров не ответили (не 429 — таймаут/ошибка)", n_fail, len(syms))
 
+    # Инструменты брокера — ценой брокера, поверх Yahoo. См. core/mt5_quotes.py.
+    try:
+        from core import mt5_quotes
+        broker = mt5_quotes.quotes(now_ts, set(syms))
+    except Exception as e:
+        broker = {}
+        log.warning("publish_quotes: мост MT5 недоступен (%s) — цены остались "
+                    "от Yahoo, по золоту это фьючерс против спота на графике", e)
+    if broker:
+        out.update(broker)
+    else:
+        log.warning("publish_quotes: мост MT5 не дал ни одной цены — "
+                    "quotes.json целиком от Yahoo")
+
     _write("quotes.json", {"updated": _now(), "quotes": out})
 
-
-def publish_health() -> None:
-    from core import db as _db
-    beats = _db.get_heartbeats()
-    _write("health.json", {"updated": _now(), "components": beats})
 
 
 def publish_all() -> None:
@@ -422,9 +443,18 @@ def publish_all() -> None:
     # web/data/calendar.json, которую не читал ни один фронтенд-код —
     # реальный календарь в econ_events, отдаётся через /api/calendar/events
     # и build_brief_v2.py. Файл calendar.json удалён вместе с функцией.
-    slow_fns = (publish_stories, publish_regime, publish_verification,
-                publish_macro, publish_divergence,
-                publish_anomalies, publish_health, publish_charts)
+    # 02.09.2026: убраны publish_stories, publish_verification,
+    # publish_divergence, publish_anomalies, publish_health. Каждая писала свой
+    # JSON в web/data, и ни один из пяти файлов не читал никто — ни страницы,
+    # ни скрипты, ни серверные обработчики, ни утренний синтез (проверено
+    # поиском по web/*.html, assets/*.js, serve.py, analyze/*.py). Таймер при
+    # этом отрабатывал круглосуточно каждые пять минут.
+    # Модули core.stories / core.verification / core.divergence / core.anomaly
+    # тоже больше никем не используются — их побочные действия (rebuild_stories,
+    # resolve_due, update_baselines) никому не нужны, поэтому функции убраны
+    # целиком, а не оставлены ради них.
+    # Ровно так же выше однажды убрали publish_calendar.
+    slow_fns = (publish_regime, publish_macro, publish_charts)
 
     layers = []
     for fn in fast_fns + slow_fns:

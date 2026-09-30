@@ -2,99 +2,97 @@
 <html lang="{{ lang }}">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+{# canonical + hreflang: сервер знает, что у курса локаль идёт
+   после /edu, а у остальных — перед; см. serve.py:_alt_links #}
+{{ alt_links('/brokers', lang) | safe }}
+{# Список инструкций. Ни рейтингов, ни отзывов: их у нас не собрано. #}
+{{ schema_ld('brokers', lang) | safe }}
+{{ page_meta(t('brokers.page_title', lang), 'brokers', '/brokers', lang,
+             t('brokers.page_description', lang)) | safe }}
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>{{ t('brokers.page_title', lang) }}</title>
-<meta name="description" content="{{ t('brokers.page_description', lang) }}">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="SBF Intelligence">
+<meta property="og:image" content="https://lp.sbfconsult.com/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://lp.sbfconsult.com/assets/og-image.png">
+{# description переехал в page_meta выше — там он выдаётся вместе с
+   og:description и twitter:description из одного источника. Два тега
+   description на странице — это спор, который решает краулер. #}
 <meta name="robots" content="index, follow">
 <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
-<link rel="stylesheet" href="/assets/design.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/design.css?v=20260909">
 <link rel="stylesheet" href="/assets/tokens.css?v=1">
 <script src="/assets/i18n.js?v=2" defer></script>
-<script src="/assets/sbf-symbols.js?v=2"></script>
+<script src="/assets/sbf-symbols.js?v=2" defer></script>
 <script src="/assets/sbf-auth.js?v=1" defer></script>
-<script src="/assets/sbf-header.js?v=16" defer></script>
+<script src="/assets/sbf-header.js?v=23" defer></script>
 <style>
-.wrap{max-width:1180px;margin:0 auto;padding:24px 20px 60px}
-.brokers-h1{font-size:26px;font-weight:800;letter-spacing:-.01em;color:var(--ink);margin-bottom:6px}
-.brokers-sub{font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:20px;max-width:760px}
-
-/* Тулбар: страна + пометка сортировки */
-.brokers-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin-bottom:16px}
-.country-picker{font-size:13px;color:var(--muted)}
-.country-picker select{margin-left:6px;padding:5px 8px;font-size:13px;border:1px solid var(--line);border-radius:6px;background:var(--paper)}
-.sort-note{font-size:12px;color:var(--down);display:flex;align-items:center;gap:8px}
-.sort-note button{font-size:11px;padding:3px 8px;border:1px solid var(--line);border-radius:5px;background:var(--paper);cursor:pointer}
-
-/* Таблица (desktop) */
-.brokers-table-wrap{overflow-x:auto}
-.brokers-table{width:100%;border-collapse:collapse;font-size:15px}
-.brokers-table th{text-align:left;padding:9px 10px;background:var(--cream,#faf8f3);
-  border-bottom:2px solid var(--line);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);white-space:nowrap}
-.brokers-table th.sortable{cursor:pointer;user-select:none}
-.brokers-table th.sortable:hover{color:var(--ink)}
-.brokers-table th.active{color:var(--gold)}
-.brokers-table td{padding:10px;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.5}
-.brokers-table .col-name a{color:var(--ink);font-weight:700;text-decoration:none}
-.brokers-table .col-name a:hover{color:var(--gold)}
-.guide-link{display:block;font-size:11px;color:var(--muted);text-decoration:none;margin-top:4px}
-.guide-link:hover{color:var(--gold)}
-.entity-sub{font-size:11px;color:var(--muted);margin-top:2px}
-.loss-val{color:var(--down);font-size:14px}
-.loss-np{color:var(--muted);font-style:italic}
-.loss-disclose{font-size:13px;color:var(--muted);margin-top:4px;max-width:260px;line-height:1.5}
-.group-badge{font-size:10px;color:var(--gold);margin-top:4px;font-weight:600}
-.date-badge{font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace}
-.date-badge.stale{color:var(--down)}
-.src-link{font-size:12px;color:var(--muted);text-decoration:underline;margin-left:4px}
-.no-data{color:var(--faint,#c5baa8);font-style:italic}
-.empty-row{text-align:center;padding:30px;color:var(--muted);font-size:13px}
-
-/* Карточки (mobile) — по умолчанию скрыты, таблица скрыта на узких экранах */
-.brokers-cards{display:none}
-@media (max-width:760px){
-  .brokers-table-wrap{display:none}
-  .brokers-cards{display:block}
-  .broker-card{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:12px}
-  .bc-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-  .bc-head a{font-weight:700;font-size:15px;color:var(--ink);text-decoration:none}
-  .bc-row{display:flex;justify-content:space-between;gap:10px;font-size:15px;padding:4px 0;border-top:1px solid var(--line)}
-  .bc-row span:first-child{color:var(--muted)}
+body{
+  font-family:'Montserrat',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  background:var(--cream,#FBF6EF);
+  color:var(--ink,#2B2B33);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  line-height:1.55;
 }
 
+*{box-sizing:border-box}
 
-/* Риск-предупреждение — полная форма, тёплая подложка, не мелкий серый текст в подвале */
-.rwarn{margin-top:28px;padding:14px 18px;background:#FFF9F0;border:1px solid rgba(201,162,39,.35);border-radius:6px}
-.rwarn p{margin:0;font-size:13px;line-height:1.6;color:var(--ink)}
-.rwarn strong{color:var(--down)}
+a{color:inherit}
 
-.brokers-error{padding:30px;text-align:center;color:var(--down)}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:4px}
 
-/* Спред: пометка "по данным брокера" под значением */
-.spread-src{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.35}
-
-/* Лицензия: пометка "со слов брокера" */
-.licence-note{font-size:11px;color:var(--muted);margin-top:2px;max-width:200px;line-height:1.4}
-
-.quiz-filter-note{color:var(--gold)}
-
-/* Мобильная карточка — значение может содержать блочные элементы (лицензия, %) */
-.bc-val{text-align:right;font-size:15px}
-.bc-val .entity-sub, .bc-val .licence-note, .bc-val .loss-disclose{text-align:right;margin-left:auto}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 20px 40px}
 </style>
+<link rel="stylesheet" href="/assets/brokers.css?v=1">
 </head>
 <body>
 
 <div class="wrap" id="brokersPageRoot">
-  <h1 class="brokers-h1">{{ t('brokers.h1', lang) }}</h1>
-  <p class="brokers-sub">{{ t('brokers.subtitle', lang) }}</p>
+  <header class="brokers-hero">
+    <h1 class="brokers-h1">{{ t('brokers.h1', lang) }}</h1>
+    <!-- Подзаголовок и три «чипа доверия» удалены 14.08.2026 по решению
+         владельца: они пересказывали словами то, что видно по самой таблице. -->
+  </header>
 
   <div id="brokersTableRoot"></div>
+  {# 🔴 Таблицу сравнения рисует brokers.js, и без JS страница отдавала
+     686 знаков: юрлица, лицензии, минимальный депозит и спреды — то,
+     ради чего сюда приходят и на что ссылаются — для машины не
+     существовали. Текст собирает tools/build_text_layer.js из того же
+     partners.json БЕЛЫМ СПИСКОМ полей: в этом файле рядом с фактами
+     лежат наши служебные пометки, и обход дерева вынес бы их наружу. #}
+  {{ text_layer('brokers', lang) | safe }}
+
+  <aside class="disclosure" role="note">
+    <b>{{ t('brokers.disclosure_mark', lang) }}</b> {{ t('brokers.disclosure_revshare', lang) }}
+  </aside>
+
+  <section class="help-block" id="brokersHelp" hidden></section>
 
   <aside class="rwarn" role="note">
     <p>{{ t('brokers.risk_warning_full', lang) }}</p>
   </aside>
 </div>
 
-<script src="/assets/brokers.js?v=1" defer></script>
+<!-- Одно модальное окно на страницу, содержимое подставляет brokers.js -->
+<div class="bm" id="brokerModal" role="dialog" aria-modal="true" aria-labelledby="bmTitle" hidden>
+  <div class="bm-backdrop"></div>
+  <div class="bm-panel">
+    <div class="bm-head">
+      <h2 class="bm-title" id="bmTitle"></h2>
+      <button type="button" class="bm-close" aria-label="{{ t('brokers.m_close', lang) }}">&times;</button>
+    </div>
+    <div class="bm-body"></div>
+  </div>
+</div>
+
+<script src="/assets/brokers.js?v=16" defer></script>
 </body>
 </html>

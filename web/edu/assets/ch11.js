@@ -3,6 +3,11 @@
  * RU is the master text; RO/EN are translations in the same register as ch1-10.
  * window.Ch11Content = {ru, ro, en}.
  *
+ * [ОБНОВЛЕНО 15.09.2026] Эта пометка устарела: partners.json существует
+ * (web/data/partners.json, пять партнёров с юрлицами, лицензиями и
+ * процентом теряющих счетов), ступень построена и работает —
+ * AcademyShared.PartnerPicker. Текст ниже оставлен как след решения,
+ * но читать его как описание текущего состояния нельзя.
  * [ДОПУЩЕНИЕ] Ступень 6 (BrokerPicker + процент теряющих клиентов крупно) —
  * САМАЯ СИЛЬНАЯ ступень всей лестницы по формулировке спеки, но требует:
  * (1) partners.json, которого не существует; (2) реальные loss_pct, снятые
@@ -88,8 +93,9 @@ window.Ch11Content = {
       routeNotPublic: "Не публикуется — про этот узел снаружи не известно ничего",
       modeLabel: "Режим", modeCalm: "Спокойный рынок", modeRelease: "Момент публикации данных",
       metricDelay: "Задержка", metricSpread: "Спред", metricRequote: "Вероятность реквота",
+      metricsNote: "Величины типичные, а не наш замер: задержку до сервера площадки измеряет только сама площадка, и наружу эти числа не публикует никто. Свою задержку ты увидишь в отчёте об исполнении у брокера — вот её и сравнивай с этими порядками.",
       releaseNote: "Связка с главой 6: заявки уходят перед релизом, и это не заговор против клиента, а поведение поставщика ликвидности.",
-      finalPlate: "Ни одного микросекундного алгоритма на этой схеме нет. Зато есть два участка, где твоя издержка реальна и измерима, — и оба относятся к площадке, а не к рынку.",
+      finalPlate: "Ни одного микросекундного алгоритма на этой схеме нет. Зато есть два участка, где твоя издержка реальна, — и оба относятся к площадке, а не к рынку. Измерить их можешь ты сам: они видны в отчёте об исполнении у брокера.",
       openOnChart: "Открыть Золото на графике →",
     },
     bookModels: {
@@ -107,6 +113,20 @@ window.Ch11Content = {
       aboutUsTitle: "Про нас",
       aboutUsBody: "Мы в этой цепочке тоже стоим. SBF получает вознаграждение от площадок — процент от их комиссии, пока клиент торгует. Ноль, если он не торгует; ноль, если он потерял счёт и ушёл. Мы говорим это здесь, а не в конце: в главе про посредников умолчать о собственной роли — значит сделать ровно то, чему глава учит не доверять.",
       esmaNote: "Требование публиковать долю теряющих клиентов CFD ввёл европейский регулятор ESMA как часть мер по защите розничных инвесторов — цифра пересчитывается ежеквартально за предыдущие 12 месяцев и должна стоять в стандартном предупреждении о риске у каждого провайдера.",
+      // Разбор двух моделей. Отличать A от B на слух бесполезно; отличать их
+      // по последствию — «чей это доход» — ровно то, ради чего эта рубрика
+      // в главе и стоит.
+      sortTitle: "Разложи по моделям",
+      sortHint: "Шесть утверждений. В какой модели каждое из них верно?",
+      sortA: "A-BOOK", sortB: "B-BOOK",
+      sortItems: [
+        {text: "Заявка ушла внешнему поставщику ликвидности.", bin: 0},
+        {text: "Твой убыток становится доходом площадки.", bin: 1},
+        {text: "Площадка зарабатывает на комиссии и наценке к спреду, и ей всё равно, выиграл ты или нет.", bin: 0},
+        {text: "Площадка неттингует твою сделку со сделкой другого клиента у себя внутри.", bin: 1},
+        {text: "Площадка — вторая сторона твоей сделки.", bin: 1},
+        {text: "Доход площадки не зависит от твоего результата.", bin: 0},
+      ],
     },
     measureYourBroker: {
       tag: "ЧТО ИЗМЕРИТЬ САМОМУ",
@@ -119,8 +139,8 @@ window.Ch11Content = {
       openOnChart: "Открыть Золото на графике →",
     },
     ladderLimit: {
-      body: "Ты только что видел, что твой реальный контрагент — не абстрактный рынок, а конкретная компания с конкретной моделью дохода. Дальше логично спросить: а какая именно, и чем они отличаются между собой.\n\nВ этой главе мы не покажем сравнение площадок с цифрой процента теряющих клиентов крупно — не потому что не хотим, а потому что готовим её честно: с реальными данными по каждому партнёру, датой снятия и ссылкой на источник, без единого захардкоженного числа. Собираем это отдельно вместе с остальной инфраструктурой лестницы.",
-      pendingNote: "Инструмент сравнения площадок с процентом теряющих клиентов готовится отдельно вместе с остальной инфраструктурой лестницы — эта глава выложена без него, чтобы контент не ждал коммерческий слой.",
+      body: "Ты только что видел, что твой реальный контрагент — не абстрактный рынок, а конкретная компания с конкретной моделью дохода. Дальше логично спросить: а какая именно, и чем они отличаются между собой.\n\nНиже — три площадки из тех, с кем мы работаем, отсортированные по проценту теряющих счетов: меньше — выше. Число не наше, его публикует сам брокер по требованию регулятора; у карточки видно дату снятия и ссылку на источник. Юрлицо и плечо зависят от твоей страны — потолок задаёт юрисдикция, а не брокер.",
+      loadError: "Сравнение площадок не загрузилось — данные лежат в /brokers, там же полная таблица.",
     },
     quiz: [
       { id: "q1", section: "secWhereAreYou", prompt: "Высокочастотный алгоритм на бирже в США может перехватить твою заявку по CFD?",
@@ -224,6 +244,7 @@ window.Ch11Content = {
       routeNotPublic: "Nu se publică — despre acest nod nu se știe nimic din exterior",
       modeLabel: "Regim", modeCalm: "Piață liniștită", modeRelease: "Momentul publicării datelor",
       metricDelay: "Întârziere", metricSpread: "Spread", metricRequote: "Probabilitate de requote",
+      metricsNote: "Valorile sunt tipice, nu o măsurătoare de-a noastră: întârzierea până la serverul platformei o măsoară doar platforma, iar aceste cifre nu sunt publicate de nimeni. Propria întârziere o vezi în raportul de execuție al brokerului — cu ea compară aceste ordine de mărime.",
       releaseNote: "Legătură cu capitolul 6: ordinele se retrag înaintea unei publicații, și nu e o conspirație împotriva clientului, ci comportamentul furnizorului de lichiditate.",
       finalPlate: "Niciun algoritm de microsecunde nu apare în această schemă. În schimb, există două segmente unde costul tău e real și măsurabil — și ambele țin de platformă, nu de piață.",
       openOnChart: "Deschide Aur pe grafic →",
@@ -243,6 +264,17 @@ window.Ch11Content = {
       aboutUsTitle: "Despre noi",
       aboutUsBody: "Stăm și noi în acest lanț. SBF primește o recompensă de la platforme — un procent din comisionul lor, cât timp clientul tranzacționează. Zero, dacă nu tranzacționează; zero, dacă și-a pierdut contul și a plecat. Spunem asta aici, nu la final: într-un capitol despre intermediari, a tăcea despre propriul rol ar însemna exact ceea ce capitolul te învață să nu ai încredere.",
       esmaNote: "Cerința de a publica ponderea clienților CFD care pierd bani a fost introdusă de reglementatorul european ESMA ca parte a măsurilor de protecție a investitorilor retail — cifra se recalculează trimestrial pentru ultimele 12 luni și trebuie să apară în avertismentul standard de risc al fiecărui furnizor.",
+      sortTitle: "Repartizează pe modele",
+      sortHint: "Șase afirmații. În care model este adevărată fiecare?",
+      sortA: "A-BOOK", sortB: "B-BOOK",
+      sortItems: [
+        {text: "Ordinul a plecat către un furnizor extern de lichiditate.", bin: 0},
+        {text: "Pierderea ta devine venitul platformei.", bin: 1},
+        {text: "Platforma câștigă din comision și din adaosul la spread, iar rezultatul tău nu o afectează.", bin: 0},
+        {text: "Platforma compensează intern tranzacția ta cu cea a altui client.", bin: 1},
+        {text: "Platforma este contrapartea tranzacției tale.", bin: 1},
+        {text: "Venitul platformei nu depinde de rezultatul tău.", bin: 0},
+      ],
     },
     measureYourBroker: {
       tag: "CE SĂ MĂSORI SINGUR",
@@ -257,8 +289,8 @@ window.Ch11Content = {
       multiplierResultLabel: "ori mai larg decât normal",
     },
     ladderLimit: {
-      body: "Tocmai ai văzut că adevărata ta contraparte nu e o piață abstractă, ci o companie concretă cu un model de venit concret. Următoarea întrebare logică e: care anume, și prin ce diferă între ele.\n\nÎn acest capitol nu arătăm o comparație a platformelor cu cifra procentului de clienți care pierd afișată mare — nu pentru că nu vrem, ci pentru că o pregătim cinstit: cu date reale pentru fiecare partener, dată de preluare și link către sursă, fără nicio cifră fixată în cod. O strângem separat, împreună cu restul infrastructurii de parteneriat.",
-      pendingNote: "Instrumentul de comparare a platformelor cu procentul de clienți care pierd se pregătește separat, împreună cu restul infrastructurii de parteneriat — acest capitol e publicat fără el, ca conținutul să nu aștepte stratul comercial.",
+      body: "Tocmai ai văzut că adevărata ta contraparte nu e o piață abstractă, ci o companie concretă cu un model de venit concret. Următoarea întrebare logică e: care anume, și prin ce diferă între ele.\n\nMai jos — trei platforme dintre cele cu care lucrăm, sortate după procentul de conturi care pierd: mai puțin înseamnă mai sus. Cifra nu e a noastră, o publică brokerul însuși la cererea reglementatorului; pe card se vede data preluării și linkul spre sursă. Entitatea juridică și levierul depind de țara ta — plafonul îl dă jurisdicția, nu brokerul.",
+      loadError: "Comparația platformelor nu s-a încărcat — datele sunt în /brokers, unde e și tabelul complet.",
     },
     quiz: [
       { id: "q1", section: "secWhereAreYou", prompt: "Un algoritm de mare frecvență de pe o bursă din SUA îți poate intercepta ordinul CFD?",
@@ -362,6 +394,7 @@ window.Ch11Content = {
       routeNotPublic: "Not published — nothing about this node is known from outside",
       modeLabel: "Mode", modeCalm: "Calm market", modeRelease: "Moment of a data release",
       metricDelay: "Delay", metricSpread: "Spread", metricRequote: "Requote probability",
+      metricsNote: "These are typical magnitudes, not our measurement: only the venue itself measures the delay to its server, and nobody publishes those numbers. Your own delay shows up in your broker's execution report — compare that against these orders of magnitude.",
       releaseNote: "Ties back to chapter 6: orders pull back ahead of a release, and that isn't a conspiracy against the client — it's how a liquidity provider behaves.",
       finalPlate: "There isn't a single microsecond algorithm anywhere on this diagram. What there is: two spots where your cost is real and measurable — and both belong to the platform, not the market.",
       openOnChart: "Open Gold on the chart →",
@@ -381,6 +414,17 @@ window.Ch11Content = {
       aboutUsTitle: "About us",
       aboutUsBody: "We stand in this chain too. SBF gets paid by platforms — a percentage of their commission, for as long as the client keeps trading. Zero if they don't trade; zero if they blow the account and leave. We're saying this here, not at the end: staying silent about our own role in a chapter about intermediaries would be doing exactly what this chapter teaches you not to trust.",
       esmaNote: "The requirement to publish the share of losing CFD clients was introduced by the European regulator ESMA as part of its retail-investor protection measures — the figure gets recalculated every quarter over the trailing 12 months and has to appear in every provider's standard risk warning.",
+      sortTitle: "Sort them into models",
+      sortHint: "Six statements. Which model is each one true in?",
+      sortA: "A-BOOK", sortB: "B-BOOK",
+      sortItems: [
+        {text: "The order went out to an external liquidity provider.", bin: 0},
+        {text: "Your loss becomes the venue's revenue.", bin: 1},
+        {text: "The venue earns on commission and spread markup, and your result makes no difference to it.", bin: 0},
+        {text: "The venue nets your trade against another client's internally.", bin: 1},
+        {text: "The venue is the other side of your trade.", bin: 1},
+        {text: "The venue's revenue does not depend on your result.", bin: 0},
+      ],
     },
     measureYourBroker: {
       tag: "WHAT TO MEASURE YOURSELF",
@@ -395,8 +439,8 @@ window.Ch11Content = {
       multiplierResultLabel: "x wider than normal",
     },
     ladderLimit: {
-      body: "You just saw that your real counterparty isn't an abstract market — it's a specific company with a specific revenue model. The logical next question is: which one, exactly, and how do they differ from each other.\n\nThis chapter doesn't show a platform comparison with a big, prominent losing-client percentage — not because we don't want to, but because we're preparing it honestly: with real data per partner, a capture date, and a source link, without a single hardcoded number. We're building that separately, alongside the rest of the ladder infrastructure.",
-      pendingNote: "The platform-comparison tool with the losing-client percentage is being prepared separately, alongside the rest of the partner infrastructure — this chapter is published without it so the content doesn't wait on the commercial layer.",
+      body: "You just saw that your real counterparty isn't an abstract market — it's a specific company with a specific revenue model. The logical next question is: which one, exactly, and how do they differ from each other.\n\nBelow are three of the platforms we work with, sorted by the percentage of losing accounts: lower is higher up. The number isn't ours — the broker publishes it because the regulator requires it; the card shows the date it was taken and a link to the source. The legal entity and the leverage cap depend on your country: the cap is set by the jurisdiction, not by the broker.",
+      loadError: "The platform comparison failed to load — the data lives at /brokers, along with the full table.",
     },
     quiz: [
       { id: "q1", section: "secWhereAreYou", prompt: "Can a high-frequency algorithm on a US exchange intercept your CFD order?",

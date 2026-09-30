@@ -2,16 +2,39 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
+{# canonical + hreflang: сервер знает, что у курса локаль идёт
+   после /edu, а у остальных — перед; см. serve.py:_alt_links #}
+{{ alt_links('/edu/', lang) | safe }}
+{# Курс и пятнадцать глав списком: краулер видит структуру, не угадывая
+   её по ссылкам, которые рисует JS. Заголовки — из i18n, не из копии. #}
+{{ schema_ld('course', lang) | safe }}
+{{ page_meta(t('eduindex.page_title', lang), '', '/edu/', lang,
+             t('eduindex.page_description', lang)) | safe }}
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title data-i18n="eduindex.page_title">SBF — Биржевая торговля: руководство</title>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="SBF Intelligence">
+<meta property="og:image" content="https://lp.sbfconsult.com/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://lp.sbfconsult.com/assets/og-image.png">
 <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
 <link rel="alternate icon" type="image/png" href="/assets/favicon.png">
 <link rel="apple-touch-icon" href="/assets/icons/icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/design.css">
-<link rel="stylesheet" href="/edu/edu.css">
+<link rel="stylesheet" href="/assets/design.css?v=20260909">
+<link rel="stylesheet" href="/edu/edu.css?v=20260903b">
 <script src="/assets/i18n.js?v=2" defer></script>
-<script src="/assets/sbf-header.js?v=16" defer></script>
+<!-- 🔴 Справочник имён инструментов. Его тут не было вовсе, и лента в шапке
+     на /ro/edu и /en/edu оставалась русской: «ЗОЛОТО / СЕРЕБРО / СОЛАНА»
+     под румынским интерфейсом (Л-4 языкового аудита 17.09). На главной и
+     на chart.html файл подключён — оттуда и разница, которую отчёт увидел
+     как «шаблон edu не получает локаль виджета». Локаль он получал; не
+     получал словаря. Без defer — sbf-header.js читает window.SBFSymbols
+     при построении ленты. -->
+<script src="/assets/sbf-symbols.js?v=2"></script>
+<script src="/assets/sbf-header.js?v=23" defer></script>
 <script src="/assets/sbf-auth.js?v=1" defer></script>
 <script src="/assets/sbf-anon.js"></script>
 <style>
@@ -26,11 +49,11 @@ body{min-height:100vh;padding-bottom:40px}
 .top b{font-size:14px;font-weight:700;letter-spacing:.3px}
 .top .back{margin-left:auto;font-family:'JetBrains Mono';font-size:11px;
   color:var(--muted);text-decoration:none;letter-spacing:.5px}
-.top .back:hover{color:var(--gold)}
+.top .back:hover{color:var(--gold-text,#866A19)}
 
 .hero{padding:48px 24px 36px;text-align:center;max-width:680px;margin:0 auto}
 .hero .tag{font-family:'JetBrains Mono';font-size:10px;letter-spacing:2px;
-  text-transform:uppercase;color:var(--gold);margin-bottom:12px}
+  text-transform:uppercase;color:var(--gold-text,#866A19);margin-bottom:12px}
 .hero h1{font-size:clamp(26px,5vw,38px);font-weight:700;color:var(--ink);
   line-height:1.2;margin-bottom:14px}
 .hero p{color:var(--muted);font-size:14px;line-height:1.7}
@@ -46,7 +69,7 @@ body{min-height:100vh;padding-bottom:40px}
 .progress-wrap .bar-fill{height:100%;background:var(--gold);border-radius:3px;
   transition:width .4s}
 .progress-wrap .pct{font-family:'JetBrains Mono';font-weight:700;font-size:13px;
-  color:var(--gold)}
+  color:var(--gold-text,#866A19)}
 .progress-wrap .reset{font-family:'JetBrains Mono';font-size:10px;color:var(--muted);
   border:none;background:none;cursor:pointer;text-decoration:underline;
   text-underline-offset:3px}
@@ -61,7 +84,7 @@ body{min-height:100vh;padding-bottom:40px}
 .ch.done{border-color:rgba(30,142,90,.3)}
 .ch.done::after{content:'✓';position:absolute;right:16px;
   color:var(--up);font-weight:700;font-size:14px}
-.ch .num{font-family:'JetBrains Mono';font-size:11px;color:var(--gold);
+.ch .num{font-family:'JetBrains Mono';font-size:11px;color:var(--gold-text,#866A19);
   font-weight:700;min-width:28px;letter-spacing:.5px}
 .ch .title{font-weight:600;font-size:14px;line-height:1.3}
 .ch .sub{font-size:11px;color:var(--muted);margin-top:2px}
@@ -150,6 +173,36 @@ function t(key, fallback) {
   return i ? i.t(key, fallback) : (fallback || key);
 }
 
+/* Адрес во «своей» локали. По той же причине, что и t() выше, спрашиваем
+   window.sbfI18n при каждом вызове, а не при загрузке: на момент первого
+   render() его ещё нет. Пока нет — берём язык прямо из адресной строки,
+   а не отдаём русский путь молча. */
+function ЛОК(путь) {
+  var i = window.sbfI18n;
+  if (i && i.url) return i.url(путь);
+  var л = (location.pathname.match(/^\/(ro|en)(\/|$)/) || [])[1];
+  if (!л || !путь) return путь;
+  var м = путь.match(/^\/edu\/b(\/.*)?$/);
+  return м ? '/edu/' + л + '/b' + (м[1] || '') : '/' + л + путь;
+}
+
+/* Разметка страницы статическая (сервер её не рендерит), поэтому карточки
+   разделов и нижний нав держат русские адреса прямо в HTML: «/#tech»,
+   «/calendar», «/edu/glossary». На /ro/edu/ они уводили в русскую версию
+   (Л-6). Проходим по ним один раз после загрузки — список селекторов
+   намеренно узкий, чтобы не задеть переключатель языка, которому уводить
+   в другую локаль и положено. */
+function локализоватьСсылки() {
+  if (!/^\/(ro|en)(\/|$)/.test(location.pathname)) return;
+  document.querySelectorAll('.g-bottom-nav a[href^="/"], a.ch[href^="/"]')
+    .forEach(function (a) {
+      var б = a.getAttribute('href');
+      var н = ЛОК(б);
+      if (н !== б) a.setAttribute('href', н);
+    });
+}
+document.addEventListener('DOMContentLoaded', локализоватьСсылки);
+
 function _patchI18n(root) {
   if ((window.sbfI18n && window.sbfI18n.lang) === 'ru') return;
   var tt = window.sbfI18n ? window.sbfI18n.t : function (k, fb) { return fb || k; };
@@ -231,11 +284,14 @@ function render() {
   toc.innerHTML = CHAPTERS.map(c => {
     const isDone = !!(_progress[c.n] && _progress[c.n].is_completed);
     const tierBadge = c.tier === 'pro'
-      ? `<span style="font-family:'JetBrains Mono';font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--gold);border:1px solid var(--gold);padding:1px 6px;border-radius:4px;margin-left:8px;opacity:.7">PRO</span>`
+      ? `<span style="font-family:'JetBrains Mono';font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--gold-text,#866A19);border:1px solid var(--gold);padding:1px 6px;border-radius:4px;margin-left:8px;opacity:.7">PRO</span>`
       : '';
     const chapterTitle = t('eduindex.chapters.' + c.n + '.title', c.title);
     const chapterSub = t('eduindex.chapters.' + c.n + '.sub', c.sub);
-    return `<a class="ch${isDone ? ' done' : ''}" href="/edu/b/${c.n}">
+    // 🔴 Адрес главы в текущей локали: на /ro/edu/ карточки вели на
+    // «/edu/b/N» — русскую главу (Л-6), а локаль у курса ставится
+    // после /edu (/edu/ro/b/N), поэтому просто префикс не годится.
+    return `<a class="ch${isDone ? ' done' : ''}" href="${ЛОК(`/edu/b/${c.n}`)}">
       <span class="ico">${c.ico}</span>
       <div>
         <div class="num">${t('eduindex.chapter_label', 'Глава')} ${c.n.toString().padStart(2,'0')}${tierBadge}</div>

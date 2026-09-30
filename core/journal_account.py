@@ -4,12 +4,15 @@ Single-user SQLite adaptation of the PostgreSQL spec §10.
 """
 
 import json
+import logging
 import secrets
 import string
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 import sqlite3
+
+log = logging.getLogger("journal_account")
 
 DB_PATH = Path(__file__).parent.parent / "data" / "journal.db"
 
@@ -83,7 +86,13 @@ def ensure_schema() -> None:
         CREATE TABLE IF NOT EXISTS broker_links (
             id             INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id        TEXT NOT NULL DEFAULT 'default',
-            broker         TEXT NOT NULL CHECK(broker IN ('avatrade','naga')),
+            -- 🔴 Список обязан совпадать с VALID_BROKERS выше. Он разошёлся
+            -- однажды: кортеж в Python расширили до пяти партнёров, а CHECK
+            -- остался на двух, и привязка счёта XM/FxPro/InstaForex падала —
+            -- при том что проверка на входе её пропускала. Меняешь одно —
+            -- меняй другое, иначе база и код снова разойдутся молча.
+            broker         TEXT NOT NULL
+                           CHECK(broker IN ('avatrade','naga','xm','fxpro','instaforex')),
             account_number TEXT NOT NULL,
             status         TEXT NOT NULL DEFAULT 'pending_verification',
             linked_at      TEXT,
@@ -99,6 +108,40 @@ def ensure_schema() -> None:
             scheduled_hard_delete_at TEXT NOT NULL
         );
         """)
+
+        # 🔴 CREATE TABLE IF NOT EXISTS не меняет уже созданную таблицу, а
+        # ALTER TABLE в SQLite не умеет менять CHECK. Поэтому расширение
+        # списка брокеров в схеме выше на существующей базе не сработает
+        # само: там останется старое ограничение на двух партнёров, и
+        # привязка счёта XM будет падать ровно так же. Единственный путь —
+        # пересоздать таблицу и перенести строки.
+        стар = conn.execute(
+            "SELECT sql FROM sqlite_master WHERE type='table' AND name='broker_links'"
+        ).fetchone()
+        if стар and "'xm'" not in (стар[0] or ""):
+            log.info("broker_links: мигрирую CHECK под %d партнёров", len(VALID_BROKERS))
+            conn.executescript("""
+            PRAGMA foreign_keys=off;
+            BEGIN;
+            CREATE TABLE broker_links__new (
+                id             INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id        TEXT NOT NULL DEFAULT 'default',
+                broker         TEXT NOT NULL
+                               CHECK(broker IN ('avatrade','naga','xm','fxpro','instaforex')),
+                account_number TEXT NOT NULL,
+                status         TEXT NOT NULL DEFAULT 'pending_verification',
+                linked_at      TEXT,
+                UNIQUE(user_id, broker, account_number)
+            );
+            INSERT INTO broker_links__new (id, user_id, broker, account_number, status, linked_at)
+                SELECT id, user_id, broker, account_number, status, linked_at FROM broker_links;
+            DROP TABLE broker_links;
+            ALTER TABLE broker_links__new RENAME TO broker_links;
+            CREATE INDEX IF NOT EXISTS idx_broker_links_lookup
+                ON broker_links(broker, account_number);
+            COMMIT;
+            PRAGMA foreign_keys=on;
+            """)
         conn.commit()
     finally:
         conn.close()
@@ -297,8 +340,21 @@ def add_broker_link(user_id: str = "default",
                 (user_id, broker, account_number)
             )
             conn.commit()
-        except sqlite3.IntegrityError:
-            return {"error": "Эта связка уже существует"}
+        except sqlite3.IntegrityError as e:
+            # 🔴 IntegrityError — не синоним дубликата. Нарушение CHECK
+            # (брокер не из списка) прилетает тем же исключением, и
+            # пользователь, впервые привязывающий счёт XM, получал ответ
+            # «Эта связка уже существует» — сообщение, по которому ни он, ни
+            # поддержка не догадаются, что дело в схеме базы. Ровно та же
+            # ошибка уже случалась в journal_db.add_trade.
+            текст = str(e)
+            if "UNIQUE" in текст.upper():
+                return {"error": "Эта связка уже существует"}
+            if "CHECK" in текст.upper():
+                log.error("broker_links: схема не принимает брокера %r — "
+                          "CHECK в базе разошёлся с VALID_BROKERS (%s)", broker, текст)
+                return {"error": "Этот брокер пока не принимается — мы уже знаем об этом"}
+            raise
         row = conn.execute(
             "SELECT * FROM broker_links WHERE user_id=? AND broker=? AND account_number=?",
             (user_id, broker, account_number)

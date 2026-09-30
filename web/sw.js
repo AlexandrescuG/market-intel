@@ -1,7 +1,7 @@
 /* SBF Journal — Service Worker (PWA + Web Push) */
 'use strict';
 
-const CACHE_NAME = 'sbf-v8';
+const CACHE_NAME = 'sbf-v9';
 const APP_SHELL = [
   '/journal.html',
   '/assets/design.css',
@@ -78,24 +78,23 @@ self.addEventListener('fetch', function (e) {
     return;
   }
 
-  // Прочая статика (JS/CSS/иконки) — stale-while-revalidate, как раньше:
-  // отдать закэшированное сразу для скорости, обновить кэш в фоне. Эти файлы
-  // версионируются через ?v=N в самих тегах (см. sbf-header.js и т.п.), так
-  // что подмена содержимого без смены URL здесь не так критична, как для HTML.
+  // Прочая статика (JS/CSS/иконки) — NETWORK-FIRST, кэш только офлайн-фоллбек.
+  // Раньше было stale-while-revalidate («отдать кэш сразу, обновить в фоне на
+  // следующий раз»), с обоснованием «файлы версионируются через ?v=N». Но
+  // ключевые файлы (grafik-engine.js) подключаются БЕЗ ?v= — их правки не
+  // доходили до пользователя бесконечно: старый движок → нет живого чарта, не
+  // грузится M1/M5, старые баги форматирования. Свежесть кода важнее экономии
+  // одной сетевой загрузки; офлайн по-прежнему отдаётся из кэша.
   if (e.request.method === 'GET') {
     e.respondWith(
-      caches.open(CACHE_NAME).then(function (cache) {
-        return cache.match(e.request).then(function (cached) {
-          var networkFetch = fetch(e.request).then(function (response) {
-            if (response && response.status === 200) {
-              cache.put(e.request, response.clone());
-            }
-            return response;
-          }).catch(function () {
-            return cached;
-          });
-          return cached || networkFetch;
-        });
+      fetch(e.request).then(function (response) {
+        if (response && response.status === 200) {
+          var copy = response.clone();
+          caches.open(CACHE_NAME).then(function (cache) { cache.put(e.request, copy); });
+        }
+        return response;
+      }).catch(function () {
+        return caches.open(CACHE_NAME).then(function (cache) { return cache.match(e.request); });
       })
     );
   }

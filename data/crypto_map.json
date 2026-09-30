@@ -1,0 +1,23 @@
+{
+  "_описание": "Инструмент каталога -> пары на биржах. Заполняется руками и осознанно: тихий фолбэк «возьмём имя как есть» однажды подставил бы фонду #XRP график монеты XRP. Пустой gate/binance означает «на этой бирже пары нет», а не «не проверяли» — проверено живыми запросами 07.09.2026.",
+  "SHIBUSD":    {"binance": "SHIBUSDT",   "gate": "SHIB_USDT",    "коммент": "у брокера котировка не обновлялась 121 день"},
+  "BTGUSD":     {"binance": null,          "gate": "BTG_USDT",     "коммент": "Binance держит пару в статусе BREAK и отдаёт цену из окт-2022; Gate — единственная из восьми бирж с живым BTG"},
+  "ETHBTC":     {"binance": "ETHBTC",      "gate": "ETH_BTC",      "коммент": "кросс-курс, у брокера баров нет"},
+  "MELANIAUSD": {"binance": null,          "gate": "MELANIA_USDT", "коммент": "на Binance пары нет вовсе"},
+  "PAX_GOLD":   {"binance": "PAXGUSDT",    "gate": "PAXG_USDT",    "коммент": "токенизированное золото"},
+
+  "_запас": "Ниже — монеты, живые и у брокера. Здесь они как второе мнение: если брокерский фид замрёт, пуллер подхватит биржу, и это не потребует новой правки кода.",
+  "BTCUSD":   {"binance": "BTCUSDT",   "gate": "BTC_USDT"},
+  "ETHUSD":   {"binance": "ETHUSDT",   "gate": "ETH_USDT"},
+  "XRPUSD":   {"binance": "XRPUSDT",   "gate": "XRP_USDT"},
+  "LTCUSD":   {"binance": "LTCUSDT",   "gate": "LTC_USDT"},
+  "BCHUSD":   {"binance": "BCHUSDT",   "gate": "BCH_USDT"},
+  "LINKUSD":  {"binance": "LINKUSDT",  "gate": "LINK_USDT"},
+  "UNIUSD":   {"binance": "UNIUSDT",   "gate": "UNI_USDT"},
+  "DOGEUSD":  {"binance": "DOGEUSDT",  "gate": "DOGE_USDT"},
+  "SOLUSD":   {"binance": "SOLUSDT",   "gate": "SOL_USDT"},
+  "XLMUSD":   {"binance": "XLMUSDT",   "gate": "XLM_USDT"},
+  "PEPEUSD":  {"binance": "PEPEUSDT",  "gate": "PEPE_USDT"},
+  "TRUMPUSD": {"binance": "TRUMPUSDT", "gate": "TRUMP_USDT"},
+  "MATICUSD": {"binance": null,        "gate": "POL_USDT",     "коммент": "MATIC переименован в POL; на Binance пара MATICUSDT остановлена"}
+}

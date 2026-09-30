@@ -2,8 +2,15 @@
 <html lang="{{ lang }}">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>SBF | {% if lang == 'ru' %}Глава 4. Ликвидность и Механика Ордеров{% elif lang == 'ro' %}Capitolul 4. Lichiditate și Mecanica Ordinelor{% else %}Chapter 4. Liquidity and Order Mechanics{% endif %}</title>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="SBF Intelligence">
+<meta property="og:image" content="https://lp.sbfconsult.com/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://lp.sbfconsult.com/assets/og-image.png">
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/edu/assets/history.css">
@@ -19,7 +26,7 @@
     .ch4-flow-line{position:absolute;left:9%;right:9%;top:24px;height:1px;background:rgba(255,255,255,0.15);z-index:0}
     .ch4-flow-step{flex:1 1 0;min-width:0;text-align:center;position:relative;z-index:1;padding:0 4px}
     .ch4-flow-badge{width:48px;height:48px;border-radius:50%;background:#18181a;border:1px solid rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;margin:0 auto 8px;font-size:22px}
-    .ch4-flow-num{display:none;font-family:monospace;font-weight:700;font-size:11px;color:#c9973a;margin-right:3px}
+    .ch4-flow-num{display:none;font-family:monospace;font-weight:700;font-size:11px;color:var(--ch-gold,#876525);margin-right:3px}
     @media(max-width:768px){
       .ch4-flow{flex-direction:column;align-items:flex-start;gap:22px;padding-left:4px}
       .ch4-flow-line{left:28px;right:auto;top:14px;bottom:14px;width:1px;height:auto}
@@ -629,10 +636,10 @@ function MarketDepthSimulator() {
       <div style={{background:C.black,borderRadius:8,padding:"36px 40px",color:C.white}}>
         <StepTag n="3" label={S.stepDo}/>
         <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:20}}>
-          <span style={{display:"inline-flex"}}><Icon name="bar-chart" size={24} color={C.gold}/></span>
+          <span style={{display:"inline-flex"}}><Icon name="bar-chart" size={24} color={C.goldText}/></span>
           <div>
-            <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.gold}}>{S.mdTitle}</div>
-            <Mono size={11} color="rgba(255,255,255,0.4)" spacing={2}>{S.mdTag}</Mono>
+            <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.goldText}}>{S.mdTitle}</div>
+            <Mono size={11} color="rgba(255,255,255,0.55)" spacing={2}>{S.mdTag}</Mono>
           </div>
         </div>
 
@@ -644,7 +651,7 @@ function MarketDepthSimulator() {
                 background:mode===m?"rgba(201,151,58,0.15)":"rgba(255,255,255,0.04)",
                 border:mode===m?`1px solid ${C.gold}`:"1px solid rgba(255,255,255,0.08)",color:"#fff",fontFamily:"'DM Sans',sans-serif"}}>
               <div style={{fontWeight:600,fontSize:13,display:"flex",alignItems:"center",gap:6}}><Icon name={ds.presets[m].icon} size={16}/> {ds.presets[m].label}</div>
-              <div style={{fontSize:11,color:"rgba(255,255,255,0.4)",marginTop:3}}>{ds.presets[m].desc}</div>
+              <div style={{fontSize:11,color:"rgba(255,255,255,0.55)",marginTop:3}}>{ds.presets[m].desc}</div>
             </button>
           ))}
         </div>
@@ -654,30 +661,30 @@ function MarketDepthSimulator() {
           {/* Order Book */}
           <div style={{background:"rgba(255,255,255,0.04)",borderRadius:6,overflow:"hidden"}}>
             <div style={{padding:"10px 14px",borderBottom:"1px solid rgba(255,255,255,0.08)",display:"grid",gridTemplateColumns:"70px 1fr 40px",gap:8}}>
-              {[S.colPrice,S.colVolume,S.colCount].map(h => <Mono key={h} size={9} color="rgba(255,255,255,0.3)" spacing={0}>{h}</Mono>)}
+              {[S.colPrice,S.colVolume,S.colCount].map(h => <Mono key={h} size={9} color="rgba(255,255,255,0.55)" spacing={0}>{h}</Mono>)}
             </div>
             {[...asks].reverse().map((a,i) => (
               <div key={i} style={{padding:"5px 14px",display:"grid",gridTemplateColumns:"70px 1fr 40px",gap:8,alignItems:"center",position:"relative"}}>
                 <div style={{position:"absolute",right:0,top:0,bottom:0,background:`rgba(242,54,69,${a.v/maxVol*0.25})`,transition:"all .4s"}}/>
-                <Mono size={12} color={C.chartRed} spacing={0} style={{position:"relative"}}>{a.p.toFixed(2)}</Mono>
+                <Mono size={12} color={C.chartRedText} spacing={0} style={{position:"relative"}}>{a.p.toFixed(2)}</Mono>
                 <div style={{height:6,background:"rgba(255,255,255,0.06)",borderRadius:2,position:"relative",overflow:"hidden"}}>
                   <div style={{position:"absolute",right:0,top:0,height:"100%",width:`${a.v/maxVol*100}%`,background:"rgba(242,54,69,0.5)",transition:"width .5s"}}/>
                 </div>
-                <Mono size={11} color="rgba(255,255,255,0.4)" spacing={0}>{a.v}</Mono>
+                <Mono size={11} color="rgba(255,255,255,0.55)" spacing={0}>{a.v}</Mono>
               </div>
             ))}
             <div style={{padding:"8px 14px",background:"rgba(201,151,58,0.1)",borderTop:"1px solid rgba(201,151,58,0.2)",borderBottom:"1px solid rgba(201,151,58,0.2)",textAlign:"center"}}>
-              <Mono size={10} color={C.gold} spacing={1}>{S.spreadLabel}{spread}</Mono>
-              <div style={{fontFamily:"'DM Serif Display',serif",fontSize:20,color:flash==='up'?C.chartGreen:flash==='down'?C.chartRed:C.white,transition:"color .2s",marginTop:2}}>{marketPrice.toFixed(2)}</div>
+              <Mono size={10} color={C.goldText} spacing={1}>{S.spreadLabel}{spread}</Mono>
+              <div style={{fontFamily:"'DM Serif Display',serif",fontSize:20,color:flash==='up'?C.chartGreenText:flash==='down'?C.chartRedText:C.white,transition:"color .2s",marginTop:2}}>{marketPrice.toFixed(2)}</div>
             </div>
             {bids.map((b,i) => (
               <div key={i} style={{padding:"5px 14px",display:"grid",gridTemplateColumns:"70px 1fr 40px",gap:8,alignItems:"center",position:"relative"}}>
                 <div style={{position:"absolute",left:0,top:0,bottom:0,background:`rgba(8,153,129,${b.v/maxVol*0.2})`,transition:"all .4s"}}/>
-                <Mono size={12} color={C.chartGreen} spacing={0} style={{position:"relative"}}>{b.p.toFixed(2)}</Mono>
+                <Mono size={12} color={C.chartGreenText} spacing={0} style={{position:"relative"}}>{b.p.toFixed(2)}</Mono>
                 <div style={{height:6,background:"rgba(255,255,255,0.06)",borderRadius:2,position:"relative",overflow:"hidden"}}>
                   <div style={{position:"absolute",left:0,top:0,height:"100%",width:`${b.v/maxVol*100}%`,background:"rgba(8,153,129,0.5)",transition:"width .5s"}}/>
                 </div>
-                <Mono size={11} color="rgba(255,255,255,0.4)" spacing={0}>{b.v}</Mono>
+                <Mono size={11} color="rgba(255,255,255,0.55)" spacing={0}>{b.v}</Mono>
               </div>
             ))}
           </div>
@@ -689,23 +696,23 @@ function MarketDepthSimulator() {
               <p style={{fontSize:13,color:"rgba(255,255,255,0.6)",lineHeight:1.75,marginBottom:16}}>{presetMeta.desc}</p>
               {mode !== "normal" && (
                 <div style={{padding:"10px 14px",background:"rgba(201,151,58,0.08)",border:`1px solid ${C.borderGold}`,borderRadius:4}}>
-                  <p style={{fontSize:12,color:C.gold,margin:0}}>{mode==="cpi" ? ds.taskCpi : ds.taskAsia}</p>
+                  <p style={{fontSize:12,color:C.goldText,margin:0}}>{mode==="cpi" ? ds.taskCpi : ds.taskAsia}</p>
                 </div>
               )}
             </div>
 
             <div style={{background:"rgba(255,255,255,0.04)",borderRadius:4,padding:"16px",marginTop:16}}>
-              <Mono size={10} color="rgba(255,255,255,0.3)" spacing={1} style={{display:"block",marginBottom:10}}>{S.spreadVizLabel}</Mono>
+              <Mono size={10} color="rgba(255,255,255,0.55)" spacing={1} style={{display:"block",marginBottom:10}}>{S.spreadVizLabel}</Mono>
               <div style={{position:"relative",height:40}}>
                 <div style={{position:"absolute",left:0,right:0,top:"50%",height:2,background:"rgba(255,255,255,0.1)"}}/>
                 <div style={{position:"absolute",left:0,top:0,bottom:0,width:`${spreadPct}%`,background:"rgba(8,153,129,0.3)",border:"1px solid rgba(8,153,129,0.5)",borderRadius:"4px 0 0 4px",display:"flex",alignItems:"center",justifyContent:"center",transition:"width .5s"}}>
-                  <Mono size={10} color={C.chartGreen} spacing={0}>BID {bids[0].p.toFixed(2)}</Mono>
+                  <Mono size={10} color={C.chartGreenText} spacing={0}>BID {bids[0].p.toFixed(2)}</Mono>
                 </div>
                 <div style={{position:"absolute",left:`${spreadPct}%`,width:`${100-spreadPct*2}%`,top:0,bottom:0,display:"flex",alignItems:"center",justifyContent:"center",transition:"all .5s"}}>
                   <Mono size={9} color={mode!=="normal"?"#e74c3c":C.gold} spacing={0} style={{fontWeight:700}}>{S.spreadWordLower}</Mono>
                 </div>
                 <div style={{position:"absolute",right:0,top:0,bottom:0,width:`${spreadPct}%`,background:"rgba(242,54,69,0.3)",border:"1px solid rgba(242,54,69,0.5)",borderRadius:"0 4px 4px 0",display:"flex",alignItems:"center",justifyContent:"center",transition:"width .5s"}}>
-                  <Mono size={10} color={C.chartRed} spacing={0}>ASK {asks[asks.length-1].p.toFixed(2)}</Mono>
+                  <Mono size={10} color={C.chartRedText} spacing={0}>ASK {asks[asks.length-1].p.toFixed(2)}</Mono>
                 </div>
               </div>
             </div>
@@ -713,22 +720,22 @@ function MarketDepthSimulator() {
 
           {/* Last Trades */}
           <div style={{background:"rgba(255,255,255,0.04)",borderRadius:6,padding:"14px"}}>
-            <Mono size={9} color="rgba(255,255,255,0.3)" spacing={1} style={{display:"block",marginBottom:10}}>{S.tapeLabel}</Mono>
+            <Mono size={9} color="rgba(255,255,255,0.55)" spacing={1} style={{display:"block",marginBottom:10}}>{S.tapeLabel}</Mono>
             {book.tape.map((t,i) => (
               <div key={i} style={{display:"flex",justifyContent:"space-between",padding:"5px 0",borderBottom:"1px solid rgba(255,255,255,0.05)",fontSize:11,fontFamily:"monospace"}}>
-                <span style={{color:t.side==="buy"?C.chartGreen:C.chartRed}}>{t.p}</span>
-                <span style={{color:"rgba(255,255,255,0.35)"}}>{t.v}</span>
-                <span style={{color:"rgba(255,255,255,0.2)"}}>{t.t}</span>
+                <span style={{color:t.side==="buy"?C.chartGreenText:C.chartRedText}}>{t.p}</span>
+                <span style={{color:"rgba(255,255,255,0.55)"}}>{t.v}</span>
+                <span style={{color:"rgba(255,255,255,0.55)"}}>{t.t}</span>
               </div>
             ))}
-            <div style={{marginTop:12,fontSize:11,color:"rgba(255,255,255,0.3)",lineHeight:1.6}}>
-              <span style={{color:C.chartGreen}}>█</span> buy market<br/>
-              <span style={{color:C.chartRed}}>█</span> sell market
+            <div style={{marginTop:12,fontSize:11,color:"rgba(255,255,255,0.55)",lineHeight:1.6}}>
+              <span style={{color:C.chartGreenText}}>█</span> buy market<br/>
+              <span style={{color:C.chartRedText}}>█</span> sell market
             </div>
           </div>
         </div>
 
-        <p style={{fontSize:12,color:"rgba(255,255,255,0.35)",marginTop:20,fontStyle:"italic"}}>{ds.calibrationNote}</p>
+        <p style={{fontSize:12,color:"rgba(255,255,255,0.55)",marginTop:20,fontStyle:"italic"}}>{ds.calibrationNote}</p>
       </div>
       <p style={{fontSize:12.5,color:C.inkSoft,marginTop:14,maxWidth:780}}>{ds.afterNote}</p>
     </div>
@@ -849,8 +856,8 @@ function PendingOrderScheme() {
 
   return (
     <div style={{background:C.black,borderRadius:6,padding:"28px 32px",marginBottom:56,overflow:"hidden"}}>
-      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:16}}>{S.pendingDiagramLabel}</Mono>
-      <p style={{fontSize:12,color:"rgba(255,255,255,0.45)",marginBottom:14}}>{P.hint}</p>
+      <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:16}}>{S.pendingDiagramLabel}</Mono>
+      <p style={{fontSize:12,color:"rgba(255,255,255,0.55)",marginBottom:14}}>{P.hint}</p>
       <div ref={containerRef} data-source="/data/ohlc_GOLD_M30.json" style={{minHeight:240}}/>
       {(above || below) && (
         <p style={{fontSize:12.5,color:"rgba(255,255,255,0.75)",lineHeight:1.7,marginTop:18,marginBottom:0,maxWidth:620}}>
@@ -909,8 +916,29 @@ function LimitCatcher() {
 
   const candleW = Math.floor(W / 15) - 4;
 
+  // 🔴 Последнее состояние в ref — чтобы тик таймера не зависел от него ссылкой.
+  //
+  // Было: addCandle — useCallback с deps [limitPrice, orderType,
+  // stopLimitTriggered, trailPeak, trailDistance], а эффект с таймером зависел
+  // от addCandle. Перетаскивание линии ордера меняет limitPrice на КАЖДОМ
+  // движении мыши, то есть на каждом кадре пересоздавалась функция, из-за неё
+  // пересоздавался эффект, а из-за него — clearInterval + setInterval.
+  // Итог: пока ведёшь линию, интервал в 1200 мс никогда не досчитывает до
+  // конца, свечи стоят, а после отпускания рывком догоняют. Это и читается
+  // как «тренажёр лагает».
+  //
+  // Присваивание во время рендера здесь намеренное: ref должен содержать
+  // значения ЭТОГО рендера к моменту, когда сработает тик. Побочных эффектов
+  // наружу нет, повторный рендер с теми же данными ничего не меняет.
+  const stateRef = useRef({});
+  stateRef.current = { candles, limitPrice, orderType, stopLimitTriggered,
+                       trailPeak, trailDistance };
+
   const addCandle = useCallback(() => {
-    setCandles(prev => {
+    const st = stateRef.current;
+    const { limitPrice, orderType, stopLimitTriggered, trailPeak, trailDistance } = st;
+    {
+      const prev = st.candles;
       const last = prev[prev.length - 1];
       const change = (Math.random() - 0.48) * 8;
       const open = last.close;
@@ -971,17 +999,24 @@ function LimitCatcher() {
       }
 
       const shifted = prev.slice(1).map(c => ({...c, x: c.x - W/15}));
-      return [...shifted, newCandle];
-    });
-  }, [limitPrice, orderType, stopLimitTriggered, trailPeak, trailDistance]);
+      setCandles([...shifted, newCandle]);
+    }
+    // 🔴 Пустой список зависимостей — в этом весь смысл правки: ссылка на
+    // функцию стабильна, эффект с таймером её не пересоздаёт. Свежие значения
+    // берутся из stateRef при каждом вызове.
+    //
+    // Заодно исчезла вторая проблема: setScore / setHits / setTrailPeak
+    // вызывались ВНУТРИ updater-функции setCandles(prev => ...). Такая функция
+    // обязана быть чистой, а React 18 в StrictMode вызывает её дважды именно
+    // чтобы это вскрыть — счёт исполненных ордеров мог удваиваться. Теперь
+    // все setState вызываются на одном уровне, из тела тика.
+  }, []);
 
   useEffect(() => {
-    if (running) {
-      intervalRef.current = setInterval(addCandle, 1200);
-    } else {
-      clearInterval(intervalRef.current);
-    }
-    return () => clearInterval(intervalRef.current);
+    if (!running) return undefined;
+    const id = setInterval(addCandle, 1200);
+    intervalRef.current = id;
+    return () => clearInterval(id);
   }, [running, addCandle]);
 
   const getSVGY = (e) => {
@@ -991,14 +1026,19 @@ function LimitCatcher() {
   };
 
   const orderTypes = [
-    {key:"limit_buy",   label:"BUY LIMIT",    color:C.chartGreen, desc:S.descBuyLimit},
-    {key:"limit_sell",  label:"SELL LIMIT",   color:C.chartRed,   desc:S.descSellLimit},
+    {key:"limit_buy",   label:"BUY LIMIT",    color:C.chartGreenText, desc:S.descBuyLimit},
+    {key:"limit_sell",  label:"SELL LIMIT",   color:C.chartRedText,   desc:S.descSellLimit},
     {key:"stop_buy",    label:"BUY STOP",     color:"#0ea5e9",    desc:S.descBuyStop},
     {key:"stop_sell",   label:"SELL STOP",    color:"#f59e0b",    desc:S.descSellStop},
-    {key:"stop_limit",  label:"STOP LIMIT",   color:"#8b5cf6",    desc:S.descStopLimit},
+    {key:"stop_limit",  label:"STOP LIMIT",   color:"#A78BFA",    desc:S.descStopLimit},
     {key:"trailing_stop",label:"TRAILING STOP",color:"#14b8a6",   desc:S.descTrailingStop},
   ];
-  const ORDER_COLOR_RGBA = {"#089981":"8,153,129","#f23645":"242,54,69","#0ea5e9":"14,165,233","#f59e0b":"245,158,11","#8b5cf6":"139,92,246","#14b8a6":"20,184,166"};
+  // 🔴 Плашки уровня рисуются цветом ордера и подписываются ТЁМНЫМ, а не
+  // белым: цвета здесь светлые (на тёмном фоне графика иначе не видно
+  // линию), и белым по ним — 2.29:1. Фиолетовый пришлось сдвинуть к
+  // #A78BFA: при #8b5cf6 не проходила ни одна из двух подписей — ни
+  // белая (4.2), ни тёмная (3.9).
+  const ORDER_COLOR_RGBA = {"#089981":"8,153,129","#f23645":"242,54,69","#0ea5e9":"14,165,233","#f59e0b":"245,158,11","#A78BFA":"167,139,250","#14b8a6":"20,184,166"};
   const curOrder = orderTypes.find(o => o.key === orderType);
   const limitY = toY(limitPrice);
   const currentPrice = candles[candles.length - 1]?.close || 2510;
@@ -1009,7 +1049,7 @@ function LimitCatcher() {
     <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"36px 40px"}}>
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:24,flexWrap:"wrap",gap:12}}>
         <div style={{display:"flex",alignItems:"center",gap:12}}>
-          <Icon name="game" size={24} color={C.gold}/>
+          <Icon name="game" size={24} color={C.goldText}/>
           <div>
             <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.black}}>{S.gameTitle}</div>
             <Mono size={11} color={C.inkSoft} spacing={2}>{S.gameTag}</Mono>
@@ -1084,7 +1124,10 @@ function LimitCatcher() {
           {[2495,2500,2505,2510,2515,2520,2525].map(p => (
             <g key={p}>
               <line x1="0" y1={toY(p)} x2={W} y2={toY(p)} stroke="rgba(255,255,255,0.04)" strokeWidth="1"/>
-              <text x="4" y={toY(p)-3} fontSize="9" fill="rgba(255,255,255,0.2)" fontFamily="monospace">{p}</text>
+              {/* Подпись шкалы — текст, а не фоновая штриховка: при альфе 0.2
+                  на #131722 это 1.88:1, цифру цены не прочитать. Тот же ярус
+                  палитры, что у осей lightweight-charts на этом же фоне. */}
+              <text x="4" y={toY(p)-3} fontSize="9" fill={C.inkFaintOnDark} fontFamily="monospace">{p}</text>
             </g>
           ))}
 
@@ -1115,12 +1158,12 @@ function LimitCatcher() {
             <React.Fragment>
               <line x1="0" y1={limitY} x2={W} y2={limitY} stroke={curOrder.color} strokeWidth="1.5" strokeDasharray="6 3" opacity={stopLimitTriggered?0.35:1}/>
               <rect x={W-105} y={limitY-12} width={103} height={20} fill={curOrder.color} opacity={stopLimitTriggered?0.4:0.9} rx="2"/>
-              <text x={W-54} y={limitY+3} fontSize="10" fill="#fff" textAnchor="middle" fontFamily="monospace" fontWeight="700">
+              <text x={W-54} y={limitY+3} fontSize="10" fill={C.black} textAnchor="middle" fontFamily="monospace" fontWeight="700">
                 STOP {limitPrice.toFixed(1)}
               </text>
               <line x1="0" y1={toY(stopLimitFillPrice)} x2={W} y2={toY(stopLimitFillPrice)} stroke={curOrder.color} strokeWidth="1.5" strokeDasharray="2 2"/>
               <rect x={W-105} y={toY(stopLimitFillPrice)-12} width={103} height={20} fill={curOrder.color} opacity={stopLimitTriggered?0.9:0.4} rx="2"/>
-              <text x={W-54} y={toY(stopLimitFillPrice)+3} fontSize="10" fill="#fff" textAnchor="middle" fontFamily="monospace" fontWeight="700">
+              <text x={W-54} y={toY(stopLimitFillPrice)+3} fontSize="10" fill={C.black} textAnchor="middle" fontFamily="monospace" fontWeight="700">
                 LIMIT {stopLimitFillPrice.toFixed(1)}
               </text>
             </React.Fragment>
@@ -1131,7 +1174,7 @@ function LimitCatcher() {
               )}
               <line x1="0" y1={toY(trailDisplayLevel)} x2={W} y2={toY(trailDisplayLevel)} stroke={curOrder.color} strokeWidth="1.5"/>
               <rect x={W-115} y={toY(trailDisplayLevel)-12} width={113} height={20} fill={curOrder.color} opacity="0.9" rx="2"/>
-              <text x={W-59} y={toY(trailDisplayLevel)+3} fontSize="10" fill="#fff" textAnchor="middle" fontFamily="monospace" fontWeight="700">
+              <text x={W-59} y={toY(trailDisplayLevel)+3} fontSize="10" fill={C.black} textAnchor="middle" fontFamily="monospace" fontWeight="700">
                 TRAIL {trailDisplayLevel.toFixed(1)} (−{trailDistance})
               </text>
             </React.Fragment>
@@ -1139,7 +1182,7 @@ function LimitCatcher() {
             <React.Fragment>
               <line x1="0" y1={limitY} x2={W} y2={limitY} stroke={curOrder.color} strokeWidth="1.5" strokeDasharray="6 3"/>
               <rect x={W-105} y={limitY-12} width={103} height={20} fill={curOrder.color} opacity="0.9" rx="2"/>
-              <text x={W-54} y={limitY+3} fontSize="10" fill="#fff" textAnchor="middle" fontFamily="monospace" fontWeight="700">
+              <text x={W-54} y={limitY+3} fontSize="10" fill={C.black} textAnchor="middle" fontFamily="monospace" fontWeight="700">
                 {curOrder.label} {limitPrice.toFixed(1)}
               </text>
             </React.Fragment>
@@ -1154,7 +1197,7 @@ function LimitCatcher() {
 
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:12}}>
         <p style={{fontSize:13,color:C.inkMid,display:"flex",alignItems:"center",gap:6}}>
-          {running && <Icon name="target" size={16} color={C.gold}/>}
+          {running && <Icon name="target" size={16} color={C.goldText}/>}
           {running
             ? (orderType === "trailing_stop" ? S.runningHintTrail : S.runningHint(curOrder.label))
             : S.idleHint}
@@ -1173,11 +1216,11 @@ function ColdOpen4() {
   const co = T4.coldOpen;
   return (
     <div style={{marginBottom:56}}>
-      <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:16}}>{co.tag}</Mono>
+      <Mono size={11} color={C.goldText} spacing={4} style={{display:"block",marginBottom:16}}>{co.tag}</Mono>
       <h1 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(28px,4vw,44px)",fontWeight:400,color:C.black,lineHeight:1.15,marginBottom:16}}>{co.title}</h1>
-      <div style={{background:C.black,color:C.gold,borderRadius:6,padding:"12px 18px",display:"inline-block",fontFamily:"monospace",fontSize:13,marginBottom:16}}>{co.tradeCard}</div>
+      <div style={{background:C.black,color:C.goldText,borderRadius:6,padding:"12px 18px",display:"inline-block",fontFamily:"monospace",fontSize:13,marginBottom:16}}>{co.tradeCard}</div>
       <p style={{fontSize:16,color:C.inkMid,lineHeight:1.75,maxWidth:760,marginBottom:16}}>{co.lead}</p>
-      <p style={{fontSize:13,color:C.gold,fontFamily:"monospace"}}>{co.cta}</p>
+      <p style={{fontSize:13,color:C.goldText,fontFamily:"monospace"}}>{co.cta}</p>
     </div>
   );
 }
@@ -1188,7 +1231,7 @@ function NfpScene() {
   const n = T4.nfpScene;
   return (
     <div style={{marginBottom:56}}>
-      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{n.tag}</Mono>
+      <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{n.tag}</Mono>
       <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,marginBottom:14,maxWidth:760}}>{n.legend}</p>
       <SceneMount url="/data/edu_scenes/ch4_nfp_gap.json" mode="event" symbol="GOLD" copy={{
         question: n.question, options: n.options, revealText: n.revealText, nextMarker: null,
@@ -1204,7 +1247,7 @@ function SevenQuestions() {
   const q = T4.sevenQuestions;
   return (
     <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"28px 32px",marginBottom:32}}>
-      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{q.tag}</Mono>
+      <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{q.tag}</Mono>
       <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,marginBottom:16,maxWidth:760}}>{q.preamble}</p>
       <ol style={{fontSize:13,color:C.inkMid,lineHeight:1.9,paddingLeft:20,marginBottom:18}}>
         {q.questions.map((item,i) => <li key={i}>{item}</li>)}
@@ -1223,7 +1266,13 @@ function Chapter4() {
   const T4 = window.Ch4Content[lang] || window.Ch4Content.ru;
 
   const orderTypeAccents = [C.gold, C.chartGreen, C.chartRed, C.blue, "#14b8a6", "#8b5cf6"];
-  const orderTypes = S.orderTypes.map((o,i) => ({...o, accent:orderTypeAccents[i]}));
+  // 🔴 accent остаётся прежним — по нему ниже идут СРАВНЕНИЯ (o.accent ===
+  // C.chartGreen выбирает rgba-подложку), и подменить его значило бы тихо
+  // сломать подложки. Для текста — отдельный ряд: подписи рисуются на
+  // тинте своего же цвета (8% на кремовом), и там акцент даёт 2.19-3.63.
+  const orderTypeText = ["#876525", "#067764", "#D00D1D", "#1E5EEA", "#0D786C", "#7740F4"];
+  const orderTypes = S.orderTypes.map((o,i) => ({...o, accent:orderTypeAccents[i],
+                                                 accentText:orderTypeText[i]}));
 
   const mmFacts = S.mmFacts.map((f,i) => {
     if (i === 1) {
@@ -1243,7 +1292,11 @@ function Chapter4() {
     return it;
   });
 
-  const slippageColors = [C.chartRed, C.gold, C.chartRed, C.chartGreen];
+  // Колонка «проскальзывание» — это текст в ячейке, а не свеча на графике:
+  // биржевые цвета терминала (#f23645/#089981) и золото подбирались под
+  // тёмный фон и на кремовом дают 3.68, 3.37 и 2.49. Берём текстовые
+  // близнецы из палитры.
+  const slippageColors = [C.chartRedText, C.goldText, C.chartRedText, C.chartGreenText];
   const slippageExamples = S.slippageExamples.map((row,i) => ({...row, color:slippageColors[i]}));
 
   const conclusions = S.conclusions;
@@ -1262,6 +1315,47 @@ function Chapter4() {
   // повторно (state, не localStorage — спека не просит помнить отказ вечно).
   const [proDismissed, setProDismissed] = React.useState(false);
   const [proFormOpen, setProFormOpen] = React.useState(false);
+  const [proHighlight, setProHighlight] = React.useState(false);
+
+  // Приход по ссылке «Пройти опросник в главе 4 →» с пейволла глав 6-15.
+  //
+  // 🔴 Раньше эта кнопка вела просто на /edu/b/4. Человек, которому пообещали
+  // опросник, попадал на верх длинной главы: сам опросник лежит в самом низу,
+  // свёрнутый за кнопкой «Заполнить». Найти его было нечем — обещание в
+  // подписи кнопки страница не выполняла.
+  //
+  // По якорю #survey форма разворачивается сразу, страница прокручивается к
+  // ней и блок на пару секунд подсвечивается — иначе после прокрутки неясно,
+  // на что именно смотреть. Отказ «не сейчас» при этом игнорируем: человек
+  // пришёл по прямой ссылке именно за этим.
+  React.useEffect(() => {
+    let t1 = 0, t2 = 0;
+    const открыть = () => {
+      if (window.location.hash !== "#survey") return;
+      setProDismissed(false);
+      setProFormOpen(true);
+      setProHighlight(true);
+      // Ждём кадр: блок появляется в этом же цикле отрисовки, до него
+      // scrollIntoView прокручивал бы к пустому месту.
+      t1 = setTimeout(() => {
+        const el = document.getElementById("survey");
+        if (el) el.scrollIntoView({behavior:"smooth", block:"center"});
+      }, 120);
+      t2 = setTimeout(() => setProHighlight(false), 2600);
+    };
+    открыть();
+    // 🔴 hashchange обязателен, одного вызова при монтировании мало.
+    // Переход на #survey со страницы, которая УЖЕ открыта, — это навигация
+    // внутри документа: перезагрузки нет, React не перемонтируется, эффект с
+    // пустыми зависимостями второй раз не выполнится. Браузер при этом
+    // прокрутит к блоку сам, и со стороны выглядит правдоподобно — блок в
+    // экране, но свёрнут. Ровно та жалоба, с которой всё началось.
+    window.addEventListener("hashchange", открыть);
+    return () => {
+      window.removeEventListener("hashchange", открыть);
+      clearTimeout(t1); clearTimeout(t2);
+    };
+  }, []);
 
   return (
     <div style={{minHeight:"100vh",background:C.white,color:C.ink,fontFamily:"'DM Sans',sans-serif"}}>
@@ -1269,7 +1363,7 @@ function Chapter4() {
       {/* Sticky header */}
       <div style={{position:"sticky",top:106,background:"rgba(255,255,255,0.96)",backdropFilter:"blur(10px)",borderBottom:`1px solid ${C.border}`,padding:"15px 5vw",display:"flex",alignItems:"center",justifyContent:"space-between",zIndex:50}}>
         <div style={{display:"flex",alignItems:"center",gap:20}}>
-          <span onClick={() => window.location.href = getChUrl(3, lang)} style={{color:C.gold,cursor:"pointer",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</span>
+          <a href={getChUrl(3, lang)} aria-label={lang==="ru"?"Предыдущая глава":lang==="ro"?"Capitolul anterior":"Previous chapter"} style={{color:C.goldText,cursor:"pointer",textDecoration:"none",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</a>
           <Chip>{S.levelChip}</Chip>
           <Mono size={14} color={C.inkSoft} spacing={0} className="hide-mobile">{S.chapterNameShort}</Mono>
         </div>
@@ -1283,17 +1377,17 @@ function Chapter4() {
       <div style={{background:C.black,padding:"80px 5vw 70px",textAlign:"center",position:"relative",overflow:"hidden"}}>
         <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 100%, rgba(8,153,129,0.08) 0%, transparent 60%)"}}/>
         <div style={{position:"relative"}}>
-          <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:20}}>{S.heroEyebrow}</Mono>
+          <Mono size={11} color={C.goldText} spacing={4} style={{display:"block",marginBottom:20}}>{S.heroEyebrow}</Mono>
           <h1 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(36px,6vw,66px)",fontWeight:400,color:C.white,lineHeight:1.05,marginBottom:20}}>
-            {S.heroTitleLine1}<br/>{S.heroAnd} <span style={{color:C.gold}}>{S.heroTitleLine2}</span>
+            {S.heroTitleLine1}<br/>{S.heroAnd} <span style={{color:C.goldText}}>{S.heroTitleLine2}</span>
           </h1>
           <p style={{fontSize:"clamp(16px,2vw,20px)",color:"rgba(255,255,255,0.55)",maxWidth:620,margin:"0 auto 32px",lineHeight:1.65}}>
             {S.heroSubtitle}
           </p>
           <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
-            <Chip color={C.gold}>{S.fundamentalChip}</Chip>
-            <Chip color="rgba(255,255,255,0.3)">{S.technicalChip}</Chip>
-            <Chip color="rgba(255,255,255,0.3)">{S.interactiveChip}</Chip>
+            <Chip color={C.goldText}>{S.fundamentalChip}</Chip>
+            <Chip color="rgba(255,255,255,0.55)">{S.technicalChip}</Chip>
+            <Chip color="rgba(255,255,255,0.55)">{S.interactiveChip}</Chip>
           </div>
         </div>
       </div>
@@ -1304,19 +1398,19 @@ function Chapter4() {
 
         {/* ── АНТИ-МИФ → ГОЛОС SBF → ЦЕНА НЕЗНАНИЯ ── */}
         <div style={{marginBottom:48}}>
-          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T4.antiMyth.tag}</Mono>
+          <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{T4.antiMyth.tag}</Mono>
           <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px",marginBottom:28}}>
             <p style={{fontWeight:600,fontSize:14.5,color:C.black,marginBottom:10}}>{T4.antiMyth.title}</p>
             <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,margin:0}}>{T4.antiMyth.body}</p>
           </div>
 
-          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T4.voiceSbf.tag}</Mono>
+          <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{T4.voiceSbf.tag}</Mono>
           <div style={{borderLeft:`4px solid ${C.gold}`,paddingLeft:24,marginBottom:28}}>
             <p style={{fontSize:16,fontStyle:"italic",color:C.inkMid,lineHeight:1.7,fontFamily:"'DM Serif Display',serif",margin:0}}>{T4.voiceSbf.body}</p>
           </div>
 
           <div style={{background:C.black,borderRadius:8,padding:"26px 30px",color:C.white}}>
-            <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T4.priceOfNotKnowing.tag}</Mono>
+            <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{T4.priceOfNotKnowing.tag}</Mono>
             <div style={{fontFamily:"'DM Serif Display',serif",fontSize:20,color:C.white,marginBottom:12}}>{T4.priceOfNotKnowing.title}</div>
             <p style={{fontSize:13.5,lineHeight:1.75,color:"rgba(255,255,255,0.7)",margin:0}}>{T4.priceOfNotKnowing.body}</p>
           </div>
@@ -1339,18 +1433,18 @@ function Chapter4() {
             может оказаться "в начале строки"; на мобильном флекс разворачивается
             в колонку, линия -- вертикальная слева, .ch4-flow-num нумерует шаги. */}
         <div style={{background:C.black,borderRadius:6,padding:"28px 32px",marginBottom:16}}>
-          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:20}}>{S.flowDiagramLabel}</Mono>
+          <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:20}}>{S.flowDiagramLabel}</Mono>
           <div className="ch4-flow">
             <div className="ch4-flow-line"/>
             {flowItems.map((item,i) => (
               <div key={i} className="ch4-flow-step">
                 <div className="ch4-flow-badge"><Icon name={item.icon} size={24} color="#fff"/></div>
                 <div style={{fontSize:11,fontWeight:600,color:C.white}}><span className="ch4-flow-num">{i+1}.</span>{item.label}</div>
-                <div style={{fontSize:10,color:"rgba(255,255,255,0.35)",marginTop:2}}>{item.sub}</div>
+                <div style={{fontSize:10,color:"rgba(255,255,255,0.55)",marginTop:2}}>{item.sub}</div>
               </div>
             ))}
           </div>
-          <p style={{fontSize:11.5,color:"rgba(255,255,255,0.45)",fontStyle:"italic",marginTop:20,marginBottom:0}}>{S.flowExchangeNote}</p>
+          <p style={{fontSize:11.5,color:"rgba(255,255,255,0.55)",fontStyle:"italic",marginTop:20,marginBottom:0}}>{S.flowExchangeNote}</p>
         </div>
         <p style={{fontSize:12.5,color:C.inkFaint,fontStyle:"italic",marginBottom:10,maxWidth:780}}>{T4.otherSide.icebergTeaser}</p>
         {/* Якорь с возвратом (SPEC_ch2_debug_and_chart_engine.md §5) -- реальная
@@ -1361,7 +1455,7 @@ function Chapter4() {
               lang==="ro" ? "Capitolul 4 · Lichiditate și Mecanica Ordinelor" :
               "Chapter 4 · Liquidity and Order Mechanics"
             }
-            style={{display:"inline-block",fontSize:11.5,fontFamily:"monospace",color:C.gold,textDecoration:"underline",marginBottom:56}}>
+            style={{display:"inline-block",fontSize:11.5,fontFamily:"monospace",color:C.goldText,textDecoration:"underline",marginBottom:56}}>
           {lang==="ru" ? "→ Глава 11: Тёмные пулы и HFT" : lang==="ro" ? "→ Capitolul 11: Dark pools și HFT" : "→ Chapter 11: Dark Pools and HFT"}
         </a>
 
@@ -1370,7 +1464,8 @@ function Chapter4() {
           <SectionTitle sub={S.slippageSub}>
             {S.slippageTitle}
           </SectionTitle>
-          <div style={{overflowX:"auto"}}>
+          {/* Прокручиваемая таблица — с клавиатуры тоже. */}
+          <div style={{overflowX:"auto"}} tabIndex={0} role="region" aria-label={S.slippageTitle}>
             <table style={{width:"100%",borderCollapse:"collapse",fontSize:13}}>
               <thead>
                 <tr>
@@ -1422,7 +1517,7 @@ function Chapter4() {
                 <div style={{fontFamily:"'DM Serif Display',serif",fontSize:17,color:C.black}}>{o.title}</div>
               </div>
               <p style={{fontSize:13,color:C.inkMid,lineHeight:1.65,marginBottom:12}}>{o.text}</p>
-              <div style={{fontSize:11,color:o.accent,fontFamily:"monospace",letterSpacing:0.5,padding:"8px 12px",background:`rgba(${o.accent===C.chartGreen?'8,153,129':o.accent===C.chartRed?'242,54,69':o.accent===C.blue?'37,99,235':o.accent==="#14b8a6"?'20,184,166':o.accent==="#8b5cf6"?'139,92,246':'201,151,58'},0.08)`,borderRadius:3}}>
+              <div style={{fontSize:11,color:o.accentText,fontFamily:"monospace",letterSpacing:0.5,padding:"8px 12px",background:`rgba(${o.accent===C.chartGreen?'8,153,129':o.accent===C.chartRed?'242,54,69':o.accent===C.blue?'37,99,235':o.accent==="#14b8a6"?'20,184,166':o.accent==="#8b5cf6"?'139,92,246':'201,151,58'},0.08)`,borderRadius:3}}>
                 → {o.use}
               </div>
             </div>
@@ -1455,7 +1550,7 @@ function Chapter4() {
         <SevenQuestions/>
 
         <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px",marginBottom:48}}>
-          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T4.localeContext.tag}</Mono>
+          <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{T4.localeContext.tag}</Mono>
           <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,margin:0,maxWidth:780}}>{T4.localeContext.body}</p>
         </div>
 
@@ -1464,13 +1559,13 @@ function Chapter4() {
         {/* ── CONCLUSIONS ── */}
         <div style={{background:C.black,borderRadius:8,padding:"44px 48px"}}>
           <div style={{textAlign:"center",marginBottom:32}}>
-            <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:12}}>{S.conclusionsTag}</Mono>
+            <Mono size={11} color={C.goldText} spacing={4} style={{display:"block",marginBottom:12}}>{S.conclusionsTag}</Mono>
             <h3 style={{fontFamily:"'DM Serif Display',serif",fontSize:28,color:C.white,fontWeight:400}}>{S.conclusionsTitle}</h3>
           </div>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}} className="g2">
             {conclusions.map((c,i) => (
               <div key={i} style={{display:"flex",gap:14,alignItems:"flex-start",padding:"14px 16px",background:"rgba(255,255,255,0.04)",borderRadius:4,border:"1px solid rgba(255,255,255,0.06)"}}>
-                <span style={{color:C.gold,fontFamily:"monospace",fontSize:11,marginTop:2,flexShrink:0}}>0{i+1}</span>
+                <span style={{color:C.goldText,fontFamily:"monospace",fontSize:11,marginTop:2,flexShrink:0}}>0{i+1}</span>
                 <span style={{fontSize:13,color:"rgba(255,255,255,0.7)",lineHeight:1.65}}>{c}</span>
               </div>
             ))}
@@ -1479,10 +1574,19 @@ function Chapter4() {
 
         {/* ── Этап 2: профиль + опросник → 30 дней PRO (§5) ── */}
         {!proDismissed && (
-          <div style={{border:`1.5px solid ${C.borderGold}`,borderRadius:8,padding:"26px 28px",marginTop:32,marginBottom:32,background:"linear-gradient(135deg,rgba(201,151,58,0.06),rgba(230,194,87,0.02))"}}>
+          <div id="survey" style={{
+            border:`1.5px solid ${C.borderGold}`,borderRadius:8,padding:"26px 28px",
+            marginTop:32,marginBottom:32,
+            background:"linear-gradient(135deg,rgba(201,151,58,0.06),rgba(230,194,87,0.02))",
+            // Подсветка приходу по якорю: после прокрутки к блоку должно быть
+            // видно, ЧТО именно подсветилось, иначе прокрутка выглядит как
+            // случайное положение страницы.
+            boxShadow: proHighlight ? `0 0 0 4px rgba(201,151,58,0.28)` : "none",
+            transition:"box-shadow .5s ease"
+          }}>
             {!proFormOpen ? (
               <React.Fragment>
-                <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>
+                <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>
                   {lang==="ru"?"РАЗБЛОКИРОВАТЬ ГЛАВЫ 6-15":lang==="ro"?"DEBLOCHEAZĂ CAPITOLELE 6-15":"UNLOCK CHAPTERS 6-15"}
                 </Mono>
                 <p style={{fontSize:14.5,color:C.black,lineHeight:1.7,marginBottom:6,maxWidth:640}}>
@@ -1504,7 +1608,7 @@ function Chapter4() {
             ) : (
               <React.Fragment>
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
-                  <Mono size={11} color={C.gold} spacing={3}>
+                  <Mono size={11} color={C.goldText} spacing={3}>
                     {lang==="ru"?"РАЗБЛОКИРОВАТЬ ГЛАВЫ 6-15":lang==="ro"?"DEBLOCHEAZĂ CAPITOLELE 6-15":"UNLOCK CHAPTERS 6-15"}
                   </Mono>
                   <button onClick={() => setProFormOpen(false)} style={{background:"transparent",border:"none",color:C.inkFaint,cursor:"pointer",fontSize:16,lineHeight:1}}>✕</button>
@@ -1526,7 +1630,7 @@ function Chapter4() {
 
         {/* ── Предикт недели → клиффхэнгер гл.5 ── */}
         <div style={{border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px",marginTop:32,marginBottom:24}}>
-          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>
+          <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>
             {lang==="ru"?"ПРЕДИКТ НЕДЕЛИ":lang==="ro"?"PREDICȚIA SĂPTĂMÂNII":"PREDICTION OF THE WEEK"}
           </Mono>
           <p style={{fontSize:14.5,color:C.black,lineHeight:1.65,marginBottom:8}}>{T4.predict.question}</p>
@@ -1534,7 +1638,7 @@ function Chapter4() {
         </div>
 
         <div style={{border:`1px dashed ${C.borderGold}`,borderRadius:8,padding:"20px 24px",marginBottom:32,background:C.surface}}>
-          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>
+          <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>
             {lang==="ru"?"КЛИФФХЭНГЕР → ГЛАВА 5":lang==="ro"?"CLIFFHANGER → CAPITOLUL 5":"CLIFFHANGER → CHAPTER 5"}
           </Mono>
           <p style={{fontSize:14,color:C.inkMid,lineHeight:1.7,margin:0}}>{T4.cliffhanger.body}</p>

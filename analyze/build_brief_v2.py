@@ -52,6 +52,8 @@ PATTERNS_CAP = 4
 MIN_REACTION_N = 5
 MIN_PATTERN_N = 15
 MOVERS_STALE_DAYS = 3   # старше -- не "вчера", а дыра в MT5-фиде (см. docs/BRIEF_V2_PROGRESS.md)
+OUTLIERS_CAP = 3        # SPEC_brief_outliers §3.3: блок в 2-3 строки, не список рынка
+OFF_CONTEXT_CAP = 3
 
 _CALENDAR_TERMS_JS = BASE_DIR / "web" / "edu" / "assets" / "calendar-terms.js"
 _INDICATOR_KEY_RE = re.compile(r'^\s*"((?:[^"\\]|\\.)*)":\s*\{', re.MULTILINE)
@@ -284,6 +286,101 @@ def build_earnings_block(today: str) -> list[dict]:
     return pool[:5]
 
 
+def _json_or_empty(raw) -> list:
+    """summary_sources пишется джобом триажа; у строк, сделанных до миграции
+    25, там NULL -- это не ошибка, просто источников не сохранено."""
+    if not raw:
+        return []
+    try:
+        val = json.loads(raw)
+    except (json.JSONDecodeError, TypeError):
+        return []
+    return val if isinstance(val, list) else []
+
+
+def build_outliers_block(today: str) -> tuple[list[dict], list[dict]]:
+    """Блоки «Аномальные движения» и «Выбивается из контекста»
+    (SPEC_brief_outliers_2026-08-25.md §3.3). Возвращает (выбросы, темы).
+
+    Обе таблицы наполняет outliers_job.py, здесь только чтение и отметка
+    brief_date -- в какой брифинг строка попала. Числа не пересчитываем: пик
+    за день (peak_chg_pct) посчитан сканом в момент движения, а к утру от
+    него в текущей цене может не остаться ничего -- ровно поэтому колонка и
+    заведена.
+
+    В блок идут ТОЛЬКО темы с summary_status='ok': тема без фразы -- это либо
+    молчание модели, либо её отказ выбирать, и подставить вместо фразы сырой
+    заголовок значило бы выдать необработанное за обработанное.
+
+    Таблиц может не быть (bot.db старее миграции) -- тогда блоки пусты, а не
+    падение всего утреннего пайплайна.
+    """
+    con = sqlite3.connect(str(_BOT_DB))
+    con.row_factory = sqlite3.Row
+    try:
+        try:
+            rows = con.execute(
+                """SELECT id, symbol, name, asset_class, chg_pct, peak_chg_pct, price,
+                          dollar_volume, screener, last_seen_ts, news_cluster_id
+                   FROM market_outliers
+                   WHERE date(first_seen_ts,'unixepoch')=?
+                   ORDER BY abs(COALESCE(peak_chg_pct, chg_pct)) DESC LIMIT ?""",
+                (today, OUTLIERS_CAP),
+            ).fetchall()
+            topics = con.execute(
+                """SELECT id, kind, key, label, publishers, items, summary,
+                          summary_sources, outlier_symbol
+                   FROM news_clusters
+                   WHERE day=? AND summary_status='ok'
+                   ORDER BY publishers DESC LIMIT ?""",
+                (today, OFF_CONTEXT_CAP),
+            ).fetchall()
+        except sqlite3.OperationalError as e:
+            print(f"build_brief_v2: блоки выбросов пропущены ({e})", file=sys.stderr)
+            return [], []
+
+        outliers = [{
+            "symbol": r["symbol"],
+            "name": r["name"],
+            "asset_class": r["asset_class"],
+            "chg_pct": r["chg_pct"],
+            "peak_chg_pct": r["peak_chg_pct"],
+            "price": r["price"],
+            "dollar_volume": r["dollar_volume"],
+            "screener": r["screener"],
+            "seen_utc": datetime.fromtimestamp(r["last_seen_ts"], timezone.utc).isoformat(),
+            "explained": bool(r["news_cluster_id"]),
+        } for r in rows]
+
+        # 🔴 Источник фразы -- summary_sources (заголовки, которые модель
+        # ВИДЕЛА), а не sample_title темы: тот выбирался при сборке кластера и
+        # к фразе отношения не имеет. Живой пример 25.08: у темы «reserve»
+        # sample_title был про штрафы сотрудникам банков, фраза -- про попытку
+        # взять ФРС под контроль. Подставить первое ко второй -- приписать
+        # событию чужую причину, чего спека запрещает прямо.
+        off_context = [{
+            "label": r["label"] or r["key"],
+            "text": r["summary"],
+            "publishers": r["publishers"],
+            "items": r["items"],
+            "sources": _json_or_empty(r["summary_sources"]),
+            "symbol": r["outlier_symbol"],
+        } for r in topics]
+
+        # Отметка «попало в брифинг такого-то числа»: колонка brief_date есть
+        # в обеих таблицах ровно для этого, и заполнить её может только тот,
+        # кто собирает брифинг.
+        for table, ids in (("market_outliers", [r["id"] for r in rows]),
+                           ("news_clusters", [r["id"] for r in topics])):
+            if ids:
+                con.executemany(f"UPDATE {table} SET brief_date=? WHERE id=?",
+                                [(today, i) for i in ids])
+        con.commit()
+    finally:
+        con.close()
+    return outliers, off_context
+
+
 def build(date: str | None = None) -> dict:
     today = date or _today_str()
 
@@ -291,6 +388,7 @@ def build(date: str | None = None) -> dict:
     earnings_rows = build_earnings_block(today)
     movers = build_movers_block(today)
     pattern_rows = build_patterns_block(today)
+    outlier_rows, off_context = build_outliers_block(today)
 
     empty_blocks = []
     if not calendar_rows:
@@ -301,6 +399,10 @@ def build(date: str | None = None) -> dict:
         empty_blocks.append("movers")
     if not pattern_rows:
         empty_blocks.append("patterns")
+    if not outlier_rows:
+        empty_blocks.append("outliers")
+    if not off_context:
+        empty_blocks.append("off_context")
 
     return {
         "date": today,
@@ -311,6 +413,8 @@ def build(date: str | None = None) -> dict:
         "earnings": earnings_rows,
         "movers": movers,
         "patterns": pattern_rows,
+        "outliers": outlier_rows,
+        "off_context": off_context,
         "_meta": {
             "empty_blocks": empty_blocks,
             "sources": {
@@ -318,6 +422,8 @@ def build(date: str | None = None) -> dict:
                 "earnings": "web/data/earnings_calendar.json (ручной, вариант A)",
                 "movers": "ohlc_{symbol}_D1.json + core.focus.yesterday_deviation",
                 "patterns": "core.patterns.detect() + pattern_stats (bot.db), n>=15",
+                "outliers": "market_outliers (bot.db) <- outliers_job.py, скринеры Yahoo + Bybit",
+                "off_context": "news_clusters (bot.db), summary_status=ok <- core/outlier_triage.py",
             },
         },
     }
@@ -335,7 +441,9 @@ def main() -> None:
     print(f"build_brief_v2: wrote {out} "
           f"(calendar={len(payload['calendar'])}, earnings={len(payload['earnings'])}, "
           f"movers up/down={len(payload['movers']['up'])}/{len(payload['movers']['down'])}, "
-          f"patterns={len(payload['patterns'])}, empty={payload['_meta']['empty_blocks']})",
+          f"patterns={len(payload['patterns'])}, "
+          f"outliers={len(payload['outliers'])}, off_context={len(payload['off_context'])}, "
+          f"empty={payload['_meta']['empty_blocks']})",
           file=sys.stderr)
     if payload["untranslated"]:
         print(f"build_brief_v2: WARNING calendar indicators without a translation "

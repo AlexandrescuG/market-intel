@@ -1,0 +1,125 @@
+<h2>PREȚUL GRABEI</h2>
+<p>Trebuie să cumperi 500 loturi de aur — același volum. Execuți dintr-un singur ordin acum sau întinzi pe o oră?</p>
+<p>Acum: preț mediu {{avgNow}}, alunecare +{{slipNow}} pe tot volumul. Într-o oră, fără presiune pe carte: {{avgSlow}} — aproape la cea mai bună cotație. Diferența — {{diffPts}} puncte la {{size}} loturi.</p>
+<p>În continuare — cum arată această prudență în fluxul de ordine, nu în forma unei lumânări.</p>
+<h2>UNDE A FOST ACTIVITATEA</h2>
+<p>Histograma volumului de tranzacții e ascunsă. Alege treimea zilei unde crezi că au fost cele mai multe tranzacții.</p>
+<p>S-a potrivit — chiar acolo a fost vârful real de activitate.</p>
+<p>Nu s-a potrivit — vârful real a fost în altă treime.</p>
+<p>Cele mai multe schimbări de preț — în {{topLabel}} UTC ({{topVol}}). {{matchText}}</p>
+<p>E numărul de schimbări de preț din perioadă, nu loturile tranzacționate.</p>
+<p>Zonele arată unde ar trebui să fie ordinele. Volumul arată unde a fost activitatea real. Potrivirea sau lipsa ei se vede cu ochiul liber.</p>
+<h2>ANTI-MIT</h2>
+<h2>Mitul de aici e stratificat, și trebuie desfăcut strat cu strat</h2>
+<p>Primul strat: «instituțiile nu există, piața e toată lumea contra tuturor». Fals evident: partea covârșitoare a rulajului sunt bănci, fonduri, trezorerii și algoritmi, nu persoane fizice.</p>
+<p>Al doilea strat, cel principal în acest capitol: «instituțiile vânează stopurile retailului». Asta e infirmat de aritmetică, nu de opinie. Volumul retail e statistic nesemnificativ față de cel interbancar: a veni special după el e ca și cum ai jefui o bancă pentru mărunțișul din pușculița de la intrare. Cascadele pe clustere de ordine sunt totuși reale — Osler le-a măsurat pe nouă mii cinci sute de ordine —, dar clusterele nu sunt formate din stopuri retail, iar declanșarea nu vine dintr-o decizie a cuiva, ci pentru că ordinele sunt aglomerate (capitolul 5, §3.6).</p>
+<p>Al treilea strat, cel mai persistent: «banii deștepți lasă urme lizibile pe graficul cu lumânări, trebuie doar să știi paternurile». Aceasta e o afirmație verificabilă. Am verificat-o — mai jos.</p>
+<p>Adevărul, după desfacerea celor trei straturi, e mai util decât oricare dintre ele: participantul mare nu se ascunde. Încearcă să nu miște prețul — și exact această prudență lasă o urmă, vizibilă în locuri concrete, niciunul dintre ele nefiind o figură pe grafic.</p>
+<h2>VOCEA SBF · Oleg, analist</h2>
+<p>«Colega, în doisprezece ani n-am întâlnit pe nimeni care să se fi îmbogățit «citind urma banilor deștepți», și am întâlnit mulți care s-au liniștit cu această explicație. E o poveste confortabilă: dacă piața e împotriva mea, înseamnă că am fost «depistat». Poziția de victimă e comodă pentru că elimină nevoia de a calcula.</p><p>Ce mă uit eu de fapt, când vreau să înțeleg cine e în piață. Primul — cartea de ordine, dar nu imaginea, ci comportamentul: cât de repede se reface densitatea după ce a fost «mâncată». Al doilea — cum se execută propriul meu ordin: dacă alunecarea a crescut, înseamnă că cartea e mai subțire, și e bine să știu asta înainte de a intra, nu după. Al treilea — rapoartele de poziții pe futures: apar o dată pe săptămână, întârzie trei zile și arată ca un tabel, nu ca un grafic. Plictisitor, dar sunt cifre reale, nu fanteziile mele despre intențiile altora.</p><p>Și sincer despre a patra variantă. Uneori piața merge împotriva mea pur și simplu pentru că am greșit. Nicio instituție n-a fost implicată. Capacitatea de a admite prima această variantă e cam jumătate din meserie.»</p>
+<h2>PREȚUL NEȘTIINȚEI</h2>
+<h2>O regulă din care nu se poate ieși</h2>
+<p>Un trader a învățat că după preluarea lichidității și un gol neînchis, prețul «este atras» înapoi. Vede configurația pe grafic, intră împotriva mișcării, pune stopul dincolo de extremă.</p><p>Ce urmează, în două variante. În prima, configurația funcționează, și el fixează regula. În a doua, nu funcționează, și el explică asta prin «am identificat greșit zona». Ambele variante confirmă convingerea inițială: regula e corectă, executantul a greșit. E o structură din care nu se poate ieși, pentru că nu e falsificabilă.</p><p>Prețul nu stă într-o singură pierdere. Stă în faptul că omul încetează să măsoare: are o explicație pentru orice rezultat, deci n-are motiv să calculeze statistica. Am calculat noi în locul lui — mai jos —, iar cifra nu e catastrofală, ci exact ce e mai rău: aproape de întâmplare. O regulă care funcționează în jumătate din cazuri nu falimentează repede. Doar consumă încet depozitul prin comisioane și spread, lăsând senzația că «încă puțin și merge».</p><p>A doua jumătate, onestă: asta nu înseamnă că paternurile sunt inutile. Înseamnă că un pattern nu e un semnal, ci un mod de a descrie contextul, iar decizia se ia prin mărimea poziției și managementul riscului (capitolul 3), nu prin prezența unei figuri.</p>
+<h2>SARCINA PARTICIPANTULUI MARE — OGLINDA CAPITOLULUI 4</h2>
+<p>Ca să înțelegi urma, trebuie să înțelegi sarcina. E exact opusul a ceea ce se povestește de obicei.</p>
+<h2>Participantul mare nu vrea să miște prețul</h2>
+<p>Mișcarea e costul lui, nu instrumentul lui. Tot ce face la execuție urmărește ca mișcarea să fie cât mai mică.</p>
+<h2>Nu poate fi invizibil</h2>
+<p>Orice execuție lasă o amprentă în flux: ordinele dispar, se refac mai lent, tranzacțiile vin în serii de mărime egală. Asta e urma — dar e în flux, nu în forma lumânării.</p>
+<h2>Nu are nevoie de stopul tău</h2>
+<p>Are nevoie de volum. Un cluster de ordine în spatele unui nivel rotund e un loc unde există volum; tot restul e interpretare.</p>
+<p>Același panou al cărții de ordine ca în capitolul 4 — cu un cursor nou.</p>
+<p>Mișcă cursorul și vezi cum prețul mediu de execuție se depărtează de cea mai bună cotație.</p>
+<p>{{remaining}} loturi nu au găsit preț în cartea vizibilă deloc — execuția reală ar fi mers și mai departe.</p>
+<p>Tocmai ai simțit sarcina unei instituții. Acum are sens tot ce urmează.</p>
+<p>ADÂNCIME SINTETICĂ — prețul mijlocului de piață e real, volumele pe niveluri nu: carnetul de ordine nu e stocat la noi. Panoul calculează mecanica execuției, nu adâncimea pieței de azi.</p>
+<h2>CUM SE EXECUTĂ ÎN REALITATE</h2>
+<p>Patru carduri. Totul documentat și verificabil — nicio afirmație despre intenții.</p>
+<h2>🔪 Fragmentare</h2>
+<p>Ordinul e tăiat în zeci sau sute de bucăți mici și întins în timp. Cadrul academic — problema execuției optime: echilibru între costul imediateții și riscul ca prețul să plece cât timp te execuți. Nu e o tactică de ascundere, ci soluția unei probleme de optimizare.</p>
+<h2>🤖 Algoritmi de execuție</h2>
+<p>VWAP — execută proporțional cu profilul tipic de volum, ca prețul mediu să coincidă cu media ponderată a pieței. TWAP — uniform în timp. POV — o cotă fixă din volumul curent. Acești algoritmi sunt standard, sunt vânduți de furnizorii de terminale, și tocmai ei explică de ce mișcările mari arată adesea ca o serie de pași egali, nu ca un singur salt. Legătură directă cu capitolul 5: execuția VWAP e legată de profilul de volum pe ore — profil pe care l-am măsurat noi înșine.</p>
+<h2>🧊 Iceberg</h2>
+<p>Un ordin din care se vede doar o parte; pe măsură ce se execută, partea vizibilă se reface. Există ca tip standard de ordin pe burse. De aici efectul observat: densitatea la un nivel «nu se termină» oricât ai consuma din ea.</p>
+<h2>📞 În afara cărții</h2>
+<p>O parte semnificativă a volumului mare se execută deloc în cartea deschisă: cerere de cotație de la mai mulți dealeri, netting intern, dark pools (capitolul 11). Concluzia practică, neplăcută pentru mitologie: cele mai mari tranzacții nu se văd niciodată în carte.</p>
+<h2>UNDE SE VEDE CU ADEVĂRAT URMA</h2>
+<p>Patru locuri. Cel mai practic bloc al capitolului.</p>
+<p>cum se reface densitatea după ce a fost consumată; iceberguri; retragerea ordinelor înainte de o publicație (capitolul 6)</p>
+<p>serii de mărime egală — semnătura unui algoritm de execuție</p>
+<p>volumul bursier real — spre deosebire de forex spot, unde nu există un volum unic</p>
+<p>cum s-au schimbat pozițiile categoriilor de participanți pe futures, săptămânal</p>
+<h2>Separat despre COT</h2>
+<p>Singura sursă unde «pozițiile instituțiilor» nu sunt o metaforă, ci o cifră publicată. CFTC publică săptămânal defalcarea interesului deschis pe categorii de participanți. Limitările trebuie menționate alături: sunt futures, nu spot; datele sunt de marți, publicate vineri — deci întârziate; categoria «comerciali» nu e sinonimă cu «bani deștepți», sunt hedgeri, iar poziția lor e adesea opusă trendului prin construcție. Cu toate rezervele, e cu un ordin de mărime mai aproape de realitate decât orice pattern pe lumânare.</p>
+<h2>O rezervă onestă despre forex spot</h2>
+<p>Adâncimea pieței pe care o vezi în terminal pentru o pereche valutară e cartea furnizorului tău de lichiditate, nu a întregii piețe. Forexul nu are o carte unică: piața e over-the-counter, fiecare broker are propriul flux. Asta nu anulează observația — comportamentul cărții, viteza de refacere a densității, reacția la o publicație se văd și în ea —, dar e important să înțelegi că privești o felie, nu întregul. La futures și acțiuni, cartea e bursieră și unică.</p>
+<h2>«MĂSURĂTORILE NOASTRE» — CUM SE COMPORTĂ PATERNURILE VÂNDUTE DREPT URMĂ</h2>
+<p>Afirmația «banii deștepți lasă urme lizibile pe grafic» e verificabilă. Am verificat-o pe istoricul nostru, pe șapte paternuri direcționale, pe instrumente și intervale de timp. Codul e în repozitoriu, exportul mai jos.</p>
+<p>Ce am calculat. Pentru fiecare pattern: ponderea cazurilor în care prețul, după 3, 5 și 10 lumânări, a mers în direcția declarată de pattern. Plus mișcarea medie și mișcarea maximă medie împotriva poziției.</p>
+<h2>O rezervă metodologică ce nu poate fi omisă</h2>
+<p>La primul calcul, vârfurile și fundurile duble au arătat o concordanță vizibil mai mare decât restul paternurilor — circa 70-77% față de cifrele oneste de 45-54%. Cauza n-a fost în pattern, ci în noi: extremele fractale se confirmă abia după câteva lumânări de la vârf, iar măsurătoarea pornea chiar de la vârf — adică de la un punct care în timp real încă nu era cunoscut. Un clasic lookahead bias. După corectare (patternul e raportat la momentul confirmării, nu al vârfului), toate paternurile au căzut în același interval. Povestim asta în capitol pentru că e vorba tocmai despre a deosebi măsurătoarea de auto-amăgire, și pentru că e cel mai bun exemplu disponibil.</p>
+<p>Intervalul de concordanță pe paternuri — {{agree_min}}%–{{agree_max}}%, la {{n_total}} observații. Linia de referință a întâmplării — 50%. {{verdict_line}}</p>
+<p>break_retest e cea mai apropiată rudă mecanică a ceea ce se numește preluare de lichiditate. Rezultatul lui: {{break_retest_agree}}% la n = {{break_retest_n}}. Exact acest rând explică de ce vechiul semnal de tranzacționare legat de acest pattern a fost eliminat din capitol.</p>
+<p>Mișcarea maximă medie împotriva poziției e comparabilă cu mișcarea medie în favoarea ei — raport {{adverse_ratio}}. Consecința practică e mai importantă decât primele două: chiar și la un pattern cu concordanță peste jumătate, rezultatul îl decide nu el, ci mărimea poziției și dacă supraviețuiești mișcării împotriva ta (capitolul 3).</p>
+<p>E o bandă strânsă în jurul întâmplării, nu o regularitate.</p>
+<p>Există o ușoară înclinație, dar e departe de o regulă de încredere.</p>
+<p>Dispersia dintre paternuri e vizibilă — mediind, te poți înșela ușor.</p>
+<h2>Placa onestă</h2>
+<p>Măsurat: concordanța direcției și mărimea mișcării pe istoricul nostru D1/H4/H1. Nemăsurat: contextul — trendul intervalului superior, un eveniment din calendar, faza sesiunii. Am verificat patternul de unul singur, pentru că exact așa se vinde: «l-ai văzut — ai intrat». Poate în context se comportă altfel; e o lucrare separată, iar când o vom face, vom publica rezultatul, oricare ar fi el.</p>
+<h2>CE E CONFIRMAT ȘI CE E NARATIV</h2>
+<h2>Confirmat prin măsurătoare sau document</h2>
+<p>Volumul mare mișcă prețul împotriva executantului.</p>
+<p>Consecință directă a mecanicii cărții (capitolul 4), măsurată de oricine a încercat.</p>
+<p>Ordinele mari sunt fragmentate și executate algoritmic.</p>
+<p>Practică standard, algoritmii sunt descriși și vânduți.</p>
+<p>Ordinele iceberg există ca tip standard de ordin.</p>
+<p>Definit în documentația burselor și platformelor — nu o ipoteză, ci un tip de ordin pe care îl poți plasa singur.</p>
+<p>Ordinele se aglomerează în spatele nivelurilor rotunde, declanșarea unui cluster provoacă o cascadă.</p>
+<p>Osler (2003) — cartea reală de ordine condiționate, nu o presupunere despre comportamentul mulțimii.</p>
+<p>O parte din volum se execută în afara cărții deschise.</p>
+<p>Dark pools, RFQ, netting intern — mecanisme documentate, analizate în capitolul 11.</p>
+<p>Pozițiile categoriilor de participanți pe futures se publică săptămânal.</p>
+<p>CFTC, Commitment of Traders — raport public oficial, nu o estimare a noastră.</p>
+<h2>Este narativ, nu fapt</h2>
+<p>Clusterele de stopuri sunt observabile pe graficul cu lumânări.</p>
+<p>Nu le vede nimeni, în afară de deținătorul cărții de ordine — ce se desenează pe grafic e un model, nu o observație.</p>
+<p>Mișcarea către un cluster e o decizie a cuiva, îndreptată împotriva retailului.</p>
+<p>Cascada e declanșată de aglomerare, nu de intenție; volumul retail e prea mic pentru așa ceva.</p>
+<p>Umplerea golurilor se întâmplă des, dar «magnetul» e o metaforă, nu un mecanism; versiunea verificabilă a acestei afirmații e mai sus, la clustere.</p>
+<p>Există «bani deștepți» ca un grup unitar cu interese comune.</p>
+<p>În spatele fluxurilor mari stau fonduri de pensii, trezorerii, hedgeri și algoritmi cu sarcini opuse — nu sunt o singură tabără.</p>
+<p>Modelul Smart Money e un vocabular decent pentru a descrie ce vezi, și un predictor slab pentru ce va urma. Folosește-l ca limbaj: «aici era o aglomerare de ordine, aici a fost consumată, aici cartea s-a refăcut lent». Și nu-l folosi ca regulă de intrare — am arătat mai sus ce iese.</p>
+<h2>„RENTGEN-UL” ÎNTORS PE DOS</h2>
+<p>Acum vei vedea un grafic cu „rentgenul” activat: zone unde, după modelul popular, ar trebui să stea clustere de ordine. Înainte de a apăsa, ține minte un lucru: acesta e desenul modelului, nu date. Am calculat aceste zone după regulile modelului — în spatele numerelor rotunde și al marginilor intervalelor sesiunii precedente. Nu avem și nu putem avea nicio informație despre ordinele reale.</p>
+<p>Rentgenul e activat, zonele sunt evidențiate.</p>
+<p>Volumul tick — de câte ori s-a schimbat prețul într-o bară. Nu e numărul de loturi tranzacționate: pe forexul spot nu există un volum unic. Ca măsură a activității funcționează, ca măsură a banilor — nu.</p>
+<h2>Ce s-a întâmplat acum</h2>
+<p>Ai văzut {{n_days}} zile. În {{xray_hit}} din {{n_days}} prețul a făcut ce prezicea modelul. Dacă ți-am fi arătat doar o singură zi cu potrivire — și așa sunt construite majoritatea materialelor educaționale pe acest subiect —, ai fi plecat de aici convins că modelul funcționează.</p><p>Nu-ți putem spune unde stau ordinele altora. Nimeni nu poate, în afară de dealerul care deține acea carte. Singura dată când un cercetător a avut acces la ea a fost lucrarea lui Osler pe nouă mii cinci sute de ordine, și rămâne și azi sursa principală pe acest subiect, pentru că nimeni n-o poate repeta.</p><p>Ce poți observa cu adevărat singur, și asta nu e model, ci date: cum se comportă cartea de ordine în timp real. Cât de repede se reface densitatea după ce a fost consumată. Cum dispar ordinele cu un minut înainte de o publicație. Astea se văd — dar doar în moment și doar în terminal.</p>
+<p>XP se acordă pentru parcurgere, indiferent de potriviri.</p>
+<p>modelul nu s-a potrivit — prețul a trecut zona</p>
+<p>Înainte să vezi lumânările: crezi că prețul va întoarce de la zonă sau va trece prin ea?</p>
+<p>De fapt — neconcludent: nici întoarcere clară, nici trecere clară.</p>
+<p>Tot ce ai citit în acest capitol, l-ai acceptat deocamdată pe cuvânt — cu excepția unui bloc unde am publicat propriile măsurători și CSV-ul.</p><p>Și asta nu e corect. Șase capitole te-am învățat să ne verifici. Iar acest capitol n-are pe ce fi verificat, și nu din lene: comportamentul cărții de ordine nu se desenează într-un mockup. Densitatea care se reface în două secunde după ce a fost consumată; ordinele care dispar cu un minut înainte de publicație; o serie de tranzacții de mărime egală, care ține douăzeci de minute la rând — toate acestea există doar în moment. O înregistrare arată rezultatul, iar rezultatul ți l-am arătat deja — e o lumânare, și din ea nu se vede nimic.</p><p>Deci ai nevoie de un terminal. Nu de un cont cu bani — de un terminal.</p>
+<p>Contul demo se deschide fără verificare la {{noVerif}} din {{total}} platforme — verificat {{checked}}, condițiile și citatele sunt în partners.json. Nu sunt necesari bani: terminalul demo arată același carnet de ordine ca un cont real.</p>
+<p>Lista platformelor nu s-a încărcat — o găsești la /brokers.</p>
+<p>Un fond trebuie să cumpere un volum de zece ori mai mare decât densitatea vizibilă din carte. Ce va face?</p>
+<p>Va cumpăra printr-un singur ordin de piață, ca să apuce</p>
+<p>Va fragmenta și va întinde în timp, ca să nu miște prețul împotriva sa</p>
+<p>Va aștepta să apară volumul necesar în carte</p>
+<p>Corect. Mișcarea prețului e costul lui, nu instrumentul.</p>
+<p>Nu chiar. Mișcarea prețului e un cost pentru un participant mare, nu un instrument — de aceea fragmentează execuția.</p>
+<p>Unde se aglomerează cel mai des stopurile, după măsurătorile lui Osler?</p>
+<p>Puțin dincolo de numărul rotund și de marginea intervalului</p>
+<p>Nu chiar. Osler a măsurat: aglomerare puțin DINCOLO de numărul rotund și de marginea intervalului, nu chiar pe nivel (capitolul 5).</p>
+<p>Vezi pe grafic o zonă unde, după model, ar trebui să fie clustere de ordine. Ce știi sigur?</p>
+<p>Corect. Ordinele reale din acea zonă nu le vede nimeni, în afară de dealer.</p>
+<p>Nu chiar. Zona e un desen după reguli fixe ale modelului, nu o observație a ordinelor reale.</p>
+<p>Nu chiar. Calendarul spune când și cam cât de mult — nu încotro (capitolul 6).</p>
+<h2>PREDICȚIA SĂPTĂMÂNII</h2>
+<p>Pe ce interval de timp crezi că e mai mare concordanța paternurilor cu propria direcție?</p>
+<p>După datele noastre, intervalul de concordanță aproape nu depinde de timeframe — {{agree_min}}%–{{agree_max}}% pe toate trei, la {{n_total}} observații. Dacă ai ales un timeframe anume ca „evident mai bun” — pe datele noastre așa ceva nu există.</p>
+<p>+15 XP pentru participare. Despre o mărime măsurabilă, nu despre preț — în limitele conformității.</p>
+<h2>CLIFFHANGER → CAPITOLUL 8</h2>
+<p>Acum știi că urma există și unde se vede. Și știi prețul întrebării: aproape tot ce e interesant se întâmplă în flux, iar fluxul e ceva ce nu poate fi văzut într-o înregistrare.</p><p>Dar mai există și cealaltă parte, și e despre tine. Șase capitole ți-am arătat grafice de aur. Instrumentele noastre, perioadele noastre, setările noastre. Te-ai uitat la piața altcuiva.</p><p>Următorul episod — despre un instrument pe care ți-l vei configura singur: mediile mobile și ce măsoară ele de fapt. Te avertizăm din start: întrebarea centrală a capitolului — „care e perioada corectă?” — nu are un răspuns universal, și vom explica de ce oricine îți dă o cifră îți vinde de fapt setarea altcuiva. Răspunsul există doar pentru un instrument concret și un orizont concret. Adică pentru ale tale.</p>
+<h2>SURSELE CAPITOLULUI</h2>
+<p>SBF Company SRL. Verificarea afirmației „figurile candlestick prezic direcția” pe istoricul propriu. Date: 15 instrumente, timeframe-uri H1/H4/D1, 7 tipuri de figuri, {{n}} observații. Metodă: proporția cazurilor în care prețul a mers în direcția declarată de figură după 5 lumânări; vârfurile/fundurile duble sunt măsurate de la confirmarea fractalului, nu de la vârful întoarcerii — altfel apare o deplasare spre viitor (lookahead bias) care umflă rezultatul. Recalculat la {{built}}.</p>

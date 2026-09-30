@@ -57,7 +57,7 @@
   user-select: none;
   -webkit-tap-highlight-color: transparent;
 }
-@media (min-width: 761px) {
+@media (min-width: 901px) {
   .sbf-fw-btn { bottom: 24px; }
 }
 .sbf-fw-btn:hover { transform: scale(1.08); box-shadow: 0 5px 18px rgba(0,0,0,.32); }
@@ -78,13 +78,17 @@
   display: none;
   animation: sbf-fw-pop .18s cubic-bezier(.34,1.56,.64,1) both;
 }
-@media (min-width: 761px) {
+@media (min-width: 901px) {
   .sbf-fw-bubble { bottom: 24px; }
 }
 /* Поднимаем над .edu-nav (48px, fixed, bottom:0) на страницах глав курса --
    иначе z-index:9000 рисует кнопку/пузырь поверх правого края нав-бара
    (живая цена + соседняя "Глава N→"), см. buildDOM(). Без @media, чтобы
    перебить оба варианта .sbf-fw-btn/.sbf-fw-bubble (мобильный и desktop). */
+/* Значения ниже — только запасные, на случай если посчитать стек не вышло
+   (нет getBoundingClientRect, элементы ещё не отрисованы). Рабочая высота
+   ставится из поднять_над_полосами() инлайном: см. комментарий там о том,
+   почему число здесь однажды разошлось с раскладкой. */
 .sbf-fw-btn-raised { bottom: 72px; }
 .sbf-fw-bubble-raised { bottom: 72px; }
 /* P2.6: на узких экранах кнопка (position:fixed) неизбежно оказывается
@@ -127,7 +131,7 @@
   padding: 0 20px 20px;
   pointer-events: none;
 }
-@media (min-width: 761px) {
+@media (min-width: 901px) {
   .sbf-fw-form-wrap { align-items: flex-end; }
 }
 .sbf-fw-form-wrap.open { display: flex; pointer-events: all; }
@@ -141,7 +145,7 @@
   animation: sbf-fw-pop .2s cubic-bezier(.34,1.56,.64,1) both;
   margin-bottom: 56px;
 }
-@media (min-width: 761px) {
+@media (min-width: 901px) {
   .sbf-fw-form { margin-bottom: 80px; }
 }
 .sbf-fw-form-header {
@@ -255,7 +259,7 @@
   border-bottom: 1px solid #c9a227;
 }
 .sbf-fw-admin-bar.visible { display: flex; }
-.sbf-fw-admin-bar a { color: #c9a227; text-decoration: none; margin-right: 8px; }
+.sbf-fw-admin-bar a { color: var(--gold-text,#866A19); text-decoration: none; margin-right: 8px; }
 .sbf-fw-admin-bar a:hover { text-decoration: underline; }
 .sbf-fw-admin-toggle {
   margin-left: auto;
@@ -308,7 +312,13 @@
         '</div>' +
         '<div class="sbf-fw-screenshot-wrap">' +
           '<div class="sbf-fw-screenshot-progress" id="sbf-fw-scprog" data-i18n="feedback.screenshot_capturing">' + t('feedback.screenshot_capturing', 'Захватываем скриншот…') + '</div>' +
-          '<img class="sbf-fw-screenshot-preview" id="sbf-fw-preview" alt="">' +
+          // 🔴 <img> без src — это запрос к самой странице: браузер
+          // считает адресом текущий URL и тянет её целиком второй раз.
+          // Пустышка висела на каждой из 31 страницы и в любом обходе
+          // выглядела битой картинкой — я сам однажды принял её за поломку
+          // вёрстки. Прозрачный пиксель до захвата снимает и то и другое.
+          '<img class="sbf-fw-screenshot-preview" id="sbf-fw-preview" alt="" ' +
+          'src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">' +
           '<label class="sbf-fw-file-label">' +
             '<input type="file" accept="image/*" class="sbf-fw-file-input" id="sbf-fw-file">' +
             '<span data-i18n="feedback.attach_screenshot">' + t('feedback.attach_screenshot', '📎 Прикрепить свой скриншот') + '</span>' +
@@ -346,9 +356,84 @@
     // связи z-index:9000 -- без этого сдвига она рисуется ПОВЕРХ .edu-nav и
     // закрывает/перекрывает правый край нав-бара (ссылку на живую цену и
     // соседнюю "Глава N→").
-    if (document.querySelector('.edu-nav')) {
+    /* 🔴 ВЫСОТА СЧИТАЕТСЯ, А НЕ ПЕРЕПИСЫВАЕТСЯ ЧИСЛОМ.
+       Класс -raised поднимал кнопку на 72 px, и комментарий выше объяснял
+       откуда: «.edu-nav 48px, bottom:0». Это было верно, когда писалось.
+       Потом снизу добавился нижний нав высотой 58, панель главы уехала на
+       bottom:58 — и стек стал 106. Число 72 осталось. Замер на живом
+       телефоне 14.09.2026: кнопка перекрывала панель главы на 46×34 px,
+       а плашка PRO — на 184×26.
+       Считаем стек по факту: берём все закреплённые снизу полосы и встаём
+       выше самой верхней из них. Тогда следующая добавленная панель не
+       сломает это молча — а именно так оно и сломалось. */
+    /* Высота закреплённых полос внизу окна. Отдаём наружу: этим же числом
+       поднимается всплывающая плашка PRO на страницах глав (см. serve.py),
+       и третья копия того же расчёта разошлась бы с первыми двумя — как уже
+       разошлось число 72 здесь. */
+    window.SbfНизСтека = function (кроме) {
+      var окно = window.innerHeight || 0;
+      var полосы = [];
+      var все = document.querySelectorAll('body *');
+      for (var i = 0; i < все.length; i++) {
+        var el = все[i];
+        if (кроме && (el === кроме || el.contains(кроме))) continue;
+        var s = getComputedStyle(el);
+        if (s.position !== 'fixed' || s.display === 'none'
+            || s.visibility === 'hidden') continue;
+        var r = el.getBoundingClientRect();
+        if (r.height < 12 || r.width < 40) continue;
+        полосы.push(r);
+      }
+      /* 🔴 СТЕК НАРАЩИВАЕТСЯ ПОСЛОЙНО, А НЕ ИЩЕТСЯ ОДНИМ УСЛОВИЕМ.
+         Первая версия считала полосой только то, что упирается в нижний край
+         окна. Панель главы под это не подходит: она стоит НА нижнем наве, до
+         края окна ей 58 px. Стек вышел 58 вместо 106, кнопка встала на 70 —
+         то есть ровно внутрь панели, и перекрытие после «починки» стало
+         46×37 вместо 46×34. Метрика при этом молчала бы, если б я не
+         перемерил: правило было сформулировано под одну полосу, а полос две.
+         Растим снизу вверх: берём всё, что дотягивается до текущей вершины
+         стека, и поднимаем вершину; повторяем, пока добавляется. */
+      var верх = окно;
+      var менялось = true;
+      while (менялось) {
+        менялось = false;
+        for (var j = 0; j < полосы.length; j++) {
+          var p = полосы[j];
+          if (p.bottom >= верх - 3 && p.top < верх) { верх = p.top; менялось = true; }
+        }
+      }
+      return Math.max(0, Math.round(окно - верх));
+    };
+
+    function поднять_над_полосами() {
+      var высота = window.SbfНизСтека(_btn) + 12;
+      // Класс оставляем: по нему видно снаружи, что кнопка поднята, и он же
+      // работает запасным вариантом, если инлайн почему-то не встал.
       _btn.classList.add('sbf-fw-btn-raised');
       _bubble.classList.add('sbf-fw-bubble-raised');
+      _btn.style.bottom = высота + 'px';
+      _bubble.style.bottom = высота + 'px';
+    }
+
+    /* 🔴 ПЕРЕСЧИТЫВАЕМ ПОСЛЕ ТОГО, КАК СТРАНИЦА ДОСТРОИТСЯ.
+       Первый замер давал 57 вместо 105: панель главы рисует React, и на
+       момент инициализации виджета её в DOM ещё нет. Считать один раз —
+       значит считать по половине раскладки и получить правдоподобное
+       число, которое не соответствует ничему. Наблюдатель дешевле опроса
+       и честнее таймера «на глазок»: реагируем на появление и исчезновение
+       закреплённых полос, а не угадываем, когда они появятся. */
+    поднять_над_полосами();
+    window.addEventListener('resize', поднять_над_полосами, {passive: true});
+    window.addEventListener('load', поднять_над_полосами, {passive: true});
+    if (window.MutationObserver) {
+      var наблюдатель = new MutationObserver(function () {
+        // Через rAF: на момент вставки узла раскладка ещё не пересчитана,
+        // и getBoundingClientRect вернёт нули.
+        requestAnimationFrame(поднять_над_полосами);
+      });
+      наблюдатель.observe(document.body, {childList: true, subtree: true});
+      // Наблюдать вечно незачем: полосы появляются при первой отрисовке.
+      setTimeout(function () { наблюдатель.disconnect(); }, 15000);
     }
 
     // P2.6: прячем кнопку при прокрутке вниз, возвращаем при прокрутке вверх

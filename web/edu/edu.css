@@ -4,12 +4,12 @@
   --paper: #FFFFFF;
   --line:  #E7DFCF;
   --ink:   #2B2B33;
-  --muted: #8A8275;
+  --muted:#716A5A;
   --gold:  #C9A227;
   --glow:  #E6C257;
-  --up:    #1e8e5a;
+  --up:#2C784E;
   --down:  #c0392b;
-  --signal:#b07d18;
+  --signal:#906614;
 }
 
 /* ── Шрифты (override DM Sans / DM Serif где применимо) ── */
@@ -55,10 +55,91 @@ body {
   white-space: nowrap;
 }
 .edu-nav a:hover, .edu-nav button:hover { color: var(--ink); }
+
+/* 🔴 На 390px эта панель переполнялась на 105px и прокрутить её было нельзя:
+   пять элементов («← Глава 1», «Глава 2 из 15», «СОДЕРЖАНИЕ», «Глава 3 →»,
+   живая цена) при padding 0 14px и white-space:nowrap требуют ~385px при
+   доступных 374. Замер 03.09: scrollWidth − clientWidth = 105. Живая цена
+   уезжала за край, у «Глава 3 →» оставалась видна одна стрелка.
+
+   Панель фиксированная, поэтому переполнение не давало и горизонтальной
+   прокрутки страницы — контент просто пропадал. Убираем счётчик (он
+   дублирует заголовок главы) и сжимаем отступы. */
+@media (max-width: 560px) {
+  .edu-nav { padding: 0 4px; font-size: 11px; }
+  .edu-nav a, .edu-nav button { padding: 0 8px; }
+  .edu-nav .nav-counter { display: none; }
+}
+
+/* 🔴 ПАНЕЛЬ НЕ ДОЛЖНА ЗАВИСЕТЬ ОТ ДЛИНЫ ЖИВОГО ЧИСЛА.
+   Правка 03.09 выше сжала панель под цену ТОГО дня и на ней сошлась. Замер
+   14.09 на пяти устройствах: переполнение вернулось во всех 15 главах,
+   32-79 px, и величина его зависит от того, что за число сейчас в цене —
+   «7 664» против «7 665,25», «29 148» против «4 282,13». То есть панель
+   ломалась не всегда, а по мере роста котировки, и поймать это глазами
+   почти невозможно: сегодня цело, завтра нет.
+
+   Чинится не подгонкой отступов (это и была прошлая правка), а снятием
+   зависимости. Ниже 560 px:
+     • «← Глава 1» и «Глава 3 →» показываются одними стрелками. Текст не
+       удалён, а скрыт размером шрифта — диктор его по-прежнему читает, а
+       ::before/::after со стрелками получают свой размер обратно;
+     • живой цене запрещено сжиматься (flex-shrink:0): пусть лучше ужмётся
+       «Содержание», чем обрежется число;
+     • «Содержание» сжимается и обрезается многоточием — это подпись, её
+       можно сократить без вреда, в отличие от цены.
+   Запас после правки — на четырёхзначное число с дробью и процентом. */
+/* 🔴 КЛАСС БЫЛ ПРОСТАВЛЕН, А ПРАВИЛА ПОД НЕГО НЕ СУЩЕСТВОВАЛО.
+   В главах живут ТРИ схемы именования адаптивных сеток: `g2`/`g3`
+   (объявлены в <style> каждой главы), `grid-2`/`grid-3` — и ничего.
+   Замер 14.09: `g2`/`g3` встречаются 39 раз и работают, `grid-2`/`grid-3`
+   — 10 раз и не делают НИЧЕГО: такого селектора нет ни в edu.css, ни в
+   главах. Автор пометил сетку как адаптивную, увидел класс в разметке и
+   был уверен, что дело сделано.
+   Это хуже, чем забытый класс: забытый виден отсутствием, а этот виден
+   присутствием и врёт. Правило ниже делает его настоящим. */
+@media (max-width: 768px) {
+  .g2, .g3, .grid-2, .grid-3 { grid-template-columns: 1fr !important; }
+}
+/* 🔴 И `g2`/`g3` тоже ЗДЕСЬ, а не в <style> каждой главы.
+   Замер показал вторую половину той же беды: правило `.g2` объявлено в
+   собственном <style> у глав 4 и 5, а у глав 1, 2 и 3 его НЕТ. То есть
+   класс там стоял и не делал ничего — ровно как `grid-2` выше. Пятнадцать
+   копий одного правила, из которых часть отсутствует, — это не правило, а
+   лотерея: сетка сворачивается в той главе, где кто-то не забыл.
+   Одно место на весь курс. Копии в главах можно оставить, они безвредны:
+   то же объявление с тем же значением. */
+
+@media (max-width: 560px) {
+  /* 🔴 Цель касания. На узком экране подпись убирается (font-size:0) и от
+     кнопки остаётся одна стрелка: 29 px в ширину при норме 44. Кнопки
+     «предыдущая/следующая глава» стоят вплотную к «Содержанию», зазора нет,
+     так что промах уводит не туда, куда целился читатель. Ширину добираем
+     padding'ом — стрелка остаётся по центру. */
+  .edu-nav .nav-prev, .edu-nav .nav-next { font-size: 0; padding: 0 17px; min-width: 44px; }
+  .edu-nav .nav-prev::before, .edu-nav .nav-next::after { font-size: 15px; }
+  .edu-nav .nav-toc { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  /* Котировка в панели главы — ссылка на терминал, высота была 30 px. */
+  .edu-nav .nav-live { flex-shrink: 0; margin-left: auto;
+    min-height: 44px; display: inline-flex; align-items: center; }
+}
+
+/* 🔴 Две фиксированные панели на одном месте. `.edu-nav` (z-index 999) лежит
+   поверх нижней навигации сайта `.g-bottom-nav` (z-index 200) и закрывает её
+   целиком: на всех 15 главах с телефона нельзя уйти на «Сегодня», «Графики»,
+   «Календарь» и «Брокеры» — только назад по главам. Проверено
+   elementFromPoint в центре нижнего края: возвращает .nav-toc, а не пункт
+   нава сайта.
+
+   Сдвигаем панель главы НАД навигацией сайта, а не поверх неё. Высоту нава
+   публикует sbf-header.js в --sbf-bottom-h. */
+@media (max-width: 900px) {
+  .edu-nav { bottom: var(--sbf-bottom-h, 58px); }
+}
 .edu-nav .nav-prev::before { content: '←  '; }
 .edu-nav .nav-next::after  { content: '  →'; }
 .edu-nav .nav-toc {
-  color: var(--gold);
+  color: var(--gold-text,#866A19);
   font-weight: 700;
   letter-spacing: .3px;
   border-left: 1px solid var(--line);
@@ -88,7 +169,7 @@ body {
   margin-right: 4px;
   transition: background .15s;
 }
-.edu-nav .nav-live:hover { background: rgba(201,162,39,.22); color: var(--gold); }
+.edu-nav .nav-live:hover { background: rgba(201,162,39,.22); color: var(--gold-text,#866A19); }
 .edu-nav .nav-live::before { content: '⬤ '; font-size: 7px; color: var(--up); }
 
 /* ── Прогресс-бар вверху страницы ── */
@@ -119,12 +200,16 @@ body {
 
 /* ── lang-bar: заменяем старое золото на бренд ── */
 .lang-links a.active {
-  color: var(--gold) !important;
+  color: var(--gold-text,#866A19) !important;
   border-bottom-color: var(--gold) !important;
 }
 
 /* ── Отступ снизу чтобы edu-nav не перекрывал контент ── */
-#sbf-book-root { padding-bottom: 56px; }
+/* 56px здесь + var(--sbf-bottom-h) на body из sbf-header.js складывались в
+   114px пустоты под текстом каждой главы. Теперь `.edu-nav` стоит НАД навом
+   сайта (см. выше), поэтому компенсировать нужно ровно её высоту — 48px, и
+   ровно один раз. */
+#sbf-book-root { padding-bottom: 48px; }
 
 /* ── Wire-1: встраиваемые виджеты ── */
 .sbf-widget {
@@ -140,7 +225,7 @@ body {
   font-weight: 700;
   letter-spacing: 2px;
   text-transform: uppercase;
-  color: var(--gold);
+  color: var(--gold-text,#866A19);
   margin-bottom: 16px;
 }
 .sbf-sect-label {
@@ -157,6 +242,11 @@ body {
 }
 .sbf-sect-n {
   background: var(--line);
+  /* Номер секции сидит на плашке --line (#e7dfcf), а цвет наследовал
+     --muted (#716A5A) от родителя на кремовом фоне: 4.05:1 при 9px.
+     Цвет правильный только относительно СВОЕГО фона — у плашки он свой,
+     поэтому и тушь своя. */
+  color: #696354;              /* 4.51:1 на #e7dfcf */
   border-radius: 10px;
   padding: 1px 7px;
   font-size: 9px;
@@ -226,7 +316,7 @@ body {
 .sbf-o-v { font-weight: 700; color: var(--ink); }
 .sbf-o-v.pos { color: var(--up); }
 .sbf-o-v.neg { color: var(--down); }
-.sbf-o-v.gold { color: var(--gold); }
+.sbf-o-v.gold { color: var(--gold-text,#866A19); }
 .sbf-verdict {
   margin-top: 10px;
   font-size: 11px;
@@ -252,7 +342,9 @@ body {
 }
 .sbf-seg-btn.active {
   background: var(--gold);
-  color: #fff;
+  /* Третий случай «белым по золоту» (2.42:1) после .btn-primary и .sbf-cta.
+     Активная кнопка и так выделена заливкой — текст на ней тёмный. */
+  color: var(--ink, #2B2B33);
   border-color: var(--gold);
 }
 
@@ -274,6 +366,49 @@ body {
 .sbf-pat-card svg { width: 100%; height: auto; border-radius: 6px; }
 .sbf-pat-name { font-size: 12px; font-weight: 700; color: var(--ink); }
 .sbf-pat-desc { font-size: 11px; color: var(--muted); line-height: 1.4; }
+/* Строка с нашим измерением под карточкой паттерна. Контраст выше, чем у
+   описания: это единственное на карточке, что посчитано, а не нарисовано. */
+.sbf-pat-foot {
+  margin-top: 14px; padding-top: 10px; border-top: 1px solid rgba(0,0,0,0.08);
+  font-size: 11.5px; line-height: 1.6; color: var(--muted);
+}
+.sbf-pat-card { position: relative; }
+/* «схема» — только на тех карточках, где форма нарисована. Там, где под
+   паттерн нашлось настоящее вхождение в истории, метки нет. */
+.sbf-pat-tag {
+  position: absolute; top: 8px; right: 10px; z-index: 1;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+  font-size: 9px; letter-spacing: 0.8px; text-transform: uppercase;
+  color: var(--muted); opacity: 0.85;
+}
+.sbf-pat-real {
+  margin-top: 7px; font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+  font-size: 10.5px; letter-spacing: 0.2px; color: var(--muted);
+}
+.sbf-pat-hit  { color: #2E7D5B; }   /* паттерн оправдался */
+.sbf-pat-miss { color: #8a2f2f; }   /* не оправдался — и это видно */
+.sbf-pat-neutral { color: var(--muted); }
+.sbf-pat-stat {
+  margin-top: 7px; padding-top: 6px; border-top: 1px solid rgba(0,0,0,0.08);
+  font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+  font-size: 10.5px; letter-spacing: 0.2px; color: #8a2f2f;
+}
+
+/* 🔴 Цель касания для навигационных ссылок главы. Класс проставляет
+   academy-shared.js (пометитьНавигационныеСсылки) — ссылкам на главы и
+   оглавление, которые стоят НЕ внутри абзаца. Размер держится здесь,
+   потому что инлайновые React-стили не умеют в медиазапросы, а размер
+   нужен только там, где палец: на мониторе мышь попадает и в 10 px.
+   Было: «←» 10×19, «← Глава 1: Инфраструктура» 210×20. */
+@media (max-width: 768px) {
+  .sbf-tap {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 4px 10px;
+    margin: 0 -10px;          /* отступ не сдвигает соседний текст */
+  }
+}
 
 /* CTA */
 .sbf-cta {
@@ -285,7 +420,10 @@ body {
   display: block;
   padding: 14px 20px;
   background: var(--gold);
-  color: #fff;
+  /* 🔴 Тёмная тушь, а не белый. Белый на золоте — 2.42:1, вдвое ниже AA;
+     ровно тот же случай уже чинился в .btn-primary на основном сайте.
+     Золото — светлый фон, и читаемый текст на нём тёмный. */
+  color: var(--ink, #2B2B33);
   font-family: 'JetBrains Mono', monospace;
   font-size: 13px;
   font-weight: 700;
@@ -296,3 +434,7 @@ body {
   transition: opacity .15s;
 }
 .sbf-cta a:hover { opacity: .88; }
+
+/* Подпись реального отрезка под индикаторной фигурой: это не
+   предупреждение, а источник — поэтому спокойный цвет, не тревожный. */
+.sbf-fig-real-tag { color: var(--muted) !important; letter-spacing: 0.4px; }

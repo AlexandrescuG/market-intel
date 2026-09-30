@@ -2,7 +2,12 @@
    Паспарту + дуотон + печать SBF + хроно-степпер + карточки станций + era-слайдер (интерактив B). */
 
 .history-ep{--h-cream:#FBF6EF;--h-paper:#fff;--h-line:#E7DFCF;--h-line-gold:#D9C48A;
-  --h-ink:#2B2B33;--h-ink-soft:#55524B;--h-ink-faint:#8A8275;--h-gold:#C9A227;
+  --h-ink:#2B2B33;--h-ink-soft:#55524B;--h-ink-faint:#716A5A;--h-gold:#C9A227;
+  /* 16.09.2026, контраст: --h-ink-faint был #8A8275 — 3.80:1 на белом.
+     --h-gold остаётся заливкой/рамкой (точки шкалы, подложки, обводки),
+     для ТЕКСТА заведён --h-gold-text: золото #C9A227 как подпись даёт
+     2.42:1. Разбор порогов — в web/assets/design.css. */
+  --h-gold-text:#806518;
   --h-gold-pale:#F3E8C8;--h-dark:#141416;
   --h-serif:'DM Serif Display',Georgia,serif;--h-mono:'JetBrains Mono',ui-monospace,monospace;
   color:var(--h-ink);font-family:inherit}
@@ -20,6 +25,15 @@
 .h-caption{display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap;
   font-family:var(--h-serif);font-style:italic;font-size:13.5px;color:var(--h-ink-soft);padding:10px 4px 0}
 .h-caption .h-src{font-family:var(--h-mono);font-style:normal;font-size:10px;letter-spacing:.08em;color:var(--h-ink-faint);white-space:nowrap}
+/* Автор и лицензия снимка. Отдельной строкой во всю ширину, а не третьим
+   элементом в ряду: у подписи уже есть левая и правая части, и втискивание
+   третьей превратило бы её в мешанину на узком экране. Строка тихая по
+   цвету, но не тише «источника» рядом — атрибуция обязана читаться, иначе
+   она формально есть и фактически нет. */
+.h-caption .h-credit{flex:1 1 100%;order:2;font-family:var(--h-mono);font-style:normal;
+  font-size:10px;letter-spacing:.04em;color:var(--h-ink-faint);text-decoration:none;
+  padding-top:2px;overflow-wrap:anywhere}
+.h-caption a.h-credit:hover{color:var(--h-gold-text,#806518);text-decoration:underline}
 
 /* ---- Хроно-степпер ---- */
 .h-chrono{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:6px}
@@ -29,14 +43,16 @@
 .h-node:hover{border-color:var(--h-gold)}
 .h-node.done{border-color:var(--h-line-gold);background:var(--h-gold-pale);color:var(--h-ink)}
 .h-node.active{background:var(--h-dark);color:var(--h-gold-pale);border-color:var(--h-dark)}
-.h-sep{color:var(--h-line-gold)}
+/* Разделитель «—» красился линией-золотом #D9C48A: 1.72:1. Это видимый
+   текст, а не рамка, поэтому берёт тот же цвет, что подписи рядом. */
+.h-sep{color:var(--h-ink-faint)}
 .h-progress{margin-top:6px;font-family:var(--h-mono);font-size:11px;color:var(--h-ink-faint)}
-.h-progress b{color:var(--h-gold)}
+.h-progress b{color:var(--h-gold-text,#806518)}
 
 /* ---- Карточка станции ---- */
 .h-station{display:grid;gap:18px;margin-top:18px}
 .h-station-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
-.h-station-year{font-family:var(--h-mono);font-size:13px;letter-spacing:.08em;color:var(--h-gold);
+.h-station-year{font-family:var(--h-mono);font-size:13px;letter-spacing:.08em;color:var(--h-gold-text,#806518);
   background:var(--h-gold-pale);border:1px solid var(--h-line-gold);border-radius:20px;padding:3px 12px}
 .h-station-place{font-family:var(--h-mono);font-size:11px;color:var(--h-ink-faint);letter-spacing:.06em}
 .h-station-title{font-family:var(--h-serif);font-weight:400;font-size:24px;line-height:1.25;margin:6px 0 2px}
@@ -45,7 +61,7 @@
 .h-callout{border-radius:10px;padding:12px 16px;font-size:13.5px;line-height:1.55;margin-top:4px;border:1px solid}
 .h-callout-fact{background:var(--h-gold-pale);border-color:var(--h-line-gold);color:var(--h-ink-soft)}
 .h-callout-fact::before{content:"НЕОЧЕВИДНЫЙ ФАКТ";display:block;font-family:var(--h-mono);font-size:9.5px;
-  letter-spacing:.12em;color:var(--h-gold);margin-bottom:4px}
+  letter-spacing:.12em;color:var(--h-gold-text,#806518);margin-bottom:4px}
 .h-callout-hook{background:var(--h-cream);border-color:var(--h-line);color:var(--h-ink-soft);font-style:italic}
 .h-callout-legend{background:#FBEAEA;border-color:#E3B9B9;color:#7A3B3B;font-size:12.5px}
 .h-callout-legend::before{content:"⚠ ЛЕГЕНДА, НЕ ФАКТ";display:block;font-family:var(--h-mono);font-size:9.5px;
@@ -92,7 +108,7 @@
 .scn-wrap{border:1px solid var(--h-line,#E7DFCF);border-radius:8px;background:var(--h-paper,#fff);padding:14px}
 .scn-chart{width:100%}
 .scn-panel{margin-top:12px}
-.scn-marker-label{font-family:var(--h-mono,monospace);font-size:11.5px;letter-spacing:.04em;color:var(--h-gold,#C9A227);
+.scn-marker-label{font-family:var(--h-mono,monospace);font-size:11.5px;letter-spacing:.04em;color:var(--h-gold-text,#806518);
   background:var(--h-gold-pale,#F3E8C8);border:1px solid var(--h-line-gold,#D9C48A);border-radius:16px;
   padding:5px 12px;display:inline-block;margin-bottom:10px}
 .scn-question{font-size:14.5px;color:var(--h-ink,#2B2B33);margin:0 0 10px}
@@ -117,7 +133,7 @@
 /* ---- REPLAY mode -- движок графика (SPEC_ch2_debug_and_chart_engine.md §4) ---- */
 .scn-replay-head{margin-bottom:10px}
 .scn-replay-title{font-size:14px;font-weight:600;color:var(--h-ink,#2B2B33);margin-bottom:2px}
-.scn-replay-period{font-family:var(--h-mono,monospace);font-size:11px;color:var(--h-ink-faint,#8A8275)}
+.scn-replay-period{font-family:var(--h-mono,monospace);font-size:11px;color:var(--h-ink-faint,#716A5A)}
 .scn-timeline{display:flex;gap:4px;margin:10px 0;flex-wrap:wrap}
 .scn-timeline-dot{width:10px;height:10px;border-radius:50%;background:var(--h-line,#E7DFCF);
   border:none;padding:0;cursor:pointer;transition:background .15s,transform .15s}
@@ -140,9 +156,9 @@
 .scn-tool-btn.active{background:var(--h-gold,#C9A227);border-color:var(--h-gold,#C9A227);color:var(--h-dark,#141416)}
 .scn-back-to-event{position:absolute;top:10px;right:10px;z-index:5;font-family:var(--h-mono,monospace);
   font-size:11px;padding:6px 12px;border-radius:14px;border:1px solid var(--h-gold,#C9A227);
-  background:var(--h-paper,#fff);color:var(--h-gold,#C9A227);cursor:pointer;
+  background:var(--h-paper,#fff);color:var(--h-gold-text,#806518);cursor:pointer;
   box-shadow:0 4px 12px rgba(24,24,26,.1)}
-.scn-compare-note{font-size:10.5px;color:var(--h-ink-faint,#8A8275);font-style:italic;margin-top:6px}
+.scn-compare-note{font-size:10.5px;color:var(--h-ink-faint,#716A5A);font-style:italic;margin-top:6px}
 .scn-chart-wrap{position:relative}
 
 /* ---- MULTI mode (гл.3 cold open) ---- */

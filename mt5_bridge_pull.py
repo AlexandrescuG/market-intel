@@ -20,7 +20,13 @@ copy_rates_from_pos()/shutdown(). Никаких order_send и торговых 
 в бутылке живёт торговый EA, это read-only мост.
 
 Запуск: python3 mt5_bridge_pull.py [--verbose]
-Расписание: sbf-mt5-pull.timer (каждые 15 мин).
+Расписание: sbf-mt5-pull.timer (ежечасно).
+
+🔴 20.08.2026: доливка расширена с 5 символов на все инструменты графика
+(mt5_config.bars_pull_map()). Одновременно снят netref-цикл — без него
+прогон 25 символов не поместился бы ни в такт, ни в таймаут; см. комментарий
+у obtain() ниже. Разовая перестройка истории, набранной раньше из Yahoo, —
+tools/mt5_rebuild_from_broker.py.
 """
 import argparse
 import logging
@@ -31,7 +37,7 @@ from pathlib import Path
 import rpyc
 
 sys.path.insert(0, str(Path(__file__).parent))
-from mt5_config import SYMBOL_MAP, TIMEFRAME_ATTR, RECENT_BARS
+from mt5_config import bars_pull_map, TIMEFRAME_ATTR, RECENT_BARS
 
 HOST, PORT = "127.0.0.1", 18812
 TERMINAL_PATH = r"C:\Program Files\MetaTrader 5\terminal64.exe"
@@ -59,7 +65,12 @@ def fetch_and_write(verbose: bool) -> int:
     подряд честно тянул все бары и терял их все, ничего не попадало в
     price_bars (см. Core-лог 10.08). Теперь коммит после КАЖДОГО символа —
     таймаут теряет только необработанный остаток, не всю работу целиком."""
-    con = sqlite3.connect(str(BOT_DB))
+    con = sqlite3.connect(str(BOT_DB), timeout=120)
+    # 🔴 bot.db пишут соседние джобы (alpha-цикл, event_reactions, журнал).
+    # Без ожидания замка прогон падал с "database is locked" — поймано 20.08
+    # сразу после расширения доливки с 5 символов до 28: транзакций стало
+    # впятеро больше, и вероятность попасть на чужую запись выросла так же.
+    con.execute("PRAGMA busy_timeout=120000")
     conn = rpyc.classic.connect(HOST, PORT)
     total = 0
     try:
@@ -68,7 +79,7 @@ def fetch_and_write(verbose: bool) -> int:
             log.error("initialize() не удался: %s", mt5.last_error())
             return 0
         try:
-            for our_key, broker_sym in SYMBOL_MAP.items():
+            for our_key, broker_sym in bars_pull_map().items():
                 if not mt5.symbol_select(broker_sym, True):
                     if verbose:
                         log.info("%s (%s) недоступен у брокера — пропуск", broker_sym, our_key)
@@ -79,6 +90,16 @@ def fetch_and_write(verbose: bool) -> int:
                     rates = mt5.copy_rates_from_pos(broker_sym, tf_code, 0, RECENT_BARS.get(tf_name, 2000))
                     if rates is None or len(rates) == 0:
                         continue
+                    # 🔴 obtain() ОБЯЗАТЕЛЕН, а не украшение. Без него `rates`
+                    # остаётся netref'ом, и каждое обращение r["open"] внутри
+                    # цикла — отдельный round-trip до Wine-бутылки. Полный
+                    # прогон 5 символов x 6 ТФ занимал 25-30 минут (см. описание
+                    # sbf-mt5-pull.timer), из-за чего доливку и нельзя было
+                    # расширить на все инструменты графика: 25 символов не
+                    # влезали ни в часовой такт, ни в TimeoutStartSec. Снятие
+                    # массива целиком одним вызовом стоит доли секунды на
+                    # 10 000 баров — измерено 20.08.
+                    rates = rpyc.classic.obtain(rates)
                     for r in rates:
                         vol = float(r["real_volume"]) if r["real_volume"] else float(r["tick_volume"])
                         bars.append({

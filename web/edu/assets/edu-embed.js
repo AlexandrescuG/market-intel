@@ -18,12 +18,12 @@
 
   // ---- 1. инжект CSS (tcard с lp + анимация движка + обёртка фигуры) ----
   var CSS = `
-  :root{--sbf-up:#2E8B6F;--sbf-down:#C0504D;--sbf-gold:#C9A227;--sbf-line:#E7DFCF;--sbf-ink:#2B2B33;--sbf-muted:#7C7563;--sbf-paper:#FFFFFF;--sbf-cream:#FBF6EF;}
+  :root{--sbf-up:#2C784E;--sbf-down:#C0392B;--sbf-gold:#C9A227;--sbf-gold-text:#866A19;--sbf-line:#E7DFCF;--sbf-ink:#2B2B33;--sbf-muted:#716A5A;--sbf-paper:#FFFFFF;--sbf-cream:#FBF6EF;}
   .sbf-fig{background:var(--sbf-paper);border:1px solid var(--sbf-line);border-radius:12px;padding:10px;margin:20px 0;cursor:pointer}
-  .sbf-fig .sbf-fig-schema-tag{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--sbf-gold);border:1px solid var(--sbf-gold);border-radius:3px;display:inline-block;padding:2px 6px;margin:2px 4px 8px}
+  .sbf-fig .sbf-fig-schema-tag{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--sbf-gold-text);border:1px solid var(--sbf-gold);border-radius:3px;display:inline-block;padding:2px 6px;margin:2px 4px 8px}
   .sbf-fig .sbf-cap{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--sbf-muted);margin:8px 4px 2px}
   .sbf-fig svg{display:block;width:100%;height:auto}
-  .sbf-figlink{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--sbf-gold);cursor:pointer;display:inline-block;margin-top:6px}
+  .sbf-figlink{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--sbf-gold-text);cursor:pointer;display:inline-block;margin-top:6px}
   /* «Технические карточки» — стиль с lp.sbfconsult.com */
   .sbf-tcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;margin:20px 0}
   .sbf-tcard{background:var(--sbf-cream);border:1px solid var(--sbf-line);border-radius:10px;padding:14px 16px}
@@ -73,10 +73,62 @@
       // resolves and the figure is re-mounted.
       var schemaLabel = el.dataset.schemaLabel || t('eduindex.embed.schema_label', 'СХЕМА · ИЛЛЮСТРАЦИЯ, НЕ РЕАЛЬНЫЕ ДАННЫЕ');
       el.innerHTML = '<div class="sbf-fig-schema-tag">' + schemaLabel + '</div><div class="sbf-fig-chart"></div><div class="sbf-cap">' + cap + '</div>';
-      function render() { el.querySelector('.sbf-fig-chart').innerHTML = it.build(); }
+      function render() { el.querySelector('.sbf-fig-chart').innerHTML = it.build(); метка(); }
+      /* 🔴 Метка обязана следовать за тем, что показано. Индикаторные фигуры
+         (cat='ind') с приходом fig_series.json считаются по РЕАЛЬНОМУ
+         отрезку рынка — называть их «не реальные данные» после этого
+         неверно ровно так же, как называть схему настоящей. Остальные
+         семейства (candle/chart/smc) по-прежнему рисуются генератором, и
+         метка у них остаётся. */
+      function метка() {
+        var шапка = el.querySelector('.sbf-fig-schema-tag');
+        if (!шапка) return;
+        var ряд = window.SBFFigSeries && window.SBFFigSeries();
+        var пример = window.SBFFigExample && window.SBFFigExample(el.dataset.key);
+        if ((el.dataset.cat === 'candle' || el.dataset.cat === 'chart') && пример) {
+          var д = new Date(пример['пример']['ts'] * 1000);
+          шапка.textContent = пример['пример']['имя'] + ' · ' + пример['пример']['tf'] + ' · ' +
+            ('0'+д.getUTCDate()).slice(-2)+'.'+('0'+(д.getUTCMonth()+1)).slice(-2)+'.'+д.getUTCFullYear();
+          шапка.classList.add('sbf-fig-real-tag');
+        } else if (el.dataset.cat === 'smc' && ряд && ряд['поиск'] &&
+                   window.SBFFigSMC && window.SBFFigSMC(
+                     el.dataset.key === 'structure' ? 'hh' : el.dataset.key)) {
+          шапка.textContent = ряд['поиск']['показ'] + ' · ' + ряд['поиск']['tf'] +
+                              ' · ' + ряд['поиск']['от'] + '…' + ряд['поиск']['до'];
+          шапка.classList.add('sbf-fig-real-tag');
+        } else if (el.dataset.cat === 'ind' && ряд) {
+          шапка.textContent = ряд['показ'] + ' · ' + ряд['tf'] + ' · ' +
+                              ряд['от'] + '…' + ряд['до'];
+          шапка.classList.add('sbf-fig-real-tag');
+        } else {
+          шапка.textContent = schemaLabel;
+          шапка.classList.remove('sbf-fig-real-tag');
+        }
+      }
       render(); el._sbf = true;
-      el.title = t('eduindex.embed.click_to_replay', 'нажми, чтобы проиграть заново');
+      // Ряд приходит по сети уже после первой отрисовки — перерисовываемся.
+      window.addEventListener('sbf-fig-series', render);
+      // 🔴 Схема — настоящее управление: по нажатию она проигрывается заново.
+      // Но была обычным <div> с курсором-пальцем: мышью работает, с
+      // клавиатуры недоступна, диктор её управлением не называет. Замер нашёл
+      // 17 таких схем по главам — все из этой одной строки.
+      //
+      // role + tabindex + обработка Enter/Space — минимум, который делает
+      // элемент управлением по-настоящему. Тег не меняем: внутри разметка
+      // схемы, а <button> с произвольным содержимым ведёт себя по-разному в
+      // разных браузерах.
+      var подпись = t('eduindex.embed.click_to_replay', 'нажми, чтобы проиграть заново');
+      el.title = подпись;
+      el.setAttribute('role', 'button');
+      el.setAttribute('tabindex', '0');
+      el.setAttribute('aria-label', cap + ' — ' + подпись);
       el.addEventListener('click', render);
+      el.addEventListener('keydown', function (ev) {
+        if (ev.key === 'Enter' || ev.key === ' ' || ev.key === 'Spacebar') {
+          ev.preventDefault();
+          render();
+        }
+      });
     });
   }
 

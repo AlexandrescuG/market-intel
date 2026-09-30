@@ -1,0 +1,65 @@
+<h2>CAPITOLUL 4 — CAZUL CELOR CINCI PUNCTE</h2>
+<h2>Cazul celor cinci puncte</h2>
+<p>Episodul trecut s-a încheiat cu o enigmă: stop-ul stătea la 2494, dar s-a executat la 2489. Brokerul nu te-a înșelat. Piața nu „te-a vânat”. Pur și simplu, la 14:30:03, la nivelul 2494 nu se afla NICIUN cumpărător — iar ordinul tău a coborât în coadă, adunând pe cine era acolo: 2492… 2490… 2489. Acest capitol este despre coadă. După el, nu vei mai vedea lumânări, ci din ce sunt făcute.</p>
+<h2>ANTI-MIT</h2>
+<h2>„La bursă poți întotdeauna cumpăra și vinde la prețul de pe ecran”</h2>
+<p>Prețul de pe ecran este prețul ULTIMEI tranzacții — trecutul. Tranzacția ta se va executa la coada CURENTĂ de ordine — iar între aceste două numere se află totul: spread, adâncime, alunecare de preț. Într-o oră liniștită, diferența e mărunțiș, iar mitul e inofensiv. La 14:30 vineri, în ziua NFP, diferența e de puncte și zeci de puncte, iar mitul costă bani. Un profesionist se deosebește de un începător nu prin prognoze — ci pentru că știe LA CE PREȚ se va executa de fapt ordinul lui.</p>
+<h2>VOCEA SBF</h2>
+<p>„Colega, începătorii studiază „încotro va merge prețul”. Asta e jumătate din meserie. Cealaltă jumătate este „cum intru și cum ies”: cu ce tip de ordin, în ce lichiditate, cu ce spread. Am văzut strategii cu statistici excelente care au murit dintr-un singur motiv — execuția. Cinci puncte de alunecare la o tranzacție cu țintă de cincisprezece înseamnă minus o treime din profit, înainte de orice analiză. Acest capitol e plictisitor ca o sală de mașini. Dar exact acolo se decide dacă vasul ajunge la mal.”</p>
+<h2>PREȚUL NEȘTIINȚEI</h2>
+<h2>„Spread de la 0.1 puncte”</h2>
+<p>Un trader tranzacționează la un broker cu „spread de la 0.1 puncte”. Face 20 de tranzacții pe săptămână cu ordine de piață, jumătate dintre ele în primele minute după știri, când spread-ul se lărgește de 10-30 de ori. Cu o supraplată medie de doar 1.5 puncte per tranzacție, asta înseamnă minus 30 de puncte pe săptămână — minus 120 pe lună. Strategia lui, cu țintă de +150 puncte pe lună, era profitabilă. Execuția lui nu era. A părăsit piața convins că „strategia a încetat să funcționeze”. Strategia funcționa. El plătea cozii, fără să știe.</p>
+<h2>INTERACTIVUL PRINCIPAL</h2>
+<h2>O lumânare la microscop</h2>
+<p>Acesta este carnetul de ordine (DOM, Depth of Market) — coada tuturor celor care vor să cumpere sau să vândă chiar acum. Sus dreapta — vânzătorii (ASK): la aceste prețuri poți CUMPĂRA. Jos stânga — cumpărătorii (BID): la aceste prețuri poți VINDE. Diferența dintre cel mai bun BID și cel mai bun ASK este spread-ul: nu e comisionul brokerului, e prețul imediatității — ceea ce plătești pentru că nu vrei să aștepți. Numerele de lângă prețuri sunt volumul ordinelor: câte loturi stau în coadă la fiecare nivel. Banda de mai jos este jurnalul tranzacțiilor încheiate: preț, volum, secundă. Graficul arată trecutul; carnetul arată prezentul; banda arată chiar momentul schimbului.</p>
+<h2>Exemplu ghidat</h2>
+<p>Un ordin de piață BUY de 5 loturi intră în carnet — 3 loturi se execută la 2505.70, 2 la 2505.80. Prețul mediu de execuție nu e „un preț” — sunt deja două prețuri deodată: deja o micro-alunecare.</p>
+<p>Un ordin mare de 40 de loturi traversează patru niveluri la rând — de-asta „balenele” nu apasă pe BUY fără să se uite (reține asta, revenim în capitolul 7).</p>
+<p>Spread 0.3, carnetul e dens — ordinele de piață se execută aproape fără pierderi.</p>
+<p>Formatorii de piață își retrag ordinele, carnetul se golește, spread-ul sare de la 0.3 la 4+, banda înnebunește.</p>
+<p>Carnetul e subțire, spread 1.2, bandă rară — același ordin, dar mai scump.</p>
+<p>Execută un BUY de 10 loturi înainte și după declanșare — compară prețul mediu.</p>
+<p>Același ordin — de ce e mai scump decât ziua?</p>
+<p>Spread-ul este un termometru al lichidității. Reține cele trei stări — ziua, la știri, noaptea. În capitolul 5 vei afla programul lor.</p>
+<p>Regimurile sunt calibrate pe intervalele reale M30 pe ore (o zi de NFP: ~24 puncte față de ~12 puncte într-o oră obișnuită — exact 2×, de aici multiplicatorul regimului CPI). Tot restul de pe panou nu e o măsurătoare: carnetul de ordine al bursei nu e stocat la noi deloc, deci adâncimea, volumele pe niveluri și banda tranzacțiilor cu timp la secundă sunt un exemplu didactic. Ele arată CUM se comportă carnetul în trei regimuri, nu ce se afla în el la ora numită.</p>
+<p>Un formator de piață nu e nici dușman, nici binefăcător: e un magazin mereu deschis, care câștigă din marjă (spread). Pe furtună, magazinul scumpește sau se închide — are acest drept.</p>
+<p>O parte din coadă nu o vezi deloc: ordine iceberg și dark pools. Le analizăm în capitolul 11 — după ce înveți să citești partea vizibilă.</p>
+<h2>SCENĂ — ALUNECAREA DE PREȚ, ÎN DIRECT</h2>
+<p>Privește bara de 12:30 UTC — în interiorul ei spread-ul s-a lărgit de mai multe ori, iar prețul a parcurs în câteva minute cât parcurge de obicei într-o jumătate de zi.</p>
+<p>Ești într-o poziție cu un stop în interiorul acestui interval. Stop-ul tău devine un ordin de piață odată declanșat. La ce preț se va executa: la nivelul lui, sau în coadă?</p>
+<p>Bara istorică arată un interval de preț real; spread-ul în sine nu e stocat istoric — lărgirea lui e arătată prin valori tipice de broker, nu printr-o măsurătoare. Este marcat intenționat.</p>
+<h2>INSTRUMENTELE COZII</h2>
+<h2>Tipuri de ordine</h2>
+<p>Tipul de ordin este răspunsul tău la o singură întrebare: ce contează mai mult pentru tine — PREȚUL sau GARANȚIA INTRĂRII? Market spune: „intră-mă acum, prețul e secundar”. Limit: „doar la prețul meu, s-ar putea să nu intru deloc”. Stop: „intră-mă când piața dovedește mișcarea — chiar și mai scump”. Stop-Limit: „dovedește mișcarea, dar nu plătesc mai mult de atât”. Tot restul sunt combinații ale acestor patru răspunsuri.</p>
+<p>BUY LIMIT la 2480: coada lucrează pentru mine, nu plătesc spread-ul.</p>
+<p>BUY STOP peste nivel: plătesc pentru confirmarea mișcării.</p>
+<p>Știre în 3 minute, vreau să fiu în piață</p>
+<p>Mă opresc: un ordin de piață într-o coadă goală e cel mai scump mod de a afla despre spread.</p>
+<p>Doar ordine limit, și nu mă mir de execuții parțiale.</p>
+<p>Regula SBF: ordinul de piață e un instrument al orei lichide. În rest, coada trebuie să lucreze pentru tine, nu invers.</p>
+<p>Trage linia deasupra sau sub prețul curent — eticheta se actualizează singură.</p>
+<p>Ai plasat ordinul deasupra prețului. Poți cumpăra deasupra pieței doar la breakout — deci e BUY STOP. Poți vinde deasupra pieței doar la limită — deci e SELL LIMIT.</p>
+<p>Ai plasat ordinul sub preț. Poți cumpăra sub piață doar la limită — deci e BUY LIMIT. Poți vinde sub piață doar la breakout — deci e SELL STOP.</p>
+<p>Prețul se târăște pe grafic. Sarcina ta este să execuți corect șase tipuri de ordine: pune linia acolo unde acel tip are sens (BUY LIMIT — sub preț, BUY STOP — deasupra, și invers pentru SELL; STOP LIMIT și TRAILING STOP au propria logică). Dacă o pui greșit, antrenorul îți explică de ce ordinul nu se declanșează, sau se declanșează altfel decât te așteptai.</p>
+<h2>7 ÎNTREBĂRI PENTRU BROKERUL TĂU</h2>
+<p>Brokerii se aleg după bonusuri și reclame. Un profesionist alege după execuție. Iată întrebările ale căror răspunsuri valorează mai mult decât orice bonus — pune-le înainte de depozit:</p>
+<p>Nu știi cum să interpretezi răspunsurile — echipa SBF potrivește brokerul cu nevoile clientului, face parte din serviciile de suport.</p>
+<h2>CONTEXT LOCAL</h2>
+<p>Brokerii locali și cei offshore diferă în primul rând nu prin platformă, ci prin calitatea execuției și jurisdicția de protecție a clientului: aceeași strategie la doi brokeri dă rezultate diferite deja la nivel de spread și alunecare de preț. Pune „cele 7 întrebări” ambilor și compară răspunsurile scrise.</p>
+<p>Prețul imediatității — diferența dintre cel mai bun cumpărător și vânzător</p>
+<p>Corect. Spread-ul se plătește cozii, nu brokerului (comisionul brokerului e separat — întrebarea 6 din „cele 7 întrebări”).</p>
+<p>Nu chiar. Spread-ul nu e nici comision, nici taxă — e prețul imediatității: diferența dintre cel mai bun BID și cel mai bun ASK.</p>
+<p>Stop-loss-ul s-a declanșat. Cu ce tip de ordin intră în piață și la ce preț se va executa?</p>
+<p>Ordin de piață — în coadă, nu la nivelul lui</p>
+<p>Corect — chiar acesta e cold open-ul acestui capitol. Stop-urile garantate sunt un serviciu separat, cu plată (întrebarea 5).</p>
+<p>Nu chiar. Un stop declanșat devine ordin de piață și se execută în coadă, nu strict la nivelul lui.</p>
+<p>Vrei să cumperi o revenire la suport fără să supraplătești spread-ul chiar în momentul atingerii. Ordinul tău?</p>
+<p>Corect. Un ordin limit așteaptă în coadă — coada lucrează pentru tine.</p>
+<p>Nu chiar. Doar un BUY LIMIT chiar la nivel așteaptă în coadă fără să supraplătească spread-ul.</p>
+<p>De ce stop-urile pe franc din 15.01.2015 s-au executat cu mii de puncte mai rău decât nivelurile lor?</p>
+<p>A dispărut chiar coada — nu existau prețuri la care să se execute</p>
+<p>Corect — stația 11 din capitolul 2 plus acest capitol: un stop protejează împotriva mișcării prețului, dar nu împotriva dispariției lichidității. De asta te protejează mărimea poziției (capitolul 3).</p>
+<p>Nu chiar. Nu a fost o înțelegere secretă și nici stop-uri stricate — pentru câteva secunde a dispărut chiar coada de ordine, nu era la ce se executa.</p>
+<p>Vineri e NFP. Intervalul zilnic al aurului va fi mai mare sau mai mic decât media lunară?</p>
+<p>Bara zilnică de aur de vineri va închide peste deschidere?</p>
+<p>Acum știi: fiecare tranzacție are o a doua parte, iar uneori aceasta pleacă de la tejghea. Dar iată ce e ciudat: pleacă DUPĂ UN PROGRAM. La ora 3 noaptea, ora Moscovei, coada e mereu subțire. La 16:30 — mereu densă. Aurul „explodează” la 15:30 nu uneori, ci aproape în fiecare zi. Piața funcționează non-stop — dar nu uniform: lichiditatea circulă pe planetă după soare, ca un flux. Cine acumulează noaptea, cine manipulează dimineața și cine distribuie seara — episodul următor descompune ziua de tranzacționare oră de oră. Spoiler: spargerile „aleatorii” de noapte au un nume, un prenume și un motiv.</p>

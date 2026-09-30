@@ -46,10 +46,24 @@
     },
     "entity_resolution_status": {
       "updated": "2026-08-05, по итогам съёмки экранов регистрации всех пяти партнёров",
-      "confirmed": ["fxpro → Costa Rica Markets Ltd (Коста-Рика), клиентский договор §1.2", "naga → NAGA Capital Ltd (Сейшелы), FSA SD026"],
-      "high_confidence_unconfirmed": ["xm → XM Global Limited (Белиз), FSC 8557558 — назван в подвале, но подвал глобальный и от выбора страны не зависит", "instaforex → InstaFinance Ltd (БВО), BVI FSC SIBA/L/14/1082 — назван в подвале главной"],
-      "open": ["avatrade — юрлицо не установлено ни на экране, ни в документе; форма регистрации не называет ничего, до клиентского договора не дойти без отдельной почты"],
-      "named_in_registration_interface": { "xm": true, "naga": true, "instaforex": true, "fxpro": false, "avatrade": false },
+      "confirmed": [
+        "fxpro → FxPro Markets Direct Costa Rica Latam, SRL (Коста-Рика), клиентский договор маршрута cri §1.2 — исправлено 2026-08-14, до этого ошибочно значилось Costa Rica Markets Ltd с маршрута crc",
+        "naga → NAGA Capital Ltd (Сейшелы), FSA SD026"
+      ],
+      "high_confidence_unconfirmed": [
+        "xm → XM Global Limited (Белиз), FSC 8557558 — назван в подвале, но подвал глобальный и от выбора страны не зависит",
+        "instaforex → InstaFinance Ltd (БВО), BVI FSC SIBA/L/14/1082 — назван в подвале главной"
+      ],
+      "open": [
+        "avatrade — юрлицо не установлено ни на экране, ни в документе; форма регистрации не называет ничего, до клиентского договора не дойти без отдельной почты"
+      ],
+      "named_in_registration_interface": {
+        "xm": true,
+        "naga": true,
+        "instaforex": true,
+        "fxpro": false,
+        "avatrade": false
+      },
       "note": "Двое из пяти — FxPro и AvaTrade — на экране регистрации не называют контрагента вообще. У FxPro он всё же находится, но только внутри PDF за ссылкой «Terms and conditions»; у AvaTrade единственная ссылка на форме ведёт на политику конфиденциальности, и выйти на имя компании с формы нельзя."
     },
     "compensation_scheme_rule": {
@@ -59,14 +73,30 @@
       "do_not": "Не писать и не подразумевать, что брокер работает без компенсационной защиты как таковой."
     },
     "corrections_log": [
-      { "date": "2026-08-05", "field": "fxpro.entity_resolution.md", "was": "fxpro_global_markets (Багамы), вывод", "now": "fxpro_costa_rica (Коста-Рика), подтверждено договором", "why": "прежний вывод опирался на маршрут /register/us/gm — это маршрут для США. Молдавский маршрут — /register/md/crc, и договор оттуда подписывает Costa Rica Markets Ltd. Юрлицо заведено в июне 2026, о чём говорит имя файла договора." },
-      { "date": "2026-08-05", "field": "instaforex.platforms", "was": "[\"MT4 desktop\"] + «веб-терминала нет»", "now": "MT4, MT5, webtrader.instaforex.com, trade.instaforex.com", "why": "прежняя запись была ошибкой и противоречила terminal_access в той же карточке. Следствие: InstaForex можно включить в оба окна замера." },
-      { "date": "2026-08-05", "field": "instaforex — юрлицо в интерфейсе", "was": "«лицензированное юрлицо не называется нигде»", "now": "InstaFinance Ltd, БВО, SIBA/L/14/1082 — назван в подвале главной", "why": "первая проверка читала хвост текста страницы без прокрутки и обрезала блок с лицензией. Ошибку поймала перекрёстная проверка вторым чатом." }
+      {
+        "date": "2026-08-05",
+        "field": "fxpro.entity_resolution.md",
+        "was": "fxpro_global_markets (Багамы), вывод",
+        "now": "fxpro_costa_rica (Коста-Рика), подтверждено договором",
+        "why": "прежний вывод опирался на маршрут /register/us/gm — это маршрут для США. Молдавский маршрут — /register/md/crc, и договор оттуда подписывает Costa Rica Markets Ltd. Юрлицо заведено в июне 2026, о чём говорит имя файла договора."
+      },
+      {
+        "date": "2026-08-05",
+        "field": "instaforex.platforms",
+        "was": "[\"MT4 desktop\"] + «веб-терминала нет»",
+        "now": "MT4, MT5, webtrader.instaforex.com, trade.instaforex.com",
+        "why": "прежняя запись была ошибкой и противоречила terminal_access в той же карточке. Следствие: InstaForex можно включить в оба окна замера."
+      },
+      {
+        "date": "2026-08-05",
+        "field": "instaforex — юрлицо в интерфейсе",
+        "was": "«лицензированное юрлицо не называется нигде»",
+        "now": "InstaFinance Ltd, БВО, SIBA/L/14/1082 — назван в подвале главной",
+        "why": "первая проверка читала хвост текста страницы без прокрутки и обрезала блок с лицензией. Ошибку поймала перекрёстная проверка вторым чатом."
+      }
     ]
   },
-
   "groups": [],
-
   "partners": [
     {
       "id": "xm",
@@ -77,7 +107,8 @@
         "demo": null,
         "live": null,
         "tracking_ok": null,
-        "tracking_note": "VERIFY, НЕ ЗАВЕРШЕНО 2026-07-29: автоматическая попытка (WebFetch на clicks.pipaffiliates.com) дважды упала по таймауту 60с — многошаговый редирект не удалось пройти инструментом. pipaffiliates — официальная, давно работающая партнёрская платформа XM (не самописный трекер), и cookie/redirect-атрибуция — её основная функция, так что технически рабочий вариант вероятен, но это предположение, а не подтверждение. Нужен один ручной переход по ссылке в браузере (лучше в приватном режиме) до формы регистрации XM и проверка кабинета партнёрки на следующий день — появился ли клик/лид."
+        "tracking_note": "VERIFY, НЕ ЗАВЕРШЕНО 2026-07-29: автоматическая попытка (WebFetch на clicks.pipaffiliates.com) дважды упала по таймауту 60с — многошаговый редирект не удалось пройти инструментом. pipaffiliates — официальная, давно работающая партнёрская платформа XM (не самописный трекер), и cookie/redirect-атрибуция — её основная функция, так что технически рабочий вариант вероятен, но это предположение, а не подтверждение. Нужен один ручной переход по ссылке в браузере (лучше в приватном режиме) до формы регистрации XM и проверка кабинета партнёрки на следующий день — появился ли клик/лид.",
+        "affiliate_lang_note": "ЯЗЫК ЗАШИТ В ССЫЛКУ (найдено 16.09.2026). Здесь стоит параметр l=ru — то есть румын с /ro/brokers и англичанин с /en/brokers уходят на страницу партнёра не на своём языке. Код УЖЕ умеет брать вариант из полей affiliate_ro / affiliate_en, если они появятся рядом с affiliate. Не заполнены намеренно: коды локалей у каждого партнёра свои, проверяются только живым переходом по ссылке, а каждый такой переход засчитывается партнёрке как клик — это шаг владельца. Проверить, открывается ли форма регистрации, и вписать сюда."
       },
       "terminal_access": {
         "platform": "my.xm.com, веб-платформа MT5",
@@ -105,14 +136,36 @@
           "regulator": "Financial Services Commission (Belize), Securities Industry Act 2021",
           "licence_no": "8557558",
           "address": "Suite 101, 63 Eve Street, Belize City, Belize",
-          "serves": "global",
-          "excludes": ["US", "CA", "IL", "IR"],
+          "serves": "клиентов по всему миру",
+          "serves_en": "clients worldwide",
+          "serves_ro": "clienți din întreaga lume",
+          "excludes": [
+            "US",
+            "CA",
+            "IL",
+            "IR"
+          ],
+          "excludes_names": "США, Канада, Израиль, Иран",
+          "excludes_names_en": "United States, Canada, Israel, Iran",
+          "excludes_names_ro": "Statele Unite, Canada, Israel, Iran",
           "show_in_eu_locales": false,
           "checked": "2026-07-29",
           "source": "https://www.xm.com/regulation",
           "source_note": "Номер лицензии взят с сайта XM. Публичный реестр FSC Белиза машинно не читается — перекрёстной проверки нет.",
-          "leverage_retail": "1:1000",
+          "leverage_short": "от 1:1 до 1:1000",
+          "leverage_short_en": "from 1:1 to 1:1000",
+          "leverage_short_ro": "de la 1:1 la 1:1000",
+          "leverage_retail": "до 1:1000 · плечо меняется в личном кабинете · для клиентов ЕС потолок 1:30 по валютам",
+          "leverage_retail_en": "up to 1:1000 · adjustable from the client area · EU clients are capped at 1:30 on currencies",
+          "leverage_retail_ro": "până la 1:1000 · se poate modifica din contul personal · clienții din UE au plafon 1:30 la valute",
+          "leverage_adjustable": "Плечо меняется самим клиентом в личном кабинете (уточнено владельцем 2026-08-14, витриной xm.com не документировано отдельной страницей).",
           "leverage_source": "https://www.xm.com/stable-leverage",
+          "leverage_checked": "2026-08-14",
+          "leverage_verification": "broker_site",
+          "leverage_jurisdiction_note": "Белиз (FSC, Securities Industry Act 2021) числового потолка плеча не устанавливает — в тексте закона слово leverage не встречается вовсе. Потолок задаёт сам брокер. Проверено 2026-08-14 по https://www.nationalassembly.gov.bz/wp-content/uploads/2021/12/Act-No-46-of-2021-Securities-Industry-Act.pdf",
+          "leverage_jurisdiction_note_en": "Belize (FSC, Securities Industry Act 2021) sets no numerical leverage cap — the word \"leverage\" doesn't appear anywhere in the law's text. The broker sets the cap itself. Checked 2026-08-14 against https://www.nationalassembly.gov.bz/wp-content/uploads/2021/12/Act-No-46-of-2021-Securities-Industry-Act.pdf",
+          "leverage_jurisdiction_note_ro": "Belize (FSC, Securities Industry Act 2021) nu stabilește niciun plafon numeric de levier — cuvântul „leverage” nu apare nicăieri în textul legii. Plafonul este stabilit de broker însuși. Verificat la 14.08.2026 pe baza https://www.nationalassembly.gov.bz/wp-content/uploads/2021/12/Act-No-46-of-2021-Securities-Industry-Act.pdf",
+          "leverage_contradiction": "🔴 В клиентском договоре XM Global слово leverage не встречается ни разу (полный текст проверен 2026-08-14, https://cloud.xm-cdn.com/static/pdf/System-PDFs/XMGlobal-Client-Agreement-Terms-and-Conditions-of-Business.pdf) — 1:1000 нигде договорно не зафиксировано, это витринное обещание. Отдельно: живой Risk Disclosure XM Global до сих пор называет лицензию 000261/309 по Securities Act 2007, тогда как футер сайта — 8557558 по SIA 2021.",
           "leverage_confirmed_on_account": "2026-08-05, счёт #362200400",
           "loss_pct": null,
           "loss_pct_confirmed_not_published": true,
@@ -131,21 +184,37 @@
           "regulator": "CySEC",
           "licence_no": "120/10",
           "licenced_since": "2010-08-05",
-          "serves": "EEA",
+          "serves": "клиентов из стран Европейской экономической зоны",
+          "serves_en": "clients from the European Economic Area",
+          "serves_ro": "clienți din Spațiul Economic European",
           "show_in_eu_locales": true,
           "checked": "2026-07-29",
           "source": "https://www.cysec.gov.cy/en-GB/entities/investment-firms/cypriot/37582/",
           "source_note": "Подтверждено по реестру регулятора, не по сайту брокера.",
-          "leverage_retail": "1:30",
-          "leverage_source": "https://www.xm.com/margin-and-leverage",
-          "leverage_note": "Потолки ESMA: 30:1 основные валютные пары, 20:1 золото и индексы.",
+          "leverage_short": "от 1:2 до 1:30",
+          "leverage_short_en": "from 1:2 to 1:30",
+          "leverage_short_ro": "de la 1:2 la 1:30",
+          "leverage_retail": "1:30 основные пары · 1:20 прочие пары, золото и основные индексы · 1:10 прочие индексы и сырьё · 1:5 акции · 1:2 крипта",
+          "leverage_retail_en": "1:30 major pairs · 1:20 other pairs, gold and major indices · 1:10 other indices and commodities · 1:5 shares · 1:2 crypto",
+          "leverage_retail_ro": "1:30 perechi majore · 1:20 alte perechi, aur și indici majori · 1:10 alți indici și materii prime · 1:5 acțiuni · 1:2 cripto",
+          "leverage_source": "https://cloud.xm-cdn.com/static/pdf/System-PDFs/XM-Risk-Disclosures-for-Financial-Instruments.pdf",
+          "leverage_checked": "2026-08-14",
+          "leverage_verification": "broker_site",
+          "leverage_jurisdiction_note": "Потолки заданы мерой ESMA/CySEC для розничных клиентов, а не брокером. Первоисточник ESMA: https://www.esma.europa.eu/press-news/esma-news/esma-adopts-final-product-intervention-measures-cfds-and-binary-options",
+          "leverage_jurisdiction_note_en": "The caps are set by the ESMA/CySEC measure for retail clients, not by the broker. ESMA primary source: https://www.esma.europa.eu/press-news/esma-news/esma-adopts-final-product-intervention-measures-cfds-and-binary-options",
+          "leverage_jurisdiction_note_ro": "Plafoanele sunt stabilite de măsura ESMA/CySEC pentru clienții retail, nu de broker. Sursa primară ESMA: https://www.esma.europa.eu/press-news/esma-news/esma-adopts-final-product-intervention-measures-cfds-and-binary-options",
+          "leverage_contradiction": "На сайте XM висят две версии одного Risk Disclosure с разными числами: старая (www.xm.com/assets/pdf/new/docs/) говорит «от 1:5 до 1:30» и не знает про Crypto_10, новая на CDN — «от 2:1 до 30:1». Обе датированы 3 января 2018. Взята CDN-версия. Плюс один домен xm.com обслуживает два юрлица (Белиз 1:1000 и Кипр 1:30), контент подменяется по геолокации.",
           "loss_pct": 74.3,
           "loss_pct_checked": "2026-07-29",
           "loss_pct_source": "https://www.xm.com/legal-documents",
           "negative_balance_protection": true,
           "nbp_note": "Обязательна по правилам ESMA/CySEC. Отдельной цитаты со страницы XM EU в этой проверке не снято.",
-          "compensation_scheme": { "name": "CySEC Investor Compensation Fund", "amount": 20000, "currency": "EUR",
-            "source": "https://www.cysec.gov.cy/en-GB/investor-protection/tae/information/" }
+          "compensation_scheme": {
+            "name": "CySEC Investor Compensation Fund",
+            "amount": 20000,
+            "currency": "EUR",
+            "source": "https://www.cysec.gov.cy/en-GB/investor-protection/tae/information/"
+          }
         },
         {
           "id": "trading_point_mena",
@@ -154,40 +223,77 @@
           "regulator": "DFSA",
           "licence_no": "F003484",
           "licenced_since": "2019-09-10",
-          "serves": "MENA",
+          "serves": "клиентов Ближнего Востока и Северной Африки",
+          "serves_en": "clients across the Middle East and North Africa",
+          "serves_ro": "clienți din Orientul Mijlociu și Africa de Nord",
           "show_in_eu_locales": false,
           "checked": "2026-07-29",
           "source": "https://www.dfsa.ae/public-register/firms/trading-point-mena-limited",
           "loss_pct": 73.04,
           "loss_pct_checked": "2026-07-29",
           "loss_pct_source": "https://www.xm.com/mena",
-          "leverage_retail": null,
+          "leverage_short": "от 1:1 до 1:30",
+          "leverage_short_en": "from 1:1 to 1:30",
+          "leverage_short_ro": "de la 1:1 la 1:30",
+          "leverage_retail": "1:30 основные пары · 1:20 прочие пары, золото и основные индексы · 1:10 прочие индексы и сырьё · 1:5 акции",
+          "leverage_retail_en": "1:30 major pairs · 1:20 other pairs, gold and major indices · 1:10 other indices and commodities · 1:5 shares",
+          "leverage_retail_ro": "1:30 perechi majore · 1:20 alte perechi, aur și indici majori · 1:10 alți indici și materii prime · 1:5 acțiuni",
+          "leverage_source": "https://cloud.xm-cdn.com/static/pdf/System-PDFs/XMMena-Risk-Disclosure.pdf",
+          "leverage_checked": "2026-08-14",
+          "leverage_verification": "broker_site",
+          "leverage_quote": "During the Account opening process your default classification will be that of a Retail Client and the maximum default leverage is set at 30:1. The Firm offers to its Retail Clients fixed leverage ratios which vary from 1:1 to 30:1.",
+          "leverage_jurisdiction_note": "DFSA (DIFC) COB 6.16.5 задаёт минимальную начальную маржу для розницы: 3.3% / 5% / 10% — то есть 30:1 / 20:1 / 10:1. Подпункт (d) (акции) первоисточником не вычитан: официальный хост Rulebook отдаёт пустое тело, проценты восстановлены из снипетов официальных страниц и совпали с раскрытием самого XM MENA.",
+          "leverage_jurisdiction_note_en": "DFSA (DIFC) COB 6.16.5 sets the minimum initial margin for retail: 3.3% / 5% / 10% — i.e. 30:1 / 20:1 / 10:1. Sub-clause (d) (shares) wasn't confirmed against the primary source: the official Rulebook host returns an empty body, the percentages were reconstructed from official-page snippets and matched XM MENA's own disclosure.",
+          "leverage_jurisdiction_note_ro": "DFSA (DIFC) COB 6.16.5 stabilește marja inițială minimă pentru retail: 3,3% / 5% / 10% — adică 30:1 / 20:1 / 10:1. Subpunctul (d) (acțiuni) nu a fost confirmat din sursa primară: gazda oficială a Rulebook returnează un corp gol, procentele au fost reconstituite din fragmente de pe paginile oficiale și au coincis cu propria dezvăluire a XM MENA.",
+          "leverage_contradiction": "🔴 Домен xm.ae — это НЕ Trading Point MENA: в футере XM Financial Products Promotion L.L.C (CMA UAE 20200000322, Category 5 — только промо, без права держать средства клиентов), счёт открывается в XM International MU Limited (FSC Маврикий, GB23202700), и страница xm.ae/stable-leverage обещает до 1000:1. По одному эмиратскому адресу у XM две воронки: DIFC с 30:1 и промо с уводом на Маврикий с 1000:1. Проверено 2026-08-14.",
           "note_ru": "Только Matched Principal, с разрешением на розничных клиентов."
         }
       ],
       "entities_stale": [
-        { "note": "Австралийское подразделение ушло из бренда XM: теперь Trading.com Markets PTY Ltd, AFSL 443670. Любой источник, называющий XM «регулируемым ASIC», устарел." },
-        { "note": "Британское юрлицо (FRN 705428) переименовано в Trading.com Markets UK Limited. Статус по реестру FCA не прочитан — страницы реестра только на JS." }
+        {
+          "note": "Австралийское подразделение ушло из бренда XM: теперь Trading.com Markets PTY Ltd, AFSL 443670. Любой источник, называющий XM «регулируемым ASIC», устарел."
+        },
+        {
+          "note": "Британское юрлицо (FRN 705428) переименовано в Trading.com Markets UK Limited. Статус по реестру FCA не прочитан — страницы реестра только на JS."
+        }
       ],
       "loss_pct": null,
       "loss_pct_checked": null,
       "loss_pct_source": null,
       "loss_pct_blocker": "РЕШЕНО 2026-07-29 (вариант 2 из §5.2 SPEC_brokers_comparison_page.md, рекомендованный самой спекой): показывать XM с явным пропуском в колонке процента у юрлица, к которому реально попадает молдавский пользователь (xm_global, entities[].loss_pct_confirmed_not_published=true) + раскрытием цифры соседнего юрлица (trading_point_cy, 74.3%) с оговоркой про другое плечо (1:30 vs 1:1000) и другой фонд (€20 000 vs нет). Строка не участвует в сортировке по умолчанию (нет собственного числа) и рендерится ниже партнёров с реальным loss_pct, но не скрывается — таблица сама объясняет разницу бренда и юрлица. НЕ подставлять 74.3% как loss_pct самой XM — это по-прежнему цифра другой компании.",
-      "min_deposit": { "value": 5, "currency": "USD", "account_types": "Standard, Ultra Low; Shares — 10000",
-        "entity": "xm_global", "checked": "2026-07-29", "source": "https://www.xm.com/account-types",
-        "note": "Снято с белизской сборки сайта. Для кипрского юрлица не проверено — сборка ЕС в этой сессии не отдавалась." },
-
+      "commission_short": "3,5 USD за лот на счёте Zero",
+      "commission_short_en": "3.5 USD per lot on the Zero account",
+      "commission_short_ro": "3,5 USD pe lot pe contul Zero",
+      "commission_short_note": "Это ОТДЕЛЬНАЯ плата сверх спреда, а не сам спред: списывается со счёта явно, 3,5 USD за сторону на 100 000 объёма (7 USD за круг). Существует только на счёте XM Zero, где спред околонулевой. На счёте Standard комиссии нет — там заработок площадки зашит в спред.",
+      "commission_short_note_en": "There's no range: XM charges a single one-way rate, 3.5 USD per 100,000 volume. Writing \"from–to\" would be inventing one.",
+      "commission_short_note_ro": "Nu există un interval: XM percepe o singură rată într-un sens, 3,5 USD la 100.000 volum. A scrie „de la–până la” ar fi o invenție.",
+      "commission_account_mismatch": "🔴 НАЙДЕНО 14.08.2026. В строке XM смешаны ДВА типа счёта: спред снят со счёта Standard (spreads_published.account_type), а комиссия относится к счёту Zero (commission.account_type). Читателю это выглядит как «спред 2 пипса И комиссия 3,5 USD», хотя на Standard комиссии нет вовсе, а на Zero спред околонулевой. Хуже: комиссия задокументирована для КИПРСКОГО юрлица (commission.entity = trading_point_cy), а молдавский читатель попадает в XM Global (Белиз), и в белизской сборке счёта Zero, по нашей же пометке, нет. До перепроверки в кабинете подпись «на счёте Zero» обязательна — без неё строка вводит в заблуждение.",
+      "min_deposit": {
+        "value": 5,
+        "currency": "USD",
+        "account_types": "Standard, Ultra Low; Shares — 10000",
+        "entity": "xm_global",
+        "checked": "2026-07-29",
+        "source": "https://www.xm.com/account-types",
+        "note": "Снято с белизской сборки сайта. Для кипрского юрлица не проверено — сборка ЕС в этой сессии не отдавалась."
+      },
       "symbols": {
-        "EURUSD": "EURUSD", "GBPUSD": "GBPUSD", "USDJPY": "USDJPY", "EURGBP": "EURGBP",
-        "XAUUSD": "GOLD", "XAGUSD": "SILVER", "WTI": "OILCash",
-        "SPX": "US500Cash", "NASDAQ": "US100Cash", "DAX": "GER40Cash",
-        "BTC": "BTCUSD", "ETH": "ETHUSD",
+        "EURUSD": "EURUSD",
+        "GBPUSD": "GBPUSD",
+        "USDJPY": "USDJPY",
+        "EURGBP": "EURGBP",
+        "XAUUSD": "GOLD",
+        "XAGUSD": "SILVER",
+        "WTI": "OILCash",
+        "SPX": "US500Cash",
+        "NASDAQ": "US100Cash",
+        "DAX": "GER40Cash",
+        "BTC": "BTCUSD",
+        "ETH": "ETHUSD",
         "checked": "2026-08-05"
       },
-
       "spreads": [],
       "spreads_note": "Замер по методичке (два окна 13-16 и 03 UTC) ещё не проведён. Ниже — опубликованные брокером средние и наш контрольный снимок; ни то, ни другое не является замером.",
-
       "spreads_published": {
         "source": "https://www.xm.com/ru/forex-trading",
         "checked": "2026-08-06",
@@ -203,54 +309,189 @@
         "checked_full": "2026-08-06",
         "coverage": "12 из 12 инструментов методички",
         "items": [
-          { "symbol": "EURUSD", "avg": 2.0, "min": 1.6, "unit": "пипс" },
-          { "symbol": "GBPUSD", "avg": 2.4, "min": 1.7, "unit": "пипс" },
-          { "symbol": "USDJPY", "avg": 2.5, "min": 2.0, "unit": "пипс" },
-          { "symbol": "EURGBP", "avg": 2.4, "min": 1.8, "unit": "пипс" },
-          { "symbol": "XAUUSD", "broker_symbol": "GOLD", "avg": 5.5, "min": 4.0, "unit": "пипс" },
-          { "symbol": "XAGUSD", "broker_symbol": "SILVER", "avg": 7.0, "min": 6.0, "unit": "пипс" },
-          { "symbol": "WTI", "broker_symbol": "OILCash", "avg": 0.05, "min": 0.05, "unit": "USD" },
-          { "symbol": "SPX", "broker_symbol": "US500Cash", "avg": 0.70, "min": 0.70, "unit": "пункт индекса" },
-          { "symbol": "NASDAQ", "broker_symbol": "US100Cash", "avg": 2.60, "min": 2.60, "unit": "пункт индекса" },
-          { "symbol": "DAX", "broker_symbol": "GER40Cash", "avg": 2.64, "min": 2.30, "unit": "пункт индекса" },
-          { "symbol": "BTC", "broker_symbol": "BTCUSD", "avg": 50.00, "min": 50.00, "unit": "USD" },
-          { "symbol": "ETH", "broker_symbol": "ETHUSD", "avg": 4.90, "min": 4.89, "unit": "USD" }
+          {
+            "symbol": "EURUSD",
+            "avg": 2.0,
+            "min": 1.6,
+            "unit": "пипс"
+          },
+          {
+            "symbol": "GBPUSD",
+            "avg": 2.4,
+            "min": 1.7,
+            "unit": "пипс"
+          },
+          {
+            "symbol": "USDJPY",
+            "avg": 2.5,
+            "min": 2.0,
+            "unit": "пипс"
+          },
+          {
+            "symbol": "EURGBP",
+            "avg": 2.4,
+            "min": 1.8,
+            "unit": "пипс"
+          },
+          {
+            "symbol": "XAUUSD",
+            "broker_symbol": "GOLD",
+            "avg": 5.5,
+            "min": 4.0,
+            "unit": "пипс"
+          },
+          {
+            "symbol": "XAGUSD",
+            "broker_symbol": "SILVER",
+            "avg": 7.0,
+            "min": 6.0,
+            "unit": "пипс"
+          },
+          {
+            "symbol": "WTI",
+            "broker_symbol": "OILCash",
+            "avg": 0.05,
+            "min": 0.05,
+            "unit": "USD"
+          },
+          {
+            "symbol": "SPX",
+            "broker_symbol": "US500Cash",
+            "avg": 0.7,
+            "min": 0.7,
+            "unit": "пункт индекса"
+          },
+          {
+            "symbol": "NASDAQ",
+            "broker_symbol": "US100Cash",
+            "avg": 2.6,
+            "min": 2.6,
+            "unit": "пункт индекса"
+          },
+          {
+            "symbol": "DAX",
+            "broker_symbol": "GER40Cash",
+            "avg": 2.64,
+            "min": 2.3,
+            "unit": "пункт индекса"
+          },
+          {
+            "symbol": "BTC",
+            "broker_symbol": "BTCUSD",
+            "avg": 50.0,
+            "min": 50.0,
+            "unit": "USD"
+          },
+          {
+            "symbol": "ETH",
+            "broker_symbol": "ETHUSD",
+            "avg": 4.9,
+            "min": 4.89,
+            "unit": "USD"
+          }
         ],
         "unit_note": "🔴 ЧИТАТЬ ДО ПЕРЕСЧЁТА В ДЕНЬГИ. «Пипс» у XM — это десять пунктов котировки, а не последний знак. Проверено сверкой с контрольным снимком: золото 5,5 пипса против $0,55 в терминале (пипс = $0,10 при котировке с двумя знаками), серебро 7,0 пипса против $0,071 (пипс = $0,01 при трёх знаках), евродоллар 2,0 пипса против 0,00019. Правило одно и то же везде, но если считать пипс последним знаком котировки, золото ошибётся в десять раз. В стоимость круга подставлять только после перевода в валюту котировки.",
         "note": "ВАЖНО ДЛЯ МЕТОДИКИ. XM публикует СРЕДНИЙ и МИНИМАЛЬНЫЙ спред, а не рекламное «от 0,0», и средние сходятся с нашим контрольным снимком по всем классам: евродоллар 2,0 против 1,9; фунт 2,4 против 2,4; иена 2,5 против 2,3; евро/фунт 2,4 против 2,4; нефть 0,05 против 0,05; S&P 0,70 против 0,75; Nasdaq 2,60 против 2,75; DAX 2,64 против 2,50; биткоин 50,00 против 50,00 — в точку; эфир 4,90 против 4,90 — в точку. Это опровергает исходное допущение КАК_СОБИРАТЬ.md §1, что сайтовые цифры у всех реклама. Двойная польза: (1) в статье нельзя обвинять пул огулом, как минимум один брокер играет честно; (2) совпадение независимо опубликованного среднего с нашим снимком подтверждает, что снимаем правильно.",
         "correction": "Прежняя запись здесь утверждала, что металлы, индексы и крипта у XM не публикуются и что /ru/metals-trading не существует. Это была ошибка поиска: страницы есть, просто называются иначе — /ru/precious-metals, /ru/equity-indices, /ru/energies, /ru/cryptocurrencies. Покрытие XM не 4 из 12, а полное."
       },
-
       "spread_probe": {
         "kind": "контрольный снимок, НЕ замер по методичке",
         "checked": "2026-08-05T10:00Z/10:20Z",
         "render": false,
         "note": "Время вне окон методички. Нужен как страховка: если в замер цифра уедет на порядок, будет с чем сверить. Перебор watchlist занимает ~20 секунд, инструменты сняты не одномоментно.",
         "items": [
-          { "symbol": "EURUSD", "spread": 1.9, "unit": "пункт" },
-          { "symbol": "GBPUSD", "spread": 2.4, "unit": "пункт" },
-          { "symbol": "USDJPY", "spread": 2.3, "unit": "пункт" },
-          { "symbol": "EURGBP", "spread": 2.4, "unit": "пункт" },
-          { "symbol": "XAUUSD", "spread": 0.55, "unit": "USD" },
-          { "symbol": "XAGUSD", "spread": 0.071, "unit": "USD" },
-          { "symbol": "WTI", "spread": 0.05, "unit": "USD" },
-          { "symbol": "SPX", "spread": 0.75, "unit": "пункт" },
-          { "symbol": "NASDAQ", "spread": 2.75, "unit": "пункт" },
-          { "symbol": "DAX", "spread": 2.5, "unit": "пункт" },
-          { "symbol": "BTC", "spread": 50, "unit": "USD" },
-          { "symbol": "ETH", "spread": 4.9, "unit": "USD" }
+          {
+            "symbol": "EURUSD",
+            "spread": 1.9,
+            "unit": "пункт"
+          },
+          {
+            "symbol": "GBPUSD",
+            "spread": 2.4,
+            "unit": "пункт"
+          },
+          {
+            "symbol": "USDJPY",
+            "spread": 2.3,
+            "unit": "пункт"
+          },
+          {
+            "symbol": "EURGBP",
+            "spread": 2.4,
+            "unit": "пункт"
+          },
+          {
+            "symbol": "XAUUSD",
+            "spread": 0.55,
+            "unit": "USD"
+          },
+          {
+            "symbol": "XAGUSD",
+            "spread": 0.071,
+            "unit": "USD"
+          },
+          {
+            "symbol": "WTI",
+            "spread": 0.05,
+            "unit": "USD"
+          },
+          {
+            "symbol": "SPX",
+            "spread": 0.75,
+            "unit": "пункт"
+          },
+          {
+            "symbol": "NASDAQ",
+            "spread": 2.75,
+            "unit": "пункт"
+          },
+          {
+            "symbol": "DAX",
+            "spread": 2.5,
+            "unit": "пункт"
+          },
+          {
+            "symbol": "BTC",
+            "spread": 50,
+            "unit": "USD"
+          },
+          {
+            "symbol": "ETH",
+            "spread": 4.9,
+            "unit": "USD"
+          }
         ]
       },
-
-      "commission": { "model": "per_side", "value": 3.5, "currency": "USD", "per_volume": 100000,
-        "round_turn": 7, "account_type": "XM Zero", "entity": "trading_point_cy",
-        "checked": "2026-07-29", "source": "https://www.xm.com/assets/pdf/new/docs/XM-costs-and-charges.pdf",
-        "note": "Счёт XM Zero есть в документе издержек ЕС, но отсутствует в белизской сборке. По счёту Standard #362200400 комиссия по спецификации не берётся, но это НЕ ПОДТВЕРЖДЕНО в кабинете — оставлено предположением, не нулём." },
-      "dormant_fee": { "value": 5, "currency": "USD", "period": "month", "after_days": 90,
-        "source": "https://www.xm.com/assets/pdf/new/docs/XM-costs-and-charges.pdf" },
+      "commission": {
+        "model": "per_side",
+        "value": 3.5,
+        "currency": "USD",
+        "per_volume": 100000,
+        "round_turn": 7,
+        "account_type": "XM Zero",
+        "entity": "trading_point_cy",
+        "checked": "2026-07-29",
+        "source": "https://www.xm.com/assets/pdf/new/docs/XM-costs-and-charges.pdf",
+        "note": "Счёт XM Zero есть в документе издержек ЕС, но отсутствует в белизской сборке. По счёту Standard #362200400 комиссия по спецификации не берётся, но это НЕ ПОДТВЕРЖДЕНО в кабинете — оставлено предположением, не нулём."
+      },
+      "inactivity_short": "5 USD в месяц после 90 дней без сделок",
+      "inactivity_short_en": "5 USD a month after 90 days without trades",
+      "inactivity_short_ro": "5 USD pe lună după 90 de zile fără tranzacții",
+      "dormant_fee": {
+        "value": 5,
+        "currency": "USD",
+        "period": "month",
+        "after_days": 90,
+        "source": "https://www.xm.com/assets/pdf/new/docs/XM-costs-and-charges.pdf"
+      },
       "swaps": null,
       "swap_note": "НЕ СНЯТЫ. Веб-платформа XM спецификации инструментов не показывает — нужен десктопный MT5 или страница спецификаций в кабинете.",
-      "platforms": ["MT4", "MT5", "MT5 WebTrader", "XM App"],
+      "platforms": [
+        "MetaTrader 4",
+        "MetaTrader 5",
+        "MT5 WebTrader",
+        "XM App"
+      ],
       "platforms_checked": "2026-07-29",
       "platforms_source": "https://www.xm.com/mt5",
       "platforms_note": "MT4 и MT5 на глобальной и европейской сборках. На ближневосточной MT4 нет. Веб-платформа MT5 подтверждена собственным входом 2026-08-05.",
@@ -260,7 +501,6 @@
       "funding_methods": [],
       "notes_ru": null
     },
-
     {
       "id": "avatrade",
       "name": "AvaTrade",
@@ -291,81 +531,154 @@
         "checked": "2026-08-05"
       },
       "entities": [
-        { "id": "ava_trade_markets_bvi",
-          "legal_name": "Ava Trade Markets Ltd", "jurisdiction": "VG",
-          "regulator": "BVI Financial Services Commission", "licence_no": null,
-          "serves": "global", "show_in_eu_locales": false,
-          "checked": "2026-08-05", "source": "https://www.bvifsc.vg/regulated-entities/ava-trade-markets-ltd-0",
+        {
+          "id": "ava_trade_markets_bvi",
+          "legal_name": "Ava Trade Markets Ltd",
+          "jurisdiction": "VG",
+          "regulator": "BVI Financial Services Commission",
+          "licence_no": null,
+          "serves": "клиентов за пределами Европейской экономической зоны",
+          "serves_en": "clients outside the European Economic Area",
+          "serves_ro": "clienți din afara Spațiului Economic European",
+          "show_in_eu_locales": false,
+          "checked": "2026-08-05",
+          "source": "https://www.bvifsc.vg/regulated-entities/ava-trade-markets-ltd-0",
           "source_note": "Компания подтверждена реестром БВО как действующая (Dealing as Principal). Номер лицензии реестр БВО не публикует.",
-          "leverage_retail": "до 1:400 валюты, 1:200 индексы",
-          "leverage_retail_en": "up to 1:400 currencies, 1:200 indices", "leverage_retail_ro": "până la 1:400 valute, 1:200 indici",
+          "leverage_short": "до 1:20 по индексам",
+          "leverage_short_en": "up to 1:20 on indices",
+          "leverage_short_ro": "până la 1:20 la indici",
+          "leverage_short_note": "Нижней границы нет: брокер публикует только это одно число для не-ЕС счетов, диапазон «от—до» составить не из чего. Писать «от 1:1» было бы додумыванием.",
+          "leverage_short_note_en": "There's no lower bound: the broker publishes only this single figure for non-EU accounts, there's nothing to build a \"from–to\" range from. Writing \"from 1:1\" would be guessing.",
+          "leverage_short_note_ro": "Nu există limită inferioară: brokerul publică doar această cifră unică pentru conturile din afara UE, nu există din ce să se construiască un interval „de la–până la”. A scrie „de la 1:1” ar fi o presupunere.",
+          "leverage_retail": "1:20 индексы · счета вне ЕС · по валютам числа для этого юрлица брокер не публикует",
+          "leverage_retail_en": "1:20 indices · non-EU accounts · the broker publishes no figure for currencies under this entity",
+          "leverage_retail_ro": "1:20 indici · conturi din afara UE · pentru valute brokerul nu publică nicio cifră",
+          "leverage_source": "https://support.avatrade.com/hc/en-us/articles/360009579017",
+          "leverage_checked": "2026-08-14",
           "leverage_verification": "broker_site",
+          "leverage_jurisdiction_note": "БВО (SIBA + Regulatory Code) числового потолка плеча не устанавливает — поиск по «leverage» в законодательстве регулятора не даёт совпадений (проверено 2026-08-14, https://www.bvifsc.vg/library/legislation). Потолок целиком на усмотрение брокера.",
+          "leverage_jurisdiction_note_en": "The BVI (SIBA + Regulatory Code) sets no numerical leverage cap — searching the regulator's legislation for \"leverage\" returns no matches (checked 2026-08-14, https://www.bvifsc.vg/library/legislation). The cap is entirely at the broker's discretion.",
+          "leverage_jurisdiction_note_ro": "BVI (SIBA + Regulatory Code) nu stabilește niciun plafon numeric de levier — căutarea cuvântului „leverage” în legislația autorității nu găsește nicio potrivire (verificat la 14.08.2026, https://www.bvifsc.vg/library/legislation). Plafonul este la discreția completă a brokerului.",
+          "leverage_pending_owner": "⏳ ВЛАДЕЛЕЦ УТОЧНЯЕТ (2026-08-14). Указанные 1:20 по индексам взяты из help-центра AvaTrade и относятся к формулировке «EU, ADGM and ASIC retail trading accounts» — то есть к регулируемым юрлицам, а не к БВО. Владелец: «Ава дал плечо 1:20 по индексам, там всё тяжко по условиям, я узнаю». До ответа значение остаётся с подписью «по данным брокера» и НЕ должно переписываться под более выгодное число.",
+          "leverage_previous_claim": "🔴 Прежнее значение «до 1:400 валюты» СНЯТО 2026-08-14 как неподтверждённое: 400:1 встречается на официальных доменах AvaTrade только в контексте статуса AVA Professional («Pre-ESMA leverage», MT5), а не в привязке к БВО-юрлицу. Отдельной страницы «BVI retail = 400:1» не существует. Страница avatrade.com/about-avatrade/compare-regulation, на которую help-центр направляет как на источник различий между юрлицами, в 2026 строки с плечом больше не содержит.",
           "loss_pct": null,
           "loss_pct_confirmed_not_published": true,
           "loss_pct_note": "НЕ ПУБЛИКУЕТСЯ. Отсутствие подтверждено 2026-08-05.",
           "negative_balance_protection": null,
           "nbp_note": "🔴 ПРОТИВОРЕЧИЕ в документах брокера. Страница сравнения регулирования обещает «нельзя потерять больше депозита», а международный договор §24.8.3 делает клиента «полностью ответственным за погашение любого отрицательного баланса». До выяснения поле пустое, а не true.",
           "compensation_scheme": null,
-          "name_conflict": "🔴 Международный договор §2.2 называет контрагентом не эту компанию, а «Ava Trade Ltd» — под этим именем на реестре БВО две записи со статусом Cancelled. В карточке писать, что контрагент определяется при регистрации и в документах назван непоследовательно." },
-        { "id": "ava_trade_eu",
-          "legal_name": "AVA Trade EU Ltd", "jurisdiction": "IE",
-          "regulator": "Central Bank of Ireland", "licence_no": "C53877", "licenced_since": "2009-07-09",
-          "serves": "EEA", "show_in_eu_locales": true,
+          "name_conflict": "🔴 Международный договор §2.2 называет контрагентом не эту компанию, а «Ava Trade Ltd» — под этим именем на реестре БВО две записи со статусом Cancelled. В карточке писать, что контрагент определяется при регистрации и в документах назван непоследовательно."
+        },
+        {
+          "id": "ava_trade_eu",
+          "legal_name": "AVA Trade EU Ltd",
+          "jurisdiction": "IE",
+          "regulator": "Central Bank of Ireland",
+          "licence_no": "C53877",
+          "licenced_since": "2009-07-09",
+          "serves": "клиентов из стран Европейской экономической зоны",
+          "serves_en": "clients from the European Economic Area",
+          "serves_ro": "clienți din Spațiul Economic European",
+          "show_in_eu_locales": true,
           "checked": "2026-08-05",
           "source": "https://registers.centralbank.ie/FirmRegisterDataPage.aspx?firmReferenceNumber=C53877&register=32",
           "source_note": "Подтверждено по реестру ЦБ Ирландии.",
-          "leverage_retail": "1:30 валюты, 1:20 индексы (ESMA)",
-          "leverage_retail_en": "1:30 currencies, 1:20 indices (ESMA)", "leverage_retail_ro": "1:30 valute, 1:20 indici (ESMA)",
+          "leverage_short": "от 1:2 до 1:30",
+          "leverage_short_en": "from 1:2 to 1:30",
+          "leverage_short_ro": "de la 1:2 la 1:30",
+          "leverage_retail": "1:30 основные пары · 1:20 прочие пары, золото и основные индексы · 1:10 прочие индексы и сырьё · 1:5 акции · 1:2 крипта",
+          "leverage_retail_en": "1:30 major pairs · 1:20 other pairs, gold and major indices · 1:10 other indices and commodities · 1:5 shares · 1:2 crypto",
+          "leverage_retail_ro": "1:30 perechi majore · 1:20 alte perechi, aur și indici majori · 1:10 alți indici și materii prime · 1:5 acțiuni · 1:2 cripto",
+          "leverage_source": "https://support.avatrade.com/hc/en-us/articles/360006745052",
+          "leverage_checked": "2026-08-14",
+          "leverage_verification": "broker_site",
+          "leverage_jurisdiction_note": "Потолки заданы мерой ЦБ Ирландии для CFD (Annex I, действует с 01.08.2019): 3.33% / 5% / 10% / 20% / 50% начальной маржи. Первоисточник: https://www.centralbank.ie/docs/default-source/regulation/industry-market-sectors/investment-firms/mifid-firms/regulatory-requirements-and-guidance/central-bank-cfd-intervention-measure.pdf",
+          "leverage_jurisdiction_note_en": "The caps are set by the Central Bank of Ireland's CFD measure (Annex I, in force since 01.08.2019): 3.33% / 5% / 10% / 20% / 50% initial margin. Primary source: https://www.centralbank.ie/docs/default-source/regulation/industry-market-sectors/investment-firms/mifid-firms/regulatory-requirements-and-guidance/central-bank-cfd-intervention-measure.pdf",
+          "leverage_jurisdiction_note_ro": "Plafoanele sunt stabilite de măsura Băncii Centrale a Irlandei pentru CFD (Anexa I, în vigoare de la 01.08.2019): 3,33% / 5% / 10% / 20% / 50% marjă inițială. Sursa primară: https://www.centralbank.ie/docs/default-source/regulation/industry-market-sectors/investment-firms/mifid-firms/regulatory-requirements-and-guidance/central-bank-cfd-intervention-measure.pdf",
+          "leverage_contradiction": "Статус AVA Professional снимает эти потолки: «Pre-ESMA leverage — 400:1 on Forex pairs and 25:1 on certain Crypto-currencies», только на MT5 (support.avatrade.com/hc/en-us/articles/360006804132). Юридические документы EU (T&C, Risk Disclosure) чисел не содержат вовсе — только отсылка на сайт. Отдельно: avatrade.es в шапке рекламирует «Apalancamiento hasta 400:1» при европейском потолке 30:1.",
           "loss_pct": null,
           "loss_pct_confirmed_not_published": true,
           "loss_pct_note": "🔴 Процента нет ни на одном европейском сайте AvaTrade (.com, .it, .es) — только общее предупреждение. Для юрлица под надзором ЦБ Ирландии это требование раскрытия ESMA.",
           "negative_balance_protection": true,
-          "compensation_scheme": { "name": "Investor Compensation Company Ltd (ICCL)", "amount": 20000, "currency": "EUR",
-            "source": "https://origin.avatrades.net/legal-docs/eu/risk-disclosure/en.pdf" } }
+          "compensation_scheme": {
+            "name": "Investor Compensation Company Ltd (ICCL)",
+            "amount": 20000,
+            "currency": "EUR",
+            "source": "https://origin.avatrades.net/legal-docs/eu/risk-disclosure/en.pdf"
+          }
+        }
       ],
-      "leverage_retail": { "value": "до 1:400",
-        "value_en": "up to 1:400", "value_ro": "până la 1:400",
+      "leverage_retail": {
+        "value": "до 1:400",
+        "value_en": "up to 1:400",
+        "value_ro": "până la 1:400",
         "checked": "2026-08-06",
         "source": "https://www.avatrade.com/forex",
-        "note": "На сайте «up to 400:1» со сноской «*Based on your local regulation». Разбивки по юрлицам НЕ ПУБЛИКУЕТСЯ, при том что в футере перечислено восемь регулируемых компаний. Европейскому клиенту доступно 1:30 валюты и 1:20 индексы (потолки ESMA)." },
+        "note": "На сайте «up to 400:1» со сноской «*Based on your local regulation». Разбивки по юрлицам НЕ ПУБЛИКУЕТСЯ, при том что в футере перечислено восемь регулируемых компаний. Европейскому клиенту доступно 1:30 валюты и 1:20 индексы (потолки ESMA)."
+      },
       "loss_pct": null,
       "loss_pct_confirmed_not_published": true,
       "loss_pct_checked": "2026-08-05",
       "loss_pct_note": "НЕ ПУБЛИКУЕТСЯ. Отсутствие подтверждено на avatrade.com, avatrade.it и avatrade.es — везде только общее предупреждение о риске.",
       "loss_pct_disclosure": {
-        "sibling_entity": "ava_capital_au", "value": 57.0,
+        "sibling_entity": "ava_capital_au",
+        "value": 57.0,
         "source": "https://www.avatrade.com.au/about-avatrade/why-avatrade/regulation",
         "note": "Единственная площадка группы с опубликованной цифрой — австралийская, и она обслуживает только резидентов Австралии. Отдельно: у ирландского юрлица под надзором ЦБ Ирландии процента нет ни на одном европейском сайте, хотя это требование раскрытия ESMA."
       },
-      "min_deposit": { "value": 100, "currency": "USD",
+      "commission_short": "нет, только спред",
+      "commission_short_en": "none, spread only",
+      "commission_short_ro": "fără, doar spread",
+      "commission_short_note": "Отдельной комиссии за сделку нет: заработок площадки целиком зашит в спред. Дословно у брокера: «This spread is incorporated into the AvaTrade quoted rates and is not an additional charge or fee payable by you above the quoted rates».",
+      "commission_short_note_en": "There is no separate per-trade commission: the venue's revenue sits entirely inside the spread. In the broker's own words: “This spread is incorporated into the AvaTrade quoted rates and is not an additional charge or fee payable by you above the quoted rates.”",
+      "commission_short_note_ro": "Nu există comision separat pe tranzacție: venitul platformei este inclus integral în spread. În cuvintele brokerului: „This spread is incorporated into the AvaTrade quoted rates and is not an additional charge or fee payable by you above the quoted rates”.",
+      "inactivity_short": "50 USD каждые 3 месяца без сделок · плюс 100 USD в год после 12 месяцев",
+      "inactivity_short_en": "50 USD every 3 months without trades · plus 100 USD a year after 12 months",
+      "inactivity_short_ro": "50 USD la fiecare 3 luni fără tranzacții · plus 100 USD pe an după 12 luni",
+      "min_deposit": {
+        "value": 100,
+        "currency": "USD",
         "also": "€100 / £100 / AUD 100; фунтовый счёт только для Великобритании, австралийский — только для Австралии",
-        "checked": "2026-08-06", "source": "https://www.avatrade.com/about-avatrade/avatrade-withdrawals-deposits" },
-
+        "checked": "2026-08-06",
+        "source": "https://www.avatrade.com/about-avatrade/avatrade-withdrawals-deposits"
+      },
       "published_specs": {
         "checked": "2026-08-06",
         "kind": "спецификация, опубликованная брокером",
-        "account_types": { "value": "Отдельных типов счёта со спредом и с комиссией НЕТ. Публикуются: стандартный розничный CFD, исламский без свопов, AvaOptions. Уровни VIP (Silver $10k / Gold $25k / Platinum $50k / Diamond $150k) — это программа лояльности по объёму, а не типы счёта.",
-          "source": "https://www.avatrade.com/about-avatrade/vip" },
-        "commission": { "value": "нет, только спред",
-          "value_en": "none, spread only", "value_ro": "niciunul, doar spread",
+        "account_types": {
+          "value": "Отдельных типов счёта со спредом и с комиссией НЕТ. Публикуются: стандартный розничный CFD, исламский без свопов, AvaOptions. Уровни VIP (Silver $10k / Gold $25k / Platinum $50k / Diamond $150k) — это программа лояльности по объёму, а не типы счёта.",
+          "source": "https://www.avatrade.com/about-avatrade/vip"
+        },
+        "commission": {
+          "value": "нет, только спред",
+          "value_en": "none, spread only",
+          "value_ro": "niciunul, doar spread",
           "quote": "This spread is incorporated into the AvaTrade quoted rates and is not an additional charge or fee payable by you above the quoted rates.",
-          "source": "https://www.avatrade.com/trading-info/our-fees-charges" },
-        "inactivity_fee": { "value": "$50 / €50 / £50 после 3 месяцев без сделок, и далее каждые 3 месяца",
+          "source": "https://www.avatrade.com/trading-info/our-fees-charges"
+        },
+        "inactivity_fee": {
+          "value": "$50 / €50 / £50 после 3 месяцев без сделок, и далее каждые 3 месяца",
           "plus": "ЕЩЁ $100 / €100 / £100 годовой административный сбор после 12 месяцев бездействия",
           "source": "https://www.avatrade.com/trading-info/our-fees-charges",
-          "note": "Самый дорогой простой в пуле: за год бездействия набегает $200 сборов плюс $100 административного." },
-        "funding": { "value": "карты, банковский перевод, электронные кошельки (Skrill, WebMoney, Neteller — НЕ доступны клиентам ЕС и Австралии). Комиссии за пополнение нет. Вывод — только на тот же способ, которым пополняли, в пределах суммы пополнения.",
-          "source": "https://www.avatrade.com/about-avatrade/avatrade-withdrawals-deposits" },
-        "min_lot": { "value": null, "note": "🔴 НЕ ЧИТАЕТСЯ — живёт только в таблице инструментов, которая не грузится." },
-        "instruments": { "value": "«более 50 валютных пар»; по остальным классам чисел не публикуется",
-          "source": "https://www.avatrade.com/forex" }
+          "note": "Самый дорогой простой в пуле: за год бездействия набегает $200 сборов плюс $100 административного."
+        },
+        "funding": {
+          "value": "карты, банковский перевод, электронные кошельки (Skrill, WebMoney, Neteller — НЕ доступны клиентам ЕС и Австралии). Комиссии за пополнение нет. Вывод — только на тот же способ, которым пополняли, в пределах суммы пополнения.",
+          "source": "https://www.avatrade.com/about-avatrade/avatrade-withdrawals-deposits"
+        },
+        "min_lot": {
+          "value": null,
+          "note": "🔴 НЕ ЧИТАЕТСЯ — живёт только в таблице инструментов, которая не грузится."
+        },
+        "instruments": {
+          "value": "«более 50 валютных пар»; по остальным классам чисел не публикуется",
+          "source": "https://www.avatrade.com/forex"
+        }
       },
-
       "demo_requires_verification": false,
       "demo_note": "Верификация не требуется, срока нет. Цитата: «you have the option to trade with a demo account at first, which requires no proof of identity, or payment details»; «unlimited demo account... without any time limit».",
       "demo_checked": "2026-08-06",
       "demo_source": "https://www.avatrade.com/trading-platforms",
-
       "finding_broken_table": {
         "severity": "high",
         "checked": "2026-08-06",
@@ -373,16 +686,22 @@
         "note": "🔴 Таблица инструментов не грузится — подтверждено дважды, разными заходами, 05.08 и 06.08. Оболочка страницы, заголовки колонок (Instrument / Leverage / Margin / Spread / Sell / Buy) и постраничная навигация отрисовываются — вкладка Forex даже показывает страницы 1–6, то есть около 51–60 пар, — но **ни одной строки данных не появляется никогда**. Счётчик отвечает, сами данные нет. Это значит, что спред, плечо, маржа и размер лота недоступны ни по одному инструменту, который AvaTrade предлагает. Ровно под собственным заявлением брокера о «fully transparent trading policy» на https://www.avatrade.com/trading-info.",
         "url": "https://www.avatrade.com/trading-info/financial-instruments-index"
       },
-
       "symbols": {
-        "EURUSD": "EURUSD", "GBPUSD": "GBPUSD", "USDJPY": "USDJPY", "EURGBP": "EURGBP",
-        "XAUUSD": "GOLD", "XAGUSD": "SILVER", "WTI": "CrudeOIL",
-        "SPX": "US_500", "NASDAQ": "US_TECH100", "DAX": "GERMANY_40",
-        "BTC": "BTCUSD", "ETH": "ETHUSD",
+        "EURUSD": "EURUSD",
+        "GBPUSD": "GBPUSD",
+        "USDJPY": "USDJPY",
+        "EURGBP": "EURGBP",
+        "XAUUSD": "GOLD",
+        "XAGUSD": "SILVER",
+        "WTI": "CrudeOIL",
+        "SPX": "US_500",
+        "NASDAQ": "US_TECH100",
+        "DAX": "GERMANY_40",
+        "BTC": "BTCUSD",
+        "ETH": "ETHUSD",
         "checked": "2026-08-05",
         "note": "Тикер нефти написан строчными — CrudeOIL, в отличие от всех остальных инструментов брокера. Поиск по заглавным его пропускает: на этом уже была допущена ошибка «WTI не предлагается». BRENT_OIL — отдельный инструмент."
       },
-
       "spreads": [],
       "spreads_published": {
         "source_pattern": "https://www.avatrade.com/trading-info/financial-instruments-index/{класс}/{инструмент}",
@@ -390,45 +709,120 @@
         "checked": "2026-08-06",
         "kind": "карточка инструмента: спред, плечо, маржа, минимальный объём, овернайт-ставки",
         "items": [
-          { "symbol": "EURUSD", "spread": 0.8, "unit": "пипс", "min_trade_size": 1000, "leverage": "400:1", "margin": "0.25%", "overnight_buy": "-0.0084%", "overnight_sell": "0.0009%", "hours_gmt": "24/5" }
+          {
+            "symbol": "EURUSD",
+            "spread": 0.8,
+            "unit": "пипс",
+            "min_trade_size": 1000,
+            "leverage": "400:1",
+            "margin": "0.25%",
+            "overnight_buy": "-0.0084%",
+            "overnight_sell": "0.0009%",
+            "hours_gmt": "24/5"
+          }
         ],
         "todo": "Сняты только EUR/USD как доказательство. Догрузить остальные 11 — адреса вида /forex/gbp-usd, /forex/usd-jpy, /forex/eur-gbp и соответствующие разделы metals / indices / cryptocurrencies / energies.",
         "note": "🔴 ИСПРАВЛЕНО 2026-08-06. Здесь стояло «сайт условий не отдаёт». Верно лишь наполовину: СВОДНАЯ таблица Financial Instruments Index действительно не грузится — бесконечный спиннер, воспроизведено дважды. Но КАРТОЧКИ ОТДЕЛЬНЫХ ИНСТРУМЕНТОВ работают, и в них больше данных, чем было бы в таблице: спред, плечо, маржа, минимальный объём и обе овернайт-ставки. Ссылки на карточки лежат прямо на avatrade.com/forex. Опубликованный спред 0,8 пипса по евродоллару совпал с нашим снимком терминала (0,8) в точку.",
         "finding": "Находка для статьи остаётся, но меняет смысл: сломана не публикация условий, а именно сводная таблица — то есть единственный экран, где условия можно СРАВНИТЬ между инструментами. Поштучно данные доступны, целиком — нет."
       },
-
       "spread_probe": {
         "kind": "контрольный снимок, НЕ замер по методичке",
         "checked": "2026-08-05T10:00Z/10:20Z",
         "render": false,
         "items": [
-          { "symbol": "EURUSD", "spread": 0.8, "unit": "пункт" },
-          { "symbol": "GBPUSD", "spread": 1.2, "unit": "пункт" },
-          { "symbol": "USDJPY", "spread": 1.3, "unit": "пункт" },
-          { "symbol": "EURGBP", "spread": 1.2, "unit": "пункт" },
-          { "symbol": "XAUUSD", "spread": 0.34, "unit": "USD" },
-          { "symbol": "XAGUSD", "spread": 0.050, "unit": "USD" },
-          { "symbol": "WTI", "spread": 0.03, "unit": "USD" },
-          { "symbol": "SPX", "spread": 0.75, "unit": "пункт" },
-          { "symbol": "NASDAQ", "spread": 2.75, "unit": "пункт" },
-          { "symbol": "DAX", "spread": 3.0, "unit": "пункт" },
-          { "symbol": "BTC", "spread": 25.8, "unit": "USD" },
-          { "symbol": "ETH", "spread": 0.94, "unit": "USD" }
+          {
+            "symbol": "EURUSD",
+            "spread": 0.8,
+            "unit": "пункт"
+          },
+          {
+            "symbol": "GBPUSD",
+            "spread": 1.2,
+            "unit": "пункт"
+          },
+          {
+            "symbol": "USDJPY",
+            "spread": 1.3,
+            "unit": "пункт"
+          },
+          {
+            "symbol": "EURGBP",
+            "spread": 1.2,
+            "unit": "пункт"
+          },
+          {
+            "symbol": "XAUUSD",
+            "spread": 0.34,
+            "unit": "USD"
+          },
+          {
+            "symbol": "XAGUSD",
+            "spread": 0.05,
+            "unit": "USD"
+          },
+          {
+            "symbol": "WTI",
+            "spread": 0.03,
+            "unit": "USD"
+          },
+          {
+            "symbol": "SPX",
+            "spread": 0.75,
+            "unit": "пункт"
+          },
+          {
+            "symbol": "NASDAQ",
+            "spread": 2.75,
+            "unit": "пункт"
+          },
+          {
+            "symbol": "DAX",
+            "spread": 3.0,
+            "unit": "пункт"
+          },
+          {
+            "symbol": "BTC",
+            "spread": 25.8,
+            "unit": "USD"
+          },
+          {
+            "symbol": "ETH",
+            "spread": 0.94,
+            "unit": "USD"
+          }
         ]
       },
-
-      "commission": { "model": null, "value": null, "checked": null, "source": null,
-        "note": "По спецификации комиссия не берётся, но это НЕ ПОДТВЕРЖДЕНО в кабинете. Оставлено null, а не 0 — пусто ≠ ноль." },
+      "commission": {
+        "model": null,
+        "value": null,
+        "checked": null,
+        "source": null,
+        "note": "По спецификации комиссия не берётся, но это НЕ ПОДТВЕРЖДЕНО в кабинете. Оставлено null, а не 0 — пусто ≠ ноль."
+      },
       "swaps": null,
       "swap_note": "НЕ СНЯТЫ, нигде не опубликованы. Нужен десктопный терминал или спецификации в кабинете.",
       "negative_balance_protection": null,
-      "compensation_scheme": { "name": null, "amount": null, "currency": null, "source": null },
-      "platforms": ["WebTrader"],
+      "compensation_scheme": {
+        "name": null,
+        "amount": null,
+        "currency": null,
+        "source": null
+      },
+      "platforms": [
+        "AvaTrade WebTrader",
+        "AvaTrade App",
+        "AvaOptions",
+        "AvaSocial",
+        "MetaTrader 4",
+        "MetaTrader 5",
+        "DupliTrade"
+      ],
+      "platforms_checked": "2026-08-14",
+      "platforms_source": "https://www.avatrade.com/trading-platforms",
       "platforms_note": "Собственная веб-платформа подтверждена входом 2026-08-05. Полный список платформ не снят.",
       "funding_methods": [],
       "notes_ru": null
     },
-
     {
       "id": "fxpro",
       "name": "FxPro",
@@ -438,7 +832,9 @@
         "md": "fxpro_costa_rica",
         "md_confirmed": true,
         "md_confirmed_by": "клиентский договор, §1.2",
-        "md_note": "🔴 ИСПРАВЛЕНО 2026-08-05, ранее здесь стояло fxpro_global_markets (Багамы) как неподтверждённый вывод. Молдавский маршрут регистрации — direct.fxpro.com/en/register/md/crc, где crc = Costa Rica. Ссылка «Terms and conditions» с этой же формы ведёт на раздел документов, откуда клиентский договор скачивается по адресу fxpro-cdn.cloud/repo/datarepo/legal/crc/Client-Agreement_Costa-Rica-Markets-Ltd.pdf. Пункт 1.2 дословно: «FxPro is the brand and trading name of Costa Rica Markets Ltd. which is a private limited company incorporated in Costa Rica». Это опубликованный факт из подписываемого документа, а не вывод. Сходится с партнёрской ссылкой в links.affiliate: /register/md/cri/, где cri — код Коста-Рики по ISO 3166-1 alpha-3. Прежняя привязка к /register/us/gm описывала маршрут для США, а не для Молдовы.",
+        "md_note": "🔴 ИСПРАВЛЕНО ДВАЖДЫ. 2026-08-05: ранее здесь стояло fxpro_global_markets (Багамы) как неподтверждённый вывод, заменено на коста-риканское юрлицо. 2026-08-14: заменено само юрлицо — было Costa Rica Markets Ltd, стало FxPro Markets Direct Costa Rica Latam, SRL. Актуально: наша партнёрская ссылка ведёт на direct-маршрут .../register/md/**cri**/, договор этого маршрута (fxdatarepro.blob.core.windows.net/repo/datarepo/legal/cri/Client-Agreement-FxPro-CRI-December-2024.pdf, внутри дата June 2026) в п. 1.2 дословно: «FxPro is the brand and trading name of FxPro Markets Direct Costa Rica Latam, SRL which is a private limited company incorporated in Costa Rica».",
+        "md_note_root_cause": "🔴 КОРЕНЬ ОШИБКИ, зафиксировать как урок. В записи от 05.08 стояло: «Сходится с партнёрской ссылкой в links.affiliate: /register/md/cri/, где cri — код Коста-Рики по ISO 3166-1 alpha-3». То есть оба кода были ВИДНЫ — снятая форма показывала маршрут **crc**, партнёрская ссылка вела на **cri** — но их сочли двумя написаниями одного и того же и записали как подтверждение друг друга. На деле CRI — это ISO 3166-1 alpha-3 для Коста-Рики, а CRC — ISO 4217, код колона, костариканской валюты. Разные коды из разных стандартов, и FxPro использует их для ДВУХ РАЗНЫХ юрлиц с двумя разными договорами, оба живые и оба датированы June 2026. Совпадение первых двух букв было принято за совпадение сущностей. Урок: если два признака «сходятся», но написаны по-разному — это повод открыть оба, а не засчитать один за подтверждение другого.",
+        "md_note_crc_route": "Маршрут crc существует и ведёт на Costa Rica Markets Ltd (fxpro-cdn.cloud/repo/datarepo/legal/crc/Client-Agreement_Costa-Rica-Markets-Ltd.pdf, тоже June 2026). Наши кадры регистрации 02-05 сняты именно с него — то есть съёмка шла не по той ссылке, которую мы отдаём читателю. Требуется пересъёмка по партнёрской ссылке.",
         "md_note_screens": "Кадры: fxpro/registration/02_country.png (страна Moldova), 03_entity_absent.png (на форме юрлицо не названо), 04_terms.png (раздел документов с меткой Global Markets), 05_agreement_cover.png, 05_agreement_clause12.png (пункт 1.2 крупно).",
         "eea": null,
         "eea_note": "Кипрское юрлицо с собственной страницы лицензий FxPro убрано, fxpro.eu отдаёт пустую страницу. Европейского контрагента у бренда сейчас может не быть вовсе — см. partners_licences.json → stale_claims."
@@ -449,7 +845,8 @@
         "demo": null,
         "live": null,
         "tracking_ok": true,
-        "tracking_note": "Ссылка на регистрацию с гео-маршрутом на Молдову. ВНИМАНИЕ: страница закрыта robots.txt — данные по юрлицу, регулятору, лицензии и проценту убыточных счетов собирать руками."
+        "tracking_note": "Ссылка на регистрацию с гео-маршрутом на Молдову. ВНИМАНИЕ: страница закрыта robots.txt — данные по юрлицу, регулятору, лицензии и проценту убыточных счетов собирать руками.",
+        "affiliate_lang_note": "ЯЗЫК ЗАШИТ В ССЫЛКУ (найдено 16.09.2026). Здесь стоит сегмент пути /en/ — то есть румын с /ro/brokers и англичанин с /en/brokers уходят на страницу партнёра не на своём языке. Код УЖЕ умеет брать вариант из полей affiliate_ro / affiliate_en, если они появятся рядом с affiliate. Не заполнены намеренно: коды локалей у каждого партнёра свои, проверяются только живым переходом по ссылке, а каждый такой переход засчитывается партнёрке как клик — это шаг владельца. Проверить, открывается ли форма регистрации, и вписать сюда."
       },
       "terminal_access": {
         "platform": "edge.fxpro.group (FxPro Edge), MT5",
@@ -460,102 +857,218 @@
         "note": "🔴 ДЕМО. На демо спред обычно совпадает с реальным, но это допущение, и в публикации оно должно быть подписано."
       },
       "entities": [
-        { "id": "fxpro_costa_rica",
-          "legal_name": "Costa Rica Markets Ltd", "reg_no": null,
-          "jurisdiction": "CR", "regulator": null, "licence_no": null,
-          "serves": "Молдова и прочие страны маршрута /crc", "show_in_eu_locales": false,
-          "checked": "2026-08-05",
-          "source": "https://fxpro-cdn.cloud/repo/datarepo/legal/crc/Client-Agreement_Costa-Rica-Markets-Ltd.pdf",
-          "source_quote": "FxPro is the brand and trading name of Costa Rica Markets Ltd. which is a private limited company incorporated in Costa Rica.",
-          "source_note": "🔴 Юрлицо взято из клиентского договора, который брокер отдаёт по молдавскому маршруту регистрации. РЕГУЛЯТОР И ЛИЦЕНЗИЯ НЕ УКАЗАНЫ НИ В ДОГОВОРЕ, НИ НА ФОРМЕ — оставлены null, а не додуманы. В реестре Коста-Рики компания не проверялась.",
-          "new_entity_note": "🔴 Имя файла договора — «Client Agreement - Costa Rica Markets Ltd- June 2026 New entity.docx». То есть юрлицо для этого маршрута заведено в июне 2026 года. Любой источник старше июня 2026, называющий контрагента FxPro для Молдовы, устарел — включая прежнюю запись этого файла про Багамы.",
+        {
+          "id": "fxpro_costa_rica",
+          "legal_name": "FxPro Markets Direct Costa Rica Latam, SRL",
+          "reg_no": null,
+          "jurisdiction": "CR",
+          "regulator": null,
+          "licence_no": null,
+          "serves": "юрисдикция назначается по стране проживания — какая доступна вам, видно на форме регистрации",
+          "serves_en": "the jurisdiction is assigned by country of residence — the registration form shows which one is available to you",
+          "serves_ro": "jurisdicția se atribuie după țara de reședință — formularul de înregistrare arată care vă este disponibilă",
+          "serves_quote": "Since the availability of jurisdictions may depend on your country of residence, please check the registration page to see which jurisdictions are available to you.",
+          "serves_source": "https://www.fxpro.com/help-section/faq/about-the-company",
+          "serves_checked": "2026-08-14",
+          "excludes_names": "США, Канада, Иран",
+          "excludes_names_en": "United States, Canada, Iran",
+          "excludes_names_ro": "Statele Unite, Canada, Iran",
+          "excludes_source": "https://www.fxpro.com/documents/legal-information",
+          "excludes_quote": "Our Site is not intended for use and distribution by users or any people in certain jurisdictions, including but not limited to the United States of America, the Islamic Republic of Iran and Canada.",
+          "excludes_note": "Ограничение брендовое, из условий сайта FxPro, а не привязано именно к этому юрлицу. Формулировка «including but not limited to» означает, что список неполный — брокер оставляет за собой право ограничить и другие страны.",
+          "serves_note": "Дважды переписано 2026-08-14. Сначала стояло «Молдова и прочие страны маршрута /crc» — ссылка на внутренний признак, сегмент адреса формы регистрации, читателю он ничего не говорит. Затем «Молдову и другие страны, которым брокер отдаёт именно этот договор» — по сути то же самое другими словами, владелец справедливо забраковал и это. Итоговая формулировка — правило, по которому брокер сам распределяет клиентов (его собственная цитата в serves_quote), плюс короткий перечень исключённых стран. Признак маршрута сохранён в new_entity_note и source.",
+          "show_in_eu_locales": false,
+          "checked": "2026-08-14",
+          "source": "https://fxdatarepro.blob.core.windows.net/repo/datarepo/legal/cri/Client-Agreement-FxPro-CRI-December-2024.pdf",
+          "source_quote": "FxPro is the brand and trading name of FxPro Markets Direct Costa Rica Latam, SRL which is a private limited company incorporated in Costa Rica.",
+          "source_note": "🔴 Юрлицо взято из клиентского договора маршрута cri — того самого, на который ведёт НАША партнёрская ссылка (links.affiliate = .../register/md/cri/...). РЕГУЛЯТОР И ЛИЦЕНЗИЯ НЕ УКАЗАНЫ НИ В ДОГОВОРЕ, НИ НА ФОРМЕ — оставлены null, а не додуманы. Ни номера cédula jurídica, ни юридического адреса в договоре тоже нет. В реестре Коста-Рики компания не подтверждена: поиск Registro Nacional работает только через интерактивную форму с сессией, статически не читается.",
+          "entity_corrected": "🔴 ИСПРАВЛЕНО 2026-08-14, ошибка найдена по подозрению владельца. Здесь стояло «Costa Rica Markets Ltd» — юрлицо из договора маршрута **crc**, тогда как наша собственная партнёрская ссылка ведёт на маршрут **cri**, где контрагент ДРУГОЙ: «FxPro Markets Direct Costa Rica Latam, SRL». То есть читателю показывалось не то юрлицо, с которым он подпишет договор, кликнув по нашей же кнопке — ровно та ошибка, против которой написано первое правило в partners_licences.json._meta.rules. Оба договора датированы June 2026 и оба живы на CDN, поэтому расхождение не «устаревшие данные», а два параллельных маршрута. Косвенно версия cri выглядит достовернее: SRL — реальная организационно-правовая форма Коста-Рики (там S.A. и S.R.L.), тогда как «Ltd» для коста-риканской компании нетипична.",
+          "route_note": "Маршрут cri (наша ссылка) → FxPro Markets Direct Costa Rica Latam, SRL. Маршрут crc → Costa Rica Markets Ltd, договор https://fxpro-cdn.cloud/repo/datarepo/legal/crc/Client-Agreement_Costa-Rica-Markets-Ltd.pdf. Оба файла отдаются с обоих зеркал CDN (fxpro-cdn.cloud и fxdatarepro.blob.core.windows.net), содержимое зеркал совпадает. Более свежей редакции договора cri на CDN нет: имя файла говорит December-2024, но внутри дата June 2026 — файл переиздан под старым именем.",
+          "new_entity_note": "🔴 Юрлицо для коста-риканского маршрута заведено недавно: у договора crc имя файла-исходника было «Client Agreement - Costa Rica Markets Ltd- June 2026 New entity.docx». Любой источник старше июня 2026, называющий контрагента FxPro для Молдовы, устарел — включая прежнюю запись этого файла про Багамы.",
+          "verify": "Проверить оба имени (Costa Rica Markets Ltd и FxPro Markets Direct Costa Rica Latam, SRL) в реестре Коста-Рики и выяснить, лицензирована ли компания как финансовая вообще. Это ключевой открытый вопрос по FxPro.",
           "named_in_interface": false,
           "named_in_interface_note": "На форме регистрации не названо ничего: единственная строка внизу — «FxPro is a registered trademark utilised under an approved licensing agreement». Ни компании, ни юрисдикции, ни номера лицензии. Юрлицо обнаруживается только внутри PDF за ссылкой «Terms and conditions».",
           "loss_pct": null,
           "loss_pct_confirmed_not_published": true,
+          "leverage_short": "от 1:1 до 1:500",
+          "leverage_short_en": "from 1:1 to 1:500",
+          "leverage_short_ro": "de la 1:1 la 1:500",
+          "leverage_retail": "от 1:1 до 1:500",
+          "leverage_retail_en": "from 1:1 to 1:500",
+          "leverage_retail_ro": "de la 1:1 la 1:500",
+          "leverage_checked": "2026-08-14",
+          "leverage_verification": "broker_site",
+          "leverage_source": "https://www.fxpro.com/",
+          "leverage_source_note": "Верхняя граница 1:500 — то, что FxPro заявляет на главной странице («High Leverage 1:500»); подтверждено владельцем 2026-08-14 как фактическое значение для этого юрлица.",
+          "leverage_internal_note": "НЕ ДЛЯ ВЫВОДА НА СТРАНИЦУ, служебная память. Развёрнутый абзац про SUGEVAL и отсутствие чисел в договоре убран со страницы 2026-08-14 по прямому указанию владельца. Сами факты остаются верными и могут понадобиться при редактуре статьи: (1) SUGEVAL прямо заявляет, что форекс и CFD вне сферы его регулирования — «Estas actividades se encuentran fuera del ámbito de regulación de la Superintendencia General de Valores», https://www.sugeval.fi.cr/content/dam/sugeval/informacion-para-inversionistas/documentos-alertas/comunicado-forex.pdf; (2) клиентский договор чисел плеча не содержит, только оговорку «we reserve the right to adjust margin requirements and consequently alter leverage ratios offered»; (3) отдельного leverage-документа для этого юрлица на CDN FxPro нет. Не возвращать на страницу без отдельного решения владельца.",
           "negative_balance_protection": null,
           "compensation_scheme": null,
-          "verify": "Проверить Costa Rica Markets Ltd в реестре Коста-Рики и выяснить, лицензирована ли она как финансовая компания вообще. Это ключевой открытый вопрос по FxPro." },
-        { "id": "fxpro_global_markets",
-          "legal_name": "FxPro Global Markets Limited", "reg_no": "198285 B",
-          "jurisdiction": "BS", "regulator": "Securities Commission of The Bahamas", "licence_no": "SIA-F184",
-          "serves": "не-ЕС", "show_in_eu_locales": false,
-          "checked": "2026-08-05", "source": "https://scb.gov.bs/wp-content/uploads/2026/07/SIA-Firms-as-at-30-June-2026-1.pdf",
+          "name_conflict": "🔴 РАСХОЖДЕНИЕ В НАЗВАНИИ, найдено 2026-08-14. Наш договор (маршрут /crc, июнь 2026) называет контрагента «Costa Rica Markets Ltd», а договор коста-риканского маршрута /cri (декабрь 2024, https://fxdatarepro.blob.core.windows.net/repo/datarepo/legal/cri/Client-Agreement-FxPro-CRI-December-2024.pdf) — «FxPro Markets Direct Costa Rica Latam, SRL». Это либо два разных юрлица под одним брендом, либо переименование. Название НЕ ПЕРЕПИСАНО: наше снято с договора, который брокер реально отдаёт по молдавскому маршруту, и оно первично. Требует проверки глазами на живой форме регистрации."
+        },
+        {
+          "id": "fxpro_global_markets",
+          "legal_name": "FxPro Global Markets Limited",
+          "reg_no": "198285 B",
+          "jurisdiction": "BS",
+          "regulator": "Securities Commission of The Bahamas",
+          "licence_no": "SIA-F184",
+          "serves": "клиентов за пределами Европейского союза",
+          "serves_en": "clients outside the European Union",
+          "serves_ro": "clienți din afara Uniunii Europene",
+          "show_in_eu_locales": false,
+          "checked": "2026-08-05",
+          "source": "https://scb.gov.bs/wp-content/uploads/2026/07/SIA-Firms-as-at-30-June-2026-1.pdf",
           "source_note": "Компания есть в списке зарегистрированных по SIA на 30.06.2026. Номер лицензии в списке не печатается — SIA-F184 только со слов брокера.",
-          "leverage_retail": "1:200",
+          "leverage_short": "от 1:20 до 1:200",
+          "leverage_short_en": "from 1:20 to 1:200",
+          "leverage_short_ro": "de la 1:20 la 1:200",
+          "leverage_retail": "1:200 валюты, золото, индексы и энергия · 1:100 базовые металлы · 1:50 фьючерсы на сырьё · 1:25 акции и ETF · 1:20 крипта",
+          "leverage_retail_en": "1:200 FX, gold, indices and energy · 1:100 base metals · 1:50 commodity futures · 1:25 shares and ETFs · 1:20 crypto",
+          "leverage_retail_ro": "1:200 valute, aur, indici și energie · 1:100 metale de bază · 1:50 futures pe mărfuri · 1:25 acțiuni și ETF-uri · 1:20 cripto",
+          "leverage_source": "https://fxpro-cdn.cloud/repo/website/assets/docs/Leverage-information-page/leverage_gm_ret.pdf",
+          "leverage_checked": "2026-08-14",
           "leverage_verification": "broker_site",
+          "leverage_jurisdiction_note": "Совпадает с нормой регулятора: SCB Bahamas, Securities Industry (CFD) Rules 2020, r. 23 — минимальная маржа 0.5% (=200:1) по всем классам и 5% (=20:1) по цифровым активам (https://www.scb.gov.bs/wp-content/uploads/2020/08/Securities-Industry-Contracts-for-Differences-Rules-2020.pdf). Редкий случай, когда цифра брокера в точности равна норме.",
+          "leverage_jurisdiction_note_en": "Matches the regulator's rule exactly: SCB Bahamas, Securities Industry (CFD) Rules 2020, r. 23 — minimum margin 0.5% (=200:1) across all classes and 5% (=20:1) for digital assets (https://www.scb.gov.bs/wp-content/uploads/2020/08/Securities-Industry-Contracts-for-Differences-Rules-2020.pdf). A rare case where the broker's figure exactly matches the rule.",
+          "leverage_jurisdiction_note_ro": "Coincide exact cu norma autorității: SCB Bahamas, Securities Industry (CFD) Rules 2020, r. 23 — marjă minimă 0,5% (=200:1) la toate clasele și 5% (=20:1) la activele digitale (https://www.scb.gov.bs/wp-content/uploads/2020/08/Securities-Industry-Contracts-for-Differences-Rules-2020.pdf). Un caz rar în care cifra brokerului coincide exact cu norma.",
+          "leverage_public_extra": "Плечо динамическое: 1:200 действует на небольшом объёме. По валютам до 300 лотов — 1:200, 300–400 — 1:100, свыше 400 — 1:50. По золоту до 40 лотов — 1:200, свыше 50 — 1:50. По акциям до 100 000 $ — 1:25, свыше 350 000 $ — 1:5. За 15 минут до и 5 минут после важных новостей требования к марже повышаются.",
+          "leverage_public_extra_en": "Leverage is dynamic: 1:200 applies at small size. On FX up to 300 lots it is 1:200, 300–400 is 1:100, above 400 is 1:50. On gold up to 40 lots it is 1:200, above 50 it is 1:50. On shares up to $100k it is 1:25, above $350k it is 1:5. Margin requirements rise 15 minutes before and 5 minutes after major news.",
+          "leverage_public_extra_ro": "Levierul este dinamic: 1:200 se aplică la volum mic. La valute până la 300 de loturi este 1:200, 300–400 este 1:100, peste 400 este 1:50. La aur până la 40 de loturi este 1:200, peste 50 este 1:50. La acțiuni până la 100 000 $ este 1:25, peste 350 000 $ este 1:5. Cerințele de marjă cresc cu 15 minute înainte și 5 minute după știri importante.",
+          "leverage_tiered": "🔴 Плечо ДИНАМИЧЕСКОЕ, 1:200 — только для мелкого счёта. Валюты: 0–300 лотов 1:200, 300–400 1:100, свыше 400 — 1:50. Золото: 0–40 лотов 1:200, 40–50 1:100, свыше 50 — 1:50. Акции: до $100k 1:25, свыше $350k — 1:5. Отдельно: за 15 минут до и 5 минут после высокоимпактных новостей маржа повышается (валюты 1:250, металлы 1:200, индексы 1:100, энергия 1:50).",
+          "leverage_contradiction": "Главная fxpro.com рекламирует «High Leverage 1:500», страница Leverage Information — «1:10 000 on FX & Gold». Оба числа относятся к статусу Professional Client, для розницы багамского юрлица потолок 1:200, но на витрине это не разведено.",
           "loss_pct": null,
           "loss_pct_confirmed_not_published": true,
           "loss_pct_note": "НЕ ПУБЛИКУЕТСЯ. Отсутствие подтверждено 2026-08-05.",
           "negative_balance_protection": true,
           "nbp_note": "Заявлена для всех клиентов независимо от категории и юрисдикции, с оговорками против злоупотреблений.",
-          "compensation_scheme": null },
-        { "id": "fxpro_uk",
-          "legal_name": "FxPro UK Limited", "reg_no": "06925128",
-          "jurisdiction": "GB", "regulator": "FCA", "licence_no": "509956",
-          "serves": "Великобритания", "show_in_eu_locales": false,
+          "compensation_scheme": null
+        },
+        {
+          "id": "fxpro_uk",
+          "legal_name": "FxPro UK Limited",
+          "reg_no": "06925128",
+          "jurisdiction": "GB",
+          "regulator": "FCA",
+          "licence_no": "509956",
+          "serves": "клиентов из Великобритании",
+          "serves_en": "clients from the United Kingdom",
+          "serves_ro": "clienți din Regatul Unit",
+          "show_in_eu_locales": false,
           "checked": "2026-08-05",
           "source": "https://find-and-update.company-information.service.gov.uk/company/06925128",
           "source_note": "Компания подтверждена в Companies House. Номер FRN 509956 — только со слов брокера: реестр FCA приложение на Salesforce и отдаёт пустую оболочку.",
-          "leverage_retail": "1:30",
+          "leverage_short": "до 1:30",
+          "leverage_short_en": "up to 1:30",
+          "leverage_short_ro": "până la 1:30",
+          "leverage_short_note": "Брокер публикует только верхнюю границу («Retail: Up to 1:30»), ступени по классам активов задаёт норма FCA, а не витрина. Нижнюю границу не пишем — её брокер не называет.",
+          "leverage_short_note_en": "The broker publishes only the upper bound (\"Retail: Up to 1:30\"); the per-asset-class tiers are set by FCA rules, not by the broker's own page. We don't write a lower bound — the broker doesn't state one.",
+          "leverage_short_note_ro": "Brokerul publică doar limita superioară („Retail: Up to 1:30”), treptele pe clase de active sunt stabilite de norma FCA, nu de pagina brokerului. Nu scriem o limită inferioară — brokerul nu o menționează.",
+          "leverage_retail": "до 1:30 для розницы (до 1:500 при статусе Professional)",
+          "leverage_retail_en": "up to 1:30 retail (up to 1:500 with Professional status)",
+          "leverage_retail_ro": "până la 1:30 pentru retail (până la 1:500 cu statut Professional)",
+          "leverage_source": "https://fxpro-cdn.cloud/repo/website/assets/docs/Gen-Info-UK.pdf",
+          "leverage_checked": "2026-08-14",
+          "leverage_verification": "broker_site",
+          "leverage_quote": "Max leverage: Retail: Up to 1:30. Professional: Up to 1:500.",
+          "leverage_source_note": "Документ помечен самим брокером как одобренный комплаенсом FxPro UK Limited для распространения.",
+          "leverage_jurisdiction_note": "Потолок задан FCA, COBS 22.5.11R (инструмент FCA 2019/78): минимальная маржа 3.33% / 5% / 10% / 20% / 50% — то есть 30:1 / 20:1 / 10:1 / 5:1 / 2:1. Первоисточник: https://www.handbook.fca.org.uk/instrument/2019/FCA_2019_78.pdf",
+          "leverage_jurisdiction_note_en": "The cap is set by the FCA, COBS 22.5.11R (instrument FCA 2019/78): minimum margin 3.33% / 5% / 10% / 20% / 50% — i.e. 30:1 / 20:1 / 10:1 / 5:1 / 2:1. Primary source: https://www.handbook.fca.org.uk/instrument/2019/FCA_2019_78.pdf",
+          "leverage_jurisdiction_note_ro": "Plafonul este stabilit de FCA, COBS 22.5.11R (instrumentul FCA 2019/78): marjă minimă 3,33% / 5% / 10% / 20% / 50% — adică 30:1 / 20:1 / 10:1 / 5:1 / 2:1. Sursa primară: https://www.handbook.fca.org.uk/instrument/2019/FCA_2019_78.pdf",
           "loss_pct": null,
           "loss_pct_confirmed_not_published": true,
           "loss_pct_note": "🔴 Не публикуется даже здесь, при том что для юрлица под надзором FCA раскрытие конкретной цифры обязательно. fxpro.co.uk перенаправляет на fxpro.com, процента нет ни на одной странице.",
           "negative_balance_protection": true,
-          "compensation_scheme": { "name": "FSCS", "amount": null, "currency": "GBP",
-            "note": "Членство заявлено на странице лицензий FxPro; сумму покрытия брокер не публикует." } }
+          "compensation_scheme": {
+            "name": "FSCS",
+            "amount": null,
+            "currency": "GBP",
+            "note": "Членство заявлено на странице лицензий FxPro; сумму покрытия брокер не публикует."
+          }
+        }
       ],
       "entities_note": "Кипрское юрлицо (CySEC 078/07) в списке НЕ ПРИВЕДЕНО намеренно: с собственной страницы лицензий FxPro Кипр убран, fxpro.eu отдаёт пустую страницу, Кипр исчез из контактов. Отзыв утверждать нельзя, показывать как действующее — тем более. Подробности в partners_licences.json → partners.fxpro.stale_claims.",
-      "leverage_retail": { "value": "зависит от юрисдикции",
-        "value_en": "depends on jurisdiction", "value_ro": "depinde de jurisdicție",
+      "leverage_retail": {
+        "value": "зависит от юрисдикции",
+        "value_en": "depends on jurisdiction",
+        "value_ro": "depinde de jurisdicție",
         "checked": "2026-08-06",
         "source": "https://www.fxpro.com/leverage-information",
-        "note": "🔴 Страница плеча отдаёт РАЗНУЮ таблицу в зависимости от местоположения посетителя, поэтому полного списка по юрлицам получить нельзя. С нашей точки отдалось: основные валютные пары «Unlimited», второстепенные 1:500, ЗОЛОТО 1:10000, серебро и платина 1:200, основные индексы 1:500, акции и ETF 1:25, крипта 1:500. На главной рекламируется 1:500, профессиональным клиентам 1:10000. Действует динамическое плечо: снижается с ростом позиции. Потолки для розницы ЕС и Великобритании нам не отдались и остаются непроверенными." },
+        "note": "🔴 Страница плеча отдаёт РАЗНУЮ таблицу в зависимости от местоположения посетителя, поэтому полного списка по юрлицам получить нельзя. С нашей точки отдалось: основные валютные пары «Unlimited», второстепенные 1:500, ЗОЛОТО 1:10000, серебро и платина 1:200, основные индексы 1:500, акции и ETF 1:25, крипта 1:500. На главной рекламируется 1:500, профессиональным клиентам 1:10000. Действует динамическое плечо: снижается с ростом позиции. Потолки для розницы ЕС и Великобритании нам не отдались и остаются непроверенными."
+      },
       "loss_pct": null,
       "loss_pct_confirmed_not_published": true,
       "loss_pct_checked": "2026-08-05",
       "loss_pct_note": "🔴 НЕ ПУБЛИКУЕТСЯ НИГДЕ — единственный в пуле, у кого цифры нет ни у одного юрлица. fxpro.co.uk перенаправляет на fxpro.com, в футере процента нет ни на одной странице. Для британского юрлица под надзором FCA раскрытие конкретной цифры обязательно — и её нет.",
       "loss_pct_disclosure": null,
-      "min_deposit": { "value": null, "currency": null,
+      "commission_short": "от 0 до 5 USD за лот",
+      "commission_short_en": "from 0 to 5 USD per lot",
+      "commission_short_ro": "de la 0 la 5 USD pe lot",
+      "commission_short_note": "Это отдельная плата сверх спреда, а не сам спред. Нижняя граница — счёт Standard, где комиссии нет вовсе и заработок площадки зашит в спред. Верхняя — Raw+/Elite, где спред «сырой», а плата берётся явно: 3,5 USD за лот в одну сторону по основным парам и золоту, 5 USD по биткоину.",
+      "commission_short_note_en": "The lower bound is the Standard account (no commission at all), the upper bound is Raw+/Elite on non-major instruments. On major pairs and gold, these accounts charge 3.5 USD one-way.",
+      "commission_short_note_ro": "Limita inferioară — contul Standard (fără niciun comision), limita superioară — Raw+/Elite la instrumentele secundare. La perechile majore și aur, aceste conturi percep 3,5 USD într-un sens.",
+      "inactivity_short": "не публикуется · счёт отключается после 3 месяцев без сделок",
+      "inactivity_short_en": "not published · the account is disabled after 3 months without trades",
+      "inactivity_short_ro": "nepublicat · contul este dezactivat după 3 luni fără tranzacții",
+      "min_deposit": {
+        "value": null,
+        "currency": null,
         "published": "фиксированного минимума нет; рекомендуется от 1000 USD. Могут действовать минимумы конкретного способа оплаты.",
-        "checked": "2026-08-06", "source": "https://www.fxpro.com/help-section/faq/accounting-and-vault" },
-
+        "checked": "2026-08-06",
+        "source": "https://www.fxpro.com/help-section/faq/accounting-and-vault"
+      },
       "published_specs": {
         "checked": "2026-08-06",
         "kind": "спецификация, опубликованная брокером",
-        "account_types": { "value": "Четыре: Standard (всё в спреде, от 1,2 пункта по основным парам, без комиссии), Raw+ (от 0 пунктов плюс комиссия), Elite (условия Raw+ плюс возврат от $1,50 за лот), cTrader (узкий спред плюс комиссия).",
-          "source": "https://www.fxpro.com/trading-platforms/comparison" },
-        "commission": { "value": "Standard — нет. Raw+ и Elite — $3,5 за лот в одну сторону по основным парам и золоту, $5 в сторону по биткоину. cTrader — $35 за $1 000 000 оборота, списывается на открытии и закрытии, только валюты и металлы; по индексам, энергии и крипте комиссии нет, наценка в спреде.",
+        "account_types": {
+          "value": "Четыре: Standard (всё в спреде, от 1,2 пункта по основным парам, без комиссии), Raw+ (от 0 пунктов плюс комиссия), Elite (условия Raw+ плюс возврат от $1,50 за лот), cTrader (узкий спред плюс комиссия).",
+          "source": "https://www.fxpro.com/trading-platforms/comparison"
+        },
+        "commission": {
+          "value": "Standard — нет. Raw+ и Elite — $3,5 за лот в одну сторону по основным парам и золоту, $5 в сторону по биткоину. cTrader — $35 за $1 000 000 оборота, списывается на открытии и закрытии, только валюты и металлы; по индексам, энергии и крипте комиссии нет, наценка в спреде.",
           "value_en": "Standard — none. Raw+ and Elite — $3.5 per lot one-way on major pairs and gold, $5 one-way on Bitcoin. cTrader — $35 per $1,000,000 turnover, charged on opening and closing, currencies and metals only; no commission on indices, energy, or crypto, the markup is in the spread instead.",
           "value_ro": "Standard — niciunul. Raw+ și Elite — 3,5 $ per lot într-un sens la perechile majore și aur, 5 $ într-un sens la Bitcoin. cTrader — 35 $ la 1.000.000 $ rulaj, perceput la deschidere și închidere, doar valute și metale; fără comision la indici, energie sau cripto, marja fiind inclusă în spread.",
-          "source": "https://www.fxpro.com/trading-platforms/comparison" },
-        "inactivity_fee": { "value": null,
+          "source": "https://www.fxpro.com/trading-platforms/comparison"
+        },
+        "inactivity_fee": {
+          "value": null,
           "note": "Сбора за неактивность на сайте не публикуется — это НЕ значит, что его нет, значит, что он не опубликован. Что опубликовано: живые счета отключаются после 3 месяцев без сделок и восстанавливаются письмом; демо-счета восстановлению не подлежат.",
-          "source": "https://www.fxpro.com/help-section/faq/fxpro-direct/how-can-i-reactivate-my-account" },
-        "funding": { "value": "PayPal, Visa/Mastercard, банковский перевод, локальные переводы, Skrill, Neteller, BTC, ETH, Tether. Комиссии за пополнение нет. Оговорка: вывод на электронный кошелёк может стоить денег, если сделок не было; вывод на карту ограничен суммой, внесённой с неё за последние 6–12 месяцев.",
-          "source": "https://www.fxpro.com/pricing/deposit-methods" },
-        "min_lot": { "value": 0.01, "note": "На всех четырёх типах счёта. Центового счёта нет.",
-          "source": "https://www.fxpro.com/trading-platforms/comparison" },
-        "instruments": { "value": "«2100+ CFD»; по классам чисел не публикуется",
-          "source": "https://www.fxpro.com/trading-platforms/comparison" }
+          "source": "https://www.fxpro.com/help-section/faq/fxpro-direct/how-can-i-reactivate-my-account"
+        },
+        "funding": {
+          "value": "PayPal, Visa/Mastercard, банковский перевод, локальные переводы, Skrill, Neteller, BTC, ETH, Tether. Комиссии за пополнение нет. Оговорка: вывод на электронный кошелёк может стоить денег, если сделок не было; вывод на карту ограничен суммой, внесённой с неё за последние 6–12 месяцев.",
+          "source": "https://www.fxpro.com/pricing/deposit-methods"
+        },
+        "min_lot": {
+          "value": 0.01,
+          "note": "На всех четырёх типах счёта. Центового счёта нет.",
+          "source": "https://www.fxpro.com/trading-platforms/comparison"
+        },
+        "instruments": {
+          "value": "«2100+ CFD»; по классам чисел не публикуется",
+          "source": "https://www.fxpro.com/trading-platforms/comparison"
+        }
       },
-
       "demo_requires_verification": false,
       "demo_note": "Верификация не требуется: «no documents or funding required until live trading». Но демо ИСТЕКАЕТ через 180 дней. До 100 000 виртуальных средств, 8 валют счёта, демо MT4/MT5 ограничены 70 открытыми позициями.",
       "demo_checked": "2026-08-06",
       "demo_source": "https://www.fxpro.com/forex-demo-account",
-
       "symbols": {
-        "EURUSD": "EURUSD", "GBPUSD": "GBPUSD", "USDJPY": "USDJPY", "EURGBP": "EURGBP",
-        "XAUUSD": "GOLD", "XAGUSD": "SILVER", "WTI": "WTI",
-        "SPX": "#USSPX500", "NASDAQ": "#USNDAQ100", "DAX": "#Germany40",
-        "BTC": "BITCOIN", "ETH": "ETHEREUM",
+        "EURUSD": "EURUSD",
+        "GBPUSD": "GBPUSD",
+        "USDJPY": "USDJPY",
+        "EURGBP": "EURGBP",
+        "XAUUSD": "GOLD",
+        "XAGUSD": "SILVER",
+        "WTI": "WTI",
+        "SPX": "#USSPX500",
+        "NASDAQ": "#USNDAQ100",
+        "DAX": "#Germany40",
+        "BTC": "BITCOIN",
+        "ETH": "ETHEREUM",
         "checked": "2026-08-05"
       },
-
       "spreads": [],
       "spreads_blocker": "🔴 НЕ ПУБЛИКОВАТЬ НИ ОДНУ ИЗ ДВУХ ЦИФР. Живая лента котировок на fxpro.com/trading/forex и демо-терминал расходятся в разы: EURUSD 1,4 против 0,2 пункта, GBPUSD 1,6 против 0,6, золото $0,34 против $0,15. Это не шум. Возможных объяснений три — тикер отдаёт котировку другого типа счёта, тикер идёт с задержкой, или демо показывает нереалистично узкий спред. Пока причина неизвестна, «спред FxPro» не имеет определённого значения. Разрешается только реальным счётом.",
-
       "spreads_published": {
         "source": "https://www.fxpro.com/trading/forex",
         "checked": "2026-08-05",
@@ -567,56 +1080,154 @@
           "example": "https://www.fxpro.com/trading/forex/eurusd",
           "checked": "2026-08-06",
           "items": [
-            { "symbol": "EURUSD", "spread_label": "Spread MT5 floating", "spread_observed": 1.4, "unit": "пипс", "swap_long": -8.9, "swap_short": 1.9, "swap_unit": "points" }
+            {
+              "symbol": "EURUSD",
+              "spread_label": "Spread MT5 floating",
+              "spread_observed": 1.4,
+              "unit": "пипс",
+              "swap_long": -8.9,
+              "swap_short": 1.9,
+              "swap_unit": "points"
+            }
           ],
           "delay_note": "🔴 КЛЮЧЕВОЕ. На странице прямо написано: «Note: Price data indicated above may be delayed by 15 minutes». То есть спред, который читатель видит на сайте FxPro, — не текущий. Это частично объясняет расхождение с демо-терминалом, хотя пятнадцатиминутная задержка сама по себе не даёт семикратной разницы, так что вопрос закрыт не полностью.",
           "todo": "Снят только евродоллар. Догрузить остальные 11 по тому же шаблону."
         },
         "swaps_published": "Свопы у FxPro публикуются: на карточке инструмента отдельными полями Swap Long / Swap Short в пунктах, со ссылкой на отдельную страницу свопов. Прежняя запись swap_note «не сняты, нигде не опубликованы» этому противоречит и должна быть исправлена.",
         "items": [
-          { "symbol": "EURUSD", "spread": 1.4, "unit": "пункт" },
-          { "symbol": "GBPUSD", "spread": 1.6, "unit": "пункт" },
-          { "symbol": "WTI", "spread": 0.03, "unit": "USD" },
-          { "symbol": "XAUUSD", "spread": 0.34, "unit": "USD" },
-          { "symbol": "BTC", "spread": 15.0, "unit": "USD" },
-          { "symbol": "ETH", "spread": 3.0, "unit": "USD" },
-          { "symbol": "DJI", "spread": 1.75, "unit": "пункт" }
+          {
+            "symbol": "EURUSD",
+            "spread": 1.4,
+            "unit": "пункт"
+          },
+          {
+            "symbol": "GBPUSD",
+            "spread": 1.6,
+            "unit": "пункт"
+          },
+          {
+            "symbol": "WTI",
+            "spread": 0.03,
+            "unit": "USD"
+          },
+          {
+            "symbol": "XAUUSD",
+            "spread": 0.34,
+            "unit": "USD"
+          },
+          {
+            "symbol": "BTC",
+            "spread": 15.0,
+            "unit": "USD"
+          },
+          {
+            "symbol": "ETH",
+            "spread": 3.0,
+            "unit": "USD"
+          },
+          {
+            "symbol": "DJI",
+            "spread": 1.75,
+            "unit": "пункт"
+          }
         ]
       },
-
       "spread_probe": {
         "kind": "контрольный снимок, НЕ замер по методичке",
         "checked": "2026-08-05T10:00Z/10:20Z",
         "render": false,
         "items": [
-          { "symbol": "EURUSD", "spread": 0.2, "unit": "пункт" },
-          { "symbol": "GBPUSD", "spread": 0.6, "unit": "пункт" },
-          { "symbol": "USDJPY", "spread": 0.3, "unit": "пункт" },
-          { "symbol": "EURGBP", "spread": 0.2, "unit": "пункт" },
-          { "symbol": "XAUUSD", "spread": 0.15, "unit": "USD" },
-          { "symbol": "XAGUSD", "spread": 0.021, "unit": "USD" },
-          { "symbol": "WTI", "spread": 0.05, "unit": "USD" },
-          { "symbol": "SPX", "spread": 0.60, "unit": "пункт" },
-          { "symbol": "NASDAQ", "spread": null, "note": "котировка не идёт" },
-          { "symbol": "DAX", "spread": 2.0, "unit": "пункт" },
-          { "symbol": "BTC", "spread": null, "note": "bid = ask, котировка не идёт" },
-          { "symbol": "ETH", "spread": null, "note": "bid = ask, котировка не идёт" }
+          {
+            "symbol": "EURUSD",
+            "spread": 0.2,
+            "unit": "пункт"
+          },
+          {
+            "symbol": "GBPUSD",
+            "spread": 0.6,
+            "unit": "пункт"
+          },
+          {
+            "symbol": "USDJPY",
+            "spread": 0.3,
+            "unit": "пункт"
+          },
+          {
+            "symbol": "EURGBP",
+            "spread": 0.2,
+            "unit": "пункт"
+          },
+          {
+            "symbol": "XAUUSD",
+            "spread": 0.15,
+            "unit": "USD"
+          },
+          {
+            "symbol": "XAGUSD",
+            "spread": 0.021,
+            "unit": "USD"
+          },
+          {
+            "symbol": "WTI",
+            "spread": 0.05,
+            "unit": "USD"
+          },
+          {
+            "symbol": "SPX",
+            "spread": 0.6,
+            "unit": "пункт"
+          },
+          {
+            "symbol": "NASDAQ",
+            "spread": null,
+            "note": "котировка не идёт"
+          },
+          {
+            "symbol": "DAX",
+            "spread": 2.0,
+            "unit": "пункт"
+          },
+          {
+            "symbol": "BTC",
+            "spread": null,
+            "note": "bid = ask, котировка не идёт"
+          },
+          {
+            "symbol": "ETH",
+            "spread": null,
+            "note": "bid = ask, котировка не идёт"
+          }
         ]
       },
-
       "crypto_availability": {
         "status": "не торгуется на этом счёте",
         "checked": "2026-08-05",
         "note": "На сайте BTCUSD и ETHUSD котируются со спредом $15 и $3, а в терминале инструменты называются BITCOIN и ETHEREUM и идут с bid = ask. Скорее всего крипта недоступна этому счёту или этой юрисдикции — что само по себе ответ на вопрос «кто даёт европейцу крипту». Подтвердить на реальном счёте."
       },
-
-      "commission": { "model": null, "value": null, "checked": null, "source": null },
+      "commission": {
+        "model": null,
+        "value": null,
+        "checked": null,
+        "source": null
+      },
       "swaps": null,
       "swap_note": "НЕ СНЯТЫ, нигде не опубликованы.",
       "negative_balance_protection": true,
       "nbp_note": "Заявление БРЕНДА о себе, не проверка по юрлицу. FxPro декларирует защиту от отрицательного баланса для всех клиентов независимо от категории и юрисдикции, с оговорками против злоупотреблений — формулировка снята для багамского юрлица (entities → fxpro_global_markets). На молдавский маршрут теперь назначено другое юрлицо, Costa Rica Markets Ltd, и отдельно для него это НЕ ПОДТВЕРЖДЕНО. Значение поднято на уровень партнёра, чтобы не приписывать костариканской компании чужой документ.",
-      "compensation_scheme": { "name": null, "amount": null, "currency": null, "source": null },
-      "platforms": ["FxPro WebTrader", "MT4", "MT5", "cTrader", "TradingView", "FxPro Mobile"],
+      "compensation_scheme": {
+        "name": null,
+        "amount": null,
+        "currency": null,
+        "source": null
+      },
+      "platforms": [
+        "FxPro WebTrader",
+        "MetaTrader 4",
+        "MetaTrader 5",
+        "cTrader",
+        "TradingView",
+        "FxPro Mobile"
+      ],
       "platforms_checked": "2026-08-06",
       "platforms_source": "https://www.fxpro.com/trading-platforms/comparison",
       "platforms_note": "🔴 ПОПРАВКА к записи от 05.08: марки «FxPro Edge» на действующем сайте нет — собственная платформа называется FxPro WebTrader / FxPro Trading Platform. Адрес edge.fxpro.group, по которому мы заходили, работает, но брендом больше не называется. Разбивка: Standard / Raw+ / Elite — мобильное приложение, MT4/MT5, WebTrader; cTrader — платформы cTrader и TradingView.",
@@ -624,7 +1235,6 @@
       "notes_ru": null,
       "remuneration_note": "VERIFY У ЮРИСТА: по этому партнёру вознаграждение привязано к результату клиента. Формулировка про это НЕ ПУБЛИКУЕТСЯ до заключения — при неаккуратной подаче читается как обещание прибыли."
     },
-
     {
       "id": "naga",
       "name": "NAGA",
@@ -639,7 +1249,8 @@
       "licences_ref": "partners_licences.json → partners.naga",
       "links": {
         "affiliate": "https://go.joinnaga.com/29LSS44/23JF6C/",
-        "demo": null, "live": null,
+        "demo": null,
+        "live": null,
         "tracking_ok": true,
         "tracking_note": "Корректная партнёрская ссылка."
       },
@@ -652,109 +1263,297 @@
         "note": "🔴 ДЕМО. Символы с суффиксом _Pro. Оговорка про демо обязательна в публикации."
       },
       "entities": [
-        { "id": "naga_markets_europe",
-          "legal_name": "NAGA Markets Europe Ltd", "jurisdiction": "CY", "regulator": "CySEC", "licence_no": "204/13",
-          "licenced_since": "2013-06-20", "reg_no": "HE 251168", "serves": "EEA, кроме Бельгии",
-          "excludes": "третьи страны — услуг не оказывает", "show_in_eu_locales": true,
-          "checked": "2026-08-05", "source": "https://www.cysec.gov.cy/en-GB/entities/investment-firms/cypriot/37704/",
+        {
+          "id": "naga_markets_europe",
+          "legal_name": "NAGA Markets Europe Ltd",
+          "jurisdiction": "CY",
+          "regulator": "CySEC",
+          "licence_no": "204/13",
+          "licenced_since": "2013-06-20",
+          "reg_no": "HE 251168",
+          "serves": "клиентов из стран Европейской экономической зоны, кроме Бельгии",
+          "serves_en": "clients from the European Economic Area, except Belgium",
+          "serves_ro": "clienți din Spațiul Economic European, cu excepția Belgiei",
+          "excludes": "третьи страны — услуг не оказывает",
+          "show_in_eu_locales": true,
+          "checked": "2026-08-05",
+          "source": "https://www.cysec.gov.cy/en-GB/entities/investment-firms/cypriot/37704/",
           "source_note": "Ссылка на карточку реестра рабочая; тело страницы при автоматическом чтении пустое, дату лицензии стоит подтвердить глазами.",
-          "leverage_retail": "1:30 основные пары, 1:20 прочие и золото, 1:10 индексы, 1:5 акции, 1:2 крипта",
-          "leverage_retail_en": "1:30 major pairs, 1:20 others and gold, 1:10 indices, 1:5 stocks, 1:2 crypto", "leverage_retail_ro": "1:30 perechi majore, 1:20 altele și aur, 1:10 indici, 1:5 acțiuni, 1:2 cripto",
+          "leverage_short": "от 1:2 до 1:30",
+          "leverage_short_en": "from 1:2 to 1:30",
+          "leverage_short_ro": "de la 1:2 la 1:30",
+          "leverage_retail": "1:30 основные пары · 1:20 прочие пары, золото и основные индексы · 1:10 прочие индексы и сырьё · 1:5 акции и ETF · 1:2 крипта",
+          "leverage_retail_en": "1:30 major pairs · 1:20 other pairs, gold and major indices · 1:10 other indices and commodities · 1:5 shares and ETFs · 1:2 crypto",
+          "leverage_retail_ro": "1:30 perechi majore · 1:20 alte perechi, aur și indici majori · 1:10 alți indici și materii prime · 1:5 acțiuni și ETF-uri · 1:2 cripto",
+          "leverage_source": "https://cms.naga.com/NAGA_Markets_Europe_Ltd_Risk_Disclosure_and_Warning_Notice_October_2025_d1d03a1364.pdf",
+          "leverage_checked": "2026-08-14",
+          "leverage_verification": "broker_site",
+          "servicing_pending_owner": "⏳ ВЛАДЕЛЕЦ УТОЧНЯЕТ (2026-08-14): «NAGA с ЕС не работает, точнее счёт открыть можно, но никто не ведёт клиентов». Если подтвердится, это существенно: юрлицо формально лицензировано CySEC и заявляет обслуживание ЕЭЗ, но фактического сопровождения нет. НЕ публиковать до подтверждения — это утверждение о качестве обслуживания, а не о лицензии, и требует основания сильнее устного впечатления.",
+          "leverage_correction": "Исправлено 2026-08-14: прежнее «1:10 индексы» было неверным. По Table 2 раскрытия рисков (октябрь 2025) основные индексы идут под 5% маржи, то есть 1:20, а 1:10 — это «all other indices» и сырьё кроме золота. Real Stocks — маржа 100%, плеча нет вовсе. Второе подтверждение: https://nagamarkets.zendesk.com/hc/en-gb/articles/13801638117788",
+          "leverage_jurisdiction_note": "Потолки заданы мерой CySEC (CyNPIMs, по образцу ESMA) для розничных клиентов.",
+          "leverage_jurisdiction_note_en": "The caps are set by the CySEC measure (CyNPIMs, modelled on ESMA) for retail clients.",
+          "leverage_jurisdiction_note_ro": "Plafoanele sunt stabilite de măsura CySEC (CyNPIMs, după modelul ESMA) pentru clienții retail.",
           "loss_pct": 77.41,
           "loss_pct_checked": "2026-08-05",
           "loss_pct_source": "https://naga.com/eu/documents/risk_disclosure_and_warning_notice",
           "loss_pct_note": "Подтверждено дословно в футере страницы. В PDF раскрытия цифры нет — только в вебе.",
           "negative_balance_protection": true,
-          "compensation_scheme": { "name": "Cyprus Investor Compensation Fund", "amount": 20000, "currency": "EUR",
-            "note": "максимум €20 000 или 90% требования, что меньше" } },
-        { "id": "naga_capital",
-          "legal_name": "NAGA Capital Ltd", "jurisdiction": "SC", "regulator": "Seychelles FSA", "licence_no": "SD026",
-          "reg_no": "8422455-1", "serves": "вне ЕЭЗ", "show_in_eu_locales": false,
-          "checked": "2026-08-05", "source": "https://fsaseychelles.sc/regulated-entities/capital-markets",
+          "compensation_scheme": {
+            "name": "Cyprus Investor Compensation Fund",
+            "amount": 20000,
+            "currency": "EUR",
+            "note": "максимум €20 000 или 90% требования, что меньше"
+          }
+        },
+        {
+          "id": "naga_capital",
+          "legal_name": "NAGA Capital Ltd",
+          "jurisdiction": "SC",
+          "regulator": "Seychelles FSA",
+          "licence_no": "SD026",
+          "reg_no": "8422455-1",
+          "serves": "клиентов за пределами Европейской экономической зоны",
+          "serves_en": "clients outside the European Economic Area",
+          "serves_ro": "clienți din afara Spațiului Economic European",
+          "show_in_eu_locales": false,
+          "checked": "2026-08-05",
+          "source": "https://fsaseychelles.sc/regulated-entities/capital-markets",
           "source_note": "Компания подтверждена в реестре как действующий Securities Dealer. Номер SD026 реестр не публикует — он со слов брокера. Адрес в реестре расходится с адресом в документах NAGA.",
-          "leverage_retail": null,
-          "leverage_note": "Числового потолка в политике плеча нет («может меняться с уведомлением или без»). В примерах 1:300 и 1:200, в рекламе по золоту — до 1:500.",
+          "leverage_short": "от 1:10 до 1:500",
+          "leverage_short_en": "from 1:10 to 1:500",
+          "leverage_short_ro": "de la 1:10 la 1:500",
+          "leverage_short_note": "Диапазон собран из двух ЕДИНСТВЕННЫХ чисел, которые брокер называет для этого юрлица: 1:10 по CFD на акции (support-статья) и до 500:1 по золоту (рекламная страница). Договорным потолком ни одно из них не является — в политике плеча числа нет вовсе, о чём и говорит модалка. Не выдавать этот диапазон за официальный.",
+          "leverage_short_note_en": "This range is built from the only two figures the broker states for this entity: 1:10 on share CFDs (a support article) and up to 500:1 on gold (a marketing page). Neither is a contractual cap — the leverage policy states no figure at all, as the modal itself says. Don't present this range as official.",
+          "leverage_short_note_ro": "Intervalul este construit din singurele două cifre pe care brokerul le menționează pentru această entitate: 1:10 la CFD-uri pe acțiuni (un articol de suport) și până la 500:1 la aur (o pagină de marketing). Niciuna nu este un plafon contractual — politica de levier nu indică nicio cifră, așa cum spune și fereastra modală. Nu prezentați acest interval ca fiind oficial.",
+          "leverage_retail": "потолка нет · в договоре число не названо · по золоту реклама обещает до 500:1 · по CFD на акции — 1:10",
+          "leverage_retail_en": "no cap · the agreement names no figure · gold is advertised at up to 500:1 · stock CFDs at 1:10",
+          "leverage_retail_ro": "fără plafon · contractul nu indică nicio cifră · la aur publicitatea promite până la 500:1 · la CFD-uri pe acțiuni — 1:10",
+          "leverage_source": "https://cms.naga.com/NAGA_Capital_Ltd_Leverage_and_Margin_Policy_V1_September_2024_b6d4169a54.pdf",
+          "leverage_checked": "2026-08-14",
+          "leverage_verification": "broker_site",
+          "leverage_note": "Leverage and Margin Policy (Version 2, декабрь 2024), §5: «The applicable leverage ratios at any point in time can be found here» — вместо числа ссылка. Client Agreement §12 — та же отсылка. Числа 1:10/1:50/1:100/1:200/1:300 встречаются в политике ТОЛЬКО как арифметические иллюстрации внутри примеров, потолком не заявлены.",
+          "leverage_previous_claim": "Прежняя формулировка «примеры 1:300 и 1:200» переведена в unverified 2026-08-14: как заявленные потолки эти числа на официальных ресурсах NAGA не встречаются нигде. Таблица инструментов (naga.com/en/trading/hours-and-fees) рендерится клиентским JS и в HTML отдаёт «No matching records found».",
+          "leverage_jurisdiction_note": "Сейшелы (FSA) числового потолка не устанавливают: с 31.12.2024 S.I. 119/2024 ввёл качественный режим — тест на соответствие, маржа только деньгами, защита от отрицательного баланса; размер плеча оставлен на усмотрение лицензиата. https://fsaseychelles.sc/component/edocman/securities-conduct-of-business-amendment-regulations-2024/download",
+          "leverage_jurisdiction_note_en": "Seychelles (FSA) sets no numerical cap: as of 31.12.2024, S.I. 119/2024 introduced a qualitative regime — an appropriateness test, cash-only margin, negative balance protection; the leverage figure itself is left to the licensee's discretion. https://fsaseychelles.sc/component/edocman/securities-conduct-of-business-amendment-regulations-2024/download",
+          "leverage_jurisdiction_note_ro": "Seychelles (FSA) nu stabilește un plafon numeric: de la 31.12.2024, S.I. 119/2024 a introdus un regim calitativ — test de adecvare, marjă doar în numerar, protecție împotriva soldului negativ; nivelul levierului este lăsat la discreția licențiatului. https://fsaseychelles.sc/component/edocman/securities-conduct-of-business-amendment-regulations-2024/download",
+          "leverage_contradiction": "🔴 Три расхождения внутри одного бренда: (1) naga.com/en/trade-gold обещает 500:1 по золоту, а naga.com/en/academy/leverage — «up to 1:30» и 1:10 по сырью, куда золото и отнесено; ни одно число не зафиксировано в договоре. (2) Stop-out: 50% в политике NAGA Capital и 20% в support-статье того же юрлица — клиент по документам не может определить свой уровень принудительного закрытия. (3) Для контраста, южноафриканское юрлицо группы (JME Financial Services, FSCA 37166) прямо пишет «The default leverage for South Africa is 1:1000» — то есть отсутствие числа в сейшельской политике это выбор, а не техническая невозможность.",
           "loss_pct": null,
           "loss_pct_confirmed_not_published": true,
           "loss_pct_note": "НЕ ПУБЛИКУЕТСЯ. На глобальном сайте процента нет нигде — отсутствие подтверждено 2026-08-05.",
           "negative_balance_protection": true,
           "compensation_scheme": null,
           "compensation_note": "Схемы нет. В договоре от марта 2026 компенсационный фонд не упоминается вовсе, единственная инстанция — регулятор Сейшел, применимое право сейшельское.",
-          "internal_contradiction": "Уровень принудительного закрытия: 50% в политике плеча §6.5 и 20% в договоре §12.2. Оба документа действующие — перед публикацией уточнить." }
+          "internal_contradiction": "Уровень принудительного закрытия: 50% в политике плеча §6.5 и 20% в договоре §12.2. Оба документа действующие — перед публикацией уточнить."
+        }
       ],
-      "loss_pct": null, "loss_pct_checked": null, "loss_pct_source": null,
+      "loss_pct": null,
+      "loss_pct_checked": null,
+      "loss_pct_source": null,
       "loss_pct_blocker": "РЕШЕНО 2026-08-05 по схеме XM. У юрлица, которое достаётся молдавскому читателю (naga_capital), процент не публикуется — ставится пропуск с раскрытием 77.41% европейского юрлица и оговоркой, что там другое плечо и есть фонд на €20 000, которого здесь нет. Строка не участвует в сортировке по умолчанию. НЕ подставлять 77.41% как loss_pct самой NAGA.",
       "enforcement": [
-        { "date": "2023-12-29", "regulator": "CySEC", "entity": "naga_markets_europe",
-          "amount": 150000, "currency": "EUR",
+        {
+          "date": "2023-12-29",
+          "regulator": "CySEC",
+          "entity": "naga_markets_europe",
+          "amount": 150000,
+          "currency": "EUR",
           "url": "https://www.cysec.gov.cy/en-GB/public-info/decisions/95953/",
-          "note": "Ссылка и заголовок решения подтверждены по реестру; сумму и дату подтвердить глазами перед публикацией." }
+          "note": "Ссылка и заголовок решения подтверждены по реестру; сумму и дату подтвердить глазами перед публикацией."
+        }
       ],
       "group_note": "После слияния с Key Way Group (CAPEX.com), завершённого 29.08.2024, обе марки в одной группе. Capex из пула выведен 2026-08-05 — закрывается.",
-      "min_deposit": { "value": 10, "currency": "USD", "checked": "2026-08-06",
+      "commission_short": "нет, только спред",
+      "commission_short_en": "none, spread only",
+      "commission_short_ro": "fără, doar spread",
+      "commission_short_note": "Отдельной комиссии сверх спреда брокер не заявляет: в опубликованной таблице условий колонка Fee — 0.00% по всем снятым строкам (EURUSD, AUDUSD, AUDCAD). То есть заработок площадки зашит в спред.",
+      "commission_short_note_en": "In the published conditions table, the Fee column is 0.00% across every row we captured (EURUSD, AUDUSD, AUDCAD). The broker doesn't state a separate commission.",
+      "commission_short_note_ro": "În tabelul de condiții publicat, coloana Fee este 0,00% la toate rândurile capturate (EURUSD, AUDUSD, AUDCAD). Brokerul nu declară un comision separat.",
+      "inactivity_short": "не публикуется",
+      "inactivity_short_en": "not published",
+      "inactivity_short_ro": "nepublicat",
+      "min_deposit": {
+        "value": 10,
+        "currency": "USD",
+        "checked": "2026-08-06",
         "source": "https://naga.com/en/trading/hours-and-fees",
-        "note": "Таблица способов пополнения на той же странице: VISA, MasterCard, Alternative Payment и ряд банков — минимум $10, комиссия «No charge» по всем перечисленным способам." },
-
+        "note": "Таблица способов пополнения на той же странице: VISA, MasterCard, Alternative Payment и ряд банков — минимум $10, комиссия «No charge» по всем перечисленным способам."
+      },
       "symbols": {
-        "EURUSD": "EURUSD_Pro", "GBPUSD": "GBPUSD_Pro", "USDJPY": "USDJPY_Pro", "EURGBP": "EURGBP_Pro",
-        "XAUUSD": "XAUUSD_Pro", "XAGUSD": "XAGUSD_Pro", "WTI": "USOUSD_Pro",
-        "SPX": "SPX500", "NASDAQ": "NAS100", "DAX": "GERMAN30",
-        "BTC": "BTCUSD", "ETH": "ETHUSD",
+        "EURUSD": "EURUSD_Pro",
+        "GBPUSD": "GBPUSD_Pro",
+        "USDJPY": "USDJPY_Pro",
+        "EURGBP": "EURGBP_Pro",
+        "XAUUSD": "XAUUSD_Pro",
+        "XAGUSD": "XAGUSD_Pro",
+        "WTI": "USOUSD_Pro",
+        "SPX": "SPX500",
+        "NASDAQ": "NAS100",
+        "DAX": "GERMAN30",
+        "BTC": "BTCUSD",
+        "ETH": "ETHUSD",
         "checked": "2026-08-05",
         "note": "DAX 40 подписан как «GER30 (DAX)» — тикер отстал от индекса на десять бумаг. У InstaForex та же ошибка («DAX 30»). Нефть у брокера называется Crude Oil Cash."
       },
-
       "spreads": [],
       "spreads_published": {
         "source": "https://naga.com/en/trading/hours-and-fees",
         "index_page": "https://naga.com/en/pricing-and-terms/spreads",
         "checked": "2026-08-06",
         "kind": "средний спред плюс свопы, маржа, комиссия и размер лота — публикуется брокером",
-        "columns": ["Instrument", "Swap(long/short)", "Avg. spread, pips", "Margin", "Fee", "Lot Value", "Volume, lots (min/max)"],
-        "sample_rows": [
-          { "symbol": "AUDUSD", "avg": 1.0, "unit": "пипс", "swap_long": -1.1, "swap_short": -4.4, "margin": "0.20%", "fee": "0.00%", "lot": 100000, "vol_min": 0.01, "vol_max": 50 },
-          { "symbol": "AUDCAD", "avg": 1.4, "unit": "пипс", "swap_long": -9.95, "swap_short": -3.7, "margin": "0.40%", "fee": "0.00%", "lot": 100000, "vol_min": 0.01, "vol_max": 50 }
+        "columns": [
+          "Instrument",
+          "Swap(long/short)",
+          "Avg. spread, pips",
+          "Margin",
+          "Fee",
+          "Lot Value",
+          "Volume, lots (min/max)"
         ],
-        "items": [],
-        "todo": "Таблица алфавитная и подгружается порциями — сняты только первые строки как доказательство существования. Догрузить EURUSD, GBPUSD, USDJPY, EURGBP, XAUUSD, XAGUSD, USOUSD, SPX500, NAS100, GERMAN30, BTCUSD, ETHUSD.",
+        "sample_rows": [
+          {
+            "symbol": "AUDUSD",
+            "avg": 1.0,
+            "unit": "пипс",
+            "swap_long": -1.1,
+            "swap_short": -4.4,
+            "margin": "0.20%",
+            "fee": "0.00%",
+            "lot": 100000,
+            "vol_min": 0.01,
+            "vol_max": 50
+          },
+          {
+            "symbol": "AUDCAD",
+            "avg": 1.4,
+            "unit": "пипс",
+            "swap_long": -9.95,
+            "swap_short": -3.7,
+            "margin": "0.40%",
+            "fee": "0.00%",
+            "lot": 100000,
+            "vol_min": 0.01,
+            "vol_max": 50
+          }
+        ],
+        "items": [
+          {
+            "symbol": "EURUSD",
+            "avg": 0.9,
+            "unit": "пипс",
+            "swap_long": -18,
+            "swap_short": -11.2,
+            "margin": "0.10%",
+            "fee": "0.00%",
+            "lot": 100000,
+            "vol_min": 0.01,
+            "vol_max": 50,
+            "checked": "2026-08-14",
+            "source_note": "Снято живьём в браузере 14.08.2026: таблица рендерится клиентским JS и разбита на 9 страниц по алфавиту, EURUSD лежит на четвёртой — обычным HTTP-запросом страница отдаёт «No matching records found», поэтому раньше в данных его не было."
+          }
+        ],
+        "eurusd_gap_fixed": "🔴 ИСПРАВЛЕНО 2026-08-14 по замечанию владельца. До этого в колонке «Спред» у NAGA стоял AUDUSD (первая строка алфавитной таблицы, попавшая в sample_rows), тогда как у остальных четырёх партнёров — EURUSD. Колонка читается как сравнение одного и того же инструмента, поэтому это была не неполнота данных, а вводящее в заблуждение сравнение. В brokers.js добавлена страховка: если базовый инструмент не EURUSD, под значением печатается явная оговорка.",
+        "margin_implies_leverage": "Заметка на будущее: в этой же строке маржа по EURUSD — 0.10%, то есть плечо 1:1000. Это первое числовое подтверждение реального потолка у сейшельского юрлица, где политика плеча числа не называет вовсе (см. entities[naga_capital].leverage_*). Отдельно не публикуется — требует проверки, к какому юрлицу относится таблица, глобальный сайт обслуживает оба.",
+        "todo": "EURUSD снят 14.08.2026. Догрузить GBPUSD, USDJPY, EURGBP, XAUUSD, XAGUSD, USOUSD, SPX500, NAS100, GERMAN30, BTCUSD, ETHUSD — они на страницах 4-9 той же таблицы, снимать так же через браузер.",
         "note": "🔴 ИСПРАВЛЕНО 2026-08-06. Здесь стояло «публичной страницы условий нет, все цифры только из терминала». Неверно: страница есть, просто не по тому адресу, который я проверял. naga.com/en/trading-conditions действительно редиректит на главную, но в подвале сайта в разделе Pricing & Terms есть ссылка Spreads → /en/pricing-and-terms/spreads, а оттуда «Click Here» ведёт на /en/trading/hours-and-fees с полной таблицей. По полноте это ЛУЧШЕЕ раскрытие в пуле: NAGA публикует и своп, и средний спред, и маржу, и комиссию, и размер лота, и границы объёма — больше, чем XM и InstaForex."
       },
-
       "spread_probe": {
         "kind": "контрольный снимок, НЕ замер по методичке",
         "checked": "2026-08-05T10:00Z/10:20Z",
         "render": false,
         "items": [
-          { "symbol": "EURUSD", "spread": 1.2, "unit": "пункт" },
-          { "symbol": "GBPUSD", "spread": 1.5, "unit": "пункт" },
-          { "symbol": "USDJPY", "spread": 2.0, "unit": "пункт" },
-          { "symbol": "EURGBP", "spread": 1.6, "unit": "пункт" },
-          { "symbol": "XAUUSD", "spread": 0.61, "unit": "USD" },
-          { "symbol": "XAGUSD", "spread": 0.191, "unit": "USD" },
-          { "symbol": "WTI", "spread": 0.05, "unit": "USD" },
-          { "symbol": "SPX", "spread": 1.2, "unit": "пункт" },
-          { "symbol": "NASDAQ", "spread": 2.0, "unit": "пункт" },
-          { "symbol": "DAX", "spread": 1.7, "unit": "пункт" },
-          { "symbol": "BTC", "spread": 171.5, "unit": "USD" },
-          { "symbol": "ETH", "spread": 10.2, "unit": "USD" }
+          {
+            "symbol": "EURUSD",
+            "spread": 1.2,
+            "unit": "пункт"
+          },
+          {
+            "symbol": "GBPUSD",
+            "spread": 1.5,
+            "unit": "пункт"
+          },
+          {
+            "symbol": "USDJPY",
+            "spread": 2.0,
+            "unit": "пункт"
+          },
+          {
+            "symbol": "EURGBP",
+            "spread": 1.6,
+            "unit": "пункт"
+          },
+          {
+            "symbol": "XAUUSD",
+            "spread": 0.61,
+            "unit": "USD"
+          },
+          {
+            "symbol": "XAGUSD",
+            "spread": 0.191,
+            "unit": "USD"
+          },
+          {
+            "symbol": "WTI",
+            "spread": 0.05,
+            "unit": "USD"
+          },
+          {
+            "symbol": "SPX",
+            "spread": 1.2,
+            "unit": "пункт"
+          },
+          {
+            "symbol": "NASDAQ",
+            "spread": 2.0,
+            "unit": "пункт"
+          },
+          {
+            "symbol": "DAX",
+            "spread": 1.7,
+            "unit": "пункт"
+          },
+          {
+            "symbol": "BTC",
+            "spread": 171.5,
+            "unit": "USD"
+          },
+          {
+            "symbol": "ETH",
+            "spread": 10.2,
+            "unit": "USD"
+          }
         ]
       },
-
-      "commission": { "model": null, "value": null, "checked": null, "source": null },
+      "commission": {
+        "model": null,
+        "value": null,
+        "checked": null,
+        "source": null
+      },
       "swaps": null,
       "swap_note": "НЕ СНЯТЫ, нигде не опубликованы.",
       "negative_balance_protection": null,
-      "compensation_scheme": { "name": "CySEC Investor Compensation Fund", "amount": 20000, "currency": "EUR",
-        "checked": "2026-07-29", "source": "https://www.cysec.gov.cy/en-GB/investor-protection/tae/information/",
-        "note": "Общая для всех CySEC-лицензиатов схема (та же, что у XM Кипр) — сумма не проверена специально для NAGA, взята с той же страницы регулятора по праву юрисдикции." },
-      "platforms": ["NAGA App"],
+      "compensation_scheme": {
+        "name": "CySEC Investor Compensation Fund",
+        "amount": 20000,
+        "currency": "EUR",
+        "checked": "2026-07-29",
+        "source": "https://www.cysec.gov.cy/en-GB/investor-protection/tae/information/",
+        "note": "Общая для всех CySEC-лицензиатов схема (та же, что у XM Кипр) — сумма не проверена специально для NAGA, взята с той же страницы регулятора по праву юрисдикции."
+      },
+      "platforms": [
+        "NAGA Web Trader",
+        "NAGA App",
+        "MetaTrader 5"
+      ],
+      "platforms_checked": "2026-08-14",
+      "platforms_source": "https://naga.com/en/investing/platforms/metatrader",
+      "platforms_note": "🔴 MT4 у NAGA НЕ НАЙДЕН, вопреки ожиданию. Страница платформ называется «NAGA on MT5», MetaTrader 4 не упоминается на ней ни разу, адреса /en/metatrader-4 и /en/metatrader-5 отдают 404, в навигации единственная ссылка — /investing/platforms/metatrader и ведёт на MT5. Проверено живьём 2026-08-14. Если у брокера MT4 всё же есть, он его не публикует — до подтверждения в списке только MT5.",
       "demo_requires_verification": false,
       "demo_note": "Подтверждено собственным доступом 2026-08-05: демо-счёт #3402015 (метка DEMO, CFD, баланс 10 000 $) работает и торгует, верификация не проходилась. В кабинете при этом висит подсказка «NAGA Start. Provide basic info to open a Real-Money account with a $2,000 deposit limit» — то есть данные требуются для реального счёта, а не для демо.",
       "demo_checked": "2026-08-05",
       "funding_methods": [],
       "notes_ru": null
     },
-
     {
       "id": "instaforex",
       "name": "InstaForex",
@@ -769,9 +1568,11 @@
       "licences_ref": "partners_licences.json → partners.instaforex",
       "links": {
         "affiliate": "https://www.instaforex.com/en/fast_open_live_account?x=TTVDG",
-        "demo": null, "live": null,
+        "demo": null,
+        "live": null,
         "tracking_ok": true,
-        "tracking_note": "ИСПРАВЛЕНО 2026-07-29. Параметр ?x=TTVDG найден сверкой с реальным работающим партнёрским линком в /mnt/sbfdata/sbf-platform/SBFAcademy_bot/sbfacademy/content/brokers.json (тот же проект SBF, другой бот) — тот файл уже использует этот код в продакшене, а его данные по AvaTrade (tag=184200) байт-в-байт совпадают с уже проверенными записями этого файла. Отдельно не закрыто: домен instaforex.com глобальный, а CySEC-юрлицо (Instant Trading EU Ltd, лиц. 266/15) живёт на instaforex.eu — если карточка для ЕС-локали обещает кипрское юрлицо и компенсационный фонд, а ссылка ведёт на глобальный домен, пользователь подписывает договор не с тем, что описано. Для RU/MD-локали это не проблема."
+        "tracking_note": "ИСПРАВЛЕНО 2026-07-29. Параметр ?x=TTVDG найден сверкой с реальным работающим партнёрским линком в /mnt/sbfdata/sbf-platform/SBFAcademy_bot/sbfacademy/content/brokers.json (тот же проект SBF, другой бот) — тот файл уже использует этот код в продакшене, а его данные по AvaTrade (tag=184200) байт-в-байт совпадают с уже проверенными записями этого файла. Отдельно не закрыто: домен instaforex.com глобальный, а CySEC-юрлицо (Instant Trading EU Ltd, лиц. 266/15) живёт на instaforex.eu — если карточка для ЕС-локали обещает кипрское юрлицо и компенсационный фонд, а ссылка ведёт на глобальный домен, пользователь подписывает договор не с тем, что описано. Для RU/MD-локали это не проблема.",
+        "affiliate_lang_note": "ЯЗЫК ЗАШИТ В ССЫЛКУ (найдено 16.09.2026). Здесь стоит сегмент пути /en/ — то есть румын с /ro/brokers и англичанин с /en/brokers уходят на страницу партнёра не на своём языке. Код УЖЕ умеет брать вариант из полей affiliate_ro / affiliate_en, если они появятся рядом с affiliate. Не заполнены намеренно: коды локалей у каждого партнёра свои, проверяются только живым переходом по ссылке, а каждый такой переход засчитывается партнёрке как клик — это шаг владельца. Проверить, открывается ли форма регистрации, и вписать сюда."
       },
       "terminal_access": {
         "platform": "MT4, MT5 и веб-терминал",
@@ -786,96 +1587,206 @@
         "source": "https://www.instaforex.com/webtrader"
       },
       "entities": [
-        { "id": "instafinance", "legal_name": "InstaFinance Ltd", "reg_no": "1811672",
-          "jurisdiction": "VG", "regulator": "BVI Financial Services Commission", "licence_no": "SIBA/L/14/1082",
-          "serves": "global", "show_in_eu_locales": false,
-          "checked": "2026-08-05", "source": "https://www.bvifsc.vg/regulated-entities/instafinance-ltd-0",
+        {
+          "id": "instafinance",
+          "legal_name": "InstaFinance Ltd",
+          "reg_no": "1811672",
+          "jurisdiction": "VG",
+          "regulator": "BVI Financial Services Commission",
+          "licence_no": "SIBA/L/14/1082",
+          "serves": "клиентов по всему миру",
+          "serves_en": "clients worldwide",
+          "serves_ro": "clienți din întreaga lume",
+          "show_in_eu_locales": false,
+          "checked": "2026-08-05",
+          "source": "https://www.bvifsc.vg/regulated-entities/instafinance-ltd-0",
           "source_note": "Компания подтверждена реестром БВО как действующая. Номер лицензии реестр БВО не публикует — привязка номера к компании только со слов брокера.",
-          "loss_pct": null, "loss_pct_confirmed_not_published": true,
+          "loss_pct": null,
+          "loss_pct_confirmed_not_published": true,
+          "leverage_short": "от 1:1 до 1:5000",
+          "leverage_short_en": "from 1:1 to 1:5000",
+          "leverage_short_ro": "de la 1:1 la 1:5000",
+          "leverage_retail": "до 1:5000 · зависит от типа счёта и юрисдикции · 1:1000 снижается до 1:600 при балансе выше 1000 USD",
+          "leverage_retail_en": "up to 1:5000 · depends on the account type and jurisdiction · 1:1000 drops to 1:600 once the balance exceeds 1000 USD",
+          "leverage_retail_ro": "până la 1:5000 · depinde de tipul contului și de jurisdicție · 1:1000 scade la 1:600 peste un sold de 1000 USD",
+          "leverage_owner_observation": "По клиентам SBF фактическое среднее плечо по валютам — около 1:200 (наблюдение владельца, 2026-08-14). Это наша внутренняя статистика, а не заявление брокера, поэтому на страницу НЕ выводится; полезна как проверка того, что 1:5000 — верхняя витринная граница, а не типичный режим.",
+          "leverage_source": "https://www.instaforex.com/account_types",
+          "leverage_checked": "2026-08-14",
+          "leverage_verification": "broker_site",
+          "leverage_jurisdiction_note": "БВО (SIBA + Regulatory Code) числового потолка плеча не устанавливает — поиск по «leverage» в законодательстве регулятора не даёт совпадений (проверено 2026-08-14). Отсюда 1:5000: внешней границы нет.",
+          "leverage_jurisdiction_note_en": "The BVI (SIBA + Regulatory Code) sets no numerical leverage cap — searching the regulator's legislation for \"leverage\" returns no matches (checked 2026-08-14). Hence 1:5000: there's no external limit.",
+          "leverage_jurisdiction_note_ro": "BVI (SIBA + Regulatory Code) nu stabilește niciun plafon numeric de levier — căutarea cuvântului „leverage” în legislația autorității nu găsește nicio potrivire (verificat la 14.08.2026). De aici 1:5000: nu există o limită externă.",
+          "leverage_contradiction": "🔴 Четыре расхождения на одном сайте, все подтверждены 2026-08-14: (1) таблица счетов — 1:1–1:5000, страница Trading Conditions — «from 1:1 to 1:1000»; (2) тултип к колонке с 1:5000 говорит про снижение 1:1000 → 1:600, то есть примечание описывает другой потолок, чем колонка, к которой прикреплено; (3) порог снижения — баланс свыше 1000 USD, значит заявленный максимум доступен фактически только на депозитах меньше тысячи долларов; (4) разбивки по классам активов нет ни на одной странице — единое число на всё, включая крипту и CFD на акции. Отдельно: обе официальные ссылки на клиентский договор (/key_documents.php?type=pdf&file=client и /downloads/agreement_en.pdf) отдают ошибку сервера, то есть договорные 1:1000/1:600 подтверждаются только тултипом на витрине.",
           "negative_balance_protection": false,
-          "compensation_scheme": null },
-        { "id": "instant_trading_eu", "legal_name": "Instant Trading EU Ltd", "reg_no": "266937",
-          "jurisdiction": "CY", "regulator": "CySEC", "licence_no": "266/15", "licenced_since": "2015-01-13",
-          "serves": "ЕЭЗ и восемь третьих стран; Молдовы среди них НЕТ", "show_in_eu_locales": true,
-          "checked": "2026-08-05", "source": "https://www.cysec.gov.cy/en-GB/entities/investment-firms/cypriot/71294/",
+          "compensation_scheme": null
+        },
+        {
+          "id": "instant_trading_eu",
+          "legal_name": "Instant Trading EU Ltd",
+          "reg_no": "266937",
+          "jurisdiction": "CY",
+          "regulator": "CySEC",
+          "licence_no": "266/15",
+          "licenced_since": "2015-01-13",
+          "serves": "клиентов из стран Европейской экономической зоны и ещё восьми стран за её пределами; Молдовы среди них нет",
+          "serves_en": "clients from the European Economic Area plus eight countries outside it; Moldova is not among them",
+          "serves_ro": "clienți din Spațiul Economic European și încă opt țări din afara lui; Moldova nu se numără printre ele",
+          "show_in_eu_locales": true,
+          "checked": "2026-08-05",
+          "source": "https://www.cysec.gov.cy/en-GB/entities/investment-firms/cypriot/71294/",
           "source_note": "Карточка реестра прочитана целиком, лицензия действующая.",
-          "loss_pct": 75.02, "loss_pct_source": "https://www.instaforex.eu/eu_files/forex_pairs.pdf",
+          "leverage_short": "до 1:30",
+          "leverage_short_en": "up to 1:30",
+          "leverage_short_ro": "până la 1:30",
+          "leverage_retail": "до 1:30 для розницы (до 1:500 при статусе Professional); ступени ESMA 1:20 / 1:10 / 1:5 / 1:2 брокер не публикует",
+          "leverage_retail_en": "up to 1:30 retail (up to 1:500 with Professional status); the broker does not publish the ESMA steps 1:20 / 1:10 / 1:5 / 1:2",
+          "leverage_retail_ro": "până la 1:30 pentru retail (până la 1:500 cu statut Professional); brokerul nu publică treptele ESMA 1:20 / 1:10 / 1:5 / 1:2",
+          "leverage_source": "https://www.instaforex.eu/account_types",
+          "leverage_checked": "2026-08-14",
+          "leverage_verification": "broker_site",
+          "leverage_quote": "The max leverage for retail clients is 1:30, for professional traders is up to 1:500.",
+          "leverage_jurisdiction_note": "Ступени задаёт мера CySEC/ESMA, а не брокер: 1:30 основные пары, 1:20 прочие и золото, 1:10 индексы и сырьё, 1:5 акции, 1:2 крипта. Сам instaforex.eu построчной таблицы не публикует — подтверждён только верхний потолок 1:30, остальные ступени применяются в силу нормы.",
+          "leverage_jurisdiction_note_en": "The tiers are set by the CySEC/ESMA measure, not by the broker: 1:30 major pairs, 1:20 others and gold, 1:10 indices and commodities, 1:5 shares, 1:2 crypto. instaforex.eu itself doesn't publish a line-by-line table — only the top cap of 1:30 is confirmed, the other tiers apply by force of the rule.",
+          "leverage_jurisdiction_note_ro": "Treptele sunt stabilite de măsura CySEC/ESMA, nu de broker: 1:30 perechi majore, 1:20 altele și aur, 1:10 indici și materii prime, 1:5 acțiuni, 1:2 cripto. instaforex.eu însuși nu publică un tabel linie cu linie — este confirmat doar plafonul superior de 1:30, celelalte trepte se aplică prin forța normei.",
+          "loss_pct": 75.02,
+          "loss_pct_source": "https://www.instaforex.eu/eu_files/forex_pairs.pdf",
           "negative_balance_protection": true,
-          "compensation_scheme": { "name": "CySEC Investor Compensation Fund", "amount": 20000, "currency": "EUR" } }
+          "compensation_scheme": {
+            "name": "CySEC Investor Compensation Fund",
+            "amount": 20000,
+            "currency": "EUR"
+          }
+        }
       ],
-      "leverage_retail": { "value": "до 1:1000",
-        "value_en": "up to 1:1000", "value_ro": "până la 1:1000",
+      "leverage_retail": {
+        "value": "до 1:1000",
+        "value_en": "up to 1:1000",
+        "value_ro": "până la 1:1000",
         "checked": "2026-08-06",
         "conflict": true,
         "note": "🔴 САЙТ ПРОТИВОРЕЧИТ САМ СЕБЕ. Страница типов счёта заявляет 1:1–1:5000 для каждого типа (с оговоркой, что 1:1000 снижается до 1:600 при балансе выше 1000 USD), страница торговых условий — «плечо от 1:1 до 1:1000». Публиковать одну цифру без указания на расхождение нельзя.",
-        "sources": ["https://www.instaforex.com/account_types", "https://www.instaforex.com/trading_conditions"] },
+        "sources": [
+          "https://www.instaforex.com/account_types",
+          "https://www.instaforex.com/trading_conditions"
+        ]
+      },
       "loss_pct": null,
       "loss_pct_confirmed_not_published": true,
       "loss_pct_checked": "2026-08-05",
       "loss_pct_note": "НЕ ПУБЛИКУЕТСЯ на глобальном сайте, к которому относится молдавский читатель. Отсутствие подтверждено.",
       "loss_pct_disclosure": {
-        "sibling_entity": "instant_trading_eu", "value": 75.02,
+        "sibling_entity": "instant_trading_eu",
+        "value": 75.02,
         "source": "https://www.instaforex.eu/eu_files/forex_pairs.pdf",
         "note": "Цифра кипрского юрлица, которое Молдову не обслуживает. Отдельная странность: она существует ТОЛЬКО внутри PDF с ключевой информацией (дата 19.02.2025), в HTML сайта instaforex.eu баннера с процентом нет нигде — для юрлица под надзором CySEC это само по себе достойно сноски."
       },
-      "min_deposit": { "value": 1, "currency": "USD",
+      "commission_short": "от 0 до 0,6 USD за лот",
+      "commission_short_en": "from 0 to 0.6 USD per lot",
+      "commission_short_ro": "de la 0 la 0,6 USD pe lot",
+      "commission_short_note": "Это отдельная плата сверх спреда, а не сам спред. Нижняя граница — счета Standard, Pro и Cent, где комиссии нет и заработок площадки в спреде. Верхняя — Zero по валютам в живой таблице (0,6 USD за лот); у Raw фиксированные 0,5 USD. Отдельно: у InstaForex лот 10 000 единиц против 100 000 у остальных — сравнивать плату за лот между брокерами напрямую нельзя.",
+      "commission_short_note_en": "The lower bound is the Standard, Pro, and Cent accounts (no commission), the upper bound is Zero on currencies in the live table (0.6 USD per lot); Raw has a fixed 0.5 USD.",
+      "commission_short_note_ro": "Limita inferioară — conturile Standard, Pro și Cent (fără comision), limita superioară — Zero la valute în tabelul live (0,6 USD per lot); Raw are o taxă fixă de 0,5 USD.",
+      "inactivity_short": "10 USD в месяц после 3 месяцев без сделок",
+      "inactivity_short_en": "10 USD a month after 3 months without trades",
+      "inactivity_short_ro": "10 USD pe lună după 3 luni fără tranzacții",
+      "min_deposit": {
+        "value": 1,
+        "currency": "USD",
         "by_account": "Insta.Standard — от 1 USD; Insta.Cent — от 1 USD; Insta.Pro, Insta.Zero, Insta.Raw — от 100 USD",
-        "checked": "2026-08-06", "source": "https://www.instaforex.com/account_types",
-        "note": "Со сноской «в зависимости от выбранной платёжной системы». Валюты счёта USD/EUR/RUB, у центового только USD/EUR." },
-
+        "checked": "2026-08-06",
+        "source": "https://www.instaforex.com/account_types",
+        "note": "Со сноской «в зависимости от выбранной платёжной системы». Валюты счёта USD/EUR/RUB, у центового только USD/EUR."
+      },
       "published_specs": {
         "checked": "2026-08-06",
         "kind": "спецификация, опубликованная брокером — единственный в пуле, кто публикует всё без регистрации",
-        "account_types": { "value": "Пять: Standard (спред от 0,00006, без комиссии), Pro (от 0,00004, без комиссии), Zero (нулевой спред плюс комиссия), Raw (нулевой спред плюс фиксированная комиссия), Cent (центовый, спред от 0,00006). У всех рыночное исполнение, margin call 30%, stop out 10%.",
-          "source": "https://www.instaforex.com/account_types" },
-        "commission": { "value": "Standard, Pro, Cent — 0. Zero — от 0,5 USD (в живой таблице 0,6$ за лот по валютам). Raw — фиксированные 0,5 USD.",
+        "account_types": {
+          "value": "Пять: Standard (спред от 0,00006, без комиссии), Pro (от 0,00004, без комиссии), Zero (нулевой спред плюс комиссия), Raw (нулевой спред плюс фиксированная комиссия), Cent (центовый, спред от 0,00006). У всех рыночное исполнение, margin call 30%, stop out 10%.",
+          "source": "https://www.instaforex.com/account_types"
+        },
+        "commission": {
+          "value": "Standard, Pro, Cent — 0. Zero — от 0,5 USD (в живой таблице 0,6$ за лот по валютам). Raw — фиксированные 0,5 USD.",
           "value_en": "Standard, Pro, Cent — 0. Zero — from 0.5 USD (the live table shows 0.6$ per lot on currencies). Raw — a fixed 0.5 USD.",
           "value_ro": "Standard, Pro, Cent — 0. Zero — de la 0,5 USD (tabelul live arată 0,6$ per lot la valute). Raw — fix 0,5 USD.",
-          "sources": ["https://www.instaforex.com/specifications/currencies?account=insta_zero", "https://www.instaforex.com/specifications/currencies?account=insta_raw"] },
-        "inactivity_fee": { "value": 10, "currency": "USD", "period": "месяц", "after_months": 3,
+          "sources": [
+            "https://www.instaforex.com/specifications/currencies?account=insta_zero",
+            "https://www.instaforex.com/specifications/currencies?account=insta_raw"
+          ]
+        },
+        "inactivity_fee": {
+          "value": 10,
+          "currency": "USD",
+          "period": "месяц",
+          "after_months": 3,
           "quote": "Dormant and/or Inactive Account Fee of 10 USD or the equivalent to USD per account per month",
           "source": "https://secure.instaforex.com/Agreements/ClientBVI.html?lang=en",
-          "note": "Условие из договора БВО, применяется «по абсолютному усмотрению компании» при положительном балансе." },
-        "funding": { "value": "«более 11 способов»: карта, Bitcoin, PayCo, Tether, Litecoin, Ethereum, банковские и электронные переводы. Комиссии по способам НЕ ЧИТАЮТСЯ — страницы пополнения и вывода за логином.",
-          "source": "https://www.instaforex.com/trading_conditions" },
-        "min_lot": { "value": 0.01, "cent_account": 0.1, "max": 10000,
+          "note": "Условие из договора БВО, применяется «по абсолютному усмотрению компании» при положительном балансе."
+        },
+        "funding": {
+          "value": "«более 11 способов»: карта, Bitcoin, PayCo, Tether, Litecoin, Ethereum, банковские и электронные переводы. Комиссии по способам НЕ ЧИТАЮТСЯ — страницы пополнения и вывода за логином.",
+          "source": "https://www.instaforex.com/trading_conditions"
+        },
+        "min_lot": {
+          "value": 0.01,
+          "cent_account": 0.1,
+          "max": 10000,
           "note": "Поскольку валютный контракт 10 000 единиц, 0,01 лота = 100 единиц базовой валюты.",
-          "source": "https://www.instaforex.com/account_types" },
-        "instruments": { "value": "110 валютных пар, 83 CFD на акции США. По индексам, сырью и крипте чисел не публикуется.",
+          "source": "https://www.instaforex.com/account_types"
+        },
+        "instruments": {
+          "value": "110 валютных пар, 83 CFD на акции США. По индексам, сырью и крипте чисел не публикуется.",
           "source": "https://www.instaforex.com/trading_conditions",
-          "note": "На странице демо-счёта отдельно заявлено «более 300 финансовых инструментов» — с числами выше не сходится." }
+          "note": "На странице демо-счёта отдельно заявлено «более 300 финансовых инструментов» — с числами выше не сходится."
+        }
       },
-
       "demo_requires_verification": false,
       "demo_note": "Верификация не требуется, форма спрашивает только страну, почту, валюту и размер виртуального депозита. Срок действия демо на странице не публикуется.",
       "demo_checked": "2026-08-06",
       "demo_source": "https://www.instaforex.com/register_demo_account",
-
       "symbols": {
-        "EURUSD": "EURUSD.fx", "GBPUSD": "GBPUSD.fx", "USDJPY": "USDJPY.fx", "EURGBP": "EURGBP.fx",
-        "XAUUSD": "GOLD.m", "XAGUSD": "SILVER.m",
-        "SPX": "#SPX", "NASDAQ": "#NDX", "DAX": "#DAX",
-        "BTC": "#Bitcoin", "ETH": "#Ethereum",
+        "EURUSD": "EURUSD.fx",
+        "GBPUSD": "GBPUSD.fx",
+        "USDJPY": "USDJPY.fx",
+        "EURGBP": "EURGBP.fx",
+        "XAUUSD": "GOLD.m",
+        "XAGUSD": "SILVER.m",
+        "SPX": "#SPX",
+        "NASDAQ": "#NDX",
+        "DAX": "#DAX",
+        "BTC": "#Bitcoin",
+        "ETH": "#Ethereum",
         "WTI": null,
         "checked": "2026-08-05",
         "note": "Нефть: раздел Oil and gas на сайте есть, прямой URL не открывается — нужен клик по вкладке. DAX подписан как «DAX 30» — тикер отстал на десять бумаг, та же ошибка, что у NAGA."
       },
-
       "contract_sizes": {
         "reconfirmed": "Оба факта перепроверены 2026-08-06 по живой таблице спецификаций: валютный контракт 10 000 подтверждён по AUDUSD, EURUSD, GBPUSD, EURJPY и остальным строкам; SILVER.m = 500 унций подтверждено.",
         "gold_trap": "🔴 НОВОЕ 2026-08-06. У InstaForex ДВА символа золота с пятикратной разницей контракта: GOLD.m = 100 унций, XAUUSD.m = 500 унций. Открывший позицию не в том символе получит объём впятеро больше ожидаемого. Источник: https://www.instaforex.com/specifications/metals?account=insta_standard",
         "note": "🔴 КЛЮЧЕВОЕ ДЛЯ СРАВНЕНИЯ. Лот у InstaForex 10 000 единиц, а не 100 000 как у остальных четырёх. Серебро 500 унций, а не 5000. Спред «0,6 пункта» стоит здесь не $6 за круг, а $0,6 — но и позиция в десять раз меньше. Сравнивать спреды в пунктах напрямую с другими брокерами НЕЛЬЗЯ, только через cost_round_turn_usd. Это ровно та ловушка, ради которой колонка стоимости круга и придумана.",
         "checked": "2026-08-05",
-        "fx": { "value": 10000, "unit": "единиц базовой валюты" },
-        "XAUUSD": { "value": 100, "unit": "унций" },
-        "XAGUSD": { "value": 500, "unit": "унций" },
-        "BTC": { "value": 1, "unit": "BTC" },
-        "ETH": { "value": 1, "unit": "ETH" }
+        "fx": {
+          "value": 10000,
+          "unit": "единиц базовой валюты"
+        },
+        "XAUUSD": {
+          "value": 100,
+          "unit": "унций"
+        },
+        "XAGUSD": {
+          "value": 500,
+          "unit": "унций"
+        },
+        "BTC": {
+          "value": 1,
+          "unit": "BTC"
+        },
+        "ETH": {
+          "value": 1,
+          "unit": "ETH"
+        }
       },
-
       "spreads": [],
       "spreads_note": "🔴 ИСПРАВЛЕНО: прежняя формулировка «терминального замера нет и не будет без десктопного MT4» опиралась на ошибочную запись про отсутствие веб-терминала. Веб-терминал есть (webtrader.instaforex.com), значит InstaForex МОЖНО включить в оба окна замера наравне с остальными — для этого нужен вход в терминал под реальным счётом. Ниже — условия, опубликованные самим брокером: это спецификация счёта, а не живая котировка, и в этом качестве публиковать её можно с указанием источника и даты.",
-
       "spreads_published": {
         "source": "https://www.instaforex.com/specifications?account=insta_standard",
         "checked": "2026-08-05T11:20Z",
@@ -883,18 +1794,89 @@
         "kind": "спецификация счёта, публикуется брокером",
         "note": "InstaForex — единственный из пула, кто публикует всё без регистрации: спред, комиссию, свопы, размер лота. Плюс переключатель типов счёта прямо в адресе (?account=insta_standard | insta_pro | insta_zero | insta_raw | cent_standard).",
         "items": [
-          { "symbol": "EURUSD", "spread": 0.6, "unit": "пункт", "commission": 0, "swap_long": -10.1, "swap_short": 1.1, "contract": 10000 },
-          { "symbol": "GBPUSD", "spread": 0.8, "unit": "пункт", "commission": 0, "swap_long": -5.9, "swap_short": -3.6, "contract": 10000 },
-          { "symbol": "USDJPY", "spread": 0.7, "unit": "пункт", "commission": 0, "swap_long": -14.5, "swap_short": -24.2, "contract": 10000 },
-          { "symbol": "EURGBP", "spread": 0.6, "unit": "пункт", "commission": 0, "swap_long": -7.5, "swap_short": -0.4, "contract": 10000 },
-          { "symbol": "XAUUSD", "spread": 0.15, "unit": "USD", "commission": 10, "commission_unit": "USD", "commission_ambiguous": true, "swap_long": -327, "swap_short": 0.69, "contract": 100 },
-          { "symbol": "XAGUSD", "spread": 0.35, "unit": "USD", "commission": 10, "commission_unit": "USD", "commission_ambiguous": true, "swap_long": -51.68, "swap_short": 0.09, "contract": 500 },
-          { "symbol": "BTC", "spread": 0.25, "unit": "USD", "commission": 0.1, "commission_unit": "% от объёма", "swap_long": -0.05, "swap_short": -0.05, "swap_unit": "%/сут", "contract": 1 },
-          { "symbol": "ETH", "spread": 1.90, "unit": "USD", "commission": 0.1, "commission_unit": "% от объёма", "swap_long": -0.05, "swap_short": -0.05, "swap_unit": "%/сут", "contract": 1 }
+          {
+            "symbol": "EURUSD",
+            "spread": 0.6,
+            "unit": "пункт",
+            "commission": 0,
+            "swap_long": -10.1,
+            "swap_short": 1.1,
+            "contract": 10000
+          },
+          {
+            "symbol": "GBPUSD",
+            "spread": 0.8,
+            "unit": "пункт",
+            "commission": 0,
+            "swap_long": -5.9,
+            "swap_short": -3.6,
+            "contract": 10000
+          },
+          {
+            "symbol": "USDJPY",
+            "spread": 0.7,
+            "unit": "пункт",
+            "commission": 0,
+            "swap_long": -14.5,
+            "swap_short": -24.2,
+            "contract": 10000
+          },
+          {
+            "symbol": "EURGBP",
+            "spread": 0.6,
+            "unit": "пункт",
+            "commission": 0,
+            "swap_long": -7.5,
+            "swap_short": -0.4,
+            "contract": 10000
+          },
+          {
+            "symbol": "XAUUSD",
+            "spread": 0.15,
+            "unit": "USD",
+            "commission": 10,
+            "commission_unit": "USD",
+            "commission_ambiguous": true,
+            "swap_long": -327,
+            "swap_short": 0.69,
+            "contract": 100
+          },
+          {
+            "symbol": "XAGUSD",
+            "spread": 0.35,
+            "unit": "USD",
+            "commission": 10,
+            "commission_unit": "USD",
+            "commission_ambiguous": true,
+            "swap_long": -51.68,
+            "swap_short": 0.09,
+            "contract": 500
+          },
+          {
+            "symbol": "BTC",
+            "spread": 0.25,
+            "unit": "USD",
+            "commission": 0.1,
+            "commission_unit": "% от объёма",
+            "swap_long": -0.05,
+            "swap_short": -0.05,
+            "swap_unit": "%/сут",
+            "contract": 1
+          },
+          {
+            "symbol": "ETH",
+            "spread": 1.9,
+            "unit": "USD",
+            "commission": 0.1,
+            "commission_unit": "% от объёма",
+            "swap_long": -0.05,
+            "swap_short": -0.05,
+            "swap_unit": "%/сут",
+            "contract": 1
+          }
         ],
         "not_published": "Нефть и спреды по индексам. По #SPX, #NDX, #DAX публикуются только маржа и стоимость тика, спреда нет."
       },
-
       "findings": [
         {
           "id": "crypto_commission_hidden",
@@ -912,20 +1894,33 @@
           "note": "По металлам на сайте колонка Fee = 10, без указания, за круг это или в одну сторону. Разница двукратная. До уточнения в стоимость круга не подставлять."
         }
       ],
-
-      "commission": { "model": null, "value": null, "checked": null, "source": null,
-        "note": "Общей комиссии по счёту нет — она инструментальная, см. spreads_published[].commission." },
+      "commission": {
+        "model": null,
+        "value": null,
+        "checked": null,
+        "source": null,
+        "note": "Общей комиссии по счёту нет — она инструментальная, см. spreads_published[].commission."
+      },
       "swaps": "см. spreads_published[].swap_long / swap_short",
       "swap_note": "Единственный брокер пула, у которого свопы опубликованы и сняты.",
       "negative_balance_protection": null,
-      "compensation_scheme": { "name": null, "amount": null, "currency": null, "source": null },
-      "platforms": ["MT4", "MT5", "webtrader.instaforex.com", "trade.instaforex.com"],
+      "compensation_scheme": {
+        "name": null,
+        "amount": null,
+        "currency": null,
+        "source": null
+      },
+      "platforms": [
+        "MetaTrader 4",
+        "MetaTrader 5",
+        "InstaForex WebTrader"
+      ],
+      "platforms_checked": "2026-08-14",
       "platforms_note": "🔴 ИСПРАВЛЕНО. Здесь стояло «Веб-терминала нет — подтверждено 2026-08-05». Это была моя ошибка, она же противоречила terminal_access в этой же записи, где веб-терминал подтверждён 2026-08-06 со ссылкой на instaforex.com/webtrader. Верно: веб-терминал есть, десктоп не требуется.",
       "funding_methods": [],
       "notes_ru": null
     }
   ],
-
   "archived_partners": [
     {
       "id": "capex",
@@ -933,7 +1928,12 @@
       "archived": "2026-08-05",
       "reason": "Брокер закрывается. Исключён из пула — сравнивать закрывающуюся площадку с действующими бессмысленно.",
       "affiliate": "https://account.capex.com/en/register?sidc=88EA29D5-46D9-472E-AEB2-C6E5C30E822A",
-      "entity": { "legal_name": "KW Investments Ltd", "jurisdiction": "SC", "regulator": "Seychelles FSA", "licence_no": "SD020" },
+      "entity": {
+        "legal_name": "KW Investments Ltd",
+        "jurisdiction": "SC",
+        "regulator": "Seychelles FSA",
+        "licence_no": "SD020"
+      },
       "note": "Сохранено на случай возврата к теме. В рендер не идёт ни при каких условиях. Вместе с записью снята группа naga_capex — связка NAGA/Capex больше не имеет предмета."
     }
   ]

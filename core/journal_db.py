@@ -9,10 +9,16 @@ from __future__ import annotations
 
 import hashlib
 import sqlite3
+import os
 from pathlib import Path
 from typing import Any
 
-_DB = Path(__file__).parent.parent / "data" / "journal.db"
+# Путь к базе можно увести в сторону переменной SBF_JOURNAL_DB.
+# Нужно для стенда: платные главы 6-15 не посмотреть без PRO, а
+# выдавать себе право в боевой базе — значит пачкать прод. Со
+# стендом права выдаются в КОПИИ, прод не трогаем вовсе.
+_DB = Path(os.getenv("SBF_JOURNAL_DB")
+          or Path(__file__).parent.parent / "data" / "journal.db")
 
 
 # ── Инициализация схемы ───────────────────────────────────────────────────────
@@ -152,8 +158,28 @@ def add_trade(t: dict, user_id: str = "default") -> dict:
     )
     conn = _get_conn()
     try:
+        # 🔴 СНАЧАЛА СПРАШИВАЕМ, ЕСТЬ ЛИ ТАКАЯ СДЕЛКА, И ТОЛЬКО ПОТОМ ВСТАВЛЯЕМ.
+        #
+        # Раньше вставка шла через INSERT OR IGNORE, а дубликат определялся по
+        # `lastrowid == 0`. Беда в том, что OR IGNORE глотает ЛЮБОЕ нарушение
+        # ограничения, не только повтор: неверное направление сделки, источник
+        # не из списка, отсутствующее обязательное поле — всё это давало ровно
+        # тот же признак, и наружу уходило «дубликат».
+        #
+        # Цена такой подмены: человек видит «эта сделка уже импортирована» и
+        # ищет её в пустом журнале. Я сам на этом потерял час — послал в пробе
+        # dir="long" вместо "buy", получил «duplicate: true» на пустой таблице
+        # и успел решить, что сломана запись сделок. Ответ, который врёт про
+        # причину, дороже ответа, которого нет.
+        уже = conn.execute(
+            "SELECT id FROM trades WHERE user_id=? AND import_hash=?",
+            (user_id, import_hash),
+        ).fetchone()
+        if уже:
+            return {"duplicate": True, "import_hash": import_hash,
+                    "id": уже[0]}
         cur = conn.execute(
-            """INSERT OR IGNORE INTO trades
+            """INSERT INTO trades
                (user_id, symbol, dir, entry_price, exit_price, size,
                 open_ts, close_ts, pnl, pnl_r, fees, stop_loss,
                 source, import_hash, note)
@@ -168,9 +194,15 @@ def add_trade(t: dict, user_id: str = "default") -> dict:
             ),
         )
         conn.commit()
-        if cur.lastrowid == 0:
-            return {"duplicate": True, "import_hash": import_hash}
         return {"id": cur.lastrowid, "import_hash": import_hash, "pnl_r": pnl_r}
+    except sqlite3.IntegrityError as e:
+        # Сюда попадают именно нарушения ограничений, и теперь они называют
+        # себя своим именем. Гонка (две одинаковые сделки разом) тоже сюда:
+        # проверка выше её пропустит, а UNIQUE — нет; отличаем по тексту.
+        текст = str(e)
+        if "UNIQUE" in текст.upper():
+            return {"duplicate": True, "import_hash": import_hash}
+        raise ValueError(f"сделка не принята: {текст}") from e
     finally:
         conn.close()
 

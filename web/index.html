@@ -2,7 +2,10 @@
 <html lang="{{ lang }}">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+{# canonical + hreflang: сервер знает, что у курса локаль идёт
+   после /edu, а у остальных — перед; см. serve.py:_alt_links #}
+{{ alt_links('/', lang) | safe }}
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script>
 // ?embed=1 — для встраивания в iframe (SBFAcademy Mini App, вкладка «График»):
 // прячет свою шапку/тикер/переключатель Фундаментальный-Технический, т.к. снаружи
@@ -26,27 +29,35 @@ if (new URLSearchParams(location.search).get("embed") === "1") {
 })();
 </script>
 <title>{{ t('home.page_title', lang) }}</title>
-<meta name="description" content="SBF Consult: аналитика финансовых рынков в реальном времени. Сопровождение счёта, анализ рынка и подбор брокера. Офисы: Молдова, Казахстан, ЮАР, ОАЭ, Швейцария, Португалия.">
+{# 🔴 Описание и og-теги были жёстко вписаны по-русски: на /ro/ и /en/
+   карточка ссылки и сниппет в выдаче приходили на чужом языке, а
+   og:url у всех трёх локалей указывал на русскую главную. Теперь через
+   page_meta, из i18n и с адресом своей локали. #}
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
-<meta property="og:title" content="SBF Consult — Intelligence Terminal">
-<meta property="og:description" content="Аналитика финансовых рынков в реальном времени. Сопровождение счёта и анализ рынка, усиленный ИИ.">
-<meta property="og:url" content="https://lp.sbfconsult.com/">
+{{ page_meta(t('home.page_title', lang), '', '/', lang,
+             t('home.page_description', lang)) | safe }}
 <meta property="og:type" content="website">
 <meta property="og:image" content="https://lp.sbfconsult.com/assets/og-image.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="SBF Consult — Intelligence Terminal">
-<meta name="twitter:description" content="Аналитика финансовых рынков в реальном времени. Сопровождение счёта и анализ рынка, усиленный ИИ.">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "FinancialService",
+  {# @id — якорь организации на весь сайт. На него ссылаются разметки
+     курса, глав, глоссария и брокеров (provider/publisher), вместо того
+     чтобы переписывать этот блок на каждой странице пятью копиями,
+     которые разъедутся. См. core/schema_ld.py:ОРГ. #}
+  "@id": "https://lp.sbfconsult.com/#org",
   "name": "SBF Consult",
   "legalName": "SBF Company SRL",
   "url": "https://lp.sbfconsult.com/",
   "logo": "https://lp.sbfconsult.com/assets/logo.svg",
   "description": "SBF Consult — сопровождение счёта, анализ рынка и подбор брокера для частных инвесторов. Экспертная аналитика, усиленная ИИ.",
   "areaServed": ["MD", "KZ", "ZA", "AE", "CH", "PT"],
-  "availableLanguage": ["ru", "en"],
+  {# Румынский тут забыли: сайт трёхъязычный с самого начала, а в разметке
+     его не было — и /ro/ для машины выглядел как страница на неизвестно
+     каком языке. #}
+  "availableLanguage": ["ru", "ro", "en"],
   "identifier": {
     "@type": "PropertyValue",
     "propertyID": "LEI",
@@ -64,25 +75,25 @@ if (new URLSearchParams(location.search).get("embed") === "1") {
 <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Merriweather:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/design.css">
+<link rel="stylesheet" href="/assets/design.css?v=20260909">
 <link rel="stylesheet" href="/assets/tokens.css?v=1">
 <script src="/assets/i18n.js?v=2" defer></script>
 <script src="/assets/sbf-symbols.js?v=2"></script>
 <script src="/edu/assets/calendar-terms.js?v=1" defer></script>
-<script src="/assets/sbf-header.js?v=16" defer></script>
+<script src="/assets/sbf-header.js?v=23" defer></script>
 <script src="/assets/sbf-auth.js?v=1" defer></script>
-<script src="/assets/sbf-profile.js?v=2" defer></script>
+<script src="/assets/sbf-profile.js?v=4" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.0/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
-<script src="/assets/grafik-engine.js"></script>
+<script src="/assets/grafik-engine.js?v=20260908"></script>
 <script src="/assets/sbf-glossary.js?v=2" defer></script>
 <style>
 :root{
   --cream:#FBF6EF; --paper:#FFFFFF; --line:#E7DFCF; --grid:#F0E9DA;
-  --ink:#2B2B33;   --muted:#8A8275; --faint:#C5BAA8;
+  --ink:#2B2B33;   --muted:#716A5A; --faint:#7B6B52;
   --gold:#C9A227;  --glow:#E6C257;
-  --up:#1e8e5a;    --down:#c0392b;
-  --signal:#b07d18;
+  --up:#2C784E;    --down:#c0392b;
+  --signal:#906614;
 }
 *{box-sizing:border-box}
 html{overflow-x:hidden}
@@ -91,7 +102,7 @@ body{margin:0;background:var(--cream);color:var(--ink);
   -webkit-font-smoothing:antialiased}
 .mono{font-family:'JetBrains Mono',monospace}
 h1,h2,h3{font-family:Montserrat,sans-serif;font-weight:700;margin:0}
-a{color:var(--gold);text-decoration:none}
+a{color:var(--gold-text,#866A19);text-decoration:none}
 a:hover{text-decoration:underline;color:var(--glow)}
 :focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 
@@ -115,6 +126,22 @@ a:hover{text-decoration:underline;color:var(--glow)}
 .strip{overflow:hidden;border-bottom:1px solid var(--line);
   background:var(--paper);position:sticky;top:63px;z-index:20}
 .strip-inner{display:flex;flex-wrap:nowrap;width:max-content;will-change:transform}
+/* 🔴 НА ТЕЛЕФОНЕ ЛЕНТА НЕ ЕДЕТ, А ЛИСТАЕТСЯ ПАЛЬЦЕМ.
+   Замер 14.09.2026: дорожка 3597 px в окне 360, скорость 30 px/с — полный
+   круг ровно минута. При overflow:hidden пролистать нельзя, а пауза висела
+   на mouseenter, которого на телефоне не бывает. То есть читатель не мог
+   ни догнать уехавшее, ни остановить бегущее: оставалось ждать минуту.
+   Бегущая строка осмысленна там, где она боковым зрением, — на мониторе.
+   На узком экране она занимает всю ширину и требует внимания, поэтому
+   здесь это обычный список с прокруткой. */
+@media(max-width:768px){
+  .strip{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;
+    scrollbar-width:none}
+  .strip::-webkit-scrollbar{display:none}
+  /* Сбрасываем сдвиг, оставленный бегущей строкой до срабатывания медиа-
+     правила: иначе лента открылась бы прокрученной на случайное место. */
+  .strip-inner{transform:none!important;will-change:auto}
+}
 .tick{padding:9px 16px;border-right:1px solid var(--line);min-width:112px;flex:0 0 auto;cursor:default}
 .tick .k{font-size:10px;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;font-weight:600}
 .tick .v{font-family:'JetBrains Mono';font-weight:600;font-size:14px;margin-top:3px;color:var(--ink)}
@@ -147,7 +174,16 @@ a:hover{text-decoration:underline;color:var(--glow)}
 
 /* report */
 .report{font-family:Montserrat}
-.rep-instrument-link{color:var(--gold);font-weight:600;text-decoration:none;border-bottom:1.5px dotted var(--gold)}
+/* 🔴 Цель касания. Это ссылки на график актива прямо внутри текста
+   сводки («нефть подорожала…»), высота строки 19 px при норме 44.
+   Сделать их блоками нельзя — они часть предложения и разорвут абзац.
+   Поэтому вертикальные отступы с компенсирующим отрицательным margin:
+   область нажатия растёт вверх и вниз, а строка остаётся на месте.
+   Соседние ссылки стоят вплотную (зазор 0-3 px), так что поправка на
+   пустое пространство из WCAG 2.5.8 здесь не помогает. */
+.rep-instrument-link{color:var(--gold-text,#866A19);font-weight:600;text-decoration:none;
+  border-bottom:1.5px dotted var(--gold);
+  display:inline-block;padding:12px 0;margin:-12px 0}
 .rep-instrument-link:hover{background:rgba(201,162,39,.12)}
 .personal-block{margin-bottom:14px;padding:10px 14px;border-radius:10px;background:rgba(201,162,39,.07);border:1px solid rgba(201,162,39,.18);font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.8;display:none}
 .personal-block b{color:var(--ink)}
@@ -169,18 +205,127 @@ a:hover{text-decoration:underline;color:var(--glow)}
 .focus-item__move.down{color:var(--down)}
 .focus-item__body{font-family:'Merriweather',Georgia,serif;font-weight:300;font-size:17px;line-height:1.65;letter-spacing:-.005em;color:var(--ink)}
 .focus-item__more{margin-top:2px}
-.focus-item__more summary{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--gold);cursor:pointer;list-style:none;margin-top:8px}
+.focus-item__more summary{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--gold-text,#866A19);cursor:pointer;list-style:none;margin-top:8px}
 .focus-item__more summary::-webkit-details-marker{display:none}
 .focus-item__more summary::before{content:"+ ";}
 .focus-item__more[open] summary::before{content:"− ";}
 .focus-item__more-body{margin-top:10px}
+/* ── Эпицентр: доска обсуждаемости ───────────────────────────────────────── */
+.buzz-board{position:relative;overflow:hidden}
+.board-sub{font-size:13px;line-height:1.5;color:var(--muted);margin:0 0 14px}
+/* Пять направлений — пять колонок. Раньше всё лежало одним облаком с
+   легендой по цветам: сравнить крипту с сырьём было можно, а понять, что
+   именно относится к сырью, — только сверяясь с легендой. */
+/* Резерв под переключатель направлений: renderBoardTabs() наполняет его уже
+   после загрузки, а до этого он занимает ноль. На мобильном пять чипов
+   переносятся в три строки — это 94 px, которые в момент отрисовки уезжали
+   вниз вместе со всей страницей. Резерв по измеренной высоте. */
+.board-tabs{flex-wrap:wrap;margin-bottom:12px;min-height:28px}
+@media(max-width:768px){.board-tabs{min-height:94px}}
+.board-groups{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;
+  /* 🔴 РЕЗЕРВ ВЫСОТЫ ДО ПРИХОДА ДАННЫХ — 16.09.2026.
+     Доска приезжает из /api/pulse/board примерно на 570-й мс и до этого
+     занимает ноль. В момент отрисовки она выталкивала вниз всё, что под
+     ней, на 540 px: самый крупный сдвиг на сайте (CLS 2.11 на мобильном,
+     1.40 на desktop — при норме 0.1). Резерв равен ИЗМЕРЕННОЙ высоте
+     заполненной доски, а не выбран на глаз: на desktop это ровно высота
+     ячейки из строки ниже, на мобильном — высота списка из пяти групп.
+     Замер: python3 tools/audit_cls.py */
+  min-height:540px}
+@media(max-width:768px){.board-groups{min-height:240px}}
+/* Одно направление на всю ширину: сетка из одной колонки, ячейка выше —
+   в ней десять с лишним кругов вместо четырёх. */
+.board-groups.single{grid-template-columns:1fr}
+/* Высота под полный список направления: в валютах 59 инструментов, в акциях
+   60. При 380px они помещались только ужавшись до нечитаемых 12-14px. */
+.board-groups.single .board-cell{height:540px}
+.board-groups.single .board-group-h{display:none}
+.board-group{display:flex;flex-direction:column;min-width:0}
+.board-group-h{display:flex;align-items:center;gap:6px;margin-bottom:6px;
+  font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.6px;
+  text-transform:uppercase;color:var(--muted);font-weight:600}
+.board-group-h i{width:9px;height:9px;border-radius:50%;border:1.5px solid;flex-shrink:0}
+.board-cell{position:relative;width:100%;height:340px;
+  border-top:1px solid var(--line);padding-top:6px}
+.board-cell.empty::after{content:attr(data-empty);position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;text-align:center;
+  font-size:11px;color:var(--faint);padding:0 6px}
+/* Список вместо карты на узком экране — см. комментарий в loadBoard().
+   Строки те же данные: актив, изменение, число упоминаний. Шрифт 12-13px,
+   а не 7-8, как выходило у подписей в кружках. */
+.board-groups.as-list{display:block}
+.board-groups.as-list .board-group{margin-bottom:18px}
+.board-groups.as-list .board-cell{display:none}
+/* 🔴 Цель касания. Строка доски — ссылка на график актива, то есть вход
+   в продукт, и на телефоне она была 40 px высотой при норме 44. Строки идут
+   вплотную (зазор 0), поэтому поправка на пустое пространство из WCAG 2.5.8
+   тут не спасает: промахнуться можно в соседний актив. Добираем padding,
+   а не height — иначе съедет выравнивание содержимого. */
+.board-row{display:flex;align-items:center;gap:10px;padding:11px 2px;min-height:44px;
+  border-bottom:1px solid var(--line);text-decoration:none;color:inherit}
+.board-row:last-child{border-bottom:none}
+.board-row .br-sym{flex:1;min-width:0;font-size:13px;font-weight:600;color:var(--ink);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.board-row .br-chg{font-family:'JetBrains Mono',monospace;font-size:12px;flex-shrink:0}
+.board-row .br-chg.up{color:var(--up)} .board-row .br-chg.down{color:var(--down)}
+.board-row .br-n{font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:700;
+  color:var(--gold-text,#866A19);min-width:34px;text-align:right;flex-shrink:0}
+.board-bubble{position:absolute;border-radius:50%;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;cursor:pointer;
+  border:1.5px solid;text-decoration:none;overflow:hidden;
+  transition:transform .18s cubic-bezier(.2,.8,.3,1.2),box-shadow .18s;
+  /* Появление снизу вверх с задержкой по индексу — задаётся инлайном в JS.
+     Без анимации доска выглядит статичной картинкой и не читается как живая. */
+  animation:bubbleIn .5s cubic-bezier(.2,.9,.3,1.3) both}
+@keyframes bubbleIn{from{transform:scale(.2);opacity:0}to{transform:scale(1);opacity:1}}
+.board-bubble:hover{transform:scale(1.07);text-decoration:none;
+  box-shadow:0 6px 22px rgba(43,43,51,.16);z-index:5}
+.board-bubble .bb-sym{font-family:'JetBrains Mono',monospace;font-weight:700;
+  line-height:1.1;letter-spacing:.2px;color:var(--ink)}
+.board-bubble .bb-n{font-family:'JetBrains Mono',monospace;line-height:1.2;color:var(--muted)}
+.board-bubble .bb-chg{font-family:'JetBrains Mono',monospace;line-height:1.2;font-weight:600}
+.board-bubble .bb-chg.up{color:var(--up)} .board-bubble .bb-chg.down{color:var(--down)}
+/* Цвет — направление рынка. Оттенки из брендовой палитры, не радуга:
+   доска должна читаться как часть сайта, а не как чужой виджет. */
+.bb-crypto{background:rgba(201,162,39,.13);border-color:rgba(201,162,39,.5)}
+.bb-stocks{background:rgba(43,43,51,.07);border-color:rgba(43,43,51,.26)}
+.bb-indices{background:rgba(30,142,90,.10);border-color:rgba(30,142,90,.42)}
+.bb-fx{background:rgba(58,102,168,.10);border-color:rgba(58,102,168,.42)}
+.bb-commodity{background:rgba(176,106,44,.11);border-color:rgba(176,106,44,.44)}
+.board-legend{display:flex;flex-wrap:wrap;gap:14px;font-size:11.5px;color:var(--muted);
+  font-family:'JetBrains Mono',monospace}
+.board-legend .bl{display:flex;align-items:center;gap:6px}
+.board-legend .bl i{width:10px;height:10px;border-radius:50%;border:1.5px solid;display:inline-block}
+.board-empty{display:flex;align-items:center;justify-content:center;height:100%;
+  font-size:13px;color:var(--muted);text-align:center;padding:0 20px}
+/* Планшет: пять колонок по 150px уже нечитаемы — переходим на три. */
+@media(max-width:1000px){
+  .board-groups{grid-template-columns:repeat(3,1fr)}
+  .board-cell{height:210px}
+}
+@media(max-width:640px){
+  /* Телефон: две колонки. Одна колонка на пять групп дала бы простыню в пять
+     экранов — это ровно то, от чего блок должен уводить. */
+  .board-groups{grid-template-columns:repeat(2,1fr);gap:8px}
+  .board-cell{height:150px}
+  /* Пятая группа в сетке из двух колонок оставалась одна в последнем ряду с
+     пустой половиной справа — читается как недогруженный блок. Растягиваем
+     её на всю ширину: круги раскладываются горизонтально и место работает. */
+  .board-group:last-child{grid-column:1 / -1}
+  .board-group:last-child .board-cell{height:130px}
+  .board-groups.single .board-cell{height:560px}
+  .board-groups.single .board-group:last-child .board-cell{height:560px}
+  .board-group-h{font-size:9.5px;letter-spacing:.3px}
+  .board-sub{font-size:12.5px}
+}
+
 .focus-disclaimer{font-family:'JetBrains Mono',monospace;font-size:10.5px;line-height:1.5;color:var(--faint);letter-spacing:.02em;margin-top:16px;padding-left:11px;border-left:2px solid var(--line)}
 .focus-link{font-family:'JetBrains Mono',monospace;font-size:12px;display:inline-block;margin-top:16px}
 .personal-block a{color:inherit;text-decoration:none}
 .personal-block a:hover{text-decoration:underline}
 .personal-block .pb-sep{color:var(--muted);margin:0 8px}
 .report h1{font-size:19px;margin:4px 0 14px;color:var(--ink)}
-.report h3{font-size:13px;margin:10px 0 5px;color:var(--gold);font-weight:700}
+.report h3{font-size:13px;margin:10px 0 5px;color:var(--gold-text,#866A19);font-weight:700}
 .report table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13px}
 .report th,.report td{border:1px solid var(--line);padding:6px 9px;text-align:left}
 .report th{background:var(--cream);font-weight:700}
@@ -207,7 +352,7 @@ a:hover{text-decoration:underline;color:var(--glow)}
    раскрытие только у Блока 5 (см. #briefContext, переиспользует .rep-sec). */
 .brief-v2{margin-bottom:8px}
 .brief-headline{font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.6;color:var(--ink);padding:8px 2px 14px;border-bottom:1px solid var(--line);margin-bottom:10px}
-.brief-headline b{color:var(--gold)}
+.brief-headline b{color:var(--gold-text,#866A19)}
 .brief-block{margin-bottom:16px}
 .brief-block h3{font-size:12px;font-weight:700;letter-spacing:.04em;color:var(--muted);text-transform:uppercase;margin:0 0 8px}
 .brief-table{width:100%;max-width:100%;table-layout:fixed;border-collapse:collapse;font-size:12.5px}
@@ -216,7 +361,7 @@ a:hover{text-decoration:underline;color:var(--glow)}
 .brief-table td:first-child{width:52px;white-space:nowrap;overflow-wrap:normal}
 .brief-more{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);margin-top:6px}
 .brief-more a{color:var(--muted);text-decoration:none;border-bottom:1px dotted var(--muted)}
-.brief-more a:hover{color:var(--gold);border-bottom-color:var(--gold)}
+.brief-more a:hover{color:var(--gold-text,#866A19);border-bottom-color:var(--gold)}
 .brief-movers-cols{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}
 .brief-movers-cols h4{font-size:11px;font-weight:700;margin:0 0 6px;letter-spacing:.03em}
 .brief-movers-cols h4.up{color:var(--up)}
@@ -250,7 +395,10 @@ a:hover{text-decoration:underline;color:var(--glow)}
 .tcard .obs{margin-top:6px;font-size:10px;color:var(--faint)}
 
 /* signals */
-.tabs{display:flex;gap:6px;margin-bottom:14px}
+/* flex-wrap, а не медиазапрос: три вкладки «Экономика · Геополитика ·
+   Соцсети» не влезали в 320 px и вылезали на 16. Перенос срабатывает
+   только когда места нет, поэтому на широком экране строка прежняя. */
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
 .sig{padding:10px 0;border-bottom:1px solid var(--line)}
 .sig:last-child{border:none}
 .sig .m{display:flex;gap:8px;font-size:10px;color:var(--muted);
@@ -258,10 +406,10 @@ a:hover{text-decoration:underline;color:var(--glow)}
 .sig .src{color:var(--signal);text-transform:uppercase;font-weight:700}
 .sig .outlet-domain{color:var(--muted)}
 .sig .imp{color:var(--up)}
-.sig .ct{color:var(--gold);font-weight:700}
+.sig .ct{color:var(--gold-text,#866A19);font-weight:700}
 .sig .t{font-size:13px;line-height:1.5}
 .sig .t a{color:var(--ink)}
-.sig .t a:hover{color:var(--gold);text-decoration:underline}
+.sig .t a:hover{color:var(--gold-text,#866A19);text-decoration:underline}
 .sig .conf{padding:1px 6px;border-radius:8px;letter-spacing:.2px}
 .sig .conf-media{color:var(--up);background:rgba(30,142,90,.08)}
 .sig .conf-social_unverified{color:var(--muted);background:rgba(138,130,117,.1)}
@@ -279,9 +427,13 @@ a:hover{text-decoration:underline;color:var(--glow)}
 .pulse-row:hover{background:var(--surface)}
 .pulse-sym{font-family:'JetBrains Mono';font-weight:700;font-size:13px;min-width:52px;color:var(--ink)}
 .pulse-spark{flex:1;height:22px;display:block}
-.pulse-score{font-family:'JetBrains Mono';font-size:11.5px;font-weight:600;min-width:96px;text-align:right;color:var(--gold)}
+.pulse-score{font-family:'JetBrains Mono';font-size:11.5px;font-weight:600;min-width:96px;text-align:right;color:var(--gold-text,#866A19)}
+/* Строка без собственной нормы — приглушённая и без золота: это не всплеск,
+   а «ещё нечем мерить». Одинаковое золото на обеих подписях читалось бы как
+   одинаковая уверенность. */
+.pulse-score-nonorm{color:var(--muted);font-weight:500;min-width:132px}
 .pulse-chevron{color:var(--faint);font-size:13px;opacity:0;transition:opacity var(--dur) var(--ease);margin-left:2px}
-.pulse-row:hover .pulse-chevron{opacity:1;color:var(--gold)}
+.pulse-row:hover .pulse-chevron{opacity:1;color:var(--gold-text,#866A19)}
 .pulse-zero-row{font-size:11.5px;color:var(--muted);padding:7px 4px;font-style:italic}
 .pulse-calm{font-size:11px;color:var(--muted);padding:0 4px 8px;font-style:italic}
 .pulse-line{stroke:var(--gold);opacity:.85}
@@ -298,10 +450,68 @@ a:hover{text-decoration:underline;color:var(--glow)}
 .pulse-feed-card h4{margin:0 0 10px;font-family:var(--font-sans);font-size:14px;padding-right:20px}
 .pulse-feed-card .pf-item{padding:9px 0;border-top:1px solid var(--line)}
 .pulse-feed-card .pf-item:first-child{border-top:none}
-.pulse-feed-card .pf-item a{color:var(--ink);font-family:var(--font-sans);font-size:12.5px;line-height:1.4}
-.pulse-feed-card .pf-item a:hover{color:var(--gold)}
+/* Цель касания: заголовок новости в ленте пульса — ссылка на источник,
+   высота строки давала 36 px при норме 44, а ссылки идут вплотную.
+   Блочная ссылка с вертикальным padding'ом: область нажатия по всей
+   ширине карточки, промахнуться в соседнюю новость уже нельзя. */
+.pulse-feed-card .pf-item a{color:var(--ink);font-family:var(--font-sans);font-size:12.5px;line-height:1.4;
+  display:block;padding:5px 0;min-height:44px}
+.pulse-feed-card .pf-item a:hover{color:var(--gold-text,#866A19)}
 .pulse-feed-card .pf-meta{font-size:10px;color:var(--muted);margin-top:3px}
 .pulse-feed-lock{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px;padding:8px 0}
+
+/* ── Новостная сетка по активу ─────────────────────────────────────────────
+   Тридцать новостей узкой колонкой в 420px читались как лог. Сетка карточек
+   в две-три колонки даёт то, ради чего её и заводят: заголовки видно
+   параллельно, картинка работает как метка источника, а не как украшение.
+   Ширина от вьюпорта, но не во весь экран — это всё-таки окно поверх доски. */
+.pulse-feed-card{width:min(1040px, calc(100vw - 48px));max-height:82vh;padding:20px 22px}
+/* align-items:start — карточка не растягивается по высоте самой высокой в
+   ряду. Без этого новость без картинки получала пустую дыру в полэкрана:
+   текст сверху, подпись прижата к низу чужой высотой. */
+.pf-grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(228px, 1fr));
+  gap:14px;align-items:start}
+.pulse-feed-card .pf-card{display:flex;flex-direction:column;text-decoration:none;
+  color:inherit;border:1px solid var(--line);border-radius:10px;overflow:hidden;
+  background:var(--paper);transition:border-color .15s, transform .15s}
+.pulse-feed-card .pf-card:hover{border-color:var(--gold);transform:translateY(-1px)}
+.pulse-feed-card .pf-card:hover .pf-title{color:var(--gold-text,#866A19)}
+/* Картинка сверху во всю ширину карточки: 16:9 держит ряды ровными даже
+   когда издания отдают превью разных пропорций. */
+.pf-shot{width:100%;aspect-ratio:16/9;overflow:hidden;background:var(--surface);
+  border-bottom:1px solid var(--line)}
+.pf-img{width:100%;height:100%;object-fit:cover;display:block}
+/* Фотографии у новости может не быть никогда — например у всего, что пришло
+   ссылкой Google News. Тогда шапку карточки занимает логотип издания на
+   приглушённой подложке: он не притворяется иллюстрацией к событию, он
+   говорит, кто это написал. Полоса ниже фотографической, чтобы разница
+   читалась сразу. */
+.pf-shot-logo{aspect-ratio:auto;height:56px;display:flex;align-items:center;
+  justify-content:center;gap:8px;background:var(--surface)}
+.pf-shot-logo img{width:20px;height:20px;object-fit:contain;border-radius:4px}
+.pf-shot-logo span{font-family:'JetBrains Mono',monospace;font-size:10.5px;
+  color:var(--muted);letter-spacing:.5px;max-width:60%;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+.pf-text{padding:11px 13px 12px;display:flex;flex-direction:column;flex:1}
+.pf-title{font-family:var(--font-sans);font-size:13px;line-height:1.4;color:var(--ink);
+  font-weight:500}
+/* Оригинал под переводом: тише, но читаемо. Это не подпись к картинке,
+   а проверяемость — что именно написало издание. */
+.pf-orig{font-family:var(--font-sans);font-size:10.5px;line-height:1.35;color:var(--faint);
+  margin-top:4px}
+.pulse-feed-card .pf-meta{display:flex;align-items:center;gap:5px;font-size:10px;
+  color:var(--muted);margin-top:auto;padding-top:9px}
+.pf-logo{width:14px;height:14px;border-radius:3px;object-fit:contain;flex:0 0 14px}
+.pf-dot{opacity:.6}
+.pf-src{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Пока не приехали переводы — заголовки чуть приглушены, чтобы подмена
+   текста через секунду не выглядела как скачок вёрстки. */
+.pf-grid.pf-translating .pf-title{opacity:.72;transition:opacity .2s}
+@media(max-width:760px){
+  .pulse-feed-card{width:100%;padding:16px 14px}
+  .pf-grid{grid-template-columns:1fr;gap:10px}
+  .pf-shot{aspect-ratio:2/1}
+}
 
 .sidebar .panel{margin-bottom:18px}
 .empty{color:var(--faint);font-size:12px;padding:8px 0}
@@ -357,7 +567,18 @@ a:hover{text-decoration:underline;color:var(--glow)}
 
 /* live chart controls */
 .ctrl-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:8px 0 12px}
-.ctrl-tf,.ctrl-mode,.ctrl-tog{display:flex;gap:3px}
+/* 🔴 Восемь таймфреймов «M1…W1» занимают 339 px и не влезали ни в 360, ни
+   в 320: ряд выезжал за край (+6 и +46), а следом за ним — нижний нав,
+   который тянется по ширине документа.
+   Чинил я сперва НЕ ЭТОТ элемент: такой же с виду ряд `.tf-grp` лежит в
+   chart.html, и правка ушла туда. /chart.html при этом и до, и после
+   показывал ноль — то есть я поправил здоровое место и ничего не сломал
+   только по случайности. Виновника зовут `#techTf.ctrl-tf`, и живёт он
+   здесь. Замер называл его имя с самого начала; я прочитал текст кнопок
+   и пошёл искать по тексту.
+   Перенос, а не прокрутка: таймфрейм, уехавший из виду, человек не
+   найдёт, а тут каждый из восьми — равноправный вход в график. */
+.ctrl-tf,.ctrl-mode,.ctrl-tog{display:flex;flex-wrap:wrap;gap:3px}
 
 /* pattern library */
 .gpills-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
@@ -374,7 +595,7 @@ a:hover{text-decoration:underline;color:var(--glow)}
 .gex-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:8px}
 .gex-card{background:var(--cream);border:1px solid var(--line);border-radius:12px;padding:13px 15px}
 .gex-lbl{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;
-  text-transform:uppercase;color:var(--gold);margin-bottom:5px}
+  text-transform:uppercase;color:var(--gold-text,#866A19);margin-bottom:5px}
 .gex-card p{margin:0;font-size:13px;line-height:1.55;color:var(--ink)}
 .gfoot-note{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);
   margin-top:14px;line-height:1.6}
@@ -391,6 +612,19 @@ a:hover{text-decoration:underline;color:var(--glow)}
   .top .g-nav{display:none}
   .wrap{padding:12px 12px 0;gap:16px}
   .panel{padding:13px 14px}
+  /* 🔴 ЭЛЕМЕНТ ГРИДА НЕ СЖИМАЕТСЯ НИЖЕ СВОЕГО СОДЕРЖИМОГО, ПОКА ЕМУ НЕ
+     СКАЗАТЬ. У grid-элемента `min-width` по умолчанию `auto`, то есть
+     «не меньше min-content». Колонка `1fr` из-за этого перестаёт быть
+     резиновой: что-то широкое внутри распирает её, а с ней и всю страницу.
+
+     Замер 14.09.2026 на 360 px: <main> шириной 378 при левом крае 12 —
+     тридцать пикселей за экраном. И всё, что лежит внутри, наследовало
+     это: доска обсуждаемости, Crypto Fear & Greed, блок «Брокеры» —
+     замер винил их по очереди, а виноват был контейнер.
+     Сетка `.wrap` при этом СВОРАЧИВАЕТСЯ правильно (правило есть, 980px):
+     дело было не в колонках, а в том, что единственная колонка не умела
+     ужиматься. */
+  .wrap > *{min-width:0}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 
@@ -403,6 +637,46 @@ a:hover{text-decoration:underline;color:var(--glow)}
 .sbf-embed .top, .sbf-embed .strip, .sbf-embed .seg-wrap,
 .sbf-embed .sbf-fw-btn, .sbf-embed .sbf-fw-bubble, .sbf-embed .g-bottom-nav { display: none !important; }
 .sbf-embed .wrap { padding-top: 0; }
+/* Блок «что даёт аккаунт» — только для анонимов (27.08.2026) */
+.anon-value{border:1px solid rgba(201,162,39,.45);background:#FFFDF7}
+.anon-value-head{margin-bottom:12px}
+.anon-value-h{font-size:19px;font-weight:800;letter-spacing:-.01em;margin:0 0 6px}
+.anon-value-sub{font-size:14px;color:var(--muted);margin:0;line-height:1.55}
+.anon-value-list{margin:0 0 16px;padding-left:20px}
+.anon-value-list li{font-size:14.5px;line-height:1.7;margin-bottom:4px}
+.anon-value-cta{display:inline-flex;align-items:center;min-height:48px;padding:0 22px;
+  border-radius:9px;background:var(--gold);color:#1E1B12;font-size:15px;font-weight:700;
+  text-decoration:none;transition:background .15s}
+/* Цвет текста повторяем в :hover — см. ту же правку у .sbf-cta-link.
+   Общее правило a:hover ниже красит текст в --glow, а фон кнопки при
+   наведении становится тем же --glow: надпись исчезала целиком. */
+.anon-value-cta:hover{background:var(--glow,#E6C257);color:#1E1B12;text-decoration:none}
+.anon-value-note{font-size:12.5px;color:var(--muted);margin:10px 0 0}
+@media (max-width:760px){.anon-value-cta{width:100%;justify-content:center}}
+
+/* .focus-link и «Открыть график» — отдельные действия, а не ссылки внутри
+   абзаца: 19px по высоте мало для пальца. Строчные ссылки в тексте
+   сознательно не трогаем, там 44px ломает вёрстку абзаца. */
+@media(max-width:900px){
+  .focus-link,.tfoc-link,.gex-card a.primary{min-height:44px;display:inline-flex;align-items:center}
+}
+/* 🔴 Цель касания на техническом графике (видно только после переключения
+   на вкладку «Технический» — замер туда не заходил, пока не научился
+   кликать). Таймфреймы M1…W1 были 38 px в ширину, стоят вплотную: промах
+   переключает не тот период. Шире делать некуда — их шесть в ряд на 390 px,
+   поэтому берём минимум WCAG 2.5.8 (24 px) с запасом по высоте и разводим
+   зазором: 6 px между целями поднимают эффективный размер выше 44. */
+.view-tech .tf, .tech-tf .tf, button.tf { min-width: 44px; min-height: 44px; }
+.seg button, button.seg-btn { min-width: 44px; min-height: 44px; }
+.view-tech .seg, .tech-tf { gap: 6px; }
+/* «Проиграть» — 111×28 */
+.greplay { min-height: 44px; }
+
+/* Цель касания: заголовок новости в блоке сигналов (#signals .sig .t a) —
+   ссылка на источник, высота строки давала 36 px. Ссылки идут подряд
+   вплотную, поэтому блочная область нажатия на всю ширину карточки. */
+#signals .sig .t a { display: block; padding: 5px 0; min-height: 44px; }
+
 </style>
 <!-- SPEC_visual_migration.md: последним в <head>, чтобы выигрывать тай-брейки
      на одинаковой специфичности (напр. .sbf-embed .top { .. } выше) — см. план. -->
@@ -422,6 +696,7 @@ a:hover{text-decoration:underline;color:var(--glow)}
   </div>
   <nav class="g-nav">
     <a href="{{ ('/' + lang) if lang != 'ru' else '' }}/" class="g-nav-item active">{{ t('nav.today', lang) }}</a>
+    <a href="{{ ('/' + lang) if lang != 'ru' else '' }}/chart.html" class="g-nav-item">{{ t('nav.charts', lang) }}</a>
     <a href="{{ ('/' + lang) if lang != 'ru' else '' }}/edu/" class="g-nav-item">{{ t('nav.edu', lang) }}</a>
     <a href="{{ ('/' + lang) if lang != 'ru' else '' }}/calendar" class="g-nav-item">{{ t('nav.calendar', lang) }}</a>
     <a href="{{ ('/' + lang) if lang != 'ru' else '' }}/brokers" class="g-nav-item">{{ t('nav.brokers', lang) }}</a>
@@ -441,7 +716,12 @@ a:hover{text-decoration:underline;color:var(--glow)}
   <div class="sbf-lang-sw" id="sbfLangSwMob"></div>
 </div>
 
-<div class="strip" id="strip"><div class="strip-inner" id="stripInner"></div></div>
+<!-- tabindex/role/aria-label — тот же разбор, что в assets/sbf-header.js:
+     прокручиваемая лента без единого фокусируемого элемента внутри
+     недостижима с клавиатуры. Эта копия ленты живёт в index.html, шапка
+     собирает свою; расходиться им нельзя. -->
+<div class="strip" id="strip" tabindex="0" role="region"
+     aria-label="{{ t('a11y.strip_label', lang) }}"><div class="strip-inner" id="stripInner"></div></div>
 
 <div class="seg-wrap" id="segCtrl">
   <button class="seg-btn active" data-v="fund">{{ t('home.seg_fundamental', lang) }}</button>
@@ -450,6 +730,71 @@ a:hover{text-decoration:underline;color:var(--glow)}
 
 <div class="wrap" id="mainWrap" data-view="fund">
   <main>
+
+    <!-- ── Что даёт аккаунт (27.08.2026) ─────────────────────────
+         Терминал открыт целиком, и это сознательно: он и есть первое
+         впечатление. Но до этого блока о том, что вообще существует за
+         регистрацией, не было сказано нигде, кроме одной строки на странице
+         входа про «один аккаунт для сайта и приложения». Человек из ролика
+         видел всё бесплатно и уходил, потому что терять было нечего.
+         Показывается только анонимам — см. showAnonValueBlock() ниже.
+         Пункты перечисляют то, что реально за гейтом, без выдумок:
+         главы 6-15 (serve.py::_handle_edu, is_pro), журнал, user_prefs
+         (watchlist_markets/default_tf/слои графика), связка с Telegram. -->
+    <!-- ── ЭПИЦЕНТР: что обсуждают прямо сейчас ─────────────────────────────
+         Первый экран главной. Стоит выше блока «что даёт аккаунт» сознательно:
+         отзыв трейдеров и ТЗ руководителя 03.09 — «на сайте нас встречает
+         слишком много текста, что отпугивает». Живая картина рынка вместо
+         списка буллитов отвечает на это буквально.
+
+         Размер пузыря — упоминания за сутки, цвет — направление, подпись —
+         движение цены. Клик ведёт на график этого актива: блок не самоцель, а
+         вход в продукт. -->
+    <!-- Класс view-fund, а не перенос внутрь блока .view-fund ниже: доска
+         должна остаться выше «что даёт аккаунт» (порядок первого экрана из ТЗ
+         03.09), а показываться только в фундаментальном режиме. -->
+    <!-- 🔴 Без `hidden`: пока секция скрыта, места она не занимает, и в момент
+         появления толкает страницу на 540 px. Теперь место зарезервировано
+         с первой отрисовки (min-height у .board-groups), а прячется секция
+         только в том случае, ради которого `hidden` и ставили — когда доска
+         пришла ПУСТОЙ (loadBoard: `sec.hidden = true` при items.length === 0).
+         Размен осознанный: гарантированный прыжок на каждой загрузке заменён
+         одним сдвигом в редком случае «сегодня не обсуждают вообще ничего». -->
+    <section class="panel buzz-board view-fund" id="buzzBoard">
+      <div class="panel-h">
+        <h2 data-i18n="home.board_title">{{ t('home.board_title', lang) }}</h2>
+        <span class="fresh" id="boardFresh"></span>
+      </div>
+      <p class="board-sub" data-i18n="home.board_sub">{{ t('home.board_sub', lang) }}</p>
+      <div class="tabs board-tabs" id="boardTabs"></div>
+      <div class="board-groups" id="boardCanvas"></div>
+    </section>
+
+    <!-- 🔴 Показ решает СЕРВЕР (`anon` из _render_site_page), а не клиент.
+         Было: блок стоял `hidden`, а JS снимал скрытие по событию
+         sbf:user-ready, то есть после ответа /api/auth/me — и появление
+         толкало страницу вниз на пол-экрана (вклад в CLS 0.46 на мобильном).
+         Резерв высоты тут не подходит: залогиненному блок не показывается
+         вовсе, и резерв остался бы пустой дырой. Поэтому у гостя блок
+         приходит в HTML сразу и не двигается, а у своих его просто нет.
+         showAnonValueBlock() ниже оставлен: он корректно делает `if(!el)
+         return`, а гостю правит язык в ссылке CTA. -->
+    {% if anon %}
+    <section class="panel anon-value" id="anonValue">
+      <div class="anon-value-head">
+        <h2 class="anon-value-h">{{ t('home.anon_value_title', lang) }}</h2>
+        <p class="anon-value-sub">{{ t('home.anon_value_sub', lang) }}</p>
+      </div>
+      <ul class="anon-value-list">
+        <li>{{ t('home.anon_value_p1', lang) }}</li>
+        <li>{{ t('home.anon_value_p2', lang) }}</li>
+        <li>{{ t('home.anon_value_p3', lang) }}</li>
+        <li>{{ t('home.anon_value_p4', lang) }}</li>
+      </ul>
+      <a class="anon-value-cta" id="anonValueCta" href="/survey">{{ t('home.anon_value_cta', lang) }}</a>
+      <p class="anon-value-note">{{ t('home.anon_value_note', lang) }}</p>
+    </section>
+    {% endif %}
 
     <!-- ── ФУНДАМЕНТАЛЬНЫЙ ──────────────────────────────────── -->
     <div class="view-fund">
@@ -473,6 +818,8 @@ a:hover{text-decoration:underline;color:var(--glow)}
           <div class="brief-block" id="briefEarnings" style="display:none"></div>
           <div class="brief-block" id="briefMovers" style="display:none"></div>
           <div class="brief-block" id="briefPatterns" style="display:none"></div>
+          <div class="brief-block" id="briefOutliers" style="display:none"></div>
+          <div class="brief-block" id="briefOffContext" style="display:none"></div>
           <details class="rep-sec" id="briefContext" style="display:none">
             <summary>💬 <span id="briefContextTitle"></span><span class="rep-chev">▼</span></summary>
             <div class="rep-body">
@@ -509,10 +856,13 @@ a:hover{text-decoration:underline;color:var(--glow)}
       <section class="panel" id="techChartPanel">
         <div class="panel-h">
           <h2 id="techSymLabel">{{ symbol_name('GOLD', lang, 'name+ticker') }} · D1</h2>
-          <span class="tag verify">live</span>
+          <span class="tag verify" id="techLiveTag">live</span>
         </div>
         <div class="ctrl-row">
           <div class="ctrl-tf" id="techTf">
+            <button class="tf" data-tf="M1">M1</button>
+            <button class="tf" data-tf="M5">M5</button>
+            <button class="tf" data-tf="M15">M15</button>
             <button class="tf" data-tf="M30">M30</button>
             <button class="tf" data-tf="H1">H1</button>
             <button class="tf" data-tf="H4">H4</button>
@@ -584,11 +934,14 @@ a:hover{text-decoration:underline;color:var(--glow)}
       <section class="panel">
         <div class="panel-h"><h2>{{ t('home.market_buzz', lang) }}</h2>
           <span class="fresh" id="buzzFresh"></span></div>
-        <div class="pulse-explainer">{{ t('home.pulse_explainer', lang) }}</div>
+        <div class="pulse-explainer" title="{{ t('home.pulse_norm_note', lang) }}">{{ t('home.pulse_explainer', lang) }}</div>
         <div class="tabs" id="pulseTabs">
-          <button class="tab chip active" data-cat="crypto">{{ t('home.pulse_tab_crypto', lang) }}</button>
-          <button class="tab chip" data-cat="stocks">{{ t('home.pulse_tab_stocks', lang) }}</button>
+          {# Порядок тот же, что у доски ниже (BOARD_ORDER): акции, индексы,
+             крипта. Два блока про одно и то же с разным порядком вкладок
+             заставляют искать нужную заново в каждом. #}
+          <button class="tab chip active" data-cat="stocks">{{ t('home.pulse_tab_stocks', lang) }}</button>
           <button class="tab chip" data-cat="indices">{{ t('home.pulse_tab_indices', lang) }}</button>
+          <button class="tab chip" data-cat="crypto">{{ t('home.pulse_tab_crypto', lang) }}</button>
         </div>
         <div class="pulse-calm" id="pulseCalm" hidden>{{ t('home.pulse_calm', lang) }}</div>
         <div class="pulse-list" id="pulseList"></div>
@@ -611,6 +964,31 @@ a:hover{text-decoration:underline;color:var(--glow)}
 const DATA = './data/';
 const _PAGE_LANG = {{ lang | tojson }};
 const _CLOCK_LOCALE = _PAGE_LANG === 'ro' ? 'ro-RO' : _PAGE_LANG === 'en' ? 'en-GB' : 'ru-RU';
+
+/* 🔴 Внутренняя ссылка — в текущей локали. С /ro/ все 77 кликов по
+   инструментам вели на «/chart.html», то есть выбрасывали румына на
+   русский терминал и обратно уже не возвращали (Л-6 языкового аудита).
+   Отдаём общий помощник из i18n.js; он же знает про исключение курса
+   (/edu/ro/b/N вместо /ro/edu/b/N). i18n.js подключён с defer, поэтому
+   до его готовности падаем на _PAGE_LANG, который сервер уже подставил
+   в эту же страницу, — а не на путь как есть: «как есть» здесь значит
+   «по-русски», то есть ровно та ошибка, которую чиним. */
+/* Строка из словаря i18n с запасным значением. На этой странице своей
+   клиентской t() не было — серверная работает только на этапе рендера,
+   а бриф приезжает fetch'ем уже потом.
+   🔴 И да: фигурные скобки Jinja в комментарий писать нельзя. Этот файл
+   рендерится шаблонизатором, комментарий JS для него не комментарий —
+   упоминание подстановки в пояснении уронило главную в 500 целиком. */
+const ТЕКСТ = (ключ, запас) =>
+  (window.sbfI18n ? window.sbfI18n.t(ключ, запас) : (запас || ключ));
+
+const ЛОК = (путь) => {
+  if (window.sbfI18n && window.sbfI18n.url) return window.sbfI18n.url(путь);
+  if (!путь || _PAGE_LANG === 'ru' || !/^\//.test(путь)) return путь;
+  if (/^\/(ro|en)(\/|$)/.test(путь) || /^\/(assets|data|api)\//.test(путь)) return путь;
+  const м = путь.match(/^\/edu\/b(\/.*)?$/);
+  return м ? '/edu/' + _PAGE_LANG + '/b' + (м[1] || '') : '/' + _PAGE_LANG + путь;
+};
 const fmt = n => n==null?'—':(Math.abs(n)>=1000?n.toLocaleString('en-US',{maximumFractionDigits:2}):n);
 function fmt_(tpl, vars) { return tpl.replace(/\{(\w+)\}/g, (_, k) => (vars[k] != null ? vars[k] : '')); }
 const I18N_TIME = {
@@ -632,8 +1010,6 @@ function clockWindow(){
   document.getElementById('winTxt').textContent=inWin?{{ t('clock.morning_window', lang) | tojson }}:{{ t('clock.always_on', lang) | tojson }};
 }
 
-// Bybit WebSocket: крипто → yfinance символ
-const BYBIT_MAP = {'BTCUSDT':'BTC-USD','ETHUSDT':'ETH-USD','SOLUSDT':'SOL-USD'};
 
 // SBF_Charts_Layer4_Spec, Фаза 1.2.1: инструменты ватчлиста первыми в тикере.
 // Зеркалирует ту же логику sbf-header.js (там — для не-главных страниц; здесь
@@ -733,28 +1109,11 @@ async function pollLiveStrip() {
   }
 }
 
-// ── Bybit WebSocket: BTC / ETH / SOL в реальном времени ─────────────────────
-let _ws = null;
-function startBybitStrip() {
-  try {
-    _ws = new WebSocket('wss://stream.bybit.com/v5/public/spot');
-    _ws.onopen = () => _ws.send(JSON.stringify({
-      op: 'subscribe',
-      args: Object.keys(BYBIT_MAP).map(s => 'tickers.' + s)
-    }));
-    _ws.onmessage = ev => {
-      try {
-        const m = JSON.parse(ev.data);
-        if (!m.topic || !m.data || !m.data.lastPrice) return;
-        const bybitSym = m.topic.replace('tickers.', '');
-        const yfSym = BYBIT_MAP[bybitSym];
-        if (yfSym) updateStripPrice(yfSym, parseFloat(m.data.lastPrice));
-      } catch(e) {}
-    };
-    _ws.onerror = () => {};
-    _ws.onclose = () => { setTimeout(startBybitStrip, 5000); };
-  } catch(e) { setTimeout(startBybitStrip, 5000); }
-}
+// 🔴 20.08: Bybit-WebSocket убран — это был третий источник цены крипты.
+// quotes.json теперь несёт BTC/ETH/SOL от брокера (тот же фид, что рисует
+// свечи на графике), а сокет затирал их спотом Bybit: замер 20.08 давал
+// расхождение 0.1–0.24%. В ленте и на графике стояли разные числа под
+// одной подписью — та же болезнь, что у золота, только мельче.
 
 function renderMarket(m) {
   if (m && m.fear_greed) _fng = m.fear_greed;
@@ -765,7 +1124,9 @@ function renderFng(m){
   const b=document.getElementById('fngBox'); if(!m||!m.fear_greed){b.innerHTML='<div class="empty">—</div>';return;}
   _fng=m.fear_greed;
   const v=m.fear_greed.value;
-  const col=v<30?'var(--down)':v>70?'var(--up)':'var(--gold)';
+  // --gold здесь был цветом ЧИСЛА (36px), а не подложки: 2.42:1. Даже
+  // послабление для крупного текста (3:1) не спасало.
+  const col=v<30?'var(--down)':v>70?'var(--up)':'var(--gold-text,#866A19)';
   b.innerHTML=`<div class="fng-num" style="color:${col}">${v}</div>
     <div class="fng-label">${m.fear_greed.label}</div>
     <div class="fng" style="padding:0"><div class="bar"></div><div class="mark" style="margin-left:${v}%"></div></div>`;
@@ -903,6 +1264,8 @@ function renderBriefMovers(b){
   linkInstrumentsInReport(el);
 }
 
+let _последнийБриф = null;
+
 function renderBriefPatterns(b){
   const el = document.getElementById('briefPatterns');
   if(!el) return;
@@ -913,7 +1276,13 @@ function renderBriefPatterns(b){
       : fmt_(I18N_BRIEF.patternsAgreeTpl, {pct: Math.round((p.agree_share_5||0)*100), n: p.n});
     const symName = window.SBFSymbols ? window.SBFSymbols.symbolName(p.symbol, {mode:'name'}) : p.symbol;
     return '<div class="brief-pattern-row"><span class="mono">'+escapeHtmlIdx(symName)+' '+escapeHtmlIdx(p.tf)+'</span>'
-      +escapeHtmlIdx(p.display_name_ru)+' <span class="agree">— '+escapeHtmlIdx(stat)+'</span></div>';
+      // 🔴 Имя паттерна — по ключу через словарь, а не поле display_name_ru
+      // из данных: оно русское по построению (core/patterns.py), и на
+      // /ro и /en в брифе стояло «Медвежье поглощение», «Молот» (Л-3).
+      // Запасное значение — то же русское имя: если ключа в словаре нет,
+      // лучше показать по-русски, чем pattern_key латиницей.
+      +escapeHtmlIdx(ТЕКСТ('pattern.' + (p.pattern_key || ''), p.display_name_ru))
+      +' <span class="agree">— '+escapeHtmlIdx(stat)+'</span></div>';
   }).join('');
   el.innerHTML = '<h3>📐 '+I18N_BRIEF.patternsTitle+'</h3>'+rows;
   el.style.display = 'block';
@@ -951,7 +1320,54 @@ function renderBriefHeadline(b){
   el.style.display = 'block';
 }
 
+// SPEC_brief_outliers §6. Источник — web/data/outliers.json, а не
+// brief_today.json: бриф пересобирается раз в сутки, скринер идёт каждые 15
+// минут, и «рост в моменте» к утру уже история. Числа в блоке — как их снял
+// скринер, включая пик за день: он и есть причина, по которой инструмент сюда
+// попал, даже если к вечеру от роста ничего не осталось.
+function renderOutliers(o){
+  const el = document.getElementById('briefOutliers');
+  if(!el) return;
+  const items = (o && o.items) || [];
+  if(!items.length){ el.style.display='none'; return; }
+  const rows = items.map(function(it){
+    const sign = it.chg_pct>0 ? '+' : '';
+    const peak = (it.peak_chg_pct!=null && Math.abs(it.peak_chg_pct) > Math.abs(it.chg_pct)+0.5)
+      ? ' <span class="agree">'+escapeHtmlIdx(fmt_(I18N_OUTLIERS.peakTpl,
+          {peak:(it.peak_chg_pct>0?'+':'')+it.peak_chg_pct.toFixed(1)+'%'}))+'</span>'
+      : '';
+    const dir = it.chg_pct>0 ? 'up' : 'down';
+    return '<div class="brief-pattern-row"><span class="mono">'+escapeHtmlIdx(it.symbol)+'</span> '
+      +escapeHtmlIdx(it.name||'')+' <b class="'+dir+'">'+sign+it.chg_pct.toFixed(1)+'%</b>'+peak+'</div>';
+  }).join('');
+  el.innerHTML = '<h3>⚡ '+I18N_OUTLIERS.title+'</h3>'+rows;
+  el.style.display = 'block';
+}
+
+// Фразы пишет модель и только по-русски (как и ежечасная сводка): показывать
+// русский текст на /ro/ и /en/ было бы той же ошибкой «не тот язык», которую
+// в этом проекте уже ловили. Блок там скрыт целиком, а не переведён наполовину.
+function renderOffContext(o){
+  const el = document.getElementById('briefOffContext');
+  if(!el) return;
+  const items = (o && o.off_context) || [];
+  if(!items.length || _PAGE_LANG !== 'ru'){ el.style.display='none'; return; }
+  const rows = items.map(function(it){
+    const pub = (it.publishers!=null)
+      ? ' <span class="agree">— '+escapeHtmlIdx(fmt_(I18N_OUTLIERS.offPubTpl,{n:it.publishers}))+'</span>'
+      : '';
+    return '<div class="brief-pattern-row">'+escapeHtmlIdx(it.text||'')+pub+'</div>';
+  }).join('');
+  el.innerHTML = '<h3>🌐 '+I18N_OUTLIERS.offTitle+'</h3>'+rows;
+  el.style.display = 'block';
+}
+
 function renderBrief(b){
+  // Бриф приезжает fetch'ем и может обогнать словарь i18n (тот тоже по
+  // сети). Запоминаем данные, чтобы перерисовать имена паттернов, когда
+  // словарь доедет: иначе на /ro и /en в блоке «Фигуры вчера» остаются
+  // русские «Молот» и «Медвежье поглощение» при переведённых ключах.
+  _последнийБриф = b;
   renderBriefHeadline(b);
   renderBriefCalendar(b);
   renderBriefEarnings(b);
@@ -1058,7 +1474,7 @@ async function renderPersonalBlock() {
     const parts = results.map((data, i) => {
       const sym = symbols[i];
       const symName = window.SBFSymbols ? window.SBFSymbols.symbolName(sym, {mode:'name'}) : sym;
-      const href = `/chart.html?s=${encodeURIComponent(sym)}&focus=today`;
+      const href = ЛОК(`/chart.html?s=${encodeURIComponent(sym)}&focus=today`);
       let txt;
       if (data && data.next_event_ts && data.next_event_ts <= endOfDay && data.next_event) {
         const time = new Date(data.next_event_ts * 1000).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
@@ -1155,7 +1571,7 @@ async function renderFocusCard() {
     let html = `<div class="focus-item__head">${tick}${move}</div>
       ${focusBodyHtml}
       <div class="focus-disclaimer">${I18N_REPORT.focusDisclaimer}</div>
-      <a class="focus-link" href="/chart.html?s=${encodeURIComponent(data.symbol)}&focus=today">${I18N_REPORT.focusViewChart} →</a>`;
+      <a class="focus-link" href="${ЛОК(`/chart.html?s=${encodeURIComponent(data.symbol)}&focus=today`)}">${I18N_REPORT.focusViewChart} →</a>`;
     body.innerHTML = html;
     card.style.display = 'block';
   } catch (e) {
@@ -1211,7 +1627,7 @@ function linkInstrumentsInReport(reportEl) {
       if (before) frag.appendChild(document.createTextNode(before));
       const a = document.createElement('a');
       a.className = 'rep-instrument-link';
-      a.href = '/chart.html?s=' + encodeURIComponent(matchSym) + '&focus=today';
+      a.href = ЛОК('/chart.html?s=' + encodeURIComponent(matchSym) + '&focus=today');
       a.textContent = matched;
       frag.appendChild(a);
       const parent = node.parentNode;
@@ -1289,7 +1705,7 @@ function renderTech(t){
         <span style="margin-left:8px">RSI</span><b>${c.rsi}</b></div>
       <div style="border-top:1px solid var(--line);padding-top:8px;margin-bottom:8px">
         <div style="font-size:10px;color:var(--muted);margin-bottom:5px;letter-spacing:.5px;text-transform:uppercase;font-weight:700">${I18N_CARD.keyLevels}</div>
-        <div class="lv"><span>${I18N_CARD.pivotPoint}</span><b style="color:var(--gold)">${pp}</b></div>
+        <div class="lv"><span>${I18N_CARD.pivotPoint}</span><b style="color:var(--gold-text,#866A19)">${pp}</b></div>
         <div class="lv"><span>${I18N_CARD.resistance1}</span><b style="color:var(--down)">${r1}</b></div>
         <div class="lv"><span>${I18N_CARD.resistance2}</span><b style="color:var(--down)">${r2}</b></div>
         <div class="lv"><span>${I18N_CARD.support1}</span><b style="color:var(--up)">${s1}</b></div>
@@ -1338,6 +1754,21 @@ async function loadMiniCharts() {
 function openChart(ticker){
   const label = chartLabelOf(ticker);
   document.getElementById('chartFrame').src = `./chart.html?s=${label}`;
+  document.getElementById('chartOverlay').classList.add('open');
+}
+
+// Открыть график в модальном окне по готовому символу, без перевода через
+// chartLabelOf: доска обсуждаемости уже отдаёт каноническое имя, а второй
+// перевод поверх него мог бы увести на другой инструмент.
+//
+// embed=1 — тот же режим, в котором график встраивается в мини-приложение:
+// без шапки, тикера и нижней навигации, только полотно с контролами. Без
+// него в окно 900×620 приезжала бы вся страница целиком, со своей шапкой
+// внутри чужой шапки.
+function openChartSymbol(symbol){
+  if (!symbol) return;
+  document.getElementById('chartFrame').src =
+    './chart.html?embed=1&s=' + encodeURIComponent(symbol);
   document.getElementById('chartOverlay').classList.add('open');
 }
 
@@ -1398,11 +1829,20 @@ const I18N_PULSE = {
   locked: {{ t('home.pulse_feed_locked', lang) | tojson }},
   empty:  {{ t('home.pulse_feed_empty', lang) | tojson }},
   scoreTpl: {{ t('home.pulse_score_tpl', lang) | tojson }},
+  noNormTpl: {{ t('home.pulse_no_norm_tpl', lang) | tojson }},
   zeroCollapsed: {{ t('home.pulse_zero_collapsed', lang) | tojson }},
 };
 
 const I18N_DIGEST = {
   stale: {{ t('home.news_digest_stale', lang) | tojson }},
+};
+
+const I18N_OUTLIERS = {
+  title:     {{ t('home.outliers_title', lang) | tojson }},
+  sub:       {{ t('home.outliers_sub', lang) | tojson }},
+  peakTpl:   {{ t('home.outliers_peak_tpl', lang) | tojson }},
+  offTitle:  {{ t('home.off_context_title', lang) | tojson }},
+  offPubTpl: {{ t('home.off_context_pub_tpl', lang) | tojson }},
 };
 
 function escapeHtmlIdx(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
@@ -1441,8 +1881,10 @@ function renderPulseList(data){
   // Внимание, не цена -- нули (без заметных упоминаний) не рисуются построчно,
   // сворачиваются в одну строку. Если активных нет вовсе, это и есть "спокойно"
   // -- уже показано через #pulseCalm выше, вторая строка тут была бы дублем.
-  const active = data.items.filter(it=>it.score>0);
-  const zero = data.items.filter(it=>it.score<=0);
+  // Порог по упоминаниям, а не по кратности: у инструмента без собственной
+  // нормы кратности нет, и фильтр по score прятал бы именно их.
+  const active = data.items.filter(it=>it.mentions>0);
+  const zero = data.items.filter(it=>it.mentions<=0);
   if(!active.length){ listEl.innerHTML=''; return; }
   const [lo,hi] = pulseGlobalRange(active);
   let html = active.map(it=>{
@@ -1450,7 +1892,11 @@ function renderPulseList(data){
     return `<div class="pulse-row" data-symbol="${escapeHtmlIdx(it.symbol)}">
       <span class="pulse-sym">${escapeHtmlIdx(symName)}</span>
       ${sparklineSvg(it.sparkline, lo, hi)}
-      <span class="pulse-score">${fmt_(I18N_PULSE.scoreTpl,{score:it.score.toFixed(1)})}</span>
+      <span class="pulse-score${it.has_norm === false ? ' pulse-score-nonorm' : ''}">${
+        it.has_norm === false
+          ? fmt_(I18N_PULSE.noNormTpl, {n: it.mentions})
+          : fmt_(I18N_PULSE.scoreTpl, {n: it.mentions, score: it.score.toFixed(1)})
+      }</span>
       <span class="pulse-chevron" aria-hidden="true">›</span>
     </div>`;
   }).join('');
@@ -1463,7 +1909,27 @@ function renderPulseList(data){
   });
 }
 
-let _pulseCat='crypto';
+/* Блок «что даёт аккаунт» показываем только анониму: залогиненному он
+   рекламирует то, что у него уже есть. Ждём sbf:user-ready — событие,
+   которым sbf-header.js сообщает, что /api/auth/me отработал; до него
+   isLoggedIn() ещё не знает ответа и блок мигнул бы у своих. */
+function showAnonValueBlock(){
+  var el=document.getElementById('anonValue');
+  if(!el) return;
+  if(window.sbfAuth && window.sbfAuth.isLoggedIn()){ el.hidden=true; return; }
+  var cta=document.getElementById('anonValueCta');
+  if(cta && window.sbfI18n){
+    var l=window.sbfI18n.lang;
+    cta.href=(l==='en'||l==='ro'?'/'+l:'')+'/survey';
+  }
+  el.hidden=false;
+}
+document.addEventListener('sbf:user-ready', showAnonValueBlock);
+/* Подстраховка: если событие не придёт (скрипт профиля не загрузился),
+   блок всё равно появится — анониму он нужнее, чем аккуратность. */
+setTimeout(showAnonValueBlock, 3000);
+
+let _pulseCat='stocks';   // совпадает с первой вкладкой в разметке выше
 async function loadPulse(cat){
   _pulseCat=cat;
   try{
@@ -1494,22 +1960,475 @@ function openPulseFeed(symbol){
   card.innerHTML=`<button class="pf-close" id="pfClose">✕</button><h4>${escapeHtmlIdx(symName)}</h4><div id="pfBody">…</div>`;
   document.getElementById('pfClose').addEventListener('click', closePulseFeed);
   card.classList.add('on'); backdrop.classList.add('on');
-  window.sbfAuth.fetch('/api/pulse/feed?symbol='+encodeURIComponent(symbol))
+  const lang = (window.sbfI18n && window.sbfI18n.lang) || document.documentElement.lang || 'ru';
+  window.sbfAuth.fetch('/api/pulse/feed?symbol='+encodeURIComponent(symbol)
+                       +'&lang='+encodeURIComponent(lang))
     .then(r=>r.ok?r.json():[])
     .then(items=>{
       const body=document.getElementById('pfBody'); if(!body)return;
       if(!Array.isArray(items) || !items.length){ body.innerHTML=`<div class="pf-item">${escapeHtmlIdx(I18N_PULSE.empty)}</div>`; return; }
-      body.innerHTML=items.map(n=>{
-        const dt=new Date(n.ts*1000);
-        const timeStr=dt.toLocaleString(undefined,{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
-        return `<div class="pf-item">
-          <a href="${escapeHtmlIdx(n.url||'#')}" target="_blank" rel="noopener noreferrer">${escapeHtmlIdx(n.title)}</a>
-          <div class="pf-meta">${escapeHtmlIdx(n.source||'')} · ${timeStr}</div>
-        </div>`;
-      }).join('');
+      body.innerHTML=`<div class="pf-grid">${items.map(renderFeedCard).join('')}</div>`;
+      // Битая ссылка на чужой картинке — обычное дело: издание переложило
+      // файл, отдало 404, закрыло горячие ссылки. Тогда прячем картинку и
+      // оставляем карточку с логотипом источника, а не рамку с крестиком.
+      body.querySelectorAll('.pf-img').forEach(img=>{
+        img.addEventListener('error', ()=>{ const s=img.closest('.pf-shot'); if(s) s.remove(); }, {once:true});
+      });
+      // 🔴 Логотип тоже бывает битым, и обработчик выше его не покрывал:
+      // он ищет .pf-img, а в полосе с логотипом картинка без этого класса.
+      // На живой ленте это выглядело как значок «изображение не загрузилось»
+      // рядом с именем издания — хуже, чем просто имя издания.
+      // Прячем саму картинку, полосу с названием оставляем.
+      body.querySelectorAll('.pf-shot-logo img, .pf-logo').forEach(img=>{
+        img.addEventListener('error', ()=>{ img.style.display='none'; }, {once:true});
+      });
+      fillTranslations(items, lang, body);
     })
     .catch(()=>{});
 }
+
+/* Переводы приезжают ВТОРЫМ запросом, уже поверх показанного списка.
+   🔴 Раньше перевод шёл внутри /api/pulse/feed, и замер показал почему это
+   плохо: выборка новостей 5 мс, теги 3 мс, картинки 0 мс — и 6297 мс на
+   поход к переводчику. Лента открывалась шесть секунд и всё это время
+   показывала «…». Человек ждал не новости, а переводчик.
+   Теперь список виден сразу на языке оригинала, а заголовки подменяются,
+   когда переводы приедут. Переведённое кэшируется, поэтому повторный заход
+   по тому же активу наружу уже не ходит. */
+/* 🔴 ЗАПРАШИВАТЬ НАДО ПОРЦИЯМИ, А НЕ ОДНИМ СПИСКОМ.
+   Сервер переводит максимум 12 заголовков за запрос (MAX_PER_REQUEST в
+   core/news_i18n.py) — лимит осознанный, перевод идёт к бесплатной службе.
+   А здесь уходил ОДИН запрос со всеми тридцатью uid: первые двенадцать
+   переводились, остальные восемнадцать молча оставались на английском, и
+   второго запроса за ними никто не посылал.
+   Ровно это выглядело как «перевода то есть, то нет»: в ленте с длинным
+   хвостом переводилась только верхушка. Ошибка не в переводчике — он
+   отвечал, — а в том, что клиент и сервер знали про лимит по-разному. */
+const TR_ПОРЦИЯ = 12;
+
+function fillTranslations(items, lang, body){
+  const надо = items.filter(n => n.uid && !n.title_local && n.lang && n.lang !== lang);
+  if(!надо.length) return;
+  const grid = body.querySelector('.pf-grid');
+  const поИндексу = {};
+  надо.forEach(n => { поИндексу[n.uid] = n; });
+
+  const порции = [];
+  for(let i = 0; i < надо.length; i += TR_ПОРЦИЯ)
+    порции.push(надо.slice(i, i + TR_ПОРЦИЯ));
+
+  if(grid) grid.classList.add('pf-translating');
+
+  // Порции идут по очереди, а не разом: три параллельных запроса к бесплатной
+  // службе — верный способ получить отказ по адресу. Каждая приехавшая порция
+  // подставляется сразу, поэтому заголовки переводятся на глазах, сверху вниз.
+  const следующая = (i) => {
+    // Окно закрыли — дальше не ходим. Иначе за уже ненужной лентой уходило бы
+    // ещё два запроса к переводчику, и следующий человек ждал бы дольше.
+    if(i >= порции.length || !body.isConnected){
+      if(grid) grid.classList.remove('pf-translating'); return;
+    }
+    const uids = порции[i].map(n=>n.uid).join(',');
+    window.sbfAuth.fetch('/api/pulse/translate?lang='+encodeURIComponent(lang)
+                         +'&uids='+encodeURIComponent(uids))
+      .then(r=>r.ok?r.json():{})
+      .then(map=>{
+        Object.keys(map || {}).forEach(uid=>{
+          const n = поИндексу[uid], tr = map[uid];
+          if(!n || !tr || tr === n.title) return;
+          const card = body.querySelector(`.pf-card[data-uid="${cssEscapeIdx(uid)}"]`);
+          if(!card) return;
+          const t = card.querySelector('.pf-title');
+          if(t) t.textContent = tr;
+          // Оригинал появляется только сейчас: до перевода он и был заголовком,
+          // и дублировать его самим под собой было бы бессмысленно.
+          if(!card.querySelector('.pf-orig')){
+            const o = document.createElement('div');
+            o.className = 'pf-orig';
+            o.textContent = n.title;
+            t.insertAdjacentElement('afterend', o);
+          }
+        });
+        следующая(i + 1);
+      })
+      .catch(()=>{ if(grid) grid.classList.remove('pf-translating'); });
+  };
+  следующая(0);
+}
+
+/* uid — наш внутренний хеш, но в селектор он попадает как есть.
+   CSS.escape есть не везде, поэтому запасной вариант на регулярке. */
+function cssEscapeIdx(s){
+  return (window.CSS && CSS.escape) ? CSS.escape(s) : String(s).replace(/[^\w-]/g, '\\$&');
+}
+
+/* Карточка новости в ленте по активу.
+   Порядок в карточке отвечает на вопросы в том порядке, в каком их задают:
+   что случилось (заголовок на языке читателя), кто это написал (логотип и
+   имя издания), когда. Оригинальный заголовок — под переводом мелким
+   шрифтом: машинный перевод не заменяет чужой текст, он его сопровождает. */
+/* 🔴 ПЕРВЫЙ ЭКРАН ГРУЗИТСЯ СРАЗУ, ОСТАЛЬНОЕ — ЛЕНИВО.
+   loading="lazy" стояло на всех тридцати картинках подряд. Внутри окна с
+   прокруткой браузер считает «видимым» немногое, и верхние карточки тоже
+   ждали своей очереди: на экране это выглядело как «картинки есть, но не
+   грузятся» — ровно та жалоба, с которой всё началось. Замер на живой
+   ленте: 20 карточек с фотографией, ни одной битой, четыре всё ещё в
+   процессе загрузки через двадцать секунд после открытия. */
+const FEED_EAGER = 8;
+
+function renderFeedCard(n, i){
+  const грузить = (i !== undefined && i < FEED_EAGER) ? 'eager' : 'lazy';
+  const dt=new Date(n.ts*1000);
+  const timeStr=dt.toLocaleString(undefined,{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+  const url=escapeHtmlIdx(n.url||'#');
+  const источник = escapeHtmlIdx(n.source || n.domain || '');
+  // Шапка карточки: фотография статьи, если издание её отдаёт; иначе полоса
+  // с логотипом издания; если нет и его — карточка просто без шапки.
+  const shot = n.image
+    ? `<div class="pf-shot"><img class="pf-img" loading="${грузить}" referrerpolicy="no-referrer"
+         src="${escapeHtmlIdx(n.image)}" alt=""></div>`
+    : (n.logo
+        ? `<div class="pf-shot pf-shot-logo"><img loading="${грузить}"
+             src="${escapeHtmlIdx(n.logo)}" alt=""><span>${источник}</span></div>`
+        : '');
+  // В подписи логотип нужен только там, где его нет в шапке — иначе он
+  // показывался бы дважды на одной карточке.
+  const logo = (n.logo && n.image)
+    ? `<img class="pf-logo" loading="${грузить}" src="${escapeHtmlIdx(n.logo)}" alt="">`
+    : '';
+  const headline = n.title_local || n.title || '';
+  const original = (n.title_local && n.title && n.title_local !== n.title)
+    ? `<div class="pf-orig">${escapeHtmlIdx(n.title)}</div>` : '';
+  return `<a class="pf-card" href="${url}" target="_blank" rel="noopener noreferrer"
+             data-uid="${escapeHtmlIdx(n.uid||'')}">
+    ${shot}
+    <div class="pf-text">
+      <div class="pf-title">${escapeHtmlIdx(headline)}</div>
+      ${original}
+      <div class="pf-meta">${logo}<span class="pf-src">${источник}</span>
+        <span class="pf-dot">·</span><span>${timeStr}</span></div>
+    </div>
+  </a>`;
+}
+
+// ── Эпицентр: доска обсуждаемости ───────────────────────────────────────────
+// Пузыри раскладываются упаковкой окружностей: самый обсуждаемый актив в
+// центре, остальные по спирали вокруг, каждый — в первую свободную точку.
+// Сила-направленная раскладка (d3-force) дала бы то же самое, но требует
+// библиотеки и кадров анимации; здесь достаточно одного прохода.
+// Подписи направлений — через словарь: блок стоит на первом экране всех трёх
+// языковых версий, и русское «сырьё» на /en/ выглядело бы как недоделка.
+const BOARD_CATS = {
+  crypto:    {cls:'bb-crypto',    key:'home.board_cat_crypto',    fb:'крипта'},
+  stocks:    {cls:'bb-stocks',    key:'home.board_cat_stocks',    fb:'акции'},
+  indices:   {cls:'bb-indices',   key:'home.board_cat_indices',   fb:'индексы'},
+  fx:        {cls:'bb-fx',        key:'home.board_cat_fx',        fb:'валюты'},
+  commodity: {cls:'bb-commodity', key:'home.board_cat_commodity', fb:'сырьё'}
+};
+const boardLabel = m => (window.sbfI18n ? window.sbfI18n.t(m.key, m.fb) : m.fb);
+
+function boardRadius(mentions, max, min, maxR){
+  // Площадь пропорциональна упоминаниям, а не диаметр: иначе актив с вдвое
+  // большим числом выглядит вчетверо крупнее и картинка врёт.
+  if (max <= 0) return min;
+  const k = Math.sqrt(Math.max(mentions, 0) / max);
+  return Math.round(min + (maxR - min) * k);
+}
+
+function packBubbles(items, W, H){
+  // Спиральная упаковка: идём от центра наружу и садим круг в первую точку,
+  // где он никого не задевает и не вылезает за поле.
+  //
+  // 🔴 Спираль обязана добивать до дальнего угла панели. В первой версии шаг
+  // был подобран на глаз (rad = 2.2·√a при a<4000) и доставал всего ~140px от
+  // центра при полуширине панели 438 — из двадцати пузырей помещались три,
+  // остальные молча выбрасывались. Поэтому радиус здесь считается ОТ РАЗМЕРА
+  // ПАНЕЛИ, а не от константы: √-распределение по числу проб даёт равномерную
+  // плотность точек по площади.
+  const placed = [];
+  const cx = W / 2, cy = H / 2;
+  const TRIES = 9000;
+  for (const it of items){
+    const r = it.r;
+    let put = null;
+    for (let a = 0; a < TRIES && !put; a++){
+      // 🔴 Спираль эллиптическая, вписанная в ячейку, а не круговая.
+      // С круговой спиралью в узкой высокой колонке (155×300) большая часть
+      // проб улетала за боковые края и отбрасывалась проверкой границ — из
+      // двадцати кругов доезжали семнадцать, причём молча. Растягивая радиус
+      // по каждой оси отдельно, мы получаем пробы, которые почти все внутри.
+      const t = Math.sqrt(a / TRIES);
+      const ang = a * 0.4;              // ~золотой угол, витки не ложатся друг на друга
+      const x = cx + (W / 2) * t * Math.cos(ang);
+      const y = cy + (H / 2) * t * Math.sin(ang);
+      if (x - r < 0 || x + r > W || y - r < 0 || y + r > H) continue;
+      let hit = false;
+      for (const p of placed){
+        if (Math.hypot(p.x - x, p.y - y) < p.r + r + 2){ hit = true; break; }
+      }
+      if (!hit) put = {x, y};
+    }
+    // Не нашлось места — круг не рисуем. Наложить его поверх соседа хуже:
+    // доска перестаёт читаться как сравнение размеров.
+    if (put) placed.push({...it, x: put.x, y: put.y});
+  }
+  return placed;
+}
+
+// Порядок направлений на доске. Один и тот же везде: во вкладках, в колонках
+// общего среза и в заголовках — иначе человек каждый раз ищет заново, где тут
+// крипта.
+const BOARD_ORDER = ['stocks', 'indices', 'fx', 'commodity', 'crypto'];
+
+// Выбранное направление. Вкладки «Все» нет: общий срез показывал по четыре
+// инструмента на направление, и на первом экране это читалось как «вот и всё,
+// что мы отслеживаем». Открываем сразу на акциях — там больше всего движения.
+let _boardCat = BOARD_ORDER[0];
+
+function renderBoardTabs(){
+  const el = document.getElementById('boardTabs');
+  if (!el) return;
+  const tabs = BOARD_ORDER.map(c => ({cat: c, label: boardLabel(BOARD_CATS[c])}));
+  el.innerHTML = tabs.map(x =>
+    `<button class="tab chip${x.cat === _boardCat ? ' active' : ''}" data-bcat="${x.cat || ''}">${escapeHtmlIdx(x.label)}</button>`
+  ).join('');
+}
+
+document.addEventListener('click', e => {
+  const b = e.target.closest && e.target.closest('#boardTabs [data-bcat]');
+  if (!b) return;
+  _boardCat = b.dataset.bcat || BOARD_ORDER[0];
+  renderBoardTabs();
+  loadBoard();
+});
+
+// Клик по пузырю открывает график в модальном окне, а не уводит со страницы —
+// так же, как карточки в CRM. Человек смотрит доску, заглядывает в один
+// инструмент и возвращается к ней же, не теряя место и не перезагружая
+// главную.
+//
+// Ссылка при этом остаётся настоящей: href ведёт на страницу графика, и
+// «открыть в новой вкладке», средняя кнопка мыши и копирование адреса
+// работают как обычно. Перехватываем только простой левый клик — ровно то,
+// что делает большинство.
+document.addEventListener('click', e => {
+  const a = e.target.closest && e.target.closest('.board-bubble');
+  if (!a) return;
+  if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+  e.preventDefault();
+  openChartSymbol(a.dataset.sym);
+});
+
+/* 🔴 Подписи направлений («акции / индексы / валюты / сырьё / крипта»)
+   берутся из словаря, а словарь i18n.js тянет сетью. Доска рисуется
+   раньше — и boardLabel() честно отдаёт запасное русское значение. Так на
+   /ro и /en вторая группа чипсов оставалась русской при полностью
+   переведённых ключах (Л-3 языкового аудита). Перерисовываем, когда
+   словарь доехал: ждём и объект, и его ready — объекта в момент
+   выполнения этого inline-скрипта ещё нет, он приходит с defer. */
+function _подписиДоскиКогдаБудетЯзык() {
+  if (!window.sbfI18n || !window.sbfI18n.ready) return;
+  window.sbfI18n.ready.then(function () {
+    try { renderBoardTabs(); } catch (e) {}
+    try { if (_последнийБриф) renderBriefPatterns(_последнийБриф); } catch (e) {}
+    if (typeof loadBoard === 'function' && document.getElementById('buzzBoard')) loadBoard();
+  }).catch(function () {});
+}
+if (window.sbfI18n) _подписиДоскиКогдаБудетЯзык();
+else document.addEventListener('DOMContentLoaded', _подписиДоскиКогдаБудетЯзык);
+
+async function loadBoard(){
+  const sec = document.getElementById('buzzBoard');
+  const canvas = document.getElementById('boardCanvas');
+  if (!sec || !canvas) return;
+  renderBoardTabs();
+  // 🔴 Подписка ЗДЕСЬ, до всех веток и возвратов. Сначала я поставил её в
+  // конце функции — то есть после `return` для узкого экрана, и на телефоне
+  // она не регистрировалась вообще: ровно там, где поворот экрана и
+  // случается. Обработчик, живущий ниже раннего выхода, не существует для
+  // того, кто по этому выходу ушёл.
+  if (!loadBoard._следит) {
+    loadBoard._следит = true;
+    window.matchMedia('(max-width:768px)')
+      .addEventListener('change', () => loadBoard());
+  }
+  // Не через get(): тот ходит за статическими файлами в /data, а доска
+  // считается на лету из счётчика упоминаний.
+  let d = null;
+  try {
+    const r = await fetch('/api/pulse/board?t=' + Date.now() +
+                          (_boardCat ? '&cat=' + encodeURIComponent(_boardCat) : ''));
+    d = r.ok ? await r.json() : null;
+  } catch(e) { d = null; }
+  // 🔴 В общем срезе показываем только то, о чём говорят. В выбранном
+  // направлении — всё, что отслеживается, включая нули: там вопрос не «что
+  // сейчас шумит», а «за чем мы вообще следим», и круг с нулём отвечает на
+  // него честнее, чем его отсутствие.
+  const items = (d && d.items || []).filter(x => _boardCat ? true : x.mentions > 0);
+  if (!items.length){
+    // Пусто — прячем секцию целиком. Заголовок «Что обсуждают прямо сейчас»
+    // над пустым полем — это обещание, которого страница не выполняет; ровно
+    // так до сегодняшнего дня и выглядел старый блок.
+    sec.hidden = true;
+    return;
+  }
+  sec.hidden = false;
+
+  // Порядок групп фиксированный, а не по активности: доска должна выглядеть
+  // одинаково при каждом заходе, иначе человек каждый раз ищет заново, где
+  // тут крипта. Пустые направления всё равно показываем колонкой с подписью —
+  // «сегодня про сырьё молчат» это тоже факт о рынке.
+  const ORDER = _boardCat ? [_boardCat] : BOARD_ORDER;
+
+  // 🔴 НА УЗКОМ ЭКРАНЕ — СПИСОК, А НЕ КАРТА ПУЗЫРЕЙ.
+  //
+  // Замер 14.09.2026 на 360 px: доска фиксирована на 378 px (вылезает на 30,
+  // на экране 320 — на 70), и главное — 67 подписей из 80 мельче 9 px, самая
+  // мелкая 7 px. В коде ниже об этом даже написано: «при радиусе меньше 18px
+  // тикер уходит в 6px и превращается в серую точку». На телефоне пять
+  // колонок по 75 px именно туда и приводят.
+  //
+  // Смысл карты — сравнение ПЛОЩАДЕЙ: видно, что про биткоин говорят вдвое
+  // больше, чем про золото. Когда площади размером с ноготь, сравнивать
+  // нечего, и остаётся набор нечитаемых точек. Список отвечает на тот же
+  // вопрос честно: актив и число рядом, отсортировано по убыванию.
+  if (window.matchMedia('(max-width:768px)').matches) {
+    canvas.classList.add('as-list');
+    canvas.innerHTML = ORDER.map(cat => {
+      const m = BOARD_CATS[cat];
+      const list = items.filter(x => x.category === cat)
+                        .sort((a, b) => b.mentions - a.mentions)
+                        .slice(0, 6);          // шесть строк — экран телефона
+      if (!list.length) return '';
+      return `<div class="board-group">
+        <div class="board-group-h"><i class="${m.cls}"></i>${escapeHtmlIdx(boardLabel(m))}</div>
+        ${list.map(it => {
+          const имя = window.SBFSymbols
+            ? window.SBFSymbols.symbolName(it.symbol, {mode:'name'}) : it.symbol;
+          const ch = it.change_pct;
+          const cls = ch > 0 ? 'up' : ch < 0 ? 'down' : '';
+          return `<a class="board-row" href="${ЛОК(`/chart.html?s=${encodeURIComponent(it.symbol)}`)}"
+                     data-sym="${escapeHtmlIdx(it.symbol)}">
+            <span class="br-sym">${escapeHtmlIdx(имя)}</span>
+            <span class="br-chg ${cls}">${ch != null ? (ch > 0 ? '+' : '') + ch.toFixed(2) + '%' : ''}</span>
+            <span class="br-n">${it.mentions}</span>
+          </a>`;
+        }).join('')}
+      </div>`;
+    }).join('');
+    return;
+  }
+  canvas.classList.remove('as-list');
+  canvas.classList.toggle('single', !!_boardCat);
+  const byCat = {};
+  ORDER.forEach(c => { byCat[c] = []; });
+  items.forEach(it => { if (byCat[it.category]) byCat[it.category].push(it); });
+
+  // 🔴 Масштаб радиуса общий для всех групп, а не свой в каждой. Иначе самый
+  // обсуждаемый металл и самая обсуждаемая монета рисовались бы одинаковым
+  // кругом при 170 и 372 упоминаниях — и доска, задача которой сравнивать
+  // направления между собой, начала бы врать.
+  const maxMentions = Math.max(...items.map(x => x.mentions), 1);
+
+  canvas.innerHTML = ORDER.map(cat => {
+    const m = BOARD_CATS[cat];
+    return `<div class="board-group">
+      <div class="board-group-h"><i class="${m.cls}"></i>${escapeHtmlIdx(boardLabel(m))}</div>
+      <div class="board-cell" data-cat="${cat}" data-empty="${escapeHtmlIdx(
+        window.sbfI18n ? window.sbfI18n.t('home.board_quiet', 'сегодня тихо') : 'сегодня тихо')}"></div>
+    </div>`;
+  }).join('');
+
+  let idx = 0;
+  ORDER.forEach(cat => {
+    const cell = canvas.querySelector(`.board-cell[data-cat="${cat}"]`);
+    const list = byCat[cat];
+    if (!cell) return;
+    if (!list.length){ cell.classList.add('empty'); return; }
+    const W = cell.clientWidth || 150, H = cell.clientHeight || 300;
+    // Потолок радиуса — от размера ячейки, иначе крупный круг просто не
+    // поместится и будет молча выброшен упаковкой. Делитель подобран по
+    // площади: четыре-шесть кругов должны укладываться в колонку, а самый
+    // большой из них — не занимать её целиком.
+    // Потолок радиуса зависит и от того, сколько кругов в ячейке: при
+    // пятидесяти девяти валютных парах круг в 0.4 ширины оставил бы остальным
+    // пятьдесят восемь пустое место, и всё ужалось бы до нечитаемого.
+    // Делим доступную площадь на число кругов и берём от неё радиус, с
+    // поправкой на то, что плотнее 55% упаковка не садится.
+    const area = W * H * 0.55 / Math.max(list.length, 1);
+    const fair = Math.sqrt(area / Math.PI);
+    const maxR = Math.max(16, Math.floor(Math.min(W * 0.40, H / 4.6, fair * 1.9)));
+    // Нижняя граница — чтобы подпись оставалась читаемой: при радиусе меньше
+    // 18px тикер уходит в 6px и превращается в серую точку.
+    const minR = Math.max(18, Math.round(maxR * 0.34));
+    // 🔴 Ужимаем, пока не поместятся ВСЕ. Дважды за два дня доска молча
+    // теряла круги — сперва из-за короткой спирали, потом из-за круговой в
+    // узкой колонке, — и оба раза это выглядело как нехватка данных, а не
+    // как ошибка раскладки. Здесь этот класс закрыт по-другому: если хоть
+    // один не влез, уменьшаем все на 8% и пробуем снова. Пропорции между
+    // кругами при этом сохраняются, а значит сравнение не портится.
+    let placed = [];
+    let scale = 1;
+    // Двенадцать попыток, а не шесть: при шаге 0.92 шести хватало ужать всего
+    // до 0.66, и в мобильной ячейке 336×319 четырнадцать примерно одинаковых
+    // кругов (акции — там у всех по 3-9 упоминаний) всё ещё не помещались.
+    // Ровно этот случай и ловит счётчик want/got ниже.
+    for (let attempt = 0; attempt < 12; attempt++){
+      list.forEach(it => {
+        it.r = Math.max(9, Math.round(boardRadius(it.mentions, maxMentions, minR, maxR) * scale));
+      });
+      placed = packBubbles(list, W, H);
+      if (placed.length === list.length) break;
+      scale *= 0.9;
+    }
+    // Сколько кругов ХОТЕЛИ нарисовать против того, сколько получилось.
+    // Дважды раскладка молча теряла элементы, и оба раза это выглядело как
+    // нехватка данных, а не как ошибка. Теперь расхождение видно прямо в
+    // разметке, и его ловит автопроверка, а не глаз.
+    cell.dataset.want = String(list.length);
+    cell.dataset.got = String(placed.length);
+    cell.innerHTML = placed.map(it => {
+      const chg = it.chg == null ? '' : (it.chg >= 0 ? '+' : '') + it.chg.toFixed(2) + '%';
+      const dir = it.chg == null ? '' : (it.chg >= 0 ? 'up' : 'down');
+      // В мелком круге длинное имя обрезается по краю: на телефоне
+      // «NETFLIX» превращался в «IETFLI». Для акций у брокера есть биржевой
+      // тикер (NFLX, HOOD) — он туда влезает. У валют и сырья короткой формы
+      // нет, но там имя и так короткое: EURUSD, GOLD.
+      let raw = it.symbol.replace(/^[#_]/, '').split('.')[0];
+      if (it.ticker && raw.length > 5 && it.r < 34) raw = it.ticker;
+      // Шрифт подгоняем под длину имени, а не режем имя: «COMMERZBA» вместо
+      // «COMMERZBANK» выглядит как ошибка, а не как сокращение.
+      let fs = Math.max(8, Math.min(15, Math.round(it.r / 3.1)));
+      if (raw.length > 6) fs = Math.max(7, Math.round(fs * 6 / raw.length * 1.15));
+      const showName = it.r >= 30;
+      const showChg = it.r >= 24;
+      // Каскад появления не длиннее секунды на весь блок. При шаге 34 мс и
+      // шестидесяти кругах последний выезжал через 2 секунды — человек
+      // успевал решить, что доска догрузилась, и увести взгляд.
+      const delay = Math.round((idx++) * Math.min(34, 900 / Math.max(list.length, 1)));
+      return `<a class="board-bubble ${BOARD_CATS[cat].cls}" href="${ЛОК(`/chart.html?s=${encodeURIComponent(it.symbol)}`)}"
+        data-sym="${escapeHtmlIdx(it.symbol)}"
+        style="left:${Math.round(it.x - it.r)}px;top:${Math.round(it.y - it.r)}px;
+               width:${it.r*2}px;height:${it.r*2}px;animation-delay:${delay}ms"
+        title="${escapeHtmlIdx(it.name)} — ${it.mentions} упоминаний за сутки">
+        <span class="bb-sym" style="font-size:${fs}px">${escapeHtmlIdx(raw)}</span>
+        ${showName ? `<span class="bb-n" style="font-size:${Math.max(8, fs-4)}px">${it.mentions}</span>` : ''}
+        ${showChg && chg ? `<span class="bb-chg ${dir}" style="font-size:${Math.max(8, fs-4)}px">${chg}</span>` : ''}
+      </a>`;
+    }).join('');
+  });
+
+  const fresh = document.getElementById('boardFresh');
+  if (fresh && d.updated) fresh.textContent = ago(d.updated);
+}
+
+// Перекладываем при изменении ширины: раскладка считается от фактического
+// размера панели, и после поворота телефона круги оказались бы за краем.
+let _boardTimer = null;
+window.addEventListener('resize', () => {
+  clearTimeout(_boardTimer);
+  _boardTimer = setTimeout(loadBoard, 250);
+}, {passive:true});
 
 document.getElementById('pulseTabs').addEventListener('click', e=>{
   if(!e.target.dataset.cat) return;
@@ -1520,14 +2439,16 @@ document.getElementById('pulseTabs').addEventListener('click', e=>{
 
 async function load(){
   clockWindow();
-  const [m,t,s,r,meta,brief,digest]=await Promise.all(
-    ['market','technical','signals','report','meta','brief_today','news_digest'].map(get));
+  const [m,t,s,r,meta,brief,digest,outliers]=await Promise.all(
+    ['market','technical','signals','report','meta','brief_today','news_digest','outliers'].map(get));
   renderMarket(m); renderFng(m||{}); renderReport(r);
   renderBrief(brief);
   try { renderTech(t); } catch(e) { /* tcards may not exist in current layout */ }
   loadPulse(_pulseCat);
+  loadBoard();
   SIG=s; renderSignals('economy');
   renderNewsDigest(digest);
+  renderOutliers(outliers); renderOffContext(outliers);
   const techFreshEl=document.getElementById('techFresh');
   if(t&&techFreshEl)techFreshEl.textContent=ago(t.updated);
   if(s)document.getElementById('sigFresh').textContent=ago(s.updated);
@@ -1571,16 +2492,22 @@ function setView(v) {
 document.getElementById('segCtrl').addEventListener('click', e => {
   if (e.target.dataset.v) setView(e.target.dataset.v);
 });
-// Всегда открываем Фундаментальный первым; #tech — для прямых ссылок
+// Восстанавливаем последнюю вкладку (localStorage переживает перезагрузку и
+// смену языка — навигация на /{lang}/ остаётся в том же origin). #tech в ссылке
+// имеет приоритет. Раньше всегда открывался Фундаментальный — из-за чего после
+// перезагрузки/смены языка пользователя выбрасывало с его вкладки.
 (function() {
-  var startView = (location.hash || '').startsWith('#tech') ? 'tech' : 'fund';
+  var startView = (location.hash || '').startsWith('#tech')
+    ? 'tech'
+    : (localStorage.getItem(SEG_KEY) || 'fund');
   setView(startView);
 })();
 
 load();
-startBybitStrip();
 pollLiveStrip();
-setInterval(clockWindow, 60000);
+// Тик раз в секунду, не в минуту: 60с-интервал не выровнен по границе минуты,
+// поэтому HH:MM отставали до минуты от реального времени. Функция дешёвая.
+setInterval(clockWindow, 1000);
 
 // SPEC_site_fixes_2026-07-29 §1: единственная реализация переключателя языков
 // живёт в sbf-header.js (defer) -- этот инлайн-скрипт синхронный и выполняется
@@ -1600,9 +2527,21 @@ var _tickerHalfW = 0;
 var _tickerPaused = false;
 var _tickerRAF = null;
 
+// 🔴 Бегущая строка — только на широком экране.
+//
+// На узком она превращается в обычный список с прокруткой пальцем (см. CSS
+// выше). Причина замерена: 3597 px дорожки в окне 360 при скорости 30 px/с
+// — это минута до последнего инструмента, без возможности ни догнать, ни
+// остановить. Проверяем ту же границу, что и media-правило: если развести
+// их, поедет лента, которую человек в этот момент листает пальцем.
+var _tickerNarrow = window.matchMedia('(max-width:768px)');
+
 function _tickerFrame() {
   var inner = document.getElementById('stripInner');
-  if (inner && !_tickerPaused) {
+  // 🔴 Не тратим кадры впустую. Раньше цикл крутился всегда: и когда лента
+  // уехала за верх страницы, и когда вкладка скрыта. На телефоне это
+  // расход батареи за нарисованное никому.
+  if (inner && !_tickerPaused && !_tickerNarrow.matches && !document.hidden) {
     if (!_tickerHalfW && inner.scrollWidth > 0) _tickerHalfW = inner.scrollWidth / 2;
     if (_tickerHalfW) {
       _tickerPos += 0.5;
@@ -1617,7 +2556,17 @@ var _stripEl = document.getElementById('strip');
 if (_stripEl) {
   _stripEl.addEventListener('mouseenter', function(){ _tickerPaused = true; });
   _stripEl.addEventListener('mouseleave', function(){ _tickerPaused = false; });
+  // Пауза по касанию — для планшетов и гибридов, где лента ещё едет, но
+  // мыши нет. Без этого «наведи, чтобы прочитать» там недоступно вовсе.
+  _stripEl.addEventListener('touchstart', function(){ _tickerPaused = true; }, {passive:true});
+  _stripEl.addEventListener('touchend', function(){ _tickerPaused = false; }, {passive:true});
 }
+// При переходе через границу сбрасываем сдвиг: иначе лента, ставшая
+// списком, откроется прокрученной на случайное место.
+_tickerNarrow.addEventListener('change', function(e){
+  var inner = document.getElementById('stripInner');
+  if (e.matches && inner) { inner.style.transform = ''; _tickerPos = 0; }
+});
 _tickerRAF = requestAnimationFrame(_tickerFrame);
 
 // ── Tech View: живой LW-график + библиотека паттернов ───────────────────────
@@ -1626,27 +2575,110 @@ _tickerRAF = requestAnimationFrame(_tickerFrame);
   // существует (нет сборщика данных под этот инструмент) — пункт вёл в никуда.
   var TECH_SYMS = ['GOLD','SILVER','BTC','ETH','SOL','SPX','NASDAQ','DJI','WTI','NG','EURUSD','GBPUSD','DXY','USDRUB','USDJPY','USDKZT'];
   var YF_MAP = {GOLD:'GC=F',SILVER:'SI=F',BTC:'BTC-USD',ETH:'ETH-USD',SOL:'SOL-USD',
-    SPX:'^GSPC',NASDAQ:'^IXIC',DJI:'^DJI',VIX:'^VIX',WTI:'CL=F',
+    SPX:'^GSPC',NASDAQ:'^NDX',DJI:'^DJI',VIX:'^VIX',WTI:'CL=F',
     NG:'NG=F',EURUSD:'EURUSD=X',GBPUSD:'GBPUSD=X',DXY:'DX-Y.NYB'};
   // MT5-символы не имеют Yahoo Finance тикера — live-пуш через MT5 пайплайн
 
-  var techSym = 'GOLD', techTF = 'D1';
+  // Привязка символа/ТФ графика: восстанавливаем последний выбор из localStorage
+  // (переживает перезагрузку и смену языка). Дефолт GOLD/D1.
+  var TECH_SYM_KEY='sbf_tech_sym', TECH_TF_KEY='sbf_tech_tf';
+  var _validTf={M1:1,M5:1,M15:1,M30:1,H1:1,H4:1,D1:1,W1:1};
+  var _savedSym=localStorage.getItem(TECH_SYM_KEY), _savedTf=localStorage.getItem(TECH_TF_KEY);
+  var techSym = (_savedSym && TECH_SYMS.indexOf(_savedSym)>=0) ? _savedSym : 'GOLD';
+  var techTF  = (_savedTf && _validTf[_savedTf]) ? _savedTf : 'D1';
   var techChart = null, techSeries = null, techLastC = null;
   var techData = null, techLines = [], techToggles = {piv:true,cndl:false,smc:false};
+  // Живой дозапрос новых баров (как pollTail в chart.html): без него график
+  // «застревает» на последнем баре — quotes-цикл двигал только цену последней
+  // свечи, но новые минуты/бары не появлялись.
+  var techLastRealUnix = null, techTailTimer = null;
+  // 🔴 Ряд пришёл из MT5 -> живую цену берём ТОЛЬКО оттуда же.
+  // YF_MAP указывает на ФЬЮЧЕРСЫ (GOLD:'GC=F', SILVER:'SI=F', WTI:'CL=F'),
+  // а свечи из MT5 спотовые: замер 20.08 дал спот 4492.25 против фьючерса
+  // 4547.60, +1.23%. techApplyLivePrice() растягивал текущую свечу до
+  // фьючерсной цены и рисовал одиночный вертикальный шип.
+  // В chart.html это уже исправлено; здесь ВТОРАЯ, независимая копия того
+  // же механизма — её пропустили при первой правке.
+  var techLiveFromMt5 = false;
+  var TECH_TF_SEC = {M1:60,M5:300,M15:900,M30:1800,H1:3600,H4:14400,D1:86400,W1:604800};
+  function _techBarToUnix(t){ return (typeof t==='number')?t:Math.floor(Date.parse(t+'T00:00:00Z')/1000); }
+  function _techUnixToBar(ts){ return (techTF==='D1'||techTF==='W1')?new Date(ts*1000).toISOString().slice(0,10):ts; }
+
+  function techScheduleTail(){
+    if(techTailTimer){clearInterval(techTailTimer);techTailTimer=null;}
+    // §6: M1 — раз в минуту; прочие — четверть бара, но не чаще 30с.
+    // M1 — каждые 10с (источник брокер, дёшево): чтобы текущая минута появлялась
+    // быстро, а не с отставанием до минуты. Прочие ТФ — четверть бара, не чаще 30с.
+    var ms = techTF==='M1' ? 10000 : Math.max(30000,(TECH_TF_SEC[techTF]||86400)*1000/4);
+    techPollTail();
+    techTailTimer = setInterval(techPollTail, ms);
+  }
+
+  async function techPollTail(){
+    if(!techLastC||!techSeries)return;
+    try{
+      var anchor = techLastRealUnix!=null
+        ? Math.min(_techBarToUnix(techLastC.time), techLastRealUnix)
+        : _techBarToUnix(techLastC.time);
+      var r = await fetch('/api/chart/tail?s='+encodeURIComponent(techSym)+'&tf='+encodeURIComponent(techTF)+'&since='+(anchor-1)+'&t='+Date.now());
+      var data = await r.json();
+      if(Array.isArray(data.candles)){
+        for(var i=0;i<data.candles.length;i++){
+          var c=data.candles[i];
+          var bar={time:_techUnixToBar(c.time),open:c.open,high:c.high,low:c.low,close:c.close};
+          try{ techSeries.update(bar); techLastC=bar; techLastRealUnix=_techBarToUnix(bar.time); }catch(e){}
+        }
+      }
+      // Живая цена — из ответа тейла, того же фида, что и свечи. Ставится
+      // ПОСЛЕ применения баров: иначе затрёт только что полученную форму.
+      if(data.source==='mt5'){
+        techLiveFromMt5=true;
+        if(data.live_price!=null)techApplyLivePrice(data.live_price);
+      }else if(data.source!==undefined){
+        techLiveFromMt5=false;
+      }
+      _techUpdateLiveTag();
+    }catch(e){}
+  }
+
+  // Честный статус по величине задержки последнего бара. Не берём market_open от
+  // tail: там порог 2.5 бара (для M1 = 150с), и 10-минутная задержка Yahoo на
+  // фьючерсах (GOLD/SILVER/WTI) давала бы ложное «рынок закрыт». Реальное
+  // закрытие рынка — это часы простоя (индексы ночью ~16ч), отсюда порог 90 мин.
+  function _techUpdateLiveTag(){
+    var el=document.getElementById('techLiveTag'); if(!el||techLastRealUnix==null)return;
+    // Порог зависит от ТФ: последний бар может быть «в процессе» и отставать до
+    // целого периода — на H1 41 мин это норма, не задержка. «Задержка» только для
+    // внутридневки (M1..H4) и только если отстаём больше 2 баров.
+    var period=TECH_TF_SEC[techTF]||3600;
+    var lagSec=Date.now()/1000 - techLastRealUnix;
+    var intraday=(techTF!=='D1'&&techTF!=='W1');
+    if(lagSec > period*40){ el.textContent='рынок закрыт'; el.classList.remove('verify'); }
+    else if(intraday && lagSec > period*2+120){ el.textContent='задержка ~'+Math.round(lagSec/60)+' мин'; el.classList.remove('verify'); }
+    else { el.textContent='live'; el.classList.add('verify'); }
+  }
 
   function buildSymDrop() {
     var wrap = document.getElementById('techChartWrap');
     if (!wrap || document.getElementById('techSymSel')) return;
     var sel = document.createElement('select'); sel.id = 'techSymSel';
-    sel.style.cssText = 'position:absolute;top:8px;left:8px;z-index:21;font-family:"JetBrains Mono",monospace;font-size:12px;font-weight:700;border:1px solid rgba(231,223,207,.85);border-radius:5px;background:rgba(251,246,239,.92);color:#2B2B33;padding:4px 8px;cursor:pointer;min-width:72px';
+    // 🔴 Единственный <select> на сайте без доступного имени (axe critical
+    // select-name). Скринридер объявлял его «поле со списком» и молчал
+    // о том, чего именно: видимой подписи рядом нет, она не нужна зрячему
+    // — значение и есть подпись. aria-label закрывает это, не меняя вид.
+    // Заодно min-height: 30 px высоты — цель касания ниже нормы.
+    sel.setAttribute('aria-label',
+      (window.sbfI18n && window.sbfI18n.t ? window.sbfI18n.t('a11y.tech_symbol', 'Инструмент') : 'Инструмент'));
+    sel.style.cssText = 'position:absolute;top:8px;left:8px;z-index:21;font-family:"JetBrains Mono",monospace;font-size:12px;font-weight:700;border:1px solid rgba(231,223,207,.85);border-radius:5px;background:rgba(251,246,239,.92);color:#2B2B33;padding:4px 8px;cursor:pointer;min-width:72px;min-height:44px';
     TECH_SYMS.forEach(function(s){var o=document.createElement('option');o.value=s;o.textContent=window.SBFSymbols?window.SBFSymbols.symbolName(s,{mode:'name+ticker'}):s;sel.appendChild(o);});
     sel.value = techSym;
-    sel.addEventListener('change', function(){techSym=sel.value;techRender();});
+    sel.addEventListener('change', function(){techSym=sel.value;localStorage.setItem(TECH_SYM_KEY,techSym);techRender();});
     wrap.appendChild(sel);
   }
 
   async function techDrawOurs(tf) {
     techTF = tf;
+    if(techTailTimer){clearInterval(techTailTimer);techTailTimer=null;}  // сброс живого дозапроса при смене ТФ/символа
     var el = document.getElementById('techLW'); el.innerHTML = '';
     try { techData = await SBFGrafik.loadBars(techSym, tf); }
     catch(e) { el.innerHTML='<div style="padding:20px;font-family:JetBrains Mono;color:var(--muted)">'+fmt_({{ t('home.no_data_for', lang) | tojson }},{sym:techSym+' '+tf})+'</div>'; return; }
@@ -1655,16 +2687,30 @@ _tickerRAF = requestAnimationFrame(_tickerFrame);
     if (lbl) lbl.textContent = (window.SBFSymbols ? window.SBFSymbols.symbolName(techSym,{mode:'name+ticker'}) : techSym) + ' · ' + (m.interval||tf);
 
     techChart = LightweightCharts.createChart(el, {
-      localization:{locale:'en'},
+      // autoSize здесь не было: LWC меряет контейнер один раз при создании,
+      // поэтому после поворота телефона график оставался прежней ширины —
+      // либо с пустым полем справа, либо вылезал за карточку.
+      autoSize: true,
+      // Вертикальный свайп отдаём странице, иначе из полотна 360px не
+      // выскроллиться (то же, что на chart.html).
+      handleScroll: {vertTouchDrag: false},
+      localization:{locale:'en',timeFormatter:SBFGrafik.lwCrosshairFmt},
       layout:{background:{type:'solid',color:'#FFFFFF'},textColor:'#2B2B33',fontFamily:'JetBrains Mono'},
       grid:{vertLines:{color:'#F0E9DA'},horzLines:{color:'#F0E9DA'}},
       rightPriceScale:{borderColor:'#E7DFCF'},
-      timeScale:{borderColor:'#E7DFCF',timeVisible:tf==='M30'||tf==='H1'||tf==='H4',rightOffset:5},
+      timeScale:{borderColor:'#E7DFCF',timeVisible:tf!=='D1'&&tf!=='W1',rightOffset:5,tickMarkFormatter:SBFGrafik.lwTickFmt},
       crosshair:{mode:1,vertLine:{color:'#C9A227',labelBackgroundColor:'#C9A227'},horzLine:{color:'#C9A227',labelBackgroundColor:'#C9A227'}},
     });
-    techSeries = techChart.addCandlestickSeries({upColor:'#1e8e5a',downColor:'#c0392b',borderVisible:false,wickUpColor:'#1e8e5a',wickDownColor:'#c0392b'});
+    // Точность цены по величине (как в chart.html): FX-майоры (<10) — 4 знака,
+    // не 2. Без явного priceFormat LightweightCharts угадывает точность и рисует
+    // EURUSD в 2 знака — старый баг «два знака после запятой».
+    var _refPx = Math.abs(m && m.last != null ? m.last : (techData.lw.length ? techData.lw[techData.lw.length-1].close : 1));
+    var _pxPrec = _refPx < 10 ? 4 : _refPx < 1000 ? 2 : 1;
+    techSeries = techChart.addCandlestickSeries({upColor:'#1e8e5a',downColor:'#c0392b',borderVisible:false,wickUpColor:'#1e8e5a',wickDownColor:'#c0392b',
+      priceFormat:{type:'price',precision:_pxPrec,minMove:1/Math.pow(10,_pxPrec)}});
     techSeries.setData(techData.lw);
     techLastC = techData.lw.length ? Object.assign({}, techData.lw[techData.lw.length-1]) : null;
+    techLastRealUnix = techLastC ? _techBarToUnix(techLastC.time) : null;
     var volS = techChart.addHistogramSeries({priceFormat:{type:'volume'},priceScaleId:'vol'});
     techChart.priceScale('vol').applyOptions({scaleMargins:{top:0.88,bottom:0}});
     volS.setData(techData.volume);
@@ -1672,6 +2718,7 @@ _tickerRAF = requestAnimationFrame(_tickerFrame);
     techChart.timeScale().setVisibleLogicalRange({from:Math.max(0,n-120),to:n+5});
     renderTechAnalysisBlock(m);
     techApplyToggles();
+    techScheduleTail();   // запустить живой дозапрос новых баров
   }
 
   var I18N_TECH = {
@@ -1701,6 +2748,14 @@ _tickerRAF = requestAnimationFrame(_tickerFrame);
     analysisSuffix: {{ t('home.analysis_suffix', lang) | tojson }}
   };
 
+  // Формат цены по величине: FX-майоры (<10) — 4 знака, не 2/3. toLocaleString
+  // без minimumFractionDigits резал EURUSD до «1.16» («старый баг с 2 знаками»).
+  function techFmtPx(v){
+    v = +v; if(!isFinite(v)) return '—';
+    var p = Math.abs(v) < 10 ? 4 : Math.abs(v) < 1000 ? 2 : 1;
+    return v.toLocaleString('en',{minimumFractionDigits:p, maximumFractionDigits:p});
+  }
+
   function renderTechAnalysisBlock(m) {
     var el = document.getElementById('techAnalysis'); if (!el||!techData) return;
     var rsi = m.rsi!=null?m.rsi:(SBFGrafik.calcRSI14(techData.bars)||'—');
@@ -1711,11 +2766,11 @@ _tickerRAF = requestAnimationFrame(_tickerFrame);
     var near = m.nearest;
     var pivs = SBFGrafik.calcPivots(techData.bars);
     if (!near&&pivs&&m.last) near = SBFGrafik.nearestPivot(m.last, pivs);
-    var lvls = (techData.levels||[]).map(function(L){return '<span style="color:'+L.color+';margin-right:10px"><b>'+L.name+'</b> '+(+L.price).toLocaleString('en')+'</span>';}).join('');
+    var lvls = (techData.levels||[]).map(function(L){return '<span style="color:'+L.color+';margin-right:10px"><b>'+L.name+'</b> '+techFmtPx(L.price)+'</span>';}).join('');
     el.innerHTML = '<div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center">'+
       '<span>RSI <b>'+rsi+'</b></span>'+
       '<span>Bias <b style="color:'+bCol+'">'+bTxt+'</b></span>'+
-      (near?'<span>'+I18N_TECH.nearest+' <b>'+near.name+' '+(+near.price).toLocaleString('en')+'</b> ('+(near.dist_pct>0?'+':'')+near.dist_pct+'%)</span>':'')+
+      (near?'<span>'+I18N_TECH.nearest+' <b>'+near.name+' '+techFmtPx(near.price)+'</b> ('+(near.dist_pct>0?'+':'')+near.dist_pct+'%)</span>':'')+
       (lvls?'<span style="margin-left:auto;display:flex;flex-wrap:wrap;gap:6px">'+lvls+'</span>':'')+
       '</div>';
     renderTechFocus(m, rsi, bias);
@@ -1733,16 +2788,16 @@ _tickerRAF = requestAnimationFrame(_tickerFrame);
 
     // Уровни из techData.levels (PP, R1, R2, S1, S2)
     var lvlMap = {};
-    (techData.levels||[]).forEach(function(L){ lvlMap[L.name] = (+L.price).toLocaleString('en',{maximumFractionDigits:3}); });
+    (techData.levels||[]).forEach(function(L){ lvlMap[L.name] = techFmtPx(L.price); });
 
     // Дополнительные данные из техкарточки (ожидаемый ход, паттерны)
     var card = _techCards.find(function(c){ return chartLabelOf(c.ticker)===techSym; });
-    var pp = lvlMap['PP'] || (card&&card.pivots&&card.pivots.PP?(+card.pivots.PP).toLocaleString('en'):'—');
-    var r1 = lvlMap['R1'] || (card&&card.resistance&&card.resistance[0]?(+card.resistance[0]).toLocaleString('en'):'—');
-    var r2 = lvlMap['R2'] || (card&&card.resistance&&card.resistance[1]?(+card.resistance[1]).toLocaleString('en'):'—');
-    var s1 = lvlMap['S1'] || (card&&card.support&&card.support[0]?(+card.support[0]).toLocaleString('en'):'—');
-    var s2 = lvlMap['S2'] || (card&&card.support&&card.support[1]?(+card.support[1]).toLocaleString('en'):'—');
-    var last = m.last?(+m.last).toLocaleString('en',{maximumFractionDigits:3}):'—';
+    var pp = lvlMap['PP'] || (card&&card.pivots&&card.pivots.PP?techFmtPx(card.pivots.PP):'—');
+    var r1 = lvlMap['R1'] || (card&&card.resistance&&card.resistance[0]?techFmtPx(card.resistance[0]):'—');
+    var r2 = lvlMap['R2'] || (card&&card.resistance&&card.resistance[1]?techFmtPx(card.resistance[1]):'—');
+    var s1 = lvlMap['S1'] || (card&&card.support&&card.support[0]?techFmtPx(card.support[0]):'—');
+    var s2 = lvlMap['S2'] || (card&&card.support&&card.support[1]?techFmtPx(card.support[1]):'—');
+    var last = m.last?techFmtPx(m.last):'—';
     var moveStr = card&&card.expected_move?card.expected_move[0]+'–'+card.expected_move[1]+' '+(card.expected_unit||''):'';
     var pats = card?(card.patterns||[]).join(', '):'';
     var symLabel = window.SBFSymbols ? window.SBFSymbols.symbolName(techSym, {mode:'name'}) : techSym;
@@ -1774,7 +2829,7 @@ _tickerRAF = requestAnimationFrame(_tickerFrame);
           +'<div class="tfoc-sec-lbl">'+I18N_TECH.keyLevels+'</div>'
           +'<div class="tfoc-lv"><span>'+I18N_TECH.resistance2+'</span><b style="color:var(--down)">'+r2+'</b></div>'
           +'<div class="tfoc-lv"><span>'+I18N_TECH.resistance1+'</span><b style="color:var(--down)">'+r1+'</b></div>'
-          +'<div class="tfoc-lv"><span>'+I18N_TECH.pivotPoint+'</span><b style="color:var(--gold)">'+pp+'</b></div>'
+          +'<div class="tfoc-lv"><span>'+I18N_TECH.pivotPoint+'</span><b style="color:var(--gold-text,#866A19)">'+pp+'</b></div>'
           +'<div class="tfoc-lv"><span>'+I18N_TECH.support1+'</span><b style="color:var(--up)">'+s1+'</b></div>'
           +'<div class="tfoc-lv"><span>'+I18N_TECH.support2+'</span><b style="color:var(--up)">'+s2+'</b></div>'
           +(moveStr?'<div class="tfoc-lv"><span>'+I18N_TECH.expectedMove+'</span><b>'+moveStr+'</b></div>':'')
@@ -1929,13 +2984,15 @@ _tickerRAF = requestAnimationFrame(_tickerFrame);
   window._initTechView=function(){
     if(techInited)return; techInited=true;
     buildSymDrop();
+    // подсветить восстановленный ТФ (в разметке жёстко «on» на D1)
+    document.querySelectorAll('#techTf button').forEach(function(x){x.classList.toggle('on', x.dataset.tf===techTF);});
     var chartWrap=document.getElementById('techChartWrap');
     if(chartWrap&&SBFGrafik.chartFullscreenButton)SBFGrafik.chartFullscreenButton(chartWrap);
     techRender();
     document.getElementById('techTf').addEventListener('click',function(e){
       if(!e.target.dataset.tf)return;
       document.querySelectorAll('#techTf button').forEach(function(x){x.classList.remove('on');});
-      e.target.classList.add('on'); techTF=e.target.dataset.tf; techRender();
+      e.target.classList.add('on'); techTF=e.target.dataset.tf; localStorage.setItem(TECH_TF_KEY,techTF); techRender();
     });
     document.getElementById('techTog').addEventListener('click',function(e){
       if(!e.target.dataset.t)return;
@@ -1943,9 +3000,15 @@ _tickerRAF = requestAnimationFrame(_tickerFrame);
       e.target.classList.toggle('on',techToggles[t]); techApplyToggles();
     });
     setInterval(function(){
+      // 🔴 То же правило, что в chart.html: цена применяется ТОЛЬКО из фида
+      // своих свечей. Ряд из MT5 ведёт techPollTail(); а с 20.08 стал реальным
+      // и зеркальный случай — quotes.json сам брокерский, и накладывать его на
+      // ещё-Yahoo-свечи D1 нельзя (по BTC расхождение фидов 0.8%).
+      if(techLiveFromMt5)return;
       var yfSym=YF_MAP[techSym]; if(!yfSym)return;
       fetch('./data/quotes.json?t='+Date.now()).then(function(r){return r.json();}).then(function(q){
-        var d=q.quotes&&q.quotes[yfSym]; if(d&&d.price)techApplyLivePrice(d.price);
+        var d=q.quotes&&q.quotes[yfSym];
+        if(d&&d.price&&d.source!=='mt5')techApplyLivePrice(d.price);
       }).catch(function(){});
     },8000);
     initGrafik();

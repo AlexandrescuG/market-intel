@@ -2,25 +2,32 @@
 <html lang="{{ lang }}">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1, viewport-fit=cover">
 <title>{{ t('login.title', lang) }}</title>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="SBF Intelligence">
+<meta property="og:image" content="https://lp.sbfconsult.com/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://lp.sbfconsult.com/assets/og-image.png">
 <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
 <style>
 :root{
   --bg:#f5f4f0;--paper:#fff;--text:#1a1a1a;--muted:#6b7280;
-  --line:#e5e2db;--accent:#2563eb;--gold:#c9a227;--up:#16a34a;
+  --line:#e5e2db;--accent:#2563eb;--gold:#c9a227;--gold-text:#866A19;--up:#16a34a;
   --dn:#dc2626;--radius:12px;--cream:#faf9f5;--soft:#f0ede4;
 }
 @media(prefers-color-scheme:dark){
-  :root{--bg:#0f0e0c;--paper:#1a1917;--text:#f0ede4;--muted:#9ca3af;
+  :root{--bg:#0f0e0c;--paper:#1a1917;--gold-text:#E6C257;--text:#f0ede4;--muted:#9ca3af;
     --line:#2c2a26;--cream:#1e1c18;--soft:#252320}
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);
-  color:var(--text);min-height:100vh;display:flex;flex-direction:column;
+  color:var(--text);min-height:100dvh;display:flex;flex-direction:column;
   align-items:center;justify-content:flex-start;padding:24px 16px 60px}
 .logo{font-size:20px;font-weight:800;letter-spacing:-.5px;margin-bottom:32px;
-  color:var(--gold);text-decoration:none}
+  color:var(--gold-text,#866A19);text-decoration:none}
 .card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);
   padding:28px 28px 24px;width:100%;max-width:420px}
 .step-title{font-size:18px;font-weight:700;margin-bottom:4px}
@@ -33,15 +40,21 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);
   color:var(--text);outline:none;transition:border-color .15s}
 .field input:focus{border-color:var(--gold)}
 .nav-row{display:flex;gap:10px;margin-top:20px}
-.btn{flex:1;padding:12px 20px;border-radius:8px;font-size:14px;font-weight:600;
+.btn{flex:1;padding:12px 20px;min-height:44px;border-radius:8px;font-size:14px;font-weight:600;
   cursor:pointer;transition:all .15s;border:none}
-.btn-primary{background:var(--gold);color:#fff}
+.btn-primary{background:var(--gold);color:var(--ink,#2B2B33)}
 .btn-primary:hover{opacity:.9}
 .btn-primary:disabled{opacity:.45;cursor:not-allowed}
 .err{background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;
   padding:10px 12px;font-size:13px;color:var(--dn);margin-bottom:14px;display:none}
 .login-note{text-align:center;font-size:12px;color:var(--muted);margin-top:16px}
-.login-note a{color:var(--gold)}
+/* Цель касания: ссылка была 119×17 (на /register и /survey — 35×17).
+   Это последний шаг воронки — «нет аккаунта? зарегистрироваться». Строчная
+   ссылка внутри абзаца не может стать выше без отрыва от текста, поэтому
+   inline-block + вертикальные отступы: строка остаётся строкой, а область
+   нажатия дорастает до 44 px. */
+.login-note a{color:var(--gold-text,#866A19);display:inline-block;
+  padding:13px 4px;margin:-13px 0}
 .divider{display:flex;align-items:center;gap:10px;margin:20px 0;color:var(--muted);font-size:12px}
 .divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--line)}
 .providers{display:flex;flex-direction:column;align-items:center;gap:10px}
@@ -50,7 +63,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);
 </style>
 <script>window.SBF_LANG_SWITCH_ONLY = true;</script>
 <script src="/assets/i18n.js?v=2" defer></script>
-<script src="/assets/sbf-header.js?v=16" defer></script>
+<script src="/assets/sbf-header.js?v=23" defer></script>
 </head>
 <body>
 
@@ -67,11 +80,11 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);
 
   <form onsubmit="return doLogin(event)">
     <div class="field">
-      <label>{{ t('register.email_label', lang) }}</label>
+      <label for="email">{{ t('register.email_label', lang) }}</label>
       <input type="email" id="email" placeholder="{{ t('register.email_placeholder', lang) }}" autocomplete="email" required>
     </div>
     <div class="field">
-      <label>{{ t('login.password_label', lang) }}</label>
+      <label for="password">{{ t('login.password_label', lang) }}</label>
       <input type="password" id="password" placeholder="••••••••" autocomplete="current-password" required>
     </div>
     <div class="nav-row">
@@ -158,7 +171,33 @@ function _renderTelegramWidget(host, callbackName, tries) {
   s.setAttribute('data-radius', '8');
   s.setAttribute('data-onauth', callbackName + '(user)');
   s.setAttribute('data-request-access', 'write');
+
+  // 🔴 <iframe> без title (axe frame-title, serious). Виджет вставляет фрейм
+  // сам, поэтому проставить атрибут при создании нельзя — только после
+  // появления. Контейнер наш, значит наблюдаем за ним.
+  // Наблюдатель ставится ДО appendChild: скрипт async, но вставка фрейма
+  // всё равно может случиться раньше, чем мы подпишемся, — проверяем и
+  // текущее состояние тоже, одной функцией.
+  var подписьФрейма = (window.sbfI18n && window.sbfI18n.t
+    ? window.sbfI18n.t('a11y.telegram_login', 'Вход через Telegram')
+    : 'Вход через Telegram');
+  function подписатьФреймы() {
+    var есть = false;
+    host.querySelectorAll('iframe').forEach(function (f) {
+      есть = true;
+      if (!(f.getAttribute('title') || '').trim()) f.setAttribute('title', подписьФрейма);
+    });
+    return есть;
+  }
+  var наблюдатель = new MutationObserver(function () {
+    if (подписатьФреймы()) наблюдатель.disconnect();
+  });
+  наблюдатель.observe(host, { childList: true, subtree: true });
   host.appendChild(s);
+  подписатьФреймы();
+  // Страховка на случай, если фрейм вставят без мутации в host (перенос
+  // узла, замена innerHTML родителя): один отложенный проход, потом всё.
+  setTimeout(function () { if (подписатьФреймы()) наблюдатель.disconnect(); }, 4000);
 }
 
 function _renderGoogleButton(host, callbackName, tries) {

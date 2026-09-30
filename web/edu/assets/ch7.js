@@ -3,6 +3,11 @@
  * RU is the master text; RO/EN are translations in the same register as ch1-6.
  * window.Ch7Content = {ru, ro, en}.
  *
+ * [ОБНОВЛЕНО 15.09.2026] Эта пометка устарела: partners.json существует
+ * (web/data/partners.json, пять партнёров с юрлицами, лицензиями и
+ * процентом теряющих счетов), ступень построена и работает —
+ * AcademyShared.PartnerPicker. Текст ниже оставлен как след решения,
+ * но читать его как описание текущего состояния нельзя.
  * [ДОПУЩЕНИЕ] Ступень 2 партнёрской лестницы (демо-счёт, §3.8) требует
  * <PartnerBridge>/<PartnerFacts>/<RiskWarning>/<DisclosureLine> и
  * partners.json из SPEC_partner_ladder_ch6_15.md — эта инфраструктура ещё
@@ -56,7 +61,7 @@ window.Ch7Content = {
     bigOrderTask: {
       tag: "ЗАДАЧА КРУПНОГО УЧАСТНИКА — ЗЕРКАЛО ГЛАВЫ 4",
       preamble: "Чтобы понять след, надо понять задачу. Она ровно противоположна тому, что обычно рассказывают.",
-      keyPoint: "Ключевая мысль, вытекающая прямо из главы 4: чем больше объём, тем хуже цена. Рыночный ордер съедает книгу вглубь. Для тебя с одним лотом это доли пункта. Для того, кому надо исполнить тысячу лотов, это разница, измеряемая в сотнях тысяч.",
+      keyPoint: "Ключевая мысль, вытекающая прямо из главы 4: чем больше объём, тем хуже цена. Рыночный ордер съедает книгу вглубь. Для тебя с одним лотом это доли пункта. Для того, кому надо исполнить тысячу лотов, это уже деньги — посчитай на панели ниже, сколько именно выходит на твоём объёме.",
       c1Title: "Крупный участник не хочет двигать цену", c1Text: "Движение — его издержка, а не его инструмент. Всё, что он делает при исполнении, направлено на то, чтобы движения было меньше.",
       c2Title: "Он не может быть невидимым", c2Text: "Любое исполнение оставляет отпечаток в потоке: заявки исчезают, восстанавливаются медленнее, сделки идут сериями одинакового размера. Это и есть след — но он в потоке, а не в форме свечи.",
       c3Title: "Ему не нужен твой стоп", c3Text: "Ему нужен объём. Кластер заявок за круглым уровнем — это место, где объём есть; всё остальное — интерпретация.",
@@ -66,6 +71,7 @@ window.Ch7Content = {
       beyondBookNote: "{{remaining}} лотов не нашли цену в видимой книге вообще — реальное исполнение ушло бы ещё дальше.",
       bridgeResultLabel: "Ты только что почувствовал задачу института. Теперь понятно, зачем всё, что дальше.",
       topOfBook: "Цена лучшего предложения", avgFill: "Средняя цена исполнения", slippage: "Проскальзывание",
+      depthNote: "СИНТЕТИЧЕСКАЯ ГЛУБИНА — цена середины рынка настоящая, объёмы по уровням нет: биржевой стакан мы не храним. Панель считает механику исполнения, а не глубину сегодняшнего рынка.",
     },
     execution: {
       tag: "КАК ИСПОЛНЯЮТ НА САМОМ ДЕЛЕ",
@@ -146,7 +152,8 @@ window.Ch7Content = {
     },
     ladderLimit: {
       body: "Всё, что ты прочитал в этой главе, ты пока принял на слово — кроме одного блока, где мы выложили свои измерения и CSV.\n\nИ это неправильно. Шесть глав мы учили тебя проверять за нами. А эту главу проверить не на чем, и дело не в нашей лени: поведение книги заявок не рисуется на макете. Плотность, которая восстанавливается за две секунды после того, как её съели; заявки, исчезающие за минуту до релиза; серия сделок одинакового размера, идущая двадцать минут подряд — всё это существует только в моменте. Запись показывает результат, а результат мы тебе уже показали — это свеча, и по ней ничего не видно.\n\nЗначит, нужен терминал. Не счёт с деньгами — терминал.",
-      pendingNote: "Карточка демо-счёта для этой ступени готовится отдельно вместе с остальной партнёрской инфраструктурой курса — эта глава выложена без неё, чтобы контент не ждал коммерческий слой.",
+      demoNote: "Демо открывается без верификации у {{noVerif}} площадок из {{total}} — проверено {{checked}}, условия и цитаты в partners.json. Денег не нужно: демо-терминал показывает ту же книгу заявок, что и реальный счёт.",
+      loadError: "Список площадок не загрузился — он же лежит в /brokers.",
     },
     quiz: [
       { id: "q1", section: "secBigOrder", prompt: "Фонду нужно купить объём, который в десять раз больше видимой плотности в книге. Что он сделает?",
@@ -228,7 +235,7 @@ window.Ch7Content = {
     bigOrderTask: {
       tag: "SARCINA PARTICIPANTULUI MARE — OGLINDA CAPITOLULUI 4",
       preamble: "Ca să înțelegi urma, trebuie să înțelegi sarcina. E exact opusul a ceea ce se povestește de obicei.",
-      keyPoint: "Ideea-cheie, care decurge direct din capitolul 4: cu cât volumul e mai mare, cu atât prețul e mai prost. Un ordin de piață consumă cartea în adâncime. Pentru tine, cu un lot, sunt fracțiuni de punct. Pentru cel care trebuie să execute o mie de loturi, e o diferență măsurată în sute de mii.",
+      keyPoint: "Ideea-cheie, care decurge direct din capitolul 4: cu cât volumul e mai mare, cu atât prețul e mai prost. Un ordin de piață consumă cartea în adâncime. Pentru tine, cu un lot, sunt fracțiuni de punct. Pentru cel care trebuie să execute o mie de loturi, sunt deja bani — calculează pe panoul de mai jos cât iese exact la volumul tău.",
       c1Title: "Participantul mare nu vrea să miște prețul", c1Text: "Mișcarea e costul lui, nu instrumentul lui. Tot ce face la execuție urmărește ca mișcarea să fie cât mai mică.",
       c2Title: "Nu poate fi invizibil", c2Text: "Orice execuție lasă o amprentă în flux: ordinele dispar, se refac mai lent, tranzacțiile vin în serii de mărime egală. Asta e urma — dar e în flux, nu în forma lumânării.",
       c3Title: "Nu are nevoie de stopul tău", c3Text: "Are nevoie de volum. Un cluster de ordine în spatele unui nivel rotund e un loc unde există volum; tot restul e interpretare.",
@@ -238,6 +245,7 @@ window.Ch7Content = {
       beyondBookNote: "{{remaining}} loturi nu au găsit preț în cartea vizibilă deloc — execuția reală ar fi mers și mai departe.",
       bridgeResultLabel: "Tocmai ai simțit sarcina unei instituții. Acum are sens tot ce urmează.",
       topOfBook: "Cel mai bun preț din carte", avgFill: "Prețul mediu de execuție", slippage: "Alunecare (slippage)",
+      depthNote: "ADÂNCIME SINTETICĂ — prețul mijlocului de piață e real, volumele pe niveluri nu: carnetul de ordine nu e stocat la noi. Panoul calculează mecanica execuției, nu adâncimea pieței de azi.",
     },
     execution: {
       tag: "CUM SE EXECUTĂ ÎN REALITATE",
@@ -318,7 +326,8 @@ window.Ch7Content = {
     },
     ladderLimit: {
       body: "Tot ce ai citit în acest capitol, l-ai acceptat deocamdată pe cuvânt — cu excepția unui bloc unde am publicat propriile măsurători și CSV-ul.\n\nȘi asta nu e corect. Șase capitole te-am învățat să ne verifici. Iar acest capitol n-are pe ce fi verificat, și nu din lene: comportamentul cărții de ordine nu se desenează într-un mockup. Densitatea care se reface în două secunde după ce a fost consumată; ordinele care dispar cu un minut înainte de publicație; o serie de tranzacții de mărime egală, care ține douăzeci de minute la rând — toate acestea există doar în moment. O înregistrare arată rezultatul, iar rezultatul ți l-am arătat deja — e o lumânare, și din ea nu se vede nimic.\n\nDeci ai nevoie de un terminal. Nu de un cont cu bani — de un terminal.",
-      pendingNote: "Cardul contului demo pentru această treaptă se pregătește separat, împreună cu restul infrastructurii de parteneriat a cursului — acest capitol e publicat fără el, ca să nu aștepte conținutul stratul comercial.",
+      demoNote: "Contul demo se deschide fără verificare la {{noVerif}} din {{total}} platforme — verificat {{checked}}, condițiile și citatele sunt în partners.json. Nu sunt necesari bani: terminalul demo arată același carnet de ordine ca un cont real.",
+      loadError: "Lista platformelor nu s-a încărcat — o găsești la /brokers.",
     },
     quiz: [
       { id: "q1", section: "secBigOrder", prompt: "Un fond trebuie să cumpere un volum de zece ori mai mare decât densitatea vizibilă din carte. Ce va face?",
@@ -400,7 +409,7 @@ window.Ch7Content = {
     bigOrderTask: {
       tag: "THE LARGE PARTICIPANT'S PROBLEM — A MIRROR OF CHAPTER 4",
       preamble: "To understand the footprint, you have to understand the problem. It's the exact opposite of what usually gets told.",
-      keyPoint: "The key idea, straight out of chapter 4: the bigger the size, the worse the price. A market order eats the book deep. For you with one lot, that's fractions of a point. For someone who has to fill a thousand lots, it's a difference measured in hundreds of thousands.",
+      keyPoint: "The key idea, straight out of chapter 4: the bigger the size, the worse the price. A market order eats the book deep. For you with one lot, that's fractions of a point. For someone who has to fill a thousand lots, that's real money — work out on the panel below exactly how much it comes to at your size.",
       c1Title: "A large participant doesn't want to move the price", c1Text: "Movement is their cost, not their tool. Everything they do at execution is aimed at making the movement smaller.",
       c2Title: "They can't be invisible", c2Text: "Any execution leaves a fingerprint in the flow: orders disappear, come back slower, trades run in series of matching size. That's the footprint — but it's in the flow, not in the shape of a candle.",
       c3Title: "They don't need your stop", c3Text: "They need volume. A cluster of orders behind a round level is a place where volume exists; everything else is interpretation.",
@@ -410,6 +419,7 @@ window.Ch7Content = {
       beyondBookNote: "{{remaining}} lots found no price in the visible book at all — a real fill would have gone even further.",
       bridgeResultLabel: "You just felt an institution's problem. Now everything that follows makes sense.",
       topOfBook: "Best available price", avgFill: "Average fill price", slippage: "Slippage",
+      depthNote: "SYNTHETIC DEPTH — the mid price is real, the per-level volumes are not: we do not store the exchange order book. This panel computes execution mechanics, not today's market depth.",
     },
     execution: {
       tag: "HOW EXECUTION ACTUALLY WORKS",
@@ -490,7 +500,8 @@ window.Ch7Content = {
     },
     ladderLimit: {
       body: "Everything you read in this chapter, you took on trust — except for one block where we published our own measurements and the CSV.\n\nAnd that's not right. For six chapters we taught you to check our work. This chapter has nothing to check it against, and that's not laziness on our part: order-book behavior doesn't draw onto a mockup. Density recovering in two seconds after being eaten; orders vanishing a minute before a release; a series of matching-size trades running for twenty minutes straight — all of that only exists in the moment. A recording shows the outcome, and we've already shown you the outcome — it's a candle, and nothing shows through it.\n\nSo you need a terminal. Not a funded account — a terminal.",
-      pendingNote: "The demo-account card for this rung is being prepared separately, alongside the rest of the course's partner infrastructure — this chapter is published without it so the content doesn't wait on the commercial layer.",
+      demoNote: "A demo account opens without verification at {{noVerif}} of {{total}} platforms — checked {{checked}}, terms and quotes are in partners.json. No money required: the demo terminal shows the same order book as a live account.",
+      loadError: "The platform list failed to load — it also lives at /brokers.",
     },
     quiz: [
       { id: "q1", section: "secBigOrder", prompt: "A fund needs to buy a size ten times larger than the visible depth in the book. What will it do?",

@@ -13,14 +13,39 @@
       "label": "Регистрация",
       "platform": "naga.com, веб",
       "captured": "2026-08-05",
-      "needed": ["Email или вход через Facebook/Apple", "Меньше минуты — форма одноэкранная"],
+      "needed": [
+        "Email или вход через Facebook/Apple",
+        "Меньше минуты — форма одноэкранная"
+      ],
       "blocks": [
-        { "type": "steps", "items": [
-          { "img": "/assets/guides/naga/registration/01_start.png", "caption": "Откройте naga.com и нажмите «Get started»." },
-          { "img": "/assets/guides/naga/registration/02_country.png", "caption": "Заполните форму: имя, email, пароль. Страна и телефонный код определяются автоматически по IP." },
-          { "img": "/assets/guides/naga/registration/06_consents.png", "caption": "Прямо под кнопкой «Sign up» — короткая строка о регуляторе, до отправки формы." }
-        ] },
-        { "type": "entity",
+        {
+          "type": "steps",
+          "items": [
+            {
+              "img": "/assets/guides/naga/registration/01_start.png",
+              "caption": "Откройте naga.com и нажмите «Get started».",
+              "img_webp": "/assets/guides/naga/registration/01_start.webp",
+              "img_w": 1440,
+              "img_h": 900
+            },
+            {
+              "img": "/assets/guides/naga/registration/02_country.png",
+              "caption": "Заполните форму: имя, email, пароль. Страна и телефонный код определяются автоматически по IP.",
+              "img_webp": "/assets/guides/naga/registration/02_country.webp",
+              "img_w": 1440,
+              "img_h": 900
+            },
+            {
+              "img": "/assets/guides/naga/registration/06_consents.png",
+              "caption": "Прямо под кнопкой «Sign up» — короткая строка о регуляторе, до отправки формы.",
+              "img_webp": "/assets/guides/naga/registration/06_consents.webp",
+              "img_w": 472,
+              "img_h": 84
+            }
+          ]
+        },
+        {
+          "type": "entity",
           "img": "/assets/guides/naga/registration/03_entity.png",
           "legal_name": "NAGA Capital Ltd",
           "jurisdiction": "Сейшелы",
@@ -35,7 +60,10 @@
             "компенсационного фонда — в договоре ни одного упоминания, единственная инстанция обжалования — сам регулятор Сейшел",
             "публикуемого процента теряющих счетов",
             "числового потолка плеча в политике — только примеры (1:300, 1:200), по золоту реклама до 1:500"
-          ]
+          ],
+          "img_webp": "/assets/guides/naga/registration/03_entity.webp",
+          "img_w": 1440,
+          "img_h": 900
         }
       ]
     },
@@ -46,19 +74,46 @@
       "captured": "2026-08-07",
       "intro": "После регистрации откройте кабинет — счёт уже создан. Прежде чем торговать, заполните короткую анкету: она разблокирует более высокие лимиты и нужна для верификации.",
       "blocks": [
-        { "type": "steps", "items": [
-          { "img": "/assets/guides/naga/activation/02_setup_wizard_start.png",
-            "caption": "Нажмите «Get Started» в приглашении «Set Up Your Live Account» — займёт пару минут." },
-          { "img": "/assets/guides/naga/activation/03_personal_details.png",
-            "caption": "Введите данные так же, как в паспорте: имя, дату рождения, гражданство. Отдельно спросят, являетесь ли вы политически значимым лицом (PEP) и налоговым резидентом США." },
-          { "img": "/assets/guides/naga/activation/04_address.png",
-            "caption": "Укажите адрес проживания." },
-          { "img": "/assets/guides/naga/activation/06_financial_employment.png",
-            "caption": "Отдельной анкетой («Financial Details») спросят про занятость, отрасль и опыт торговли, а следом — источник средств, цель инвестиций, доход и суммарные активы.",
-            "note": "Там же уточнят страну, из которой пойдут пополнения и выводы, и номер налогоплательщика (TIN) — если в вашей стране его не выдают, есть отдельный вариант ответа." }
-        ] },
-        { "type": "callout", "style": "note", "title": "После анкеты счёт становится «реальным»",
-          "body": "Сразу после заполнения кабинет присылает уведомление «You upgraded to a real-money account!» — это не то же самое, что верификация личности (см. раздел ниже), а просто подтверждение, что базовые данные приняты и доступны способы пополнения." }
+        {
+          "type": "steps",
+          "items": [
+            {
+              "img": "/assets/guides/naga/activation/02_setup_wizard_start.png",
+              "caption": "Нажмите «Get Started» в приглашении «Set Up Your Live Account» — займёт пару минут.",
+              "img_webp": "/assets/guides/naga/activation/02_setup_wizard_start.webp",
+              "img_w": 1280,
+              "img_h": 1106
+            },
+            {
+              "img": "/assets/guides/naga/activation/03_personal_details.png",
+              "caption": "Введите данные так же, как в паспорте: имя, дату рождения, гражданство. Отдельно спросят, являетесь ли вы политически значимым лицом (PEP) и налоговым резидентом США.",
+              "img_webp": "/assets/guides/naga/activation/03_personal_details.webp",
+              "img_w": 1280,
+              "img_h": 1106
+            },
+            {
+              "img": "/assets/guides/naga/activation/04_address.png",
+              "caption": "Укажите адрес проживания.",
+              "img_webp": "/assets/guides/naga/activation/04_address.webp",
+              "img_w": 1280,
+              "img_h": 1106
+            },
+            {
+              "img": "/assets/guides/naga/activation/06_financial_employment.png",
+              "caption": "Отдельной анкетой («Financial Details») спросят про занятость, отрасль и опыт торговли, а следом — источник средств, цель инвестиций, доход и суммарные активы.",
+              "note": "Там же уточнят страну, из которой пойдут пополнения и выводы, и номер налогоплательщика (TIN) — если в вашей стране его не выдают, есть отдельный вариант ответа.",
+              "img_webp": "/assets/guides/naga/activation/06_financial_employment.webp",
+              "img_w": 1280,
+              "img_h": 1112
+            }
+          ]
+        },
+        {
+          "type": "callout",
+          "style": "note",
+          "title": "После анкеты счёт становится «реальным»",
+          "body": "Сразу после заполнения кабинет присылает уведомление «You upgraded to a real-money account!» — это не то же самое, что верификация личности (см. раздел ниже), а просто подтверждение, что базовые данные приняты и доступны способы пополнения."
+        }
       ]
     },
     {
@@ -67,17 +122,45 @@
       "platform": "app.naga.com, кабинет",
       "captured": "2026-08-07",
       "blocks": [
-        { "type": "steps", "items": [
-          { "img": "/assets/guides/naga/funding/01_deposit_form.png",
-            "caption": "В разделе «Funds» → «Deposit» выберите способ: карта (Visa/Mastercard), Skrill, Neteller или банковский перевод — и введите сумму." }
-        ] },
-        { "type": "table", "columns": ["Параметр", "Значение"], "rows": [
-          ["Минимальный депозит", "10 USD"],
-          ["Комиссия за пополнение", "«No charge» по всем перечисленным способам"]
-        ] },
-        { "type": "callout", "style": "note", "title": "«Withdrawable» — не то же самое, что баланс",
+        {
+          "type": "steps",
+          "items": [
+            {
+              "img": "/assets/guides/naga/funding/01_deposit_form.png",
+              "caption": "В разделе «Funds» → «Deposit» выберите способ: карта (Visa/Mastercard), Skrill, Neteller или банковский перевод — и введите сумму.",
+              "img_webp": "/assets/guides/naga/funding/01_deposit_form.webp",
+              "img_w": 1280,
+              "img_h": 1106
+            }
+          ]
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Параметр",
+            "Значение"
+          ],
+          "rows": [
+            [
+              "Минимальный депозит",
+              "10 USD"
+            ],
+            [
+              "Комиссия за пополнение",
+              "«No charge» по всем перечисленным способам"
+            ]
+          ]
+        },
+        {
+          "type": "callout",
+          "style": "note",
+          "title": "«Withdrawable» — не то же самое, что баланс",
           "body": "Доступно к выводу может быть меньше, чем лежит на счёте: если у вас открыты позиции, вывести можно только сумму, которая оставит уровень маржи выше 150% — иначе система не даст оформить заявку, чтобы защитить вас от принудительного закрытия сделок.",
-          "img": "/assets/guides/naga/funding/02_withdrawable.png" }
+          "img": "/assets/guides/naga/funding/02_withdrawable.png",
+          "img_webp": "/assets/guides/naga/funding/02_withdrawable.webp",
+          "img_w": 1280,
+          "img_h": 1106
+        }
       ]
     },
     {
@@ -87,25 +170,65 @@
       "captured": "2026-08-07",
       "intro": "Без верификации личности NAGA даёт пополнить счёt не более чем на €2 000 — эта цифра указана прямо на экране запуска проверки, до начала процесса. Саму проверку выполняет сторонний сервис Sumsub, а не NAGA напрямую.",
       "blocks": [
-        { "type": "steps", "items": [
-          { "img": "/assets/guides/naga/verification/01_consent.png",
-            "caption": "Нажмите «Agree and continue» на экране согласия — он объясняет, что данные обрабатывает Sumsub, и даёт ссылки на политику конфиденциальности." },
-          { "img": "/assets/guides/naga/verification/02_sumsub_optin.png",
-            "caption": "Необязательный шаг: можно завести Sumsub ID, чтобы не проходить верификацию заново в других сервисах, которые тоже используют Sumsub.",
-            "note": "Переключатель включён по умолчанию — если не хотите хранить данные повторно, отключите его до нажатия «Start verification»." },
-          { "img": "/assets/guides/naga/verification/03_doctype_select.png",
-            "caption": "Шаг 1 из 2: выберите страну, выдавшую документ, и его тип — паспорт, ID-карта или водительское удостоверение.",
-            "note": "Есть кнопка «Continue on phone» — можно отсканировать QR-код и пройти шаг с камерой смартфона, если не доверяете камере компьютера." },
-          { "img": "/assets/guides/naga/verification/04_upload_tips.png",
-            "caption": "Перед загрузкой — три коротких требования: цветное фото, хорошее освещение, никаких редактированных изображений." },
-          { "img": "/assets/guides/naga/verification/05_upload_doc.png",
-            "caption": "Прикрепите файл (JPG, PNG, HEIC, WEBP или PDF, до 50 МБ) или сфотографируйте документ прямо здесь." },
-          { "img": "/assets/guides/naga/verification/06_liveness_intro.png",
-            "caption": "Шаг 2 из 2 — проверка живости (liveness check): система снимает лицо и фон через камеру, чтобы убедиться, что документ подаёт его владелец." }
-        ] },
-        { "type": "callout", "style": "note", "title": "Если камера не включается",
+        {
+          "type": "steps",
+          "items": [
+            {
+              "img": "/assets/guides/naga/verification/01_consent.png",
+              "caption": "Нажмите «Agree and continue» на экране согласия — он объясняет, что данные обрабатывает Sumsub, и даёт ссылки на политику конфиденциальности.",
+              "img_webp": "/assets/guides/naga/verification/01_consent.webp",
+              "img_w": 1280,
+              "img_h": 1112
+            },
+            {
+              "img": "/assets/guides/naga/verification/02_sumsub_optin.png",
+              "caption": "Необязательный шаг: можно завести Sumsub ID, чтобы не проходить верификацию заново в других сервисах, которые тоже используют Sumsub.",
+              "note": "Переключатель включён по умолчанию — если не хотите хранить данные повторно, отключите его до нажатия «Start verification».",
+              "img_webp": "/assets/guides/naga/verification/02_sumsub_optin.webp",
+              "img_w": 1280,
+              "img_h": 1112
+            },
+            {
+              "img": "/assets/guides/naga/verification/03_doctype_select.png",
+              "caption": "Шаг 1 из 2: выберите страну, выдавшую документ, и его тип — паспорт, ID-карта или водительское удостоверение.",
+              "note": "Есть кнопка «Continue on phone» — можно отсканировать QR-код и пройти шаг с камерой смартфона, если не доверяете камере компьютера.",
+              "img_webp": "/assets/guides/naga/verification/03_doctype_select.webp",
+              "img_w": 1280,
+              "img_h": 1112
+            },
+            {
+              "img": "/assets/guides/naga/verification/04_upload_tips.png",
+              "caption": "Перед загрузкой — три коротких требования: цветное фото, хорошее освещение, никаких редактированных изображений.",
+              "img_webp": "/assets/guides/naga/verification/04_upload_tips.webp",
+              "img_w": 1280,
+              "img_h": 1112
+            },
+            {
+              "img": "/assets/guides/naga/verification/05_upload_doc.png",
+              "caption": "Прикрепите файл (JPG, PNG, HEIC, WEBP или PDF, до 50 МБ) или сфотографируйте документ прямо здесь.",
+              "img_webp": "/assets/guides/naga/verification/05_upload_doc.webp",
+              "img_w": 1280,
+              "img_h": 1112
+            },
+            {
+              "img": "/assets/guides/naga/verification/06_liveness_intro.png",
+              "caption": "Шаг 2 из 2 — проверка живости (liveness check): система снимает лицо и фон через камеру, чтобы убедиться, что документ подаёт его владелец.",
+              "img_webp": "/assets/guides/naga/verification/06_liveness_intro.webp",
+              "img_w": 1280,
+              "img_h": 1112
+            }
+          ]
+        },
+        {
+          "type": "callout",
+          "style": "note",
+          "title": "Если камера не включается",
           "body": "Sumsub покажет инструкцию прямо на экране: открыть значок сайта в адресной строке браузера → найти пункт «Camera» → включить доступ → вернуться и нажать «Try again». В автоматизированных или изолированных браузерных средах (например, виртуальных машинах без физической камеры) доступ к камере технически недоступен — тогда остаётся только вариант «Continue on phone».",
-          "img": "/assets/guides/naga/verification/07_camera_blocked.png" }
+          "img": "/assets/guides/naga/verification/07_camera_blocked.png",
+          "img_webp": "/assets/guides/naga/verification/07_camera_blocked.webp",
+          "img_w": 1280,
+          "img_h": 1112
+        }
       ]
     },
     {
@@ -114,41 +237,124 @@
       "platform": "app.naga.com, веб-терминал",
       "captured": "2026-08-07",
       "blocks": [
-        { "type": "steps", "items": [
-          { "img": "/assets/guides/naga/trading/01_markets_overview.png",
-            "caption": "В разделе «Markets» инструменты сгруппированы по категориям — индексы, форекс, сырьё, крипто — с живой ценой и изменением за день." },
-          { "img": "/assets/guides/naga/trading/02_positions_empty.png",
-            "caption": "Раздел «Positions» показывает открытые, отложенные и закрытые сделки — до первой сделки здесь пусто, с кнопкой «Start Trading»." },
-          { "img": "/assets/guides/naga/trading/03_order_ticket.png",
-            "caption": "Откройте инструмент — справа появится тикет: Sell/Buy, рыночная или заданная цена, объём в лотах или сумма в долларах.",
-            "note": "«Order Protector» — это Stop Loss и Take Profit, оба выключены по умолчанию (переключатели справа). Без Stop Loss позиция ничем не ограничена сверху убытка, кроме баланса счёта." }
-        ] },
-        { "type": "callout", "style": "fact", "title": "Уровень маржи объясняется прямо в интерфейсе",
+        {
+          "type": "steps",
+          "items": [
+            {
+              "img": "/assets/guides/naga/trading/01_markets_overview.png",
+              "caption": "В разделе «Markets» инструменты сгруппированы по категориям — индексы, форекс, сырьё, крипто — с живой ценой и изменением за день.",
+              "img_webp": "/assets/guides/naga/trading/01_markets_overview.webp",
+              "img_w": 1280,
+              "img_h": 1112
+            },
+            {
+              "img": "/assets/guides/naga/trading/02_positions_empty.png",
+              "caption": "Раздел «Positions» показывает открытые, отложенные и закрытые сделки — до первой сделки здесь пусто, с кнопкой «Start Trading».",
+              "img_webp": "/assets/guides/naga/trading/02_positions_empty.webp",
+              "img_w": 1280,
+              "img_h": 1112
+            },
+            {
+              "img": "/assets/guides/naga/trading/03_order_ticket.png",
+              "caption": "Откройте инструмент — справа появится тикет: Sell/Buy, рыночная или заданная цена, объём в лотах или сумма в долларах.",
+              "note": "«Order Protector» — это Stop Loss и Take Profit, оба выключены по умолчанию (переключатели справа). Без Stop Loss позиция ничем не ограничена сверху убытка, кроме баланса счёта.",
+              "img_webp": "/assets/guides/naga/trading/03_order_ticket.webp",
+              "img_w": 1280,
+              "img_h": 1112
+            }
+          ]
+        },
+        {
+          "type": "callout",
+          "style": "fact",
+          "title": "Уровень маржи объясняется прямо в интерфейсе",
           "body": "Формула: (Equity ÷ Margin used) × 100. Ниже 50% NAGA начинает принудительно закрывать позиции — от самой убыточной, пока маржи не станет достаточно. От 51% до 150% — предупреждение и рекомендация пополнить счёт или закрыть часть позиций. Выше 150% — всё в порядке.",
-          "img": "/assets/guides/naga/trading/04_margin_level.png" },
-        { "type": "callout", "style": "fact", "title": "Лучшая публикация условий из пяти",
-          "body": "NAGA публикует одной таблицей то, что остальные не публикуют вовсе или дробят по страницам: своп long и short, средний спред в пипсах, маржу, комиссию, размер лота и границы объёма." },
-        { "type": "table", "columns": ["Инструмент", "Спред, ср.", "Своп L/S", "Маржа", "Комиссия", "Лот", "Объём"], "rows": [
-          ["AUD/USD", "1,0", "−1,1 / −4,4", "0,20%", "0,00%", "100 000", "0,01–50"],
-          ["AUD/CAD", "1,4", "−9,95 / −3,7", "0,40%", "0,00%", "100 000", "0,01–50"]
-        ], "caption": "Страница «Hours & Fees», проверено 2026-08-06. Показаны первые строки как подтверждение; таблица алфавитная и подгружается порциями." },
-        { "type": "callout", "style": "note", "title": "Оговорка о символах",
-          "body": "В терминале инструменты названы с суффиксом _Pro: EURUSD_Pro, XAUUSD_Pro. А индекс DAX 40 подписан как GER30 (DAX) — тикер отстал от индекса на десять бумаг." },
-        { "type": "callout", "style": "fact", "title": "Готовые сигналы от Trading Central",
+          "img": "/assets/guides/naga/trading/04_margin_level.png",
+          "img_webp": "/assets/guides/naga/trading/04_margin_level.webp",
+          "img_w": 1280,
+          "img_h": 1115
+        },
+        {
+          "type": "callout",
+          "style": "fact",
+          "title": "Лучшая публикация условий из пяти",
+          "body": "NAGA публикует одной таблицей то, что остальные не публикуют вовсе или дробят по страницам: своп long и short, средний спред в пипсах, маржу, комиссию, размер лота и границы объёма."
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Инструмент",
+            "Спред, ср.",
+            "Своп L/S",
+            "Маржа",
+            "Комиссия",
+            "Лот",
+            "Объём"
+          ],
+          "rows": [
+            [
+              "AUD/USD",
+              "1,0",
+              "−1,1 / −4,4",
+              "0,20%",
+              "0,00%",
+              "100 000",
+              "0,01–50"
+            ],
+            [
+              "AUD/CAD",
+              "1,4",
+              "−9,95 / −3,7",
+              "0,40%",
+              "0,00%",
+              "100 000",
+              "0,01–50"
+            ]
+          ],
+          "caption": "Страница «Hours & Fees», проверено 2026-08-06. Показаны первые строки как подтверждение; таблица алфавитная и подгружается порциями."
+        },
+        {
+          "type": "callout",
+          "style": "note",
+          "title": "Оговорка о символах",
+          "body": "В терминале инструменты названы с суффиксом _Pro: EURUSD_Pro, XAUUSD_Pro. А индекс DAX 40 подписан как GER30 (DAX) — тикер отстал от индекса на десять бумаг."
+        },
+        {
+          "type": "callout",
+          "style": "fact",
+          "title": "Готовые сигналы от Trading Central",
           "body": [
             "В разделе «Trading Signals» — идеи от Trading Central (тот же сторонний поставщик, что и у AvaTrade): инструмент, направление, целевые уровни, короткий сценарий на понятном языке.",
             "На базовом уровне доступно 5 сигналов в день — чтобы видеть больше, нужен статус Silver Trader. Как и у AvaTrade, это не наша рекомендация: сигналы генерируются автоматически по методике Trading Central и одинаково доступны всем клиентам соответствующего уровня."
           ],
-          "img": "/assets/guides/naga/trading/05_signals.png" },
-        { "type": "callout", "style": "fact", "title": "Встроенный копитрейдинг с публичным рейтингом",
+          "img": "/assets/guides/naga/trading/05_signals.png",
+          "img_webp": "/assets/guides/naga/trading/05_signals.webp",
+          "img_w": 1280,
+          "img_h": 1112
+        },
+        {
+          "type": "callout",
+          "style": "fact",
+          "title": "Встроенный копитрейдинг с публичным рейтингом",
           "body": [
             "Раздел «Find Leaders» показывает реальный рейтинг трейдеров по прибыли за 30 и 7 дней — с числом подписчиков и копирующих счетов у каждого. Кнопка «Autocopy» подключает копирование сделок конкретного трейдера автоматически.",
             "Это не гарантия результата: прошлая доходность лидера ничего не обещает на будущее, а показанная прибыль — это прибыль лидера, а не гарантированная прибыль для копирующего (комиссии и задержка копирования её уменьшают)."
           ],
-          "img": "/assets/guides/naga/trading/06_find_leaders.png" },
-        { "type": "callout", "style": "note", "title": "Можно зарабатывать и на своих подписчиках",
+          "img": "/assets/guides/naga/trading/06_find_leaders.png",
+          "img_webp": "/assets/guides/naga/trading/06_find_leaders.webp",
+          "img_w": 1280,
+          "img_h": 1112
+        },
+        {
+          "type": "callout",
+          "style": "note",
+          "title": "Можно зарабатывать и на своих подписчиках",
           "body": "«Copy Premium» в разделе «Wallet» платит трейдеру, которого копируют, — до $0,90 за лот на популярных активах на уровне Diamond. Условия: быть минимум на уровне Iron, торговать своим счётом (не через копирование), держать сделку дольше 5 минут, инвестировать в неё больше $100 и закрыть в плюс. Уровень зависит от суммы на счёте — с нуля доступен только после депозита от $250.",
-          "img": "/assets/guides/naga/trading/07_copy_premium.png" }
+          "img": "/assets/guides/naga/trading/07_copy_premium.png",
+          "img_webp": "/assets/guides/naga/trading/07_copy_premium.webp",
+          "img_w": 1280,
+          "img_h": 1112
+        }
       ]
     }
   ]

@@ -60,7 +60,15 @@
   var isCalendar = _bare === '/calendar' || _bare.startsWith('/edu/calendar');
   var isJournal  = _bare === '/journal.html' || _bare === '/journal';
   var isBrokers  = _bare === '/brokers' || _bare === '/brokers.html';
-  var isEdu      = !isMain && !isCalendar && !isJournal && !isBrokers;
+  // Был объявлен ниже и ни разу не использован — задел под пункт меню,
+  // который так и не подключили. Подключён 25.08 (SPEC_chart_all_instruments):
+  // страница графика была доступна только из карточек журнала и календаря.
+  var isCharts   = _bare === '/chart.html' || _bare === '/chart' || _bare.startsWith('/chart');
+  // isEdu — catch-all «всё остальное», поэтому он присваивал себе и страницу
+  // графика: на /chart.html пункт «Обучение» подсвечивался как активный
+  // задолго до этой правки, просто в глаза не бросалось, пока рядом не
+  // появился второй активный пункт.
+  var isEdu      = !isMain && !isCalendar && !isJournal && !isBrokers && !isCharts;
 
   // Detect edu book pages for RU/RO/EN switcher: /edu/b/n, /edu/ro/b/n, /edu/en/b/n
   var _bookM = path.match(/\/edu\/(ro\/|en\/)?b\/(\d+)/);
@@ -73,14 +81,15 @@
     if (page === 'journal'  && isJournal)  return 'active';
     if (page === 'edu'      && isEdu)      return 'active';
     if (page === 'brokers'  && isBrokers)  return 'active';
+    if (page === 'charts'   && isCharts)   return 'active';
     return '';
   }
 
   // ── CSS ──────────────────────────────────────────────────────────────────
   var CSS = [
     ':root{--cream:#FBF6EF;--paper:#FFFFFF;--line:#E7DFCF;',
-    '--ink:#2B2B33;--muted:#8A8275;--faint:#C5BAA8;',
-    '--gold:#C9A227;--glow:#E6C257;--up:#1e8e5a;--down:#c0392b;}',
+    '--ink:#2B2B33;--muted:#716A5A;--faint:#7B6B52;',
+    '--gold:#C9A227;--glow:#E6C257;--up:#2C784E;--down:#c0392b;}',
 
     '.sbf-hd{display:flex;align-items:center;gap:18px;padding:10px 24px;',
     'border-bottom:1px solid var(--line);background:var(--paper);',
@@ -97,7 +106,7 @@
     'font-weight:600;color:var(--muted);text-decoration:none;padding:6px 11px;',
     'border-radius:7px;transition:color .12s,background .12s;white-space:nowrap;}',
     '.sbf-hd .g-nav-item:hover{color:var(--ink);background:rgba(201,162,39,.08);text-decoration:none;}',
-    '.sbf-hd .g-nav-item.active{color:var(--gold);font-weight:700;}',
+    '.sbf-hd .g-nav-item.active{color:var(--gold-text,#866A19);font-weight:700;}',
 
     '.sbf-right{margin-left:auto;display:flex;align-items:center;gap:18px;',
     'font-size:12px;font-family:"JetBrains Mono",monospace;}',
@@ -108,6 +117,14 @@
     '.sbf-lang-btn{display:flex;align-items:center;gap:4px;font-family:"JetBrains Mono",monospace;',
     'font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--muted);background:none;',
     'border:none;cursor:pointer;padding:4px 7px;border-radius:5px;transition:color .15s,background .15s;}',
+    // 🔴 42×22px на телефоне — вдвое меньше порога в 44px, и это единственный
+    // способ сменить язык. Отдельная жалоба руководителя 03.09: «шторка с
+    // языками — реально не видно». Увеличиваем и кнопку, и пункты списка.
+    '@media(max-width:900px){',
+    '.sbf-lang-btn{font-size:13px;padding:11px 12px;min-height:44px;}',
+    '.sbf-lang-chev{font-size:11px;}',
+    '.sbf-lang-list{min-width:96px;}',
+    '.sbf-lang-list a{padding:12px 14px;font-size:13px;min-height:44px;}}',
     '.sbf-lang-btn:hover,.sbf-lang-btn[aria-expanded="true"]{color:var(--ink);background:rgba(201,162,39,.08);}',
     '.sbf-lang-chev{font-size:9px;transition:transform .15s;}',
     '.sbf-lang-btn[aria-expanded="true"] .sbf-lang-chev{transform:rotate(180deg);}',
@@ -122,8 +139,8 @@
     'text-decoration:none;color:var(--muted);padding:6px 9px;border-radius:5px;}',
     '.sbf-lang-list a:hover,.sbf-lang-list a:focus{color:var(--ink);background:rgba(201,162,39,.08);',
     'outline:none;text-decoration:none;}',
-    '.sbf-lang-list a[aria-selected="true"]{color:var(--gold);}',
-    '.sbf-lang-check{color:var(--gold);font-size:10px;}',
+    '.sbf-lang-list a[aria-selected="true"]{color:var(--gold-text,#866A19);}',
+    '.sbf-lang-check{color:var(--gold-text,#866A19);font-size:10px;}',
     '.sbf-win{display:flex;align-items:center;gap:6px;color:var(--muted);}',
     '.dot{width:7px;height:7px;border-radius:50%;background:var(--faint);}',
     '.dot.on{background:var(--up);box-shadow:0 0 7px var(--up);}',
@@ -132,6 +149,20 @@
     '.strip{overflow:hidden;border-bottom:1px solid var(--line);',
     'background:var(--paper);position:sticky;top:65px;z-index:40;}',
     '.strip-i{display:flex;flex-wrap:nowrap;width:max-content;will-change:transform;}',
+    // 🔴 То же правило, что и в web/index.html, и оно обязано быть ЗДЕСЬ.
+    //
+    // Стили шапки вставляются скриптом в рантайме, то есть попадают в
+    // документ ПОЗЖЕ страничного <style> — и при равной специфичности
+    // побеждают. Первый прогон правки это и показал: на 360 лента осталась
+    // overflow:hidden, хотя медиа-правило в index.html было написано
+    // правильно. Правило, живущее в одном из двух источников, — это
+    // правило, которое работает через раз.
+    '@media(max-width:768px){',
+    '.strip{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;',
+    'scrollbar-width:none;}',
+    '.strip::-webkit-scrollbar{display:none;}',
+    '.strip-i,.strip-inner{transform:none!important;will-change:auto;}',
+    '}',
     '.tick{padding:9px 16px;border-right:1px solid var(--line);min-width:112px;flex:0 0 auto;cursor:default;}',
     '.tick .k{font-size:10px;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;font-weight:600;}',
     '.tick .v{font-family:"JetBrains Mono",monospace;font-weight:600;font-size:14px;margin-top:3px;color:var(--ink);}',
@@ -161,7 +192,7 @@
     '.sbf-mob-bar img{width:32px;height:32px;object-fit:contain;flex-shrink:0}',
     '.sbf-mob-bar .mob-brand{font-weight:700;font-size:13px;letter-spacing:.3px;color:var(--ink,#2B2B33)}',
     '.sbf-mob-bar .mob-time{margin-left:auto;display:flex;align-items:center;gap:5px;',
-    'font-size:11px;color:var(--muted,#8A8275);font-family:"JetBrains Mono",monospace}',
+    'font-size:11px;color:var(--muted,#7C7563);font-family:"JetBrains Mono",monospace}',
     '.sbf-mob-bar .mob-dot{width:7px;height:7px;border-radius:50%;',
     'background:var(--up,#1e8e5a);box-shadow:0 0 6px var(--up,#1e8e5a);',
     'animation:mobPulse 1.6s infinite;flex-shrink:0}',
@@ -169,26 +200,111 @@
     '@keyframes mobPulse{50%{opacity:.4}}',
     '.strip{transition:transform .2s ease;}',
 
-    '@media(max-width:760px){',
+    // 🔴 Порог 760, а не 900, означал, что на планшете в портрете (768 —
+    // ровно iPad) показывалась десктопная шапка, которой нужно 1180px.
+    // Замер 03.09: scrollWidth 1180 при ширине экрана 768 на 11 страницах из
+    // 15 — «Войти» и «30 дней PRO» уезжали за правый край, добраться до них
+    // можно было только горизонтальной прокруткой. Тот же порог в sbf-nexus
+    // поднимали до 900 в августе по той же причине.
+    '@media(max-width:900px){',
     '.sbf-hd{display:none!important;}',
     '.sbf-mob-bar{display:flex!important;}',
-    '.strip{top:50px!important;}',
-    'body{padding-bottom:58px!important;}',
+    // Высоту ленты котировок больше не задаём числом: она разная на разных
+    // страницах (74px на графике, 81px на главной — зависит от line-height),
+    // а мобильный бар считался ровно 50px при фактических 53. Реальные
+    // значения публикует _publishChromeVars() ниже.
+    '.strip{top:var(--sbf-bar-h,53px)!important;}',
+    '.sbf-has-bn body{padding-bottom:var(--sbf-bottom-h,58px)!important;}',
     '.g-bottom-nav{display:flex;}}',
+    // 🔴 Safari на iOS принудительно увеличивает страницу при тапе по полю с
+    // font-size < 16px и обратно не уменьшает. Таких полей на сайте было 17
+    // из 17: вход, регистрация, опрос, админка, поиск инструментов, поиск по
+    // глоссарию, все формы дневника. Человек тапал в «Email» — и оказывался
+    // на увеличенной странице, из которой не выбраться.
+    //
+    // Правило живёт здесь, а не в design.css, сознательно: страницы входа,
+    // регистрации и опроса подключают свои <style> ПОСЛЕ общей таблицы и
+    // перебивают её (проверено замером — там оставалось 14px). Этот блок
+    // добавляется в <head> скриптом, то есть последним, и выигрывает у всех.
+    '@media(max-width:900px){',
+    'input:not([type=checkbox]):not([type=radio]),select,textarea{font-size:16px!important}}',
     '.g-bn-item{flex:1;display:flex;flex-direction:column;align-items:center;',
     'justify-content:center;gap:3px;text-decoration:none;color:var(--muted);',
     'padding:6px 0 8px;transition:color .12s;-webkit-tap-highlight-color:transparent;}',
-    '.g-bn-item.active{color:var(--gold);}',
+    '.g-bn-item.active{color:var(--gold-text,#866A19);}',
     '.g-bn-item:hover{color:var(--ink);text-decoration:none;}',
     '.g-bn-ico{font-size:20px;line-height:1;}',
     '.g-bn-lbl{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.4px;',
     'font-weight:600;text-transform:uppercase;}',
-    '.sbf-embed .g-bottom-nav, .sbf-embed .sbf-mob-bar, .sbf-embed .sbf-fw-btn, .sbf-embed .sbf-fw-bubble{display:none!important;}'
+    '.sbf-embed .g-bottom-nav, .sbf-embed .sbf-mob-bar, .sbf-embed .sbf-fw-btn, .sbf-embed .sbf-fw-bubble{display:none!important;}',
+
+    // Подписи нижнего нава на 390px не помещались в колонку 65px при 11px и
+    // letter-spacing .4px — «КАЛЕНДАРЬ» упиралась в края.
+    //
+    // ⚠️ Блок должен стоять последним в массиве. Базовые правила `.g-bn-lbl`
+    // и `.g-bn-item` объявлены НИЖЕ мобильного `@media`-блока, а медиазапрос
+    // не добавляет специфичности — поставленный раньше, он молча
+    // проигрывает обычному правилу, идущему следом. Первая версия этой
+    // правки так и не сработала: в CSS она была, в computed style — нет.
+    '@media(max-width:430px){',
+    '.g-bn-lbl{font-size:9.5px;letter-spacing:.1px}',
+    '.g-bn-item{min-width:0;padding:6px 2px 8px}}'
   ].join('');
 
   var st = document.createElement('style');
   st.textContent = CSS;
   document.head.appendChild(st);
+
+  // Высота хрома — в CSS-переменных, а не числами в десяти местах.
+  //
+  // 🔴 Раньше каждый липкий элемент помнил своё число: лента — top:50, блок
+  // «Фундаментальный/Технический» на главной — top:98, поиск глоссария —
+  // top:64, шапка главы курса — top:106. Ни одно из них не совпадало с
+  // фактической высотой: мобильный бар 53px, лента от 74 до 81 в зависимости
+  // от страницы. Итог — переключатель режима на главной был наполовину
+  // закрыт лентой, а поиск по глоссарию уезжал под неё целиком.
+  //
+  // Считаем по факту и пересчитываем на resize, повороте и смене языка
+  // (в RO/EN подписи длиннее и высота меняется).
+  function _publishChromeVars() {
+    var root = document.documentElement.style;
+    var bar  = document.querySelector('.sbf-mob-bar');
+    var hd   = document.querySelector('.sbf-hd');
+    var strip = document.querySelector('.strip');
+    var bn   = document.querySelector('.g-bottom-nav');
+    var h = function (el) {
+      if (!el) return 0;
+      var r = el.getBoundingClientRect();
+      return r.height > 0 ? Math.round(r.height) : 0;
+    };
+    var barH = h(bar) || h(hd);
+    root.setProperty('--sbf-bar-h', barH + 'px');
+    root.setProperty('--sbf-top-h', (barH + h(strip)) + 'px');
+    // Нижний нав на iPhone дорастает на env(safe-area-inset-bottom), а
+    // компенсация body была прибита к 58px — нижние ~27px контента уходили
+    // под нав навсегда. Берём фактическую высоту вместе с safe-area.
+    root.setProperty('--sbf-bottom-h', (h(bn) || 58) + 'px');
+  }
+  window.__sbfPublishChromeVars = _publishChromeVars;
+  if (window.ResizeObserver) {
+    var _ro = new ResizeObserver(_publishChromeVars);
+    ['.sbf-mob-bar', '.sbf-hd', '.strip', '.g-bottom-nav'].forEach(function (sel) {
+      var el = document.querySelector(sel);
+      if (el) _ro.observe(el);
+    });
+    // Разметку хрома этот же скрипт добавляет ниже — досматриваем позже.
+    setTimeout(function () {
+      ['.sbf-mob-bar', '.sbf-hd', '.strip', '.g-bottom-nav'].forEach(function (sel) {
+        var el = document.querySelector(sel);
+        if (el) { try { _ro.observe(el); } catch (e) {} }
+      });
+      _publishChromeVars();
+    }, 300);
+  }
+  window.addEventListener('resize', _publishChromeVars, { passive: true });
+  window.addEventListener('orientationchange', function () { setTimeout(_publishChromeVars, 250); });
+  document.addEventListener('DOMContentLoaded', _publishChromeVars);
+  setTimeout(_publishChromeVars, 60);
 
   // CSS применён (что и было нужно для уже существующей на странице разметки).
   // Дальше — добавление НОВОГО хедера/нава и живые котировки/часы: в iframe это
@@ -321,8 +437,6 @@
   }
 
   // ── HTML ─────────────────────────────────────────────────────────────────
-  var isCharts = path === '/chart.html' || path.includes('/chart');
-
   var _hdHtml = [
     '<header class="sbf-hd">',
     '  <a href="' + navHref('/') + '" class="sbf-brand">',
@@ -331,6 +445,7 @@
     '  </a>',
     '  <nav class="g-nav">',
     '    <a href="' + navHref('/') + '"           class="g-nav-item ' + navCls('today')    + '" data-i18n="nav.today">' + t('nav.today', 'Сегодня') + '</a>',
+    '    <a href="' + navHref('/chart.html') + '" class="g-nav-item ' + navCls('charts')   + '" data-i18n="nav.charts">' + t('nav.charts', 'Графики') + '</a>',
     '    <a href="' + navHref('/edu/') + '"       class="g-nav-item ' + navCls('edu')       + '" data-i18n="nav.edu">' + t('nav.edu', 'Обучение') + '</a>',
     '    <a href="' + navHref('/calendar') + '"   class="g-nav-item ' + navCls('calendar')  + '" data-i18n="nav.calendar">' + t('nav.calendar', 'Календарь') + '</a>',
     '    <a href="' + navHref('/brokers') + '"     class="g-nav-item ' + navCls('brokers')   + '" data-i18n="nav.brokers">' + t('nav.brokers', 'Брокеры') + '</a>',
@@ -348,7 +463,15 @@
     '  <div class="mob-time"><span class="mob-dot" id="mobLiveDot"></span><span id="mobClock">—</span></div>',
     '  <div class="sbf-lang-sw" id="sbfLangSwMob"></div>',
     '</div>',
-    '<div class="strip" id="strip"><div class="strip-i" id="stripI"></div></div>'
+    // 🔴 tabindex + role + aria-label. Лента котировок прокручивается, но
+    // попасть в неё с клавиатуры было нельзя (axe scrollable-region-focusable):
+    // внутри нет ни одного фокусируемого элемента, значит Tab туда не
+    // заходит, и содержимое недостижимо без мыши или пальца.
+    // role="region" + имя — чтобы в списке ориентиров она называлась, а не
+    // была безымянной группой: «лента котировок» говорит больше, чем «регион».
+    '<div class="strip" id="strip" tabindex="0" role="region" aria-label="'
+      + t('a11y.strip_label', 'Лента котировок').replace(/"/g, '&quot;')
+      + '"><div class="strip-i" id="stripI"></div></div>'
   ].join('\n');
 
   // Bottom nav built separately so position:fixed is never trapped inside a stacking parent
@@ -356,6 +479,7 @@
     '<a href="' + navHref('/') + '"           class="g-bn-item ' + navCls('today')    + '"><span class="g-bn-ico"><img class="mi-icon" src="/assets/icons/icon-sun.svg" alt="" width="20" height="20"></span><span class="g-bn-lbl" data-i18n="nav.today">' + t('nav.today', 'Сегодня') + '</span></a>',
     // Profile injected here as 2nd by sbf-profile.js
     '<a href="' + navHref('/edu/') + '"     class="g-bn-item ' + navCls('edu')       + '"><span class="g-bn-ico"><img class="mi-icon" src="/assets/icons/icon-books.png" alt="" width="20" height="20"></span><span class="g-bn-lbl" data-i18n="nav.edu">' + t('nav.edu', 'Обучение') + '</span></a>',
+    '<a href="' + navHref('/chart.html') + '" class="g-bn-item ' + navCls('charts')   + '"><span class="g-bn-ico"><img class="mi-icon" src="/assets/icons/icon-bar-chart.png" alt="" width="20" height="20"></span><span class="g-bn-lbl" data-i18n="nav.charts">' + t('nav.charts', 'Графики') + '</span></a>',
     '<a href="' + navHref('/calendar') + '" class="g-bn-item ' + navCls('calendar')  + '"><span class="g-bn-ico"><img class="mi-icon" src="/assets/icons/icon-calendar.png" alt="" width="20" height="20"></span><span class="g-bn-lbl" data-i18n="nav.calendar">' + t('nav.calendar', 'Календарь') + '</span></a>',
     '<a href="' + navHref('/brokers') + '"   class="g-bn-item ' + navCls('brokers')   + '"><span class="g-bn-ico"><img class="mi-icon" src="/assets/icons/icon-briefcase.png" alt="" width="20" height="20"></span><span class="g-bn-lbl" data-i18n="nav.brokers">' + t('nav.brokers', 'Брокеры') + '</span></a>'
   ].join('\n');
@@ -376,6 +500,12 @@
       nav.innerHTML = _navHtml;
       document.body.appendChild(nav);
     }
+    // 🔴 Отступ под нижний нав раньше вешался на body безусловно, а сам блок
+    // CSS инжектится ДО раннего return для SBF_LANG_SWITCH_ONLY. Из-за этого
+    // на /login, /register и /survey внизу оставалось 58px пустоты под нав,
+    // которого на этих страницах нет. Помечаем корень только тогда, когда
+    // нав действительно в DOM.
+    document.documentElement.classList.add('sbf-has-bn');
   }
   if (document.body) { inject(); }
   else { document.addEventListener('DOMContentLoaded', inject); }
@@ -422,7 +552,6 @@
       return {it: it, r: r};
     }).sort(function (a, b) { return a.r - b.r; }).map(function (x) { return x.it; });
   }
-  var BYBIT_MAP = { 'BTCUSDT':'BTC-USD','ETHUSDT':'ETH-USD','SOLUSDT':'SOL-USD' };
   var _fng = null;
   var _live = {};
 
@@ -472,7 +601,24 @@
     requestAnimationFrame(_stripFrame);
   }
 
+  // 🔴 ЭТОТ MARQUEE МЁРТВ, И ЗАПУСКАТЬ ЕГО НЕЛЬЗЯ.
+  //
+  // _stripFrame ищет элемент #stripI. На страницах его нет: живая дорожка
+  // называется #stripInner и живёт в web/index.html со своим собственным
+  // циклом. Проверено 14.09.2026 — getElementById('stripI') возвращает null
+  // на главной и в главах.
+  //
+  // То есть requestAnimationFrame крутился вечно, шестьдесят раз в секунду
+  // спрашивал у документа несуществующий элемент и ничего не двигал. На
+  // мониторе это незаметно, на телефоне это расход батареи за нарисованное
+  // никому.
+  //
+  // Сам код оставлен, а не удалён: если шапка когда-нибудь начнёт рисовать
+  // свою ленту (buildStrip выше — её строитель), запуск вернётся одной
+  // строкой. Молча удалять работающий строитель вместе с его двигателем —
+  // способ через полгода обнаружить, что ленту негде взять.
   (function initStripMarquee() {
+    if (!document.getElementById('stripI')) return;   // ленты шапки на странице нет
     var strip = document.getElementById('strip');
     if (strip) {
       strip.addEventListener('mouseenter', function () { _stripPaused = true; });
@@ -519,7 +665,7 @@
     if (winTxt) winTxt.textContent = inWin ? t('clock.morning_window', 'Утренний синтез') : t('clock.always_on', 'Скрипты 24/7');
   }
   clockTick();
-  setInterval(clockTick, 60000);
+  setInterval(clockTick, 1000);  // раз в секунду: 60с-тик не выровнен по минуте → часы отставали до минуты
   _i18n.ready.then(clockTick); // подставить перевод сразу, не ждать минуту до первого interval
 
   function setLive(ok) {
@@ -531,7 +677,7 @@
     if (mobLiveDot) mobLiveDot.className = 'mob-dot' + (ok ? '' : ' off');
   }
 
-  // ── Данные: market.json + quotes.json + Bybit WS ─────────────────────────
+  // ── Данные: market.json + quotes.json ────────────────────────────────────
   async function pollQuotes() {
     try {
       var r = await fetch('/data/quotes.json?t=' + Date.now());
@@ -572,35 +718,16 @@
     if (_lastMarketItems) buildStrip(reorderByWatchlist(_lastMarketItems));
   });
 
-  var _ws = null;
-  function startBybitWS() {
-    try {
-      _ws = new WebSocket('wss://stream.bybit.com/v5/public/spot');
-      _ws.onopen = function () {
-        _ws.send(JSON.stringify({
-          op: 'subscribe',
-          args: Object.keys(BYBIT_MAP).map(function (s) { return 'tickers.' + s; })
-        }));
-      };
-      _ws.onmessage = function (ev) {
-        try {
-          var m = JSON.parse(ev.data);
-          if (!m.topic || !m.data || !m.data.lastPrice) return;
-          var bsym = m.topic.replace('tickers.', '');
-          var ysym = BYBIT_MAP[bsym];
-          if (ysym) updateStripPrice(ysym, parseFloat(m.data.lastPrice));
-        } catch (e) {}
-      };
-      _ws.onerror = function () {};
-      _ws.onclose = function () { setTimeout(startBybitWS, 5000); };
-    } catch (e) { setTimeout(startBybitWS, 5000); }
-  }
+  // 🔴 20.08: Bybit-WebSocket убран — это был третий источник цены крипты.
+  // quotes.json теперь несёт BTC/ETH/SOL от брокера (тот же фид, что рисует
+  // свечи на графике), а сокет затирал их спотом Bybit: замер 20.08 давал
+  // расхождение 0.1–0.24%. В ленте и на графике стояли разные числа под
+  // одной подписью — та же болезнь, что у золота, только мельче.
 
   loadMarket();
   pollQuotes();
   setInterval(pollQuotes, 10000);
   setInterval(loadMarket, 300000);
-  startBybitWS();
 
   // Strip scroll-hide (mobile only): slides up on scroll down, returns on scroll up
   (function() {
@@ -629,6 +756,16 @@
 // заинжектил бы), поэтому i18n.js подключён отдельным <script> пораньше в
 // <head> каждой страницы (до sbf-header.js). См. ниже — построение шапки
 // дожидается sbfI18n.ready.
+
+// Источник перехода (sbf-attrib.js) — грузим раньше всего: метки кампании
+// надо снять на ТОЙ странице, на которую человек приземлился, а регистрация
+// произойдёт двумя-тремя переходами позже, когда их в адресе уже не будет.
+(function () {
+  var s = document.createElement('script');
+  s.src = '/assets/sbf-attrib.js?v=1';
+  s.async = false;
+  document.head.appendChild(s);
+})();
 
 // Автозагрузка общего auth-клиента (sbf-auth.js) — ДО профиля и фидбека,
 // оба используют window.sbfAuth.
@@ -689,7 +826,7 @@ function _sbfLoadUserContext() {
 // Автозагрузка модуля профиля
 (function () {
   var s = document.createElement('script');
-  s.src = '/assets/sbf-profile.js?v=2';
+  s.src = '/assets/sbf-profile.js?v=4';
   s.async = false;
   document.head.appendChild(s);
 })();

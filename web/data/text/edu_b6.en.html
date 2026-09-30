@@ -1,0 +1,124 @@
+<h2>FIND THE RELEASE</h2>
+<p>One full Gold trading day, with no markers. Tap the candle where you think the news came out.</p>
+<p>{{marker_label}} · {{date}}, {{time}} UTC. The move bar is {{release_bar_range}} points — {{peak_vs_quiet}}× the typical 30-minute bar during this day's quiet hours.</p>
+<p>Next: where that bar comes from, and why its size can be estimated in advance while its direction can't.</p>
+<h2>SURPRISE OR NUMBER</h2>
+<p>A real release: forecast {{ex_forecast}}, actual {{ex_actual}}. Where did price go over the next three hours?</p>
+<p>Price moved {{actualDirWord}} by {{move_pts}} points (from {{open0}} to {{closeLast}}). But across {{n}} releases with a surprise, the sign of the move matches the sign of the surprise in only {{hit_rate}}% of cases (95% CI {{ci_lo}}–{{ci_hi}}%) — indistinguishable from a coin flip.</p>
+<p>What moves price isn't the fact itself, but the gap between fact and forecast — and even its sign doesn't predict direction. Next: what actually does.</p>
+<h2>ANTI-MYTH</h2>
+<h2>The myth here is a double one, and the second half is more dangerous than the first</h2>
+<p>First half: «news is noise, trade the chart». Disproved in a minute by our own data: the median reaction to high-impact releases is {{impact_high_vs_low}}× the reaction to low-impact ones ({{impact_high}} vs {{impact_low}} of the daily range, {{n_impact_high}} and {{n_impact_low}} observations). Ignoring the calendar isn't «trading pure technicals» — it's trading blind during the exact hours when price is most prone to move harder than usual.</p>
+<p>Second half, where people fall after already opening the calendar: «data came in better than forecast — so I buy that country's currency». That's a cheat sheet that used to live in the previous edition of this very chapter, and we removed it because we checked it. In our sample, the sign of the surprise predicts the sign of the 30-minute move in {{dir_hit_rate}}% of cases — over {{n_releases_dir}} observations, confidence interval {{dir_ci}}. That's indistinguishable from a coin flip.</p>
+<p>The truth sits in between, and it's more useful than either extreme: the calendar doesn't predict direction, it predicts scale. It tells you WHEN the market will move. How hard — our own measurements say that's less clear-cut than commonly assumed too (§3.4). Which way — it never says, and anyone who claims otherwise either hasn't measured it or measured it and didn't publish.</p>
+<h2>SBF VOICE · Oleg, analyst</h2>
+<p>«Colleague, the most common question after your first week with the calendar is: „it came in better than forecast, why did it drop?” I always give the same answer: because the market wasn't trading the number, it was trading the expectation, and the expectation had already been in the price for three days before the release.</p><p>Picture this: all week the talk is that the data will be strong. Whoever wanted to buy on that — bought early. A strong number comes out, and there's no one left to buy, but plenty of people ready to take profit. Price falls on «good» news, and there's no conspiracy here, just the arithmetic of positioning.</p><p>What I actually do with the calendar — and it's more boring than people expect. I look at it to know what NOT to do. Don't enter with a market order ten minutes before a high-impact release. Don't hold a tight stop through a release — it won't get taken out by the move, it'll get taken out by the widened spread. Don't be surprised when a position that sat calm for four hours covers its daily target in a minute, in either direction.</p><p>For me the calendar is a schedule of risks, not opportunities. Opportunities grow out of it too, but much later, and only once you've learned not to get caught in that first minute by accident.»</p>
+<h2>THE PRICE OF NOT KNOWING</h2>
+<h2>The arithmetic of a missed release</h2>
+<p>A trader holds a gold position with a 15-point stop — a normal stop for their timeframe, sized per chapter 3. They didn't check the calendar. A high-impact release hits.</p><p>Two factors land at once, and both are measurable. First: the median bar size at the moment of such a release, per our data, is {{release_median_move}} of the daily range — noticeably more than their stop. Second, and this is what decides it: the spread widens at the moment of publication — the market maker pulled its orders (chapter 4). The stop doesn't fill at the stop price, it fills at the first available one.</p><p>Outcome: the position closes not because the trader's analysis was wrong, but because they happened to be in the market at the exact moment the book was empty. Forty minutes later, price is back where it was. They conclude «my stop was too tight» and next time set it wider — increasing risk while solving the wrong problem.</p><p>The honest second half: this doesn't mean you can never hold a position through a release. It means the decision to hold must be a conscious one: either the position closes before the release, or its size is reduced ahead of time, or the stop is set knowing that in the first minute it guarantees nothing. All three are decisions. Not knowing about the release isn't one.</p>
+<h2>WHAT AN ECONOMIC CALENDAR ACTUALLY IS</h2>
+<p>The word «news» is misleading. There's no news in the calendar in the journalistic sense — it's a publication schedule for statistical agencies and central banks. Every row has an owner, an exact minute, and three numbers.</p>
+<p>What it was last time. The baseline for comparison.</p>
+<p>The median or consensus of an analyst poll. Not one person's opinion and not a guess — it's what's already priced in by the time of publication.</p>
+<p>Surprise = Actual − Forecast. That's what moves the market — not the actual value on its own. 180,000 jobs is a great number against a forecast of 120,000 and a bad one against a forecast of 250,000.</p>
+<h2>Impact</h2>
+<p>Calendars flag events across three tiers. The flag is useful, but it isn't a law: impact reflects the average historical response, not a guarantee. We have our own measurements (§3.4), and they show the spread within one impact tier is wider than the gap between tiers.</p>
+<h2>Revisions</h2>
+<p>One thing rarely written about: many indicators get revised after the fact. An NFP release contains not just the new number but a correction to the prior two months. A strong surprise accompanied by a large negative revision to last month is often read by the market as weak — which explains some of the «confusing» reactions.</p>
+<h2>SURPRISE, NOT THE NUMBER</h2>
+<h2>Why surprises need to be normalized</h2>
+<p>The problem: surprises from different releases aren't directly comparable. Missing NFP by 50,000 and missing CPI by 0.2 percentage points are different units at different scales. The fix is normalization: divide the surprise by that indicator's historical standard deviation of surprises. That gives a dimensionless number — «missed by two standard deviations». That's how any two releases get compared against each other.</p>
+<p>A real release from our database: forecast {{ex_forecast}}, actual {{ex_actual}}, difference {{ex_surprise}}, this indicator's historical σ {{ex_std}}, result {{ex_sigma}}σ. Every number here is measured, none invented.</p>
+<p>Three real releases in a row — a small surprise, a medium one, a large one — next to gold's actual reaction. Drag the slider below to see the median response at different surprise sizes, from our data.</p>
+<p>Drag the «surprise size in σ» slider — the panel on the right shows gold's median response to a surprise that size, with the observation count.</p>
+<p>That's a median, not a mean, and it's a distribution, not a forecast — the same surprise size has produced both twice as much and almost nothing.</p>
+<h2>&quot;OUR OWN MEASUREMENTS&quot; — THE CHAPTER'S CORE</h2>
+<h2>Reaction strength versus surprise size</h2>
+<p>Everything above is in any textbook. What follows isn't: we took {{n_releases}} real releases from our database over {{coverage_days}} days, matched each one to the instrument's actual 30-minute move, and computed three things.</p>
+<h2>1 · Reaction size barely grows with surprise size</h2>
+<p>This turned out to be an honest surprise: per our data, the median reaction to a surprise under 0.5σ is {{move_small}}, to a surprise over 2σ — {{move_large}}, a ratio of {{move_ratio}}. Observations: {{n_small}} and {{n_large}}. The difference is practically absent — the mere fact of a surprise (something differing from expectation) moves the market almost as much as its magnitude does. We expected a clearer relationship and planned to write it up as the chapter's «only reliable one». The data disagreed, and we're publishing what we found, not what we expected.</p>
+<h2>2 · The calendar's impact tier works, but coarsely</h2>
+<p>Median reaction by tier: high — {{impact_high}}, medium — {{impact_medium}}, low — {{impact_low}}. The spread within the «high» tier alone (our data's IQR is {{impact_high_iqr}}) is wider than the gap between tiers. The practical takeaway: don't just look at the colored badge — look at how much that specific indicator is capable of surprising.</p>
+<h2>3 · Direction isn't predicted by the sign of the surprise</h2>
+<p>The share of cases where the sign of the 30-minute move matched the naively expected sign (strong data → gold down): {{dir_hit_rate}}%, {{n_releases_dir}} observations, confidence interval {{dir_ci}}. {{dir_verdict}} This is exactly why the «news impact matrix» that used to live in this chapter's previous edition was removed. We checked it against our own data, and it didn't hold up. Publishing a cheat sheet while knowing that would be exactly what we criticize others for.</p>
+<p>Statistically indistinguishable from a coin flip.</p>
+<p>There's a slight tilt, but it's far from a reliable rule.</p>
+<p>The tilt is noticeable — but still check it against your own series; don't trade on this number alone.</p>
+<h2>The strength matrix — what replaces the direction matrix</h2>
+<p>Rows are event types, columns are instruments, each cell shows the median 30-minute move as a fraction of the daily range plus the observation count. Cells with too few observations are shown, but muted and hatched — an illustration of the method, not a pattern. No up or down arrows.</p>
+<h2>What's measured here, and what isn't</h2>
+<p>Measured: the size of the move (bar range) and the sign of the price change by the end of the window. Not measured: the spread at the moment of publication — we don't have spread history (chapter 4), so the real entry price in that first minute was worse than the chart makes it look. Sample size — {{coverage_days}} days; that's not a lot, and these numbers will shift as more data accumulates. Share of actual/forecast values we couldn't parse: {{parse_failed_pct}}%.</p>
+<p>Muted, hatched cells — fewer than 4 observations: an illustration of the method, not a pattern.</p>
+<h2>WHY THE MARKET FALLS ON GOOD NEWS</h2>
+<p>The most common beginner question, and the simplest answer once you strip out the mysticism.</p>
+<h2>Mechanism one — the expectation is already in the price</h2>
+<p>The forecast is known in advance and gets traded on. By the time strong data is published, whoever wanted to buy on that expectation has already bought. The confirmation lands — and there are no buyers left, but plenty of sellers: the very people who bought on the expectation and are now taking profit. Hence «buy the rumor, sell the fact» — not a strategy, not a conspiracy, just a description of a buyer flow running out.</p>
+<h2>Mechanism two — the surprise is smaller than expected</h2>
+<p>The data is strong, but weaker than consensus — and the market falls on «good» news because what's traded is the gap, not the level.</p>
+<h2>Mechanism three — repricing the consequences</h2>
+<p>Strong data means tighter central-bank policy (chapter 2), which is bad for risk assets. «Good news for the economy» and «good news for the asset» are different things, and often opposite ones.</p>
+<p>What we're NOT saying. That «smart money deliberately sells into the crowd». No such coordinated mechanism exists; buyer-flow exhaustion and profit-taking are enough on their own to explain what's observed. The difference matters: the first explanation turns the user into a victim, the second into a market participant who can do math.</p>
+<h2>WHY A NUMBER EXACTLY ON FORECAST STILL MOVES THE MARKET</h2>
+<p>A counterintuitive block that fully closes chapter 5's cliffhanger. The surprise is zero, and there's still a move. Three reasons:</p>
+<p>Uncertainty gets resolved. Before publication, market makers keep the book thin. Afterward, orders come back, and the return of liquidity itself moves price, regardless of the content.</p>
+<p>Positions taken to hedge the uncertainty get closed. Hedges bought «just in case» are no longer needed.</p>
+<p>The odds on other events get repriced. Inflation landing exactly on forecast means the central bank decision in two weeks just became more predictable — and that gets repriced instead.</p>
+<p>The practical takeaway: volatility is caused by the resolution of uncertainty, not the news itself. That's why the compression before a release (Bollinger Bands, below) isn't a coincidence or «big players storing up energy» — it's a direct consequence of the book emptying out and then refilling.</p>
+<h2>THREE TYPES OF RELEASES</h2>
+<h2>📊 Scheduled numbers</h2>
+<p>The date is known a year ahead, the hour a month ahead, the forecast a week ahead. NFP, CPI, retail sales, GDP. The value is the only unknown. This whole chapter is about these.</p>
+<h2>🏦 Central bank decisions</h2>
+<p>A bridge to chapter 2. The key difference: besides a number there's a text and a press conference, and the market often moves on the wording rather than the decision. The reaction stretches over hours, not minutes.</p>
+<h2>⚡ Unscheduled</h2>
+<p>The calendar is powerless here. The only defense isn't position size relative to a forecast — it's position size, period (chapter 3). We say it plainly: what this chapter teaches doesn't apply to these events.</p>
+<h2>RELEASE SIMULATOR v2</h2>
+<p>A real release from our database. The date on screen — you can check it in the terminal.</p>
+<p>How far will gold move in the next 30 minutes?</p>
+<p>What will you do ten minutes before this release?</p>
+<p>You saw the move on the chart. The real fill price in that first minute would have been worse: the spread widens at the moment of publication, and we don't keep spread history — so we say plainly that isn't in the picture.</p>
+<p>+30 XP for completing all 4 releases, regardless of your answers — we're paying for participation and caution, not for guessing right.</p>
+<p>σ (sigma) — how many standard deviations the surprise is from what's typical for this indicator. More on this further down the page.</p>
+<h2>STEP 1 — LIVE CALENDAR, NO SIGN-UP</h2>
+<h2>What you just clicked is a recording.</h2>
+<h2>BOLLINGER BANDS AND THE COMPRESSION BEFORE A RELEASE</h2>
+<p>INTERACTIVE — TECHNICAL (BOLLINGER BANDS)</p>
+<p>Find the «Squeeze» zone on the chart (where the lines narrow the most) and click on that block.</p>
+<p>🎯 Exactly. That's where the bands compressed the hardest — volatility dropped, the book went quiet ahead of a calendar release. That's where the next strong move started.</p>
+<p>❌ No, the bands are still wide here. Look for the «narrow neck» where price is squeezed in a vice.</p>
+<p>On the real chart above, this is exactly what the compression looked like before the release that opened this chapter: the spread vanished, participants were waiting for the number, not guessing direction.</p>
+<h2>Fair price (SMA)</h2>
+<p>The indicator's middle line is a 20-period moving average. It shows where the balance of power between buyers and sellers stands right now.</p>
+<h2>Extreme zones (±2 SD)</h2>
+<p>The bands are built from deviations of the variance. Under a normality assumption, price should sit inside the tunnel about 95% of the time — but real returns don't obey that assumption: the tails are fatter, breakouts more frequent than a normal distribution predicts, and most of them land in exactly the minutes around a release.</p>
+<h2>Expansion</h2>
+<p>When the market has a strong trend or panic, the bands spread apart sharply. Jumping into a trade at that exact moment is the most common beginner mistake.</p>
+<h2>Squeeze</h2>
+<p>The bands narrow into a tight corridor. Volatility drops — not because the market is mystically «storing up energy», but because the market maker pulled its orders ahead of a release already sitting on the calendar (section above). A breakout isn't a prediction from the indicator — it's the moment the information arrives.</p>
+<p>«Price stays inside the tunnel 95% of the time» — true under a normality assumption that real returns don't actually satisfy: the tails are fatter, breakouts more frequent — and they cluster around releases.</p>
+<p>The squeeze has a cause: the market maker pulled its orders, the book thinned out ahead of a calendar release.</p>
+<p>A squeeze isn't a prediction of a breakout. It's a signal that participants are waiting for information. The breakout happens when the information arrives — and when that happens lives in the calendar, not in the indicator itself.</p>
+<p>180,000 jobs were created. Is that strong data?</p>
+<p>Impossible to say without knowing the forecast</p>
+<p>Correct. What moves markets is the gap to the forecast, not the level.</p>
+<p>Not quite. The number alone means nothing without the forecast — 180,000 is great against a forecast of 120,000 and bad against a forecast of 250,000.</p>
+<p>Why does the day's volatility peak at 12:30 UTC in summer?</p>
+<p>US macro data gets published (8:30 in Washington)</p>
+<p>Correct — chapter 5. NYSE opens an hour later.</p>
+<p>Not quite. NYSE opens an hour later — the peak is made by data, not the exchange bell.</p>
+<p>Data came in exactly on forecast. What happens to volatility?</p>
+<p>A move is still likely — uncertainty gets resolved and liquidity comes back</p>
+<p>Correct. It isn't the news itself that moves things — it's the resolution of uncertainty.</p>
+<p>Not quite. Even a zero surprise resolves uncertainty and brings liquidity back into the book — that's already a move.</p>
+<p>A minute before a high-impact release, a market order fills…</p>
+<p>Worse — the market maker pulled its orders, the spread is wider</p>
+<p>Correct — chapter 4. The book thins out ahead of a release.</p>
+<p>Not quite. Market makers pull their orders ahead of publication — the book is thinner, the spread wider.</p>
+<h2>PREDICTION OF THE WEEK</h2>
+<p>How far will gold move at the next high-impact release?</p>
+<p>+15 XP for participating. This is about magnitude, not direction — fully within compliance bounds.</p>
+<h2>CLIFFHANGER → CHAPTER 7</h2>
+<p>Now you know when the market will move, and you have a rough sense of how differently that can turn out, per our own measurements. And you know what the calendar doesn't tell you — which way.</p><p>But look at the scatter diagram one more time. On a large surprise, the move isn't always large — we measured that honestly. But at the moment of any surprise, someone is buying and selling enough volume to move the price within thirty minutes. Not a thousand retail traders on their phones. Someone — one participant, or a few.</p><p>You can't see them on a candlestick chart — a candle shows the outcome, not the participants. But they leave a trace, and it can be read: in where orders disappear, where they come back, and how price behaves in the twenty seconds when a large participant is building a position without wanting to move the market against themselves.</p><p>The next episode is about what that trace looks like and how to tell it apart from your own imagination. Fair warning up front: this is the first chapter in the course whose content can't be checked against our own mockups. An order book can be drawn. How it breathes cannot.</p>
+<h2>CHAPTER 6 TAKEAWAYS</h2>
+<h2>Checklist: News Pulse</h2>
+<h2>CHAPTER SOURCES</h2>
+<p>SBF Company SRL. Measuring the link between a macro release's surprise size and the actual price move. Data: our own database of economic events and measured reactions, 30-minute window, period {{first}} — {{last}}, {{n}} releases across {{assets}} instruments. Method: surprise normalized to each indicator's historical standard deviation; move normalized to the instrument's daily range. Recomputed as of {{built}}.</p>

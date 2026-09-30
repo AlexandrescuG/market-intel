@@ -12,6 +12,7 @@ news_burst_job.py — SBF_Charts_Layer1_Spec, Фаза 3 («Новостные �
   python3 news_burst_job.py [--verbose]
 """
 import argparse
+import html
 import json
 import re
 import sqlite3
@@ -21,6 +22,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
+from core import news_junk
 from core.config import DB_PATH
 
 # Словарь ключевых слов на символ (RU+EN, регистронезависимо). Прогоняется по
@@ -46,6 +48,94 @@ _SYMBOL_PATTERNS = {
     "DXY":    re.compile(r"\bdxy\b|dollar index|индекс доллара", re.I),
 }
 
+
+_TAG_RE = re.compile(r"<[^>]+>")
+_URL_RE = re.compile(r"https?://\S+|www\.\S+")
+
+
+def _searchable(title: str | None, text: str | None) -> str:
+    """Заголовок + текст без разметки и без ссылок.
+
+    Убираем именно ссылки, а не только теги: домен пишется буквами и проходит
+    любую проверку «слово целиком». Порядок важен — сперва ссылки, потом теги,
+    иначе href уже склеился бы с текстом. Сущности (&amp;, &nbsp;) распускаем,
+    чтобы «AT&amp;T» искалось как «AT&T».
+    """
+    blob = f"{title or ''}\n{text or ''}"
+    blob = _URL_RE.sub(" ", blob)
+    blob = _TAG_RE.sub(" ", blob)
+    return html.unescape(blob)
+
+def _load_core_patterns() -> dict:
+    """Рукописные выражения (data/news_patterns_core.json).
+
+    Отдельный файл от сгенерированного: тот перезаписывается при каждом
+    пересборе каталога, а этот правится глазами и должен переживать пересборку.
+    Формат тот же — {символ: {"pattern": "..."}}, чтобы файлы были
+    взаимозаменяемы и их можно было сравнивать.
+    """
+    path = Path(__file__).parent / "data" / "news_patterns_core.json"
+    if not path.exists():
+        return {}
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except Exception as e:
+        print(f"news_patterns_core.json не прочитан ({e}) — работаем без него",
+              file=sys.stderr)
+        return {}
+    out = {}
+    for sym, meta in raw.items():
+        if sym.startswith("_") or not isinstance(meta, dict):
+            continue
+        pat = meta.get("pattern")
+        if not pat:
+            continue
+        try:
+            out[sym] = re.compile(pat, re.I)
+        except re.error as e:
+            # Битое выражение пропускаем поимённо: одна опечатка не повод
+            # остаться без остальных пятидесяти.
+            print(f"выражение для {sym} не скомпилировалось: {e}", file=sys.stderr)
+    return out
+
+
+def _load_catalog_patterns() -> dict:
+    """Выражения для инструментов каталога (tools/news_symbol_patterns.py).
+
+    🔴 Словарь выше писался под пятнадцать символов реестра и с тех пор не рос,
+    а витрина доросла до 334 инструментов, из них 206 акций. Новость про Boeing
+    физически не могла попасть на график Boeing: такого адреса в словаре нет.
+
+    Файл читается, а не встраивается в код, по двум причинам: каталог брокера
+    меняется, и правила сопоставления имён стоит пересматривать глазами — файл
+    для этого можно открыть и прочитать, а регулярку в коде никто не перечитает.
+
+    Нет файла — работаем на встроенном словаре. Отсутствие расширения не должно
+    ронять тегирование: пятнадцать символов лучше нуля.
+    """
+    path = Path(__file__).parent / "data" / "news_symbol_patterns.json"
+    if not path.exists():
+        return {}
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except Exception as e:
+        print(f"news_symbol_patterns.json не прочитан ({e}) — только встроенный словарь",
+              file=sys.stderr)
+        return {}
+    out = {}
+    for sym, meta in raw.items():
+        pat = (meta or {}).get("pattern")
+        if not pat or sym in _SYMBOL_PATTERNS:
+            continue
+        try:
+            out[sym] = re.compile(pat, re.I)
+        except re.error as e:
+            # Битое выражение — пропускаем именно его, а не весь файл: одна
+            # опечатка в одном инструменте не повод остаться без остальных 300.
+            print(f"выражение для {sym} не скомпилировалось: {e}", file=sys.stderr)
+    return out
+
+
 TAG_WINDOW_DAYS = 8      # тегируем немного шире окна всплеска (7д) с запасом
 BURST_WINDOW = 3600      # 1 час
 BASELINE_WINDOW = 7 * 86400
@@ -70,14 +160,63 @@ def _published_ts(row) -> float:
 
 def tag_recent(con, verbose=False) -> int:
     cutoff = time.time() - TAG_WINDOW_DAYS * 86400
+    # 🔴 Тегируем не только RSS.
+    #
+    # Здесь стояло `source='rss'`, и это отсекало ДВА живых источника: X даёт
+    # 48 118 сигналов (1357 с текстом только за последние сутки, последний
+    # пришёл сегодня), Telegram — ещё 4116. Всё это собиралось, складывалось в
+    # базу и никуда не шло: на графике инструмента твит появиться не мог,
+    # потому что тегирование его не видело.
+    #
+    # Отдельно про stocktwits: он в перечне намеренно отсутствует — последняя
+    # запись оттуда от 8 июля, источник мёртв, и тянуть из него нечего.
     rows = con.execute(
-        "SELECT uid, title, text FROM signals WHERE source='rss' AND last_seen >= ?",
+        "SELECT uid, title, text FROM signals "
+        "WHERE source IN ('rss','twitter','telegram') AND last_seen >= ?",
         (datetime.fromtimestamp(cutoff, timezone.utc).isoformat(),),
     ).fetchall()
-    tagged = 0
+    # 🔴 Ищем по тексту, а не по разметке. Поле text у RSS-сигналов хранит сырой
+    # HTML целиком, вместе со ссылкой вида
+    # https://news.google.com/rss/articles/... — и выражение \bGOOGLE\b
+    # находило слово «google» в КАЖДОЙ новости, пришедшей через Google News.
+    # Замер 07.09: 4692 тега у #GOOGLE — второе место после биткоина, при этом
+    # ни в одном из проверенных заголовков Google не упоминался вовсе. На
+    # графике Alphabet висели «EUR/USD Weekly Forecast» и «Gold drops over 1%».
+    #
+    # Тот же механизм молча портил бы #AMAZON (amazon.com), #APPLE (apple.news),
+    # #REDDIT, #TWITTER и любую компанию, чьё имя встречается в доменах.
+    #
+    # Инструмент писался с оглядкой на ложные срабатывания в прозе — стоп-лист
+    # обычных слов, запрет коротких тикеров. Шум пришёл с той стороны, о
+    # которой не подумали: не из текста, а из разметки вокруг него.
+    #
+    # См. _searchable() ниже.
+    # Порядок слияния = приоритет. Снизу вверх: встроенные 15 символов,
+    # поверх — сгенерированные из каталога (широкие, но буквальные), поверх
+    # всего — написанные руками (data/news_patterns_core.json). Рукописные
+    # должны побеждать: генератор для AUDUSD выдаёт \bAUDUSD\b, чего в
+    # новостях не бывает, а рукописное ловит «AUD/USD» и «Australian dollar».
+    patterns = dict(_SYMBOL_PATTERNS)
+    patterns.update(_load_catalog_patterns())
+    patterns.update(_load_core_patterns())
+    tagged = пропущено_мусора = 0
     for uid, title, text in rows:
-        blob = f"{title}\n{text}"
-        for symbol, pat in _SYMBOL_PATTERNS.items():
+        # 🔴 Поточные заметки об отчётности фондов не тегируем вовсе.
+        #
+        # «Rational Advisors Inc. Sells 2,473 Shares of Tesla, Inc. $TSLA» —
+        # это не упоминание Tesla в новостном смысле, а автоматическая
+        # заметка о подаче формы. Замер 11.09.2026: 10 карточек из 30 в ленте
+        # по Tesla. Отсекаем здесь, а не на выдаче, чтобы они не попадали
+        # ЗАОДНО и в счётчик упоминаний Эпицентра: иначе десяток подач формы
+        # выглядел бы всплеском внимания к компании.
+        #
+        # Сама новость остаётся в signals — мы её не удаляем, только не
+        # связываем с инструментом.
+        if news_junk.is_filing_note(title):
+            пропущено_мусора += 1
+            continue
+        blob = _searchable(title, text)
+        for symbol, pat in patterns.items():
             if pat.search(blob):
                 cur = con.execute(
                     "INSERT OR IGNORE INTO news_instrument_tags(news_uid, symbol) VALUES(?,?)",
@@ -87,8 +226,47 @@ def tag_recent(con, verbose=False) -> int:
                     tagged += 1
     con.commit()
     if verbose:
-        print(f"тегировано новых (uid,symbol) пар: {tagged} (просканировано {len(rows)} новостей)")
+        print(f"тегировано новых (uid,symbol) пар: {tagged} "
+              f"(просканировано {len(rows)} новостей, "
+              f"пропущено заметок об отчётности: {пропущено_мусора})")
+    _retention(con, verbose)
     return tagged
+
+
+# Сколько держим новости. Самое длинное окно, которое их читает, — 14 дней
+# (лента ватчлиста), базовая линия упоминаний — 7 дней. Полгода это запас
+# в десять раз, оставленный сознательно: по этой же таблице считается история
+# реакций на события, и укорачивать её ради места незачем.
+SIGNALS_RETENTION_DAYS = 180
+
+
+def _retention(con, verbose: bool = False) -> None:
+    """Удалить новости старше полугода вместе с их тегами.
+
+    🔴 Чистки не было вообще. На 09.09.2026 в signals.db 122 914 записей и
+    111 МБ, и это при сборе ~1500 в сутки. Сегодня объём сбора вырос: сняты
+    два ограничителя — гейт econ_relevance больше не выбрасывает новости про
+    инструменты витрины, и добавлены запросы по самим инструментам. Без
+    чистки база пошла бы в гигабайты за год, а заметили бы это тогда, когда
+    диск кончится.
+
+    Теги удаляем первой командой: строки в news_instrument_tags ссылаются на
+    uid новости, внешнего ключа нет, и обратный порядок оставил бы висячие
+    ссылки, по которым потом джойнится доска обсуждаемости.
+    """
+    cutoff = f"-{SIGNALS_RETENTION_DAYS} days"
+    try:
+        con.execute(
+            "DELETE FROM news_instrument_tags WHERE news_uid IN "
+            "(SELECT uid FROM signals WHERE last_seen < datetime('now', ?))", (cutoff,))
+        cur = con.execute("DELETE FROM signals WHERE last_seen < datetime('now', ?)", (cutoff,))
+        con.commit()
+        if verbose and cur.rowcount:
+            print(f"чистка: удалено {cur.rowcount} новостей старше {SIGNALS_RETENTION_DAYS} дней")
+    except sqlite3.OperationalError as e:
+        # Занятая база — не повод ронять тегирование: чистка повторится
+        # через пятнадцать минут следующим прогоном.
+        print(f"чистка пропущена ({e})", file=sys.stderr)
 
 
 def detect_bursts(con, verbose=False) -> int:

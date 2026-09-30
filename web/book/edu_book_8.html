@@ -2,8 +2,15 @@
 <html lang="{{ lang }}">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>SBF | {% if lang == 'ru' %}Глава 8. Тренд и Циклы{% elif lang == 'ro' %}Capitolul 8. Tendință și Cicluri{% else %}Chapter 8. Trend and Cycles{% endif %}</title>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="SBF Intelligence">
+<meta property="og:image" content="https://lp.sbfconsult.com/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://lp.sbfconsult.com/assets/og-image.png">
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
   <style>
@@ -92,7 +99,7 @@ const STRINGS = {
   },
 };
 
-const {C, Mono, Chip, Rule, AskAnalystBtn, getChUrl, QuizBlock, ComplianceFootnote, ColdStart} = window.AcademyShared;
+const {C, Mono, Chip, Rule, AntiMythBlock, RevealSteps, AskAnalystBtn, getChUrl, QuizBlock, ComplianceFootnote, ColdStart} = window.AcademyShared;
 
 const SectionTitle = ({children,sub,align="left",id}) => (
   <div id={id} style={{textAlign:align,marginBottom:36,scrollMarginTop:130}}>
@@ -202,7 +209,7 @@ function buildVars(ema_, lang) {
 function ColdStart8Entry({ ema_ }) {
   const T8 = window.Ch8Content[INITIAL_LANG] || window.Ch8Content.ru;
   const cs = T8.coldStart;
-  if (!ema_ || !ema_.lab) return <div style={{background:C.black,padding:"60px 5vw",textAlign:"center"}}><Mono size={11} color={C.gold} spacing={4}>{cs.tag}</Mono></div>;
+  if (!ema_ || !ema_.lab) return <div style={{background:C.black,padding:"60px 5vw",textAlign:"center"}}><Mono size={11} color={C.goldText} spacing={4}>{cs.tag}</Mono></div>;
 
   const stat = React.useMemo(() => {
     const buckets = { 20: [], 50: [], 200: [] };
@@ -240,23 +247,22 @@ function IntroBlock({ vars }) {
   const T8 = window.Ch8Content[INITIAL_LANG] || window.Ch8Content.ru;
   return (
     <div id="secAntiMyth" style={{marginBottom:48,scrollMarginTop:130}}>
-      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T8.antiMyth.tag}</Mono>
-      <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px",marginBottom:28}}>
-        <p style={{fontWeight:600,fontSize:14.5,color:C.black,marginBottom:10}}>{T8.antiMyth.title}</p>
-        <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,marginBottom:12}}>{T8.antiMyth.body1}</p>
-        <p style={{fontSize:13.5,color:C.inkMid,lineHeight:1.7,marginBottom:12}}>{T8.antiMyth.body2}</p>
-        <p style={{fontSize:13.5,color:C.black,lineHeight:1.7,margin:0,fontWeight:600}}>{T8.antiMyth.body3}</p>
-      </div>
+      <AntiMythBlock lang={INITIAL_LANG} style={{marginBottom:28}}
+        data={{tag: T8.antiMyth.tag, title: T8.antiMyth.title, bodies: [T8.antiMyth.body1, T8.antiMyth.body2, T8.antiMyth.body3]}}/>
 
-      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T8.voiceSbf.tag}</Mono>
+      <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{T8.voiceSbf.tag}</Mono>
       <div style={{borderLeft:`4px solid ${C.gold}`,paddingLeft:24,marginBottom:28}}>
         {T8.voiceSbf.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:16,fontStyle:"italic",color:C.inkMid,lineHeight:1.7,fontFamily:"'DM Serif Display',serif",marginBottom:12}}>{p}</p>)}
       </div>
 
       <div style={{background:C.black,borderRadius:8,padding:"26px 30px",color:C.white}}>
-        <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T8.priceOfNotKnowing.tag}</Mono>
+        <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{T8.priceOfNotKnowing.tag}</Mono>
         <div style={{fontFamily:"'DM Serif Display',serif",fontSize:20,color:C.white,marginBottom:12}}>{T8.priceOfNotKnowing.title}</div>
-        {T8.priceOfNotKnowing.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:13.5,lineHeight:1.75,color:"rgba(255,255,255,0.7)",marginBottom:10}}>{vars ? fillTemplate(p, vars) : p}</p>)}
+        {/* Разбор открывается по шагам — см. комментарий в главе 9.
+            Живые числа подставляются до передачи в компонент. */}
+        <RevealSteps lang={INITIAL_LANG} preset="cost" dark
+          bodies={T8.priceOfNotKnowing.body.split("\n\n")
+                    .map(p => vars ? fillTemplate(p, vars) : p)}/>
       </div>
     </div>
   );
@@ -269,7 +275,7 @@ function MaMath() {
   return (
     <div style={{marginBottom:48}}>
       <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"24px 28px",marginBottom:20,textAlign:"center"}}>
-        <Mono size={20} color={C.gold} spacing={0}>EMA(t) = Price(t) × k + EMA(t-1) × (1-k)</Mono>
+        <Mono size={20} color={C.goldText} spacing={0}>EMA(t) = Price(t) × k + EMA(t-1) × (1-k)</Mono>
         <p style={{fontSize:12.5,color:C.inkMid,lineHeight:1.65,marginTop:14,maxWidth:640,margin:"14px auto 0"}}>{mm.formulaNote}</p>
       </div>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}} className="g2">
@@ -278,7 +284,7 @@ function MaMath() {
           <p style={{fontSize:12.5,color:C.inkMid,lineHeight:1.65,margin:0}}>{mm.infoBody}</p>
         </div>
         <div style={{background:C.black,borderRadius:6,padding:"18px 22px",color:"#fff"}}>
-          <div style={{fontWeight:600,fontSize:13,color:C.gold,marginBottom:8}}>{mm.ruleTitle}</div>
+          <div style={{fontWeight:600,fontSize:13,color:C.goldText,marginBottom:8}}>{mm.ruleTitle}</div>
           <p style={{fontSize:12.5,color:"rgba(255,255,255,0.75)",lineHeight:1.65,margin:0}}>{mm.ruleBody}</p>
         </div>
       </div>
@@ -335,10 +341,10 @@ function LagSlider({ candles }) {
       <p style={{fontSize:14,color:C.inkMid,lineHeight:1.75,marginBottom:24,maxWidth:820}}>{lg.preamble}</p>
       <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"26px 30px"}}>
         <Mono size={11} color={C.inkFaint} spacing={1} style={{display:"block",marginBottom:10,textTransform:"uppercase"}}>{lg.sliderLabel}: {period}</Mono>
-        <input type="range" min="5" max="200" step="1" value={period} onChange={e=>setPeriod(+e.target.value)} style={{width:"100%",marginBottom:24}}/>
+        <input type="range" aria-label={lg.sliderLabel} min="5" max="200" step="1" value={period} onChange={e=>setPeriod(+e.target.value)} style={{width:"100%",marginBottom:24}}/>
         <div style={{display:"flex",gap:32,flexWrap:"wrap",justifyContent:"center"}}>
           <div style={{textAlign:"center"}}>
-            <div style={{fontFamily:"'DM Serif Display',serif",fontSize:34,color:C.gold}}>{crossings != null ? crossings : "—"}</div>
+            <div style={{fontFamily:"'DM Serif Display',serif",fontSize:34,color:C.goldText}}>{crossings != null ? crossings : "—"}</div>
             <Mono size={10.5} color={C.inkFaint} spacing={0.5}>{lg.crossingsLabel}</Mono>
           </div>
           <div style={{textAlign:"center"}}>
@@ -411,9 +417,9 @@ function OverfitLab({ ema_ }) {
           <p style={{fontSize:13,color:C.inkMid,lineHeight:1.7,marginBottom:20,maxWidth:780}}>{lb.screen1Legend}</p>
 
           <Mono size={11} color={C.inkFaint} spacing={1} style={{display:"block",marginBottom:6}}>{lb.fastLabel}: {fast}</Mono>
-          <input type="range" min="0" max={FAST_PERIODS.length-1} value={fastIdx} onChange={e=>setFastIdx(+e.target.value)} style={{width:"100%",marginBottom:14}}/>
+          <input type="range" aria-label={lb.fastLabel} min="0" max={FAST_PERIODS.length-1} value={fastIdx} onChange={e=>setFastIdx(+e.target.value)} style={{width:"100%",marginBottom:14}}/>
           <Mono size={11} color={C.inkFaint} spacing={1} style={{display:"block",marginBottom:6}}>{lb.slowLabel}: {slow}</Mono>
-          <input type="range" min="0" max={SLOW_PERIODS.length-1} value={slowIdx} onChange={e=>setSlowIdx(+e.target.value)} style={{width:"100%",marginBottom:24}}/>
+          <input type="range" aria-label={lb.slowLabel} min="0" max={SLOW_PERIODS.length-1} value={slowIdx} onChange={e=>setSlowIdx(+e.target.value)} style={{width:"100%",marginBottom:24}}/>
 
           {slow <= fast ? (
             <p style={{color:C.red,fontSize:12.5}}>—</p>
@@ -422,13 +428,13 @@ function OverfitLab({ ema_ }) {
           ) : (
             <div style={{display:"flex",gap:28,flexWrap:"wrap",marginBottom:22,justifyContent:"center",background:"#fff",border:`1px solid ${C.border}`,borderRadius:6,padding:"18px 20px"}}>
               <div style={{textAlign:"center"}}><div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.black}}>{(cell.is.share_agree*100).toFixed(1)}%</div><Mono size={9.5} color={C.inkFaint} spacing={0.5}>{lb.metricAgree}</Mono></div>
-              <div style={{textAlign:"center"}}><div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.gold}}>{cell.is.sum_move_net.toFixed(2)}</div><Mono size={9.5} color={C.inkFaint} spacing={0.5}>{lb.metricNet}</Mono></div>
+              <div style={{textAlign:"center"}}><div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.goldText}}>{cell.is.sum_move_net.toFixed(2)}</div><Mono size={9.5} color={C.inkFaint} spacing={0.5}>{lb.metricNet}</Mono></div>
               <div style={{textAlign:"center"}}><div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.red}}>{cell.is.max_dd.toFixed(2)}</div><Mono size={9.5} color={C.inkFaint} spacing={0.5}>{lb.metricDd}</Mono></div>
             </div>
           )}
 
           <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
-            <button onClick={autofit} style={{padding:"11px 22px",background:"transparent",color:C.gold,border:`1px solid ${C.gold}`,borderRadius:4,cursor:"pointer",fontFamily:"monospace",fontSize:11.5,letterSpacing:1}}>{lb.autofitBtn}</button>
+            <button onClick={autofit} style={{padding:"11px 22px",background:"transparent",color:C.goldText,border:`1px solid ${C.gold}`,borderRadius:4,cursor:"pointer",fontFamily:"monospace",fontSize:11.5,letterSpacing:1}}>{lb.autofitBtn}</button>
             <button onClick={lockIn} disabled={!cell || slow<=fast} style={{padding:"11px 26px",background:(!cell||slow<=fast)?C.border:C.black,color:"#fff",border:"none",borderRadius:4,cursor:(!cell||slow<=fast)?"default":"pointer",fontFamily:"monospace",fontSize:11.5,letterSpacing:1,fontWeight:700}}>{lb.fixBtn}</button>
           </div>
         </div>
@@ -437,17 +443,17 @@ function OverfitLab({ ema_ }) {
           <StepTag n="2" label={lb.screen2Tag}/>
           <div style={{display:"flex",gap:24,flexWrap:"wrap",marginBottom:22,justifyContent:"center"}}>
             <div style={{background:"rgba(255,255,255,0.05)",borderRadius:6,padding:"16px 22px",textAlign:"center"}}>
-              <Mono size={10} color="rgba(255,255,255,0.4)" spacing={0.5} style={{display:"block",marginBottom:6}}>{lb.isLabel}</Mono>
-              <div style={{fontFamily:"'DM Serif Display',serif",fontSize:26,color:C.gold}}>{cell.is.sum_move_net.toFixed(2)}</div>
+              <Mono size={10} color="rgba(255,255,255,0.55)" spacing={0.5} style={{display:"block",marginBottom:6}}>{lb.isLabel}</Mono>
+              <div style={{fontFamily:"'DM Serif Display',serif",fontSize:26,color:C.goldText}}>{cell.is.sum_move_net.toFixed(2)}</div>
             </div>
             <div style={{background:"rgba(255,255,255,0.05)",borderRadius:6,padding:"16px 22px",textAlign:"center"}}>
-              <Mono size={10} color="rgba(255,255,255,0.4)" spacing={0.5} style={{display:"block",marginBottom:6}}>{lb.oosLabel}</Mono>
+              <Mono size={10} color="rgba(255,255,255,0.55)" spacing={0.5} style={{display:"block",marginBottom:6}}>{lb.oosLabel}</Mono>
               <div style={{fontFamily:"'DM Serif Display',serif",fontSize:26,color: cell.oos.sum_move_net>=0 ? "#6ec99a" : C.red}}>{cell.oos.sum_move_net.toFixed(2)}</div>
               <Mono size={10} color="rgba(255,255,255,0.5)" spacing={0}>#{rank} / {oosSorted.length}</Mono>
             </div>
           </div>
           <div style={{background:"rgba(255,255,255,0.04)",borderRadius:6,padding:"20px 24px",marginBottom:18}}>
-            <div style={{fontWeight:600,fontSize:14,color:C.gold,marginBottom:10}}>{lb.revealTitle}</div>
+            <div style={{fontWeight:600,fontSize:14,color:C.goldText,marginBottom:10}}>{lb.revealTitle}</div>
             {fillTemplate(lb.revealBody, {
               is_result: cell.is.sum_move_net.toFixed(2), oos_rank: rank, grid_size: oosSorted.length, oos_result: cell.oos.sum_move_net.toFixed(2),
             }).split("\n\n").map((p,i) => <p key={i} style={{fontSize:12.5,color:"rgba(255,255,255,0.75)",lineHeight:1.7,marginBottom:10}}>{p}</p>)}
@@ -506,9 +512,15 @@ function OosTable({ ema_ }) {
         <table style={{borderCollapse:"collapse",width:"100%",minWidth:560}}>
           <thead>
             <tr>
+              {/* Сортировка объявлена как сортировка — см. главу 9. */}
               {cols.map(col => (
-                <th key={col.key} onClick={()=>onSort(col.key)} style={{textAlign:col.align,padding:"8px 10px",fontSize:10.5,fontFamily:"monospace",color:sortKey===col.key?C.gold:C.inkFaint,textTransform:"uppercase",borderBottom:`1px solid ${C.border}`,cursor:"pointer",userSelect:"none",whiteSpace:"nowrap"}}>
-                  {col.label}{sortKey===col.key ? (sortDir>0?" ▾":" ▴") : ""}
+                <th key={col.key} scope="col"
+                    aria-sort={sortKey===col.key ? (sortDir>0?"descending":"ascending") : "none"}
+                    style={{textAlign:col.align,padding:0,borderBottom:`1px solid ${C.border}`,whiteSpace:"nowrap"}}>
+                  <button type="button" onClick={()=>onSort(col.key)}
+                    style={{width:"100%",textAlign:col.align,padding:"8px 10px",fontSize:10.5,fontFamily:"monospace",color:sortKey===col.key?C.goldText:C.inkFaint,textTransform:"uppercase",cursor:"pointer",userSelect:"none",background:"none",border:"none",fontWeight:600,letterSpacing:0.5}}>
+                    {col.label}{sortKey===col.key ? (sortDir>0?" ▾":" ▴") : ""}
+                  </button>
                 </th>
               ))}
             </tr>
@@ -557,7 +569,7 @@ function CoreMeasureBlock({ ema_, vars }) {
         <p style={{fontSize:12,color:C.inkMid,lineHeight:1.65,margin:0}}>{vars ? fillTemplate(cm.honestBody, vars) : "—"}</p>
       </div>
 
-      <a href="/data/edu_stats/ema_reality.csv" download style={{fontFamily:"monospace",fontSize:12,color:C.gold,textDecoration:"none",border:`1px solid ${C.gold}`,padding:"9px 16px",borderRadius:4,display:"inline-block"}}>{cm.downloadCsv}</a>
+      <a href="/data/edu_stats/ema_reality.csv" download style={{fontFamily:"monospace",fontSize:12,color:C.goldText,textDecoration:"none",border:`1px solid ${C.gold}`,padding:"9px 16px",borderRadius:4,display:"inline-block"}}>{cm.downloadCsv}</a>
     </div>
   );
 }
@@ -598,7 +610,12 @@ function EmaUsageModes({ candles }) {
       crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
     });
     const closeSeries = chart.addLineSeries({ color: "rgba(255,255,255,0.4)", lineWidth: 1, priceLineVisible: false, lastValueVisible: false });
-    const emaASeries = chart.addLineSeries({ color: C.gold, lineWidth: 2, priceLineVisible: false, lastValueVisible: false, title: "EMA" });
+    // 🔴 goldOnDark, а НЕ goldText. goldText — это var(--ch-gold, …), а
+    // lightweight-charts рисует на canvas и CSS-переменную не разворачивает:
+    // получал строку «var(--ch-gold, #876525)» и падал с «Cannot parse
+    // color», унося весь виджет. Фон графика здесь C.black, поэтому линии
+    // нужен светлый золотой литерал.
+    const emaASeries = chart.addLineSeries({ color: C.goldOnDark, lineWidth: 2, priceLineVisible: false, lastValueVisible: false, title: "EMA" });
     const emaBSeries = chart.addLineSeries({ color: "#6ea8fe", lineWidth: 2, priceLineVisible: false, lastValueVisible: false, title: "EMA" });
     chartRef.current = chart;
     seriesRef.current = { closeSeries, emaASeries, emaBSeries };
@@ -653,7 +670,7 @@ function EmaUsageModes({ candles }) {
         {mode === "regime" && (
           <div style={{display:"flex",gap:32,justifyContent:"center",marginTop:14}}>
             <div style={{textAlign:"center"}}>
-              <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.gold}}>{distPct!=null?(distPct>0?"+":"")+distPct.toFixed(2)+"%":"—"}</div>
+              <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:C.goldText}}>{distPct!=null?(distPct>0?"+":"")+distPct.toFixed(2)+"%":"—"}</div>
               <Mono size={9} color="rgba(255,255,255,0.5)" spacing={0.5}>{w.distLabel}</Mono>
             </div>
             <div style={{textAlign:"center"}}>
@@ -683,6 +700,51 @@ function EmaUsageModes({ candles }) {
 }
 
 // ─── Ступень 3: домашнее задание, без CTA лестницы ─────────────────────────
+/* ── Ступень 3: привязка журнала ─────────────────────────────────────────────
+   🔴 ЗДЕСЬ БЫЛА ЗАГЛУШКА «привязка журнала готовится отдельно вместе с
+   остальной инфраструктурой лестницы». Журнал при этом работает и открыт
+   по /journal: в нём заводят сделки, он считает дисциплину и часы. То есть
+   ступень ждала не инструмента, а того, чтобы её связали с уже готовым.
+
+   Шаг показывает состояние журнала читателя — сколько сделок в нём уже
+   есть, — и ведёт туда. Число берётся из той же ручки, по которой глава 14
+   проверяет свои ворота: один источник правды на обе главы, иначе они
+   однажды разойдутся в том, что считают «заведённым журналом». */
+function JournalStep({ ll }) {
+  const { useEffect, useState } = React;
+  const [сделок, setСделок] = useState(null);
+
+  useEffect(() => {
+    let живо = true;
+    fetch("/api/journal/gate-status", {cache: "no-store"})
+      .then(r => r.ok ? r.json() : null)
+      .then(j => {
+        if (!живо || !j || !j.conditions) return;
+        setСделок(j.conditions.trades ? j.conditions.trades.have : 0);
+      })
+      .catch(() => {});
+    return () => { живо = false; };
+  }, []);
+
+  const пусто = сделок === 0 || сделок === null;
+  return (
+    <div style={{background:"#fff",border:`1px solid ${C.borderGold}`,borderRadius:8,padding:"20px 24px"}}>
+      <div style={{fontWeight:600,fontSize:13,color:C.black,marginBottom:8}}>{ll.journalTitle}</div>
+      <p style={{fontSize:13,color:C.inkMid,lineHeight:1.7,marginBottom:14}}>
+        {пусто ? ll.journalEmpty : fillTemplate(ll.journalHas, {n: сделок})}
+      </p>
+      {/* Ссылка, а не кнопка: открывается средним кликом в новой вкладке,
+          работает с клавиатуры, видна диктору. */}
+      <a href="/journal" style={{display:"inline-block",padding:"11px 22px",background:C.gold,
+           color:"#18181a",borderRadius:4,textDecoration:"none",fontFamily:"monospace",
+           fontSize:12,letterSpacing:1}}>{ll.journalCta}</a>
+      <p style={{fontSize:11.5,color:C.inkFaint,lineHeight:1.6,marginTop:12,marginBottom:0}}>
+        {ll.journalNote}
+      </p>
+    </div>
+  );
+}
+
 function LadderLimitBlock() {
   const T8 = window.Ch8Content[INITIAL_LANG] || window.Ch8Content.ru;
   const ll = T8.ladderLimit;
@@ -693,9 +755,7 @@ function LadderLimitBlock() {
         <div style={{fontWeight:600,fontSize:13,color:C.black,marginBottom:10}}>{ll.homeworkTitle}</div>
         {ll.homeworkBody.split("\n\n").map((p,i) => <p key={i} style={{fontSize:13,color:C.inkMid,lineHeight:1.7,marginBottom:10}}>{p}</p>)}
       </div>
-      <div style={{border:`1px dashed ${C.borderGold}`,borderRadius:8,padding:"18px 22px",background:C.surface}}>
-        <p style={{fontSize:12,color:C.inkFaint,fontStyle:"italic",margin:0}}>{ll.pendingNote}</p>
-      </div>
+      <JournalStep ll={ll}/>
     </div>
   );
 }
@@ -715,7 +775,7 @@ function PredictTf({ vars }) {
   const correct = pickedTf && vars && pickedTf === vars.tf_worst;
   return (
     <div style={{border:`1px solid ${C.border}`,borderRadius:8,padding:"22px 26px",marginTop:8,marginBottom:24}}>
-      <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{p.tag}</Mono>
+      <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{p.tag}</Mono>
       <p style={{fontSize:14.5,color:C.black,lineHeight:1.65,marginBottom:14}}>{p.question}</p>
       <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:14}}>
         {p.options.map((o,i) => (
@@ -753,7 +813,7 @@ function Chapter8() {
 
       <div style={{position:"sticky",top:106,background:"rgba(255,255,255,0.96)",backdropFilter:"blur(10px)",borderBottom:`1px solid ${C.border}`,padding:"15px 5vw",display:"flex",alignItems:"center",justifyContent:"space-between",zIndex:50}}>
         <div style={{display:"flex",alignItems:"center",gap:20}}>
-          <span onClick={() => window.location.href = getChUrl(7, lang)} style={{color:C.gold,cursor:"pointer",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</span>
+          <a href={getChUrl(7, lang)} aria-label={lang==="ru"?"Предыдущая глава":lang==="ro"?"Capitolul anterior":"Previous chapter"} style={{color:C.goldText,cursor:"pointer",textDecoration:"none",fontFamily:"monospace",fontSize:14,letterSpacing:2}}>←</a>
           <Chip>{S.levelChip}</Chip>
           <Mono size={14} color={C.inkSoft} spacing={0} className="hide-mobile">{S.chapterNameShort}</Mono>
         </div>
@@ -766,15 +826,15 @@ function Chapter8() {
       <div style={{background:C.black,padding:"80px 5vw 70px",textAlign:"center",position:"relative",overflow:"hidden"}}>
         <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at 50% 100%, rgba(201,151,58,0.1) 0%, transparent 60%)"}}/>
         <div style={{position:"relative"}}>
-          <Mono size={11} color={C.gold} spacing={4} style={{display:"block",marginBottom:20}}>{S.heroEyebrow}</Mono>
+          <Mono size={11} color={C.goldText} spacing={4} style={{display:"block",marginBottom:20}}>{S.heroEyebrow}</Mono>
           <h1 style={{fontFamily:"'DM Serif Display',serif",fontSize:"clamp(36px,6vw,66px)",fontWeight:400,color:C.white,lineHeight:1.05,marginBottom:20}}>
-            {S.heroTitleLine1}<br/><span style={{color:C.gold}}>{S.heroTitleLine2}</span>
+            {S.heroTitleLine1}<br/><span style={{color:C.goldText}}>{S.heroTitleLine2}</span>
           </h1>
           <p style={{fontSize:"clamp(16px,2vw,20px)",color:"rgba(255,255,255,0.55)",maxWidth:640,margin:"0 auto 32px",lineHeight:1.65}}>{S.heroSubtitle}</p>
           <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
-            <Chip color={C.gold}>{S.fundamentalChip}</Chip>
-            <Chip color="rgba(255,255,255,0.3)">{S.technicalChip}</Chip>
-            <Chip color="rgba(255,255,255,0.3)">{S.interactiveChip}</Chip>
+            <Chip color={C.goldText}>{S.fundamentalChip}</Chip>
+            <Chip color="rgba(255,255,255,0.55)">{S.technicalChip}</Chip>
+            <Chip color="rgba(255,255,255,0.55)">{S.interactiveChip}</Chip>
           </div>
         </div>
       </div>
@@ -818,7 +878,7 @@ function Chapter8() {
         <PredictTf vars={vars}/>
 
         <div style={{border:`1px dashed ${C.borderGold}`,borderRadius:8,padding:"20px 24px",marginBottom:32,background:C.surface}}>
-          <Mono size={11} color={C.gold} spacing={3} style={{display:"block",marginBottom:10}}>{T8.cliffhanger.tag}</Mono>
+          <Mono size={11} color={C.goldText} spacing={3} style={{display:"block",marginBottom:10}}>{T8.cliffhanger.tag}</Mono>
           {T8.cliffhanger.body.split("\n\n").map((p,i) => <p key={i} style={{fontSize:14,color:C.inkMid,lineHeight:1.7,marginBottom:10}}>{p}</p>)}
         </div>
 
@@ -834,7 +894,7 @@ function Chapter8() {
               return (
                 <li>
                   {text}{" "}
-                  <a href="/data/edu_stats/ema_reality.csv" download style={{color:C.gold}}>{T8.sources.csvLabel}</a>
+                  <a href="/data/edu_stats/ema_reality.csv" download style={{color:C.goldText}}>{T8.sources.csvLabel}</a>
                 </li>
               );
             })()}
