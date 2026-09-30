@@ -1,135 +1,184 @@
 #!/usr/bin/env bash
 # ops/bonsai_setup.sh — поэтапная проверка Bonsai 2 27B как запасной модели.
 #
-# 🔴 ЗАЧЕМ ПОЭТАПНО. Bonsai 2 — тернарная сборка Qwen3.8-27B: 5,95 ГБ вместо
-# 54 при 98,2% качества FP16. По цифрам она решает ровно ту беду, на которой
-# 29.09 срезался Ollama-фоллбэк: обычная 2-битная сборка того же Qwen даёт
-# 72,59 против 84,78 и разваливается именно на длинных рассуждениях
-# (AIME26: 57,5 против 95,83) — это и был «Золото подорвало уровень $4200».
+# 🔴 ИМЕНА ПЕРЕМЕННЫХ ЗДЕСЬ ЛАТИНИЦЕЙ, И ЭТО НЕ ВКУСОВЩИНА. Bash допускает
+# в именах только [A-Za-z_][A-Za-z0-9_]*; на `ДОМ=/путь` он разбирает
+# строку как команду и падает с «No such file or directory», а `${ДОМ}`
+# даёт «bad substitution». Первая версия этого файла была написана с
+# русскими именами (как весь остальной код проекта — в Python и JS они
+# законны) и не пережила первый же запуск. Комментарии по-русски, имена —
+# латиницей: в shell иначе нельзя.
 #
-# 🔴 НО ТРИ РИСКА, КОТОРЫЕ РЕШАЕТ ТОЛЬКО ЗАМЕР НА ЭТОЙ МАШИНЕ:
+# 🔴 ЗАЧЕМ ПОЭТАПНО. Bonsai 2 — тернарная сборка Qwen3.8-27B: 5,95 ГБ
+# вместо 54 при 98,2% качества FP16. По цифрам она решает ровно ту беду,
+# на которой 29.09 срезался Ollama-фоллбэк: обычная 2-битная сборка того
+# же Qwen даёт 72,59 против 84,78 и разваливается именно на длинных
+# рассуждениях (AIME26: 57,5 против 95,83) — это и был «Золото подорвало
+# уровень $4200».
+#
+# 🔴 ТРИ РИСКА, КОТОРЫЕ РЕШАЕТ ТОЛЬКО ЗАМЕР НА ЭТОЙ МАШИНЕ:
 #   1. Ollama её не загрузит вообще: PQ2_0 и PTQ1_0 мейнлайн не знает, а
-#      файл F16 стоковый llama.cpp грузит и выдаёт мусор БЕЗ ошибки. Нужен
-#      форк PrismML. (Их же KNOWN_ISSUES, раздел «Runtimes other than the
-#      PrismML build».)
+#      файл F16 стоковый llama.cpp грузит и выдаёт мусор БЕЗ ошибки.
+#      Нужен форк PrismML (их же KNOWN_ISSUES).
 #   2. У нас GTX 1080 — Pascal 2016 года. В их таблице производительности
 #      самая старая карта — A100; Pascal не упомянут вовсе.
 #   3. VRAM 8 ГБ, из них ~2,8 заняты. Модель 5,95 ГБ впритык не влезает, а
-#      они отдельно пишут, что контекст 32K не помещается и в 12 ГБ.
-#
-# Поэтому каждый шаг — с ранним выходом: незачем тянуть 5,95 ГБ, если
-# бинарник не видит карту.
+#      они отдельно пишут, что 32K контекста не помещается и в 12 ГБ.
 #
 # Запуск:
-#   bash ops/bonsai_setup.sh 1     # бинарник форка (159 МБ) + видит ли GPU
-#   bash ops/bonsai_setup.sh 2     # модель PTQ1_0 (5,95 ГБ) + sha256
-#   bash ops/bonsai_setup.sh 3     # llama-bench: токенов в секунду
-#   bash ops/bonsai_setup.sh все
+#   bash ops/bonsai_setup.sh check   # ничего не качает: пути, адреса, curl
+#   bash ops/bonsai_setup.sh 1       # бинарник форка (159 МБ) + видит ли GPU
+#   bash ops/bonsai_setup.sh 2       # модель PTQ1_0 (5,95 ГБ) + sha256
+#   bash ops/bonsai_setup.sh 3       # llama-bench: токенов в секунду
 set -uo pipefail
 
-ДОМ="/mnt/sbfdata/Базы/llm/bonsai2"
-ТЕГ="prism-b10709-9a9394a"
+HOME_DIR="/mnt/sbfdata/Базы/llm/bonsai2"
+TAG="prism-b10709-9a9394a"
 # CUDA 12.8, а не 13.3: у 13.3 на Linux сегфолт (их KNOWN_ISSUES).
-АРХИВ="llama-${ТЕГ}-bin-linux-cuda-12.8-x64.tar.gz"
-АРХИВ_URL="https://github.com/PrismML-Eng/llama.cpp/releases/download/${ТЕГ}/${АРХИВ}"
-АРХИВ_SHA="8aec67eb023b251712c7e6490f367b5671bf587eced1436a9b85f4a90c3b7d3d"
+ARCHIVE="llama-${TAG}-bin-linux-cuda-12.8-x64.tar.gz"
+ARCHIVE_URL="https://github.com/PrismML-Eng/llama.cpp/releases/download/${TAG}/${ARCHIVE}"
+ARCHIVE_SHA="8aec67eb023b251712c7e6490f367b5671bf587eced1436a9b85f4a90c3b7d3d"
 
-МОДЕЛЬ="Ternary-Bonsai-2-27B-PTQ1_0.gguf"
-МОДЕЛЬ_URL="https://huggingface.co/prism-ml/Ternary-Bonsai-2-27B-gguf/resolve/main/${МОДЕЛЬ}"
-МОДЕЛЬ_SHA="53107f530aa52eb00912263ab1ee29bd199261c87cd7b4ad4ca1318c1fe33ee3"
-МОДЕЛЬ_БАЙТ=5946648928
+MODEL="Ternary-Bonsai-2-27B-PTQ1_0.gguf"
+MODEL_URL="https://huggingface.co/prism-ml/Ternary-Bonsai-2-27B-gguf/resolve/main/${MODEL}"
+MODEL_SHA="53107f530aa52eb00912263ab1ee29bd199261c87cd7b4ad4ca1318c1fe33ee3"
+MODEL_BYTES=5946648928
 
-БИН="${ДОМ}/bin/llama-cli"
+BIN=""
 
-скачать() {   # url, файл, sha256
-  local url="$1" файл="$2" сум="$3"
-  if [ -f "$файл" ]; then
-    echo "  уже скачано: $(basename "$файл")"
+# Ищем llama-cli каждый раз заново: архив кладёт его то в корень, то в bin/.
+find_bin() {
+  if [ -x "$HOME_DIR/bin/llama-cli" ]; then
+    BIN="$HOME_DIR/bin/llama-cli"
   else
-    echo "  качаю $(basename "$файл")…"
-    curl -fL --progress-bar -o "$файл.часть" "$url" || { echo "✗ скачать не удалось"; return 1; }
-    mv "$файл.часть" "$файл"
+    BIN="$(find "$HOME_DIR" -name llama-cli -type f -perm -u+x 2>/dev/null | head -1)"
   fi
-  echo "  проверяю sha256…"
-  local факт
-  факт="$(sha256sum "$файл" | cut -d' ' -f1)"
-  if [ "$факт" != "$сум" ]; then
+  [ -n "$BIN" ]
+}
+
+download() {   # url, файл, sha256
+  local url="$1" path="$2" want="$3"
+  if [ -s "$path" ]; then
+    echo "  уже на диске: $(basename "$path")"
+  else
+    echo "  качаю $(basename "$path") …"
+    # -C - продолжает оборванную закачку: 5,95 ГБ с одной попытки берутся
+    # не всегда, а начинать заново из-за обрыва — терять полчаса.
+    curl -fL -C - --retry 3 --retry-delay 5 --progress-bar \
+         -o "$path.part" "$url" || { echo "✗ скачать не удалось"; return 1; }
+    mv "$path.part" "$path"
+  fi
+  echo "  считаю sha256 (на 6 ГБ это с полминуты) …"
+  local got
+  got="$(sha256sum "$path" | cut -d' ' -f1)"
+  if [ "$got" != "$want" ]; then
     # 🔴 Молча принять чужой файл нельзя: битую или подменённую модель
     # видно только по бессмыслице на выходе — то есть слишком поздно.
-    echo "✗ sha256 НЕ СОВПАЛ"
-    echo "   ждали: $сум"
-    echo "   факт:  $факт"
+    echo "✗ sha256 НЕ СОВПАЛ — файл битый или не тот"
+    echo "   ждали: $want"
+    echo "   факт:  $got"
     return 1
   fi
   echo "  sha256 совпал"
 }
 
-шаг1() {
-  echo "═══ ШАГ 1: бинарник форка и видит ли он GTX 1080 ═══"
-  mkdir -p "$ДОМ/bin" || return 1
-  скачать "$АРХИВ_URL" "$ДОМ/$АРХИВ" "$АРХИВ_SHA" || return 1
-  echo "  распаковываю…"
-  tar -xzf "$ДОМ/$АРХИВ" -C "$ДОМ/bin" --strip-components=1 2>/dev/null \
-    || tar -xzf "$ДОМ/$АРХИВ" -C "$ДОМ/bin"
-  [ -x "$БИН" ] || БИН="$(find "$ДОМ/bin" -name llama-cli -type f | head -1)"
-  if [ ! -x "${БИН:-}" ]; then
-    echo "✗ llama-cli в архиве не найден"; return 1
-  fi
-  echo "  бинарник: $БИН"
+step_check() {
+  echo "═══ ХОЛОСТАЯ ПРОВЕРКА: ничего не качаем ═══"
+  echo "  каталог:  $HOME_DIR"
+  echo "  архив:    $ARCHIVE"
+  echo "  адрес:    $ARCHIVE_URL"
+  echo "  модель:   $MODEL ($((MODEL_BYTES/1024/1024)) МБ)"
+  echo "  адрес:    $MODEL_URL"
   echo
-  echo "  --- какие устройства он видит ---"
-  "$БИН" --list-devices 2>&1 | head -20
+  command -v curl >/dev/null || { echo "✗ curl не установлен"; return 1; }
+  command -v sha256sum >/dev/null || { echo "✗ sha256sum не найден"; return 1; }
+  command -v tar >/dev/null || { echo "✗ tar не найден"; return 1; }
+  echo "  curl, sha256sum, tar — на месте"
+  mkdir -p "$HOME_DIR/bin" || { echo "✗ каталог не создаётся"; return 1; }
+  echo "  каталог создан/существует"
+  local avail
+  avail=$(df -BG --output=avail "$HOME_DIR" | tail -1 | tr -dc '0-9')
+  echo "  свободно: ${avail} ГБ (нужно ~6)"
+  [ "${avail:-0}" -lt 8 ] && { echo "✗ мало места"; return 1; }
+  echo "  проверяю, что ссылки живые (только заголовки, тело не тянем) …"
+  local code
+  code=$(curl -fsSIL -o /dev/null -w '%{http_code}' "$ARCHIVE_URL" 2>/dev/null)
+  echo "    бинарник: HTTP ${code:-нет ответа}"
+  code=$(curl -fsSIL -o /dev/null -w '%{http_code}' "$MODEL_URL" 2>/dev/null)
+  echo "    модель:   HTTP ${code:-нет ответа}"
   echo
-  if "$БИН" --list-devices 2>&1 | grep -qi "CUDA\|NVIDIA"; then
-    echo "✅ CUDA-устройство видно. Можно шаг 2."
-    return 0
-  fi
-  echo "⚠️  CUDA-устройства в списке нет — значит пойдёт на процессоре."
-  echo "   Это не приговор (модель memory-bound), но ждать придётся дольше."
-  echo "   Решайте, качать ли 5,95 ГБ: шаг 2."
-  return 0
+  echo "✅ Готово к шагу 1."
 }
 
-шаг2() {
+step1() {
+  echo "═══ ШАГ 1: бинарник форка и видит ли он GTX 1080 ═══"
+  mkdir -p "$HOME_DIR/bin" || return 1
+  download "$ARCHIVE_URL" "$HOME_DIR/$ARCHIVE" "$ARCHIVE_SHA" || return 1
+  echo "  распаковываю …"
+  tar -xzf "$HOME_DIR/$ARCHIVE" -C "$HOME_DIR/bin" --strip-components=1 2>/dev/null \
+    || tar -xzf "$HOME_DIR/$ARCHIVE" -C "$HOME_DIR/bin" || return 1
+  if ! find_bin; then
+    echo "✗ llama-cli в архиве не найден. Что распаковалось:"
+    find "$HOME_DIR/bin" -maxdepth 2 -type f -perm -u+x | head -10
+    return 1
+  fi
+  echo "  бинарник: $BIN"
+  echo
+  echo "  --- какие устройства он видит ---"
+  "$BIN" --list-devices 2>&1 | head -20
+  echo
+  if "$BIN" --list-devices 2>&1 | grep -qiE "CUDA|NVIDIA"; then
+    echo "✅ CUDA-устройство видно. Есть смысл в шаге 2."
+  else
+    echo "⚠️  CUDA-устройства в списке нет — пойдёт на процессоре."
+    echo "   Не приговор (модель memory-bound), но ждать дольше."
+  fi
+}
+
+step2() {
   echo "═══ ШАГ 2: модель PTQ1_0, 5,95 ГБ ═══"
-  mkdir -p "$ДОМ" || return 1
-  local свободно
-  свободно=$(df -BG --output=avail "$ДОМ" | tail -1 | tr -dc '0-9')
-  echo "  свободно на диске: ${свободно} ГБ (нужно ~6)"
-  [ "${свободно:-0}" -lt 8 ] && { echo "✗ мало места"; return 1; }
-  скачать "$МОДЕЛЬ_URL" "$ДОМ/$МОДЕЛЬ" "$МОДЕЛЬ_SHA" || return 1
-  local факт_байт
-  факт_байт=$(stat -c%s "$ДОМ/$МОДЕЛЬ")
-  [ "$факт_байт" = "$МОДЕЛЬ_БАЙТ" ] || { echo "✗ размер $факт_байт ≠ $МОДЕЛЬ_БАЙТ"; return 1; }
+  mkdir -p "$HOME_DIR" || return 1
+  local avail
+  avail=$(df -BG --output=avail "$HOME_DIR" | tail -1 | tr -dc '0-9')
+  echo "  свободно: ${avail} ГБ"
+  [ "${avail:-0}" -lt 8 ] && { echo "✗ мало места"; return 1; }
+  download "$MODEL_URL" "$HOME_DIR/$MODEL" "$MODEL_SHA" || return 1
+  local got
+  got=$(stat -c%s "$HOME_DIR/$MODEL")
+  [ "$got" = "$MODEL_BYTES" ] || { echo "✗ размер $got ≠ $MODEL_BYTES"; return 1; }
   echo "✅ модель на месте и целая. Можно шаг 3."
 }
 
-шаг3() {
+step3() {
   echo "═══ ШАГ 3: сколько токенов в секунду ═══"
-  [ -x "${БИН:-}" ] || БИН="$(find "$ДОМ/bin" -name llama-cli -type f 2>/dev/null | head -1)"
-  local бенч; бенч="$(dirname "${БИН:-$ДОМ/bin/x}")/llama-bench"
-  [ -f "$ДОМ/$МОДЕЛЬ" ] || { echo "✗ сначала шаг 2"; return 1; }
-  if [ ! -x "$бенч" ]; then
-    echo "  llama-bench в архиве нет — меряю прогоном llama-cli"
-  else
-    echo "  --- на видеокарте, сколько слоёв влезет ---"
-    # -ngl 99 просит выгрузить всё; если не влезет, увидим по ошибке или
-    # по «CPU model buffer size» в несколько гигабайт.
-    timeout 900 "$бенч" -m "$ДОМ/$МОДЕЛЬ" -p 512 -n 128 -ngl 99 2>&1 | tail -12
-    echo
-    echo "  --- только процессор (контроль) ---"
-    timeout 1200 "$бенч" -m "$ДОМ/$МОДЕЛЬ" -p 512 -n 128 -ngl 0 -t 8 2>&1 | tail -12
+  [ -s "$HOME_DIR/$MODEL" ] || { echo "✗ сначала шаг 2"; return 1; }
+  find_bin || { echo "✗ сначала шаг 1"; return 1; }
+  local bench; bench="$(dirname "$BIN")/llama-bench"
+  if [ ! -x "$bench" ]; then
+    echo "  llama-bench в сборке нет — беру llama-cli с замером времени"
+    local t0 t1
+    t0=$(date +%s)
+    timeout 1800 "$BIN" -m "$HOME_DIR/$MODEL" -ngl 99 -c 8192 -n 256 \
+        -p "Одним предложением: что такое стоп-лосс?" 2>&1 | tail -20
+    t1=$(date +%s)
+    echo "  заняло $((t1-t0)) с на 256 токенов потолка"
+    return 0
   fi
+  echo "  --- на видеокарте (-ngl 99: выгрузить всё, что влезет) ---"
+  timeout 1800 "$bench" -m "$HOME_DIR/$MODEL" -p 512 -n 128 -ngl 99 2>&1 | tail -12
   echo
-  echo "🔴 Ориентир: брифингу нужно ~2000 токенов ответа при reasoning_effort"
-  echo "   medium. При 4 ток/с это 8 минут, при 1 ток/с — больше получаса."
-  echo "   Окно есть (брифинг в 06:00), но решать по этой цифре."
+  echo "  --- только процессор, контроль ---"
+  timeout 2400 "$bench" -m "$HOME_DIR/$MODEL" -p 512 -n 128 -ngl 0 -t 8 2>&1 | tail -12
+  echo
+  echo "🔴 Ориентир: брифингу нужно ~2000 токенов при reasoning_effort medium."
+  echo "   4 ток/с — восемь минут, укладываемся. 1 ток/с — больше получаса."
 }
 
 case "${1:-}" in
-  1) шаг1 ;;
-  2) шаг2 ;;
-  3) шаг3 ;;
-  все|all) шаг1 && шаг2 && шаг3 ;;
-  *) sed -n '1,30p' "$0"; echo; echo "Укажите шаг: 1, 2, 3 или «все»"; exit 2 ;;
+  check|проверка) step_check ;;
+  1) step1 ;;
+  2) step2 ;;
+  3) step3 ;;
+  all|все) step_check && step1 && step2 && step3 ;;
+  *) echo "Укажите: check (ничего не качает), 1, 2, 3 или all"; exit 2 ;;
 esac
