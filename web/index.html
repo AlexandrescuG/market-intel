@@ -1298,6 +1298,19 @@ function briefBold(s){
   return escapeHtmlIdx(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
 }
 
+/* 🔴 Заголовок и контекст брифа пишет модель, и пишет по-русски. С
+   30.09.2026 их переводит analyze/llm_context.py в момент сборки — четыре
+   текста раз в сутки на язык, а не поход к переводчику на каждое открытие
+   страницы. Перевод лежит ОТДЕЛЬНО (headline_i18n/context_i18n), оригинал в
+   headline/context не трогается: если служба перевода отказала, читатель
+   увидит русский, а не пустое место. Ровно то же правило, что в ленте. */
+function briefHeadlineFor(b){
+  return (b.headline_i18n && b.headline_i18n[_PAGE_LANG]) || b.headline;
+}
+function briefContextFor(b){
+  return (b.context_i18n && b.context_i18n[_PAGE_LANG]) || b.context;
+}
+
 function renderBriefContext(b){
   const wrap = document.getElementById('briefContext');
   const titleEl = document.getElementById('briefContextTitle');
@@ -1306,7 +1319,7 @@ function renderBriefContext(b){
   if(!b || !b.context || !b.context.length){ wrap.style.display='none'; return; }
   const confMap = {quotes:I18N_BRIEF.confQuotes, media:I18N_BRIEF.confMedia, social_unverified:I18N_BRIEF.confSocial};
   titleEl.textContent = I18N_BRIEF.contextTitle;
-  bodyEl.innerHTML = b.context.map(function(c){
+  bodyEl.innerHTML = briefContextFor(b).map(function(c){
     return '<li>'+briefBold(c.text)+' <span class="brief-conf">— '+escapeHtmlIdx(confMap[c.confidence]||c.confidence||'')+'</span></li>';
   }).join('');
   wrap.style.display = '';
@@ -1316,7 +1329,7 @@ function renderBriefHeadline(b){
   const el = document.getElementById('briefHeadline');
   if(!el) return;
   if(!b || !b.headline){ el.style.display='none'; return; }
-  el.innerHTML = '▸ <b>'+I18N_BRIEF.headlinePrefix+'</b> '+briefBold(b.headline);
+  el.innerHTML = '▸ <b>'+I18N_BRIEF.headlinePrefix+'</b> '+briefBold(briefHeadlineFor(b));
   el.style.display = 'block';
 }
 
