@@ -212,6 +212,34 @@ MIGRATIONS: list[tuple[int, str, str]] = [
     # капитализации $5,8 млрд. Теперь пишем оба, каждое со своей подписью.
     (31, "market_outliers.market_cap",
      "ALTER TABLE market_outliers ADD COLUMN market_cap INTEGER"),
+    # 09.09.2026: канал перестаёт быть переклейкой markettwits — появляется
+    # агент-редактор, который пишет посты из СВОИХ данных (реакции на события,
+    # всплески упоминаний, сюжеты, расхождение слухов и котировок).
+    # channel_posts — очередь между генератором (market_intel) и публикатором
+    # (Vorovka2, у него единственный авторизованный Telethon-клиент).
+    (32, "channel_posts: очередь постов агента",
+     """CREATE TABLE IF NOT EXISTS channel_posts (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          created_ts INTEGER NOT NULL,
+          rubric TEXT NOT NULL,
+          dedup_key TEXT,
+          target TEXT NOT NULL DEFAULT 'test',
+          text TEXT NOT NULL,
+          image_path TEXT,
+          facts_json TEXT,
+          status TEXT NOT NULL DEFAULT 'pending',
+          channel_msg_id INTEGER,
+          published_ts INTEGER,
+          error TEXT
+        )"""),
+    # Один и тот же повод не должен уходить в канал дважды: всплеск по COPPER
+    # держится часами, а генератор бегает по таймеру.
+    (33, "channel_posts: защита от повторов",
+     "CREATE UNIQUE INDEX IF NOT EXISTS idx_channel_posts_dedup "
+     "ON channel_posts(dedup_key) WHERE dedup_key IS NOT NULL"),
+    (34, "channel_posts: выборка очереди",
+     "CREATE INDEX IF NOT EXISTS idx_channel_posts_status "
+     "ON channel_posts(status, created_ts)"),
 ]
 
 

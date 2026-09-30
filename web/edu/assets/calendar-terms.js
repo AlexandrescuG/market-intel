@@ -347,6 +347,11 @@ var CALENDAR_TERMS = {
   // На фронте translatedEventName() до словаря в этом случае не доходит:
   // ветка indicator === 'Calendar' возвращает title раньше.
   "Jackson Hole Symposium": {ru: "Симпозиум в Джексон-Хоуле", ro: "Simpozionul de la Jackson Hole"},
+  // 29.09.2026: сегодняшний брифинг показал их латиницей (build_brief_v2
+  // предупреждал: «calendar indicators without a translation»).
+  "Cash Rate": {ru: "Ставка РБА", ro: "Rata RBA"},
+  "RBA Rate Statement": {ru: "Заявление РБА по ставке", ro: "Declarația RBA privind rata"},
+  "Chancellor John Healey Speech": {ru: "Выступление канцлера казначейства Хили", ro: "Discursul cancelarului Healey"},
   "Job Advertisements": {ru: "Объявления о вакансиях", ro: "Anunțuri de angajare"},
   "Job Offers": {ru: "Предложения о работе", ro: "Oferte de muncă"},
   "Job Quits": {ru: "Добровольные увольнения", ro: "Demisii voluntare"},

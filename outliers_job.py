@@ -39,6 +39,7 @@ import sys
 import time
 from datetime import date, datetime, timezone
 from pathlib import Path
+from urllib.parse import urlparse
 
 sys.path.insert(0, str(Path(__file__).parent))
 
@@ -50,7 +51,10 @@ WEB_DATA = Path(__file__).parent / "web" / "data"
 
 log = logging.getLogger("outliers_job")
 
-DISCLAIMER = "Статистическое наблюдение, не рекомендация."
+# 15.09.2026: константа удалена из постов о выбросах по решению владельца
+# (см. alert_text). В картинке брифинга подпись осталась — там она часть
+# нижней плашки с источником данных, а не отдельная строка в ленте, и её
+# решение не касалось (brief_image_job.DISCLAIMER).
 
 
 def _connect() -> sqlite3.Connection:
@@ -92,23 +96,149 @@ def _fmt_money(v) -> str:
     return str(int(v))
 
 
+_QUOTES_JSON = WEB_DATA / "quotes.json"
+_QUOTES_MAX_AGE = 6 * 3600      # старше — молчим, а не показываем вчерашний рынок
+
+# Индексы фона. Для акций — американский рынок (оба скринера yfinance по нему),
+# для крипты — BTC/ETH: сравнивать альткоин с S&P 500 бессмысленно.
+_BACKDROP = {
+    "equity": [("^GSPC", "S&P 500"), ("^NDX", "Nasdaq 100")],
+    "crypto": [("BTC-USD", "Биткоин"), ("ETH-USD", "Эфириум")],
+}
+
+
+def _market_backdrop(asset_class: str, now_ts: int) -> str | None:
+    """«Рынок вокруг» — одна строка. None, если котировок нет или они старые:
+    рост бумаги на фоне вчерашнего рынка — это не фон, а выдумка."""
+    try:
+        raw = json.loads(_QUOTES_JSON.read_text(encoding="utf-8"))
+        updated = datetime.fromisoformat(raw["updated"]).timestamp()
+    except (OSError, json.JSONDecodeError, KeyError, ValueError) as e:
+        log.warning("фон: %s не прочитан (%s)", _QUOTES_JSON, e)
+        return None
+    if now_ts - updated > _QUOTES_MAX_AGE:
+        log.warning("фон: quotes.json старше %d ч — строку не пишем", _QUOTES_MAX_AGE // 3600)
+        return None
+    quotes = raw.get("quotes") or {}
+    parts = []
+    for sym, title in _BACKDROP.get(asset_class, _BACKDROP["equity"]):
+        chg = (quotes.get(sym) or {}).get("change_pct")
+        if isinstance(chg, (int, float)):
+            parts.append(f"{title} {_fmt_pct(chg)}")
+    return " · ".join(parts) if parts else None
+
+
+def _peers_line(con, row: dict, now_ts: int) -> str | None:
+    """Сколько ЕЩЁ инструментов сегодня за порогом в ту же сторону.
+
+    Отвечает на вопрос «это движение всего рынка или этой одной бумаги» —
+    единственный вид фона, который можно посчитать точно по своим данным.
+    Считаем по market_outliers, то есть по прошедшим порог: строка так и
+    сформулирована («за порогом»), чтобы не выдавать это за долю рынка.
+    """
+    day_start = now_ts - (now_ts % 86400)
+    same_dir = "> 0" if row["chg_pct"] > 0 else "< 0"
+    n = con.execute(
+        f"SELECT count(*) FROM market_outliers WHERE last_seen_ts >= ? AND id <> ? "
+        f"AND asset_class = ? AND chg_pct {same_dir}",
+        (day_start, row["id"], row["asset_class"]),
+    ).fetchone()[0]
+    if not n:
+        return None
+    what = "монета" if row["asset_class"] == "crypto" else "бумага"
+    plural = {"монета": ("монета", "монеты", "монет"),
+              "бумага": ("бумага", "бумаги", "бумаг")}[what]
+    where = "растёт" if row["chg_pct"] > 0 else "падает"
+    return (f"Сегодня за порогом ещё {n} {_plural(n, *plural)} — "
+            f"{where} не одна эта")
+
+
+def _domain(url: str) -> str:
+    """Домен без www и без зоны — как в постах канала («ch-toulon», «github»)."""
+    try:
+        host = urlparse(url).netloc.replace("www.", "")
+        return host.split(".")[0] or host
+    except Exception:
+        return "источник"
+
+
+def _source_link(row: dict) -> str:
+    """Одна строка-ссылка внизу поста, как в остальных постах канала.
+
+    🔴 02.09: ссылка ровно одна. Раньше их было две подряд — на новость и на
+    карточку инструмента, причём подписью новости стояло имя издания из
+    Yahoo («— Motley Fool»), которое в русском посте читается как непонятная
+    приписка. Теперь: есть новость — ссылка ведёт на неё и подписана доменом;
+    нет новости — ведёт на карточку инструмента, где числа можно проверить.
+    """
+    url = row.get("_news_url")
+    if url:
+        return f'— <a href="{url}">{_domain(url)}</a>'
+    sym = row["symbol"]
+    if row["asset_class"] == "crypto":
+        base = sym[:-4] if sym.endswith("USDT") else sym
+        return f'— <a href="https://www.bybit.com/trade/spot/{base}/USDT">bybit</a>'
+    return f'— <a href="https://finance.yahoo.com/quote/{sym}">yahoo finance</a>'
+
+
+def _hashtags(row: dict) -> str:
+    """Шапка в стиле канала: маркер, флаг, тикер, тема."""
+    up = row["chg_pct"] > 0
+    if row["asset_class"] == "crypto":
+        return f"{'✴️' if up else '⚠️'}#{row['symbol']} #крипто #движение"
+    # Оба скринера (day_gainers/day_losers) — американский рынок.
+    return f"{'✴️' if up else '⚠️'}🇺🇸#{row['symbol']} #акции #движение"
+
+
 def alert_text(row: dict) -> str:
-    """§2.5. Без объяснения тоже отправляем: факт движения самоценен, а
-    придумывать причину нельзя."""
-    cls = "крипта" if row["asset_class"] == "crypto" else "акция"
+    """§2.5, формат канала @SBFEconomics (01.09.2026, решение владельца).
+
+    Раньше это была карточка из машинных полей — тикер, процент, цена,
+    оборот, время съёмки, имя скринера. Владелец: «если мы такое пишем, то
+    нужно писать, на фоне чего это произошло». Голое число без фона читателю
+    ничего не говорит: +24% у Fervo Energy — это ралли всего рынка, отраслевая
+    история или одна бумага? Поэтому теперь под фактом идут: рынок вокруг,
+    сколько ещё инструментов сегодня за порогом, и новость, если она нашлась.
+
+    Причину НЕ придумываем и НЕ ждём: пост уходит фактом, а объяснение
+    дописывается правкой, когда новость появится (refresh_published).
+    """
     name = row.get("name") or row["symbol"]
-    lines = [f"📈 <b>{row['symbol']}</b> · {name}", f"{cls} · {_fmt_pct(row['chg_pct'])} за день"]
+    lines = [_hashtags(row)]
+
+    move = f"{name} {_fmt_pct(row['chg_pct'])} за день"
     peak = row.get("peak_chg_pct")
     if peak is not None and abs(peak) > abs(row["chg_pct"]) + 0.5:
-        lines.append(f"в моменте {_fmt_pct(peak)}")
-    lines.append(f"цена {row['price']} · оборот ${_fmt_money(row.get('dollar_volume'))}")
-    seen = datetime.fromtimestamp(row["last_seen_ts"], timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
-    lines.append(f"снято {seen} · источник {row.get('screener')}")
-    if row.get("_news"):
-        lines.append("")
-        lines.append(row["_news"])
+        move += f" (в моменте {_fmt_pct(peak)})"
+    lines.append(move)
+    # 🔴 02.09: было «оборот $693,7 млн» — неверное слово. Оборот компании это
+    # её выручка, деньги внутри бизнеса; у нас же цена × regularMarketVolume,
+    # то есть сколько денег прошло через СДЕЛКИ с бумагой за день. Пишем
+    # «объём торгов». Рядом капитализация: без неё $694 млн читались как
+    # размер компании, хотя капитализация FRVO — $5,8 млрд.
+    facts = [f"Цена {row['price']}"]
+    if row.get("market_cap"):
+        facts.append(f"капитализация ${_fmt_money(row['market_cap'])}")
+    facts.append(f"объём торгов за день ${_fmt_money(row.get('dollar_volume'))}")
+    lines.append(", ".join(facts))
+
+    if row.get("_backdrop"):
+        lines.append(f"Рынок вокруг: {row['_backdrop']}")
+    if row.get("_peers"):
+        lines.append(row["_peers"])
+
+    # 🔴 02.09: заголовка новости в посте НЕТ вообще. Он приходил из чужой
+    # ленты в чужой интонации («Почему акции Fervo Energy взлетели до небес») и
+    # выглядел кликбейтом посреди сухой сводки — владелец забраковал. Новость
+    # никуда не делась: на неё ведёт ссылка внизу поста, и именно она заменяет
+    # ссылку на карточку инструмента, когда объяснение находится.
+    # 🔴 15.09: строки «Статистическое наблюдение, не рекомендация» в посте
+    # больше нет — решение владельца. Она висела под каждым выбросом и в
+    # ленте канала читалась как служебный штамп, а не как оговорка. Сам пост
+    # и так не содержит ни оценок, ни призывов: только факт движения, цифры и
+    # ссылка на источник.
     lines.append("")
-    lines.append(f"<i>{DISCLAIMER}</i>")
+    lines.append(_source_link(row))
     return "\n".join(lines)
 
 
@@ -123,23 +253,221 @@ def _quiet_mode(cfg: dict, today: date) -> bool:
         return False
 
 
-def _attach_news(con, rows: list[dict]) -> None:
-    """Одна строка объяснения, если §3 связала выброс с темой."""
-    for r in rows:
-        if not r.get("news_cluster_id"):
+def _is_russian(t: str) -> bool:
+    return sum(1 for c in t if "Ѐ" <= c <= "ӿ") / max(len(t), 1) > 0.25
+
+
+# Дословный текст generic-страницы ошибки Google. deep_translator не бросает на
+# неё исключение, а возвращает тело страницы как будто это перевод — ловушка
+# уже описана в collectors/twitter.py, здесь тот же случай.
+_GOOGLE_ERROR_SIGNATURE = "Error 500 (Server Error)"
+
+
+def _ru(text: str) -> str:
+    """Заголовок новости по-русски. Канал русскоязычный, а кластеры собраны из
+    англоязычных лент — «Stocks making the biggest moves midday» в русском
+    посте выглядит как чужая вставка. Перевод не получился — отдаём оригинал:
+    английский заголовок хуже русского, но лучше отсутствующего."""
+    if not text or _is_russian(text):
+        return text
+    text = text[:2000]
+
+    # Два переводчика подряд, не один. 01.09 Google отдал страницу ошибки на
+    # живом заголовке («Why Fervo Energy Stock Skyrocketed Today») — с одним
+    # источником пост ушёл бы в русский канал с английской строкой. MyMemory
+    # тот же заголовок перевёл сразу.
+    try:
+        from deep_translator import GoogleTranslator, MyMemoryTranslator
+    except ImportError as e:
+        log.warning("перевод недоступен: %s", e)
+        return text
+
+    def _google():
+        return GoogleTranslator(source="auto", target="ru").translate(text)
+
+    def _mymemory():
+        return MyMemoryTranslator(source="en-US", target="ru-RU").translate(text)
+
+    for attempt in (_google, _mymemory):
+        try:
+            out = attempt()
+        except Exception as e:
+            log.warning("перевод (%s) не удался: %s", attempt.__name__, e)
             continue
+        # Результат обязан БЫТЬ русским: и страница ошибки Google, и «перевод»,
+        # вернувший исходную английскую строку, одинаково означают неудачу.
+        if out and _GOOGLE_ERROR_SIGNATURE not in out and _is_russian(out):
+            return out
+    return text
+
+
+def _find_cluster_by_symbol(con, row: dict, now_ts: int):
+    """Запасной поиск новости по самому инструменту.
+
+    01.09: из четырёх выбросов дня кластер был привязан к двум. Привязка §3
+    идёт по теме дня, а разовая корпоративная новость («компания X подписала
+    контракт») в тему дня не попадает — при 71 живом кластере выброс всё равно
+    уходил без объяснения. Здесь ищем по outlier_symbol (кластер уже помечен
+    этим тикером) и по вхождению тикера/имени компании в заголовок.
+
+    Имя компании берём ПЕРВЫМ словом (Fervo из «Fervo Energy Company»): полное
+    имя в заголовках почти не встречается, а слова вроде Energy/Holding/Inc
+    поймали бы пол-ленты. Слова короче четырёх букв не используем вовсе —
+    ровно тот класс ложных срабатываний, что уже ловили на тикерах-омонимах.
+    """
+    since = now_ts - 36 * 3600
+    got = con.execute(
+        "SELECT label, sample_title, sample_url, publishers FROM news_clusters "
+        "WHERE outlier_symbol = ? AND created_ts >= ? ORDER BY publishers DESC LIMIT 1",
+        (row["symbol"], since),
+    ).fetchone()
+    if got:
+        return got
+
+    needles = [f"${row['symbol']}"]
+    first_word = (row.get("name") or "").split()[:1]
+    if first_word and len(first_word[0]) >= 4 and first_word[0].isalpha():
+        needles.append(first_word[0])
+    for needle in needles:
         got = con.execute(
-            "SELECT label, sample_title, sample_url, publishers FROM news_clusters WHERE id=?",
-            (r["news_cluster_id"],),
+            "SELECT label, sample_title, sample_url, publishers FROM news_clusters "
+            "WHERE created_ts >= ? AND (sample_title LIKE ? OR label LIKE ?) "
+            "ORDER BY publishers DESC LIMIT 1",
+            (since, f"%{needle}%", f"%{needle}%"),
         ).fetchone()
-        if not got:
+        if got:
+            return got
+    return None
+
+
+_YAHOO_NEWS_MAX_AGE = 72 * 3600
+
+
+def _yahoo_news(symbol: str, now_ts: int):
+    """Свежая новость по самому тикеру с Yahoo Finance.
+
+    🔴 01.09: наши кластеры собраны из лент по ТЕМАМ ДНЯ, и корпоративная
+    новость одной компании в них не попадает. По PSQL алерт написал «причина
+    в новостях не найдена», хотя на карточке Yahoo лежали три заметки, прямо
+    объясняющие движение («Pasqal Enters Nasdaq Price Discovery After
+    Completing De-SPAC Merger»). Значит искать надо там же, где смотрит
+    человек, а не только в своей базе.
+
+    Возвращает (заголовок, ссылка, издатель) или None. Берём самую свежую и
+    только если она не старше трёх суток: новость недельной давности рядом с
+    сегодняшним движением — ложная связь, а не объяснение.
+    """
+    try:
+        import yfinance as yf
+        items = yf.Ticker(symbol).news or []
+    except Exception as e:
+        log.warning("новости Yahoo по %s не получены: %s", symbol, e)
+        return None
+
+    best = None
+    for item in items:
+        c = item.get("content") or item
+        title = (c.get("title") or "").strip()
+        if not title:
             continue
-        label, title, url, publishers = got
-        text = title or label or ""
-        if url:
-            text = f'<a href="{url}">{text}</a>'
-        r["_news"] = (f"📰 {text} — пишут {publishers} "
-                      f"{_plural(publishers, 'издание', 'издания', 'изданий')}")
+        pub = c.get("pubDate") or c.get("displayTime") or ""
+        try:
+            ts = int(datetime.fromisoformat(pub.replace("Z", "+00:00")).timestamp())
+        except ValueError:
+            continue
+        if now_ts - ts > _YAHOO_NEWS_MAX_AGE:
+            continue
+        url = ((c.get("canonicalUrl") or {}).get("url")
+               or (c.get("clickThroughUrl") or {}).get("url") or "")
+        provider = ((c.get("provider") or {}).get("displayName") or "").strip()
+        if best is None or ts > best[0]:
+            best = (ts, title, url, provider)
+    return best[1:] if best else None
+
+
+def _attach_context(con, rows: list[dict], now_ts: int) -> None:
+    """Фон к каждому выбросу: рынок вокруг, соседи за порогом, новость."""
+    for r in rows:
+        r["_backdrop"] = _market_backdrop(r["asset_class"], now_ts)
+        r["_peers"] = _peers_line(con, r, now_ts)
+    _attach_news(con, rows, now_ts)
+
+
+def _attach_news(con, rows: list[dict], now_ts: int) -> None:
+    """Одна строка объяснения, если §3 связала выброс с темой — либо если её
+    нашёл запасной поиск по самому инструменту (см. _find_cluster_by_symbol)."""
+    for r in rows:
+        got = None
+        if r.get("news_cluster_id"):
+            got = con.execute(
+                "SELECT label, sample_title, sample_url, publishers FROM news_clusters WHERE id=?",
+                (r["news_cluster_id"],),
+            ).fetchone()
+        if not got:
+            got = _find_cluster_by_symbol(con, r, now_ts)
+        if got:
+            label, title, url, publishers = got
+            r["_news"] = (f"📰 {_ru(title or label or '')} — пишут {publishers} "
+                          f"{_plural(publishers, 'издание', 'издания', 'изданий')}")
+            r["_news_url"] = url
+            continue
+        # В своей базе новости нет — идём на карточку инструмента Yahoo, туда
+        # же, куда пошёл бы человек. Крипту пропускаем: у bybit-тикеров на
+        # Yahoo карточки нет.
+        if r["asset_class"] == "crypto":
+            continue
+        found = _yahoo_news(r["symbol"], now_ts)
+        if not found:
+            continue
+        title, url, _provider = found
+        # Имя издания из Yahoo («Motley Fool») намеренно НЕ печатаем: в русском
+        # посте оно читается как приписка неизвестно к чему. Источник и так
+        # виден строкой-ссылкой внизу, доменом.
+        r["_news"] = f"📰 {_ru(title)}"
+        r["_news_url"] = url
+
+
+def refresh_published(con, now_ts: int) -> int:
+    """Дополнить уже опубликованные посты, у которых причина нашлась позже.
+
+    01.09, требование владельца: выброс публикуется сразу, даже без объяснения
+    («просто пишем тикер и обозначаем рост»), но когда новость появляется —
+    пост обязан её получить. Движение видно в первые минуты, новость выходит
+    через час; ждать её ради полного поста значит опоздать с самим фактом.
+
+    Работает только по постам за сутки и только в одну сторону: строка, в
+    которой объяснение уже есть, повторно не трогается. Правку поста делает
+    Vorovka2 (у него Telethon-клиент), здесь только взводится флаг.
+    """
+    # «Объяснения ещё нет» = ссылка внизу ведёт на карточку инструмента, а не
+    # на новость. Признак именно такой, потому что заголовок в посте больше не
+    # печатается (02.09) — искать в тексте нечего.
+    rows = con.execute(
+        "SELECT id, symbol, name, asset_class, chg_pct, peak_chg_pct, price, "
+        "dollar_volume, market_cap, news_cluster_id, alert_payload FROM market_outliers "
+        "WHERE channel_msg_id > 0 AND last_seen_ts >= ? "
+        "AND (alert_payload LIKE '%finance.yahoo.com/quote/%' "
+        "     OR alert_payload LIKE '%bybit.com/trade%') "
+        "ORDER BY last_seen_ts DESC",
+        (now_ts - 86400,),
+    ).fetchall()
+    updated = 0
+    for row in rows:
+        r = dict(zip(("id", "symbol", "name", "asset_class", "chg_pct", "peak_chg_pct",
+                      "price", "dollar_volume", "market_cap", "news_cluster_id",
+                      "alert_payload"), row))
+        _attach_news(con, [r], now_ts)
+        if not r.get("_news_url"):
+            continue
+        r["_backdrop"] = _market_backdrop(r["asset_class"], now_ts)
+        r["_peers"] = _peers_line(con, r, now_ts)
+        con.execute("UPDATE market_outliers SET alert_payload=?, channel_edit_pending=1 "
+                    "WHERE id=?", (alert_text(r), r["id"]))
+        log.info("выброс %s: причина найдена позже — пост будет дополнен", r["symbol"])
+        updated += 1
+    if updated:
+        con.commit()
+    return updated
 
 
 def dispatch(con, cfg: dict, now_ts: int) -> dict:
@@ -149,7 +477,7 @@ def dispatch(con, cfg: dict, now_ts: int) -> dict:
     step = float(cfg.get("repeat_step_fraction") or 0.5)
 
     rows = O.today_rows(con, now_ts)
-    _attach_news(con, rows)
+    _attach_context(con, rows, now_ts)
 
     already = sum(1 for r in rows if r.get("alerted_ts"))
     cap = int(cfg.get("max_alerts_per_day") or 5)
@@ -197,11 +525,22 @@ def dispatch(con, cfg: dict, now_ts: int) -> dict:
                         (now_ts, r["chg_pct"], r["id"]))
             sent += 1
         else:
-            # Адресат — подписчики. Отправляет бот: у него аудитория,
-            # часовые пояса и «тихие часы». Здесь только кладём готовый текст:
-            # бот не форматирует алерты, иначе формат §2.5 жил бы в двух зонах
-            # и разошёлся бы на первой правке. Строку он найдёт по
-            # alert_payload IS NOT NULL AND alerted_ts IS NULL.
+            # Адресат — подписчики. Формат остаётся здесь: бот не форматирует
+            # алерты, иначе §2.5 жил бы в двух зонах и разошёлся на первой
+            # правке.
+            #
+            # 🔴 01.09: сначала ПОСТ В КАНАЛ @SBFEconomics, и только потом бот
+            # форвардит его подписчикам (решение владельца). У поста появляется
+            # постоянная ссылка, канал ведёт свою ленту, а подписчик видит
+            # первоисточник, а не пересказ.
+            #
+            # Публикуем НЕ отсюда: канал ведётся через Telethon-юзербота
+            # Vorovka2 (@SBFEconomics — его TARGET_CHANNEL), боты в канал не
+            # добавлены и Bot API туда не пишет. Здесь строка просто ложится в
+            # очередь — alert_payload заполнен, channel_msg_id пуст; её
+            # забирает publish_outliers() внутри уже работающего процесса
+            # Vorovka2. Второй Telethon-клиент на той же сессии заводить
+            # нельзя — это конфликт сессии с боевым процессом.
             con.execute("UPDATE market_outliers SET alert_payload=? WHERE id=?",
                         (alert_text(r), r["id"]))
             left_for_bot += 1
@@ -218,8 +557,7 @@ def dispatch(con, cfg: dict, now_ts: int) -> dict:
             f"{_plural(len(over_cap), 'инструмент', 'инструмента', 'инструментов')} "
             f"за порогом сегодня (лимит {cap} "
             f"{_plural(cap, 'алерт', 'алерта', 'алертов')} исчерпан) — "
-            f"смотри блок в брифинге.\n\n"
-            f"<i>{DISCLAIMER}</i>")
+            f"смотри блок в брифинге.")
     con.commit()
     return {"quiet": quiet, "sent": sent, "suppressed": suppressed,
             "pending_for_bot": left_for_bot}
@@ -335,14 +673,14 @@ def report(cfg: dict, top: int) -> int:
     for title, rows, thr in (("АКЦИИ", eq, cfg["equity"]), ("КРИПТА", cr, cfg["crypto"])):
         rows.sort(key=lambda r: abs(r["chg_pct"]), reverse=True)
         print(f"\n=== {title} — порог {thr['abs_chg_pct']}%, "
-              f"оборот от ${thr.get('min_dollar_volume'):,} ===")
+              f"объём торгов от ${thr.get('min_dollar_volume'):,} ===")
         for r in rows[:top]:
             passes = (abs(r["chg_pct"]) >= thr["abs_chg_pct"]
                       and r["dollar_volume"] >= thr.get("min_dollar_volume", 0)
                       and r["price"] >= thr.get("min_price_usd", 0))
             mark = "ПРОЙДЁТ" if passes else "       "
             print(f"  {mark} {r['symbol']:<12} {r['chg_pct']:+7.2f}%  "
-                  f"пик {str(r['peak_chg_pct']):>8}  оборот ${_fmt_money(r['dollar_volume']):>9}"
+                  f"пик {str(r['peak_chg_pct']):>8}  объём ${_fmt_money(r['dollar_volume']):>9}"
                   f"  {(r['name'] or '')[:34]}")
     print(f"\nрынок США открыт: {market_open}")
     return 0
@@ -405,11 +743,15 @@ def main() -> int:
         # её вообще пропадает (к утру движение уже история).
         linked, topics = _link_news(con, now_ts)
         stats = dispatch(con, cfg, now_ts)
+        # После рассылки: посты, опубликованные без объяснения, могли его
+        # получить за прошедшие 15 минут. Правку сделает Vorovka2 по флагу.
+        enriched = refresh_published(con, now_ts)
         path = publish_json(con, cfg, now_ts)
     finally:
         con.close()
 
     print(f"outliers: новых {new}, обновлено {updated}, объяснено новостью {linked}, "
+          f"дополнено постов {enriched}, "
           f"тем-всплесков {topics}, отправлено {stats['sent']}, "
           f"придержано {stats['suppressed']}, ждёт бота {stats['pending_for_bot']}, "
           f"тихий режим {stats['quiet']}, рынок США открыт {market_open} -> {path.name}")

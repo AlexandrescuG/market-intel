@@ -31,7 +31,12 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 CLAUDE_BIN = str(Path.home() / ".local" / "bin" / "claude")
-CLAUDE_TIMEOUT_SEC = 150  # бандл + разбор 0-3 кандидатов -- дольше одного сигнала (run_analyst.py: 90с)
+# 🔴 11.09.2026: было 150 с, и это резало ХВОСТ нормального разброса, а не
+# зависания. Замер по agent_calls за сутки: медиана ~77 с, успешные прогоны
+# доходят до 119 с — то есть лимит стоял вплотную к обычному верху, и цикл
+# падал на ровном месте. 240 даёт двойной запас от медианы; настоящее
+# зависание оно всё равно поймает.
+CLAUDE_TIMEOUT_SEC = 240
 DEFAULT_MODEL = "claude-haiku-4-5-20251001"
 DEFAULT_MAX_BUDGET_USD = 0.20
 
@@ -148,9 +153,18 @@ def call_agent(bundle_md_path: Path, max_budget_usd: float = DEFAULT_MAX_BUDGET_
         proc = subprocess.run(cmd, timeout=CLAUDE_TIMEOUT_SEC, capture_output=True, text=True,
                                check=False, cwd=str(_MARKET_INTEL_ROOT))
     except (subprocess.TimeoutExpired, OSError) as e:
+        # 🔴 11.09.2026: сообщение об ошибке собирается ВРУЧНУЮ, без str(e).
+        # У TimeoutExpired в __str__ входит вся команда, а команда — это
+        # `claude -p <промпт>`: в операционный канал уходило по 4835 знаков
+        # промпта на каждый сбой, три подряд. Читать такое невозможно, а
+        # полезного там одна строка.
+        if isinstance(e, subprocess.TimeoutExpired):
+            err = f"TimeoutExpired: не уложился в {CLAUDE_TIMEOUT_SEC} с"
+        else:
+            err = f"{type(e).__name__}: {str(e)[:200]}"
         return {"ok": False, "forecasts": [], "duration_ms": int((time.time() - t0) * 1000),
                 "cost_usd": None, "exit_code": -1, "raw_stdout": "",
-                "error": f"{type(e).__name__}: {e}", "model": model}
+                "error": err, "model": model}
 
     duration_ms = int((time.time() - t0) * 1000)
     if proc.returncode != 0:

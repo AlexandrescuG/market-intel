@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import asyncio
 import concurrent.futures
+import html
 import logging
 import pathlib
 import re
@@ -52,18 +53,35 @@ _GOOGLE_ERROR_SIGNATURE = "Error 500 (Server Error)"
 async def _translate(text: str) -> str | None:
     if not TRANSLATE or not text or _is_russian(text):
         return None
-    try:
+    # 🔴 17.09: два переводчика подряд. Google режет по лимиту («too many
+    # requests… 5 requests per second») и отвечает страницей ошибки — на этом
+    # 15-16.09 перевод пропадал целиком. MyMemory тот же текст переводит; тот
+    # же фоллбэк уже стоит в outliers_job._ru().
+    def _google() -> str | None:
         from deep_translator import GoogleTranslator
-        loop = asyncio.get_event_loop()
-        tr = await loop.run_in_executor(
-            _pool, lambda: GoogleTranslator(source="auto", target="ru").translate(text[:1500]))
-        if tr and _GOOGLE_ERROR_SIGNATURE in tr:
-            log.warning("translate: Google отдал страницу ошибки вместо перевода — пропускаю")
-            return None
-        return tr if tr and tr.strip() != text.strip() else None
-    except Exception as e:
-        log.debug("translate failed: %s", e)
-        return None
+        return GoogleTranslator(source="auto", target="ru").translate(text[:1500])
+
+    def _mymemory() -> str | None:
+        from deep_translator import MyMemoryTranslator
+        # MyMemory требует локаль, а не просто язык, и не умеет auto.
+        return MyMemoryTranslator(source="en-US", target="ru-RU").translate(text[:480])
+
+    loop = asyncio.get_event_loop()
+    for attempt in (_google, _mymemory):
+        try:
+            tr = await loop.run_in_executor(_pool, attempt)
+        except Exception as e:
+            log.debug("translate (%s) failed: %s", attempt.__name__, e)
+            continue
+        if not tr or _GOOGLE_ERROR_SIGNATURE in tr or tr.strip() == text.strip():
+            continue
+        # Результат обязан быть русским: англоязычный «перевод» — это отказ,
+        # а не результат, и подпись «🇷🇺 <английский текст>» бессмысленна.
+        if not _is_russian(tr):
+            continue
+        return tr
+    log.warning("translate: оба переводчика отказали — пост уйдёт с оригиналом")
+    return None
 
 
 # ─── парсинг (перенесён из monitor.py, без изменений логики) ─────────────────────
@@ -224,11 +242,32 @@ def _fmt(n: int) -> str:
 
 
 async def _caption(tw: dict, dim: str) -> str:
-    tr = await _translate(tw["text"][:200])
-    tline = f"\n\n🇷🇺 {tr.strip()}" if tr else ""
+    """🔴 17.09.2026: в подписи теперь ЕСТЬ сам текст твита.
+
+    Раньше подпись состояла из иконки, @автора, ПЕРЕВОДА и счётчиков — то
+    есть весь текст поста держался на внешнем переводчике. 15-16.09 Google
+    начал отвечать «too many requests», перевод возвращал None, и в канал
+    два дня уходили посты вообще без текста: «💰 @author / ❤️ 12K 🔁 3K /
+    ссылка». Владелец это и заметил.
+
+    Оригинал — наши собственные данные, он есть всегда. Перевод остаётся
+    дополнением сверху, а не единственным содержанием.
+    """
+    original = (tw.get("text") or "").strip()
     icon = {"economy": "💰", "geopolitics": "🌍", "crowd": "🔥"}.get(dim, "📊")
-    return (f"{icon} <b>@{tw['author']}</b>{tline}\n\n"
-            f"❤️ {_fmt(tw['likes'])}   🔁 {_fmt(tw['retweets'])}\n{tw['url']}")
+    lines = [f"{icon} <b>@{tw['author']}</b>"]
+    if original:
+        lines.append("")
+        lines.append(html.escape(original[:600]))
+    # Перевод не нужен, если твит и так по-русски (_translate вернёт None) и
+    # не нужен, если он не удался: текст читатель уже получил выше.
+    tr = await _translate(original[:400])
+    if tr:
+        lines.append("")
+        lines.append(f"🇷🇺 {html.escape(tr.strip())}")
+    lines.append("")
+    lines.append(f"❤️ {_fmt(tw['likes'])}   🔁 {_fmt(tw['retweets'])}\n{tw['url']}")
+    return "\n".join(lines)
 
 
 async def _scan_query(page, dimension: str, query: str) -> list[dict]:

@@ -30,6 +30,12 @@ from core.symbols_registry import _load as _load_registry
 WEB_DATA = BASE_DIR / "web" / "data"
 RATIO_NOTE_THRESHOLD = 1.3      # тот же порог «×N нормы», что в боте (tg_adapt)
 QUOTES_CAP = 5
+PANEL_CANDIDATES = 10           # кандидатов на 4 панели, с запасом на мёртвые ряды
+# 🔴 31.08: тот же список, что в боте (tg_adapt.NUMBERS_EXCLUDE) — тонкие
+# управляемые рынки, у которых «×N нормы» высоко каждый день. Картинка и текст
+# поста должны показывать одни и те же инструменты, иначе читающий ищет между
+# ними несуществующую разницу.
+EXCLUDE = {"USDKZT"}
 KEEP_DAYS = 14                  # старые картинки чистит сам джоб (см. _prune)
 
 log = logging.getLogger("brief_image_job")
@@ -60,7 +66,7 @@ def build_rows(movers: dict) -> tuple[list[dict], list[dict]]:
     своей нормы: в картинке сверху и на графиках должно быть одно и то же,
     иначе читающий ищет несуществующую связь."""
     rows = list(movers.get("up") or []) + list(movers.get("down") or [])
-    rows = [r for r in rows if r.get("symbol")]
+    rows = [r for r in rows if r.get("symbol") and r["symbol"] not in EXCLUDE]
     rows.sort(key=lambda r: (r.get("ratio") or 0), reverse=True)
 
     numbers = [{
@@ -71,7 +77,14 @@ def build_rows(movers: dict) -> tuple[list[dict], list[dict]]:
         "note": _note(r),
     } for r in rows[:QUOTES_CAP]]
 
-    panels = [{**p, "name": _ru_name(p["symbol"])} for p in BI.pick_symbols(movers)]
+    # 🔴 31.08: кандидатов на панели подаём С ЗАПАСОМ. Раньше просили ровно
+    # четыре, и если у одного из них не оказывалось часовых баров, рисовалось
+    # три — сетка 2×2 с дырой внизу справа. Рендер сам возьмёт первые четыре
+    # из тех, что реально отрисовались, и обрежет остаток до чётного числа.
+    candidates = [r for r in rows if r["symbol"] not in EXCLUDE][:PANEL_CANDIDATES]
+    panels = [{**p, "name": _ru_name(p["symbol"])}
+              for p in BI.pick_symbols({"up": candidates, "down": []},
+                                       limit=PANEL_CANDIDATES)]
     return numbers, panels
 
 
@@ -117,7 +130,10 @@ def run(date: str, out: Path | None = None) -> int:
         log.error("картинка: ни одной панели и ни одной котировки не отрисовано")
         return 1
     pruned = _prune()
-    print(f"brief_image: {result} ({len(numbers)} котировок, {len(panels)} панелей"
+    # «Кандидатов», а не «панелей»: с 31.08 джоб подаёт список с запасом
+    # (PANEL_CANDIDATES), а рисует рендер ровно 4 или 2. В логе стояло
+    # «6 панелей», и это читалось как сломанная сетка, хотя сетка верная.
+    print(f"brief_image: {result} ({len(numbers)} котировок, {len(panels)} кандидатов"
           + (f", убрано старых {pruned}" if pruned else "") + ")")
     return 0
 

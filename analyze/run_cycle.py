@@ -156,6 +156,11 @@ def _last_run_ts(con: sqlite3.Connection, profile: str) -> int | None:
     return row[0] if row and row[0] is not None else None
 
 
+# Длина операционного алерта. 400 знаков — примерно экран телефона: больше
+# человек всё равно не читает, а пролистывает.
+_ALERT_MAX_LEN = 400
+
+
 def _alert(message: str, verbose: bool) -> None:
     """exit_code=3 (или 3 подряд, или разрыв >12ч) -- единственное, что
     будит человека. Идёт в @gdenigi_bot через общую очередь: разделение
@@ -163,6 +168,13 @@ def _alert(message: str, verbose: bool) -> None:
     пишут в один чат, и операционные сообщения от @Markgandon_bot
     читались как сбой, а не как замысел. Отказ отправки НЕ должен ронять
     сам цикл."""
+    # 🔴 11.09.2026: длина режется ЗДЕСЬ, а не только у источника. Простыню
+    # устроил str(TimeoutExpired), который тащил в сообщение весь промпт —
+    # починено в agent_run.py, но это был лишь один из возможных источников.
+    # Алерт обязан оставаться читаемым с телефона, чем бы его ни наполнили:
+    # человека будит одна строка, подробности лежат в cycle_runs и логе.
+    if len(message) > _ALERT_MAX_LEN:
+        message = message[:_ALERT_MAX_LEN] + f"… (обрезано, было {len(message)} знаков)"
     try:
         from analyze.outbox import enqueue_ops
         enqueue_ops(f"⚠️ alpha_cycle: {message}")
