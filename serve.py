@@ -2761,6 +2761,11 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         # тегов тридцать адресов из восьмидесяти четырёх — десять платных
         # глав в трёх языках — оставались без canonical и без связи между
         # языками: ровно те страницы, ссылку на которые мы и продаём.
+        # 🔴 noindex (30.09.2026): главы 6-15 доступны только после
+        # регистрации, анонимный краулер видит лишь экран «Осталось два
+        # шага» — тридцать одинаковых тонких страниц в индексе. Из карты
+        # сайта они тоже убраны (tools/build_sitemap.py). follow оставлен:
+        # ссылки на соседние главы и оглавление должны работать.
         html = f"""<!doctype html><html lang="{lang}"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 {_alt_links(f"/edu/b/{ch}", lang)}
@@ -2768,7 +2773,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 {_page_meta(f"{ch}. " + i18n.t(f'eduindex.chapters.{ch}.title', lang) + " — SBF",
             "", f"/edu/b/{ch}", lang,
             i18n.t(f'eduindex.chapters.{ch}.sub', lang))}
-<title>{i18n.t('eduindex.paywall.title', lang)}</title>
+<title>{ch}. {i18n.t(f'eduindex.chapters.{ch}.title', lang)} — SBF</title>
+<meta name="robots" content="noindex, follow">
 <link rel="stylesheet" href="/assets/design.css?v=20260909">
 <link rel="stylesheet" href="/edu/edu.css?v=20260903b">
 <link rel="stylesheet" href="/assets/sbf-nav.css?v=20260903b">

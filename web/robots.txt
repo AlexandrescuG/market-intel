@@ -1,41 +1,49 @@
+# lp.sbfconsult.com — что можно читать роботам.
+#
+# 🔴 ЗАПРЕТЫ ПОВТОРЕНЫ В КАЖДОЙ ГРУППЕ. По RFC 9309 бот читает ТОЛЬКО
+# самую конкретную группу, где назван по имени, а «*» тогда игнорирует.
+# Меняете список закрытого — меняйте во всех трёх группах.
+# Главы курса 6-15 не закрыты здесь: они отдают noindex сами (serve.py,
+# _send_edu_paywall), а robots-запрет помешал бы краулеру этот noindex увидеть.
+# /api/ не закрыт намеренно: из него страницы берут данные при рендере,
+# и Googlebot без них увидит пустые блоки.
+
+# ── Все остальные ───────────────────────────────────────────
 User-agent: *
+Disallow: /admin
+Disallow: /journal
+Disallow: /login
 Allow: /
 
-# AI-ассистенты и поисковые AI — явно разрешаем чтение
-User-agent: GPTBot
-Allow: /
-
+# ── Поиск и агенты: индексируют и отвечают СО ССЫЛКОЙ ───────
+User-agent: Googlebot
+User-agent: Bingbot
+User-agent: YandexBot
 User-agent: OAI-SearchBot
-Allow: /
-
 User-agent: ChatGPT-User
-Allow: /
-
-User-agent: ClaudeBot
-Allow: /
-
-User-agent: anthropic-ai
-Allow: /
-
-User-agent: Claude-Web
-Allow: /
-
+User-agent: Claude-SearchBot
+User-agent: Claude-User
 User-agent: PerplexityBot
+User-agent: Perplexity-User
+User-agent: DuckAssistBot
+Disallow: /admin
+Disallow: /journal
+Disallow: /login
 Allow: /
 
-User-agent: Google-Extended
-Allow: /
-
+# ── Обучение моделей: ссылок не дают, забирают текст в веса ─
+# Google-Extended и Applebot-Extended — токены согласия на обучение, не
+# краулеры. Запретить обучение — поменять эту группу на «Disallow: /».
+User-agent: GPTBot
+User-agent: ClaudeBot
 User-agent: CCBot
-Allow: /
-
+User-agent: Google-Extended
 User-agent: Applebot-Extended
-Allow: /
-
 User-agent: meta-externalagent
-Allow: /
-
 User-agent: Amazonbot
+Disallow: /admin
+Disallow: /journal
+Disallow: /login
 Allow: /
 
 Sitemap: https://lp.sbfconsult.com/sitemap.xml
