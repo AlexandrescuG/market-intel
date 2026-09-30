@@ -44,9 +44,19 @@ from urllib.parse import urlparse
 NS = {"sm": "http://www.sitemaps.org/schemas/sitemap/0.9"}
 
 
+# 🔴 СВОЙ User-Agent ОБЯЗАТЕЛЕН: Cloudflare отдаёт 403 стандартному
+# urllib ("Python-urllib/3.x"). Проверено 30.09.2026 — curl на те же адреса
+# получал 200, а скрипт 403 на обе карты сайта. Ловушка в том, что дальше
+# он печатал «нового нет — отправлять нечего» и выходил с кодом 0: молчание
+# вместо ошибки, то есть cron годами рапортовал бы об успехе, не отправив
+# ни одного адреса.
+АГЕНТ = "SBFIndexNow/1.0 (+https://lp.sbfconsult.com/)"
+
+
 def читать_карту(url: str) -> dict[str, str]:
     """{адрес: lastmod} из sitemap (включая sitemap index на один уровень)."""
-    with urllib.request.urlopen(url, timeout=30) as r:
+    запрос = urllib.request.Request(url, headers={"User-Agent": АГЕНТ})
+    with urllib.request.urlopen(запрос, timeout=30) as r:
         корень = ET.fromstring(r.read())
     итог: dict[str, str] = {}
     for sm in корень.findall("sm:sitemap", NS):
@@ -90,12 +100,19 @@ def main() -> int:
     if а.url:
         кандидаты = {u: "" for u in а.url}
     else:
-        кандидаты = {}
+        кандидаты, карт_прочитано = {}, 0
         for карта in КАРТЫ:
             try:
                 кандидаты.update(читать_карту(карта))
+                карт_прочитано += 1
             except Exception as e:                      # одна карта не должна ронять другую
                 print(f"✗ {карта}: {e}", file=sys.stderr)
+        # 🔴 «Ни одной карты не прочитано» — это ОТКАЗ, а не «нечего слать».
+        # Без этой ветки 403 от Cloudflare выглядел ровно как пустая очередь.
+        if not карт_прочитано:
+            print("✗ ни одна карта сайта не прочитана — отправлять нечего, "
+                  "и это ошибка, а не пустая очередь", file=sys.stderr)
+            return 1
         кандидаты = {u: lm for u, lm in кандидаты.items()
                      if u not in отправлено or (lm and lm != отправлено[u])}
 
