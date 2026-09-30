@@ -38,8 +38,12 @@ from pathlib import Path
 БРОКЕРЫ = ("xm", "naga", "fxpro", "instaforex", "avatrade")
 
 # Публичные страницы: (путь без префикса локали, приоритет, частота).
-# Служебное (/journal, /admin, /m, /survey, /login) в карту не кладём:
-# это личные кабинеты и формы, им в поиске делать нечего.
+# Служебное (/journal, /admin, /m, /survey, /login, /register) в карту не
+# кладём: это личные кабинеты и формы, им в поиске делать нечего.
+
+# Главы, открытые без регистрации. 6-15 доступны только после неё: аноним
+# (и краулер) видит экран-заглушку с noindex — в карте ему делать нечего.
+ОТКРЫТЫЕ_ГЛАВЫ = range(1, 6)
 СТРАНИЦЫ: list[tuple[str, str, str]] = [
     ("/",            "1.0", "daily"),
     ("/brokers",     "0.9", "weekly"),
@@ -48,7 +52,6 @@ from pathlib import Path
     ("/chart.html",  "0.7", "daily"),
     ("/edu/",        "0.9", "weekly"),
     ("/privacy",     "0.3", "yearly"),
-    ("/register",    "0.5", "monthly"),
     *[(f"/brokers/{б}", "0.8", "monthly") for б in БРОКЕРЫ],
 ]
 
@@ -69,7 +72,7 @@ def собрать() -> list[list[tuple[str, str]]]:
     группы = []
     for путь, _, _ in СТРАНИЦЫ:
         группы.append([(я, адрес(путь, я)) for я in ЯЗЫКИ])
-    for n in range(1, 16):
+    for n in ОТКРЫТЫЕ_ГЛАВЫ:
         группы.append([(я, адрес(f"/edu/b/{n}", я)) for я in ЯЗЫКИ])
     return группы
 

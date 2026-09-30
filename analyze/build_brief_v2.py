@@ -48,6 +48,15 @@ WEB_DATA = BASE_DIR / "web" / "data"
 
 CALENDAR_CAP = 6
 MOVERS_CAP = 3
+# Блок называется «кто ходил шире обычного», значит ratio обязан быть > 1.
+# Бриф 29.09.2026 вывел GBPUSD 0,97 / NG 0,88 / DXY 0,77 — ход УЖЕ нормы,
+# потому что топ-3 брался без порога. Пусто — честнее, чем неправда.
+MOVERS_MIN_RATIO = 1.0
+# Одно решение по ставке источник шлёт под разными метками («Interest Rate»,
+# «Cash Rate») и иногда со сдвигом в час (29.09.2026: RBA трижды — 04:30,
+# 04:30 и 05:30). Схлопываем по смыслу в пределах этого окна.
+RATE_DEDUP_WINDOW_S = 90 * 60
+_RATE_TYPES = frozenset({"rate", "cash rate"})
 PATTERNS_CAP = 4
 MIN_REACTION_N = 5
 MIN_PATTERN_N = 15
@@ -96,6 +105,23 @@ def _dedup_key(e: dict) -> tuple:
     return (e.get("country"), e.get("ts_utc") or e.get("scheduled_ts"), label)
 
 
+def _is_same_rate_decision(e: dict, rate_seen: list[tuple]) -> bool:
+    """True, если e — повтор уже взятого решения по ставке той же страны
+    (другая метка и/или сдвиг до RATE_DEDUP_WINDOW_S). Первое вхождение
+    регистрируется в rate_seen и возвращает False."""
+    etype = normalize_event_type(e.get("indicator") or e.get("title") or "")
+    if etype not in _RATE_TYPES:
+        return False
+    ts = e.get("scheduled_ts")
+    for country, ts0 in rate_seen:
+        if country != e.get("country"):
+            continue
+        if ts is None or ts0 is None or abs(ts - ts0) <= RATE_DEDUP_WINDOW_S:
+            return True
+    rate_seen.append((e.get("country"), ts))
+    return False
+
+
 def _today_str(now: datetime | None = None) -> str:
     now = now or datetime.now(timezone.utc)
     return now.strftime("%Y-%m-%d")
@@ -135,9 +161,12 @@ def build_calendar_block(today: str) -> tuple[list[dict], int, list[str]]:
 
     deduped = []
     seen = set()
+    rate_seen: list[tuple] = []     # (страна, scheduled_ts) уже взятых решений по ставке
     for e in high_med:
         key = _dedup_key(e)
         if key in seen:
+            continue
+        if _is_same_rate_decision(e, rate_seen):
             continue
         seen.add(key)
         deduped.append(e)
@@ -181,7 +210,8 @@ def build_movers_block(today: str) -> dict:
     """Блок 3. Сортировка по ratio (отклонение от своей нормы), не по %."""
     moves = full_universe_moves(DEFAULT_UNIVERSE, today)
     cutoff = (datetime.strptime(today, "%Y-%m-%d") - timedelta(days=MOVERS_STALE_DAYS)).strftime("%Y-%m-%d")
-    moves = [m for m in moves if m["bar_date"] >= cutoff and m["ratio"] is not None]
+    moves = [m for m in moves if m["bar_date"] >= cutoff and m["ratio"] is not None
+             and m["ratio"] > MOVERS_MIN_RATIO]
 
     up = sorted([m for m in moves if m["chg_pct"] > 0], key=lambda m: m["ratio"], reverse=True)[:MOVERS_CAP]
     down = sorted([m for m in moves if m["chg_pct"] < 0], key=lambda m: m["ratio"], reverse=True)[:MOVERS_CAP]

@@ -48,28 +48,30 @@ if (new URLSearchParams(location.search).get("embed") === "1") {
      чтобы переписывать этот блок на каждой странице пятью копиями,
      которые разъедутся. См. core/schema_ld.py:ОРГ. #}
   "@id": "https://lp.sbfconsult.com/#org",
-  "name": "SBF Consult",
-  "legalName": "SBF Company SRL",
+  "name": "SBF Company",
+  "legalName": "Societatea cu Răspundere Limitată \"SBF COMPANY\"",
+  "alternateName": ["«SBF COMPANY» S.R.L.", "SBF Company SRL", "SBF Consult"],
   "url": "https://lp.sbfconsult.com/",
   "logo": "https://lp.sbfconsult.com/assets/logo.svg",
-  "description": "SBF Consult — сопровождение счёта, анализ рынка и подбор брокера для частных инвесторов. Экспертная аналитика, усиленная ИИ.",
+  "description": "SBF Company — сопровождение счёта, анализ рынка и подбор брокера для частных инвесторов. Экспертная аналитика, усиленная ИИ.",
   "areaServed": ["MD", "KZ", "ZA", "AE", "CH", "PT"],
   {# Румынский тут забыли: сайт трёхъязычный с самого начала, а в разметке
      его не было — и /ro/ для машины выглядел как страница на неизвестно
      каком языке. #}
   "availableLanguage": ["ru", "ro", "en"],
-  "identifier": {
-    "@type": "PropertyValue",
-    "propertyID": "LEI",
-    "value": "254900BW4MI5M0006I30"
-  },
+  "leiCode": "254900BW4MI5M0006I30",
+  "identifier": [
+    { "@type": "PropertyValue", "propertyID": "LEI",  "value": "254900BW4MI5M0006I30" },
+    { "@type": "PropertyValue", "propertyID": "IDNO", "value": "1025600035871" }
+  ],
   "address": {
     "@type": "PostalAddress",
     "streetAddress": "Ул. Алексей Щусев 47",
     "addressLocality": "Кишинёв",
     "addressCountry": "MD"
   },
-  "sameAs": ["https://sbfconsult.com/"]
+  "sameAs": ["https://sbfconsult.com/", "https://www.sbf.md/",
+             "https://lei.bloomberg.com/leis/view/254900BW4MI5M0006I30"]
 }
 </script>
 <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg">
