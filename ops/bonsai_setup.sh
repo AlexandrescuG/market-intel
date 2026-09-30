@@ -34,10 +34,32 @@ set -uo pipefail
 
 HOME_DIR="/mnt/sbfdata/Базы/llm/bonsai2"
 TAG="prism-b10709-9a9394a"
-# CUDA 12.8, а не 13.3: у 13.3 на Linux сегфолт (их KNOWN_ISSUES).
-ARCHIVE="llama-${TAG}-bin-linux-cuda-12.8-x64.tar.gz"
+
+# 🔴 КАКУЮ СБОРКУ БРАТЬ. Первым взяли CUDA 12.8 — и она не запустилась:
+# «libcudart.so.12: cannot open shared object file». CUDA Toolkit на этой
+# машине не установлен вовсе (ldconfig не знает ни одной libcudart, пакетов
+# cuda нет), есть только libcuda.so.1 из драйвера. Ставить Toolkit ради
+# замера — вмешательство в систему, которое надо обсуждать отдельно;
+# сначала меряем тем, что работает без установки.
+#   cpu    — 16 МБ, ничего не требует, ответ в худшем случае
+#   vulkan — 33 МБ, GTX 1080 умеет Vulkan; но у них PQ2_0 на Vulkan молча
+#            уходит на процессор, а PTQ1_0 декодит медленнее, чем должен
+#   cuda   — 159 МБ, нужен CUDA-рантайм 12 (libcudart, libcublas)
+BUILD="${BONSAI_BUILD:-cpu}"
+case "$BUILD" in
+  cpu)
+    ARCHIVE="llama-${TAG}-bin-ubuntu-x64.tar.gz"
+    ARCHIVE_SHA="48b487f00fd2b27bc3ef77c701b43c1c23a4af484d2a203ae87d0efc41506728" ;;
+  vulkan)
+    ARCHIVE="llama-${TAG}-bin-ubuntu-vulkan-x64.tar.gz"
+    ARCHIVE_SHA="4d7f858539d0207cf64e90beb83fcb7e076580d52856580f223cbecdd3ef6d03" ;;
+  cuda)
+    # CUDA 12.8, а не 13.3: у 13.3 на Linux сегфолт (их KNOWN_ISSUES).
+    ARCHIVE="llama-${TAG}-bin-linux-cuda-12.8-x64.tar.gz"
+    ARCHIVE_SHA="8aec67eb023b251712c7e6490f367b5671bf587eced1436a9b85f4a90c3b7d3d" ;;
+  *) echo "BONSAI_BUILD: cpu, vulkan или cuda"; exit 2 ;;
+esac
 ARCHIVE_URL="https://github.com/PrismML-Eng/llama.cpp/releases/download/${TAG}/${ARCHIVE}"
-ARCHIVE_SHA="8aec67eb023b251712c7e6490f367b5671bf587eced1436a9b85f4a90c3b7d3d"
 
 MODEL="Ternary-Bonsai-2-27B-PTQ1_0.gguf"
 MODEL_URL="https://huggingface.co/prism-ml/Ternary-Bonsai-2-27B-gguf/resolve/main/${MODEL}"
@@ -122,16 +144,34 @@ step1() {
     find "$HOME_DIR/bin" -maxdepth 2 -type f -perm -u+x | head -10
     return 1
   fi
-  echo "  бинарник: $BIN"
+  echo "  бинарник: $BIN  (сборка: $BUILD)"
   echo
-  echo "  --- какие устройства он видит ---"
-  "$BIN" --list-devices 2>&1 | head -20
+  # 🔴 ТРИ ИСХОДА, А НЕ ДВА. Первая версия проверяла только «есть ли в
+  # выводе слово CUDA» — и когда бинарник не запустился вовсе
+  # («libcudart.so.12: cannot open shared object file»), уверенно
+  # сообщила «CUDA-устройства нет, пойдёт на процессоре». Это разные
+  # вещи: «карта не поддержана» и «программа не стартовала». Отличаем
+  # по коду возврата, а неудачу показываем целиком.
+  local out rc
+  out="$("$BIN" --list-devices 2>&1)"; rc=$?
+  echo "  --- вывод --list-devices (код $rc) ---"
+  echo "$out" | head -20
   echo
-  if "$BIN" --list-devices 2>&1 | grep -qiE "CUDA|NVIDIA"; then
-    echo "✅ CUDA-устройство видно. Есть смысл в шаге 2."
+  if [ $rc -ne 0 ] || echo "$out" | grep -qiE "error while loading|cannot open shared object"; then
+    echo "✗ БИНАРНИК НЕ ЗАПУСТИЛСЯ — про карту это ничего не говорит."
+    if echo "$out" | grep -q "libcudart"; then
+      echo "   Не хватает CUDA-рантайма (libcudart/libcublas): Toolkit не"
+      echo "   установлен, есть только libcuda.so.1 из драйвера."
+      echo "   Дальше: BONSAI_BUILD=cpu (ничего ставить не надо) либо"
+      echo "   ставить CUDA 12 — это решение владельца."
+    fi
+    return 1
+  fi
+  if echo "$out" | grep -qiE "CUDA|NVIDIA|Vulkan"; then
+    echo "✅ Ускоритель виден. Есть смысл в шаге 2."
   else
-    echo "⚠️  CUDA-устройства в списке нет — пойдёт на процессоре."
-    echo "   Не приговор (модель memory-bound), но ждать дольше."
+    echo "ℹ️  Ускорителя нет — сборка процессорная, так и задумано."
+    echo "   Модель упирается в память, не в вычисления: мерить шагом 3."
   fi
 }
 
