@@ -86,6 +86,8 @@ body{background:var(--cream);color:var(--ink);font-family:Montserrat,sans-serif;
 .cal-d.in-range{background:rgba(201,162,39,.2);border-radius:0}
 .cal-d.in-range.sel-start{border-radius:4px 0 0 4px}
 .cal-d.in-range.sel-end{border-radius:0 4px 4px 0}
+.cal-h1{font-size:18px;font-weight:700;color:var(--ink);margin:0 0 12px;letter-spacing:.2px}
+@media (max-width:640px){.cal-h1{font-size:16px;margin-bottom:8px}}
 .cal-hint{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);
   text-align:center;margin-top:8px;letter-spacing:.3px;min-height:14px}
 
@@ -245,6 +247,11 @@ body{background:var(--cream);color:var(--ink);font-family:Montserrat,sans-serif;
 
   <!-- Main -->
   <main class="cal-main">
+    <!-- 🔴 У страницы не было ни одного заголовка вообще — ни h1, ни h2.
+         Экранная читалка не могла назвать, куда человек попал, а Bing
+         30.09.2026 отдельно сообщил «H1 tag missing». Заголовок видимый:
+         прятать его ради метрики значило бы чинить замер, а не страницу. -->
+    <h1 class="cal-h1">{{ t('calendar.h1', lang) }}</h1>
     <!-- Date range picker -->
     <div class="date-rng" id="date-rng">
       <div class="drng-presets">

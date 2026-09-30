@@ -116,7 +116,10 @@ a:hover{text-decoration:underline;color:var(--glow)}
 .brand{display:flex;align-items:center;gap:12px}
 .brand .logo-wrap{width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .brand .logo-wrap img{width:44px;height:44px;object-fit:contain}
-.brand-text b{font-weight:700;font-size:15px;letter-spacing:.5px;color:var(--ink)}
+/* Селектор h1, а не b: элемент в шапке стал заголовком страницы (см.
+   разметку ниже). margin:0 и явный font-size обязательны — у h1 свои
+   умолчания браузера, без сброса шапка разъехалась бы на 2em отступа. */
+.brand-text h1{font-weight:700;font-size:15px;letter-spacing:.5px;color:var(--ink);margin:0;line-height:1.2}
 .brand-text span{color:var(--muted);font-size:11px;display:block;margin-top:1px}
 .top .right{margin-left:auto;display:flex;align-items:center;gap:18px;font-size:12px;font-family:'JetBrains Mono'}
 .win{display:flex;align-items:center;gap:6px;color:var(--muted)}
@@ -607,7 +610,7 @@ a:hover{text-decoration:underline;color:var(--glow)}
 @media(max-width:760px){
   .top{padding:8px 14px}
   .brand-text span{display:none}
-  .brand-text b{font-size:13px;white-space:nowrap}
+  .brand-text h1{font-size:13px;white-space:nowrap}
   .strip{top:58px}
   .seg-wrap{top:98px}
   .right .win:nth-child(2){display:none}
@@ -691,8 +694,17 @@ a:hover{text-decoration:underline;color:var(--glow)}
     <div class="logo-wrap">
       <img src="./assets/logo.png" alt="SBF" width="44" height="44">
     </div>
+    <!-- 🔴 h1, а не b. Bing 30.09.2026: «H1 tag missing» на главной, при
+         десяти h2 ниже — страница начиналась сразу со второго уровня, и
+         экранная читалка не находила заголовка страницы вовсе.
+         Название продукта в шапке и есть заголовок этой страницы, поэтому
+         правка семантическая: текст, место и вид не меняются (класс
+         .brand-text задаёт размер и насыщенность, сброс полей h1 — в
+         brand-text h1 в стилях). Прятать заголовок ради метрики или
+         дописывать невидимый — не то же самое, что назвать уже видимый
+         своим именем. -->
     <div class="brand-text">
-      <b>SBF INTELLIGENCE</b>
+      <h1>SBF INTELLIGENCE</h1>
       <span>{{ t('brand.tagline', lang) }}</span>
     </div>
   </div>
