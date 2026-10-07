@@ -843,7 +843,7 @@ function SqueezeTrainer() {
         )}
       </div>
       <p style={{fontSize:12,color:C.inkSoft,lineHeight:1.65,marginTop:14,fontStyle:"italic",maxWidth:780}}>{sq.calendarLink}</p>
-      <a href="/chart.html?s=GOLD" target="_blank" rel="noopener" style={{fontFamily:"monospace",fontSize:12,color:C.goldText,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>
+      <a href="/chart?s=GOLD" target="_blank" rel="noopener" style={{fontFamily:"monospace",fontSize:12,color:C.goldText,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>
         {(() => { const symLabel = window.SBFSymbols ? window.SBFSymbols.symbolName("GOLD", {lang: INITIAL_LANG, mode:"name+ticker"}) : "GOLD"; return INITIAL_LANG==="ru"?`Открыть ${symLabel} на графике →`:INITIAL_LANG==="ro"?`Deschide ${symLabel} pe grafic →`:`Open ${symLabel} on the chart →`; })()}
       </a>
 

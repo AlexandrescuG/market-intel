@@ -1182,7 +1182,7 @@ def _schema_ld_глава(ch: int, lang: str) -> str:
 
 _РАЗДЕЛЫ_САЙТА = (
     ("/",           "nav.today"),
-    ("/chart.html", "nav.charts"),
+    ("/chart",      "nav.charts"),
     ("/edu/",       "nav.edu"),
     ("/calendar",   "nav.calendar"),
     ("/brokers",    "nav.brokers"),
@@ -1366,7 +1366,12 @@ _КАНОНИЧЕСКИЙ_АДРЕС = {
     "/edu/glossary.html":  "/glossary",
     "/broker_guide.html":  "/brokers",
     "/journal.html":       "/journal",
-    "/grafik.html":        "/chart.html",
+    # 01.10.2026: канонический адрес графика — /chart без расширения.
+    # /grafik.html вёл на /chart.html, то есть на другой редирект: цепочка
+    # из двух 301 подряд, которую краулеры проходят с потерей веса ссылки.
+    # Теперь оба старых адреса ведут на конечный одним шагом.
+    "/chart.html":         "/chart",
+    "/grafik.html":        "/chart",
 }
 _КНИГА_ФАЙЛ_RE = re.compile(r'^/book/edu_book_(\d{1,2})\.html$')
 
@@ -1732,7 +1737,7 @@ def _edu_inject(ch: int, lang: str = i18n.DEFAULT_LANG) -> str:
   <span class="nav-counter">{i18n.t("edu.chapter_counter", lang, ch=ch)}</span>
   <a class="nav-toc" href="{_toc_href}">{i18n.t("edu.toc", lang)}</a>
   <a class="nav-next" href="{next_href}">{next_label}</a>
-  <a class="nav-live" id="edu-live-btn" href="/chart.html?s={chart_key}" target="_blank">
+  <a class="nav-live" id="edu-live-btn" href="/chart?s={chart_key}" target="_blank">
     <span id="edu-live-price">{live_label}</span>
   </a>
 </div>
@@ -1743,7 +1748,7 @@ def _edu_inject(ch: int, lang: str = i18n.DEFAULT_LANG) -> str:
     <div id="edu-live-widget" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-family:'JetBrains Mono',monospace;font-size:12px">
       <span style="color:#716A5A">{i18n.t("edu.loading", lang)}</span>
     </div>
-    <a href="/chart.html?s={chart_key}" target="_blank"
+    <a href="/chart?s={chart_key}" target="_blank"
        style="display:inline-flex;align-items:center;gap:6px;margin-top:12px;padding:7px 16px;background:#C9A227;color:#2B2B33;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.5px;text-decoration:none;border-radius:6px">
       {i18n.t("edu.open_in_terminal", lang, live_label=live_label)}
     </a>
@@ -2664,7 +2669,12 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.end_headers()
         elif path_clean in ("/edu/calendar", "/calendar"):
             self._render_site_page("edu/calendar.html", req_lang)
-        elif path_clean in ("/chart.html", "/chart"):
+        elif path_clean == "/chart":
+            # 🔴 Только /chart. Раньше тут стояло ("/chart.html", "/chart"), и
+            # оба адреса отдавали 200 с ОДНИМ И ТЕМ ЖЕ содержимым — ровно то
+            # раздвоение для краулеров, которое мы в этот же день чинили на
+            # www/апексе sbfconsult.com. Старый адрес теперь уезжает 301-м
+            # через _КАНОНИЧЕСКИЙ_АДРЕС ниже по ветке .html.
             self._render_site_page("chart.html", req_lang)
         # ── Admin panel ──
         elif path_clean in ("/admin", "/admin.html"):

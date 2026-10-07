@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 {# canonical + hreflang: сервер знает, что у курса локаль идёт
    после /edu, а у остальных — перед; см. serve.py:_alt_links #}
-{{ alt_links('/chart.html', lang) | safe }}
-{{ page_meta(t('chart.page_title', lang), '', '/chart.html', lang,
+{{ alt_links('/chart', lang) | safe }}
+{{ page_meta(t('chart.page_title', lang), '', '/chart', lang,
              t('chart.page_description', lang)) | safe }}
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script>

@@ -469,7 +469,7 @@ function IchimokuLiveChart() {
         ))}
       </div>
       <p style={{fontSize:12,color:"rgba(255,255,255,0.5)",lineHeight:1.65,margin:0,maxWidth:680}}>{lc.caption}</p>
-      <a href={"/chart.html?s=" + symbol} target="_blank" rel="noopener" style={{fontFamily:"monospace",fontSize:11.5,color:C.goldText,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`,marginTop:10,display:"inline-block"}}>
+      <a href={"/chart?s=" + symbol} target="_blank" rel="noopener" style={{fontFamily:"monospace",fontSize:11.5,color:C.goldText,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`,marginTop:10,display:"inline-block"}}>
         {(() => { const symLabel = window.SBFSymbols ? window.SBFSymbols.symbolName(symbol, {lang: INITIAL_LANG, mode:"name+ticker"}) : symbol; return INITIAL_LANG==="ru"?`Открыть ${symLabel} на графике →`:INITIAL_LANG==="ro"?`Deschide ${symLabel} pe grafic →`:`Open ${symLabel} on the chart →`; })()}
       </a>
     </div>

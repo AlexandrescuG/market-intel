@@ -49,7 +49,7 @@ from pathlib import Path
     ("/brokers",     "0.9", "weekly"),
     ("/glossary",    "0.8", "monthly"),
     ("/calendar",    "0.7", "daily"),
-    ("/chart.html",  "0.7", "daily"),
+    ("/chart",       "0.7", "daily"),
     ("/edu/",        "0.9", "weekly"),
     ("/privacy",     "0.3", "yearly"),
     *[(f"/brokers/{б}", "0.8", "monthly") for б in БРОКЕРЫ],
@@ -85,7 +85,18 @@ def свойства(путь: str) -> tuple[str, str]:
 
 
 def проверить(пути: list[str]) -> dict[str, int]:
-    """Живой прогон: какой статус реально отдаёт каждый адрес."""
+    """Живой прогон: какой статус реально отдаёт каждый адрес.
+
+    🔴 РЕДИРЕКТ — ЭТО НЕ 200, ХОТЯ goto() ВЕРНЁТ 200.
+    Playwright идёт по редиректам и отдаёт статус КОНЕЧНОЙ страницы.
+    01.10.2026 я переименовал /chart.html в /chart, оставив на старом
+    адресе 301, — и этот щуп бодро сообщил «все адреса отдают 200», хотя
+    один из них отдавал 301. Для карты сайта это существенно: карта
+    обязана перечислять конечные адреса, иначе краулер на каждый заход
+    тратит лишний запрос, а вес ссылки размазывается по цепочке.
+    `redirected_from` у ответа непустой ровно тогда, когда переход был.
+    Возвращаем настоящий код первого запроса, а не последнего.
+    """
     from playwright.sync_api import sync_playwright
     статусы: dict[str, int] = {}
     with sync_playwright() as pw:
@@ -94,7 +105,14 @@ def проверить(пути: list[str]) -> dict[str, int]:
         for п in пути:
             try:
                 о = стр.goto(БАЗА_ПРОВЕРКИ + п, wait_until="commit", timeout=20000)
-                статусы[п] = о.status if о else 0
+                if о is None:
+                    статусы[п] = 0
+                    continue
+                первый = о.request
+                while первый.redirected_from is not None:
+                    первый = первый.redirected_from
+                начальный = первый.response()
+                статусы[п] = начальный.status if начальный else о.status
             except Exception:
                 статусы[п] = 0
         бр.close()

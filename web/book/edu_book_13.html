@@ -279,7 +279,7 @@ function WhySwing() {
       <p style={{fontSize:14,color:C.black,fontWeight:600,lineHeight:1.78,marginBottom:14,maxWidth:820}}>{w.body2(scalp, swing)}</p>
       <p style={{fontSize:14,color:C.inkMid,lineHeight:1.78,marginBottom:14,maxWidth:820}}>{w.body3}</p>
       <p style={{fontSize:13.5,color:C.inkSoft,lineHeight:1.78,fontStyle:"italic",maxWidth:820,marginBottom:14}}>{w.body4}</p>
-      <a href="/chart.html?s=GOLD" target="_blank" rel="noopener" style={{fontFamily:"monospace",fontSize:12,color:C.goldText,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>{w.openOnChart}</a>
+      <a href="/chart?s=GOLD" target="_blank" rel="noopener" style={{fontFamily:"monospace",fontSize:12,color:C.goldText,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>{w.openOnChart}</a>
     </div>
   );
 }
@@ -470,7 +470,7 @@ function PyramidCalculator() {
         <p style={{fontSize:11.5,color:C.inkFaint,fontStyle:"italic",marginBottom:8}}>{py.compliance}</p>
       )}
       {step >= 3 && (
-        <a href="/chart.html?s=GOLD" target="_blank" rel="noopener" style={{fontFamily:"monospace",fontSize:12,color:C.goldText,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>{py.openOnChart}</a>
+        <a href="/chart?s=GOLD" target="_blank" rel="noopener" style={{fontFamily:"monospace",fontSize:12,color:C.goldText,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>{py.openOnChart}</a>
       )}
     </div>
   );
@@ -573,7 +573,7 @@ function BreakevenCostTable({ be, loading, error }) {
       </div>
 
       <a href="/data/edu_stats/breakeven_cost.csv" download style={{fontFamily:"monospace",fontSize:12,color:C.goldText,textDecoration:"none",border:`1px solid ${C.gold}`,padding:"9px 16px",borderRadius:4,display:"inline-block",marginRight:14}}>{b.csvBtn}</a>
-      <a href="/chart.html?s=GOLD" target="_blank" rel="noopener" style={{fontFamily:"monospace",fontSize:12,color:C.goldText,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>{b.openOnChart}</a>
+      <a href="/chart?s=GOLD" target="_blank" rel="noopener" style={{fontFamily:"monospace",fontSize:12,color:C.goldText,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>{b.openOnChart}</a>
     </div>
   );
 }

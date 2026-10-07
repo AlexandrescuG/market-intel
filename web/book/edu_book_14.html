@@ -373,7 +373,7 @@ function CostArithmetic({ onCompleted }) {
       )}
       {step >= 2 && <p style={{fontSize:11.5,color:C.inkFaint,fontStyle:"italic",marginBottom:8}}>{ca.compliance}</p>}
       {step >= 3 && (
-        <a href="/chart.html?s=GOLD" target="_blank" rel="noopener" style={{fontFamily:"monospace",fontSize:12,color:C.goldText,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>{ca.openOnChart}</a>
+        <a href="/chart?s=GOLD" target="_blank" rel="noopener" style={{fontFamily:"monospace",fontSize:12,color:C.goldText,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>{ca.openOnChart}</a>
       )}
     </div>
   );
@@ -486,7 +486,7 @@ function TargetFeasibility() {
       </div>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:10}}>
         <Mono size={9.5} color={C.inkFaint} spacing={0}>{tf.symbolNote}</Mono>
-        <a href="/chart.html?s=GOLD" target="_blank" rel="noopener" style={{fontFamily:"monospace",fontSize:11,color:C.goldText,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>{tf.openOnChart}</a>
+        <a href="/chart?s=GOLD" target="_blank" rel="noopener" style={{fontFamily:"monospace",fontSize:11,color:C.goldText,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>{tf.openOnChart}</a>
       </div>
     </div>
   );
@@ -521,7 +521,7 @@ function SetupNoWinrates() {
           </div>
         ))}
       </div>
-      <a href="/chart.html?s=GOLD" target="_blank" rel="noopener" style={{display:"inline-block",marginTop:14,fontFamily:"monospace",fontSize:12,color:C.goldText,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>{s.openOnChart}</a>
+      <a href="/chart?s=GOLD" target="_blank" rel="noopener" style={{display:"inline-block",marginTop:14,fontFamily:"monospace",fontSize:12,color:C.goldText,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>{s.openOnChart}</a>
     </div>
   );
 }

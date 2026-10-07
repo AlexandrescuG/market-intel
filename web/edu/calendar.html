@@ -1202,7 +1202,7 @@ function loadPriceChart(idx){
   var raw = sel ? sel.value : 'EURUSD';
   var sym = _SYM_MAP[raw] || raw;
   var fr = document.createElement('iframe');
-  fr.src = '/chart.html?s='+encodeURIComponent(sym)+'&embed=1';
+  fr.src = '/chart?s='+encodeURIComponent(sym)+'&embed=1';
   fr.style.cssText = 'width:100%;border:none;display:block;height:520px';
   fr.dataset.priceFrame = '1';
   fr.allowFullscreen = true;

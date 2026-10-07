@@ -1072,7 +1072,7 @@
           var pct   = (up ? '+' : '') + fmt(m.price_change_percent, 2) + '%';
           var cls   = up ? 'j-up' : 'j-dn';
           var vol   = m.volatility_state || 'normal';
-          var chartUrl = '/chart.html?s=' + encodeURIComponent(m.symbol);
+          var chartUrl = '/chart?s=' + encodeURIComponent(m.symbol);
           return '<a class="j-retro-card" href="' + chartUrl + '" title="' + t('journal.open_chart_tip', 'Открыть график') + '">'
             + '<div class="j-retro-sym">' + escHtml(symLabel(m.symbol)) + '</div>'
             + '<div class="j-retro-chg ' + cls + '">' + pct + '</div>'
@@ -1576,7 +1576,7 @@
         return '<span class="j-setup-tag">' + escHtml(tag) + '</span>';
       }).join('');
       var st  = s.status || 'pending';
-      var chartUrl = '/chart.html?s=' + encodeURIComponent(s.symbol) + '&tf=' + encodeURIComponent(s.timeframe);
+      var chartUrl = '/chart?s=' + encodeURIComponent(s.symbol) + '&tf=' + encodeURIComponent(s.timeframe);
       var thesis = (s.thesis || '').length > 120
         ? s.thesis.slice(0, 120) + '…'
         : s.thesis;

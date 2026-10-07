@@ -549,7 +549,7 @@ function OscillatorRealityTable({ cells }) {
               <tr key={i}>
                 <td style={{padding:"6px 9px",fontSize:11.5,color:C.black,fontWeight:600,borderBottom:`1px solid ${C.border}`}}>
                   {CHART_SYMBOLS.has(r.symbol)
-                    ? <a href={"/chart.html?s="+r.symbol} target="_blank" rel="noopener" style={{color:C.black,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`,display:"inline-block",padding:"8px 0"}}>{window.SBFSymbols ? window.SBFSymbols.symbolName(r.symbol, {lang: INITIAL_LANG, mode:"name+ticker"}) : r.symbol}</a>
+                    ? <a href={"/chart?s="+r.symbol} target="_blank" rel="noopener" style={{color:C.black,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`,display:"inline-block",padding:"8px 0"}}>{window.SBFSymbols ? window.SBFSymbols.symbolName(r.symbol, {lang: INITIAL_LANG, mode:"name+ticker"}) : r.symbol}</a>
                     : (window.SBFSymbols ? window.SBFSymbols.symbolName(r.symbol, {lang: INITIAL_LANG, mode:"name+ticker"}) : r.symbol)}
                 </td>
                 <td style={{padding:"6px 9px",textAlign:"center",fontSize:10.5,fontFamily:"monospace",color:C.inkSoft,borderBottom:`1px solid ${C.border}`}}>{r.tf}</td>

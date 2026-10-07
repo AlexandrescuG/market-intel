@@ -407,7 +407,7 @@ function OrderPath() {
                          letterSpacing:0.3,lineHeight:1.5,textAlign:"center",marginTop:0,marginBottom:12}}>{op.metricsNote}</p>
               <p style={{fontSize:11.5,color:"rgba(255,255,255,0.55)",fontStyle:"italic",textAlign:"center",margin:0}}>{op.releaseNote}</p>
               <div style={{textAlign:"center",marginTop:14}}>
-                <a href="/chart.html?s=GOLD" target="_blank" rel="noopener" style={{fontFamily:"monospace",fontSize:11,color:C.goldText,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>{op.openOnChart}</a>
+                <a href="/chart?s=GOLD" target="_blank" rel="noopener" style={{fontFamily:"monospace",fontSize:11,color:C.goldText,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>{op.openOnChart}</a>
               </div>
             </div>
           )}
@@ -495,7 +495,7 @@ function MeasureYourBroker() {
           <div key={i} style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:6,padding:"18px 20px"}}>
             <div style={{fontWeight:600,fontSize:13,color:C.black,marginBottom:8}}>{t}</div>
             <p style={{fontSize:12.5,color:C.inkMid,lineHeight:1.6,margin: i<2 ? 10 : 0}}>{x}</p>
-            {i<2 && <a href="/chart.html?s=GOLD" target="_blank" rel="noopener" style={{fontFamily:"monospace",fontSize:10.5,color:C.goldText,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>{m.openOnChart}</a>}
+            {i<2 && <a href="/chart?s=GOLD" target="_blank" rel="noopener" style={{fontFamily:"monospace",fontSize:10.5,color:C.goldText,textDecoration:"none",borderBottom:`1px dotted ${C.gold}`}}>{m.openOnChart}</a>}
           </div>
         ))}
       </div>

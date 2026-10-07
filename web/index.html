@@ -710,7 +710,7 @@ a:hover{text-decoration:underline;color:var(--glow)}
   </div>
   <nav class="g-nav">
     <a href="{{ ('/' + lang) if lang != 'ru' else '' }}/" class="g-nav-item active">{{ t('nav.today', lang) }}</a>
-    <a href="{{ ('/' + lang) if lang != 'ru' else '' }}/chart.html" class="g-nav-item">{{ t('nav.charts', lang) }}</a>
+    <a href="{{ ('/' + lang) if lang != 'ru' else '' }}/chart" class="g-nav-item">{{ t('nav.charts', lang) }}</a>
     <a href="{{ ('/' + lang) if lang != 'ru' else '' }}/edu/" class="g-nav-item">{{ t('nav.edu', lang) }}</a>
     <a href="{{ ('/' + lang) if lang != 'ru' else '' }}/calendar" class="g-nav-item">{{ t('nav.calendar', lang) }}</a>
     <a href="{{ ('/' + lang) if lang != 'ru' else '' }}/brokers" class="g-nav-item">{{ t('nav.brokers', lang) }}</a>
@@ -1501,7 +1501,7 @@ async function renderPersonalBlock() {
     const parts = results.map((data, i) => {
       const sym = symbols[i];
       const symName = window.SBFSymbols ? window.SBFSymbols.symbolName(sym, {mode:'name'}) : sym;
-      const href = ЛОК(`/chart.html?s=${encodeURIComponent(sym)}&focus=today`);
+      const href = ЛОК(`/chart?s=${encodeURIComponent(sym)}&focus=today`);
       let txt;
       if (data && data.next_event_ts && data.next_event_ts <= endOfDay && data.next_event) {
         const time = new Date(data.next_event_ts * 1000).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
@@ -1598,7 +1598,7 @@ async function renderFocusCard() {
     let html = `<div class="focus-item__head">${tick}${move}</div>
       ${focusBodyHtml}
       <div class="focus-disclaimer">${I18N_REPORT.focusDisclaimer}</div>
-      <a class="focus-link" href="${ЛОК(`/chart.html?s=${encodeURIComponent(data.symbol)}&focus=today`)}">${I18N_REPORT.focusViewChart} →</a>`;
+      <a class="focus-link" href="${ЛОК(`/chart?s=${encodeURIComponent(data.symbol)}&focus=today`)}">${I18N_REPORT.focusViewChart} →</a>`;
     body.innerHTML = html;
     card.style.display = 'block';
   } catch (e) {
@@ -1654,7 +1654,7 @@ function linkInstrumentsInReport(reportEl) {
       if (before) frag.appendChild(document.createTextNode(before));
       const a = document.createElement('a');
       a.className = 'rep-instrument-link';
-      a.href = ЛОК('/chart.html?s=' + encodeURIComponent(matchSym) + '&focus=today');
+      a.href = ЛОК('/chart?s=' + encodeURIComponent(matchSym) + '&focus=today');
       a.textContent = matched;
       frag.appendChild(a);
       const parent = node.parentNode;
@@ -1780,7 +1780,7 @@ async function loadMiniCharts() {
 
 function openChart(ticker){
   const label = chartLabelOf(ticker);
-  document.getElementById('chartFrame').src = `./chart.html?s=${label}`;
+  document.getElementById('chartFrame').src = `/chart?s=${label}`;
   document.getElementById('chartOverlay').classList.add('open');
 }
 
@@ -1795,7 +1795,7 @@ function openChart(ticker){
 function openChartSymbol(symbol){
   if (!symbol) return;
   document.getElementById('chartFrame').src =
-    './chart.html?embed=1&s=' + encodeURIComponent(symbol);
+    '/chart?embed=1&s=' + encodeURIComponent(symbol);
   document.getElementById('chartOverlay').classList.add('open');
 }
 
@@ -2350,7 +2350,7 @@ async function loadBoard(){
             ? window.SBFSymbols.symbolName(it.symbol, {mode:'name'}) : it.symbol;
           const ch = it.change_pct;
           const cls = ch > 0 ? 'up' : ch < 0 ? 'down' : '';
-          return `<a class="board-row" href="${ЛОК(`/chart.html?s=${encodeURIComponent(it.symbol)}`)}"
+          return `<a class="board-row" href="${ЛОК(`/chart?s=${encodeURIComponent(it.symbol)}`)}"
                      data-sym="${escapeHtmlIdx(it.symbol)}">
             <span class="br-sym">${escapeHtmlIdx(имя)}</span>
             <span class="br-chg ${cls}">${ch != null ? (ch > 0 ? '+' : '') + ch.toFixed(2) + '%' : ''}</span>
@@ -2449,7 +2449,7 @@ async function loadBoard(){
       // шестидесяти кругах последний выезжал через 2 секунды — человек
       // успевал решить, что доска догрузилась, и увести взгляд.
       const delay = Math.round((idx++) * Math.min(34, 900 / Math.max(list.length, 1)));
-      return `<a class="board-bubble ${BOARD_CATS[cat].cls}" href="${ЛОК(`/chart.html?s=${encodeURIComponent(it.symbol)}`)}"
+      return `<a class="board-bubble ${BOARD_CATS[cat].cls}" href="${ЛОК(`/chart?s=${encodeURIComponent(it.symbol)}`)}"
         data-sym="${escapeHtmlIdx(it.symbol)}"
         style="left:${Math.round(it.x - it.r)}px;top:${Math.round(it.y - it.r)}px;
                width:${it.r*2}px;height:${it.r*2}px;animation-delay:${delay}ms"

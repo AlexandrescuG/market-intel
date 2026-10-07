@@ -445,7 +445,7 @@
     '  </a>',
     '  <nav class="g-nav">',
     '    <a href="' + navHref('/') + '"           class="g-nav-item ' + navCls('today')    + '" data-i18n="nav.today">' + t('nav.today', 'Сегодня') + '</a>',
-    '    <a href="' + navHref('/chart.html') + '" class="g-nav-item ' + navCls('charts')   + '" data-i18n="nav.charts">' + t('nav.charts', 'Графики') + '</a>',
+    '    <a href="' + navHref('/chart') + '" class="g-nav-item ' + navCls('charts')   + '" data-i18n="nav.charts">' + t('nav.charts', 'Графики') + '</a>',
     '    <a href="' + navHref('/edu/') + '"       class="g-nav-item ' + navCls('edu')       + '" data-i18n="nav.edu">' + t('nav.edu', 'Обучение') + '</a>',
     '    <a href="' + navHref('/calendar') + '"   class="g-nav-item ' + navCls('calendar')  + '" data-i18n="nav.calendar">' + t('nav.calendar', 'Календарь') + '</a>',
     '    <a href="' + navHref('/brokers') + '"     class="g-nav-item ' + navCls('brokers')   + '" data-i18n="nav.brokers">' + t('nav.brokers', 'Брокеры') + '</a>',
@@ -479,7 +479,7 @@
     '<a href="' + navHref('/') + '"           class="g-bn-item ' + navCls('today')    + '"><span class="g-bn-ico"><img class="mi-icon" src="/assets/icons/icon-sun.svg" alt="" width="20" height="20"></span><span class="g-bn-lbl" data-i18n="nav.today">' + t('nav.today', 'Сегодня') + '</span></a>',
     // Profile injected here as 2nd by sbf-profile.js
     '<a href="' + navHref('/edu/') + '"     class="g-bn-item ' + navCls('edu')       + '"><span class="g-bn-ico"><img class="mi-icon" src="/assets/icons/icon-books.png" alt="" width="20" height="20"></span><span class="g-bn-lbl" data-i18n="nav.edu">' + t('nav.edu', 'Обучение') + '</span></a>',
-    '<a href="' + navHref('/chart.html') + '" class="g-bn-item ' + navCls('charts')   + '"><span class="g-bn-ico"><img class="mi-icon" src="/assets/icons/icon-bar-chart.png" alt="" width="20" height="20"></span><span class="g-bn-lbl" data-i18n="nav.charts">' + t('nav.charts', 'Графики') + '</span></a>',
+    '<a href="' + navHref('/chart') + '" class="g-bn-item ' + navCls('charts')   + '"><span class="g-bn-ico"><img class="mi-icon" src="/assets/icons/icon-bar-chart.png" alt="" width="20" height="20"></span><span class="g-bn-lbl" data-i18n="nav.charts">' + t('nav.charts', 'Графики') + '</span></a>',
     '<a href="' + navHref('/calendar') + '" class="g-bn-item ' + navCls('calendar')  + '"><span class="g-bn-ico"><img class="mi-icon" src="/assets/icons/icon-calendar.png" alt="" width="20" height="20"></span><span class="g-bn-lbl" data-i18n="nav.calendar">' + t('nav.calendar', 'Календарь') + '</span></a>',
     '<a href="' + navHref('/brokers') + '"   class="g-bn-item ' + navCls('brokers')   + '"><span class="g-bn-ico"><img class="mi-icon" src="/assets/icons/icon-briefcase.png" alt="" width="20" height="20"></span><span class="g-bn-lbl" data-i18n="nav.brokers">' + t('nav.brokers', 'Брокеры') + '</span></a>'
   ].join('\n');
