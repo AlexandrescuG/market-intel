@@ -19,7 +19,6 @@ ENV_FILE="$ROOT/.env"
 
 # имя_переменной|человеческое имя|где взять
 SERVICES=(
-  "DEEPL_API_KEY|DeepL API Free|https://www.deepl.com/your-account/keys — 500 тыс. знаков в месяц, лучшее качество"
   "AZURE_TRANSLATOR_KEY|Azure Translator F0|portal.azure.com → Translator → Keys and Endpoint — 2 млн знаков в месяц"
   "AZURE_TRANSLATOR_REGION|Регион Azure|оттуда же, строка Location/Region, например westeurope. НЕ секрет"
   "GOOGLE_TRANSLATE_API_KEY|Google Cloud Translation|console.cloud.google.com → APIs → Credentials — ~500 тыс. знаков покрываются кредитом"
@@ -53,7 +52,7 @@ if [ "${1:-}" = "--check" ]; then
 fi
 
 echo "Порядок обращения в цепочке — по убыванию качества:"
-echo "  DeepL → Azure → Google Cloud → бесплатный Google → MyMemory"
+echo "  Azure → Google Cloud → бесплатный Google → MyMemory"
 echo "Незаданный ключ просто пропускается, это штатное состояние."
 echo
 показать_состояние
