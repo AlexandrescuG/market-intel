@@ -27,6 +27,8 @@ import re
 import sqlite3
 import time
 
+from core import translator_quota
+
 log = logging.getLogger("news_i18n")
 
 SUPPORTED = ("ru", "ro", "en")
@@ -108,6 +110,129 @@ _отключён_до: dict[str, float] = {}
 _MYMEMORY_КОД = {"ru": "ru-RU", "ro": "ro-RO", "en": "en-GB"}
 
 
+# ── Платные службы с бесплатным тарифом ─────────────────────────────────────
+#
+# 🔴 ПОРЯДОК — ПО УБЫВАНИЮ КАЧЕСТВА, А НЕ ПО РАЗМЕРУ КВОТЫ.
+# Решение владельца 07.10.2026: сначала DeepL, при исчерпании — ниже по
+# списку. Заметим, что это НЕ то же самое, что «сначала самый щедрый»:
+# у DeepL бесплатных 500 тысяч знаков в месяц, у Azure — два миллиона,
+# вчетверо больше. Начиная с DeepL, мы раньше сжигаем меньший бюджет — и
+# это осознанный размен: пока он есть, заголовки читаются лучше.
+#
+# Ключи берутся из окружения и НИКОГДА не попадают ни в аргументы команд,
+# ни в логи. Вводит их владелец сам — ops/translators_setup.sh.
+# Нет ключа — провайдер молча пропускается: это штатное состояние до
+# настройки, а не ошибка.
+_КЛЮЧ = {
+    "deepl":        "DEEPL_API_KEY",
+    "azure":        "AZURE_TRANSLATOR_KEY",
+    "google_cloud": "GOOGLE_TRANSLATE_API_KEY",
+}
+
+# Признаки «кончилась месячная квота» в ответе службы. Отличать это от
+# обычного отказа обязательно: отказ стоит повторить через десять минут,
+# исчерпанную квоту — только первого числа.
+_ПРИЗНАК_КВОТЫ = (
+    "456",                      # DeepL: Quota Exceeded, отдельный код
+    "quota",                    # DeepL и Google: «quota exceeded»
+    "exceeded",                 # Azure: «exceeded free tier»
+    "out of credits",
+    "403001",                   # Azure: ключ заблокирован по превышению
+    "dailylimitexceeded",       # Google Cloud
+    "userratelimitexceeded",
+)
+
+
+class ИсчерпанаКвота(RuntimeError):
+    """Служба сказала, что месячный лимит выбран. Не повторять до месяца."""
+
+
+def _это_квота(e: Exception) -> bool:
+    сообщение = f"{type(e).__name__} {e}".lower()
+    return any(п in сообщение for п in _ПРИЗНАК_КВОТЫ)
+
+
+def _deepl(тексты: list[str], lang: str) -> list[str]:
+    """DeepL API Free. Лучшее качество из трёх, самый маленький бюджет.
+
+    source="auto" у DeepL настоящий, в отличие от MyMemory, — определять
+    язык на нашей стороне не нужно. Пустая строка на выходе означает «этот
+    текст перевести не удалось», партия из-за него не бракуется.
+    """
+    import os
+
+    from deep_translator import DeeplTranslator
+    tr = DeeplTranslator(source="auto", target=lang,
+                         api_key=os.environ["DEEPL_API_KEY"], use_free_api=True)
+    out = []
+    for t in тексты:
+        try:
+            out.append(tr.translate(t) or "")
+        except Exception as e:                  # noqa: BLE001
+            if _это_квота(e):
+                raise ИсчерпанаКвота(str(e)[:200]) from e
+            out.append("")
+    return out
+
+
+def _azure(тексты: list[str], lang: str) -> list[str]:
+    """Azure Translator, тариф F0 — два миллиона знаков в месяц."""
+    import os
+
+    from deep_translator import MicrosoftTranslator
+    tr = MicrosoftTranslator(source="auto", target=lang,
+                             api_key=os.environ["AZURE_TRANSLATOR_KEY"],
+                             region=os.environ.get("AZURE_TRANSLATOR_REGION") or None)
+    out = []
+    for t in тексты:
+        try:
+            out.append(tr.translate(t) or "")
+        except Exception as e:                  # noqa: BLE001
+            if _это_квота(e):
+                raise ИсчерпанаКвота(str(e)[:200]) from e
+            out.append("")
+    return out
+
+
+def _google_cloud(тексты: list[str], lang: str) -> list[str]:
+    """Google Cloud Translation v2 — голым REST, без новой зависимости.
+
+    🔴 В deep_translator есть GoogleTranslator, но это НЕ Cloud API: он
+    скрапит публичную страницу и живёт по лимиту запросов с адреса (с
+    11.09 отвечает TooManyRequests). Cloud API — другая служба, с ключом и
+    месячной квотой, и путать их нельзя.
+
+    v2 принимает партию целиком: одним запросом на все двенадцать
+    заголовков вместо двенадцати запросов.
+    """
+    import json as _json
+    import os
+    import urllib.error
+    import urllib.parse
+    import urllib.request
+
+    тело = urllib.parse.urlencode(
+        [("q", t) for t in тексты] + [("target", lang), ("format", "text")]
+    ).encode("utf-8")
+    запрос = urllib.request.Request(
+        # 🔴 Ключ уходит заголовком, а не параметром в URL: параметр осел бы
+        # в журналах прокси и в истории. Google принимает оба способа.
+        "https://translation.googleapis.com/language/translate/v2",
+        data=тело, method="POST",
+        headers={"X-Goog-Api-Key": os.environ["GOOGLE_TRANSLATE_API_KEY"],
+                 "Content-Type": "application/x-www-form-urlencoded"})
+    try:
+        with urllib.request.urlopen(запрос, timeout=TIMEOUT_SEC * 2) as r:
+            ответ = _json.loads(r.read())
+    except urllib.error.HTTPError as e:
+        текст = e.read().decode("utf-8", "replace")[:300]
+        if e.code == 403 or _это_квота(Exception(текст)):
+            raise ИсчерпанаКвота(f"{e.code} {текст}") from e
+        raise
+    строки = ответ.get("data", {}).get("translations", [])
+    return [(с.get("translatedText") or "") for с in строки] or [""] * len(тексты)
+
+
 def _google(тексты: list[str], lang: str) -> list[str]:
     from deep_translator import GoogleTranslator
     return GoogleTranslator(source="auto", target=lang).translate_batch(тексты)
@@ -159,7 +284,44 @@ def _mymemory(тексты: list[str], lang: str) -> list[str]:
         return list(pool.map(один, тексты))
 
 
-_ПЕРЕВОДЧИКИ = (("google", _google), ("mymemory", _mymemory))
+# Порядок = порядок попыток. Платные с ключом идут первыми, бесплатные
+# остаются последней линией: они не кончаются, но и качество у них ниже.
+_ПЕРЕВОДЧИКИ = (
+    ("deepl",        _deepl),
+    ("azure",        _azure),
+    ("google_cloud", _google_cloud),
+    ("google",       _google),
+    ("mymemory",     _mymemory),
+)
+
+
+def _настроен(имя: str) -> bool:
+    """Есть ли ключ. Нет ключа — не ошибка, а «этим не пользуемся»."""
+    import os
+    перем = _КЛЮЧ.get(имя)
+    return перем is None or bool(os.environ.get(перем, "").strip())
+
+
+def _квота_база() -> sqlite3.Connection | None:
+    """Своё подключение для учёта квот.
+
+    🔴 Отдельное, а не то, что передают в translate_missing: сюда ходит и
+    утренний бриф, у которого подключения нет вовсе. Отказ открыть базу
+    НЕ ломает перевод — вернём None, и цепочка отработает без учёта.
+    Счётчик это учёт, а не условие работы.
+
+    timeout=30 и busy_timeout — по тому же правилу, из-за которого publish
+    падал в 18% прогонов: по этой базе одновременно работают коллекторы.
+    """
+    try:
+        from core.config import DB_PATH
+        con = sqlite3.connect(str(DB_PATH), timeout=30)
+        con.execute("PRAGMA busy_timeout=30000")
+        translator_quota.ensure_schema(con)
+        return con
+    except Exception as e:                      # noqa: BLE001
+        log.debug("учёт квот недоступен: %s", str(e)[:120])
+        return None
 
 
 # ── Контроль: числа обязаны пережить перевод ────────────────────────────────
@@ -219,14 +381,35 @@ def translate_texts(тексты: list[str], lang: str) -> list[str] | None:
     if not тексты or lang not in SUPPORTED:
         return None
     тексты = тексты[:MAX_PER_REQUEST]
+    знаков = sum(len(t) for t in тексты)
+    квота = _квота_база()
     for имя, fn in _ПЕРЕВОДЧИКИ:
         if _отключён_до.get(имя, 0) > time.time():
             continue
+        if not _настроен(имя):
+            continue                    # ключа нет — это не отказ, а «не наш»
+        if квота is not None and not translator_quota.есть_запас(квота, имя, знаков):
+            continue                    # бюджет месяца выбран, ждём первого числа
         try:
             ответ = fn(тексты, lang)
+        except ИсчерпанаКвота as e:
+            # 🔴 Исчерпание квоты — НЕ отказ службы, и десятиминутный
+            # предохранитель тут вреден: через десять минут квота не
+            # появится, а мы снова потратим секунды на заведомо провальный
+            # запрос, и так до конца месяца. Отметка живёт в базе и
+            # переживает перезапуск сервера.
+            log.warning("%s: %s", имя, str(e)[:160])
+            if квота is not None:
+                translator_quota.объявить_исчерпанным(квота, имя)
+            continue
         except Exception as e:
             log.debug("%s не ответил: %s", имя, str(e)[:120])
             ответ = None
+        else:
+            # Считаем ОТПРАВЛЕННОЕ и только при удачном ответе: провайдер
+            # тарифицирует вход, но за упавший запрос денег не берёт.
+            if квота is not None and not _плох(ответ, тексты):
+                translator_quota.записать(квота, имя, знаков)
         if _плох(ответ, тексты):
             _отключён_до[имя] = time.time() + _МЁРТВ_НА_СЕК
             log.warning("переводчик %s не работает, отключаю на %d мин",
