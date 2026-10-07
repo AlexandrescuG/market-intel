@@ -241,12 +241,41 @@ def degraded() -> list[str]:
     row = con.execute("SELECT max(created_ts) FROM forecasts").fetchone()
     age_h = (time.time() - ((row and row[0]) or 0)) / 3600.0
     # 3 ч — окно, которым источник сам отбирает прогнозы (sources.from_forecasts).
-    if age_h > 3.0:
+    if age_h > 3.0 and not forecasts_off_by_decision():
         out.append(
             f"источник alpha_forecast молчит: прогнозов нет {age_h:.1f} ч "
             f"(наполняет agent_run через claude CLI — проверьте оплату/доступ). "
             f"Остальные источники работают, это ~20% потока сигналов")
     return out
+
+
+def forecasts_off_by_decision() -> bool:
+    """Выключен ли поставщик прогнозов СОЗНАТЕЛЬНО.
+
+    🔴 07.10, правка собственной ошибки через час после её внесения.
+    Я добавил жёлтый вердикт «alpha_forecast молчит — проверьте оплату», не
+    посмотрев, что 01.10 владелец ВЫКЛЮЧИЛ alpha_cycle решением: 77% расхода
+    модели на источник, который торговал в минус (-2.03 R на 57 сделках).
+    То есть пульс просил бы починить то, что намеренно убрано, — и просил бы
+    каждые сутки, вечно.
+
+    Это ровно та болезнь, от которой пульс и сделан: сообщение, на которое
+    нечего ответить, превращается в фон и уносит с собой внимание к
+    настоящим. Поэтому источник правды тот же, что и для юнитов, —
+    `ops/units.txt` с ролью `off`."""
+    try:
+        txt = (ROOT / "ops" / "units.txt").read_text(encoding="utf-8")
+    except OSError:
+        return False
+    for line in txt.splitlines():
+        s = line.strip()
+        if s.startswith("#") or "sbf-alpha-cycle" not in s:
+            continue
+        # формат: <юнит> <роль> <макс_простой> # комментарий
+        parts = s.split()
+        if len(parts) >= 2 and parts[1] == "off":
+            return True
+    return False
 
 
 def guard_state() -> list[str]:
