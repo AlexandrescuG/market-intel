@@ -53,6 +53,8 @@ log = logging.getLogger("translator_quota")
     "google_cloud": 500_000,
     "google":          None,
     "mymemory":        None,
+    # Свой сервер: лимита нет вовсе, считать нечего.
+    "libretranslate":  None,
 }
 
 

@@ -266,11 +266,60 @@ def _mymemory(тексты: list[str], lang: str) -> list[str]:
 
 # Порядок = порядок попыток. Платные с ключом идут первыми, бесплатные
 # остаются последней линией: они не кончаются, но и качество у них ниже.
+def _libretranslate(тексты: list[str], lang: str) -> list[str]:
+    """Свой LibreTranslate в Docker — последняя линия, которая не кончается.
+
+    🔴 ПОЧЕМУ ПОСЛЕДНИМ, А НЕ ПЕРВЫМ, ХОТЯ ОН БЕСПЛАТНЫЙ И БЫСТРЫЙ.
+    Замер 07.10.2026 на пяти живых заголовках против MyMemory показал три
+    вида порчи, которых у остальных не было:
+      • «нефть WTI» → «ITC brut»: имя инструмента искажено. Для сайта про
+        рынки это хуже отсутствия перевода — читатель ищет WTI и не найдёт.
+      • «Strait Of Hormuz Uncertainty Offsets…» → «Ормузский пролив СНИМАЕТ
+        неопределённость»: смысл перевёрнут на противоположный.
+      • «выше ₽84» → «выше  84»: знак валюты потерян.
+    🔴 НИ ОДИН из трёх не ловится проверкой чисел: цифры везде на месте.
+    Поэтому место ему там, где его ответ виден только если молчат ВСЕ
+    остальные, — а не там, где он подменяет собой рабочую службу.
+
+    Зачем он тогда нужен: он единственный, кого нельзя выключить снаружи.
+    Вся история отказов этого проекта — умершие чужие бесплатные службы
+    (подписка Claude, Google, скрапинг Reddit, RSS Bloomberg, квота
+    MyMemory). Плохой перевод лучше пустого места, и у нижнего звена
+    цепочки надёжность важнее качества.
+
+    Язык источника указываем явно: "auto" у LibreTranslate есть, но на
+    коротком заголовке с числами он ошибается чаще, чем наш detect().
+    """
+    import json as _json
+    import os
+    import urllib.request
+
+    адрес = os.environ.get("LIBRETRANSLATE_URL", "http://127.0.0.1:5055")
+    out = []
+    for t in тексты:
+        источник = detect(t)
+        if источник == lang:
+            out.append("")
+            continue
+        тело = _json.dumps({"q": t, "source": источник, "target": lang,
+                            "format": "text"}).encode("utf-8")
+        запрос = urllib.request.Request(
+            адрес.rstrip("/") + "/translate", data=тело,
+            headers={"Content-Type": "application/json"})
+        try:
+            with urllib.request.urlopen(запрос, timeout=TIMEOUT_SEC * 2) as r:
+                out.append(_json.load(r).get("translatedText") or "")
+        except Exception:                       # noqa: BLE001
+            out.append("")
+    return out
+
+
 _ПЕРЕВОДЧИКИ = (
-    ("azure",        _azure),
-    ("google_cloud", _google_cloud),
-    ("google",       _google),
-    ("mymemory",     _mymemory),
+    ("azure",          _azure),
+    ("google_cloud",   _google_cloud),
+    ("google",         _google),
+    ("mymemory",       _mymemory),
+    ("libretranslate", _libretranslate),
 )
 
 
