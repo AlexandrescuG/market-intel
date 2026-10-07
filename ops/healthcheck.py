@@ -40,7 +40,7 @@ import sqlite3
 import subprocess
 import sys
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 BASE = Path(__file__).resolve().parent.parent
@@ -556,6 +556,128 @@ def check_heartbeats(cfg: dict, verbose: bool) -> list[Finding]:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# Утренний брифинг — дошёл ли он до бота
+# ─────────────────────────────────────────────────────────────────────────────
+
+def check_briefing(cfg: dict, verbose: bool) -> list[Finding]:
+    """🔴 Проверка, которой не хватило 02.10.2026.
+
+    Утренний прогон отрабатывал и писал web/data/brief_today.json, таймеры
+    были зелёные, healthcheck молчал — а подписчики пять дней не получали
+    брифинга вообще. Разрыв был на последнем метре: `SBFAcademy_bot`
+    (`briefing/ingest.py`) читал удалённый 01.10 markdown-отчёт и, не найдя
+    файла, не писал в таблицу `briefings` ни строки. Бот каждые пять минут
+    не находил брифинг и в 23:00 отправлял запасную «Мысль дня».
+
+    Отсюда правило: конвейер считается живым не тогда, когда отработали его
+    шаги, а когда результат лежит там, откуда его берёт получатель. Здесь
+    получатель — таблица `briefings` в базе бота, и смотрим мы прямо в неё,
+    а не на юниты market_intel.
+
+    Проверяется после `after_hour` по местному времени — до утреннего прогона
+    отсутствие сегодняшней строки это норма, а не поломка."""
+    db_path = Path(cfg["db"]).expanduser()
+    if not db_path.is_absolute():
+        db_path = BASE / db_path
+    if not db_path.exists():
+        return [Finding("brief-db", f"брифинг: базы бота {db_path} нет")]
+
+    local = datetime.now().astimezone()
+    if local.hour < cfg.get("after_hour", 8):
+        if verbose:
+            print(f"  ok   брифинг: ещё {local:%H:%M}, утренний прогон не обязан был закончить")
+        return []
+
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    con = sqlite3.connect(str(db_path), timeout=30)
+    try:
+        row = con.execute(
+            "SELECT generated_at, length(payload_json) FROM briefings WHERE date = ?",
+            (today,)).fetchone()
+        last = con.execute("SELECT max(date) FROM briefings").fetchone()
+    except sqlite3.Error as e:
+        return [Finding("brief-read", f"брифинг: таблица briefings не читается ({e})")]
+    finally:
+        con.close()
+
+    if row is None:
+        since = f", последний за {last[0]}" if last and last[0] else ", ни одного за всё время"
+        return [Finding("brief-missing",
+                        f"брифинг: в базе бота нет строки за {today}{since} — "
+                        f"подписчики получат запасную «Мысль дня». Смотреть "
+                        f"SBFAcademy_bot/sbfacademy/briefing/ingest.py")]
+
+    min_len = cfg.get("min_payload_len", 1500)
+    if (row[1] or 0) < min_len:
+        return [Finding("brief-thin",
+                        f"брифинг за {today} в базе есть, но payload {row[1]} знаков "
+                        f"при ожидаемых {min_len}+ — похоже, собрался пустым")]
+    if verbose:
+        print(f"  ok   брифинг: за {today} в базе бота, {row[1]} знаков")
+    return []
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Время событий календаря и переводы часов
+# ─────────────────────────────────────────────────────────────────────────────
+
+def check_calendar_dst(cfg: dict, verbose: bool) -> list[Finding]:
+    """🔴 Проверка, которой не хватило всё лето 2026.
+
+    Рукописный список главных релизов США был вбит ЗИМНИМ UTC, и с июля по
+    31.10 КАЖДОЕ высокоимпактное событие (NFP, CPI, PCE, FOMC) показывалось на
+    час позже правды. Заметить это нельзя было ни по одному алерту: данные
+    свежие, юниты зелёные, число событий в брифинге верное — сдвинут только час.
+    Нашлось вопросом владельца.
+
+    Сравнение идёт события С САМИМ СОБОЙ по другую сторону перевода часов в
+    стране события (tools/calendar_dst_audit.py). Серия, у которой МЕСТНОЕ
+    время релиза меняется ровно на величину перевода, привязана к
+    фиксированному UTC в источнике — то есть права только половину года."""
+    sys.path.insert(0, str(BASE))
+    try:
+        from tools.calendar_dst_audit import analyse, fix_curated, sync_ts_utc
+    except Exception as e:
+        return [Finding("cal-dst-import", f"календарь/DST: аудит не импортируется ({e})")]
+
+    db = Path(cfg.get("db") or "/mnt/sbfdata/sbf-platform/SBFAcademy_bot/bot.db")
+    if not db.exists():
+        return [Finding("cal-dst-db", f"календарь/DST: базы {db} нет")]
+    since = (datetime.now(timezone.utc) - timedelta(days=cfg.get("window_days", 130))
+             ).strftime("%Y-%m-%d")
+    con = sqlite3.connect(str(db), timeout=60)
+    try:
+        drifts = analyse(con, since)
+        curated = fix_curated(con, apply=False)
+        stale = sync_ts_utc(con, apply=False)
+    except sqlite3.Error as e:
+        return [Finding("cal-dst-read", f"календарь/DST: база не читается ({e})")]
+    finally:
+        con.close()
+
+    out: list[Finding] = []
+    if drifts:
+        high = [d for d in drifts if d.impact == "high"]
+        names = ", ".join(d.title for d in (high or drifts)[:3])
+        out.append(Finding("cal-dst-drift",
+                           f"календарь: {len(drifts)} серий привязаны к фиксированному UTC "
+                           f"и уедут на час через перевод часов"
+                           + (f" (важных {len(high)}: {names})" if high else f" ({names}…)")
+                           + " — лечится python3 -m tools.calendar_dst_audit --apply"))
+    if curated:
+        out.append(Finding("cal-dst-curated",
+                           f"календарь: в рукописном списке {curated} строк с неверным часом "
+                           f"— лечится тем же --apply"))
+    if stale > cfg.get("stale_ts_tolerance", 0):
+        out.append(Finding("cal-dst-stale",
+                           f"календарь: у {stale} строк ts_utc расходится со scheduled_ts — "
+                           f"читателям показывается старое время события"))
+    if verbose and not out:
+        print("  ok   календарь: местное время релизов не плывёт через переводы часов")
+    return out
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Мост MT5
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -713,6 +835,10 @@ def main() -> int:
         findings += check_ohlc_json(cfg["ohlc_json"], market_open, args.verbose)
         findings += check_bridge(cfg["bridge"], args.verbose)
         findings += check_heartbeats(cfg["heartbeats"], args.verbose)
+        if cfg.get("briefing"):
+            findings += check_briefing(cfg["briefing"], args.verbose)
+        if cfg.get("calendar_dst"):
+            findings += check_calendar_dst(cfg["calendar_dst"], args.verbose)
     except Exception as e:
         print(f"НАДЗОР СЛОМАН: проверка упала: {type(e).__name__}: {e}", file=sys.stderr)
         return 2

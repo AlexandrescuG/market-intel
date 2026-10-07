@@ -132,9 +132,15 @@ class LevelZone(unittest.TestCase):
         Иначе это перенос вывода на данные, которых не видели."""
         from analyze.engine import sources
         self.assertEqual(sources.LEVEL_ZONE["EURUSD"], (0.0, 0.25))
-        self.assertEqual(sources.LEVEL_ZONE["NG"], (0.25, 2.0))
+        # 07.10: зона по газу снята вместе с инструментом. Настройка для
+        # инструмента, которым не торгуем, однажды оживёт вместе с ним и
+        # уже без замера — поэтому её не должно быть вовсе.
+        self.assertNotIn("NG", sources.LEVEL_ZONE)
         for s in ("XAUUSD", "GBPUSD", "USDJPY", "USDZAR", "USDCNY"):
             self.assertNotIn(s, sources.LEVEL_ZONE)
+        # И зона остаётся только у того, что реально торгуется.
+        for s in sources.LEVEL_ZONE:
+            self.assertIn(s, sources.UNIVERSE)
 
     def test_уровни_не_подглядывают_вперёд(self):
         """Уровень считается по барам ДО сигнального. Если бы будущее
@@ -428,6 +434,40 @@ class StopClamp(unittest.TestCase):
                               cur_stop=1.34000, symbol_info=self.GBP, tick=t)
         self.assertAlmostEqual(got, 1.34500)
 
+    # Брокер с НУЛЕВОЙ минимальной дистанцией — Daoti отдаёт stops_level=0 по
+    # всем символам, в отличие от Ava (20-120 пунктов).
+    JPY0 = SimpleNamespace(point=0.001, trade_stops_level=0, digits=3)
+
+    def test_на_нулевой_дистанции_остаётся_запас(self):
+        """🔴 07.10. При stops_level=0 (так у Daoti по всем символам)
+        минимальная дистанция равна одному спреду, и стоп прижимался РОВНО
+        к ней — без запаса на движение цены между опросом тика и обработкой
+        запроса. Числа из живого запроса: USDJPY покупка, bid 157.301,
+        просили стоп 157.289 — ровно 0.012 при спреде 0.012.
+
+        Оговорка, чтобы тест не врал о своём происхождении: отказы
+        retcode=10006 на реальном счёте вызваны НЕ этим, а мёртвым потоком
+        котировок у брокера. Запас нужен сам по себе, но он их не лечит."""
+        t = self.tick(157.301, 157.313)
+        got = risk.clamp_stop(157.350, is_long=True, price=157.301,
+                              cur_stop=156.854, symbol_info=self.JPY0, tick=t)
+        self.assertIsNotNone(got)
+        bare = risk.min_barrier(self.JPY0, t)
+        self.assertAlmostEqual(bare, 0.012, places=6,
+                               msg="минимум тут равен одному спреду")
+        self.assertLess(got, 157.301 - bare,
+                        "стоп встал РОВНО на границу — именно это и отбивалось")
+        self.assertGreater(got, 156.854, "и всё-таки вперёд")
+
+    def test_запас_не_вырождается_в_ноль(self):
+        """Если и stops_level, и спред нулевые, доля от нуля даст ноль —
+        поэтому запас обязан иметь нижнюю границу в тиках."""
+        t = self.tick(157.300, 157.300)
+        got = risk.clamp_stop(157.350, is_long=True, price=157.300,
+                              cur_stop=156.000, symbol_info=self.JPY0, tick=t)
+        self.assertIsNotNone(got)
+        self.assertLessEqual(got, 157.300 - 0.001 * risk.BARRIER_SAFETY_TICKS)
+
 
 class Portfolio(unittest.TestCase):
     def setUp(self):
@@ -613,17 +653,31 @@ class Portfolio(unittest.TestCase):
         self.assertAlmostEqual(e["NG"], 100.0)
         self.assertAlmostEqual(e["USD"], -100.0)
 
-    def test_у_газа_свой_предел_издержек(self):
-        """Замер 16.09: спред газа 41.1% риска при общем пороге 12%. Без
-        своего предела инструмент был бы включён и молча отвергал каждый
-        сигнал — то, ради чего послабление и делалось."""
-        self.assertGreater(risk.spread_limit_for("NG"),
-                           risk.MAX_SPREAD_SHARE_OF_RISK)
-        self.assertGreaterEqual(risk.spread_limit_for("NG"), 0.42,
-                                "предел должен покрывать замеренные 41.1%")
-        # Послабление ТОЛЬКО газу: общий порог не тронут.
-        for s in ("EURUSD", "USDZAR", "XAUUSD"):
-            self.assertEqual(risk.spread_limit_for(s), risk.MAX_SPREAD_SHARE_OF_RISK)
+    def test_послаблений_по_издержкам_нет_ни_одного(self):
+        """🔴 07.10, замена теста «у газа свой предел». Прежний тест
+        ТРЕБОВАЛ наличия послабления (0.45 против 0.12) и тем закреплял
+        ошибку: газ прошёл в торговлю только с выключенным фильтром.
+
+        Выбор был не «ослабить порог или молчать», а «ослабить порог или не
+        включать инструмент». Порог по издержкам — единственный фильтр, про
+        который у нас есть доказательство, что он работает, и отключать его
+        ради инструмента значит менять известное на неизвестное.
+
+        Правило: если инструмент проходит только с послаблением — он не
+        проходит. Поэтому словарь обязан быть пустым, а не «пустым пока»."""
+        self.assertEqual(risk.SPREAD_RISK_OVERRIDE, {},
+                         "появилось послабление — проверьте, не повторяется "
+                         "ли история с газом")
+        for s in ("EURUSD", "USDZAR", "XAUUSD", "GBPUSD", "USDJPY", "NG"):
+            self.assertEqual(risk.spread_limit_for(s),
+                             risk.MAX_SPREAD_SHARE_OF_RISK)
+
+    def test_газа_нет_в_торгуемых(self):
+        """Газ убран 07.10. Проверяется не результат за 26 сделок (такая
+        выборка ничего не решает), а то, что инструмент не вернулся в
+        UNIVERSE незаметно вместе с какой-нибудь другой правкой."""
+        from analyze.engine import sources
+        self.assertNotIn("NG", sources.UNIVERSE)
 
     def test_нераскладываемый_инструмент_это_отказ_а_не_ноль(self):
         """🔴 Доделка 14.09. Первая версия возвращала 0 для всего, в чём нет
