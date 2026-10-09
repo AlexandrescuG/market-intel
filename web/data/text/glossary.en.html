@@ -1,183 +1,518 @@
-<h2 id="gl-pivot">Pivot (PP)</h2>
-<p>A calculated reversal level derived from the previous period's high, low and close.</p>
-<p>The pivot point (PP) is a base level computed as PP = (High + Low + Close) / 3 over the previous period — day, week or month. Resistance levels (R1, R2, R3) and support levels (S1, S2, S3) are built around it. Intraday traders watch these levels closely: price often turns near them or accelerates once they break. Pivots are public, calculated automatically, and are not trading advice.</p>
-<p>From &quot;pivot&quot; — a point something turns around: the level price rotates about.</p>
-<p><a href="#gl-support">Support</a>, <a href="#gl-resistance">Resistance</a>, <a href="#gl-timeframe">Timeframe</a></p>
-<h2 id="gl-support">Support</h2>
-<p>A price level where demand has historically exceeded supply, halting a decline.</p>
-<p>A support level is a horizontal zone where price has repeatedly stopped falling and turned back up. Buyers tend to become active near these zones. The more times price has tested a level without breaking it, the more significant that support is considered. Once broken, support often turns into resistance — the flip. Support levels are used to place stop-losses and to look for entries on retests.</p>
-<p>From &quot;support&quot; — the floor that holds price up.</p>
-<p><a href="#gl-resistance">Resistance</a>, <a href="#gl-pivot">Pivot (PP)</a>, <a href="#gl-stoploss">Stop-loss</a></p>
-<h2 id="gl-resistance">Resistance</h2>
-<p>A price level where supply has historically exceeded demand, halting a rally.</p>
-<p>A resistance level is a price zone where sellers have systematically outweighed buyers. Price approaches the level, is pushed back and declines. Once broken, former resistance frequently becomes support. Traders use resistance levels to take profit and to judge how much room a move has left. Round numbers (1000, 1500, 2000) often act as psychological resistance.</p>
-<p>From &quot;resistance&quot; — the ceiling that slows a rally.</p>
-<p><a href="#gl-support">Support</a>, <a href="#gl-pivot">Pivot (PP)</a>, <a href="#gl-resistance">Resistance</a></p>
-<h2 id="gl-rsi">RSI</h2>
-<p>A 0–100 oscillator measuring the speed and size of price changes.</p>
-<p>RSI (Relative Strength Index) is a technical indicator developed by J. Welles Wilder. Readings above 70 are traditionally called overbought, below 30 oversold. Important: overbought is not a sell signal — in a strong trend RSI can stay above 70 for a long time. RSI divergence (price rising while RSI falls) is a popular sign of a weakening trend. RSI is calculated as 100 − 100/(1 + RS), where RS is the ratio of average gains to average losses over the period.</p>
-<p>Introduced by J. Welles Wilder in 1978 in &quot;New Concepts in Technical Trading Systems&quot;.</p>
-<p><a href="#gl-divergence">Divergence</a>, <a href="#gl-timeframe">Timeframe</a>, <a href="#gl-trend">Trend</a></p>
-<h2 id="gl-smc">SMC</h2>
-<p>An approach that reads the market through the actions of large participants — banks and hedge funds.</p>
-<p>SMC (Smart Money Concepts) is a technical-analysis methodology built on the assumption that large institutional participants — banks, hedge funds, market makers — deliberately create patterns to capture liquidity before a reversal. Its key ideas are the Order Block (a zone of large orders), the Fair Value Gap, Break of Structure and Inducement. SMC is an educational framework; trade outcomes remain unpredictable.</p>
-<p>The term took hold in trading communities in the 2010s as an alternative to classical technical analysis.</p>
-<p><a href="#gl-fvg">Fair Value Gap</a>, <a href="#gl-liquidity-sweep">Liquidity Sweep</a>, <a href="#gl-orderblock">Order Block</a>, <a href="#gl-marketmaker">Market maker</a></p>
-<h2 id="gl-fvg">Fair Value Gap</h2>
-<p>A price gap left behind by a sharp impulsive move.</p>
-<p>A Fair Value Gap (FVG) is three consecutive candles where the wicks of the first and third do not overlap: price moved so fast that trading never covered the whole range. The market is assumed to want to fill the FVG by returning to that zone. An FVG can be bullish (price jumped up) or bearish (price jumped down). Within SMC it is used as a potential retest area.</p>
-<p>&quot;Fair value gap&quot; — a price interval left untraded by an impulsive move.</p>
-<p><a href="#gl-smc">SMC</a>, <a href="#gl-orderblock">Order Block</a>, <a href="#gl-liquidity-sweep">Liquidity Sweep</a></p>
-<h2 id="gl-liquidity-sweep">Liquidity Sweep</h2>
-<p>A brief break of a key level that triggers the stop orders resting behind it.</p>
-<p>A liquidity sweep is a move where price briefly breaks an important level — a high, a low, a support line — clears out other traders' stop-losses and then reverses. In SMC terms this is read as a deliberate manoeuvre by large players to source liquidity before the real move. SMC traders look for a sweep followed by a reversal structure as their signal.</p>
-<p>&quot;Sweeping liquidity&quot; — price briefly takes out the stops beyond a level before turning.</p>
-<p><a href="#gl-smc">SMC</a>, <a href="#gl-fvg">Fair Value Gap</a>, <a href="#gl-support">Support</a>, <a href="#gl-resistance">Resistance</a></p>
-<h2 id="gl-orderblock">Order Block</h2>
-<p>The last consolidation zone before a strong impulsive move.</p>
-<p>An Order Block is the last candle (or group of candles) before a sharp impulsive move, assumed to hold large institutional orders. A bullish OB is a bearish candle preceding a bullish impulse; a bearish OB is a bullish candle preceding a bearish one. Price is expected to react when it retests the OB zone. The OB is an educational concept, not a guarantee of an outcome.</p>
-<p>&quot;Block of orders&quot; — a zone where a large player is presumed to have placed size.</p>
-<p><a href="#gl-smc">SMC</a>, <a href="#gl-fvg">Fair Value Gap</a>, <a href="#gl-liquidity-sweep">Liquidity Sweep</a></p>
-<h2 id="gl-marketmaker">Market maker</h2>
-<p>A participant who supplies liquidity by continuously quoting both sides of the market.</p>
-<p>A market maker is a firm or trader that simultaneously posts bids and asks, earning the difference — the spread. On futures and FX markets, market makers provide liquidity even when there is no matching order on the other side. Banks, large brokers and specialist firms such as Citadel and Virtu act as market makers. Their presence narrows spreads and improves execution.</p>
-<p>From &quot;market maker&quot; — the participant who makes a market by quoting both sides.</p>
-<p><a href="#gl-spread">Spread</a>, <a href="#gl-liquidity">Liquidity</a>, <a href="#gl-orderbook">Order book</a></p>
-<h2 id="gl-pattern">Pattern</h2>
-<p>A recurring candle or price configuration that traders read as predictive.</p>
-<p>A pattern is a repeatable visual structure on a price chart. Candlestick patterns: Engulfing, Doji, Hammer, Evening and Morning Star. Chart patterns: head and shoulders, double bottom and top, flag, wedge, triangle. Important: the statistical reliability of patterns varies widely, and no pattern works every time. A pattern is one input to analysis, not a trading signal.</p>
-<p>From &quot;pattern&quot; — a repeating template, here of price.</p>
-<p><a href="#gl-engulfing">Engulfing</a>, <a href="#gl-trend">Trend</a>, <a href="#gl-timeframe">Timeframe</a></p>
+<h2 id="gl-a-book-b-book">A-book and B-book</h2>
+<p>Whether the broker passes your trade to the market or keeps it in-house.</p>
+<p>In the A-book model the broker routes the trade to a liquidity provider and lives on spread and commission — its income does not depend on your result. In B-book it becomes the counterparty, and your loss is its profit. The conflict of interest here is structural rather than malicious, and in practice most brokers run both models, allocating clients between them.</p>
+<p>«Book A» and «book B» — two ledgers: trades passed out and trades kept inside.</p>
+<p><a href="#gl-stp-ecn">STP and ECN</a>, <a href="#gl-requote">Requote</a>, <a href="#gl-spread">Spread</a>, <a href="#gl-marketmaker">Market maker</a></p>
+<h2 id="gl-adx">ADX</h2>
+<p>Trend strength without direction: the higher it is, the more pronounced the move.</p>
+<p>Readings below 20 are usually read as no trend, above 25 as a trend present. The indicator's value lies precisely in not saying where price is going but whether trend techniques are worth using at all: the same strategy that earns at high ADX gives the gains back to chop at low ADX. It is sensibly used as a regime switch rather than a signal.</p>
+<p>Average Directional Index, proposed by Welles Wilder.</p>
+<p><a href="#gl-trend">Trend</a>, <a href="#gl-flat">Range (flat)</a>, <a href="#gl-atr">ATR</a></p>
+<h2 id="gl-alpha">Alpha</h2>
+<p>Return that cannot be explained by the movement of the market.</p>
+<p>Alpha is what remains after subtracting beta's contribution: the contribution of skill as such. The difficulty is that it is easily confused with hidden risk. A strategy selling insurance against a rare event shows years of smooth alpha — until the event arrives. Alpha is therefore assessed only together with whatever risk might explain it.</p>
+<p>The first Greek letter; the intercept in a regression of returns on the market.</p>
+<p><a href="#gl-beta">Beta</a>, <a href="#gl-sharpe">Sharpe ratio</a>, <a href="#gl-index">Index</a></p>
+<h2 id="gl-altcoin">Altcoin</h2>
+<p>Any crypto asset other than bitcoin.</p>
+<p>Altcoins are highly correlated with bitcoin but amplified: they fall deeper and rise harder. The cause is not the nature of the projects but liquidity — the market is thinner, so the same flow moves price further. Practical consequence: diversifying across ten altcoins barely reduces risk, because on a bad day they all go down together.</p>
+<p>Short for «alternative coin» — an alternative to bitcoin.</p>
+<p><a href="#gl-bitcoin">Bitcoin</a>, <a href="#gl-dominance">Bitcoin dominance</a>, <a href="#gl-liquidity">Liquidity</a></p>
+<h2 id="gl-asic">ASIC</h2>
+<p>Australia's regulator: strict requirements, but no compensation fund.</p>
+<p>ASIC requires client money to be held separately and since 2021 has capped retail leverage at 1:30 on major currency pairs. One difference from Europe is significant and rarely mentioned in marketing: there is no compensation scheme for broker insolvency equivalent to the FSCS or the Cypriot fund — protection reduces to capital and reporting requirements.</p>
+<p>Australian Securities and Investments Commission.</p>
+<p><a href="#gl-fca">FCA</a>, <a href="#gl-cysec">CySEC</a>, <a href="#gl-leverage-cap">Leverage cap</a></p>
+<h2 id="gl-ath">All-Time High (ATH)</h2>
+<p>All-Time High — the highest price an asset has ever reached.</p>
+<p>The ATH is the highest price an asset has traded at in its entire history. A new ATH usually draws retail attention and media coverage, which is no guarantee the rally continues.</p>
+<p>All-Time High — the record across the whole trading history.</p>
+<p><a href="#gl-bull-market">Bull market</a>, <a href="#gl-drawdown">Drawdown</a>, <a href="#gl-breakout">Breakout</a>, <a href="#gl-sp500">S&amp;P 500</a></p>
+<h2 id="gl-atr">ATR</h2>
+<p>The average range of a candle over a period — volatility in points, with no direction.</p>
+<p>The true range of a candle is the largest of three values: (high − low), |high − previous close| and |low − previous close|. The last two exist for gaps: if the market opened away from the previous close, the plain candle range understates the move. ATR is a moving average of true range, most often over 14 periods. It says nothing about direction — a crash and a rally give equally high readings. In practice it is used for volatility-based stops (ATR × multiplier instead of a round number of points), for normalising targets, and for comparing instruments: 50 points on gold and 50 on EUR/USD are entirely different moves, but in ATR they are comparable.</p>
+<p>Average True Range, introduced by J. Welles Wilder alongside the RSI in 1978.</p>
+<p><a href="#gl-volatility">Volatility</a>, <a href="#gl-stoploss">Stop-loss</a>, <a href="#gl-timeframe">Timeframe</a>, <a href="#gl-vix">VIX</a>, <a href="#gl-bollinger">Bollinger Bands</a></p>
+<h2 id="gl-backwardation">Backwardation</h2>
+<p>Near futures above far ones: a sign of shortage right now.</p>
+<p>Backwardation means the commodity is needed immediately and buyers will pay a premium for immediacy. It shows up with supply disruptions, low inventories, geopolitical flare-ups. For a long holder it is a rare tailwind: rolling into the next contract adds value. Curve shape is one of the few things in commodities that speaks to physical scarcity rather than to mood.</p>
+<p>From «backward» — the deferred price ends up below the immediate one.</p>
+<p><a href="#gl-contango">Contango</a>, <a href="#gl-futures">Futures</a>, <a href="#gl-oil-inventories">Oil inventories</a></p>
+<h2 id="gl-basis">Basis</h2>
+<p>The gap between the futures price and the physical price on the spot.</p>
+<p>Basis shows how far the exchange price diverges from the price at a specific point — a terminal, a port, a plant. It embeds freight, cargo quality and the local demand balance. For a hedger, basis is the residual risk: the future covers the general price move but not the divergence between the exchange and one's own warehouse.</p>
+<p>From Greek basis, «foundation» — the base price against which deviation is measured.</p>
+<p><a href="#gl-futures">Futures</a>, <a href="#gl-contango">Contango</a>, <a href="#gl-spread">Spread</a></p>
+<h2 id="gl-basis-point">Basis point (bp)</h2>
+<p>One hundredth of a percentage point: 25 bp means 0.25%.</p>
+<p>The unit exists to remove ambiguity: «the rate rose 1%» could mean 5% to 6% or 5% to 5.05%. In basis points there is no second reading. The standard central-bank step is 25 bp, an accelerated one 50 or 75. «The Fed hiked 75 basis points» means a rise of 0.75 percentage points, not three quarters of the rate's level.</p>
+<p>The «point» is counted from a base, the percentage point.</p>
+<p><a href="#gl-policy-rate">Policy rate</a>, <a href="#gl-bond-yield">Bond yield</a>, <a href="#gl-spread">Spread</a></p>
+<h2 id="gl-bear-market">Bear market</h2>
+<p>A sustained decline, usually 20% or more from a recent high.</p>
+<p>A bear market is a prolonged period of falling prices and pessimistic sentiment.</p>
+<p>A bear swipes downward with its paw — hence the falling market.</p>
+<p><a href="#gl-bull-market">Bull market</a>, <a href="#gl-dno">The bottom</a>, <a href="#gl-drawdown">Drawdown</a>, <a href="#gl-recession">Recession</a></p>
+<h2 id="gl-beta">Beta</h2>
+<p>An asset's sensitivity to the movement of the market as a whole.</p>
+<p>A beta of 1.3 means that for a 1% rise in the index the stock historically added 1.3%. Above one amplifies the market, below one damps it, negative moves against it. The trap is in «historically»: beta is computed over a past window and changes, drifting towards one in crises, because in a panic everything falls together and diversification works worse than expected.</p>
+<p>The second Greek letter; the notation for a regression's slope coefficient.</p>
+<p><a href="#gl-correlation">Correlation</a>, <a href="#gl-sharpe">Sharpe ratio</a>, <a href="#gl-index">Index</a>, <a href="#gl-alpha">Alpha</a></p>
+<h2 id="gl-bid-ask">Bid and ask</h2>
+<p>The best buying price and the best selling price in the order book.</p>
+<p>The bid is what is offered for the asset, the ask what is wanted for it; the gap between them is the spread. Hence a practical consequence many miss: a buy fills at the ask and a close at the bid, so the position opens already down by the spread. There is no single «price» at any instant — there are always at least two.</p>
+<p>From «to bid», to offer a price as at auction, and «to ask», to demand one.</p>
+<p><a href="#gl-spread">Spread</a>, <a href="#gl-orderbook">Order book</a>, <a href="#gl-liquidity">Liquidity</a></p>
+<h2 id="gl-bitcoin">Bitcoin</h2>
+<p>The first crypto asset, with issuance capped at 21 million coins.</p>
+<p>Bitcoin set the template: open source, proof of work, an issuance schedule written in advance. What interests markets is that it behaves as a risk asset rather than a haven: in the 2020 and 2022 crises it fell with equities, not against them. Its correlation with the technology sector remains higher than with gold, despite the «digital gold» rhetoric.</p>
+<p>A compound of «bit», the unit of information, and «coin»; launched in 2009.</p>
+<p><a href="#gl-halving">Halving</a>, <a href="#gl-onchain">On-chain data</a>, <a href="#gl-dominance">Bitcoin dominance</a>, <a href="#gl-stablecoin">Stablecoin</a></p>
+<h2 id="gl-blue-chip">Blue chip</h2>
+<p>A large, stable company with a long record and high liquidity.</p>
+<p>There is no formal definition: it is reputation rather than criterion. Such stocks are usually less volatile, pay dividends more reliably and sell more easily on a bad day — the last of which matters more in practice than the first two. An important caveat: the status is not permanent. Blue-chip lists from thirty years ago contain names no longer listed at all.</p>
+<p>From the blue poker chip — the most valuable in the set.</p>
+<p><a href="#gl-share">Share</a>, <a href="#gl-dividend">Dividend</a>, <a href="#gl-sp500">S&amp;P 500</a></p>
+<h2 id="gl-boe">Bank of England</h2>
+<p>The United Kingdom's central bank, among the oldest in the world.</p>
+<p>Decisions are taken by a nine-member committee and votes are published by name — the market reads the split as a hint about the next step, which the Fed does not provide. A distinct feature: sterling and gilts are more sensitive to fiscal policy than most. The September 2022 episode, when a budget plan collapsed long gilts, forced the bank into emergency intervention.</p>
+<p>Founded 1694; its 19th-century reputation earned it the name «the Old Lady of Threadneedle Street».</p>
+<p><a href="#gl-ecb">ECB</a>, <a href="#gl-fed">The Fed</a>, <a href="#gl-policy-rate">Policy rate</a></p>
+<h2 id="gl-boj">Bank of Japan</h2>
+<p>The central bank that held rates at or below zero for decades.</p>
+<p>Because of its ultra-low rate the yen served for decades as the funding currency for carry trades, and the BoJ ran yield curve control — pinning the ten-year yield inside a set band. Exiting that policy in 2024 revealed how many global positions rested on it: the unwind of yen funding broke markets within two days.</p>
+<p>Founded 1882; the Japanese name is Nihon Ginkō, literally «bank of Japan».</p>
+<p><a href="#gl-carry-trade">Carry trade</a>, <a href="#gl-intervention">FX intervention</a>, <a href="#gl-policy-rate">Policy rate</a>, <a href="#gl-ecb">ECB</a></p>
+<h2 id="gl-bollinger">Bollinger Bands</h2>
+<p>An average plus or minus two standard deviations: a channel of varying width.</p>
+<p>The bands widen as volatility rises and narrow as it falls, so a «squeeze» often precedes a sharp move — though it says nothing about direction. A common error is treating a touch of the band as a reversal signal: in a trend price can ride the upper band for weeks. The indicator's own author wrote that the bands provide context, not signals.</p>
+<p>After John Bollinger, who proposed the indicator in the early 1980s.</p>
+<p><a href="#gl-moving-average">Moving average</a>, <a href="#gl-volatility">Volatility</a>, <a href="#gl-atr">ATR</a></p>
+<h2 id="gl-bond">Bond</h2>
+<p>A debt security: the issuer borrows and undertakes to repay with interest.</p>
+<p>Buying a bond lends money to a government or company: it repays the face value at maturity and pays coupons along the way. Unlike a share, a bond gives no stake in the business and does not grow with it — its return is known in money terms but unknown in purchasing power. Bond prices move inversely to rates: rates up, price down.</p>
+<p>From Latin obligatio, «obligation» — the paper is the formalised promise to repay.</p>
+<p><a href="#gl-coupon">Coupon</a>, <a href="#gl-bond-yield">Bond yield</a>, <a href="#gl-duration">Duration</a>, <a href="#gl-treasury">Treasuries</a></p>
+<h2 id="gl-bond-yield">Bond yield</h2>
+<p>The annual return from holding the bond to maturity at today's price.</p>
+<p>Yield to maturity folds coupon, time to maturity and the gap between price and par into one number. It, not the coupon, is what gets compared across issues. Key to reading the news: «ten-year yields rose» means bonds got cheaper, not that investors are being paid more — the coupon is unchanged, the entry price simply fell.</p>
+<p>From «yield», as in a crop — what the security yields to its owner.</p>
+<p><a href="#gl-bond">Bond</a>, <a href="#gl-coupon">Coupon</a>, <a href="#gl-yield-curve">Yield curve</a>, <a href="#gl-real-yield">Real yield</a></p>
+<h2 id="gl-breakout">Breakout</h2>
+<p>Price moving beyond the boundary of a range or a significant level.</p>
+<p>A breakout matters because it changes positioning: stops sit beyond the level, and their execution itself adds momentum. Hence two frequent outcomes rather than one: continuation when volume follows, and a return when it does not. A breakout is therefore judged not by the fact of crossing the line but by the behaviour immediately after: a close beyond the level and volume at the moment of the break.</p>
+<p>From «break out» — price breaks out of the boundary that held it.</p>
+<p><a href="#gl-false-breakout">False breakout</a>, <a href="#gl-retest">Retest</a>, <a href="#gl-support">Support</a>, <a href="#gl-resistance">Resistance</a></p>
+<h2 id="gl-brent">Brent</h2>
+<p>The North Sea benchmark crude — the reference for Europe, Asia and Africa.</p>
+<p>Roughly two thirds of world oil trade is priced off Brent. The grade is light and low-sulphur, trades on ICE in London, and is seaborne — hence its sensitivity to shipping and chokepoints. The Brent–WTI difference reflects logistics and local balances rather than quality; when the spread widens it usually says something about the US, not the world.</p>
+<p>Named after the Brent field in the North Sea, itself named after the brent goose.</p>
+<p><a href="#gl-wti">WTI</a>, <a href="#gl-opec">OPEC+</a>, <a href="#gl-oil-inventories">Oil inventories</a>, <a href="#gl-futures">Futures</a></p>
+<h2 id="gl-bull-market">Bull market</h2>
+<p>A sustained rise, usually 20% or more from a recent low.</p>
+<p>A bull market is a period in which most assets are rising and participants are optimistic.</p>
+<p>A bull strikes upward with its horns — hence the rising market.</p>
+<p><a href="#gl-bear-market">Bear market</a>, <a href="#gl-ath">All-Time High (ATH)</a>, <a href="#gl-sp500">S&amp;P 500</a>, <a href="#gl-recession">Recession</a></p>
+<h2 id="gl-buyback">Buyback</h2>
+<p>A company buying its own shares in the market, reducing the count.</p>
+<p>A buyback lifts earnings per share arithmetically: the same profit is divided among fewer shares. For a shareholder it is an alternative to a dividend, often better on tax. The criticism is equally clear: buying back with borrowed money at an inflated price flatters the accounts while weakening the balance sheet. So what matters is not that a buyback happened but the price it happened at.</p>
+<p>«Buy back» — the company takes back the shares it issued.</p>
+<p><a href="#gl-eps">EPS (earnings per share)</a>, <a href="#gl-dividend">Dividend</a>, <a href="#gl-share">Share</a></p>
+<h2 id="gl-call">Call</h2>
+<p>An option to buy: the right to purchase the asset at the strike.</p>
+<p>A call gains value as the underlying rises. The buyer pays a premium and gets capped loss with uncapped upside. The seller of a naked call collects the premium and takes on upside risk with no ceiling — one of the few positions whose loss is theoretically unlimited. A covered call (the asset is already owned) behaves quite differently: it caps the gain, not the risk.</p>
+<p>From «to call away» — the holder may call the asset away from the seller at the strike.</p>
+<p><a href="#gl-option">Option</a>, <a href="#gl-put">Put</a>, <a href="#gl-strike">Strike</a>, <a href="#gl-delta">Delta</a></p>
+<h2 id="gl-candlestick">Candlestick</h2>
+<p>A way to show open, close, high and low in a single element.</p>
+<p>The body spans open to close, the wicks mark the period's extremes. A candle is more useful than a line because it shows the struggle inside the interval, not merely the outcome. An important caveat: the same movement produces different candles on different timeframes, and a «signal» shape often vanishes when the scale changes. A test across 90,000 trades found no directional edge in candlestick patterns.</p>
+<p>The method came from 18th-century Japan and the Osaka rice market; Steve Nison brought it west.</p>
+<p><a href="#gl-pattern">Pattern</a>, <a href="#gl-engulfing">Engulfing</a>, <a href="#gl-timeframe">Timeframe</a></p>
+<h2 id="gl-carry-trade">Carry trade</h2>
+<p>Borrowing in a low-rate currency to invest in a high-rate one.</p>
+<p>The profit is the rate differential and accrues in small daily increments. The risk, however, is not gradual but abrupt: the exchange rate can eat a year's differential in days. Hence carry's characteristic profile — long quiet gains and rare sharp collapses. The classic case is yen funding: its mass unwind in August 2024 broke markets within two days.</p>
+<p>From «carry» — the income the position carries by itself, without price moving.</p>
+<p><a href="#gl-swap-points">Swap points</a>, <a href="#gl-policy-rate">Policy rate</a>, <a href="#gl-volatility">Volatility</a></p>
+<h2 id="gl-compensation-scheme">Compensation scheme</h2>
+<p>A fund that reimburses clients if the broker becomes insolvent.</p>
+<p>In the UK this is the FSCS, covering up to £85,000; in Cyprus the ICF, up to €20,000. The scheme covers the firm's insolvency, not trading losses: what is lost in the market is reimbursed by nobody. Offshore entities usually have no such fund at all, and this is one of the most material practical differences between jurisdictions.</p>
+<p>From Latin compensare, «to balance out» — making good what was lost.</p>
+<p><a href="#gl-fca">FCA</a>, <a href="#gl-cysec">CySEC</a>, <a href="#gl-segregated-account">Segregated account</a>, <a href="#gl-offshore-licence">Offshore licence</a></p>
+<h2 id="gl-consumer-confidence">Consumer confidence</h2>
+<p>A survey of households on how they see their own future.</p>
+<p>The US publishes two versions: the Conference Board's, tied more to the labour market, and the University of Michigan's, sensitive to petrol prices. They diverge regularly, which is normal — they ask different questions. The link to actual spending is weaker than it seems: people spend out of income, not mood, so the index reads better as an expectations gauge than as a forecast of purchases.</p>
+<p>«Confidence» here is a sense of security about the future, not self-assessment.</p>
+<p><a href="#gl-retail-sales">Retail sales</a>, <a href="#gl-gdp">GDP</a>, <a href="#gl-fear-greed">Fear &amp; Greed</a></p>
+<h2 id="gl-contango">Contango</h2>
+<p>Far futures priced above near ones: the normal state of the forward curve.</p>
+<p>Contango reflects the cost of carry — storage, insurance, the cost of money. For anyone holding a long position across contract rolls it means a standing deduction: each time you sell the cheap near contract and buy the expensive far one. This is precisely why long-run returns on commodity funds lag the rise in the exchange price itself.</p>
+<p>Probably from «continuation» — a fee for deferring settlement on the 19th-century London exchange.</p>
+<p><a href="#gl-futures">Futures</a>, <a href="#gl-backwardation">Backwardation</a>, <a href="#gl-roll">Roll</a></p>
+<h2 id="gl-copper">Copper</h2>
+<p>An industrial metal often read as a leading indicator of the economy.</p>
+<p>Copper goes into wiring, motors, construction and power grids, so its demand is tied directly to the industrial cycle — hence the nickname «Doctor Copper». The caveat matters: over half of world demand is Chinese, so copper often reports on Chinese construction and grid build-out rather than on the global economy at large.</p>
+<p>From Latin cuprum, after Cyprus, where the metal was mined in antiquity.</p>
+<p><a href="#gl-futures">Futures</a>, <a href="#gl-recession">Recession</a>, <a href="#gl-gdp">GDP</a></p>
+<h2 id="gl-core-inflation">Core inflation</h2>
+<p>Inflation excluding food and energy — a gauge of how entrenched price growth is.</p>
+<p>Food and fuel rise and fall with weather and geopolitics, i.e. for reasons the policy rate cannot touch. Strip them out and you see demand in the economy — which is what the central bank watches. Hence a frequent story: headline inflation falls with oil while core holds flat, and rates are not cut even though the headlines promised otherwise.</p>
+<p>«Core» as in the kernel of inflation — the part not driven by one-off shocks.</p>
+<p><a href="#gl-inflation">Inflation</a>, <a href="#gl-cpi">CPI</a>, <a href="#gl-pce">PCE (personal consumption expenditures)</a>, <a href="#gl-policy-rate">Policy rate</a></p>
+<h2 id="gl-correlation">Correlation</h2>
+<p>A measure of how far two assets move together: from −1 to +1.</p>
+<p>Correlation is what diversification needs: a set of five assets correlated at 0.9 is essentially one asset in five wrappers. The main trap is instability: correlations computed in calm times rise in a crisis, and a portfolio that looked spread out falls as one. What must be checked is not average correlation but behaviour in the worst periods.</p>
+<p>From Latin correlatio, «relation» — the joint variability of two quantities.</p>
+<p><a href="#gl-beta">Beta</a>, <a href="#gl-diversification">Diversification</a>, <a href="#gl-volatility">Volatility</a></p>
+<h2 id="gl-coupon">Coupon</h2>
+<p>The bond's regular interest payment, set at issue.</p>
+<p>The coupon is computed on face value, not on purchase price, so a holder's actual return depends on whether they paid above or below par. Coupons may be fixed or floating — tied to a reference rate or to inflation. When rates rise, old low-coupon bonds cheapen: the market drags them to the new yield by the only means available, price.</p>
+<p>From French coupon, «detachable slip» — coupons were once literally clipped from the certificate.</p>
+<p><a href="#gl-bond">Bond</a>, <a href="#gl-bond-yield">Bond yield</a></p>
+<h2 id="gl-covered-call">Covered call</h2>
+<p>Selling a call against an asset already held in the portfolio.</p>
+<p>The structure produces regular premium income but caps the upside: if the asset runs above the strike it is called away at the strike, and everything above goes to the option buyer. Downside risk stays wholly with the owner — the premium only softens it slightly. A covered call is therefore described more honestly as selling part of future upside than as «safe income».</p>
+<p>«Covered» means the obligation to deliver is covered by the asset itself rather than by cash.</p>
+<p><a href="#gl-call">Call</a>, <a href="#gl-option-premium">Option premium</a>, <a href="#gl-hedge">Hedge</a></p>
+<h2 id="gl-cpi">CPI</h2>
+<p>The Consumer Price Index — the headline measure of inflation.</p>
+<p>CPI (Consumer Price Index) measures the change in the cost of a basket of goods and services and is published monthly. Core CPI strips out food and energy, the most volatile components. The Fed targets PCE inflation, but CPI is what the market watches. A reading above forecast tends to strengthen the dollar and weigh on equities, as tighter policy is priced in; below forecast, the reverse. Look at Core CPI against the forecast, not just against the previous print.</p>
+<p>Compiled by the US Bureau of Labor Statistics since the early 20th century.</p>
+<p><a href="#gl-fed">The Fed</a>, <a href="#gl-nfp">Non-Farm Payrolls (NFP)</a>, <a href="#gl-volatility">Volatility</a>, <a href="#gl-inflation">Inflation</a>, <a href="#gl-core-inflation">Core inflation</a>, <a href="#gl-ppi">PPI (producer price index)</a>, <a href="#gl-pce">PCE (personal consumption expenditures)</a></p>
+<h2 id="gl-crack-spread">Crack spread</h2>
+<p>The gap between product prices and crude — the refining margin.</p>
+<p>The crack spread shows what a refinery earns: products minus feedstock. For understanding petrol and diesel prices it matters more than the absolute crude price: with a narrow spread refineries cut runs, fuel supply drops, and fuel gets dearer even as crude falls. «Oil fell but petrol didn't» is therefore usually a story about refining, not about collusion.</p>
+<p>From «cracking», the process of breaking heavy petroleum fractions into light ones.</p>
+<p><a href="#gl-brent">Brent</a>, <a href="#gl-wti">WTI</a>, <a href="#gl-spread">Spread</a></p>
+<h2 id="gl-credit-spread">Credit spread</h2>
+<p>The yield premium over government paper for the risk the borrower fails to pay.</p>
+<p>The spread is the price of distrust: the higher the market's perceived default probability, the more is demanded above the risk-free rate. Widening spreads in junk bonds often lead falling equities, so they are watched as a risk-appetite gauge. Note that spreads narrow not only when the borrower improves, but also when too much money is chasing yield.</p>
+<p>From «spread» — the gap between two yields rather than their level.</p>
+<p><a href="#gl-bond-yield">Bond yield</a>, <a href="#gl-treasury">Treasuries</a>, <a href="#gl-risk">Risk</a></p>
+<h2 id="gl-cross-rate">Cross rate</h2>
+<p>A pair without the US dollar: EURGBP or AUDJPY, for example.</p>
+<p>A cross is computed through the dollar even when the dollar does not appear in the quote, so its spread is the sum of two spreads and is usually wider. Practical upshot: a cross moves not only on its own news but on dollar events, which hit its two legs unequally. Volatility in yen and sterling crosses has historically been markedly higher than in the majors.</p>
+<p>From «cross rate» — the rate is obtained by crossing two quotes.</p>
+<p><a href="#gl-currency-pair">Currency pair</a>, <a href="#gl-majors">Majors</a>, <a href="#gl-spread">Spread</a></p>
+<h2 id="gl-currency-pair">Currency pair</h2>
+<p>One currency's price expressed in another: the first is base, the second quote.</p>
+<p>In EURUSD = 1.08 the base is the euro, the quote the dollar: one euro buys 1.08 dollars. Buying the pair means buying the base and selling the quote at once — in FX you cannot buy anything without selling something else. Hence a common confusion in the news: «the dollar strengthened» and «EURUSD fell» are the same event.</p>
+<p>A pair because a currency has no price on its own: price appears only relative to another.</p>
+<p><a href="#gl-pip">Pip</a>, <a href="#gl-majors">Majors</a>, <a href="#gl-cross-rate">Cross rate</a></p>
+<h2 id="gl-curve-inversion">Curve inversion</h2>
+<p>Short yields above long ones — the market expects rate cuts.</p>
+<p>Inversion means short money is paid better than long money: it happens when the policy rate is high now while slowdown and easing are seen ahead. Historically US inversion has preceded recessions, but with long and variable lags — from a few months to two years — and on one occasion the signal did not pan out. It is a risk warning, not a timetable.</p>
+<p>From Latin inversio, «a turning upside down» — the curve flips its usual slope.</p>
+<p><a href="#gl-yield-curve">Yield curve</a>, <a href="#gl-recession">Recession</a>, <a href="#gl-policy-rate">Policy rate</a></p>
+<h2 id="gl-cysec">CySEC</h2>
+<p>Cyprus's regulator — a large share of EU brokers operate through it.</p>
+<p>A CySEC licence grants access to the whole EU market and binds the broker to MiFID II: segregated client funds, leverage caps, an investor compensation fund. An important caveat for a client in Moldova or Kazakhstan: you will most likely be onboarded not to the Cypriot entity but to an offshore one in the same group, and CySEC's rules will not apply to your account.</p>
+<p>Cyprus Securities and Exchange Commission.</p>
+<p><a href="#gl-fca">FCA</a>, <a href="#gl-mifid2">MiFID II</a>, <a href="#gl-leverage-cap">Leverage cap</a>, <a href="#gl-compensation-scheme">Compensation scheme</a></p>
+<h2 id="gl-dark-pool">Dark pool</h2>
+<p>A closed venue where orders are invisible until a trade executes.</p>
+<p>Dark pools exist for large participants who must move a sizeable block without shifting the price. Trades are disclosed only after execution. The consequence for everyone else: part of real volume never appears in the visible book, so the liquidity picture on screen is incomplete. The share of such trades in the US is a notable portion of equity turnover.</p>
+<p>A «dark pool» of liquidity, as opposed to the lit exchange.</p>
+<p><a href="#gl-iceberg">Iceberg order</a>, <a href="#gl-liquidity">Liquidity</a>, <a href="#gl-market-depth">Market depth</a></p>
+<h2 id="gl-defi">DeFi</h2>
+<p>Financial services built on smart contracts, with no bank in the middle.</p>
+<p>DeFi reproduces exchange, lending and derivatives in code: the rules execute automatically and are visible to everyone. Hence the chief risk is not the counterparty but the program itself: an error in a contract is irreversible, and the sector's largest losses stem from code vulnerabilities rather than price moves. Yields here are not risk-free, whatever the number looks like.</p>
+<p>Decentralized Finance, as opposed to the centralised kind.</p>
+<p><a href="#gl-tvl">TVL</a>, <a href="#gl-stablecoin">Stablecoin</a>, <a href="#gl-gas-fee">Gas fee</a></p>
+<h2 id="gl-delta">Delta</h2>
+<p>How much the option's price moves for a one-unit move in the underlying.</p>
+<p>Call delta runs from 0 to 1, put delta from −1 to 0. An at-the-money option has delta near 0.5: it behaves like half the underlying. Delta is also read as a rough probability of expiring in the money. Across a portfolio deltas add up, which is the basis of delta hedging: the position is brought to zero sensitivity to direction, leaving the bet on volatility.</p>
+<p>The fourth Greek letter; in mathematics Δ denotes an increment, which is exactly the meaning here.</p>
+<p><a href="#gl-option">Option</a>, <a href="#gl-gamma">Gamma</a>, <a href="#gl-moneyness">Moneyness (ITM, OTM, ATM)</a></p>
+<h2 id="gl-demo-account">Demo account</h2>
+<p>An account with virtual money for testing the platform and a strategy.</p>
+<p>A demo faithfully reproduces the interface and order mechanics but not two crucial things. First, execution: a demo usually has no slippage and no rejections, while a live account at a news release has both. Second, the trader's own behaviour: a demo carries no fear of loss, and discipline with virtual money says nothing about discipline with your own.</p>
+<p>Short for «demonstration», from Latin demonstrare, «to show».</p>
+<p><a href="#gl-kyc">KYC and AML</a>, <a href="#gl-slippage">Slippage</a>, <a href="#gl-position-sizing">Position sizing</a></p>
+<h2 id="gl-devaluation">Devaluation</h2>
+<p>A fall in the national currency — by official decision or under market pressure.</p>
+<p>Devaluation makes exports cheaper and imports dearer, so it is used to support domestic production — at the cost of purchasing power at home. Inflation follows with a lag of several months, through dearer imported goods. Strictly, devaluation is the decision taken under a fixed rate, while a market-driven fall is depreciation.</p>
+<p>From Latin valere, «to have worth», with the prefix de- denoting its removal.</p>
+<p><a href="#gl-peg">Currency peg</a>, <a href="#gl-inflation">Inflation</a>, <a href="#gl-intervention">FX intervention</a></p>
+<h2 id="gl-divergence">Divergence</h2>
+<p>A disagreement between price and an oscillator, pointing to a weakening trend.</p>
+<p>Bullish divergence: price makes a new low, the oscillator (RSI, MACD) does not — bearish pressure is fading. Bearish divergence: price makes a new high while the oscillator prints a lower one — bullish pressure is fading. Hidden divergence signals continuation instead. Divergence does not give an entry by itself; it needs confirmation from price structure or a pattern. It is most reliable on H4 and above.</p>
+<p>From &quot;to diverge&quot; — price and indicator moving apart.</p>
+<p><a href="#gl-rsi">RSI</a>, <a href="#gl-trend">Trend</a>, <a href="#gl-pattern">Pattern</a>, <a href="#gl-oscillator">Oscillator</a>, <a href="#gl-macd">MACD</a>, <a href="#gl-stochastic">Stochastic oscillator</a></p>
+<h2 id="gl-diversification">Diversification</h2>
+<p>Spreading risk across assets that do not fall at the same time.</p>
+<p>Diversification works through low correlation, not through the number of positions: twenty technology stocks are not diversification. The gain is not in average return but in smoothing the path to it — and that is a real gain, because drawdown decides whether you reach the result. Risk is not removed entirely: market risk always remains.</p>
+<p>From Latin diversus, «different» — spreading across genuinely different holdings.</p>
+<p><a href="#gl-correlation">Correlation</a>, <a href="#gl-risk">Risk</a>, <a href="#gl-hedge">Hedge</a></p>
+<h2 id="gl-dividend">Dividend</h2>
+<p>A portion of profit paid out to shareholders in cash.</p>
+<p>The payment is not an obligation but a board decision, and it can be cut — which is how a dividend differs fundamentally from a coupon. On the ex-date the share price falls by roughly the payment: cash left the company, and that is mechanics rather than a drawdown. A high dividend yield often reflects not generosity but a collapsed price — worth checking before drawing conclusions.</p>
+<p>From Latin dividendum, «that which is to be divided», from dividere, «to divide».</p>
+<p><a href="#gl-share">Share</a>, <a href="#gl-buyback">Buyback</a>, <a href="#gl-bond-yield">Bond yield</a></p>
+<h2 id="gl-dno">The bottom</h2>
+<p>The lowest point of a decline before price turns up.</p>
+<p>The bottom is the point below which price did not go during the current move, after which it turned up. Whether a bottom is in can only be known after the fact.</p>
+<p>The floor of a move — the lowest point reached.</p>
+<p><a href="#gl-bear-market">Bear market</a>, <a href="#gl-otskok">Bounce</a></p>
+<h2 id="gl-dominance">Bitcoin dominance</h2>
+<p>Bitcoin's share of total crypto market capitalisation.</p>
+<p>The measure serves as a rough phase indicator: rising dominance usually means money leaving small coins for bitcoin, falling dominance the reverse rotation into altcoins. The limitation matters: the denominator includes thousands of tokens of doubtful liquidity as well as stablecoins, so dominance can shift without a single bitcoin trade.</p>
+<p>From Latin dominatio — how far bitcoin dominates the rest of the market.</p>
+<p><a href="#gl-bitcoin">Bitcoin</a>, <a href="#gl-market-cap">Market capitalisation</a>, <a href="#gl-altcoin">Altcoin</a></p>
+<h2 id="gl-dot-plot">Dot plot</h2>
+<p>A chart of FOMC members' rate expectations: one dot each.</p>
+<p>Published four times a year with the projections. Each dot is one person's view of the appropriate rate at year-end, unattributed. The market watches the median and the dispersion: a tight cloud means agreement, a wide one means argument within the committee. The caveat the Fed itself repeats: it is neither a promise nor a plan, but a snapshot of opinion on the day of the meeting.</p>
+<p>Literally a plot of dots: each dot one vote placed on the rate scale.</p>
+<p><a href="#gl-fed">The Fed</a>, <a href="#gl-forward-guidance">Forward guidance</a>, <a href="#gl-policy-rate">Policy rate</a></p>
+<h2 id="gl-double-top">Double top and double bottom</h2>
+<p>Two attempts at a level, both failed.</p>
+<p>The pattern's meaning is simple and requires no faith in geometry: price failed twice at a level, so supply sits there. Its practical use is mostly in framing risk: the level gives an obvious place for a stop. As a forecast it works poorly and is recognised only once complete. On small timeframes such shapes are so numerous that their informativeness falls to chance.</p>
+<p>Named for the count of peaks or troughs: two consecutive touches of one level.</p>
+<p><a href="#gl-head-shoulders">Head and shoulders</a>, <a href="#gl-pattern">Pattern</a>, <a href="#gl-resistance">Resistance</a></p>
+<h2 id="gl-dovish">Dovish</h2>
+<p>A central bank leaning towards supporting growth and employment, ready to cut.</p>
+<p>A dovish signal is mention of employment risks, acknowledgement of a slowdown, a hint at a pause or a cut. Markets answer with equities and bonds up and the currency softer. An important caveat: dovishness can be bad news if the market reads it as an admission that things are worse than thought — then equities fall along with rates. Context decides more than tone.</p>
+<p>The dove as a symbol of peace: such a central bank is not at war with inflation but shielding jobs.</p>
+<p><a href="#gl-hawkish">Hawkish</a>, <a href="#gl-policy-rate">Policy rate</a>, <a href="#gl-forward-guidance">Forward guidance</a></p>
+<h2 id="gl-drawdown">Drawdown</h2>
+<p>The fall in an account from its high to its low, in percent.</p>
+<p>Drawdown matters more than return because it decides whether you survive to collect the return. The arithmetic is asymmetric: minus 50% needs plus 100% to recover. Assessing a strategy means looking not only at depth but at duration — how many months the account spent below its prior peak. It is duration, not depth, that makes people abandon systems that work.</p>
+<p>«Drawdown» as in a fall in level, as of water in a reservoir.</p>
+<p><a href="#gl-risk">Risk</a>, <a href="#gl-equity-curve">Equity curve</a>, <a href="#gl-risk-of-ruin">Risk of ruin</a></p>
+<h2 id="gl-duration">Duration</h2>
+<p>A bond price's sensitivity to rate changes, expressed in years.</p>
+<p>A duration of 8 means a one-percentage-point rise in yields cheapens the bond by roughly 8%. The longer the maturity and the lower the coupon, the higher the duration. This is why «safe» long government bonds delivered double-digit losses in 2022: they genuinely had no credit risk, but interest-rate risk was never cancelled. Issuer reliability and price safety are different things.</p>
+<p>From Latin duratio, «duration» — a weighted measure of when the money comes back.</p>
+<p><a href="#gl-bond">Bond</a>, <a href="#gl-bond-yield">Bond yield</a>, <a href="#gl-policy-rate">Policy rate</a></p>
+<h2 id="gl-dxy">Dollar index (DXY)</h2>
+<p>The dollar against a basket of six currencies, in which the euro is over half.</p>
+<p>The basket's composition has not changed since inception beyond replacing European currencies with the euro, so the euro weight is about 58% and China does not feature at all. Hence the caveat: DXY is primarily the dollar against Europe, not against the world. For the dollar in global trade, trade-weighted indices are used, and they behave noticeably differently.</p>
+<p>Dollar Index, computed since 1973, with a base of 100 at launch.</p>
+<p><a href="#gl-majors">Majors</a>, <a href="#gl-gold">Gold</a>, <a href="#gl-policy-rate">Policy rate</a></p>
+<h2 id="gl-earnings">Earnings</h2>
+<p>Publication of a company's financial results for the quarter.</p>
+<p>What matters for price is not profit itself but three things: the surprise against consensus, revenue, and the company's own outlook. A stock can fall on record profit if guidance was cut — the most common source of a beginner's bewilderment. Earnings land before the open or after the close, and the move in thin pre-market trading can be deceptively wide.</p>
+<p>«Earnings» — what was earned over the period.</p>
+<p><a href="#gl-eps">EPS (earnings per share)</a>, <a href="#gl-guidance">Guidance</a>, <a href="#gl-pe-ratio">P/E ratio</a></p>
+<h2 id="gl-ecb">ECB</h2>
+<p>The euro area's central bank: one rate for twenty different economies.</p>
+<p>The key reference is the deposit facility rate, which is what gets quoted as «the ECB rate». The setup is more complex than the Fed's: a mandate on inflation alone, with no employment target, and decisions affecting countries with very different debt loads. Hence particular attention to Italian–German yield spreads: their widening constrains the ECB more than its own forecasts do.</p>
+<p>The European Central Bank, operating since 1998, based in Frankfurt.</p>
+<p><a href="#gl-fed">The Fed</a>, <a href="#gl-policy-rate">Policy rate</a>, <a href="#gl-boe">Bank of England</a>, <a href="#gl-boj">Bank of Japan</a></p>
 <h2 id="gl-engulfing">Engulfing</h2>
 <p>A two-candle reversal pattern where the second candle fully engulfs the body of the first.</p>
 <p>A bullish engulfing appears after a downtrend: a bullish candle engulfs the bearish one, opening lower and closing above the previous candle. It is read as a shift in sentiment towards the buyers. A bearish engulfing is the mirror image in an uptrend. These patterns carry more weight on higher timeframes and near key support and resistance levels.</p>
 <p>From &quot;to engulf&quot; — a candle that completely covers the body of the one before it.</p>
 <p><a href="#gl-pattern">Pattern</a>, <a href="#gl-trend">Trend</a>, <a href="#gl-support">Support</a></p>
+<h2 id="gl-eps">EPS (earnings per share)</h2>
+<p>Net profit divided by the number of shares.</p>
+<p>EPS is the headline number of a quarterly report: it is compared with the analyst consensus, and the stock's reaction depends on the difference rather than the level. Note that EPS rises two ways: when profit grows and when the share count shrinks. The second route — buybacks — improves the metric without improving the business, so EPS is read alongside revenue.</p>
+<p>Earnings Per Share, literally the earnings attributable to one share.</p>
+<p><a href="#gl-pe-ratio">P/E ratio</a>, <a href="#gl-earnings">Earnings</a>, <a href="#gl-buyback">Buyback</a></p>
+<h2 id="gl-equity-curve">Equity curve</h2>
+<p>The chart of capital over time: the primary document on how a system behaves.</p>
+<p>The curve shows what the final figure hides: the length of slumps, the evenness of growth, dependence on a single lucky trade. A system with the same result but a smooth curve is practically executable; one with a jagged curve is not, because a person will not endure it. A useful exercise is to cover the last stretch and ask whether you would have kept trading on the strength of the beginning alone.</p>
+<p>«Equity» here means account capital rather than shares: the curve of funds over time.</p>
+<p><a href="#gl-drawdown">Drawdown</a>, <a href="#gl-profit-factor">Profit factor</a>, <a href="#gl-expectancy">Expectancy</a></p>
+<h2 id="gl-expectancy">Expectancy</h2>
+<p>The average outcome of one trade in a system, expressed in R.</p>
+<p>Computed as win rate times average win minus loss rate times average loss. Positive expectancy is the only thing that distinguishes a system from gambling. Hence the key conclusion that overturns intuition: win rate alone says nothing — a system winning 35% of the time can be profitable, and one winning 80% can lose money.</p>
+<p>A term from probability theory: the expected value of a random variable over many repetitions.</p>
+<p><a href="#gl-winrate">Win rate</a>, <a href="#gl-r-ratio">R-multiple</a>, <a href="#gl-profit-factor">Profit factor</a></p>
+<h2 id="gl-expiry">Expiry</h2>
+<p>The date on which an option or future ceases to exist.</p>
+<p>At expiry an option is either exercised or dies worthless, and all of its time value is by then zero. Large expiry dates are visible in the market itself: volumes swell nearby and price sometimes pins to the strikes carrying the most open interest. For futures, expiry means delivery or cash settlement — hence the need to roll into the next contract.</p>
+<p>From Latin expirare, «to breathe out» — the contract's term literally runs out.</p>
+<p><a href="#gl-option">Option</a>, <a href="#gl-theta">Theta</a>, <a href="#gl-max-pain">Max pain</a></p>
+<h2 id="gl-false-breakout">False breakout</h2>
+<p>A move beyond a level followed by a quick return into the range.</p>
+<p>A false breakout is structured to collect stops and close back inside the range — hence the characteristic long wick. For some it is a loss, for others a signal: the return means there was no demand beyond the level. False and genuine cannot be told apart at the moment of the break, so the choice usually reduces to entering at once or waiting for the period to close.</p>
+<p>«False» as opposed to genuine; «fakeout» from «fake».</p>
+<p><a href="#gl-breakout">Breakout</a>, <a href="#gl-liquidity-sweep">Liquidity Sweep</a>, <a href="#gl-retest">Retest</a></p>
+<h2 id="gl-fca">FCA</h2>
+<p>The United Kingdom's regulator, among the strictest in the industry.</p>
+<p>The FCA requires segregated client money, caps retail leverage and provides protection through the FSCS — up to £85,000 per client if the broker fails. A frequent confusion in copy: the FCA regulates the UK, not the EU, and since the country left the union, passporting the licence into the EU no longer applies.</p>
+<p>Financial Conduct Authority, operating since 2013.</p>
+<p><a href="#gl-cysec">CySEC</a>, <a href="#gl-asic">ASIC</a>, <a href="#gl-compensation-scheme">Compensation scheme</a>, <a href="#gl-leverage-cap">Leverage cap</a></p>
 <h2 id="gl-fear-greed">Fear &amp; Greed</h2>
 <p>A composite 0–100 index reflecting the current emotional backdrop of the crypto market.</p>
 <p>The Crypto Fear &amp; Greed Index runs from 0 to 100: 0–25 extreme fear, 26–45 fear, 46–55 neutral, 56–75 greed, 76–100 extreme greed. It weighs volatility, trading volume, social-media sentiment, Bitcoin dominance and search trends. Buffett's line applies: be fearful when others are greedy and greedy when others are fearful. The index measures mood; it is not a trading signal.</p>
 <p>Devised by CNNMoney to gauge market sentiment across seven factors.</p>
-<p><a href="#gl-vix">VIX</a>, <a href="#gl-volatility">Volatility</a>, <a href="#gl-trend">Trend</a></p>
-<h2 id="gl-nfp">Non-Farm Payrolls (NFP)</h2>
-<p>The key US macro report on jobs added outside agriculture.</p>
-<p>NFP (Non-Farm Payrolls) is a monthly US Department of Labor report released on the first Friday of the month. It shows the change in employment over the previous month. Strong data — above forecast — usually strengthens the dollar; weak data weakens it. NFP is one of the most volatile events on the calendar: the first 30 minutes after the release can bring sharp moves across every market. Together with the unemployment rate and wage growth it feeds into Fed decisions.</p>
-<p>Agriculture is excluded from the report because of its strong seasonal swings.</p>
-<p><a href="#gl-cpi">CPI</a>, <a href="#gl-fed">The Fed</a>, <a href="#gl-volatility">Volatility</a></p>
-<h2 id="gl-cpi">CPI</h2>
-<p>The Consumer Price Index — the headline measure of inflation.</p>
-<p>CPI (Consumer Price Index) measures the change in the cost of a basket of goods and services and is published monthly. Core CPI strips out food and energy, the most volatile components. The Fed targets PCE inflation, but CPI is what the market watches. A reading above forecast tends to strengthen the dollar and weigh on equities, as tighter policy is priced in; below forecast, the reverse. Look at Core CPI against the forecast, not just against the previous print.</p>
-<p>Compiled by the US Bureau of Labor Statistics since the early 20th century.</p>
-<p><a href="#gl-fed">The Fed</a>, <a href="#gl-nfp">Non-Farm Payrolls (NFP)</a>, <a href="#gl-volatility">Volatility</a></p>
+<p><a href="#gl-vix">VIX</a>, <a href="#gl-volatility">Volatility</a>, <a href="#gl-trend">Trend</a>, <a href="#gl-consumer-confidence">Consumer confidence</a></p>
 <h2 id="gl-fed">The Fed</h2>
 <p>The US central bank, which sets the key rate and moves every market in the world.</p>
 <p>The Federal Reserve is the central bank of the United States, setting monetary policy through the Fed Funds Rate. The FOMC meets eight times a year. A rate hike is tightening — hawkish: credit becomes dearer, the dollar firms, equities and crypto come under pressure. A cut is easing — dovish: cheaper money, risk assets rally. The chair's language at the press conference often matters more than the decision itself.</p>
 <p>The Federal Reserve System was created in 1913 as the US central bank.</p>
-<p><a href="#gl-cpi">CPI</a>, <a href="#gl-nfp">Non-Farm Payrolls (NFP)</a>, <a href="#gl-volatility">Volatility</a></p>
-<h2 id="gl-stoploss">Stop-loss</h2>
-<p>An order that closes a position automatically once a set loss is reached.</p>
-<p>A stop-loss (SL) is a protective order that caps the loss. It sits at the level where the position is closed automatically. It is the core of risk management: without a stop, a single losing trade can wipe out an account. The 1% rule says risk no more than 1% of the deposit on one trade. Stops are placed beyond a support or resistance level, beyond a candle extreme, or by volatility (ATR × multiplier). Having stops taken out en masse is a liquidity sweep.</p>
-<p>From &quot;stop loss&quot; — literally, stop the loss.</p>
-<p><a href="#gl-takeprofit">Take-profit</a>, <a href="#gl-r-ratio">R-multiple</a>, <a href="#gl-leverage">Leverage</a>, <a href="#gl-support">Support</a></p>
-<h2 id="gl-takeprofit">Take-profit</h2>
-<p>An order that closes a position automatically once the profit target is reached.</p>
-<p>A take-profit (TP) locks in profit at a predefined level and is used alongside a stop-loss. The ratio of TP to SL is the risk-to-reward (R:R). A common minimum is 1:2 — profit twice the risk — which leaves a system profitable at a 34% win rate. Closing part of the position at the first target and moving the stop to breakeven is a widespread way to manage the rest.</p>
-<p>From &quot;take profit&quot; — literally, take the profit.</p>
-<p><a href="#gl-stoploss">Stop-loss</a>, <a href="#gl-r-ratio">R-multiple</a>, <a href="#gl-risk">Risk</a></p>
-<h2 id="gl-r-ratio">R-multiple</h2>
-<p>The ratio of potential profit to the risk accepted on a single trade.</p>
-<p>R (the risk unit) is the distance from entry to stop-loss expressed in money. 1R is the risk on a trade. A take-profit at 2R means potential profit twice the risk. Keeping a P&amp;L journal in R lets you compare trades across instruments and account sizes. Average R over a period is the key measure of a system's quality. The &quot;cost of indiscipline&quot; is the difference in R between clean trades and trades that broke your rules.</p>
-<p>&quot;R&quot; stands for risk: one unit of risk per trade, with results measured in multiples of it.</p>
-<p><a href="#gl-stoploss">Stop-loss</a>, <a href="#gl-takeprofit">Take-profit</a>, <a href="#gl-risk">Risk</a>, <a href="#gl-leverage">Leverage</a></p>
-<h2 id="gl-leverage">Leverage</h2>
-<p>Using borrowed broker funds to increase position size.</p>
-<p>Leverage lets you trade a position larger than your own capital. At 1:10, a $1,000 deposit controls a $10,000 position. Profit and loss scale in proportion. A margin call is the forced closure of positions once margin is exhausted. High leverage means a small move against you can liquidate the position. Professional traders typically stay within 1:3 to 1:5.</p>
-<p>From &quot;lever&quot;: a small amount of capital moves a large position.</p>
-<p><a href="#gl-stoploss">Stop-loss</a>, <a href="#gl-risk">Risk</a>, <a href="#gl-spread">Spread</a>, <a href="#gl-margin">Margin</a></p>
-<h2 id="gl-spread">Spread</h2>
-<p>The difference between the ask (buy) and bid (sell) price of an instrument.</p>
-<p>The spread is the broker's implicit commission: on entry a trader is immediately down by the spread. Liquid instruments have tight spreads — EURUSD around 0.2–0.5 pips; exotic pairs and thin stocks can run to several per cent. Spreads widen around news and in low-liquidity hours — overnight, holidays. For scalping and high-frequency trading the spread is decisive.</p>
-<p>From &quot;spread&quot; — the gap between the buying and the selling price.</p>
-<p><a href="#gl-liquidity">Liquidity</a>, <a href="#gl-leverage">Leverage</a>, <a href="#gl-marketmaker">Market maker</a></p>
-<h2 id="gl-liquidity">Liquidity</h2>
-<p>How easily an asset can be bought or sold without moving its price.</p>
-<p>Liquidity is a defining property of a market. Highly liquid markets — EUR/USD, the S&amp;P 500, BTC — offer tight spreads, fast fills and little slippage. Illiquid ones — penny stocks, exotic crypto — bring wide spreads and heavy slippage. Liquidity drops outside main trading hours. In SMC, &quot;liquidity&quot; also means the stop orders stacked above and below key levels that large players are said to hunt.</p>
-<p>From the Latin liquidus — flowing, fluid.</p>
-<p><a href="#gl-spread">Spread</a>, <a href="#gl-marketmaker">Market maker</a>, <a href="#gl-orderbook">Order book</a>, <a href="#gl-slippage">Slippage</a></p>
-<h2 id="gl-orderbook">Order book</h2>
-<p>The list of open buy and sell orders with their prices and sizes.</p>
-<p>The order book visualises supply and demand. The bid side holds buy orders — what buyers are willing to pay. The ask side holds sell orders. The best bid and best ask together form the spread. A &quot;wall&quot; — one very large order — can hold price up temporarily. A deep book, with orders at many levels, means high liquidity. On futures and spot crypto the book updates in real time.</p>
-<p>The book of orders: the list of resting bids and offers by price level.</p>
-<p><a href="#gl-liquidity">Liquidity</a>, <a href="#gl-spread">Spread</a>, <a href="#gl-marketmaker">Market maker</a></p>
-<h2 id="gl-slippage">Slippage</h2>
-<p>The difference between the expected fill price and the actual one.</p>
-<p>Slippage happens when an order fills at a worse price than requested. The causes are thin liquidity, high volatility around news, and slow order handling. Market orders are the most exposed. Limit orders remove negative slippage but may not fill at all. In scalping and HFT, slippage is a make-or-break factor.</p>
-<p>From &quot;to slip&quot; — the gap between the price you expected and the one you got.</p>
-<p><a href="#gl-liquidity">Liquidity</a>, <a href="#gl-spread">Spread</a>, <a href="#gl-stoploss">Stop-loss</a>, <a href="#gl-orderbook">Order book</a></p>
-<h2 id="gl-timeframe">Timeframe</h2>
-<p>The time interval each candle on a chart covers (M30, H1, H4, D1, W1).</p>
-<p>A timeframe is the period one candle represents. M1/M5/M15 suit scalping and intraday work. M30/H1 are intraday and swing. H4/D1 are medium-term. W1/MN are long-term. The multi-timeframe principle: read the trend on the higher timeframe, find the entry on the lower one. Levels drawn on a higher timeframe carry more weight than those on a lower one.</p>
-<p>The frame of time a single candle covers.</p>
-<p><a href="#gl-trend">Trend</a>, <a href="#gl-pattern">Pattern</a>, <a href="#gl-support">Support</a>, <a href="#gl-resistance">Resistance</a></p>
-<h2 id="gl-trend">Trend</h2>
-<p>A sustained directional move: up (bullish), down (bearish) or sideways (range).</p>
-<p>A trend is defined by its sequence of extremes: bullish means higher highs and higher lows, bearish means lower highs and lower lows. A range is horizontal, with no clear direction. Dow's axiom holds that a trend is in force until proven otherwise. Identifying the trend is the first step of any analysis, and trading with it reduces the odds of a bad trade.</p>
-<p>From &quot;trend&quot; — the prevailing direction of price.</p>
-<p><a href="#gl-timeframe">Timeframe</a>, <a href="#gl-support">Support</a>, <a href="#gl-resistance">Resistance</a>, <a href="#gl-flat">Range (flat)</a></p>
+<p><a href="#gl-cpi">CPI</a>, <a href="#gl-nfp">Non-Farm Payrolls (NFP)</a>, <a href="#gl-volatility">Volatility</a>, <a href="#gl-policy-rate">Policy rate</a>, <a href="#gl-dot-plot">Dot plot</a>, <a href="#gl-fomc-minutes">FOMC minutes</a>, <a href="#gl-qe">Quantitative easing (QE)</a></p>
+<h2 id="gl-fibonacci">Fibonacci levels</h2>
+<p>Marking a pullback by fractions of the move: 38.2%, 50%, 61.8%.</p>
+<p>The levels are drawn from the start and end of an impulse, on the expectation that the retracement halts at one of the fractions. There is no mathematical grounding linking the number sequence to price, and that is worth stating plainly. The tool works rather as a common reference: many participants watch the same levels and orders cluster where they are expected. Self-confirmation is a mechanism too, but not a prediction.</p>
+<p>After Leonardo of Pisa, known as Fibonacci, who described the sequence in 1202.</p>
+<p><a href="#gl-support">Support</a>, <a href="#gl-resistance">Resistance</a>, <a href="#gl-retest">Retest</a></p>
 <h2 id="gl-flat">Range (flat)</h2>
 <p>A period of trading inside a horizontal price band with no clear trend.</p>
 <p>A range, or flat, is price moving between support and resistance without forming a sustained trend. Trend strategies produce many false signals in a range. Counter-trend approaches work better: buy near the lower boundary, sell near the upper one. Volume usually drops inside a range, and a break on high volume often marks the start of a trend.</p>
 <p>&quot;Flat&quot; — price moving along a horizontal band.</p>
-<p><a href="#gl-trend">Trend</a>, <a href="#gl-support">Support</a>, <a href="#gl-resistance">Resistance</a>, <a href="#gl-volatility">Volatility</a></p>
-<h2 id="gl-volatility">Volatility</h2>
-<p>A measure of how widely price swings over a period.</p>
-<p>Volatility measures how far price strays from its average. High volatility means large candles, wide spreads and strong moves; low volatility means narrow candles and a quiet market. ATR (Average True Range) is a popular measure of historical volatility. Implied volatility (IV) is the volatility the market expects, priced into options. For equities the benchmark is the VIX, the &quot;fear index&quot;. Volatility usually compresses ahead of a release and jumps after it.</p>
-<p>From the Latin volatilis — flying, fleeting.</p>
-<p><a href="#gl-vix">VIX</a>, <a href="#gl-atr">ATR</a>, <a href="#gl-spread">Spread</a>, <a href="#gl-trend">Trend</a></p>
-<h2 id="gl-vix">VIX</h2>
-<p>The expected 30-day volatility of the S&amp;P 500 — the market's &quot;fear gauge&quot;.</p>
-<p>The VIX (CBOE Volatility Index) is derived from S&amp;P 500 option prices. Below 15 the market is calm. Between 20 and 30 there is moderate uncertainty. Above 30 signals high anxiety, often near a market bottom. It is inversely correlated with the S&amp;P 500: when the index falls, the VIX rises. The VIX says nothing about direction, only about amplitude. Crypto has an equivalent in DVOL, the Deribit volatility index for BTC.</p>
-<p>Introduced by the CBOE in 1993 as a measure of expected market volatility.</p>
-<p><a href="#gl-fear-greed">Fear &amp; Greed</a>, <a href="#gl-volatility">Volatility</a>, <a href="#gl-trend">Trend</a></p>
-<h2 id="gl-divergence">Divergence</h2>
-<p>A disagreement between price and an oscillator, pointing to a weakening trend.</p>
-<p>Bullish divergence: price makes a new low, the oscillator (RSI, MACD) does not — bearish pressure is fading. Bearish divergence: price makes a new high while the oscillator prints a lower one — bullish pressure is fading. Hidden divergence signals continuation instead. Divergence does not give an entry by itself; it needs confirmation from price structure or a pattern. It is most reliable on H4 and above.</p>
-<p>From &quot;to diverge&quot; — price and indicator moving apart.</p>
-<p><a href="#gl-rsi">RSI</a>, <a href="#gl-trend">Trend</a>, <a href="#gl-pattern">Pattern</a>, <a href="#gl-oscillator">Oscillator</a></p>
-<h2 id="gl-volume">Volume</h2>
-<p>The number of lots, contracts or coins traded over a period.</p>
-<p>Volume is an important secondary indicator. A move on high volume carries more weight. A rally on thin volume is a potentially weak signal, and falling volume inside a trend warns of a possible reversal. A volume profile shows at which prices the most trading took place; the Point of Control — the price with the highest traded volume — often acts as support or resistance.</p>
-<p>From &quot;volume&quot; — the amount traded.</p>
-<p><a href="#gl-liquidity">Liquidity</a>, <a href="#gl-trend">Trend</a>, <a href="#gl-flat">Range (flat)</a>, <a href="#gl-orderbook">Order book</a></p>
-<h2 id="gl-long">Long</h2>
-<p>Buying an asset in expectation of a rise.</p>
-<p>A long position is the basic market stance: the trader buys an asset expecting to sell it higher later. Profit comes from a rising price, loss from a falling one. The opposite of a short.</p>
-<p>&quot;Long&quot; — holding the asset itself, in contrast to borrowing it.</p>
-<p><a href="#gl-short">Short</a></p>
-<h2 id="gl-short">Short</h2>
-<p>Selling an asset borrowed from the broker in expectation of a fall.</p>
-<p>In a short sale the trader borrows an asset from the broker, sells it at the current price and undertakes to return it later. If the price falls, they buy it back cheaper, return the loan and keep the difference. If the price rises, the loss is theoretically unlimited.</p>
-<p>&quot;Short&quot; — being short of the asset you have sold.</p>
-<p><a href="#gl-long">Long</a></p>
-<h2 id="gl-ath">All-Time High (ATH)</h2>
-<p>All-Time High — the highest price an asset has ever reached.</p>
-<p>The ATH is the highest price an asset has traded at in its entire history. A new ATH usually draws retail attention and media coverage, which is no guarantee the rally continues.</p>
-<p>All-Time High — the record across the whole trading history.</p>
-<p><a href="#gl-bull-market">Bull market</a></p>
-<h2 id="gl-bull-market">Bull market</h2>
-<p>A sustained rise, usually 20% or more from a recent low.</p>
-<p>A bull market is a period in which most assets are rising and participants are optimistic.</p>
-<p>A bull strikes upward with its horns — hence the rising market.</p>
-<p><a href="#gl-bear-market">Bear market</a>, <a href="#gl-ath">All-Time High (ATH)</a></p>
-<h2 id="gl-bear-market">Bear market</h2>
-<p>A sustained decline, usually 20% or more from a recent high.</p>
-<p>A bear market is a prolonged period of falling prices and pessimistic sentiment.</p>
-<p>A bear swipes downward with its paw — hence the falling market.</p>
-<p><a href="#gl-bull-market">Bull market</a>, <a href="#gl-dno">The bottom</a></p>
+<p><a href="#gl-trend">Trend</a>, <a href="#gl-support">Support</a>, <a href="#gl-resistance">Resistance</a>, <a href="#gl-volatility">Volatility</a>, <a href="#gl-adx">ADX</a>, <a href="#gl-triangle">Triangle</a>, <a href="#gl-stochastic">Stochastic oscillator</a></p>
+<h2 id="gl-fomc-minutes">FOMC minutes</h2>
+<p>The record of discussion at a Fed meeting, published three weeks later.</p>
+<p>The minutes show not the decision but the argument: who favoured a pause, who a hike, and on what grounds. The market looks for the degree of unanimity and the conditions under which the committee would change course. The reaction is usually milder than to the meeting itself, but can be sharp if the text contradicts how the press conference sounded three weeks earlier.</p>
+<p>«Minutes» in the sense of a record, from Latin minuta, «rough note».</p>
+<p><a href="#gl-fed">The Fed</a>, <a href="#gl-dot-plot">Dot plot</a>, <a href="#gl-forward-guidance">Forward guidance</a></p>
+<h2 id="gl-forward-guidance">Forward guidance</h2>
+<p>A central bank's public indication of what it intends to do next.</p>
+<p>The tool works by changing expectations: if the market believes a promise to hold rates low for two years, long yields fall today without a single decision. Its price is credibility: departing from the promise is costly at the next attempt. Hence wording has grown more cautious, tied to data rather than to dates.</p>
+<p>Literally guidance pointing forward — a marker for the future, not a decision about the present.</p>
+<p><a href="#gl-hawkish">Hawkish</a>, <a href="#gl-dovish">Dovish</a>, <a href="#gl-dot-plot">Dot plot</a>, <a href="#gl-policy-rate">Policy rate</a></p>
+<h2 id="gl-free-float">Free float</h2>
+<p>The share of stock in free circulation and available to trade.</p>
+<p>Large blocks held by founders and governments do not trade, so the real market is smaller than market cap. A low free float means thin liquidity and wide moves on modest volume. Indices weight constituents by free float rather than total capitalisation — otherwise a company with one owner would carry a weight with no corresponding shares for sale.</p>
+<p>The portion that «floats freely», not tied up by strategic holders.</p>
+<p><a href="#gl-market-cap">Market capitalisation</a>, <a href="#gl-liquidity">Liquidity</a>, <a href="#gl-index">Index</a></p>
+<h2 id="gl-funding-rate">Funding rate</h2>
+<p>A payment between longs and shorts that keeps a perpetual near spot.</p>
+<p>If the perpetual trades above spot, longs pay shorts, and vice versa. Settlement is usually every eight hours. The sign and size of funding is a direct measure of positioning skew: persistently high positive funding means the market is crowded long, and such states often end in a sharp drop once leverage starts unwinding.</p>
+<p>From «funding» — the charge for carrying a leveraged position.</p>
+<p><a href="#gl-perpetual">Perpetual</a>, <a href="#gl-carry-trade">Carry trade</a>, <a href="#gl-liquidation">Liquidation</a></p>
+<h2 id="gl-futures">Futures</h2>
+<p>An exchange contract to deliver an asset in the future at an agreed price.</p>
+<p>Unlike an option, a future obliges both sides, so it carries no premium: entry costs only margin. The contract is standardised by the exchange in size and date, and settlement is daily — profit and loss are credited each evening. It is through futures that the price the news calls «the price of oil» or «of gold» is actually formed.</p>
+<p>From «future» — a deal for future delivery struck today.</p>
+<p><a href="#gl-expiry">Expiry</a>, <a href="#gl-margin">Margin</a>, <a href="#gl-roll">Roll</a>, <a href="#gl-settlement">Settlement</a></p>
+<h2 id="gl-fvg">Fair Value Gap</h2>
+<p>A price gap left behind by a sharp impulsive move.</p>
+<p>A Fair Value Gap (FVG) is three consecutive candles where the wicks of the first and third do not overlap: price moved so fast that trading never covered the whole range. The market is assumed to want to fill the FVG by returning to that zone. An FVG can be bullish (price jumped up) or bearish (price jumped down). Within SMC it is used as a potential retest area.</p>
+<p>&quot;Fair value gap&quot; — a price interval left untraded by an impulsive move.</p>
+<p><a href="#gl-smc">SMC</a>, <a href="#gl-orderblock">Order Block</a>, <a href="#gl-liquidity-sweep">Liquidity Sweep</a></p>
+<h2 id="gl-fx-fixing">Fixing</h2>
+<p>The official rate at a set moment of the day, used for valuations.</p>
+<p>The best known is the 4pm WM/Reuters London fix: funds worldwide revalue portfolios against it, so an enormous flow of orders converges on that minute. Hence the characteristic volume spikes and short sharp moves in the minutes either side. Knowing the fixing time is useful if only to avoid placing an entry in that minute.</p>
+<p>From «to fix» — the rate is fixed for an instant as a reference value.</p>
+<p><a href="#gl-intervention">FX intervention</a>, <a href="#gl-currency-pair">Currency pair</a>, <a href="#gl-liquidity">Liquidity</a></p>
+<h2 id="gl-gamma">Gamma</h2>
+<p>The rate of change of delta itself: how fast sensitivity builds.</p>
+<p>Gamma is largest near the money and near expiry, where delta jumps on the slightest move. For the option buyer that is a gift: the position gains sensitivity in the favourable direction by itself. For the seller it is a source of rapid losses, because a hedge set a minute ago is no longer neutral. Large dealer gamma positions explain part of the sharp intraday moves.</p>
+<p>The third Greek letter: the second derivative of price with respect to the underlying, after delta.</p>
+<p><a href="#gl-delta">Delta</a>, <a href="#gl-option">Option</a>, <a href="#gl-gamma-exposure">Gamma exposure (GEX)</a></p>
+<h2 id="gl-gamma-exposure">Gamma exposure (GEX)</h2>
+<p>Dealers' aggregate gamma: a clue to whether they damp or amplify moves.</p>
+<p>When market makers are long gamma their hedging works against the move — selling into strength, buying into weakness — and the market gets calmer. Short gamma means hedging follows the move and accelerates it, which is behind sharp bursts in a thin market. GEX is estimated from open interest, so it is inference from indirect data: real dealer books are not visible to us.</p>
+<p>«Gamma» plus «exposure» — what the hedger is exposed to.</p>
+<p><a href="#gl-gamma">Gamma</a>, <a href="#gl-open-interest">Open interest (OI)</a>, <a href="#gl-marketmaker">Market maker</a></p>
+<h2 id="gl-gap">Gap</h2>
+<p>A break on the chart: price opened far from the previous close.</p>
+<p>Gaps appear wherever trading is interrupted: weekends in FX, overnight in equities, trading halts. The main practical consequence: a stop-loss sitting inside the gap does not work as intended — it fills at the first available price, which may be far away. Carrying a position through a weekend or through earnings is therefore a risk a stop does not bound.</p>
+<p>A «gap» — literally an empty space between candles on the chart.</p>
+<p><a href="#gl-stoploss">Stop-loss</a>, <a href="#gl-slippage">Slippage</a>, <a href="#gl-volatility">Volatility</a></p>
+<h2 id="gl-gas-fee">Gas fee</h2>
+<p>Payment for computation on a blockchain, varying with network load.</p>
+<p>Gas pays for work, not for the amount transferred, so sending a million and sending a dollar cost the same. The gas price is an auction for space in a block: in busy hours it rises tens of times over and small operations stop making economic sense. It was precisely the cost of gas that gave rise to layer-two networks as a way around it.</p>
+<p>A fuel metaphor: computation «burns gas», and the quantity reflects its complexity.</p>
+<p><a href="#gl-defi">DeFi</a>, <a href="#gl-layer2">Layer 2 (L2)</a>, <a href="#gl-onchain">On-chain data</a></p>
+<h2 id="gl-gdp">GDP</h2>
+<p>The value of everything produced in a country in a period — the main measure of its size.</p>
+<p>GDP arrives with a long lag and in three vintages: advance, revised and final, so the market mostly reacts to the first. For trading it is less useful than leading indicators such as PMI: by the time the number lands, expectations are already priced. Distinguish nominal from real GDP — the latter is inflation-adjusted and speaks to output rather than prices.</p>
+<p>«Gross» as in without deductions; «domestic» as in produced inside the country, by whomever.</p>
+<p><a href="#gl-recession">Recession</a>, <a href="#gl-pmi">PMI</a>, <a href="#gl-industrial-production">Industrial production</a></p>
+<h2 id="gl-gold">Gold</h2>
+<p>An asset with no cash flow: its price is set by the cost of alternatives.</p>
+<p>Gold pays no coupon and no dividend, so its chief adversary is the real yield: when risk-free paper pays above inflation, holding metal becomes expensive. The second factor is the dollar it is quoted in. Central-bank buying has added steady, price-insensitive demand in recent years. As an inflation hedge gold works over decades, not years.</p>
+<p>Exchange code XAU: X marks «not a national currency», AU is gold's symbol in the periodic table.</p>
+<p><a href="#gl-real-yield">Real yield</a>, <a href="#gl-dxy">Dollar index (DXY)</a>, <a href="#gl-silver">Silver</a>, <a href="#gl-hedge">Hedge</a></p>
+<h2 id="gl-guidance">Guidance</h2>
+<p>Management's own estimate of future results.</p>
+<p>Guidance often moves a stock harder than the result: last quarter has already happened, while the outlook reprices every quarter to come. Management knows this, so targets are frequently set conservatively to be beaten later — a practice so widespread that «beating guidance» by itself says little. Withdrawing guidance altogether is a strong signal of uncertainty.</p>
+<p>«Guidance» — the company gives the market a marker for its own numbers.</p>
+<p><a href="#gl-earnings">Earnings</a>, <a href="#gl-eps">EPS (earnings per share)</a>, <a href="#gl-share">Share</a></p>
+<h2 id="gl-halving">Halving</h2>
+<p>The halving of bitcoin's mining reward, roughly every four years.</p>
+<p>The halving is written into the network's rules and cuts the inflow of new coins in half, reducing supply at unchanged demand. Rallies have historically followed halvings, but the sample is four events, and attributing the rise to one factor while rates and regulation changed simultaneously is not sound. The date is known in advance, so the expectation is priced before the event.</p>
+<p>From «half» — the block reward is cut in half.</p>
+<p><a href="#gl-bitcoin">Bitcoin</a>, <a href="#gl-onchain">On-chain data</a></p>
+<h2 id="gl-hawkish">Hawkish</h2>
+<p>A central bank leaning towards fighting inflation even at the cost of growth.</p>
+<p>«Hawkish» describes both a decision and a tone: a promise to hold rates high for longer, caveats about inflation risks, refusal to discuss cuts. For markets the tone often matters more than the decision — the rate itself is usually anticipated, while unexpected firmness in the wording reprices expectations across the whole curve within a minute. It supports the currency and weighs on equities and gold.</p>
+<p>The hawk as a predator attacking inflation, against the peaceable dove.</p>
+<p><a href="#gl-dovish">Dovish</a>, <a href="#gl-policy-rate">Policy rate</a>, <a href="#gl-forward-guidance">Forward guidance</a>, <a href="#gl-fed">The Fed</a></p>
+<h2 id="gl-head-shoulders">Head and shoulders</h2>
+<p>A three-peak formation in which the middle peak is higher than the outer two.</p>
+<p>The pattern is treated as a reversal: a break of the line joining the troughs is read as a trend change, and the distance from head to that line as a target. The caveat is obligatory: patterns are recognised reliably only once complete — that is, in hindsight — and testing on a large sample has shown no directional edge in chart patterns. They are best treated as a description of shape rather than a forecast.</p>
+<p>From the appearance: the central peak is the «head», the two outer ones «shoulders».</p>
+<p><a href="#gl-pattern">Pattern</a>, <a href="#gl-double-top">Double top and double bottom</a>, <a href="#gl-razvorot">Reversal</a></p>
 <h2 id="gl-hedge">Hedge</h2>
 <p>A position that insures a portfolio against the risk of another position.</p>
 <p>Hedging means opening a position that offsets the loss on another one if price moves the wrong way. A hedge reduces risk — and potential profit along with it.</p>
 <p>From &quot;hedge&quot; — a fence around a field, here around a position.</p>
-<p><a href="#gl-leverage">Leverage</a></p>
+<p><a href="#gl-leverage">Leverage</a>, <a href="#gl-put">Put</a>, <a href="#gl-diversification">Diversification</a>, <a href="#gl-covered-call">Covered call</a></p>
+<h2 id="gl-hft">High-frequency trading (HFT)</h2>
+<p>Trading on microsecond horizons, relying on speed rather than forecast.</p>
+<p>HFT earns from the spread and from instant reaction, holding positions for seconds or less. The effect is twofold and measurable: spreads have narrowed markedly over two decades, so entry is cheaper for an ordinary participant, yet in moments of stress this liquidity withdraws faster than any other. Competing with HFT on speed is pointless for a retail trader.</p>
+<p>High Frequency Trading — named for the number of operations per unit of time.</p>
+<p><a href="#gl-marketmaker">Market maker</a>, <a href="#gl-latency">Latency</a>, <a href="#gl-spread">Spread</a></p>
+<h2 id="gl-housing-starts">Housing starts and permits</h2>
+<p>How many homes broke ground and how many permits were issued.</p>
+<p>Housing is the most rate-sensitive sector: the decision to build is taken against mortgage costs, so the response to policy shows up before the rest of the economy. Permits lead starts, starts lead sales, sales lead spending on furniture and appliances. Because of that chain, housing data are traditionally read as an early cycle indicator.</p>
+<p>«Starts» literally means construction begun — the moment the foundation is laid.</p>
+<p><a href="#gl-policy-rate">Policy rate</a>, <a href="#gl-gdp">GDP</a>, <a href="#gl-recession">Recession</a></p>
+<h2 id="gl-iceberg">Iceberg order</h2>
+<p>A large order of which only a small portion is visible in the book.</p>
+<p>The tool exists for those accumulating size: show it all and the market moves away from you in advance. The visible slice executes and refreshes automatically from the hidden remainder. For anyone reading the book it means a level that «keeps getting eaten and never ends» is probably an iceberg, with a participant behind it far larger than the book suggests.</p>
+<p>After the iceberg, of which only a small fraction of the volume shows above water.</p>
+<p><a href="#gl-market-depth">Market depth</a>, <a href="#gl-orderbook">Order book</a>, <a href="#gl-marketmaker">Market maker</a></p>
+<h2 id="gl-ichimoku">Ichimoku</h2>
+<p>A five-line system in which the «cloud» marks a zone of equilibrium.</p>
+<p>The indicator is designed as one system rather than a set of signals: price above the cloud is a bullish context, below it bearish, inside it undecided. The cloud is plotted shifted forward, making it the only common indicator that projects onto future periods. The 9, 26, 52 parameters come from a six-day trading week and relate only loosely to the modern calendar.</p>
+<p>Japanese «ichi-moku», «one glance» — the author wanted a system readable at a glance.</p>
+<p><a href="#gl-moving-average">Moving average</a>, <a href="#gl-trend">Trend</a>, <a href="#gl-support">Support</a></p>
+<h2 id="gl-implied-volatility">Implied volatility (IV)</h2>
+<p>The volatility the market prices into an option — an expectation, not a history.</p>
+<p>IV is backed out of the market: take the option's traded premium and ask what range of movement would justify it. It is a forward-looking expectation, unlike historical volatility, which is computed from past prices. The gap between the two is itself traded: when IV sits well above realised volatility, options are expensive and the seller is paid a premium for fear that may never arrive.</p>
+<p>From «implied» — the quantity is not observed but inferred from price.</p>
+<p><a href="#gl-volatility">Volatility</a>, <a href="#gl-option-premium">Option premium</a>, <a href="#gl-vega">Vega</a>, <a href="#gl-vix">VIX</a></p>
+<h2 id="gl-index">Index</h2>
+<p>A computed measure over a basket of securities, representing a market or part of it.</p>
+<p>The weighting method decides what an index shows: by capitalisation it reports on the largest names, equal-weighted on the average member, by share price — as the Dow does — on almost nothing but history. Hence the story of recent years: the US index rises while most of its constituents do not, because weight is concentrated in a handful of technology names.</p>
+<p>From Latin index, «pointer, list» — a summary pointer to the market's condition.</p>
+<p><a href="#gl-sp500">S&amp;P 500</a>, <a href="#gl-market-cap">Market capitalisation</a>, <a href="#gl-free-float">Free float</a></p>
+<h2 id="gl-industrial-production">Industrial production</h2>
+<p>The physical volume of output from factories, mines and utilities.</p>
+<p>The series is in physical volumes, so inflation does not distort it — its advantage over revenue. In developed economies industry is a smaller share of GDP than it once was, so its contribution to the overall picture is more modest, but cyclicality is sharper: industry falls first and recovers first. Capacity utilisation is published alongside.</p>
+<p>«Industrial» from industry — extraction and processing, as distinct from services.</p>
+<p><a href="#gl-pmi">PMI</a>, <a href="#gl-gdp">GDP</a>, <a href="#gl-copper">Copper</a></p>
+<h2 id="gl-inflation">Inflation</h2>
+<p>The rate of increase in the general price level: how much purchasing power money loses.</p>
+<p>The calendar shows inflation two ways: year on year (YoY), against the same month a year ago, and month on month (MoM). The first smooths seasonality but drags along a base effect: the figure can fall simply because the month a year earlier was abnormal. The second reflects what is happening now but is noisy. To read central-bank policy, both are watched — and core inflation separately.</p>
+<p>From Latin inflatio, «a swelling» — the money supply swells relative to the quantity of goods.</p>
+<p><a href="#gl-cpi">CPI</a>, <a href="#gl-core-inflation">Core inflation</a>, <a href="#gl-policy-rate">Policy rate</a>, <a href="#gl-real-yield">Real yield</a></p>
+<h2 id="gl-intervention">FX intervention</h2>
+<p>A central bank buying or selling its own currency to influence the rate.</p>
+<p>Intervention produces an abrupt move and often turns the trend for hours or days, but it works poorly against persistent pressure: reserves are finite, flows are not. The Bank of Japan intervened in 2022 and 2024, moving USDJPY several figures within minutes. In a zone where intervention is expected, a stop must allow for the jump rather than for ordinary volatility.</p>
+<p>From Latin interventio — intervention in market price formation.</p>
+<p><a href="#gl-peg">Currency peg</a>, <a href="#gl-policy-rate">Policy rate</a>, <a href="#gl-currency-pair">Currency pair</a></p>
+<h2 id="gl-ipo">IPO</h2>
+<p>A company's first public share sale on an exchange.</p>
+<p>At an IPO the price is set by the underwriters together with the company, not by the market, which is why the first day of trading often shows how far they missed. The seller knows more about the business than the buyer and picks the moment — usually one favourable to themselves. Hence a statistical observation: returns from buying listings over one to two years average below the market.</p>
+<p>Initial Public Offering.</p>
+<p><a href="#gl-share">Share</a>, <a href="#gl-free-float">Free float</a>, <a href="#gl-market-cap">Market capitalisation</a></p>
+<h2 id="gl-ism">ISM</h2>
+<p>The US version of PMI, from the Institute for Supply Management.</p>
+<p>ISM and S&amp;P Global PMI measure the same thing on different samples, so they sometimes diverge — not an error but a different respondent base. For markets the US ISM carries more weight thanks to its long history: it can be compared with cycles decades back. The threshold is likewise 50, and ISM's employment sub-index is read as a hint for Friday's payrolls.</p>
+<p>Institute for Supply Management, the US supply-professionals association, founded 1915.</p>
+<p><a href="#gl-pmi">PMI</a>, <a href="#gl-gdp">GDP</a>, <a href="#gl-recession">Recession</a></p>
+<h2 id="gl-jobless-claims">Jobless claims</h2>
+<p>Weekly US data: the fastest signal on the state of the labour market.</p>
+<p>Initial claims show how many people filed for benefits for the first time; continuing claims how many remain on them. The value is frequency: weekly, on Thursdays, against monthly payrolls. The data are noisy, so the four-week average is what gets watched. A sustained rise in initial claims is among the earliest evidence of an economy cooling.</p>
+<p>From «claim» — a claim on insurance benefit.</p>
+<p><a href="#gl-nfp">Non-Farm Payrolls (NFP)</a>, <a href="#gl-unemployment-rate">Unemployment rate</a>, <a href="#gl-jolts">JOLTS</a></p>
+<h2 id="gl-jolts">JOLTS</h2>
+<p>The number of US job openings: a measure of labour demand, not of employment.</p>
+<p>JOLTS shows how many posts employers are trying to fill. The ratio of openings to unemployed people became a key Fed metric after 2021: when vacancies far outnumber people, wages rise and press on inflation. The data arrive almost two months late, so the market reaction is modest, but the series matters for reading policy.</p>
+<p>Job Openings and Labor Turnover Survey.</p>
+<p><a href="#gl-nfp">Non-Farm Payrolls (NFP)</a>, <a href="#gl-unemployment-rate">Unemployment rate</a>, <a href="#gl-jobless-claims">Jobless claims</a></p>
+<h2 id="gl-kelly">Kelly criterion</h2>
+<p>A formula for the fraction of capital to stake that maximises long-run growth.</p>
+<p>Kelly gives the mathematically optimal size when probabilities are known. In markets they are not, so full Kelly is dangerous in practice: an error in estimating edge leads to excessive size and deep drawdowns. The common compromise is half or quarter Kelly: growth slightly slower, bearability markedly better.</p>
+<p>After John Kelly of Bell Labs, who published the criterion in 1956.</p>
+<p><a href="#gl-position-sizing">Position sizing</a>, <a href="#gl-expectancy">Expectancy</a>, <a href="#gl-risk-of-ruin">Risk of ruin</a></p>
 <h2 id="gl-khomyak">Bagholder</h2>
 <p>A mocking name for an inexperienced retail trader who loses money to their own emotions.</p>
 <p>&quot;Bagholder&quot; is slang for the mass retail trader with no system, acting on emotion, hype and social-media tips — and left holding the bag when the move ends.</p>
@@ -188,43 +523,573 @@
 <p>&quot;The puppeteer&quot; is slang for a large market participant that retail traders suspect of moving price for its own benefit — for instance, clearing stops before a reversal.</p>
 <p>A trader's name for whoever is assumed to be pulling the strings.</p>
 <p><a href="#gl-marketmaker">Market maker</a>, <a href="#gl-liquidity-sweep">Liquidity Sweep</a></p>
-<h2 id="gl-dno">The bottom</h2>
-<p>The lowest point of a decline before price turns up.</p>
-<p>The bottom is the point below which price did not go during the current move, after which it turned up. Whether a bottom is in can only be known after the fact.</p>
-<p>The floor of a move — the lowest point reached.</p>
-<p><a href="#gl-bear-market">Bear market</a>, <a href="#gl-otskok">Bounce</a></p>
+<h2 id="gl-kyc">KYC and AML</h2>
+<p>Mandatory verification of a client's identity and the source of their funds.</p>
+<p>A broker in a regulated jurisdiction may not open an account without documents confirming identity and address. This is not bureaucracy for its own sake: without verification money cannot be withdrawn, and cases where a withdrawal stalls on incomplete KYC are the most common complaint about brokers — one actually resolved with documents rather than grievances.</p>
+<p>Know Your Customer; Anti-Money Laundering.</p>
+<p><a href="#gl-cysec">CySEC</a>, <a href="#gl-mifid2">MiFID II</a>, <a href="#gl-demo-account">Demo account</a></p>
+<h2 id="gl-latency">Latency</h2>
+<p>The time from sending an order to its registration at the venue.</p>
+<p>Latency is network travel plus processing at the broker and the exchange. For long-horizon trading tens of milliseconds are immaterial; for scalping and for entries on news releases they are the difference between the quoted price and the actual one. The practical conclusion for a retail trader: not to chase milliseconds, but not to build a strategy that depends on them.</p>
+<p>From Latin latens, «hidden» — time spent invisibly.</p>
+<p><a href="#gl-hft">High-frequency trading (HFT)</a>, <a href="#gl-slippage">Slippage</a>, <a href="#gl-requote">Requote</a></p>
+<h2 id="gl-layer2">Layer 2 (L2)</h2>
+<p>A layer above a blockchain that executes operations more cheaply and quickly.</p>
+<p>An L2 batches many transactions off the main chain and writes a compressed proof back to it, so the fee per user falls several-fold. Security, however, is only partly inherited from the base chain and depends on the specific design: different L2s make different trust assumptions and impose different withdrawal delays.</p>
+<p>«Layer two» sits above layer one — the base chain that stores the result.</p>
+<p><a href="#gl-gas-fee">Gas fee</a>, <a href="#gl-onchain">On-chain data</a>, <a href="#gl-defi">DeFi</a></p>
+<h2 id="gl-leverage">Leverage</h2>
+<p>Using borrowed broker funds to increase position size.</p>
+<p>Leverage lets you trade a position larger than your own capital. At 1:10, a $1,000 deposit controls a $10,000 position. Profit and loss scale in proportion. A margin call is the forced closure of positions once margin is exhausted. High leverage means a small move against you can liquidate the position. Professional traders typically stay within 1:3 to 1:5.</p>
+<p>From &quot;lever&quot;: a small amount of capital moves a large position.</p>
+<p><a href="#gl-stoploss">Stop-loss</a>, <a href="#gl-risk">Risk</a>, <a href="#gl-spread">Spread</a>, <a href="#gl-margin">Margin</a>, <a href="#gl-leverage-cap">Leverage cap</a>, <a href="#gl-margin-call">Margin call</a>, <a href="#gl-position-sizing">Position sizing</a></p>
+<h2 id="gl-leverage-cap">Leverage cap</h2>
+<p>The regulatory ceiling on leverage for retail clients.</p>
+<p>ESMA limits have applied in the EU since 2018: 1:30 on major currency pairs, 1:20 on indices, 1:10 on commodities, 1:2 on crypto. Similar rules exist in the UK and Australia. The point is not concern for returns but the speed of ruin: at 1:500 leverage, a 0.2% move wipes out the deposit. Offshore entities carry no such caps and offer 1:500 and above.</p>
+<p>«Leverage» as a lever: the cap sets how long a lever may be used.</p>
+<p><a href="#gl-leverage">Leverage</a>, <a href="#gl-cysec">CySEC</a>, <a href="#gl-asic">ASIC</a>, <a href="#gl-negative-balance-protection">Negative balance protection</a></p>
+<h2 id="gl-limit-order">Limit order</h2>
+<p>An order with a stated price: it fills no worse than that, or not at all.</p>
+<p>A limit order guarantees price but not that a trade happens. It also adds liquidity to the book, which is why many venues charge less for it. The main risk is non-execution at the moment that matters: the market reaches your price, turns without touching the order, and the move leaves without you. Choosing between limit and market is choosing what to risk: price or participation.</p>
+<p>«Limit» as in the boundary beyond which the trade is not permitted.</p>
+<p><a href="#gl-market-order">Market order</a>, <a href="#gl-orderbook">Order book</a>, <a href="#gl-bid-ask">Bid and ask</a></p>
+<h2 id="gl-liquidation">Liquidation</h2>
+<p>Forced closure of a position by the exchange when collateral runs short.</p>
+<p>In crypto, liquidation is automatic and instant — no call, no grace period. The danger is the cascade: liquidating longs means market sells, which push price lower and trigger the next liquidations. This is how 10% moves within a minute happen with no news at all. Liquidation maps show where levels have piled up, and the market is happy to travel to them.</p>
+<p>From Latin liquidare, «to make liquid» — turning a position into cash.</p>
+<p><a href="#gl-margin-call">Margin call</a>, <a href="#gl-leverage">Leverage</a>, <a href="#gl-funding-rate">Funding rate</a>, <a href="#gl-volatility">Volatility</a></p>
+<h2 id="gl-liquidity">Liquidity</h2>
+<p>How easily an asset can be bought or sold without moving its price.</p>
+<p>Liquidity is a defining property of a market. Highly liquid markets — EUR/USD, the S&amp;P 500, BTC — offer tight spreads, fast fills and little slippage. Illiquid ones — penny stocks, exotic crypto — bring wide spreads and heavy slippage. Liquidity drops outside main trading hours. In SMC, &quot;liquidity&quot; also means the stop orders stacked above and below key levels that large players are said to hunt.</p>
+<p>From the Latin liquidus — flowing, fluid.</p>
+<p><a href="#gl-spread">Spread</a>, <a href="#gl-marketmaker">Market maker</a>, <a href="#gl-orderbook">Order book</a>, <a href="#gl-slippage">Slippage</a>, <a href="#gl-market-depth">Market depth</a>, <a href="#gl-dark-pool">Dark pool</a>, <a href="#gl-bid-ask">Bid and ask</a></p>
+<h2 id="gl-liquidity-sweep">Liquidity Sweep</h2>
+<p>A brief break of a key level that triggers the stop orders resting behind it.</p>
+<p>A liquidity sweep is a move where price briefly breaks an important level — a high, a low, a support line — clears out other traders' stop-losses and then reverses. In SMC terms this is read as a deliberate manoeuvre by large players to source liquidity before the real move. SMC traders look for a sweep followed by a reversal structure as their signal.</p>
+<p>&quot;Sweeping liquidity&quot; — price briefly takes out the stops beyond a level before turning.</p>
+<p><a href="#gl-smc">SMC</a>, <a href="#gl-fvg">Fair Value Gap</a>, <a href="#gl-support">Support</a>, <a href="#gl-resistance">Resistance</a>, <a href="#gl-false-breakout">False breakout</a>, <a href="#gl-liquidity">Liquidity</a>, <a href="#gl-market-depth">Market depth</a></p>
+<h2 id="gl-long">Long</h2>
+<p>Buying an asset in expectation of a rise.</p>
+<p>A long position is the basic market stance: the trader buys an asset expecting to sell it higher later. Profit comes from a rising price, loss from a falling one. The opposite of a short.</p>
+<p>&quot;Long&quot; — holding the asset itself, in contrast to borrowing it.</p>
+<p><a href="#gl-short">Short</a>, <a href="#gl-leverage">Leverage</a>, <a href="#gl-market-order">Market order</a></p>
+<h2 id="gl-lot">Lot</h2>
+<p>The unit of trade size: a standard FX lot is 100,000 units of the base currency.</p>
+<p>A mini lot is 10,000; a micro lot 1,000. On a standard EURUSD lot one point is worth about ten dollars; on a micro lot about ten cents. The practical consequence: lot size, not «confidence in the idea», decides whether the account survives a normal move against you. Sizing the lot from permitted risk is a mandatory step before entry.</p>
+<p>From French lot, «share, batch» — the standard batch of goods in exchange trading.</p>
+<p><a href="#gl-pip">Pip</a>, <a href="#gl-leverage">Leverage</a>, <a href="#gl-position-sizing">Position sizing</a></p>
+<h2 id="gl-macd">MACD</h2>
+<p>The difference between two exponential averages, plus a signal line.</p>
+<p>MACD shows whether the averages are diverging or converging — that is, whether the move is accelerating. A crossing of the signal line is read as a change in momentum; the histogram shows the size of the divergence. Built on averages, the indicator lags exactly as they do, and in a range it produces a string of contradictory crossings. It is more often used for divergence against price than for crossings.</p>
+<p>Moving Average Convergence Divergence.</p>
+<p><a href="#gl-moving-average">Moving average</a>, <a href="#gl-divergence">Divergence</a>, <a href="#gl-oscillator">Oscillator</a></p>
+<h2 id="gl-majors">Majors</h2>
+<p>The most liquid currency pairs, all involving the US dollar.</p>
+<p>The majors are EURUSD, USDJPY, GBPUSD, USDCHF, USDCAD, AUDUSD and NZDUSD. They carry the tightest spreads, the deepest liquidity and the most predictable execution — slippage on news is smaller. Beyond that list come crosses and exotics, where spreads are several times wider and overnight widening is routine even if the daytime quote looks calm.</p>
+<p>From «major» — the principal pairs by turnover.</p>
+<p><a href="#gl-currency-pair">Currency pair</a>, <a href="#gl-cross-rate">Cross rate</a>, <a href="#gl-dxy">Dollar index (DXY)</a></p>
+<h2 id="gl-margin">Margin</h2>
+<p>The part of the deposit a broker locks as collateral against an open position.</p>
+<p>Margin is neither a commission nor a cost: it is money frozen and returned when the position closes. Required margin = position size / leverage — at 1:100 a $10,000 position ties up $100. Free margin is what remains to carry new positions or absorb losses on current ones. Margin level = equity / used margin × 100%: while it stays high the account lives. When it falls to the threshold the broker first warns (margin call) and then closes positions itself (stop out). The exact thresholds are set by the broker and differ between them — worth reading in the account specification before the first trade, not after.</p>
+<p>From &quot;margin&quot; — the reserve set aside against a position.</p>
+<p><a href="#gl-leverage">Leverage</a>, <a href="#gl-stoploss">Stop-loss</a>, <a href="#gl-risk">Risk</a>, <a href="#gl-spread">Spread</a>, <a href="#gl-margin-call">Margin call</a>, <a href="#gl-leverage-cap">Leverage cap</a>, <a href="#gl-segregated-account">Segregated account</a></p>
+<h2 id="gl-margin-call">Margin call</h2>
+<p>A demand to top up collateral, or the position is closed for you.</p>
+<p>When losses eat into the collateral, the broker asks for more money. Fail to provide it and the position is closed at market — and the timing is not yours. The underrated point: a margin call arrives not when you got the direction wrong, but when you got the size wrong. A correct idea with excessive leverage is closed at a loss before it becomes correct.</p>
+<p>From «call» — the broker calls for additional margin.</p>
+<p><a href="#gl-margin">Margin</a>, <a href="#gl-leverage">Leverage</a>, <a href="#gl-futures">Futures</a>, <a href="#gl-risk">Risk</a></p>
+<h2 id="gl-market-cap">Market capitalisation</h2>
+<p>Share price times share count: the market's valuation of the whole company.</p>
+<p>Market cap is an opinion, not the value of the assets: it changes every second while the factories stand still. To compare firms with different debt it is supplemented by enterprise value, which adds debt and subtracts cash. A useful caveat: you cannot buy a company at its market cap — an attempted takeover moves the price immediately.</p>
+<p>From «capital» — the capital at which the market values the enterprise.</p>
+<p><a href="#gl-share">Share</a>, <a href="#gl-free-float">Free float</a>, <a href="#gl-index">Index</a></p>
+<h2 id="gl-market-depth">Market depth</h2>
+<p>How much volume rests in orders at each price level.</p>
+<p>Depth answers how much size the market can absorb without visibly moving price. Two instruments with identical spreads can differ tenfold in depth, and for a large order it is depth that matters, not the spread. A caveat: visible depth is not all of it — part of the volume hides in iceberg orders, and part vanishes an instant before you reach it.</p>
+<p>A water metaphor: the deeper the book, the more volume it can take.</p>
+<p><a href="#gl-orderbook">Order book</a>, <a href="#gl-liquidity">Liquidity</a>, <a href="#gl-slippage">Slippage</a></p>
+<h2 id="gl-market-order">Market order</h2>
+<p>An order to execute immediately at whatever price is available.</p>
+<p>A market order guarantees execution but not price — exactly the reverse of a limit order. In a calm market the gap from expectation is a point or two; on a news release or in a thin book the order eats into the depth and the fill comes out materially worse. At data releases, market orders are the most expensive way to get in.</p>
+<p>«Market» as in «at the current market price, whatever it is».</p>
+<p><a href="#gl-limit-order">Limit order</a>, <a href="#gl-slippage">Slippage</a>, <a href="#gl-liquidity">Liquidity</a></p>
+<h2 id="gl-marketmaker">Market maker</h2>
+<p>A participant who supplies liquidity by continuously quoting both sides of the market.</p>
+<p>A market maker is a firm or trader that simultaneously posts bids and asks, earning the difference — the spread. On futures and FX markets, market makers provide liquidity even when there is no matching order on the other side. Banks, large brokers and specialist firms such as Citadel and Virtu act as market makers. Their presence narrows spreads and improves execution.</p>
+<p>From &quot;market maker&quot; — the participant who makes a market by quoting both sides.</p>
+<p><a href="#gl-spread">Spread</a>, <a href="#gl-liquidity">Liquidity</a>, <a href="#gl-orderbook">Order book</a>, <a href="#gl-bid-ask">Bid and ask</a>, <a href="#gl-gamma-exposure">Gamma exposure (GEX)</a>, <a href="#gl-hft">High-frequency trading (HFT)</a>, <a href="#gl-a-book-b-book">A-book and B-book</a></p>
+<h2 id="gl-max-pain">Max pain</h2>
+<p>The strike at which the largest amount of options expires worthless.</p>
+<p>It is computed from open interest: find the price at which total payout to option holders is smallest, i.e. buyers' «pain» is greatest. It is treated as a magnet for price into expiry, but it remains an observation rather than a mechanism: OI shifts until the final day and coincidences happen. As the sole basis for a trade it is not enough.</p>
+<p>Literally «maximum pain» — the pain of option holders whose contracts expire empty.</p>
+<p><a href="#gl-open-interest">Open interest (OI)</a>, <a href="#gl-expiry">Expiry</a>, <a href="#gl-strike">Strike</a></p>
+<h2 id="gl-mifid2">MiFID II</h2>
+<p>The EU directive on markets in financial instruments, in force since 2018.</p>
+<p>MiFID II sets out what clients experience as «rules of fair play»: mandatory assessment of whether a product suits the client, disclosure of all costs in advance, execution-quality reports, call recording. It also made the loss-ratio warnings compulsory. It applies to EU entities — and does not apply if your account sits offshore.</p>
+<p>Markets in Financial Instruments Directive.</p>
+<p><a href="#gl-cysec">CySEC</a>, <a href="#gl-leverage-cap">Leverage cap</a>, <a href="#gl-segregated-account">Segregated account</a></p>
+<h2 id="gl-moneyness">Moneyness (ITM, OTM, ATM)</h2>
+<p>Where the strike sits relative to spot: in, at, or out of the money.</p>
+<p>An in-the-money option has intrinsic value: a call struck below spot, a put struck above. Out of the money there is no intrinsic value and the premium is pure time and volatility. At the money — strike near spot — time value is greatest and the option is most sensitive to movement. This is not a property of the contract but a state: it changes as price moves.</p>
+<p>From «in the money»; the literal rendering has stuck in Russian and Romanian alike.</p>
+<p><a href="#gl-strike">Strike</a>, <a href="#gl-option">Option</a>, <a href="#gl-delta">Delta</a></p>
+<h2 id="gl-moving-average">Moving average</h2>
+<p>The average price over the last N periods, recomputed at every step.</p>
+<p>A simple average weights all points equally; an exponential one weights recent data more, so it turns faster and is noisier. An average lags by definition: it describes the past window, not the future. Hence the rule: an average is useful as a direction filter rather than an entry signal, and the shorter the period, the more false crossings it produces.</p>
+<p>«Moving» because the calculation window slides forward with each new period.</p>
+<p><a href="#gl-trend">Trend</a>, <a href="#gl-macd">MACD</a>, <a href="#gl-bollinger">Bollinger Bands</a></p>
+<h2 id="gl-natgas">Natural gas</h2>
+<p>One of the most volatile exchange commodities: price is regional.</p>
+<p>Gas, unlike oil, travels poorly, so there is no single world price: Henry Hub is the US reference, Dutch TTF the European one, and the two can diverge several-fold. Hence exceptional sensitivity to weather, storage levels and LNG flows. Seasonality is more pronounced than in any other major commodity.</p>
+<p>Henry Hub is a gas junction in Louisiana; TTF stands for Title Transfer Facility, a virtual hub.</p>
+<p><a href="#gl-futures">Futures</a>, <a href="#gl-contango">Contango</a>, <a href="#gl-brent">Brent</a></p>
+<h2 id="gl-ndf">Non-deliverable forward (NDF)</h2>
+<p>An FX forward without delivery: cash settlement on the rate difference.</p>
+<p>The instrument is used where a currency is non-convertible or its export restricted — for the yuan, rupee, peso, tenge. The contract settles in dollars on the gap between the agreed rate and a fixing; the local currency never moves. For an observer an NDF is useful because it shows what rate the market expects where the official rate is set by the authorities.</p>
+<p>Non-deliverable forward — a forward without delivery.</p>
+<p><a href="#gl-currency-pair">Currency pair</a>, <a href="#gl-peg">Currency peg</a>, <a href="#gl-futures">Futures</a></p>
+<h2 id="gl-negative-balance-protection">Negative balance protection</h2>
+<p>A rule under which a client cannot end up owing the broker money.</p>
+<p>Without it a severe gap can take an account below zero, and the broker may demand the difference. This is not theoretical: in January 2015 the removal of the franc cap left some clients with debts exceeding their deposits. In the EU and UK the protection is mandatory for retail; at offshore entities it generally is not. It is a contract clause worth reading before opening an account.</p>
+<p>Literally protection against a balance falling below zero.</p>
+<p><a href="#gl-leverage">Leverage</a>, <a href="#gl-margin-call">Margin call</a>, <a href="#gl-leverage-cap">Leverage cap</a>, <a href="#gl-gap">Gap</a></p>
+<h2 id="gl-nfp">Non-Farm Payrolls (NFP)</h2>
+<p>The key US macro report on jobs added outside agriculture.</p>
+<p>NFP (Non-Farm Payrolls) is a monthly US Department of Labor report released on the first Friday of the month. It shows the change in employment over the previous month. Strong data — above forecast — usually strengthens the dollar; weak data weakens it. NFP is one of the most volatile events on the calendar: the first 30 minutes after the release can bring sharp moves across every market. Together with the unemployment rate and wage growth it feeds into Fed decisions.</p>
+<p>Agriculture is excluded from the report because of its strong seasonal swings.</p>
+<p><a href="#gl-cpi">CPI</a>, <a href="#gl-fed">The Fed</a>, <a href="#gl-volatility">Volatility</a>, <a href="#gl-unemployment-rate">Unemployment rate</a>, <a href="#gl-jobless-claims">Jobless claims</a>, <a href="#gl-jolts">JOLTS</a></p>
+<h2 id="gl-oco">OCO (one cancels the other)</h2>
+<p>A pair of orders where filling one automatically cancels the other.</p>
+<p>The typical use is placing a stop-loss and a take-profit together: whichever happens first, the other order removes itself. Without OCO an unpleasant case arises: the take fills, the forgotten stop remains, and when price returns it opens a position the other way. This is not exotic but a common error when several positions are managed by hand.</p>
+<p>One Cancels the Other — the name describes the whole mechanic.</p>
+<p><a href="#gl-stop-order">Stop order</a>, <a href="#gl-limit-order">Limit order</a>, <a href="#gl-takeprofit">Take-profit</a></p>
+<h2 id="gl-offshore-licence">Offshore licence</h2>
+<p>Registering a broker in a light-touch jurisdiction: Belize, Seychelles, BVI.</p>
+<p>Offshore entities allow high leverage and the servicing of clients outside the EU, but protection there is materially weaker: no compensation funds, lower capital requirements, and any dispute must be pursued at the place of registration. The practical conclusion: look not at the list of regulators on the broker's website but at which entity appears in your own contract.</p>
+<p>From «offshore» — registered away from the main country of business.</p>
+<p><a href="#gl-cysec">CySEC</a>, <a href="#gl-fca">FCA</a>, <a href="#gl-leverage-cap">Leverage cap</a>, <a href="#gl-segregated-account">Segregated account</a></p>
+<h2 id="gl-oil-inventories">Oil inventories</h2>
+<p>Weekly data on US commercial crude and fuel stocks.</p>
+<p>Published by the EIA on Wednesdays, with the API estimate a day earlier. What moves price is not the level but the deviation from forecast: an unexpected build means demand is softer than expected. The number must be read alongside refinery runs and exports — stocks can build simply because plants went into maintenance, which says nothing about demand.</p>
+<p>EIA — the Energy Information Administration, the statistical arm of the US Department of Energy.</p>
+<p><a href="#gl-brent">Brent</a>, <a href="#gl-wti">WTI</a>, <a href="#gl-backwardation">Backwardation</a>, <a href="#gl-opec">OPEC+</a></p>
+<h2 id="gl-onchain">On-chain data</h2>
+<p>Statistics straight from the blockchain: transfers, addresses, exchange balances.</p>
+<p>The advantage of on-chain data is that it is fact rather than survey: you can see how many coins left exchange addresses and how many addresses are in profit. The limitation is serious: one owner may hold a thousand addresses, and one exchange may pool a million customers into one. «Active addresses» is therefore not a count of people, and the two must not be equated.</p>
+<p>From «on chain» — data written into the blockchain itself rather than around it.</p>
+<p><a href="#gl-bitcoin">Bitcoin</a>, <a href="#gl-gas-fee">Gas fee</a>, <a href="#gl-dominance">Bitcoin dominance</a></p>
+<h2 id="gl-opec">OPEC+</h2>
+<p>The group of oil-producing states that coordinates output volumes.</p>
+<p>OPEC gathers the large exporters; the «plus» format added Russia and several others. Quota decisions move price, but their effect is bounded by two things: members' own discipline, which not all observe, and the response of US shale, which switches on at high prices. Announced cuts and delivered cuts therefore coincide far from always.</p>
+<p>Organization of the Petroleum Exporting Countries, founded 1960.</p>
+<p><a href="#gl-brent">Brent</a>, <a href="#gl-wti">WTI</a>, <a href="#gl-oil-inventories">Oil inventories</a></p>
+<h2 id="gl-open-interest">Open interest (OI)</h2>
+<p>How many contracts remain open — as opposed to volume traded in a period.</p>
+<p>Volume counts trades over a period; open interest counts live positions right now. They mean different things: heavy volume with flat OI means positions merely changed hands, while OI rising alongside volume means fresh money entered. Around the strikes carrying the most OI, price behaves differently near expiry, because that is where dealer hedging is concentrated.</p>
+<p>Literally «interest left open» — contracts not yet settled or closed.</p>
+<p><a href="#gl-option">Option</a>, <a href="#gl-volume">Volume</a>, <a href="#gl-expiry">Expiry</a>, <a href="#gl-max-pain">Max pain</a></p>
+<h2 id="gl-option">Option</h2>
+<p>The right to buy or sell an asset at a preset price before a stated date.</p>
+<p>An option gives the buyer the right, but not the obligation, to transact at the exercise price (strike) before expiry. The seller does carry the obligation — and is paid a premium for it. Hence the asymmetry: the buyer risks only the premium, the seller an amount bounded only by how far the market moves. Options are used to hedge a portfolio and to trade volatility, not merely to bet on direction.</p>
+<p>From Latin optio, «choice» — the name itself says this is a right to choose, not a duty.</p>
+<p><a href="#gl-call">Call</a>, <a href="#gl-put">Put</a>, <a href="#gl-strike">Strike</a>, <a href="#gl-implied-volatility">Implied volatility (IV)</a></p>
+<h2 id="gl-option-premium">Option premium</h2>
+<p>The option's price: what the buyer pays and the seller receives up front.</p>
+<p>The premium is intrinsic value (how far the option is already in the money) plus time value — payment for the time remaining and for expected volatility. The time component decays towards expiry, and does so non-linearly: the final days eat it fastest. Buying a «cheap» far-out-of-the-money option and waiting is therefore a bet not only on direction but against the clock.</p>
+<p>From Latin praemium, «reward» — the seller's payment for the obligation taken on.</p>
+<p><a href="#gl-option">Option</a>, <a href="#gl-implied-volatility">Implied volatility (IV)</a>, <a href="#gl-theta">Theta</a></p>
+<h2 id="gl-orderblock">Order Block</h2>
+<p>The last consolidation zone before a strong impulsive move.</p>
+<p>An Order Block is the last candle (or group of candles) before a sharp impulsive move, assumed to hold large institutional orders. A bullish OB is a bearish candle preceding a bullish impulse; a bearish OB is a bullish candle preceding a bearish one. Price is expected to react when it retests the OB zone. The OB is an educational concept, not a guarantee of an outcome.</p>
+<p>&quot;Block of orders&quot; — a zone where a large player is presumed to have placed size.</p>
+<p><a href="#gl-smc">SMC</a>, <a href="#gl-fvg">Fair Value Gap</a>, <a href="#gl-liquidity-sweep">Liquidity Sweep</a></p>
+<h2 id="gl-orderbook">Order book</h2>
+<p>The list of open buy and sell orders with their prices and sizes.</p>
+<p>The order book visualises supply and demand. The bid side holds buy orders — what buyers are willing to pay. The ask side holds sell orders. The best bid and best ask together form the spread. A &quot;wall&quot; — one very large order — can hold price up temporarily. A deep book, with orders at many levels, means high liquidity. On futures and spot crypto the book updates in real time.</p>
+<p>The book of orders: the list of resting bids and offers by price level.</p>
+<p><a href="#gl-liquidity">Liquidity</a>, <a href="#gl-spread">Spread</a>, <a href="#gl-marketmaker">Market maker</a>, <a href="#gl-market-depth">Market depth</a>, <a href="#gl-iceberg">Iceberg order</a>, <a href="#gl-limit-order">Limit order</a></p>
+<h2 id="gl-oscillator">Oscillator</h2>
+<p>An indicator whose values swing inside a fixed range — usually 0 to 100.</p>
+<p>A trend indicator follows price; an oscillator measures the speed and the &quot;overheating&quot; of a move. Hence the bounded scale: the value runs into its limits and turns, like a pendulum. RSI, the stochastic and the MACD histogram are oscillators. Overbought and oversold zones are not reversal signals in themselves: in a strong trend an oscillator can hold above 70 for weeks, and &quot;selling overbought&quot; is a classic way to stand against the market. Oscillators work better in a range than in a trend. Their most informative event is divergence: price makes a new extreme and the oscillator does not.</p>
+<p>From the Latin oscillare — to swing.</p>
+<p><a href="#gl-rsi">RSI</a>, <a href="#gl-divergence">Divergence</a>, <a href="#gl-volatility">Volatility</a>, <a href="#gl-flat">Range (flat)</a>, <a href="#gl-stochastic">Stochastic oscillator</a>, <a href="#gl-macd">MACD</a></p>
 <h2 id="gl-otskok">Bounce</h2>
 <p>A short-lived rally after a sharp fall — not necessarily a change of trend.</p>
 <p>A bounce is a quick, brief recovery after a sharp decline. Unlike a real reversal it usually leaves the dominant trend intact and is often followed by more selling.</p>
 <p>Price bouncing off a level rather than turning at it.</p>
 <p><a href="#gl-dno">The bottom</a>, <a href="#gl-bear-market">Bear market</a></p>
-<h2 id="gl-slit">Blowing up an account</h2>
-<p>Losing a deposit quickly and painfully, usually to excessive risk or leverage.</p>
-<p>To blow up an account is to lose all the trading capital, or a large part of it, usually through absent risk management, excessive leverage or emotional trading after a run of losses.</p>
-<p>The account &quot;blows up&quot; — the capital is gone in one stretch.</p>
-<p><a href="#gl-leverage">Leverage</a>, <a href="#gl-khomyak">Bagholder</a></p>
+<h2 id="gl-pattern">Pattern</h2>
+<p>A recurring candle or price configuration that traders read as predictive.</p>
+<p>A pattern is a repeatable visual structure on a price chart. Candlestick patterns: Engulfing, Doji, Hammer, Evening and Morning Star. Chart patterns: head and shoulders, double bottom and top, flag, wedge, triangle. Important: the statistical reliability of patterns varies widely, and no pattern works every time. A pattern is one input to analysis, not a trading signal.</p>
+<p>From &quot;pattern&quot; — a repeating template, here of price.</p>
+<p><a href="#gl-engulfing">Engulfing</a>, <a href="#gl-trend">Trend</a>, <a href="#gl-timeframe">Timeframe</a>, <a href="#gl-candlestick">Candlestick</a>, <a href="#gl-head-shoulders">Head and shoulders</a>, <a href="#gl-double-top">Double top and double bottom</a>, <a href="#gl-triangle">Triangle</a></p>
+<h2 id="gl-pce">PCE (personal consumption expenditures)</h2>
+<p>The Fed's preferred inflation measure — broader and more adaptive than CPI.</p>
+<p>PCE captures not only prices but changes in behaviour: if chicken gets dearer and people switch to turkey, PCE reflects it while CPI, with its fixed basket, barely does. PCE therefore usually prints a few tenths below CPI. The Fed's 2% target is stated on core PCE, not CPI — worth remembering when the news compares the print with the target.</p>
+<p>Personal Consumption Expenditures, a component of the GDP accounts.</p>
+<p><a href="#gl-cpi">CPI</a>, <a href="#gl-core-inflation">Core inflation</a>, <a href="#gl-fed">The Fed</a>, <a href="#gl-inflation">Inflation</a></p>
+<h2 id="gl-pe-ratio">P/E ratio</h2>
+<p>Share price divided by earnings per share: how many years of profit the stock costs.</p>
+<p>A P/E of 20 means the buyer pays twenty annual profits. A high multiple does not mean «expensive»: it may reflect expected growth. Comparison is therefore meaningful only within a sector and against the company's own history. The trap is in the denominator: when earnings collapse the P/E soars, and a seemingly «expensive» stock is simply unprofitable.</p>
+<p>Price to Earnings — market price over annual earnings per share.</p>
+<p><a href="#gl-eps">EPS (earnings per share)</a>, <a href="#gl-earnings">Earnings</a>, <a href="#gl-share">Share</a></p>
+<h2 id="gl-peg">Currency peg</h2>
+<p>Fixing a currency's rate to another by government decision.</p>
+<p>A peg buys predictability but costs the central bank its independent rate: it must defend the level, and therefore follow someone else's monetary policy. While reserves and credibility hold, the chart looks like a straight line — which is exactly why exits from a peg can be violent. Dropping the franc's euro cap in January 2015 produced a 30% move in minutes.</p>
+<p>From «peg» — the rate is literally pegged to a reference currency.</p>
+<p><a href="#gl-intervention">FX intervention</a>, <a href="#gl-devaluation">Devaluation</a>, <a href="#gl-currency-pair">Currency pair</a></p>
+<h2 id="gl-perpetual">Perpetual</h2>
+<p>A future with no expiry date: it can be held indefinitely.</p>
+<p>With no expiry, a perpetual's price is pulled towards spot artificially — through a funding rate the two sides pay each other every few hours. In crypto, perpetuals carry the bulk of volume, more than spot, so price is formed there. A side effect: the high leverage available makes liquidation cascades routine.</p>
+<p>From Latin perpetuus, «continuous, endless» — a contract without a term.</p>
+<p><a href="#gl-funding-rate">Funding rate</a>, <a href="#gl-futures">Futures</a>, <a href="#gl-leverage">Leverage</a>, <a href="#gl-liquidation">Liquidation</a></p>
+<h2 id="gl-pip">Pip</h2>
+<p>The customary minimum price step of a currency pair: the fourth decimal.</p>
+<p>For most pairs a pip is 0.0001; for yen pairs, 0.01. Modern brokers quote one further digit, the fractional pip, so a spread of 1.3 pips means 13 fractional units. The unit is purely practical: pip value together with lot size determines what one gradation on the chart costs in money — without which risk cannot be computed.</p>
+<p>From «percentage in point».</p>
+<p><a href="#gl-lot">Lot</a>, <a href="#gl-spread">Spread</a>, <a href="#gl-currency-pair">Currency pair</a></p>
+<h2 id="gl-pivot">Pivot (PP)</h2>
+<p>A calculated reversal level derived from the previous period's high, low and close.</p>
+<p>The pivot point (PP) is a base level computed as PP = (High + Low + Close) / 3 over the previous period — day, week or month. Resistance levels (R1, R2, R3) and support levels (S1, S2, S3) are built around it. Intraday traders watch these levels closely: price often turns near them or accelerates once they break. Pivots are public, calculated automatically, and are not trading advice.</p>
+<p>From &quot;pivot&quot; — a point something turns around: the level price rotates about.</p>
+<p><a href="#gl-support">Support</a>, <a href="#gl-resistance">Resistance</a>, <a href="#gl-timeframe">Timeframe</a></p>
+<h2 id="gl-pmi">PMI</h2>
+<p>A survey of purchasing managers: above 50 is expansion, below 50 contraction.</p>
+<p>PMI's value is speed: it lands in the first days of the month, before official statistics exist, so it serves as a leading signal. Read not the level but two things: which side of 50, and the direction of travel. A fall from 58 to 53 is still growth, but decelerating — and that is what markets react to. The employment and prices sub-indices are watched separately.</p>
+<p>Purchasing Managers' Index — the managers who see demand turn first.</p>
+<p><a href="#gl-ism">ISM</a>, <a href="#gl-gdp">GDP</a>, <a href="#gl-recession">Recession</a>, <a href="#gl-industrial-production">Industrial production</a></p>
+<h2 id="gl-policy-rate">Policy rate</h2>
+<p>The central bank's rate, from which the cost of money in the economy is derived.</p>
+<p>The central bank sets the price of short-term money for banks, which pass it into loans and deposits. Hikes cool demand and, with a lag of several quarters, inflation; cuts do the reverse. What matters to markets is not the decision itself — usually anticipated — but the surprise against expectations and the language about the path ahead: that is what reprices assets in the first minute.</p>
+<p>«Key» because the rest of the economy's rate structure unlocks from it.</p>
+<p><a href="#gl-fed">The Fed</a>, <a href="#gl-yield-curve">Yield curve</a>, <a href="#gl-basis-point">Basis point (bp)</a>, <a href="#gl-hawkish">Hawkish</a></p>
+<h2 id="gl-position-sizing">Position sizing</h2>
+<p>How much to take, derived from permitted loss rather than from conviction.</p>
+<p>The calculation runs the opposite way to a beginner's instinct: first set the permitted risk as a percentage of the account, then the distance to the stop, and only from those does size follow. Size thus becomes a consequence of the plan rather than of mood. This single habit separates an account that survives a run of ten losses from one that does not.</p>
+<p>From «to size» — setting position size against risk.</p>
+<p><a href="#gl-risk">Risk</a>, <a href="#gl-lot">Lot</a>, <a href="#gl-stoploss">Stop-loss</a>, <a href="#gl-kelly">Kelly criterion</a></p>
+<h2 id="gl-ppi">PPI (producer price index)</h2>
+<p>Prices at the factory gate — often a lead on consumer inflation.</p>
+<p>PPI measures what producers sell at, not what households buy at. Costs reach the shelf with a lag, so a turn in PPI is often visible before a turn in CPI — but pass-through is incomplete: firms absorb part of cost increases in margin, especially when demand is weak. PPI is therefore more useful as a warning about direction than as a forecast of magnitude.</p>
+<p>Producer Price Index, as opposed to the consumer one.</p>
+<p><a href="#gl-cpi">CPI</a>, <a href="#gl-inflation">Inflation</a>, <a href="#gl-core-inflation">Core inflation</a></p>
+<h2 id="gl-profit-factor">Profit factor</h2>
+<p>The sum of all gains divided by the sum of all losses.</p>
+<p>Above one means the system makes money; 1.5 is usually considered decent, above 2 is rare and suspicious of curve-fitting. The measure ignores the order of trades, so it says nothing about drawdown: two systems with the same profit factor can differ several-fold in how bearable they are. Reading it alongside drawdown is mandatory.</p>
+<p>Literally the factor by which gains exceed losses.</p>
+<p><a href="#gl-expectancy">Expectancy</a>, <a href="#gl-winrate">Win rate</a>, <a href="#gl-drawdown">Drawdown</a></p>
+<h2 id="gl-put">Put</h2>
+<p>An option to sell: the right to sell the asset at the strike.</p>
+<p>A put appreciates as the underlying falls, so it is bought both as a bearish bet and as portfolio insurance: losses on shares are partly offset by the put's gain. The cost of that insurance is the premium paid, and it rises the more strongly the market expects a decline. Selling a put is an obligation to buy the asset at the strike — a bet that the fall will not come.</p>
+<p>From «to put to» — the holder may put the asset to the option seller at the strike.</p>
+<p><a href="#gl-option">Option</a>, <a href="#gl-call">Call</a>, <a href="#gl-strike">Strike</a>, <a href="#gl-hedge">Hedge</a></p>
+<h2 id="gl-qe">Quantitative easing (QE)</h2>
+<p>Central-bank bond buying once there is no room left to cut rates.</p>
+<p>The central bank creates reserves and buys long-dated paper, lifting its price and pushing yields down at the far end of the curve. The aim is to cheapen long money when the short rate is already at zero. The side effect shows up in markets: money squeezed out of government bonds moves into equities and credit, which is why QE periods have historically coincided with rallies in risk assets.</p>
+<p>«Quantitative» because the lever is the quantity bought, not the price of money.</p>
+<p><a href="#gl-qt">Quantitative tightening (QT)</a>, <a href="#gl-policy-rate">Policy rate</a>, <a href="#gl-bond-yield">Bond yield</a>, <a href="#gl-fed">The Fed</a></p>
+<h2 id="gl-qt">Quantitative tightening (QT)</h2>
+<p>Shrinking the central bank's balance sheet: QE in reverse.</p>
+<p>The central bank either sells paper or simply stops reinvesting maturing proceeds, and liquidity drains from the system. The effect is slower and duller than the policy rate but points the same way — tighter conditions. QT bites harder the thinner the market: it was the combination of balance-sheet run-off and low liquidity that produced sudden money-market rate spikes.</p>
+<p>The mirror of QE: tightening with the same lever used to ease — the size of the balance sheet.</p>
+<p><a href="#gl-qe">Quantitative easing (QE)</a>, <a href="#gl-policy-rate">Policy rate</a>, <a href="#gl-liquidity">Liquidity</a></p>
+<h2 id="gl-r-ratio">R-multiple</h2>
+<p>The ratio of potential profit to the risk accepted on a single trade.</p>
+<p>R (the risk unit) is the distance from entry to stop-loss expressed in money. 1R is the risk on a trade. A take-profit at 2R means potential profit twice the risk. Keeping a P&amp;L journal in R lets you compare trades across instruments and account sizes. Average R over a period is the key measure of a system's quality. The &quot;cost of indiscipline&quot; is the difference in R between clean trades and trades that broke your rules.</p>
+<p>&quot;R&quot; stands for risk: one unit of risk per trade, with results measured in multiples of it.</p>
+<p><a href="#gl-stoploss">Stop-loss</a>, <a href="#gl-takeprofit">Take-profit</a>, <a href="#gl-risk">Risk</a>, <a href="#gl-leverage">Leverage</a>, <a href="#gl-expectancy">Expectancy</a>, <a href="#gl-winrate">Win rate</a>, <a href="#gl-position-sizing">Position sizing</a></p>
 <h2 id="gl-razvorot">Reversal</h2>
 <p>A change of trend direction, from up to down or the other way round.</p>
 <p>A reversal is the moment the dominant trend turns the other way. It is confirmed after the fact, by a break of structure — not by a single candle.</p>
 <p>From &quot;to reverse&quot; — the trend turning the other way.</p>
 <p><a href="#gl-trend">Trend</a>, <a href="#gl-dno">The bottom</a></p>
+<h2 id="gl-real-yield">Real yield</h2>
+<p>Yield minus inflation: what is left in purchasing power.</p>
+<p>A nominal 5% against 7% inflation is a real loss: more money, less to buy with it. Real yields are observed directly in inflation-linked paper — TIPS in the US. The level matters beyond the bond market: when real yields rise, assets with no cash flow — gold above all — lose appeal, because risk-free storage now has a price.</p>
+<p>In economics «real» means «adjusted for inflation», as opposed to nominal.</p>
+<p><a href="#gl-bond-yield">Bond yield</a>, <a href="#gl-inflation">Inflation</a>, <a href="#gl-gold">Gold</a></p>
+<h2 id="gl-recession">Recession</h2>
+<p>A sustained contraction in activity, not merely two weak quarters.</p>
+<p>The «two quarters of falling GDP» rule is a convenient shorthand, not a definition. In the US the dating is done by the NBER, looking at employment, incomes and output together, and it announces a downturn's start with a lag of up to a year. For markets that means an awkward asymmetry: equities usually fall before the announcement and start rising well before the recession officially ends.</p>
+<p>From Latin recessio, «a retreat» — the economy retreats from the level reached.</p>
+<p><a href="#gl-gdp">GDP</a>, <a href="#gl-curve-inversion">Curve inversion</a>, <a href="#gl-unemployment-rate">Unemployment rate</a>, <a href="#gl-soft-landing">Soft landing</a></p>
+<h2 id="gl-repo">Repo</h2>
+<p>A loan secured by securities with an obligation to buy them back.</p>
+<p>Repo is the plumbing of the money market: a bank sells bonds agreeing to repurchase them a day later slightly dearer — borrowing against collateral. Repo rates show how ample cash is in the system, and a spike means money suddenly turned scarce. In September 2019 the US overnight rate jumped to 10% and the Fed had to inject funds on an emergency basis.</p>
+<p>Short for «repurchase agreement».</p>
+<p><a href="#gl-sofr">SOFR</a>, <a href="#gl-policy-rate">Policy rate</a>, <a href="#gl-liquidity">Liquidity</a></p>
+<h2 id="gl-requote">Requote</h2>
+<p>A broker declining to fill at the requested price and offering a new one.</p>
+<p>Requotes occur with dealing-desk brokers, where the order passes through the broker's own book. Formally it is protection against filling at a stale price; in practice it is a source of complaints, because requotes arrive most often in a fast market — exactly when the entry matters most. Non-dealing models have no requotes but do have slippage: refusal is replaced by a worse price.</p>
+<p>From «to requote» — to name the price again.</p>
+<p><a href="#gl-slippage">Slippage</a>, <a href="#gl-latency">Latency</a>, <a href="#gl-market-order">Market order</a></p>
+<h2 id="gl-resistance">Resistance</h2>
+<p>A price level where supply has historically exceeded demand, halting a rally.</p>
+<p>A resistance level is a price zone where sellers have systematically outweighed buyers. Price approaches the level, is pushed back and declines. Once broken, former resistance frequently becomes support. Traders use resistance levels to take profit and to judge how much room a move has left. Round numbers (1000, 1500, 2000) often act as psychological resistance.</p>
+<p>From &quot;resistance&quot; — the ceiling that slows a rally.</p>
+<p><a href="#gl-support">Support</a>, <a href="#gl-pivot">Pivot (PP)</a>, <a href="#gl-resistance">Resistance</a>, <a href="#gl-breakout">Breakout</a>, <a href="#gl-retest">Retest</a></p>
+<h2 id="gl-retail-sales">Retail sales</h2>
+<p>Monthly retail turnover: a direct measure of consumer demand.</p>
+<p>US consumption is about two thirds of GDP, so retail sales is one of the heavier releases. It is published in nominal money, i.e. not adjusted for inflation: 3% growth with 3% inflation means the same quantity was bought. The «control group» — excluding autos, petrol and building materials — is watched separately, being steadier and feeding straight into the GDP calculation.</p>
+<p>«Retail» is sale to the final consumer, as opposed to wholesale.</p>
+<p><a href="#gl-gdp">GDP</a>, <a href="#gl-consumer-confidence">Consumer confidence</a>, <a href="#gl-inflation">Inflation</a></p>
+<h2 id="gl-retest">Retest</h2>
+<p>Price returning to a broken level after moving beyond it.</p>
+<p>After a break, former resistance often acts as support, and a return to it offers an entry with a closer stop — the technique's main practical merit. The price paid is missed moves: strong breakouts give no retest at all and leave without returning. Choosing between entering on the break and entering on the retest is choosing between frequency of trades and quality of entry.</p>
+<p>«Re-» as in again, «test» as in checking: the level is checked a second time, now from the other side.</p>
+<p><a href="#gl-breakout">Breakout</a>, <a href="#gl-support">Support</a>, <a href="#gl-resistance">Resistance</a></p>
 <h2 id="gl-risk">Risk</h2>
 <p>The share of the deposit a trader knowingly accepts losing on one trade.</p>
 <p>Risk is set BEFORE the entry and counted as a percentage of the deposit, not in currency: 1% of $10,000 and 1% of $1,000 are different sums but the same decision. Position size follows from risk, never the other way round: first &quot;how much am I prepared to lose&quot;, then &quot;how many lots that means at my stop&quot;. A common guide is 1–2% per trade: at 1%, ten losses in a row cost about 10% of the account; at 5%, half of it. Drawdown is asymmetric — recovering from −50% takes +100%. Risk not capped by a stop-loss is capped by the size of the deposit.</p>
 <p>From the Italian risco — a danger you accept knowingly.</p>
-<p><a href="#gl-stoploss">Stop-loss</a>, <a href="#gl-r-ratio">R-multiple</a>, <a href="#gl-leverage">Leverage</a>, <a href="#gl-slit">Blowing up an account</a></p>
-<h2 id="gl-margin">Margin</h2>
-<p>The part of the deposit a broker locks as collateral against an open position.</p>
-<p>Margin is neither a commission nor a cost: it is money frozen and returned when the position closes. Required margin = position size / leverage — at 1:100 a $10,000 position ties up $100. Free margin is what remains to carry new positions or absorb losses on current ones. Margin level = equity / used margin × 100%: while it stays high the account lives. When it falls to the threshold the broker first warns (margin call) and then closes positions itself (stop out). The exact thresholds are set by the broker and differ between them — worth reading in the account specification before the first trade, not after.</p>
-<p>From &quot;margin&quot; — the reserve set aside against a position.</p>
-<p><a href="#gl-leverage">Leverage</a>, <a href="#gl-stoploss">Stop-loss</a>, <a href="#gl-risk">Risk</a>, <a href="#gl-spread">Spread</a></p>
-<h2 id="gl-atr">ATR</h2>
-<p>The average range of a candle over a period — volatility in points, with no direction.</p>
-<p>The true range of a candle is the largest of three values: (high − low), |high − previous close| and |low − previous close|. The last two exist for gaps: if the market opened away from the previous close, the plain candle range understates the move. ATR is a moving average of true range, most often over 14 periods. It says nothing about direction — a crash and a rally give equally high readings. In practice it is used for volatility-based stops (ATR × multiplier instead of a round number of points), for normalising targets, and for comparing instruments: 50 points on gold and 50 on EUR/USD are entirely different moves, but in ATR they are comparable.</p>
-<p>Average True Range, introduced by J. Welles Wilder alongside the RSI in 1978.</p>
-<p><a href="#gl-volatility">Volatility</a>, <a href="#gl-stoploss">Stop-loss</a>, <a href="#gl-timeframe">Timeframe</a>, <a href="#gl-vix">VIX</a></p>
-<h2 id="gl-oscillator">Oscillator</h2>
-<p>An indicator whose values swing inside a fixed range — usually 0 to 100.</p>
-<p>A trend indicator follows price; an oscillator measures the speed and the &quot;overheating&quot; of a move. Hence the bounded scale: the value runs into its limits and turns, like a pendulum. RSI, the stochastic and the MACD histogram are oscillators. Overbought and oversold zones are not reversal signals in themselves: in a strong trend an oscillator can hold above 70 for weeks, and &quot;selling overbought&quot; is a classic way to stand against the market. Oscillators work better in a range than in a trend. Their most informative event is divergence: price makes a new extreme and the oscillator does not.</p>
-<p>From the Latin oscillare — to swing.</p>
-<p><a href="#gl-rsi">RSI</a>, <a href="#gl-divergence">Divergence</a>, <a href="#gl-volatility">Volatility</a>, <a href="#gl-flat">Range (flat)</a></p>
+<p><a href="#gl-stoploss">Stop-loss</a>, <a href="#gl-r-ratio">R-multiple</a>, <a href="#gl-leverage">Leverage</a>, <a href="#gl-slit">Blowing up an account</a>, <a href="#gl-drawdown">Drawdown</a>, <a href="#gl-position-sizing">Position sizing</a>, <a href="#gl-risk-of-ruin">Risk of ruin</a>, <a href="#gl-diversification">Diversification</a></p>
+<h2 id="gl-risk-of-ruin">Risk of ruin</h2>
+<p>The probability of losing the account entirely at a given risk per trade.</p>
+<p>The measure ties three things together: risk per trade, win rate, and the losing streak the account can absorb. The arithmetic is merciless: at 10% risk per trade, a run of ten consecutive losses — and it does happen — leaves a third of the account. At 1% risk the same run takes a tenth. This is exactly why a sensible per-trade risk limit is discussed in single percentage points.</p>
+<p>A concept from game theory: the probability of total ruin for a player with finite capital.</p>
+<p><a href="#gl-drawdown">Drawdown</a>, <a href="#gl-position-sizing">Position sizing</a>, <a href="#gl-kelly">Kelly criterion</a></p>
+<h2 id="gl-roll">Roll</h2>
+<p>Moving from an expiring future into the next maturity.</p>
+<p>A futures position cannot be held past the contract's term, so it is moved: close the near contract, open the far one. The price difference produces a gain or a loss, and over long horizons this effect dominates everything else. A chart stitched from different contracts has gaps at the roll points — so historical levels on a «continuous» future must be read with care.</p>
+<p>From «to roll over» — the position is rolled into the next contract.</p>
+<p><a href="#gl-futures">Futures</a>, <a href="#gl-contango">Contango</a>, <a href="#gl-expiry">Expiry</a></p>
+<h2 id="gl-rsi">RSI</h2>
+<p>A 0–100 oscillator measuring the speed and size of price changes.</p>
+<p>RSI (Relative Strength Index) is a technical indicator developed by J. Welles Wilder. Readings above 70 are traditionally called overbought, below 30 oversold. Important: overbought is not a sell signal — in a strong trend RSI can stay above 70 for a long time. RSI divergence (price rising while RSI falls) is a popular sign of a weakening trend. RSI is calculated as 100 − 100/(1 + RS), where RS is the ratio of average gains to average losses over the period.</p>
+<p>Introduced by J. Welles Wilder in 1978 in &quot;New Concepts in Technical Trading Systems&quot;.</p>
+<p><a href="#gl-divergence">Divergence</a>, <a href="#gl-timeframe">Timeframe</a>, <a href="#gl-trend">Trend</a></p>
+<h2 id="gl-segregated-account">Segregated account</h2>
+<p>Client money is held separately from the broker's own funds.</p>
+<p>The requirement exists for one case — broker insolvency: money in segregated accounts does not form part of the estate and is not used to pay the firm's debts. It is the first thing to check, and in regulated jurisdictions it is mandatory. A caveat: segregation protects against insolvency, not against trading losses or the client's own mistakes.</p>
+<p>From Latin segregare, «to separate» — funds kept apart from the firm's own assets.</p>
+<p><a href="#gl-cysec">CySEC</a>, <a href="#gl-fca">FCA</a>, <a href="#gl-compensation-scheme">Compensation scheme</a>, <a href="#gl-offshore-licence">Offshore licence</a></p>
+<h2 id="gl-settlement">Settlement</h2>
+<p>How the contract ends: physical delivery or cash.</p>
+<p>Deliverable contracts require the asset to change hands; cash-settled ones close against a settlement price. A retail trader must know which they hold: it was precisely this confusion that cost retail holders money in April 2020, when May WTI went negative — there was nowhere to store the oil and delivery was obligatory.</p>
+<p>From «to settle» — the final squaring of the parties' obligations.</p>
+<p><a href="#gl-futures">Futures</a>, <a href="#gl-expiry">Expiry</a>, <a href="#gl-roll">Roll</a></p>
+<h2 id="gl-share">Share</h2>
+<p>A slice of ownership in a company: a claim on profits and a vote.</p>
+<p>A shareholder is not a creditor but a part-owner: nothing is promised to them. If the company earns, they receive dividends and capital growth; if it fails, they stand last in line, behind every creditor. That asymmetry explains why equities out-earn bonds on average: the difference is payment for risk accepted, not a free gift from the market.</p>
+<p>From Latin actio in the sense of a claim, via Dutch actie — a share in a company.</p>
+<p><a href="#gl-dividend">Dividend</a>, <a href="#gl-market-cap">Market capitalisation</a>, <a href="#gl-bond">Bond</a></p>
+<h2 id="gl-sharpe">Sharpe ratio</h2>
+<p>Return above the risk-free rate divided by the volatility of results.</p>
+<p>Sharpe answers «how much risk was paid for the return obtained». An important limitation: it penalises dispersion in both directions, treating a big lucky run as the same flaw as a slump. It is also nearly meaningless for strategies with rare large payouts — selling options shows a high Sharpe right up to the day it stops.</p>
+<p>After William Sharpe, the Nobel laureate who proposed the measure in 1966.</p>
+<p><a href="#gl-volatility">Volatility</a>, <a href="#gl-drawdown">Drawdown</a>, <a href="#gl-sortino">Sortino ratio</a>, <a href="#gl-beta">Beta</a></p>
+<h2 id="gl-short">Short</h2>
+<p>Selling an asset borrowed from the broker in expectation of a fall.</p>
+<p>In a short sale the trader borrows an asset from the broker, sells it at the current price and undertakes to return it later. If the price falls, they buy it back cheaper, return the loan and keep the difference. If the price rises, the loss is theoretically unlimited.</p>
+<p>&quot;Short&quot; — being short of the asset you have sold.</p>
+<p><a href="#gl-long">Long</a>, <a href="#gl-short-interest">Short interest</a>, <a href="#gl-short-squeeze">Short squeeze</a></p>
+<h2 id="gl-short-interest">Short interest</h2>
+<p>The share of stock sold short and not yet bought back.</p>
+<p>The measure is expressed as a percentage of free float, and the time to unwind is estimated in «days to cover» — how many daily volumes it would take for all shorts to repurchase. High short interest says two things at once: scepticism about the stock, and the risk of a violent upward squeeze if that scepticism proves wrong. The data are published with a lag.</p>
+<p>By analogy with open interest: the volume of short positions left open.</p>
+<p><a href="#gl-short">Short</a>, <a href="#gl-short-squeeze">Short squeeze</a>, <a href="#gl-free-float">Free float</a></p>
+<h2 id="gl-short-squeeze">Short squeeze</h2>
+<p>A sharp rally driven by the forced closing of short positions.</p>
+<p>Shorts lose money as price rises and are called for more collateral; closing out means buying — which pushes price higher still. The process is self-sustaining until the shorts are exhausted, so moves can be absurd relative to the underlying business. Crucially, a squeeze ends just as abruptly: the fuel was coercion, not demand.</p>
+<p>From «squeeze» — the shorts are literally squeezed, with no way out.</p>
+<p><a href="#gl-short-interest">Short interest</a>, <a href="#gl-short">Short</a>, <a href="#gl-liquidity">Liquidity</a></p>
+<h2 id="gl-silver">Silver</h2>
+<p>A metal with a split nature: half safe haven, half industrial input.</p>
+<p>Silver follows gold but with greater amplitude, because its market is smaller and the industrial component — electronics, solar panels, solder — is visible in the price. Hence the behaviour: in a haven-demand phase silver lags gold, in an expansion it leads. Traders use the gold/silver ratio as a rough gauge of which phase is in force.</p>
+<p>Code XAG: AG from argentum, silver's symbol in the periodic table.</p>
+<p><a href="#gl-gold">Gold</a>, <a href="#gl-futures">Futures</a>, <a href="#gl-volatility">Volatility</a></p>
+<h2 id="gl-slippage">Slippage</h2>
+<p>The difference between the expected fill price and the actual one.</p>
+<p>Slippage happens when an order fills at a worse price than requested. The causes are thin liquidity, high volatility around news, and slow order handling. Market orders are the most exposed. Limit orders remove negative slippage but may not fill at all. In scalping and HFT, slippage is a make-or-break factor.</p>
+<p>From &quot;to slip&quot; — the gap between the price you expected and the one you got.</p>
+<p><a href="#gl-liquidity">Liquidity</a>, <a href="#gl-spread">Spread</a>, <a href="#gl-stoploss">Stop-loss</a>, <a href="#gl-orderbook">Order book</a>, <a href="#gl-market-order">Market order</a>, <a href="#gl-latency">Latency</a>, <a href="#gl-gap">Gap</a>, <a href="#gl-requote">Requote</a></p>
+<h2 id="gl-slit">Blowing up an account</h2>
+<p>Losing a deposit quickly and painfully, usually to excessive risk or leverage.</p>
+<p>To blow up an account is to lose all the trading capital, or a large part of it, usually through absent risk management, excessive leverage or emotional trading after a run of losses.</p>
+<p>The account &quot;blows up&quot; — the capital is gone in one stretch.</p>
+<p><a href="#gl-leverage">Leverage</a>, <a href="#gl-khomyak">Bagholder</a></p>
+<h2 id="gl-smc">SMC</h2>
+<p>An approach that reads the market through the actions of large participants — banks and hedge funds.</p>
+<p>SMC (Smart Money Concepts) is a technical-analysis methodology built on the assumption that large institutional participants — banks, hedge funds, market makers — deliberately create patterns to capture liquidity before a reversal. Its key ideas are the Order Block (a zone of large orders), the Fair Value Gap, Break of Structure and Inducement. SMC is an educational framework; trade outcomes remain unpredictable.</p>
+<p>The term took hold in trading communities in the 2010s as an alternative to classical technical analysis.</p>
+<p><a href="#gl-fvg">Fair Value Gap</a>, <a href="#gl-liquidity-sweep">Liquidity Sweep</a>, <a href="#gl-orderblock">Order Block</a>, <a href="#gl-marketmaker">Market maker</a></p>
+<h2 id="gl-sofr">SOFR</h2>
+<p>The US benchmark overnight rate on secured repo transactions.</p>
+<p>SOFR is computed from actual repo trades in Treasuries rather than a survey of banks — precisely where it differs from LIBOR, which was a survey and ended in manipulation scandals. Since 2023 SOFR has replaced LIBOR as the benchmark for loans and derivatives. Practically: floating rates reset off it, so it reaches the end borrower.</p>
+<p>Secured Overnight Financing Rate.</p>
+<p><a href="#gl-repo">Repo</a>, <a href="#gl-policy-rate">Policy rate</a>, <a href="#gl-bond-yield">Bond yield</a></p>
+<h2 id="gl-soft-landing">Soft landing</h2>
+<p>Bringing inflation down without a recession: an aim rarely achieved.</p>
+<p>A soft landing means rates were raised enough to stop prices rising but not enough to break employment. The difficulty is the lag: policy reaches the economy several quarters later, so decisions must be taken on data describing the past. Historically there have been many attempts and very few indisputable successes.</p>
+<p>An aviation metaphor: the economy is landed onto falling inflation without crashing it.</p>
+<p><a href="#gl-recession">Recession</a>, <a href="#gl-policy-rate">Policy rate</a>, <a href="#gl-inflation">Inflation</a></p>
+<h2 id="gl-sortino">Sortino ratio</h2>
+<p>Like Sharpe, but with only downside deviation in the denominator.</p>
+<p>Sortino fixes Sharpe's chief oddity: it does not count good luck as risk. The denominator holds the dispersion of losing periods only, so a strategy with rare large gains gets a fair assessment. For asymmetric systems — trend-following, venture-like — Sortino is more informative. For symmetric ones the difference is small and the two measures agree.</p>
+<p>After Frank Sortino, who proposed the correction to Sharpe in the 1980s.</p>
+<p><a href="#gl-sharpe">Sharpe ratio</a>, <a href="#gl-drawdown">Drawdown</a>, <a href="#gl-volatility">Volatility</a></p>
+<h2 id="gl-sp500">S&amp;P 500</h2>
+<p>The index of 500 large US public companies, weighted by free float.</p>
+<p>The world's principal equity benchmark: trillions of dollars of funds track it, and inclusion in the index itself creates demand for a stock. Membership is decided by a committee rather than a formula, so there is an element of selection. Concentration has risen in recent years: a handful of the largest names carry about a third of the weight, and the index is no longer quite «the market on average».</p>
+<p>Named for the Standard &amp; Poor's agency; the index in its modern form dates from 1957.</p>
+<p><a href="#gl-index">Index</a>, <a href="#gl-vix">VIX</a>, <a href="#gl-market-cap">Market capitalisation</a></p>
+<h2 id="gl-spread">Spread</h2>
+<p>The difference between the ask (buy) and bid (sell) price of an instrument.</p>
+<p>The spread is the broker's implicit commission: on entry a trader is immediately down by the spread. Liquid instruments have tight spreads — EURUSD around 0.2–0.5 pips; exotic pairs and thin stocks can run to several per cent. Spreads widen around news and in low-liquidity hours — overnight, holidays. For scalping and high-frequency trading the spread is decisive.</p>
+<p>From &quot;spread&quot; — the gap between the buying and the selling price.</p>
+<p><a href="#gl-liquidity">Liquidity</a>, <a href="#gl-leverage">Leverage</a>, <a href="#gl-marketmaker">Market maker</a>, <a href="#gl-bid-ask">Bid and ask</a>, <a href="#gl-stp-ecn">STP and ECN</a>, <a href="#gl-market-depth">Market depth</a></p>
+<h2 id="gl-stablecoin">Stablecoin</h2>
+<p>A token pegged to a currency, usually one-to-one with the dollar.</p>
+<p>Stablecoins differ by backing: cash and government bonds, other crypto assets, or an algorithm. The third kind showed its fragility in 2022 when UST lost its peg and went to zero within days. For markets, stablecoin supply is a gauge of money ready to buy, and a deviation of their price from the dollar is a sign of stress in the system.</p>
+<p>From «stable» — a coin whose price, by design, does not change.</p>
+<p><a href="#gl-peg">Currency peg</a>, <a href="#gl-liquidity">Liquidity</a>, <a href="#gl-defi">DeFi</a></p>
+<h2 id="gl-stagflation">Stagflation</h2>
+<p>High inflation alongside stagnation — the worst combination for a central bank.</p>
+<p>Normally inflation and unemployment pull in opposite directions, and the policy rate cures one at the other's expense. In stagflation both problems are present, and any decision worsens the other half: hike and you finish off growth, cut and you fuel prices. The classic episode is the 1970s, triggered by an oil shock — a rise in costs rather than demand.</p>
+<p>A blend of «stagnation» and «inflation», credited to the British politician Iain Macleod, 1965.</p>
+<p><a href="#gl-inflation">Inflation</a>, <a href="#gl-recession">Recession</a>, <a href="#gl-policy-rate">Policy rate</a></p>
+<h2 id="gl-stochastic">Stochastic oscillator</h2>
+<p>Where price sits inside the range of the last N periods, from 0 to 100.</p>
+<p>The measure answers whether the close was nearer the period's high or its low. Readings above 80 and below 20 are called overbought and oversold, but in a strong trend the stochastic stays pinned in the extreme zone for a long time, and trading against it ruins accounts. It is therefore used in ranges or as confirmation, not as a standalone reversal signal.</p>
+<p>From Greek stochastikos, «able to guess» — whence «stochastic», random.</p>
+<p><a href="#gl-oscillator">Oscillator</a>, <a href="#gl-rsi">RSI</a>, <a href="#gl-divergence">Divergence</a></p>
+<h2 id="gl-stock-split">Stock split</h2>
+<p>Splitting a share into several: price divides, ownership stake is unchanged.</p>
+<p>A split creates nothing: ten shares at 100 become a hundred at 10. The point is accessibility — a small investor buys a cheaper share more easily, and liquidity improves. A reverse split does the opposite and usually signals trouble: price is lifted to stay inside the exchange's listing requirements. Historical charts must be viewed split-adjusted.</p>
+<p>From «split» — the share is divided into several smaller ones.</p>
+<p><a href="#gl-share">Share</a>, <a href="#gl-market-cap">Market capitalisation</a>, <a href="#gl-eps">EPS (earnings per share)</a></p>
+<h2 id="gl-stop-order">Stop order</h2>
+<p>An order that activates when a price is reached and only then goes to market.</p>
+<p>An important distinction: a stop-market becomes a market order once triggered and will certainly fill, though possibly far from the stated level. A stop-limit becomes a limit order and may not fill at all — which is exactly what leaves a position open in a fast decline, precisely when protection is needed. For capital protection the first type is safer.</p>
+<p>«Stop» as in the price at which a dormant order wakes and acts.</p>
+<p><a href="#gl-stoploss">Stop-loss</a>, <a href="#gl-market-order">Market order</a>, <a href="#gl-slippage">Slippage</a></p>
+<h2 id="gl-stoploss">Stop-loss</h2>
+<p>An order that closes a position automatically once a set loss is reached.</p>
+<p>A stop-loss (SL) is a protective order that caps the loss. It sits at the level where the position is closed automatically. It is the core of risk management: without a stop, a single losing trade can wipe out an account. The 1% rule says risk no more than 1% of the deposit on one trade. Stops are placed beyond a support or resistance level, beyond a candle extreme, or by volatility (ATR × multiplier). Having stops taken out en masse is a liquidity sweep.</p>
+<p>From &quot;stop loss&quot; — literally, stop the loss.</p>
+<p><a href="#gl-takeprofit">Take-profit</a>, <a href="#gl-r-ratio">R-multiple</a>, <a href="#gl-leverage">Leverage</a>, <a href="#gl-support">Support</a>, <a href="#gl-stop-order">Stop order</a>, <a href="#gl-gap">Gap</a>, <a href="#gl-position-sizing">Position sizing</a></p>
+<h2 id="gl-stp-ecn">STP and ECN</h2>
+<p>Execution models in which the order goes out to liquidity providers.</p>
+<p>STP passes the order onward with no dealer intervention. ECN matches participants' orders in a shared book, so the spread can be zero while the broker earns a commission on volume. For the client the practical difference is cost structure: on ECN a tight spread plus commission; on a standard account no commission but a wider spread. Compare the total, not one component.</p>
+<p>Straight Through Processing; Electronic Communication Network.</p>
+<p><a href="#gl-a-book-b-book">A-book and B-book</a>, <a href="#gl-spread">Spread</a>, <a href="#gl-liquidity">Liquidity</a>, <a href="#gl-requote">Requote</a></p>
+<h2 id="gl-straddle">Straddle</h2>
+<p>Buying a call and a put at the same strike: a bet on range, not direction.</p>
+<p>A straddle wins if the market travels far either way and loses if it sits still. Breakeven is the sum of both premiums, and it is often wider than it looks: ahead of a big event IV is high, so call and put are both expensive. It happens often that the news lands, price jerks, and the straddle still loses, because deflating IV took more than the move gave.</p>
+<p>From «to straddle» — to stand with legs apart: the position sits on both sides of price.</p>
+<p><a href="#gl-implied-volatility">Implied volatility (IV)</a>, <a href="#gl-option">Option</a>, <a href="#gl-vega">Vega</a></p>
+<h2 id="gl-strike">Strike</h2>
+<p>The price at which an option is exercised, if it is exercised.</p>
+<p>The strike is fixed in the contract and does not move, while the asset's market price wanders around it — and it is precisely the gap between the two that decides whether the option is worth anything at expiry. The set of strikes for one date forms the implied-volatility «smile»: equidistant strikes are usually priced differently, and that skew by itself tells you which move the market fears more.</p>
+<p>From «strike price» — the price at which the trade strikes when exercised.</p>
+<p><a href="#gl-option">Option</a>, <a href="#gl-call">Call</a>, <a href="#gl-put">Put</a>, <a href="#gl-moneyness">Moneyness (ITM, OTM, ATM)</a></p>
+<h2 id="gl-support">Support</h2>
+<p>A price level where demand has historically exceeded supply, halting a decline.</p>
+<p>A support level is a horizontal zone where price has repeatedly stopped falling and turned back up. Buyers tend to become active near these zones. The more times price has tested a level without breaking it, the more significant that support is considered. Once broken, support often turns into resistance — the flip. Support levels are used to place stop-losses and to look for entries on retests.</p>
+<p>From &quot;support&quot; — the floor that holds price up.</p>
+<p><a href="#gl-resistance">Resistance</a>, <a href="#gl-pivot">Pivot (PP)</a>, <a href="#gl-stoploss">Stop-loss</a>, <a href="#gl-retest">Retest</a>, <a href="#gl-volume-profile">Volume profile</a></p>
+<h2 id="gl-swap-points">Swap points</h2>
+<p>The charge or credit for holding an FX position overnight.</p>
+<p>The two currencies' rate differential accrues daily: one side of the trade pays you, the other costs you. The broker adds its own margin, so credits are usually smaller than theory and debits larger. Wednesdays often carry a triple swap, covering the weekend. For positions held beyond a week the swap stops being a detail and enters the arithmetic alongside the spread.</p>
+<p>From «swap» — the exchange of interest payments between two currencies.</p>
+<p><a href="#gl-carry-trade">Carry trade</a>, <a href="#gl-policy-rate">Policy rate</a>, <a href="#gl-spread">Spread</a></p>
+<h2 id="gl-takeprofit">Take-profit</h2>
+<p>An order that closes a position automatically once the profit target is reached.</p>
+<p>A take-profit (TP) locks in profit at a predefined level and is used alongside a stop-loss. The ratio of TP to SL is the risk-to-reward (R:R). A common minimum is 1:2 — profit twice the risk — which leaves a system profitable at a 34% win rate. Closing part of the position at the first target and moving the stop to breakeven is a widespread way to manage the rest.</p>
+<p>From &quot;take profit&quot; — literally, take the profit.</p>
+<p><a href="#gl-stoploss">Stop-loss</a>, <a href="#gl-r-ratio">R-multiple</a>, <a href="#gl-risk">Risk</a>, <a href="#gl-oco">OCO (one cancels the other)</a></p>
+<h2 id="gl-term-premium">Term premium</h2>
+<p>The extra return demanded for lending long rather than short.</p>
+<p>A long bond's yield is expected short rates plus the term premium — compensation for the uncertainty of the future. The premium cannot be observed directly, only modelled, which is exactly why it is argued over. Practically: when long yields rise without any change in rate expectations, it is usually the premium rising — the market is asking more for the same maturity.</p>
+<p>Literally the premium paid for «term», the time to maturity.</p>
+<p><a href="#gl-yield-curve">Yield curve</a>, <a href="#gl-bond-yield">Bond yield</a>, <a href="#gl-duration">Duration</a></p>
+<h2 id="gl-theta">Theta</h2>
+<p>How much value an option loses per day from the passage of time alone.</p>
+<p>Theta is negative for the buyer and positive for the seller: time works for whoever collected the premium. Decay accelerates into expiry, so short-dated options melt noticeably faster. Hence the rule beginners learn expensively: a bought option loses money even in a flat market, and profit needs not just the right direction but the right direction in time.</p>
+<p>The eighth Greek letter, chosen for the initial of «time» in the English tradition.</p>
+<p><a href="#gl-option-premium">Option premium</a>, <a href="#gl-expiry">Expiry</a>, <a href="#gl-option">Option</a></p>
+<h2 id="gl-timeframe">Timeframe</h2>
+<p>The time interval each candle on a chart covers (M30, H1, H4, D1, W1).</p>
+<p>A timeframe is the period one candle represents. M1/M5/M15 suit scalping and intraday work. M30/H1 are intraday and swing. H4/D1 are medium-term. W1/MN are long-term. The multi-timeframe principle: read the trend on the higher timeframe, find the entry on the lower one. Levels drawn on a higher timeframe carry more weight than those on a lower one.</p>
+<p>The frame of time a single candle covers.</p>
+<p><a href="#gl-trend">Trend</a>, <a href="#gl-pattern">Pattern</a>, <a href="#gl-support">Support</a>, <a href="#gl-resistance">Resistance</a>, <a href="#gl-candlestick">Candlestick</a>, <a href="#gl-moving-average">Moving average</a></p>
+<h2 id="gl-trade-balance">Trade balance</h2>
+<p>The gap between a country's exports and imports over a period.</p>
+<p>A surplus means the country sells more than it buys; a deficit the reverse. For the currency what matters is not the sign itself but the change and how it is financed: a persistent deficit with capital inflows can run for decades, as in the US. Exports and imports are read separately: both falling together usually signals a slowdown rather than an improving balance.</p>
+<p>«Balance» as in the remainder after flows are netted against each other.</p>
+<p><a href="#gl-gdp">GDP</a>, <a href="#gl-devaluation">Devaluation</a>, <a href="#gl-currency-pair">Currency pair</a></p>
+<h2 id="gl-treasury">Treasuries</h2>
+<p>US Treasury debt — the world's reference for the risk-free rate.</p>
+<p>Treasuries split by maturity: Bills under a year, Notes from two to ten years, Bonds out to thirty. The ten-year yield is the most quoted rate on the planet: the cost of money, US mortgages and equity valuations are all read off it. They are called risk-free in the credit sense — repayment is near-certain. Interest-rate and inflation risk remain in full.</p>
+<p>From the US Treasury, the department that issues them.</p>
+<p><a href="#gl-bond">Bond</a>, <a href="#gl-bond-yield">Bond yield</a>, <a href="#gl-credit-spread">Credit spread</a>, <a href="#gl-yield-curve">Yield curve</a></p>
+<h2 id="gl-trend">Trend</h2>
+<p>A sustained directional move: up (bullish), down (bearish) or sideways (range).</p>
+<p>A trend is defined by its sequence of extremes: bullish means higher highs and higher lows, bearish means lower highs and lower lows. A range is horizontal, with no clear direction. Dow's axiom holds that a trend is in force until proven otherwise. Identifying the trend is the first step of any analysis, and trading with it reduces the odds of a bad trade.</p>
+<p>From &quot;trend&quot; — the prevailing direction of price.</p>
+<p><a href="#gl-timeframe">Timeframe</a>, <a href="#gl-support">Support</a>, <a href="#gl-resistance">Resistance</a>, <a href="#gl-flat">Range (flat)</a>, <a href="#gl-moving-average">Moving average</a>, <a href="#gl-adx">ADX</a>, <a href="#gl-breakout">Breakout</a></p>
+<h2 id="gl-triangle">Triangle</h2>
+<p>A narrowing range: highs and lows converge.</p>
+<p>Narrowing means falling volatility — accumulation before a move. The shape says nothing about direction, despite the popular «ascending» and «descending» readings. There is one useful and measurable property: the range on exit is usually wider than inside, so a squeeze is grounds for preparing a plan for both directions rather than predicting one.</p>
+<p>From the geometric shape formed by the converging boundary lines.</p>
+<p><a href="#gl-bollinger">Bollinger Bands</a>, <a href="#gl-breakout">Breakout</a>, <a href="#gl-volatility">Volatility</a></p>
+<h2 id="gl-tvl">TVL</h2>
+<p>The total value of assets deposited in a DeFi protocol.</p>
+<p>TVL is used as a size measure, but it has two flaws. First, it is denominated in dollars, so it rises and falls with token prices even when nothing is deposited or withdrawn. Second, the same asset pledged along a chain of protocols is counted several times. TVL therefore reads better as a trend than as a sum.</p>
+<p>Total Value Locked — funds locked inside contracts.</p>
+<p><a href="#gl-defi">DeFi</a>, <a href="#gl-liquidity">Liquidity</a>, <a href="#gl-stablecoin">Stablecoin</a></p>
+<h2 id="gl-twap">TWAP</h2>
+<p>Execution in equal slices at equal intervals of time.</p>
+<p>TWAP cuts a large order into pieces and releases them by the clock, ignoring volume. That is how it differs from VWAP, which adapts to market activity. The simplicity is both virtue and weakness: the algorithm is predictable, and its presence is detectable if you look, through regular identical trades. It is used where volume data are sparse or the market is uneven.</p>
+<p>Time Weighted Average Price.</p>
+<p><a href="#gl-vwap">VWAP</a>, <a href="#gl-market-order">Market order</a>, <a href="#gl-liquidity">Liquidity</a></p>
+<h2 id="gl-unemployment-rate">Unemployment rate</h2>
+<p>The share of people seeking work within the labour force.</p>
+<p>The series is treacherous because it falls for two opposite reasons: people found jobs — or stopped looking and dropped out of the count. It is therefore read alongside the participation rate. The Sahm rule, popular since 2022, uses exactly this series: a 0.5-point rise in the three-month average off the year's low has historically coincided with the onset of recession.</p>
+<p>In statistics the unemployed are not everyone without a job, only those actively seeking one.</p>
+<p><a href="#gl-nfp">Non-Farm Payrolls (NFP)</a>, <a href="#gl-jolts">JOLTS</a>, <a href="#gl-jobless-claims">Jobless claims</a>, <a href="#gl-recession">Recession</a></p>
+<h2 id="gl-vega">Vega</h2>
+<p>The option price's sensitivity to a change in implied volatility.</p>
+<p>Vega shows how much an option gains or loses when IV rises by one percentage point. It is larger for longer-dated and near-the-money options. Vega explains a common story: the event passes, price moves the right way, yet the bought option is cheaper — because uncertainty left with the event, IV collapsed, and vega took more than direction gave.</p>
+<p>The only «Greek» absent from the Greek alphabet: the name is borrowed from the star Vega.</p>
+<p><a href="#gl-implied-volatility">Implied volatility (IV)</a>, <a href="#gl-option-premium">Option premium</a>, <a href="#gl-volatility">Volatility</a></p>
+<h2 id="gl-vix">VIX</h2>
+<p>The expected 30-day volatility of the S&amp;P 500 — the market's &quot;fear gauge&quot;.</p>
+<p>The VIX (CBOE Volatility Index) is derived from S&amp;P 500 option prices. Below 15 the market is calm. Between 20 and 30 there is moderate uncertainty. Above 30 signals high anxiety, often near a market bottom. It is inversely correlated with the S&amp;P 500: when the index falls, the VIX rises. The VIX says nothing about direction, only about amplitude. Crypto has an equivalent in DVOL, the Deribit volatility index for BTC.</p>
+<p>Introduced by the CBOE in 1993 as a measure of expected market volatility.</p>
+<p><a href="#gl-fear-greed">Fear &amp; Greed</a>, <a href="#gl-volatility">Volatility</a>, <a href="#gl-trend">Trend</a>, <a href="#gl-implied-volatility">Implied volatility (IV)</a>, <a href="#gl-sp500">S&amp;P 500</a>, <a href="#gl-option">Option</a></p>
+<h2 id="gl-volatility">Volatility</h2>
+<p>A measure of how widely price swings over a period.</p>
+<p>Volatility measures how far price strays from its average. High volatility means large candles, wide spreads and strong moves; low volatility means narrow candles and a quiet market. ATR (Average True Range) is a popular measure of historical volatility. Implied volatility (IV) is the volatility the market expects, priced into options. For equities the benchmark is the VIX, the &quot;fear index&quot;. Volatility usually compresses ahead of a release and jumps after it.</p>
+<p>From the Latin volatilis — flying, fleeting.</p>
+<p><a href="#gl-vix">VIX</a>, <a href="#gl-atr">ATR</a>, <a href="#gl-spread">Spread</a>, <a href="#gl-trend">Trend</a>, <a href="#gl-implied-volatility">Implied volatility (IV)</a>, <a href="#gl-bollinger">Bollinger Bands</a></p>
+<h2 id="gl-volume">Volume</h2>
+<p>The number of lots, contracts or coins traded over a period.</p>
+<p>Volume is an important secondary indicator. A move on high volume carries more weight. A rally on thin volume is a potentially weak signal, and falling volume inside a trend warns of a possible reversal. A volume profile shows at which prices the most trading took place; the Point of Control — the price with the highest traded volume — often acts as support or resistance.</p>
+<p>From &quot;volume&quot; — the amount traded.</p>
+<p><a href="#gl-liquidity">Liquidity</a>, <a href="#gl-trend">Trend</a>, <a href="#gl-flat">Range (flat)</a>, <a href="#gl-orderbook">Order book</a>, <a href="#gl-open-interest">Open interest (OI)</a>, <a href="#gl-volume-profile">Volume profile</a>, <a href="#gl-vwap">VWAP</a></p>
+<h2 id="gl-volume-profile">Volume profile</h2>
+<p>The distribution of volume across prices rather than across time.</p>
+<p>An ordinary volume histogram answers «when it traded»; the profile answers «at what price». The level with the greatest volume is called the point of control: there the market agreed with the price longest, and returns to it are frequent. Low-volume zones are crossed quickly — which is why moves between dense levels look like jumps. The tool describes structure; it does not forecast.</p>
+<p>«Profile» as a side view: volume is unrolled along the vertical price axis, like a relief profile.</p>
+<p><a href="#gl-volume">Volume</a>, <a href="#gl-vwap">VWAP</a>, <a href="#gl-support">Support</a></p>
+<h2 id="gl-vwap">VWAP</h2>
+<p>The average price over a period, weighted by traded volume.</p>
+<p>VWAP serves two different purposes. For a large participant it is a benchmark of execution quality: buying below VWAP means doing better than the day's average. For a retail trader it is an intraday magnet that price frequently rejects from — precisely because algorithms reference it. Unlike a moving average, VWAP is computed from the session's open.</p>
+<p>Volume Weighted Average Price.</p>
+<p><a href="#gl-volume">Volume</a>, <a href="#gl-twap">TWAP</a>, <a href="#gl-market-depth">Market depth</a></p>
+<h2 id="gl-winrate">Win rate</h2>
+<p>The share of profitable trades — the most commonly misread metric there is.</p>
+<p>A high win rate is easy to achieve: take profit quickly and let losses run. Such a system looks superb until the first large trade eats everything accumulated. Win rate therefore means something only alongside the average ratio of win to loss. The breakeven threshold is simple arithmetic: stop divided by the sum of target and stop.</p>
+<p>From «win rate» — the frequency of winning outcomes.</p>
+<p><a href="#gl-expectancy">Expectancy</a>, <a href="#gl-r-ratio">R-multiple</a>, <a href="#gl-profit-factor">Profit factor</a></p>
+<h2 id="gl-wti">WTI</h2>
+<p>The US benchmark crude, delivered at Cushing, Oklahoma.</p>
+<p>WTI is lighter and cleaner than Brent but trades inland: delivery runs into Cushing storage, and how full that single hub is moves the price. Hence the well-known April 2020 episode — a negative price on the May contract: there was nowhere to store, yet the obligation to take delivery remained. The grade is the US market's reference and is quoted on CME.</p>
+<p>West Texas Intermediate — for its region of production and its mid-range density.</p>
+<p><a href="#gl-brent">Brent</a>, <a href="#gl-opec">OPEC+</a>, <a href="#gl-oil-inventories">Oil inventories</a>, <a href="#gl-settlement">Settlement</a></p>
+<h2 id="gl-yield-curve">Yield curve</h2>
+<p>One issuer's yields across maturities, from a month to thirty years.</p>
+<p>A normal curve slopes up: the longer you part with money, the more you ask. Its shape is a compressed summary of expectations — the short end follows the central bank's rate, the long end follows growth and inflation expectations. The curve therefore reads as the market's view of the future, and a view paid for with money rather than voiced in an interview.</p>
+<p>Literally the curve of yields: maturity along the axis, yield as the value.</p>
+<p><a href="#gl-bond-yield">Bond yield</a>, <a href="#gl-curve-inversion">Curve inversion</a>, <a href="#gl-policy-rate">Policy rate</a>, <a href="#gl-term-premium">Term premium</a></p>

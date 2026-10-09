@@ -15,18 +15,46 @@
   // Small self-contained dictionary for the handful of UI strings this file
   // owns directly (search placeholder, popup chrome) — no need to pull in
   // the server-side i18n dictionary for just 4 strings.
+  // 🔴 Подписи разделов живут здесь, а НЕ в i18n/site/*.json, и это тот же
+  // довод, что для четырёх строк выше: файл подключён без `defer` и
+  // исполняется раньше i18n.js, поэтому общий словарь на момент отрисовки
+  // не гарантирован. Держать их в i18n и читать отсюда значит иногда
+  // рисовать фильтр с пустыми подписями. Ключи разделов — в данных
+  // (поле section), список допустимых — в tools/glossary_merge.py.
   var STR = {
     ru: {
       etymology:      'Этимология',
       more_in_glossary: 'Подробнее в глоссарии →',
       search_placeholder: 'Поиск термина…',
-      related_prefix: 'По теме:'
+      search_label:   'Поиск по глоссарию',
+      related_prefix: 'По теме:',
+      all_sections:   'Все',
+      nothing_found:  'Ничего не найдено. Попробуйте другое слово или снимите фильтр.',
+      counter:        'Статей: ',
+      jump_label:     'Перейти к букве',
+      sec: { technical:'Графика и индикаторы', macro:'Макро и центробанки',
+             options:'Опционы', bonds:'Облигации и ставки',
+             futures:'Фьючерсы и сырьё', fx:'Валютный рынок',
+             equity:'Акции', crypto:'Крипта', risk:'Риск и портфель',
+             micro:'Стакан и исполнение', brokers:'Брокеры и регуляторы',
+             slang:'Сленг' }
     },
     ro: {
       etymology:      'Etimologie',
       more_in_glossary: 'Mai multe în glosar →',
       search_placeholder: 'Caută un termen…',
-      related_prefix: 'Vezi și:'
+      search_label:   'Căutare în glosar',
+      related_prefix: 'Vezi și:',
+      all_sections:   'Toate',
+      nothing_found:  'Nu s-a găsit nimic. Încercați alt cuvânt sau scoateți filtrul.',
+      counter:        'Articole: ',
+      jump_label:     'Salt la litera',
+      sec: { technical:'Grafic și indicatori', macro:'Macro și bănci centrale',
+             options:'Opțiuni', bonds:'Obligațiuni și dobânzi',
+             futures:'Futures și materii prime', fx:'Piața valutară',
+             equity:'Acțiuni', crypto:'Cripto', risk:'Risc și portofoliu',
+             micro:'Carnet de ordine și execuție', brokers:'Brokeri și reglementatori',
+             slang:'Argou' }
     },
     // Английской ветки тут не было вовсе — отсюда «Поиск термина…»
     // в поле над английским глоссарием.
@@ -34,9 +62,24 @@
       etymology:      'Etymology',
       more_in_glossary: 'More in the glossary →',
       search_placeholder: 'Search a term…',
-      related_prefix: 'See also:'
+      search_label:   'Search the glossary',
+      related_prefix: 'See also:',
+      all_sections:   'All',
+      nothing_found:  'Nothing found. Try another word or clear the filter.',
+      counter:        'Entries: ',
+      jump_label:     'Jump to letter',
+      sec: { technical:'Charts and indicators', macro:'Macro and central banks',
+             options:'Options', bonds:'Bonds and rates',
+             futures:'Futures and commodities', fx:'Currency market',
+             equity:'Equities', crypto:'Crypto', risk:'Risk and portfolio',
+             micro:'Order book and execution', brokers:'Brokers and regulators',
+             slang:'Slang' }
     }
   };
+  function секция(ключ) {
+    var таб = (STR[LANG] && STR[LANG].sec) || STR.ru.sec;
+    return таб[ключ] || STR.ru.sec[ключ] || ключ;
+  }
   function t(key) {
     return (STR[LANG] && STR[LANG][key]) || STR.ru[key];
   }
@@ -217,8 +260,15 @@
     } else {
       etymWrap.style.display = 'none';
     }
+    // 🔴 БЫЛО '/m/glossary#' + slug, И ЭТО ВЕЛО НА ГЛАВНУЮ.
+    // Маршрут /m/* давно отдаёт 301 на '/', поэтому ссылка «Подробнее в
+    // глоссарии» из любой карточки в тексте главы уводила читателя на
+    // главную страницу — без якоря и без термина. Проверено запросом:
+    // /m/glossary → 301 → https://lp.sbfconsult.com/. Плюс адрес был
+    // всегда русский: на /en и /ro попап вёл в чужую локаль (это та же
+    // утечка локали, что Л-6 языкового аудита).
     var moreLink = document.getElementById('glMore');
-    moreLink.href = '/m/glossary#' + entry.slug;
+    moreLink.href = (LANG === 'ru' ? '' : '/' + LANG) + '/glossary#gl-' + entry.slug;
 
     _overlay.style.display = 'block';
     _popup.style.display = 'block';
@@ -267,49 +317,106 @@
   }
 
   // ── Glossary page ─────────────────────────────────────────────────────────
+  // 🔴 ПЕРЕПИСАНО ПОД 219 СТАТЕЙ (было 46).
+  // На сорока шести хватало одного поля поиска и заголовков-букв. На двух
+  // сотнях это нечитаемо: страница стала длиннее экрана в десятки раз, а
+  // «посмотреть, что вообще есть по опционам» было нельзя вовсе. Добавлены
+  // три вещи и исправлены две.
+  //   • Перемычка по буквам — чтобы до нужной статьи доходить прыжком.
+  //   • Фильтр по разделам из поля section данных.
+  //   • Поиск теперь ищет по НАЗВАНИЮ, СИНОНИМАМ и короткому определению.
+  //     Прежний искал по textContent готовой карточки: синонимы в разметку
+  //     не попадают, поэтому «фандинг» не находил funding-rate, а «ястреб» —
+  //     hawkish. Это и есть главная поломка поиска, а не длина списка.
+  //   • Ссылки «по теме» показывают ИМЯ статьи, а не slug: читать строку
+  //     «negative-balance-protection» человеку не предлагают.
+  //   • У поля поиска появился label (без него оно было безымянным для
+  //     экранного чтения — та же находка С-4 аудита, что и 90 select'ов).
   function renderGlossaryPage(container, openSlug) {
     loadGlossary(function (data) {
-      // Sort by Cyrillic then Latin
       var sorted = data.slice().sort(function (a, b) {
-        return a.term.localeCompare(b.term, 'ru');
+        return a.term.localeCompare(b.term, LANG === 'ru' ? 'ru' : LANG);
       });
+      var имена = {};
+      sorted.forEach(function (т) { имена[т.slug] = т.term; });
 
-      // Group by first letter
+      // Буква статьи. Цифры и знаки сводим в одну группу «#», иначе
+      // перемычка обрастает одиночными буквами-сиротами.
+      function буква(т) {
+        var c = (т.term[0] || '').toUpperCase();
+        return /[0-9#$€£¥₽₴₸]/.test(c) ? '#' : c;
+      }
+
       var groups = {};
       sorted.forEach(function (entry) {
-        var letter = entry.term[0].toUpperCase();
-        if (!groups[letter]) groups[letter] = [];
-        groups[letter].push(entry);
+        var l = буква(entry);
+        (groups[l] = groups[l] || []).push(entry);
       });
-
       var letters = Object.keys(groups).sort(function (a, b) {
-        return a.localeCompare(b, 'ru');
+        if (a === '#') return 1;
+        if (b === '#') return -1;
+        return a.localeCompare(b, LANG === 'ru' ? 'ru' : LANG);
       });
 
-      // Search input
-      var searchHtml =
+      // Разделы — только те, что реально есть в данных, в порядке убывания
+      // числа статей: пустых кнопок на странице не бывает по построению.
+      var счёт = {};
+      sorted.forEach(function (т) { счёт[т.section] = (счёт[т.section] || 0) + 1; });
+      var разделы = Object.keys(счёт).sort(function (a, b) { return счёт[b] - счёт[a]; });
+
+      var ЧИП = 'display:inline-flex;align-items:center;min-height:44px;padding:0 13px;' +
+        'margin:0 6px 6px 0;border:1.5px solid var(--line,#E7DFCF);border-radius:999px;' +
+        'background:var(--paper,#fff);color:var(--ink,#2B2B33);font:600 12px Montserrat,sans-serif;' +
+        'cursor:pointer;white-space:nowrap';
+
+      var поиск =
         '<div style="position:sticky;top:64px;z-index:30;background:var(--cream,#FBF6EF);padding:10px 0 6px">' +
-        '<input id="glSearch" type="search" placeholder="' + esc(t('search_placeholder')) + '"' +
-        ' style="width:100%;padding:10px 14px;border:1.5px solid var(--line,#E7DFCF);border-radius:10px;' +
-        'font-size:14px;font-family:Montserrat,sans-serif;background:var(--paper,#fff);color:var(--ink,#2B2B33);' +
-        'outline:none;box-sizing:border-box">' +
+          '<label for="glSearch" style="position:absolute;width:1px;height:1px;overflow:hidden;' +
+            'clip:rect(0 0 0 0);white-space:nowrap">' + esc(t('search_label')) + '</label>' +
+          '<input id="glSearch" type="search" autocomplete="off" placeholder="' + esc(t('search_placeholder')) + '"' +
+            ' style="width:100%;min-height:44px;padding:10px 14px;border:1.5px solid var(--line,#E7DFCF);' +
+            'border-radius:10px;font-size:14px;font-family:Montserrat,sans-serif;background:var(--paper,#fff);' +
+            'color:var(--ink,#2B2B33);box-sizing:border-box">' +
         '</div>';
 
-      // Letter sections
-      var sectionsHtml = letters.map(function (letter) {
-        var entries = groups[letter].map(function (entry) {
+      var чипы =
+        '<div id="glSecs" role="group" aria-label="' + esc(t('jump_label')) + '" style="padding:4px 0 2px">' +
+          '<button type="button" class="gl-sec" data-sec="" aria-pressed="true" style="' + ЧИП +
+            ';border-color:var(--gold,#C9A227)">' + esc(t('all_sections')) + ' · ' + sorted.length + '</button>' +
+          разделы.map(function (с) {
+            return '<button type="button" class="gl-sec" data-sec="' + esc(с) + '" aria-pressed="false" style="' +
+              ЧИП + '">' + esc(секция(с)) + ' · ' + счёт[с] + '</button>';
+          }).join('') +
+        '</div>';
+
+      var перемычка =
+        '<nav aria-label="' + esc(t('jump_label')) + '" style="padding:2px 0 8px;line-height:1">' +
+          letters.map(function (l) {
+            return '<a href="#gl-letter-' + encodeURIComponent(l) + '" class="gl-jump" style="' +
+              'display:inline-flex;align-items:center;justify-content:center;min-width:30px;min-height:44px;' +
+              'color:var(--gold-text,#866A19);font:700 12px JetBrains Mono,monospace;text-decoration:none">' +
+              esc(l) + '</a>';
+          }).join('') +
+        '</nav>';
+
+      var секции = letters.map(function (letter) {
+        var карточки = groups[letter].map(function (entry) {
           var open = entry.slug === openSlug;
+          // Стог для поиска: имя + синонимы + короткое определение.
+          var стог = [entry.term, (entry.aliases || []).join(' '), entry.short || '']
+            .join(' ').toLowerCase();
           return (
             '<div class="gl-card" id="gl-' + entry.slug + '" data-open="' + (open ? '1' : '0') + '" ' +
+              'data-sec="' + esc(entry.section || '') + '" data-hay="' + esc(стог) + '" ' +
               'style="border:1px solid var(--line,#E7DFCF);border-radius:10px;' +
               'background:var(--paper,#fff);margin-bottom:6px;overflow:hidden">' +
-            '<button class="gl-card-hd" style="width:100%;text-align:left;border:none;background:none;' +
+            '<button type="button" class="gl-card-hd" aria-expanded="' + (open ? 'true' : 'false') + '" ' +
+              'style="width:100%;min-height:44px;text-align:left;border:none;background:none;' +
               'padding:13px 14px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;' +
-              'font-family:Montserrat,sans-serif;font-size:13px;font-weight:600;color:var(--ink,#2B2B33)">' +
+              'gap:10px;font-family:Montserrat,sans-serif;font-size:13px;font-weight:600;color:var(--ink,#2B2B33)">' +
               '<span>' + esc(entry.term) + '</span>' +
-              '<span class="gl-card-arrow" style="font-size:10px;color:var(--muted,#716A5A);' +
-                'transform:rotate(' + (open ? '180' : '0') + 'deg);transition:transform .2s">' +
-                '▼</span>' +
+              '<span class="gl-card-arrow" aria-hidden="true" style="font-size:10px;color:var(--muted,#716A5A);' +
+                'transform:rotate(' + (open ? '180' : '0') + 'deg);transition:transform .2s">▼</span>' +
             '</button>' +
             '<div class="gl-card-body" style="display:' + (open ? 'block' : 'none') + ';' +
               'padding:0 14px 14px;font-size:13px;line-height:1.65;color:var(--ink,#2B2B33)">' +
@@ -323,9 +430,9 @@
                 : '') +
               (entry.related && entry.related.length
                 ? '<div style="font-size:11px;color:var(--muted,#716A5A)">' + esc(t('related_prefix')) + ' ' +
-                  entry.related.map(function (slug) {
+                  entry.related.filter(function (s) { return имена[s]; }).map(function (slug) {
                     return '<a href="#gl-' + slug + '" class="gl-rel" style="color:var(--gold-text,#866A19);' +
-                      'text-decoration:none;margin-right:6px">' + slug + '</a>';
+                      'text-decoration:none;margin-right:8px;white-space:nowrap">' + esc(имена[slug]) + '</a>';
                   }).join('') + '</div>'
                 : '') +
             '</div>' +
@@ -333,80 +440,110 @@
           );
         }).join('');
         return (
-          '<div class="gl-section" data-letter="' + letter + '">' +
-          '<div style="font-size:11px;font-weight:700;color:var(--muted,#716A5A);letter-spacing:.05em;' +
-            'text-transform:uppercase;padding:10px 2px 6px">' + letter + '</div>' +
-          entries +
+          '<div class="gl-section" data-letter="' + esc(letter) + '">' +
+          '<h2 id="gl-letter-' + encodeURIComponent(letter) + '" style="font-size:11px;font-weight:700;' +
+            'color:var(--muted,#716A5A);letter-spacing:.05em;text-transform:uppercase;' +
+            'padding:10px 2px 6px;margin:0;scroll-margin-top:120px">' + esc(letter) + '</h2>' +
+          карточки +
           '</div>'
         );
       }).join('');
 
-      container.innerHTML = searchHtml + '<div id="glSections">' + sectionsHtml + '</div>';
+      container.innerHTML = поиск + чипы + перемычка +
+        '<p id="glCount" style="font-size:11px;color:var(--muted,#716A5A);margin:0 0 8px">' +
+          esc(t('counter')) + sorted.length + '</p>' +
+        '<p id="glEmpty" hidden style="font-size:13px;color:var(--muted,#716A5A);' +
+          'padding:16px 2px">' + esc(t('nothing_found')) + '</p>' +
+        '<div id="glSections">' + секции + '</div>';
 
-      // Toggle cards
+      var входПоиска = container.querySelector('#glSearch');
+      var счётчик    = container.querySelector('#glCount');
+      var пусто      = container.querySelector('#glEmpty');
+      var текРаздел  = '';
+
+      // Один проход фильтрации на оба условия: раздел и строка поиска.
+      // Раздельные обработчики раньше затирали работу друг друга.
+      function применить() {
+        var q = (входПоиска.value || '').toLowerCase().trim();
+        var видно = 0;
+        container.querySelectorAll('.gl-section').forEach(function (sec) {
+          var есть = false;
+          sec.querySelectorAll('.gl-card').forEach(function (card) {
+            var ок = (!текРаздел || card.dataset.sec === текРаздел) &&
+                     (!q || (card.dataset.hay || '').indexOf(q) !== -1);
+            card.style.display = ок ? 'block' : 'none';
+            if (ок) { есть = true; видно++; }
+          });
+          sec.style.display = есть ? 'block' : 'none';
+        });
+        счётчик.textContent = t('counter') + видно;
+        пусто.hidden = видно > 0;
+      }
+
+      входПоиска.addEventListener('input', применить);
+
+      container.querySelectorAll('.gl-sec').forEach(function (кн) {
+        кн.addEventListener('click', function () {
+          текРаздел = кн.dataset.sec || '';
+          container.querySelectorAll('.gl-sec').forEach(function (д) {
+            var выбран = d_eq(д, кн);
+            д.setAttribute('aria-pressed', выбран ? 'true' : 'false');
+            д.style.borderColor = выбран ? 'var(--gold,#C9A227)' : 'var(--line,#E7DFCF)';
+          });
+          применить();
+        });
+      });
+      function d_eq(a, b) { return a === b; }
+
+      // Раскрытие карточки
       container.addEventListener('click', function (e) {
-        var hd = e.target.closest('.gl-card-hd');
+        var hd = e.target.closest ? e.target.closest('.gl-card-hd') : null;
         if (!hd) return;
         var card = hd.closest('.gl-card');
         var body = card.querySelector('.gl-card-body');
         var arrow = hd.querySelector('.gl-card-arrow');
-        var isOpen = card.dataset.open === '1';
-        body.style.display = isOpen ? 'none' : 'block';
-        arrow.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
-        card.dataset.open = isOpen ? '0' : '1';
-        if (!isOpen) {
-          // Scroll into view
-          setTimeout(function () {
-            card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-          }, 80);
-        }
+        var открыт = card.dataset.open === '1';
+        body.style.display = открыт ? 'none' : 'block';
+        arrow.style.transform = открыт ? 'rotate(0deg)' : 'rotate(180deg)';
+        card.dataset.open = открыт ? '0' : '1';
+        hd.setAttribute('aria-expanded', открыт ? 'false' : 'true');
+        if (!открыт) setTimeout(function () {
+          card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 80);
       });
 
-      // Rel links: open target card
+      // Ссылка «по теме» раскрывает целевую статью.
+      // 🔴 Снимает фильтр и поиск: иначе целевая карточка скрыта фильтром,
+      // переход «срабатывает» и визуально не происходит ничего.
       container.addEventListener('click', function (e) {
-        var rel = e.target.closest('.gl-rel');
+        var rel = e.target.closest ? e.target.closest('.gl-rel') : null;
         if (!rel) return;
         e.preventDefault();
         var slug = rel.getAttribute('href').replace('#gl-', '');
-        var target = document.getElementById('gl-' + slug);
+        var target = container.querySelector('#gl-' + slug);
         if (!target) return;
-        var body = target.querySelector('.gl-card-body');
-        var arrow = target.querySelector('.gl-card-arrow');
-        body.style.display = 'block';
-        arrow.style.transform = 'rotate(180deg)';
+        if (текРаздел || входПоиска.value) {
+          текРаздел = ''; входПоиска.value = '';
+          container.querySelectorAll('.gl-sec').forEach(function (д) {
+            var всё = !д.dataset.sec;
+            д.setAttribute('aria-pressed', всё ? 'true' : 'false');
+            д.style.borderColor = всё ? 'var(--gold,#C9A227)' : 'var(--line,#E7DFCF)';
+          });
+          применить();
+        }
+        target.querySelector('.gl-card-body').style.display = 'block';
+        target.querySelector('.gl-card-arrow').style.transform = 'rotate(180deg)';
+        target.querySelector('.gl-card-hd').setAttribute('aria-expanded', 'true');
         target.dataset.open = '1';
         setTimeout(function () {
           target.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 80);
       });
 
-      // Open from URL hash on load
-      if (openSlug) {
-        setTimeout(function () {
-          var card = document.getElementById('gl-' + openSlug);
-          if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 200);
-      }
-
-      // Client-side search
-      var searchInput = document.getElementById('glSearch');
-      if (searchInput) {
-        searchInput.addEventListener('input', function () {
-          var q = this.value.toLowerCase().trim();
-          var sections = container.querySelectorAll('.gl-section');
-          sections.forEach(function (sec) {
-            var cards = sec.querySelectorAll('.gl-card');
-            var anyVisible = false;
-            cards.forEach(function (card) {
-              var text = (card.textContent || '').toLowerCase();
-              var visible = !q || text.indexOf(q) !== -1;
-              card.style.display = visible ? 'block' : 'none';
-              if (visible) anyVisible = true;
-            });
-            sec.style.display = anyVisible ? 'block' : 'none';
-          });
-        });
-      }
+      if (openSlug) setTimeout(function () {
+        var card = container.querySelector('#gl-' + openSlug);
+        if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 200);
     });
   }
 
