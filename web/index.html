@@ -52,7 +52,13 @@ if (new URLSearchParams(location.search).get("embed") === "1") {
   "legalName": "Societatea cu Răspundere Limitată \"SBF COMPANY\"",
   "alternateName": ["«SBF COMPANY» S.R.L.", "SBF Company SRL", "SBF Consult"],
   "url": "https://lp.sbfconsult.com/",
-  "logo": "https://lp.sbfconsult.com/assets/logo.svg",
+  {# 🔴 Было /assets/logo.svg — такого файла на сайте НЕТ, адрес отдавал 404.
+     То есть разметка объявляла поисковику и ассистенту логотип организации
+     по мёртвой ссылке, и выглядело это как заполненное поле. Ровно тот
+     случай, когда ошибка не видна глазами: страница рисуется нормально.
+     Единственный существующий знак — /assets/logo.png (192×192, с 12.10
+     без белой подложки, собирается tools/make_logo.py). #}
+  "logo": "https://lp.sbfconsult.com/assets/logo.png",
   "description": "SBF Company — сопровождение счёта, анализ рынка и подбор брокера для частных инвесторов. Экспертная аналитика, усиленная ИИ.",
   "areaServed": ["MD", "KZ", "ZA", "AE", "CH", "PT"],
   {# Румынский тут забыли: сайт трёхъязычный с самого начала, а в разметке
@@ -82,7 +88,7 @@ if (new URLSearchParams(location.search).get("embed") === "1") {
 <script src="/assets/i18n.js?v=2" defer></script>
 <script src="/assets/sbf-symbols.js?v=2"></script>
 <script src="/edu/assets/calendar-terms.js?v=1" defer></script>
-<script src="/assets/sbf-header.js?v=23" defer></script>
+<script src="/assets/sbf-header.js?v=24" defer></script>
 <script src="/assets/sbf-auth.js?v=1" defer></script>
 <script src="/assets/sbf-profile.js?v=4" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.0/marked.min.js"></script>
@@ -692,7 +698,7 @@ a:hover{text-decoration:underline;color:var(--glow)}
 <header class="top sbf-hd">
   <div class="brand">
     <div class="logo-wrap">
-      <img src="./assets/logo.png" alt="SBF" width="44" height="44">
+      <img src="./assets/logo.png?v=20261012" alt="SBF" width="44" height="44">
     </div>
     <!-- 🔴 h1, а не b. Bing 30.09.2026: «H1 tag missing» на главной, при
          десяти h2 ниже — страница начиналась сразу со второго уровня, и
@@ -724,7 +730,7 @@ a:hover{text-decoration:underline;color:var(--glow)}
 </header>
 
 <div class="sbf-mob-bar" id="sbfMobBar">
-  <img src="./assets/logo.png" alt="SBF">
+  <img src="./assets/logo.png?v=20261012" alt="SBF">
   <span class="mob-brand">SBF INTELLIGENCE</span>
   <div class="mob-time"><span class="mob-dot" id="mobLiveDot"></span><span id="mobClock">—</span></div>
   <div class="sbf-lang-sw" id="sbfLangSwMob"></div>

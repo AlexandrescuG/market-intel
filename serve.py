@@ -1900,16 +1900,16 @@ def _build_edu_page(ch: int, lang: str) -> bytes:
         '<link rel="stylesheet" href="/assets/sbf-nav.css?v=20260903b">\n'
         '<script src="/assets/i18n.js?v=2" defer></script>\n'
         '<script src="/assets/sbf-symbols.js?v=2"></script>\n'
-        '<script src="/assets/sbf-header.js?v=23" defer></script>'
+        '<script src="/assets/sbf-header.js?v=24" defer></script>'
     )
     if '/edu/edu.css?v=20260903b' not in html:
         html = html.replace("</head>", f"{css_tags}\n</head>", 1)
-    elif '/assets/sbf-header.js?v=23' not in html:
+    elif '/assets/sbf-header.js?v=24' not in html:
         html = html.replace("</head>",
             '<link rel="stylesheet" href="/assets/sbf-nav.css?v=20260903b">\n'
             '<script src="/assets/i18n.js?v=2" defer></script>\n'
             '<script src="/assets/sbf-symbols.js?v=2"></script>\n'
-            '<script src="/assets/sbf-header.js?v=23" defer></script>\n</head>', 1)
+            '<script src="/assets/sbf-header.js?v=24" defer></script>\n</head>', 1)
 
     grafik_tags = (
         '<script src="/edu/assets/grafik-engine.js"></script>\n'
@@ -2825,7 +2825,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 <link rel="stylesheet" href="/assets/sbf-nav.css?v=20260903b">
 <script src="/assets/i18n.js?v=2" defer></script>
 <script src="/assets/sbf-symbols.js?v=2"></script>
-<script src="/assets/sbf-header.js?v=23" defer></script>
+<script src="/assets/sbf-header.js?v=24" defer></script>
 <script src="/assets/sbf-auth.js?v=1" defer></script>
 <style>
 .paywall-wrap{{max-width:560px;margin:80px auto;padding:0 20px;text-align:center}}

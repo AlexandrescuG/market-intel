@@ -440,7 +440,7 @@
   var _hdHtml = [
     '<header class="sbf-hd">',
     '  <a href="' + navHref('/') + '" class="sbf-brand">',
-    '    <div class="logo-wrap"><img src="/assets/logo.png" alt="SBF"></div>',
+    '    <div class="logo-wrap"><img src="/assets/logo.png?v=20261012" alt="SBF"></div>',
     '    <div class="sbf-brand-text"><b>SBF INTELLIGENCE</b><span data-i18n="brand.tagline">' + t('brand.tagline', 'рыночная разведка · sbfconsult.com') + '</span></div>',
     '  </a>',
     '  <nav class="g-nav">',
@@ -458,7 +458,7 @@
     '  </div>',
     '</header>',
     '<div class="sbf-mob-bar" id="sbfMobBar">',
-    '  <img src="/assets/logo.png" alt="SBF">',
+    '  <img src="/assets/logo.png?v=20261012" alt="SBF">',
     '  <span class="mob-brand">SBF INTELLIGENCE</span>',
     '  <div class="mob-time"><span class="mob-dot" id="mobLiveDot"></span><span id="mobClock">—</span></div>',
     '  <div class="sbf-lang-sw" id="sbfLangSwMob"></div>',
