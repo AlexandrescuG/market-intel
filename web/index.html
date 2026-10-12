@@ -48,9 +48,12 @@ if (new URLSearchParams(location.search).get("embed") === "1") {
      чтобы переписывать этот блок на каждой странице пятью копиями,
      которые разъедутся. См. core/schema_ld.py:ОРГ. #}
   "@id": "https://lp.sbfconsult.com/#org",
-  "name": "SBF Company",
+  "name": "SBF Consult",
   "legalName": "Societatea cu Răspundere Limitată \"SBF COMPANY\"",
-  "alternateName": ["«SBF COMPANY» S.R.L.", "SBF Company SRL", "SBF Consult"],
+  {# Имя для читателя — бренд SBF Consult (решение владельца 09.10.2026);
+     юрлицо «SBF COMPANY» S.R.L. остаётся в legalName и в alternateName,
+     чтобы ассистент не принял два написания за две разные компании. #}
+  "alternateName": ["«SBF COMPANY» S.R.L.", "SBF Company SRL", "SBF Company"],
   "url": "https://lp.sbfconsult.com/",
   {# 🔴 Было /assets/logo.svg — такого файла на сайте НЕТ, адрес отдавал 404.
      То есть разметка объявляла поисковику и ассистенту логотип организации
@@ -59,7 +62,7 @@ if (new URLSearchParams(location.search).get("embed") === "1") {
      Единственный существующий знак — /assets/logo.png (192×192, с 12.10
      без белой подложки, собирается tools/make_logo.py). #}
   "logo": "https://lp.sbfconsult.com/assets/logo.png",
-  "description": "SBF Company — сопровождение счёта, анализ рынка и подбор брокера для частных инвесторов. Экспертная аналитика, усиленная ИИ.",
+  "description": "SBF Consult — сопровождение счёта, анализ рынка и подбор брокера для частных инвесторов. Экспертная аналитика, усиленная ИИ.",
   "areaServed": ["MD", "KZ", "ZA", "AE", "CH", "PT"],
   {# Румынский тут забыли: сайт трёхъязычный с самого начала, а в разметке
      его не было — и /ro/ для машины выглядел как страница на неизвестно
