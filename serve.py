@@ -1099,6 +1099,21 @@ _FAVICON_ICON_RE = re.compile(r'<link[^>]*\brel="icon"[^>]*>')
 _FAVICON_APPLE_RE = re.compile(r'\s*<link[^>]*\brel="apple-touch-icon"[^>]*>')
 
 
+def _реквизиты(html: str, lang: str) -> str:
+    """Вставить блок реквизитов перед </body>.
+
+    Идемпотентна: если блок уже есть (шаблон однажды добавит свой или
+    страница соберётся дважды), второй не ставим — дубль реквизитов
+    выглядит как ошибка в документе, который читают именно на предмет
+    точности. Зачем это вообще отдаётся сервером и почему одной вставкой
+    на все страницы — в core/entity.py.
+    """
+    if 'class="sbf-req"' in html or "</body>" not in html:
+        return html
+    from core import entity
+    return html.replace("</body>", entity.блок(lang, i18n.t) + "</body>", 1)
+
+
 def _normalize_favicon(html: str) -> str:
     if not _FAVICON_ICON_RE.search(html):
         return html  # страницы вовсе без <link rel="icon"> чинятся отдельно, не здесь
@@ -1119,6 +1134,13 @@ _jinja.globals["url_for"] = _url_for
 _site_jinja = Environment(loader=FileSystemLoader(str(WEB_DIR)), autoescape=True)
 _site_jinja.globals["t"] = i18n.t
 _site_jinja.globals["symbol_name"] = _symbols.symbol_name
+# Реквизиты юрлица — шаблонам как {{ entity.idno }} и т.д. Нужно, чтобы
+# разметка Organization не держала ВТОРУЮ копию IDNO/LEI/адреса: копия
+# расходится с первой правкой, а заметить расхождение в JSON-LD глазами
+# нельзя — страница выглядит одинаково.
+from core import entity as _entity
+_site_jinja.globals["entity"] = _entity.данные()
+_site_jinja.globals["entity_address"] = _entity.адрес
 # Текстовый слой для краулеров — доступен шаблонам как text_layer(имя, lang).
 # Определение ниже по файлу; здесь регистрируется ленивой обёрткой, чтобы не
 # зависеть от порядка объявлений в модуле.
@@ -1854,6 +1876,11 @@ function sbfNavigate(tool) {{
 def _build_edu_page(ch: int, lang: str) -> bytes:
     """Рендерим шаблон + вставляем скомпилированный JS + edu-nav инжекции."""
     html = _normalize_favicon(_jinja.get_template(f"edu_book_{ch}.html").render(lang=lang))
+    # Главы курса идут мимо _render_site_page, поэтому реквизиты им
+    # нужно вставить отдельно — иначе пятнадцать страниц из пятидесяти
+    # одной оказались бы без обязательного блока, и это тот случай,
+    # когда «на сайте есть» и «на всех страницах есть» расходятся.
+    html = _реквизиты(html, lang)
 
     if ch in _COMPILED:
         # Убираем CDN-скрипты и babel-блок
@@ -2906,6 +2933,11 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             # незаметно — отсутствие ссылок глазами не видно.
             html = html.replace(
                 "<body>", "<body>" + _прогрессивный_щит() + _навигация(lang), 1)
+            # Реквизиты юрлица — по тому же доводу, что и навигация выше:
+            # нужны КАЖДОЙ странице (закон требует постоянного доступа), а
+            # забытый в одном шаблоне блок глазами не виден. Подробности и
+            # ссылка на норму — в core/entity.py.
+            html = _реквизиты(html, lang)
         except Exception as e:
             self.send_response(500)
             self.send_header("Content-Type", "text/plain; charset=utf-8")
