@@ -38,12 +38,26 @@ WEB_DATA = ROOT / "web" / "data"
 OUT_PATH = WEB_DATA / "broker_sparklines.json"
 CATALOG_PATH = WEB_DATA / "broker_catalog.json"
 
-TF = "H1"
-BARS = 24          # сутки по часам — столько же, сколько рисовал прежний джоб
-# Ряд, последняя точка которого старше суток, в файл не идёт. Кривая суточной
-# давности рядом с сегодняшней ценой — ровно та беда, из-за которой этот джоб
-# и переписан.
-MAX_AGE_SEC = 24 * 3600
+# 🔴 ПОЧЕМУ D1 ПЕРВЫМ, А НЕ H1 (13.10.2026).
+# Прежняя версия брала ТОЛЬКО H1 не старше суток — и рисовала кривую у 15
+# инструментов из 842. Причина не в джобе: в кэше свечей свежий H1 есть
+# лишь у 19 символов (ctrader_pull тянет внутридневные бары по узкому
+# списку), тогда как D1 свежий за неделю — у 738. То есть данные для линии
+# почти у всех ЕСТЬ, просто на дневном таймфрейме, а джоб их не смотрел.
+# Для мини-графика в списке дневные бары даже уместнее: 24 дневных бара —
+# это ~месяц формы цены, обычный спарклайн на финансовых витринах, а не
+# «последние сутки по часам», которые по неактивному инструменту всё
+# равно почти прямая.
+#
+# Порядок: сначала D1 (покрытие), при его отсутствии/устаревании — H1
+# (внутридневная картина для активных инструментов). Правило «нет данных —
+# нет линии» ниже сохраняется: оставшиеся ~100 — это делистнутые бумаги
+# (#FACEBOOK, #CITRIXSYSTEMS и т.п.), по ним честнее пусто, чем прямая.
+BARS = 24
+ПОПЫТКИ = (
+    ("D1", 7 * 24 * 3600),   # дневной бар на выходных не обновляется — неделя
+    ("H1", 24 * 3600),       # фоллбэк: суточная внутридневная динамика
+)
 
 log = logging.getLogger("broker_sparklines")
 
@@ -57,39 +71,56 @@ def catalog_symbols() -> list[str]:
     return [it.get("symbol") for it in items if it.get("symbol")]
 
 
+def _ряд(sym: str, now: float) -> tuple[list[float], str] | None:
+    """Первый таймфрейм из ПОПЫТКИ, у которого есть свежий ряд ≥3 точек.
+    Возвращает (closes, tf) или None. Каждый TF по символу запрашивается
+    у кэша не больше раза за счёт порядка перебора — дальше первого
+    успешного не идём."""
+    for tf, max_age in ПОПЫТКИ:
+        bars, _stale = candle_cache.get(sym, tf)
+        if not bars or now - bars[-1]["time"] > max_age:
+            continue
+        closes = [round(float(b["close"]), 6) for b in bars[-BARS:]]
+        # Меньше трёх точек — не кривая, а шум: линия по ним создаёт
+        # впечатление движения там, где его не измеряли.
+        if len(closes) >= 3:
+            return closes, tf
+    return None
+
+
 def build(verbose: bool = False) -> int:
     symbols = catalog_symbols()
     now = time.time()
     series: dict[str, list[float]] = {}
-    skipped_empty = skipped_old = 0
+    # Таймфрейм — ПО СИМВОЛУ: у части инструментов линия дневная, у части
+    # часовая. Для мини-графика это допустимо (он показывает форму, не
+    # абсолютный период), но фронт должен знать, чтобы не подписать период
+    # неверно. Пишем карту sym→tf рядом с рядами.
+    tf_of: dict[str, str] = {}
+    skipped = 0
 
     for sym in symbols:
-        bars, _stale = candle_cache.get(sym, TF)
-        if not bars:
-            skipped_empty += 1
+        got = _ряд(sym, now)
+        if got is None:
+            skipped += 1
             continue
-        if now - bars[-1]["time"] > MAX_AGE_SEC:
-            skipped_old += 1
-            continue
-        closes = [round(float(b["close"]), 6) for b in bars[-BARS:]]
-        # Меньше трёх точек — не кривая, а шум: нарисованная по ним линия
-        # создаёт впечатление движения там, где его не измеряли.
-        if len(closes) >= 3:
-            series[sym] = closes
+        series[sym], tf_of[sym] = got
 
     OUT_PATH.write_text(json.dumps({
         "updated": int(now),
-        "tf": TF,
         "bars": BARS,
         "count": len(series),
         "asked": len(symbols),
         "source": "candle_cache",
+        "tf_of": tf_of,
         "series": series,
     }, separators=(",", ":")), encoding="utf-8")
 
     if verbose:
+        from collections import Counter
+        по_тф = Counter(tf_of.values())
         print(f"рядов записано: {len(series)} из {len(symbols)} инструментов каталога "
-              f"(нет в кэше: {skipped_empty}, устарели: {skipped_old})")
+              f"(без свежих свечей: {skipped}); по ТФ: {dict(по_тф)}")
     return len(series)
 
 
