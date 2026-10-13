@@ -396,6 +396,73 @@ def _ensure_threshold_column(con: sqlite3.Connection) -> None:
         con.commit()
 
 
+def _ensure_epoch_column(con: sqlite3.Connection) -> None:
+    cols = {r[1] for r in con.execute("PRAGMA table_info(engine_strategy_state)")}
+    if "epoch_ts" not in cols:
+        con.execute("ALTER TABLE engine_strategy_state ADD COLUMN epoch_ts INTEGER")
+        con.commit()
+
+
+def rebase_to_epoch(con: sqlite3.Connection, epoch: int, threshold: float,
+                    account: str = "demo") -> list[tuple]:
+    """Пересчитать кривые стратегий от ЭПОХИ конфигурации.
+
+    🔴 13.10. Смысл — в ответе на вопрос «почему стоят торги». На демо их
+    держал стоп-кран: четыре стратегии остановлены, 233 отвергнутых сигнала
+    за двое суток. При этом ни одна из четырёх не сделала ни одной сделки
+    после смены геометрии 07.10: их просадка целиком принадлежит прежней
+    конфигурации, у которой преимущество было неотличимо от нуля.
+
+    Кран мерил просадку от пика, набранного ДРУГОЙ системой, — и потому
+    новую не допускал к проверке вовсе. `pattern_pin_bar_top` стоял, будучи
+    в плюсе (+1.84 R на 85 сделках), за падение с пика 27.92 R.
+
+    Родня этой функции — `resume_stale_halts`: там менялся ПОРОГ, здесь
+    меняется сама торгуемая система. Защиту не снимаем: кран остаётся с тем
+    же пределом, но считает с новой точки. Если стратегия пробьёт порог уже
+    после эпохи — остановится снова, и это будет про неё, а не про прошлое.
+
+    Идемпотентно: эпоха запоминается в строке, повторный прогон ничего не
+    делает. Поэтому следующая смена геометрии чинится правкой одной
+    константы `sources.GEOMETRY_EPOCH`, без ручных правок базы и без меня."""
+    _ensure_threshold_column(con)
+    _ensure_epoch_column(con)
+    out: list[tuple] = []
+    rows = con.execute(
+        "SELECT strategy, status, cum_r, peak_r, epoch_ts FROM engine_strategy_state "
+        "WHERE account=?", (account,)).fetchall()
+    for strategy, status, cum_r, peak_r, had in rows:
+        if had == epoch:
+            continue                        # уже пересчитана на эту эпоху
+        # Кривая заново: только сделки, закрытые ПОСЛЕ эпохи, в порядке закрытия.
+        rs = [r[0] for r in con.execute(
+            "SELECT r_realized FROM engine_trades WHERE account=? AND strategy=? "
+            "AND mode='live' AND status='closed' AND r_realized IS NOT NULL "
+            "AND closed_ts >= ? ORDER BY closed_ts", (account, strategy, epoch))]
+        cum = 0.0
+        peak = 0.0
+        for r in rs:
+            cum += r
+            peak = max(peak, cum)
+        dd = cum - peak
+        resumed = status == ST_HALTED and dd > -threshold
+        new_status = ST_LIVE if resumed else status
+        con.execute(
+            "UPDATE engine_strategy_state SET cum_r=?, peak_r=?, n_closed=?, "
+            "epoch_ts=?, status=?, "
+            "halted_ts=CASE WHEN ?=1 THEN NULL ELSE halted_ts END, "
+            "halt_reason=CASE WHEN ?=1 THEN NULL ELSE halt_reason END, "
+            "halt_threshold=CASE WHEN ?=1 THEN NULL ELSE halt_threshold END, "
+            "updated_ts=? WHERE account=? AND strategy=?",
+            (cum, peak, len(rs), epoch, new_status,
+             int(resumed), int(resumed), int(resumed),
+             int(time.time()), account, strategy))
+        out.append((strategy, status, new_status, cum_r or 0.0, cum, len(rs)))
+    if out:
+        con.commit()
+    return out
+
+
 def resume_stale_halts(con: sqlite3.Connection, current_threshold: float,
                        account: str = "demo") -> list[tuple]:
     """Снять остановки, сделанные по УЖЕ НЕ ДЕЙСТВУЮЩЕМУ порогу.
@@ -454,17 +521,52 @@ def strategy_report(con: sqlite3.Connection, account: str = "demo") -> list[dict
     После разделения на два счёта это дало строки-двойники: одна с реальными
     числами, вторая с нулями, и обе подписаны live. Отчёт, который показывает
     одну стратегию дважды с разными итогами, хуже отсутствующего отчёта —
-    по нему принимают решения."""
+    по нему принимают решения.
+
+    🔴 13.10, ТА ЖЕ ОШИБКА ДРУГИМ БОКОМ, и я внёс её сам в этот же день.
+    `cum_r`/`n_closed` после введения эпохи конфигурации считаются ОТ ЭПОХИ,
+    а выигрыши и проигрыши тянулись из всей истории. В отчёте получилось
+    «сделок 0, сумма R 0.00» рядом с «W 44 L 46» — числитель и знаменатель
+    разными линейками в одной строке, и выглядело это как будто стратегии
+    не торговали вовсе.
+
+    Теперь ВСЁ окно одно — от эпохи, и оно подписано. Полная история никуда
+    не делась: она в `engine_trades`, и для неё отдельные поля
+    `wins_all`/`losses_all`/`r_all`, чтобы трек-рекорд был виден рядом, а не
+    вместо."""
+    epoch = epoch_of(con, account)
     rows = con.execute("""
         SELECT s.strategy, s.status, s.cum_r, s.peak_r, s.n_closed, s.halt_reason,
                (SELECT count(*) FROM engine_trades t WHERE t.strategy=s.strategy
                   AND t.account=s.account AND t.status='open'),
                (SELECT count(*) FROM engine_trades t WHERE t.strategy=s.strategy
+                  AND t.account=s.account AND t.status='closed'
+                  AND t.r_realized>0 AND t.closed_ts>=?),
+               (SELECT count(*) FROM engine_trades t WHERE t.strategy=s.strategy
+                  AND t.account=s.account AND t.status='closed'
+                  AND t.r_realized<=0 AND t.closed_ts>=?),
+               (SELECT count(*) FROM engine_trades t WHERE t.strategy=s.strategy
                   AND t.account=s.account AND t.status='closed' AND t.r_realized>0),
                (SELECT count(*) FROM engine_trades t WHERE t.strategy=s.strategy
-                  AND t.account=s.account AND t.status='closed' AND t.r_realized<=0)
+                  AND t.account=s.account AND t.status='closed' AND t.r_realized<=0),
+               (SELECT coalesce(sum(t.r_realized),0) FROM engine_trades t
+                  WHERE t.strategy=s.strategy AND t.account=s.account
+                  AND t.status='closed' AND t.r_realized IS NOT NULL)
         FROM engine_strategy_state s WHERE s.account=? ORDER BY s.strategy""",
-        (account,)).fetchall()
+        (epoch, epoch, account)).fetchall()
     cols = ["strategy", "status", "cum_r", "peak_r", "n_closed", "halt_reason",
-            "open", "wins", "losses"]
+            "open", "wins", "losses", "wins_all", "losses_all", "r_all"]
     return [dict(zip(cols, r)) for r in rows]
+
+
+def epoch_of(con: sqlite3.Connection, account: str = "demo") -> int:
+    """Эпоха, на которую пересчитаны кривые этого счёта. 0 — если ещё нет.
+
+    Берётся из состояния, а не из `sources.GEOMETRY_EPOCH`, чтобы отчёт
+    показывал окно, по которому числа ДЕЙСТВИТЕЛЬНО посчитаны, а не то,
+    которое задумано в коде. Разница видна, если прогон после смены
+    константы ещё не проходил."""
+    _ensure_epoch_column(con)
+    row = con.execute("SELECT min(coalesce(epoch_ts,0)) FROM engine_strategy_state "
+                      "WHERE account=?", (account,)).fetchone()
+    return int((row and row[0]) or 0)

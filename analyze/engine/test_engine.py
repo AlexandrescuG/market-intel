@@ -925,6 +925,69 @@ class Drawdown(unittest.TestCase):
             risk.strategy_gate({"status": ST_HALTED, "halt_reason": "просадка"})
         self.assertEqual(c.exception.status, "strategy_halted")
 
+    def test_кран_не_судит_новую_геометрию_по_старым_пикам(self):
+        """🔴 13.10, ответ на «почему стоят торги». На демо их держал
+        стоп-кран: четыре стратегии остановлены, 233 отвергнутых сигнала за
+        двое суток. Ни одна из четырёх не сделала ни одной сделки после
+        смены геометрии 07.10 — вся просадка принадлежала прежней
+        конфигурации, у которой преимущество было неотличимо от нуля.
+
+        Проверяется ровно тот случай: до эпохи стратегия набрала пик и
+        упала с него на 25R, после эпохи сделок нет. Кран обязан отпустить —
+        и обязан держать, если стратегия пробила порог УЖЕ ПОСЛЕ эпохи."""
+        con = sqlite3.connect(":memory:")
+        con.executescript(ledger.SCHEMA)
+        epoch = 1_000_000
+
+        def seed(strategy, rs, when):
+            ledger.ensure_strategy(con, strategy, ST_LIVE, "demo")
+            for i, r in enumerate(rs):
+                con.execute(
+                    "INSERT INTO engine_trades (strategy,symbol,tf,direction,mode,"
+                    "status,account,r_realized,closed_ts,ticket) VALUES "
+                    "(?,'EURUSD','1h','long','live','closed','demo',?,?,1)",
+                    (strategy, r, when + i))
+            con.commit()
+
+        # Просадка -25R набрана ДО эпохи, после эпохи тишина.
+        seed("старое", [28.0] + [-1.0] * 25, epoch - 10_000)
+        ledger.halt(con, "старое", "просадка от пика -25R", 20.0, "demo")
+        # Просадка -25R набрана ПОСЛЕ эпохи.
+        seed("свежее", [28.0] + [-1.0] * 25, epoch + 10)
+        ledger.halt(con, "свежее", "просадка от пика -25R", 20.0, "demo")
+
+        ledger.rebase_to_epoch(con, epoch, 20.0, "demo")
+        st = {r[0]: r[1] for r in con.execute(
+            "SELECT strategy, status FROM engine_strategy_state WHERE account='demo'")}
+        self.assertEqual(st["старое"], ST_LIVE,
+                         "просадка прошлой конфигурации не должна держать новую")
+        self.assertEqual(st["свежее"], ST_HALTED,
+                         "а своя просадка после эпохи — должна")
+
+    def test_пересчёт_от_эпохи_идемпотентен(self):
+        """Повторный прогон не должен ни двигать кривую, ни воскрешать
+        остановку: иначе стратегия, остановленная после эпохи, оживала бы
+        каждый час."""
+        con = sqlite3.connect(":memory:")
+        con.executescript(ledger.SCHEMA)
+        epoch = 1_000_000
+        ledger.ensure_strategy(con, "s", ST_LIVE, "demo")
+        for i, r in enumerate([5.0, -30.0]):
+            con.execute(
+                "INSERT INTO engine_trades (strategy,symbol,tf,direction,mode,"
+                "status,account,r_realized,closed_ts,ticket) VALUES "
+                "('s','EURUSD','1h','long','live','closed','demo',?,?,1)",
+                (r, epoch + i))
+        con.commit()
+        ledger.halt(con, "s", "просадка", 20.0, "demo")
+        first = ledger.rebase_to_epoch(con, epoch, 20.0, "demo")
+        self.assertTrue(first, "первый прогон обязан пересчитать")
+        second = ledger.rebase_to_epoch(con, epoch, 20.0, "demo")
+        self.assertEqual(second, [], "второй прогон не должен делать ничего")
+        status = con.execute("SELECT status FROM engine_strategy_state "
+                             "WHERE account='demo' AND strategy='s'").fetchone()[0]
+        self.assertEqual(status, ST_HALTED, "остановка своей просадкой остаётся")
+
 
 class LedgerBehaviour(unittest.TestCase):
     def setUp(self):

@@ -23,6 +23,7 @@ analyze/engine/run.py — один прогон движка.
 from __future__ import annotations
 
 import argparse
+import datetime
 import logging
 import sys
 import time
@@ -262,6 +263,21 @@ def run(*, dry: bool, live: bool, enabled: list[str] | None, verbose: bool,
         with execution.Bridge(acc.port, acc.lock) as (mt5, conn):
             execution.preflight_account(mt5, acc)
 
+            # 🔴 13.10. Кривые — от эпохи конфигурации, а не от начала времён.
+            # Иначе стоп-кран судит новую геометрию по пикам прежней: на
+            # 13.10 четыре стратегии демо стояли, не сделав после правки
+            # 07.10 ни одной сделки, и отвергли 233 сигнала за двое суток.
+            for name, was, now_, old_cum, new_cum, n in ledger.rebase_to_epoch(
+                    con, sources.GEOMETRY_EPOCH, acc.max_drawdown_r, acc.name):
+                if was != now_:
+                    log.warning("ВОЗОБНОВЛЕНА %s: кривая пересчитана от смены "
+                                "конфигурации — было %.2fR за всю историю, "
+                                "стало %.2fR за %d сделок после эпохи",
+                                name, old_cum, new_cum, n)
+                else:
+                    log.info("кривая %s пересчитана от эпохи: %.2fR -> %.2fR "
+                             "(%d сделок)", name, old_cum, new_cum, n)
+
             # 🔴 Снятие остановок, сделанных по уже не действующему порогу.
             # 07.09 порог подняли с 8 до 20 R, а стратегии, остановленные до
             # правки, остались стоять: правило изменилось, последствия нет.
@@ -400,13 +416,25 @@ def report(account: str = "demo") -> int:
     if not rows:
         print("журнал движка пуст")
         return 0
-    print(f"{'стратегия':26}{'режим':9}{'сделок':>7}{'W':>5}{'L':>5}"
-          f"{'сумма R':>10}{'пик R':>9}{'просадка':>10}{'откр':>6}")
+    # 🔴 Окно обязано быть подписано. 13.10 я ввёл эпоху конфигурации и
+    # получил отчёт, где «сделок 0, сумма R 0.00» стояло рядом с «W 44 L 46»:
+    # числа из разных окон в одной строке. Теперь слева — ТЕКУЩАЯ
+    # конфигурация, справа — вся история, и каждая группа названа.
+    epoch = ledger.epoch_of(con, account)
+    when = (datetime.datetime.fromtimestamp(epoch).strftime("%d.%m.%Y %H:%M")
+            if epoch else "не задана")
+    print(f"слева — с последней смены конфигурации ({when}), "
+          f"справа — вся история счёта\n")
+    print(f"{'стратегия':26}{'режим':9}"
+          f"{'сделок':>7}{'W':>4}{'L':>4}{'сумма R':>9}{'пик':>7}{'просад':>8}"
+          f"  | {'W∑':>4}{'L∑':>4}{'R∑':>9}{'откр':>6}")
     for r in rows:
         dd = (r["cum_r"] or 0) - (r["peak_r"] or 0)
-        print(f"{r['strategy']:26}{r['status']:9}{r['n_closed']:>7}{r['wins']:>5}"
-              f"{r['losses']:>5}{r['cum_r'] or 0:>10.2f}{r['peak_r'] or 0:>9.2f}"
-              f"{dd:>10.2f}{r['open']:>6}")
+        print(f"{r['strategy']:26}{r['status']:9}"
+              f"{r['n_closed']:>7}{r['wins']:>4}{r['losses']:>4}"
+              f"{r['cum_r'] or 0:>9.2f}{r['peak_r'] or 0:>7.2f}{dd:>8.2f}"
+              f"  | {r['wins_all']:>4}{r['losses_all']:>4}"
+              f"{r['r_all'] or 0:>9.2f}{r['open']:>6}")
         if r["halt_reason"]:
             print(f"    остановлена: {r['halt_reason']}")
     n, acc = con.execute("SELECT count(*), sum(accepted) FROM engine_signals "
